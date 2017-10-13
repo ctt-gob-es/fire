@@ -1,0 +1,20 @@
+﻿
+FIRe es una solución que simplifica la integración de procesos de firma electrónica de usuario en trámites web al concentrar en un solo componente todos los requisitos de creación de firmas basadas tanto en certificados locales como en certificados en la nube. 
+
+1. Licencia
+FIRe se encuentra bajo las licencias GNU GPL versión 2.0 y EUPL versión 1.1. Puede consultar los textos
+completos de estas licencias en los ficheros adjuntos ("gpl-2.0.txt" y "EUPL v.1.1.pdf").
+
+2. Usted declara y garantiza que está autorizado a aceptar y cumplir las clásulas y condiciones de FIRe.
+
+3. Usted reconoce y acepta que correrá con todos los riesgos que surjan del uso que usted haga de FIRe. 
+
+4. Derechos de Propiedad Intelectual
+El Gobierno de España retiene los Derechos de Propiedad Intelectual sobre FIRe.
+
+5. Renuncia a garantías y descargo de responsabilidad
+5.1 Ausencia de garantías. FIRE SE PROVEE EN SU ESTADO ACTUAL Y SIN GARANTÍAS DE NINGÚN TIPO.  NO SE OFRECE DE MANERA EXPLÍCITA, IMPLÍCITA, NI JURADA GARANTÍAS, AFIRMACIONES NI DECLARACIONES DE NINGÚN TIPO CON RESPECTO A FIRE.
+5.2 Descargo de responsabilidad. Usted recibe FIRE de forma gratuita. POR CONSIGUIENTE, USTED RECONOCE Y ACEPTA QUE EL GOBIERNO DE ESPAÑA Y SU PERSONAL NO TENDRÁ RESPONSABILIDAD ALGUNA QUE SURJA DEL USO DE FIRE O SE RELACIONE CON DICHO USO. SU ÚNICO DERECHO O RECURSO LEGAL ANTE CUALQUIER PROBLEMA O DISCONFORMIDAD CON FIRE ES DEJAR DE USARLO DE INMEDIATO.
+
+
+USTED RECONOCE EXPRESAMENTE QUE HA LEÍDO ESTAS CONDICIONES DE FIRE Y QUE COMPRENDE Y ACEPTA LOS DERECHOS, LAS OBLIGACIONES, LAS CLÁUSULAS Y LAS CONDICIONES AQUÍ ESTIPULADAS. 

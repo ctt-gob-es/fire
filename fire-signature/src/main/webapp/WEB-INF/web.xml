@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>fire-signature</display-name>
+  <description>Componente central de FIRe</description>
+  <servlet>
+  	<description>Servicio central de FIRe v2 y superiores </description>
+  	<display-name>fireService</display-name>
+  	<servlet-name>fireService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.FIReService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de recuperacion de certificados compatible con Cl@ve Firma v1.1</description>
+  	<display-name>getCertificates</display-name>
+  	<servlet-name>getCertificates</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.CertificateService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de carga de datos compatible con Cl@ve Firma v1.1</description>
+  	<display-name>loadData</display-name>
+  	<servlet-name>loadData</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.LoadService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de firma compatible con Cl@ve Firma v1.1</description>
+  	<display-name>sign</display-name>
+  	<servlet-name>sign</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.SignService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de solicitud de nuevo certificado compatible con Cl@ve Firma v1.1</description>
+  	<display-name>generateCertificate</display-name>
+  	<servlet-name>generateCertificate</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.GenerateCertificateService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de recuperacion del certificado recien generado compatible con Cl@ve Firma v1.1</description>
+  	<display-name>recoverCertificate</display-name>
+  	<servlet-name>recoverCertificate</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.RecoverCertificateService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio interno para la seleccion del origen del certificado de firma (nube o local)</description>
+  	<display-name>chooseCertificateOriginService</display-name>
+  	<servlet-name>chooseCertificateOriginService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.ChooseCertificateOriginService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio interno para la cancelacion de la operacion y redireccion a la pagina de error</description>
+  	<display-name>cancelOperationService</display-name>
+  	<servlet-name>cancelOperationService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.CancelOperationService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio interno para la seleccion de certificado y prefirma de los datos</description>
+  	<display-name>presignService</display-name>
+  	<servlet-name>presignService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.PreSignService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio para la prefirma de los datos con el Cliente @firma</description>
+  	<display-name>triphaseSignService</display-name>
+  	<servlet-name>triphaseSignService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio para la solicitud de un nuevo certificado de firma en la nube</description>
+  	<display-name>requestCertificateService</display-name>
+  	<servlet-name>requestCertificateService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.RequestNewCertificateService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio para el guardado de datos en un directorio temporal</description>
+  	<display-name>storageService</display-name>
+  	<servlet-name>storageService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.storage.StorageService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio para la recuperacion de datos de un directorio temporal</description>
+  	<display-name>retrieveService</display-name>
+  	<servlet-name>retrieveService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.storage.RetrieveService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>MiniAppletSuccessService</display-name>
+  	<servlet-name>MiniAppletSuccessService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.MiniAppletSuccessService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>MiniAppletErrorService</display-name>
+  	<servlet-name>MiniAppletErrorService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.MiniAppletErrorService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>PreSignBatchService</display-name>
+  	<servlet-name>PreSignBatchService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.batch.BatchPresigner</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>PostSignBatchService</display-name>
+  	<servlet-name>PostSignBatchService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.batch.BatchPostsigner</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>AutoFirmaJnlpService</display-name>
+  	<servlet-name>AutoFirmaJnlpService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.autofirma.AutoFirmaJnlpService</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+  	<servlet-name>fireService</servlet-name>
+  	<url-pattern>/fireService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>getCertificates</servlet-name>
+  	<url-pattern>/getCertificates</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>loadData</servlet-name>
+  	<url-pattern>/loadData</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>sign</servlet-name>
+  	<url-pattern>/sign</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>generateCertificate</servlet-name>
+  	<url-pattern>/generateCertificate</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>recoverCertificate</servlet-name>
+  	<url-pattern>/recoverCertificate</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>chooseCertificateOriginService</servlet-name>
+  	<url-pattern>/public/chooseCertificateOriginService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>presignService</servlet-name>
+  	<url-pattern>/public/presignService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>requestCertificateService</servlet-name>
+  	<url-pattern>/public/requestCertificateService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>cancelOperationService</servlet-name>
+  	<url-pattern>/public/cancelOperationService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>MiniAppletSuccessService</servlet-name>
+  	<url-pattern>/public/miniappletSuccessService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>MiniAppletErrorService</servlet-name>
+  	<url-pattern>/public/miniappletErrorService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>storageService</servlet-name>
+  	<url-pattern>/public/afirma/storage</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>retrieveService</servlet-name>
+  	<url-pattern>/public/afirma/retrieve</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>triphaseSignService</servlet-name>
+  	<url-pattern>/public/afirma/triphaseSignService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>PreSignBatchService</servlet-name>
+  	<url-pattern>/public/afirma/preSignBatchService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>PostSignBatchService</servlet-name>
+  	<url-pattern>/public/afirma/postSignBatchService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>AutoFirmaJnlpService</servlet-name>
+  	<url-pattern>/public/afirma/afirmaJnlpService</url-pattern>
+  </servlet-mapping>
+</web-app>

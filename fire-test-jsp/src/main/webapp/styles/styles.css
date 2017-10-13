@@ -1,0 +1,128 @@
+
+*{
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	margin:0;
+}
+
+#container {
+	width:750px; 
+	margin:0 auto; 
+	margin-top:50px;
+	background: #eeeeee;
+	padding: 20px;
+	height:475px; 
+}
+#error-txt {
+	color:red; 
+	font-size: 12px;
+	text-align: center;
+	margin-top: 10px;
+}
+
+#error-txt-left {
+	color:red; 
+	font-size: 12px;
+	text-align: left;
+	margin-top: 10px;
+}
+
+#success-txt-left {
+	color: green; 
+	font-size: 12px;
+	text-align: left;
+	margin-top: 10px;
+}
+
+#submit-btn, .submit-btn {
+	padding:20px; 
+	background:#820606; 
+	border:1px solid #632206; 
+	border-radius: 15px; 
+	color:#FFFFFF; 
+	width: 300px;
+	text-align: center;
+}
+
+.edit-txt {
+	width:300px; 
+	background: #D3D3D3; 
+	padding:20px;
+	border-radius: 15px;
+	border: 2px solid #EEEEEE;
+}
+
+.fieldset-fire {
+	font-size: 15px; 
+	border: 0; 
+}
+
+#sign-container {
+	margin-left: 100px;
+	margin-top: 20px;
+	text-align: left;
+} 
+
+#menubar {
+	background: #303030; 
+	padding: 30px;
+	text-align:left;
+	margin: 0px;
+}
+
+#bar-txt {
+	color: white;
+	font-size: 20pt; 
+	font-family: Verdana !important;
+}
+
+.light-grey {
+	color: #808080
+}
+#descrp{
+	color: #808080
+}
+
+.batch-results {
+	border-collapse: collapse;
+	margin: 15px auto;
+}
+
+.doc-column {
+	width: 100px;
+}
+
+.result-column {
+	width: 100px;
+}
+
+.details-column {
+	width: 400px;
+}
+
+.recover-button-column {
+	width: 200px;
+}
+
+table,tr,th,td {
+	border: thin solid black;
+	padding: 3px;
+} 
+
+.doc-list-title {
+	font-weight: bold;
+}
+
+.doc-list li {
+	margin: 7px;
+}
+
+.left-column {
+	width: 50%;
+	float: left;
+}
+
+.right-column {
+	width: 50%;
+	margin-left: 50%;
+	padding-left: 20px;
+}

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>fire-test-jsp</display-name>
+  <description>Aplicacion de prueba de FIRe v2.1</description>
+  <listener>
+  	<listener-class>es.gob.fire.test.webapp.SessionDataCleaner</listener-class>
+  </listener>
+  <welcome-file-list>
+    <welcome-file>Login.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <servlet>
+  	<description>Servicio de login de prueba</description>
+  	<display-name>LoginService</display-name>
+  	<servlet-name>LoginService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.LoginService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>LoginService</servlet-name>
+  	<url-pattern>/LoginService</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<description>Servicio de prueba que ejecuta la operacion de firma</description>
+  	<display-name>SignatureService</display-name>
+  	<servlet-name>SignatureService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.SignatureService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>SignatureService</servlet-name>
+  	<url-pattern>/SignatureService</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<description>Servicio de prueba para la creacion de un lote de firmas</description>
+  	<display-name>CreateBatchService</display-name>
+  	<servlet-name>CreateBatchService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.CreateBatchService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>CreateBatchService</servlet-name>
+  	<url-pattern>/CreateBatchService</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<description>Servicio de prueba para adjuntar ficheros a un lote de firmas</description>
+  	<display-name>AddDocumentBatchService</display-name>
+  	<servlet-name>AddDocumentBatchService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.AddDocumentBatchService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>AddDocumentBatchService</servlet-name>
+  	<url-pattern>/AddDocumentBatchService</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<description>Servicio de prueba para la firma de un lote de firmas</description>
+  	<display-name>SignBatchService</display-name>
+  	<servlet-name>SignBatchService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.SignBatchService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>SignBatchService</servlet-name>
+  	<url-pattern>/SignBatchService</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<description>Servicio de prueba para la recuperacion del resultado de la firma de un lote</description>
+  	<display-name>RecoverBatchService</display-name>
+  	<servlet-name>RecoverBatchService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.RecoverBatchService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>RecoverBatchService</servlet-name>
+  	<url-pattern>/RecoverBatchService</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<description>Servicio de prueba para la consulta del progreso de un lote de firma</description>
+  	<display-name>RecoverBatchStateService</display-name>
+  	<servlet-name>RecoverBatchStateService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.RecoverBatchStateService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>RecoverBatchStateService</servlet-name>
+  	<url-pattern>/RecoverBatchStateService</url-pattern>
+  </servlet-mapping>
+</web-app>

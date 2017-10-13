@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>clavefirma-test-services</display-name>
+  <description>Servicio backend de prueba de Cl@ve firma</description>
+  <servlet>
+  	<description>Servicio de recuperacion de certificados</description>
+  	<display-name>TestGetCertificateService</display-name>
+  	<servlet-name>TestGetCertificateService</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestGetCertificateService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de carga de datos</description>
+  	<display-name>TestLoadDataService</display-name>
+  	<servlet-name>TestLoadDataService</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestLoadDataService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de firma</description>
+  	<display-name>TestSignService</display-name>
+  	<servlet-name>TestSignService</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestSignService</servlet-class>
+  </servlet>
+    <servlet>
+  	<description>Servicio de solicitud de nuevo certificado</description>
+  	<display-name>TestGenerateCertificateService</display-name>
+  	<servlet-name>TestGenerateCertificateService</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestGenerateCertificateService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de recuperacion del certificado recien generado</description>
+  	<display-name>TestRecoverCertificateService</display-name>
+  	<servlet-name>TestRecoverCertificateService</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestRecoverCertificateService</servlet-class>
+  </servlet>
+
+  <!-- Servicios internos -->
+  <servlet>
+  	<description>Servicio simulado de autorizaciones Clave</description>
+  	<display-name>TestServiceAuthServlet</display-name>
+  	<servlet-name>TestServiceAuthServlet</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestServiceAuthServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio simulado de autorizaciones Clave</description>
+  	<display-name>TestServiceGenCertServlet</display-name>
+  	<servlet-name>TestServiceGenCertServlet</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestServiceGenCertServlet</servlet-class>
+  </servlet>
+  
+  <!-- Mapeo -->  
+  <servlet-mapping>
+  	<servlet-name>TestGetCertificateService</servlet-name>
+  	<url-pattern>/TestGetCertificateService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>TestLoadDataService</servlet-name>
+  	<url-pattern>/TestLoadDataService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>TestSignService</servlet-name>
+  	<url-pattern>/TestSignService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>TestGenerateCertificateService</servlet-name>
+  	<url-pattern>/TestGenerateCertificateService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>TestRecoverCertificateService</servlet-name>
+  	<url-pattern>/TestRecoverCertificateService</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Servicios internos -->
+  <servlet-mapping>
+  	<servlet-name>TestServiceAuthServlet</servlet-name>
+  	<url-pattern>/TestServiceAuthServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>TestServiceGenCertServlet</servlet-name>
+  	<url-pattern>/TestServiceGenCertServlet</url-pattern>
+  </servlet-mapping>
+</web-app>

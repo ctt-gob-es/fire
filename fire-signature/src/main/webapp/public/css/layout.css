@@ -1,0 +1,72 @@
+@charset "utf-8";
+
+/* *************************************************************************** */
+/* Proyecto: MINHAP                                                            */
+/* Titulo: layout.css                                          */
+/* Desripcion: Estructura general del site                     */
+/* *************************************************************************** */
+
+/*------------------------------ WRAPPER --------------------------------------*/
+
+html, body, span, object, iframe, figure, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, code, del, dfn, em, img, q, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td { margin: 0; padding: 0; border: 0; font-weight: inherit; font-style: inherit; font-size: 100%; font-family: inherit; vertical-align: baseline; }
+
+body { font-family: Arial, Helvetica, sans-serif; font-size: 85%; font-weight: normal; margin: 0 auto; padding: 0; border: 0; color: #707070; background: #fff;}
+
+.main { display:block; position: relative; width: 1024px; margin: 0 auto; }
+.general_content { position: relative; float: left; width: 100%; background: url(../img/general/header_bk_org.png) top left repeat-x; background-size: auto 10em; }
+.wrapper { position: relative; width: 1024px; margin: 0 auto; }
+.wrapper_menu { position: relative; width: 90%; margin: 0 auto; }
+.wrapper_main { position: relative; width: 1024px; margin: 0em auto;border-top: none; border-bottom: none;}
+.wrapper_main:after { content: ""; clear: both; display: block; }
+
+/*------------------------------ HEADER ---------------------------------------*/
+
+header {width: 100%; border-top: 2px solid #FF6600; background-image: -webkit-linear-gradient(0deg, #dededf 50%, #d4d0cd 50%);}
+header .header_top { position: relative; height: auto; padding: 2% 0; background: url(../img/general/dms/bg-cabecera.png) top left no-repeat;}
+header .header_bottom { position: relative;}
+header .header_menu_right {float: right; width: 65%}
+
+
+/*------------------------------ CONTENIDO ------------------------------------*/
+.main_top {padding-bottom: 0.5em;}
+.contenido .contenido_left { position: relative; float: left; width: 25%;}
+.contenido .main { position: relative; float: left; width: 100%;}
+.contenido .main.tmpl_2_cols { position: relative; float: left; width: 70%; margin-left: 5%;}
+.contenido .barra_separacion {background: url(../img/general/menu_gen_bk.png) top center no-repeat; min-height: 2em;}
+
+ul { padding-left: 1.5em;}
+li > ul { padding-left: 4em;}
+li > p { padding-top: 1em;}
+li { padding-top: 0.5em;}
+
+/*------------------------------ FOOTER ---------------------------------------*/
+
+footer {position: relative;width: 100%;color: #fff;background: #707070;border-top: 3px solid #dd5a05;margin-top: 2em;padding-bottom: 1.5em;}
+footer .footer_top { position: relative; min-height: 2.67em; margin-top: 1em;}
+footer .footer_top .txt_alignL{  padding-left: 3em;}
+footer .footer_top img {max-width: 100%; width: 80px;}
+footer .footer_main { position: relative; padding-bottom: 1em; }
+footer .footer_bottom { position: relative;  padding: 0em 0 1em 0em;}
+footer .footer_bottom .comp_left { padding-left: 3em;}
+footer .footer_bottom .comp_right:after { content: ""; clear: both; display: block; }
+  
+  /*MEDIUM RESOLUTION STYLES*/
+@media screen and (min-width: 768px) and (max-width: 1024px) {  
+    .main { width: 100%; }  
+	.wrapper {  width: 100%;}
+	footer .footer_top {  width:100%; padding-left: 0em; }
+	footer .footer_bottom { width:100%; padding-left: 0em; }
+
+ }
+
+/*SMALL RESOLUTION STYLES*/
+@media screen and (max-width: 767px) {  
+    .main { width: 100%; }  
+	.wrapper {  width: 100%;}
+	footer .footer_top { width:100%; padding-left: 0em; }
+	footer .footer_bottom { width:100%; padding-left: 0em; }
+	
+}
+
+
+

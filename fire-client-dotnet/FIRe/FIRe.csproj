@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{246037E1-C1DC-4701-A912-3EB219CFEE43}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FIRe</RootNamespace>
+    <AssemblyName>FIRe</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>FireDocComment.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>FireDocComment.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Certificate\HttpCertificateBlockedException.cs" />
+    <Compile Include="FIRe\BatchNoSignedException.cs" />
+    <Compile Include="FIRe\InvalidBatchDocumentException.cs" />
+    <Compile Include="FIRe\InvalidTransactionException.cs" />
+    <Compile Include="FIRe\FireConfig.cs" />
+    <Compile Include="ConfigManager.cs" />
+    <Compile Include="FIRe\FireClient.cs" />
+    <Compile Include="FIRe\DuplicateDocumentException.cs" />
+    <Compile Include="FIRe\NumDocumentsExceededException.cs" />
+    <Compile Include="HttpCustomErrors.cs" />
+    <Compile Include="ConnectionManager.cs" />
+    <Compile Include="Base64.cs" />
+    <Compile Include="ConfigureException.cs" />
+    <Compile Include="GenerateCert\GenerateCertificateResult.cs" />
+    <Compile Include="GenerateCert\HttpGenerateCertificate.cs" />
+    <Compile Include="GenerateCert\HttpCertificateAvailableException.cs" />
+    <Compile Include="HttpWeakRegistryException.cs" />
+    <Compile Include="HttpNoUserException.cs" />
+    <Compile Include="FIRe\FireBatchResult.cs" />
+    <Compile Include="FIRe\FireTransactionIdResult.cs" />
+    <Compile Include="FIRe\FireTransactionResult.cs" />
+    <Compile Include="FIRe\FireLoadResult.cs" />
+    <Compile Include="Load\LoadResult.cs" />
+    <Compile Include="Certificate\HttpCertificateList.cs" />
+    <Compile Include="HttpOperationException.cs" />
+    <Compile Include="HttpForbiddenException.cs" />
+    <Compile Include="HttpNetworkException.cs" />
+    <Compile Include="Load\HttpLoadProcess.cs" />
+    <Compile Include="Sign\HttpSignProcess.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="FIRe\FireApi.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

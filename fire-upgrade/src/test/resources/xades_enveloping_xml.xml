@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ds:Signature Id="Signature-f99299b2-1326-4f0d-83ad-c10735662b1a-Signature" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference Id="Reference-618b9580-abea-4148-b9c3-dc7160fd2791" Type="http://www.w3.org/2000/09/xmldsig#Object" URI="#Object-31ae4520-e262-48b9-a236-f25e191b7863"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>G0O/PwwRTYIpvlZnMnWPiWiayP5NO8tcpfula17NCbPhmglu9BINq3HxnXvodXq4ZdAJd6HJvgq3
+ISrjk6wHhw==</ds:DigestValue></ds:Reference><ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#Signature-f99299b2-1326-4f0d-83ad-c10735662b1a-SignedProperties"><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>r2G7QoMtcB00l/FjrR7Rojt3VrQIiVyNEb9ixjHkHEimUOjPe1mczAuG5HemNCPwFWpvhc4UlgyT
+AzHpouHjSA==</ds:DigestValue></ds:Reference><ds:Reference URI="#Signature-f99299b2-1326-4f0d-83ad-c10735662b1a-KeyInfo"><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>madoSZrWuzn9kSt26xnPQmRHBUaazzg23ajdw8JgpM4Q3XBqWv9w8aWOH74KdHFpRqWsUA6JNbP1
+jx+yU/3QHg==</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="Signature-f99299b2-1326-4f0d-83ad-c10735662b1a-SignatureValue">IQnPBwCsCsNwG9NxVmbCkbHf/aCWiLkn29twyz0PQdDoqg/sWYMM8H/iaBXTmaMYjToO3MuHTYiM
+u52uhDDgDiQxdnsBjbCI1K2aDf8rTVOQCPKsiZBt1HW24qYgY3WbUABSuIPHfyjnjM9a+ITZck5C
+tmhskv45Kt6mVjX9WXT6K0J2GGnCFbV7fOadDn1ww1euOa6AtFwcA4hrkH2uOS8c+eC6HjHDF2li
+MimvuupKM99phfKJInpF8nopIpxfZ6XyedJW3pcoEhGJGajTkopAISeynNym7Bc5zAg6mphL+nS0
+3eHLmp1DcBn2RUAqIAVpJjpnsP49uHnygxs9Zw==</ds:SignatureValue><ds:KeyInfo Id="Signature-f99299b2-1326-4f0d-83ad-c10735662b1a-KeyInfo"><ds:X509Data><ds:X509Certificate>MIIIcjCCBlqgAwIBAgIQZyAWmun2HlR6ORj0kRMA8TANBgkqhkiG9w0BAQsFADCBwjELMAkGA1UE
+BhMCRVMxRDBCBgNVBAcTO1Bhc2VvIGRlbCBHZW5lcmFsIE1hcnRpbmV6IENhbXBvcyA0NiA2YSBw
+bGFudGEgMjgwMTAgTWFkcmlkMUEwPwYDVQQKEzhBZ2VuY2lhIE5vdGFyaWFsIGRlIENlcnRpZmlj
+YWNpb24gUy5MLlUuIC0gQ0lGIEI4MzM5NTk4ODEqMCgGA1UEAxMhQU5DRVJUIENvcnBvcmF0aXZv
+cyBQZXJzb25hbGVzIFYyMB4XDTE2MDUwNDA4MTIwOFoXDTE5MDUwNDA4MTIwOFowgfgxCzAJBgNV
+BAYTAkVTMSYwJAYDVQQKEx1FTVBSRVNBIENPTiBDT05WRU5JTyBDQ1AgUy5BLjEdMBsGA1UECxMU
+REVQQVJUQU1FTlRPIERFIFJSSEgxMTAvBgNVBAsTKENlcnRpZmljYWRvIENvcnBvcmF0aXZvIFBl
+cnNvbmFsIChGaXJtYSkxETAPBgNVBAwTCERJUkVDVE9SMRkwFwYDVQQEDBBFSkVNUExPIEVTUEHD
+kU9MMQ0wCwYDVQQqEwRKVUFOMRIwEAYDVQQFEwkxMTExMTExMUgxHjAcBgNVBAMMFUpVQU4gRUpF
+TVBMTyBFU1BBw5FPTDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKm17L+jR0ZYICwf
+w6IAqJ1LFSXMVEbLkkpascOV4PE0wzqJndcwiuZHD/VVZbymkzHj+tuihhcvwMwGEViZdwGTJMlH
+/fgui+9r/T5FZVZ9XYb/ZF/IMtX6w4L4MQ4S2ZydcFLoWTLL3HucH76AUogyrPj+c3Zxt+20ylaI
+gGR3NYUgnDd/3keQx2vABswgAM8bBmixrcBHMceNbtcmXGKQEM1NC4TJq8GtuZrWOQVFuFuqpsrU
+SAkLGNg3ah/dS/wQ9/K5OiR1mF90Lkak2O9vADVFH7N3T2PFdU8sIpwQXOA56D7abaWJSfRu7GFo
+RG+9X19LV0EFraWQbCLiljECAwEAAaOCAyowggMmMIGABggrBgEFBQcBAQR0MHIwLwYIKwYBBQUH
+MAGGI2h0dHA6Ly9vY3NwLmFjLmFuY2VydC5jb20vb2NzcC54dWRhMD8GCCsGAQUFBzAChjNodHRw
+Oi8vd3d3LmFuY2VydC5jb20vcGtpL3YyL2NlcnRzL0FOQ0VSVENDUF9WMi5jcnQwHwYDVR0jBBgw
+FoAUX+7dKQMBQ2nIHj1bgX6l86F2rPgwDAYDVR0TAQH/BAIwADCCAR4GA1UdIASCARUwggERMIIB
+DQYNKwYBBAGBk2gCAQECATCB+zA3BggrBgEFBQcCARYraHR0cHM6Ly93d3cuYW5jZXJ0LmNvbS9j
+b25kaWNpb25lcy9DQ1BGaXJtYTCBvwYIKwYBBQUHAgIwgbIwDRYGQU5DRVJUMAMCAQEagaBFc3Rl
+IGNlcnRpZmljYWRvIHNlIGV4cGlkZSBjb21vIENlcnRpZmljYWRvIFJlY29ub2NpZG8gZGUgYWN1
+ZXJkbyBjb24gbGEgbGVnaXNsYWNpb24gdmlnZW50ZS4gQ29uZGljaW9uZXMgZGUgdXNvIGVuICBo
+dHRwczovL3d3dy5hbmNlcnQuY29tL2NvbmRpY2lvbmVzL0NDUEZpcm1hMIGaBgNVHR8EgZIwgY8w
+gYyggYmggYaGKmh0dHA6Ly93d3cuYW5jZXJ0LmNvbS9jcmwvQU5DRVJUQ0NQX1YyLmNybIYraHR0
+cDovL3d3dzIuYW5jZXJ0LmNvbS9jcmwvQU5DRVJUQ0NQX1YyLmNybIYraHR0cDovL3d3dzMuYW5j
+ZXJ0LmNvbS9jcmwvQU5DRVJUQ0NQX1YyLmNybDAOBgNVHQ8BAf8EBAMCBkAwHgYDVR0RBBcwFYET
+bm8tcmVwbHlAYW5jZXJ0LmNvbTAvBggrBgEFBQcBAwQjMCEwCAYGBACORgEBMAsGBgQAjkYBAwIB
+DzAIBgYEAI5GAQQwMwYDVR0JBCwwKjAoBgsrBgEEAYGTaAoBATEZDBdTaW4gZ2FyYW50aWEgZGUg
+cG9kZXJlczAdBgNVHQ4EFgQUvwAbfqlECZPhz9Twxo2O80zCwp0wDQYJKoZIhvcNAQELBQADggIB
+AGZ10/s+58uxbvESiQMJP4K+zKXp8+vDiR3cWN/dyttuSKiDoClUV1xGUZWz4BztnzLPMkT7buDt
+UTNIGUJusHTronpIY9CDnNAOLp1igQ1yTn8Kop2JbZLbfR4SsJ0pD9rFQRuh5IKRs0oJ0H9eHWPG
+HS3nMWWnNTO3PMoxdoKxE0opTNP3GLqpSsyL9SJZkdC/mXCkq4tzYy3lALxFcmr3EzTcZEwDJWf7
+pnpnJDE/gQw8wts9iHH3e9Ty+2lDI7sBPJFWmetzjVd2YjQnkwPe8yIGsBasegHzLdrlvyylbkUO
+nbwnbrnaKRKL3EwImjMLIJ044hS1c0FM3QhFc5RYK/7AaTUTCKF9R4deheclp0bCTnkNHgyjm6vw
+fsPG97IVMio/jWj9ZhcBqpm/wHhTHj0j8ZrN+2u//I6QtvIDrZzEQJw/JXBFrtFdOokFTrcrqa/h
+ZxyLoYUwNbRqf0N7ru7DrUANhKn8vG+VYnM/19m+61pwme23pzD0NGTjl3VWtHU5L0kizF0oC8b5
+QO4uAU5OCAPXqzXKrpG4iMyG8on57v20F8GHWTusdhpZSi37w447Me3MweoIrr+yvxMmqXYUJzpX
+IJT0GAWIBD6JbBMBqnSnaZV42a7e7kTGpCDce2SP7t6BvQMHf2Kk6qQKWKpgv1A8OSLzkradvEjJ</ds:X509Certificate></ds:X509Data><ds:KeyValue><ds:RSAKeyValue><ds:Modulus>qbXsv6NHRlggLB/DogConUsVJcxURsuSSlqxw5Xg8TTDOomd1zCK5kcP9VVlvKaTMeP626KGFy/A
+zAYRWJl3AZMkyUf9+C6L72v9PkVlVn1dhv9kX8gy1frDgvgxDhLZnJ1wUuhZMsvce5wfvoBSiDKs
++P5zdnG37bTKVoiAZHc1hSCcN3/eR5DHa8AGzCAAzxsGaLGtwEcxx41u1yZcYpAQzU0LhMmrwa25
+mtY5BUW4W6qmytRICQsY2DdqH91L/BD38rk6JHWYX3QuRqTY728ANUUfs3dPY8V1TywinBBc4Dno
+PtptpYlJ9G7sYWhEb71fX0tXQQWtpZBsIuKWMQ==</ds:Modulus><ds:Exponent>AQAB</ds:Exponent></ds:RSAKeyValue></ds:KeyValue></ds:KeyInfo><ds:Object Id="Object-31ae4520-e262-48b9-a236-f25e191b7863" MimeType="application/octet-stream"><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>es.gob.clavefirma</groupId>
+	<artifactId>clavefirma-test-clavefirma2-jsp</artifactId>
+	<version>1.0</version>
+	<name>clavefirma-test-clavefirma2-jsp</name>
+	<packaging>war</packaging>
+
+	<properties>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<jdk.version>1.6</jdk.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>uji</id>
+			<url>http://devel.uji.es/nexus/content/groups/public/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>es.gob.afirma</groupId>
+			<artifactId>afirma-core</artifactId>
+			<version>3.3.2-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.json</groupId>
+			<artifactId>javax.json-api</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+    		<groupId>org.glassfish</groupId>
+    		<artifactId>javax.json</artifactId>
+    		<version>1.0.4</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>commons-fileupload</groupId>
+		    <artifactId>commons-fileupload</artifactId>
+		    <version>1.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>es.gob.clavefirma</groupId>
+			<artifactId>clavefirma-client</artifactId>
+			<version>1.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+	
+	<build>
+		<plugins>
+
+			<!-- Eclipse project -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<!-- Always download and attach dependencies source code -->
+					<downloadSources>false</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+					<!-- Avoid type mvn eclipse:eclipse -Dwtpversion=2.0 -->
+					<wtpversion>2.0</wtpversion>
+				</configuration>
+			</plugin>
+
+			<!-- Set JDK Compiler Level -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>*.properties</exclude>
+				</excludes>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
+	</build>
+</project></ds:Object><ds:Object><xades:QualifyingProperties Id="Signature-f99299b2-1326-4f0d-83ad-c10735662b1a-QualifyingProperties" Target="#Signature-f99299b2-1326-4f0d-83ad-c10735662b1a-Signature" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#"><xades:SignedProperties Id="Signature-f99299b2-1326-4f0d-83ad-c10735662b1a-SignedProperties"><xades:SignedSignatureProperties><xades:SigningTime>2017-06-15T16:51:50+02:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>5iwlCWCIFiCKi/5sF8N0ML6H6Gqcva5NZqCJYlUGbNV5zKXJzhUbNQLlMjT1vc3HXYldZeHCj0y7rhnRjS7FzQ==</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>CN=ANCERT Corporativos Personales V2, O=Agencia Notarial de Certificacion S.L.U. - CIF B83395988, L=Paseo del General Martinez Campos 46 6a planta 28010 Madrid, C=ES</ds:X509IssuerName><ds:X509SerialNumber>137077095551875303195989105392502374641</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#Reference-618b9580-abea-4148-b9c3-dc7160fd2791"><xades:Description/><xades:MimeType>application/octet-stream</xades:MimeType><xades:Encoding/></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature>

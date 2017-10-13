@@ -1,0 +1,1163 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FIRe</name>
+    </assembly>
+    <members>
+        <member name="T:FIRe.HttpCertificateBlockedException">
+            <summary>
+            Certificado bloqueado.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpCertificateBlockedException.#ctor">
+            <summary>
+            Certificado bloqueado.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpCertificateBlockedException.#ctor(System.String,System.Exception)">
+            <summary>
+            Certificado bloqueado.
+            </summary>
+            <param name="msg">Menaje</param>
+            <param name="e">Excepcion</param>
+        </member>
+        <member name="T:FIRe.BatchNoSignedException">
+            <summary>
+            El lote no se ha firmado todavía.
+            </summary>
+        </member>
+        <member name="M:FIRe.BatchNoSignedException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.BatchNoSignedException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.InvalidBatchDocumentException">
+            <summary>
+            La firma del documento no se generó correctamente o se indicó un documento no válido.
+            </summary>
+        </member>
+        <member name="M:FIRe.InvalidBatchDocumentException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.InvalidBatchDocumentException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.InvalidTransactionException">
+            <summary>
+            Indica cuando se intenta operar sobre una transacción no existente o ya caducada.
+            </summary>
+        </member>
+        <member name="M:FIRe.InvalidTransactionException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.InvalidTransactionException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.FireConfig">
+            <summary>
+            Clase en la que almacenar la configuración de la aplicación. Cuando no se proporciona expresamente,
+            se cargan los valores desde el registro de Windows. Los valores configurables, tanto a través de
+            diccionario como del registro son:
+            <list type="bullet">
+            <item><term>fire_service:</term><description>URL del servicio del componente central.</description></item>
+            <item><term>admit_all_certs:</term><description>Indica si se debe aceptar que la conexión SSL esté cifrada con cualquier
+            certificado SSL (<code>true</code>) o que sólo con alguno cuya CA esté dada de alta en el almacén
+            de certificados de confianza del sistema.</description></item>
+            <item><term>ssl_client_pkcs12:</term><description>Ruta absoluta del almacén con el certificado de autenticación SSL cliente.</description></item>
+            <item><term>ssl_client_pass:</term><description>Contraseña del almacén con el certificado de autenticación SSL cliente.</description></item>
+            </list>
+            Los valores del registro de Windows se leen de las clave: <code>HKEY_CURRENT_USER\Software\FIRe</code>
+            </summary>
+        </member>
+        <member name="M:FIRe.FireConfig.#ctor">
+            <summary>
+            Construye el objeto de configuración cargando los valores desde el registro de Windows.
+            </summary>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio del
+            componente central en el registro de Windows.</exception>
+        </member>
+        <member name="M:FIRe.FireConfig.#ctor(System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Construye el objeto de configuración cargando los valores proporcionados y, si no se han pasado, los
+            valores del registro de Windows.
+            </summary>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio del
+            componente central ni en el diccionario proporcionado ni en el registro de Windows.</exception>
+        </member>
+        <member name="M:FIRe.FireConfig.initConfigKey(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            Inicializa una de las variables de la configuración del sistema con el valor
+            configurado en un diccionario o un valor por defecto si no existia el anterior.
+            </summary>
+            <param name="config">Objeto en el que almacenar la configuración.</param>
+            <param name="key">Clave del parámetro que se desea configurar.</param>
+            <param name="defaultConfig">Objeto con la configuración por defecto.</param>
+            <param name="defaultValue">Valor por defecto.</param>
+        </member>
+        <member name="M:FIRe.FireConfig.getFireService">
+            <summary>
+            Obtiene del registro la URL para hacer uso de los servicios de clavefirma v2 (FIRe).
+            </summary>
+            <returns>URL configurada en el registro.</returns>
+        </member>
+        <member name="M:FIRe.FireConfig.getSSLAdmitAllCerts">
+            <summary>
+            Obtiene si se debe admitir cualquier certificado SSL servidor.
+            </summary>
+            <returns>true si no se deben realizar comprobaciones sobre el certificado SSL servidor,
+            false en caso contrario.</returns>
+        </member>
+        <member name="M:FIRe.FireConfig.getSSLClientPkcs12">
+            <summary>
+            Obtiene la ruta del almacén de claves del certificado SSL cliente.
+            </summary>
+            <returns>Ruta del almacén PKCS#12 con el certificado y clave SSL cliente.</returns>
+        </member>
+        <member name="M:FIRe.FireConfig.getSSLClientPass">
+            <summary>
+            Obtiene la contraseña del almacén del certificado cliente SSL.
+            </summary>
+            <returns>Contraseña del almacén.</returns>
+        </member>
+        <member name="T:FIRe.ConfigManager">
+            <summary>Clase para la gestor de la configuración del componente distribuido.</summary>
+        </member>
+        <member name="M:FIRe.ConfigManager.getFireService">
+            <summary>
+            Obtiene del registro la URL para hacer uso de los servicios de clavefirma v2 (FIRe).
+            </summary>
+            <returns>URL configurada en el registro.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getUrlListCertsService">
+            <summary>
+            Obtiene del registro la URL para listar los certificados de firma.
+            </summary>
+            <returns>URL configurada en el registro.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getUrlGenerateCertService">
+            <summary>
+            Obtiene del registro la URL para generar un nuevo certificado de firma.
+            </summary>
+            <returns>URL configurada en el registro.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getUrlRecoverCertService">
+            <summary>
+            Obtiene del registro la URL para recuperar el nuevo certificado de firma.
+            </summary>
+            <returns>URL configurada en el registro.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getUrlLoadService">
+            <summary>
+            Obtiene del registro la URL para cargar datos para firmar.
+            </summary>
+            <returns>URL configurada en el registro.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getUrlSignService">
+            <summary>
+            Obtiene del registro la URL para firmar.
+            </summary>
+            <returns>URL configurada en el registro.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getSSLAdmitAllCerts">
+            <summary>
+            Obtiene del registro si se debe admitir cualquier certificado SSL servidor.
+            </summary>
+            <returns>true si no se deben realizar comprobaciones sobre el certificado SSL servidor,
+            false en caso contrario.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getSSLClientPkcs12">
+            <summary>
+            Obtiene del registro la ruta del almacén de claves del certificado SSL cliente.
+            </summary>
+            <returns>Ruta del almacén PKCS#12 con el certificado y clave SSL cliente.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getSSLClientPass">
+            <summary>
+            Obtiene del registro la contraseña del almacén del certificado cliente SSL.
+            </summary>
+            <returns>Contraseña del almacén.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getRegistryKey(System.String,System.String)">
+            <summary>
+            Obtiene un valor del registro de Windows.
+            </summary>
+            <param name="key">Clave de registro</param>
+            /// <param name="valueName">Nombre del valor de registro</param>
+            <returns>Valor del registro o nulo si no se indicó.</returns>
+        </member>
+        <member name="T:FIRe.FireClient">
+            <summary> Cliente del servicio de firma electrónica.</summary>
+            Permite firmar/multifirmar un único documento o sobre un lote completo.
+            Esta clase puede recibir la configuración para la conexión con el componente central
+            u obtener la URL del servicio de firma a través del registro
+        </member>
+        <member name="M:FIRe.FireClient.#ctor(System.String)">
+            <summary>
+            Crea el cliente de FIRe indicandole el identificador de la aplicación actual.
+            La configuracion necesaria para conectar con el componente central se tomará
+            del registro.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.#ctor(System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Crea el cliente de FIRe indicandole el identificador de la aplicación actual
+            y la configuracion necesaria para conectar con el componente central. Los parametros
+            no configurados a traves de este diccionario se tomarán del registro del sistema.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="config">Configuración de la conexión con el componente central.</param>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.sign(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Firma unos datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="subjectId">Identificador del firmante.</param>
+            <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
+            <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
+            <param name="algth">Algoritmo de firma.</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="dataB64"> Datos a firmar en base64.</param>
+            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.recoverSign(System.String,System.String,System.String)">
+            <summary>
+            Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <param name="upgrade">Formato al que queremos mejorar la firma (puede ser null).</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error generico durante la operación.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.recoverError(System.String,System.String)">
+            <summary>
+            Recupera el error tras la firma de los datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.createBatchProcess(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Crea un batch de documentos para posteriormente realizar la firma por lotes.
+            </summary>
+            <param name="subjectId">Identificador del firmante.</param>
+            <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
+            <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
+            <param name="algth">Algoritmo de firma.</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="upgrade"> Parámetros de actualización.</param>
+            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <returns>Referencia al proceso batch.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.addDocumentToBatch(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Incluye un documento en el batch para realizar una firma por lotes.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <param name="documentId">Identificador del documento a incluir.</param>
+            <param name="documentB64">Documento en base 64.</param>
+            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.NumDocumentsExceededException">Cuando se intentan agregar más documentos de los permitidos al lote.</exception>
+            <exception cref="T:FIRe.DuplicateDocumentException">Cuando se el identificador de documento ya se usó para otro documento del lote.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.addDocumentToBatch(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Incluye en el batch un documento con una configuración de firma propia para realizar una firma por lotes.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <param name="documentId">Identificador del documento a incluir.</param>
+            <param name="documentB64">Documento en base 64.</param>
+            <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
+            <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="upgrade"> Parámetros de actualización.</param>
+            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+            <exception cref="T:FIRe.NumDocumentsExceededException">Cuando se intentan agregar más documentos de los permitidos al lote.</exception>
+            <exception cref="T:FIRe.DuplicateDocumentException">Cuando se el identificador de documento ya se usó para otro documento del lote.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.signBatch(System.String,System.String,System.Boolean)">
+            <summary>
+            Realiza una firma por lotes.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <param name="stopOnError">Indicador de si debe detenerse al producirse un error en la firma.</param>
+            <returns>URL de redirección.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.recoverBatchResult(System.String,System.String)">
+            <summary>
+            Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.recoverBatchResultState(System.String,System.String)">
+            <summary>
+            Recupera el progreso del proceso de firma de los datos del proceso batch.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <returns>Progreso de la firma.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.recoverBatchSign(System.String,System.String,System.String)">
+            <summary>
+            Recupera la firma de un documento del proceso batch haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <param name="docId">Identificador del documento seleccionado.</param>
+            <returns>Firma del documento realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+            <exception cref="T:FIRe.InvalidBatchDocumentException">Cuando se indica el identificador de un documento que no existe en el lote o que no se firmó correctamente.</exception>
+            <exception cref="T:FIRe.BatchNoSignedException">Cuando se solicita recuperar una firma del lote antes de firmar el propio lote.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.getResponseToPostPetition(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Realiza una peticion POST y devuelve un byte array con la respuesta.
+            </summary>
+            <param name="url">URL a la que realizar la petición.</param>
+            <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <param name="config">Configuración para la conexión de red.</param>
+            <returns>Respuesta de la llamada a la URL indicada.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.NumDocumentsExceededException">Cuando se intentan agregar a un lote más documentos de los permitidos.</exception>
+            <exception cref="T:FIRe.DuplicateDocumentException">Cuando se intenta agregar a un lote un documento con el mismo identificador que otro utilizado anteriormente.</exception>
+            <exception cref="T:FIRe.BatchNoSignedException">Cuando se intenta recuperar la firma de un documento de un lote antes de firmar el propio lote.</exception>
+            <exception cref="T:FIRe.InvalidBatchDocumentException">Cuando se solicita la firma de un documento de un lote que no existe o que no se firmó correctamente.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.getJson(System.String)">
+            <summary>
+             Devuelve un conjunto de propiedades extraídas de un JSON.
+            </summary>
+            <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
+            <returns></returns>
+        </member>
+        <member name="T:FIRe.DuplicateDocumentException">
+            <summary>
+            Indica cuando se intenta agregar a un lote un documento con un identificador que ya se utilizo
+            anteriormente en este lote.
+            </summary>
+        </member>
+        <member name="M:FIRe.DuplicateDocumentException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.DuplicateDocumentException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.NumDocumentsExceededException">
+            <summary>
+            Indica cuando se intenta agregar a un lote más documentos de los permitidos.
+            </summary>
+        </member>
+        <member name="M:FIRe.NumDocumentsExceededException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.NumDocumentsExceededException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.HttpCustomErrors">
+            <summary>Clase con los tipos de error HTTP propios de la aplicación.</summary>
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.NO_CERTS">
+            Identifica los casos en los que un usuario no tiene certificados del tipo indicado.
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.NO_USER">
+            El usuario no esta dado de alta en el sistema.
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.CERTIFICATE_BLOCKED">
+            El usuario no esta dado de alta en el sistema. 
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.CERTIFICATE_AVAILABLE">
+            Error que identifica que el usuario ya dispone de tantos certificados como puede tener del tipo indicado. 
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.NUM_DOCUMENTS_EXCEEDED">
+            Se excede el límite de documentos establecido (comúnmente, el tamaño de un lote). 
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.DUPLICATE_DOCUMENT">
+            Se indica un identificador de documento que ya está dado de alta en el lote de firma.
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.INVALID_TRANSACTION">
+            La transaccion indicada no es valida o ya ha caducado. 
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.SIGN_ERROR">
+            Error devuelto por el servicio de custodia al realizar la operación de firma. 
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.POSTSIGN_ERROR">
+            Error devuelto por el servicio de custodia al realizar la operación de firma. 
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.WEAK_REGISTRY">
+            Error devuelto por el servicio de custodia al realizar la operación de firma. 
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:FIRe.HttpCustomErrors.UPGRADING_ERROR" -->
+        <!-- Badly formed XML comment ignored for member "F:FIRe.HttpCustomErrors.SAVING_ERROR" -->
+        <member name="F:FIRe.HttpCustomErrors.BATCH_NO_SIGNED">
+            Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes.
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.INVALID_BATCH_DOCUMENT">
+            Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes.
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.BATCH_DOCUMENT_FAILED">
+            Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes.
+        </member>
+        <member name="T:FIRe.ConnectionManager">
+            <summary>Clase para la codificación de datos binarios en cadenas Base64 y viceversa.</summary>
+        </member>
+        <member name="M:FIRe.ConnectionManager.connectByGet(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>Realiza una llamada HTTP/HTTPS vía GET y devuelve el resultado.</summary>
+            <param name="url">URL a la que realizar la petición.</param>
+            <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <param name="config">Configuración para la conexión de red.</param>
+            <returns>Respuesta de la llamada.</returns>
+        </member>
+        <member name="M:FIRe.ConnectionManager.connectByPost(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>Realiza una llamada HTTP/HTTPS vía POST y devuelve el resultado.</summary>
+            <param name="url">URL a la que realizar la petición.</param>
+            <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <param name="config">Configuración para la conexión de red.</param>
+            <returns>Respuesta de la llamada.</returns>
+        </member>
+        <member name="M:FIRe.ConnectionManager.wantAdmitAllCert(System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>Indica si se debe admitir cualquier certificado SSL servidor.</summary>
+            <returns>true cuando se deba admitir cualquier certificado SSL servidor, false en caso contrario.</returns>
+        </member>
+        <member name="T:FIRe.Base64">
+            <summary>Clase para la codificación de datos binarios en cadenas Base64 y viceversa.</summary>
+        </member>
+        <member name="M:FIRe.Base64.Base64Encode(System.String)">
+            <summary>Codifica una cadena de texto plano en base64</summary>
+            <param name="plainText">Cadena a codificar.</param>
+            <returns>Cadena base64.</returns>
+        </member>
+        <member name="M:FIRe.Base64.Base64Decode(System.String)">
+            <summary>Decodifica una cadena base64 en un texto plano.</summary>
+            <param name="base64EncodedData">Cadena a decodificar.</param>
+            <returns>Cadena decodificada.</returns>
+        </member>
+        <member name="T:FIRe.ConfigureException">
+            <summary>
+            Se utiliza para identificar un error en la configuración de la biblioteca.
+            </summary>
+        </member>
+        <member name="M:FIRe.ConfigureException.#ctor">
+            <summary>
+            Excepción sin parámetros que llama al constructor de la clase padre
+            </summary>
+        </member>
+        <member name="M:FIRe.ConfigureException.#ctor(System.String)">
+            <summary>
+            Excepción con un parámetro que llama al constructor de la clase padre
+            </summary>
+            <param name="msg">Mensaje de la excepción</param>
+        </member>
+        <member name="T:FIRe.GenerateCertificateResult">
+            <summary>Clase para el almacén del resultado de una operación de generación de certificados.</summary>
+        </member>
+        <member name="M:FIRe.GenerateCertificateResult.#ctor(System.String)">
+            <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
+            <param name="json">Definición del resultado de una operación de carga de datos a firmar.</param>
+            <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
+        </member>
+        <member name="M:FIRe.GenerateCertificateResult.getJson(System.String)">
+            <summary>
+             Devuelve un conjunto de propiedades extraídas de un JSON.
+            </summary>
+            <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
+            <returns>Diccionario con el conjunto de propiedades extraídas del JSON junto con sus valores asignados.</returns>
+        </member>
+        <member name="M:FIRe.GenerateCertificateResult.getTransactionId">
+            <summary> Obtiene el identificador de la transacción de firma.</summary>
+            <returns>Identificador de la transacción de firma</returns>
+        </member>
+        <member name="M:FIRe.GenerateCertificateResult.getRedirectUrl">
+            <summary>Obtiene la URL a redireccionar al usuario para que se autentique.</summary>
+            <returns>URL a redireccionar al usuario para que se autentique.</returns>
+        </member>
+        <member name="M:FIRe.GenerateCertificateResult.ToString">
+            <summary>Genera una cadena JSON con las propiedades del resultado de la carga de datos.</summary>
+            <returns>JSON con las propiedades del objeto.</returns>
+        </member>
+        <member name="T:FIRe.HttpGenerateCertificate">
+            <summary>
+            Clase para la generación y recuperación de certificados de firma. Esta clase obtiene la URL
+            del servicio de generación de certificado y recuperación del certificado generado del registro.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpGenerateCertificate.generateCertificate(System.String,System.String,System.String)">
+            <summary>Genera un nuevo certificado de firma.</summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="subjectId">Identificador del titular al que generar el certificado.</param>
+            <param name="confB64">Configuración a indicar al servicio remoto (dependiente de la implementación).</param>
+            <returns>Resultado del proceso de generación.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido o la repuesta del servidor
+            no es correcta.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpCertificateAvailableException">Cuando se solicita crear una certificado para un usuario que ya tiene.</exception>
+            <exception cref="T:FIRe.HttpNoUserException">Cuando el usuario no está dado de alta en el sistema.</exception>
+            <exception cref="T:FIRe.HttpWeakRegistryException">Cuando el usuario realizó un registro débil y no puede tener certificados de firma.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.HttpGenerateCertificate.recoverCertificate(System.String,System.String)">
+            <summary>Carga datos para ser posteriormente firmados.</summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción en la que se generó el certificado.</param>
+            <returns>Resultado de la carga.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:System.Security.Cryptography.CryptographicException">Cuando no se puede decodificar el certificado recuperado.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.HttpGenerateCertificate.getResponseToPostPetition(System.String,System.String)">
+            <summary>
+            Realiza una peticion POST y devuelve una cadena con el JSON de la respuesta.
+            </summary>
+            <param name="url">URL a la que realizar la petición.</param>
+            <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <returns>JSON en un String con la respuesta del servidor</returns>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.HttpCertificateAvailableException">Cuando se solicita crear una certificado para un usuario que ya tiene.</exception>
+            <exception cref="T:FIRe.HttpNoUserException">Cuando el usuario no está dado de alta en el sistema.</exception>
+            <exception cref="T:FIRe.HttpWeakRegistryException">Cuando el usuario realizó un registro débil y no puede tener certificados de firma.</exception>
+        </member>
+        <member name="M:FIRe.HttpGenerateCertificate.getResponseToGetPetition(System.String,System.String)">
+            <summary>
+            Realiza una peticion GET y devuelve un byte array con la respuesta.
+            </summary>
+            <param name="url">URL a la que realizar la petición.</param>
+            <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <returns>Certificado codificado.</returns>
+            <exception cref="T:FIRe.HttpOperationException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            
+        </member>
+        <member name="T:FIRe.HttpCertificateAvailableException">
+            <summary>El usuario ya tiene certificados de firma vigentes y no puede crear otros nuevos.</summary>
+        </member>
+        <member name="M:FIRe.HttpCertificateAvailableException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpCertificateAvailableException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.HttpWeakRegistryException">
+            <summary>Cuando el usuario realizó un registro débil y no puede tener certificados de firma.</summary>
+        </member>
+        <member name="M:FIRe.HttpWeakRegistryException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpWeakRegistryException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.HttpNoUserException">
+            <summary>El usuario no existe.</summary>
+        </member>
+        <member name="M:FIRe.HttpNoUserException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpNoUserException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.FireBatchResult">
+            <summary>Clase para el almacén del resultado de una operación de firma por lotes.</summary>
+        </member>
+        <member name="P:FIRe.FireBatchResult.batch">
+            <summary>
+            Listado de resultados de firma en proceso batch.
+            </summary>
+        </member>
+        <member name="T:FIRe.FireSingleResult">
+            <summary>Clase para el almacén del resultado de una operación de firma de un documento.</summary>
+        </member>
+        <member name="P:FIRe.FireSingleResult.id">
+            <summary>
+            Identificador del documento.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireSingleResult.ok">
+            <summary>
+            Indicador de éxito de la firma.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireSingleResult.dt">
+            <summary>
+            Resultado de la firma.
+            </summary>
+        </member>
+        <member name="T:FIRe.FireTransactionIdResult">
+            <summary>Clase para el almacén del identificador de la transacción.</summary>
+        </member>
+        <member name="M:FIRe.FireTransactionIdResult.#ctor(System.String)">
+            <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
+            <param name="json">Definición del resultado de una operación de carga de datos a firmar.</param>
+            <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
+        </member>
+        <member name="M:FIRe.FireTransactionIdResult.getJson(System.String)">
+            <summary>
+             Devuelve un conjunto de propiedades extraídas de un JSON.
+            </summary>
+            <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FIRe.FireTransactionIdResult.getTransactionId">
+            <summary> Obtiene el identificador de la transacción de firma.</summary>
+            <returns>Identificador de la transacción de firma</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionIdResult.ToString">
+            <summary>Genera una cadena JSON con las propiedades del resultado de la carga de datos.</summary>
+            <returns>JSON con las propiedades del objeto.</returns>
+        </member>
+        <member name="T:FIRe.FireTransactionResult">
+            <summary>Clase para el almacén del resultado de una operación de carga de datos para firmar.</summary>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.#ctor(System.Byte[])">
+            <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
+            <param name="result">Definición del resultado de una operación de firma.</param>
+            <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getJson(System.String)">
+            <summary>
+             Devuelve un conjunto de propiedades extraídas de un JSON.
+            </summary>
+            <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getResult">
+            <summary> Obtiene el resultado de la transacción de firma.</summary>
+            <returns>Identificador de la transacción de firma</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getErrorCode">
+            <summary>Obtiene el código de error durante la firma.</summary>
+            <returns>Código de error.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getErrorMessage">
+            <summary>Obtiene el mensaje de error durante la firma.</summary>
+            <returns>Mensaje de error.</returns>
+        </member>
+        <member name="T:FIRe.FireLoadResult">
+            <summary>Clase para el almacén del resultado de una operación de carga de datos para firmar.</summary>
+        </member>
+        <member name="M:FIRe.FireLoadResult.#ctor(System.String)">
+            <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
+            <param name="json">Definición del resultado de una operación de carga de datos a firmar.</param>
+            <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
+        </member>
+        <member name="M:FIRe.FireLoadResult.getJson(System.String)">
+            <summary>
+             Devuelve un conjunto de propiedades extraídas de un JSON.
+            </summary>
+            <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FIRe.FireLoadResult.getTransactionId">
+            <summary> Obtiene el identificador de la transacción de firma.</summary>
+            <returns>Identificador de la transacción de firma</returns>
+        </member>
+        <member name="M:FIRe.FireLoadResult.getRedirectUrl">
+            <summary>Obtiene la URL a redireccionar al usuario para que se autentique.</summary>
+            <returns>URL a redireccionar al usuario para que se autentique.</returns>
+        </member>
+        <member name="M:FIRe.FireLoadResult.ToString">
+            <summary>Genera una cadena JSON con las propiedades del resultado de la carga de datos.</summary>
+            <returns>JSON con las propiedades del objeto.</returns>
+        </member>
+        <member name="T:FIRe.LoadResult">
+            <summary>Clase para el almacén del resultado de una operación de carga de datos para firmar.</summary>
+        </member>
+        <member name="M:FIRe.LoadResult.#ctor(System.String)">
+            <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
+            <param name="json">Definición del resultado de una operación de carga de datos a firmar.</param>
+            <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
+        </member>
+        <member name="M:FIRe.LoadResult.getJson(System.String)">
+            <summary>
+             Devuelve un conjunto de propiedades extraídas de un JSON.
+            </summary>
+            <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FIRe.LoadResult.getTransactionId">
+            <summary> Obtiene el identificador de la transacción de firma.</summary>
+            <returns>Identificador de la transacción de firma</returns>
+        </member>
+        <member name="M:FIRe.LoadResult.getRedirectUrl">
+            <summary>Obtiene la URL a redireccionar al usuario para que se autentique.</summary>
+            <returns>URL a redireccionar al usuario para que se autentique.</returns>
+        </member>
+        <member name="M:FIRe.LoadResult.getTriphaseData">
+            <summary>Obtiene los datos de la sesión trifásica.</summary>
+            <returns>Datos de la sesión trifásica.</returns>
+        </member>
+        <member name="M:FIRe.LoadResult.ToString">
+            <summary>Genera una cadena JSON con las propiedades del resultado de la carga de datos.</summary>
+            <returns>JSON con las propiedades del objeto.</returns>
+        </member>
+        <member name="T:FIRe.HttpCertificateList">
+            <summary>
+            Clase para la solicitud del listado de certificados de un usuario. Esta clase obtiene la URL
+            del servicio al que debe atacar a través del valor de registro
+            "CURRENT_USER/SOFTWARE/ClaveFirma/certificates_service".
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpCertificateList.getList(System.String,System.String)">
+            <summary>
+             Recuperar los certificados del sistema.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="subjectId">Identificador del titular de la clave de firma.</param>
+            <returns>Listado de certificados</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNoUserException">Cuando el usuario no está dado de alta en el sistema.</exception>
+            <exception cref="T:FIRe.HttpCertificateBlockedException">Cuando los certificados del usuario estén bloqueados.</exception>
+            <exception cref="T:FIRe.HttpWeakRegistryException">Cuando el usuario realizó un registro débil y no puede tener certificados de firma.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.HttpCertificateList.getJson(System.String)">
+            <summary>
+             Devuelve las propiedades extraidas del JSON proporcionado.
+            </summary>
+            <param name="JSON">Cadena en formato JSON.</param>
+            <returns>Conjunto de propiedades y sus valores.</returns>
+        </member>
+        <member name="T:FIRe.HttpOperationException">
+            <summary>
+            Error durante la ejecución de la operación.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpOperationException.#ctor">
+            <summary>
+            Excepción sin parámetros que llama al constructor de la clase padre
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpOperationException.#ctor(System.String)">
+            <summary>
+            Excepción con un parámetros que llama al constructor de la clase padre
+            </summary>
+            <param name="msg">Mensaje de la excepción</param>
+        </member>
+        <member name="M:FIRe.HttpOperationException.#ctor(System.String,System.Exception)">
+            <summary>
+             Excepción con dos parámetros que llama al constructor de la clase padre
+            </summary>
+            <param name="responseDescription">Mensaje de la excepción</param>
+            <param name="e">Exception</param>
+        </member>
+        <member name="T:FIRe.HttpForbiddenException">
+            <summary>El usuario no tiene permiso de acceso al servicio.</summary>
+        </member>
+        <member name="M:FIRe.HttpForbiddenException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpForbiddenException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.HttpNetworkException">
+            <summary>
+            No se ha podido recuperar los certificados del usuario por problemas de conexión
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpNetworkException.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpNetworkException.#ctor(System.String,System.Exception)">
+            <summary>
+            
+            </summary>
+            <param name="msg"></param>
+            <param name="e"></param>
+        </member>
+        <member name="T:FIRe.HttpLoadProcess">
+            <summary>
+            Clase para la carga de datos a firmar. Esta clase obtiene la URL del
+            servicio al que debe atacar para la carga de datos a través del registro.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpLoadProcess.loadData(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>Carga datos para ser posteriormente firmados.</summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="subjectId">Identificador del titular de la clave de firma.</param>
+            <param name="op">Tipo de operación a realizar: firma, cofirma o contrafirma</param>
+            <param name="ft">Formato de la operación.</param>
+            <param name="algth">Algoritmo de firma.</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="certB64">Certificado de usuario para realizar la firma.</param>
+            <param name="dataB64">Datos a firmar.</param>
+            <param name="confB64">Configuración a indicar al servicio remoto (dependiente de la implementación).</param>
+            <returns>Resultado de la carga.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.HttpLoadProcess.getResponseToPostPetition(System.String,System.String)">
+            <summary>
+            Realiza una peticion POST y devuelve un byte array con la respuesta.
+            </summary>
+            <param name="url">URL a la que realizar la petición.</param>
+            <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <returns>JSON en un String con la respuesta del servidor</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="T:FIRe.HttpSignProcess">
+            <summary> Cliente del servicio de firma electrónica.</summary>
+            La operación a realizar podrá ser firma, cofirma o contrafirma.
+            Esta clase obtiene la URL del servicio de firma a través del registro.
+        </member>
+        <member name="M:FIRe.HttpSignProcess.sign(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Firma unos datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
+            <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
+            <param name="algth">Algoritmo de firma.</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="cert">Certificado de usuario para realizar la firma.</param>
+            <param name="dataB64"> Datos a firmar en base64.</param>
+            <param name="tdB64">Datos de la operación trifásica en base64.</param>
+            <param name="upgrade">Formato al que queremos mejorar la firma (puede ser <code>null</code>).</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.HttpSignProcess.getResponseToPostPetition(System.String,System.String)">
+            <summary>
+            Realiza una peticion POST y devuelve un byte array con la respuesta.
+            </summary>
+            <param name="url">URL a la que realizar la petición.</param>
+            <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <returns>Respuesta de la llamada a la URL indicada.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="T:FIRe.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:FIRe.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:FIRe.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="T:FIRe.FireApi">
+            <summary> Cliente del servicio de firma electrónica.</summary>
+            La operación a realizar podrá ser firma, cofirma o contrafirma.
+            Esta clase obtiene la URL del servicio de firma a través del registro.
+        </member>
+        <member name="M:FIRe.FireApi.sign(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Firma unos datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="subjectId">Identificador del firmante.</param>
+            <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
+            <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
+            <param name="algth">Algoritmo de firma.</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="dataB64"> Datos a firmar en base64.</param>
+            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.recoverSign(System.String,System.String,System.String)">
+            <summary>
+            Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="upgrade">Formato al que queremos mejorar la firma (puede ser null).</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.recoverError(System.String,System.String)">
+            <summary>
+            Recupera el error tras la firma de los datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.createBatchProcess(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Crea un batch de documentos para posteriormente realizar la firma por lotes.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="subjectId">Identificador del firmante.</param>
+            <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
+            <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
+            <param name="algth">Algoritmo de firma.</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="upgrade"> Parámetros de actualización.</param>
+            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <returns>Referencia al proceso batch.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.addDocumentToBatch(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Incluye un documento en el batch para realizar una firma por lotes.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="documentId">Identificador del documento a incluir.</param>
+            <param name="documentB64">Documento en base 64.</param>
+            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.addDocumentToBatch(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Incluye en el batch un documento con una configuración de firma propia para realizar una firma por lotes.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="documentId">Identificador del documento a incluir.</param>
+            <param name="documentB64">Documento en base 64.</param>
+            <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
+            <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="upgrade"> Parámetros de actualización.</param>
+            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.signBatch(System.String,System.String,System.Boolean)">
+            <summary>
+            Realiza una firma por lotes.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="stopOnError">Indicador de si debe detenerse al producirse un error en la firma.</param>
+            <returns>URL de redirección.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.recoverBatchResult(System.String,System.String)">
+            <summary>
+            Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.recoverBatchResultState(System.String,System.String)">
+            <summary>
+            Recupera el progreso del proceso de firma de los datos del proceso batch.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <returns>Progreso de la firma.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.recoverBatchSign(System.String,System.String,System.String)">
+            <summary>
+            Recupera la firma de un documento del proceso batch haciendo uso del servicio de red de firma en la nube.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="docId">Identificador del documento seleccionado.</param>
+            <returns>Firma del documento realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.getResponseToPostPetition(System.String,System.String)">
+            <summary>
+            Realiza una peticion POST y devuelve un byte array con la respuesta.
+            </summary>
+            <param name="url">URL a la que realizar la petición.</param>
+            <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <returns>Respuesta de la llamada a la URL indicada.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.getJson(System.String)">
+            <summary>
+             Devuelve un conjunto de propiedades extraídas de un JSON.
+            </summary>
+            <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

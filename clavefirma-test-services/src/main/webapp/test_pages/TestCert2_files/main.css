@@ -1,0 +1,275 @@
+body {
+  font-family: "Arial", "sans-serif";
+  font-size: 12px;
+  background-color: rgb(255, 255, 255);
+  color: #575757;
+  /*-webkit-text-shadow: 0px 2px 2px #DBDBDB;
+     -moz-text-shadow: 0px 2px 2px #DBDBDB;
+          text-shadow: 0px 2px 2px #DBDBDB;*/
+}
+
+header { 
+  border-radius: 4px;
+  position: relative;
+  background-color: #4D5961;
+  color: #fff;
+}
+
+.header-navbar {
+  margin-bottom: 0px;
+  height: 45px;
+}
+
+.header-navbar-text {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.arlogo {
+  background: url(../img/ParqLogoProsa.gif) repeat-y 0 0;
+  height: 45px;
+  border-right: 2px solid #fff;
+  width: 90px;
+}
+
+.artitulos {
+  color: #FFFFFF;
+  position: absolute;
+  top: 5px;
+  left: 96px;
+}
+
+.artitulos h1 {
+  font-size: 1.3em;
+  text-transform: none;
+  margin: 0;
+  padding: 0;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.artitulos h2 {
+  font-size: 1em;
+  font-weight: normal;
+  text-transform: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sub-header {
+  left: 0px;
+  right: 0px;
+  padding-bottom: 2px;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #fff;
+}
+.sub-header .line {
+  background-color: #DCE1E5;
+  height: 1.7em;
+  border-top: 2px solid #fff;
+}
+
+.page-logo {
+  position: relative;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: #FFF;
+  border-radius: 6px;
+}
+
+.page-title {
+  text-align:center;
+  padding: 10px 5px 5px 10px;
+  font-size: 40px;
+}
+
+.inputSimulate {
+    line-height: 2.3;
+}
+
+.scroll-list {
+    max-height: 300px;
+    overflow-y: auto; 
+}
+
+.size-medium {
+  font-size: 16px;
+}
+
+.size-big {
+  font-size: 20px;
+}
+
+.icon-input {
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .icon-input {
+    top: -60px!important;
+    margin-left: 90%;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .icon-input {
+    top: -60px!important;
+    margin-left: 90%!important;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .icon-input {
+    top: -44px!important;
+    right: -250px!important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .icon-input {
+    top: -27px!important;
+    right: -40px!important;
+  }
+}
+
+/*BS3 MOD*/
+.panel-default {
+    -webkit-box-shadow: 0 0 4px 2px #E7E7E7;
+       -moz-box-shadow: 0 0 4px 2px #E7E7E7;
+            box-shadow: 0 0 4px 2px #E7E7E7;
+}
+
+.panel-default h3 {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.masthead {
+    padding-bottom: 10px;
+}
+
+.form-container {
+  padding-top: 10px;
+  padding-bottom: 0px;
+  padding-left: 15px;
+  padding-right: 15px;
+  -webkit-box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.21);
+     -moz-box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.21);
+          box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.21);
+  background-color: #FFF9F4;
+  display: table;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.ul-nopadding {
+  padding-left: 10px;
+}
+
+.form-buttons-container {
+  position: relative;
+  /*bottom: 0;*/
+  display: block;
+  text-align: center;
+  right: 0;
+  left: 0;
+
+  background-color: #E8ECEF;
+  padding: 2px;
+  border-top: 1px solid #4D5961;
+}
+
+.form-buttons-container .form-group {
+  margin-bottom: 0px;
+}
+
+/* ////////////////////////////////////// */
+
+input,button {
+  background: url(./ParqFondoInput.gif) repeat-x 0 0!important;
+}
+
+input, label, select, textarea, .datosSalidaInline dt, .datosSalida dt {
+  color: #FF6600;
+  line-height: 18px;
+}
+.p0, .p1, .p2, .p6, H3, H4, H5, LEGEND, .agrupaciones, .anotaciones {
+  color: #575757;
+}
+input, textarea {
+  border-color: #575757!important;
+  background-color: #FFffff!important;
+  margin-top:5px;
+}
+label {
+  font-family: Verdana;
+  font-weight: normal;
+  margin: 3px 0;
+  padding: 0 3px 0 0;
+  text-align: justify;
+  white-space: nowrap;
+}
+legend {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 0.9em;
+  font-weight: bold;
+  padding: 10px 5px;
+}
+fieldset {
+  border:#FF6600 1px solid;
+  margin: 0 0 10px;
+  padding: 0 20px 14px;
+  background-color: #FFF9F4;
+}
+fieldset p {
+  font-family: verdana;
+  position: relative;
+}
+ul {
+  font-size: 90%;
+  /*list-style: none outside none;*/
+}
+p label {
+  margin-right: 35px;
+}
+caption, TR.subCabecera, TH, TD.cabecera, TD, .celda, .avisoOblig {
+  color: #ff0000;
+  font-size: 0.8em;
+  line-height: 20px;
+}
+.avisoOblig {
+  padding: 2px 5px;
+  background-attachment: scroll;
+  background-color: #FFFF6C;
+  background-image: none;
+  background-repeat: repeat;
+  background-position: 0 0;
+}
+  
+input.BotBoton, button.BotBoton {
+  border: 1px outset;
+  font-family: Verdana, sans-serif;
+  overflow: visible;
+  background-color: #F1F3F6;
+  border-color: #6C757C;
+  color: #FF6600;
+  cursor: pointer;
+}
+
+input.BotBoton[disabled], button.BotBoton[disabled] {
+  color: #B9B9B9;
+}
+
+.error-msg {
+  border: 1px solid #A50C10;
+  background: #DD0005;
+  color: #F9F9F7;
+  padding: 10px;
+  margin: 6px;
+  text-shadow: 0px 0px 0px #000;
+}
+
+.form-info {
+  font-size: 13px;
+}
