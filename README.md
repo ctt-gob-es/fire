@@ -37,7 +37,7 @@ El sistema FIRe está compuesto principalmente por dos elementos:
 
 ### v2.1
 
-####Componente central
+#### Componente central
   
  - [RFE] Se introduce la posibilidad de introducir y configurar un gestor de documentos que le indique a las operaciones de firma y lotes de donde tomar y donde guardar los datos en lugar de recibirlos directamente.
  - [RFE] Se adminte el uso del formato "NONE" que permite realizar una firma digital PKCS#1 sobre los datos indicados.
@@ -50,12 +50,12 @@ El sistema FIRe está compuesto principalmente por dos elementos:
  - [BUG] Corrección del error en el tratamiento de los nombres y título de los documentos enviados a firmar cuando tienen caracteres no ANSI básicos (tíldes, eñes...). Se hace obligatorio el uso de la codificación UTF-8.
  - [BUG] La página de carga del Cliente @firma ignora las mayúsculas en la selección del método de firma (sign, cosign o countersign). Esto resuelve el error de selección de la operación con el método de firma con enumerados.
  
-####Cliente distribuido Java
+#### Cliente distribuido Java
 
  - [RFE] Se introduce un nuevo API que permite proporcionar directamente la configuración de la conexión con el componente central.
  - [RFE] Se agregan nuevas excepciones para describir errores durante la recuperación de la firma de un lote.
  
-####Cliente distribuido .NET
+#### Cliente distribuido .NET
 
  - [RFE] Se introduce un nuevo API que permite proporcionar directamente la configuración de la conexión con el componente central.
  - [RFE] Se agregan nuevas excepciones para describir errores al agregar documentos a un lote.
@@ -66,14 +66,14 @@ El sistema FIRe está compuesto principalmente por dos elementos:
  - [BUG] Se corrige el envío de los parámetros extra para la configuración de las firmas.
  - [BUG] Se corrige el envío de la configuración del comportamiento de la firma de lote cuando se encuentra un error. Siempre se continuaba con el resto de firmas.
  
-####Cliente distribuido PHP
+#### Cliente distribuido PHP
 
  - [RFE] Se agregan nuevas excepciones para describir errores al agregar documentos a un lote.
  - [RFE] Se agregan nuevas excepciones para describir errores durante la recuperación de la firma de un lote.
  - [BUG] Se corrige la declaración de excepciones para eliminar algunas que nunca se lanzaban.
  - [BUG] Se agrega al método de recuperación de firma el parámetro necesario para permitir su actualización a formatos longevos.
  
-####Aplicación de pruebas
+#### Aplicación de pruebas
 
  - [RFE] Se modifica para hacer uso del nuevo componente distribuido Java.
 
@@ -81,7 +81,7 @@ El sistema FIRe está compuesto principalmente por dos elementos:
 
 ### v2.0.1
 
-####Componente central
+#### Componente central
 
  - [RFE] Se sustituye el MiniApplet 1.5 incluida por la misma versión firmada por el MinHAFP.
  - [RFE] Se modifica la configuración por defecto para que se utilice AutoFirma nativo para las firmas con certificado local.
@@ -92,20 +92,20 @@ El sistema FIRe está compuesto principalmente por dos elementos:
 
 Se cambia el nombre del proyecto a FIRe
 
-####Componente central
+#### Componente central
 
  - [RFE] Se integra la opción de incluir la selección de certificado como parte del proceso de firma.
  - [RFE] Se integra el despliegue del MiniApplet @firma y AutoFirma vía JNLP para su uso como parte del proceso de firma.
  - [RFE] Se integran las funciones de firma de lotes para la firma de múltiples documentos.
  - [RFE] Se integran páginas web para la selección del origen del certificado, selección del certificado en la nube, expedición de certificados y firma con certificado cliente.
 
-####Componente distribuido
+#### Componente distribuido
 
  - [RFE] Se agrega un nuevo API desde el que invocar las nuevas funciones de firma (simples y de lotes), independiente del origen del certificado.
  - [RFE] Se agrega un método para obtener los errores internos producidos en servidor durante la ejecución de la transacción.
  - [RFE] [java] Se elimina la dependencia con el módulo core del Cliente @firma (afirma-core.jar).
 
-####Aplicación de pruebas
+#### Aplicación de pruebas
 
  - [RFE] Aplicación de pruebas;		Uso del nuevo componente distribuido Java.
  - [RFE] Aplicación de pruebas;		Uso del modelo de selección de certificado integrada en el proceso de firma.
