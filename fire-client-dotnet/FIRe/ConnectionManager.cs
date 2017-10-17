@@ -143,7 +143,7 @@ namespace FIRe
                 log.TraceData(TraceEventType.Warning, 1, "No se ha encontrado un certificado cliente SSL configurado en el registro: " + e.ToString());
             }
 
-            if (!string.IsNullOrEmpty(sslClientPkcs12) && !string.IsNullOrEmpty(sslClientPkcs12))
+            if (!string.IsNullOrEmpty(sslClientPkcs12) && !string.IsNullOrEmpty(sslClientPass))
             {
                 try
                 {
