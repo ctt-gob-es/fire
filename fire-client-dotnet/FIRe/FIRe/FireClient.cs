@@ -776,6 +776,9 @@ namespace FIRe
         /// <exception cref="InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
         private static byte[] getResponseToPostPetition(string url, string urlParameters, Dictionary<String, String> config)
         {
+            HttpWebResponse response = null;
+            Stream dataStream = null;
+            MemoryStream ms = null;
             try
             {
                 // generamos la respuesta del servidor
@@ -785,10 +788,6 @@ namespace FIRe
                 MemoryStream ms = new MemoryStream();
                 dataStream.CopyTo(ms);
                 byte[] bytes = ms.ToArray();
-                // Cerramos los streams
-                response.Close();
-                ms.Close();
-                dataStream.Close();
 
                 return bytes;
             }
@@ -838,6 +837,13 @@ namespace FIRe
             }
             catch (Exception e) {
                 throw new HttpOperationException(e.Message, e);
+            }
+            finally
+            {
+                // Cerramos los streams
+                if (ms != null) { ms.Close(); }
+                if (dataStream != null) { dataStream.Close(); }
+                if (response != null) response.Close();
             }
         }
 
