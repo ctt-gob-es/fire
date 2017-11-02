@@ -9,7 +9,9 @@
  */
 package es.gob.fire.server.services;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Properties;
@@ -17,15 +19,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.openlandsw.rss.gateway.DataTransactionResult;
-import com.openlandsw.rss.gateway.GateWayAPI;
-import com.openlandsw.rss.gateway.ParameterAux;
-import com.openlandsw.rss.gateway.StartOpTransactionResult;
-import com.openlandsw.rss.gateway.StartOperationInfo;
-import com.openlandsw.rss.gateway.constants.ConstantsGateWay.GateWayOperationCtes.StartOpTransactionCtes;
-
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.signature.GenerateCertificateResult;
 import es.gob.fire.signature.LoadResult;
 import es.gob.fire.signature.connector.FIReConnector;
 import es.gob.fire.signature.connector.clavefirma.ClaveFirmaConnector;
@@ -197,32 +193,32 @@ public final class TestPrincipal {
 
 		final String subjectId = "52044291Y"; //$NON-NLS-1$
 
-		final StartOperationInfo opInfo = new StartOperationInfo();
-		opInfo.setRedirectError("https://es.yahoo.com"); //$NON-NLS-1$
-		opInfo.setRedirectOK("https://www.google.es"); //$NON-NLS-1$
-		opInfo.setOperationName(StartOpTransactionCtes.ISSUE_CERTIFICATE);
+		final FIReConnector nbh = new ClaveFirmaConnector();
 
-		final ParameterAux param = new ParameterAux();
-		param.setKey(StartOpTransactionCtes.CERTIFICATE_TYPE);
-		param.setData(StartOpTransactionCtes.CERTIFICATE_TYPE_SIGN);
+		final Properties config = new Properties();
+		config.put("redirectOkUrl", "http://www.google.com"); //$NON-NLS-1$ //$NON-NLS-2$
+		config.put("redirectErrorUrl", "http://www.ibm.com"); //$NON-NLS-1$ //$NON-NLS-2$
+		nbh.init(config);
 
-		final ParameterAux[] paramsList = new ParameterAux[1];
-		paramsList[0] = param;
-		final StartOpTransactionResult intermediateResult = new GateWayAPI().startOpTransaction(subjectId, opInfo, paramsList);
+		final GenerateCertificateResult intermediateResult = nbh.generateCertificate(subjectId);
 
-		final String idTransaction = intermediateResult.getIdTransaction();
-		final String confirmUrl = intermediateResult.getRedirect();
+		final String idTransaction = intermediateResult.getTransactionId();
+		final String confirmUrl = intermediateResult.getRedirectUrl();
 
 		// Somos redirigidos a la pagina de confirmacion
 		System.out.println("Id transaccion: " + idTransaction); //$NON-NLS-1$
 		System.out.println("URL redireccion: " + confirmUrl); //$NON-NLS-1$
 		System.out.println(" ============== "); //$NON-NLS-1$
 
-		// Retomamos el control
-		final DataTransactionResult result = new GateWayAPI().dataTransaction(idTransaction);
-		final String resultOp = result.getStateTransaction().getResult();
+		// HAY QUE PARAR AQUI LA EJECUCION Y ENTRAR MANUALMENTE EN LA URL QUE SE HA MOSTRADO
+		// COMO REDIRECCION EN EL PRINTLN
 
-		System.out.println("Result: " + resultOp); //$NON-NLS-1$
-		System.out.println("================="); //$NON-NLS-1$
+
+		final byte[] certEncoded = nbh.recoverCertificate(idTransaction);
+
+		final X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509") //$NON-NLS-1$
+				.generateCertificate(new ByteArrayInputStream(certEncoded));
+
+		System.out.println("CN del certificado generado: " + AOUtil.getCN(cert)); //$NON-NLS-1$
 	}
 }
