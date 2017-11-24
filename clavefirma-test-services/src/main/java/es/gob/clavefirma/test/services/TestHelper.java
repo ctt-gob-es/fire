@@ -61,12 +61,14 @@ class TestHelper {
 	private static final String REDIRECT_URL_ID_TAG = "$$TID$$"; //$NON-NLS-1$
 	private static final String REDIRECT_URL_OK_TAG = "$$ROK$$"; //$NON-NLS-1$
 	private static final String REDIRECT_URL_KO_TAG = "$$RKO$$"; //$NON-NLS-1$
+	private static final String REDIRECT_URL_INFODOCUMENTOS_TAG = "$$INFODOCUMENTOS$"; //$NON-NLS-1$
 	private static final String REDIRECT_ID = "$$ID$$"; //$NON-NLS-1$
 
 	private static final String URL_SIGN_PARAMETERS_TEMPLATE = "test_pages/TestAuth.jsp?transactionid=" + REDIRECT_URL_ID_TAG //$NON-NLS-1$
 			+ "&redirectko=" + REDIRECT_URL_KO_TAG //$NON-NLS-1$
 			+ "&redirectok=" + REDIRECT_URL_OK_TAG //$NON-NLS-1$
-			+ "&id=" + REDIRECT_ID; //$NON-NLS-1$
+			+ "&id=" + REDIRECT_ID //$NON-NLS-1$
+			+ "&infoDocumentos=" + REDIRECT_URL_INFODOCUMENTOS_TAG; //$NON-NLS-1$
 
 	private static final String URL_CERT_PARAMETERS_TEMPLATE = "test_pages/TestCert.jsp?transactionid=" + REDIRECT_URL_ID_TAG //$NON-NLS-1$
 			+ "&redirectko=" + REDIRECT_URL_KO_TAG //$NON-NLS-1$
@@ -370,20 +372,22 @@ class TestHelper {
 	}
 
 	@SuppressWarnings("deprecation")
-	static String getSignRedirectionUrl(final String subjectId, final String transactionId, final String okUrlB64, final String errorUrlB64) {
+	static String getSignRedirectionUrl(final String subjectId, final String transactionId, final String okUrlB64, final String errorUrlB64, final String infoDocumentosB64) {
 		try {
 			return urlTemplateSign
 					.replace(REDIRECT_URL_ID_TAG, transactionId)
 					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
 					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
-					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING));
+					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING))
+					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocumentosB64);
 		} catch (final UnsupportedEncodingException e) {
 			LOGGER.warning("No se soporta el encoding proporcionado para codificar la URL, se usara el por defecto: " + e); //$NON-NLS-1$
 			return urlTemplateSign
 					.replace(REDIRECT_URL_ID_TAG, transactionId)
 					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
 					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
-					.replace(REDIRECT_ID, URLEncoder.encode(subjectId));
+					.replace(REDIRECT_ID, URLEncoder.encode(subjectId))
+					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocumentosB64);
 		}
 	}
 
