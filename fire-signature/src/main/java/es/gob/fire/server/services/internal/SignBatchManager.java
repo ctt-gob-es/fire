@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.signature.ConfigManager;
 
 /**
  * Manejador que gestiona las peticiones para iniciar el proceso de firma de un lote.
@@ -91,14 +90,10 @@ public class SignBatchManager {
 			origin = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN);
 		}
 
-		// Obtenemos la URL de la parte pública
-        String redirectUrlBase = ConfigManager.getPublicUrl();
-        if (redirectUrlBase==null || redirectUrlBase.isEmpty()){
-			// Si no hay una url definida, utilizamos la url que nos indica la petición.
-			redirectUrlBase = request.getRequestURL().toString();
-	        redirectUrlBase = redirectUrlBase.substring(0, redirectUrlBase.toString().lastIndexOf('/'));
-		}
-        redirectUrlBase = redirectUrlBase + "/public/"; //$NON-NLS-1$
+		// Devolvemos la pagina a la que se debe redirigir al usuario
+        String redirectUrlBase = request.getRequestURL().toString();
+        redirectUrlBase = redirectUrlBase.
+        		substring(0, redirectUrlBase.toString().lastIndexOf('/') + 1) + "public/"; //$NON-NLS-1$
 
         // Si ya se definio el origen del certificado, se envia al servicio que se encarga de
         // redirigirlo. Si no, se envia la pagina de seleccion
