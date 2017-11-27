@@ -24,6 +24,7 @@ import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.DocInfo;
 
 /**
@@ -235,10 +236,15 @@ public class SignOperationManager {
         	return;
 		}
 
-        // Devolvemos al usuario el ID de la transaccion y la pagina a la que debe dirigir al usuario
-        String redirectUrlBase = request.getRequestURL().toString();
-        redirectUrlBase = redirectUrlBase.
-        		substring(0, redirectUrlBase.toString().lastIndexOf('/') + 1) + "public/"; //$NON-NLS-1$
+        // Obtenemos la URL de la parte pública
+        String redirectUrlBase = ConfigManager.getPublicUrl();
+        if (redirectUrlBase==null || redirectUrlBase.isEmpty()){
+			// Si no hay una url definida, utilizamos la url que nos indica la petición.
+			redirectUrlBase = request.getRequestURL().toString();
+	        redirectUrlBase = redirectUrlBase.substring(0, redirectUrlBase.toString().lastIndexOf('/'));
+		}
+        redirectUrlBase = redirectUrlBase + "/public/"; //$NON-NLS-1$
+   
 
         // Si ya se definio el origen del certificado, se envia al servicio que se encarga de
         // redirigirlo. Si no, se envia directamente a la pagina de seleccion
@@ -254,6 +260,7 @@ public class SignOperationManager {
         	}
         }
 
+        // Devolvemos al usuario el ID de la transaccion y la pagina a la que debe dirigir al usuario
         final SignOperationResult result = new SignOperationResult(
         		session.getTransactionId(),
         		redirectUrlBase + redirectUrl +
