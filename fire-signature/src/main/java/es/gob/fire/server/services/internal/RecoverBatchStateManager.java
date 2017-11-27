@@ -48,8 +48,10 @@ public class RecoverBatchStateManager {
             return;
         }
 
+        LOGGER.fine(String.format("TrId %1s: RecoverBatchStateManager", transactionId)); //$NON-NLS-1$
+
         // Recuperamos el resto de parametros de la sesion
-        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false);
+        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
 
         // Si no se ha encontrado la session en el pool de sesiones vigentes, se
         // interpreta que estaba caducada
@@ -62,10 +64,9 @@ public class RecoverBatchStateManager {
     	// Comprobamos si habia firmas que procesar y, en caso negativo, indicamos que se han procesado todas
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
-    		sendResult(response, "100".getBytes()); //$NON-NLS-1$
+    		sendResult(response, "1".getBytes()); //$NON-NLS-1$
     		return;
 		}
-
 
     	final int numOperations = batchResult.documentsCount();
     	int pending = numOperations;

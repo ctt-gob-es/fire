@@ -45,7 +45,7 @@ public class MiniAppletErrorService extends HttpServlet {
 		final String errorMessage = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_MESSAGE);
 		String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
-		final FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), true);
+		final FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), true, false);
 		if (session == null) {
         	LOGGER.warning("La sesion no existe"); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);

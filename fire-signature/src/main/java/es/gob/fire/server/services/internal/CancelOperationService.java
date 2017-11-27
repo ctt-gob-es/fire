@@ -38,7 +38,7 @@ public class CancelOperationService extends HttpServlet {
 		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
-		final FireSession session = SessionCollector.getFireSession(trId, userId, request.getSession(false), true);
+		final FireSession session = SessionCollector.getFireSession(trId, userId, request.getSession(false), true, false);
     	if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		final String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);

@@ -116,10 +116,13 @@ public class ServiceParams {
     public static final String SESSION_PARAM_DOCUMENT_MANAGER = "docmanager"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado del valor bandera que indica si se redirigi&oacute; a la pasarela de autorizaci&oacute;n. */
     public static final String SESSION_PARAM_REDIRECTED = "gatewayredirected"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado del valor que indica cu&aacute;l ha sido la anterior operaci&oacute;n realizada. */
+    public static final String SESSION_PARAM_PREVIOUS_OPERATION = "prevop"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el tipo de error obtenido. */
     public static final String SESSION_PARAM_ERROR_TYPE = "errortype"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el mensaje de error obtenido. */
 	public static final String SESSION_PARAM_ERROR_MESSAGE = "errormsg"; //$NON-NLS-1$
+
 
 	/** Par&aacute;metro usado para configurar la URL a la que redirigir al usuario en caso de error. */
 	public static final String CONNECTION_PARAM_ERROR_URL = "redirectErrorUrl"; //$NON-NLS-1$

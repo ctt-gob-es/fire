@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
 <%@page import="java.net.URLEncoder"%>
@@ -12,14 +13,18 @@
 	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 	
-	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, true);
-
-	// Leemos los valores necesarios de la configuracion
+	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, false, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
 	}
-	
+
+	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
+	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+		fireSession = SessionCollector.getFireSession(trId, userId, session, false, true);
+	}
+
+	// Leemos los valores necesarios de la configuracion
 	final String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
 	final String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);

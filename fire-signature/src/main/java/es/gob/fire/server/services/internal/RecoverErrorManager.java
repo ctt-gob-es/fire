@@ -47,11 +47,10 @@ public class RecoverErrorManager {
             return;
         }
 
-        // Recuperamos el resto de parametros de la sesion
-        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false);
+        LOGGER.fine(String.format("TrId %1s: RecoverErrorManager", transactionId)); //$NON-NLS-1$
 
-        // Si no se ha encontrado la sesion en el pool de sesiones vigentes, se
-        // interpreta que estaba caducada
+        // Recuperamos el resto de parametros de la sesion
+        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
         if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		sendResult(response, OperationError.INVALID_SESSION);

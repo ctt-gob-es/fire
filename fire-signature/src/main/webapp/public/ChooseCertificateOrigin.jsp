@@ -20,7 +20,7 @@
 		return;
 	}
 
-	final FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, false);
+	final FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, false);
 	if (fireSession == null) {
 		if (errorUrl != null) {
 			response.sendRedirect(errorUrl);	

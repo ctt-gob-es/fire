@@ -68,13 +68,20 @@ public class RecoverSignManager {
             return;
         }
 
+        LOGGER.fine(String.format("TrId %1s: RecoverSignManager", transactionId)); //$NON-NLS-1$
+
         // Recuperamos el resto de parametros de la sesion
-        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false);
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
         if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
     		return;
         }
+
+        // Si la operacion anterior no fue el inicio de una firma, forzamos a que se recargue por si faltan datos
+		if (SessionFlags.OP_PRE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
+		}
 
         // Comprobamos que no se haya declarado ya un error
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {

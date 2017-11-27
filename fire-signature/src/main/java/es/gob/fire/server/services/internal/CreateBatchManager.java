@@ -122,7 +122,7 @@ public class CreateBatchManager {
         final FireSession session = SessionCollector.createFireSession(request.getSession());
         final String transactionId = session.getTransactionId();
 
-        LOGGER.info("Iniciada transaccion de lote: " + transactionId); //$NON-NLS-1$
+        LOGGER.fine(String.format("TrId %1s: CreateBatchManager", transactionId)); //$NON-NLS-1$
 
         // Guardamos los datos recibidos en la sesion
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
@@ -140,8 +140,6 @@ public class CreateBatchManager {
         if (origin != null) {
         	session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, origin);
         }
-
-        SessionCollector.commit(session);
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto

@@ -146,7 +146,7 @@ public final class TestPrincipal {
 		// HAY QUE PARAR AQUI LA EJECUCION Y ENTRAR MANUALMENTE EN LA URL QUE SE HA MOSTRADO
 		// COMO REDIRECCION EN EL PRINTLN
 		// La contrasena para pruebas oscilara entre "Entra001" y "Entra002" (hay que renovarla regularmente)
-		// El c�digo OTP de prueba es "111111"
+		// El codigo OTP de prueba es "111111"
 
 		final Map<String, byte[]> ret;
 		try {

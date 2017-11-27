@@ -124,7 +124,9 @@ public final class SessionCollector {
     }
 
     /**
-     * Elimina los datos de sesion (salvo mensajes de error) y los ficheros temporales
+     * Elimina los datos de sesi&oacute;n (salvo mensajes de error, el indicador sobre si
+     * en alg&uacute;n momento se cedi&oacute; el control de la transacci&oacute;n en
+     * cuesti&oacute;n y el identificador del usuario) y los ficheros temporales
      * asociados, pero no la propia sesion para permitir recuperar el mensaje de error.
      * @param fireSession Sesion que se desea limpiar.
      */
@@ -141,6 +143,7 @@ public final class SessionCollector {
     	for (final String attr : fireSession.getAtributteNames()) {
     		if (!attr.equals(ServiceParams.SESSION_PARAM_ERROR_TYPE) &&
     				!attr.equals(ServiceParams.SESSION_PARAM_ERROR_MESSAGE) &&
+    				!attr.equals(ServiceParams.SESSION_PARAM_REDIRECTED) &&
     				!attr.equals(ServiceParams.SESSION_PARAM_SUBJECT_ID)) {
     			fireSession.removeAttribute(attr);
     		}
@@ -209,34 +212,61 @@ public final class SessionCollector {
 	 * La sesi&oacute;n se carga de las distintas fuentes disponibles, a menos que se indique
 	 * que s&oacute;lo se obtenga si ya est&aacute; cargada en memoria. Este es un mecanismo
 	 * de seguridad con el que poder evitar que un usuario logueado empiece a reclamar transacciones
-	 * de otros usuarios.
+	 * de otros usuarios.<br/>
+	 * Por orden de prioridad, los datos de sesi&oacute;n se recuperan de:
+	 * <ol>
+	 * <li>La propia sesi&oacute;n HTTP.</li>
+	 * <li>La colecci&oacute;n de sesiones en memoria.</li>
+	 * <li>El gestor de sesiones entre m&uacute;ltiples nodos.</li>
+	 * </ol>
+	 * Mediante el par&aacute;metro {@code onlyLoaded} se puede indicar que s&oacute;lo se recupere
+	 * la sesi&oacute;n si ya estaba cargada. Esto es &uacute;til cuando sabemos que la sesi&oacute;n
+	 * ya est&aacute; cargada (posiblemente, porque se recuper&oacute; anteriormente dentro de la
+	 * misma operaci&oacute;n) y no queremos abrir la puerta al resto de comprobaciones por seguridad.
+	 * Mediante el par&aacute;metro {@code forceLoad} se puede forzar a que se carguen los datos de
+	 * sesi&oacute;n del gestor de sesiones si se defini&oacute; este. Esto se puede utilizar para
+	 * asegurarnos de que disponemos de los &uacute;ltimos datos de la transacci&oacute;n.
+	 * Si tanto el par&aacute;metro {@code onlyLoaded} como {@code forceLoad} est&aacute;n activos,
+	 * no se podr&aacute; recuperar la sesi&oacute;n.
 	 * @param trId Identificador de transacci&oacute;n a recuperar.
 	 * @param userId Identificador del usuario propietario de la transacci&oacute;n.
 	 * @param session Sesi&oacute; actual.
 	 * @param onlyLoaded Indica si solo se debe recuperar la transacci&oacute;n si ya estaba cargado en memoria.
+	 * @param forceLoad Fuerza que, en caso de haberse definido un gestor de sesiones, se recargue la sesi&oacute;n de &eacute;l.
 	 * @return Datos de sesi&oacute;n con la transacci&oacute;n deseada o {@code null} si no se encontr&oacute;
 	 * o establa caducada.
 	 */
-	public static FireSession getFireSession(final String trId, final String userId, final HttpSession session, final boolean onlyLoaded) {
+	public static FireSession getFireSession(final String trId, final String userId, final HttpSession session, final boolean onlyLoaded, final boolean forceLoad) {
 
 		if (trId == null) {
 			return null;
 		}
 
+		// Comprobamos si necesitamos carga de memoria compartida, para saltarnos los
+		// pasos previos (ver si ya esta cargado o si se carga de memoria)
+		final boolean needForceLoad = canForceLoad(forceLoad);
+
 		FireSession fireSession = null;
 
 		// Comprobamos si los datos de la transaccion ya estan cargados
-		if (session != null && session.getAttribute(trId) != null) {
+		if (!needForceLoad && session != null && session.getAttribute(trId) != null) {
 			fireSession = findSessionFromCurrentSession(trId, session);
+
+			if (fireSession != null) {
+				LOGGER.fine("Sesion ya cargada"); //$NON-NLS-1$
+			}
 		}
 
 		if (!onlyLoaded) {
 
 			// Comprobamos si la transaccion esta en memoria
-			if (fireSession == null) {
+			if (fireSession == null && !needForceLoad) {
 				fireSession = findSessionFromServerMemory(trId);
 				if (fireSession != null && session != null) {
 					fireSession.copySessionAttributes(session);
+				}
+				if (fireSession != null) {
+					LOGGER.fine("Sesion cargada de memoria"); //$NON-NLS-1$
 				}
 			}
 
@@ -245,6 +275,9 @@ public final class SessionCollector {
 				fireSession = findSessionFromSharedMemory(trId, session);
 				if (fireSession != null && session != null) {
 					fireSession.copySessionAttributes(session);
+				}
+				if (fireSession != null) {
+					LOGGER.fine("Sesion cargada de almacenamiento persistente"); //$NON-NLS-1$
 				}
 			}
 
@@ -276,6 +309,16 @@ public final class SessionCollector {
 		}
 
 		return fireSession;
+	}
+
+	/**
+	 * Comprueba si se puede forzar la carga de la sesi&oacute;n de memoria compartida.
+	 * @param forceLoad {@code true} si se debe intentar cargar la sesi&oacute;n de
+	 * memoria compartida, {@code false} en caso contrario.
+	 * @return {@code true} si es posible cargar la sesi&oacute;n de memoria compartida.
+	 */
+	private static boolean canForceLoad(final boolean forceLoad) {
+		return forceLoad && dao != null;
 	}
 
 	/**
@@ -353,6 +396,11 @@ public final class SessionCollector {
 		// deberia actualizarse indefinidamente
 		session.updateExpirationTime(ConfigManager.getTempsTimeout());
 
+		// Actualizamos la informacion de la sesion, que ya existira, de la relacion que se
+		// guarda en memoria
+		sessions.put(session.getTransactionId(), session);
+
+		// Actualizamos, si procede, la informacion de la sesion de la memoria compartida
 		if (dao != null) {
 			dao.saveSession(session);
 		}

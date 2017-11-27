@@ -66,16 +66,20 @@ public class RecoverBatchResultManager {
             return;
         }
 
-        // Recuperamos el resto de parametros de la sesion
-        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false);
+        LOGGER.fine(String.format("TrId %1s: RecoverBatchManager", transactionId)); //$NON-NLS-1$
 
-        // Si no se ha encontrado la session en el pool de sesiones vigentes, se
-        // interpreta que estaba caducada
+        // Recuperamos el resto de parametros de la sesion
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
         if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
         	return;
         }
+
+		// Si la operacion anterior no fue el inicio de una firma, forzamos a que se recargue por si faltan datos
+		if (SessionFlags.OP_PRE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
+		}
 
         // Comprobamos que no se haya declarado ya un error
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
@@ -324,6 +328,7 @@ public class RecoverBatchResultManager {
         else {
             session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE.toString());
             session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
+            session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_RECOVER);
             SessionCollector.commit(session);
         }
 

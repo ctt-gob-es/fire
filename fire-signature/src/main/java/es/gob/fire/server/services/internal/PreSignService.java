@@ -93,12 +93,17 @@ public final class PreSignService extends HttpServlet {
         }
         redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
 
-        final FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), true);
+        FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), false, false);
         if (session == null) {
         	LOGGER.warning("La sesion no contiene los datos de la operacion"); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);
         	response.sendRedirect(redirectErrorUrl);
         	return;
+		}
+
+		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
+		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), false, true);
 		}
 
     	// Leemos los valores necesarios de la configuracion
@@ -390,10 +395,12 @@ public final class PreSignService extends HttpServlet {
         session.setAttribute(ServiceParams.SESSION_PARAM_TRIPHASE_DATA, Base64.encode(lr.getTriphaseData().toString().getBytes(StandardCharsets.UTF_8), true));
         session.setAttribute(ServiceParams.SESSION_PARAM_REMOTE_TRANSACTION_ID, lr.getTransactionId());
         session.setAttribute(ServiceParams.SESSION_PARAM_CERT, certB64);
+        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_PRE);
         session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED, Boolean.TRUE);
+
         SessionCollector.commit(session);
 
-        // Redirigimos al usuario a la pantalla de exito que indico
+        // Redirigimos al usuario a la pantalla de autorizacion indicada por el conector
         response.sendRedirect(lr.getRedirectUrl());
     }
 

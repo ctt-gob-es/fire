@@ -65,7 +65,7 @@ public class MiniAppletSuccessService extends HttpServlet {
         }
         errorUrl = URLDecoder.decode(errorUrl, URL_ENCODING);
 
-        final FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), true);
+        FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), true, false);
         if (session == null) {
         	LOGGER.warning("La sesion no existe"); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);
@@ -73,12 +73,16 @@ public class MiniAppletSuccessService extends HttpServlet {
     		return;
         }
 
+		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
+		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), false, true);
+		}
+
     	// Comprobamos que haya URL de redireccion
     	final Properties connConfig	= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
     	if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_SUCCESS_URL) ||
     			!connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
     		LOGGER.warning("No se encontraron en la sesion las URL de redireccion para la operacion"); //$NON-NLS-1$
-    		SessionCollector.cleanSession(session);
     		setErrorToSession(session, OperationError.INVALID_STATE);
     		response.sendRedirect(errorUrl);
     		return;
@@ -103,13 +107,16 @@ public class MiniAppletSuccessService extends HttpServlet {
         		updateSingleResult(batchResult, afirmaBatchResultB64);
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al procesar el resultado de la firma de lote del Cliente @firma: " + e, e); //$NON-NLS-1$
-        		SessionCollector.cleanSession(session);
         		setErrorToSession(session, OperationError.SIGN_MINIAPPLET,
         				"No se completo correctamente la firma del lote con certificado local"); //$NON-NLS-1$
         		response.sendRedirect(errorUrl);
         		return;
         	}
         }
+
+        // Actualizamos la bandera de operacion anterior para avisar de que se ha iniciado la
+        // ejecucion de una firma
+        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_PRE);
 
         SessionCollector.commit(session);
 
@@ -173,12 +180,11 @@ public class MiniAppletSuccessService extends HttpServlet {
 	}
 
 	private static void setErrorToSession(final FireSession session, final OperationError error) {
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
-		SessionCollector.commit(session);
+		setErrorToSession(session, error, error.getMessage());
 	}
 
 	private static void setErrorToSession(final FireSession session, final OperationError error, final String msg) {
+		SessionCollector.cleanSession(session);
 		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
 		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, msg);
 		SessionCollector.commit(session);

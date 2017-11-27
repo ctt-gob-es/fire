@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
 <%@page import="java.net.URLEncoder"%>
@@ -23,10 +24,15 @@
 		return;
 	}
 	
-	FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, true);
+	FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, true, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
+	}
+	
+	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
+	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+		fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, true);
 	}
 	
 	// Identificador del usuario

@@ -136,6 +136,8 @@ public class SignOperationManager {
 
 		final FireSession session = SessionCollector.createFireSession(request.getSession());
 
+		LOGGER.fine(String.format("TrId %1s: SignOperationManager", session.getTransactionId())); //$NON-NLS-1$
+
         // Guardamos en la sesion la configuracion de la operacion
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ID, appId);
@@ -151,9 +153,6 @@ public class SignOperationManager {
         	session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, origin);
         }
 
-        SessionCollector.commit(session);
-
-
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
         FIReDocumentManager docManager;
@@ -162,17 +161,13 @@ public class SignOperationManager {
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
-        	session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(OperationError.INTERNAL_ERROR.getCode()));
-        	session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, OperationError.INTERNAL_ERROR.getMessage());
-        	SessionCollector.commit(session);
+        	setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(session.getTransactionId(), redirectErrorUrl));
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
-        	session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(OperationError.INTERNAL_ERROR.getCode()));
-        	session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, OperationError.INTERNAL_ERROR.getMessage());
-        	SessionCollector.commit(session);
+        	setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(session.getTransactionId(), redirectErrorUrl));
         	return;
         }
@@ -200,6 +195,7 @@ public class SignOperationManager {
         	session.setAttribute(ServiceParams.SESSION_PARAM_DOC_ID, docId);
         }
 
+        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         SessionCollector.commit(session);
 
         // Obtenemos los datos a firmar a partir de los datos proporcionados
@@ -228,9 +224,7 @@ public class SignOperationManager {
         }
         catch (final Exception e) {
         	LOGGER.severe("Error en el guardado temporal de los datos a firmar: " + e); //$NON-NLS-1$
-        	session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(OperationError.INTERNAL_ERROR.getCode()));
-        	session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, OperationError.INTERNAL_ERROR.getMessage());
-        	SessionCollector.commit(session);
+        	setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(session.getTransactionId(), redirectErrorUrl));
         	return;
 		}
@@ -263,6 +257,12 @@ public class SignOperationManager {
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
         sendResult(response, result);
+	}
+
+	private static void setErrorToSession(final FireSession session, final OperationError error) {
+		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
+		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
+		SessionCollector.commit(session);
 	}
 
 	private static void sendResult(final HttpServletResponse response, final SignOperationResult result) throws IOException {

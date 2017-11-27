@@ -50,16 +50,18 @@ public class SignBatchManager {
     		return;
     	}
 
-    	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false);
+    	LOGGER.fine(String.format("TrId %1s: SignBatchManager", transactionId)); //$NON-NLS-1$
+
+    	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
     	if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
     		return;
     	}
 
-    	// TODO: Borrar esto cuando se terimen los cambios en el componente distribuido PHP
+    	// TODO: Borrar esto cuando se terminen los cambios en el componente distribuido PHP
     	// en el que, por ahora, no se envia el subjectId por parametro, asi que hemos de usar
-    	// el de sesion. Este impide realizar la comprobacion de seguridad adicional de que sea
+    	// el de sesion. Esto impide realizar la comprobacion de seguridad adicional de que sea
     	// el mismo usuario el que crease la transaccion y el que ahora dice ser
     	final String currentUserId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 
@@ -110,6 +112,7 @@ public class SignBatchManager {
         // Configuramos en la sesion si se debe detener el proceso de error cuando se encuentre uno
         // para tenerlo en cuenta en este paso y los siguientes
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR, stopOnError);
+        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         SessionCollector.commit(session);
 
         final SignOperationResult result = new SignOperationResult(

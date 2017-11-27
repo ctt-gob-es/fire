@@ -46,11 +46,16 @@ public final class RequestNewCertificateService extends HttpServlet {
 		final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId  = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
-		final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), true);
+		FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), true, false);
         if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
     		return;
+        }
+
+        // Si la operacion anterior no fue la solicitud de una firma, forzamos a que se recargue por si faltan datos
+        if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+        	session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
         }
 
 		final Properties connConfig	= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
@@ -134,7 +139,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
         session.setAttribute(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID, generateTransactionId);
         session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED, Boolean.TRUE);
-
+        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_GEN);
         SessionCollector.commit(session);
 
         response.sendRedirect(redirectUrl);

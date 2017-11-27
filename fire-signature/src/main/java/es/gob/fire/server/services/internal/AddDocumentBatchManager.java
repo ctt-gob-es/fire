@@ -71,7 +71,9 @@ public class AddDocumentBatchManager {
     		return;
     	}
 
-    	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false);
+    	LOGGER.fine(String.format("TrId %1s: AddDocumentBatchManager", transactionId)); //$NON-NLS-1$
+
+    	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
     	if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());

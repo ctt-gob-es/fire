@@ -28,7 +28,7 @@
 	String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
 	String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	
-	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, true);
+	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, true, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;

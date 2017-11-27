@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
 <%@page import="java.net.URLEncoder"%>
@@ -18,10 +19,15 @@
 	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
-	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, true);
+	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, true, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
+	}
+	
+	// Si la operacion anterior no fue la solicitud de generacion de un certificado, forzamos a que se recargue por si faltan datos
+	if (SessionFlags.OP_GEN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+		fireSession = SessionCollector.getFireSession(trId, userId, session, false, true);
 	}
 	
 	final String generateTrId = fireSession.getString(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID);
@@ -62,6 +68,9 @@
 	// Eliminamos el parametro que indica que fuimos redirigidos a una plataforma externa para que
 	// que no se interprete que un posible error derivaba de ello 
 	fireSession.removeAttribute(ServiceParams.SESSION_PARAM_REDIRECTED);
+	// Al haber terminado de generar el certificado, volvemos a indicar que se habia pedido una firma
+	session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
+	SessionCollector.commit(fireSession);
 	
 	// Se define el comportamiento del boton en base a si se forzo el origen
 	// (se muestra el boton Cancelar) o no (boton Volver) 

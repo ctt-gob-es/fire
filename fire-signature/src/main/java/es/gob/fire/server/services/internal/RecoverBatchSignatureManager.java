@@ -50,6 +50,8 @@ public class RecoverBatchSignatureManager {
             return;
         }
 
+        LOGGER.fine(String.format("TrId %1s: RecoverBatchSignatureManager", transactionId)); //$NON-NLS-1$
+
         if (docId == null || docId.isEmpty()) {
         	LOGGER.warning("No se ha proporcionado el ID del documento"); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -57,15 +59,17 @@ public class RecoverBatchSignatureManager {
         }
 
         // Recuperamos el resto de parametros de la sesion
-        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false);
-
-        // Si no se ha encontrado la session en el pool de sesiones vigentes, se
-        // interpreta que estaba caducada
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
         if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
     		return;
         }
+
+		// Si la operacion anterior no fue la recuperacion del resultado del lote, forzamos a que se recargue por si faltan datos
+		if (SessionFlags.OP_RECOVER != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
+		}
 
         // Comprobamos que previamente se haya recuperado el resultado global del lote
         if (!Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_SIGNED))) {
@@ -97,10 +101,10 @@ public class RecoverBatchSignatureManager {
         	return;
         }
 
-        // Si fallo la operacion de firma de ese documento, se notifica un error
-        // en la operacion
+        // Si fallo la operacion de firma o la firma ya se recupero (momento en el
+        // que se marca como erroneo), se notifica un error en la operacion
         if (batchResult.isSignFailed(docId)) {
-            LOGGER.severe("El documento solicitado no se firmo correctamente"); //$NON-NLS-1$
+            LOGGER.severe("El documento solicitado ya se recupero o no se firmo correctamente"); //$NON-NLS-1$
         	response.sendError(HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorCode(),
         			HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorDescription());
         	return;

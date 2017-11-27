@@ -76,11 +76,16 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
 
-		final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(), false);
+		FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(), false, false);
 		if (session == null) {
 			LOGGER.severe("No existe sesion vigente asociada a la transaccion " + transactionId); //$NON-NLS-1$
 			response.sendRedirect(redirectErrorUrl);
 			return;
+		}
+
+		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
+		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
 		}
 
 		// Agregamos a la sesion el origen del certificado
@@ -91,11 +96,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED, Boolean.TRUE.toString());
 		}
 
-		SessionCollector.commit(session);
-
 		// Se selecciono firmar con un certificado local
 		if (ServiceParams.CERTIFICATE_ORIGIN_LOCAL.equalsIgnoreCase(origin)) {
-			signWithClienteAfirma(request, response);
+			signWithClienteAfirma(session, request, response);
 		}
 		// Si no se selecciono firma local, se utilizara Clave Firma
 		else {
@@ -103,7 +106,10 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 	}
 
-	private static void signWithClienteAfirma(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+	private static void signWithClienteAfirma(final FireSession session, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+
+		SessionCollector.commit(session);
+
 		try {
 			request.getRequestDispatcher("MiniApplet.jsp").forward(request, response); //$NON-NLS-1$
 			return;
@@ -131,7 +137,6 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
 			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$
-			SessionCollector.cleanSession(session);
             setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(errorUrl);
 			return;
@@ -145,6 +150,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			final FIReConnector connector = FIReConnectorFactory.getClaveFirmaConnector(connConfig);
 			certificates = connector.getCertificates(subjectId);
 			if (certificates == null || certificates.length == 0) {
+				SessionCollector.commit(session);
 				request.getRequestDispatcher("ChooseCertificateNoCerts.jsp").forward(request, response); //$NON-NLS-1$
 				return;
 			}
@@ -194,6 +200,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		// Adjuntamos los certificados a la sesion para que los reciba el JSP
 		session.setAttribute(trId + "-certs", certificates); //$NON-NLS-1$
+		SessionCollector.commit(session);
 
 		try {
 			request.getRequestDispatcher("ChooseCertificate.jsp").forward(request, response); //$NON-NLS-1$
@@ -206,9 +213,10 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 	}
 
-	private static void setErrorToSession(final FireSession sessionConfig, final OperationError error) {
-		sessionConfig.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-		sessionConfig.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
-		SessionCollector.commit(sessionConfig);
+	private static void setErrorToSession(final FireSession session, final OperationError error) {
+		SessionCollector.cleanSession(session);
+		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
+		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
+		SessionCollector.commit(session);
 	}
 }
