@@ -139,9 +139,23 @@ final class PlatformWsHelper {
     }
 
     private static void setSystemParameters(final String tsPath, final String tsPass, final String tsType) {
-        System.setProperty("javax.net.ssl.trustStore", tsPath); //$NON-NLS-1$
-        System.setProperty("javax.net.ssl.trustStorePassword", tsPass); //$NON-NLS-1$
-        System.setProperty("javax.net.ssl.trustStoreType", tsType); //$NON-NLS-1$
+   		setSystemProperty("javax.net.ssl.trustStore", tsPath); //$NON-NLS-1$
+   		setSystemProperty("javax.net.ssl.trustStorePassword", tsPass); //$NON-NLS-1$
+   		setSystemProperty("javax.net.ssl.trustStoreType", tsType); //$NON-NLS-1$
+    }
+
+    /**
+     * Establece una propiedad del sistema.
+     * @param property Propiedad a establecer.
+     * @param value Valor que asinar a la propiedad.
+     */
+    private static void setSystemProperty(final String property, final String value) {
+    	if (value != null) {
+    		System.setProperty(property, value);
+    	}
+    	else {
+    		LOGGER.warning("No se ha encontrado la propiedad \"" + property + "\" en el fichero de configuracion"); //$NON-NLS-1$ //$NON-NLS-2$
+    	}
     }
 
     private static Properties generateHandlerProperties(
