@@ -2,3 +2,4 @@
 .settings
 target
 .classpath
+fire-signature-common-libraries/pom.xml
