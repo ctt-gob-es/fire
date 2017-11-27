@@ -10,7 +10,6 @@
 package es.gob.fire.test.webapp;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.logging.Logger;
 
 import javax.servlet.annotation.WebListener;
@@ -40,8 +39,6 @@ public final class SessionDataCleaner implements HttpSessionListener {
     public static final String TRIPHASE_DATA_FILENAME_TAG = "triphasedatafile"; //$NON-NLS-1$
 
     private static final Logger LOGGER = Logger.getLogger(SessionDataCleaner.class.getName());
-
-    SimpleDateFormat sd = new SimpleDateFormat("HH:mm:ss");
 
     @Override
     public void sessionCreated(final HttpSessionEvent hse) {
