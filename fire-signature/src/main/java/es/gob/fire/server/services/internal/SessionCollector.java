@@ -232,17 +232,17 @@ public final class SessionCollector {
 
 		if (!onlyLoaded) {
 
-			// Comprobamos si la transaccion esta en memoria
+			// Comprobamos si la transaccion esta en almacenamiento persistente (para multiples nodos)
 			if (fireSession == null) {
-				fireSession = findSessionFromServerMemory(trId);
+				fireSession = findSessionFromSharedMemory(trId, session);
 				if (fireSession != null && session != null) {
 					fireSession.copySessionAttributes(session);
 				}
 			}
 
-			// Comprobamos si la transaccion esta en almacenamiento persistente (para multiples nodos)
+			// Comprobamos si la transaccion esta en memoria
 			if (fireSession == null) {
-				fireSession = findSessionFromSharedMemory(trId, session);
+				fireSession = findSessionFromServerMemory(trId);
 				if (fireSession != null && session != null) {
 					fireSession.copySessionAttributes(session);
 				}
@@ -334,7 +334,7 @@ public final class SessionCollector {
 			if (fireSession != null) {
 				if (fireSession.isExpired()) {
 					fireSession.invalidate();
-					dao.removeSession(id);
+					removeSession(id);
 					return null;
 				}
 			}
