@@ -79,8 +79,6 @@ public class ConfigManager {
 
 	private static final String PROP_SESSIONS_DAO = "sessions.dao"; //$NON-NLS-1$
 
-	private static final String PROP_PUBLIC_URL = "public.url"; //$NON-NLS-1$
-
 	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
 	private static final String USE_BBDD = "usebbdd"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
@@ -530,25 +528,5 @@ public class ConfigManager {
 		}
 
 		return config.getProperty(PROP_SESSIONS_DAO);
-	}
-
-	/**
-	 * Recupera la URL de la parte pública del componente central.
-	 * 
-	 * @return URL de la parte pública del componente central o {@code null} 
-	 * si no se ha podido recuperar o no se ha configurado.
-	 */
-	public static String getPublicUrl() {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return null;
-			}
-		}
-
-		return config.getProperty(PROP_PUBLIC_URL);
 	}
 }
