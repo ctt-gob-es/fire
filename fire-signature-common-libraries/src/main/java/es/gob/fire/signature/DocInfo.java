@@ -9,6 +9,7 @@
  */
 package es.gob.fire.signature;
 
+import java.io.Serializable;
 import java.util.Properties;
 
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
@@ -16,7 +17,10 @@ import es.gob.afirma.core.signers.TriphaseData.TriSign;
 /**
  * Clase para almacenar informaci&oacute;n del documento firmado.
  */
-public class DocInfo {
+public class DocInfo implements Serializable {
+
+	/** Serial Id. */
+	private static final long serialVersionUID = 5411072283426781574L;
 
 	private static final String PROPERTY_DOC_TITLE = "docTitle"; //$NON-NLS-1$
 
