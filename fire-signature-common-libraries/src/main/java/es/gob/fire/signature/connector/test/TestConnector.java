@@ -216,23 +216,23 @@ public class TestConnector implements FIReConnector {
 			throw new FIReCertificateException("Error en la codificacion del certificado", e); //$NON-NLS-1$
 		}
 
-		
-		// Enviamos la información de los documentos separando cada campo por una coma. 
-		// Si algún campo no se indica, enviamos un " " para que se incluya el hueco entre las comas.
-		String infoDocumentos = "";
-		for (TriSign triSign : td.getTriSigns()) {
-			DocInfo docInfo = DocInfo.extractDocInfo(triSign);
+
+		// Enviamos la informacion de los documentos separando cada campo por una coma.
+		// Si algun campo no se indica, enviamos un " " para que se incluya el hueco entre las comas.
+		String infoDocumentos = ""; //$NON-NLS-1$
+		for (final TriSign triSign : td.getTriSigns()) {
+			final DocInfo docInfo = DocInfo.extractDocInfo(triSign);
 			String name = docInfo.getName();
-			if (name == null || name.equals("")) {
-				name = " ";
+			if (name == null || name.isEmpty()) {
+				name = " "; //$NON-NLS-1$
 			}
 			String title = docInfo.getTitle();
-			if (title == null || title.equals("")) {
-				title = " ";
+			if (title == null || title.isEmpty()) {
+				title = " "; //$NON-NLS-1$
 			}
-			infoDocumentos += name + "," + title + ",";
+			infoDocumentos += name + "," + title + ","; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+
 		final String urlBase = this.testUrlBase + "TestLoadDataService"; //$NON-NLS-1$
 		final StringBuilder urlParameters = new StringBuilder()
 		.append("subjectid=").append(subjectId) //$NON-NLS-1$

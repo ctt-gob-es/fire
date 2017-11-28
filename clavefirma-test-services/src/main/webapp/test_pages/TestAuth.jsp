@@ -1,4 +1,5 @@
 
+<%@page import="java.nio.charset.Charset"%>
 <%@page import="java.net.URLDecoder"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
@@ -9,14 +10,14 @@
  	String infoDocumentos = request.getParameter("infoDocumentos");
 	
  	String[] info = new String[0];
- 	if (infoDocumentos!=null && !"".equals(infoDocumentos)){
- 		infoDocumentos = new String(Base64.decode(infoDocumentos, true),"UTF-8");
+ 	if (infoDocumentos != null && !infoDocumentos.isEmpty()){
+ 		infoDocumentos = new String(Base64.decode(infoDocumentos, true), "UTF-8");
  		info = infoDocumentos.split(",");
  	}
 	
 	boolean hayInfo = false;
 	for (int i=0; i<info.length; i++){
-		if (info[i]!=null && !info[i].equals("") && !info[i].equals(" ")){
+		if (info[i]!=null && !info[i].trim().isEmpty()){
 			hayInfo = true;
 		}
 	}
