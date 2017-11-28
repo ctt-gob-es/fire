@@ -110,6 +110,7 @@ public class SignatureService extends HttpServlet {
         confProperties.setProperty("docTitle", "Mi titulo"); //$NON-NLS-1$ //$NON-NLS-2$
         confProperties.setProperty("docName", "Mi nombre"); //$NON-NLS-1$ //$NON-NLS-2$
 
+		
         // Podemos configurar un DocumentManager configurado en el componente central.
         // Con esto, en lugar de tomar el campo datos que le pasamos a la aplicacion,
         // se le pasara este campo al DocumentManager configurado para que lo use de
