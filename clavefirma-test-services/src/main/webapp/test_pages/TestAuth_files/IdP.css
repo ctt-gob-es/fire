@@ -6,6 +6,14 @@ body {
   color: #51504f;
 }
 
+.tituloFirma {
+  white-space: pre-line;
+  margin-top: -5px;
+  margin-left: 3px;
+  margin-right: 19px;
+	
+}
+
 FIELDSET {
 	border: 0;
 	margin: 0 0 10px;
@@ -54,6 +62,53 @@ FIELDSET {
 	margin-left: 2%;
 	margin-right: 2%;
 }
+
+
+@media (min-width: 620px) {
+	.tmpl_4_cols {
+		position: relative;
+		float: left;
+		width: 20%;
+		margin-left: 2%;
+		margin-right: 2%;
+	}
+}
+
+
+@media (max-width: 520px) {
+	.tmpl_4_cols {
+		position: relative;
+		float: left;
+		width: 50%;
+		margin-left: 2%;
+		margin-right: 2%;
+	}
+}
+
+
+
+@media (min-width: 620px) {
+	.tmpl_5_cols {
+	position: relative;
+		float: left;
+		width: 33%;
+		margin-left: 2%;
+		margin-right: 2%;
+	}
+}
+
+
+@media (max-width: 520px) {
+	.tmpl_5_cols {
+	position: relative;
+		float: left;
+		width: 50%;
+		margin-left: 2%;
+		margin-right: 2%;
+	}
+}
+
+
 /*------------------------------ FOOTER ---------------------------------------*/
 
 footer { position: relative; width: 100%; color: #fff; background: #707070; border-top: 3px solid #FF6600; margin-top: 2em;}

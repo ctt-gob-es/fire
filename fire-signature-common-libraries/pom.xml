@@ -52,6 +52,12 @@
     		<version>2.4.05</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.openlandsw.rss</groupId>
+    		<artifactId>gateway-api-comun</artifactId>
+    		<version>2.4.05</version>
+		</dependency>
+
 	    <dependency>
 			<groupId>com.dmurph</groupId>
   			<artifactId>JGoogleAnalyticsTracker</artifactId>

@@ -33,7 +33,9 @@ import javax.json.JsonReader;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.misc.http.HttpError;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.DocInfo;
 import es.gob.fire.signature.GenerateCertificateResult;
 import es.gob.fire.signature.LoadResult;
 import es.gob.fire.signature.connector.CertificateBlockedException;
@@ -214,6 +216,23 @@ public class TestConnector implements FIReConnector {
 			throw new FIReCertificateException("Error en la codificacion del certificado", e); //$NON-NLS-1$
 		}
 
+		
+		// Enviamos la información de los documentos separando cada campo por una coma. 
+		// Si algún campo no se indica, enviamos un " " para que se incluya el hueco entre las comas.
+		String infoDocumentos = "";
+		for (TriSign triSign : td.getTriSigns()) {
+			DocInfo docInfo = DocInfo.extractDocInfo(triSign);
+			String name = docInfo.getName();
+			if (name == null || name.equals("")) {
+				name = " ";
+			}
+			String title = docInfo.getTitle();
+			if (title == null || title.equals("")) {
+				title = " ";
+			}
+			infoDocumentos += name + "," + title + ",";
+		}
+		
 		final String urlBase = this.testUrlBase + "TestLoadDataService"; //$NON-NLS-1$
 		final StringBuilder urlParameters = new StringBuilder()
 		.append("subjectid=").append(subjectId) //$NON-NLS-1$
@@ -221,7 +240,8 @@ public class TestConnector implements FIReConnector {
 		.append("&certificate=").append(Base64.encode(certEncoded, true)) //$NON-NLS-1$
 		.append("&triphasedata=").append(Base64.encode(td.toString().getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
 		.append("&urlok=").append(Base64.encode(this.redirectOkUrl.getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
-		.append("&urlerror=").append(Base64.encode(this.redirectErrorUrl.getBytes(DEFAULT_ENCODING), true)); //$NON-NLS-1$
+		.append("&urlerror=").append(Base64.encode(this.redirectErrorUrl.getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
+		.append("&infoDocumentos=").append(Base64.encode(infoDocumentos.getBytes(DEFAULT_ENCODING), true)); //$NON-NLS-1$
 
 		byte[] response;
 		try {

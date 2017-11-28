@@ -4,6 +4,25 @@
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+ <%
+ 	String infoDocumentos = request.getParameter("infoDocumentos");
+	
+ 	String[] info = new String[0];
+ 	if (infoDocumentos!=null && !"".equals(infoDocumentos)){
+ 		infoDocumentos = new String(Base64.decode(infoDocumentos, true),"UTF-8");
+ 		info = infoDocumentos.split(",");
+ 	}
+	
+	boolean hayInfo = false;
+	for (int i=0; i<info.length; i++){
+		if (info[i]!=null && !info[i].equals("") && !info[i].equals(" ")){
+			hayInfo = true;
+		}
+	}
+ %>
+ 
+ 
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -68,14 +87,59 @@
 
  <form method="post" action="<%= request.getContextPath() %>/TestServiceAuthServlet" id="pinAndSFDA">
 
-<section class="tmpl_2_cols">	
-	<h1>Firma</h1> 
-	<div class="centro_tituloCabecera">
-	<p class="margen_der">Esta es una p&aacute;gina de prueba para simular el servicio de firma.</p>&nbsp;&nbsp;						   								<p class="margen_der">Para firmar, a continuación introduce tu contraseña.</p>
-	</div>
-</section>
+ <% if (!hayInfo) { %>
+	<section class="tmpl_2_cols">	
+<% } else { %>
+	<section class="tmpl_3_cols">
+<% } %>
+		<h1>Firma</h1> 
+		<div class="centro_tituloCabecera">
+		<p class="margen_der">Esta es una p&aacute;gina de prueba para simular el servicio de firma.</p>&nbsp;&nbsp;						   								<p class="margen_der">Para firmar, a continuación introduce tu contraseña.</p>
+		</div>
+	</section>
 
-<section class="tmpl_2_cols">
+	
+ <% if (hayInfo) { %>
+
+	<section class="tmpl_4_cols">
+	<fieldset>
+		<div class="row" id="pasarela-content-row">
+		<p class="tituloFirma">
+			<label class="grisoscuro" for="owner">Documentos a firmar </label>
+		</p>
+		<table id="documents-table">
+		<thead class="fixedHeaderTable">
+		<tr>
+			<th>Id. Documento</th><th>Título </th>
+		</tr>
+		</thead>
+		<tbody>
+			<%
+				for (int i=0; i<info.length; i=i+2){
+			%>
+				<tr>
+					<td><%= info[i] %></td>
+					<td><%= info[i+1] %></td>
+				</tr>
+			<%
+				}
+			%>
+		</tbody>
+		</table>
+		</div>
+	</fieldset>
+	</section>
+ 
+	
+<% } %>
+	
+	
+	
+<% if (!hayInfo) { %>
+	<section class="tmpl_2_cols">
+<% } else { %>
+	<section class="tmpl_5_cols">
+<% } %>
 <fieldset>
 	 <p>
 	 <label class="grisoscuro" for="owner">USUARIO FIRMANTE</label>&nbsp;&nbsp;								<%= request.getParameter("id") %></p>
