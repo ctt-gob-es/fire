@@ -7,9 +7,16 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.server.admin;
+package es.gob.fire.server.admin.entity;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Date;
+
+import es.gob.fire.server.admin.tool.Base64;
 
 /**
  * Aplicaciones dadas de alta en la base de datos.
@@ -31,6 +38,8 @@ public class Application {
 	private String cer;
 
 	private String huella;
+	
+	private X509Certificate certX509;
 
 	/**
 	 * Constructor vac&iacute;o que iniciliza los String a cadena vac&iacute;a.
@@ -182,5 +191,27 @@ public class Application {
 		this.huella = huella;
 	}
 
-
+	/**
+	 * Obtiene el certificado de la aplicaci&oacute;n.
+	 * @return
+	 */
+	public X509Certificate getCertX509() {
+		return certX509;
+	}
+	/**
+	 * Establece el certificado de la aplicaci&oacute;n.
+	 * @param certX509
+	 */
+	public void setCertX509(X509Certificate certX509) {
+		this.certX509 = certX509;
+	}
+	/**
+	 * Establece el Certificado X509 mediante una cadena en base 64
+	 * @param cert
+	 * @throws CertificateException
+	 * @throws IOException
+	 */
+	public void setCertb64ToX509(String cert) throws CertificateException, IOException {
+		this.setCertX509((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert))));
+	}
 }

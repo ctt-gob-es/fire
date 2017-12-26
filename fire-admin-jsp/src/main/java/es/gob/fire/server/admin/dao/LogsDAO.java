@@ -7,13 +7,16 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.server.admin;
+package es.gob.fire.server.admin.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import es.gob.fire.server.admin.conf.DbManager;
+import es.gob.fire.server.admin.entity.Log;
 
 /**
  * Manejador para la gesti&oacute;n de las trazas de la aplicaci&oacute;n.

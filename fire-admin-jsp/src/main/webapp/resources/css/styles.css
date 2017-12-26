@@ -4,10 +4,10 @@ ul li {
     list-style-type: none;
 }
 
-ul li.field-text {
-	min-width: 180px;
+/* ul li.field-text { */
+/* 	min-width: 180px; */
 	
-}
+/* } */
 
 
 *{
@@ -258,3 +258,66 @@ ul li.field-text {
 #formProperties p{
 	margin: .5em 0 0 0;
 }
+
+.menubarPosition{
+	position: relative;
+    top: 0;
+    width: 100%;
+}
+#menuiemLogout{
+	position: absolute;
+	top:10px;
+    left: 95%;
+}
+
+/**********Menu*****************/
+
+#header {
+	margin:auto;
+	width:500px;
+	font-family:Arial, Helvetica, sans-serif;
+}
+			
+			#header ul, ol {
+				list-style:none;
+			}
+			
+			.nav {
+				width:500px; /*Le establecemos un ancho*/
+				margin:0 auto; /*Centramos automaticamente*/
+			}
+ 
+			.nav > li {
+				float:left;
+			}
+			
+			.nav li a {
+				background-color:#303030;
+				color:#fff;
+				text-decoration:none;
+				padding:10px 12px;
+				display:block;
+			}
+			
+			.nav li a:hover {
+				background-color:#434343;
+			}
+			
+			.nav li ul {
+				display:none;
+				position:absolute;
+				min-width:140px;
+			}
+			
+			.nav li:hover > ul {
+				display:block;
+			}
+			
+			.nav li ul li {
+				position:relative;
+			}
+			
+			.nav li ul li ul {
+				right:-140px;
+				top:0px;
+			}

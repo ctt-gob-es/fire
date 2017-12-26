@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.server.admin;
+package es.gob.fire.server.admin.conf;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +19,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import es.gob.fire.server.admin.message.AdminFilesNotFoundException;
 
 
 /**

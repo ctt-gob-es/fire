@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.server.admin;
+package es.gob.fire.server.admin.session;
 
 import java.util.Enumeration;
 import java.util.logging.Logger;

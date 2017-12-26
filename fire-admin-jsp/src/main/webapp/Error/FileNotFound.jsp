@@ -5,15 +5,13 @@
 <head>
 	<meta charset="UTF-8">
 	<title>FIRe</title>
-	<link rel="shortcut icon" href="img/cert.png">
-	<link rel="stylesheet" href="styles.css"/>
+	<link rel="shortcut icon" href="../resources/img/cert.png">
+	<link rel="stylesheet" href="../resources/css/styles.css">
 </head>
 	<body>
 		
 		<!-- Barra de navegacion -->
-		<ul id="menubar">
-			<li id="bar-txt"><b>FIRe</b></li>
-		</ul>
+		<jsp:include page="../resources/jsp/NavigationBar.jsp" />
 		<!-- Contenido -->
 		<div id="container" style="height: 450px !important;">
 			<% 	

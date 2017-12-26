@@ -2,9 +2,9 @@
 
 <%@page import="java.util.List" %>
 
-<%@page import="es.gob.fire.server.admin.ConfigurationDAO" %>
-<%@page import="es.gob.fire.server.admin.AplicationsDAO" %>
-<%@page import="es.gob.fire.server.admin.Application" %>
+<%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
+<%@page import="es.gob.fire.server.admin.dao.AplicationsDAO" %>
+<%@page import="es.gob.fire.server.admin.entity.Application" %>
 
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -25,6 +25,7 @@
 	// op = 2 -> editar aplicacion
 	String title = ""; //$NON-NLS-1$
 	String subTitle = ""; //$NON-NLS-1$
+	String certData="";//$NON-NLS-1$
 	Application app;
 	switch (op) {
 		case 0:
@@ -40,11 +41,21 @@
 			subTitle = "Modifique los datos que desee editar"; //$NON-NLS-1$
 			break;
 		default:
-			response.sendRedirect("Login.jsp?login=fail"); //$NON-NLS-1$
+			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 			return;
 	}
 	app = id != null ? AplicationsDAO.selectApplication(id)
 			: new Application();
+	
+	if(request.getParameter("cer")!= null && !"".equals(request.getParameter("cer")))
+	{
+		app.setCertb64ToX509(request.getParameter("cer").trim());
+		certData=app.getCertX509().getSubjectX500Principal().getName();
+	}else if(app.getCer()!=null && !"".equals(app.getCer())){
+		app.setCertb64ToX509(app.getCer());
+		certData=app.getCertX509().getSubjectX500Principal().getName();
+	}
+		
 %>
 
 <!DOCTYPE html>
@@ -52,11 +63,12 @@
 <head>
 	<meta charset="UTF-8">
 	<title>FIRe</title>
-	<link rel="shortcut icon" href="img/cert.png">
-	<link rel="stylesheet" href="styles.css">
+	<link rel="shortcut icon" href="../resources/img/cert.png">
+	<link rel="stylesheet" href="../resources/css/styles.css">
 </head>
 <script>
 	function isCert(){
+		
 		if (document.getElementById("nombre-app").value == "" ){
 			alert('El nombre de la aplicación no puede estar vacío');
 			document.getElementById("nombre-app").focus();
@@ -68,31 +80,35 @@
 			document.getElementById("nombre-resp").focus();
 			return false;
 		}
-		
-				
-		var data = document.getElementById("cert-resp").value
-		if (data == ""){
-			alert("El certificado no puede estar vacio, introduzca un certificado en base 64");
-			document.getElementById("cert-resp").focus();
+		var op=<%=op%>;
+		alert("Operacion="op);
+		if(document.getElementById("fichero-firma").value == "" && op=="1"){
+			alert("El certificado no puede estar vacio, seleccione un certificado '*.cer' ");
+			document.getElementById("fichero-firma").focus();
 			return false;
 		}
-		var begin = data.split("-----BEGIN CERTIFICATE-----");
-		if(begin.length >1){
-			data = begin[1].trim();
-		}
-		var end = data.split("-----END CERTIFICATE-----")
-		if(end.length > 1){
-			data = end[0].trim();
-		}
-		// nos quitamos los espacios
-		document.getElementById("cert-resp").value = data.replace(" ","");
+				
+// 		var data = document.getElementById("cert-resp").value
+// 		if (data == ""){
+// 			alert("El certificado no puede estar vacio, introduzca un certificado en base 64");
+// 			document.getElementById("cert-resp").focus();
+// 			return false;
+// 		}
+// 		var begin = data.split("-----BEGIN CERTIFICATE-----");
+// 		if(begin.length >1){
+// 			data = begin[1].trim();
+// 		}
+// 		var end = data.split("-----END CERTIFICATE-----")
+// 		if(end.length > 1){
+// 			data = end[0].trim();
+// 		}
+// 		// nos quitamos los espacios
+// 		document.getElementById("cert-resp").value = data.replace(" ","");
 	}
 </script>
 <body>
-	<!-- Barra de navegacion -->
-	<ul id="menubar">
-		<li id="bar-txt"><b><%= title %></b></li>
-	</ul>
+	<!-- Barra de navegacion -->		
+	<jsp:include page="../resources/jsp/NavigationBar.jsp" />
 	<!-- contenido -->
 	<div id="container">
 	
@@ -111,7 +127,7 @@
 		</div>
 		
 		<p>Los campos con * son obligatorios</p>
-			<form method="POST" action="newApp?iddApp=<%= id %>&op=<%= op %>">
+			<form method="POST" action="newApp?iddApp=<%= id %>&op=<%= op %>" enctype="multipart/form-data" onsubmit="isCert()">
 				<ul style="margin-top: 20px;">
 					<li class="field-text">
 						<!-- Label para la accesibilidad de la pagina -->
@@ -156,16 +172,27 @@
 						value="<%= request.getParameter("tel")!= null ? request.getParameter("tel") : app.getTelefono()%>">
 					</li>
 				</ul>
+				<ul  style="margin-top: 20px;">
+					<li class="field-text">					
+						<label for="fichero-firma" style="color: #404040;">* Seleccionar certificado</label><br>										
+					</li>
+					<li>
+						<input id="fichero-firma" type="file" name="cert-file" accept=".cer,.der,.pem"/>
+					</li>
+				</ul>
 				
 				<ul style="margin-top: 20px;">
 					<li class="field-text">
 						<!-- Label para la accesibilidad de la pagina -->
-						<label for="cert-resp" style="color: #404040;">* Certificado en Base64</label>
+						<label for="cert-resp" style="color: #404040;">Certificado</label>
 					</li>
 					<li>
 						<textArea rows="10" cols="62" id="cert-resp" name="cert-resp" class="edit-txt" style="width: 400px;margin-top:10px;resize:none">
-						<%= request.getParameter("cer")!= null ? request.getParameter("cer").trim() : app.getCer()%></textArea>
+						<%= certData %>
+						</textArea>
+						
 					</li>
+						
 				</ul>
 	
 			<fieldset class="fieldset-clavefirma" >
@@ -173,11 +200,11 @@
 		   		<% 
 		   		if (op > 0) {
 		   			final String msg = (op == 1 ) ? "Crear aplicaci&oacute;n" : "Guardar cambios";   //$NON-NLS-1$ //$NON-NLS-2$
-
+					final String tit= (op == 1 ) ? "Crea nueva aplicación":"Guarda las modificaciones realizadas";
 		   		%>
 			   		
 			   		<div  style="text-align: center; margin-top: 1%;">
-			   			<input class="form-btn" name="add-app-btn" type="submit" value="<%= msg %>" onclick="return isCert()">
+			   			<input class="form-btn" name="add-app-btn" type="submit" value="<%= msg %>" title="<%=tit %>" >
 			   		</div>
 		   		<% } %>
 		   		
@@ -189,13 +216,14 @@
 			document.getElementById("email-resp").disabled = <%= op == 0 ? "true" : "false" %>
 			document.getElementById("nombre-resp").disabled = <%= op == 0 ? "true" : "false" %>
 			document.getElementById("telf-resp").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("cert-resp").disabled = <%= op == 0 ? "true" : "false" %>
-		
+			document.getElementById("cert-resp").disabled = true;
+			
+			
 			// quitamos los espacios en blanco que se han agregado en el certificado
 			document.getElementById("cert-resp").value = document.getElementById("cert-resp").value.trim();
 			if (<%= Boolean.parseBoolean(request.getParameter("error")) %>){ 
 				alert('El certificado introducido no es correcto, por favor introduzca un certificado valido');
-				document.getElementById("cert-resp").focus();
+				document.getElementById("fichero-firma").focus();
 			}
 			
 		</script>

@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.server.admin;
+package es.gob.fire.server.admin.dao;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
@@ -25,6 +25,11 @@ import java.util.logging.Logger;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+
+import es.gob.fire.server.admin.conf.DbManager;
+import es.gob.fire.server.admin.entity.Application;
+import es.gob.fire.server.admin.tool.Base64;
+import es.gob.fire.server.admin.tool.Hexify;
 
 /**
  * DAO para la gesti&oacute;n de aplicaciones dadas de alta en el sistema.
@@ -225,7 +230,7 @@ public class AplicationsDAO {
 			result.setTelefono(rs.getString(5));
 			result.setAlta(rs.getDate(6));
 			result.setCer(rs.getString(7));
-			result.setHuella(rs.getString(7));
+			result.setHuella(rs.getString(8));
 		}
 		rs.close();
 		st.close();

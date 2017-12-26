@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.server.admin;
+package es.gob.fire.server.admin.message;
 
 /**
  * @author mario
@@ -22,12 +22,12 @@ public class AdminFilesNotFoundException extends Exception{
         super();
     }
 
-	AdminFilesNotFoundException(final String msg, final String filename) {
+	public AdminFilesNotFoundException(final String msg, final String filename) {
 		super(msg);
 		fileName = filename;
     }
 
-	AdminFilesNotFoundException(final String msg, final String filename, final Throwable cause) {
+	public AdminFilesNotFoundException(final String msg, final String filename, final Throwable cause) {
 		super(msg, cause);
 		fileName = filename;
     }

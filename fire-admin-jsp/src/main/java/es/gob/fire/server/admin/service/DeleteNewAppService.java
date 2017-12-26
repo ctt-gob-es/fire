@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.server.admin;
+package es.gob.fire.server.admin.service;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -18,6 +18,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import es.gob.fire.server.admin.dao.AplicationsDAO;
 
 /**
  * Servicio para el alta de una nueva aplicaci&oacute;n en el sistema.

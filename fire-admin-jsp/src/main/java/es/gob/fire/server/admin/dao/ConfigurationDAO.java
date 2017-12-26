@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.server.admin;
+package es.gob.fire.server.admin.dao;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -17,6 +17,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import es.gob.fire.server.admin.conf.DbManager;
+import es.gob.fire.server.admin.tool.Base64;
 
 /**
  * Manejador de la configuraci&oacute;n del sistema.
@@ -41,7 +44,7 @@ public class ConfigurationDAO {
 	 * @return {@code true} si la contrase&ntilde;a es del administrador, {@code false} en caso contrario.
 	 * @throws SQLException Cuando ocurre alg&uacute;n error durante la comprobaci&oacute;n.
 	 */
-	public static boolean checkAdminPassword(final String psswd) throws SQLException {
+	public static boolean checkAdminPassword(final String psswd,final String user) throws SQLException {
 
 		final byte[] md;
 		try {
@@ -55,7 +58,8 @@ public class ConfigurationDAO {
 		}
 
 		boolean result;
-		final String keyAdminB64 = getConfigValue(KEY_ADMIN_PASS);
+		//final String keyAdminB64 = getConfigValue(KEY_ADMIN_PASS);
+		final String keyAdminB64 = getConfigValue(user);
 		if (keyAdminB64 ==  null || !keyAdminB64.equals(Base64.encode(md))) {
 			LOGGER.severe("Se ha insertado una contrasena de administrador no valida"); //$NON-NLS-1$
 			result = false;

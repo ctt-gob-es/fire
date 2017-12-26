@@ -1,13 +1,15 @@
 
 
-<%@page import="es.gob.fire.server.admin.DbManager"%>
-<%@page import="es.gob.fire.server.admin.ConfigurationDAO" %>
-<%@page import="es.gob.fire.server.admin.AplicationsDAO" %>
-<%@page import="es.gob.fire.server.admin.Application" %>
-<%@page import="es.gob.fire.server.admin.MessageResult" %>
-<%@page import="es.gob.fire.server.admin.MessageResultManager" %>
-<%@page import="es.gob.fire.server.admin.AdminFilesNotFoundException" %>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="es.gob.fire.server.admin.dao.UsersDAO"%>
+<%@page import="es.gob.fire.server.admin.conf.DbManager"%>
+<%@page import="es.gob.fire.server.admin.dao.AplicationsDAO" %>
+<%@page import="es.gob.fire.server.admin.entity.Application" %>
+<%@page import="es.gob.fire.server.admin.message.MessageResult" %>
+<%@page import="es.gob.fire.server.admin.message.MessageResultManager" %>
+<%@page import="es.gob.fire.server.admin.message.AdminFilesNotFoundException" %>
 <%@page import="java.util.List" %>
+<%@page import="es.gob.fire.server.admin.tool.Utils" %>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
@@ -16,11 +18,11 @@
 		DbManager.initialize();
 	}
 	catch (AdminFilesNotFoundException e){
-		response.sendRedirect("FileNotFound.jsp?file=" + AdminFilesNotFoundException.getFileName()); //$NON-NLS-1$
+		response.sendRedirect("../Error/FileNotFound.jsp?file=" + AdminFilesNotFoundException.getFileName()); //$NON-NLS-1$
 		return;
 	}
 	catch (Exception e){
-		response.sendRedirect("SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
+		response.sendRedirect("../Error/SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
 		return;
 	}
 
@@ -28,35 +30,37 @@
 	if (state == null) {
 		// Leemos la contrasena de entrada
 		String psswd = request.getParameter("password"); //$NON-NLS-1$
-
+		String user = request.getParameter("user");
 		// Comprobamos la contrasena
-		if (psswd == null) {
-			response.sendRedirect("Login.jsp?login=fail"); //$NON-NLS-1$
+		if (psswd == null || user==null) {
+			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 			return;
 		}
 
 		try {
-			if (!ConfigurationDAO.checkAdminPassword(psswd)) {
-				response.sendRedirect("Login.jsp?login=fail"); //$NON-NLS-1$
+			if (!UsersDAO.checkAdminPassword(psswd,user)) {
+				response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 				return;	
 			}
 		}
 		catch (Exception e) {
-			response.sendRedirect("SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
+			response.sendRedirect("../Error/SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
 			return;
 		}
 
 		// Marcamos la sesion como iniciada 
 		request.getSession().setAttribute("initializedSession", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		request.getSession().setAttribute("user", user);//$NON-NLS-1$ //$NON-NLS-2$
 	}
 	else if (!"true".equals(state)) { //$NON-NLS-1$
-		response.sendRedirect("Login.jsp?login=fail"); //$NON-NLS-1$
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 	}
 
 	// Logica para determinar si mostrar un resultado de operacion
 	String op = request.getParameter("op"); //$NON-NLS-1$
 	String result = request.getParameter("r"); //$NON-NLS-1$
-	MessageResult mr = MessageResultManager.analizeResponse(op, result);
+	String entity= request.getParameter("ent"); //$NON-NLS-1$
+	MessageResult mr = MessageResultManager.analizeResponse(op, result,entity);
 %>
 
 <!DOCTYPE html>
@@ -64,8 +68,8 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Administraci&oacute;n FIRe</title>
-	<link rel="shortcut icon" href="img/cert.png">
-	<link rel="stylesheet" href="styles.css">
+	<link rel="shortcut icon" href="../resources/img/cert.png">
+	<link rel="stylesheet" href="../resources/css/styles.css">
 </head>
 <body>
 <script>
@@ -78,9 +82,8 @@
 	}
 </script>
 	<!-- Barra de navegacion -->
-	<ul id="menubar">
-		<li id="bar-txt"><b>Administraci&oacute;n de FIRe</b></li>
-	</ul>
+	<jsp:include page="../resources/jsp/NavigationBar.jsp" />
+	
 	<!-- contenido -->
 	<div id="container">
 	
@@ -117,7 +120,7 @@
 				apps = AplicationsDAO.getApplications();
 			}
 			catch (Exception e) {
-				response.sendRedirect("SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
+				response.sendRedirect("../Error/SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
 				return;
 			}
 			for (Application app : apps) {
@@ -133,11 +136,11 @@
 						(<a href="tel://<%= app.getTelefono() %>"><%= app.getTelefono() %></a>)
 					<% } %> 
 				</td>
-				<td><%= app.getAlta() %></td>
+				<td><%=Utils.getStringDateFormat(app.getAlta()) %></td>
 				<td>
-					<a href="NewApplication.jsp?id-app=<%= app.getId() %>&op=0"><img src="img/details_icon.png"/></a>
-					<a href="NewApplication.jsp?id-app=<%= app.getId() %>&op=2"><img src="img/editar_icon.png"/></a>
-					<a href="deleteApp?id-app=<%= app.getId() %>"><img src="img/delete_icon.png" onclick="return confirmar()"/></a>
+					<a href="NewApplication.jsp?id-app=<%= app.getId() %>&op=0"><img src="../resources/img/details_icon.png"/></a>
+					<a href="NewApplication.jsp?id-app=<%= app.getId() %>&op=2"><img src="../resources/img/editar_icon.png"/></a>
+					<a href="deleteApp?id-app=<%= app.getId() %>"><img src="../resources/img/delete_icon.png" onclick="return confirmar()"/></a>
 				</td>
 			</tr>
 		<%
