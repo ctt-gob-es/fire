@@ -58,7 +58,7 @@ public class TestLoadDataService extends HttpServlet {
 	/** Clave para indicar que el certificado de usuario no existe y se debe cargar el "nuevo" certificado. */
 	public static final String KEY_NEWCERT = "newcert"; //$NON-NLS-1$
 
-	/** Clave para indicar la información de los documentos */
+	/** Clave para indicar la informaci&oacute;n de los documentos */
 	public static final String KEY_INFODOCUMENTOS = "infoDocumentos"; //$NON-NLS-1$
 
 
@@ -103,7 +103,7 @@ public class TestLoadDataService extends HttpServlet {
 		p.store(fos, ""); //$NON-NLS-1$
 		fos.close();
 
-		String redirectUrl = TestHelper.getSignRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe, infoDocumentosB64);
+		final String redirectUrl = TestHelper.getSignRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe, infoDocumentosB64);
 
 		final LoadResult result = new LoadResult(
 			transactionId,

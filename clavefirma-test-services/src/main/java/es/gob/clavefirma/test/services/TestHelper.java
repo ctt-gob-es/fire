@@ -373,13 +373,19 @@ class TestHelper {
 
 	@SuppressWarnings("deprecation")
 	static String getSignRedirectionUrl(final String subjectId, final String transactionId, final String okUrlB64, final String errorUrlB64, final String infoDocumentosB64) {
+
+		String infoDocsB64 = infoDocumentosB64;
+		if (infoDocsB64 == null) {
+			infoDocsB64 = ""; //$NON-NLS-1$
+		}
+
 		try {
 			return urlTemplateSign
 					.replace(REDIRECT_URL_ID_TAG, transactionId)
 					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
 					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
 					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING))
-					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocumentosB64);
+					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocsB64);
 		} catch (final UnsupportedEncodingException e) {
 			LOGGER.warning("No se soporta el encoding proporcionado para codificar la URL, se usara el por defecto: " + e); //$NON-NLS-1$
 			return urlTemplateSign
@@ -387,7 +393,7 @@ class TestHelper {
 					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
 					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
 					.replace(REDIRECT_ID, URLEncoder.encode(subjectId))
-					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocumentosB64);
+					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocsB64);
 		}
 	}
 
