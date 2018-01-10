@@ -75,11 +75,11 @@ public class ConfigManager {
 
 	private static final String PROP_FIRE_PAGES_LOGO_URL = "pages.logo"; //$NON-NLS-1$
 
+	private static final String PROP_FIRE_PUBLIC_URL = "pages.public.url"; //$NON-NLS-1$
+
 	private static final String PROP_DOCUMENT_MANAGER_PREFIX = "docmanager."; //$NON-NLS-1$
 
 	private static final String PROP_SESSIONS_DAO = "sessions.dao"; //$NON-NLS-1$
-	  
-	private static final String PROP_PUBLIC_URL = "public.url"; //$NON-NLS-1$
 
 	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
 	private static final String USE_BBDD = "usebbdd"; //$NON-NLS-1$
@@ -531,16 +531,15 @@ public class ConfigManager {
 
 		return config.getProperty(PROP_SESSIONS_DAO);
 	}
-	
-	
+
+
 	/**
-	  * Recupera la URL de la parte pública del componente central.
-	  * 
-	  * @return URL de la parte pública del componente central o {@code null} 
+	  * Recupera la URL de la parte p&uacute;blica del componente central.
+	  * @return URL de la parte p&uacute;blica del componente central o {@code null}
 	  * si no se ha podido recuperar o no se ha configurado.
 	  */
-	 public static String getPublicUrl() {
-	 
+	 public static String getPublicContextUrl() {
+
 	 	if (config == null) {
 	 		try {
 	 			loadConfig();
@@ -549,8 +548,8 @@ public class ConfigManager {
 	 			return null;
 	 		}
 	 	}
-	 
-	 	return config.getProperty(PROP_PUBLIC_URL);
+
+	 	return config.getProperty(PROP_FIRE_PUBLIC_URL);
 	 }
-	 
+
 }

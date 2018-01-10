@@ -136,8 +136,9 @@ public class SignOperationManager {
 		extraParamsB64 = AOUtil.properties2Base64(extraParams);
 
 		final FireSession session = SessionCollector.createFireSession(request.getSession());
+		final String transactionId = session.getTransactionId();
 
-		LOGGER.fine(String.format("TrId %1s: SignOperationManager", session.getTransactionId())); //$NON-NLS-1$
+		LOGGER.fine(String.format("TrId %1s: SignOperationManager", transactionId)); //$NON-NLS-1$
 
         // Guardamos en la sesion la configuracion de la operacion
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
@@ -163,13 +164,13 @@ public class SignOperationManager {
         catch (final IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
         	setErrorToSession(session, OperationError.INTERNAL_ERROR);
-        	sendResult(response, new SignOperationResult(session.getTransactionId(), redirectErrorUrl));
+        	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
         	setErrorToSession(session, OperationError.INTERNAL_ERROR);
-        	sendResult(response, new SignOperationResult(session.getTransactionId(), redirectErrorUrl));
+        	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
 
@@ -221,24 +222,23 @@ public class SignOperationManager {
 
         // Creamos un temporal con los datos a procesar asociado a la sesion
         try {
-        	TempFilesHelper.storeTempData(session.getTransactionId(), data);
+        	TempFilesHelper.storeTempData(transactionId, data);
         }
         catch (final Exception e) {
         	LOGGER.severe("Error en el guardado temporal de los datos a firmar: " + e); //$NON-NLS-1$
         	setErrorToSession(session, OperationError.INTERNAL_ERROR);
-        	sendResult(response, new SignOperationResult(session.getTransactionId(), redirectErrorUrl));
+        	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
 		}
 
-        // Obtenemos la URL de la parte pública
-        String redirectUrlBase = ConfigManager.getPublicUrl();
-        if (redirectUrlBase==null || redirectUrlBase.isEmpty()){
-        	// Si no hay una url definida, utilizamos la url que nos indica la petición.
-        	redirectUrlBase = request.getRequestURL().toString();
-        	redirectUrlBase = redirectUrlBase.substring(0, redirectUrlBase.toString().lastIndexOf('/'));
-        }
-        redirectUrlBase = redirectUrlBase + "/public/"; //$NON-NLS-1$
-        
+		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
+		// se calcula en base a la URL actual
+		String redirectUrlBase = ConfigManager.getPublicContextUrl();
+		if (redirectUrlBase == null || redirectUrlBase.isEmpty()){
+			redirectUrlBase = request.getRequestURL().toString();
+			redirectUrlBase = redirectUrlBase.substring(0, redirectUrlBase.lastIndexOf('/'));
+		}
+		redirectUrlBase += "/public/"; //$NON-NLS-1$
 
         // Si ya se definio el origen del certificado, se envia al servicio que se encarga de
         // redirigirlo. Si no, se envia directamente a la pagina de seleccion
@@ -256,10 +256,10 @@ public class SignOperationManager {
 
         // Devolvemos al usuario el ID de la transaccion y la pagina a la que debe dirigir al usuario
         final SignOperationResult result = new SignOperationResult(
-        		session.getTransactionId(),
+        		transactionId,
         		redirectUrlBase + redirectUrl +
         			(redirectUrl.indexOf('?') == -1 ? "?" : "&") + //$NON-NLS-1$ //$NON-NLS-2$
-        			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + session.getTransactionId() + //$NON-NLS-1$
+        			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$
         			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
