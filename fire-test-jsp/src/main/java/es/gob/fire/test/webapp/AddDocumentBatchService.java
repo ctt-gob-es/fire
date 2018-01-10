@@ -93,7 +93,6 @@ public class AddDocumentBatchService extends HttpServlet {
 		config.setProperty("docTitle", "T\u00EDtulo " + doc.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 		config.setProperty("docName", "Nombre " + doc.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 
-
 		// Si se indico una configuracion de firma particular para el documento, llamamos al metodo
 		// del API que permite introducirla. En caso contrario, llamamos al metodo del API que no
 		try {
