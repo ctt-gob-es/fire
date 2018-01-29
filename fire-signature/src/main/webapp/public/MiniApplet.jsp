@@ -270,8 +270,16 @@
 			}
 
 			function sendErrorCallback(errorType, errorMessage) {
-				document.getElementById("errortype").value = errorType;
-				document.getElementById("errormsg").value = errorMessage;
+				document.getElementById("inputerrortype").value = errorType;
+				document.getElementById("inputerrormsg").value = errorMessage;
+				
+				
+				
+				document.getElementById("errorMsg").innerHTML = "" + errorType + ": " + errorMessage;
+				
+				
+				
+				
 				
 				if (errorType != "es.gob.afirma.core.AOCancelledOperationException") {
 					showErrorOptions();
@@ -307,7 +315,15 @@
 				var app;
 				var appVersion;
 				if (MiniApplet.echo() === "Cliente JavaScript") {
-					if (<%= ConfigManager.getClienteAfirmaForceNative() %>) {
+					if (MiniApplet.isAndroid()) {
+						app = "Cliente @firma Android";
+						appVersion = "Cliente m\u00F3vil @firma 1.5 o superior";
+					}
+					else if (MiniApplet.isIOS()) {
+						app = "Cliente @firma iOS";
+						appVersion = "Cliente m\u00F3vil @firma 1.5 o superior";
+					}
+					else if (<%= ConfigManager.getClienteAfirmaForceNative() %>) {
 						app = "AutoFirma";
 						appVersion = "AutoFirma 1.5 o superior";
 					}
@@ -393,14 +409,14 @@
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_IS_BATCH_OPERATION %>" value="<%= isBatchOperation %>" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
-					<input id="errortype" type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_TYPE %>" />
-					<input id="errormsg" type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_MESSAGE %>" />
+					<input id="inputerrortype" type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_TYPE %>" />
+					<input id="inputerrormsg" type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_MESSAGE %>" />
 					<input id="afirmaBatchResult" type="hidden" name="<%= ServiceParams.HTTP_PARAM_AFIRMA_BATCH_RESULT %>" />
 					<input id="cert" type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT %>" value="" />
 					<input id="buttonSign" type="button" class="button_firmar" value="Firmar" onclick="<%= formFunction %>"/>
 				</form>
 			</div>
-			<div><span class="bold">Nota:</span> La firma se va a realizar con el <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</div>
+			<div><span class="bold">Nota:</span> La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</div>
 		</section>
 		
 	</main>

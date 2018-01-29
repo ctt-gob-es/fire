@@ -60,9 +60,9 @@ public class ConfigFileLoader {
 				}
 				else {
 					LOGGER.warning(
-							"No se encontro el fichero " + configFilename + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configFile.getAbsolutePath() + //$NON-NLS-1$
-							"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+							"El fichero " + configFilename + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
+									ENVIRONMENT_VAR_CONFIG_DIR + ". El fichero debe encontrase dentro del directorio '" + configDir + //$NON-NLS-1$
+							"'.\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
 				}
 			}
 
