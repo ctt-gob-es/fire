@@ -12,10 +12,10 @@ package es.gob.fire.server.services.internal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import es.gob.fire.signature.connector.FIReConnector;
-import es.gob.fire.signature.connector.FIReConnectorFactory;
-import es.gob.fire.signature.connector.FIReConnectorFactoryException;
-import es.gob.fire.signature.connector.FIReConnectorUnknownUserException;
+import es.gob.fire.server.connector.FIReConnector;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
+
 
 /**
  * Clase con m&eacute;todos de utilidad para la gesti&oacute;n de las peticiones al
@@ -28,15 +28,16 @@ class FIReHelper {
 	/**
 	 * Conecta con el servicio de custodia de certificados en la nube para comprobar si
 	 * el usuario est&aacute; dado de alta en &eacute;l.
+	 * @param providerName Nombre del proveedor de firma en la nube.
 	 * @param subjectId Identificador del usuario del que se desee comprobar el alta.
 	 * @return {@code true} si el usuario est&aacute; dado de alta en el servicio
 	 * de custodia de certificados en la nube, {@code false} en caso contrario.
 	 */
-	public static boolean isUserRegistered(final String subjectId) {
+	public static boolean isUserRegistered(final String providerName, final String subjectId) {
 
         final FIReConnector connector;
         try {
-            connector = FIReConnectorFactory.getClaveFirmaConnector(null);
+        	connector = ProviderManager.initTransacction(providerName, null);
         }
 		catch(final FIReConnectorFactoryException e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$

@@ -37,7 +37,7 @@ import es.gob.afirma.core.signers.AOPkcs1Signer;
 import es.gob.afirma.core.signers.AOSimpleSigner;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
-import es.gob.fire.signature.connector.FIReSignatureException;
+import es.gob.fire.server.connector.FIReSignatureException;
 
 /**
  * Servlet implementation class TestSignService

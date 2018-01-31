@@ -20,12 +20,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
+import es.gob.fire.server.services.ProviderLegacy;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DocInfo;
 
 /**
  * Manejador encargado de la gesti&oacute;n de las operaciones de firma ordenadas al
@@ -249,7 +250,9 @@ public class SignOperationManager {
  					ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$
         } else {
         	redirectUrl = "ChooseCertificateOrigin.jsp"; //$NON-NLS-1$
-        	if (!FIReHelper.isUserRegistered(subjectId)) {
+
+        	//TODO: Deberiamos comprobar que el usuario esta dado de alta en cada uno de los servicios
+        	if (!FIReHelper.isUserRegistered(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, subjectId)) {
         		redirectUrl += "?"  + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=true"; //$NON-NLS-1$ //$NON-NLS-2$
         	}
         }

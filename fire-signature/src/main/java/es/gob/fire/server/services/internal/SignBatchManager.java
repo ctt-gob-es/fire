@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.ProviderLegacy;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.signature.ConfigManager;
 
@@ -109,7 +110,9 @@ public class SignBatchManager {
         			ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$
         } else {
         	redirectUrl = "ChooseCertificateOrigin.jsp?" + ServiceParams.HTTP_PARAM_OPERATION + "=" + ServiceParams.OPERATION_BATCH; //$NON-NLS-1$ //$NON-NLS-2$
-        	if (!FIReHelper.isUserRegistered(currentUserId)) {
+
+        	//TODO: Deberiamos comprobar que el usuario esta dado de alta en cada uno de los servicios
+        	if (!FIReHelper.isUserRegistered(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, currentUserId)) {
         		redirectUrl += "&"  + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=true"; //$NON-NLS-1$ //$NON-NLS-2$
         	}
         }

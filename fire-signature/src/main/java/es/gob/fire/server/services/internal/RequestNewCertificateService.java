@@ -19,14 +19,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.connector.FIReCertificateAvailableException;
+import es.gob.fire.server.connector.FIReCertificateException;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
+import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
+import es.gob.fire.server.connector.GenerateCertificateResult;
+import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.HttpCustomErrors;
-import es.gob.fire.signature.GenerateCertificateResult;
-import es.gob.fire.signature.connector.FIReCertificateAvailableException;
-import es.gob.fire.signature.connector.FIReCertificateException;
-import es.gob.fire.signature.connector.FIReConnectorFactoryException;
-import es.gob.fire.signature.connector.FIReConnectorNetworkException;
-import es.gob.fire.signature.connector.FIReConnectorUnknownUserException;
-import es.gob.fire.signature.connector.WeakRegistryException;
 
 /**
  * Servlet implementation class RequestNewCertificateService
@@ -58,6 +58,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         	session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
         }
 
+        final String origin	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
 		final Properties connConfig	= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
     	final Properties generationConfig = connConfig != null ? (Properties) connConfig.clone() : new Properties();
@@ -77,7 +78,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
         final GenerateCertificateResult gcr;
         try {
-        	gcr = GenerateCertificateManager.generateCertificate(subjectId, generationConfig);
+        	gcr = GenerateCertificateManager.generateCertificate(origin, subjectId, generationConfig);
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.warning("No se ha proporcionado el identificador del usuario que solicita el certificado"); //$NON-NLS-1$

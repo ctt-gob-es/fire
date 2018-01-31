@@ -27,14 +27,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.server.connector.FIReConnector;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.signature.connector.FIReConnector;
-import es.gob.fire.signature.connector.FIReConnectorFactory;
-import es.gob.fire.signature.connector.FIReConnectorFactoryException;
-import es.gob.fire.signature.connector.FIReConnectorUnknownUserException;
 
 
 /**
@@ -181,7 +180,7 @@ public class RecoverBatchResultManager {
         	// Obtenemos el conector con el backend ya configurado
         	final FIReConnector connector;
         	try {
-        		connector = FIReConnectorFactory.getClaveFirmaConnector(connConfig);
+        		connector = ProviderManager.initTransacction(origin, connConfig);
         	}
         	catch (final FIReConnectorFactoryException e) {
         		LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$

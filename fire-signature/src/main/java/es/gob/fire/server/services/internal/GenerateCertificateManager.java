@@ -17,18 +17,17 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.connector.FIReCertificateAvailableException;
+import es.gob.fire.server.connector.FIReCertificateException;
+import es.gob.fire.server.connector.FIReConnector;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
+import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
+import es.gob.fire.server.connector.GenerateCertificateResult;
+import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.signature.GenerateCertificateResult;
-import es.gob.fire.signature.connector.FIReCertificateAvailableException;
-import es.gob.fire.signature.connector.FIReCertificateException;
-import es.gob.fire.signature.connector.FIReConnector;
-import es.gob.fire.signature.connector.FIReConnectorFactory;
-import es.gob.fire.signature.connector.FIReConnectorFactoryException;
-import es.gob.fire.signature.connector.FIReConnectorNetworkException;
-import es.gob.fire.signature.connector.FIReConnectorUnknownUserException;
-import es.gob.fire.signature.connector.WeakRegistryException;
 
 /**
  * Manejador de la operaci&oacute;n de generaci&oacute;n de certificados. Esta clase
@@ -51,6 +50,7 @@ public class GenerateCertificateManager {
             final HttpServletResponse response) throws IOException {
 
 		final String subjectId      = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String providerName	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 		final String configB64      = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
 
 		Properties config = null;
@@ -61,7 +61,7 @@ public class GenerateCertificateManager {
         final GenerateCertificateResult gcr;
 
         try {
-        	gcr = generateCertificate(subjectId, config);
+        	gcr = generateCertificate(providerName, subjectId, config);
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.warning("No se ha proporcionado el identificador del usuario que solicita el certificado"); //$NON-NLS-1$
@@ -120,6 +120,7 @@ public class GenerateCertificateManager {
 
 	/**
 	 * Ejecuta una operacion de generaci&oacute;n de certificado en servidor.
+	 * @param providerName Nombre del proveedor de firma en la nube.
 	 * @param subjectId Identificador del usuario.
 	 * @param config Properties de configuraci&oacute;n del conector con el servicio de custodia.
 	 * @return Resultado de la operaci&oacute;n, compuesto por el identificador de la
@@ -135,7 +136,7 @@ public class GenerateCertificateManager {
 	 * @throws WeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil.
 	 * y no se pueda crear otro.
 	 */
-	public static GenerateCertificateResult generateCertificate(final String subjectId, final Properties config) throws IOException, FIReConnectorFactoryException, FIReCertificateAvailableException, FIReCertificateException, FIReConnectorNetworkException, FIReConnectorUnknownUserException, WeakRegistryException {
+	public static GenerateCertificateResult generateCertificate(final String providerName, final String subjectId, final Properties config) throws IOException, FIReConnectorFactoryException, FIReCertificateAvailableException, FIReCertificateException, FIReConnectorNetworkException, FIReConnectorUnknownUserException, WeakRegistryException {
 
 		// Comprobacion del usuario
     	if (subjectId == null || subjectId.length() == 0) {
@@ -146,7 +147,7 @@ public class GenerateCertificateManager {
         }
 
     	// Obtenemos el conector con el backend ya configurado
-    	final FIReConnector connector = FIReConnectorFactory.getClaveFirmaConnector(config);
+    	final FIReConnector connector = ProviderManager.initTransacction(providerName, config);
 
         return connector.generateCertificate(subjectId);
 	}

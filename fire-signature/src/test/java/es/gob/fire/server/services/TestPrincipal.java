@@ -21,10 +21,10 @@ import org.junit.Test;
 
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.fire.signature.GenerateCertificateResult;
-import es.gob.fire.signature.LoadResult;
-import es.gob.fire.signature.connector.FIReConnector;
-import es.gob.fire.signature.connector.clavefirma.ClaveFirmaConnector;
+import es.gob.fire.server.connector.FIReConnector;
+import es.gob.fire.server.connector.GenerateCertificateResult;
+import es.gob.fire.server.connector.LoadResult;
+import es.gob.fire.server.connector.clavefirma.ClaveFirmaConnector;
 
 /** Pruebas simples del servicio de custodia de Cl@ve Firma.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */

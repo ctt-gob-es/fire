@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import es.gob.fire.signature.DocInfo;
+import es.gob.fire.server.connector.DocInfo;
 
 /**
  * Resultado de un proceso de firma de lote.

@@ -25,10 +25,10 @@ import java.security.cert.CertificateException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.connector.FIReCertificateAvailableException;
-import es.gob.fire.signature.connector.FIReCertificateException;
-import es.gob.fire.signature.connector.WeakRegistryException;
+import es.gob.fire.server.connector.FIReCertificateAvailableException;
+import es.gob.fire.server.connector.FIReCertificateException;
+import es.gob.fire.server.connector.WeakRegistryException;
+
 
 class TestHelper {
 
@@ -166,7 +166,7 @@ class TestHelper {
 			}
 
 			if (is == null) {
-				is = ConfigManager.class.getResourceAsStream('/' + CONFIG_FILE);
+				is = TestHelper.class.getResourceAsStream('/' + CONFIG_FILE);
 			}
 
 			config.load(is);

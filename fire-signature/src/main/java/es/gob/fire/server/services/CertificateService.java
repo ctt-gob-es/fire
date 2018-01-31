@@ -23,19 +23,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.connector.CertificateBlockedException;
+import es.gob.fire.server.connector.FIReCertificateException;
+import es.gob.fire.server.connector.FIReConnector;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
+import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
+import es.gob.fire.server.connector.WeakRegistryException;
+import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.GoogleAnalitycs;
 import es.gob.fire.signature.LoggingHandler;
-import es.gob.fire.signature.connector.CertificateBlockedException;
-import es.gob.fire.signature.connector.FIReCertificateException;
-import es.gob.fire.signature.connector.FIReConnector;
-import es.gob.fire.signature.connector.FIReConnectorFactory;
-import es.gob.fire.signature.connector.FIReConnectorFactoryException;
-import es.gob.fire.signature.connector.FIReConnectorNetworkException;
-import es.gob.fire.signature.connector.FIReConnectorUnknownUserException;
-import es.gob.fire.signature.connector.WeakRegistryException;
 
 /** Servlet para la obtenci&oacute;n de certificados de un usuario. */
 public final class CertificateService extends HttpServlet {
@@ -174,7 +174,7 @@ public final class CertificateService extends HttpServlet {
         	if (configB64 != null && configB64.length() > 0) {
         		config = ServiceUtil.base642Properties(configB64);
         	}
-            connector = FIReConnectorFactory.getClaveFirmaConnector(config);
+            connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector con el servicio de custodia", e); //$NON-NLS-1$

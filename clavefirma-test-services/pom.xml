@@ -14,17 +14,19 @@
 	</properties>
 
 	<dependencies>
+	
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-signature-connector</artifactId>
+			<version>2.1.1-SNAPSHOT</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-common-libraries</artifactId>
 			<version>2.1.1-SNAPSHOT</version>
 			
 			<exclusions>
-				<exclusion>
-					<groupId>es.gob.fire</groupId>
-					<artifactId>fire-upgrade</artifactId>
-				</exclusion>
-			
 				<exclusion>
 					<groupId>es.gob.afirma</groupId>
 					<artifactId>afirma-lib-jmimemagic</artifactId>
@@ -39,12 +41,7 @@
 					<groupId>es.gob.afirma</groupId>
 					<artifactId>afirma-crypto-core-pkcs7-tsp</artifactId>
 				</exclusion>
-		
-				<exclusion>
-					<groupId>com.openlandsw.rss</groupId>
-		    		<artifactId>gateway-api</artifactId>
-				</exclusion>
-		
+
 			    <exclusion>
 					<groupId>com.dmurph</groupId>
 		  			<artifactId>JGoogleAnalyticsTracker</artifactId>

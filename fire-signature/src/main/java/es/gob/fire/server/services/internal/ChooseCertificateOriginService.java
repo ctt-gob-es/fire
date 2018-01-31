@@ -21,14 +21,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.signature.connector.CertificateBlockedException;
-import es.gob.fire.signature.connector.FIReCertificateException;
-import es.gob.fire.signature.connector.FIReConnector;
-import es.gob.fire.signature.connector.FIReConnectorFactory;
-import es.gob.fire.signature.connector.FIReConnectorFactoryException;
-import es.gob.fire.signature.connector.FIReConnectorNetworkException;
-import es.gob.fire.signature.connector.FIReConnectorUnknownUserException;
-import es.gob.fire.signature.connector.WeakRegistryException;
+import es.gob.fire.server.connector.CertificateBlockedException;
+import es.gob.fire.server.connector.FIReCertificateException;
+import es.gob.fire.server.connector.FIReConnector;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
+import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
+import es.gob.fire.server.connector.WeakRegistryException;
+
 
 /**
  * Servlet implementation class ChooseCertificateOriginService
@@ -100,9 +100,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		if (ServiceParams.CERTIFICATE_ORIGIN_LOCAL.equalsIgnoreCase(origin)) {
 			signWithClienteAfirma(session, request, response);
 		}
-		// Si no se selecciono firma local, se utilizara Clave Firma
+		// Si no se selecciono firma local, se firmara con un proveedor de firma en la nube
 		else {
-			signWithClaveFirma(session, request, response, redirectErrorUrl);
+			signWithProvider(origin, session, request, response, redirectErrorUrl);
 		}
 	}
 
@@ -121,15 +121,17 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	}
 
 	/**
-	 * Redirige el flujo de ejecuci&oacute;n para la firma con certificados en la nube de Clave Firma.
-	 * @param configData Configuraci&oacute;n asociada a la transacci&oacute;n.
+	 * Redirige el flujo de ejecuci&oacute;n para la firma con los certificados
+	 * en la nube del proveedor indicado.
+	 * @param providerName Nombre del proveedor de firma en la nube que se debe utilizar.
+	 * @param session Datos de la transacci&oacute;n.
 	 * @param request Petici&oacute;n realizada al servicio.
 	 * @param response Objeto de respuesta del servicio.
 	 * @param errorUrl URL a la que redirigir en caso de error hasta que se obtenga la de sesi&oacute;n.
 	 * @throws IOException Cuando ocurre un error al redirigir al usuario.
 	 * @throws ServletException Cuando ocurre un error al redirigir al usuario.
 	 */
-	private static void signWithClaveFirma(final FireSession session, final HttpServletRequest request, final HttpServletResponse response, final String errorUrl) throws IOException, ServletException {
+	private static void signWithProvider(final String providerName, final FireSession session, final HttpServletRequest request, final HttpServletResponse response, final String errorUrl) throws IOException, ServletException {
 
 		final String trId = session.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
 		final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
@@ -147,7 +149,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		// Listamos los certificados del usuario
 		X509Certificate[] certificates = null;
 		try {
-			final FIReConnector connector = FIReConnectorFactory.getClaveFirmaConnector(connConfig);
+			final FIReConnector connector = ProviderManager.initTransacction(providerName, connConfig);
 			certificates = connector.getCertificates(subjectId);
 			if (certificates == null || certificates.length == 0) {
 				SessionCollector.commit(session);

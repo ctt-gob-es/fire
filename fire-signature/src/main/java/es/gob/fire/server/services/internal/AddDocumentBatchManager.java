@@ -19,13 +19,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.document.DefaultFIReDocumentManager;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DocInfo;
 
 /**
  * Manejador que gestiona las peticiones para agregar nuevos documentos a un lote de firma.

@@ -11,6 +11,8 @@ package es.gob.fire.signature;
 
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -31,23 +33,11 @@ public class ConfigManager {
 
 	private static final String PROP_TEMP_DIR = "temp.dir"; //$NON-NLS-1$
 
-	private static final String PROP_BACKEND = "backendClassName"; //$NON-NLS-1$
+	/** Propiedad utilizada para indicar los proveedores activos en el componente central. */
+	private static final String PROP_PROVIDERS_LIST = "providers"; //$NON-NLS-1$
 
-	private static final String PROP_CLAVEFIRMA_PROVIDER_NAME = "clavefirma.providerName"; //$NON-NLS-1$
-
-	private static final String PROP_TEST_ENDPOINT = "test.endpoint"; //$NON-NLS-1$
-
-	private static final String PROP_TEST_SSL_KS = "test.ssl.keystore"; //$NON-NLS-1$
-
-	private static final String PROP_TEST_SSL_KS_TYPE = "test.ssl.keystoreType"; //$NON-NLS-1$
-
-	private static final String PROP_TEST_SSL_KS_PASS = "test.ssl.keystorePass"; //$NON-NLS-1$
-
-	private static final String PROP_TEST_SSL_TS = "test.ssl.truststore"; //$NON-NLS-1$
-
-	private static final String PROP_TEST_SSL_TS_TYPE = "test.ssl.truststoreType"; //$NON-NLS-1$
-
-	private static final String PROP_TEST_SSL_TS_PASS = "test.ssl.truststorePass"; //$NON-NLS-1$
+	/** Prefijo utilizado para las propiedades que determinan la clase principal de un proveedor. */
+	private static final String PREFIX_PROP_PROVIDER = "provider."; //$NON-NLS-1$
 
 	private static final String PROP_APP_ID = "default.appId"; //$NON-NLS-1$
 
@@ -85,6 +75,9 @@ public class ConfigManager {
 	private static final String USE_BBDD = "usebbdd"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
 	private static final String PROP_CHECK_APPLICATION = "security.checkApplication"; //$NON-NLS-1$
+
+	/** Cadena utilizada para separar valores dentro de una propiedad. */
+	private static final String VALUES_SEPARATOR = ","; //$NON-NLS-1$
 
 	/** Nombre del fichero de configuraci&oacute;n. */
 	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
@@ -130,6 +123,39 @@ public class ConfigManager {
 				throw new ConfigFilesException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
 			}
 		}
+	}
+
+
+	/**
+	 * Devuelve el listado de nombres de los proveedores configurados.
+	 * En caso de que no se haya definido ninguno, este listado
+	 * estar&aacute; vac&iacute;o.
+	 * @return Listado de proveedores configurados.
+	 */
+	public static String[] getProviders() {
+		final String providers = config.getProperty(PROP_PROVIDERS_LIST);
+		if (providers == null) {
+			return new String[0];
+		}
+
+		final List<String> providersList = new ArrayList<>();
+		final String[] providersTempList = providers.split(VALUES_SEPARATOR);
+		for (final String provider : providersTempList) {
+			if (provider != null && !provider.trim().isEmpty() &&
+					!providersList.contains(provider)) {
+				providersList.add(provider);
+			}
+		}
+		return providersList.toArray(new String[providersList.size()]);
+	}
+
+	/**
+	 * Recupera el nombre de la clase de conexi&oacute;n de un proveedor.
+	 * @param name Nombre del proveedor.
+	 * @return Clase de conexi&oacute;n del proveedor.
+	 */
+	public static String getProviderClass(final String name) {
+		return config.getProperty(PREFIX_PROP_PROVIDER + name);
 	}
 
 	/**
@@ -211,23 +237,6 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera el servicio de back end de la aplicaci&oacute;n.
-	 * @return Servicio de back end.
-	 */
-	public static String getBackEndService(){
-		return config.getProperty(PROP_BACKEND);
-	}
-
-	/**
-	 * Recupera el servicio de back end de la aplicaci&oacute;n.
-	 * @param defaultService URL del servicio por defecto.
-	 * @return Servicio de back end.
-	 */
-	public static String getBackEndService(final String defaultService){
-		return config.getProperty(PROP_BACKEND, defaultService);
-	}
-
-	/**
 	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
 	 * @throws ConfigFilesException Si no encuentra el fichero login.properties.
 	 */
@@ -240,9 +249,9 @@ public class ConfigManager {
 			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion de la conexion", CONFIG_FILE); //$NON-NLS-1$
 		}
 
-		if (getBackEndService() == null ) {
-			LOGGER.severe("El campo " + PROP_BACKEND + " es obligatorio"); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new ConfigFilesException("El campo " + PROP_BACKEND + " es obligatorio", CONFIG_FILE); //$NON-NLS-1$ //$NON-NLS-2$
+		if (getProviders() == null) {
+			LOGGER.severe("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST); //$NON-NLS-1$
+			throw new ConfigFilesException("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST, CONFIG_FILE); //$NON-NLS-1$
 		}
 
 		if (isCheckApplicationNeeded()) {
@@ -273,77 +282,6 @@ public class ConfigManager {
 	 */
 	public static String getAppId(){
 		return config.getProperty(PROP_APP_ID);
-	}
-
-	/**
-	 * Devuelve el identificador de proveedor con el que se autentica el componente
-	 * central frente a Cl@ve Firma.
-	 * @return Identificador de proveedor.
-	 */
-	public static String getClaveFirmaProviderName() {
-		return config.getProperty(PROP_CLAVEFIRMA_PROVIDER_NAME);
-	}
-
-	/**
-	 * Devuelve la URL base del servicio de pruebas.
-	 * @return URL base del servicio de pruebas.
-	 */
-	public static String getTestServiceUrlBase(){
-		return config.getProperty(PROP_TEST_ENDPOINT);
-	}
-
-	/**
-	 * Devuelve la ruta del almacen de claves para la autenticacion SSL
-	 * contra el servicio remoto de test.
-	 * @return Ruta del almac&eacute;n de claves.
-	 */
-	public static String getTestSslKeyStore() {
-		return config.getProperty(PROP_TEST_SSL_KS);
-	}
-
-	/**
-	 * Devuelve el tipo del almacen de claves para la autenticacion SSL
-	 * contra el servicio remoto de test.
-	 * @return Tipo del almac&eacute;n de claves.
-	 */
-	public static String getTestSslKeyStoreType() {
-		return config.getProperty(PROP_TEST_SSL_KS_TYPE);
-	}
-
-	/**
-	 * Devuelve la contrase&ntilde;a del almacen de claves para la
-	 * autenticacion SSL contra el servicio remoto de test.
-	 * @return Contrase&ntilde;a del almac&eacute;n de claves.
-	 */
-	public static String getTestSslKeyStorePass() {
-		return config.getProperty(PROP_TEST_SSL_KS_PASS);
-	}
-
-	/**
-	 * Devuelve la ruta del almacen de certificados de confianza
-	 * para la autenticacion SSL contra el servicio remoto de test.
-	 * @return Ruta del almac&eacute;n de confianza.
-	 */
-	public static String getTestSslTrustStore() {
-		return config.getProperty(PROP_TEST_SSL_TS);
-	}
-
-	/**
-	 * Devuelve el tipo del almacen de claves para la autenticacion SSL
-	 * contra el servicio remoto de test.
-	 * @return Tipo del almac&eacute;n de claves.
-	 */
-	public static String getTestSslTrustStoreType() {
-		return config.getProperty(PROP_TEST_SSL_TS_TYPE);
-	}
-
-	/**
-	 * Devuelve la contrase&ntilde;a del almacen de claves para la
-	 * autenticacion SSL contra el servicio remoto de test.
-	 * @return Contrase&ntilde;a del almac&eacute;n de claves.
-	 */
-	public static String getTestSslTrustStorePass() {
-		return config.getProperty(PROP_TEST_SSL_TS_PASS);
 	}
 
 	/**

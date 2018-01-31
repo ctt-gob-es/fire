@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.fire.signature.LoadResult;
+import es.gob.fire.server.connector.LoadResult;
 
 /**
  * Servlet implementation class TestLoadData

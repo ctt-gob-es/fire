@@ -18,13 +18,13 @@ import java.util.logging.Logger;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.connector.FIReCertificateException;
+import es.gob.fire.server.connector.FIReConnector;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
+import es.gob.fire.server.services.ProviderLegacy;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.signature.connector.FIReCertificateException;
-import es.gob.fire.signature.connector.FIReConnector;
-import es.gob.fire.signature.connector.FIReConnectorFactory;
-import es.gob.fire.signature.connector.FIReConnectorFactoryException;
-import es.gob.fire.signature.connector.FIReConnectorNetworkException;
 
 /**
  * Manejador de la operaci&oacute;n de recuperaci&oacute;n de los certificados
@@ -42,7 +42,8 @@ public class RecoverCertificateManager {
 
 	/**
 	 * Ejecuta una operacion de recuperaci&oacute;n del certificado generado
-	 * en servidor.
+	 * en servidor. Este metodo s&oacute;lo se utiliza desde el servicio Legacy
+	 * de Cl@ve Firma.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta HTTP de generaci&oacute;n de certificado.
 	 * @throws IOException Cuando ocurre alg&uacute;n error en la comunicaci&oacute;n
@@ -62,7 +63,7 @@ public class RecoverCertificateManager {
 
     	byte[] newCertEncoded;
         try {
-        	newCertEncoded = recoverCertificate(transactionId, config);
+        	newCertEncoded = recoverCertificate(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, transactionId, config);
         }
         catch (final FIReConnectorFactoryException e) {
             LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
@@ -94,6 +95,7 @@ public class RecoverCertificateManager {
 	/**
 	 * Ejecuta una operacion de recuperaci&oacute;n del certificado generado
 	 * en servidor.
+	 * @param providerName Nombre del proveedor en la nube.
 	 * @param transactionId Id de la transaccion de generacion de certificado.
 	 * @param config Configuraci&oacute;n del conector para la recuperacion del certificador y
 	 * redirecci&oacute;n del usuario.
@@ -103,12 +105,12 @@ public class RecoverCertificateManager {
 	 * @throws FIReConnectorFactoryException Cuando la configuraci&oacute;n del conector del
 	 * servicio de custodia no es v&aacute;lida.
 	 */
-	public static byte[] recoverCertificate(final String transactionId, final Properties config)
+	public static byte[] recoverCertificate(final String providerName, final String transactionId, final Properties config)
 			throws	FIReCertificateException, FIReConnectorNetworkException,
 					FIReConnectorFactoryException {
 
 		// Obtenemos el conector con el backend ya configurado
-		final FIReConnector connector = FIReConnectorFactory.getClaveFirmaConnector(config);
+		final FIReConnector connector = ProviderManager.initTransacction(providerName, config);
 
 		// Recuperamos el certificado
 		return connector.recoverCertificate(transactionId);

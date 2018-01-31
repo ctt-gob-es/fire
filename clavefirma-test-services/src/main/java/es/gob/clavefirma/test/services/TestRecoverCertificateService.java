@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.signature.FIReInvalidRequestOperationException;
-import es.gob.fire.signature.connector.FIReSignatureException;
 
 /**
  * Servicio para la recuperacion de un certificado recien creado.

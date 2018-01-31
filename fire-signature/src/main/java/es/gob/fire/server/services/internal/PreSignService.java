@@ -29,18 +29,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.server.connector.DocInfo;
+import es.gob.fire.server.connector.FIReConnector;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
+import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
+import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DocInfo;
-import es.gob.fire.signature.LoadResult;
-import es.gob.fire.signature.connector.FIReConnector;
-import es.gob.fire.signature.connector.FIReConnectorFactory;
-import es.gob.fire.signature.connector.FIReConnectorFactoryException;
-import es.gob.fire.signature.connector.FIReConnectorNetworkException;
-import es.gob.fire.signature.connector.FIReConnectorUnknownUserException;
 
 /** Servicio de carga de datos para su posterior firma en servidor.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -61,7 +60,6 @@ public final class PreSignService extends HttpServlet {
     	final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
     	final String userId  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
     	final String certB64        = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
-    	final String remoteSubjId   = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
     	String redirectErrorUrl 	= request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
         // Comprobamos que se hayan prorcionado los parametros indispensables
@@ -78,7 +76,7 @@ public final class PreSignService extends HttpServlet {
             return;
         }
 
-        if (remoteSubjId == null || remoteSubjId.isEmpty()) {
+        if (userId == null || userId.isEmpty()) {
             LOGGER.warning("No se ha proporcionado el identificador del firmante"); //$NON-NLS-1$
             SessionCollector.removeSession(transactionId);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -114,6 +112,7 @@ public final class PreSignService extends HttpServlet {
         final String extraParamsB64 = session.getString(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
         final String subOperation   = session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
         final String format         = session.getString(ServiceParams.SESSION_PARAM_FORMAT);
+        final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
         final Properties connConfig = (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         final boolean stopOnError   = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
 
@@ -157,8 +156,8 @@ public final class PreSignService extends HttpServlet {
             return;
         }
 
-        // El identificador de usuario proporcionado debe ser el que estaba habilitado en la sesion
-        if (!remoteSubjId.equals(subjectId)) {
+        // El identificador de usuario proporcionado debe ser el que estaba registrado en la sesion
+        if (!userId.equals(subjectId)) {
         	LOGGER.warning("El identificador de usuario proporcionado no coincide con el de la sesion"); //$NON-NLS-1$
             SessionCollector.removeSession(session);
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -348,10 +347,10 @@ public final class PreSignService extends HttpServlet {
         // Obtenemos el conector con el backend ya configurado
         final FIReConnector connector;
         try {
-            connector = FIReConnectorFactory.getClaveFirmaConnector(connConfig);
+            connector = ProviderManager.initTransacction(providerName, connConfig);
         }
         catch (final FIReConnectorFactoryException e) {
-            LOGGER.log(Level.SEVERE, "Error en la configuracion del conector con el servicio de custodia", e); //$NON-NLS-1$
+            LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor " + providerName, e); //$NON-NLS-1$
             setErrorToSession(session, OperationError.INTERNAL_ERROR);
             response.sendRedirect(redirectErrorUrl);
             return;

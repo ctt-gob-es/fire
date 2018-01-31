@@ -28,13 +28,13 @@ import es.gob.afirma.triphase.signer.processors.PAdESTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESASiCSTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
+import es.gob.fire.server.connector.DocInfo;
+import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.internal.BatchDocument;
 import es.gob.fire.server.services.internal.BatchResult;
 import es.gob.fire.server.services.internal.Pkcs1TriPhasePreProcessor;
 import es.gob.fire.server.services.internal.SignBatchConfig;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DocInfo;
-import es.gob.fire.signature.connector.FIReSignatureException;
 
 /**
  * Clase auxiliar que proporciona individualmente las operaciones de prefirma y postfirma.
@@ -155,9 +155,9 @@ public final class FIReTriHelper {
             }
 
             // El core del cliente @firma devuelve todas las firmas de una contrafirma con el mismo
-            // ID para despues poder asociarlas. Como esto no esta permitido por ClaveFirma,
-            // modificaremos los ID para garantizar que son distintos y, antes de ejecutar la postfirma,
-            // desharemos el cambio
+            // ID para despues poder asociarlas. Como algunos proveedores en la nube no permiten que
+            // se proporcionen varios datos con el mismo ID, los modificaremos para que sean distintos
+            // y, posteriormente, desharemos el cambio para ejecutar la postfirma
             preRes = FIReTriSignIdProcessor.make(preRes);
         }
         else {

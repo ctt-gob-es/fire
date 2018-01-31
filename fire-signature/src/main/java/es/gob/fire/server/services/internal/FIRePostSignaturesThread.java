@@ -17,12 +17,12 @@ import java.util.logging.Logger;
 
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
+import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
 import es.gob.fire.server.services.UpgradeException;
-import es.gob.fire.signature.connector.FIReSignatureException;
 
 class FIRePostSignaturesThread extends ConcurrentProcessThread {
 

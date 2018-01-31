@@ -49,6 +49,9 @@
 		<module>fire-client-java</module>
 		<module>fire-signature</module>
 		<module>fire-signature-common-libraries</module>
+		<module>fire-signature-connector</module>
+		<module>fire-signature-connector-clavefirma</module>
+		<module>fire-signature-connector-clavefirma-test</module>
 		<module>fire-signature-document</module>
 		<module>fire-test-jsp</module>
 		<module>fire-upgrade</module>

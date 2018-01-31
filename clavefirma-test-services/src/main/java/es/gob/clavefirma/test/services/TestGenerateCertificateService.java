@@ -23,9 +23,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.signature.GenerateCertificateResult;
-import es.gob.fire.signature.connector.FIReCertificateAvailableException;
-import es.gob.fire.signature.connector.WeakRegistryException;
+import es.gob.fire.server.connector.FIReCertificateAvailableException;
+import es.gob.fire.server.connector.GenerateCertificateResult;
+import es.gob.fire.server.connector.WeakRegistryException;
 
 /**
  * Servicio para la solicitud de un nuevo certificado de pruebas.

@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.signature.connector.FIReCertificateException;
-import es.gob.fire.signature.connector.WeakRegistryException;
+import es.gob.fire.server.connector.FIReCertificateException;
+import es.gob.fire.server.connector.WeakRegistryException;
 
 /**
  * Servlet implementation class TestGestCertificateService

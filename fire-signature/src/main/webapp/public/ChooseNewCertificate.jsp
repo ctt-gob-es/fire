@@ -32,6 +32,7 @@
 	
 	final String generateTrId = fireSession.getString(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID);
 	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+	final String providerName = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
     final Properties connConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
     
 	String errorUrl = null;
@@ -44,7 +45,7 @@
     
     byte[] certEncoded = null;
     try {
-    	certEncoded = RecoverCertificateManager.recoverCertificate(generateTrId, connConfig);
+    	certEncoded = RecoverCertificateManager.recoverCertificate(providerName, generateTrId, connConfig);
     }
     catch (Exception e) {
     	if (errorUrl != null) {
