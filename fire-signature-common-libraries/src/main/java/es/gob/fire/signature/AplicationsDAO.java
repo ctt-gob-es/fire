@@ -33,8 +33,10 @@ public class AplicationsDAO {
 	private static final Logger LOGGER = Logger.getLogger(AplicationsDAO.class.getName());
 
 	private static final String STATEMENT_SELECT_APP_NAME = "SELECT nombre FROM tb_aplicaciones WHERE id = ?"; //$NON-NLS-1$
-	private static final String STATEMENT_SELECT_CERT ="SELECT COUNT(*) FROM tb_aplicaciones WHERE id = ? AND huella = ?"; //$NON-NLS-1$
 
+	private static final String STATEMENT_SELECT_CERT ="SELECT COUNT(*) FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado AND (tb_certificados.huella_principal = ? OR tb_certificados.huella_backup=?)";
+
+	
 	/** Comprueba si una aplicaci&oacute;n est&aacute; habilitada en el sistema.
 	 * @param appId Identificador de la aplicaci&oacute;n.
 	 * @return {@code true} si la applicaci&oacute;n est&aacute; dada de alta,
@@ -53,6 +55,7 @@ public class AplicationsDAO {
 
 		// Comprobamos en BD
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APP_NAME);
+		
 		st.setString(1, appId);
 
 		if (!st.execute()) {
@@ -108,11 +111,14 @@ public class AplicationsDAO {
 			final String propertyThumb = Base64.encode(md.digest(cer.getEncoded()));
 			return id != null && id.equals(appId) && propertyThumb.equals(thumb);
 		}
-
+		/*SELECT COUNT(*) FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  
+		 * AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado 
+		 * AND (tb_certificados.huella_principal = ? OR tb_certificados.huella_backup=?)*/
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_CERT);
 		st.setString(1, appId);
 		st.setString(2, thumb);
-
+		st.setString(3, thumb);
+		
 		if (!st.execute()) {
 			st.close();
 			LOGGER.warning("No existe ningun certificado con la huella: " + thumb); //$NON-NLS-1$
