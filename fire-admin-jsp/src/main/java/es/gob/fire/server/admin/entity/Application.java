@@ -39,6 +39,8 @@ public class Application {
 
 	private String huella;
 	
+	private String fk_certificado;
+	
 	private X509Certificate certX509;
 
 	/**
@@ -157,6 +159,24 @@ public class Application {
 	 */
 	public void setAlta(final Date alta) {
 		this.alta = alta;
+	}
+
+	
+	
+	
+	/**
+	 * Obtiene la clave foranea del certificado asociado 
+	 * @return
+	 */
+	public final String getFk_certificado() {
+		return fk_certificado;
+	}
+	/**
+	 * Establece la clave foranea del certificado
+	 * @param fk_certificado
+	 */
+	public final void setFk_certificado(String fk_certificado) {
+		this.fk_certificado = fk_certificado;
 	}
 
 	/**

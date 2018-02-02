@@ -31,6 +31,9 @@ import es.gob.fire.server.admin.entity.Application;
 import es.gob.fire.server.admin.tool.Base64;
 import es.gob.fire.server.admin.tool.Hexify;
 
+
+import org.json.JSONObject;
+
 /**
  * DAO para la gesti&oacute;n de aplicaciones dadas de alta en el sistema.
  */
@@ -46,15 +49,23 @@ public class AplicationsDAO {
 
 	private static final String STATEMENT_SELECT_CONFIG_VALUE = "SELECT valor FROM tb_configuracion WHERE parametro = ?"; //$NON-NLS-1$
 
-	private static final String STATEMENT_SELECT_APPLICATIONS = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, cer FROM tb_aplicaciones ORDER BY nombre"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_APPLICATIONS = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre"; //$NON-NLS-1$
+	
+	private static final String STATEMENT_SELECT_APPLICATIONS_PAG = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre limit ?,?"; //$NON-NLS-1$
+	
+	private static final String ST_SELECT_APPLICATIONS_PAG_BYCERT = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre limit ?,?"; //$NON-NLS-1$
+	
+	private static final String STATEMENT_SELECT_APPLICATIONS_COUNT="SELECT count(*) FROM tb_aplicaciones";
+	
+	private static final String ST_SELECT_APPLICATIONS_COUNT_BYCERT="SELECT count(*) FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=?";
 
-	private static final String STATEMENT_SELECT_APPLICATION = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, cer, huella FROM tb_aplicaciones WHERE id= ?"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_APPLICATION_BYID = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado FROM tb_aplicaciones WHERE id= ?"; //$NON-NLS-1$
 
-	private static final String STATEMENT_INSERT_APPLICATION = "INSERT INTO tb_aplicaciones(id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, cer, huella) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
+	private static final String STATEMENT_INSERT_APPLICATION = "INSERT INTO tb_aplicaciones(id, nombre, responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 	private static final String STATEMENT_REMOVE_APPLICATION = "DELETE FROM tb_aplicaciones WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String STATEMENT_UPDATE_APPLICATION = "UPDATE tb_aplicaciones SET nombre=?, responsable = ?, resp_correo = ?, resp_telefono = ?, cer = ?, huella = ? WHERE id = ?";//$NON-NLS-1$
+	private static final String STATEMENT_UPDATE_APPLICATION = "UPDATE tb_aplicaciones SET nombre=?, responsable = ?, resp_correo = ?, resp_telefono = ?, fk_certificado=?  WHERE id = ?";//$NON-NLS-1$
 
 	private static final String KEY_ADMIN_PASS = "admin_pass"; //$NON-NLS-1$
 
@@ -122,7 +133,8 @@ public class AplicationsDAO {
 	public static List<Application> getApplications() throws SQLException {
 
 		final List<Application> result = new ArrayList<Application>();
-
+	
+		/*"SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre*/
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS);
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
@@ -133,8 +145,7 @@ public class AplicationsDAO {
 			app.setCorreo(rs.getString(4));
 			app.setTelefono(rs.getString(5));
 			app.setAlta(rs.getDate(6));
-			app.setCer(rs.getString(7));
-			app.setHuella(rs.getString(7));
+			app.setFk_certificado(rs.getString(7));			
 			result.add(app);
 		}
 		rs.close();
@@ -143,21 +154,115 @@ public class AplicationsDAO {
 		return result;
 	}
 
+	public static String getApplicationsCount()throws SQLException {
+		int count=0;
+		JSONObject jsonObj= new JSONObject();
+		try {
+			final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS_COUNT);
+			final ResultSet rs = st.executeQuery();
+			if(rs.next()) {
+				count=rs.getInt(1);
+			}
+			jsonObj.put("count",count);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return jsonObj.toString();
+		
+	}
+	
+	public static String getApplicationsCountByCertificate(final String id)throws SQLException {
+		int count=0;
+		JSONObject jsonObj= new JSONObject();
+		try {
+			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_APPLICATIONS_COUNT_BYCERT);
+			st.setInt(1, Integer.parseInt(id));
+			final ResultSet rs = st.executeQuery();
+			if(rs.next()) {
+				count=rs.getInt(1);
+			}
+			jsonObj.put("count",count);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return jsonObj.toString();
+		
+	}
+	
+	public static String getApplicationsPag(final String start, final String total) throws SQLException {
+
+		
+		final JSONObject jsonObj= new JSONObject();
+		final List<Application> result = new ArrayList<Application>();
+		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS_PAG);
+		st.setInt(1,Integer.parseInt(start));
+		st.setInt(2, Integer.parseInt(total));
+		final ResultSet rs = st.executeQuery();
+		while (rs.next()) {
+			
+			final Application app = new Application();
+			app.setId(rs.getString(1));
+			app.setNombre(rs.getString(2));
+			app.setResponsable(rs.getString(3));
+			app.setCorreo(rs.getString(4));
+			app.setTelefono(rs.getString(5));
+			app.setAlta(rs.getDate(6));			
+			result.add(app);
+		}
+		rs.close();
+		st.close();
+		jsonObj.put("AppList", result);
+		return jsonObj.toString();
+	}
+	
+
+	public static String getApplicationsPagByCertificate(final String id, final String start, final String total) throws SQLException {
+
+		
+		final JSONObject jsonObj= new JSONObject();
+		final List<Application> result = new ArrayList<Application>();
+		/*SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, 
+		 * tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre limit ?,?"*/
+		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_APPLICATIONS_PAG_BYCERT);
+		st.setInt(1, Integer.parseInt(id));
+		st.setInt(2,Integer.parseInt(start));
+		st.setInt(3, Integer.parseInt(total));
+		final ResultSet rs = st.executeQuery();
+		while (rs.next()) {
+			
+			final Application app = new Application();
+			app.setId(rs.getString(1));
+			app.setNombre(rs.getString(2));
+			app.setResponsable(rs.getString(3));
+			app.setCorreo(rs.getString(4));
+			app.setTelefono(rs.getString(5));
+			app.setAlta(rs.getDate(6));	
+			app.setFk_certificado(rs.getString(7));
+			result.add(app);
+		}
+		rs.close();
+		st.close();
+		jsonObj.put("AppList", result);
+		return jsonObj.toString();
+	}
+	
 	/**
 	 * Agrega una nueva aplicaci&oacute;n al sistema.
 	 * @param nombre Nombre de la aplicacion.
 	 * @param responsable Repsonsable de la aplicaci&oacute;n.
 	 * @param email Correo electr&oacute;nico de la aplicaci&oacute;n.
-	 * @param telefono N&uacute;mero de te&eacute;lefono de la aplicaci&oacute;n.
-	 * @param cer Certificado con el que se realizar&aacute; la autenticaci&oacute;n.
-	 * @param huella Huella del certificado.
+	 * @param telefono N&uacute;mero de te&eacute;lefono de la aplicaci&oacute;n.	 
 	 * @throws SQLException Cuando no se puede insertar la nueva aplicacion en base de datos.
 	 * @throws GeneralSecurityException  Cuando no se puede generar el identificador aleatorio de la aplicaci&oacute;n.
+	 * @SQL INSERT INTO tb_aplicaciones(id, nombre, responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?, ?, ?)
 	 */
-	public static void createApplication(final String nombre, final String responsable, final String email, final String telefono, final String cer, final String huella) throws SQLException, GeneralSecurityException {
+	public static void createApplication(final String nombre, final String responsable, final String email, final String telefono, final String fkCer)  throws SQLException, GeneralSecurityException {
 
 		final String id = generateId();
-
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INSERT_APPLICATION);
 
 		st.setString(1, id);
@@ -166,13 +271,10 @@ public class AplicationsDAO {
 		st.setString(4, email);
 		st.setString(5, telefono);
 		st.setDate(6, new Date(new java.util.Date().getTime()));
-	    st.setString(7, cer);
-	    st.setString(8, huella);
-
+	    st.setString(7, fkCer);
+	
 		LOGGER.info("Damos de alta la aplicacion '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
-
 		st.execute();
-
 		st.close();
 	}
 
@@ -203,11 +305,8 @@ public class AplicationsDAO {
 
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_REMOVE_APPLICATION);
 		st.setString(1, id);
-
 		LOGGER.info("Damos de baja la aplicacion con el ID: " + id); //$NON-NLS-1$
-
 		st.execute();
-
 		st.close();
 	}
 
@@ -219,7 +318,7 @@ public class AplicationsDAO {
 	 */
 	public static Application selectApplication(final String id) throws SQLException {
 		final Application result = new Application();
-		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATION);
+		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATION_BYID);
 		st.setString(1, id);
 		final ResultSet rs = st.executeQuery();
 		if (rs.next()){
@@ -228,9 +327,8 @@ public class AplicationsDAO {
 			result.setResponsable(rs.getString(3));
 			result.setCorreo(rs.getString(4));
 			result.setTelefono(rs.getString(5));
-			result.setAlta(rs.getDate(6));
-			result.setCer(rs.getString(7));
-			result.setHuella(rs.getString(8));
+			result.setAlta(rs.getDate(6));			
+			result.setFk_certificado(rs.getString(7));
 		}
 		rs.close();
 		st.close();
@@ -249,21 +347,18 @@ public class AplicationsDAO {
 	 * @param huella huella del certificado de la aplicaci&oacute;n.
 	 * @throws SQLException si hay un problema en la conexi&oacute;n con la base de datos
 	 */
-	public static void updateApplication (final String id, final String nombre, final String responsable, final String email, final String telefono, final String cer, final String huella) throws SQLException{
+	public static void updateApplication (final String id, final String nombre, final String responsable, final String email, final String telefono, final String fkCer) throws SQLException{
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_UPDATE_APPLICATION);
 
 		st.setString(1, nombre);
 		st.setString(2, responsable);
 		st.setString(3, email);
-		st.setString(4, telefono);
-	    st.setString(5, cer);
-	    st.setString(6, huella);
-	    st.setString(7, id);
+		st.setString(4, telefono);	 	 
+	    st.setString(5, fkCer);
+	    st.setString(6, id);
 
 		LOGGER.info("Actualizamos la aplicacion '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
-
 		st.execute();
-
 		st.close();
 	}
 

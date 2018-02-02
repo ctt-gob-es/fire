@@ -88,7 +88,7 @@ ul li {
 }
 
 .form-btn {
-	padding:20px; 
+	padding:10px; 
 	background:#820606; 
 	border:1px solid #632206; 
 	border-radius: 15px; 
@@ -121,11 +121,11 @@ ul li {
 	display: block;
 	width: 100%;
 	height: 50px;
-	text-align: center;
+	text-align: right;
 }
 
 .menu-btn {
-	padding:15px; 
+	padding:10px; 
 	background:#820606; 
 	border:1px solid #632206; 
 	border-radius: 15px; 
@@ -138,7 +138,6 @@ ul li {
 	text-shadow:1px 1px 1px black;
 	cursor:pointer;
 	text-decoration:none;
-	
 }
 
 .menu-btn:active{
@@ -153,7 +152,7 @@ ul li {
 .edit-txt {
 	width:300px; 
 	background: #D3D3D3; 
-	padding:20px;
+	padding:10px;
 	border-radius: 15px;
 	border: 2px solid #EEEEEE;
 }
@@ -198,7 +197,9 @@ ul li {
 #descrp{
 	color: #808080
 }
-
+#page{
+	color: #808080
+}
 .admin-table {
 	width: 100%;
 	border-collapse: collapse;
@@ -269,6 +270,32 @@ ul li {
 	top:10px;
     left: 95%;
 }
+
+
+.btn-borrar-cert {
+	padding:5px; 
+	background:#820606; 
+	border:1px solid #632206; 
+	border-radius: 10px; 
+	color:#FFFFFF; 
+	width: 100px;
+	text-align: center;
+	box-shadow: 0px 3px 0px #C54949,
+					0px 0px 20px black;
+	-webkit-transition:all 0.2s ease;
+	text-shadow:1px 1px 1px black;
+	cursor:pointer;
+	text-decoration:none;
+}
+.btn-borrar-cert:active{
+	width: 100px;
+	position:relative;
+	top:3px;
+	box-shadow: 0px 1px 0px #8A0808,
+				0px 3px 5px black;
+	text-shadow:0,5px 0,5px 0,5px white;	
+}
+
 
 /**********Menu*****************/
 
