@@ -3,8 +3,85 @@
   <display-name>clavefirma-admin-jsp</display-name>
   <description>Modulo de administracion de aplicaciones del servicio FIRe v2.0</description>
   <listener>
-  	<listener-class>es.gob.fire.server.admin.SessionDataCleaner</listener-class>
+  	<listener-class>es.gob.fire.server.admin.session.SessionDataCleaner</listener-class>
   </listener>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>NewUserService</display-name>
+  	<servlet-name>NewUserService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.NewUserService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>DeleteUserService</display-name>
+  	<servlet-name>DeleteUserService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.DeleteUserService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>ModifyPasswdUserService</display-name>
+  	<servlet-name>ModifyPasswdUserService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.ModifyPasswdUserService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>AppService</display-name>
+  	<servlet-name>AppService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.AppService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>PreviewCertificate</display-name>
+  	<servlet-name>PreviewCertificate</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.PreviewCertificate</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>NewCertificateService</display-name>
+  	<servlet-name>NewCertificateService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.NewCertificateService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>DeleteCertificateService</display-name>
+  	<servlet-name>DeleteCertificateService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.DeleteCertificateService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>NewUserService</servlet-name>
+  	<url-pattern>/NewUserService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>DeleteUserService</servlet-name>
+  	<url-pattern>/DeleteUserService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>ModifyPasswdUserService</servlet-name>
+  	<url-pattern>/ModifyPasswdUserService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>AppService</servlet-name>
+  	<url-pattern>/AppService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>PreviewCertificate</servlet-name>
+  	<url-pattern>/PreviewCertificate</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>NewCertificateService</servlet-name>
+  	<url-pattern>/NewCertificateService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>DeleteCertificateService</servlet-name>
+  	<url-pattern>/DeleteCertificateService</url-pattern>
+  </servlet-mapping>
   <welcome-file-list>
     <welcome-file>Login.jsp</welcome-file>
   </welcome-file-list>

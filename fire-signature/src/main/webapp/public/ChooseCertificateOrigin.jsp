@@ -1,4 +1,3 @@
-
 <%@page import="es.gob.fire.server.services.internal.ProviderInfo"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderManager"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
@@ -173,7 +172,7 @@
 					<div class="contain-box-bottom">
 						<h2 class="title-box">Firma con Cl@ve Firma</h2>
 						<% if (!userRegistered) { %>
-							<p class="text-box">El usuario no esta dado de alta en Cl@ve, por lo que no tiene disponible esta opci&oacute;n.</p>
+							<p class="text-box">El usuario no esta dado de alta en Cl@ve, por lo que no podr&aacute; firmar con certificado en la nube.</p>
 						<% } else { %>
 							<p class="text-box">Utilice un certificado de firma de Cl@ve o realice su solicitud si no dispone de &eacute;l.</p>
 						<% } %>

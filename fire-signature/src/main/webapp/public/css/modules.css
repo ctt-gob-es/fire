@@ -13,15 +13,19 @@
 
 .mod_claim_izq { width: 100%; } 
 .mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 3em; vertical-align: top;}
-.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 65%; color: #707070;}
+.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 63%; color: #707070;}
+ /*PC*/
 .mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
 .mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
 
 .mod_footer .footer_top .footer-text-big {font-size: 1em; font-weight: bold; display: inline-block; vertical-align: super;}
 .mod_footer .footer_bottom {vertical-align: super; }
 .mod_footer .footer_bottom .footer-text { font-size: 1em; font-weight: bold; }
-.contenido {display: block; min-width: 665px; max-width: 1050px; margin: 0 5px; height: auto; min-height:40em; position: relative;}
-.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:37px; padding-top:1em; padding-bottom:1em;}
+.contenido {display: block; width: 665px; margin: 0 auto; height: auto; min-height:40em; position: relative;}
+
+
+/*PC*/
+.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.8em; padding-top:1em; padding-bottom:1em;}
 .contenido .title-sec {color: #dd5a00; margin: 0 auto; font-size:29px; padding-top:1.5em; line-height: 31px;margin-bottom: 0.5em;}
 .contenido .main-text {display: inline-block; color: #707070; margin: 0 auto; width: 100%; font-weight: normal; font-size:23px;}
 .contenido .cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px; float: left; width: 100%; display: block; box-sizing: border-box;}
@@ -55,7 +59,9 @@
 .contenido .button:hover { text-decoration:underline; cursor:pointer;}
 .arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.4em;}
 .arrow-right-inicio {top: 11px; right: 1.4em;}
-.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 21px;position: absolute;right: 4.5em;}
+./* .arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 21px;position: absolute;right: 4.5em;} */
+
+.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 10px;position: absolute;right: 4.5em;}
 
 .contenido-firmar {width: 470px;}
 .contenido-firmar .container-box { width: 100%; }
@@ -101,6 +107,9 @@
 .clear {clear: both;}
 .no-float {float: none !important;}
 
+.container-box-title{width: 100%;margin: 6em;}/*margin-bottom: 3em;*/
+.container_tit{float: left; width:70%;}
+.container_btn_operation{float: right; width:30%;}
 
 /*SMALL RESOLUTION STYLES*/
 @media screen and (max-width: 680px) {  
@@ -114,7 +123,10 @@
   .mod_claim_izq .mod_claim_in { margin-left: 0.5em;}
   .mod_claim_text { margin-left: 0.5em; }
   .mod_claim_text_sec { margin-left: 0.5em; }
-
+   /*Movil*/
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.2em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.2em; padding-top:0.3em; padding-bottom:0.3em;}
 }
 
 @media screen and (max-width: 420px) {  
@@ -125,10 +137,14 @@
 }
 
 /*MEDIUM RESOLUTION STYLES*/
-@media screen and (max-width: 768px){  
+@media screen and (max-width: 846px){  
 
   .contenido-error .title-error {width: 100%; margin: 0 auto;}
   .contenido-error .container-box-error  {width: 100%; padding: 10px; box-sizing: border-box;}
   .contenido-error .error-box .button_firmar {width: 100%; box-sizing: border-box;}
+  	 /*Movil*/
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.2em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.2em; padding-top:0.3em; padding-bottom:0.3em;}
 
 }

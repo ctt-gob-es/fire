@@ -365,6 +365,14 @@
 
 	<!-- contenido -->
 	<main class="main">
+		
+
+		<section class="contenido contenido-firmar">
+			<div  class="container-box-title">
+					<div class="container_tit">
+						<h1 class="title"><span class="bold">Firma con certificado local</span></h1>
+					</div>
+					<div class="container_btn_operation">
 		<% if (originForced) { %>
 			<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
 				<span >Cancelar</span>
@@ -375,10 +383,9 @@
 				<span >volver</span>
 			</a>
 		<% } %>
+					</div>
+				</div>
 
-		<section class="contenido contenido-firmar">
-			<h1 class="title"><span class="bold">Firma con certificado local</span></h1>
-			
 			<div class="contenido contenido-opciones temp-hide" id="errorButtonsPanel">
 				<h2 class="mensaje-error" id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
 				<div class="botones">
@@ -387,7 +394,7 @@
 				</div>
 			</div>
 
-			<div class="container-box no-float">
+			<div class="container-box "><!-- no-float -->
 			<% if (docInfos != null && docInfos.length > 0) { %>
 				<ul class="lista-elem">
 				<li class="elem bold">Nombre - Título</li>

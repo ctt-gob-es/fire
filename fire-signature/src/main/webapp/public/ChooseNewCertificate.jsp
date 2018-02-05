@@ -137,6 +137,14 @@
 
 	<!-- contenido -->
 	<main class="main">
+		
+		
+		<section class="contenido">
+			<div  class="container-box-title">
+				<div class="container_tit">
+					<h1 class="title"><span class="bold">Seleccione el certificado de firma</span></h1>
+				</div>
+				<div class="container_btn_operation">
 		<% if (originForced) { %>
 			<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
 				<span >Cancelar</span>
@@ -147,9 +155,10 @@
 				<span >volver</span>
 			</a>
 		<% } %>
+				</div>
+			</div>
 		
-		<section class="contenido">
-			<h1 class="title"><span class="bold">Seleccione el certificado de firma</span></h1>
+		
 			<div class="container-box">
 			
 				<div class="cert-box">

@@ -103,6 +103,8 @@
 					<label for="fichero-firma">Seleccionar documento:</label><br>
 					<input id="fichero-firma" type="file" name="sign-file" />
 				</div>
+		
+
 				
 				<div style="margin-top:30px;text-align: center; ">
 					<input  id="submit-btn"  type="submit" value="FIRMAR">

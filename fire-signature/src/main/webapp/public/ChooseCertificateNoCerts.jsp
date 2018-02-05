@@ -109,21 +109,28 @@
 
 	<!-- contenido -->
 	<main class="main">
-		<% if (originForced) { %>
-			<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
-				<span >Cancelar</span>
-			</a>
-		<% } else { %>
-			<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
-				<span class="arrow-left-white"></span>
-				<span >volver</span>
-			</a>
-		<% } %>
+		
 
 			<section class="contenido contenido-error">
 			
-				<h1 class="title"><span class="bold">No tiene certificados en Cl@ve Firma</span></h1>
-				
+				<div  class="container-box-title">
+					<div class="container_tit">
+						<h1 class="title"><span class="bold">No tiene certificados en Cl@ve Firma</span></h1>
+					</div>
+					<div class="container_btn_operation">
+					<% if (originForced) { %>
+						<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
+							<span >Cancelar</span>
+						</a>
+					<% } else { %>
+						<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
+							<span class="arrow-left-white"></span>
+							<span >volver</span>
+						</a>
+					<% } %>
+					</div>
+				</div>
+			
 				<form method="POST" action="requestCertificateService">
 		  			<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 		  			<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>">
