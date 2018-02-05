@@ -124,19 +124,27 @@
 
 	<!-- contenido -->
 	<main class="main">
-		<% if (originForced) { %>
-			<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
-				<span >Cancelar</span>
-			</a>
-		<% } else { %>
-			<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
-				<span class="arrow-left-white"></span>
-				<span >volver</span>
-			</a>
-		<% } %>
+		
 		
 		<section class="contenido">
-			<h1 class="title"><span class="bold">Seleccione el certificado de firma</span></h1>
+				<div  class="container-box-title">
+					<div class="container_tit">
+						<h1 class="title"><span class="bold">Seleccione el certificado de firma</span></h1>
+					</div>
+					<div class="container_btn_operation">
+					<% if (originForced) { %>
+						<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
+							<span >Cancelar</span>
+						</a>
+					<% } else { %>
+						<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
+							<span class="arrow-left-white"></span>
+							<span >volver</span>
+						</a>
+					<% } %>
+					</div>
+				</div>
+
 			<div class="container-box">
 			
 			<%  if (certificates != null) {
