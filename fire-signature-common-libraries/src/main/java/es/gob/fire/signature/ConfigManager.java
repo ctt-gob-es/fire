@@ -76,6 +76,8 @@ public class ConfigManager {
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
 	private static final String PROP_CHECK_APPLICATION = "security.checkApplication"; //$NON-NLS-1$
 
+	private static final String PROVIDER_LOCAL = "local"; //$NON-NLS-1$
+
 	/** Cadena utilizada para separar valores dentro de una propiedad. */
 	private static final String VALUES_SEPARATOR = ","; //$NON-NLS-1$
 
@@ -249,9 +251,18 @@ public class ConfigManager {
 			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion de la conexion", CONFIG_FILE); //$NON-NLS-1$
 		}
 
-		if (getProviders() == null) {
-			LOGGER.severe("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST); //$NON-NLS-1$
+		final String[] providers = getProviders();
+		if (providers == null) {
+			LOGGER.severe("Debe declararse al menos un proveedor mediante la propiedad " + PROP_PROVIDERS_LIST); //$NON-NLS-1$
 			throw new ConfigFilesException("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST, CONFIG_FILE); //$NON-NLS-1$
+		}
+
+		try {
+			checkProviders(providers);
+		}
+		catch (final Exception e) {
+			LOGGER.severe("Error en la configuracion de los proveedores: " + e); //$NON-NLS-1$
+			throw new ConfigFilesException("Error en la configuracion de los proveedores: " + e.getMessage(), CONFIG_FILE, e); //$NON-NLS-1$
 		}
 
 		if (isCheckApplicationNeeded()) {
@@ -332,6 +343,26 @@ public class ConfigManager {
 	 */
 	public static boolean isCheckApplicationNeeded() {
 		return 	Boolean.parseBoolean(config.getProperty(PROP_CHECK_APPLICATION, Boolean.TRUE.toString()));
+	}
+
+	private static void checkProviders(final String[] providers) {
+		final List<String> wrongProviders = new ArrayList<>(providers.length);
+		for (final String providerName : providers) {
+			if (!PROVIDER_LOCAL.equalsIgnoreCase(providerName) &&
+					!config.containsKey(PREFIX_PROP_PROVIDER + providerName)) {
+				wrongProviders.add(providerName);
+			}
+		}
+		if (!wrongProviders.isEmpty()) {
+			final StringBuilder errorMsg = new StringBuilder();
+			for (final String providerName : wrongProviders) {
+				if (errorMsg.length() != 0) {
+					errorMsg.append(", "); //$NON-NLS-1$
+				}
+				errorMsg.append(providerName);
+			}
+			throw new NullPointerException("No se ha definido la clase conectora de los proveedores: " + errorMsg.toString()); //$NON-NLS-1$
+		}
 	}
 
 	/**

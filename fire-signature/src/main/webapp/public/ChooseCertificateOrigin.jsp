@@ -1,4 +1,6 @@
 
+<%@page import="es.gob.fire.server.services.internal.ProviderInfo"%>
+<%@page import="es.gob.fire.server.services.internal.ProviderManager"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
@@ -116,6 +118,54 @@
 			<h1 class="title">Seleccione el sistema de firma</h1>
 			<div class="container-box">	
 		
+		<%
+		String[] providers = ProviderManager.getProviders();
+		for (String provider : providers) {
+			ProviderInfo info = ProviderManager.getProviderInfo(provider);
+			boolean enabled = true;
+			if (ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(provider)) {
+				enabled = localAllowed;
+			} else {
+				enabled = userRegistered && !info.isNeedJavaScript();
+			}
+		%>
+			<div name="provider-option" class="main-box-left <%= info.isNeedJavaScript() ? "need-javascript" : "" %> <%= enabled ? "" : "disabled" %>" id="option<%= info.getName() %>">
+					<div class="contain-box-top">
+						<img alt="<%= info.getTitle() %>" title="<%= info.getTitle() %>" src="<%= info.getLogoUri() %>">
+					</div>
+					<div class="contain-box-bottom">
+						<h2 class="title-box"><%= info.getHeader() %></h2>
+						<% if(info.isNeedJavaScript()) { %>
+							<noscript>
+								<p class="text-box">Su navegador web tiene JavaScript desactivado. Habilite JavaScript para poder usar sus certificados.</p>
+							</noscript>
+						<% } %>
+						<p name="provider-description" class="text-box <%= info.isNeedJavaScript() ? "hide" : "" %>">
+							<%= userRegistered ? info.getDescription() : info.getNoRegisteredMessage() %>
+						</p>
+					</div>
+					<form method="POST" action="chooseCertificateOriginService" id="form<%= info.getName() %>">
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= subjectId %>" />
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= info.getName() %>" />
+						<% if (unregistered != null) { %>
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED %>" value="<%= unregistered %>" />
+						<% } %>
+						<% if (op != null) { %>
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_OPERATION %>" value="<%= op %>" />
+						<% } %>
+						
+						<a class="button" title="<%= info.getHeader() %>" onclick="document.getElementById('form<%= info.getName() %>').submit();" href="javascript:{}">
+							<span>Acceder</span>
+							<span class="arrow-right arrow-right-inicio"></span>
+						</a>
+					</form>
+				</div>
+		<%
+		}
+		%>
+<!-- 
 				<div class="main-box-left <%= userRegistered ? "" : "disabled" %>" id="certRemote">
 					<div class="contain-box-top">
 						<img alt="Clave firma" title="Cl@ve Firma" src="img/general/dms/logo-clavefirma.png">
@@ -123,7 +173,7 @@
 					<div class="contain-box-bottom">
 						<h2 class="title-box">Firma con Cl@ve Firma</h2>
 						<% if (!userRegistered) { %>
-							<p class="text-box">El usuario no esta dado de alta en Cl@ve, por lo que no podr&aacute; firmar con certificado en la nube.</p>
+							<p class="text-box">El usuario no esta dado de alta en Cl@ve, por lo que no tiene disponible esta opci&oacute;n.</p>
 						<% } else { %>
 							<p class="text-box">Utilice un certificado de firma de Cl@ve o realice su solicitud si no dispone de &eacute;l.</p>
 						<% } %>
@@ -154,7 +204,7 @@
 					<div class="contain-box-bottom">
 						<h2 class="title-box title-box-autofirma">Firma con certificado local</h2>
 						<noscript>
-							<p class="text-box">Su navegador web tiene JavaScript desactivado. No es posible utilizar certificados locales sin JavaScript.</p>
+							<p class="text-box">Su navegador web tiene JavaScript desactivado. Habilite JavaScript para poder usar sus certificados.</p>
 						</noscript>
 						<p class="text-box hide" id="certLocalText">Utilice un certificado instalado en el almacén de claves de su navegador o alojado en tarjeta inteligente.</p>
 						
@@ -176,6 +226,7 @@
 						</a>
 					</form>
 				</div>
+ -->
 
 			</div>
 		</section>
@@ -196,20 +247,25 @@
 	</footer>
    	<script type="text/javascript">
    	
-   		// Si no se puede usar un certificado local
-   		// accedemos directamente al apartado de Cl@ve Firma
-   		var sendForm = !<%= localAllowed %>;
-   		if (sendForm) {
-   			document.getElementsByTagName("form")[0].submit();
-   		}
-   		
 		// Si funciona JavaScript podremos retirar la clase que
-		// desactiva la opcion de firma local y la que oculta su texto 
+		// desactiva la opcion de firma local y la que oculta su texto
+		var disabledElements = document.getElementsByName("provider-description");
+		for (var i = 0; i < disabledElements.length; i++) {
+			disabledElements[i].className.replace( /(?:^|\s)hide(?!\S)/g , '' )	
+		}
+		
+		var disabledElements = document.getElementsByName("provider-option");
+		for (var i = 0; i < disabledElements.length; i++) {
+			disabledElements[i].className.replace( /(?:^|\s)need-javascript(?!\S)/g , '' )	
+		}
+		
+		/*
    		document.getElementById("certLocal").className =
    		   document.getElementById("certLocal").className.replace( /(?:^|\s)disabled(?!\S)/g , '' )
    		document.getElementById("certLocalText").className =
    		   document.getElementById("certLocalText").className.replace( /(?:^|\s)hide(?!\S)/g , '' )
-
+		*/
+   		   
    	</script>
 </body>
 </html>

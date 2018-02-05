@@ -20,7 +20,7 @@
 .mod_footer .footer_top .footer-text-big {font-size: 1em; font-weight: bold; display: inline-block; vertical-align: super;}
 .mod_footer .footer_bottom {vertical-align: super; }
 .mod_footer .footer_bottom .footer-text { font-size: 1em; font-weight: bold; }
-.contenido {display: block; width: 665px; margin: 0 auto; height: auto; min-height:40em; position: relative;}
+.contenido {display: block; min-width: 665px; max-width: 1050px; margin: 0 5px; height: auto; min-height:40em; position: relative;}
 .contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:37px; padding-top:1em; padding-bottom:1em;}
 .contenido .title-sec {color: #dd5a00; margin: 0 auto; font-size:29px; padding-top:1.5em; line-height: 31px;margin-bottom: 0.5em;}
 .contenido .main-text {display: inline-block; color: #707070; margin: 0 auto; width: 100%; font-weight: normal; font-size:23px;}
@@ -42,7 +42,8 @@
 .contenido .main-box-right {float:right; display:inline-block; width: 321px; height: 357px; margin: 0 auto; border: 1px solid rgb(216, 212, 212);box-shadow: 0px 0px 5px rgb(216, 212, 212); margin-top:1em;}
 .contenido .main-box-left.hover, .contenido .main-box-right.hover {border: 2px solid rgb(216, 212, 212)}
 .contenido .main-box-right.disabled, .contenido .main-box-left.disabled {opacity: 0.6;}
-.contenido .container-box {display: block; width: 665px; float:left;}
+.contenido .main-box-right.need-javascript, .contenido .main-box-left.need-javascript {opacity: 0.6;}
+.contenido .container-box {display: block; min-width: 665px; float:left;}
 .contenido .contain-box-bottom {display: block; background-color: #eae8e9; margin:5px;height: 235px; box-sizing: border-box;}
 .contenido .contain-box-bottom .title-box {padding: 1em 0px 0.2em 23px;font-weight: bold;font-size: 18px;color: #dd5a00;}
 .contenido .contain-box-bottom .title-box-autofirma {color: #be081f;}
@@ -50,6 +51,7 @@
 .contenido .main-box-right .button, .contenido .main-box-left .button {border: 1px solid #707070;padding: 0.4em 1.5em; border-radius: 2em;margin: 0em auto;width: 4.5em;display: block;position: relative;top: -4em;color: #707070; text-decoration: none;font-size: 15px;}
 .contenido .main-box-right .button, .contenido:hover .main-box-left .button:hover {border: 1px solid #606060; color: #606060; }
 .contenido .main-box-right.disabled .button, .contenido .main-box-left.disabled .button {display:none;}
+.contenido .main-box-right.need-javascript .button, .contenido .main-box-left.need-javascript .button {display:none;}
 .contenido .button:hover { text-decoration:underline; cursor:pointer;}
 .arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.4em;}
 .arrow-right-inicio {top: 11px; right: 1.4em;}

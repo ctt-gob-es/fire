@@ -78,6 +78,10 @@ public final class ClaveFirmaConnector implements FIReConnector {
     /** Identificador del par&aacute;metro con el que indicar el nombre del proceso que invoca al servicio. */
     private static final String PARAM_PROCEDURE_NAME = "procedureName"; //$NON-NLS-1$
 
+    /** Identificador del par&aacute;metro con el que indicar si el proveedor debe permitir
+     * generar un nuevo certificado a sus usuarios cuando no tengan uno v&aacute;lido. */
+    private static final String PARAM_ALLOW_REQUEST_NEW_CERT = "allowRequestNewCert"; //$NON-NLS-1$
+
 	private static final int CERT_STATE_CODE_BLOCKED = 5;
 
 	private static final String FAKE_URL = "https://localhost"; //$NON-NLS-1$
@@ -491,9 +495,26 @@ public final class ClaveFirmaConnector implements FIReConnector {
 			gatewayApi.endTransaction(intermediateResult.getIdTransaction());
 		}
 		catch (final Exception e) {
+			LOGGER.warning("Ocurrio un error al cerrar la transaccion con el proveedor: " + e); //$NON-NLS-1$
 			// No hacemos nada
 		}
 
 		return false;
+	}
+
+	@Override
+	public boolean allowRequestNewCerts() {
+
+		// Se permitira la emision de nuevos certificados salvo que se configure
+		// expresamente el valor "false"
+
+		boolean allowed = true;
+		if (this.providerConfig != null) {
+			final String allowedValue = this.providerConfig.getProperty(PARAM_ALLOW_REQUEST_NEW_CERT);
+			if (allowedValue != null && Boolean.FALSE.toString().equalsIgnoreCase(allowedValue)) {
+				allowed = false;
+			}
+		}
+		return allowed;
 	}
 }

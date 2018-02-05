@@ -7,5 +7,5 @@ package es.gob.fire.server.services;
 public class ProviderLegacy {
 
 	/** Nombre de proveedor de Cl@ve Firma. */
-	public static final String PROVIDER_NAME_CLAVEFIRMA = "clavefirma";
+	public static final String PROVIDER_NAME_CLAVEFIRMA = "clavefirma"; //$NON-NLS-1$
 }

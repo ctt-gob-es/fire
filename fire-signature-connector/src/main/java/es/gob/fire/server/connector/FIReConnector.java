@@ -82,6 +82,11 @@ public interface FIReConnector {
      * @param transactionId Identificador de la transacci&oacute;n a la que corresponde la firma. */
     void endSign(final String transactionId);
 
+    /** Indica si se permite generar nuevos certificados de firma a los usuarios.
+     * @return {@code true} si los usuarios podr&aacute;n generar un certificado
+     * de firma cuando no tengan ya uno, {@code false} en caso contrario. */
+    boolean allowRequestNewCerts();
+
     /** Genera un nuevo certificado de firma para el usuario.
      * @param subjectId Identificador del usuario.
      * @return Resultado de la generacion con el ID de transacci&oacute;n y la URL para la redirecci&oacute;n en caso de &eacute;xito.

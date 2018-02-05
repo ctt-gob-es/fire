@@ -392,4 +392,9 @@ public class TestConnector implements FIReConnector {
 			throw new FIReCertificateException("Error al decodificar el certificado de firma", e); //$NON-NLS-1$
 		}
 	}
+
+	@Override
+	public boolean allowRequestNewCerts() {
+		return true;
+	}
 }

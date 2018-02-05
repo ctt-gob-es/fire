@@ -2,6 +2,7 @@ package es.gob.fire.server.services.internal;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,9 +19,15 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class ProviderManager {
 
+	private static final String PROVIDER_INFO_FILE = "provider_info.properties"; //$NON-NLS-1$
+
 	private static final String SUFIX_PROVIDER_CONFIG = "_config.properties"; //$NON-NLS-1$
 
+	private static final String LOCAL_PROVIDER_INFO_PATH = "/es/gob/fire/server/resources/local_provider.properties"; //$NON-NLS-1$
+
 	private static final Logger LOGGER = Logger.getLogger(ProviderManager.class.getName());
+
+	public static final String PROVIDER_NAME_LOCAL = "local"; //$NON-NLS-1$
 
 	/**
 	 * Inicializamos una transacci&oacute;n a trav&eacute;s de un proveedor.
@@ -40,6 +47,51 @@ public class ProviderManager {
 		}
 
 		// Obtenemos el fichero de configuracion del proveedor
+		final Properties providerConfig = loadProviderConfig(providerName);
+
+		// Inicializamos el proveedor
+		final FIReConnector connector = FIReConnectorFactory.getConnector(providerClass);
+		connector.init((Properties) providerConfig.clone());
+
+		// Inicializamos la transaccion
+		connector.initOperation(transactionConfig);
+
+		return connector;
+	}
+
+	/**
+	 * Obtiene el listado de proveedores configurados.
+	 * @return Listado con los nombres de los proveedores.
+	 */
+	public static String[] getProviders() {
+		return ConfigManager.getProviders();
+	}
+
+	/**
+	 * Obtiene la informaci&oacute;n necesaria de un proveedor para poder mostrarle
+	 * al usuario para que identifique su uso.
+	 * @param providerName Nombre del proveedor.
+	 * @return Informaci&oacute;n del proveedor.
+	 */
+	public static ProviderInfo getProviderInfo(final String providerName) {
+
+		Properties infoProperties;
+		if (PROVIDER_NAME_LOCAL.equalsIgnoreCase(providerName)) {
+			infoProperties = loadLocalProviderInfoProperties();
+		}
+		else {
+			final String classname = ConfigManager.getProviderClass(providerName);
+			infoProperties = loadProviderInfoProperties(classname);
+		}
+		return new ProviderInfo(providerName, infoProperties);
+	}
+
+	/**
+	 * Carga el fichero de configuraci&oacute;n de un proveedor.
+	 * @param providerName Nombre el proveedor.
+	 * @return Configuraci&oacute;n cargada.
+	 */
+	private static Properties loadProviderConfig(final String providerName) {
 		Properties providerConfig;
 		try {
 			providerConfig = ConfigFileLoader.loadConfigFile(providerName + SUFIX_PROVIDER_CONFIG);
@@ -59,13 +111,62 @@ public class ProviderManager {
 			providerConfig = new Properties();
 		}
 
-		// Inicializamos el proveedor
-		final FIReConnector connector = FIReConnectorFactory.getConnector(providerClass);
-		connector.init((Properties) providerConfig.clone());
+		return providerConfig;
+	}
 
-		// Inicializamos la transaccion
-		connector.initOperation(transactionConfig);
+	/**
+	 * Carga el fichero interno de propiedades del proveedor en el que se encuentra
+	 * la informaci&oacute;n generica que debe proporcionar. El fichero debe tener
+	 * el nombre determinado por {@link #PROVIDER_INFO_FILE} y encontrarse en el
+	 * mismo paquete que la clase conectora.
+	 * @param classname Clase conectora del proveedor.
+	 * @return Properties cargado.
+	 */
+	private static Properties loadProviderInfoProperties(final String classname) {
 
-		return connector;
+		String classPath;
+		if (classname.lastIndexOf('.') == -1) {
+			classPath = classname;
+		} else {
+			classPath = classname.substring(0, classname.lastIndexOf('.')).replace('.', '/');
+		}
+		if (!classPath.startsWith("/")) { //$NON-NLS-1$
+			classPath = "/" + classPath; //$NON-NLS-1$
+		}
+		if (!classPath.endsWith("/")) { //$NON-NLS-1$
+			classPath += "/"; //$NON-NLS-1$
+		}
+		final String providerInfoPath = classPath + PROVIDER_INFO_FILE;
+		return loadInternalProperties(providerInfoPath);
+	}
+
+	/**
+	 * Carga el fichero interno de propiedades del proveedor de firma con certificados
+	 * locales.
+	 * @return Properties cargado.
+	 */
+	private static Properties loadLocalProviderInfoProperties() {
+		return loadInternalProperties(LOCAL_PROVIDER_INFO_PATH);
+	}
+
+	/**
+	 * Carga un fichero interno de propiedades.
+	 * @param path Ruta interna del fichero.
+	 * @return Properties cargado.
+	 */
+	private static Properties loadInternalProperties(final String path) {
+
+		final Properties providerInfoProperties = new Properties();
+		try (InputStream is = ProviderManager.class.getResourceAsStream(path)) {
+			providerInfoProperties.load(is);
+		}
+		catch (final Exception e) {
+			LOGGER.warning(
+				String.format(
+					"No se ha encontrado o no ha podido cargarse el fichero interno '%s' con la informacion del proveedor", //$NON-NLS-1$
+					path)
+			);
+		}
+		return providerInfoProperties;
 	}
 }
