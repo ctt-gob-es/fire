@@ -145,7 +145,9 @@
 					</div>
 				</div>
 
-			<div class="container-box">
+		
+			
+			<div class="container-box-cert">
 			
 			<%  if (certificates != null) {
 					SimpleDateFormat sf =  new SimpleDateFormat("dd-MM-yyyy"); //$NON-NLS-1$
@@ -187,6 +189,7 @@
 			}
 			%>
 			</div>
+		
 		</section>
 	</main>
 	

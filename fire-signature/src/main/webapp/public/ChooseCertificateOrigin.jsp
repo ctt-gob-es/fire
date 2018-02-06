@@ -104,21 +104,24 @@
 				</div>
 			</div>
 			<div class="clr"></div>
+			
 		</div>
 	</header>
 
 	<!-- contenido -->
 	<main class="main">
+	
+			
+		<section class="contenido">
 		<a href= "cancelOperationService?<%= cancelUrlParams %>" class="button-cancelar">
 			<span >Cancelar</span>
 		</a>
-
-		<section class="contenido">
 			<h1 class="title">Seleccione el sistema de firma</h1>
 			<div class="container-box">	
 		
 		<%
 		String[] providers = ProviderManager.getProviders();
+		for (int i=1;i<=3;i++){//Borrar 
 		for (String provider : providers) {
 			ProviderInfo info = ProviderManager.getProviderInfo(provider);
 			boolean enabled = true;
@@ -140,7 +143,7 @@
 							</noscript>
 						<% } %>
 						<p name="provider-description" class="text-box <%= info.isNeedJavaScript() ? "hide" : "" %>">
-							<%= userRegistered ? info.getDescription() : info.getNoRegisteredMessage() %>
+							<%= userRegistered ? info.getDescription() : info.getNoRegisteredMessage() %>													
 						</p>
 					</div>
 					<form method="POST" action="chooseCertificateOriginService" id="form<%= info.getName() %>">
@@ -163,6 +166,7 @@
 				</div>
 		<%
 		}
+		}//Borrar
 		%>
 <!-- 
 				<div class="main-box-left <%= userRegistered ? "" : "disabled" %>" id="certRemote">
@@ -248,14 +252,14 @@
    	
 		// Si funciona JavaScript podremos retirar la clase que
 		// desactiva la opcion de firma local y la que oculta su texto
-		var disabledElements = document.getElementsByName("provider-description");
-		for (var i = 0; i < disabledElements.length; i++) {
-			disabledElements[i].className.replace( /(?:^|\s)hide(?!\S)/g , '' )	
+		var disabledElementsProvDesc = document.getElementsByName("provider-description");
+		for (var i = 0; i < disabledElementsProvDesc.length; i++) {		
+			disabledElementsProvDesc[i].className= disabledElementsProvDesc[i].className.replace( /(?:^|\s)hide(?!\S)/g , '' );	
 		}
 		
-		var disabledElements = document.getElementsByName("provider-option");
-		for (var i = 0; i < disabledElements.length; i++) {
-			disabledElements[i].className.replace( /(?:^|\s)need-javascript(?!\S)/g , '' )	
+		var disabledElementsProvOp = document.getElementsByName("provider-option");
+		for (var i = 0; i < disabledElementsProvOp.length; i++) {
+			disabledElementsProvOp[i].className=disabledElementsProvOp[i].className.replace( /(?:^|\s)need-javascript(?!\S)/g , '' )	
 		}
 		
 		/*

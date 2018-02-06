@@ -159,7 +159,7 @@
 			</div>
 		
 		
-			<div class="container-box">
+			<div class="container-box-cert">
 			
 				<div class="cert-box">
 					<div class="cert-box-int">

@@ -83,6 +83,7 @@ public class TestConnector implements FIReConnector {
         // Configuramos la URL base de los servicios de prueba
         this.testUrlBase = config.getProperty(PROP_TEST_ENDPOINT);
         if (this.testUrlBase == null || this.testUrlBase.length() == 0) {
+        	LOGGER.warning("No se ha establecido la propiedad " + PROP_TEST_ENDPOINT + " se establece la ruta por defecto: " + DEFAULT_TEST_URL_BASE);
         	this.testUrlBase = DEFAULT_TEST_URL_BASE;
         }
         else if (!this.testUrlBase.endsWith("/")) { //$NON-NLS-1$
