@@ -84,7 +84,9 @@
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/modules.css">
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
-
+<script type="text/javascript">
+	alert(<%=errorUrl%>);
+</script>
 </head>
 <body>
 	<!-- Barra de navegacion -->
@@ -112,13 +114,19 @@
 	<main class="main">
 	
 			
-		<section class="contenido">
-		<a href= "cancelOperationService?<%= cancelUrlParams %>" class="button-cancelar">
-			<span >Cancelar</span>
-		</a>
-			<h1 class="title">Seleccione el sistema de firma</h1>
-			<div class="container-box">	
+		<section class="contenido">		
+		<div class="container-title"  >
+			<div class="title-head">
+				<h1 class="title">Seleccione el sistema de firma</h1>
+			</div>
+			<div class="title-button">				
+				<a href= "cancelOperationService?<%= cancelUrlParams %>" class="button-cancelar">
+					<div>Cancelar</div>
+				</a>
+			</div>
+		</div>
 		
+		<div class="container-box">	
 		<%
 		String[] providers = ProviderManager.getProviders();
 		for (int i=1;i<=3;i++){//Borrar 
@@ -133,7 +141,7 @@
 		%>
 			<div name="provider-option" class="main-box-left <%= info.isNeedJavaScript() ? "need-javascript" : "" %> <%= enabled ? "" : "disabled" %>" id="option<%= info.getName() %>">
 					<div class="contain-box-top">
-						<img alt="<%= info.getTitle() %>" title="<%= info.getTitle() %>" src="<%= info.getLogoUri() %>">
+						<img alt="<%= info.getTitle() %>" title="<%= info.getTitle() %>" src="<%= info.getLogoUri() %>" >
 					</div>
 					<div class="contain-box-bottom">
 						<h2 class="title-box"><%= info.getHeader() %></h2>
