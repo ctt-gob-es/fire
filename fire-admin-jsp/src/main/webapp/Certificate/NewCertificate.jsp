@@ -166,7 +166,7 @@
 	}
 	
 	</script>
-	<script src="../resources/js/certificate.js" type="text/javascript"></script>
+	
 	<script src="../resources/js/validateCertificates.js" type="text/javascript"></script>
 </head>
 
@@ -349,4 +349,5 @@
 		</script>
    	</div>
 </body>
+<script src="../resources/js/certificate.js" type="text/javascript"></script>
 </html>

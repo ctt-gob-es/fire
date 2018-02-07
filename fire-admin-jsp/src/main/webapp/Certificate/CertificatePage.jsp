@@ -70,12 +70,7 @@
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-	<script type="text/javascript">
-	/*Importante estas variables (requestTypeCount y requestType) deben estar declaradas antes que la llamada a ../resources/js/certificate.js*/
-			requestTypeCount="countRecordsCert";
-           	requestType="getRecordsCert";
-	</script>
-	<script src="../resources/js/certificate.js" type="text/javascript"></script>
+	
 	
 		
 </head>
@@ -123,4 +118,10 @@
    	</div>
 	
 </body>
+<script type="text/javascript">
+	/*Importante estas variables (requestTypeCount y requestType) deben estar declaradas antes que la llamada a ../resources/js/certificate.js*/
+			requestTypeCount="countRecordsCert";
+           	requestType="getRecordsCert";
+	</script>
+	<script src="../resources/js/certificate.js" type="text/javascript"></script>
 </html>

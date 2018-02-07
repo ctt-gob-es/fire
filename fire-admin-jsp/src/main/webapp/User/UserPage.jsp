@@ -34,7 +34,7 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>	
-	<script src="../resources/js/user.js" type="text/javascript"></script>
+	
 </head>
 <body>
 <script>
@@ -80,4 +80,5 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
    	</div>
 
 </body>
+<script src="../resources/js/user.js" type="text/javascript"></script>
 </html>

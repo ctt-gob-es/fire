@@ -76,7 +76,7 @@
 	<link rel="stylesheet" href="../resources/css/jquery-ui.min.css">
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
-	<script src="../resources/js/application.js" type="text/javascript"></script>
+
 		
 </head>
 <body>
@@ -124,4 +124,5 @@
    	</div>
 	
 </body>
+<script src="../resources/js/application.js" type="text/javascript"></script>
 </html>
