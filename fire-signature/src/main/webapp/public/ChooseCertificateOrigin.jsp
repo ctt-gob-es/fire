@@ -167,7 +167,7 @@
 						<% } %>
 						
 						<a class="button" title="<%= info.getHeader() %>" onclick="document.getElementById('form<%= info.getName() %>').submit();" href="javascript:{}">
-							<span>Acceder</span>
+							<span class="button-text">Acceder</span>
 							<span class="arrow-right arrow-right-inicio"></span>
 						</a>
 					</form>

@@ -365,28 +365,28 @@
 
 	<!-- contenido -->
 	<main class="main">
-		
-
+	
 		<section class="contenido contenido-firmar">
-			<div  class="container-box-title">
-					<div class="container_tit">
+		
+			<div class="container-box-title" ><!--  -->
+					<div class="container_tit" ><!-- class="container_tit" -->
 						<h1 class="title"><span class="bold">Firma con certificado local</span></h1>
 					</div>
-					<div class="container_btn_operation">
-		<% if (originForced) { %>
-			<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
-				<span >Cancelar</span>
-			</a>
-		<% } else { %>
-			<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">
-				<span class="arrow-left-white"></span>
-				<span >volver</span>
-			</a>
-		<% } %>
+					<div class="container_btn_operation"><!-- class="container_btn_operation" -->
+						<% if (originForced) { %>
+							<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
+								<span >Cancelar</span>
+							</a>
+						<% } else { %>
+							<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">
+								<span class="arrow-left-white"></span>
+								<span >volver</span>
+							</a>
+						<% } %>
 					</div>
-				</div>
+			</div>
 
-			<div class="contenido contenido-opciones temp-hide" id="errorButtonsPanel">
+			<div class="contenido contenido-opciones " id="errorButtonsPanel"><!-- temp-hide -->
 				<h2 class="mensaje-error" id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
 				<div class="botones">
 					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>
@@ -394,7 +394,7 @@
 				</div>
 			</div>
 
-			<div class="container-box "><!-- no-float -->
+			<div class="container-box"><!-- no-float -->
 			<% if (docInfos != null && docInfos.length > 0) { %>
 				<ul class="lista-elem">
 				<li class="elem bold">Nombre - Título</li>
@@ -405,8 +405,22 @@
 					<%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %>
 					</li>
 				<% } %>
+				<li>Nombre - Título Prueba 1</li>
+				<li>Nombre - Título Prueba 2</li>
+				<li>Nombre - Título Prueba 3</li>
+				<li>Nombre - Título Prueba 4</li>
+				<li>Nombre - Título Prueba 5</li>
+				<li>Nombre - Título Prueba 6</li>
+				<li>Nombre - Título Prueba 7</li>
+				<li>Nombre - Título Prueba 8</li>
+				<li>Nombre - Título Prueba 9</li>
+				<li>Nombre - Título Prueba 10</li>
+				<li>Nombre - Título Prueba 11</li>
+				<li>Nombre - Título Prueba 12</li>
+				<li>Nombre - Título Prueba 13</li>
 				</ul>
 			<% } %>
+			
 			</div>
 			
 			<div Class="container-firmar"> 
@@ -423,7 +437,7 @@
 					<input id="buttonSign" type="button" class="button_firmar" value="Firmar" onclick="<%= formFunction %>"/>
 				</form>
 			</div>
-			<div><span class="bold">Nota:</span> La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</div>
+			<div class="nota-firmar"><span class="bold">Nota:</span> La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</div>
 		</section>
 		
 	</main>
