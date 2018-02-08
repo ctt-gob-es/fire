@@ -23,7 +23,6 @@ import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
-import es.gob.fire.server.services.ProviderLegacy;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.signature.ConfigManager;
@@ -113,10 +112,16 @@ public class SignOperationManager {
 		}
 		redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
 
-		String origin = null;
+        // Se obtiene el listado final de proveedores para la operacion, filtrando la
+        // lista de proveedores dados de alta con los solicitados
+		String[] provs;
 		if (connConfig.containsKey(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN)) {
-			origin = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN);
+			final String origin = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN);
+			provs = ProviderManager.getFilteredProviders(origin.split(ServiceParams.VALUES_SEPARATOR));
 		}
+        else {
+        	provs = ProviderManager.getProviderNames();
+        }
 
 		String appName = null;
 		if (connConfig.containsKey(ServiceParams.CONNECTION_PARAM_APPLICATION_NAME)) {
@@ -151,10 +156,7 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParamsB64);
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
-
-        if (origin != null) {
-        	session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, origin);
-        }
+        session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, provs);
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
@@ -241,20 +243,15 @@ public class SignOperationManager {
 		}
 		redirectUrlBase += "/public/"; //$NON-NLS-1$
 
-        // Si ya se definio el origen del certificado, se envia al servicio que se encarga de
-        // redirigirlo. Si no, se envia directamente a la pagina de seleccion
-        String redirectUrl;
-        if (origin != null) {
+        // Si hay proveedor disponible, se selecciona automaticamente;
+        // si no, se envia a la pagina de seleccion de proveedor
+		String redirectUrl;
+        if (provs.length == 1) {
         	redirectUrl = "chooseCertificateOriginService?" + //$NON-NLS-1$
-        			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + origin + "&" + //$NON-NLS-1$ //$NON-NLS-2$
+        			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] + "&" + //$NON-NLS-1$ //$NON-NLS-2$
  					ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$
         } else {
         	redirectUrl = "ChooseCertificateOrigin.jsp"; //$NON-NLS-1$
-
-        	//TODO: Deberiamos comprobar que el usuario esta dado de alta en cada uno de los servicios
-        	if (!FIReHelper.isUserRegistered(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, subjectId)) {
-        		redirectUrl += "?"  + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=true"; //$NON-NLS-1$ //$NON-NLS-2$
-        	}
         }
 
         // Devolvemos al usuario el ID de la transaccion y la pagina a la que debe dirigir al usuario

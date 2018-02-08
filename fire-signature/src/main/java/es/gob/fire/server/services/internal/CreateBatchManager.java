@@ -101,10 +101,16 @@ public class CreateBatchManager {
 			return;
 		}
 
-		String origin = null;
+        // Se obtiene el listado final de proveedores para la operacion, filtrando la
+        // lista de proveedores dados de alta con los solicitados
+		String[] provs;
 		if (connConfig.containsKey(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN)) {
-			origin = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN);
+			final String origin = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN);
+			provs = ProviderManager.getFilteredProviders(origin.split(ServiceParams.VALUES_SEPARATOR));
 		}
+        else {
+        	provs = ProviderManager.getProviderNames();
+        }
 
 		String appName = null;
 		if (connConfig.containsKey(ServiceParams.CONNECTION_PARAM_APPLICATION_NAME)) {
@@ -136,10 +142,7 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_ID, transactionId);
-
-        if (origin != null) {
-        	session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, origin);
-        }
+        session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, provs);
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto

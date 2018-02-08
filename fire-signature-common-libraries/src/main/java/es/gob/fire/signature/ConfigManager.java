@@ -134,21 +134,23 @@ public class ConfigManager {
 	 * estar&aacute; vac&iacute;o.
 	 * @return Listado de proveedores configurados.
 	 */
-	public static String[] getProviders() {
+	public static ProviderElement[] getProviders() {
 		final String providers = config.getProperty(PROP_PROVIDERS_LIST);
 		if (providers == null) {
-			return new String[0];
+			return new ProviderElement[0];
 		}
 
-		final List<String> providersList = new ArrayList<>();
+		final List<ProviderElement> providersList = new ArrayList<>();
 		final String[] providersTempList = providers.split(VALUES_SEPARATOR);
 		for (final String provider : providersTempList) {
-			if (provider != null && !provider.trim().isEmpty() &&
-					!providersList.contains(provider)) {
-				providersList.add(provider);
+			if (provider != null && !provider.trim().isEmpty()) {
+				final ProviderElement prov = new ProviderElement(provider);
+				if (providersList.contains(provider)) {
+					providersList.add(prov);
+				}
 			}
 		}
-		return providersList.toArray(new String[providersList.size()]);
+		return providersList.toArray(new ProviderElement[providersList.size()]);
 	}
 
 	/**
@@ -251,7 +253,7 @@ public class ConfigManager {
 			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion de la conexion", CONFIG_FILE); //$NON-NLS-1$
 		}
 
-		final String[] providers = getProviders();
+		final ProviderElement[] providers = getProviders();
 		if (providers == null) {
 			LOGGER.severe("Debe declararse al menos un proveedor mediante la propiedad " + PROP_PROVIDERS_LIST); //$NON-NLS-1$
 			throw new ConfigFilesException("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST, CONFIG_FILE); //$NON-NLS-1$
@@ -345,9 +347,10 @@ public class ConfigManager {
 		return 	Boolean.parseBoolean(config.getProperty(PROP_CHECK_APPLICATION, Boolean.TRUE.toString()));
 	}
 
-	private static void checkProviders(final String[] providers) {
+	private static void checkProviders(final ProviderElement[] providers) {
 		final List<String> wrongProviders = new ArrayList<>(providers.length);
-		for (final String providerName : providers) {
+		for (final ProviderElement provider : providers) {
+			final String providerName = provider.getName();
 			if (!PROVIDER_LOCAL.equalsIgnoreCase(providerName) &&
 					!config.containsKey(PREFIX_PROP_PROVIDER + providerName)) {
 				wrongProviders.add(providerName);

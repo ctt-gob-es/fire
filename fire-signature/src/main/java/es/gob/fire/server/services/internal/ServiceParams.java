@@ -138,9 +138,10 @@ public class ServiceParams {
 
 	/** Par&aacute;metro usado para configurar que se debe utilizar un certificado local. */
     public static final String CERTIFICATE_ORIGIN_LOCAL = "local"; //$NON-NLS-1$
-    /** Par&aacute;metro usado para configurar que se debe utilizar un certificado de clavefirma. */
-    public static final String CERTIFICATE_ORIGIN_CLAVEFIRMA = "clavefirma"; //$NON-NLS-1$
 
     /** Identificador de operaci&oacute;n de firma de lotes. */
     public static final String OPERATION_BATCH = "batch"; //$NON-NLS-1$
+
+    /** Cadena utilizada para separar valores establecidos dentro de una misma propiedad. */
+    public static final String VALUES_SEPARATOR = ","; //$NON-NLS-1$
 }

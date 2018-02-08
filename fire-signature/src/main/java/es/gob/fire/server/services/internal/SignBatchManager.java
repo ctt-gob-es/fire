@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.HttpCustomErrors;
-import es.gob.fire.server.services.ProviderLegacy;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.signature.ConfigManager;
 
@@ -61,11 +60,15 @@ public class SignBatchManager {
     		return;
     	}
 
+		// Identificamos si ya esta definido el origen del certificado
+		final String[] provs = (String[]) session.getObject(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+
     	// TODO: Borrar esto cuando se terminen los cambios en el componente distribuido PHP
     	// en el que, por ahora, no se envia el subjectId por parametro, asi que hemos de usar
     	// el de sesion. Esto impide realizar la comprobacion de seguridad adicional de que sea
     	// el mismo usuario el que crease la transaccion y el que ahora dice ser
     	final String currentUserId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
+
 
         final Properties connConfig = (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
@@ -86,12 +89,6 @@ public class SignBatchManager {
 		}
 		redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
 
-		// Identificamos si ya esta definido el origen del certificado
-		String origin = null;
-		if (connConfig.containsKey(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN)) {
-			origin = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN);
-		}
-
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		String redirectUrlBase = ConfigManager.getPublicContextUrl();
@@ -104,17 +101,12 @@ public class SignBatchManager {
         // Si ya se definio el origen del certificado, se envia al servicio que se encarga de
         // redirigirlo. Si no, se envia la pagina de seleccion
         String redirectUrl;
-        if (origin != null) {
+        if (provs != null && provs.length == 1) {
         	redirectUrl = "chooseCertificateOriginService?" + //$NON-NLS-1$
-        			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + origin + "&" + //$NON-NLS-1$ //$NON-NLS-2$
+        			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] + "&" + //$NON-NLS-1$ //$NON-NLS-2$
         			ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$
         } else {
         	redirectUrl = "ChooseCertificateOrigin.jsp?" + ServiceParams.HTTP_PARAM_OPERATION + "=" + ServiceParams.OPERATION_BATCH; //$NON-NLS-1$ //$NON-NLS-2$
-
-        	//TODO: Deberiamos comprobar que el usuario esta dado de alta en cada uno de los servicios
-        	if (!FIReHelper.isUserRegistered(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, currentUserId)) {
-        		redirectUrl += "&"  + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=true"; //$NON-NLS-1$ //$NON-NLS-2$
-        	}
         }
 
         // Configuramos en la sesion si se debe detener el proceso de error cuando se encuentre uno
