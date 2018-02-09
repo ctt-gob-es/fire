@@ -365,36 +365,38 @@
 
 	<!-- contenido -->
 	<main class="main">
-	
-		<section class="contenido contenido-firmar">
 		
-			<div class="container-box-title" ><!--  -->
-					<div class="container_tit" ><!-- class="container_tit" -->
+		<section class="contenido contenido-firmar">
+			<div  class="container-box-title">
+					<div class="container_tit">
 						<h1 class="title"><span class="bold">Firma con certificado local</span></h1>
 					</div>
-					<div class="container_btn_operation"><!-- class="container_btn_operation" -->
-						<% if (originForced) { %>
-							<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
-								<span >Cancelar</span>
-							</a>
-						<% } else { %>
-							<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">
-								<span class="arrow-left-white"></span>
-								<span >volver</span>
-							</a>
-						<% } %>
+					<div class="container_btn_operation">
+		<% if (originForced) { %>
+			<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
+				<span >Cancelar</span>
+			</a>
+		<% } else { %>
+			<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">
+				<span class="arrow-left-white"></span>
+				<span >volver</span>
+			</a>
+		<% } %>
 					</div>
-			</div>
+				</div>
 
-			<div class="contenido contenido-opciones " id="errorButtonsPanel"><!-- temp-hide -->
-				<h2 class="mensaje-error" id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
+			<div class="contenido-opciones temp-hide" id="errorButtonsPanel"><!-- temp-hide -->
+				<div class="mensaje-error" >
+				<h2 id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
+				</div>
+				
 				<div class="botones">
 					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
 				</div>
 			</div>
 
-			<div class="container-box"><!-- no-float -->
+			<div class="container-box "><!-- no-float -->
 			<% if (docInfos != null && docInfos.length > 0) { %>
 				<ul class="lista-elem">
 				<li class="elem bold">Nombre - Título</li>
@@ -405,25 +407,22 @@
 					<%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %>
 					</li>
 				<% } %>
-				<li>Nombre - Título Prueba 1</li>
-				<li>Nombre - Título Prueba 2</li>
-				<li>Nombre - Título Prueba 3</li>
-				<li>Nombre - Título Prueba 4</li>
-				<li>Nombre - Título Prueba 5</li>
-				<li>Nombre - Título Prueba 6</li>
-				<li>Nombre - Título Prueba 7</li>
-				<li>Nombre - Título Prueba 8</li>
-				<li>Nombre - Título Prueba 9</li>
-				<li>Nombre - Título Prueba 10</li>
-				<li>Nombre - Título Prueba 11</li>
-				<li>Nombre - Título Prueba 12</li>
-				<li>Nombre - Título Prueba 13</li>
+				<!-- Borrar li  -->
+				<li>Prueba 1</li>
+				<li>Prueba 2</li>
+				<li>Prueba 3</li>
+				<li>Prueba 4</li>
+				<li>Prueba 5</li>
+				<li>Prueba 6</li>
+				<li>Prueba 7</li>
+				<li>Prueba 8</li>
+				<li>Prueba 9</li>
+				<li>Prueba 10</li>
 				</ul>
 			<% } %>
-			
 			</div>
 			
-			<div Class="container-firmar"> 
+			<div Class="container-firmar "> 
 				<form name="formSign" id="formSign" method="POST" action="miniappletSuccessService">
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
