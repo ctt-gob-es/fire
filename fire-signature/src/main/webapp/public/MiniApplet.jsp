@@ -187,7 +187,7 @@
 			function doSignBatch() {
 
 				document.getElementById("errorMsg").style.display = "none";
-				
+				//document.getElementById("errorMsg").style
 				// Obtenemos datos
 				var batchXmlB64 = "<%= batchXmlB64 %>";
 				var preSignUrl = "<%= preSignBatchUrl %>";
@@ -395,9 +395,10 @@
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
 				</div>
 			</div>
-
-			<div class="container-box "><!-- no-float -->
+			
 			<% if (docInfos != null && docInfos.length > 0) { %>
+			<div class="container-box "><!-- no-float -->
+			
 				<ul class="lista-elem">
 				<li class="elem bold">Nombre - Título</li>
 				<% for (DocInfo docInfo : docInfos)  { %>
@@ -418,9 +419,9 @@
 				<li>Prueba 8</li>
 				<li>Prueba 9</li>
 				<li>Prueba 10</li>
-				</ul>
-			<% } %>
+				</ul>		
 			</div>
+			<% } %>
 			
 			<div Class="container-firmar "> 
 				<form name="formSign" id="formSign" method="POST" action="miniappletSuccessService">
