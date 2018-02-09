@@ -128,7 +128,8 @@
 		
 		<div class="container-box">	
 		<%
-		String[] providers = ProviderManager.getProviders();
+		String[] providers = (String[]) fireSession.getObject(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+		
 		for (int i=1;i<=3;i++){//Borrar 
 		for (String provider : providers) {
 			ProviderInfo info = ProviderManager.getProviderInfo(provider);
@@ -176,69 +177,6 @@
 		}
 		}//Borrar
 		%>
-<!-- 
-				<div class="main-box-left <%= userRegistered ? "" : "disabled" %>" id="certRemote">
-					<div class="contain-box-top">
-						<img alt="Clave firma" title="Cl@ve Firma" src="img/general/dms/logo-clavefirma.png">
-					</div>
-					<div class="contain-box-bottom">
-						<h2 class="title-box">Firma con Cl@ve Firma</h2>
-						<% if (!userRegistered) { %>
-							<p class="text-box">El usuario no esta dado de alta en Cl@ve, por lo que no podr&aacute; firmar con certificado en la nube.</p>
-						<% } else { %>
-							<p class="text-box">Utilice un certificado de firma de Cl@ve o realice su solicitud si no dispone de &eacute;l.</p>
-						<% } %>
-					</div>
-					<form method="POST" action="chooseCertificateOriginService" id="formClaveFirma">
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= subjectId %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= ServiceParams.CERTIFICATE_ORIGIN_CLAVEFIRMA %>" />
-						<% if (unregistered != null) { %>
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED %>" value="<%= unregistered %>" />
-						<% } %>
-						<% if (op != null) { %>
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_OPERATION %>" value="<%= op %>" />
-						<% } %>
-						
-						<a class="button" title="Firmar con Clave Firma" onclick="document.getElementById('formClaveFirma').submit();" href="javascript:{}">
-							<span>Acceder</span>
-							<span class="arrow-right arrow-right-inicio"></span>
-						</a>
-					</form>
-				</div>
-			
-				<div class="main-box-right disabled" id="certLocal">
-					<div class="contain-box-top">
-						<img alt="AutoFirma" title="AutoFirma" src="img/general/dms/logo-autofirma.png">
-					</div>
-					<div class="contain-box-bottom">
-						<h2 class="title-box title-box-autofirma">Firma con certificado local</h2>
-						<noscript>
-							<p class="text-box">Su navegador web tiene JavaScript desactivado. Habilite JavaScript para poder usar sus certificados.</p>
-						</noscript>
-						<p class="text-box hide" id="certLocalText">Utilice un certificado instalado en el almacén de claves de su navegador o alojado en tarjeta inteligente.</p>
-						
-					</div>
-					<form method="POST" action="chooseCertificateOriginService" id="formLocal">
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= subjectId %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= ServiceParams.CERTIFICATE_ORIGIN_LOCAL %>" />
-						<% if (unregistered != null) { %>
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED %>" value="<%= unregistered %>" />
-						<% } %>
-						<% if (op != null) { %>
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_OPERATION %>" value="<%= op %>" />
-						<% } %>
-						 <a class="button" title="Firmar con certificado local" onclick="document.getElementById('formLocal').submit();" href="javascript:{}">
-							<span>Acceder</span>
-							<span class="arrow-right arrow-right-inicio"></span>
-						</a>
-					</form>
-				</div>
- -->
-
 			</div>
 		</section>
 	</main>

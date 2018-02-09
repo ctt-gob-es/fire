@@ -144,10 +144,10 @@ public class ConfigManager {
 
 		final List<ProviderElement> providersList = new ArrayList<>();
 		final String[] providersTempList = providers.split(VALUES_SEPARATOR);
-		for (final String provider : providersTempList) {
+		for (final String provider : providersTempList) {						
 			if (provider != null && !provider.trim().isEmpty()) {
 				final ProviderElement prov = new ProviderElement(provider);
-				if (providersList.contains(provider)) {
+				if (!providersList.contains(provider)) {
 					providersList.add(prov);
 				}
 			}
@@ -265,7 +265,7 @@ public class ConfigManager {
 			checkProviders(providers);
 		}
 		catch (final Exception e) {
-			LOGGER.severe("Error en la configuracion de los proveedores: " + e); //$NON-NLS-1$
+			LOGGER.severe("Error en la configuracion de los proveedores: " + e.getMessage()); //$NON-NLS-1$
 			throw new ConfigFilesException("Error en la configuracion de los proveedores: " + e.getMessage(), CONFIG_FILE, e); //$NON-NLS-1$
 		}
 

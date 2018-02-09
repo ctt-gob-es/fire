@@ -57,13 +57,14 @@
 .contenido .contain-box-bottom {display: block; background-color: #eae8e9; margin:5px;height: 210px; box-sizing: border-box;}
 .contenido .contain-box-bottom .title-box {padding: 1em 0px 0.2em 15px;font-weight: bold;font-size: 16px;color: #dd5a00;}
 .contenido .contain-box-bottom .title-box-autofirma {color: #be081f;}
+
 .contenido .contain-box-bottom .text-box {padding:0 15px; font-size:15px; color: #707070; margin-bottom: 2.5em;text-align: left;}
-.contenido .main-box-right .button, .contenido .main-box-left .button {border: 1px solid #707070;padding: 0.4em 1.5em; border-radius: 2em;margin: 0em auto;width: 4.5em;display: block;position: relative;top: -4em;color: #707070; text-decoration: none;font-size: 15px;}
+.contenido .main-box-right .button, .contenido .main-box-left .button {border: 1px solid #707070;padding: 0.4em 1.5em; border-radius: 2em;margin: 0em auto;width: 4.5em;display: block;position: relative;top: -4em;color: #707070; text-decoration: none;font-size: 15px;text-align: left;}
 .contenido .main-box-right .button, .contenido:hover .main-box-left .button:hover {border: 1px solid #606060; color: #606060; }
 .contenido .main-box-right.disabled .button, .contenido .main-box-left.disabled .button {display:none;}
 .contenido .main-box-right.need-javascript .button, .contenido .main-box-left.need-javascript .button {display:none;}
 .contenido .button:hover { text-decoration:underline; cursor:pointer;}
-.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.4em;}
+.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.1em;}
 .arrow-right-inicio {top: 11px; right: 1.4em;}
 ./* .arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 21px;position: absolute;right: 4.5em;} */
 

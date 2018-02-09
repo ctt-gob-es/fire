@@ -366,7 +366,6 @@
 	<!-- contenido -->
 	<main class="main">
 		
-
 		<section class="contenido contenido-firmar">
 			<div  class="container-box-title">
 					<div class="container_tit">
@@ -386,8 +385,11 @@
 					</div>
 				</div>
 
-			<div class="contenido contenido-opciones temp-hide" id="errorButtonsPanel">
-				<h2 class="mensaje-error" id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
+			<div class="contenido-opciones temp-hide" id="errorButtonsPanel"><!-- temp-hide -->
+				<div class="mensaje-error" >
+				<h2 id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
+				</div>
+				
 				<div class="botones">
 					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
@@ -405,11 +407,22 @@
 					<%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %>
 					</li>
 				<% } %>
+				<!-- Borrar li  -->
+				<li>Prueba 1</li>
+				<li>Prueba 2</li>
+				<li>Prueba 3</li>
+				<li>Prueba 4</li>
+				<li>Prueba 5</li>
+				<li>Prueba 6</li>
+				<li>Prueba 7</li>
+				<li>Prueba 8</li>
+				<li>Prueba 9</li>
+				<li>Prueba 10</li>
 				</ul>
 			<% } %>
 			</div>
 			
-			<div Class="container-firmar"> 
+			<div Class="container-firmar "> 
 				<form name="formSign" id="formSign" method="POST" action="miniappletSuccessService">
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
@@ -423,7 +436,7 @@
 					<input id="buttonSign" type="button" class="button_firmar" value="Firmar" onclick="<%= formFunction %>"/>
 				</form>
 			</div>
-			<div><span class="bold">Nota:</span> La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</div>
+			<div class="nota-firmar"><span class="bold">Nota:</span> La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</div>
 		</section>
 		
 	</main>
