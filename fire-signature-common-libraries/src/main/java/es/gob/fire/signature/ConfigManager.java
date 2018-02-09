@@ -142,14 +142,10 @@ public class ConfigManager {
 
 		final List<ProviderElement> providersList = new ArrayList<>();
 		final String[] providersTempList = providers.split(VALUES_SEPARATOR);
-		for (final String provider : providersTempList) {
+		for (final String provider : providersTempList) {						
 			if (provider != null && !provider.trim().isEmpty()) {
 				final ProviderElement prov = new ProviderElement(provider);
-<<<<<<< Upstream, based on origin/multi_provider
-				if (providersList.contains(provider)) {
-=======
 				if (!providersList.contains(provider)) {
->>>>>>> ed8b8e6 fire-test
 					providersList.add(prov);
 				}
 			}
