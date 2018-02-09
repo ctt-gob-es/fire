@@ -37,65 +37,62 @@ CREATE TABLE `tb_usuarios` (
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
 
 
----FIN CREAR TABLAS NUEVAS----------
+-- FIN CREAR TABLAS NUEVAS----------
 
-----INSERTAR DATOS--------------
+-- INSERTAR DATOS--------------
 
------USUARIO POR DEFECTO --------
+-- USUARIO POR DEFECTO --------
 insert into tb_usuarios (nombre_usuario,clave,nombre,apellidos,usu_defecto) 
 
 values('admin_pass','D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=','default name','default surnames',1);
 
----RESTO USUARIOS -------
+-- RESTO USUARIOS -------
 insert into tb_usuarios (nombre_usuario,clave,nombre,apellidos)
 
 SELECT parametro,valor,concat(parametro,"_name") as nombre,concat(parametro,"_surname") as apellidos 
 
 FROM tb_configuracion WHERE parametro <> 'admin_pass';
 
-------------CERTIFICADOS-------
+-- CERTIFICADOS-------
 insert into tb_certificados (nombre_cert,fec_alta,cert_principal,huella_principal) 
-select concat("CERT_",a.id)as nombre_cert,a.fecha_alta,a.cer,a.huella from tb_aplicaciones a
+select concat("CERT_",a.id)as nombre_cert,a.fecha_alta,a.cer,a.huella from tb_aplicaciones a;
 
---------APLICACIONES NEW-----------
+-- APLICACIONES NEW-----------
 
 INSERT INTO tb_aplicaciones_new (id,nombre,fecha_alta,responsable,resp_correo,resp_telefono,fk_certificado)
-
 SELECT a.id, a.nombre,a.fecha_alta,a.responsable,a.resp_correo,a.resp_telefono ,c.id_certificado 
-
 FROM tb_aplicaciones a, tb_certificados c 
-
 WHERE  SUBSTRING_INDEX(c.nombre_cert,'_',-1)=a.id;
 
 CREATE TABLE tb_aplicaciones_old SELECT * FROM tb_aplicaciones;
 
 DROP table tb_aplicaciones ;
 
-ALTER TABLE `fire`.`tb_aplicaciones_new` 
-RENAME TO  `fire`.`tb_aplicaciones` ;
+ALTER TABLE `tb_aplicaciones_new` 
+RENAME TO  `tb_aplicaciones` ;
 
 
-ALTER TABLE `fire`.`tb_aplicaciones` 
+ALTER TABLE `tb_aplicaciones` 
 
 ADD INDEX `fk_certificado_idx` (`fk_certificado` ASC);
 
-ALTER TABLE `fire`.`tb_aplicaciones` 
+ALTER TABLE `tb_aplicaciones` 
 ADD CONSTRAINT `fk_certificado`
   
 FOREIGN KEY (`fk_certificado`)
-  REFERENCES `fire`.`tb_certificados` (`id_certificado`)
+  REFERENCES `tb_certificados` (`id_certificado`)
   
 ON DELETE RESTRICT
   ON UPDATE CASCADE;
 
-ALTER TABLE `fire`.`tb_aplicaciones` DROP FOREIGN KEY `fk_certificado`;
+ALTER TABLE `tb_aplicaciones` DROP FOREIGN KEY `fk_certificado`;
 
-ALTER TABLE `fire`.`tb_aplicaciones` 
+ALTER TABLE `tb_aplicaciones` 
 CHANGE COLUMN `fk_certificado` `fk_certificado` INT(11) NOT NULL ;
 
-ALTER TABLE `fire`.`tb_aplicaciones` 
+ALTER TABLE `tb_aplicaciones` 
 ADD CONSTRAINT `fk_certificado`
   FOREIGN KEY (`fk_certificado`)
   
-REFERENCES `fire`.`tb_certificados` (`id_certificado`)
+REFERENCES `tb_certificados` (`id_certificado`)
   ON UPDATE CASCADE;
