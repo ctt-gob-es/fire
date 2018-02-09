@@ -71,6 +71,8 @@ public class ConfigManager {
 
 	private static final String PROP_SESSIONS_DAO = "sessions.dao"; //$NON-NLS-1$
 
+	private static final String PROP_HTTP_CERT_ATTR = "http.cert.attr"; //$NON-NLS-1$
+
 	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
 	private static final String USE_BBDD = "usebbdd"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
@@ -524,4 +526,22 @@ public class ConfigManager {
 	 	return config.getProperty(PROP_FIRE_PUBLIC_URL);
 	 }
 
+	 /**
+	  * Recupera el nombre del atributo de la cabecera de las peticiones HTTP
+	  * en el que se transmite el certificado para la autenticaci&oacute;n
+	  * cliente SSL.
+	 * @return Nombre del atributo configurado.
+	 */
+	public static String getHttpsCertAttributeHeader() {
+
+		 if (config == null) {
+			 try {
+				 loadConfig();
+			 } catch (final ConfigFilesException e) {
+				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				 return null;
+			 }
+		 }
+		 return config.getProperty(PROP_HTTP_CERT_ATTR);
+	 }
 }

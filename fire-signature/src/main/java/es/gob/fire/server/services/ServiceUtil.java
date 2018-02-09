@@ -17,6 +17,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.signature.AplicationsDAO;
+import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.DBConnectionException;
 
 /**
@@ -97,6 +99,26 @@ public final class ServiceUtil {
      * {@code null} si no hay ninguno.
      */
     static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request){
+
+    	X509Certificate[] certificates = getCertificatesFromAttribute(request);
+    	if (certificates == null) {
+    		final String propName = ConfigManager.getHttpsCertAttributeHeader();
+    		if (propName != null && !propName.isEmpty()) {
+    			certificates = getCertificatesFromHeader(request, propName);
+    		}
+    	}
+    	return certificates;
+    }
+
+    /**
+     * Recupera los certificados de autenticacion SSL como atributo de las peticiones.
+     * Esto ser&aacute; cuando se transmitan al servidor de aplicaciones los certificados mediante
+     * AJP.
+     * @param request Petici&oacute;n con los certificados.
+     * @return Lista de los certificados X509 enviados o {@code null} se enviaron como
+     * atributos de la petici&oacute;n.
+     */
+    private static X509Certificate[] getCertificatesFromAttribute(final HttpServletRequest request) {
     	final Object[] cer = (Object[]) request.getAttribute("javax.servlet.request.X509Certificate"); //$NON-NLS-1$
     	if (cer == null){
     		return null;
@@ -106,6 +128,39 @@ public final class ServiceUtil {
     		certificates[i] = (X509Certificate) cer[i];
   	   	}
     	return certificates;
+    }
+
+    /**
+     * Recupera los certificados de autenticacion SSL como una propiedad de la cabecera de las
+     * peticiones. Se deber&aacute; indicar el nombre de la propiedad de la cabecera en la que
+     * se transmiten los certificados.
+     * @param request Petici&oacute;n con los certificados.
+     * @return Lista de los certificados X509 enviados o {@code null} se enviaron en la propiedad
+     * de la cabecera.
+     */
+    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName)
+    {
+        X509Certificate certificates[] = null;
+        final String headerName = propName;
+        String headerCert = request.getHeader(headerName);
+        try {
+            if(headerCert != null && !headerCert.isEmpty()) {
+                headerCert = headerCert.replace("-----BEGIN CERTIFICATE----- ", ""); //$NON-NLS-1$ //$NON-NLS-2$
+                headerCert = headerCert.replace(" -----END CERTIFICATE-----", ""); //$NON-NLS-1$ //$NON-NLS-2$
+                final byte certBytes[] = Base64.decode(headerCert);
+                final ByteArrayInputStream bis = new ByteArrayInputStream(certBytes);
+                final CertificateFactory fact = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
+                final X509Certificate cer = (X509Certificate)fact.generateCertificate(bis);
+                certificates = new X509Certificate[1];
+                certificates[0] = cer;
+            } else {
+                LOGGER.warning("No existe certficado en la request en el header " + headerName); //$NON-NLS-1$
+            }
+        }
+        catch(final Exception ex) {
+            LOGGER.severe("Ha ocurrido un error al extraer certificado : " + ex); //$NON-NLS-1$
+        }
+        return certificates;
     }
 
     /** Devuelve la huella del certificado en Base64.
