@@ -91,16 +91,24 @@
 		extraParamsProperties.setProperty("serverUrl", baseUrl + "afirma/triphaseSignService"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (String k : extraParamsProperties.keySet().toArray(new String[extraParamsProperties.size()])) {
-	extraParams.append(k).append("="). //$NON-NLS-1$
-			append(extraParamsProperties.getProperty(k)).append("\\n"); //$NON-NLS-1$
+			extraParams.append(k).append("="). //$NON-NLS-1$
+				append(extraParamsProperties.getProperty(k)).append("\\n"); //$NON-NLS-1$
 		}
 	}
 
 
 	// Obtenemos las URL a las que hay que redirigir al usuario en caso de exito y error
-	final Properties resultRefs = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-	final String successUrl = resultRefs.getProperty(ServiceParams.CONNECTION_PARAM_SUCCESS_URL);
-	final String errorUrl = resultRefs.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+	final Properties connConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	final String successUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_SUCCESS_URL);
+	final String errorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+	final String afirmaWS = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_AUTOFIRMA_WS);
+	boolean afirmaNative;
+	if (afirmaWS != null) {
+		afirmaNative = !Boolean.parseBoolean(afirmaWS);
+	}
+	else {
+		afirmaNative = ConfigManager.getClienteAfirmaForceNative();
+	}
 	
 	final String formFunction = isBatchOperation ? "doSignBatch()" : "doSign()"; //$NON-NLS-1$ //$NON-NLS-2$
 	
@@ -464,7 +472,7 @@
 		// la carga JNLP si no lo tiene
 		if (deployJava.versionCheck("1.8+")) {
 			MiniApplet.setJnlpService("<%= baseUrl %>afirma/afirmaJnlpService");
-			MiniApplet.setForceAFirma(<%= ConfigManager.getClienteAfirmaForceNative() %>);
+			MiniApplet.setForceAFirma(<%= afirmaNative %>);
 		}
 
 		MiniApplet.setForceWSMode(true);

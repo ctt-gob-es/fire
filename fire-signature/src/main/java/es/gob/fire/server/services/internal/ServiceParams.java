@@ -137,6 +137,9 @@ public class ServiceParams {
 	/** Par&aacute;metro usado para configurar el gestor de documentos con el que obtener los datos
 	 * a firmar y guardar las firmas. */
 	public static final String CONNECTION_PARAM_DOCUMENT_MANAGER = "docManager"; //$NON-NLS-1$
+	/** Par&aacute;metro usado para configurar si se desea que AutoFirma se ejecute como
+	 * aplicaci&oacute;n nativa o aplicaci&oacute;n WebStart. */
+	public static final String CONNECTION_PARAM_AUTOFIRMA_WS = "afirmaWS"; //$NON-NLS-1$
 
 	/** Par&aacute;metro usado para configurar que se debe utilizar un certificado local. */
     public static final String CERTIFICATE_ORIGIN_LOCAL = "local"; //$NON-NLS-1$
