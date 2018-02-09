@@ -78,6 +78,8 @@ public class ServiceParams {
     public static final String SESSION_PARAM_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el certificado de firma en Base64. */
     public static final String SESSION_PARAM_CERT = "cert"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el listado de proveedores disponibles para el usuario. */
+    public static final String SESSION_PARAM_PROVIDERS = "providers"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el origen del certificado de firma. */
     public static final String SESSION_PARAM_CERT_ORIGIN = "certorigin"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n que indica si el origen del certificado se forz&oacute; desde la aplicaci&oacute;n. */

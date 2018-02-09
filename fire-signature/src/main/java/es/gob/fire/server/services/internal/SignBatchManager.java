@@ -60,8 +60,8 @@ public class SignBatchManager {
     		return;
     	}
 
-		// Identificamos si ya esta definido el origen del certificado
-		final String[] provs = (String[]) session.getObject(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+		// Recuperamos los proveedores cargados para la aplicacion
+		final String[] provs = (String[]) session.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
 
     	// TODO: Borrar esto cuando se terminen los cambios en el componente distribuido PHP
     	// en el que, por ahora, no se envia el subjectId por parametro, asi que hemos de usar

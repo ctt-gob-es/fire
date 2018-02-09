@@ -128,7 +128,7 @@
 		
 		<div class="container-box">	
 		<%
-		String[] providers = (String[]) fireSession.getObject(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+		String[] providers = (String[]) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
 		
 		for (int i=1;i<=3;i++){//Borrar 
 		for (String provider : providers) {

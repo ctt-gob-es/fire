@@ -156,7 +156,7 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParamsB64);
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
-        session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, provs);
+        session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
