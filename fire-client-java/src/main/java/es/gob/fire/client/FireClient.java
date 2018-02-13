@@ -443,13 +443,8 @@ public class FireClient {
         	throw new IOException(e);
         }
 
-        // Si el resultado es un error, lo devolvemos
-        if (result.getResultType() == TransactionResult.STATE_ERROR) {
-        	return result;
-        }
-
-        // Si el resultado no es un error y ya contiene ya la firma resultante, la devolvemos
-        if (result.getResult() != null) {
+        // Si el resultado es un error o si ya contiene la firma, lo devolvemos
+        if (result.getErrorCode() != 0 || result.getResult() != null) {
         	return result;
         }
 

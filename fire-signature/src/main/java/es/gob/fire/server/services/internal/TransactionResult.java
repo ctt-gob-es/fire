@@ -71,7 +71,7 @@ public class TransactionResult {
 
 	private String errorMessage = null;
 
-	private String provName = null;
+	private String providerName = null;
 
 	private byte[] result = null;
 
@@ -97,12 +97,12 @@ public class TransactionResult {
 	 * Crea el objeto que debe devolverse como resultado de una transacci&oacute;n cuando esta
 	 * ha finalizado correctamente. Este objeto no tiene definido el resultado final.
 	 * @param resultType Tipo de resultado.
-	 * @param provName Nombre del proveedor utilizado.
+	 * @param providerName Nombre del proveedor utilizado.
 	 */
-	public TransactionResult(final int resultType, final String provName) {
+	public TransactionResult(final int resultType, final String providerName) {
 		this.resultType = resultType;
 		this.state = STATE_OK;
-		this.provName = provName;
+		this.providerName = providerName;
 	}
 
 	/**
@@ -153,16 +153,16 @@ public class TransactionResult {
 	 * Devuelve el nombre de proveedor utilizado para la firma.
 	 * @return Nombre de proveedor.
 	 */
-	public String getProvName() {
-		return this.provName;
+	public String getProviderName() {
+		return this.providerName;
 	}
 
 	/**
 	 * Establece el nombre del proveedor utilizado para la firma.
-	 * @param provName Nombre del proveedor.
+	 * @param providerName Nombre del proveedor.
 	 */
-	public void setProvName(final String provName) {
-		this.provName = provName;
+	public void setProviderName(final String providerName) {
+		this.providerName = providerName;
 	}
 
 	/**
@@ -202,8 +202,8 @@ public class TransactionResult {
 			resultBuilder.add(JSON_ATTR_ERROR_MSG, this.errorMessage);
 			resultBuilder.add(JSON_ATTR_ERROR_CODE, this.errorCode);
 		}
-		if (this.provName != null) {
-			resultBuilder.add(JSON_ATTR_PROVIDER_NAME, this.provName);
+		if (this.providerName != null) {
+			resultBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
 		}
 
 		// Construimos la respuesta
@@ -233,10 +233,15 @@ public class TransactionResult {
 
 		opResult.state = STATE_OK;
 
-		final byte[] prefix = Arrays.copyOf(result, JSON_RESULT_PREFIX.length());
-		if (result.length > JSON_RESULT_PREFIX.length() + 2 &&
-				Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes())) {
+		// Comprobamos el inicio de la respuesta para saber si recibimos la informacion
+		// de la operacion o el binario resultante
+		byte[] prefix = null;
+		if (result != null && result.length > JSON_RESULT_PREFIX.length() + 2) {
+			prefix = Arrays.copyOf(result, JSON_RESULT_PREFIX.length());
+		}
 
+		// Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
+		if (prefix != null && Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes())) {
 			final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
 			final JsonObject json = jsonReader.readObject();
 			final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
@@ -247,7 +252,7 @@ public class TransactionResult {
 				opResult.errorMessage = resultObject.getString(JSON_ATTR_ERROR_MSG);
 			}
 			if (resultObject.containsKey(JSON_ATTR_PROVIDER_NAME)) {
-				opResult.provName = resultObject.getString(JSON_ATTR_PROVIDER_NAME);
+				opResult.providerName = resultObject.getString(JSON_ATTR_PROVIDER_NAME);
 			}
             jsonReader.close();
 		}

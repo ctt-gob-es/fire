@@ -102,7 +102,7 @@ public class RecoverErrorManager {
 				errorCode,
 				errorMsg);
 
-		tr.setProvName(session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN));
+		tr.setProviderName(session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN));
 
 		return tr;
 	}

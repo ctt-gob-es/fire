@@ -13,6 +13,7 @@
     <form id="form1" runat="server">
     <div>
     
+        <br /><b>Proveedor:</b><br /> <asp:Label runat="server" id="ProviderName"></asp:Label>
         <br /><b>Resultado de firma:</b><br /> <asp:Label runat="server" id="Result1"></asp:Label>
         <br /><b>Resultado de firma:</b><br /> <asp:Label runat="server" id="Result2"></asp:Label>
 

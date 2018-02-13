@@ -9,7 +9,7 @@ public partial class example_fire_recover_batch_sign : System.Web.UI.Page
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionResult signature;
-        string transactionId = "2c78060f-68fa-410c-9469-bdcc92bc4ff7";
+        string transactionId = "ac335c7f-0696-46f7-b8c2-8016f6cbfc75";
         try
         {
             signature = new FireClient("A418C37E84BA").recoverBatchSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)

@@ -159,10 +159,10 @@ public class TransactionResult {
 
 	/**
 	 * Establece el nombre del proveedor utilizado para la firma.
-	 * @param provName Nombre del proveedor.
+	 * @param providerName Nombre del proveedor.
 	 */
-	public void setProviderName(final String provName) {
-		this.providerName = provName;
+	public void setProviderName(final String providerName) {
+		this.providerName = providerName;
 	}
 
 	/**
@@ -233,7 +233,7 @@ public class TransactionResult {
 
 		opResult.state = STATE_OK;
 
-		// Comprobamos el inicio de la respuesta para saber si recibimos la informacio
+		// Comprobamos el inicio de la respuesta para saber si recibimos la informacion
 		// de la operacion o el binario resultante
 		byte[] prefix = null;
 		if (result != null && result.length > JSON_RESULT_PREFIX.length() + 2) {
