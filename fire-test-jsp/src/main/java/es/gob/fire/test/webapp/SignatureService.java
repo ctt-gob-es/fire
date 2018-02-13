@@ -110,6 +110,7 @@ public class SignatureService extends HttpServlet {
         confProperties.setProperty("docTitle", "Mi titulo"); //$NON-NLS-1$ //$NON-NLS-2$
         confProperties.setProperty("docName", "Mi nombre"); //$NON-NLS-1$ //$NON-NLS-2$
 
+        // Configuracion del uso de AutoFirma en caso de firma con certificado local
         //confProperties.setProperty("afirmaWS", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 
         // Podemos configurar un DocumentManager configurado en el componente central.

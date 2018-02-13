@@ -9,11 +9,17 @@
  */
 package es.gob.fire.server.services.internal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 
 import es.gob.fire.server.connector.DocInfo;
 
@@ -49,14 +55,39 @@ public class BatchResult implements Serializable {
 	/** Estado que indica que la firma ya se ha recuperado. */
 	public static final String RECOVERED = "RECOVERED"; //$NON-NLS-1$
 
+	private static final String JSON_ATTR_PROVIDER_NAME = "prov"; //$NON-NLS-1$
+	private static final String JSON_ATTR_BATCH_RESULT = "batch"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_ID = "id"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_OK = "ok"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_DETAILS = "dt"; //$NON-NLS-1$
+
 	private final Map<String, BatchDocumentReference> results;
 
 	private X509Certificate signingCertificate;
+
+	private String providerName = null;
 
 	/** Construye el objeto con el resultado del lote. */
 	public BatchResult() {
 		this.results = new HashMap<>();
 		this.signingCertificate = null;
+	}
+
+
+	/**
+	 * Devuelve el nombre de proveedor utilizado para la firma.
+	 * @return Nombre de proveedor.
+	 */
+	public String getProviderName() {
+		return this.providerName;
+	}
+
+	/**
+	 * Establece el nombre del proveedor utilizado para la firma.
+	 * @param provName Nombre del proveedor.
+	 */
+	public void setProviderName(final String provName) {
+		this.providerName = provName;
 	}
 
 	/**
@@ -187,26 +218,66 @@ public class BatchResult implements Serializable {
 		return this.results.containsKey(docId);
 	}
 
-	@Override
-	public String toString() {
+	/**
+	 * Compone un objeto JSON con la informaci&oacute;n y el resultado de
+	 * la operaci&oacute;n de firma de lote.
+	 * @return Resultado codificado en forma de JSON.
+	 */
+	public byte[] encode() {
 
-		final StringBuilder buffer = new StringBuilder();
-		buffer.append("{\"batch\":["); //$NON-NLS-1$
+		// Si no tenemos resultado, devolvemos un JSON con la informacion que se
+		// dispone de la transaccion
+		final JsonArrayBuilder resultBuilder = Json.createArrayBuilder();
+
 		final Iterator<String> keys = this.results.keySet().iterator();
 		while (keys.hasNext()) {
 			final String id = keys.next();
 			final BatchDocumentReference result = this.results.get(id);
-			buffer.append("{\"id\": \"").append(id).append("\"") //$NON-NLS-1$ //$NON-NLS-2$
-			.append(", \"ok\": \"").append(result.isSigned()).append("\"") //$NON-NLS-1$ //$NON-NLS-2$
-			.append(", \"dt\": \"").append(result.getDetails() != null ? result.getDetails() : "").append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			buffer.append("}"); //$NON-NLS-1$
-			if (keys.hasNext()) {
-				buffer.append(","); //$NON-NLS-1$
-			}
-		}
-		buffer.append("]}"); //$NON-NLS-1$
 
-		return buffer.toString();
+			resultBuilder.add(
+					Json.createObjectBuilder()
+					.add(JSON_ATTR_DOC_ID, id)
+					.add(JSON_ATTR_DOC_OK, result.isSigned())
+					.add(JSON_ATTR_DOC_DETAILS, result.getDetails() != null ? result.getDetails() : "") //$NON-NLS-1$
+					);
+		}
+
+		// Construimos la respuesta
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final JsonWriter json = Json.createWriter(baos);
+
+		final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+		jsonBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
+		jsonBuilder.add(JSON_ATTR_BATCH_RESULT, resultBuilder);
+
+		json.writeObject(jsonBuilder.build());
+		json.close();
+
+		return baos.toByteArray();
+
+
+//		final StringBuilder buffer = new StringBuilder();
+//		buffer.append("{\"batch\":["); //$NON-NLS-1$
+//		final Iterator<String> keys = this.results.keySet().iterator();
+//		while (keys.hasNext()) {
+//			final String id = keys.next();
+//			final BatchDocumentReference result = this.results.get(id);
+//			buffer.append("{\"id\": \"").append(id).append("\"") //$NON-NLS-1$ //$NON-NLS-2$
+//			.append(", \"ok\": \"").append(result.isSigned()).append("\"") //$NON-NLS-1$ //$NON-NLS-2$
+//			.append(", \"dt\": \"").append(result.getDetails() != null ? result.getDetails() : "").append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//			buffer.append("}"); //$NON-NLS-1$
+//			if (keys.hasNext()) {
+//				buffer.append(","); //$NON-NLS-1$
+//			}
+//		}
+//		buffer.append("]}"); //$NON-NLS-1$
+//
+//		return buffer.toString();
+	}
+
+	@Override
+	public String toString() {
+		return new String(encode());
 	}
 
 	private class BatchDocumentReference implements Serializable {

@@ -88,6 +88,9 @@ public class FireClient {
     		"&transactionid=" + TAG_VALUE_TRANSACTION + //$NON-NLS-1$
     		"&upgrade=" + TAG_VALUE_UPGRADE; //$NON-NLS-1$
 
+    private static final String URL_PARAMETERS_RECOVER_SIGNATURE_RESULT =
+    		"&transactionid=" + TAG_VALUE_TRANSACTION; //$NON-NLS-1$
+
     private static final String URL_PARAMETERS_CREATE_BATCH =
             "&config=" + TAG_VALUE_CONFIG + //$NON-NLS-1$
             "&algorithm=" + TAG_VALUE_ALGORITHM + //$NON-NLS-1$
@@ -409,10 +412,11 @@ public class FireClient {
         	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
+        TransactionResult result;
         try {
-        	return TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, this.conn.readUrl(this.serviceUrl, urlParameters, Method.GET));
+        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, this.conn.readUrl(this.serviceUrl, urlParameters, Method.GET));
         } catch (final HttpError e) {
-        	LOGGER.severe("Error en la llamada al servicio de recuperacion de firma: " + e.getResponseDescription()); //$NON-NLS-1$
+        	LOGGER.severe("Error en la llamada al servicio de recuperacion del resultado de la operacion de firma: " + e.getResponseDescription()); //$NON-NLS-1$
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
         		throw new HttpForbiddenException(e);
         	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
@@ -438,6 +442,52 @@ public class FireClient {
         			e);
         	throw new IOException(e);
         }
+
+        // Si el resultado es un error, lo devolvemos
+        if (result.getResultType() == TransactionResult.STATE_ERROR) {
+        	return result;
+        }
+
+        // Si el resultado no es un error y ya contiene ya la firma resultante, la devolvemos
+        if (result.getResult() != null) {
+        	return result;
+        }
+
+        // Si no tenemos la firma, hacemos una nueva llamada para descargarla
+        urlParameters =
+        		URL_PARAMETERS_BASE
+        		.replace(TAG_VALUE_APP_ID, this.appId)
+        		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
+        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_SIGN_RESULT.getId()) +
+        		URL_PARAMETERS_RECOVER_SIGNATURE_RESULT
+                .replace(TAG_VALUE_TRANSACTION, transactionId);
+
+        byte[] signature;
+        try {
+        	 signature = this.conn.readUrl(this.serviceUrl, urlParameters, Method.GET);
+        } catch (final HttpError e) {
+        	LOGGER.severe("Error en la llamada al servicio de recuperacion de firma: " + e.getResponseDescription()); //$NON-NLS-1$
+        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+        		throw new HttpForbiddenException(e);
+        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+        		throw new HttpNetworkException(e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
+        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
+        	} else {
+        		throw new HttpOperationException(e.getMessage(), e);
+        	}
+        }
+        catch (final Exception e) {
+        	LOGGER.log(
+        			Level.SEVERE,
+        			"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
+        			e);
+        	throw new IOException(e);
+        }
+
+        result.setResult(signature);
+
+        return result;
     }
 
     /**

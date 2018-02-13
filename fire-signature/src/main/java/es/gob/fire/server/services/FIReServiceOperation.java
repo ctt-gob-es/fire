@@ -16,7 +16,7 @@ public enum FIReServiceOperation {
 
 	/** Operaci&oacute;n de firma. */
 	SIGN (1),
-	/** Operaci&oacute;n de recuperaci&oacute;n de firma. */
+	/** Operaci&oacute;n de recuperaci&oacute;n del resultado de firma. */
 	RECOVER_SIGN (2),
 	/** Operaci&oacute;n de creaci&oacute;n de un lote de firma. */
 	CREATE_BATCH (5),
@@ -30,6 +30,8 @@ public enum FIReServiceOperation {
 	RECOVER_BATCH_STATE(9),
 	/** Operaci&oacute;n para recuperar una firma particular de un lote. */
 	RECOVER_SIGN_BATCH (10),
+	/** Operaci&oacute;n para recuperar una firma simple generada que se sabe que termin&oacute; correctamente. */
+	RECOVER_SIGN_RESULT(11),
 	/** Operaci&oacute;n para recuperar el detalle de un error producido durante una transacci&oacute;n. */
 	RECOVER_ERROR(99);
 

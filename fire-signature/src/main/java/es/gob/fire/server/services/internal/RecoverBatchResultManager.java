@@ -146,6 +146,7 @@ public class RecoverBatchResultManager {
     		}
 
         	batchResult.setSigningCertificate(signingCert);
+        	batchResult.setProviderName(origin);
 
         	// Si se pidio que se detuviese la operacion en caso de error y se
         	// encuentra alguno, entonces no sera necesario actualizar las firmas
@@ -260,6 +261,8 @@ public class RecoverBatchResultManager {
         		return;
         	}
 
+        	batchResult.setProviderName(origin);
+
         	// Si hay que detener el proceso en caso de error, comprobamos si
         	// ha ocurrido alguno ya y marcamos todas las operaciones que ya
         	// estaban iniciadas como abortadas
@@ -332,7 +335,7 @@ public class RecoverBatchResultManager {
         }
 
         // Enviamos el XML resultado de la firma del lote
-        sendResult(response, batchResult.toString().getBytes());
+        sendResult(response, batchResult.encode());
 	}
 
 	/**

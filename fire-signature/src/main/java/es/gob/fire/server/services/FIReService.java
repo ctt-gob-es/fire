@@ -26,6 +26,7 @@ import es.gob.fire.server.services.internal.RecoverBatchSignatureManager;
 import es.gob.fire.server.services.internal.RecoverBatchStateManager;
 import es.gob.fire.server.services.internal.RecoverErrorManager;
 import es.gob.fire.server.services.internal.RecoverSignManager;
+import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
 import es.gob.fire.signature.AplicationsDAO;
@@ -182,6 +183,9 @@ public class FIReService extends HttpServlet {
     			break;
     		case RECOVER_SIGN:
     			RecoverSignManager.recoverSignature(params, response);
+    			break;
+    		case RECOVER_SIGN_RESULT:
+    			RecoverSignResultManager.recoverSignature(params, response);
     			break;
     		case CREATE_BATCH:
     			CreateBatchManager.createBatch(request, params, response);
