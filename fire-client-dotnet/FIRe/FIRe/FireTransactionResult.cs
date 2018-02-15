@@ -22,18 +22,14 @@ namespace FIRe
         private static readonly int STATE_OK = 0;
         // Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
         private static readonly int STATE_ERROR = -1;
-
-        // Prefijo que antecede al codigo de error cuando este se produjo durante la operacion.
-        private static readonly string ERROR_PREFIX = "ERR-";
+        
         // Nombre del campo principal del JSON con la informacion de la firma
         private static readonly string JSON_ATTR_RESULT = "result"; //$NON-NLS-1$
         // Prefijo de la estructura que almacena la informacion sobre la operacion realizada
         private static readonly string JSON_RESULT_PREFIX = "{\"" + JSON_ATTR_RESULT + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
-        // Sufijo que se indica a continuacion de un codigo de error.
-        private static readonly string ERROR_SUFIX = ":";
 
         private readonly int state;
-        private String providerName { get; set; }
+        private String providerName;
         private readonly String errorCode;
         private readonly String errorMessage;
         private byte[] result { get; set; }
@@ -47,8 +43,8 @@ namespace FIRe
 				    "El resultado de la firma no puede ser nulo" 
 			    );
 		    }
-
-			this.state = STATE_OK;
+            
+            this.state = STATE_OK;
 
             // Comprobamos el inicio de la respuesta para saber si recibimos la informacion
             // de la operacion o el binario resultante
@@ -58,25 +54,25 @@ namespace FIRe
                 prefix = new byte[JSON_RESULT_PREFIX.Length];
                 Array.Copy(bytes, 0, prefix, 0, prefix.Length);
             }
-
-
+            
             // Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
-            if (prefix != null && prefix.Equals(JSON_RESULT_PREFIX))
+            if (prefix != null && System.Text.Encoding.UTF8.GetString(prefix).Equals(JSON_RESULT_PREFIX))
+            //if (prefix != null && prefix.SequenceEqual(System.Text.Encoding.Unicode.GetBytes(JSON_RESULT_PREFIX)))
             {
                 try
                 {
                     FireSignResult signResult = deserializedSignResult(System.Text.Encoding.UTF8.GetString(bytes));
-                    if (signResult.ercod != 0)
+                    if (signResult.getErrorCode() != 0)
                     {
-                        this.errorCode = signResult.ercod.ToString();
+                        this.errorCode = signResult.getErrorCode().ToString();
                     }
-                    if (signResult.ermsg != null)
+                    if (signResult.getErrorMessage() != null)
                     {
-                        this.errorMessage = signResult.ermsg;
+                        this.errorMessage = signResult.getErrorMessage();
                     }
-                    if (signResult.prov != null)
+                    if (signResult.getProviderName() != null)
                     {
-                        this.providerName = signResult.prov;
+                        this.providerName = signResult.getProviderName();
                     }
                 }
                 catch(Exception)
@@ -109,10 +105,24 @@ namespace FIRe
 	    }
 
         /// <summary> Establece el resultado de la transacción de firma.</summary>
-        /// <param name="data">Datos resultantes de la transacción.</returns>
+        /// <param name="data">Datos resultantes de la transacción.</param>
         public void setResult(byte[] data)
         {
             this.result = data;
+        }
+
+        /// <summary>Obtiene el nombre del proveedor utilizado para la firma.</summary>
+        /// <returns>Nombre del proveedor.</returns>
+        public String getProviderName()
+        {
+            return this.providerName;
+        }
+
+        /// <summary>Obtiene el nombre del proveedor utilizado para realizar la firma.</summary>
+        /// <param name="providerName">Nombre del proveedor.</param>
+        public void setProviderName(String providerName)
+        {
+            this.providerName = providerName;
         }
 
         /// <summary>Obtiene el código de error durante la firma.</summary>
@@ -134,6 +144,42 @@ namespace FIRe
     public class FireSignResult
     {
         /// <summary>
+        /// Resultado de la operacion de firma.
+        /// </summary>
+        public FireSignResultData result { get; set; }
+
+        /// <summary>
+        /// Recupera el nombre del proveedor utilizado en la operación.
+        /// </summary>
+        /// <returns>Nombre del proveedor.</returns>
+        public String getProviderName()
+        {
+            return this.result.prov;
+        }
+
+        /// <summary>
+        /// Recupera el código del error que se produjese durante la operación.
+        /// </summary>
+        /// <returns>Código de error o null si no se produjo ningún error.</returns>
+        public int getErrorCode()
+        {
+            return this.result.ercod;
+        }
+
+        /// <summary>
+        /// Recupera el mensaje del error que se produjese durante la operación.
+        /// </summary>
+        /// <returns>Mensaje de error o null si no se produjo ningún error.</returns>
+        public String getErrorMessage()
+        {
+            return this.result.ermsg;
+        }
+    }
+
+    /// <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
+    public class FireSignResultData
+    {
+        /// <summary>
         /// Nombre del proveedor.
         /// </summary>
         public string prov { get; set; }
@@ -146,4 +192,5 @@ namespace FIRe
         /// </summary>
         public string ermsg { get; set; }
     }
+
 }

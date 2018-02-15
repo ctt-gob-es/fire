@@ -135,6 +135,11 @@ namespace FIRe
             "&upgrade=" + UPGRADE +
             "&op=" + OP;
 
+        private static readonly string URL_PARAMETERS_RECOVER_SIGN_RESULT =
+            "appid=" + APP_ID +
+            "&transactionid=" + TRANSACTION +
+            "&op=" + OP;
+
         /// <summary>
         /// Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
         /// </summary>
@@ -178,8 +183,27 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters);
-            // Mostramos los datos obtenidos
-            return new FireTransactionResult(bytes);
+
+            // Identificamos los datos obtenidos
+            FireTransactionResult result = new FireTransactionResult(bytes);
+
+            // Si el resultado es un error o si ya contiene la firma, lo devolvemos
+            if (result.getErrorCode() != null || result.getResult() != null)
+            {
+                return result;
+            }
+
+            // Si no, hacemos una nueva llamada para recuperarla
+            urlParameters = URL_PARAMETERS_RECOVER_SIGN_RESULT
+                .Replace(APP_ID, appId)
+                .Replace(TRANSACTION, transactionId)
+                .Replace(OP, "11"); // El tipo de operacion solicitada es RECOVER_SIGN_RESULT (11)
+
+            //  realizamos la peticion post al servicio y recibimos los datos de la peticion
+            bytes = getResponseToPostPetition(url, urlParameters);
+            result.setResult(bytes);
+
+            return result;
         }
 
         /// <summary>

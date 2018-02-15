@@ -10,6 +10,7 @@
 <body>
     <form id="form1" runat="server">
     <div>
+        <br /><b>Proveedor:</b><br /> <asp:Label runat="server" id="Provider"></asp:Label>
         <br /><b>Firma:</b><br /> <asp:Label runat="server" id="SignatureB64"></asp:Label>
     </div>
     </form>

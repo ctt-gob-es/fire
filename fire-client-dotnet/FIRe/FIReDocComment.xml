@@ -743,7 +743,18 @@
             <summary> Obtiene el resultado de la transacción de firma.</summary>
             <returns>Identificador de la transacción de firma</returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:FIRe.FireTransactionResult.setResult(System.Byte[])" -->
+        <member name="M:FIRe.FireTransactionResult.setResult(System.Byte[])">
+            <summary> Establece el resultado de la transacción de firma.</summary>
+            <param name="data">Datos resultantes de la transacción.</param>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getProviderName">
+            <summary>Obtiene el nombre del proveedor utilizado para la firma.</summary>
+            <returns>Nombre del proveedor.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.setProviderName(System.String)">
+            <summary>Obtiene el nombre del proveedor utilizado para realizar la firma.</summary>
+            <param name="providerName">Nombre del proveedor.</param>
+        </member>
         <member name="M:FIRe.FireTransactionResult.getErrorCode">
             <summary>Obtiene el código de error durante la firma.</summary>
             <returns>Código de error.</returns>
@@ -755,17 +766,43 @@
         <member name="T:FIRe.FireSignResult">
             <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
         </member>
-        <member name="P:FIRe.FireSignResult.prov">
+        <member name="P:FIRe.FireSignResult.result">
+            <summary>
+            Resultado de la operacion de firma.
+            </summary>
+        </member>
+        <member name="M:FIRe.FireSignResult.getProviderName">
+            <summary>
+            Recupera el nombre del proveedor utilizado en la operación.
+            </summary>
+            <returns>Nombre del proveedor.</returns>
+        </member>
+        <member name="M:FIRe.FireSignResult.getErrorCode">
+            <summary>
+            Recupera el código del error que se produjese durante la operación.
+            </summary>
+            <returns>Código de error o null si no se produjo ningún error.</returns>
+        </member>
+        <member name="M:FIRe.FireSignResult.getErrorMessage">
+            <summary>
+            Recupera el mensaje del error que se produjese durante la operación.
+            </summary>
+            <returns>Mensaje de error o null si no se produjo ningún error.</returns>
+        </member>
+        <member name="T:FIRe.FireSignResultData">
+            <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
+        </member>
+        <member name="P:FIRe.FireSignResultData.prov">
             <summary>
             Nombre del proveedor.
             </summary>
         </member>
-        <member name="P:FIRe.FireSignResult.ercod">
+        <member name="P:FIRe.FireSignResultData.ercod">
             <summary>
             Código de error.
             </summary>
         </member>
-        <member name="P:FIRe.FireSignResult.ermsg">
+        <member name="P:FIRe.FireSignResultData.ermsg">
             <summary>
             Mensaje de error.
             </summary>
