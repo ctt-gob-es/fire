@@ -18,7 +18,7 @@ import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.internal.TempFilesHelper;
 
 /**
- *  Manejador que determina de donde recoge los documentos ClaveFirma para realizar una firma
+ *  Manejador que determina de donde recoge los documentos FIRe para realizar una firma
  *  trifasica mediante el Cliente @firma y donde almacenar la firma resultante. Concretamente,
  *  obtendr&aacute; los datos del directorio temporal en el que se almacenan al enviarse al
  *  servidor y almacena las firmas en el mismo directorio temporal.

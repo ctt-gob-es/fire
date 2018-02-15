@@ -36,8 +36,8 @@ import es.gob.fire.signature.GoogleAnalitycs;
 import es.gob.fire.signature.LoggingHandler;
 
 /**
- * Servicio central de ClaveFirma que integra las funciones de firma a traves del ClaveFirma
- * y el MiniApplet, as&iacute; como la generaci&oacute;n de certificados electr&oacute;nicos.
+ * Servicio central de FIRe que integra las funciones de firma a traves del Cliente @firma
+ * y proveedores de firma en la nube.
  */
 public class FIReService extends HttpServlet {
 

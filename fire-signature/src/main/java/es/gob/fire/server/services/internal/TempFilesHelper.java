@@ -31,7 +31,7 @@ public final class TempFilesHelper {
 
     private static final Logger LOGGER = Logger.getLogger(TempFilesHelper.class.getName());
 
-    private static final String DEFAULT_PREFFIX = "clavefirma-"; //$NON-NLS-1$
+    private static final String DEFAULT_PREFIX = "fire-"; //$NON-NLS-1$
 
     private static File TMPDIR;
 
@@ -133,7 +133,7 @@ public final class TempFilesHelper {
         	f = new File(TMPDIR, tempFileName);
         }
         else {
-        	f = File.createTempFile(DEFAULT_PREFFIX, null, TMPDIR);
+        	f = File.createTempFile(DEFAULT_PREFIX, null, TMPDIR);
         }
 
         final OutputStream fos = new FileOutputStream(f);

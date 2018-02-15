@@ -103,7 +103,7 @@ public final class LoggingHandler extends Handler {
 		return new CMSTimestamper(new TsaParams(p));
 	}
 
-	/** Instala el gestor de log seguro para <code>es.gob.clavefirma</code>.
+	/** Instala el gestor de log seguro para <code>es.gob.fire</code>.
 	 * @throws SecurityException Si no hay permisos para la instalaci&oacute;n.
 	 * @throws IOException Si no se puede leer o aplicar la configuraci&oacute;n del
 	 *                     registro. */

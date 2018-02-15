@@ -47,10 +47,10 @@ public class ConfigManager {
 
 	private static final String PROP_BATCH_MAX_DOCUMENTS = "batch.maxDocuments"; //$NON-NLS-1$
 
-	private static final String PROP_CLAVEFIRMA_TEMP_TIMEOUT = "temp.clavefirma.timeout"; //$NON-NLS-1$
+	private static final String PROP_FIRE_TEMP_TIMEOUT = "temp.fire.timeout"; //$NON-NLS-1$
 
 	/** Segundos que, por defecto, tardan los ficheros temporales del proceso de firma de lote en caducar. */
-	private static final int DEFAULT_CLAVEFIRMA_TEMP_TIMEOUT = 600; // 10 minutos
+	private static final int DEFAULT_FIRE_TEMP_TIMEOUT = 600; // 10 minutos
 
 	private static final String PROP_CLIENTEAFIRMA_TEMP_TIMEOUT =  "temp.afirma.timeout"; //$NON-NLS-1$
 
@@ -144,7 +144,7 @@ public class ConfigManager {
 
 		final List<ProviderElement> providersList = new ArrayList<>();
 		final String[] providersTempList = providers.split(VALUES_SEPARATOR);
-		for (final String provider : providersTempList) {						
+		for (final String provider : providersTempList) {
 			if (provider != null && !provider.trim().isEmpty()) {
 				final ProviderElement prov = new ProviderElement(provider);
 				if (!providersList.contains(provider)) {
@@ -232,13 +232,13 @@ public class ConfigManager {
 	 */
 	public static int getTempsTimeout() {
 		try {
-			return Integer.parseInt(config.getProperty(PROP_CLAVEFIRMA_TEMP_TIMEOUT, Integer.toString(DEFAULT_CLAVEFIRMA_TEMP_TIMEOUT))) * 1000;
+			return Integer.parseInt(config.getProperty(PROP_FIRE_TEMP_TIMEOUT, Integer.toString(DEFAULT_FIRE_TEMP_TIMEOUT))) * 1000;
 		}
 		catch (final Exception e) {
 			LOGGER.warning("Se encontro un valor invalido para la propiedad '" + //$NON-NLS-1$
-					PROP_CLAVEFIRMA_TEMP_TIMEOUT +
+					PROP_FIRE_TEMP_TIMEOUT +
 					"' del fichero de configuracion"); //$NON-NLS-1$
-			return DEFAULT_CLAVEFIRMA_TEMP_TIMEOUT * 1000;
+			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 		}
 	}
 
