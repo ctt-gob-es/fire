@@ -187,8 +187,7 @@
 			document.getElementById("usr-surname").disabled = <%= op == 0 ? "true" : "false" %>
 			document.getElementById("email").disabled = <%= op == 0 ? "true" : "false" %>
 			document.getElementById("telf-contact").disabled = <%= op == 0 ? "true" : "false" %>
-			
-															
+																
 		</script>
    	</div>
 </body>

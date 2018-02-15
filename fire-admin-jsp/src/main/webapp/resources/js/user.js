@@ -2,6 +2,7 @@
  * 
  */
   $(document).ready(function(){
+	 
             var totalRecords;
             var recordsPerPage=5;
             var recordsToFetch=recordsPerPage;
@@ -12,7 +13,15 @@
             $.get("processUsrRequest.jsp?requestType=countRecords",function(data){
                 var JSONData=JSON.parse(data);
              
-                totalRecords=JSONData.count; 
+                totalRecords=JSONData.count;
+                if (totalRecords > 0) {
+					$("#data").html("");
+				} else {
+					$("#nav_page").hide();
+					return;
+				}
+                
+                
                 totalPages=Math.floor(totalRecords/recordsPerPage);
                 
                 if(totalRecords%recordsPerPage!=0){
@@ -28,27 +37,30 @@
                 
                 $("#page").html("Página "+currentPage+" de "+totalPages);
                 
+                //
+                $.get("processUsrRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
+                	var JSONData=JSON.parse(data);
+                	printUsersTable(JSONData, recordsToFetch);       
+              	
+                    if(currentPage==totalPages){
+                        $("#next").hide();
+                    }
+                    else{
+                        $("#next").show();
+                    }
+                    
+                    if(currentPage==1){
+                        $("#back").hide();
+                    }
+                    else{
+                        $("#back").show();
+                    }
+
+                });
+                
             });    
             
-            $.get("processUsrRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
-            	var JSONData=JSON.parse(data);
-            	printUsersTable(JSONData, recordsToFetch);       
-          	
-                if(currentPage==totalPages){
-                    $("#next").hide();
-                }
-                else{
-                    $("#next").show();
-                }
-                
-                if(currentPage==1){
-                    $("#back").hide();
-                }
-                else{
-                    $("#back").show();
-                }
-
-            });
+           
             
             
             $("#next").click(function(){

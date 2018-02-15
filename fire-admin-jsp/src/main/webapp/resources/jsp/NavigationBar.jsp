@@ -20,11 +20,11 @@
 							<li><a href="../Certificate/CertificatePage.jsp" title="Gestiona los certificados permitiendo: visualizar, crear, modificar y eliminar.">Certificados</a>
 								
 							</li>
-							<li><a href="">Logs</a>
-								<ul>
-									<li><a href="">Gesti&oacute;n</a></li>								
-								</ul>
-							</li>
+<!-- 							<li><a href="">Logs</a> -->
+<!-- 								<ul> -->
+<!-- 									<li><a href="">Gesti&oacute;n</a></li>								 -->
+<!-- 								</ul> -->
+<!-- 							</li> -->
 						</ul>
 					</nav>			
 			</li>	

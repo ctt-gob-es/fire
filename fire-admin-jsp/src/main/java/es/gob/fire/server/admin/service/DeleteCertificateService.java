@@ -60,6 +60,7 @@ public class DeleteCertificateService extends HttpServlet {
 				
 				if(total <= 0) {
 					CertificatesDAO.removeCertificate(id);
+					
 				}
 				else {
 					isOk = false;

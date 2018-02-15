@@ -5,6 +5,8 @@
 $(document)
 		.ready(
 				function() {
+					
+					
 					var totalRecords;
 					var recordsPerPage = 5;
 					var recordsToFetch = recordsPerPage;
@@ -12,6 +14,7 @@ $(document)
 					var currentPage = 1;
 					var currentIndex = 0;
 
+					//Consultar los registros
 					$.get("processCertRequest.jsp?requestType="
 							+ requestTypeCount, function(data) {
 						var JSONData = JSON.parse(data);
@@ -21,6 +24,8 @@ $(document)
 							$("#data").html("");
 						} else {
 							$("#navDataTable").css({display : 'none'});
+							$("#nav_page").hide();
+							return;
 						}
 						totalPages = Math.floor(totalRecords / recordsPerPage);
 
@@ -35,36 +40,41 @@ $(document)
 						}
 
 						$("#page").html("Página " + currentPage + " de " + totalPages);
+						
+						//En caso de tener registros pintar la tabla
+						$.get("processCertRequest.jsp?requestType=" + requestType
+								+ "&currentIndex=" + currentIndex
+								+ "&recordsToFetch=" + recordsToFetch,
+								function(data) {
+									var JSONData = JSON.parse(data);
+
+									if (totalRecords > 0) {
+										if (requestType == "getRecordsCert") {
+											printCertificateTable(JSONData,recordsToFetch);
+										} else {
+											printApplicationsByCertificateTable(JSONData, recordsToFetch);
+										}
+									}
+
+									if (currentPage == totalPages) {
+										$("#next").hide();
+									} else {
+										$("#next").show();
+									}
+
+									if (currentPage == 1) {
+										$("#back").hide();
+									} else {
+										$("#back").show();
+									}
+
+								});
+						
+						
 
 					});
 
-					$.get("processCertRequest.jsp?requestType=" + requestType
-							+ "&currentIndex=" + currentIndex
-							+ "&recordsToFetch=" + recordsToFetch,
-							function(data) {
-								var JSONData = JSON.parse(data);
-
-								if (totalRecords > 0) {
-									if (requestType == "getRecordsCert") {
-										printCertificateTable(JSONData,recordsToFetch);
-									} else {
-										printApplicationsByCertificateTable(JSONData, recordsToFetch);
-									}
-								}
-
-								if (currentPage == totalPages) {
-									$("#next").hide();
-								} else {
-									$("#next").show();
-								}
-
-								if (currentPage == 1) {
-									$("#back").hide();
-								} else {
-									$("#back").show();
-								}
-
-							});
+					
 
 					$("#next").click(function() {
 						$("#data").html("");
@@ -292,7 +302,7 @@ $(document)
 			totalRecords = JSONData.count;
 
 			if (totalRecords > 0) {			
-				alert("Error al dar de baja el certificado, tiene asociadas aplicaciones.");
+				alert("Error al dar de baja el certificado '"+nombreCert+"', tiene asociadas aplicaciones.");
 			} else {
 				if (confirm('¿Está seguro de eliminar el certificado '+ nombreCert + '?')) {
 					document.location.href=url+idCert;

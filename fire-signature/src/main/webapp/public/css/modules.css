@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*****************************************************************************
-*    Proyecto: MINHAP
+*    Proyecto: MINHAPcontenido-firmar .container-box
 *    Titulo: modules.css
 *    Desripcion: Estilos para la realizacion de los modulos
 ******************************************************************************/
@@ -21,7 +21,7 @@
 .mod_footer .footer_top .footer-text-big {font-size: 1em; font-weight: bold; display: inline-block; vertical-align: super;}
 .mod_footer .footer_bottom {vertical-align: super; }
 .mod_footer .footer_bottom .footer-text { font-size: 1em; font-weight: bold; }
-.contenido {display: block; width: 100%; margin: 0 auto; height: auto; min-height:40em; position: relative;z-index:9;}/*width: 665px;*/
+.contenido {display: block; width: 100%; margin: 0 auto; height: auto;  position: relative;z-index:9;}/*width: 665px;min-height:40em;*/
 
 
 /*PC*/
@@ -32,7 +32,7 @@
 /*.contenido.cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px;float: left;  width:50%; display: block; box-sizing: border-box;}*/
 
 /**/
-.contenido .container-box-cert {display: block; width:50%; margin-left: auto; margin-right: auto; }/*min-width: 665px;   width:50%;margin-left: auto;margin-right: auto; */
+.contenido .container-box-cert {display: block; width:539px; margin-left: auto; margin-right: auto; }/*min-width: 665px;   width:50%;margin-left: auto;margin-right: auto; */
 
 .contenido.container-box-cert.cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px;float: left;  width:50%; display: block; box-sizing: border-box;}
 .contenido.container-box-cert.cert-box.cert-box-int {background-color: #eae8e9;width: 100%;}
@@ -93,16 +93,31 @@
 
 
 
-.contenido-firmar {width: 470px;position: relative;}
-.contenido-firmar .container-box { width: 100%;height:20%; text-align: center;position: absolute;top:5em;overflow:auto;}
-.contenido-firmar .container-box .lista-elem {display: block;width: 100%;list-style-type: circle;list-style-image: initial;padding: 1.5em 0 1.5em 1.5em;box-sizing: border-box;}
-.contenido-firmar .container-box .lista-elem .elem {width: 100%; list-style-type: circle;list-style-image: initial;line-height: 1.4em;}
-.contenido-firmar .container-box .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;}
+.contenido-firmar {width: 470px;}/*position: relative;*/
+/* .contenido-firmar-listadocs{width: 1024px;position: relative;top:2em;margin-left: auto;margin-right: auto;} */
+.contenido-firmar-listadocs{width:90%;position: relative;top:2em;margin-left: auto;margin-right: auto;}
+
+.contenido-firmar-listadocs.container-box { width: 100%;top:0.5em;position: relative;text-align: left;}
+/* .contenido-firmar .container-box { width: 100%; text-align:center;top:2em;position: relative;text-align: left;} */
+
+/* .contenido-firmar .container-box .lista-elem {display: block;width: 100%;list-style-type: circle;list-style-image: initial;padding: 1.5em 0 1.5em 1.5em;box-sizing: border-box;} */
+/* .contenido-firmar .container-box .lista-elem .elem {width: 100%; list-style-type: circle;list-style-image: initial;line-height: 1.4em;} */
+
+
+
+
+/* .contenido-firmar .container-box .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;} */
+
 .contenido-firmar .container-box .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
 
-.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;position: absolute;top:16em;}
+.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;top:1em; position: relative;}
+
 .contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
-.contenido-firmar .nota-firmar{position: absolute;top: 25em;}
+.contenido-firmar .nota-firmar{position: relative;top: 1em;}
+
+.cabecera-listaDocs{display: inline-block;width: 47%;padding: 0.35em;font-weight: bold;text-align: center;}
+.celda-listaDocs{display: inline-block;width: 47%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;}
+
 
 .contenido-principal { font-size: 1.2em; }
 
@@ -119,9 +134,9 @@
 .contenido-error .container-box-error .error-box { margin-bottom: 3em;}
 .contenido-error .text-error-box {color #707070;font-size: 17px;margin-bottom: 0.75em;text-align: center;margin-top: 1.5em;}
 
-.contenido-opciones {width: 100%; height:15%; display:block;}
-.contenido-opciones .botones {margin: 0 auto;text-align: center;position: absolute;top:19em;}
-.mensaje-error {color #707070;font-size: 22px;margin-bottom: 1em;text-align: center;position: absolute;top:9em;}
+.contenido-opciones {width: 100%; height:15%; display:block;position: relative;}
+.contenido-opciones .botones {margin: 0 auto;text-align: center;position: relative;top:1em;}
+.mensaje-error {color #707070;font-size: 22px;margin-bottom: 1em;text-align: center;position: relative;top:1em;}
 #errorMsg{text-align: center;}
 
 .paragraph { padding-top: 2em;}
@@ -135,7 +150,7 @@
 .button-cancelar {z-index:10; float: right;width: 80px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;margin-top: 1em;font-weight: bold; cursor:pointer; text-decoration: none;}
 .button-cancelar:hover {text-decoration: underline;}
 
-.button-operacion {width: 170px;padding: 0.2em 1em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 1.2em 1em;font-size:24px;box-sizing: border-box;font-weight: bold;text-decoration: none;}
+.button-operacion {width: 170px;padding: 0.2em 1em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 1.2em 1em;font-size:22px;box-sizing: border-box;font-weight: bold;text-decoration: none;}
 .button-operacion:hover {text-decoration: underline; cursor:pointer;}
 
 .hide {display: none !important;}
@@ -144,7 +159,7 @@
 .clear {clear: both;}
 .no-float {float: none !important;}
 
-.container-box-title{width: 100%;margin: 2em; display: block;}/*margin-bottom: 3em;*/
+.container-box-title{width: 100%;margin: 2em; display: block;position: relative;}/*margin-bottom: 3em;*/
 .container_tit{float: left; width:70%;display: inline-block;}
 .container_btn_operation{float: right; width:20%;display: inline-block;margin-top: 1em;}
 
@@ -154,12 +169,21 @@
 .container-title .title-head{display: inline-block; width:70%;position: absolute;}
 .container-title .title-button{display: inline-block; width:20%;position: absolute; top: 1em; right:5%;}
 
+
+.progress-dialog{display: none;background-color: rgba(50,50,50,0.3); width: 100%; height: 100%; z-index: 9990; position: fixed; left: 0; top: 0; }
+.progress-dialog-window{background-color: white; position: fixed; top: 30%; left: 35%; width: 30%; padding: 20px; border: 2px solid black; border-radius: 15px;}
+.progress-dialog-text{ text-align: center; font-weight: bold; font-size: 20pt; display:block;}
+.progress-dialog-img{text-align: center; display:block;}
+.img-loading{width:100px;height: 100px}
+
+
+
 /*SMALL RESOLUTION STYLES*/
 @media screen and (max-width: 680px) {  
   
   .contenido { width: 100%; padding: 5px;  box-sizing: border-box;}
 
-  .contenido .container-box { float:none; width: 100%;}
+/*   .contenido .container-box { float:none; width: 100%;} */
   .contenido .main-box-left {float:none; width: 236px;  display:inline-block; margin-bottom: 1em; margin-top:1em;margin-right:0.5em; ;margin-left: 0.5em;}/*margin: 0 auto;width: 321px; */
   .contenido .main-box-right {float:none; width: 321px; margin: 0 auto; display:block; margin-top:1em;}
 
@@ -170,33 +194,87 @@
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.2em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.2em; padding-top:0.3em; padding-bottom:0.3em;}
-	.container-title .title-button{display: inline-block; width:20%;position: absolute; top:-22%; right:2%;}
+	.container-title .title-button{display: inline-block; width:20%; top:-22%; right:2%;}/*position: absolute;*/
 
-.container-box-title{width:90%;margin: 2em; display: block;}
+.container-box-title{width:90% display: block; position: relative;}/*;margin: 2em;*/
 .container_tit{float: left; width:70%;display: inline-block;}
-.container_btn_operation{float: left; width:15%;display: inline-block;margin-top: -1em;}
+.container_btn_operation{float: right; width:15%;display: inline-block;margin-top: -1em;}
 
-.contenido-firmar .container-box { width: 60%;height:20%; text-align: left;position: absolute;top:5em;overflow:auto;margin-left: 4em;}
-.contenido-firmar {width: 100%;position: relative; margin-left: auto;margin-right: auto;}
+
+.contenido-firmar {width: 470px;position: relative;}/*position: relative;*/
+/* .contenido-firmar .container-box { width: 60%;text-align: left;top:5em;position: relative;display: block;}margin-left: 4em; */
+
 	
-.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;position: absolute;top:16em;}
-.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
-.contenido-firmar .nota-firmar{position: absolute;top: 25em;}	
+.contenido-firmar .container-firmar {width: 90%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;top: 1em;position: relative;}
+.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
+.contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;}
+
+.cabecera-listaDocs{display: inline-block;width: 40%;padding: 0.35em;font-weight: bold;text-align: center; font-size: 12px;}
+.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;font-size: 12px;}
+
 	
+.progress-dialog-text{ text-align: center; font-weight: bold; font-size: 16pt; display:block;}
+/* .img-loading{width: 100px;height: 100px}	 */
 }
+
+
+
+@media screen and (max-width: 560px) {  
+
+.container_btn_operation{float: right; width:15%;display: inline-block;margin-top: -1em;}
+.contenido .container-box-cert {display: block; width:410px; margin-left: auto; margin-right: auto; }
+.contenido.container-box-cert.cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px;float: left;  width:100%; display: block; box-sizing: border-box;}
+
+.contenido.container-box-cert .cert-box .title-cert-box {font-size: 16px;font-weight: bold;}
+.contenido .cert-box .title-cert-box {font-size: 16px;font-weight: bold;}
+
+.contenido.container-box-cert .cert-box .text-cert-box {font-size: 14px;color: #707070;line-height: 15px;}
+.contenido .cert-box .text-cert-box {font-size: 14px;color: #707070;line-height: 15px;}
+
+.contenido.container-box-cert .cert-box .button {border: 1px solid #707070; padding: 0.4em 0.6em; border-radius: 2em; margin: 0em auto; display: block; position: relative; color: #707070; text-decoration: none; font-size: 12px; width: 6em;}
+.contenido .cert-box .button {border: 1px solid #707070; padding: 0.4em 0.6em; border-radius: 2em; margin: 0em auto; display: block; position: relative; color: #707070; text-decoration: none; font-size: 12px; width: 6em;}
+.contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width: auto; min-width: 52px;}
+
+.contenido-firmar {width: 90%; margin-left: auto;margin-right: auto;}	
+}
+
 
 @media screen and (max-width: 420px) {  
 
+	.contenido .cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px; float: left; width: 100%; display: block; box-sizing: border-box;}
+.container_btn_operation{float: right; width:15%;display: inline-block;margin-top: -1em;}
+.contenido .container-box-cert {display: block;  width:320px; margin-left: auto; margin-right: auto; }/*min-width: 665px;   width:50%;margin-left: auto;margin-right: auto; */
+.contenido.container-box-cert.cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px;float: left;  width:100%; display: block; box-sizing: border-box;}
+
+.contenido.container-box-cert .cert-box .title-cert-box {font-size: 14px;font-weight: bold;}
+.contenido .cert-box .title-cert-box {font-size: 14px;font-weight: bold;}
+
+.contenido.container-box-cert .cert-box .text-cert-box {font-size: 12px;color: #707070;line-height: 15px;}
+.contenido .cert-box .text-cert-box {font-size: 12px;color: #707070;line-height: 15px;}
+
+.contenido.container-box-cert .cert-box .button {border: 1px solid #707070; padding: 0.4em 0.6em; border-radius: 2em; margin: 0em auto; display: block; position: relative; color: #707070; text-decoration: none; font-size: 12px; width: 6em;}
+.contenido .cert-box .button {border: 1px solid #707070; padding: 0.4em 0.6em; border-radius: 2em; margin: 0em auto; display: block; position: relative; color: #707070; text-decoration: none; font-size: 12px; width: 6em;}		
+
+.contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width: auto; min-width: 32px;}
+	
   .contenido .cert-box .cert-box-left {display: inline-block;  width: 100%; }
   .contenido .cert-box .cert-box-center {display: inline-block;width: 100%;padding: 5px;box-sizing: border-box;}
   .contenido .cert-box .cert-box-right {display: inline-block; width: 100%; padding-right:0em;}
   .container-title .title-button{display: inline-block; width:20%;position: absolute; top: -22%; right:2%;}
   
-  .contenido-firmar .container-box { width: 80%;height:20%; text-align: left;position: absolute;top:6em;overflow:auto;}
+/*   .contenido-firmar .container-box { width: 80%; text-align: left;top:6em;display: block;position: relative;} */
   	.contenido-firmar {width: 270px;position: relative;}
-  	.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;position: absolute;top:16em;}
+  	.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;position: relative;top:6em;}
 	.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
-	.contenido-firmar .nota-firmar{position: absolute;top: 25em;}	
+	.contenido-firmar .nota-firmar{display:block; top:12em;position: relative;}	
+	
+	.mensaje-error {color #707070;font-size: 14px;margin-bottom: 1em;text-align: center;position: relative;top:1em;}
+	
+	.button-operacion {width: 130px;padding: 0.2em 1em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 1.2em 1em;font-size:12px;box-sizing: border-box;font-weight: bold;text-decoration: none;}
+	
+	#progressText{font-size: 12pt;}
+	.progress-dialog-text{ text-align: center; font-weight: bold;  display:block;}
+	.img-loading{width: 50px;height: 50px;}
 }
 
 /*MEDIUM RESOLUTION STYLES*/
@@ -207,16 +285,22 @@
   .contenido-error .error-box .button_firmar {width: 100%; box-sizing: border-box;}
   .contenido .main-box-left {display:inline-block; width: 235px; height: 339px;border: 1px solid rgb(216, 212, 212); box-shadow: 0px 0px 5px rgb(216, 212, 212);margin-left: 0.5em;margin-right: 0.5em; margin-bottom:1em;margin-top: 1em;}
   
-  	 /*Movil*/
+/*Movil*/
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.2em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.2em; padding-top:0.3em; padding-bottom:0.3em;}
 
 
 .container_btn_operation{float: right; width:20%;display: inline-block;margin-top: -1em;}	
-	
-.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;position: absolute;top:16em;}
-.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
-.contenido-firmar .nota-firmar{position: absolute;top: 25em;}	
+
+/* .contenido-firmar .container-box { width: 100%;text-align: left;top:2em;position: relative;display: block;}margin-left: 4em; */
+.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 3em;text-align: center;top:2em;position: relative;}
+.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
+.contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;}
+
+.cabecera-listaDocs{display: inline-block;width: 40%;padding: 0.35em;font-weight: bold;text-align: center; font-size: 12px;}
+.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;font-size: 12px;}
+
+.progress-dialog-text{ text-align: center; font-weight: bold; font-size: 18pt; display:block;}
 
 }

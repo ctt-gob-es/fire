@@ -107,8 +107,9 @@ public class SignatureService extends HttpServlet {
         }
 
         // Configuracion del nombre y titulo del documento
-        confProperties.setProperty("docTitle", "Mi titulo"); //$NON-NLS-1$ //$NON-NLS-2$
-        confProperties.setProperty("docName", "Mi nombre"); //$NON-NLS-1$ //$NON-NLS-2$
+//        confProperties.setProperty("docTitle", "Mi titulo"); //$NON-NLS-1$ //$NON-NLS-2$
+//        confProperties.setProperty("docName", "Mi nombre"); //$NON-NLS-1$ //$NON-NLS-2$
+       
 
         //confProperties.setProperty("afirmaWS", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 

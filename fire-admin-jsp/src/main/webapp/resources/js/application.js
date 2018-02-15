@@ -3,7 +3,7 @@
  */
   $(document).ready(function(){
 	  
-	  
+	  	
 
             var totalRecords;
             var recordsPerPage=5;
@@ -16,9 +16,15 @@
                 var JSONData=JSON.parse(data);
           
                 totalRecords=JSONData.count;
+              
                 if(totalRecords > 0){
                 	$("#data").html("");
                 }
+                else{
+                	$("#nav_page").hide();
+                	return;
+                }
+                
                 totalPages=Math.floor(totalRecords/recordsPerPage);
                 
                 if(totalRecords%recordsPerPage!=0){
@@ -34,11 +40,9 @@
                 
                 $("#page").html("Página "+currentPage+" de "+totalPages);
                 
-            });    
-         
-
-            
-            	$.get("processAppRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
+                
+                //
+                $.get("processAppRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
                 	var JSONData=JSON.parse(data);                
                 	  printApplicationTable(JSONData, recordsToFetch);       
                  
@@ -57,6 +61,12 @@
                     }
 
                 });
+                
+            });    
+         
+
+            
+            	
               
             
                 

@@ -65,13 +65,13 @@ public class DeleteUserService extends HttpServlet {
 				isOk = false;
 			}
 		}
-		//Comprobar que el usuario que se borra es el mismo que está logado, 
-		//en ese caso se cierra la sesión redirigiendo a la página de Login.jsp
+		//Comprobar que el usuario que se borra es el mismo que estï¿½ logado, 
+		//en ese caso se cierra la sesiï¿½n redirigiendo a la pï¿½gina de Login.jsp
 		if(isOk && loggedUsr!=null && !"".equals(loggedUsr) && loggedUsr.equals(user_name)){
 			response.sendRedirect("Login.jsp?");
 		}
 		else {
-			response.sendRedirect("User/UserPage.jsp?op=baja&r=" + (isOk ? "1" : "0")+"&ent=usr"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
+			response.sendRedirect("User/UserPage.jsp?op=baja&r=" + (isOk ? "1" : "0")+"&ent=user"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
 		}
 		
 	}

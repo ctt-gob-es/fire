@@ -111,10 +111,10 @@
 				</p>
 			<% } %>
 		<div id="data" style="display: block-inline; text-align:center;">
-			<h4>No hay Aplicaciones</h4>"	
+			<h4>No hay Aplicaciones</h4>	
 		</div>
 	<br>
-	<div style="display: block-inline; text-align:right;">
+	<div id="nav_page" style="display: block-inline; text-align:right;">
 		<button id="back">Anterior</button>
         <button id="next">Siguiente</button>
         <p id="page"></p>
@@ -125,4 +125,5 @@
 	
 </body>
 <script src="../resources/js/application.js" type="text/javascript"></script>
+
 </html>

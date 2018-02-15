@@ -188,20 +188,22 @@
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 	<script type="text/javascript" src="js/miniapplet.js"></script>
 	<script type="text/javascript" src="js/deployJava.js"></script>
+	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
 	<script type="text/javascript">
 		
 		<% if (isBatchOperation) { %>
 		
 			function doSignBatch() {
-
+				
 				document.getElementById("errorMsg").style.display = "none";
-				//document.getElementById("errorMsg").style
+				
 				// Obtenemos datos
 				var batchXmlB64 = "<%= batchXmlB64 %>";
 				var preSignUrl = "<%= preSignBatchUrl %>";
 				var postSignUrl = "<%= postSignBatchUrl %>";
 	
-				try {
+				try {					
+					showProgress();
 					MiniApplet.signBatch(
 						batchXmlB64,
 						preSignUrl,
@@ -219,7 +221,7 @@
 		<% } else { %>
 
 			function doSign() {
-	
+				
 				document.getElementById("errorMsg").style.display = "none";
 				
 				// Obtenemos datos
@@ -229,7 +231,8 @@
 				var algorithm = "<%= algorithm %>";
 				var extraParamsB64 = "<%= extraParams.toString() %>";
 	
-				try {
+				try {				
+					showProgress();
 					if (cop.toUpperCase() === "SIGN") {
 						MiniApplet.sign(
 							refB64,
@@ -259,9 +262,12 @@
 							sendErrorCallback);
 					}
 					else {
+						hideProgress();
 						sendErrorCallback("java.lang.UnsupportedOperationException", "Operacion de firma no soportada");
 					}
+					
 				} catch(e) {
+					hideProgress();
 					sendErrorCallback(MiniApplet.getErrorType(), MiniApplet.getErrorMessage());
 				}
 			}
@@ -270,32 +276,31 @@
 			function sendResultCallback(signatureB64, certificateB64) {
 				document.getElementById("cert").value = certificateB64.replace(/\+/g, "-").replace(/\//g, "_");
 				document.getElementById("formSign").submit();
+				
+				
 			}
 
 			function sendBatchResultCallback(batchResultB64) {
 				document.getElementById("afirmaBatchResult").value = batchResultB64;
 				document.getElementById("formSign").submit();
+// 				hideProgress();
+				
 			}
 
 			function sendErrorCallback(errorType, errorMessage) {
+				 
 				document.getElementById("inputerrortype").value = errorType;
-				document.getElementById("inputerrormsg").value = errorMessage;
-				
-				
-				
+				document.getElementById("inputerrormsg").value = errorMessage;								
 				document.getElementById("errorMsg").innerHTML = "" + errorType + ": " + errorMessage;
-				
-				
-				
-				
-				
+								
 				if (errorType != "es.gob.afirma.core.AOCancelledOperationException") {
 					showErrorOptions();
 				}
+// 				hideProgress();
 			}
 
 			function showErrorOptions() {
-				
+				hideProgress(); 
 				// Ocultamos el boton de firmar
 				document.getElementById("buttonSign").style.display = "none";
 				
@@ -375,63 +380,37 @@
 	<main class="main">
 		
 		<section class="contenido contenido-firmar">
+			
 			<div  class="container-box-title">
 					<div class="container_tit">
 						<h1 class="title"><span class="bold">Firma con certificado local</span></h1>
 					</div>
 					<div class="container_btn_operation">
-		<% if (originForced) { %>
-			<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
-				<span >Cancelar</span>
-			</a>
-		<% } else { %>
-			<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">
-				<span class="arrow-left-white"></span>
-				<span >volver</span>
-			</a>
-		<% } %>
+					<% if (originForced) { %>
+						<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
+							<span >Cancelar</span>
+						</a>
+					<% } else { %>
+						<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">
+							<span class="arrow-left-white"></span>
+							<span >volver</span>
+						</a>
+					<% } %>
 					</div>
 				</div>
 
 			<div class="contenido-opciones temp-hide" id="errorButtonsPanel"><!-- temp-hide -->
-				<div class="mensaje-error" >
+				<div id="mensaje_error" class="mensaje-error" >
 				<h2 id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
 				</div>
 				
-				<div class="botones">
+				<div id="botones_error" class="botones">
 					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
 				</div>
 			</div>
-			
-			<% if (docInfos != null && docInfos.length > 0) { %>
-			<div class="container-box "><!-- no-float -->
-			
-				<ul class="lista-elem">
-				<li class="elem bold">Nombre - Título</li>
-				<% for (DocInfo docInfo : docInfos)  { %>
-					<li class="elem">
-					<%= docInfo.getName() != null ? docInfo.getName() : "" %>
-					<%= docInfo.getName() != null && docInfo.getTitle() != null ? " - " : "" %>
-					<%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %>
-					</li>
-				<% } %>
-				<!-- Borrar li  -->
-				<li>Prueba 1</li>
-				<li>Prueba 2</li>
-				<li>Prueba 3</li>
-				<li>Prueba 4</li>
-				<li>Prueba 5</li>
-				<li>Prueba 6</li>
-				<li>Prueba 7</li>
-				<li>Prueba 8</li>
-				<li>Prueba 9</li>
-				<li>Prueba 10</li>
-				</ul>		
-			</div>
-			<% } %>
-			
-			<div Class="container-firmar "> 
+				
+			<div id="container_firmar" Class="container-firmar "> 
 				<form name="formSign" id="formSign" method="POST" action="miniappletSuccessService">
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
@@ -444,9 +423,45 @@
 					<input id="cert" type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT %>" value="" />
 					<input id="buttonSign" type="button" class="button_firmar" value="Firmar" onclick="<%= formFunction %>"/>
 				</form>
+			</div>		
+			<div class="nota-firmar">
+					<span class="bold">Nota:</span> La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.
 			</div>
-			<div class="nota-firmar"><span class="bold">Nota:</span> La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</div>
+			
+
+			<div id="progressDialog" class="progress-dialog">
+				<div class="progress-dialog-window">
+					<div class="progress-dialog-text">
+						<span id="progressText"></span>
+					</div>
+					<div class="progress-dialog-img">
+						<img class="img-loading" src="img/general/dms/cargando-loading.gif"/>
+					</div>				
+				</div>
+			</div>
+			
 		</section>
+		
+		<% if (docInfos != null && docInfos.length > 0) { %>
+		<section class="contenido-firmar-listadocs">
+			<div id="listDocs" class="container-box "><!-- no-float -->			
+<!-- 				<ul class="lista-elem"> -->
+<!-- 				<li class="elem bold">Nombre - Título</li> -->
+					<div class="cabecera-listaDocs">Título</div>
+					<div class="cabecera-listaDocs">Nombre</div>
+				<% int i=1;
+				for (DocInfo docInfo : docInfos)  { %>
+
+					<div class="celda-listaDocs" style="<%=i%2==0?"":"background-color: #FFC57A;"%>"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>
+					<div class="celda-listaDocs" style="<%=i%2==0?"":"background-color: #FFC57A;"%>"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>
+					
+
+				<%i++; 
+				}%>				
+
+			</div>
+		</section>
+		<% } %>
 		
 	</main>
 
@@ -485,7 +500,47 @@
 
 		// Actualizamos el texto de requisitos
 		updateRequirementsText();
+		
+		//Modificamos la posición del botón firmar y el mensaje junto con los botones de error
+// 		var listaDocs=document.getElementById("listDocs");
+		
+// 		if(listaDocs== null || typeof listaDocs==="undefined"){	
+			
+// 			var botonFirma = document.getElementById("container_firmar");
+// 			var msgError = document.getElementById("mensaje_error");
+// 			var btnErr = document.getElementById("botones_error");
+			
+// 			botonFirma.style.top="8em";
+// 			btnErr.style.top="10em";
+// 		}
+		
+		//Función que controla el tamaño de la pantalla para posicionar el texto de error
+		//cuando el ancho la pantalla es menor de 420px
+// 		if (matchMedia) {
+// 			const winsize = window.matchMedia( "(min-width: 420px)" );
+// 			winsize.addListener(windowChange);
+// 			windowChange(winsize);
+// 			}
+// 		function windowChange(winsize){
+// 			if(winsize.matches){
+// 				msgError.style.top="3em";
+// 			}
+// 			else{
+// 				msgError.style.top="6em";
+// 			}
+// 		}
+		
+		/** Muestra y actualiza el dialogo de progreso. */
+		function showProgress() {
+			document.getElementById("progressText").innerHTML = "Ejecutando firma..."; 
+			document.getElementById("progressDialog").style.display = "block";
+		}
 
+		/** Oculta el dialogo de progreso. */
+		function hideProgress() {
+			document.getElementById("progressDialog").style.display = "none";
+		}
+		
 	</script>
 
 </body>

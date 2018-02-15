@@ -70,9 +70,7 @@
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-	
-	
-		
+			
 </head>
 <body>
 
@@ -97,18 +95,18 @@
 			</p>
 		</div>
 		
-			<% if(mr != null && msg!=null && !"".equals(msg)) { %>
+			<% if(mr != null) { %>
 				<p id="<%=
 						mr.isOk() ? "success-txt" : "error-txt"  //$NON-NLS-1$ //$NON-NLS-2$
 						%>">
-					<%= mr.getMessage().concat(msg) %>
+					<%= msg!=null && !"".equals(msg)? mr.getMessage().concat(msg):mr.getMessage() %>
 				</p>
 			<% } %>
 		<div id="data" style="display: block-inline; text-align:center;">
 			<h4>No hay Certificados</h4>		
 		</div>
 	<br>
-	<div style="display: block-inline; text-align:right;">
+	<div id="nav_page" style="display: block-inline; text-align:right;">
 		<button id="back">Anterior</button>
         <button id="next">Siguiente</button>
         <p id="page"></p>
@@ -124,4 +122,5 @@
            	requestType="getRecordsCert";
 	</script>
 	<script src="../resources/js/certificate.js" type="text/javascript"></script>
+	
 </html>

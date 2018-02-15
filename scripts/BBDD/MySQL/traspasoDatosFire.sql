@@ -12,13 +12,13 @@ CREATE TABLE `tb_aplicaciones_new` (
 CREATE TABLE `tb_certificados` (
   `id_certificado` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_cert` varchar(45) NOT NULL,
-  `fec_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fec_alta` datetime NOT NULL DEFAULT 0,
   `cert_principal` varchar(5000) DEFAULT NULL,
   `cert_backup` varchar(5000) DEFAULT NULL,
   `huella_principal` varchar(45) DEFAULT NULL,
   `huella_backup` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id_certificado`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='tabla de certificados';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='tabla de certificados';
 
 
 CREATE TABLE `tb_usuarios` (
@@ -28,13 +28,13 @@ CREATE TABLE `tb_usuarios` (
   `nombre` varchar(45) NOT NULL COMMENT 'Nombre completo del usuario',
   `apellidos` varchar(120) NOT NULL COMMENT 'Apellidos del usuario',
   `correo_elec` varchar(45) DEFAULT NULL COMMENT 'Correo electrónico',
-  `fec_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'fecha de alta del usuario.',
+  `fec_alta` datetime NOT NULL DEFAULT 0 COMMENT 'fecha de alta del usuario.',
   `telf_contacto` varchar(45) DEFAULT NULL COMMENT 'Teléfono de contacto',
   `rol` varchar(45) NOT NULL DEFAULT 'admin' COMMENT 'Papel (rol) que desempeña dentro de la aplicación',
   `usu_defecto` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `nombre_usuario_UNIQUE` (`nombre_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 -- FIN CREAR TABLAS NUEVAS----------
@@ -42,20 +42,20 @@ CREATE TABLE `tb_usuarios` (
 -- INSERTAR DATOS--------------
 
 -- USUARIO POR DEFECTO --------
-insert into tb_usuarios (nombre_usuario,clave,nombre,apellidos,usu_defecto) 
+INSERT INTO tb_usuarios (nombre_usuario,clave,nombre,apellidos,usu_defecto) 
 
-values('admin_pass','D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=','default name','default surnames',1);
+VALUES('admin_pass','D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=','default name','default surnames',1);
 
 -- RESTO USUARIOS -------
-insert into tb_usuarios (nombre_usuario,clave,nombre,apellidos)
+INSERT INTO tb_usuarios (nombre_usuario,clave,nombre,apellidos)
 
-SELECT parametro,valor,concat(parametro,"_name") as nombre,concat(parametro,"_surname") as apellidos 
+SELECT parametro,valor,CONCAT(parametro,"_name") AS nombre,CONCAT(parametro,"_surname") AS apellidos 
 
 FROM tb_configuracion WHERE parametro <> 'admin_pass';
 
 -- CERTIFICADOS-------
-insert into tb_certificados (nombre_cert,fec_alta,cert_principal,huella_principal) 
-select concat("CERT_",a.id)as nombre_cert,a.fecha_alta,a.cer,a.huella from tb_aplicaciones a;
+INSERT INTO tb_certificados (nombre_cert,fec_alta,cert_principal,huella_principal) 
+SELECT CONCAT("CERT_",a.id) AS nombre_cert,a.fecha_alta,a.cer,a.huella from tb_aplicaciones a;
 
 -- APLICACIONES NEW-----------
 

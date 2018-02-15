@@ -12,7 +12,7 @@ html, body, span, object, iframe, figure, h1, h2, h3, h4, h5, h6, p, blockquote,
 
 body { font-family: Arial, Helvetica, sans-serif; font-size: 85%; font-weight: normal; margin: 0 auto; padding: 0; border: 0; color: #707070; background: #fff;}
 
-.main { display:block; position: relative; width: 1024px; margin: 0 auto; }
+.main { display:block; width: 90%;  margin: 0 auto;min-height: 40em; }/*width: 1024px;*/
 .general_content { position: relative; float: left; width: 100%; background: url(../img/general/header_bk_org.png) top left repeat-x; background-size: auto 10em; }
 .wrapper { position: relative; width: 1024px; margin: 0 auto; }
 .wrapper_menu { position: relative; width: 90%; margin: 0 auto; }
@@ -41,7 +41,7 @@ li { padding-top: 0.5em;}
 
 /*------------------------------ FOOTER ---------------------------------------*/
 
-footer {position: relative;width: 100%;color: #fff;background: #707070;border-top: 3px solid #dd5a05;margin-top: 2em;padding-bottom: 1.5em;}
+footer {position: relative;width: 100%;color: #fff;background: #707070;border-top: 3px solid #dd5a05;margin-top: 4em;padding-bottom: 1.5em;}
 footer .footer_top { position: relative; min-height: 2.67em; margin-top: 1em;}
 footer .footer_top .txt_alignL{  padding-left: 3em;}
 footer .footer_top img {max-width: 100%; width: 80px;}
@@ -52,7 +52,7 @@ footer .footer_bottom .comp_right:after { content: ""; clear: both; display: blo
   
   /*MEDIUM RESOLUTION STYLES*/
 @media screen and (min-width: 768px) and (max-width: 1024px) {  
-    .main { width: 100%; }  
+    .main { width: 90%; }  
 	.wrapper {  width: 100%;}
 	footer .footer_top {  width:100%; padding-left: 0em; }
 	footer .footer_bottom { width:100%; padding-left: 0em; }
@@ -61,7 +61,7 @@ footer .footer_bottom .comp_right:after { content: ""; clear: both; display: blo
 
 /*SMALL RESOLUTION STYLES*/
 @media screen and (max-width: 767px) {  
-    .main { width: 100%; }  
+    .main { width: 90%; }  
 	.wrapper {  width: 100%;}
 	footer .footer_top { width:100%; padding-left: 0em; }
 	footer .footer_bottom { width:100%; padding-left: 0em; }

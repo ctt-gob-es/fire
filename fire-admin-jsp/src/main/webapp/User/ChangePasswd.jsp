@@ -20,8 +20,8 @@
 	usr =  UsersDAO.getUserByName(loggedUsr);
 	
 	
-	final String title = "Mofificar contraseña"; //$NON-NLS-1$
-	final String subTitle = "Mofificar contraseña del usuario ".concat(usr.getNombre()).concat(" ").concat(usr.getApellidos());//$NON-NLS-1$
+	final String title = "Modificar contraseña"; //$NON-NLS-1$
+	final String subTitle = "Modificar contraseña del usuario ".concat(usr.getNombre()).concat(" ").concat(usr.getApellidos());//$NON-NLS-1$
 	
 	
 	
