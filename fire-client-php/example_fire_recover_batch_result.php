@@ -9,8 +9,8 @@
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
 	//$appId = "7BA5453995EC";	// Entorno preproduccion
-	$appId = "A418C37E84BA";	// Entorno local
-	$transactionId = "0b977526-4e0d-4475-819c-5d7da230ba17";
+	$appId = "B5DD7690A7FA";	// Entorno local
+	$transactionId = "962db6f1-46a4-47ce-93ad-5007816aa497";
 	
 	// Funcion del API de Clave Firma para cargar los datos a firmar
 	$arrayBatchResponse;
@@ -27,6 +27,7 @@
 
 	// Mostramos los datos obtenidos
 	foreach ($arrayBatchResponse as &$batchDocument) {
+		echo "<br><b>Proveedor:</b><br>".$batchDocument->providerName;
 		echo "<br><b>Identificador de documento:</b><br>".$batchDocument->id;
 		echo "<br><b>Estado de la firma:</b><br>".$batchDocument->ok;
 		if(!$batchDocument->ok) {

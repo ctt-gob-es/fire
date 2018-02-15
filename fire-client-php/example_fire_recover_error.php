@@ -11,14 +11,14 @@
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
 	//$appId = "7BA5453995EC";	// Entorno preproduccion
-	$appId = "A418C37E84BA";	// Entorno local
+	$appId = "B5DD7690A7FA";	// Entorno local
 	
 	// Funcion del API de Clave Firma para cargar los datos a firmar
 	$error;
 	try {
 		$error = recoverError(
 			$appId,			// Identificador de la aplicacion (dada de alta previamente en el sistema)
-			"3a591496-d8e3-415f-9742-928f811fd6d8"		// Identificador de transaccion recuperado en la operacion sign()
+			"30ee59ef-cf4f-418e-83db-0a9e71fcc0c8"		// Identificador de transaccion recuperado en la operacion sign()
 		);
 	}
 	catch(Exception $e) {
@@ -27,6 +27,7 @@
 	}
 
 	// Mostramos los datos obtenidos
+	echo "<br><b>Proveedor:</b><br>".$error->providerName;
 	echo "<br><b>Codigo de error:</b><br>".$error->errorCode;
 	echo "<br><b>Mensaje de error:</b><br>".$error->errorMessage;
 
