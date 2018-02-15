@@ -402,9 +402,9 @@
             <exception cref="T:FIRe.InvalidBatchDocumentException">Cuando se solicita la firma de un documento de un lote que no existe o que no se firmó correctamente.</exception>
             <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
         </member>
-        <member name="M:FIRe.FireClient.getJson(System.String)">
+        <member name="M:FIRe.FireClient.deserializedBatchResult(System.String)">
             <summary>
-             Devuelve un conjunto de propiedades extraídas de un JSON.
+             Deserializa una estructura JSON para obtener de ella un objeto de tipo FireBatchResult.
             </summary>
             <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
             <returns></returns>
@@ -673,6 +673,11 @@
         <member name="T:FIRe.FireBatchResult">
             <summary>Clase para el almacén del resultado de una operación de firma por lotes.</summary>
         </member>
+        <member name="P:FIRe.FireBatchResult.prov">
+            <summary>
+            Listado de resultados de firma en proceso batch.
+            </summary>
+        </member>
         <member name="P:FIRe.FireBatchResult.batch">
             <summary>
             Listado de resultados de firma en proceso batch.
@@ -724,12 +729,12 @@
         </member>
         <member name="M:FIRe.FireTransactionResult.#ctor(System.Byte[])">
             <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
-            <param name="result">Definición del resultado de una operación de firma.</param>
+            <param name="bytes">Definición del resultado de una operación de firma.</param>
             <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
         </member>
-        <member name="M:FIRe.FireTransactionResult.getJson(System.String)">
+        <member name="M:FIRe.FireTransactionResult.deserializedSignResult(System.String)">
             <summary>
-             Devuelve un conjunto de propiedades extraídas de un JSON.
+             Deserializa una estructura JSON para obtener de ella un objeto de tipo FireSignResult.
             </summary>
             <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
             <returns></returns>
@@ -738,6 +743,18 @@
             <summary> Obtiene el resultado de la transacción de firma.</summary>
             <returns>Identificador de la transacción de firma</returns>
         </member>
+        <member name="M:FIRe.FireTransactionResult.setResult(System.Byte[])">
+            <summary> Establece el resultado de la transacción de firma.</summary>
+            <param name="data">Datos resultantes de la transacción.</param>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getProviderName">
+            <summary>Obtiene el nombre del proveedor utilizado para la firma.</summary>
+            <returns>Nombre del proveedor.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.setProviderName(System.String)">
+            <summary>Obtiene el nombre del proveedor utilizado para realizar la firma.</summary>
+            <param name="providerName">Nombre del proveedor.</param>
+        </member>
         <member name="M:FIRe.FireTransactionResult.getErrorCode">
             <summary>Obtiene el código de error durante la firma.</summary>
             <returns>Código de error.</returns>
@@ -745,6 +762,50 @@
         <member name="M:FIRe.FireTransactionResult.getErrorMessage">
             <summary>Obtiene el mensaje de error durante la firma.</summary>
             <returns>Mensaje de error.</returns>
+        </member>
+        <member name="T:FIRe.FireSignResult">
+            <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
+        </member>
+        <member name="P:FIRe.FireSignResult.result">
+            <summary>
+            Resultado de la operacion de firma.
+            </summary>
+        </member>
+        <member name="M:FIRe.FireSignResult.getProviderName">
+            <summary>
+            Recupera el nombre del proveedor utilizado en la operación.
+            </summary>
+            <returns>Nombre del proveedor.</returns>
+        </member>
+        <member name="M:FIRe.FireSignResult.getErrorCode">
+            <summary>
+            Recupera el código del error que se produjese durante la operación.
+            </summary>
+            <returns>Código de error o null si no se produjo ningún error.</returns>
+        </member>
+        <member name="M:FIRe.FireSignResult.getErrorMessage">
+            <summary>
+            Recupera el mensaje del error que se produjese durante la operación.
+            </summary>
+            <returns>Mensaje de error o null si no se produjo ningún error.</returns>
+        </member>
+        <member name="T:FIRe.FireSignResultData">
+            <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
+        </member>
+        <member name="P:FIRe.FireSignResultData.prov">
+            <summary>
+            Nombre del proveedor.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireSignResultData.ercod">
+            <summary>
+            Código de error.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireSignResultData.ermsg">
+            <summary>
+            Mensaje de error.
+            </summary>
         </member>
         <member name="T:FIRe.FireLoadResult">
             <summary>Clase para el almacén del resultado de una operación de carga de datos para firmar.</summary>

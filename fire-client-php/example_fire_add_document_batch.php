@@ -13,9 +13,9 @@
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
 	//$appId = "7BA5453995EC";	// Entorno preproduccion
-	$appId = "A418C37E84BA";	// Entorno local
+	$appId = "B5DD7690A7FA";	// Entorno local
 	// Identificador de la transaccion
-	$transactionId = "0b977526-4e0d-4475-819c-5d7da230ba17";
+	$transactionId = "962db6f1-46a4-47ce-93ad-5007816aa497";
 	// Simulacion de documento para agregarlo al batch
 	$documentB64 = base64_encode("Hola Mundo!!");
 	// Funcion del API de Clave Firma para generar un nuevo certificado

@@ -143,6 +143,7 @@ public final class SessionCollector {
     	for (final String attr : fireSession.getAtributteNames()) {
     		if (!attr.equals(ServiceParams.SESSION_PARAM_ERROR_TYPE) &&
     				!attr.equals(ServiceParams.SESSION_PARAM_ERROR_MESSAGE) &&
+    				!attr.equals(ServiceParams.SESSION_PARAM_CERT_ORIGIN) &&
     				!attr.equals(ServiceParams.SESSION_PARAM_REDIRECTED) &&
     				!attr.equals(ServiceParams.SESSION_PARAM_SUBJECT_ID)) {
     			fireSession.removeAttribute(attr);

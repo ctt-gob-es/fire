@@ -8,7 +8,7 @@ EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Examples", "Examples\", "{2C33F92F-84AA-419F-B14C-9D7283DBB119}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.2"
-		ProjectReferences = "{246037e1-c1dc-4701-a912-3eb219cfee43}|fire.dll;"
+		ProjectReferences = "{246037e1-c1dc-4701-a912-3eb219cfee43}|FIRe.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_51685"
 		Debug.AspNetCompiler.PhysicalPath = "Examples\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51685\"
@@ -45,8 +45,8 @@ Global
 		{2C33F92F-84AA-419F-B14C-9D7283DBB119}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

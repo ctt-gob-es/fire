@@ -9,19 +9,38 @@
  */
 package es.gob.fire.server.services.internal;
 
-import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonWriter;
 
 /**
  * Resultado de una transacci&oacute;n.
  */
 public class TransactionResult {
 
-	/** Prefijo que antecede al c&oacute;digo de error cuando este se produjo durante la
-	 * operaci&oacute;n. */
-	private static final String ERROR_PREFIX = "ERR-"; //$NON-NLS-1$
+	/** Codificaci&oacute;n de caracters por defecto. */
+	public static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
 
-	/** Sufijo que se indica a continuaci&oacute;n de un c&oacute;digo de error . */
-	private static final char ERROR_SUFIX = ':';
+	/** Prefijo de la respuesta JSON que engloba los detalles de la operaci&oacute;n. */
+	private static final String JSON_ATTR_RESULT = "result"; //$NON-NLS-1$
+
+	/** Par&aacute;metro JSON con el c&oacute;digo del error. */
+	private static final String JSON_ATTR_ERROR_CODE = "ercod"; //$NON-NLS-1$
+
+	/** Par&aacute;metro JSON con el mensaje del error. */
+	private static final String JSON_ATTR_ERROR_MSG = "ermsg"; //$NON-NLS-1$
+
+	/** Par&aacute;metro JSON con el c&oacute;digo del error. */
+	private static final String JSON_ATTR_PROVIDER_NAME = "prov"; //$NON-NLS-1$
+
+	/** Cadena de inicio de una estructura JSON compatible. */
+	private static final String JSON_RESULT_PREFIX = "{\"" + JSON_ATTR_RESULT + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** Resultado de operaci&oacute;n de firma/multifica individual. */
 	public static final int RESULT_TYPE_SIGN = 11;
@@ -52,6 +71,8 @@ public class TransactionResult {
 
 	private String errorMessage = null;
 
+	private String providerName = null;
+
 	private byte[] result = null;
 
 	private TransactionResult(final int resultType) {
@@ -70,6 +91,18 @@ public class TransactionResult {
 		this.state = STATE_ERROR;
 		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
+	}
+
+	/**
+	 * Crea el objeto que debe devolverse como resultado de una transacci&oacute;n cuando esta
+	 * ha finalizado correctamente. Este objeto no tiene definido el resultado final.
+	 * @param resultType Tipo de resultado.
+	 * @param providerName Nombre del proveedor utilizado.
+	 */
+	public TransactionResult(final int resultType, final String providerName) {
+		this.resultType = resultType;
+		this.state = STATE_OK;
+		this.providerName = providerName;
 	}
 
 	/**
@@ -117,6 +150,22 @@ public class TransactionResult {
 	}
 
 	/**
+	 * Devuelve el nombre de proveedor utilizado para la firma.
+	 * @return Nombre de proveedor.
+	 */
+	public String getProviderName() {
+		return this.providerName;
+	}
+
+	/**
+	 * Establece el nombre del proveedor utilizado para la firma.
+	 * @param providerName Nombre del proveedor.
+	 */
+	public void setProviderName(final String providerName) {
+		this.providerName = providerName;
+	}
+
+	/**
 	 * Devuelve los datos obtenidos como resultado cuando la transacci&oacute;n ha
 	 * finalizado correctamente.
 	 * @return Resultado de la operaci&oacute;n.
@@ -126,25 +175,50 @@ public class TransactionResult {
 	}
 
 	/**
-	 * Obtiene la cadena de bytes resultado de la transacci&oacute;n. Este resultado es
-	 * susceptible de parsearse mediante el m&eacute;todo {@link #parse(int, byte[])}.
+	 * Establece el resultado de la transacci&oacute;n.
+	 * @param result
+	 */
+	public void setResult(final byte[] result) {
+		this.result = result;
+	}
+
+	/**
+	 * Obtiene el resultado de la transacci&oacute;n, que puede ser los bytes del resultado
+	 * o un objeto JSON con la informaci&oacute;n del proceso si este no se obtuvo. Este
+	 * resultado es susceptible de parsearse mediante el m&eacute;todo {@link #parse(int, byte[])}.
 	 * @return Resultado de la operaci&oacute;n.
 	 */
 	public byte[] encodeResult() {
 
-		// Resultado OK
-		if (this.state == STATE_OK) {
+		// Si tenemos un resultado, lo devolvemos directamente
+		if (this.result != null) {
 			return this.result;
 		}
 
-		// Error
-		try {
-			return (ERROR_PREFIX + this.errorCode + ERROR_SUFIX + this.errorMessage).getBytes("utf-8"); //$NON-NLS-1$
+		// Si no tenemos resultado, devolvemos un JSON con la informacion que se
+		// dispone de la transaccion
+		final JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
+		if (this.errorMessage != null) {
+			resultBuilder.add(JSON_ATTR_ERROR_MSG, this.errorMessage);
+			resultBuilder.add(JSON_ATTR_ERROR_CODE, this.errorCode);
 		}
-		catch (final Exception e) {
-			return (ERROR_PREFIX + this.errorCode + ERROR_SUFIX + this.errorMessage).getBytes();
+		if (this.providerName != null) {
+			resultBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
 		}
+
+		// Construimos la respuesta
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final JsonWriter json = Json.createWriter(baos);
+
+		final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+		jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
+
+		json.writeObject(jsonBuilder.build());
+		json.close();
+
+		return baos.toByteArray();
 	}
+
 
 	/**
 	 * Obtiene un objeto con el resultado de la transacci&oacute;n a partir de los
@@ -159,23 +233,28 @@ public class TransactionResult {
 
 		opResult.state = STATE_OK;
 
-		// Comprobamos si se ha producido un error no recuperable
-		if (result.length > 6 &&
-				ERROR_PREFIX.equals(new String(new byte[] { result[0], result[1], result[2], result[3] }))) {
-
-			// Comprobamos los primeros caracteres para corroborar que se trata de un error
-			for (int i = 5; i < Math.min(result.length, 11) && opResult.state == STATE_OK; i++) {
-				if (result[i] == ':') {
-					opResult.state = STATE_ERROR;
-				}
-			}
+		// Comprobamos el inicio de la respuesta para saber si recibimos la informacion
+		// de la operacion o el binario resultante
+		byte[] prefix = null;
+		if (result != null && result.length > JSON_RESULT_PREFIX.length() + 2) {
+			prefix = Arrays.copyOf(result, JSON_RESULT_PREFIX.length());
 		}
 
-		// En caso de error, habremos recibido el codigo y el mensaje
-		if (opResult.state == STATE_ERROR) {
-			final String error = new String(result, StandardCharsets.UTF_8);
-			opResult.errorCode = Integer.parseInt(error.substring(ERROR_PREFIX.length(), error.indexOf(ERROR_SUFIX)));
-			opResult.errorMessage = error.substring(error.indexOf(ERROR_SUFIX) + 1);
+		// Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
+		if (prefix != null && Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes())) {
+			final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
+			final JsonObject json = jsonReader.readObject();
+			final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
+			if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {
+				opResult.errorCode = resultObject.getInt(JSON_ATTR_ERROR_CODE);
+			}
+			if (resultObject.containsKey(JSON_ATTR_ERROR_MSG)) {
+				opResult.errorMessage = resultObject.getString(JSON_ATTR_ERROR_MSG);
+			}
+			if (resultObject.containsKey(JSON_ATTR_PROVIDER_NAME)) {
+				opResult.providerName = resultObject.getString(JSON_ATTR_PROVIDER_NAME);
+			}
+            jsonReader.close();
 		}
 		// En caso de exito habremos recibido directamente el resultado.
 		else {

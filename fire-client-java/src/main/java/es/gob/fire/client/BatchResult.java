@@ -17,6 +17,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonString;
 
 /**
  * Resultado de una operaci&oacute;n de firma de lote.
@@ -28,6 +29,8 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 
 	private static final String JSON_OBJECT = "batch"; //$NON-NLS-1$
 
+	private static final String JSON_FIELD_PROVIDER_NAME = "prov"; //$NON-NLS-1$
+
 	private static final String JSON_FIELD_ID = "id"; //$NON-NLS-1$
 
 	private static final String JSON_FIELD_OK = "ok"; //$NON-NLS-1$
@@ -36,8 +39,26 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 
 	private boolean error = false;
 
+	private String providerName = null;
+
 	private BatchResult() {
 		// Impedimos la creacion directa de objetos
+	}
+
+	/**
+	 * Devuelve el nombre de proveedor utilizado para la firma.
+	 * @return Nombre de proveedor.
+	 */
+	public String getProviderName() {
+		return this.providerName;
+	}
+
+	/**
+	 * Establece el nombre del proveedor utilizado para la firma.
+	 * @param provName Nombre del proveedor.
+	 */
+	public void setProviderName(final String provName) {
+		this.providerName = provName;
 	}
 
 	/**
@@ -84,11 +105,14 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 
 		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
 		final JsonObject mainObject = jsonReader.readObject();
+		final JsonString providerName = mainObject.getJsonString(JSON_FIELD_PROVIDER_NAME);
+		result.setProviderName(providerName.getChars().toString());
+
 		final JsonArray jsonArray = mainObject.getJsonArray(JSON_OBJECT);
 		for (int i = 0; i < jsonArray.size(); i++) {
 			final JsonObject jsonObject = jsonArray.getJsonObject(i);
 			final String id = jsonObject.getString(JSON_FIELD_ID);
-			final boolean ok = Boolean.parseBoolean(jsonObject.getString(JSON_FIELD_OK));
+			final boolean ok = jsonObject.getBoolean(JSON_FIELD_OK);
 			String dt = null;
 			if (jsonObject.containsKey(JSON_FIELD_DETAIL)) {
 				dt = jsonObject.getString(JSON_FIELD_DETAIL);

@@ -7,14 +7,22 @@ public partial class example_fire_recover_sign : System.Web.UI.Page
     {
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionResult signature;
-        string transactionId = "218173a7-9c32-40e3-8ae4-a57a6891e143";
+        string transactionId = "09237210-64ac-4c38-8000-033f4812ba32";
         try
         {
-            signature = new FireClient("A418C37E84BA").recoverSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
-                transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
-                "00001",        // Identificador del usuario
-                null            // Formato longevo
-            );
+            
+                        signature = new FireClient("A418C37E84BA").recoverSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                            transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
+                            "00001",        // Identificador del usuario
+                            null            // Formato longevo
+                        );
+            
+            /*
+            signature = FireApi.recoverSign("A418C37E84BA", // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                            transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
+                            null            // Formato longevo
+                        );
+            */
         }
         catch (Exception ex)
         {
@@ -23,6 +31,7 @@ public partial class example_fire_recover_sign : System.Web.UI.Page
         }
 
         // Mostramos los datos obtenidos
+        Provider.Text = signature.getProviderName();
         SignatureB64.Text = System.Convert.ToBase64String(signature.getResult());
     }
 

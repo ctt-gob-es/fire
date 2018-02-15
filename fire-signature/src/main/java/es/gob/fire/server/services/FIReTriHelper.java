@@ -315,7 +315,7 @@ public final class FIReTriHelper {
         		}
 
         		// El core del cliente @firma devuelve todas las firmas de una contrafirma con el mismo
-                // ID para despues poder asociarlas. Como esto no esta permitido por ClaveFirma,
+                // ID para despues poder asociarlas. Como esto no esta permitido por algunos proveedores,
                 // modificaremos los ID para garantizar que son distintos y, antes de ejecutar la postfirma,
                 // desharemos el cambio
         		preRes = FIReTriSignIdProcessor.make(preRes);

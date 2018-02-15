@@ -124,8 +124,24 @@
 		// Llamamos al servicio remoto
 		$response = connect($URL_SERVICE, $URL_SERVICE_PARAMS);
 		
-		// Procesamos la respuesta
-		return new TransactionResult($response);
+		// Si la respuesta notifica un error o incluye los datos procesados, se devuelve
+		$transaction = new TransactionResult($response);
+		if (isset($transaction->errorCode) || isset($transaction->result)) {
+			return $transaction;
+		}
+		
+		// Si no tenemos el binario resultante, lo pedimos
+		$URL_SERVICE_PARAMS = array(
+			"op" => 11, // El tipo de operacion solicitada es RECOVER_SIGN_RESULT (11)
+			"transactionid" => $transactionId,
+			"appid" => $appId
+		);
+		
+		// Llamamos al servicio
+		$response = connect($URL_SERVICE, $URL_SERVICE_PARAMS);
+		$transaction->result = $response;
+		
+		return $transaction;
 	}
 	
 	/**
@@ -154,8 +170,6 @@
 
 		// Llamamos al servicio remoto
 		$response = connect($URL_SERVICE, $URL_SERVICE_PARAMS);
-		
-		
 		
 		// Procesamos la respuesta parseada
 		return new TransactionResult($response);
@@ -413,11 +427,12 @@
 		// Llamamos al servicio remoto
 		$response = connect($URL_SERVICE, $URL_SERVICE_PARAMS);
 		$jsonResponse = json_decode($response);
+		$providerName = $jsonResponse->prov;
 		$batchDocuments = $jsonResponse->batch;
 		// Parseamos el json recibido
 		$allDocuments = array();
 		foreach ($batchDocuments as $document) {
-			$allDocuments[] = new BatchResult($document);
+			$allDocuments[] = new BatchResult($document, $providerName);
 		}		
 		return $allDocuments;
 	}
@@ -672,8 +687,9 @@
 		var $id;
 		var $ok;
 		var $dt;
+		var $providerName;
 		
-		function BatchResult ($response){
+		function BatchResult ($response, $provName){
 			if(isset($response->id)) {
 				$this->id = $response->id;
 			}
@@ -684,6 +700,10 @@
 			
 			if(isset($response->dt)) {
 				$this->dt = $response->dt;
+			}
+
+			if(isset($provName)) {
+				$this->providerName = $provName;
 			}
 			
 			if (empty($this->id)){
@@ -699,7 +719,7 @@
 	};
 	
 	/**
-	 * Clase que almacena la respuesta del servicio de generacion de certificado.
+	 * Clase que almacena la respuesta del servicio de solicitud de firma.
 	 */
 	 class SignOperationResult{
 		var $transactionId;
@@ -724,6 +744,7 @@
 	class TransactionResult{
 		var $resultType;
 		var $state;
+		var $providerName;
 		var $errorCode;
 		var $errorMessage;
 		var $result;
@@ -734,33 +755,29 @@
 			// Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
 			$STATE_ERROR = -1;
 			
-			// Prefijo que antecede al codigo de error cuando este se produjo durante la operacion.
-			$ERROR_PREFIX = "ERR-";
-			// Sufijo que se indica a continuacion de un codigo de error.
-			$ERROR_SUFIX = ":";
+			// Prefijo que antecede a los datos con la informacion de la firma
+			$RESULT_PREFIX = "{\"result\":";
 		
 			$this->state = $STATE_OK;
 			
-			// Comprobamos si se ha producido un error no recuperable
-			if (strlen($result) > 6 && $ERROR_PREFIX == substr($result, 0, 4)) {
-				// Comprobamos los primeros caracteres para corroborar que se trata de un error
-				for ($i = 5; $i < min(strlen($result), 11) && $this->state == $STATE_OK; $i++) {
-					if (substr($result, $i, 1) == $ERROR_SUFIX) {
-						$this->state = $STATE_ERROR;
-					}
+			// Comprobamos si se ha recibido la informacion de la firma, en cuyo caso, la cargamos.
+			if (strlen($result) > strlen($RESULT_PREFIX) + 2 && $RESULT_PREFIX == substr($result, 0, strlen($RESULT_PREFIX))) {
+				$jsonResponse = json_decode($result);
+				if (isset($jsonResponse->result->prov)) {
+					$this->providerName = $jsonResponse->result->prov;
+				}
+				if (isset($jsonResponse->result->ercod)) {
+					$this->errorCode = $jsonResponse->result->ercod;
+					$this->state = $STATE_ERROR;
+				}
+				if (isset($jsonResponse->result->ermsg)) {
+					$this->errorMessage = $jsonResponse->result->ermsg;
 				}
 			}
-
-			// En caso de error, habremos recibido el codigo y el mensaje
-			if ($this->state == $STATE_ERROR) {
-				$this->errorCode = substr($result,strlen($ERROR_PREFIX), strpos($result,$ERROR_SUFIX)-strlen($ERROR_PREFIX));
-				$this->errorMessage = substr($result, strpos($result,$ERROR_SUFIX) + 1);
-			}
-			// En caso de exito habremos recibido directamente el resultado
+			// Si no, se considera quen lo recibido es el resultado de la firma.
 			else {
 				$this->result = $result;
 			}
-
 		}
 	};
 ?>

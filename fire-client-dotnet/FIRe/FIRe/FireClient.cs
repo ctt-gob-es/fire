@@ -38,6 +38,16 @@ namespace FIRe
         private static readonly string DOCID = "%DOCID%";
         private static readonly string STOPONERROR = "%STOPONERROR%";
 
+        private static readonly string OP_CODE_SIGN = "1";
+        private static readonly string OP_CODE_RECOVER_SIGN = "2";
+        private static readonly string OP_CODE_CREATE_BATCH = "5";
+        private static readonly string OP_CODE_ADD_DOCUMENT_TO_BATCH = "6";
+        private static readonly string OP_CODE_SIGN_BATCH = "7";
+        private static readonly string OP_CODE_RECOVER_BATCH = "8";
+        private static readonly string OP_CODE_RECOVER_BATCH_STATE = "9";
+        private static readonly string OP_CODE_RECOVER_BATCH_SIGN = "10";
+        private static readonly string OP_CODE_RECOVER_SIGN_RESULT = "11";
+        private static readonly string OP_CODE_RECOVER_ERROR = "99";
         private readonly string appId;
         private readonly FireConfig config;
 
@@ -144,7 +154,7 @@ namespace FIRe
             string url = this.config.getFireService();
             
             string urlParameters = URL_PARAMETERS_SIGN
-                .Replace(OP, "1") // El tipo de operacion solicitada es SIGN (1)
+                .Replace(OP, OP_CODE_SIGN) // El tipo de operacion solicitada es SIGN
                 .Replace(APP_ID, appId)
                 .Replace(SUBJECTID, subjectId)
                 .Replace(COP, op)
@@ -166,6 +176,12 @@ namespace FIRe
             "&transactionid=" + TRANSACTION +
             "&subjectid=" + SUBJECTID +
             "&upgrade=" + UPGRADE +
+            "&op=" + OP;
+
+        private static readonly string URL_PARAMETERS_RECOVER_SIGN_RESULT =
+            "appid=" + APP_ID +
+            "&transactionid=" + TRANSACTION +
+            "&subjectid=" + SUBJECTID +
             "&op=" + OP;
 
         /// <summary>
@@ -205,7 +221,7 @@ namespace FIRe
                 .Replace(APP_ID, this.appId)
                 .Replace(TRANSACTION, transactionId)
                 .Replace(SUBJECTID, subjectId)
-                .Replace(OP, "2"); // El tipo de operacion solicitada es RECOVER_SIGN (2)
+                .Replace(OP, OP_CODE_RECOVER_SIGN); // El tipo de operacion solicitada es RECOVER_SIGN
 
             // Si se ha indicado un formato de upgrade, lo actualizamos; si no, lo eliminamos de la URL
             if (upgrade != null && upgrade != "")
@@ -219,8 +235,29 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
-            // Mostramos los datos obtenidos
-            return new FireTransactionResult(bytes);
+
+            // Identificamos los datos obtenidos
+            FireTransactionResult result = new FireTransactionResult(bytes);
+
+            // Si el resultado es un error o si ya contiene la firma, lo devolvemos
+            if (result.getErrorCode() != null || result.getResult() != null)
+            {
+                return result;
+            }
+
+            // Si no, hacemos una nueva llamada para recuperarla
+            urlParameters = URL_PARAMETERS_RECOVER_SIGN_RESULT
+                .Replace(APP_ID, this.appId)
+                .Replace(TRANSACTION, transactionId)
+                .Replace(SUBJECTID, subjectId)
+                .Replace(OP, OP_CODE_RECOVER_SIGN_RESULT); // El tipo de operacion solicitada es RECOVER_SIGN_RESULT
+
+            //  realizamos la peticion post al servicio y recibimos los datos de la peticion
+            bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            result.setResult(bytes);
+
+            return result;
+
         }
 
         private static readonly string URL_PARAMETERS_RECOVER_ERROR =
@@ -341,7 +378,7 @@ namespace FIRe
             string url = this.config.getFireService();
 
             string urlParameters = URL_PARAMETERS_CREATE_BATCH
-                .Replace(OP, "5") // El tipo de operacion solicitada es CREATE_BATCH (5)
+                .Replace(OP, OP_CODE_CREATE_BATCH) // El tipo de operacion solicitada es CREATE_BATCH
                 .Replace(APP_ID, this.appId)
                 .Replace(SUBJECTID, subjectId)
                 .Replace(COP, op)
@@ -424,7 +461,7 @@ namespace FIRe
             string url = this.config.getFireService();
 
             string urlParameters = URL_PARAMETERS_ADD_DOCUMENT_BATCH
-                .Replace(OP, "6") // El tipo de operacion solicitada es ADD_DOCUMENT_TO_BATCH (6)
+                .Replace(OP, OP_CODE_ADD_DOCUMENT_TO_BATCH) // El tipo de operacion solicitada es ADD_DOCUMENT_TO_BATCH
                 .Replace(APP_ID, this.appId)
                 .Replace(SUBJECTID, subjectId)
                 .Replace(TRANSACTION, transactionId)
@@ -590,7 +627,7 @@ namespace FIRe
                 .Replace(APP_ID, this.appId)
                 .Replace(TRANSACTION, transactionId)
                 .Replace(SUBJECTID, subjectId)
-                .Replace(OP, "7") // El tipo de operacion solicitada es SIGN_BATCH (7)
+                .Replace(OP, OP_CODE_SIGN_BATCH) // El tipo de operacion solicitada es SIGN_BATCH
                 .Replace(STOPONERROR, stopOnError.ToString());
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
@@ -640,11 +677,11 @@ namespace FIRe
                 .Replace(APP_ID, this.appId)
                 .Replace(TRANSACTION, transactionId)
                 .Replace(SUBJECTID, subjectId)
-                .Replace(OP, "8"); // El tipo de operacion solicitada es RECOVER_BATCH (8)
+                .Replace(OP, OP_CODE_RECOVER_BATCH); // El tipo de operacion solicitada es RECOVER_BATCH
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
-            FireBatchResult documentList = getJson(System.Text.Encoding.UTF8.GetString(bytes));
+            FireBatchResult documentList = deserializedBatchResult(System.Text.Encoding.UTF8.GetString(bytes));
             // Mostramos los datos obtenidos
             return documentList;
         }
@@ -689,7 +726,7 @@ namespace FIRe
                 .Replace(APP_ID, this.appId)
                 .Replace(TRANSACTION, transactionId)
                 .Replace(SUBJECTID, subjectId)
-                .Replace(OP, "9"); // El tipo de operacion solicitada es RECOVER_BATCH_STATE (9)
+                .Replace(OP, OP_CODE_RECOVER_BATCH_STATE); // El tipo de operacion solicitada es RECOVER_BATCH_STATE
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
@@ -750,7 +787,7 @@ namespace FIRe
                 .Replace(DOCID, docId)
                 .Replace(TRANSACTION, transactionId)
                 .Replace(SUBJECTID, subjectId)
-                .Replace(OP, "10"); // El tipo de operacion solicitada es RECOVER_BATCH_SIGN (10)
+                .Replace(OP, OP_CODE_RECOVER_BATCH_SIGN); // El tipo de operacion solicitada es RECOVER_BATCH_SIGN
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
@@ -782,10 +819,10 @@ namespace FIRe
             try
             {
                 // generamos la respuesta del servidor
-                HttpWebResponse response = ConnectionManager.connectByPost(url, urlParameters, config);
+                response = ConnectionManager.connectByPost(url, urlParameters, config);
                 // recibimos el stream de la respuesta
-                Stream dataStream = response.GetResponseStream();
-                MemoryStream ms = new MemoryStream();
+                dataStream = response.GetResponseStream();
+                ms = new MemoryStream();
                 dataStream.CopyTo(ms);
                 byte[] bytes = ms.ToArray();
 
@@ -848,14 +885,15 @@ namespace FIRe
         }
 
         /// <summary>
-        ///  Devuelve un conjunto de propiedades extraídas de un JSON.
+        ///  Deserializa una estructura JSON para obtener de ella un objeto de tipo FireBatchResult.
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
         /// <returns></returns>
-        private static FireBatchResult getJson(string JSON)
+        private static FireBatchResult deserializedBatchResult(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
             return json_serializer.Deserialize<FireBatchResult>(JSON);
         }
     }
+
 }

@@ -9,7 +9,7 @@ public partial class example_fire_sign_batch : System.Web.UI.Page
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireLoadResult result;
-        string transactionId = "2c78060f-68fa-410c-9469-bdcc92bc4ff7";
+        string transactionId = "3a4a8c9f-4fed-44e0-bd1c-9147bd216cd2";
         try
         {
             result = new FireClient("A418C37E84BA").signBatch( // Identificador de la aplicacion (dada de alta previamente en el sistema)

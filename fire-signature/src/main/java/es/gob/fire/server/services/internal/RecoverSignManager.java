@@ -60,7 +60,7 @@ public class RecoverSignManager {
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String upgrade = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
 
-        // Comprobamos que se hayan prorcionado los parametros indispensables
+        // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
         	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -104,6 +104,7 @@ public class RecoverSignManager {
         final String format			= session.getString(ServiceParams.SESSION_PARAM_FORMAT);
         final String extraParamsB64	= session.getString(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
 
+        final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
         final String remoteTrId		= session.getString(ServiceParams.SESSION_PARAM_REMOTE_TRANSACTION_ID); // 3
 
         // En caso de haberse indicado un DocumentManager, lo recogemos
@@ -133,14 +134,13 @@ public class RecoverSignManager {
         	LOGGER.severe("Parametros extra de configuracion de la firma mal formatos: " + e); //$NON-NLS-1$
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "Parametros extra de confirguracion de la firma mal formatos: " + e); //$NON-NLS-1$
+                    "Parametros extra de configuracion de la firma mal formatos: " + e); //$NON-NLS-1$
         	return;
 		}
 
         // En el caso de la firma con certificado local, tendremos ya la firma
         // completa y la podemos procesar y devolver
-        final String origin = session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-        if (ServiceParams.CERTIFICATE_ORIGIN_LOCAL.equals(origin)) {
+        if (ServiceParams.CERTIFICATE_ORIGIN_LOCAL.equals(providerName)) {
 
         	// Recuperamos la respuesta del temporal en el que lo almacenamos
         	byte[] signResult;
@@ -171,16 +171,28 @@ public class RecoverSignManager {
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al postprocesar con el FIReDocumentManager la firma del documento", e); //$NON-NLS-1$
+        		SessionCollector.removeSession(session);
+            	response.sendError(HttpCustomErrors.SAVING_ERROR.getErrorCode());
+    			return;
+        	}
+
+        	// Guardamos la firma resultante para devolverla despues
+        	try {
+        		TempFilesHelper.storeTempData(transactionId, signResult);
+        	}
+        	catch (final Exception e) {
+        		LOGGER.log(Level.SEVERE, "Error al almacenar la firma despues de haberla completado", e); //$NON-NLS-1$
             	SessionCollector.removeSession(session);
             	response.sendError(HttpCustomErrors.SAVING_ERROR.getErrorCode());
     			return;
         	}
 
         	// Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
-        	SessionCollector.removeSession(session);
+        	session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_RECOVER);
+        	SessionCollector.commit(session);
 
         	// Enviamos la firma electronica como resultado
-        	sendResult(response, signResult);
+        	sendResult(response, buildResult(providerName));
         	return;
         }
 
@@ -211,7 +223,7 @@ public class RecoverSignManager {
         // Obtenemos el conector con el backend ya configurado
         final FIReConnector connector;
         try {
-    		connector = ProviderManager.initTransacction(origin, connConfig);
+    		connector = ProviderManager.initTransacction(providerName, connConfig);
         }
         catch (final FIReConnectorFactoryException e) {
             LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
@@ -232,6 +244,7 @@ public class RecoverSignManager {
 		}
 		catch(final Exception e) {
 			LOGGER.log(Level.WARNING, "Error durante el proceso de firma", e); //$NON-NLS-1$
+			SessionCollector.removeSession(session);
 			response.sendError(HttpCustomErrors.SIGN_ERROR.getErrorCode());
 			return;
 		}
@@ -275,9 +288,6 @@ public class RecoverSignManager {
             return;
         }
 
-        // En este punto ya se ha terminado de trabajar con la sesion del usuario y se elimina del pool
-        SessionCollector.removeSession(session);
-
 		// Se actualiza si esta definido el formato de actualizacion
 		try {
 			signResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
@@ -304,18 +314,33 @@ public class RecoverSignManager {
 			return;
 		}
 
+    	// Guardamos la firma resultante para devolverla despues
+    	try {
+    		TempFilesHelper.storeTempData(transactionId, signResult);
+    	}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.SEVERE, "Error al almacenar la firma despues de haberla completado", e); //$NON-NLS-1$
+        	SessionCollector.removeSession(session);
+        	response.sendError(HttpCustomErrors.SAVING_ERROR.getErrorCode());
+			return;
+    	}
+
         // Enviamos la firma electronica como resultado
-        sendResult(response, signResult);
+        sendResult(response, buildResult(providerName));
 	}
 
 	private static String buildErrorMessage(final String code, final String message) {
 		return "ERR-" + code + ":" + message; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
+	private static TransactionResult buildResult(final String providerName) {
+		return new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, providerName);
+	}
+
+	private static void sendResult(final HttpServletResponse response, final TransactionResult result) throws IOException {
 		// El servicio devuelve el resultado de la operacion de firma.
         final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, result).encodeResult());
+        output.write(result.encodeResult());
         output.flush();
         output.close();
 	}

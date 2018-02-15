@@ -26,6 +26,7 @@ import es.gob.fire.server.services.internal.RecoverBatchSignatureManager;
 import es.gob.fire.server.services.internal.RecoverBatchStateManager;
 import es.gob.fire.server.services.internal.RecoverErrorManager;
 import es.gob.fire.server.services.internal.RecoverSignManager;
+import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
 import es.gob.fire.signature.AplicationsDAO;
@@ -35,8 +36,8 @@ import es.gob.fire.signature.GoogleAnalitycs;
 import es.gob.fire.signature.LoggingHandler;
 
 /**
- * Servicio central de ClaveFirma que integra las funciones de firma a traves del ClaveFirma
- * y el MiniApplet, as&iacute; como la generaci&oacute;n de certificados electr&oacute;nicos.
+ * Servicio central de FIRe que integra las funciones de firma a traves del Cliente @firma
+ * y proveedores de firma en la nube.
  */
 public class FIReService extends HttpServlet {
 
@@ -182,6 +183,9 @@ public class FIReService extends HttpServlet {
     			break;
     		case RECOVER_SIGN:
     			RecoverSignManager.recoverSignature(params, response);
+    			break;
+    		case RECOVER_SIGN_RESULT:
+    			RecoverSignResultManager.recoverSignature(params, response);
     			break;
     		case CREATE_BATCH:
     			CreateBatchManager.createBatch(request, params, response);

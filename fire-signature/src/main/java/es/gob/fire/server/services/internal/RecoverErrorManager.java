@@ -53,7 +53,7 @@ public class RecoverErrorManager {
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
         if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
-    		sendResult(response, OperationError.INVALID_SESSION);
+    		sendResult(response, buildErrorResult(session, OperationError.INVALID_SESSION));
     		return;
         }
 
@@ -64,38 +64,55 @@ public class RecoverErrorManager {
         	// redirigir a la pasarela de autorizacion, se notifica como tal
         	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED)) {
             	LOGGER.warning("Ocurrio un error desconocido despues de llamar a la pasarela de autorizacion de firma en la nube o a la de emision de certificados"); //$NON-NLS-1$
+            	final TransactionResult result = buildErrorResult(session, OperationError.EXTERNAL_SERVICE_ERROR);
             	SessionCollector.removeSession(session);
-            	sendResult(response, OperationError.EXTERNAL_SERVICE_ERROR);
+            	sendResult(response, result);
         		return;
         	}
 
         	LOGGER.warning("No se ha notificado el tipo de error de la transaccion"); //$NON-NLS-1$
+            final TransactionResult result = buildErrorResult(session, OperationError.UNDEFINED_ERROR);
         	SessionCollector.removeSession(session);
-        	sendResult(response, OperationError.UNDEFINED_ERROR);
+        	sendResult(response, result);
         	return;
         }
 
         // Recuperamos la informacion de error y eliminamos la sesion
+        final TransactionResult result = buildErrorResult(session);
+        SessionCollector.removeSession(session);
+    	sendResult(response, result);
+	}
+
+	private static TransactionResult buildErrorResult(final FireSession session, final OperationError error) {
+		return buildErrorResult(session, error.getCode(), error.getMessage());
+	}
+
+	private static TransactionResult buildErrorResult(final FireSession session) {
+
         final String errorType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         final String errorMsg = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
 
-        SessionCollector.removeSession(session);
-
-    	sendResult(response, errorType, errorMsg);
+		return buildErrorResult(session, Integer.parseInt(errorType), errorMsg);
 	}
 
-	private static void sendResult(final HttpServletResponse response, final OperationError error) throws IOException {
-		// El servicio devuelve el resultado de la operacion de firma.
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(new TransactionResult(TransactionResult.RESULT_TYPE_ERROR, error.getCode(), error.getMessage()).encodeResult());
-        output.flush();
-        output.close();
+	private static TransactionResult buildErrorResult(final FireSession session, final int errorCode, final String errorMsg) {
+
+		final TransactionResult tr = new TransactionResult(
+				TransactionResult.RESULT_TYPE_ERROR,
+				errorCode,
+				errorMsg);
+
+		if (session != null) {
+			tr.setProviderName(session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN));
+		}
+
+		return tr;
 	}
 
-	private static void sendResult(final HttpServletResponse response, final String errorCode, final String errorMsg) throws IOException {
+	private static void sendResult(final HttpServletResponse response, final TransactionResult result) throws IOException {
 		// El servicio devuelve el resultado de la operacion de firma.
         final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(new TransactionResult(TransactionResult.RESULT_TYPE_ERROR, Integer.parseInt(errorCode), errorMsg).encodeResult());
+        output.write(result.encodeResult());
         output.flush();
         output.close();
 	}

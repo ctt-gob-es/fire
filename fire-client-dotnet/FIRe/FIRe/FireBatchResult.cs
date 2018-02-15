@@ -19,6 +19,12 @@ namespace FIRe
     /// <summary>Clase para el almacén del resultado de una operación de firma por lotes.</summary>
     public class FireBatchResult
     {
+
+        /// <summary>
+        /// Listado de resultados de firma en proceso batch.
+        /// </summary>
+        public String prov { get; set; }
+
         /// <summary>
         /// Listado de resultados de firma en proceso batch.
         /// </summary>
