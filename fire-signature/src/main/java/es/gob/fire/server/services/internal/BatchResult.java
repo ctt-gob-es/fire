@@ -46,9 +46,9 @@ public class BatchResult implements Serializable {
 	public static final String UPGRADE_ERROR = "UPGRADE_ERROR"; //$NON-NLS-1$
 	/** Error que denota un problema durante el guardado de la firma. */
 	public static final String ERROR_SAVING_DATA = "ERROR_SAVING_DATA"; //$NON-NLS-1$
-	/** Error que denota que se configur&oacute; una operacion de firma no v&aacute;lida. */
+	/** Error que denota que se configur&oacute; una operaci&oacute;n de firma no v&aacute;lida. */
 	public static final String INVALID_SIGNATURE_OPERATION = "INVALID_SIGNATURE_OPERATION"; //$NON-NLS-1$
-	/** Error que denota que se abort&oacute; la operaci&oacute;n (incluso despues de terminar) al detectar un error. */
+	/** Error que denota que se abort&oacute; la operaci&oacute;n (incluso despu&eacute;s de terminar) al detectar un error. */
 	public static final String ABORTED = "ABORTED"; //$NON-NLS-1$
 	/** Error que denota un problema al recuperar una firma generada. */
 	public static final String ERROR_RECOVERING = "ERROR_RECOVERING"; //$NON-NLS-1$
