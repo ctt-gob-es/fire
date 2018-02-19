@@ -13,7 +13,7 @@
 
 .mod_claim_izq { width: 100%; } 
 .mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 3em; vertical-align: top;}
-.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 63%; color: #707070;}
+.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 63%; color: #707070;margin-top: -0.65em;}
  /*PC*/
 .mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
 .mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
@@ -25,7 +25,7 @@
 
 
 /*PC*/
-.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.8em; padding-top:1em; padding-bottom:1em;}
+.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1.8em; padding-top:1em; padding-bottom:1em;}
 .contenido .title-sec {color: #dd5a00; margin: 0 auto; font-size:29px; padding-top:1.5em; line-height: 31px;margin-bottom: 0.5em;}
 .contenido .main-text {display: inline-block; color: #707070; margin: 0 auto; width: 100%; font-weight: normal; font-size:23px;}
 .contenido .cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px; float: left; width: 100%; display: block; box-sizing: border-box;}
@@ -165,7 +165,7 @@
 
 
 
-.container-title{ display:block; width:100%;position: relative; height:4em;}
+.container-title{ display:block; width:85%;position: relative; height:4em;}
 .container-title .title-head{display: inline-block; width:70%;position: absolute;}
 .container-title .title-button{display: inline-block; width:20%;position: absolute; top: 1em; right:5%;}
 

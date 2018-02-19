@@ -22,7 +22,7 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 85%; font-weight: n
 /*------------------------------ HEADER ---------------------------------------*/
 
 header {width: 100%; border-top: 2px solid #FF6600; background-image: -webkit-linear-gradient(0deg, #dededf 50%, #d4d0cd 50%);}
-header .header_top { position: relative; height: auto; padding: 2% 0; background: url(../img/general/dms/bg-cabecera.png) top left no-repeat;}
+header .header_top { position: relative; height: auto; padding: 2% 0; background: url(../img/general/dms/bg-cabecera.png) top left no-repeat;text-align: center;}
 header .header_bottom { position: relative;}
 header .header_menu_right {float: right; width: 65%}
 
