@@ -1,0 +1,96 @@
+@charset "UTF-8";
+/*****************************************************************************
+*    Proyecto: MINHAPcontenido-firmar .container-box
+*    Titulo: modChooseCertificateOrigin.css
+*    Desripcion: Estilos para la realizacion del ChooseCertificateOrigin
+****************************************************************************/
+
+/*Inicial*/
+
+.hide {display: none !important;}
+.temp-hide {display: none;}
+.bold {font-weight: bold;  }
+.clear {clear: both;}
+.no-float {float: none !important;}
+
+
+.mod_claim_izq { width: 100%; } 
+.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 3em; vertical-align: top;}
+.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 63%; color: #707070;margin-top: -0.65em;}
+.mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+.mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
+
+.contenido {display: block; width: 100%; margin: 0 auto; height: auto;  position: relative;z-index:9;}
+.container-title{ display:block; width:95%;position: relative; height:4em;}
+.container-title .title-head{display: inline-block; width:70%;position: absolute;left: 4.5em;}
+.container-title .title-button{display: inline-block; width:30%;position: absolute; top: 1em; right:1%;}
+
+.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1.8em; padding-top:1em; padding-bottom:1em;}
+.button-cancelar {z-index:10; float: right;width: 80px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
+.button-cancelar:hover {text-decoration: underline;}
+
+.contenido .container-box {display: block; width:100%;margin-left: auto;margin-right: auto; text-align: center; }
+.contenido .main-box-left {display:inline-block; width: 235px; height: 339px;border: 1px solid rgb(216, 212, 212); box-shadow: 0px 0px 5px rgb(216, 212, 212);margin-left: 0.5em;margin-right: 0.5em; margin-bottom:1em;margin-top: 1em;}
+.contenido .main-box-right.need-javascript, .contenido .main-box-left.need-javascript {opacity: 0.6;}
+
+
+.contain-box-top img{width: 100%;}
+.contenido .contain-box-bottom {display: block; background-color: #eae8e9; margin:5px;height: 210px; box-sizing: border-box;}
+.contenido .contain-box-bottom .title-box {padding: 1em 0px 0.2em 15px;font-weight: bold;font-size: 16px;color: #dd5a00;}
+.contenido .contain-box-bottom .text-box {padding:0 15px; font-size:15px; color: #707070; margin-bottom: 2.5em;text-align: left;}
+
+.contenido .main-box-right .button, .contenido .main-box-left .button {border: 1px solid #707070;padding: 0.4em 1.5em; border-radius: 2em;margin: 0em auto;width: 4.5em;display: block;position: relative;top: -4em;color: #707070; text-decoration: none;font-size: 15px;text-align: left;}
+.contenido .main-box-right .button, .contenido:hover .main-box-left .button:hover {border: 1px solid #606060; color: #606060; }
+.contenido .main-box-right.disabled .button, .contenido .main-box-left.disabled .button {display:none;}
+.contenido .main-box-right.need-javascript .button, .contenido .main-box-left.need-javascript .button {display:none;}
+.contenido .button:hover { text-decoration:underline; cursor:pointer;}
+
+.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.5em;}
+.arrow-right-inicio {top: 11px; right: 1.4em;}
+
+/*****************************************/
+@media screen and (max-width: 864px) and (min-width: 601px){  
+	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	
+}
+/********************************/
+@media screen and (max-width: 600px)and (min-width: 481px) { 
+	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 1em; vertical-align: top;}
+	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.40em;}
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;}
+}
+/******************************/
+
+@media screen and (max-width: 480px) and (min-width: 381px){ 
+
+	.container-title .title-head{display: inline-block; width:70%;position: absolute;left: 0.5em;}
+	.container-title .title-button{display: inline-block; width:30%;position: absolute; top: 0.5em;}
+	.button-cancelar {z-index:10; float: left;width: 60px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 12px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
+	.button-cancelar:hover {text-decoration: underline;}
+	
+	
+	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
+	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.40em;}
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 0.85em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1em; padding-top:1em; padding-bottom:1em;}
+}
+
+@media screen and (max-width: 380px) { 
+
+	.container-title .title-head{display: inline-block; width:63%;position: absolute;left: 0.5em;}
+	.container-title .title-button{display: inline-block; width:30%;position: absolute; top: 0.5em;margin-right: -2em;}
+	.button-cancelar {z-index:10; float: left;width: 60px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 12px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
+	.button-cancelar:hover {text-decoration: underline;}
+	
+	
+	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.2em; vertical-align: top;}
+	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.40em;}
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 0.85em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1em; padding-top:1em; padding-bottom:1em;}
+}

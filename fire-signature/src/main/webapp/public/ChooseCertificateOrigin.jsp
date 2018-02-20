@@ -82,7 +82,8 @@
 	<title>Selección del mecanismo de firma</title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
-	<link rel="stylesheet" type="text/css" href="css/modules.css">
+<!-- 	<link rel="stylesheet" type="text/css" href="css/modules.css"> -->
+		<link rel="stylesheet" type="text/css" href="css/modChooseCertificateOrigin.css">
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 <script type="text/javascript">
 	alert(<%=errorUrl%>);

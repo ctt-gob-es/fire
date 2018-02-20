@@ -43,6 +43,17 @@
 	text-align: center;
 }
 
+#submit-btn-add{
+	padding:15px; 
+	background:#707B7C; 
+	border:1px solid #515A5A; 
+	border-radius: 7px; 
+	color:#FFFFFF; 
+	width: 250px;
+	text-align: center;
+}
+
+
 .edit-txt {
 	width:300px; 
 	background: #D3D3D3; 

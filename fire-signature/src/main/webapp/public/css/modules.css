@@ -85,7 +85,7 @@
 .contenido .main-box-right.disabled .button, .contenido .main-box-left.disabled .button {display:none;}
 .contenido .main-box-right.need-javascript .button, .contenido .main-box-left.need-javascript .button {display:none;}
 .contenido .button:hover { text-decoration:underline; cursor:pointer;}
-.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.1em;}
+.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.5em;}
 .arrow-right-inicio {top: 11px; right: 1.4em;}
 ./* .arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 21px;position: absolute;right: 4.5em;} */
 
@@ -94,7 +94,7 @@
 
 
 .contenido-firmar {width: 470px;}/*position: relative;*/
-/* .contenido-firmar-listadocs{width: 1024px;position: relative;top:2em;margin-left: auto;margin-right: auto;} */
+
 .contenido-firmar-listadocs{width:90%;position: relative;top:2em;margin-left: auto;margin-right: auto;}
 
 .contenido-firmar-listadocs.container-box { width: 100%;top:0.5em;position: relative;text-align: left;}
@@ -108,7 +108,7 @@
 
 /* .contenido-firmar .container-box .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;} */
 
-.contenido-firmar .container-box .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
+/* .contenido-firmar .container-box .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;} */
 
 .contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;top:1em; position: relative;}
 
@@ -116,7 +116,7 @@
 .contenido-firmar .nota-firmar{position: relative;top: 1em;}
 
 .cabecera-listaDocs{display: inline-block;width: 47%;padding: 0.35em;font-weight: bold;text-align: center;}
-.celda-listaDocs{display: inline-block;width: 47%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;}
+.celda-listaDocs{display: inline-block;width: 47%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;vertical-align: top;}
 
 
 .contenido-principal { font-size: 1.2em; }
@@ -127,7 +127,7 @@
 .contenido-error .error-box .button_firmar {margin 0 auto;padding: 0.4em 2em;border-style: none;  border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:19px;}
 
 .contenido-error .container-box-error {width: 100%; margin-bottom: 1.5em;display: block;}
-/*.contenido-error .container-box-error {width: 563px; margin:0 auto; margin-bottom: 1.5em; }*/
+
 
 .container-textbox-error{display: block;width:100%;}
 
@@ -144,10 +144,10 @@
 .button_firmar {text-decoration: none;}
 .button_firmar:hover {text-decoration: underline; cursor:pointer;  }
 
-.button-volver {float: right;width: 80px;padding: 0.2em 0.3em 0.3em 1.2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;margin-top: 1em;font-weight: bold; cursor:pointer; text-decoration: none;}
+.button-volver {float: right;width: 80px;padding: 0.2em 0.3em 0.3em 1.2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
 .button-volver:hover {text-decoration: underline; cursor:pointer;}
 
-.button-cancelar {z-index:10; float: right;width: 80px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;margin-top: 1em;font-weight: bold; cursor:pointer; text-decoration: none;}
+.button-cancelar {z-index:10; float: right;width: 80px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
 .button-cancelar:hover {text-decoration: underline;}
 
 .button-operacion {width: 170px;padding: 0.2em 1em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 1.2em 1em;font-size:22px;box-sizing: border-box;font-weight: bold;text-decoration: none;}
@@ -165,9 +165,9 @@
 
 
 
-.container-title{ display:block; width:85%;position: relative; height:4em;}
-.container-title .title-head{display: inline-block; width:70%;position: absolute;}
-.container-title .title-button{display: inline-block; width:20%;position: absolute; top: 1em; right:5%;}
+.container-title{ display:block; width:95%;position: relative; height:4em;}
+.container-title .title-head{display: inline-block; width:70%;position: absolute;left: 4.5em;}
+.container-title .title-button{display: inline-block; width:30%;position: absolute; top: 1em; right:1%;}
 
 
 .progress-dialog{display: none;background-color: rgba(50,50,50,0.3); width: 100%; height: 100%; z-index: 9990; position: fixed; left: 0; top: 0; }
@@ -181,20 +181,21 @@
 /*SMALL RESOLUTION STYLES*/
 @media screen and (max-width: 680px) {  
   
-  .contenido { width: 100%; padding: 5px;  box-sizing: border-box;}
+  	.contenido { width: 100%; padding: 5px;  box-sizing: border-box;}
 
 /*   .contenido .container-box { float:none; width: 100%;} */
-  .contenido .main-box-left {float:none; width: 236px;  display:inline-block; margin-bottom: 1em; margin-top:1em;margin-right:0.5em; ;margin-left: 0.5em;}/*margin: 0 auto;width: 321px; */
-  .contenido .main-box-right {float:none; width: 321px; margin: 0 auto; display:block; margin-top:1em;}
-
-  .mod_claim_izq .mod_claim_in { margin-left: 0.5em;}
-  .mod_claim_text { margin-left: 0.5em; }
-  .mod_claim_text_sec { margin-left: 0.5em; }
+ 	.contenido .main-box-left {float:none; width: 236px;  display:inline-block; margin-bottom: 1em; margin-top:1em;margin-right:0.5em; ;margin-left: 0.5em;}/*margin: 0 auto;width: 321px; */
+  	.contenido .main-box-right {float:none; width: 321px; margin: 0 auto; display:block; margin-top:1em;}
+	
+  	.mod_claim_izq .mod_claim_in { margin-left: 0.5em;}
+ 	.mod_claim_text { margin-left: 0.5em; }
+  	.mod_claim_text_sec { margin-left: 0.5em; }
    /*Movil*/
+   	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.40em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.2em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.2em; padding-top:0.3em; padding-bottom:0.3em;}
-	.container-title .title-button{display: inline-block; width:20%; top:-22%; right:2%;}/*position: absolute;*/
+	.container-title .title-button{display: inline-block; width:20%; top:-22%; right:2%;top:1em;}/*position: absolute;*/
 
 .container-box-title{width:90% display: block; position: relative;}/*;margin: 2em;*/
 .container_tit{float: left; width:70%;display: inline-block;}
@@ -210,7 +211,7 @@
 .contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;}
 
 .cabecera-listaDocs{display: inline-block;width: 40%;padding: 0.35em;font-weight: bold;text-align: center; font-size: 12px;}
-.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;font-size: 12px;}
+.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;font-size: 12px;vertical-align: top;}
 
 	
 .progress-dialog-text{ text-align: center; font-weight: bold; font-size: 16pt; display:block;}
@@ -219,8 +220,26 @@
 
 
 
-@media screen and (max-width: 560px) {  
+@media screen and (max-width: 575px) {  
 
+/* 	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 75%; color: #707070;margin-top: -0.40em;} */
+/* 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;} */
+/* 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;} */
+/* 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.2em; padding-top:0.3em; padding-bottom:0.3em;} */
+	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left:0.5em; vertical-align: top;}
+
+  
+  	
+ 	.mod_claim_text { margin-left: 0.5em; }
+  	.mod_claim_text_sec { margin-left: 0.5em; }
+	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.40em;}
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 0.88em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:1em; padding-bottom:0.3em;}
+	.container-title .title-button{display: inline-block; width:30%;position: absolute; right:1%;}
+	
+	
+	
 .container_btn_operation{float: right; width:15%;display: inline-block;margin-top: -1em;}
 .contenido .container-box-cert {display: block; width:410px; margin-left: auto; margin-right: auto; }
 .contenido.container-box-cert.cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px;float: left;  width:100%; display: block; box-sizing: border-box;}
@@ -236,6 +255,8 @@
 .contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width: auto; min-width: 52px;}
 
 .contenido-firmar {width: 90%; margin-left: auto;margin-right: auto;}	
+
+.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.3em;}
 }
 
 
@@ -278,18 +299,19 @@
 }
 
 /*MEDIUM RESOLUTION STYLES*/
-@media screen and (max-width: 846px){  
+@media screen and (max-width: 864px){  
 
   .contenido-error .title-error {width: 100%; margin: 0 auto;}
   .contenido-error .container-box-error  {width: 100%; padding: 10px; box-sizing: border-box;}
   .contenido-error .error-box .button_firmar {width: 100%; box-sizing: border-box;}
-  .contenido .main-box-left {display:inline-block; width: 235px; height: 339px;border: 1px solid rgb(216, 212, 212); box-shadow: 0px 0px 5px rgb(216, 212, 212);margin-left: 0.5em;margin-right: 0.5em; margin-bottom:1em;margin-top: 1em;}
-  
+  .contenido .main-box-left {display:inline-block; width: 235px; height: 339px;border: 1px solid rgb(216, 212, 212); box-shadow: 0px 0px 5px rgb(216, 212, 212);margin-left: 0.5em;margin-right: 0.5em; margin-bottom:1em;margin-top: 0.7em;}
+ 
 /*Movil*/
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.2em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.2em; padding-top:0.3em; padding-bottom:0.3em;}
-
+	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:1em; padding-bottom:0.3em;}
+.container-title .title-button{display: inline-block; width:30%;position: absolute; right:1%;}
 
 .container_btn_operation{float: right; width:20%;display: inline-block;margin-top: -1em;}	
 
@@ -299,7 +321,7 @@
 .contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;}
 
 .cabecera-listaDocs{display: inline-block;width: 40%;padding: 0.35em;font-weight: bold;text-align: center; font-size: 12px;}
-.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;font-size: 12px;}
+.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;font-size: 12px;vertical-align: top;}
 
 .progress-dialog-text{ text-align: center; font-weight: bold; font-size: 18pt; display:block;}
 

@@ -97,7 +97,8 @@
 	<title>Selección de certificado de firma</title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
-	<link rel="stylesheet" type="text/css" href="css/modules.css">
+	<link rel="stylesheet" type="text/css" href="css/modChooseCertificate.css">
+<!-- <link rel="stylesheet" type="text/css" href="css/modules.css"> -->
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 
 </head>

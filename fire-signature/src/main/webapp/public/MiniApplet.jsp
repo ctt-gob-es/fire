@@ -184,11 +184,11 @@
 	<title>Firma con certificado local</title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
-	<link rel="stylesheet" type="text/css" href="css/modules.css">
+<!-- 	<link rel="stylesheet" type="text/css" href="css/modules.css"> -->
+	<link rel="stylesheet" type="text/css" href="css/modMiniApplet.css">
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 	<script type="text/javascript" src="js/miniapplet.js"></script>
 	<script type="text/javascript" src="js/deployJava.js"></script>
-	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
 	<script type="text/javascript">
 		
 		<% if (isBatchOperation) { %>
@@ -288,7 +288,7 @@
 			}
 
 			function sendErrorCallback(errorType, errorMessage) {
-				 
+				hideProgress();
 				document.getElementById("inputerrortype").value = errorType;
 				document.getElementById("inputerrormsg").value = errorMessage;								
 				document.getElementById("errorMsg").innerHTML = "" + errorType + ": " + errorMessage;
@@ -296,7 +296,7 @@
 				if (errorType != "es.gob.afirma.core.AOCancelledOperationException") {
 					showErrorOptions();
 				}
-// 				hideProgress();
+
 			}
 
 			function showErrorOptions() {
@@ -315,7 +315,7 @@
 			 * el usuario haya decidido abortar la operaci&oacuten.
 			 */
 			function doCancel() {
-				
+				hideProgress();
 				document.getElementById("formSign").action = "miniappletErrorService";
 				document.getElementById("formSign").submit()
 			}
@@ -445,8 +445,6 @@
 		<% if (docInfos != null && docInfos.length > 0) { %>
 		<section class="contenido-firmar-listadocs">
 			<div id="listDocs" class="container-box "><!-- no-float -->			
-<!-- 				<ul class="lista-elem"> -->
-<!-- 				<li class="elem bold">Nombre - Título</li> -->
 					<div class="cabecera-listaDocs">Título</div>
 					<div class="cabecera-listaDocs">Nombre</div>
 				<% int i=1;
