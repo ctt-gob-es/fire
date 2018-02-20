@@ -178,8 +178,37 @@
 
 
 
-/*SMALL RESOLUTION STYLES*/
-@media screen and (max-width: 680px) {  
+
+/*MEDIUM RESOLUTION STYLES*/
+@media screen and (max-width: 864px) and (min-width: 681px){  
+
+  .contenido-error .title-error {width: 100%; margin: 0 auto;}
+  .contenido-error .container-box-error  {width: 100%; padding: 10px; box-sizing: border-box;}
+  .contenido-error .error-box .button_firmar {width: 100%; box-sizing: border-box;}
+  .contenido .main-box-left {display:inline-block; width: 235px; height: 339px;border: 1px solid rgb(216, 212, 212); box-shadow: 0px 0px 5px rgb(216, 212, 212);margin-left: 0.5em;margin-right: 0.5em; margin-bottom:1em;margin-top: 0.7em;}
+ 
+/*Movil*/
+	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:1em; padding-bottom:0.3em;}
+.container-title .title-button{display: inline-block; width:30%;position: absolute; right:1%;}
+
+.container_btn_operation{float: right; width:20%;display: inline-block;margin-top: -1em;}	
+
+/* .contenido-firmar .container-box { width: 100%;text-align: left;top:2em;position: relative;display: block;}margin-left: 4em; */
+.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 3em;text-align: center;top:2em;position: relative;}
+.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
+.contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;}
+
+.cabecera-listaDocs{display: inline-block;width: 40%;padding: 0.35em;font-weight: bold;text-align: center; font-size: 12px;}
+.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;font-size: 12px;vertical-align: top;}
+
+.progress-dialog-text{ text-align: center; font-weight: bold; font-size: 18pt; display:block;}
+
+}
+
+@media screen and (max-width: 680px)and (min-width: 576px) {  
   
   	.contenido { width: 100%; padding: 5px;  box-sizing: border-box;}
 
@@ -217,10 +246,7 @@
 .progress-dialog-text{ text-align: center; font-weight: bold; font-size: 16pt; display:block;}
 /* .img-loading{width: 100px;height: 100px}	 */
 }
-
-
-
-@media screen and (max-width: 575px) {  
+@media screen and (max-width: 575px)and (min-width: 421px) {  
 
 /* 	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 75%; color: #707070;margin-top: -0.40em;} */
 /* 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;} */
@@ -259,12 +285,13 @@
 .arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.3em;}
 }
 
+/*SMALL RESOLUTION STYLES*/
 
 @media screen and (max-width: 420px) {  
 
-	.contenido .cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px; float: left; width: 100%; display: block; box-sizing: border-box;}
+.contenido .cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px; float: left; width: 100%; display: block; box-sizing: border-box;}
 .container_btn_operation{float: right; width:15%;display: inline-block;margin-top: -1em;}
-.contenido .container-box-cert {display: block;  width:320px; margin-left: auto; margin-right: auto; }/*min-width: 665px;   width:50%;margin-left: auto;margin-right: auto; */
+.contenido .container-box-cert {display: block;  width:320px; margin-left: auto; margin-right: auto; }
 .contenido.container-box-cert.cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px;float: left;  width:100%; display: block; box-sizing: border-box;}
 
 .contenido.container-box-cert .cert-box .title-cert-box {font-size: 14px;font-weight: bold;}
@@ -296,33 +323,4 @@
 	#progressText{font-size: 12pt;}
 	.progress-dialog-text{ text-align: center; font-weight: bold;  display:block;}
 	.img-loading{width: 50px;height: 50px;}
-}
-
-/*MEDIUM RESOLUTION STYLES*/
-@media screen and (max-width: 864px){  
-
-  .contenido-error .title-error {width: 100%; margin: 0 auto;}
-  .contenido-error .container-box-error  {width: 100%; padding: 10px; box-sizing: border-box;}
-  .contenido-error .error-box .button_firmar {width: 100%; box-sizing: border-box;}
-  .contenido .main-box-left {display:inline-block; width: 235px; height: 339px;border: 1px solid rgb(216, 212, 212); box-shadow: 0px 0px 5px rgb(216, 212, 212);margin-left: 0.5em;margin-right: 0.5em; margin-bottom:1em;margin-top: 0.7em;}
- 
-/*Movil*/
-	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:1em; padding-bottom:0.3em;}
-.container-title .title-button{display: inline-block; width:30%;position: absolute; right:1%;}
-
-.container_btn_operation{float: right; width:20%;display: inline-block;margin-top: -1em;}	
-
-/* .contenido-firmar .container-box { width: 100%;text-align: left;top:2em;position: relative;display: block;}margin-left: 4em; */
-.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 3em;text-align: center;top:2em;position: relative;}
-.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
-.contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;}
-
-.cabecera-listaDocs{display: inline-block;width: 40%;padding: 0.35em;font-weight: bold;text-align: center; font-size: 12px;}
-.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;font-size: 12px;vertical-align: top;}
-
-.progress-dialog-text{ text-align: center; font-weight: bold; font-size: 18pt; display:block;}
-
 }
