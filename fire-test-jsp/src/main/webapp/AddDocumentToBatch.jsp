@@ -144,8 +144,8 @@
 					<input id="extraparams-conf" type="hidden" name="extraParams" value="bW9kZT1pbXBsaWNpdA=="/> <!-- ExtraParams (mode=implicit) en Base64 URL SAFE -->
 				</fieldset>
 				
-				<div style="margin-top:30px;text-align: center; ">
-					<input  id="submit-btn"  type="submit" value="AGREGAR DOCUMENTO AL LOTE">
+				<div style="margin-top:30px;text-align: left;">
+					<input  id="submit-btn-add"  type="submit" value="AGREGAR DOCUMENTO AL LOTE">
 				</div>
 			</form>
 			
