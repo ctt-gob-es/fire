@@ -24,7 +24,7 @@ public class ProviderManager {
 
 	private static final String PROVIDER_INFO_FILE = "provider_info.properties"; //$NON-NLS-1$
 
-	private static final String SUFIX_PROVIDER_CONFIG = "_config.properties"; //$NON-NLS-1$
+	private static final String PROVIDER_CONFIG_FILE_TEMPLATE = "provider.%s.properties"; //$NON-NLS-1$
 
 	private static final String LOCAL_PROVIDER_INFO_PATH = "/es/gob/fire/server/resources/local_provider.properties"; //$NON-NLS-1$
 
@@ -109,13 +109,15 @@ public class ProviderManager {
 	 * @return Configuraci&oacute;n cargada.
 	 */
 	private static Properties loadProviderConfig(final String providerName) {
+
+		final String providerConfigFilename = String.format(PROVIDER_CONFIG_FILE_TEMPLATE, providerName);
 		Properties providerConfig;
 		try {
-			providerConfig = ConfigFileLoader.loadConfigFile(providerName + SUFIX_PROVIDER_CONFIG);
+			providerConfig = ConfigFileLoader.loadConfigFile(providerConfigFilename);
 		} catch (final FileNotFoundException e) {
 			LOGGER.warning(String.format(
-					"No se ha encontrado el fichero de configuracion del proveedor %s: " + e, //$NON-NLS-1$
-					providerName
+					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
+					providerConfigFilename, providerName
 			));
 			providerConfig = new Properties();
 		} catch (final IOException e) {
