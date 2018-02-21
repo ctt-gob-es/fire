@@ -2,20 +2,82 @@
 -- **************** Creación de Tablas ********************
 -- ********************************************************
 
-CREATE TABLE tb_aplicaciones (
-	id varchar2(48) PRIMARY KEY,
-	nombre varchar2(45) NOT NULL,
-	responsable varchar2(45) NOT NULL,
-	resp_correo varchar2(45) DEFAULT NULL,
-	resp_telefono varchar2(30) DEFAULT NULL,
-	fecha_alta TIMESTAMP NOT NULL,
-	cer varchar2(4000) NOT NULL,
-	huella varchar2(28) NOT NULL
-);
+CREATE TABLE "TB_APLICACIONES" (
+  "ID" VARCHAR2(48) NOT NULL,
+  "NOMBRE" VARCHAR2(45) NOT NULL,
+  "RESPONSABLE" VARCHAR2(45) NOT NULL,
+  "RESP_CORREO" VARCHAR2(45),
+  "RESP_TELEFONO" VARCHAR2(30) ,
+  "FECHA_ALTA" TIMESTAMP NOT NULL,
+  "FK_CERTIFICADO" NUMBER,
+  constraint  "TB_APLICACIONES_PK" primary key ("id")
+) /
+ALTER TABLE  "TB_APLICACIONES" modify
+("FECHA_ALTA" TIMESTAMP default SYSDATE);
+/
 
-CREATE TABLE tb_configuracion (
-	parametro varchar2(30) PRIMARY KEY,
-	valor varchar2(45) DEFAULT NULL
-);
+CREATE TABLE "TB_CERTIFICADOS" (
+    "ID_CERTIFICADO"   NUMBER NOT NULL,
+    "NOMBRE_CERT"      VARCHAR2(45) NOT NULL,
+    "FEC_ALTA"         TIMESTAMP NOT NULL,
+    "CERT_PRINCIPAL"   BLOB,
+    "CERT_BACKUP"      BLOB,
+    "HUELLA_PRINCIPAL" VARCHAR2(45),
+    "HUELLA_BACKUP"    VARCHAR2(45),
+    constraint  "TB_CERTIFICADOS_PK" primary key ("ID_CERTIFICADO")
+)
+/
+CREATE sequence "TB_CERTIFICADOS_SEQ" 
+/
 
+CREATE trigger "BI_TB_CERTIFICADOS"  
+  before insert on "TB_CERTIFICADOS"              
+  for each row 
+begin  
+  if :NEW."ID_CERTIFICADO" is null then
+    select "TB_CERTIFICADOS_SEQ".nextval into :NEW."ID_CERTIFICADO" from dual;
+  end if;
+end;
+/ 
+ALTER TABLE  "TB_CERTIFICADOS" modify
+("FEC_ALTA" TIMESTAMP default SYSDATE);
+/
+
+CREATE TABLE  "TB_USUARIOS" 
+   (	"ID_USUARIO" NUMBER NOT NULL ENABLE, 
+	"NOMBRE_USUARIO" VARCHAR2(30) NOT NULL ENABLE, 
+	"CLAVE" VARCHAR2(45) NOT NULL ENABLE, 
+	"NOMBRE" VARCHAR2(45) NOT NULL ENABLE, 
+	"APELLIDOS" VARCHAR2(120) NOT NULL ENABLE, 
+	"CORREO_ELEC" VARCHAR2(45), 
+	"FEC_ALTA" TIMESTAMP (6) NOT NULL ENABLE, 
+	"TELF_CONTACTO" VARCHAR2(45), 
+	"ROL" VARCHAR2(45), 
+	"USU_DEFECTO" NUMBER(1,0) NOT NULL ENABLE, 
+	 CONSTRAINT "TB_USUARIOS_PK" PRIMARY KEY ("ID_USUARIO") ENABLE, 
+	 CONSTRAINT "TB_USUARIOS_UK1" UNIQUE ("NOMBRE_USUARIO") ENABLE
+   ) ;
+
+
+CREATE OR REPLACE TRIGGER  "BI_TB_USUARIOS" 
+  before insert on "TB_USUARIOS"               
+  for each row  
+begin   
+  if :NEW."ID_USUARIO" is null then 
+    select "TB_USUARIOS_SEQ".nextval into :NEW."ID_USUARIO" from dual; 
+  end if; 
+end; 
+
+/
+ALTER TRIGGER  "BI_TB_USUARIOS" ENABLE;
+ALTER TABLE  "TB_USUARIOS" modify
+("USU_DEFECTO" NUMBER(1,0) default 0);
+/
+ALTER TABLE  "TB_USUARIOS" modify
+("FEC_ALTA" TIMESTAMP default SYSDATE);
+/
+
+
+ALTER TABLE "TB_APLICACIONES" add constraint
+"TB_APLICACIONES_FK" foreign key ("fk_certificado") references "TB_CERTIFICADOS" ("ID_CERTIFICADO")
 

@@ -9,7 +9,7 @@ CREATE TABLE `tb_aplicaciones` (
   `resp_correo` varchar(45) DEFAULT NULL,
   `resp_telefono` varchar(30) DEFAULT NULL,
   `fecha_alta` datetime NOT NULL,
-  `fk_certificado` int(11) DEFAULT NULL
+  `fk_certificado` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `tb_certificados` (
@@ -53,10 +53,6 @@ FOREIGN KEY (`fk_certificado`)
 ON DELETE RESTRICT
   ON UPDATE CASCADE;
 
-ALTER TABLE `tb_aplicaciones` DROP FOREIGN KEY `fk_certificado`;
-
-ALTER TABLE `tb_aplicaciones` 
-CHANGE COLUMN `fk_certificado` `fk_certificado` INT(11) NOT NULL ;
 
 ALTER TABLE `tb_aplicaciones` 
 ADD CONSTRAINT `fk_certificado`
