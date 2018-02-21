@@ -82,7 +82,7 @@
   .contenido-error .error-box .button_firmar {width: 100%; box-sizing: border-box;}
   .contenido .main-box-left {display:inline-block; width: 235px; height: 339px;border: 1px solid rgb(216, 212, 212); box-shadow: 0px 0px 5px rgb(216, 212, 212);margin-left: 0.5em;margin-right: 0.5em; margin-bottom:1em;margin-top: 0.7em;}
  
-/*Movil*/
+
 	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}

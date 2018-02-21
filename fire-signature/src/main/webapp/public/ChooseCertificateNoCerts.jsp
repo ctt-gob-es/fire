@@ -82,7 +82,8 @@
 	<title>No dispone de certificado de firma</title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
-	<link rel="stylesheet" type="text/css" href="css/modules.css">
+	<link rel="stylesheet" type="text/css" href="css/modChooseCertificateNoCerts.css">
+<!-- 	<link rel="stylesheet" type="text/css" href="css/modules.css"> -->
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 
 </head>
@@ -131,7 +132,6 @@
 					</div>
 				</div>
 				<div class="container-box-error">
-					<div class="container-textbox-error">&nbsp;</div>				
 					<div class="container-textbox-error">
 						<p class="text-error-box">Si lo desea puede emitir un nuevo certificado en la nube para firmar</p>
 					</div>
@@ -147,7 +147,6 @@
 				
 				<% if (!originForced) { %>
 			  		
-<!-- 			  			<div class="container-box-error"></div> -->
 					<div id="certLocalText" class="container-textbox-error hide">					
 						<p class="text-error-box">Tambien puede firmar usando sus certificados locales (incluyendo DNIe).</p>
 					</div>								  				
