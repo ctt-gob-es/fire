@@ -57,7 +57,6 @@ namespace FIRe
             
             // Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
             if (prefix != null && System.Text.Encoding.UTF8.GetString(prefix).Equals(JSON_RESULT_PREFIX))
-            //if (prefix != null && prefix.SequenceEqual(System.Text.Encoding.Unicode.GetBytes(JSON_RESULT_PREFIX)))
             {
                 try
                 {
@@ -65,6 +64,7 @@ namespace FIRe
                     if (signResult.getErrorCode() != 0)
                     {
                         this.errorCode = signResult.getErrorCode().ToString();
+                        this.state = STATE_ERROR;
                     }
                     if (signResult.getErrorMessage() != null)
                     {
@@ -75,9 +75,9 @@ namespace FIRe
                         this.providerName = signResult.getProviderName();
                     }
                 }
-                catch(Exception)
+                catch(Exception e)
                 {
-                    this.state = STATE_ERROR;
+                    throw new FormatException("El servicio respondio con un JSON no valido: " + System.Text.Encoding.UTF8.GetString(bytes), e);
                 }
             }
             else

@@ -185,7 +185,15 @@ namespace FIRe
             byte[] bytes = getResponseToPostPetition(url, urlParameters);
 
             // Identificamos los datos obtenidos
-            FireTransactionResult result = new FireTransactionResult(bytes);
+            FireTransactionResult result;
+            try
+            {
+                result = new FireTransactionResult(bytes);
+            }
+            catch (Exception e)
+            {
+                throw new HttpOperationException("La respuesta del servicio no tiene un formato valido", e);
+            }
 
             // Si el resultado es un error o si ya contiene la firma, lo devolvemos
             if (result.getErrorCode() != null || result.getResult() != null)
@@ -237,8 +245,15 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters);
-            // Mostramos los datos obtenidos
-            return new FireTransactionResult(bytes);
+            
+            // Devolvemos la respuesta
+            try {
+                return new FireTransactionResult(bytes);
+            }
+            catch (Exception e)
+            {
+                throw new HttpOperationException("La respuesta del servicio no tiene un formato valido", e);
+            }
         }
 
         private static readonly String URL_PARAMETERS_CREATE_BATCH =
@@ -667,8 +682,15 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters);
-            // Mostramos los datos obtenidos
-            return new FireTransactionResult(bytes);
+            
+            // Devolvemos la respuesta
+            try {
+                return new FireTransactionResult(bytes);
+            }
+            catch (Exception e)
+            {
+                throw new HttpOperationException("La respuesta del servicio no tiene un formato valido", e);
+            }
         }
 
         /// <summary>

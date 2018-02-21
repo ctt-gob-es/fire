@@ -226,8 +226,9 @@ public class TransactionResult {
 	 * @param resultType Tipo de resultado.
 	 * @param result Datos devueltos por la operacion de recuperacion de datos.
 	 * @return Resultado de la operaci&oacute;n.
+	 * @throws HttpOperationException Cuando se proporcionan datos no v&aacute;lidos.
 	 */
-	public static TransactionResult parse(final int resultType, final byte[] result) {
+	public static TransactionResult parse(final int resultType, final byte[] result) throws HttpOperationException {
 
 		final TransactionResult opResult = new TransactionResult(resultType);
 
@@ -242,19 +243,25 @@ public class TransactionResult {
 
 		// Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
 		if (prefix != null && Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes())) {
-			final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
-			final JsonObject json = jsonReader.readObject();
-			final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
-			if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {
-				opResult.errorCode = resultObject.getInt(JSON_ATTR_ERROR_CODE);
+			try {
+				final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
+				final JsonObject json = jsonReader.readObject();
+				final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
+				if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {
+					opResult.errorCode = resultObject.getInt(JSON_ATTR_ERROR_CODE);
+					opResult.state = STATE_ERROR;
+				}
+				if (resultObject.containsKey(JSON_ATTR_ERROR_MSG)) {
+					opResult.errorMessage = resultObject.getString(JSON_ATTR_ERROR_MSG);
+				}
+				if (resultObject.containsKey(JSON_ATTR_PROVIDER_NAME)) {
+					opResult.providerName = resultObject.getString(JSON_ATTR_PROVIDER_NAME);
+				}
+				jsonReader.close();
 			}
-			if (resultObject.containsKey(JSON_ATTR_ERROR_MSG)) {
-				opResult.errorMessage = resultObject.getString(JSON_ATTR_ERROR_MSG);
+			catch (final Exception e) {
+				throw new HttpOperationException("El servicio respondio con un JSON no valido: " + new String(result), e);
 			}
-			if (resultObject.containsKey(JSON_ATTR_PROVIDER_NAME)) {
-				opResult.providerName = resultObject.getString(JSON_ATTR_PROVIDER_NAME);
-			}
-			jsonReader.close();
 		}
 		// Si no, habremos recibido directamente el resultado.
 		else {

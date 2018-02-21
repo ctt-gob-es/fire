@@ -1088,7 +1088,7 @@ public class FireClient {
     	catch (final Exception e) {
     		LOGGER.log(
     				Level.SEVERE,
-    				"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
+    				"Error en la comunicacion con el servicio de recuperacion de error", //$NON-NLS-1$
     				e);
     		throw new IOException(e);
     	}
