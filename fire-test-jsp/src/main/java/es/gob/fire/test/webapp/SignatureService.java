@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
@@ -62,7 +61,15 @@ public class SignatureService extends HttpServlet {
 
 		// Recobemos los parametros para la operacion. A excepcion de los datos,
 		// normalmente estos parametros estaran prefijados para cada aplicacion
-		final OperationConfig config = getOperationConfig(request);
+		OperationConfig config;
+		try {
+			config = getOperationConfig(request);
+		}
+		catch (final Exception e) {
+			request.getRequestDispatcher("Sign.jsp?attributes=fail").forward(request, response); //$NON-NLS-1$
+			return;
+		}
+
 		final String op = config.getCryptoOperation();
 		final String format = config.getFormat();
 		final String algorithm = config.getAlgorithm();
@@ -109,7 +116,7 @@ public class SignatureService extends HttpServlet {
         // Configuracion del nombre y titulo del documento
 //        confProperties.setProperty("docTitle", "Mi titulo"); //$NON-NLS-1$ //$NON-NLS-2$
 //        confProperties.setProperty("docName", "Mi nombre"); //$NON-NLS-1$ //$NON-NLS-2$
-       
+
 
         // Configuracion del uso de AutoFirma en caso de firma con certificado local
         //confProperties.setProperty("afirmaWS", "false"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -184,8 +191,8 @@ public class SignatureService extends HttpServlet {
 	        		fileContent.close();
 	        	}
 	        }
-	    } catch (final FileUploadException e) {
-	        throw new ServletException("Error al procesar el fichero", e); //$NON-NLS-1$
+	    } catch (final Exception e) {
+	        throw new ServletException("Error al procesar los parametros de la peticion", e); //$NON-NLS-1$
 	    }
 
 		return config;
