@@ -274,17 +274,16 @@
 
 		<% } %>
 			function sendResultCallback(signatureB64, certificateB64) {
-				document.getElementById("cert").value = certificateB64.replace(/\+/g, "-").replace(/\//g, "_");
+				// Algunos entornos,  
+				if (certificateB64) {
+					document.getElementById("cert").value = certificateB64.replace(/\+/g, "-").replace(/\//g, "_");
+				}
 				document.getElementById("formSign").submit();
-				
-				
 			}
 
 			function sendBatchResultCallback(batchResultB64) {
 				document.getElementById("afirmaBatchResult").value = batchResultB64;
 				document.getElementById("formSign").submit();
-// 				hideProgress();
-				
 			}
 
 			function sendErrorCallback(errorType, errorMessage) {
@@ -296,7 +295,6 @@
 				if (errorType != "es.gob.afirma.core.AOCancelledOperationException") {
 					showErrorOptions();
 				}
-
 			}
 
 			function showErrorOptions() {
@@ -309,7 +307,7 @@
 				document.getElementById("errorButtonsPanel").style.display = "block";
 				document.getElementById("buttonSign2").focus();
 			}
-			
+
 			/**
 			 * Redirige a la pantalla de error despues de haberse producido un error y
 			 * el usuario haya decidido abortar la operaci&oacuten.
