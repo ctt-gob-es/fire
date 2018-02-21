@@ -131,7 +131,6 @@
 		<%
 		String[] providers = (String[]) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
 		
-		for (int i=1;i<=3;i++){//Borrar 
 		for (String provider : providers) {
 			ProviderInfo info = ProviderManager.getProviderInfo(provider);
 			boolean enabled = true;
@@ -176,7 +175,6 @@
 				</div>
 		<%
 		}
-		}//Borrar
 		%>
 			</div>
 		</section>
@@ -209,12 +207,6 @@
 			disabledElementsProvOp[i].className=disabledElementsProvOp[i].className.replace( /(?:^|\s)need-javascript(?!\S)/g , '' )	
 		}
 		
-		/*
-   		document.getElementById("certLocal").className =
-   		   document.getElementById("certLocal").className.replace( /(?:^|\s)disabled(?!\S)/g , '' )
-   		document.getElementById("certLocalText").className =
-   		   document.getElementById("certLocalText").className.replace( /(?:^|\s)hide(?!\S)/g , '' )
-		*/
    		   
    	</script>
 </body>
