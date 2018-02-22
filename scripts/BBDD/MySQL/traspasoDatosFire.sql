@@ -44,7 +44,7 @@ CREATE TABLE `tb_usuarios` (
 -- USUARIO POR DEFECTO --------
 INSERT INTO tb_usuarios (nombre_usuario,clave,nombre,apellidos,usu_defecto) 
 
-VALUES('admin_pass','D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=','default name','default surnames',1);
+VALUES('admin','D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=','default name','default surnames',1);
 
 -- RESTO USUARIOS -------
 INSERT INTO tb_usuarios (nombre_usuario,clave,nombre,apellidos)

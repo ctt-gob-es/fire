@@ -84,7 +84,7 @@ ALTER TABLE  "TB_APLICACIONES_NEW" modify
 -- USUARIO POR DEFECTO --------
 INSERT INTO tb_usuarios (nombre_usuario,clave,nombre,apellidos,usu_defecto) 
 
-VALUES('admin_pass','D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=','default name','default surnames',1);
+VALUES('admin','D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=','default name','default surnames',1);
 
 -- CERTIFICADOS-------
 INSERT INTO tb_certificados (nombre_cert,fec_alta,cert_principal,huella_principal) 
