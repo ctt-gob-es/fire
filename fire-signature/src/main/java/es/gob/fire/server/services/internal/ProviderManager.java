@@ -24,7 +24,7 @@ public class ProviderManager {
 
 	private static final String PROVIDER_INFO_FILE = "provider_info.properties"; //$NON-NLS-1$
 
-	private static final String PROVIDER_CONFIG_FILE_TEMPLATE = "provider.%s.properties"; //$NON-NLS-1$
+	private static final String PROVIDER_CONFIG_FILE_TEMPLATE = "provider_%s.properties"; //$NON-NLS-1$
 
 	private static final String LOCAL_PROVIDER_INFO_PATH = "/es/gob/fire/server/resources/local_provider.properties"; //$NON-NLS-1$
 
