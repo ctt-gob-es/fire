@@ -32,8 +32,6 @@ import javax.json.JsonReader;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.misc.http.HttpError;
-import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.fire.server.connector.CertificateBlockedException;
 import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.connector.FIReCertificateAvailableException;
@@ -44,6 +42,8 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.LoadResult;
+import es.gob.fire.server.connector.TriphaseData;
+import es.gob.fire.server.connector.TriphaseData.TriSign;
 import es.gob.fire.server.connector.WeakRegistryException;
 
 /** Servicio de pruebas con certificados en disco.
@@ -239,7 +239,7 @@ public class TestConnector implements FIReConnector {
 		// Si algun campo no se indica, enviamos un " " para que se incluya el hueco entre las comas.
 		String infoDocumentos = ""; //$NON-NLS-1$
 		for (final TriSign triSign : td.getTriSigns()) {
-			final DocInfo docInfo = DocInfo.extractDocInfo(triSign);
+			final DocInfo docInfo = triSign.getDocInfo();
 			String name = docInfo.getName();
 			if (name == null || name.isEmpty()) {
 				name = " "; //$NON-NLS-1$

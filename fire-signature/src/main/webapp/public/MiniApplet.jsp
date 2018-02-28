@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.DocInfo"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
 <%@page import="java.net.URLEncoder"%>
@@ -13,7 +14,6 @@
 <%@page import="es.gob.fire.server.services.FIReTriHelper"%>
 <%@page import="es.gob.fire.server.services.ServiceUtil"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
-<%@page import="es.gob.fire.server.connector.DocInfo"%>
 <%@page import="java.util.Map"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page import="java.util.Properties"%>
@@ -450,7 +450,6 @@
 
 					<div class="celda-listaDocs" style="<%=i%2==0?"":"background-color: #FFC57A;"%>"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>
 					<div class="celda-listaDocs" style="<%=i%2==0?"":"background-color: #FFC57A;"%>"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>
-					
 
 				<%i++; 
 				}%>				

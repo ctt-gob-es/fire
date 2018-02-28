@@ -19,9 +19,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-import es.gob.afirma.core.misc.Base64;
-import es.gob.afirma.core.signers.TriphaseData;
-
 /** Resultado de una operaci&oacute;n de carga de datos a firmar.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class LoadResult {

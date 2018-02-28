@@ -10,9 +10,10 @@
 package es.gob.fire.server.connector;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Properties;
 
-import es.gob.afirma.core.signers.TriphaseData.TriSign;
+import es.gob.fire.server.connector.TriphaseData.TriSign;
 
 /**
  * Clase para almacenar informaci&oacute;n del documento firmado.
@@ -69,6 +70,20 @@ public class DocInfo implements Serializable {
 		return docInfo;
 	}
 
+	/**
+	 * Extrae la informaci&oacute;n declarada del documento que se firma de
+	 * la configuraci&oacute;n y la elimina de la misma.
+	 * @param config Configuraci&oacute;n de firma.
+	 * @return Informaci&oacute;n del documento.
+	 */
+	public static DocInfo extractDocInfo(final Map<String, String> config) {
+
+		final DocInfo docInfo = new DocInfo();
+		docInfo.setTitle(extractProperty(config, PROPERTY_DOC_TITLE));
+		docInfo.setName(extractProperty(config, PROPERTY_DOC_NAME));
+
+		return docInfo;
+	}
 
 	/**
 	 * Extrae el valor de una propiedad de un properties y elimina la propiedad
@@ -81,6 +96,22 @@ public class DocInfo implements Serializable {
 		String value = null;
 		if (properties != null && properties.containsKey(property)) {
 			value = properties.getProperty(property);
+			properties.remove(property);
+		}
+		return value;
+	}
+
+	/**
+	 * Extrae el valor de una propiedad de un properties y elimina la propiedad
+	 * de ese properties.
+	 * @param properties Conjunto de propiedades.
+	 * @param property Nombre de la propiedad de la que obtener el valor.
+	 * @return Valor de la propiedad o {@code null} si no estaba establecido.
+	 */
+	private static String extractProperty(final Map<String, String> properties, final String property) {
+		String value = null;
+		if (properties != null && properties.containsKey(property)) {
+			value = properties.get(property);
 			properties.remove(property);
 		}
 		return value;
@@ -136,6 +167,25 @@ public class DocInfo implements Serializable {
 
 		if (docInfo.getName() != null) {
 			signConfig.setProperty(PROPERTY_DOC_NAME, docInfo.getName());
+		}
+	}
+
+	/**
+	 * Agrega a la informaci&oacute;n de una firma, la informaci&oacute;n del documento que firma.
+	 * @param signConfig Configuraci&oacute;n de firma.
+	 * @param docInfo Informaci&oacute;n del documento que se firma.
+	 */
+	public static void addDocInfoToSign(final Map<String, String> signConfig, final DocInfo docInfo) {
+		if (signConfig == null || docInfo == null) {
+			return;
+		}
+
+		if (docInfo.getTitle() != null) {
+			signConfig.put(PROPERTY_DOC_TITLE, docInfo.getTitle());
+		}
+
+		if (docInfo.getName() != null) {
+			signConfig.put(PROPERTY_DOC_NAME, docInfo.getName());
 		}
 	}
 }

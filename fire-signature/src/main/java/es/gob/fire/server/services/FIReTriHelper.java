@@ -28,7 +28,6 @@ import es.gob.afirma.triphase.signer.processors.PAdESTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESASiCSTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
-import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.internal.BatchDocument;
 import es.gob.fire.server.services.internal.BatchResult;
@@ -552,4 +551,18 @@ public final class FIReTriHelper {
     	}
     	return format;
     }
+
+	/**
+	 * Convierte un objeto TriPhaseData del Cliente Afirma a una de FIRe.
+	 * @param source Objeto del Cliente Afirma a convertir origen.
+	 * @return Objeto de FIRe con los mismos datos que el del Cliente Afirma.
+	 */
+	public static final es.gob.fire.server.connector.TriphaseData fromTriPhaseDataAfirmaToFire(final TriphaseData source) {
+		final es.gob.fire.server.connector.TriphaseData target = new es.gob.fire.server.connector.TriphaseData();
+		target.setFormat(source.getFormat());
+		for (final TriSign triSign : source.getTriSigns()) {
+			target.addSignOperation(new es.gob.fire.server.connector.TriphaseData.TriSign(triSign.getDict(), triSign.getId()));
+		}
+		return target;
+	}
 }
