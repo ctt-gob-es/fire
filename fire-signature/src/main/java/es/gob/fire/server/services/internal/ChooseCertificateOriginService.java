@@ -28,6 +28,7 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.WeakRegistryException;
+import es.gob.fire.signature.ConfigFilesException;
 
 
 /**
@@ -53,7 +54,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		originForced = request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED);
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-		 
+		
+		
 		 
 		if (subjectId == null || subjectId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de usuario"); //$NON-NLS-1$
@@ -105,9 +107,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			signWithClienteAfirma(session, request, response);
 		}
 		// Si no se selecciono firma local, se firmara con un proveedor de firma en la nube
-		else {
-			signWithProvider(origin, session, request, response, redirectErrorUrl);
+		else {			
+			signWithProvider(origin, session, request, response, redirectErrorUrl);	
 		}
+
+		
+		
 	}
 
 	private static void signWithClienteAfirma(final FireSession session, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
@@ -134,6 +139,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	 * @param errorUrl URL a la que redirigir en caso de error hasta que se obtenga la de sesi&oacute;n.
 	 * @throws IOException Cuando ocurre un error al redirigir al usuario.
 	 * @throws ServletException Cuando ocurre un error al redirigir al usuario.
+	
 	 */
 	private static void signWithProvider(final String providerName, final FireSession session, final HttpServletRequest request, final HttpServletResponse response, final String errorUrl) throws IOException, ServletException {
 
@@ -270,10 +276,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		SessionCollector.commit(session);
 	}
 
-	private static void setErrorToSession(final FireSession session, final OperationError error) {
-		
+	private static void setErrorToSession(final FireSession session, final OperationError error) {	
 		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
+		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE,  ErrorManager.getMessage(Integer.toString(error.getCode())));
 		SessionCollector.commit(session);
 	}
 	

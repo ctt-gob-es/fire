@@ -25,7 +25,7 @@
 
 
 .container-box-title{width: 100%;margin: 2em; display: block;position: relative;}
-.container_tit{float: left; width:70%;display: inline-block;margin-left: 4em;}
+.container_tit{float: left; width:50%;display: inline-block;margin-left: 13em;}
 .container_btn_operation{float: right; width:20%;display: inline-block;margin-top: 1em;}
 
 .arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 1px;position: relative;right: 3px;}
@@ -37,7 +37,7 @@
 .button-cancelar {z-index:10; float: right;width: 80px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
 .button-cancelar:hover {text-decoration: underline;}
 
-.contenido .container-box-cert {display: block; width:539px; margin-left: auto; margin-right: auto; }/*min-width: 665px;   width:50%;margin-left: auto;margin-right: auto; */
+.contenido .container-box-cert {display: block; width:600px; margin-left: auto; margin-right: auto; }/*min-width: 665px;   width:50%;margin-left: auto;margin-right: auto; */
 
 .contenido.container-box-cert.cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px;float: left;  width:50%; display: block; box-sizing: border-box;}
 .contenido.container-box-cert.cert-box.cert-box-int {background-color: #eae8e9;width: 100%;}
@@ -61,7 +61,7 @@
 .contenido .cert-box .cert-box-left {display: inline-block;width: 18%;}
 .contenido .cert-box .cert-box-left a {width: 100%;display: block;min-width: 70px;}
 .contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width: auto;}
-.contenido .cert-box .cert-box-center {display: inline-block;width: 80%;}
+.contenido .cert-box .cert-box-center {display: inline-block;width: 80%;padding-top: 1em;}
 .contenido .cert-box .cert-box-right {display: inline-block; margin-bottom: 1em; float: right; padding-right: 1em; margin-top: 0.5em;}
 .contenido .cert-box .title-cert-box {font-size: 22px;font-weight: bold;}
 .contenido .cert-box .text-cert-box {font-size: 16px;color: #707070;line-height: 20px;}
@@ -69,11 +69,16 @@
 .contenido .cert-box .button:hover {color: #606060; border: 1px solid #606060;}
 
 /*******************************************************************************************/
-@media screen and (max-width: 865px) and (min-width: 641px){ 
+@media screen and (max-width: 880px) and (min-width: 641px){ 
 	.container_tit{float: left; width:70%;display: inline-block;margin-left: 2.5em;}
 	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	
+	.contenido .container-box-cert {display: block; width:440px; margin-left: auto; margin-right: auto; }
+	.contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width:50%;height: 50%;}
+	.contenido .cert-box .title-cert-box {font-size: 16px;font-weight: bold;}
+	.contenido .cert-box .text-cert-box {font-size: 12px;color: #707070;line-height: 14px;}
 	
 	}
 /********************************/
@@ -84,6 +89,11 @@
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;}
+	
+	.contenido .container-box-cert {display: block; width:440px; margin-left: auto; margin-right: auto; }
+	.contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width:50%;height: 50%;}
+	.contenido .cert-box .title-cert-box {font-size: 16px;font-weight: bold;}
+	.contenido .cert-box .text-cert-box {font-size: 12px;color: #707070;line-height: 14px;}
 }
 @media screen and (max-width: 590px)and (min-width: 510px) { 
 	.container_tit{float: left; width:63%;display: inline-block;margin-left: 4em;}
