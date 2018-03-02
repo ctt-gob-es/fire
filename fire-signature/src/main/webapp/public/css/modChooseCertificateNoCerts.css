@@ -31,6 +31,7 @@
 .contenido-error .title-error {color: #ac0306;margin: 0 auto;font-size:29px;padding-top: 1.5em;line-height: 31px;width: 750px;margin-bottom: 2em;font-weight:bold;}
 .contenido-error .error-box {width: 100%;display: block; box-sizing: border-box;padding: 1em 0;margin-top: 5em; text-align: center;}
 .contenido-error .error-box .button_firmar {margin 0 auto;padding: 0.4em 2em;border-style: none;  border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:19px;}
+.contenido-error .error-box .button_firmar:hover {text-decoration: underline; cursor:pointer;}
 .contenido-error .container-box-error {width: 100%; margin-bottom: 1.5em;display: block;position: relative;top:4em;}
 
 .container-textbox-error{display: block;width:100%;position: absolute;top:auto;}
@@ -50,7 +51,7 @@
 .button-volver:hover {text-decoration: underline; cursor:pointer;}
 
 .button-cancelar {z-index:10; float: right;width: 80px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
-.button-cancelar:hover {text-decoration: underline;}
+.button-cancelar:hover {text-decoration: underline;cursor:pointer;}
 
 .arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 1px;position: relative;right: 3px;}
 

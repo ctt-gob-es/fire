@@ -29,7 +29,7 @@
 .contenido-firmar-listadocs.container-box { width: 100%;top:0.5em;position: relative;text-align: left;}
 .contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;top:1em; position: relative;}
 .contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
-.contenido-firmar .nota-firmar{position: relative;top: 1em;padding: 1em;border-radius: 10px;border-color:#dd5a00;border-left-style:solid;line-height:20px;  }
+.contenido-firmar .nota-firmar{position: relative;top: 1em;padding: 1em;border-radius: 10px;border-color:#dd5a00;border-left-style:solid;border-right-style:solid; line-height:20px;  }
 
 .cabecera-listaDocs{display: inline-block;width: 47%;padding: 0.35em;font-weight: bold;text-align: center;}
 .celda-listaDocs{display: inline-block;width: 47%;padding: 0.35em;border: 1px solid #dd5a05;margin: 0.1em;vertical-align: top; }

@@ -323,30 +323,41 @@
 			 * @firma que se encuentre cargado.
 			 */
 			function updateRequirementsText() {
+				var hrefJava="https://www.java.com/es/download/";
+				var hrefAutofirma="http://firmaelectronica.gob.es/Home/Descargas";
+				var hrefAndroid="https://play.google.com/store/apps/details?id=es.gob.afirma";
+				var hrefIOS="https://itunes.apple.com/es/app/cliente-firma-movil/id627410001?mt=8&uo=4";
+				var href;
 				var app;
 				var appVersion;
 				if (MiniApplet.echo() === "Cliente JavaScript") {
 					if (MiniApplet.isAndroid()) {
 						app = "Cliente @firma Android";
 						appVersion = "Cliente m\u00F3vil @firma 1.5 o superior";
+						href=hrefAndroid;
 					}
 					else if (MiniApplet.isIOS()) {
 						app = "Cliente @firma iOS";
 						appVersion = "Cliente m\u00F3vil @firma 1.5 o superior";
+						href=hrefIOS;
 					}
 					else if (<%= ConfigManager.getClienteAfirmaForceNative() %>) {
 						app = "AutoFirma";
 						appVersion = "AutoFirma 1.5 o superior";
+						href=hrefAutofirma;
 					}
 					else {
 						app = "AutoFirma WebStart";
 						appVersion = "Java 8 o superior";
+						href=hrefJava;
 					}
 				}
 				else {
 					app = "MiniApplet @firma";
 					appVersion = "Java 7 o superior";
+					href=hrefJava;
 				}
+				document.getElementById("linkDownload").href=href;
 				document.getElementById("signningApp").innerText = app;
 				document.getElementById("signningAppVersion").innerText = appVersion;
 			}
@@ -423,7 +434,10 @@
 				</form>
 			</div>		
 			<div class="nota-firmar">
-					<span class="bold">Nota:</span> La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. Aseg&uacute;rese de tener instalado <span id="signningAppVersion" class="bold">Java 7 o superior</span>.
+					<span class="bold">Advertencia:</span> 
+					La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. 
+					Aseg&uacute;rese de tener instalado 
+						<a id="linkDownload" href="#" target="_blanc"> <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</a>		
 			</div>
 			
 
