@@ -37,7 +37,7 @@
 		
 		// Nombre de la aplicacion
 		String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
-		
+	
 		String errorUrl = null;
 		Properties connConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig != null && connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
@@ -75,6 +75,8 @@
 
 	final String errorType = fireSession.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
 	final String errorMsg = fireSession.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
+	boolean varStrings=false;
+	
 	// Preparamos el logo de la pantalla
 		String logoUrl = ConfigManager.getPagesLogoUrl();
 		if (logoUrl == null || logoUrl.isEmpty()) {

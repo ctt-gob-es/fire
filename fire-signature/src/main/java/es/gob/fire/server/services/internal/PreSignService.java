@@ -50,6 +50,8 @@ public final class PreSignService extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
 
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
+    
+    private static String originForced=null;
 
     /** Carga los datos para su posterior firma en servidor.
      * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
@@ -61,6 +63,7 @@ public final class PreSignService extends HttpServlet {
     	final String userId  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
     	final String certB64        = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
     	String redirectErrorUrl 	= request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+    	originForced = request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED);
 
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
@@ -136,8 +139,7 @@ public final class PreSignService extends HttpServlet {
 	        }
 	        catch (final Exception e) {
 	        	LOGGER.severe("Ocurrio un error grave al validar el identificador de la aplicaci&oacute;n :" +e); //$NON-NLS-1$
-
-	        	setErrorToSession(session, OperationError.INTERNAL_ERROR);
+	        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, true, null);	     
 	        	response.sendRedirect(redirectErrorUrl);
 	        	return;
 	        }
@@ -151,7 +153,7 @@ public final class PreSignService extends HttpServlet {
             LOGGER.warning(
         		"No se encontro en la sesion el identificador del titular de la clave de firma" //$NON-NLS-1$
             );
-            setErrorToSession(session, OperationError.INVALID_STATE);
+            ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, true, null);       
         	response.sendRedirect(redirectErrorUrl);
             return;
         }
@@ -165,29 +167,29 @@ public final class PreSignService extends HttpServlet {
         }
 
         if (algorithm == null || algorithm.isEmpty()) {
-            LOGGER.warning("No se encontro en la sesion el algoritmo de firma"); //$NON-NLS-1$
-            setErrorToSession(session, OperationError.INVALID_STATE);
+            LOGGER.warning("No se encontro en la sesion el algoritmo de firma"); //$NON-NLS-1$          
+            ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, true, null);   
         	response.sendRedirect(redirectErrorUrl);
             return;
         }
 
         if (subOperation == null || subOperation.isEmpty()) {
-            LOGGER.warning("No se encontro en la sesion la operacion de firma a realizar"); //$NON-NLS-1$
-            setErrorToSession(session, OperationError.INVALID_STATE);
+            LOGGER.warning("No se encontro en la sesion la operacion de firma a realizar"); //$NON-NLS-1$          
+            ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, true, null);   
         	response.sendRedirect(redirectErrorUrl);
             return;
         }
 
         if (format == null || format.isEmpty()) {
-            LOGGER.warning("No se encontro en la sesion el formato de firma"); //$NON-NLS-1$
-            setErrorToSession(session, OperationError.INVALID_STATE);
+            LOGGER.warning("No se encontro en la sesion el formato de firma"); //$NON-NLS-1$        
+            ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, true, null);   
         	response.sendRedirect(redirectErrorUrl);
             return;
         }
 
 		if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
-			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$
-            setErrorToSession(session, OperationError.INVALID_STATE);
+			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$           
+            ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, true, null);   
         	response.sendRedirect(redirectErrorUrl);
 			return;
 		}
@@ -199,7 +201,7 @@ public final class PreSignService extends HttpServlet {
         }
         catch (final Exception e) {
         	LOGGER.warning("Se ha proporcionado extraParams mal formados"); //$NON-NLS-1$
-        	setErrorToSession(session, OperationError.INVALID_STATE);
+        	 ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, true, null);   
         	response.sendRedirect(redirectErrorUrl);
             return;
 		}
@@ -212,8 +214,8 @@ public final class PreSignService extends HttpServlet {
             );
         }
         catch (final Exception e) {
-        	LOGGER.warning("No se ha podido decodificar el certificado del firmante: " + e); //$NON-NLS-1$
-        	setErrorToSession(session, OperationError.INVALID_STATE);
+        	LOGGER.warning("No se ha podido decodificar el certificado del firmante: " + e); //$NON-NLS-1$        	
+        	ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, true, null);   
         	response.sendRedirect(redirectErrorUrl);
         	return;
         }
@@ -227,8 +229,8 @@ public final class PreSignService extends HttpServlet {
         		data = TempFilesHelper.retrieveTempData(transactionId);
         	}
         	catch (final Exception e) {
-        		LOGGER.warning("No se han podido recuperar los datos de la operacion: " + e); //$NON-NLS-1$
-            	setErrorToSession(session, OperationError.INVALID_STATE);
+        		LOGGER.warning("No se han podido recuperar los datos de la operacion: " + e); //$NON-NLS-1$            	
+            	ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, true, null);   
             	response.sendRedirect(redirectErrorUrl);
         		return;
         	}
@@ -250,8 +252,8 @@ public final class PreSignService extends HttpServlet {
         		);
             }
             catch (final Exception e) {
-                LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
-                setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
+                LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$          
+                ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN, true, null);   
                 response.sendRedirect(redirectErrorUrl);
                 return;
             }
@@ -262,7 +264,7 @@ public final class PreSignService extends HttpServlet {
         	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         	if (batchResult == null || batchResult.documentsCount() == 0) {
         		LOGGER.log(Level.WARNING, "No se han agregado documentos al lote"); //$NON-NLS-1$
-            	setErrorToSession(session, OperationError.RECOVER_BATCH_NO_DOCUMENTS);
+            	ErrorManager.setErrorToSession(session, OperationError.RECOVER_BATCH_NO_DOCUMENTS, true, null);   
             	response.sendRedirect(redirectErrorUrl);
         		return;
 			}
@@ -274,8 +276,8 @@ public final class PreSignService extends HttpServlet {
         		final String docId = it.next();
         		if (batchResult.isSignFailed(docId)) {
         			LOGGER.warning("La firma estaba marcada como erronea desde el inicio"); //$NON-NLS-1$
-            		if (stopOnError) {
-						setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
+            		if (stopOnError) {						
+						ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN, true, null); 
 						response.sendRedirect(redirectErrorUrl);
 	            		return;
 					}
@@ -289,7 +291,7 @@ public final class PreSignService extends HttpServlet {
             	catch (final Exception e) {
             		LOGGER.warning("No se pudo recuperar uno de los datos agregados al lote: " + e); //$NON-NLS-1$
             		if (stopOnError) {
-						setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
+            			ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN, true, null);					
 						response.sendRedirect(redirectErrorUrl);
 	            		return;
 					}
@@ -321,7 +323,7 @@ public final class PreSignService extends HttpServlet {
             }
             catch (final Exception e) {
                 LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
-                setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
+                ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN, true, null);	               
                 response.sendRedirect(redirectErrorUrl);
                 return;
             }
@@ -351,7 +353,7 @@ public final class PreSignService extends HttpServlet {
         }
         catch (final FIReConnectorFactoryException e) {
             LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor " + providerName, e); //$NON-NLS-1$
-            setErrorToSession(session, OperationError.INTERNAL_ERROR);
+            ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, true, null);	          
             response.sendRedirect(redirectErrorUrl);
             return;
         }
@@ -369,20 +371,41 @@ public final class PreSignService extends HttpServlet {
         }
         catch (final FIReConnectorUnknownUserException e) {
         	LOGGER.severe("El usuario " + subjectId + " no tiene certificados en el sistema: " + e); //$NON-NLS-1$ //$NON-NLS-2$
-        	setErrorToSession(session, OperationError.UNKNOWN_USER);
-        	response.sendRedirect(redirectErrorUrl);
+        	if(originForced!=null && !"".equals(originForced) && Boolean.parseBoolean(originForced)) {
+        		ErrorManager.setErrorToSession(session, OperationError.UNKNOWN_USER, Boolean.parseBoolean(originForced), null);	
+        		response.sendRedirect(redirectErrorUrl);
+        	}
+        	else {
+        		ErrorManager.setErrorToSession(session, OperationError.UNKNOWN_USER, false, null);
+        		 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+        	}
+        	        	     	
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
-        	setErrorToSession(session, OperationError.SIGN_SERVICE_NETWORK);
-        	response.sendRedirect(redirectErrorUrl);
+        	if(originForced!=null && !"".equals(originForced) && Boolean.parseBoolean(originForced)) {
+        		ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_NETWORK, Boolean.parseBoolean(originForced), null);	
+        		response.sendRedirect(redirectErrorUrl);
+        	}
+        	else {
+        		ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_NETWORK, false, null);
+        		 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+        	}
+
             return;
         }
         catch (final Exception e) {
             LOGGER.log(Level.SEVERE, "Error en la carga de datos: " + e, e); //$NON-NLS-1$
-            setErrorToSession(session, OperationError.SIGN_SERVICE);
-            response.sendRedirect(redirectErrorUrl);
+        	if(originForced!=null && !"".equals(originForced) && Boolean.parseBoolean(originForced)) {
+        		ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE, Boolean.parseBoolean(originForced), null);	
+        		response.sendRedirect(redirectErrorUrl);
+        	}
+        	else {
+        		ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE, false, null);
+        		 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+        	}
+            
             return;
         }
 
@@ -403,10 +426,4 @@ public final class PreSignService extends HttpServlet {
         response.sendRedirect(lr.getRedirectUrl());
     }
 
-	private static void setErrorToSession(final FireSession session, final OperationError error) {
-		SessionCollector.cleanSession(session);
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
-		SessionCollector.commit(session);
-	}
 }

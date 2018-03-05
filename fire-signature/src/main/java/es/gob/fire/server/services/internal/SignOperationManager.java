@@ -165,14 +165,14 @@ public class SignOperationManager {
         	docManager = FIReDocumentManagerFactory.newDocumentManager(docManagerName);
         }
         catch (final IllegalArgumentException e) {
-        	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
-        	setErrorToSession(session, OperationError.INTERNAL_ERROR);
+        	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$     
+        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, false,null);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
-        	setErrorToSession(session, OperationError.INTERNAL_ERROR);
+        	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$   
+        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, false,null);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
@@ -229,7 +229,7 @@ public class SignOperationManager {
         }
         catch (final Exception e) {
         	LOGGER.severe("Error en el guardado temporal de los datos a firmar: " + e); //$NON-NLS-1$
-        	setErrorToSession(session, OperationError.INTERNAL_ERROR);
+        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, false,null);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
 		}
@@ -266,11 +266,11 @@ public class SignOperationManager {
         sendResult(response, result);
 	}
 
-	private static void setErrorToSession(final FireSession session, final OperationError error) {
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
-		SessionCollector.commit(session);
-	}
+//	private static void setErrorToSession(final FireSession session, final OperationError error) {
+//		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
+//		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
+//		SessionCollector.commit(session);
+//	}
 
 	private static void sendResult(final HttpServletResponse response, final SignOperationResult result) throws IOException {
         response.setContentType("application/json"); //$NON-NLS-1$

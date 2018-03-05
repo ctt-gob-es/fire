@@ -1,25 +1,29 @@
+	#PARAM_USER se sustituye por en usuario de la sesion logado.
+	#PARAM_PROVIDER se sustituye por el proveedor seleccionado.
+	
 	# Errores generales
-	1=El usuario no esta dado de alta en el sistema.
-	2=Estado invalido.
-	3=Error desconocido durante la operaci&oacute;n.
-	4=Operaci&oacute;n cancelada por el usuario.
-	6=La sesi&oacute;n no es v&aacute;lida o ha caducado.
-	7=Error interno del servidor.
-	8=Error detectado despues de llamar a la pasarela externa.
+	1=El usuario PARAM_USER no est&aacute; dado de alta para el proveedor PARAM_PROVIDER. Pulse bot&oacute;n Volver para seleccionar otro proveedor. 
+	2=Error en los datos del estado del usuario PARAM_USER. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
+	3=Se ha producido un error desconocido. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
+	4=Operaci&oacute;n cancelada por el usuario PARAM_USER. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
+	6=La sesi&oacute;n del usuario PARAM_USER no es v&aacute;lida o ha caducado. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
+	7=Se ha producido un error del componente central. Com&ucaute;nmente, ser&aacute; un problema de configuraci&oacute;n o conexi&oacute;n con sistemas externos. Consulte con el administrador del componente central. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
+
+	8=Se ha producido un error externo a FIRe despu&eacute;s de redirigir al usuario  PARAM_USER a la pasarela del proveedor PARAM_PROVIDER. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
 
 	# Errores especificos del servicios de listado de certificados
-	101=Error en la obtencion de los certificados.
-	102=Error al conectar con el servicio para la recuperacion de certificados.
-	103=Los certificados del usuario estan bloqueados.
-	104=El usuario no puede poseer certificados de firma por haber realizado un registro debil.
+	101=Error al obtener el certificado del usuario PARAM_USER del  proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
+	102=Error al conectar con el servicio del proveedor PARAM_PROVIDER , para obtener los certificados del usuario  PARAM_USER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
+	103=Los certificados del usuario PARAM_USER para el proveedor PARAM_PROVIDER est&aacute;n bloqueados. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
+	104=El usuario PARAM_USER no tiene certificados emitidos por el proveedor PARAM_PROVIDER.  Es posible que necesite cumplimentar alg&uacute;n requisito externo a esta aplicaci&oacute;n con dicho proveedor. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
 
 	# Errores propios de la operacion de firma
-	201=Error en la obtencion de la firma de los datos.
-	202=Error al ejecutar la prefirma de los datos.
+	201=Error durante la operaci&oacute;n de firma para el proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
+	202=Error al prefirmar los datos, puede deberse a una configuraci&oacute;n err&oacute;nea de firma, como  solicitar una firma PAdES sobre un documento no PDF. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
 	203=Error al ejecutar la postfirma de los datos.
-	205=Error al conectar con el servicio para la generacion de la firma con la clave remota.
-	250=Error al generar la firma con el cliente nativo.
+	205=Error al conectar con el proveedor PARAM_PROVIDER, al intentar realizar la operaci&oacute;n de  firma. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
+	250=Error al realizar una firma con el Cliente @firma. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
 
 	# Errores propios de la operacion de lote
 	301=Error en el guardado temporal de los datos en el temporal del servidor.
-	302=No se encontraron documentos en el lote.
+	302=Error no se han encontrado los documentos en la firma por lotes. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.

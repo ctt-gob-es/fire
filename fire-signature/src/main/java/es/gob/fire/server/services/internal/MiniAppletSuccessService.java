@@ -83,8 +83,7 @@ public class MiniAppletSuccessService extends HttpServlet {
     	if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_SUCCESS_URL) ||
     			!connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
     		LOGGER.warning("No se encontraron en la sesion las URL de redireccion para la operacion"); //$NON-NLS-1$
-    		setErrorToSession(session, OperationError.INVALID_STATE);
-    		response.sendRedirect(errorUrl);
+    		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, false, null);   		
     		return;
     	}
 		final String redirectUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_SUCCESS_URL);
@@ -107,8 +106,7 @@ public class MiniAppletSuccessService extends HttpServlet {
         		updateSingleResult(batchResult, afirmaBatchResultB64);
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al procesar el resultado de la firma de lote del Cliente @firma: " + e, e); //$NON-NLS-1$
-        		setErrorToSession(session, OperationError.SIGN_MINIAPPLET,
-        				"No se completo correctamente la firma del lote con certificado local"); //$NON-NLS-1$
+        		ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, false, "No se completo correctamente la firma del lote con certificado local");
         		response.sendRedirect(errorUrl);
         		return;
         	}
@@ -179,16 +177,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 		}
 	}
 
-	private static void setErrorToSession(final FireSession session, final OperationError error) {
-		setErrorToSession(session, error, error.getMessage());
-	}
 
-	private static void setErrorToSession(final FireSession session, final OperationError error, final String msg) {
-		SessionCollector.cleanSession(session);
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, msg);
-		SessionCollector.commit(session);
-	}
 
 	/**
 	 * Posibles resultados que puede asignar el Cliente Afirma a las firmas

@@ -56,23 +56,16 @@ public class MiniAppletErrorService extends HttpServlet {
         // Obtenenmos la configuracion del conector
         final Properties connConfig		= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
     	if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
-            setErrorToSession(session, OperationError.INVALID_STATE, null);
+    		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE,true, null);
             response.sendRedirect(errorUrl);
         	return;
     	}
     	errorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
 
 		// Asignamos los mensajes de error
-    	setErrorToSession(session, OperationError.SIGN_MINIAPPLET, errorMessage);
+    	ErrorManager.setErrorToSession(session,  OperationError.SIGN_MINIAPPLET, true,errorMessage);
         response.sendRedirect(errorUrl);
 	}
 
-	// Agrega a la informacion de sesion el error producido durante la operacion
-	private static void setErrorToSession(final FireSession session, final OperationError error, final String errorMessage) {
-		SessionCollector.cleanSession(session);
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, errorMessage != null ?
-				errorMessage : error.getMessage());
-		SessionCollector.commit(session);
-	}
+
 }

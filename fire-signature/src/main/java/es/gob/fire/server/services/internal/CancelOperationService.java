@@ -59,21 +59,10 @@ public class CancelOperationService extends HttpServlet {
 			return;
 		}
 
-		final String redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
-
-		setErrorToSession(session, OperationError.OPERATION_CANCELED);
+		final String redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);		
+		ErrorManager.setErrorToSession(session, OperationError.OPERATION_CANCELED, true,null);
 		response.sendRedirect(redirectErrorUrl);
 	}
 
-	/**
-	 * Agrega a la sesion la informacion de error correspondiente.
-	 * @param fireSession Informaci&oacute;n de sesi&oacute;n.
-	 * @param error Error que se agrega.
-	 */
-	private static void setErrorToSession(final FireSession fireSession, final OperationError error) {
-		SessionCollector.cleanSession(fireSession);
-		fireSession.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-		fireSession.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
-		SessionCollector.commit(fireSession);
-	}
+	
 }
