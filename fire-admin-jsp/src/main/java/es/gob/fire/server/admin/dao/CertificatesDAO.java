@@ -64,6 +64,56 @@ public class CertificatesDAO {
 		return jsonObj.toString();
 		
 	}
+	/**
+	 * Consulta que obtiene todos los registros de la tabla tb_certificados
+	 * @return Devuelve un String con formato JSON
+	 * @throws SQLException
+	 * @throws CertificateException
+	 * @throws IOException
+	 */
+	public static String getCertificatesJSON() throws SQLException, CertificateException, IOException {
+
+		final JSONObject jsonObj= new JSONObject();
+		final List<CertificateFire> result = new ArrayList<CertificateFire>();
+		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_ALL);
+		
+		final ResultSet rs = st.executeQuery();
+		while (rs.next()) {
+			final CertificateFire cert= new CertificateFire();
+			cert.setId_certificado(rs.getString(1));
+			cert.setNombre_cert(rs.getString(2));
+			cert.setFec_alta(rs.getDate(3));
+			if(rs.getString(4)!=null && !"".equals(rs.getString(4))) {
+				cert.setCertPrincipalb64ToX509(rs.getString(4));
+				final String certPrincipal[]=cert.getCertX509_principal().getSubjectX500Principal().getName().split(",");
+				java.util.Date expDatePrincipal= new java.util.Date();
+				expDatePrincipal=cert.getCertX509_principal().getNotAfter();
+				cert.setCert_principal(certPrincipal[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDatePrincipal)));
+			}
+			if(rs.getString(5)!=null && !"".equals(rs.getString(5))) {
+				cert.setCertBkupb64ToX509(rs.getString(5));
+				final String certBkup[]=cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");
+				java.util.Date expDateBkup= new java.util.Date();
+				expDateBkup=cert.getCertX509_backup().getNotAfter();
+				cert.setCert_backup(certBkup[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDateBkup)));
+			}			
+			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) {
+				cert.setHuella_principal(rs.getString(6));
+			}
+		
+			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) {
+				cert.setHuella_backup(rs.getString(7));
+			}			
+			result.add(cert);
+		}
+		rs.close();
+		st.close();
+		jsonObj.put("CertList", result);
+		return jsonObj.toString();
+	}
+	
+	
+	
 	
 	public static String getCertificatesPag(final String start, final String total) throws SQLException, CertificateException, IOException {
 

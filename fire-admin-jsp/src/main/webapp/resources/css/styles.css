@@ -229,6 +229,10 @@ ul li {
 .admin-table tr td:last-child {
   border-right: 0;
 }
+ #acciones{
+	min-width: 100px;
+}
+
 
 #timestap{
 	display:none;

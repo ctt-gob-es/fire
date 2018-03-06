@@ -15,6 +15,7 @@
 	String errorText = null;
 	try {
 		DbManager.initialize();
+		
 	}
 	catch (AdminFilesNotFoundException e){
 		response.sendRedirect("../Error/FileNotFound.jsp?file=" + AdminFilesNotFoundException.getFileName()); //$NON-NLS-1$
@@ -74,8 +75,10 @@
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
 	<link rel="stylesheet" href="../resources/css/jquery-ui.min.css">
+	<link rel="stylesheet" href="../resources/css/datatables.min.css">
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="../resources/js/datatables.min.js" type="text/javascript"></script>
 
 		
 </head>
@@ -110,15 +113,35 @@
 					<%= mr.getMessage() %>
 				</p>
 			<% } %>
+			
+			
 		<div id="data" style="display: block-inline; text-align:center;">
+<!-- 			<table id="appTable"  class="display" > -->
+<!-- 				<thead> -->
+<!-- 					<tr> -->										
+<!-- 						<th id="id">ID</th> -->
+<!-- 						<th id="nombre">Aplicaci&oacute;n</th> -->
+<!-- 						<th id="responsable">Responsable</th> -->
+<!-- 						<th id="correo">Correo</th> -->
+<!-- 						<th id="telefono">Telefono</th> -->
+<!-- 						<th id="alta">Fecha Alta</th> -->
+					<!--<th id="fk_certificado">ID CERT</th> -->
+						 
+<!-- 					</tr> -->
+<!-- 				</thead> -->
+<!-- 				<tbody> -->
+<!-- 				</tbody> -->
+<!-- 			</table>	 -->
+		
 			<h4>No hay Aplicaciones</h4>	
 		</div>
-	<br>
-	<div id="nav_page" style="display: block-inline; text-align:right;">
-		<button id="back">Anterior</button>
-        <button id="next">Siguiente</button>
-        <p id="page"></p>
-	</div>
+<!-- 		COMENTADO PARA LA PAGINACIÓN -->
+<!-- 	<br> -->
+<!-- 	<div id="nav_page" style="display: block-inline; text-align:right;"> -->
+<!-- 		<button id="back">Anterior</button> -->
+<!--         <button id="next">Siguiente</button> -->
+<!--         <p id="page"></p> -->
+<!-- 	</div> -->
         
 	
    	</div>

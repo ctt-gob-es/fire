@@ -182,7 +182,7 @@ public class UsersDAO {
 	}
 	
 	/**
-	 * Obtiene listado de todos los usuarios dados de alta en la aplicación.
+	 * Obtiene listado de todos los usuarios dados de alta en la aplicaciï¿½n.
 	 * @return Listado de usuarios.
 	 * @throws SQLException
 	 */
@@ -234,7 +234,47 @@ public class UsersDAO {
 		
 	}
 	
+	/**
+	 * Consulta que obtiene todos los registros de la tabla tb_usuarios
+	 * @return Devuelve un String en formato JSON
+	 * @throws SQLException
+	 */
+	public static String getUsersJSON() throws SQLException {
+		
+		final JSONObject jsonObj= new JSONObject();
+		final List<User> usrList = new ArrayList<User>();
+		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_ALL_USERS);
+		final ResultSet rs = st.executeQuery();
+		while (rs.next()) {
+			
+			final User usr = new User();
+			usr.setId_usuario(rs.getString(1));
+			usr.setNombre_usuario(rs.getString(2));
+			usr.setClave(rs.getString(3));
+			usr.setNombre(rs.getString(4));
+			usr.setApellidos(rs.getString(5));
+			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) {
+				usr.setCorreo_elec(rs.getString(6));
+			}
+			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) {
+				usr.setTelf_contacto(rs.getString(7));
+			}
+			usr.setRol(rs.getString(8));
+			usr.setFec_alta( rs.getDate(9));
+			usr.setUsu_defecto(String.valueOf(rs.getInt(10)));
+			usrList.add(usr);
+		}
+		rs.close();
+		st.close();
+		jsonObj.put("UsrList", usrList);
+		return jsonObj.toString();
+	}
 	
+	/**
+	 * Consulta que obtiene todos los registros de la tabla tb_usuarios paginado 
+	 * @return Devuelve un String en formato JSON
+	 * @throws SQLException
+	 */
 	public static String getUsersPag(final String start, final String total) throws SQLException {
 
 		
@@ -319,7 +359,7 @@ public class UsersDAO {
 	}
 	
 	/**
-	 * Añade un nuevo usuario al sistema, no siendo necesarios insertar el id_usuario por ser calculado (autonumérico), ni  fec_alta 
+	 * Aï¿½ade un nuevo usuario al sistema, no siendo necesarios insertar el id_usuario por ser calculado (autonumï¿½rico), ni  fec_alta 
 	 * ya que se calcula la fecha y tiempo actual al introducir en bbdd
 	 * @param userName
 	 * @param passwd

@@ -105,12 +105,13 @@
 		<div id="data" style="display: block-inline; text-align:center;">
 			<h4>No hay Certificados</h4>		
 		</div>
-	<br>
-	<div id="nav_page" style="display: block-inline; text-align:right;">
-		<button id="back">Anterior</button>
-        <button id="next">Siguiente</button>
-        <p id="page"></p>
-	</div>
+		<!-- 		COMENTADO PARA LA PAGINACIÓN -->
+<!-- 	<br> -->
+<!-- 	<div id="nav_page" style="display: block-inline; text-align:right;"> -->
+<!-- 		<button id="back">Anterior</button> -->
+<!--         <button id="next">Siguiente</button> -->
+<!--         <p id="page"></p> -->
+<!-- 	</div> -->
         
 	
    	</div>
@@ -119,7 +120,8 @@
 <script type="text/javascript">
 	/*Importante estas variables (requestTypeCount y requestType) deben estar declaradas antes que la llamada a ../resources/js/certificate.js*/
 			requestTypeCount="countRecordsCert";
-           	requestType="getRecordsCert";
+			requestType="All";
+//            	requestType="getRecordsCert";
 	</script>
 	<script src="../resources/js/certificate.js" type="text/javascript"></script>
 	

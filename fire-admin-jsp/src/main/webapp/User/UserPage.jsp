@@ -71,12 +71,12 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
 			
 		<div id="data">		
 		</div>
-		<br>
-		<div id="nav_page" style="display: block-inline; text-align:right;">
-			<button id="back">Anterior</button>
-	        <button id="next">Siguiente</button>
-	        <p id="page"></p>
-		</div>
+<!-- 		<br> -->
+<!-- 		<div id="nav_page" style="display: block-inline; text-align:right;"> -->
+<!-- 			<button id="back">Anterior</button> -->
+<!-- 	        <button id="next">Siguiente</button> -->
+<!-- 	        <p id="page"></p> -->
+<!-- 		</div> -->
    	</div>
 
 </body>

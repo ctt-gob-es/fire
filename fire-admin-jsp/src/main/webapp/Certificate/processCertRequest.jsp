@@ -8,7 +8,11 @@ String data="";
 if(req.equals("countRecordsCert")){
     data= CertificatesDAO.getCertificatesCount();
 }
+if(req.equals("All")){
+    data= CertificatesDAO.getCertificatesJSON();
+}
 
+//Paginado
 if(req.equals("getRecordsCert")){
 	String start=request.getParameter("currentIndex");
 	String total=request.getParameter("recordsToFetch");
@@ -22,7 +26,8 @@ if(req.equals("countRecordsCertApp") && id!=null && !"null".equals(id) && !"".eq
 if(req.equals("getRecordsCertApp")&& id!=null && !"null".equals(id) && !"".equals(id)){
 	String start=request.getParameter("currentIndex");
 	String total=request.getParameter("recordsToFetch");
-	data=AplicationsDAO.getApplicationsPagByCertificate(id, start, total);
+	//data=AplicationsDAO.getApplicationsPagByCertificate(id, start, total);
+	data=AplicationsDAO.getApplicationsByCertificateJSON(id);
 }
 
 

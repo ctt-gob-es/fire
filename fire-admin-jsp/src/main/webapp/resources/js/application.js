@@ -12,135 +12,171 @@
             var currentPage=1;
             var currentIndex=0;
             
-            $.get("processAppRequest.jsp?requestType=countRecords",function(data){
-                var JSONData=JSON.parse(data);
-          
-                totalRecords=JSONData.count;
+           //COMENTADO CON PAGINACIÓN 
+//            $.get("processAppRequest.jsp?requestType=countRecords",function(data){
+//                var JSONData=JSON.parse(data);
+//          
+//                totalRecords=JSONData.count;
+//              
+//                if(totalRecords > 0){
+//                	$("#data").html("");
+//                }
+//                else{
+//                	$("#nav_page").hide();
+//                	return;
+//                }
+//                
+//                totalPages=Math.floor(totalRecords/recordsPerPage);
+//                
+//                if(totalRecords%recordsPerPage!=0){
+//                	totalPages++;
+//                }
+//                
+//                if(totalRecords<recordsPerPage){
+//                    recordsToFetch=totalRecords%recordsPerPage;
+//                }
+//                else{
+//                	recordsToFetch=recordsPerPage;
+//                }
+//                
+//                $("#page").html("Página "+currentPage+" de "+totalPages);
+//                
+//                
+//                //
+//                $.get("processAppRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
+//                	var JSONData=JSON.parse(data);                
+//                	  printApplicationTable(JSONData, recordsToFetch);       
+//                 
+//                    if(currentPage==totalPages){
+//                        $("#next").hide();
+//                    }
+//                    else{
+//                        $("#next").show();
+//                    }
+//                    
+//                    if(currentPage==1){
+//                        $("#back").hide();
+//                    }
+//                    else{
+//                        $("#back").show();
+//                    }
+//
+//                });
+//                
+//            });    
+//         
+//
+//            
+//            	
+//              
+//            
+//                
+//                $("#next").click(function(){
+//                	$("#data").html("");
+//                	currentPage++;
+//
+//                	if(currentPage==totalPages){
+//                		$("#next").hide();
+//                        if(totalRecords%recordsPerPage!=0){
+//                        	recordsToFetch=totalRecords%recordsPerPage;
+//                        }
+//                        else{
+//                        	recordsToFetch=recordsPerPage;
+//                        }
+//                    }
+//                    else{
+//                        $("#next").show();
+//                        recordsToFetch=recordsPerPage;
+//                    }
+//                	                
+//                    if(currentPage==1){
+//                        $("#back").hide();
+//                    }
+//                    else{
+//                        $("#back").show();
+//                    }
+//
+//                    $.get("processAppRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
+//                        var JSONData=JSON.parse(data);
+//                        printApplicationTable(JSONData, recordsToFetch);
+//                        
+//                    });
+//                    
+//                    $("#page").html("Página "+currentPage+" de "+totalPages);
+//
+//                });
+//                
+//                
+//                $("#back").click(function(){
+//                    $("#data").html("");
+//                    currentPage--;
+//                    currentIndex=currentIndex-recordsToFetch-recordsPerPage;
+//
+//                    if(currentPage==totalPages){
+//                        $("#next").hide();
+//                        recordsToFetch=totalRecords%recordsPerPage;
+//                    }
+//                    else{
+//                        $("#next").show();
+//                        recordsToFetch=recordsPerPage;
+//                    }
+//                    
+//                    if(currentPage==1){
+//                        $("#back").hide();
+//                    }
+//                    else{
+//                        $("#back").show();
+//                    }
+//
+//                    $.get("processAppRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
+//                        var JSONData=JSON.parse(data);
+//                        printApplicationTable(JSONData, recordsToFetch);
+//                        
+//                    });
+//                    
+//                    $("#page").html("Página "+currentPage+" de "+totalPages);
+//
+//                });
+
+                //Prueba de datatables
+//               $('#appTable').dataTable( {
+//                    "processing": true, 
+//                    "serverSide": true,
+//                    "ajax":{
+//                    	"url":"processAppRequest.jsp?requestType=All",
+//                   	"dataSrc":"AppList",
+//                   	"type":"GET"
+//                  } 
+//               
+//	               
+//               } );
+                
+                /********************** SIN PAGINACIÓN *******************************/
+                $.get("processAppRequest.jsp?requestType=countRecords",function(data){
+                    var JSONData=JSON.parse(data);
               
-                if(totalRecords > 0){
-                	$("#data").html("");
-                }
-                else{
-                	$("#nav_page").hide();
-                	return;
-                }
-                
-                totalPages=Math.floor(totalRecords/recordsPerPage);
-                
-                if(totalRecords%recordsPerPage!=0){
-                	totalPages++;
-                }
-                
-                if(totalRecords<recordsPerPage){
-                    recordsToFetch=totalRecords%recordsPerPage;
-                }
-                else{
-                	recordsToFetch=recordsPerPage;
-                }
-                
-                $("#page").html("Página "+currentPage+" de "+totalPages);
-                
-                
-                //
-                $.get("processAppRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
-                	var JSONData=JSON.parse(data);                
-                	  printApplicationTable(JSONData, recordsToFetch);       
-                 
-                    if(currentPage==totalPages){
-                        $("#next").hide();
-                    }
-                    else{
-                        $("#next").show();
-                    }
-                    
-                    if(currentPage==1){
-                        $("#back").hide();
-                    }
-                    else{
-                        $("#back").show();
-                    }
+                    totalRecords=JSONData.count;
+                  
+                    if(totalRecords > 0){
+                    	$("#data").html("");
+                    	$.get("processAppRequest.jsp?requestType=All",function(data){
+                        	var JSONData=JSON.parse(data);                
+                        	  printApplicationTable(JSONData, totalRecords);                        
 
-                });
-                
-            });    
-         
-
-            
-            	
-              
-            
-                
-                $("#next").click(function(){
-                	$("#data").html("");
-                	currentPage++;
-
-                	if(currentPage==totalPages){
-                		$("#next").hide();
-                        if(totalRecords%recordsPerPage!=0){
-                        	recordsToFetch=totalRecords%recordsPerPage;
-                        }
-                        else{
-                        	recordsToFetch=recordsPerPage;
-                        }
+                        });
                     }
-                    else{
-                        $("#next").show();
-                        recordsToFetch=recordsPerPage;
-                    }
-                	                
-                    if(currentPage==1){
-                        $("#back").hide();
-                    }
-                    else{
-                        $("#back").show();
-                    }
-
-                    $.get("processAppRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
-                        var JSONData=JSON.parse(data);
-                        printApplicationTable(JSONData, recordsToFetch);
-                        
-                    });
-                    
-                    $("#page").html("Página "+currentPage+" de "+totalPages);
-
+                    else{                    	
+                    	return;
+                    }              
+                   
                 });
                 
                 
-                $("#back").click(function(){
-                    $("#data").html("");
-                    currentPage--;
-                    currentIndex=currentIndex-recordsToFetch-recordsPerPage;
-
-                    if(currentPage==totalPages){
-                        $("#next").hide();
-                        recordsToFetch=totalRecords%recordsPerPage;
-                    }
-                    else{
-                        $("#next").show();
-                        recordsToFetch=recordsPerPage;
-                    }
-                    
-                    if(currentPage==1){
-                        $("#back").hide();
-                    }
-                    else{
-                        $("#back").show();
-                    }
-
-                    $.get("processAppRequest.jsp?requestType=getRecords&currentIndex="+currentIndex+"&recordsToFetch="+recordsToFetch,function(data){
-                        var JSONData=JSON.parse(data);
-                        printApplicationTable(JSONData, recordsToFetch);
-                        
-                    });
-                    
-                    $("#page").html("Página "+currentPage+" de "+totalPages);
-
-                });
-
-
+                
+            /********************** SIN PAGINACIÓN FIN*******************************/
             function printApplicationTable(JSONData, recordsToFetch){
             	
-            	var htmlTableHead="<table class='admin-table'><thead><tr><td>Aplicaci&oacute;n</td><td>ID</td><td>Responsable</td><td>Fecha Alta</td><td>Acciones</td></tr></thead><tbody>";
+            	var htmlTableHead="<table id='appTable' class='admin-table'><thead><tr><td>Aplicaci&oacute;n</td><td>ID</td><td>Responsable</td><td>Fecha Alta</td><td id='acciones'>Acciones</td></tr></thead><tbody>";
             	var htmlTableBody="";
             	var htmlTableFoot="</tbody></table>";
        		        		

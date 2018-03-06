@@ -55,6 +55,8 @@ public class AplicationsDAO {
 	
 	private static final String ST_SELECT_APPLICATIONS_PAG_BYCERT = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre limit ?,?"; //$NON-NLS-1$
 	
+	private static final String ST_SELECT_APPLICATIONS_BYCERT = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre "; //$NON-NLS-1$
+	
 	private static final String STATEMENT_SELECT_APPLICATIONS_COUNT="SELECT count(*) FROM tb_aplicaciones";
 	
 	private static final String ST_SELECT_APPLICATIONS_COUNT_BYCERT="SELECT count(*) FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=?";
@@ -154,6 +156,41 @@ public class AplicationsDAO {
 		return result;
 	}
 
+	/**
+	 * Consulta que obtiene todos los registros de la tabla tb_aplicaciones. 
+	 * @return Devuelve los datos como un string en formato JSON
+	 * @throws SQLException
+	 */
+	public static String getApplicationsJSON() throws SQLException {
+
+		final List<Application> result = new ArrayList<Application>();
+		final JSONObject jsonObj= new JSONObject();
+		/*"SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre*/
+		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS);
+		final ResultSet rs = st.executeQuery();
+		while (rs.next()) {
+			final Application app = new Application();
+			app.setId(rs.getString(1));
+			app.setNombre(rs.getString(2));
+			app.setResponsable(rs.getString(3));
+			app.setCorreo(rs.getString(4));
+			app.setTelefono(rs.getString(5));
+			app.setAlta(rs.getDate(6));
+			app.setFk_certificado(rs.getString(7));			
+			result.add(app);
+		}
+		rs.close();
+		st.close();
+		jsonObj.put("AppList", result);
+		return jsonObj.toString();
+	}
+	
+	
+	/**
+	 * Obtiene el número de registros de la tabla tb_aplicaciones
+	 * @return
+	 * @throws SQLException
+	 */
 	public static String getApplicationsCount()throws SQLException {
 		int count=0;
 		JSONObject jsonObj= new JSONObject();
@@ -172,7 +209,12 @@ public class AplicationsDAO {
 		return jsonObj.toString();
 		
 	}
-	
+	/**
+	 * Obtiene el número de registros de la tabla tb_aplicaciones para un identificador (id_certificado) de la tabla tb_certificados
+	 * @param id
+	 * @return
+	 * @throws SQLException
+	 */
 	public static String getApplicationsCountByCertificate(final String id)throws SQLException {
 		int count=0;
 		JSONObject jsonObj= new JSONObject();
@@ -192,7 +234,13 @@ public class AplicationsDAO {
 		return jsonObj.toString();
 		
 	}
-	
+	/**
+	 * Obtiene todos los registros paginados.
+	 * @param start
+	 * @param total
+	 * @return
+	 * @throws SQLException
+	 */
 	public static String getApplicationsPag(final String start, final String total) throws SQLException {
 
 		
@@ -219,6 +267,40 @@ public class AplicationsDAO {
 		return jsonObj.toString();
 	}
 	
+	/**
+	 * Consulta que obtiene todas las aplicaciones por indicador del Certificado
+	 * @param id
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String getApplicationsByCertificateJSON(final String id) throws SQLException {
+
+		
+		final JSONObject jsonObj= new JSONObject();
+		final List<Application> result = new ArrayList<Application>();
+		/*SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, 
+		 * tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre "*/
+		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_APPLICATIONS_BYCERT);
+		st.setInt(1, Integer.parseInt(id));
+
+		final ResultSet rs = st.executeQuery();
+		while (rs.next()) {
+			
+			final Application app = new Application();
+			app.setId(rs.getString(1));
+			app.setNombre(rs.getString(2));
+			app.setResponsable(rs.getString(3));
+			app.setCorreo(rs.getString(4));
+			app.setTelefono(rs.getString(5));
+			app.setAlta(rs.getDate(6));	
+			app.setFk_certificado(rs.getString(7));
+			result.add(app);
+		}
+		rs.close();
+		st.close();
+		jsonObj.put("AppList", result);
+		return jsonObj.toString();
+	}
 
 	public static String getApplicationsPagByCertificate(final String id, final String start, final String total) throws SQLException {
 

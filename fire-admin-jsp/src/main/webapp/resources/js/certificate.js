@@ -15,166 +15,202 @@ $(document)
 					var currentIndex = 0;
 
 					//Consultar los registros
-					$.get("processCertRequest.jsp?requestType="
-							+ requestTypeCount, function(data) {
+//					$.get("processCertRequest.jsp?requestType="
+//							+ requestTypeCount, function(data) {
+//						var JSONData = JSON.parse(data);
+//						totalRecords = JSONData.count;
+//
+//						if (totalRecords > 0) {
+//							$("#data").html("");
+//						} else {
+//							$("#navDataTable").css({display : 'none'});
+//							$("#nav_page").hide();
+//							return;
+//						}
+//						totalPages = Math.floor(totalRecords / recordsPerPage);
+//
+//						if (totalRecords % recordsPerPage != 0) {
+//							totalPages++;
+//						}
+//
+//						if (totalRecords < recordsPerPage) {
+//							recordsToFetch = totalRecords % recordsPerPage;
+//						} else {
+//							recordsToFetch = recordsPerPage;
+//						}
+//
+//						$("#page").html("Página " + currentPage + " de " + totalPages);
+//						
+//						//En caso de tener registros pintar la tabla
+//						$.get("processCertRequest.jsp?requestType=" + requestType
+//								+ "&currentIndex=" + currentIndex
+//								+ "&recordsToFetch=" + recordsToFetch,
+//								function(data) {
+//									var JSONData = JSON.parse(data);
+//
+//									if (totalRecords > 0) {
+//										if (requestType == "getRecordsCert") {
+//											printCertificateTable(JSONData,recordsToFetch);
+//										} else {
+//											printApplicationsByCertificateTable(JSONData, recordsToFetch);
+//										}
+//									}
+//
+//									if (currentPage == totalPages) {
+//										$("#next").hide();
+//									} else {
+//										$("#next").show();
+//									}
+//
+//									if (currentPage == 1) {
+//										$("#back").hide();
+//									} else {
+//										$("#back").show();
+//									}
+//
+//								});
+//						
+//						
+//
+//					});
+//
+//					
+//
+//					$("#next").click(function() {
+//						$("#data").html("");
+//						currentPage++;
+//
+//						if (currentPage == totalPages) {
+//							$("#next").hide();
+//							if (totalRecords % recordsPerPage != 0) {
+//								recordsToFetch = totalRecords% recordsPerPage;
+//							} else {
+//								recordsToFetch = recordsPerPage;
+//							}
+//						} else {
+//							$("#next").show();
+//							recordsToFetch = recordsPerPage;
+//						}
+//
+//										if (currentPage == 1) {
+//											$("#back").hide();
+//										} else {
+//											$("#back").show();
+//										}
+//
+//										$.get("processCertRequest.jsp?requestType="+ requestType+ "&currentIndex="+ currentIndex+ "&recordsToFetch="+ recordsToFetch,
+//												function(data) {
+//													var JSONData = JSON.parse(data);
+//													if (totalRecords > 0) {
+//														if (requestType == "getRecordsCert") {
+//															printCertificateTable(JSONData,recordsToFetch);
+//														} else {
+//															printApplicationsByCertificateTable(JSONData,recordsToFetch);
+//														}
+//													}
+//										});
+//										$("#page").html("Página " + currentPage
+//														+ " de " + totalPages);
+//
+//									});
+//
+//					$("#back")
+//							.click(
+//									function() {
+//										$("#data").html("");
+//										currentPage--;
+//										currentIndex = currentIndex
+//												- recordsToFetch
+//												- recordsPerPage;
+//
+//										if (currentPage == totalPages) {
+//											$("#next").hide();
+//											recordsToFetch = totalRecords
+//													% recordsPerPage;
+//										} else {
+//											$("#next").show();
+//											recordsToFetch = recordsPerPage;
+//										}
+//
+//										if (currentPage == 1) {
+//											$("#back").hide();
+//										} else {
+//											$("#back").show();
+//										}
+//
+//										$.get("processCertRequest.jsp?requestType="
+//																+ requestType
+//																+ "&currentIndex="
+//																+ currentIndex
+//																+ "&recordsToFetch="
+//																+ recordsToFetch,
+//														function(data) {
+//															var JSONData = JSON
+//																	.parse(data);
+//															if (totalRecords > 0) {
+//																if (requestType == "getRecordsCert") {
+//																	printCertificateTable(
+//																			JSONData,
+//																			recordsToFetch);
+//																} else {
+//																	printApplicationsByCertificateTable(
+//																			JSONData,
+//																			recordsToFetch);
+//																}
+//															}
+//														});
+//
+//										$("#page").html(
+//												"Página " + currentPage
+//														+ " de " + totalPages);
+//
+//									});
+
+					/*********************************SIN PAGINACIÓN******************************************/
+					$.get("processCertRequest.jsp?requestType="+ requestTypeCount, function(data) {
 						var JSONData = JSON.parse(data);
 						totalRecords = JSONData.count;
 
 						if (totalRecords > 0) {
 							$("#data").html("");
-						} else {
-							$("#navDataTable").css({display : 'none'});
-							$("#nav_page").hide();
+							//En caso de tener registros pintar la tabla
+							$.get("processCertRequest.jsp?requestType=" + requestType,
+									function(data) {
+										var JSONData = JSON.parse(data);
+
+										if (totalRecords > 0) {
+											if (requestType == "All") {
+												printCertificateTable(JSONData,totalRecords);
+											} else {
+												printApplicationsByCertificateTable(JSONData, totalRecords);
+											}
+										}						
+
+									});
+						} else {						
 							return;
-						}
-						totalPages = Math.floor(totalRecords / recordsPerPage);
+						}				
+				
+				
+				
+				
 
-						if (totalRecords % recordsPerPage != 0) {
-							totalPages++;
-						}
+			});
 
-						if (totalRecords < recordsPerPage) {
-							recordsToFetch = totalRecords % recordsPerPage;
-						} else {
-							recordsToFetch = recordsPerPage;
-						}
+			
 
-						$("#page").html("Página " + currentPage + " de " + totalPages);
-						
-						//En caso de tener registros pintar la tabla
-						$.get("processCertRequest.jsp?requestType=" + requestType
-								+ "&currentIndex=" + currentIndex
-								+ "&recordsToFetch=" + recordsToFetch,
-								function(data) {
-									var JSONData = JSON.parse(data);
-
-									if (totalRecords > 0) {
-										if (requestType == "getRecordsCert") {
-											printCertificateTable(JSONData,recordsToFetch);
-										} else {
-											printApplicationsByCertificateTable(JSONData, recordsToFetch);
-										}
-									}
-
-									if (currentPage == totalPages) {
-										$("#next").hide();
-									} else {
-										$("#next").show();
-									}
-
-									if (currentPage == 1) {
-										$("#back").hide();
-									} else {
-										$("#back").show();
-									}
-
-								});
-						
-						
-
-					});
-
+			
+					/***************************************************************************/
 					
-
-					$("#next").click(function() {
-						$("#data").html("");
-						currentPage++;
-
-						if (currentPage == totalPages) {
-							$("#next").hide();
-							if (totalRecords % recordsPerPage != 0) {
-								recordsToFetch = totalRecords% recordsPerPage;
-							} else {
-								recordsToFetch = recordsPerPage;
-							}
-						} else {
-							$("#next").show();
-							recordsToFetch = recordsPerPage;
-						}
-
-										if (currentPage == 1) {
-											$("#back").hide();
-										} else {
-											$("#back").show();
-										}
-
-										$.get("processCertRequest.jsp?requestType="+ requestType+ "&currentIndex="+ currentIndex+ "&recordsToFetch="+ recordsToFetch,
-												function(data) {
-													var JSONData = JSON.parse(data);
-													if (totalRecords > 0) {
-														if (requestType == "getRecordsCert") {
-															printCertificateTable(JSONData,recordsToFetch);
-														} else {
-															printApplicationsByCertificateTable(JSONData,recordsToFetch);
-														}
-													}
-										});
-										$("#page").html("Página " + currentPage
-														+ " de " + totalPages);
-
-									});
-
-					$("#back")
-							.click(
-									function() {
-										$("#data").html("");
-										currentPage--;
-										currentIndex = currentIndex
-												- recordsToFetch
-												- recordsPerPage;
-
-										if (currentPage == totalPages) {
-											$("#next").hide();
-											recordsToFetch = totalRecords
-													% recordsPerPage;
-										} else {
-											$("#next").show();
-											recordsToFetch = recordsPerPage;
-										}
-
-										if (currentPage == 1) {
-											$("#back").hide();
-										} else {
-											$("#back").show();
-										}
-
-										$
-												.get(
-														"processCertRequest.jsp?requestType="
-																+ requestType
-																+ "&currentIndex="
-																+ currentIndex
-																+ "&recordsToFetch="
-																+ recordsToFetch,
-														function(data) {
-															var JSONData = JSON
-																	.parse(data);
-															if (totalRecords > 0) {
-																if (requestType == "getRecordsCert") {
-																	printCertificateTable(
-																			JSONData,
-																			recordsToFetch);
-																} else {
-																	printApplicationsByCertificateTable(
-																			JSONData,
-																			recordsToFetch);
-																}
-															}
-														});
-
-										$("#page").html(
-												"Página " + currentPage
-														+ " de " + totalPages);
-
-									});
-
+					
+					
 					function printCertificateTable(JSONData, recordsToFetch) {
 
 						var htmlTableHead = "<table class='admin-table'>"
-								+ "<thead>" + "<tr>" + "<td>Nombre</td>"
+								+ "<thead>" + "<tr>" + "<td >Nombre</td>"
 								+ "<td>Certificado 1</td>"
 								+ "<td>Certificado 2</td>"
-								+ "<td>Fecha Alta</td>" + "<td>Acciones</td>"
+								+ "<td>Fecha Alta</td>" + "<td id='acciones'>Acciones</td>"
 								+ "</tr>" + "</thead><tbody>";
 						var htmlTableBody = "";
 						var htmlTableFoot = "</tbody></table>";

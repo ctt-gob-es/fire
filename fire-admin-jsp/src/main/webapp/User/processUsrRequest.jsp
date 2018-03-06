@@ -6,7 +6,9 @@ String data="";
 if(req.equals("countRecords")){
     data= UsersDAO.getUsersCount();
 }
-
+if(req.equals("All")){
+    data= UsersDAO.getUsersJSON();
+}
 if(req.equals("getRecords")){
 	String start=request.getParameter("currentIndex");
 	String total=request.getParameter("recordsToFetch");

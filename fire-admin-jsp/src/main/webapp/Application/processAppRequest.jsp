@@ -10,7 +10,10 @@ String data="";
 if(req.equals("countRecords")){
     data= AplicationsDAO.getApplicationsCount();
 }
-
+if(req.equals("All")){
+    data= AplicationsDAO.getApplicationsJSON();
+  
+}
 if(req.equals("getRecords")){
 	String start=request.getParameter("currentIndex");
 	String total=request.getParameter("recordsToFetch");

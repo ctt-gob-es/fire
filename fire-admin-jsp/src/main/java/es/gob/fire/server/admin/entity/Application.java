@@ -35,13 +35,13 @@ public class Application {
 
 	private Date alta;
 
-	private String cer;
-
-	private String huella;
+//	private String cer;
+//
+//	private String huella;
 	
 	private String fk_certificado;
 	
-	private X509Certificate certX509;
+//	private X509Certificate certX509;
 
 	/**
 	 * Constructor vac&iacute;o que iniciliza los String a cadena vac&iacute;a.
@@ -52,8 +52,8 @@ public class Application {
 		this.responsable = ""; //$NON-NLS-1$
 		this.correo = ""; //$NON-NLS-1$
 		this.telefono = "";  //$NON-NLS-1$
-		this.cer = ""; //$NON-NLS-1$
-		this.huella = ""; //$NON-NLS-1$
+//		this.cer = ""; //$NON-NLS-1$
+//		this.huella = ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -183,55 +183,55 @@ public class Application {
 	 * Recupera el certificado de la aplicaci&oacute;n.
 	 * @return el certificado.
 	 */
-	public String getCer() {
-		return this.cer;
-	}
+//	public String getCer() {
+//		return this.cer;
+//	}
 
 	/**
 	 * Establece el certificado de la aplicaci&oacute;n.
 	 * @param cer certificado de la aplicaci&oacute;n.
 	 */
-	public void setCer(final String cer) {
-		this.cer = cer;
-	}
+//	public void setCer(final String cer) {
+//		this.cer = cer;
+//	}
 
 	/**
 	 * Recupera la huella del certificado de la aplicaci&oacute;n.
 	 * @return huella del certificado.
 	 */
-	public String getHuella() {
-		return this.huella;
-	}
+//	public String getHuella() {
+//		return this.huella;
+//	}
 
 	/**
 	 * Establece la huella dado un certificado
 	 * @param huella
 	 */
-	public void setHuella(final String huella) {
-		this.huella = huella;
-	}
+//	public void setHuella(final String huella) {
+//		this.huella = huella;
+//	}
 
 	/**
 	 * Obtiene el certificado de la aplicaci&oacute;n.
 	 * @return
 	 */
-	public X509Certificate getCertX509() {
-		return certX509;
-	}
+//	public X509Certificate getCertX509() {
+//		return certX509;
+//	}
 	/**
 	 * Establece el certificado de la aplicaci&oacute;n.
 	 * @param certX509
 	 */
-	public void setCertX509(X509Certificate certX509) {
-		this.certX509 = certX509;
-	}
+//	public void setCertX509(X509Certificate certX509) {
+//		this.certX509 = certX509;
+//	}
 	/**
 	 * Establece el Certificado X509 mediante una cadena en base 64
 	 * @param cert
 	 * @throws CertificateException
 	 * @throws IOException
 	 */
-	public void setCertb64ToX509(String cert) throws CertificateException, IOException {
-		this.setCertX509((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert))));
-	}
+//	public void setCertb64ToX509(String cert) throws CertificateException, IOException {
+//		this.setCertX509((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert))));
+//	}
 }

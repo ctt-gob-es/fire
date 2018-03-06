@@ -319,12 +319,12 @@
 			<div id="data" style="display: block-inline; text-align:center;">
 				<h4>No hay Aplicaciones asociadas al certificado <%=nameCert%> </h4>		
 			</div>
-			<br>
-			<div id="navDataTable" style="display: block-inline; text-align:right;">
-				<button id="back">Anterior</button>
-				<button id="next">Siguiente</button>
-				<p id="page"></p>
-			</div>
+<!-- 			<br> -->
+<!-- 			<div id="navDataTable" style="display: block-inline; text-align:right;"> -->
+<!-- 				<button id="back">Anterior</button> -->
+<!-- 				<button id="next">Siguiente</button> -->
+<!-- 				<p id="page"></p> -->
+<!-- 			</div> -->
 		</fieldset>
 		<fieldset class="fieldset-clavefirma">			
 			<div style="margin: auto;width: 60%;padding: 3px; margin-top: 5px;">
