@@ -50,8 +50,7 @@ public class CancelOperationService extends HttpServlet {
     		return;
     	}
 
-		final TransactionConfig connConfig =
-				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+		final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			SessionCollector.removeSession(session);
 			LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
@@ -59,10 +58,11 @@ public class CancelOperationService extends HttpServlet {
 			return;
 		}
 
-		final String redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);		
 		ErrorManager.setErrorToSession(session, OperationError.OPERATION_CANCELED, true,null);
+		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
+
 		response.sendRedirect(redirectErrorUrl);
 	}
 
-	
+
 }

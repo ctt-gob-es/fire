@@ -16,9 +16,9 @@ import java.util.Map;
 import org.junit.Test;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.fire.server.connector.LoadResult;
+import es.gob.fire.server.connector.TriphaseData;
+import es.gob.fire.server.connector.TriphaseData.TriSign;
 
 /** Pruebas del resultado de la carga de datos.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */

@@ -18,9 +18,11 @@ enum OperationError {
 	// Errores generales
 	UNKNOWN_USER(1, "El usuario no esta dado de alta en el sistema"), //$NON-NLS-1$
 	INVALID_STATE(2, "Estado invalido"), //$NON-NLS-1$
+
 	UNDEFINED_ERROR(3, "Error desconocido durante la operaci&oacute;n"), //$NON-NLS-1$
 	OPERATION_CANCELED(4, "Operacion cancelada por el usuario"), //$NON-NLS-1$
 	INVALID_SESSION(6, "La sesi&oacute;n no es v&aacute;lida o ha caducado"), //$NON-NLS-1$
+
 	INTERNAL_ERROR(7, "Error interno del servidor"), //$NON-NLS-1$
 	EXTERNAL_SERVICE_ERROR(8, "Error detectado despues de llamar a la pasarela externa"), //$NON-NLS-1$
 
@@ -39,7 +41,6 @@ enum OperationError {
 	SIGN_MINIAPPLET(250, "Error al generar la firma con el cliente nativo"), //$NON-NLS-1$
 
 	// Errores propios de la operacion de lote
-	RECOVER_BATCH_SAVE_DATA(301, "Error en el guardado temporal de los datos en el temporal del servidor"), //$NON-NLS-1$
 	RECOVER_BATCH_NO_DOCUMENTS(302, "No se encontraron documentos en el lote"); //$NON-NLS-1$
 
 	private int code;

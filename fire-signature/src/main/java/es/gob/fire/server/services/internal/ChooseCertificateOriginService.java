@@ -42,8 +42,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
 	private static String originForced=null;
-	
-	
+
+
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
@@ -52,9 +52,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		originForced = request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED);
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-		
-		
-		 
+
+
+
 		if (subjectId == null || subjectId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de usuario"); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -105,12 +105,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			signWithClienteAfirma(session, request, response);
 		}
 		// Si no se selecciono firma local, se firmara con un proveedor de firma en la nube
-		else {			
-			signWithProvider(origin, session, request, response, redirectErrorUrl);	
+		else {
+			signWithProvider(origin, session, request, response, redirectErrorUrl);
 		}
 
-		
-		
+
+
 	}
 
 	private static void signWithClienteAfirma(final FireSession session, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
@@ -118,7 +118,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		SessionCollector.commit(session);
 
 		try {
-			request.getRequestDispatcher(fireSignatureCS.PG_MINI_APPLET).forward(request, response); //$NON-NLS-1$
+			request.getRequestDispatcher(fireSignatureCS.PG_MINI_APPLET).forward(request, response);
 			return;
 		} catch (final ServletException e) {
 			LOGGER.warning("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina."); //$NON-NLS-1$
@@ -137,7 +137,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	 * @param errorUrl URL a la que redirigir en caso de error hasta que se obtenga la de sesi&oacute;n.
 	 * @throws IOException Cuando ocurre un error al redirigir al usuario.
 	 * @throws ServletException Cuando ocurre un error al redirigir al usuario.
-	
+
 	 */
 	private static void signWithProvider(final String providerName, final FireSession session, final HttpServletRequest request, final HttpServletResponse response, final String errorUrl) throws IOException, ServletException {
 
@@ -150,13 +150,11 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, Boolean.parseBoolean(originForced),null);
         	response.sendRedirect(errorUrl);
-        	
+
 			return;
 		}
 
-
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
-
 		// Listamos los certificados del usuario
 		X509Certificate[] certificates = null;
 		try {
@@ -167,81 +165,81 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			certificates = connector.getCertificates(subjectId);
 			if (certificates == null || certificates.length == 0) {
 				SessionCollector.commit(session);
-				request.getRequestDispatcher(fireSignatureCS.PG_CHOOSE_CERTIFICATE_NOCERT).forward(request, response); //$NON-NLS-1$
+				request.getRequestDispatcher(fireSignatureCS.PG_CHOOSE_CERTIFICATE_NOCERT).forward(request, response);
 				return;
 			}
 		}
 		catch(final FIReConnectorFactoryException e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, Boolean.parseBoolean(originForced),null);											
-			response.sendRedirect(redirectErrorUrl);			         			
+			ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, Boolean.parseBoolean(originForced),null);
+			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
 		catch(final FIReCertificateException e) {
 			LOGGER.log(Level.SEVERE, "No se ha podido recuperar los certificados del usuario " + subjectId + ": " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, Boolean.parseBoolean(originForced),null);
-			
-			if (Boolean.parseBoolean(originForced)) {								
+
+			if (Boolean.parseBoolean(originForced)) {
 				response.sendRedirect(redirectErrorUrl);
 			}
-			else {				
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response); //$NON-NLS-1$
-			}						          
+			else {
+				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+			}
 			return;
 		}
 		catch(final FIReConnectorNetworkException e) {
 			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE_NETWORK, Boolean.parseBoolean(originForced),null);
-			if (Boolean.parseBoolean(originForced)) {								
+			if (Boolean.parseBoolean(originForced)) {
 				response.sendRedirect(redirectErrorUrl);
 			}
-			else {				
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response); //$NON-NLS-1$
-			}						           
+			else {
+				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+			}
 			return;
 		}
 		catch(final CertificateBlockedException e) {
 			LOGGER.log(Level.WARNING, "Los certificados del usuario " + subjectId + " estan bloqueados: " + e); //$NON-NLS-1$ //$NON-NLS-2$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_BLOCKED, Boolean.parseBoolean(originForced),null);
-			if (Boolean.parseBoolean(originForced)) {								
+			if (Boolean.parseBoolean(originForced)) {
 				response.sendRedirect(redirectErrorUrl);
 			}
 			else {
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response); //$NON-NLS-1$
-			}		  
+				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+			}
 			return;
 		}
 		catch(final WeakRegistryException e) {
 			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " realizo un registro debil: " + e); //$NON-NLS-1$ //$NON-NLS-2$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_WEAK_REGISTRY, Boolean.parseBoolean(originForced),null);
-			if (Boolean.parseBoolean(originForced)) {								
+			if (Boolean.parseBoolean(originForced)) {
 				response.sendRedirect(redirectErrorUrl);
 			}
-			else {				
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response); //$NON-NLS-1$
-			}           
+			else {
+				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+			}
 			return;
 		}
 		catch(final FIReConnectorUnknownUserException e) {
 			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no esta registrado en el sistema: " + e); //$NON-NLS-1$ //$NON-NLS-2$
 			ErrorManager.setErrorToSession(session, OperationError.UNKNOWN_USER, Boolean.parseBoolean(originForced),null);
-			if (Boolean.parseBoolean(originForced)) {							
+			if (Boolean.parseBoolean(originForced)) {
 				response.sendRedirect(redirectErrorUrl);
 			}
-			else {			
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response); //$NON-NLS-1$
-			} 
+			else {
+				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+			}
 			return;
 		}
 		catch(final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error indeterminado al recuperar los certificados del usuario " + subjectId + ": " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, Boolean.parseBoolean(originForced),null);
-			if (Boolean.parseBoolean(originForced)) {								
+			if (Boolean.parseBoolean(originForced)) {
 				response.sendRedirect(redirectErrorUrl);
 			}
 			else {
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response); //$NON-NLS-1$
-			}          
+				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+			}
 			return;
 		}
 
@@ -250,7 +248,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		SessionCollector.commit(session);
 
 		try {
-			request.getRequestDispatcher(fireSignatureCS.PG_CHOOSE_CERTIFICATE).forward(request, response); //$NON-NLS-1$
+			request.getRequestDispatcher(fireSignatureCS.PG_CHOOSE_CERTIFICATE).forward(request, response);
 			return;
 		}
 		catch (final ServletException e) {
@@ -260,5 +258,5 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 	}
 
-	
+
 }

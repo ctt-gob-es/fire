@@ -457,9 +457,14 @@
 				<% int i=1;
 				for (DocInfo docInfo : docInfos)  { %>
 
+<<<<<<< HEAD
 					<div class="<%=i%2==0?"celda-listaDocs":"celda-listaDocs_Color"%>"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>
 					<div class="<%=i%2==0?"celda-listaDocs":"celda-listaDocs_Color"%>"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>
 					
+=======
+					<div class="celda-listaDocs" style="<%=i%2==0?"":"background-color: #FFC57A;"%>"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>
+					<div class="celda-listaDocs" style="<%=i%2==0?"":"background-color: #FFC57A;"%>"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>
+>>>>>>> refs/heads/conector_fnmt
 
 				<%i++; 
 				}%>				

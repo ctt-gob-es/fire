@@ -90,7 +90,7 @@ public final class TestPrincipal {
 		final LoadResult res = nbh.loadDataToSign(
 			USER,
 			"SHA512withRSA", //$NON-NLS-1$
-			td,
+			FIReTriHelper.fromTriPhaseDataAfirmaToFire(td),
 			cert
 		);
 
@@ -136,7 +136,7 @@ public final class TestPrincipal {
 		final LoadResult res = nbh.loadDataToSign(
 			USER,
 			"SHA1withRSA", //$NON-NLS-1$
-			td,
+			FIReTriHelper.fromTriPhaseDataAfirmaToFire(td),
 			cert
 		);
 

@@ -49,7 +49,7 @@ public final class TestTestService {
 			testService.loadDataToSign(
 				"00001", //$NON-NLS-1$
 				"SHA256withRSA", //$NON-NLS-1$
-				TriphaseData.parser(TRIPHASE_DATA_SAMPLE.getBytes()),
+				es.gob.fire.server.connector.TriphaseData.parser(TRIPHASE_DATA_SAMPLE.getBytes()),
 				CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
 					TestTestService.class.getResourceAsStream("/ANF_USUARIO_ACTIVO.cer") //$NON-NLS-1$
 				)
@@ -107,7 +107,7 @@ public final class TestTestService {
 		final LoadResult res = nbh.loadDataToSign(
 			"00001", //$NON-NLS-1$
 			"SHA1withRSA", //$NON-NLS-1$
-			td,
+			FIReTriHelper.fromTriPhaseDataAfirmaToFire(td),
 			cert
 		);
 

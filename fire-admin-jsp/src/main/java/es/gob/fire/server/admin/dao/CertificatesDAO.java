@@ -65,7 +65,7 @@ public class CertificatesDAO {
 		return jsonObj.toString();
 
 	}
-<<<<<<< HEAD
+
 	/**
 	 * Consulta que obtiene todos los registros de la tabla tb_certificados
 	 * @return Devuelve un String con formato JSON
@@ -78,7 +78,7 @@ public class CertificatesDAO {
 		final JSONObject jsonObj= new JSONObject();
 		final List<CertificateFire> result = new ArrayList<CertificateFire>();
 		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_ALL);
-		
+
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			final CertificateFire cert= new CertificateFire();
@@ -98,14 +98,14 @@ public class CertificatesDAO {
 				java.util.Date expDateBkup= new java.util.Date();
 				expDateBkup=cert.getCertX509_backup().getNotAfter();
 				cert.setCert_backup(certBkup[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDateBkup)));
-			}			
+			}
 			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) {
 				cert.setHuella_principal(rs.getString(6));
 			}
-		
+
 			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) {
 				cert.setHuella_backup(rs.getString(7));
-			}			
+			}
 			result.add(cert);
 		}
 		rs.close();
@@ -113,13 +113,11 @@ public class CertificatesDAO {
 		jsonObj.put("CertList", result);
 		return jsonObj.toString();
 	}
-	
-	
-	
-	
-=======
 
->>>>>>> refs/heads/conector_fnmt
+
+
+
+
 	public static String getCertificatesPag(final String start, final String total) throws SQLException, CertificateException, IOException {
 
 		final JSONObject jsonObj= new JSONObject();

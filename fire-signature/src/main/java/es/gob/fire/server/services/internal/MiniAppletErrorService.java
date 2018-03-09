@@ -53,10 +53,11 @@ public class MiniAppletErrorService extends HttpServlet {
         }
 
         // Obtenenmos la configuracion del conector
+
         final TransactionConfig connConfig	=
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
     	if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-            setErrorToSession(session, OperationError.INVALID_STATE, null);
+    		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE,true, null);
 
             response.sendRedirect(errorUrl);
         	return;
