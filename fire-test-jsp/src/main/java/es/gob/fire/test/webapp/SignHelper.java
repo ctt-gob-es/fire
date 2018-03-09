@@ -82,6 +82,14 @@ public class SignHelper {
 					Level.SEVERE, "No se encuentra el fichero de configuracion del cliente Cl@ve Firma", e); //$NON-NLS-1$
 			throw new IOException("No se encuentra el fichero de configuracion del cliente Cl@ve Firma", e); //$NON-NLS-1$
 		}
+
+        // Si el resultado obtenido es un error, lanzamos una excepcion para notificarlo
+        if (result.getState() == TransactionResult.STATE_ERROR) {
+        	throw new HttpOperationException(
+        			"ERR-" + result.getErrorCode() + //$NON-NLS-1$
+        			": " + result.getErrorMessage()); //$NON-NLS-1$
+        }
+
         return  result.getResult();
     }
 }

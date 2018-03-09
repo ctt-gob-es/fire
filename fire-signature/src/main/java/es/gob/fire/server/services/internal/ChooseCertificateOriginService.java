@@ -12,7 +12,6 @@ package es.gob.fire.server.services.internal;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -135,21 +134,25 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		final String trId = session.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
 		final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
-		final Properties connConfig = (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+		final TransactionConfig connConfig =
+				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
-		if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
+		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$
             setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(errorUrl);
 			return;
 		}
 
-		final String redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
 		// Listamos los certificados del usuario
 		X509Certificate[] certificates = null;
 		try {
-			final FIReConnector connector = ProviderManager.initTransacction(providerName, connConfig);
+			final FIReConnector connector = ProviderManager.initTransacction(
+					providerName,
+					connConfig.getProperties()
+			);
 			certificates = connector.getCertificates(subjectId);
 			if (certificates == null || certificates.length == 0) {
 				SessionCollector.commit(session);

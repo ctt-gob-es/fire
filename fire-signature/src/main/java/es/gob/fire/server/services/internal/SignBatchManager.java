@@ -11,7 +11,6 @@ package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -70,24 +69,17 @@ public class SignBatchManager {
     	final String currentUserId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 
 
-        final Properties connConfig = (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+        final TransactionConfig connConfig =
+        		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
 		// Listamos los certificados del usuario
-		if (connConfig == null || connConfig.isEmpty()) {
-			LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
-			return;
-        }
-
-		String redirectErrorUrl;
-		if (!connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
+		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning("No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
 		}
-		redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual

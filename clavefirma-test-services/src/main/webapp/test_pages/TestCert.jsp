@@ -1,28 +1,53 @@
 <!DOCTYPE html>
 <!-- saved from url=(0164)https://clave-dninbrt.dev.seg-social.gob.es/rss-gateway/CertificateManagementServlet?id_transaction=8e6f5a59c6da85805ba534f596ed147baf371c52ec68f3b1d4c9d77df56a5720 -->
 <%@page import="es.gob.afirma.core.misc.Base64"%>
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-
-<meta content="IE=edge" http-equiv="X-UA-Compatible">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<meta content="no-cache" http-equiv="cache-control">
-<meta content="0" http-equiv="expires">
-<meta content="no-cache" http-equiv="pragma">
-<!--<base href="./">--><base href=".">
-<title>Tu Seguridad Social</title>
-<link media="screen" rel="stylesheet" href="">
-<link href="./TestCert_files/IdP.css" media="screen" rel="stylesheet">
-<script src="./TestCert_files/jquery-1.9.1.min.js"></script><script language="javascript">
-var mbMovilBrowser = false;					var msIdFocus = null;					var marSubmit = false;					function isBrowserMobile() {					if (navigator.userAgent.match(/Android/i)					|| navigator.userAgent.match(/webOS/i)					|| navigator.userAgent.match(/iPhone/i)					|| navigator.userAgent.match(/iPad/i)					|| navigator.userAgent.match(/iPod/i)					|| navigator.userAgent.match(/BlackBerry/i)					|| navigator.userAgent.match(/Windows Phone/i)) {					return true;					} else {					return false;					}					}					function onSubmit() {					if (marSubmit==true){					var working=document.forms.decisionForm.id_texto.value;					alert(working);					return false;					}					marSubmit=true;					}
-
-function cancel() {
-	var formulario = document.getElementById("decisionForm");
-	formulario.action = decodeURIComponent("<%= new String(Base64.decode(request.getParameter("redirectko"), true)) %>");
-	formulario.submit();
-}
-</script>
-<link href="https://clave-dninbrt.dev.seg-social.gob.es/rss-gateway-static/img/faviconQ3E1TZ34.ico" rel="icon">
+<html lang="es">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta content="IE=edge" http-equiv="X-UA-Compatible">
+	<meta content="width=device-width, initial-scale=1.0" name="viewport">
+	<meta content="no-cache" http-equiv="cache-control">
+	<meta content="0" http-equiv="expires">
+	<meta content="no-cache" http-equiv="pragma">
+	<!--<base href="./">--><base href=".">
+	<title>Tu Seguridad Social</title>
+	<link media="screen" rel="stylesheet" href="">
+	<link href="./TestCert_files/IdP.css" media="screen" rel="stylesheet">
+	<script src="./TestCert_files/jquery-1.9.1.min.js"></script><script language="javascript">
+		var mbMovilBrowser = false;
+		var msIdFocus = null;
+		var marSubmit = false;
+		function isBrowserMobile() {
+			if (navigator.userAgent.match(/Android/i) ||
+					navigator.userAgent.match(/webOS/i) ||
+					navigator.userAgent.match(/iPhone/i) ||
+					navigator.userAgent.match(/iPad/i) ||
+					navigator.userAgent.match(/iPod/i) ||
+					navigator.userAgent.match(/BlackBerry/i) ||
+					navigator.userAgent.match(/Windows Phone/i)) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+	
+		function onSubmit() {
+			if (marSubmit == true) {
+				var working=document.forms.decisionForm.id_texto.value;
+				alert(working);
+				return false;
+			}
+			marSubmit=true;
+		}
+	
+		function cancel() {
+			var formulario = document.getElementById("decisionForm");
+			formulario.action = decodeURIComponent("<%=new String(Base64.decode(request.getParameter("redirectko"), true))%>");
+			formulario.submit();
+		}
+	</script>
+	<link href="https://clave-dninbrt.dev.seg-social.gob.es/rss-gateway-static/img/faviconQ3E1TZ34.ico" rel="icon">
 </head>
 <body id="decision-body">
 <div class="container_cabecera">

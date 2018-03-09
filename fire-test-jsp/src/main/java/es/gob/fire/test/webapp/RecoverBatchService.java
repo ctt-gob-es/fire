@@ -10,6 +10,7 @@
 package es.gob.fire.test.webapp;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
@@ -54,7 +55,7 @@ public class RecoverBatchService extends HttpServlet {
 	    catch (final Exception e) {
 			Logger.getLogger("es.gob.fire.test.webapp").severe( //$NON-NLS-1$
 					"Error durante la operacion de recuperacion del lote: " + e); //$NON-NLS-1$
-	    	response.sendRedirect("ErrorPage.jsp?msg=" + e.getMessage()); //$NON-NLS-1$
+	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 	    	return;
 	    }
 

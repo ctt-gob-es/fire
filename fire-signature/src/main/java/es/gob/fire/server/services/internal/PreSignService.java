@@ -113,8 +113,9 @@ public final class PreSignService extends HttpServlet {
         final String subOperation   = session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
         final String format         = session.getString(ServiceParams.SESSION_PARAM_FORMAT);
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-        final Properties connConfig = (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         final boolean stopOnError   = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
+        final TransactionConfig connConfig =
+        		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
         // Comprobaciones de seguridad
     	if (appId == null || appId.isEmpty()) {
@@ -185,13 +186,13 @@ public final class PreSignService extends HttpServlet {
             return;
         }
 
-		if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
+		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$
             setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(redirectErrorUrl);
 			return;
 		}
-		redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+		redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
         Properties extraParams;
         try {
@@ -236,7 +237,7 @@ public final class PreSignService extends HttpServlet {
             // En caso de haberse indicado un nombre de fichero a traves del parametro
             // de configuracion, los pasamos a los extraParams para que se puedan procesar
             // en el conector como parte de la configuracion de la firma
-            final DocInfo docInfo = DocInfo.extractDocInfo(connConfig);
+            final DocInfo docInfo = DocInfo.extractDocInfo(connConfig.getProperties());
             DocInfo.addDocInfoToSign(extraParams, docInfo);
 
         	try {
@@ -347,7 +348,7 @@ public final class PreSignService extends HttpServlet {
         // Obtenemos el conector con el backend ya configurado
         final FIReConnector connector;
         try {
-            connector = ProviderManager.initTransacction(providerName, connConfig);
+            connector = ProviderManager.initTransacction(providerName, connConfig.getProperties());
         }
         catch (final FIReConnectorFactoryException e) {
             LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor " + providerName, e); //$NON-NLS-1$

@@ -66,13 +66,16 @@ public class RecoverSignResultManager {
 
         // Comprobamos que no se haya declarado ya un error
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
+        	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
+        	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
         	SessionCollector.removeSession(session);
-        	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + //$NON-NLS-1$
-        			session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE));
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-        			buildErrorMessage(
-	        			session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE),
-	        			session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE)));
+        	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + errMessage); //$NON-NLS-1$
+        	sendResult(
+        			response,
+        			new TransactionResult(
+        					TransactionResult.RESULT_TYPE_BATCH,
+        					Integer.parseInt(errType),
+        					errMessage).encodeResult());
         	return;
         }
 
@@ -93,10 +96,6 @@ public class RecoverSignResultManager {
 
         // Enviamos la firma electronica como resultado
         sendResult(response, signResult);
-	}
-
-	private static String buildErrorMessage(final String code, final String message) {
-		return "ERR-" + code + ":" + message; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {

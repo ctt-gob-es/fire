@@ -97,15 +97,13 @@
 				  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
 				  de certificados de firma. -->
 				<input id="extraparams-conf" type="hidden" name="extraParams"
-				value="bW9kZT1pbXBsaWNpdApmaWx0ZXJzPWtleXVzYWdlLm5vbnJlcHVkaWF0aW9uOnRydWU="/>
+				value="bW9kZT1pbXBsaWNpdA0KZmlsdGVycz1rZXl1c2FnZS5ub25yZXB1ZGlhdGlvbjp0cnVl" />
 
 				<div style="margin-top: 10px; text-align: left; ">
 					<label for="fichero-firma">Seleccionar documento:</label><br>
 					<input id="fichero-firma" type="file" name="sign-file" />
 				</div>
-		
 
-				
 				<div style="margin-top:30px;text-align: center; ">
 					<input  id="submit-btn"  type="submit" value="FIRMAR">
 				</div>

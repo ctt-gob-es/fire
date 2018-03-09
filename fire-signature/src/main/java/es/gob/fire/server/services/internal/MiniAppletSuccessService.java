@@ -15,7 +15,6 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,16 +78,16 @@ public class MiniAppletSuccessService extends HttpServlet {
 		}
 
     	// Comprobamos que haya URL de redireccion
-    	final Properties connConfig	= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-    	if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_SUCCESS_URL) ||
-    			!connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
+    	final TransactionConfig connConfig	=
+    			(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+    	if (connConfig == null || connConfig.getRedirectSuccessUrl() == null) {
     		LOGGER.warning("No se encontraron en la sesion las URL de redireccion para la operacion"); //$NON-NLS-1$
     		setErrorToSession(session, OperationError.INVALID_STATE);
     		response.sendRedirect(errorUrl);
     		return;
     	}
-		final String redirectUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_SUCCESS_URL);
-		errorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+		final String redirectUrl = connConfig.getRedirectSuccessUrl();
+		errorUrl = connConfig.getRedirectErrorUrl();
 
 		// Agregamos el certificado en caso de haberlo recibido (que se deberia, pero no sera imprescindible)
 		final String certB64 = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
