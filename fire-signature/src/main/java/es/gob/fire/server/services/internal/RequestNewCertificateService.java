@@ -62,10 +62,12 @@ public final class RequestNewCertificateService extends HttpServlet {
         }
 
         final String origin	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		final Properties connConfig	= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-
-    	final Properties generationConfig = connConfig != null ? (Properties) connConfig.clone() : new Properties();
-    	final String errorUrlRedirection = generationConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+		TransactionConfig connConfig =
+				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+		if (connConfig == null) {
+			connConfig = new TransactionConfig(new Properties());
+		}
+    	final String errorUrlRedirection = connConfig.getRedirectErrorUrl();
 
     	// Creamos una configuracion igual a la de firma para la generacion de certificado
     	// y establecemos que la URL de redireccion en caso de exito sea la de recuperacion
@@ -73,15 +75,15 @@ public final class RequestNewCertificateService extends HttpServlet {
         String localUrlBase = request.getRequestURL().toString();
         localUrlBase = localUrlBase.substring(0, localUrlBase.toString().lastIndexOf('/') + 1);
 
-        generationConfig.setProperty(
-        		ServiceParams.CONNECTION_PARAM_SUCCESS_URL,
+        final TransactionConfig requestCertConfig = (TransactionConfig) connConfig.clone();
+        requestCertConfig.setRedirectSuccessUrl(
         		localUrlBase + "ChooseNewCertificate.jsp?" + //$NON-NLS-1$
         				ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
         				ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId); //$NON-NLS-1$
 
         final GenerateCertificateResult gcr;
         try {
-        	gcr = GenerateCertificateManager.generateCertificate(origin, subjectId, generationConfig);
+        	gcr = GenerateCertificateManager.generateCertificate(origin, subjectId, requestCertConfig.getProperties());
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.warning("No se ha proporcionado el identificador del usuario que solicita el certificado"); //$NON-NLS-1$

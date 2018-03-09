@@ -43,8 +43,6 @@ import com.openlandsw.rss.gateway.exception.SafeCertGateWayException;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.AOSignConstants;
-import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.fire.server.connector.BadConfigurationException;
 import es.gob.fire.server.connector.CertificateBlockedException;
 import es.gob.fire.server.connector.DocInfo;
@@ -56,6 +54,8 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.LoadResult;
+import es.gob.fire.server.connector.TriphaseData;
+import es.gob.fire.server.connector.TriphaseData.TriSign;
 import es.gob.fire.server.connector.WeakRegistryException;
 
 /** Implementaci&oacute;n del API interno de firma en la nube mediante los
@@ -64,10 +64,6 @@ import es.gob.fire.server.connector.WeakRegistryException;
 public final class ClaveFirmaConnector implements FIReConnector {
 
     private static final String EX_MSG_INVALID_PROVIDER_NAME = "El par\u00E1metro no cumple con la longitud requerida. Verifique que no supera el m\u00E1ximo permitido o sea vac\u00EDo."; //$NON-NLS-1$
-
-    /** Nombre de la propiedad para almac&eacute;n de prefirmas en la
-     * sesi&oacute;n trif&aacute;sica. */
-    private static final String PROPERTY_NAME_PRESIGN = "PRE"; //$NON-NLS-1$
 
     /** Resultado de la operacion de generaci&oacute;n de exito en caso de error. */
     private static final String NEW_CERT_SUCCESS_RESULT = "OK"; //$NON-NLS-1$
@@ -232,9 +228,9 @@ public final class ClaveFirmaConnector implements FIReConnector {
         // el segundo y subsiguientes.
         for (final TriSign preTrisSign : preTrisSigns) {
             final DocumentsToSign doc = new DocumentsToSign();
-            doc.setData(md.digest(Base64.decode(preTrisSign.getProperty(PROPERTY_NAME_PRESIGN))));
+            doc.setData(md.digest(preTrisSign.getPresign()));
             doc.setIdData(preTrisSign.getId());
-            final DocInfo docInfo = DocInfo.extractDocInfo(preTrisSign);
+            final DocInfo docInfo = preTrisSign.getDocInfo();
             doc.setNameDocument(docInfo.getName());
             doc.setTitleDocument(docInfo.getTitle());
             docs.add(doc);

@@ -1,4 +1,6 @@
 
+<%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
+<%@page import="es.gob.fire.server.services.DocInfo"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
 <%@page import="java.net.URLEncoder"%>
@@ -13,7 +15,6 @@
 <%@page import="es.gob.fire.server.services.FIReTriHelper"%>
 <%@page import="es.gob.fire.server.services.ServiceUtil"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
-<%@page import="es.gob.fire.server.connector.DocInfo"%>
 <%@page import="java.util.Map"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page import="java.util.Properties"%>
@@ -98,17 +99,11 @@
 
 
 	// Obtenemos las URL a las que hay que redirigir al usuario en caso de exito y error
-	final Properties connConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-	final String successUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_SUCCESS_URL);
-	final String errorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
-	final String afirmaWS = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_AUTOFIRMA_WS);
-	boolean afirmaNative;
-	if (afirmaWS != null) {
-		afirmaNative = !Boolean.parseBoolean(afirmaWS);
-	}
-	else {
-		afirmaNative = ConfigManager.getClienteAfirmaForceNative();
-	}
+	final TransactionConfig connConfig =
+		(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	final String successUrl = connConfig.getRedirectSuccessUrl();
+	final String errorUrl = connConfig.getRedirectErrorUrl();
+	final boolean afirmaNative = !connConfig.isAutoFirmaWSEnabled();
 	
 	final String formFunction = isBatchOperation ? "doSignBatch()" : "doSign()"; //$NON-NLS-1$ //$NON-NLS-2$
 	

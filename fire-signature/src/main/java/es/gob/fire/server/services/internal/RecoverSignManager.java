@@ -82,20 +82,22 @@ public class RecoverSignManager {
 			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
 		}
 
-        // Comprobamos que no se haya declarado ya un error
+        // Comprobamos que no se haya declarado ya un error, en cuyo caso, lo devolvemos
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
+        	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
+        	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
         	SessionCollector.removeSession(session);
-        	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + //$NON-NLS-1$
-        			session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE));
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-        			buildErrorMessage(
-	        			session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE),
-	        			session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE)));
+        	LOGGER.warning("Ocurrio un error durante la operacion de firma: " + errMessage); //$NON-NLS-1$
+        	sendResult(
+        			response,
+        			new TransactionResult(
+        					TransactionResult.RESULT_TYPE_SIGN,
+        					Integer.parseInt(errType),
+        					errMessage));
         	return;
         }
 
         // Extraemos la configuracion de firma
-        final Properties connConfig	= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         final String tdB64			= session.getString(ServiceParams.SESSION_PARAM_TRIPHASE_DATA); // 1
         final String certB64		= session.getString(ServiceParams.SESSION_PARAM_CERT); // 2
         final byte[] docId			= (byte[]) session.getObject(ServiceParams.SESSION_PARAM_DOC_ID);
@@ -106,6 +108,9 @@ public class RecoverSignManager {
 
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
         final String remoteTrId		= session.getString(ServiceParams.SESSION_PARAM_REMOTE_TRANSACTION_ID); // 3
+
+        final TransactionConfig connConfig	=
+        		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
         // En caso de haberse indicado un DocumentManager, lo recogemos
         final FIReDocumentManager docManager	= (FIReDocumentManager) session.getObject(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER);
@@ -213,7 +218,7 @@ public class RecoverSignManager {
         	return;
 		}
 
-    	if (connConfig == null || connConfig.isEmpty()) {
+    	if (connConfig == null) {
     		LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
    					"No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
@@ -223,7 +228,7 @@ public class RecoverSignManager {
         // Obtenemos el conector con el backend ya configurado
         final FIReConnector connector;
         try {
-    		connector = ProviderManager.initTransacction(providerName, connConfig);
+    		connector = ProviderManager.initTransacction(providerName, connConfig.getProperties());
         }
         catch (final FIReConnectorFactoryException e) {
             LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
@@ -327,10 +332,6 @@ public class RecoverSignManager {
 
         // Enviamos la firma electronica como resultado
         sendResult(response, buildResult(providerName));
-	}
-
-	private static String buildErrorMessage(final String code, final String message) {
-		return "ERR-" + code + ":" + message; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private static TransactionResult buildResult(final String providerName) {

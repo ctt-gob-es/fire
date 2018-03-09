@@ -173,7 +173,7 @@ public class FireSession implements Serializable {
 	 * contenidos en la sesi&oacute;n.
 	 * @return Nombres de los atributos de la sesi&oacute;n.
 	 */
-	public String[] getAtributteNames() {
+	public String[] getAttributteNames() {
 		return this.ssData.keySet().toArray(new String[this.ssData.size()]);
 	}
 

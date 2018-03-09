@@ -125,28 +125,10 @@ public class ServiceParams {
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el mensaje de error obtenido. */
 	public static final String SESSION_PARAM_ERROR_MESSAGE = "errormsg"; //$NON-NLS-1$
 
-
-	/** Par&aacute;metro usado para configurar la URL a la que redirigir al usuario en caso de error. */
-	public static final String CONNECTION_PARAM_ERROR_URL = "redirectErrorUrl"; //$NON-NLS-1$
-	/** Par&aacute;metro usado para configurar la URL a la que redirigir al usuario en caso de &eacute;xito. */
-	public static final String CONNECTION_PARAM_SUCCESS_URL = "redirectOkUrl"; //$NON-NLS-1$
-	/** Par&aacute;metro usado para configurar el origen del certificado que debe usarse. */
-	public static final String CONNECTION_PARAM_CERT_ORIGIN = "certOrigin"; //$NON-NLS-1$
-	/** Par&aacute;metro usado para configurar el nombre de la aplicaci&oacute;n que solicita firmar. */
-	public static final String CONNECTION_PARAM_APPLICATION_NAME = "appName"; //$NON-NLS-1$
-	/** Par&aacute;metro usado para configurar el gestor de documentos con el que obtener los datos
-	 * a firmar y guardar las firmas. */
-	public static final String CONNECTION_PARAM_DOCUMENT_MANAGER = "docManager"; //$NON-NLS-1$
-	/** Par&aacute;metro usado para configurar si se desea que AutoFirma se ejecute como
-	 * aplicaci&oacute;n nativa o aplicaci&oacute;n WebStart. */
-	public static final String CONNECTION_PARAM_AUTOFIRMA_WS = "afirmaWS"; //$NON-NLS-1$
-
 	/** Par&aacute;metro usado para configurar que se debe utilizar un certificado local. */
     public static final String CERTIFICATE_ORIGIN_LOCAL = "local"; //$NON-NLS-1$
 
     /** Identificador de operaci&oacute;n de firma de lotes. */
     public static final String OPERATION_BATCH = "batch"; //$NON-NLS-1$
 
-    /** Cadena utilizada para separar valores establecidos dentro de una misma propiedad. */
-    public static final String VALUES_SEPARATOR = ","; //$NON-NLS-1$
 }

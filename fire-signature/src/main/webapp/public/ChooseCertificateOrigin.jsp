@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderInfo"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderManager"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
@@ -33,9 +34,10 @@
 	}
 	
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
-	Properties connConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-	if (connConfig != null && connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
-		errorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+	TransactionConfig connConfig =
+			(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
+		errorUrl = connConfig.getRedirectErrorUrl();
 	} else {
 		errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 	}
@@ -82,12 +84,8 @@
 	<title>Selección del mecanismo de firma</title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
-<!-- 	<link rel="stylesheet" type="text/css" href="css/modules.css"> -->
-		<link rel="stylesheet" type="text/css" href="css/modChooseCertificateOrigin.css">
+	<link rel="stylesheet" type="text/css" href="css/modChooseCertificateOrigin.css">
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
-<script type="text/javascript">
-	alert(<%=errorUrl%>);
-</script>
 </head>
 <body>
 	<!-- Barra de navegacion -->

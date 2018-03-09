@@ -10,6 +10,7 @@
 package es.gob.fire.test.webapp;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,7 +56,7 @@ public class RecoverBatchStateService extends HttpServlet {
 			state = ConfigManager.getInstance().getFireClient(appId).recoverBatchResultState(transactionId, userId);
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error durante la evaluacion del estado del lote: " + e, e); //$NON-NLS-1$
-			response.sendRedirect("ErrorPage.jsp?msg=" + e.getMessage()); //$NON-NLS-1$
+			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 

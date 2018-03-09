@@ -260,7 +260,7 @@ public class TransactionResult {
 				jsonReader.close();
 			}
 			catch (final Exception e) {
-				throw new HttpOperationException("El servicio respondio con un JSON no valido: " + new String(result), e);
+				throw new HttpOperationException("El servicio respondio con un JSON no valido: " + new String(result), e); //$NON-NLS-1$
 			}
 		}
 		// Si no, habremos recibido directamente el resultado.

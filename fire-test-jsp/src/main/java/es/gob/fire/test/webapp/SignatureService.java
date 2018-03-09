@@ -11,6 +11,7 @@ package es.gob.fire.test.webapp;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -143,7 +144,7 @@ public class SignatureService extends HttpServlet {
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,
 					"Error durante la operacion de firma: " + e, e); //$NON-NLS-1$
-	    	response.sendRedirect("ErrorPage.jsp?msg=" + e.getMessage()); //$NON-NLS-1$
+	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$));
 	    	return;
 		}
 

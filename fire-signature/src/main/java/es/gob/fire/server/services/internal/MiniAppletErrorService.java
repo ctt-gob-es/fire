@@ -10,7 +10,6 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -54,13 +53,15 @@ public class MiniAppletErrorService extends HttpServlet {
         }
 
         // Obtenenmos la configuracion del conector
-        final Properties connConfig		= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-    	if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
-    		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE,true, null);
+        final TransactionConfig connConfig	=
+        		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+    	if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
+            setErrorToSession(session, OperationError.INVALID_STATE, null);
+
             response.sendRedirect(errorUrl);
         	return;
     	}
-    	errorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+    	errorUrl = connConfig.getRedirectErrorUrl();
 
 		// Asignamos los mensajes de error
     	ErrorManager.setErrorToSession(session,  OperationError.SIGN_MINIAPPLET, true,errorMessage);

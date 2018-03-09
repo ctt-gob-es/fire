@@ -264,7 +264,7 @@ public final class LoadService extends HttpServlet {
             lr = connector.loadDataToSign(
                 subjectId,
                 algorithm,
-                td,
+                FIReTriHelper.fromTriPhaseDataAfirmaToFire(td),
                 CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
                     new ByteArrayInputStream(Base64.decode(ServiceUtil.undoUrlSafe(certB64)))
                 )

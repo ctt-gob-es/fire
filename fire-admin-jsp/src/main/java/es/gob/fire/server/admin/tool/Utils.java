@@ -13,7 +13,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -43,16 +42,16 @@ public class Utils {
         }
         return baos.toByteArray();
     }
-    
+
     /**
-     * 
+     *
      * @param date
      * @return
      */
-    public static String getStringDateFormat(Date date) {
-    	  	   	  	
+    public static String getStringDateFormat(final Date date) {
+
     	return DateFormat.getInstance().format(date);
-    	
+
     }
-    
+
 }

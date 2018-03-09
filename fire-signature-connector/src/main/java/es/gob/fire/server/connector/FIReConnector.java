@@ -15,8 +15,6 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Properties;
 
-import es.gob.afirma.core.signers.TriphaseData;
-
 /** Interfaz contra un proveedor de custodia de certificados y operaciones de firma PKCS#1. */
 public interface FIReConnector {
 

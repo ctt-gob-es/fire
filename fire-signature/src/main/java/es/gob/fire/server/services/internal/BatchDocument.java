@@ -9,7 +9,7 @@
  */
 package es.gob.fire.server.services.internal;
 
-import es.gob.fire.server.connector.DocInfo;
+import es.gob.fire.server.services.DocInfo;
 
 /**
  * Documento a firmar dentro de un proceso de lote.

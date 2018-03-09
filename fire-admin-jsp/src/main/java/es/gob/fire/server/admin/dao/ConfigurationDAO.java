@@ -34,13 +34,11 @@ public class ConfigurationDAO {
 
 	private static final String STATEMENT_SELECT_CONFIG_VALUE = "SELECT valor FROM tb_configuracion WHERE parametro = ?"; //$NON-NLS-1$
 
-	private static final String KEY_ADMIN_PASS = "admin_pass"; //$NON-NLS-1$
-
-
 	/**
 	 * Comprueba contra base de datos que la contrase&ntilde;a indicada se corresponda
 	 * con la del administrador del sistema.
 	 * @param psswd Contrase&ntilde;a.
+	 * @param user Usuario que se autentica.
 	 * @return {@code true} si la contrase&ntilde;a es del administrador, {@code false} en caso contrario.
 	 * @throws SQLException Cuando ocurre alg&uacute;n error durante la comprobaci&oacute;n.
 	 */
@@ -58,7 +56,6 @@ public class ConfigurationDAO {
 		}
 
 		boolean result;
-		//final String keyAdminB64 = getConfigValue(KEY_ADMIN_PASS);
 		final String keyAdminB64 = getConfigValue(user);
 		if (keyAdminB64 ==  null || !keyAdminB64.equals(Base64.encode(md))) {
 			LOGGER.severe("Se ha insertado una contrasena de administrador no valida"); //$NON-NLS-1$

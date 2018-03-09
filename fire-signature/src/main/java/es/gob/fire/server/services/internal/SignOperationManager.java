@@ -24,7 +24,6 @@ import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -90,10 +89,10 @@ public class SignOperationManager {
             return;
         }
 
-		Properties connConfig = null;
+		TransactionConfig connConfig = null;
 		if (configB64 != null && configB64.length() > 0) {
 			try {
-				connConfig = ServiceUtil.base642Properties(configB64);
+				connConfig = new TransactionConfig(configB64);
 			}
 			catch(final Exception e) {
 				LOGGER.warning("Se proporcionaron datos malformados para la conexion y configuracion del backend"); //$NON-NLS-1$
@@ -103,41 +102,31 @@ public class SignOperationManager {
 			}
 		}
 
-		String redirectErrorUrl;
-		if (connConfig == null || connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL) == null) {
+		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning("No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
 		}
-		redirectErrorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
         // Se obtiene el listado final de proveedores para la operacion, filtrando la
         // lista de proveedores dados de alta con los solicitados
 		String[] provs;
-		if (connConfig.containsKey(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN)) {
-			final String origin = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_CERT_ORIGIN);
-			provs = ProviderManager.getFilteredProviders(origin.split(ServiceParams.VALUES_SEPARATOR));
+		final String[] requestedProvs = connConfig.getProviders();
+		if (requestedProvs != null) {
+			provs = ProviderManager.getFilteredProviders(requestedProvs);
 		}
         else {
         	provs = ProviderManager.getProviderNames();
         }
 
-		String appName = null;
-		if (connConfig.containsKey(ServiceParams.CONNECTION_PARAM_APPLICATION_NAME)) {
-			appName = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_APPLICATION_NAME);
-			connConfig.remove(ServiceParams.CONNECTION_PARAM_APPLICATION_NAME);
-		}
-
-		String docManagerName = null;
-		if (connConfig.containsKey(ServiceParams.CONNECTION_PARAM_DOCUMENT_MANAGER)) {
-			docManagerName = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_DOCUMENT_MANAGER);
-			connConfig.remove(ServiceParams.CONNECTION_PARAM_DOCUMENT_MANAGER);
-		}
+		final String appName = connConfig.getAppName();
+		final String docManagerName = connConfig.getDocumentManager();
 
 		// Copiamos al extraParams la informacion del documento firmado y el formato de firma
 		final Properties extraParams = AOUtil.base642Properties(extraParamsB64);
-		final DocInfo docInfo = DocInfo.extractDocInfo(connConfig);
+		final DocInfo docInfo = DocInfo.extractDocInfo(connConfig.getProperties());
 		DocInfo.addDocInfoToSign(extraParams, docInfo);
 		extraParamsB64 = AOUtil.properties2Base64(extraParams);
 
@@ -150,7 +139,7 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ID, appId);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appName);
-        session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig);
+        session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig.cleanConfig());
         session.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
         session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParamsB64);

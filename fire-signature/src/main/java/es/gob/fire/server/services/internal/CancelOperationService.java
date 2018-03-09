@@ -11,7 +11,6 @@ package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -51,8 +50,9 @@ public class CancelOperationService extends HttpServlet {
     		return;
     	}
 
-		final Properties connConfig = (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-		if (connConfig == null || !connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
+		final TransactionConfig connConfig =
+				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			SessionCollector.removeSession(session);
 			LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$

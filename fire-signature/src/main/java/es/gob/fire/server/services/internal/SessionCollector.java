@@ -140,7 +140,7 @@ public final class SessionCollector {
     	TempFilesHelper.deleteTempData(fireSession.getTransactionId());
 
     	// Eliminamos todos los datos de sesion menos los que indican errores
-    	for (final String attr : fireSession.getAtributteNames()) {
+    	for (final String attr : fireSession.getAttributteNames()) {
     		if (!attr.equals(ServiceParams.SESSION_PARAM_ERROR_TYPE) &&
     				!attr.equals(ServiceParams.SESSION_PARAM_ERROR_MESSAGE) &&
     				!attr.equals(ServiceParams.SESSION_PARAM_CERT_ORIGIN) &&

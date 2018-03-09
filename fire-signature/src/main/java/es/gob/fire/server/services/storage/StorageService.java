@@ -74,7 +74,7 @@ public final class StorageService extends HttpServlet {
 		sis.close();
 
 		// Separamos los parametros y sus valores
-		final Hashtable<String, String> params = new Hashtable<String, String>();
+		final Hashtable<String, String> params = new Hashtable<>();
 		final String[] urlParams = new String(baos.toByteArray()).split("&"); //$NON-NLS-1$
 		for (final String param : urlParams) {
 			final int equalsPos = param.indexOf('=');

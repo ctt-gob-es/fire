@@ -82,12 +82,16 @@ public class RecoverBatchResultManager {
 
         // Comprobamos que no se haya declarado ya un error
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
-        	LOGGER.warning("Se identifico un error durante la operacion: " + session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE)); //$NON-NLS-1$
-    		SessionCollector.removeSession(session);
-        	response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(),
-        			buildErrorMessage(
-	        			session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE),
-	        			session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE)));
+        	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
+        	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
+        	SessionCollector.removeSession(session);
+        	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + errMessage); //$NON-NLS-1$
+        	sendResult(
+        			response,
+        			new TransactionResult(
+        					TransactionResult.RESULT_TYPE_BATCH,
+        					Integer.parseInt(errType),
+        					errMessage).encodeResult());
         	return;
         }
 
@@ -170,7 +174,8 @@ public class RecoverBatchResultManager {
 
         // Firma en la nube
         else {
-        	final Properties connConfig	= (Properties) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+        	final TransactionConfig connConfig	=
+        			(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         	if (connConfig == null) {
         		LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
         		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
@@ -181,7 +186,7 @@ public class RecoverBatchResultManager {
         	// Obtenemos el conector con el backend ya configurado
         	final FIReConnector connector;
         	try {
-        		connector = ProviderManager.initTransacction(origin, connConfig);
+        		connector = ProviderManager.initTransacction(origin, connConfig.getProperties());
         	}
         	catch (final FIReConnectorFactoryException e) {
         		LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
@@ -377,16 +382,6 @@ public class RecoverBatchResultManager {
 	}
 
 	/**
-	 * Construye un mensaje de error que enviar como respuesta al servicio.
-	 * @param code C&oacute;digo de error.
-	 * @param message Texto del mensaje de error.
-	 * @return Texto compuesto con el mensaje de error.
-	 */
-	private static String buildErrorMessage(final String code, final String message) {
-		return "ERR-" + code + ":" + message; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	/**
 	 * Envia el XML resultado de la operaci&oacute;n como respuesta del servicio.
 	 * @param response Respuesta del servicio.
 	 * @param result Resultado de la operaci&oacute;n.
@@ -394,7 +389,7 @@ public class RecoverBatchResultManager {
 	 */
 	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
         final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(new TransactionResult(TransactionResult.RESULT_TYPE_BATCH, result).encodeResult());
+        output.write(result);
         output.flush();
         output.close();
 	}

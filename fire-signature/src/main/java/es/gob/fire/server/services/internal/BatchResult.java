@@ -21,7 +21,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
-import es.gob.fire.server.connector.DocInfo;
+import es.gob.fire.server.services.DocInfo;
 
 /**
  * Resultado de un proceso de firma de lote.

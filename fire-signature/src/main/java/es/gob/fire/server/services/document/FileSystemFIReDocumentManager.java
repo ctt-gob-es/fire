@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
@@ -27,7 +28,7 @@ import es.gob.fire.server.document.FIReDocumentManager;
  * Gestor de documentos para la carga de datos desde sistema de ficheros para su
  * uso en FIRe y guardado de las firmas generadas por el propio FIRe.
  */
-public class FileSystemFIReDocumentManager implements FIReDocumentManager {
+public class FileSystemFIReDocumentManager implements FIReDocumentManager, Serializable {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = -5810048749537708465L;

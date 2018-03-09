@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
@@ -33,11 +34,12 @@
 	final String generateTrId = fireSession.getString(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID);
 	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
 	final String providerName = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-    final Properties connConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+    final TransactionConfig connConfig =
+    		(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
     
 	String errorUrl = null;
-	if (connConfig != null && connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
-		errorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
+		errorUrl = connConfig.getRedirectErrorUrl();
 		if (errorUrl != null) {
 			errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 		}
@@ -45,7 +47,11 @@
     
     byte[] certEncoded = null;
     try {
-    	certEncoded = RecoverCertificateManager.recoverCertificate(providerName, generateTrId, connConfig);
+    	certEncoded = RecoverCertificateManager.recoverCertificate(
+    			providerName,
+    			generateTrId,
+    			connConfig.getProperties()
+    	);
     }
     catch (Exception e) {
     	if (errorUrl != null) {

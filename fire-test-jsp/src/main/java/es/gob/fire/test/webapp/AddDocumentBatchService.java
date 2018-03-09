@@ -11,6 +11,7 @@ package es.gob.fire.test.webapp;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -115,7 +116,7 @@ public class AddDocumentBatchService extends HttpServlet {
 			return;
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Ocurrio un error al agregar el documento al lote", e); //$NON-NLS-1$
-			response.sendRedirect("ErrorPage.jsp?msg=" + e.getMessage()); //$NON-NLS-1$
+			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 

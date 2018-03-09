@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
@@ -42,9 +43,10 @@
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
 	
 	String errorUrl = null;
-	Properties connConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-	if (connConfig != null && connConfig.containsKey(ServiceParams.CONNECTION_PARAM_ERROR_URL)) {
-		errorUrl = connConfig.getProperty(ServiceParams.CONNECTION_PARAM_ERROR_URL);
+	TransactionConfig connConfig =
+			(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
+		errorUrl = connConfig.getRedirectErrorUrl();
 		if (errorUrl != null) {
 			errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 		}

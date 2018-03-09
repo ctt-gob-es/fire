@@ -81,13 +81,16 @@ public class RecoverBatchSignatureManager {
 
         // Comprobamos que no se haya declarado ya un error
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
+        	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
+        	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
         	SessionCollector.removeSession(session);
-        	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + //$NON-NLS-1$
-        			session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE));
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-        			buildErrorMessage(
-        					session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE),
-        					session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE)));
+        	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + errMessage); //$NON-NLS-1$
+        	sendResult(
+        			response,
+        			new TransactionResult(
+        					TransactionResult.RESULT_TYPE_BATCH_SIGN,
+        					Integer.parseInt(errType),
+        					errMessage).encodeResult());
         	return;
         }
 
@@ -159,7 +162,7 @@ public class RecoverBatchSignatureManager {
 
 	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
         final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(new TransactionResult(TransactionResult.RESULT_TYPE_BATCH_SIGN, result).encodeResult());
+        output.write(result);
         output.flush();
         output.close();
 	}
