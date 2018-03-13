@@ -9,14 +9,8 @@
  */
 package es.gob.fire.server.admin.entity;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import es.gob.fire.server.admin.tool.Base64;
 
 /**
  * Aplicaciones dadas de alta en la base de datos.
@@ -35,13 +29,9 @@ public class Application {
 
 	private Date alta;
 
-//	private String cer;
-//
-//	private String huella;
-	
 	private String fk_certificado;
-	
-//	private X509Certificate certX509;
+
+
 
 	/**
 	 * Constructor vac&iacute;o que iniciliza los String a cadena vac&iacute;a.
@@ -52,8 +42,6 @@ public class Application {
 		this.responsable = ""; //$NON-NLS-1$
 		this.correo = ""; //$NON-NLS-1$
 		this.telefono = "";  //$NON-NLS-1$
-//		this.cer = ""; //$NON-NLS-1$
-//		this.huella = ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -161,77 +149,20 @@ public class Application {
 		this.alta = alta;
 	}
 
-	
-	
-	
+
 	/**
-	 * Obtiene la clave foranea del certificado asociado 
+	 * Obtiene la clave foranea del certificado asociado
 	 * @return
 	 */
 	public final String getFk_certificado() {
-		return fk_certificado;
+		return this.fk_certificado;
 	}
 	/**
 	 * Establece la clave foranea del certificado
 	 * @param fk_certificado
 	 */
-	public final void setFk_certificado(String fk_certificado) {
+	public final void setFk_certificado(final String fk_certificado) {
 		this.fk_certificado = fk_certificado;
 	}
 
-	/**
-	 * Recupera el certificado de la aplicaci&oacute;n.
-	 * @return el certificado.
-	 */
-//	public String getCer() {
-//		return this.cer;
-//	}
-
-	/**
-	 * Establece el certificado de la aplicaci&oacute;n.
-	 * @param cer certificado de la aplicaci&oacute;n.
-	 */
-//	public void setCer(final String cer) {
-//		this.cer = cer;
-//	}
-
-	/**
-	 * Recupera la huella del certificado de la aplicaci&oacute;n.
-	 * @return huella del certificado.
-	 */
-//	public String getHuella() {
-//		return this.huella;
-//	}
-
-	/**
-	 * Establece la huella dado un certificado
-	 * @param huella
-	 */
-//	public void setHuella(final String huella) {
-//		this.huella = huella;
-//	}
-
-	/**
-	 * Obtiene el certificado de la aplicaci&oacute;n.
-	 * @return
-	 */
-//	public X509Certificate getCertX509() {
-//		return certX509;
-//	}
-	/**
-	 * Establece el certificado de la aplicaci&oacute;n.
-	 * @param certX509
-	 */
-//	public void setCertX509(X509Certificate certX509) {
-//		this.certX509 = certX509;
-//	}
-	/**
-	 * Establece el Certificado X509 mediante una cadena en base 64
-	 * @param cert
-	 * @throws CertificateException
-	 * @throws IOException
-	 */
-//	public void setCertb64ToX509(String cert) throws CertificateException, IOException {
-//		this.setCertX509((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert))));
-//	}
 }

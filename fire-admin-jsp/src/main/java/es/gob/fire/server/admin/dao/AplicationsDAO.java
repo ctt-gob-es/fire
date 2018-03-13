@@ -9,6 +9,7 @@
  */
 package es.gob.fire.server.admin.dao;
 
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
@@ -17,6 +18,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -25,6 +27,10 @@ import java.util.logging.Logger;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 
 import es.gob.fire.server.admin.conf.DbManager;
 import es.gob.fire.server.admin.entity.Application;
@@ -32,7 +38,6 @@ import es.gob.fire.server.admin.tool.Base64;
 import es.gob.fire.server.admin.tool.Hexify;
 
 
-import org.json.JSONObject;
 
 /**
  * DAO para la gesti&oacute;n de aplicaciones dadas de alta en el sistema.
@@ -50,16 +55,16 @@ public class AplicationsDAO {
 	private static final String STATEMENT_SELECT_CONFIG_VALUE = "SELECT valor FROM tb_configuracion WHERE parametro = ?"; //$NON-NLS-1$
 
 	private static final String STATEMENT_SELECT_APPLICATIONS = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre"; //$NON-NLS-1$
-	
+
 	private static final String STATEMENT_SELECT_APPLICATIONS_PAG = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre limit ?,?"; //$NON-NLS-1$
-	
+
 	private static final String ST_SELECT_APPLICATIONS_PAG_BYCERT = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre limit ?,?"; //$NON-NLS-1$
-	
+
 	private static final String ST_SELECT_APPLICATIONS_BYCERT = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre "; //$NON-NLS-1$
-	
-	private static final String STATEMENT_SELECT_APPLICATIONS_COUNT="SELECT count(*) FROM tb_aplicaciones";
-	
-	private static final String ST_SELECT_APPLICATIONS_COUNT_BYCERT="SELECT count(*) FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=?";
+
+	private static final String STATEMENT_SELECT_APPLICATIONS_COUNT="SELECT count(*) FROM tb_aplicaciones"; //$NON-NLS-1$
+
+	private static final String ST_SELECT_APPLICATIONS_COUNT_BYCERT="SELECT count(*) FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=?"; //$NON-NLS-1$
 
 	private static final String STATEMENT_SELECT_APPLICATION_BYID = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado FROM tb_aplicaciones WHERE id= ?"; //$NON-NLS-1$
 
@@ -135,7 +140,7 @@ public class AplicationsDAO {
 	public static List<Application> getApplications() throws SQLException {
 
 		final List<Application> result = new ArrayList<Application>();
-	
+
 		/*"SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre*/
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS);
 		final ResultSet rs = st.executeQuery();
@@ -147,7 +152,7 @@ public class AplicationsDAO {
 			app.setCorreo(rs.getString(4));
 			app.setTelefono(rs.getString(5));
 			app.setAlta(rs.getDate(6));
-			app.setFk_certificado(rs.getString(7));			
+			app.setFk_certificado(rs.getString(7));
 			result.add(app);
 		}
 		rs.close();
@@ -157,35 +162,54 @@ public class AplicationsDAO {
 	}
 
 	/**
-	 * Consulta que obtiene todos los registros de la tabla tb_aplicaciones. 
+	 * Consulta que obtiene todos los registros de la tabla tb_aplicaciones.
 	 * @return Devuelve los datos como un string en formato JSON
 	 * @throws SQLException
 	 */
 	public static String getApplicationsJSON() throws SQLException {
 
-		final List<Application> result = new ArrayList<Application>();
-		final JSONObject jsonObj= new JSONObject();
+
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+
 		/*"SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre*/
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS);
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
-			final Application app = new Application();
-			app.setId(rs.getString(1));
-			app.setNombre(rs.getString(2));
-			app.setResponsable(rs.getString(3));
-			app.setCorreo(rs.getString(4));
-			app.setTelefono(rs.getString(5));
-			app.setAlta(rs.getDate(6));
-			app.setFk_certificado(rs.getString(7));			
-			result.add(app);
+			Date date= null;
+			final Timestamp timestamp = rs.getTimestamp(6);
+			if (timestamp != null) {
+				date = new Date(timestamp.getTime());
+			}
+
+			data.add(Json.createObjectBuilder()
+					.add("id", rs.getString(1)) //$NON-NLS-1$
+					.add("nombre", rs.getString(2)) //$NON-NLS-1$
+					.add("responsable", rs.getString(3)) //$NON-NLS-1$
+					.add("correo", rs.getString(4)) //$NON-NLS-1$
+					.add("telefono", rs.getString(5)) //$NON-NLS-1$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date!=null?date:rs.getDate(6))) //$NON-NLS-1$
+					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
+					);
 		}
 		rs.close();
 		st.close();
-		jsonObj.put("AppList", result);
-		return jsonObj.toString();
+		jsonObj.add("AppList", data); //$NON-NLS-1$
+
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+		}
+
+	    return writer.toString();
 	}
-	
-	
+
+
 	/**
 	 * Obtiene el número de registros de la tabla tb_aplicaciones
 	 * @return
@@ -193,21 +217,35 @@ public class AplicationsDAO {
 	 */
 	public static String getApplicationsCount()throws SQLException {
 		int count=0;
-		JSONObject jsonObj= new JSONObject();
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS_COUNT);
 			final ResultSet rs = st.executeQuery();
 			if(rs.next()) {
 				count=rs.getInt(1);
 			}
-			jsonObj.put("count",count);
+			jsonObj.add("count", count);  //$NON-NLS-1$
+			rs.close();
+			st.close();
+
 		}
-		catch(Exception e){
+		catch(final Exception e){
 			e.printStackTrace();
 		}
-		
-		return jsonObj.toString();
-		
+
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+		}
+
+	    return writer.toString();
+
+
 	}
 	/**
 	 * Obtiene el número de registros de la tabla tb_aplicaciones para un identificador (id_certificado) de la tabla tb_certificados
@@ -217,7 +255,8 @@ public class AplicationsDAO {
 	 */
 	public static String getApplicationsCountByCertificate(final String id)throws SQLException {
 		int count=0;
-		JSONObject jsonObj= new JSONObject();
+
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_APPLICATIONS_COUNT_BYCERT);
 			st.setInt(1, Integer.parseInt(id));
@@ -225,14 +264,26 @@ public class AplicationsDAO {
 			if(rs.next()) {
 				count=rs.getInt(1);
 			}
-			jsonObj.put("count",count);
+			jsonObj.add("count", count);  //$NON-NLS-1$
+			rs.close();
+			st.close();
 		}
-		catch(Exception e){
+		catch(final Exception e){
 			e.printStackTrace();
 		}
-		
-		return jsonObj.toString();
-		
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+		}
+
+	    return writer.toString();
+
+
 	}
 	/**
 	 * Obtiene todos los registros paginados.
@@ -243,30 +294,50 @@ public class AplicationsDAO {
 	 */
 	public static String getApplicationsPag(final String start, final String total) throws SQLException {
 
-		
-		final JSONObject jsonObj= new JSONObject();
-		final List<Application> result = new ArrayList<Application>();
+
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS_PAG);
 		st.setInt(1,Integer.parseInt(start));
 		st.setInt(2, Integer.parseInt(total));
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
-			
-			final Application app = new Application();
-			app.setId(rs.getString(1));
-			app.setNombre(rs.getString(2));
-			app.setResponsable(rs.getString(3));
-			app.setCorreo(rs.getString(4));
-			app.setTelefono(rs.getString(5));
-			app.setAlta(rs.getDate(6));			
-			result.add(app);
+			Date date= null;
+			final Timestamp timestamp = rs.getTimestamp(6);
+			if (timestamp != null) {
+				date = new Date(timestamp.getTime());
+			}
+
+			data.add(Json.createObjectBuilder()
+					.add("id", rs.getString(1)) //$NON-NLS-1$
+					.add("nombre", rs.getString(2)) //$NON-NLS-1$
+					.add("responsable", rs.getString(3)) //$NON-NLS-1$
+					.add("correo", rs.getString(4)) //$NON-NLS-1$
+					.add("telefono", rs.getString(5)) //$NON-NLS-1$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date!=null?date:rs.getDate(6))) //$NON-NLS-1$
+					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
+					);
+
 		}
 		rs.close();
 		st.close();
-		jsonObj.put("AppList", result);
-		return jsonObj.toString();
+		jsonObj.add("AppList", data); //$NON-NLS-1$
+
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+			jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+		}
+
+	    return writer.toString();
+
 	}
-	
+
 	/**
 	 * Consulta que obtiene todas las aplicaciones por indicador del Certificado
 	 * @param id
@@ -275,39 +346,55 @@ public class AplicationsDAO {
 	 */
 	public static String getApplicationsByCertificateJSON(final String id) throws SQLException {
 
-		
-		final JSONObject jsonObj= new JSONObject();
-		final List<Application> result = new ArrayList<Application>();
-		/*SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, 
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+
+		/*SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a,
 		 * tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre "*/
 		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_APPLICATIONS_BYCERT);
 		st.setInt(1, Integer.parseInt(id));
 
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
-			
-			final Application app = new Application();
-			app.setId(rs.getString(1));
-			app.setNombre(rs.getString(2));
-			app.setResponsable(rs.getString(3));
-			app.setCorreo(rs.getString(4));
-			app.setTelefono(rs.getString(5));
-			app.setAlta(rs.getDate(6));	
-			app.setFk_certificado(rs.getString(7));
-			result.add(app);
+
+			Date date= null;
+			final Timestamp timestamp = rs.getTimestamp(6);
+			if (timestamp != null) {
+				date = new Date(timestamp.getTime());
+			}
+			data.add(Json.createObjectBuilder()
+					.add("id", rs.getString(1)) //$NON-NLS-1$
+					.add("nombre", rs.getString(2)) //$NON-NLS-1$
+					.add("responsable", rs.getString(3)) //$NON-NLS-1$
+					.add("correo", rs.getString(4)) //$NON-NLS-1$
+					.add("telefono", rs.getString(5)) //$NON-NLS-1$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date!=null?date:rs.getDate(6))) //$NON-NLS-1$
+					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
+					);
 		}
 		rs.close();
 		st.close();
-		jsonObj.put("AppList", result);
-		return jsonObj.toString();
+		jsonObj.add("AppList", data); //$NON-NLS-1$
+
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+		}
+	    return writer.toString();
 	}
 
 	public static String getApplicationsPagByCertificate(final String id, final String start, final String total) throws SQLException {
 
-		
-		final JSONObject jsonObj= new JSONObject();
-		final List<Application> result = new ArrayList<Application>();
-		/*SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, 
+
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+
+		/*SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a,
 		 * tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre limit ?,?"*/
 		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_APPLICATIONS_PAG_BYCERT);
 		st.setInt(1, Integer.parseInt(id));
@@ -315,29 +402,43 @@ public class AplicationsDAO {
 		st.setInt(3, Integer.parseInt(total));
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
-			
-			final Application app = new Application();
-			app.setId(rs.getString(1));
-			app.setNombre(rs.getString(2));
-			app.setResponsable(rs.getString(3));
-			app.setCorreo(rs.getString(4));
-			app.setTelefono(rs.getString(5));
-			app.setAlta(rs.getDate(6));	
-			app.setFk_certificado(rs.getString(7));
-			result.add(app);
+			Date date= null;
+			final Timestamp timestamp = rs.getTimestamp(6);
+			if (timestamp != null) {
+				date = new Date(timestamp.getTime());
+			}
+			data.add(Json.createObjectBuilder()
+					.add("id", rs.getString(1)) //$NON-NLS-1$
+					.add("nombre", rs.getString(2)) //$NON-NLS-1$
+					.add("responsable", rs.getString(3)) //$NON-NLS-1$
+					.add("correo", rs.getString(4)) //$NON-NLS-1$
+					.add("telefono", rs.getString(5)) //$NON-NLS-1$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date!=null?date:rs.getDate(6))) //$NON-NLS-1$
+					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
+					);
+
 		}
 		rs.close();
 		st.close();
-		jsonObj.put("AppList", result);
-		return jsonObj.toString();
+		jsonObj.add("AppList", data); //$NON-NLS-1$
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+		}
+	    return writer.toString();
 	}
-	
+
 	/**
 	 * Agrega una nueva aplicaci&oacute;n al sistema.
 	 * @param nombre Nombre de la aplicacion.
 	 * @param responsable Repsonsable de la aplicaci&oacute;n.
 	 * @param email Correo electr&oacute;nico de la aplicaci&oacute;n.
-	 * @param telefono N&uacute;mero de te&eacute;lefono de la aplicaci&oacute;n.	 
+	 * @param telefono N&uacute;mero de te&eacute;lefono de la aplicaci&oacute;n.
 	 * @throws SQLException Cuando no se puede insertar la nueva aplicacion en base de datos.
 	 * @throws GeneralSecurityException  Cuando no se puede generar el identificador aleatorio de la aplicaci&oacute;n.
 	 * @SQL INSERT INTO tb_aplicaciones(id, nombre, responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -354,7 +455,7 @@ public class AplicationsDAO {
 		st.setString(5, telefono);
 		st.setDate(6, new Date(new java.util.Date().getTime()));
 	    st.setString(7, fkCer);
-	
+
 		LOGGER.info("Damos de alta la aplicacion '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
 		st.execute();
 		st.close();
@@ -409,7 +510,7 @@ public class AplicationsDAO {
 			result.setResponsable(rs.getString(3));
 			result.setCorreo(rs.getString(4));
 			result.setTelefono(rs.getString(5));
-			result.setAlta(rs.getDate(6));			
+			result.setAlta(rs.getDate(6));
 			result.setFk_certificado(rs.getString(7));
 		}
 		rs.close();
@@ -435,7 +536,7 @@ public class AplicationsDAO {
 		st.setString(1, nombre);
 		st.setString(2, responsable);
 		st.setString(3, email);
-		st.setString(4, telefono);	 	 
+		st.setString(4, telefono);
 	    st.setString(5, fkCer);
 	    st.setString(6, id);
 

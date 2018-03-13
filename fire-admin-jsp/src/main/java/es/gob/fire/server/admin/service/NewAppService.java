@@ -12,6 +12,7 @@ package es.gob.fire.server.admin.service;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -34,33 +35,33 @@ public class NewAppService extends HttpServlet {
 	private static final String PARAM_NAME = "nombre-app"; //$NON-NLS-1$
 	private static final String PARAM_RESP = "nombre-resp"; //$NON-NLS-1$
 	private static final String PARAM_EMAIL = "email-resp"; //$NON-NLS-1$
-	private static final String PARAM_TEL = "telf-resp"; //$NON-NLS-1$	
+	private static final String PARAM_TEL = "telf-resp"; //$NON-NLS-1$
 	private static final String PARAM_CERTID = "id-certificate"; //$NON-NLS-1$
 	private static final String PARAM_OP = "op"; //$NON-NLS-1$
-	
-	
+
+
 	private String name=null;
 	private String res = null;
 	private String email = null;
-	private String tel = null;	
+	private String tel = null;
 	private String idcertificate=null;
 
-	
+
 	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		req.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
-		/*Obtenemos los parámetros enviados del formulario junto con el Certificado*/
+		/*Obtenemos los parï¿½metros enviados del formulario junto con el Certificado*/
 		this.getParameters(req);
-		
-		//Obtener el tipo de operación 1-Alta 2-Edición
-		final int op = Integer.parseInt(req.getParameter(PARAM_OP));//$NON-NLS-1$
-		final String stringOp = op == 1 ? "alta" : "edicion" ; //$NON-NLS-2$
-	
+
+		//Obtener el tipo de operaciï¿½n 1-Alta 2-Ediciï¿½n
+		final int op = Integer.parseInt(req.getParameter(PARAM_OP));
+		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
+
 		try {
-								
+
 			boolean isOk = true;
 			if (this.getName() == null || this.getRes() == null) {
 				LOGGER.log(Level.SEVERE,
@@ -80,101 +81,101 @@ public class NewAppService extends HttpServlet {
 				// editar aplicacion
 				else if (op == 2){
 					LOGGER.info("Edicion de la aplicacion con nombre: " + this.getName()); //$NON-NLS-1$
-									
+
 					AplicationsDAO.updateApplication(req.getParameter("iddApp"), this.getName(), this.getRes(), this.getEmail(), this.getTel(), this.getIdcertificate());//$NON-NLS-1$
 				}
-			
+
 				else{
 					throw new IllegalStateException("Estado no permitido");//$NON-NLS-1$
 				}
 
 			}
 
-			resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=" + (isOk ? "1" : "0")+"&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		}		
+			resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=" + (isOk ? "1" : "0")+"&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,"Ha ocurrido un error crear la aplicacion : " + e, e); //$NON-NLS-1$
 			resp.sendRedirect("Application/AdminMainPage.jsp?op=alta&r=0&ent=app"); //$NON-NLS-1$
 		}
 
-					
-		
+
+
 	}
 
 	/**
-	 * Procedimiento que obtine los datos de los parámetros enviados desde el formulario para añadir aplicación.
-	 * Parámetros: nombre-app, nombre-resp,email-resp, telf-resp y 
+	 * Procedimiento que obtine los datos de los parï¿½metros enviados desde el formulario para aï¿½adir aplicaciï¿½n.
+	 * Parï¿½metros: nombre-app, nombre-resp,email-resp, telf-resp y
 	 * @param req
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private void getParameters(HttpServletRequest req) throws IOException, ServletException {
+	private void getParameters(final HttpServletRequest req) throws IOException, ServletException {
 		this.setName(null);
 		this.setRes(null);
 		this.setEmail(null);
 		this.setTel(null);
 		this.setIdcertificate(null);
-		
-		if(req.getParameter(PARAM_NAME)!=null && !"".equals(req.getParameter(PARAM_NAME))) {
+
+		if(req.getParameter(PARAM_NAME)!=null && !"".equals(req.getParameter(PARAM_NAME))) { //$NON-NLS-1$
 			this.setName(req.getParameter(PARAM_NAME));
 		}
-		if(req.getParameter(PARAM_RESP)!=null && !"".equals(req.getParameter(PARAM_RESP))) {
-			this.setRes(req.getParameter(PARAM_RESP));	
+		if(req.getParameter(PARAM_RESP)!=null && !"".equals(req.getParameter(PARAM_RESP))) {//$NON-NLS-1$
+			this.setRes(req.getParameter(PARAM_RESP));
 		}
-		if(req.getParameter(PARAM_EMAIL)!=null && !"".equals(req.getParameter(PARAM_EMAIL))) {
+		if(req.getParameter(PARAM_EMAIL)!=null && !"".equals(req.getParameter(PARAM_EMAIL))) {//$NON-NLS-1$
 			this.setEmail(req.getParameter(PARAM_EMAIL));
 		}
-		if(req.getParameter(PARAM_TEL)!=null && !"".equals(req.getParameter(PARAM_TEL))) {
+		if(req.getParameter(PARAM_TEL)!=null && !"".equals(req.getParameter(PARAM_TEL))) {//$NON-NLS-1$
 			this.setTel(req.getParameter(PARAM_TEL));
 		}
-		if(req.getParameter(PARAM_CERTID)!=null && !"".equals(req.getParameter(PARAM_CERTID))) {
+		if(req.getParameter(PARAM_CERTID)!=null && !"".equals(req.getParameter(PARAM_CERTID))) {//$NON-NLS-1$
 			this.setIdcertificate(req.getParameter(PARAM_CERTID));
-		}					
-		
+		}
+
 	}
 
 	// Getters and Setters
 	private String getName() {
-		return name;
+		return this.name;
 	}
 
-	private void setName(String name) {
+	private void setName(final String name) {
 		this.name = name;
 	}
 
 	private String getRes() {
-		return res;
+		return this.res;
 	}
 
-	private void setRes(String res) {
+	private void setRes(final String res) {
 		this.res = res;
 	}
 
 	private String getEmail() {
-		return email;
+		return this.email;
 	}
 
-	private void setEmail(String email) {
+	private void setEmail(final String email) {
 		this.email = email;
 	}
 
 	private String getTel() {
-		return tel;
+		return this.tel;
 	}
 
-	private void setTel(String tel) {
+	private void setTel(final String tel) {
 		this.tel = tel;
 	}
 
 	private final String getIdcertificate() {
-		return idcertificate;
+		return this.idcertificate;
 	}
 
-	private final void setIdcertificate(String idcertificate) {
+	private final void setIdcertificate(final String idcertificate) {
 		this.idcertificate = idcertificate;
 	}
 
 
-	
-	
+
+
 }

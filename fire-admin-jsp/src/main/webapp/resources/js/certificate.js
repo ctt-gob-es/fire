@@ -229,10 +229,10 @@ $(document)
 									+ dataUndefined(JSONData.CertList[i].cert_backup)
 									+ "</td>";
 
-							fecAlta = new Date(JSONData.CertList[i].fec_alta);
-							htmlTableBody = htmlTableBody + "<td>"
-									+ convertDateFormat(fecAlta) + "</td>";
-
+//							fecAlta = new Date(JSONData.CertList[i].fec_alta);
+//							htmlTableBody = htmlTableBody + "<td>"+ convertDateFormat(fecAlta) + "</td>";
+							htmlTableBody = htmlTableBody + "<td>"+ JSONData.CertList[i].fec_alta+ "</td>";														
+							
 							htmlTableBody = htmlTableBody + "<td>";
 							htmlTableBody = htmlTableBody
 									+ "<a href='NewCertificate.jsp?id-cert="
@@ -298,9 +298,10 @@ $(document)
 										+ JSONData.AppList[i].telefono
 										+ "</a>)";
 							}
-							fecAlta = new Date(JSONData.AppList[i].alta);
-							htmlTableBody = htmlTableBody + "</td><td>"
-									+ convertDateFormat(fecAlta) + "</td>";
+							
+//							fecAlta = new Date(JSONData.AppList[i].alta);							
+//							htmlTableBody = htmlTableBody + "</td><td>"+ convertDateFormat(fecAlta) + "</td>";
+							htmlTableBody = htmlTableBody + "</td><td>"+ JSONData.AppList[i].alta+ "</td>";
 							htmlTableBody = htmlTableBody + "</tr>";
 
 							currentIndex++;

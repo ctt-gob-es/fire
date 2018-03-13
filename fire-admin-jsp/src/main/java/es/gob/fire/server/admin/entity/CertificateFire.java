@@ -20,43 +20,43 @@ public class CertificateFire {
 	private String huella_backup;
 	private X509Certificate certX509_principal;
 	private X509Certificate certX509_backup;
-	
+
 	/**
-	 * Constructor vacío
+	 * Constructor vacï¿½o
 	 */
 	public CertificateFire() {}
-	
-	
+
+
 	//GETTER Y SETTER
 	/**
 	 * Recupera el id del Certificado.
 	 * @return
 	 */
 	public final String getId_certificado() {
-		return id_certificado;
+		return this.id_certificado;
 	}
-	
-	
+
+
 	/**
 	 * Establece el id del Certificado.
 	 * @param id_certificado
 	 */
-	public final void setId_certificado(String id_certificado) {
+	public final void setId_certificado(final String id_certificado) {
 		this.id_certificado = id_certificado;
-	}	
+	}
 
 	/**
 	 * Recupera el nombre del certificado
 	 * @return
 	 */
 	public final String getNombre_cert() {
-		return nombre_cert;
+		return this.nombre_cert;
 	}
 	/**
 	 * Establece el nombre del certificado
 	 * @param nombre_cert
 	 */
-	public final void setNombre_cert(String nombre_cert) {
+	public final void setNombre_cert(final String nombre_cert) {
 		this.nombre_cert = nombre_cert;
 	}
 	/**
@@ -64,27 +64,27 @@ public class CertificateFire {
 	 * @return
 	 */
 	public final Date getFec_alta() {
-		return fec_alta;
+		return this.fec_alta;
 	}
 	/**
 	 * Establece la fecha de alta del certificado en el sistema
 	 * @param fec_alta
 	 */
-	public final void setFec_alta(Date fec_alta) {
+	public final void setFec_alta(final Date fec_alta) {
 		this.fec_alta = fec_alta;
 	}
 	/**
-	 * Recupera los datos en base 64 del certificado principal 
+	 * Recupera los datos en base 64 del certificado principal
 	 * @return
 	 */
 	public final String getCert_principal() {
-		return cert_principal;
+		return this.cert_principal;
 	}
 	/**
 	 * Establece los datos en base 64 del certificado principal
 	 * @param cert_principal
 	 */
-	public final void setCert_principal(String cert_principal) {
+	public final void setCert_principal(final String cert_principal) {
 		this.cert_principal = cert_principal;
 	}
 	/**
@@ -92,13 +92,13 @@ public class CertificateFire {
 	 * @return
 	 */
 	public final String getCert_backup() {
-		return cert_backup;
+		return this.cert_backup;
 	}
 	/**
 	 * Establece los datos en base 64 del certificado backup
 	 * @param cert_backup
 	 */
-	public final void setCert_backup(String cert_backup) {
+	public final void setCert_backup(final String cert_backup) {
 		this.cert_backup = cert_backup;
 	}
 	/**
@@ -106,13 +106,13 @@ public class CertificateFire {
 	 * @return
 	 */
 	public final String getHuella_principal() {
-		return huella_principal;
+		return this.huella_principal;
 	}
 	/**
 	 *Establece  la huella del certificado principal
 	 * @param huella_principal
 	 */
-	public final void setHuella_principal(String huella_principal) {
+	public final void setHuella_principal(final String huella_principal) {
 		this.huella_principal = huella_principal;
 	}
 	/**
@@ -120,29 +120,29 @@ public class CertificateFire {
 	 * @return
 	 */
 	public final String getHuella_backup() {
-		return huella_backup;
+		return this.huella_backup;
 	}
 	/**
 	 * Establece  la huella del certificado backup
 	 * @param huella_backup
 	 */
-	public final void setHuella_backup(String huella_backup) {
+	public final void setHuella_backup(final String huella_backup) {
 		this.huella_backup = huella_backup;
 	}
-	
+
 	/**
 	 * Recupera objeto certificado principal
 	 * @return
 	 */
 	public final X509Certificate getCertX509_principal() {
-		return certX509_principal;
+		return this.certX509_principal;
 	}
 
 	/**
 	 *  Establece objeto certificado principal
 	 * @param certX509
 	 */
-	public final void setCertX509_principal(X509Certificate certX509_principal) {
+	public final void setCertX509_principal(final X509Certificate certX509_principal) {
 		this.certX509_principal = certX509_principal;
 	}
 
@@ -151,26 +151,26 @@ public class CertificateFire {
 	 * @return
 	 */
 	public final X509Certificate getCertX509_backup() {
-		return certX509_backup;
+		return this.certX509_backup;
 	}
 
 	/**
 	 * Establece objeto certificado backup
 	 * @param certX509_backup
 	 */
-	public final void setCertX509_backup(X509Certificate certX509_backup) {
+	public final void setCertX509_backup(final X509Certificate certX509_backup) {
 		this.certX509_backup = certX509_backup;
 	}
 
-	
+
 	/**
 	 * Establece el Certificado X509 mediante una cadena en base 64
 	 * @param cert
 	 * @throws CertificateException
 	 * @throws IOException
 	 */
-	public void setCertPrincipalb64ToX509(String cert) throws CertificateException, IOException {
-		this.setCertX509_principal ((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert))));
+	public void setCertPrincipalb64ToX509(final String cert) throws CertificateException, IOException {
+		this.setCertX509_principal ((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert)))); //$NON-NLS-1$
 	}
 	/**
 	 * Establece el Certificado X509 mediante una cadena en base 64
@@ -178,14 +178,14 @@ public class CertificateFire {
 	 * @throws CertificateException
 	 * @throws IOException
 	 */
-	public void setCertBkupb64ToX509(String cert) throws CertificateException, IOException {
-		this.setCertX509_backup((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert))));
+	public void setCertBkupb64ToX509(final String cert) throws CertificateException, IOException {
+		this.setCertX509_backup((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert)))); //$NON-NLS-1$
 	}
 
 
-	
-	
-	
-	
-	
+
+
+
+
+
 }

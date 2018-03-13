@@ -135,6 +135,7 @@
                 var JSONData=JSON.parse(data);
              
                 totalRecords=JSONData.count;
+                alert(totalRecords);
                 if (totalRecords > 0) {
 					$("#data").html("");
 					$.get("processUsrRequest.jsp?requestType=All",function(data){
@@ -160,8 +161,11 @@
             		htmlTableBody=htmlTableBody+'<td headers="usersurname">'+dataUndefined(JSONData.UsrList[i].apellidos)+'</td>';
             		htmlTableBody=htmlTableBody+'<td headers="email">'+ dataUndefined(JSONData.UsrList[i].correo_elec)+'</td>';            		
             		htmlTableBody=htmlTableBody+'<td headers="telf">'+ dataUndefined(JSONData.UsrList[i].telf_contacto)+'</td>';
-            		fecAlta=new Date(JSONData.UsrList[i].fec_alta);
-            		htmlTableBody=htmlTableBody+'<td headers="datetime">'+convertDateFormat(fecAlta)+'</td>';            		
+           		
+//            		fecAlta=new Date(JSONData.UsrList[i].fec_alta);
+//            		htmlTableBody=htmlTableBody+'<td headers="datetime">'+convertDateFormat(fecAlta)+'</td>';
+            		
+            		htmlTableBody=htmlTableBody+'<td headers="datetime">'+JSONData.UsrList[i].fec_alta+'</td>'; 
             		htmlTableBody=htmlTableBody+'<td headers="actions">';            		
             		htmlTableBody=htmlTableBody+'<a href="NewUser.jsp?id-usr='+JSONData.UsrList[i].id_usuario+'&usr-name='+JSONData.UsrList[i].nombre_usuario+'&op=0"><img src="../resources/img/details_icon.png"/></a>';    				
             		htmlTableBody=htmlTableBody+'<a href="NewUser.jsp?id-usr='+JSONData.UsrList[i].id_usuario+'&usr-name='+JSONData.UsrList[i].nombre_usuario+'&op=2"><img src="../resources/img/editar_icon.png"/></a>';

@@ -153,6 +153,7 @@
                 
                 /********************** SIN PAGINACIÓN *******************************/
                 $.get("processAppRequest.jsp?requestType=countRecords",function(data){
+              
                     var JSONData=JSON.parse(data);
               
                     totalRecords=JSONData.count;
@@ -175,7 +176,7 @@
                 
             /********************** SIN PAGINACIÓN FIN*******************************/
             function printApplicationTable(JSONData, recordsToFetch){
-            	
+            
             	var htmlTableHead="<table id='appTable' class='admin-table'><thead><tr><td>Aplicaci&oacute;n</td><td>ID</td><td>Responsable</td><td>Fecha Alta</td><td id='acciones'>Acciones</td></tr></thead><tbody>";
             	var htmlTableBody="";
             	var htmlTableFoot="</tbody></table>";
@@ -189,10 +190,9 @@
         		if (JSONData.AppList[i].telefono != null && dataUndefined(JSONData.AppList[i].telefono)!="" && JSONData.AppList[i].telefono!="") { 
         			htmlTableBody=htmlTableBody+"(<a href='tel://"+JSONData.AppList[i].telefono+"'>"+JSONData.AppList[i].telefono+"</a>)";
         			} 
-        		fecAlta=new Date(JSONData.AppList[i].alta);
-        		
-        		htmlTableBody=htmlTableBody+"</td><td>"+convertDateFormat(fecAlta)+"</td>";
-        
+//        		fecAlta=new Date(JSONData.AppList[i].alta);      		
+//        		htmlTableBody=htmlTableBody+"</td><td>"+convertDateFormat(fecAlta)+"</td>";
+        		htmlTableBody=htmlTableBody+"</td><td>"+JSONData.AppList[i].alta+"</td>";
         		htmlTableBody=htmlTableBody+"<td>";
         		htmlTableBody=htmlTableBody+"<a href='NewApplication.jsp?id-app="+JSONData.AppList[i].id+"&op=0'><img src='../resources/img/details_icon.png'/></a>";
         		htmlTableBody=htmlTableBody+"<a href='NewApplication.jsp?id-app="+JSONData.AppList[i].id+"&op=2'><img src='../resources/img/editar_icon.png'/></a>";        		

@@ -56,6 +56,6 @@ public class DeleteNewAppService extends HttpServlet {
 			}
 		}
 
-		resp.sendRedirect("Application/AdminMainPage.jsp?op=baja&r=" + (isOk ? "1" : "0")+"&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		resp.sendRedirect("Application/AdminMainPage.jsp?op=baja&r=" + (isOk ? "1" : "0")+"&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 }

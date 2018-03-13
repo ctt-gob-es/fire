@@ -10,16 +10,22 @@
 package es.gob.fire.server.admin.dao;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.cert.CertificateException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.JSONObject;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 
 import es.gob.fire.server.admin.conf.DbManager;
 import es.gob.fire.server.admin.entity.CertificateFire;
@@ -47,22 +53,35 @@ public class CertificatesDAO {
 
 	private static final String STATEMENT_UPDATE_CERTIFICATE = "UPDATE tb_certificados SET nombre_cert=?, cert_principal = ?, cert_backup = ?, huella_principal = ?, huella_backup = ? WHERE id_certificado = ?";//$NON-NLS-1$
 
-	public static String getCertificatesCount()throws SQLException {
+	public static String getCertificatesCount() {
 		int count=0;
-		final JSONObject jsonObj= new JSONObject();
+
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_COUNT);
 			final ResultSet rs = st.executeQuery();
 			if(rs.next()) {
 				count=rs.getInt(1);
 			}
-			jsonObj.put("count",count); //$NON-NLS-1$
+			rs.close();
+			st.close();
+			jsonObj.add("count", count);  //$NON-NLS-1$
 		}
 		catch(final Exception e){
 			e.printStackTrace();
 		}
 
-		return jsonObj.toString();
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+		}
+
+	    return writer.toString();
 
 	}
 
@@ -75,58 +94,106 @@ public class CertificatesDAO {
 	 */
 	public static String getCertificatesJSON() throws SQLException, CertificateException, IOException {
 
-		final JSONObject jsonObj= new JSONObject();
-		final List<CertificateFire> result = new ArrayList<CertificateFire>();
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+
 		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_ALL);
 
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
+
+			Date date= null;
+			final Timestamp timestamp = rs.getTimestamp(3);
+			if (timestamp != null) {
+				date = new Date(timestamp.getTime());
+			}
+
+
 			final CertificateFire cert= new CertificateFire();
 			cert.setId_certificado(rs.getString(1));
 			cert.setNombre_cert(rs.getString(2));
 			cert.setFec_alta(rs.getDate(3));
-			if(rs.getString(4)!=null && !"".equals(rs.getString(4))) {
+			if(rs.getString(4)!=null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
 				cert.setCertPrincipalb64ToX509(rs.getString(4));
-				final String certPrincipal[]=cert.getCertX509_principal().getSubjectX500Principal().getName().split(",");
+				final String certPrincipal[]=cert.getCertX509_principal().getSubjectX500Principal().getName().split(","); //$NON-NLS-1$
 				java.util.Date expDatePrincipal= new java.util.Date();
 				expDatePrincipal=cert.getCertX509_principal().getNotAfter();
-				cert.setCert_principal(certPrincipal[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDatePrincipal)));
+				cert.setCert_principal(certPrincipal[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDatePrincipal))); //$NON-NLS-1$
 			}
-			if(rs.getString(5)!=null && !"".equals(rs.getString(5))) {
+			if(rs.getString(5)!=null && !"".equals(rs.getString(5))) {//$NON-NLS-1$
 				cert.setCertBkupb64ToX509(rs.getString(5));
-				final String certBkup[]=cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");
+				final String certBkup[]=cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 				java.util.Date expDateBkup= new java.util.Date();
 				expDateBkup=cert.getCertX509_backup().getNotAfter();
-				cert.setCert_backup(certBkup[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDateBkup)));
+				cert.setCert_backup(certBkup[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDateBkup))); //$NON-NLS-1$
 			}
-			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) {
+			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 				cert.setHuella_principal(rs.getString(6));
 			}
 
-			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) {
+			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 				cert.setHuella_backup(rs.getString(7));
 			}
-			result.add(cert);
+
+			data.add(Json.createObjectBuilder()
+					.add("id_certificado",cert.getId_certificado()) //$NON-NLS-1$
+					.add("nombre_cert", cert.getNombre_cert()) //$NON-NLS-1$
+					.add("fec_alta", Utils.getStringDateFormat(date!=null?date:rs.getDate(3))) //$NON-NLS-1$
+					.add("cert_principal", cert.getCert_principal()!=null?cert.getCert_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("cert_backup", cert.getCert_backup()!=null?cert.getCert_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_principal", cert.getHuella_principal()!=null?cert.getHuella_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_backup", cert.getHuella_backup()!=null?cert.getHuella_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
+					);
+
 		}
 		rs.close();
 		st.close();
-		jsonObj.put("CertList", result);
-		return jsonObj.toString();
+
+		jsonObj.add("CertList", data); //$NON-NLS-1$
+
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+			jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de certificados", e); //$NON-NLS-1$
+		}
+
+	    return writer.toString();
+
+
 	}
 
 
 
 
-
+	/**
+	 * Consulta que obtiene todos los registros de la tabla tb_certificados paginados
+	 * @param start
+	 * @param total
+	 * @return Devuelve un String con formato JSON
+	 * @throws SQLException
+	 * @throws CertificateException
+	 * @throws IOException
+	 */
 	public static String getCertificatesPag(final String start, final String total) throws SQLException, CertificateException, IOException {
 
-		final JSONObject jsonObj= new JSONObject();
-		final List<CertificateFire> result = new ArrayList<CertificateFire>();
+		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+
 		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_PAG);
 		st.setInt(1,Integer.parseInt(start));
 		st.setInt(2, Integer.parseInt(total));
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
+			Date date= null;
+			final Timestamp timestamp = rs.getTimestamp(3);
+			if (timestamp != null) {
+				date = new Date(timestamp.getTime());
+			}
+
 			final CertificateFire cert= new CertificateFire();
 			cert.setId_certificado(rs.getString(1));
 			cert.setNombre_cert(rs.getString(2));
@@ -152,12 +219,34 @@ public class CertificatesDAO {
 			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 				cert.setHuella_backup(rs.getString(7));
 			}
-			result.add(cert);
+			data.add(Json.createObjectBuilder()
+					.add("id_certificado",cert.getId_certificado()) //$NON-NLS-1$
+					.add("nombre_cert", cert.getNombre_cert()) //$NON-NLS-1$
+					.add("fec_alta", Utils.getStringDateFormat(date!=null?date:rs.getDate(3))) //$NON-NLS-1$
+					.add("cert_principal", cert.getCert_principal()!=null?cert.getCert_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("cert_backup", cert.getCert_backup()!=null?cert.getCert_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_principal", cert.getHuella_principal()!=null?cert.getHuella_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_backup", cert.getHuella_backup()!=null?cert.getHuella_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
+					);
+
 		}
 		rs.close();
 		st.close();
-		jsonObj.put("CertList", result); //$NON-NLS-1$
-		return jsonObj.toString();
+
+		jsonObj.add("CertList", data); //$NON-NLS-1$
+
+		final StringWriter writer= new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+			jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de certificados", e); //$NON-NLS-1$
+		}
+
+	    return writer.toString();
+
 	}
 
 	/**
@@ -309,7 +398,7 @@ public class CertificatesDAO {
 	    st.setString(6, huella_backup);
 
 
-		LOGGER.info("Damos de alta la aplicacion '" + nombre + "' con el ID: " );//TODO obtener el id insertado usado //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.info("Damos de alta la aplicacion '" + nombre +"'" ); //$NON-NLS-1$ //$NON-NLS-2$
 
 		st.execute();
 

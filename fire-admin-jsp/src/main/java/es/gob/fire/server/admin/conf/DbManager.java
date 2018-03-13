@@ -178,20 +178,20 @@ public class DbManager {
 		catch(final NullPointerException e){
 			LOGGER.severe("No se ha encontrado el fichero de configuracion de la base de datos: " + e); //$NON-NLS-1$
 			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
+				try { is.close(); } catch (final Exception ex) { ex.getStackTrace();/* No hacemos nada */ }
 			}
 			throw new AdminFilesNotFoundException("No se ha encontrado el fichero de propiedades" + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No se pudo cargar el fichero de configuracion del modulo de administracion", e); //$NON-NLS-1$
 			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
+				try { is.close(); } catch (final Exception ex) { ex.getStackTrace();/* No hacemos nada */ }
 			}
 			throw new AdminFilesNotFoundException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
 		}
 		finally {
 			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
+				try { is.close(); } catch (final Exception ex) {ex.getStackTrace(); /* No hacemos nada */ }
 			}
 		}
 		return dbConfig;

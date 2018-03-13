@@ -3,7 +3,7 @@ package es.gob.fire.server.admin.entity;
 import java.sql.Date;
 
 /**
- * Usuarios 
+ * Usuarios
  * @author Adolfo.Navarro
  *
  */
@@ -17,8 +17,8 @@ public class User {
 	private String telf_contacto;
 	private String rol;
 	private Date fec_alta;
-	private String usu_defecto; 
-	
+	private String usu_defecto;
+
 	/**
 	 * Construcctor de Usuario
 	 */
@@ -26,14 +26,14 @@ public class User {
 
 
 	/**
-	 * Constructor con los campos necesarios para la insertción de la entidad en bbdd
+	 * Constructor con los campos necesarios para la insertciï¿½n de la entidad en bbdd
 	 * @param nombre_usuario
 	 * @param clave
 	 * @param nombre
 	 * @param apellidos
 	 * @param rol
 	 */
-	public User(String nombre_usuario, String clave, String nombre, String apellidos, String rol) {
+	public User(final String nombre_usuario, final String clave, final String nombre, final String apellidos, final String rol) {
 		super();
 		this.nombre_usuario = nombre_usuario;
 		this.clave = clave;
@@ -55,8 +55,8 @@ public class User {
 	 * @param rol
 	 * @param fec_alta
 	 */
-	public User(String id_usuario, String nombre_usuario, String clave, String nombre, String apellidos,
-			String correo_elec, String telf_contacto, String rol, Date fec_alta) {
+	public User(final String id_usuario, final String nombre_usuario, final String clave, final String nombre, final String apellidos,
+			final String correo_elec, final String telf_contacto, final String rol, final Date fec_alta) {
 		super();
 		this.id_usuario = id_usuario;
 		this.nombre_usuario = nombre_usuario;
@@ -76,13 +76,13 @@ public class User {
 	 * @return
 	 */
 	public final String getId_usuario() {
-		return id_usuario;
+		return this.id_usuario;
 	}
 	/**
 	 * establece el id de usuario
 	 * @param id_usuario
 	 */
-	public final void setId_usuario(String id_usuario) {
+	public final void setId_usuario(final String id_usuario) {
 		this.id_usuario = id_usuario;
 	}
 	/**
@@ -90,13 +90,13 @@ public class User {
 	 * @return
 	 */
 	public final String getNombre_usuario() {
-		return nombre_usuario;
+		return this.nombre_usuario;
 	}
 /**
  * Estableceel nombre del usuario
  * @param nombre_usuario
  */
-	public final void setNombre_usuario(String nombre_usuario) {
+	public final void setNombre_usuario(final String nombre_usuario) {
 		this.nombre_usuario = nombre_usuario;
 	}
 	/**
@@ -104,13 +104,13 @@ public class User {
 	 * @return
 	 */
 	public final String getClave() {
-		return clave;
+		return this.clave;
 	}
 	/**
 	 * Establece la clave del usuario
 	 * @param clave
 	 */
-	public final void setClave(String clave) {
+	public final void setClave(final String clave) {
 		this.clave = clave;
 	}
 	/**
@@ -118,27 +118,27 @@ public class User {
 	 * @return
 	 */
 	public final Date getFec_alta() {
-		return fec_alta;
+		return this.fec_alta;
 	}
 	/**
 	 * Establece la fecha de alta del usuario
 	 * @param fec_alta
 	 */
-	public final void setFec_alta(Date fec_alta) {
+	public final void setFec_alta(final Date fec_alta) {
 		this.fec_alta = fec_alta;
 	}
 	/**
-	 * Obtiene el nombre completo del usuario 
+	 * Obtiene el nombre completo del usuario
 	 * @return
 	 */
 	public final String getNombre() {
-		return nombre;
+		return this.nombre;
 	}
 	/**
-	 * Establece el nombre completo del usuario 
+	 * Establece el nombre completo del usuario
 	 * @param nombre
 	 */
-	public final void setNombre(String nombre) {
+	public final void setNombre(final String nombre) {
 		this.nombre = nombre;
 	}
 	/**
@@ -146,41 +146,41 @@ public class User {
 	 * @return
 	 */
 	public final String getApellidos() {
-		return apellidos;
+		return this.apellidos;
 	}
 	/**
 	 * Establece los apellidos del usuario
 	 * @param apellidos
 	 */
-	public final void setApellidos(String apellidos) {
+	public final void setApellidos(final String apellidos) {
 		this.apellidos = apellidos;
 	}
 	/**
-	 * Obtiene el correo electrónico del usuario
+	 * Obtiene el correo electrï¿½nico del usuario
 	 * @return
 	 */
 	public final String getCorreo_elec() {
-		return correo_elec;
+		return this.correo_elec;
 	}
 	/**
-	 * Establece el correo electrónico del usuario
+	 * Establece el correo electrï¿½nico del usuario
 	 * @param correo_elec
 	 */
-	public final void setCorreo_elec(String correo_elec) {
+	public final void setCorreo_elec(final String correo_elec) {
 		this.correo_elec = correo_elec;
 	}
 	/**
-	 * Obtiene el teléfono de contacto del usuario
+	 * Obtiene el telï¿½fono de contacto del usuario
 	 * @return
 	 */
 	public final String getTelf_contacto() {
-		return telf_contacto;
+		return this.telf_contacto;
 	}
 	/**
-	 * Establece el teléfono de contacto del usuario
+	 * Establece el telï¿½fono de contacto del usuario
 	 * @param telf_contacto
 	 */
-	public final void setTelf_contacto(String telf_contacto) {
+	public final void setTelf_contacto(final String telf_contacto) {
 		this.telf_contacto = telf_contacto;
 	}
 	/**
@@ -188,25 +188,25 @@ public class User {
 	 * @return
 	 */
 	public final String getRol() {
-		return rol;
+		return this.rol;
 	}
 	/**
 	 * Establece el rol (tipo de usuario en el sistema)
 	 * @param rol
 	 */
-	public final void setRol(String rol) {
+	public final void setRol(final String rol) {
 		this.rol = rol;
 	}
 
 
 	public final String getUsu_defecto() {
-		return usu_defecto;
+		return this.usu_defecto;
 	}
 
 
-	public final void setUsu_defecto(String usu_defecto) {
+	public final void setUsu_defecto(final String usu_defecto) {
 		this.usu_defecto = usu_defecto;
 	}
-	
-	
+
+
 }
