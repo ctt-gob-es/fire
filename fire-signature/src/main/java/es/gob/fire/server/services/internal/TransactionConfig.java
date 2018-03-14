@@ -1,6 +1,7 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Properties;
 
 import es.gob.fire.server.services.ServiceUtil;
@@ -9,7 +10,10 @@ import es.gob.fire.signature.ConfigManager;
 /**
  * Configuraci&oacute;n asociada a una transacci&oacute;n.
  */
-public class TransactionConfig {
+public class TransactionConfig implements Serializable {
+
+	/** Serial Id. */
+	private static final long serialVersionUID = -990580085715618601L;
 
 	/** Par&aacute;metro usado para configurar la URL a la que redirigir al usuario en caso de error. */
 	private static final String PARAM_ERROR_URL = "redirectErrorUrl"; //$NON-NLS-1$
