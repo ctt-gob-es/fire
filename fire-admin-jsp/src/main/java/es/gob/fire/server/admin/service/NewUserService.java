@@ -183,7 +183,7 @@ public class NewUserService extends HttpServlet {
 
 
 	/**
-	 * Procedimiento que obtiene los parámetros enviados al servicio
+	 * Procedimiento que obtiene los par&aacute;metros enviados al servicio
 	 * @param req
 	 */
 	private void getParameters(final HttpServletRequest req)  {
@@ -218,7 +218,7 @@ public class NewUserService extends HttpServlet {
 		if(req.getParameter(PARAM_USEREMAIL)!=null && !"".equals(req.getParameter(PARAM_USEREMAIL))) {//$NON-NLS-1$
 			this.setUserEMail(req.getParameter(PARAM_USEREMAIL));
 		}
-		if(req.getParameter(PARAM_USERTELF)!=null && !"".equals(req.getParameter(PARAM_USERTELF))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_USERTELF) != null && !"".equals(req.getParameter(PARAM_USERTELF))) {//$NON-NLS-1$
 			this.setUserTelf(req.getParameter(PARAM_USERTELF));
 		}
 	}

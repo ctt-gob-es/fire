@@ -11,8 +11,6 @@ package es.gob.fire.services;
 
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -25,11 +23,12 @@ public class ConfigManager {
 
 
 
-	
+
 
 	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
 	private static final String PROP_LOGS_ROLLINGDATE = "logs.rollingDate"; //$NON-NLS-1$
-	
+	private static final String PROP_LOGS_PACKAGES = "logs.packages"; //$NON-NLS-1$
+
 
 	/** Nombre del fichero de configuraci&oacute;n. */
 	private static final String CONFIG_FILE = "config_logger.properties"; //$NON-NLS-1$
@@ -92,10 +91,10 @@ public class ConfigManager {
 			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion de la conexion", CONFIG_FILE); //$NON-NLS-1$
 		}
 
-		
+
 	}
 
-	
+
 
 	/**
 	 * Devuelve el directorio configurado para el guardado de temporales.
@@ -118,6 +117,8 @@ public class ConfigManager {
 	}
 
 
-	
-	
+	public static String getPackages() {
+		return config.getProperty(PROP_LOGS_PACKAGES);
+	}
+
 }

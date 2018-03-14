@@ -29,6 +29,7 @@ import es.gob.fire.server.services.internal.RecoverSignManager;
 import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
+import es.gob.fire.services.fireLogger;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
@@ -57,6 +58,7 @@ public class FIReService extends HttpServlet {
     	super.init();
 
     	try {
+    		fireLogger.installLogger();
 	    	ConfigManager.checkInitialized();
 		}
     	catch (final Exception e) {
