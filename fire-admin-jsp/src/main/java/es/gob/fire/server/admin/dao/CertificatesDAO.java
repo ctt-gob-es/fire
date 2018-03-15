@@ -138,11 +138,11 @@ public class CertificatesDAO {
 			data.add(Json.createObjectBuilder()
 					.add("id_certificado",cert.getId_certificado()) //$NON-NLS-1$
 					.add("nombre_cert", cert.getNombre_cert()) //$NON-NLS-1$
-					.add("fec_alta", Utils.getStringDateFormat(date != null?date:rs.getDate(3))) //$NON-NLS-1$
-					.add("cert_principal", cert.getCert_principal() != null?cert.getCert_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("cert_backup", cert.getCert_backup() != null?cert.getCert_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("huella_principal", cert.getHuella_principal() != null?cert.getHuella_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("huella_backup", cert.getHuella_backup() != null?cert.getHuella_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("fec_alta", Utils.getStringDateFormat(date != null ? date : rs.getDate(3))) //$NON-NLS-1$
+					.add("cert_principal", cert.getCert_principal() != null ? cert.getCert_principal() : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("cert_backup", cert.getCert_backup() != null ? cert.getCert_backup() : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_principal", cert.getHuella_principal() != null ? cert.getHuella_principal() : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_backup", cert.getHuella_backup() != null ? cert.getHuella_backup() : "") //$NON-NLS-1$ //$NON-NLS-2$
 					);
 
 		}
@@ -222,7 +222,7 @@ public class CertificatesDAO {
 			data.add(Json.createObjectBuilder()
 					.add("id_certificado",cert.getId_certificado()) //$NON-NLS-1$
 					.add("nombre_cert", cert.getNombre_cert()) //$NON-NLS-1$
-					.add("fec_alta", Utils.getStringDateFormat(date != null ? date:rs.getDate(3))) //$NON-NLS-1$
+					.add("fec_alta", Utils.getStringDateFormat(date != null ? date : rs.getDate(3))) //$NON-NLS-1$
 					.add("cert_principal", cert.getCert_principal() != null ? cert.getCert_principal() : "") //$NON-NLS-1$ //$NON-NLS-2$
 					.add("cert_backup", cert.getCert_backup() != null ? cert.getCert_backup() : "") //$NON-NLS-1$ //$NON-NLS-2$
 					.add("huella_principal", cert.getHuella_principal() !=null ? cert.getHuella_principal() : "") //$NON-NLS-1$ //$NON-NLS-2$

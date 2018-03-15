@@ -95,7 +95,7 @@
 <!-- 		<a class="menu-btn" href="NewApplication.jsp?op=1" >Alta de aplicaci&oacute;n</a> -->
 	</div>
 	<% if(errorText != null) { %>
-		<p id="error-txt"><%=  errorText %></p> 
+		<p id="error-txt"><%= errorText %></p> 
 	<%
 		errorText = null;
 	  }

@@ -42,7 +42,7 @@ if(req.equals("getCertificateId")){//$NON-NLS-1$
 		if(cert.getCertX509_backup() != null){
 			final String[] datCertificate = cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 			for (int i = 0; i < datCertificate.length; i++){
-				data=data.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
+				data = data.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
 			}
 			//fecha caducidad
 			Date fecha = new Date();
@@ -50,7 +50,7 @@ if(req.equals("getCertificateId")){//$NON-NLS-1$
 			data = data.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));//$NON-NLS-1$	
 		}
 		else{
-			data=data.concat("--");//$NON-NLS-1$
+			data = data.concat("--");//$NON-NLS-1$
 		}
 	}
 }

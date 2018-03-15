@@ -157,7 +157,7 @@
                     var JSONData = JSON.parse(data);
               
                     totalRecords = JSONData.count;
-                  
+               
                     if(totalRecords > 0){
                     	$("#data").html("");
                     	$.get("processAppRequest.jsp?requestType=All", function(data){

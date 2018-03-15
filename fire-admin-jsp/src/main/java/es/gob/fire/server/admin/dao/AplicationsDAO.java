@@ -186,8 +186,8 @@ public class AplicationsDAO {
 					.add("id", rs.getString(1)) //$NON-NLS-1$
 					.add("nombre", rs.getString(2)) //$NON-NLS-1$
 					.add("responsable", rs.getString(3)) //$NON-NLS-1$
-					.add("correo", rs.getString(4)) //$NON-NLS-1$
-					.add("telefono", rs.getString(5)) //$NON-NLS-1$
+					.add("correo", rs.getString(4)!= null ? rs.getString(4) : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("telefono", rs.getString(5) != null ? rs.getString(5) : "") //$NON-NLS-1$ //$NON-NLS-2$
 					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(6))) //$NON-NLS-1$
 					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
 					);
@@ -313,9 +313,9 @@ public class AplicationsDAO {
 					.add("id", rs.getString(1)) //$NON-NLS-1$
 					.add("nombre", rs.getString(2)) //$NON-NLS-1$
 					.add("responsable", rs.getString(3)) //$NON-NLS-1$
-					.add("correo", rs.getString(4)) //$NON-NLS-1$
-					.add("telefono", rs.getString(5)) //$NON-NLS-1$
-					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date != null ? date : rs.getDate(6))) //$NON-NLS-1$
+					.add("correo", rs.getString(4)!= null ? rs.getString(4) : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("telefono", rs.getString(5) != null ? rs.getString(5) : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(6))) //$NON-NLS-1$
 					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
 					);
 
@@ -366,9 +366,9 @@ public class AplicationsDAO {
 					.add("id", rs.getString(1)) //$NON-NLS-1$
 					.add("nombre", rs.getString(2)) //$NON-NLS-1$
 					.add("responsable", rs.getString(3)) //$NON-NLS-1$
-					.add("correo", rs.getString(4)) //$NON-NLS-1$
-					.add("telefono", rs.getString(5)) //$NON-NLS-1$
-					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat( date != null ? date : rs.getDate(6))) //$NON-NLS-1$
+					.add("correo", rs.getString(4)!= null ? rs.getString(4) : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("telefono", rs.getString(5) != null ? rs.getString(5) : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(6))) //$NON-NLS-1$
 					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
 					);
 		}
@@ -411,9 +411,9 @@ public class AplicationsDAO {
 					.add("id", rs.getString(1)) //$NON-NLS-1$
 					.add("nombre", rs.getString(2)) //$NON-NLS-1$
 					.add("responsable", rs.getString(3)) //$NON-NLS-1$
-					.add("correo", rs.getString(4)) //$NON-NLS-1$
-					.add("telefono", rs.getString(5)) //$NON-NLS-1$
-					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date != null ? date : rs.getDate(6))) //$NON-NLS-1$
+					.add("correo", rs.getString(4)!= null ? rs.getString(4) : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("telefono", rs.getString(5) != null ? rs.getString(5) : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(6))) //$NON-NLS-1$
 					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
 					);
 

@@ -132,10 +132,9 @@
 
             /********************************************************/
             $.get("processUsrRequest.jsp?requestType=countRecords", function(data){
-                var JSONData = JSON.parse(data);
-             
+                var JSONData = JSON.parse(data);            
                 totalRecords = JSONData.count;
-                alert(totalRecords);
+               
                 if (totalRecords > 0) {
 					$("#data").html("");
 					$.get("processUsrRequest.jsp?requestType=All", function(data){

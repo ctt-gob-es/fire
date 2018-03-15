@@ -283,7 +283,7 @@ public class UsersDAO {
 					.add("telf_contacto", rs.getString(7) != null && !"".equals(rs.getString(7)) ? rs.getString(7) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					.add("rol", rs.getString(8)) //$NON-NLS-1$
 					.add("fec_alta", Utils.getStringDateFormat(date != null ? date : rs.getDate(9))) //$NON-NLS-1$
-					.add("usu_defecto", rs.getString(10)) //$NON-NLS-1$
+					.add("usu_defecto", rs.getString(10) !=null ? rs.getString(10) : "0") //$NON-NLS-1$ //$NON-NLS-2$
 					);
 
 		}
@@ -333,7 +333,7 @@ public class UsersDAO {
 					.add("telf_contacto", rs.getString(7) != null && !"".equals(rs.getString(7)) ? rs.getString(7) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					.add("rol", rs.getString(8)) //$NON-NLS-1$
 					.add("fec_alta", Utils.getStringDateFormat(date != null ? date : rs.getDate(9))) //$NON-NLS-1$
-					.add("usu_defecto", rs.getString(10)) //$NON-NLS-1$
+					.add("usu_defecto", rs.getString(10) !=null ? rs.getString(10) : "0") //$NON-NLS-1$ //$NON-NLS-2$
 					);
 
 		}
