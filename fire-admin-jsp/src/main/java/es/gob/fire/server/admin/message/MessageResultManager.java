@@ -19,16 +19,16 @@ public class MessageResultManager {
 	private static final String OP_BAJA = "baja"; //$NON-NLS-1$
 
 	private static final String OP_EDICION = "edicion"; //$NON-NLS-1$
-	
-	private static final String OP_CLAVE ="clave";//$NON-NLS-1$
+
+	private static final String OP_CLAVE = "clave";//$NON-NLS-1$
 
 	private static final String RESULT_OK = "1"; //$NON-NLS-1$
 
-	private static final String ENT_USR="user";//$NON-NLS-1$
-	
-	private static final String ENT_APP="app";//$NON-NLS-1$
-	
-	private static final String ENT_CER="cer";//$NON-NLS-1$
+	private static final String ENT_USR = "user";//$NON-NLS-1$
+
+	private static final String ENT_APP = "app";//$NON-NLS-1$
+
+	private static final String ENT_CER = "cer";//$NON-NLS-1$
 
 	/**
 	 * Analiza la respuesta de una operaci&oacute;n.
@@ -61,7 +61,7 @@ public class MessageResultManager {
 						"El Certificado ha sido dado de alta correctamente" : //$NON-NLS-1$
 							"Error al dar de alta al Certificado"; //$NON-NLS-1$
 			}
-			
+
 		}
 		else if (OP_BAJA.equals(op)) {
 			if( entity.equals(ENT_APP)){
@@ -73,13 +73,13 @@ public class MessageResultManager {
 				msg = ok ?
 				"El Usuario ha sido dado de baja correctamente" : //$NON-NLS-1$
 					"Error al dar de baja al usuario"; //$NON-NLS-1$
-			}		
-		
+			}
+
 			else if(entity.equals(ENT_CER)){
 				msg = ok ?
 				"El Certificado ha sido dado de baja correctamente" : //$NON-NLS-1$
 					"Error al dar de baja al certificado"; //$NON-NLS-1$
-			}	
+			}
 		}
 		else if (OP_EDICION.equals(op)) {
 			if( entity.equals(ENT_APP)){
@@ -97,7 +97,7 @@ public class MessageResultManager {
 						"El Certificado ha sido editado correctamente" : //$NON-NLS-1$
 						"Error al realizar la edicion del certificado"; //$NON-NLS-1$
 			}
-							
+
 		}
 		else if(OP_CLAVE.equals(op)) {
 			if(entity.equals(ENT_USR)){

@@ -22,7 +22,7 @@ public class CertificateFire {
 	private X509Certificate certX509_backup;
 
 	/**
-	 * Constructor vac�o
+	 * Constructor vac&iacute;o
 	 */
 	public CertificateFire() {}
 

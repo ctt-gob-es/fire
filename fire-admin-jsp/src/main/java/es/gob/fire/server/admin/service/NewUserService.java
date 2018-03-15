@@ -34,26 +34,26 @@ public class NewUserService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(NewUserService.class.getName());
 
-	private static final String PARAM_IDUSER="idUser";//$NON-NLS-1$
+	private static final String PARAM_IDUSER = "idUser";//$NON-NLS-1$
 	private static final String PARAM_LOGNAME = "login-usr"; //$NON-NLS-1$
 	private static final String PARAM_PASSWD = "passwd-usr"; //$NON-NLS-1$
-	private static final String PARAM_USER_ROLE="role-usr";//$NON-NLS-1$
+	private static final String PARAM_USER_ROLE = "role-usr";//$NON-NLS-1$
 	private static final String PARAM_OP = "op"; //$NON-NLS-1$
-	private static final String PARAM_USERNAME="usr-name";//$NON-NLS-1$
-	private static final String PARAM_USERSURNAME="usr-surname";//$NON-NLS-1$
-	private static final String PARAM_USEREMAIL="email";//$NON-NLS-1$
-	private static final String PARAM_USERTELF="telf-contact";//$NON-NLS-1$
+	private static final String PARAM_USERNAME = "usr-name";//$NON-NLS-1$
+	private static final String PARAM_USERSURNAME = "usr-surname";//$NON-NLS-1$
+	private static final String PARAM_USEREMAIL = "email";//$NON-NLS-1$
+	private static final String PARAM_USERTELF = "telf-contact";//$NON-NLS-1$
 
-	private static final String SHA_2="SHA-256"; //$NON-NLS-1$
+	private static final String SHA_2 = "SHA-256"; //$NON-NLS-1$
 
-	private String idUser=null;
-	private String loginUser=null;
-	private String password=null;
-	private String userRole=null;
-	private String userName=null;
-	private String userSurname=null;
-	private String userEMail=null;
-	private String userTelf=null;
+	private String idUser = null;
+	private String loginUser = null;
+	private String password = null;
+	private String userRole = null;
+	private String userName = null;
+	private String userSurname = null;
+	private String userEMail = null;
+	private String userTelf = null;
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -70,20 +70,20 @@ public class NewUserService extends HttpServlet {
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 
 		req.setCharacterEncoding("utf-8"); //$NON-NLS-1$
-		//Obtener el tipo de operaci�n 1-Alta 2-Edici�n
+		//Obtener el tipo de operacion 1-Alta 2-Edicion
 		final int op = Integer.parseInt(req.getParameter(PARAM_OP));
 		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
-		/*Obtenemos los par�metros enviados del formulario */
+		/*Obtenemos los parametros enviados del formulario */
 		this.getParameters(req);
 
 		try {
 
 			final MessageDigest md = MessageDigest.getInstance(SHA_2);
 			byte[] digest;
-			String clave =null;
+			String clave = null;
 			//Comprobar que se ha cargado el Certificado nuevo.
 			//Obtenemos la clave codificada
-			if(this.getPassword()!=null && !"".equals(this.getPassword())) {//$NON-NLS-1$
+			if(this.getPassword() != null && !"".equals(this.getPassword())) {//$NON-NLS-1$
 				md.update(this.getPassword().getBytes());
 				digest = md.digest();
 				clave = Base64.encode(digest);
@@ -94,16 +94,16 @@ public class NewUserService extends HttpServlet {
 				// nuevo usuario
 				if (op == 1){
 
-					if (this.getLoginUser()== null || this.getPassword() == null ||
-							 this.getUserName()==null || this.getUserSurname()==null) {
+					if (this.getLoginUser() == null || this.getPassword() == null ||
+							 this.getUserName() == null || this.getUserSurname() == null) {
 						LOGGER.log(Level.SEVERE,
 								"No se han proporcionado todos los datos requeridos para el alta del usuario (login, clave, rol, nombre y apellidos)"); //$NON-NLS-1$
 						isOk = false;
 					}
 					else {
 						//Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
-						final User usr= UsersDAO.getUserByName(this.getLoginUser());
-						if(usr!=null && usr.getNombre_usuario()!=null && !"".equals(usr.getNombre_usuario()))//$NON-NLS-1$
+						final User usr = UsersDAO.getUserByName(this.getLoginUser());
+						if(usr != null && usr.getNombre_usuario() != null && !"".equals(usr.getNombre_usuario()))//$NON-NLS-1$
 						{
 							LOGGER.log(Level.SEVERE,"Se ha proporcionado un nombre de login repetido, no se puede dar de alta el usuario"); //$NON-NLS-1$
 							isOk = false;
@@ -120,9 +120,9 @@ public class NewUserService extends HttpServlet {
 
 					}
 				}
-				else if(op==2) {	//Edici�n de usuario
+				else if(op == 2) {	//Edicion de usuario
 					if (this.getIdUser()==null
-							|| this.getUserName()==null || this.getUserSurname()==null) {
+							|| this.getUserName() == null || this.getUserSurname() == null) {
 						LOGGER.log(Level.SEVERE,
 								"No se han proporcionado todos los datos requeridos para la edici�n del usuario (login, rol, nombre y apellidos)"); //$NON-NLS-1$
 						isOk = false;
@@ -138,11 +138,11 @@ public class NewUserService extends HttpServlet {
 					}
 
 				}
-				else if(op==3 && this.getLoginUser()!=null ){
+				else if(op == 3 && this.getLoginUser() != null ){
 					//Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
 					final User usr= UsersDAO.getUserByName(this.getLoginUser());
 					resp.setContentType("text/html");//$NON-NLS-1$
-					if(usr!=null && usr.getId_usuario()!=null && !"".equals(usr.getId_usuario()))//$NON-NLS-1$
+					if(usr != null && usr.getId_usuario() != null && !"".equals(usr.getId_usuario()))//$NON-NLS-1$
 					{
 						final String usrLogin="El usuario con login, ".concat(this.getLoginUser()).concat(", ya existe en el sistema.");//$NON-NLS-1$ //$NON-NLS-2$
 						resp.getWriter().write(usrLogin);
@@ -155,7 +155,7 @@ public class NewUserService extends HttpServlet {
 					throw new IllegalStateException("Estado no permitido");//$NON-NLS-1$
 				}
 
-			if(op!=3) {
+			if(op != 3) {
 				resp.sendRedirect("User/UserPage.jsp?op=" + stringOp + "&r=" + (isOk ? "1" : "0")+"&ent=user"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}
 
@@ -197,25 +197,25 @@ public class NewUserService extends HttpServlet {
 		this.setUserEMail(null);
 		this.setUserTelf(null);
 
-		if(req.getParameter(PARAM_IDUSER)!=null && !"".equals(req.getParameter(PARAM_IDUSER))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_IDUSER) != null && !"".equals(req.getParameter(PARAM_IDUSER))) {//$NON-NLS-1$
 			this.setIdUser(req.getParameter(PARAM_IDUSER));
 		}
-		if(req.getParameter(PARAM_LOGNAME)!=null && !"".equals(req.getParameter(PARAM_LOGNAME))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_LOGNAME) != null && !"".equals(req.getParameter(PARAM_LOGNAME))) {//$NON-NLS-1$
 			this.setLoginUser(req.getParameter(PARAM_LOGNAME));
 		}
-		if(req.getParameter(PARAM_PASSWD)!=null && !"".equals(req.getParameter(PARAM_PASSWD))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_PASSWD) != null && !"".equals(req.getParameter(PARAM_PASSWD))) {//$NON-NLS-1$
 			this.setPassword(req.getParameter(PARAM_PASSWD));
 		}
-		if(req.getParameter(PARAM_USER_ROLE)!=null && !"".equals(req.getParameter(PARAM_USER_ROLE))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_USER_ROLE) != null && !"".equals(req.getParameter(PARAM_USER_ROLE))) {//$NON-NLS-1$
 			this.setUserRole(req.getParameter(PARAM_USER_ROLE));
 		}
-		if(req.getParameter(PARAM_USERNAME)!=null && !"".equals(req.getParameter(PARAM_USERNAME))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_USERNAME) != null && !"".equals(req.getParameter(PARAM_USERNAME))) {//$NON-NLS-1$
 			this.setUserName(req.getParameter(PARAM_USERNAME));
 		}
-		if(req.getParameter(PARAM_USERSURNAME)!=null && !"".equals(req.getParameter(PARAM_USERSURNAME))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_USERSURNAME) != null && !"".equals(req.getParameter(PARAM_USERSURNAME))) {//$NON-NLS-1$
 			this.setUserSurname(req.getParameter(PARAM_USERSURNAME));
 		}
-		if(req.getParameter(PARAM_USEREMAIL)!=null && !"".equals(req.getParameter(PARAM_USEREMAIL))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_USEREMAIL) != null && !"".equals(req.getParameter(PARAM_USEREMAIL))) {//$NON-NLS-1$
 			this.setUserEMail(req.getParameter(PARAM_USEREMAIL));
 		}
 		if(req.getParameter(PARAM_USERTELF) != null && !"".equals(req.getParameter(PARAM_USERTELF))) {//$NON-NLS-1$
@@ -226,95 +226,115 @@ public class NewUserService extends HttpServlet {
 
 	/*GETTER Y SETTER*/
 
+	/**
+	 * Obtiene el login (nombre con el que se accede a la aplicaci&oacute;n) del usuario
+	 * @return
+	 */
 	private final String getLoginUser() {
 		return this.loginUser;
 	}
-
-
-
+	/**
+	 * Establece el login (nombre con el que se accede a la aplicaci&oacute;n) del usuario
+	 * @return
+	 */
 	private final void setLoginUser(final String loginUser) {
 		this.loginUser = loginUser;
 	}
-
-
-
+	/**
+	 * Obtiene la clave (Password)
+	 * @return
+	 */
 	private final String getPassword() {
 		return this.password;
 	}
-
-
-
+	/**
+	 * Establece la clave (Password)
+	 * @return
+	 */
 	private final void setPassword(final String password) {
 		this.password = password;
 	}
-
-
-
+	/**
+	 * Obtiene el rol del usuario
+	 * @return
+	 */
 	private final String getUserRole() {
 		return this.userRole;
 	}
-
-
-
+	/**
+	 * Establece el rol del usuario
+	 * @return
+	 */
 	private final void setUserRole(final String userRole) {
 		this.userRole = userRole;
 	}
-
-
-
+	/**
+	 * Obtiene el nombre del usuario
+	 * @return
+	 */
 	private final String getUserName() {
 		return this.userName;
 	}
-
-
-
+	/**
+	 * Establece el nombre del usuario
+	 * @return
+	 */
 	private final void setUserName(final String userName) {
 		this.userName = userName;
 	}
-
-
-
+	/**
+	 * Obtiene los apellidos del usuario
+	 * @return
+	 */
 	private final String getUserSurname() {
 		return this.userSurname;
 	}
-
-
-
+	/**
+	 * Establece los apellidos del usuario
+	 * @return
+	 */
 	private final void setUserSurname(final String userSurname) {
 		this.userSurname = userSurname;
 	}
-
-
-
+	/**
+	 * Obtiene los email del usuario
+	 * @return
+	 */
 	private final String getUserEMail() {
 		return this.userEMail;
 	}
-
-
-
+	/**
+	 * Establece los email del usuario
+	 * @return
+	 */
 	private final void setUserEMail(final String userEMail) {
 		this.userEMail = userEMail;
 	}
-
-
-
+	/**
+	 * Obtiene el tel&eacute;fono del usuario
+	 * @return
+	 */
 	private final String getUserTelf() {
 		return this.userTelf;
 	}
-
-
-
+	/**
+	 * Establece el tel&eacute;fono del usuario
+	 * @return
+	 */
 	private final void setUserTelf(final String userTelf) {
 		this.userTelf = userTelf;
 	}
-
-
-
+	/**
+	 * Obtiene el ID  del usuario
+	 * @return
+	 */
 	private final String getIdUser() {
 		return this.idUser;
 	}
-
-
+	/**
+	 * Establece el ID  del usuario
+	 * @return
+	 */
 	private final void setIdUser(final String idUser) {
 		this.idUser = idUser;
 	}

@@ -47,7 +47,7 @@ public class DeleteCertificateService extends HttpServlet {
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 		final String id = request.getParameter(PARAM_ID);
-		String msg=""; //$NON-NLS-1$
+		String msg = ""; //$NON-NLS-1$
 		LOGGER.info("Baja del certificado con ID: " + id); //$NON-NLS-1$
 
 		boolean isOk = true;
@@ -70,7 +70,7 @@ public class DeleteCertificateService extends HttpServlet {
 				else {
 					isOk = false;
 					LOGGER.log(Level.INFO, "Error al dar de baja el certificado, tiene asociadas aplicaciones"); //$NON-NLS-1$
-					msg=", tiene asociadas aplicaciones"; //$NON-NLS-1$
+					msg = ", tiene asociadas aplicaciones"; //$NON-NLS-1$
 				}
 
 			}
@@ -88,7 +88,6 @@ public class DeleteCertificateService extends HttpServlet {
 	 */
 	@Override
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		doGet(request, response);
 	}
 

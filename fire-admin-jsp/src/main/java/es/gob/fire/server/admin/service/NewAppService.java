@@ -40,11 +40,11 @@ public class NewAppService extends HttpServlet {
 	private static final String PARAM_OP = "op"; //$NON-NLS-1$
 
 
-	private String name=null;
+	private String name = null;
 	private String res = null;
 	private String email = null;
 	private String tel = null;
-	private String idcertificate=null;
+	private String idcertificate = null;
 
 
 	@Override
@@ -56,7 +56,7 @@ public class NewAppService extends HttpServlet {
 		/*Obtenemos los par�metros enviados del formulario junto con el Certificado*/
 		this.getParameters(req);
 
-		//Obtener el tipo de operaci�n 1-Alta 2-Edici�n
+		//Obtener el tipo de operacion 1-Alta 2-Edicion
 		final int op = Integer.parseInt(req.getParameter(PARAM_OP));
 		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
 
@@ -91,7 +91,7 @@ public class NewAppService extends HttpServlet {
 
 			}
 
-			resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=" + (isOk ? "1" : "0")+"&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=" + (isOk ? "1" : "0") + "&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,"Ha ocurrido un error crear la aplicacion : " + e, e); //$NON-NLS-1$
@@ -116,61 +116,93 @@ public class NewAppService extends HttpServlet {
 		this.setTel(null);
 		this.setIdcertificate(null);
 
-		if(req.getParameter(PARAM_NAME)!=null && !"".equals(req.getParameter(PARAM_NAME))) { //$NON-NLS-1$
+		if(req.getParameter(PARAM_NAME) != null && !"".equals(req.getParameter(PARAM_NAME))) { //$NON-NLS-1$
 			this.setName(req.getParameter(PARAM_NAME));
 		}
-		if(req.getParameter(PARAM_RESP)!=null && !"".equals(req.getParameter(PARAM_RESP))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_RESP) != null && !"".equals(req.getParameter(PARAM_RESP))) {//$NON-NLS-1$
 			this.setRes(req.getParameter(PARAM_RESP));
 		}
-		if(req.getParameter(PARAM_EMAIL)!=null && !"".equals(req.getParameter(PARAM_EMAIL))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_EMAIL) != null && !"".equals(req.getParameter(PARAM_EMAIL))) {//$NON-NLS-1$
 			this.setEmail(req.getParameter(PARAM_EMAIL));
 		}
-		if(req.getParameter(PARAM_TEL)!=null && !"".equals(req.getParameter(PARAM_TEL))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_TEL) != null && !"".equals(req.getParameter(PARAM_TEL))) {//$NON-NLS-1$
 			this.setTel(req.getParameter(PARAM_TEL));
 		}
-		if(req.getParameter(PARAM_CERTID)!=null && !"".equals(req.getParameter(PARAM_CERTID))) {//$NON-NLS-1$
+		if(req.getParameter(PARAM_CERTID) != null && !"".equals(req.getParameter(PARAM_CERTID))) {//$NON-NLS-1$
 			this.setIdcertificate(req.getParameter(PARAM_CERTID));
 		}
 
 	}
 
 	// Getters and Setters
+	/**
+	 * Obtiene el nombre de la aplicaci&ácute;n
+	 * @return
+	 */
 	private String getName() {
 		return this.name;
 	}
-
+	/**
+	 *  Establece el nombre de la aplicaci&ácute;n
+	 * @param name
+	 */
 	private void setName(final String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Obtiene el nombre del responsable
+	 * @return
+	 */
 	private String getRes() {
 		return this.res;
 	}
-
+	/**
+	 *  Establece el nombre del responsable
+	 * @param res
+	 */
 	private void setRes(final String res) {
 		this.res = res;
 	}
-
+	/**
+	 * Obtiene el e-mail del responsable
+	 * @return
+	 */
 	private String getEmail() {
 		return this.email;
 	}
-
+	/**
+	 * Establece el e-mail del responsable
+	 * @param email
+	 */
 	private void setEmail(final String email) {
 		this.email = email;
 	}
-
+	/**
+	 * Obtiene el tel&eacute;fono del responsable
+	 * @return
+	 */
 	private String getTel() {
 		return this.tel;
 	}
-
+	/**
+	 * Establece el tel&eacute;fono del responsable
+	 * @param tel
+	 */
 	private void setTel(final String tel) {
 		this.tel = tel;
 	}
-
+	/**
+	 * Obtiene el id del certificado
+	 * @return
+	 */
 	private final String getIdcertificate() {
 		return this.idcertificate;
 	}
-
+	/**
+	 * Establece el id del certificado
+	 * @param idcertificate
+	 */
 	private final void setIdcertificate(final String idcertificate) {
 		this.idcertificate = idcertificate;
 	}

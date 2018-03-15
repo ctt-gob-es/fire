@@ -26,7 +26,7 @@ public class User {
 
 
 	/**
-	 * Constructor con los campos necesarios para la insertci�n de la entidad en bbdd
+	 * Constructor con los campos necesarios para la insertci&oacute;n de la entidad en bbdd
 	 * @param nombre_usuario
 	 * @param clave
 	 * @param nombre
@@ -170,14 +170,14 @@ public class User {
 		this.correo_elec = correo_elec;
 	}
 	/**
-	 * Obtiene el tel�fono de contacto del usuario
+	 * Obtiene el tel&eacute;fono de contacto del usuario
 	 * @return
 	 */
 	public final String getTelf_contacto() {
 		return this.telf_contacto;
 	}
 	/**
-	 * Establece el tel�fono de contacto del usuario
+	 * Establece el tel&eacute;fono de contacto del usuario
 	 * @param telf_contacto
 	 */
 	public final void setTelf_contacto(final String telf_contacto) {

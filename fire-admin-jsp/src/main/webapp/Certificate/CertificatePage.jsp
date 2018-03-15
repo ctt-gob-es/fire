@@ -9,7 +9,7 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	String user="";
+	String user = "";//$NON-NLS-1$
 	String errorText = null;
 	try {
 		DbManager.initialize();
@@ -27,27 +27,17 @@
 	if (state == null) {
 		// Leemos la contrasena de entrada
 		String psswd = request.getParameter("password"); //$NON-NLS-1$
-		user = request.getParameter("user");
+		user = request.getParameter("user");//$NON-NLS-1$
 		// Comprobamos la contrasena
-		if (psswd == null || user==null) {
+		if (psswd == null || user == null) {
 			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 			return;
 		}
 
-// 		try {
-// 			if (!UsersDAO.checkAdminPassword(psswd,user)) {
-// 				response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-// 				return;	
-// 			}
-// 		}
-// 		catch (Exception e) {
-// 			response.sendRedirect("../Error/SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
-// 			return;
-// 		}
 
 		// Marcamos la sesion como iniciada 
 		request.getSession().setAttribute("initializedSession", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-		request.getSession().setAttribute("user", user);//$NON-NLS-1$ //$NON-NLS-2$
+		request.getSession().setAttribute("user", user);//$NON-NLS-1$ 
 	}
 	else if (!"true".equals(state)) { //$NON-NLS-1$
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
@@ -56,8 +46,8 @@
 	// Logica para determinar si mostrar un resultado de operacion
 	String op = request.getParameter("op"); //$NON-NLS-1$
 	String result = request.getParameter("r"); //$NON-NLS-1$
-	String entity= request.getParameter("ent"); //$NON-NLS-1$
-	String msg=request.getParameter("msg");
+	String entity = request.getParameter("ent"); //$NON-NLS-1$
+	String msg = request.getParameter("msg");//$NON-NLS-1$
 	MessageResult mr = MessageResultManager.analizeResponse(op, result,entity);
 		
 	
@@ -99,20 +89,12 @@
 				<p id="<%=
 						mr.isOk() ? "success-txt" : "error-txt"  //$NON-NLS-1$ //$NON-NLS-2$
 						%>">
-					<%= msg!=null && !"".equals(msg)? mr.getMessage().concat(msg):mr.getMessage() %>
+					<%= msg != null && !"".equals(msg) ? mr.getMessage().concat(msg) : mr.getMessage() %>
 				</p>
 			<% } %>
 		<div id="data" style="display: block-inline; text-align:center;">
 			<h4>No hay Certificados</h4>		
-		</div>
-		<!-- 		COMENTADO PARA LA PAGINACIÓN -->
-<!-- 	<br> -->
-<!-- 	<div id="nav_page" style="display: block-inline; text-align:right;"> -->
-<!-- 		<button id="back">Anterior</button> -->
-<!--         <button id="next">Siguiente</button> -->
-<!--         <p id="page"></p> -->
-<!-- 	</div> -->
-        
+		</div>        
 	
    	</div>
 	
@@ -121,7 +103,7 @@
 	/*Importante estas variables (requestTypeCount y requestType) deben estar declaradas antes que la llamada a ../resources/js/certificate.js*/
 			requestTypeCount="countRecordsCert";
 			requestType="All";
-//            	requestType="getRecordsCert";
+//          requestType="getRecordsCert";
 	</script>
 	<script src="../resources/js/certificate.js" type="text/javascript"></script>
 	

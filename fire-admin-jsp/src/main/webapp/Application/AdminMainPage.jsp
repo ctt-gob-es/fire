@@ -11,7 +11,7 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	String user="";
+	String user = "";//$NON-NLS-1$
 	String errorText = null;
 	try {
 		DbManager.initialize();
@@ -30,9 +30,9 @@
 	if (state == null) {
 		// Leemos la contrasena de entrada
 		String psswd = request.getParameter("password"); //$NON-NLS-1$
-		user = request.getParameter("user");
+		user = request.getParameter("user");//$NON-NLS-1$
 		// Comprobamos la contrasena
-		if (psswd == null || user==null) {
+		if (psswd == null || user == null) {
 			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 			return;
 		}
@@ -50,7 +50,7 @@
 
 		// Marcamos la sesion como iniciada 
 		request.getSession().setAttribute("initializedSession", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-		request.getSession().setAttribute("user", user);//$NON-NLS-1$ //$NON-NLS-2$
+		request.getSession().setAttribute("user", user);//$NON-NLS-1$ 
 	}
 	else if (!"true".equals(state)) { //$NON-NLS-1$
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
@@ -95,7 +95,7 @@
 <!-- 		<a class="menu-btn" href="NewApplication.jsp?op=1" >Alta de aplicaci&oacute;n</a> -->
 	</div>
 	<% if(errorText != null) { %>
-		<p id="error-txt"><%= errorText %></p> 
+		<p id="error-txt"><%=  errorText %></p> 
 	<%
 		errorText = null;
 	  }
@@ -107,43 +107,18 @@
 		</div>
 		
 			<% if(mr != null) { %>
-				<p id="<%=
+				<p id="<%= 
 						mr.isOk() ? "success-txt" : "error-txt"  //$NON-NLS-1$ //$NON-NLS-2$
 						%>">
-					<%= mr.getMessage() %>
+					<%=  mr.getMessage() %>
 				</p>
 			<% } %>
 			
 			
 		<div id="data" style="display: block-inline; text-align:center;">
-<!-- 			<table id="appTable"  class="display" > -->
-<!-- 				<thead> -->
-<!-- 					<tr> -->										
-<!-- 						<th id="id">ID</th> -->
-<!-- 						<th id="nombre">Aplicaci&oacute;n</th> -->
-<!-- 						<th id="responsable">Responsable</th> -->
-<!-- 						<th id="correo">Correo</th> -->
-<!-- 						<th id="telefono">Telefono</th> -->
-<!-- 						<th id="alta">Fecha Alta</th> -->
-					<!--<th id="fk_certificado">ID CERT</th> -->
-						 
-<!-- 					</tr> -->
-<!-- 				</thead> -->
-<!-- 				<tbody> -->
-<!-- 				</tbody> -->
-<!-- 			</table>	 -->
 		
 			<h4>No hay Aplicaciones</h4>	
 		</div>
-<!-- 		COMENTADO PARA LA PAGINACIÓN -->
-<!-- 	<br> -->
-<!-- 	<div id="nav_page" style="display: block-inline; text-align:right;"> -->
-<!-- 		<button id="back">Anterior</button> -->
-<!--         <button id="next">Siguiente</button> -->
-<!--         <p id="page"></p> -->
-<!-- 	</div> -->
-        
-	
    	</div>
 	
 </body>

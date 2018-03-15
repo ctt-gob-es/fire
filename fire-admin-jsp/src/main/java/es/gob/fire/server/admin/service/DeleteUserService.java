@@ -40,11 +40,11 @@ public class DeleteUserService extends HttpServlet {
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
 		final String idUser = request.getParameter(PARAM_ID);
-		final String user_name=request.getParameter(PARAM_USRNAME);
-		final HttpSession session= request.getSession();
-		final String loggedUsr= (String) session.getAttribute("user"); //$NON-NLS-1$
+		final String user_name = request.getParameter(PARAM_USRNAME);
+		final HttpSession session = request.getSession();
+		final String loggedUsr = (String) session.getAttribute("user"); //$NON-NLS-1$
 
-		LOGGER.info("Baja del usuario con ID: " + idUser+" Nombre:"+user_name); //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.info("Baja del usuario con ID: " + idUser + " Nombre:" + user_name); //$NON-NLS-1$ //$NON-NLS-2$
 
 		boolean isOk = true;
 		if (idUser == null || "".equals(idUser)) { //$NON-NLS-1$
@@ -57,22 +57,22 @@ public class DeleteUserService extends HttpServlet {
 					UsersDAO.removeUser(idUser,user_name);
 				}
 				else {
-					LOGGER.info("Se ha intentado dar de baja al usuario por defecto con ID: " + idUser+" Nombre:"+user_name); //$NON-NLS-1$ //$NON-NLS-2$
+					LOGGER.info("Se ha intentado dar de baja al usuario por defecto con ID: " + idUser + " Nombre:" + user_name); //$NON-NLS-1$ //$NON-NLS-2$
 					isOk = false;
 				}
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error al dar de baja el usuario con ID:" + idUser+" Nombre:"+user_name , e); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.log(Level.SEVERE, "Error al dar de baja el usuario con ID:" + idUser + " Nombre:" + user_name , e); //$NON-NLS-1$ //$NON-NLS-2$
 				isOk = false;
 			}
 		}
 		//Comprobar que el usuario que se borra es el mismo que est� logado,
 		//en ese caso se cierra la sesi�n redirigiendo a la p�gina de Login.jsp
-		if(isOk && loggedUsr!=null && !"".equals(loggedUsr) && loggedUsr.equals(user_name)){ //$NON-NLS-1$
+		if(isOk && loggedUsr != null && !"".equals(loggedUsr) && loggedUsr.equals(user_name)){ //$NON-NLS-1$
 			response.sendRedirect("Login.jsp?"); //$NON-NLS-1$
 		}
 		else {
-			response.sendRedirect("User/UserPage.jsp?op=baja&r=" + (isOk ? "1" : "0")+"&ent=user"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			response.sendRedirect("User/UserPage.jsp?op=baja&r=" + (isOk ? "1" : "0") + "&ent=user"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 	}

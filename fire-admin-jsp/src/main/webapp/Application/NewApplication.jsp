@@ -27,8 +27,8 @@
 	// op = 2 -> editar aplicacion
 	String title = ""; //$NON-NLS-1$
 	String subTitle = ""; //$NON-NLS-1$
-	String certDataPrincipal="";
-	String certDataBkup="";
+	String certDataPrincipal = "";//$NON-NLS-1$
+	String certDataBkup = "";//$NON-NLS-1$
 	Application app;
 	switch (op) {
 		case 0:
@@ -49,27 +49,27 @@
 	}
 	app = id != null ? AplicationsDAO.selectApplication(id): new Application();
 		
-	if(app.getFk_certificado()!=null && !"".equals(app.getFk_certificado())){
+	if(app.getFk_certificado() != null && !"".equals(app.getFk_certificado())){//$NON-NLS-1$
 		cert=CertificatesDAO.selectCertificateByID(app.getFk_certificado());
-		if(cert.getCertX509_principal()!=null){
-			final String[] datCertificate=cert.getCertX509_principal().getSubjectX500Principal().getName().split(",");
-			for (int i=0;i<datCertificate.length;i++){
-				certDataPrincipal=certDataPrincipal.concat(datCertificate[i]).concat("</br>");
+		if(cert.getCertX509_principal() != null){
+			final String[] datCertificate=cert.getCertX509_principal().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
+			for (int i = 0; i < datCertificate.length; i++){
+				certDataPrincipal = certDataPrincipal.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
 			}
 			//fecha caducidad
 			Date fecha= new Date();
 			fecha=cert.getCertX509_principal().getNotAfter();		
-			certDataPrincipal=certDataPrincipal.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));
+			certDataPrincipal = certDataPrincipal.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));//$NON-NLS-1$
 		}
-		if(cert.getCertX509_backup()!=null){
-			final String[] datCertificate=cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");
-			for (int i=0;i<datCertificate.length;i++){
-				certDataBkup=certDataBkup.concat(datCertificate[i]).concat("</br>");
+		if(cert.getCertX509_backup() != null){
+			final String[] datCertificate = cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
+			for (int i = 0; i < datCertificate.length; i++){
+				certDataBkup = certDataBkup.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
 			}
 			//fecha caducidad
-			Date fecha= new Date();
-			fecha=cert.getCertX509_backup().getNotAfter();		
-			certDataBkup=certDataBkup.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));
+			Date fecha = new Date();
+			fecha = cert.getCertX509_backup().getNotAfter();		
+			certDataBkup = certDataBkup.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));//$NON-NLS-1$
 		}
 	}	
 		
@@ -83,7 +83,7 @@
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-	<script>var op=<%=op%>;	
+	<script>var op=<%=  op%>;	
 		$(function() {
 			$("select").change(function (){
 		    	var opSel="0";
@@ -93,12 +93,12 @@
 		      		opSel=$(this).val();
 		      	});
 		      	if(opSel!="0"){
-		      		$.get("processAppRequest.jsp?requestType=getCertificateId&id-cert="+opSel, function(data){	      		
+		      		$.get("processAppRequest.jsp?requestType=getCertificateId&id-cert=" + opSel, function(data){	      		
 			      		var certificados=data.split("§");		      		
-			      		if(certificados[0]!=null && typeof certificados[0]!="undefined" && certificados[0].trim()!="--"){		      			
+			      		if(certificados[0] != null && typeof certificados[0] != "undefined" && certificados[0].trim() != "--"){		      			
 			      			$("#cert-prin").html(certificados[0]);
 			      		}
-			      		if(certificados[1]!=null && typeof certificados[1]!="undefined" && certificados[1].trim()!="--"){		      			
+			      		if(certificados[1] != null && typeof certificados[1] != "undefined" && certificados[1].trim() != "--"){		      			
 			      			$("#cert-resp").html(certificados[1]);
 			      		}
 			      	});
@@ -117,11 +117,11 @@
 		
 		<div style="display: block-inline; text-align:center;">
 			<p id="descrp">
-			  <%= subTitle %>
+			  <%=  subTitle %>
 			</p>
 		</div>			
 		<p>Los campos con * son obligatorios</p>
-			<form id="frmApplication" method="POST" action="../newApp?iddApp=<%= id %>&op=<%= op %>"  onsubmit="isCert()">
+			<form id="frmApplication" method="POST" action="../newApp?iddApp=<%=  id %>&op=<%=  op %>"  onsubmit="isCert()">
 							
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				<div style="display: inline-block; width: 20%;margin: 3px;">
@@ -131,7 +131,7 @@
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 					
 						<input id="nombre-app" class="edit-txt" type="text" name="nombre-app" style="width: 80%;margin-top:3px;" 
-						value="<%=(request.getParameter("name")!= null) ? request.getParameter("name") : (app.getNombre()!=null)?app.getNombre():"" %>"> 
+						value="<%= (request.getParameter("name") != null) ? request.getParameter("name") : (app.getNombre()!=null)?app.getNombre() : "" %>"> 
 						
 				</div>
 					
@@ -141,7 +141,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 				<input id="nombre-resp" class="edit-txt" type="text" name="nombre-resp" style="width: 80%;margin-top:3px;"
-						value="<%= request.getParameter("res")!= null ? request.getParameter("res") : (app.getResponsable()!=null)?app.getResponsable():""%>">				
+						value="<%=  request.getParameter("res") != null ? request.getParameter("res") : (app.getResponsable() != null) ? app.getResponsable() : ""%>">				
 				</div>						
 			</div>	
 			
@@ -152,7 +152,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 					<input id="email-resp" class="edit-txt" type="text" name="email-resp" style="width: 80%;margin-top:3px;"
-						value="<%= request.getParameter("email")!= null ? request.getParameter("email") :(app.getCorreo()!=null)?app.getCorreo():"" %>">											
+						value="<%=  request.getParameter("email") != null ? request.getParameter("email") : (app.getCorreo()!=null) ? app.getCorreo() : "" %>">											
 				</div>
 					
 				<div style="display: inline-block; width: 10%;margin: 3px;">
@@ -162,7 +162,7 @@
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 				
 				<input id="telf-resp" class="edit-txt" type="text" name="telf-resp" style="width: 80%;margin-top:3px;" 
-						value="<%= request.getParameter("tel")!= null ? request.getParameter("tel") :(app.getTelefono()!=null)?app.getTelefono():""%>">									
+						value="<%=  request.getParameter("tel")!= null ? request.getParameter("tel") : (app.getTelefono() != null) ? app.getTelefono() : ""%>">									
 				</div>						
 			</div>
 							
@@ -172,21 +172,21 @@
 						<label for="id-certificate" style="color: #404040;">* Seleccionar certificado</label><br>	
 					</div>	
 					<div  style="display: inline-block; width: 30%;margin: 3px;">				
-					<%if(op!=0){ %>							
+					<%if(op != 0){ %>							
 						<select id="id-certificate" name="id-certificate" class="edit-txt">
 							<option value="0"></option> 			
 						<% for (CertificateFire cer:lCert){ 
-							if(op==1){%>													
-							<option value="<%=cer.getId_certificado()%>"><%=cer.getNombre_cert() %></option>  
+							if(op == 1){%>													
+							<option value="<%= cer.getId_certificado()%>"><%= cer.getNombre_cert() %></option>  
 							<%}
 							else{%>
-							<option value="<%=cer.getId_certificado()%>" <%=cert.getId_certificado().equals(cer.getId_certificado())?"selected='selected'":"" %>><%=cer.getNombre_cert() %></option>  
+							<option value="<%= cer.getId_certificado()%>" <%= cert.getId_certificado().equals(cer.getId_certificado()) ? "selected='selected'" : "" %>><%= cer.getNombre_cert() %></option>  
 							<% }
 						} %>			    		  			   
 				  		</select>				  					
 					<%}else{%>						
 						<input id="id-certificate" class="edit-txt" type="text" name="id-certificate" style="width: 80%;margin-top:3px;" 
-						value="<%=cert.getNombre_cert()%>"/>																								
+						value="<%= cert.getNombre_cert()%>"/>																								
 					<%} %>			
 					</div>
 			
@@ -231,7 +231,7 @@
 		   		%>
 			   		
 			   		<div  style="display: inline-block; width: 35%;margin: 3px">
-			   			<input class="menu-btn" name="add-app-btn" type="submit" value="<%= msg %>" title="<%=tit %>" >
+			   			<input class="menu-btn" name="add-app-btn" type="submit" value="<%= msg %>" title="<%= tit %>" >
 			   		</div>
 		   		<% } %>
 			   					   		
@@ -241,11 +241,11 @@
 		</form>
 		<script>
 			//bloqueamos los campos en caso de que sea una operacion de solo lectura
-			document.getElementById("nombre-app").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("email-resp").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("nombre-resp").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("telf-resp").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("id-certificate").disabled = <%= op == 0 ? "true" : "false" %>
+			document.getElementById("nombre-app").disabled = <%=  op == 0 ? "true" : "false" %>
+			document.getElementById("email-resp").disabled = <%=  op == 0 ? "true" : "false" %>
+			document.getElementById("nombre-resp").disabled = <%=  op == 0 ? "true" : "false" %>
+			document.getElementById("telf-resp").disabled = <%=  op == 0 ? "true" : "false" %>
+			document.getElementById("id-certificate").disabled = <%=  op == 0 ? "true" : "false" %>
 		
 		</script>
    	</div>

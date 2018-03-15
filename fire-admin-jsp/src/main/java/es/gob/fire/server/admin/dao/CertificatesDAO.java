@@ -41,11 +41,11 @@ public class CertificatesDAO {
 
 	private static final String ST_SELECT_CERTIFICATES_BYID = "SELECT id_certificado, nombre_cert, fec_alta, cert_principal,cert_backup,huella_principal,huella_backup FROM tb_certificados WHERE id_certificado=? ORDER BY nombre_cert"; //$NON-NLS-1$
 
-	private static final String ST_SELECT_CERTIFICATES_ALL="SELECT id_certificado, nombre_cert, fec_alta, cert_principal,cert_backup,huella_principal,huella_backup FROM tb_certificados ORDER BY id_certificado"; //$NON-NLS-1$
+	private static final String ST_SELECT_CERTIFICATES_ALL = "SELECT id_certificado, nombre_cert, fec_alta, cert_principal,cert_backup,huella_principal,huella_backup FROM tb_certificados ORDER BY id_certificado"; //$NON-NLS-1$
 
 	private static final String ST_SELECT_CERTIFICATES_PAG = "SELECT id_certificado, nombre_cert, fec_alta, cert_principal,cert_backup,huella_principal,huella_backup FROM tb_certificados ORDER BY nombre_cert limit ?,?"; //$NON-NLS-1$
 
-	private static final String ST_SELECT_CERTIFICATES_COUNT="SELECT count(*) FROM tb_certificados"; //$NON-NLS-1$
+	private static final String ST_SELECT_CERTIFICATES_COUNT = "SELECT count(*) FROM tb_certificados"; //$NON-NLS-1$
 
 	private static final String STATEMENT_INSERT_CERTIFICATE = "INSERT INTO tb_certificados(nombre_cert, fec_alta, cert_principal,cert_backup,huella_principal,huella_backup) VALUES (?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
@@ -56,12 +56,12 @@ public class CertificatesDAO {
 	public static String getCertificatesCount() {
 		int count=0;
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_COUNT);
 			final ResultSet rs = st.executeQuery();
 			if(rs.next()) {
-				count=rs.getInt(1);
+				count = rs.getInt(1);
 			}
 			rs.close();
 			st.close();
@@ -71,7 +71,7 @@ public class CertificatesDAO {
 			e.printStackTrace();
 		}
 
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -94,7 +94,7 @@ public class CertificatesDAO {
 	 */
 	public static String getCertificatesJSON() throws SQLException, CertificateException, IOException {
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 
 		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_ALL);
@@ -102,47 +102,47 @@ public class CertificatesDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 
-			Date date= null;
+			Date date = null;
 			final Timestamp timestamp = rs.getTimestamp(3);
 			if (timestamp != null) {
 				date = new Date(timestamp.getTime());
 			}
 
 
-			final CertificateFire cert= new CertificateFire();
+			final CertificateFire cert = new CertificateFire();
 			cert.setId_certificado(rs.getString(1));
 			cert.setNombre_cert(rs.getString(2));
 			cert.setFec_alta(rs.getDate(3));
-			if(rs.getString(4)!=null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
+			if(rs.getString(4) != null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
 				cert.setCertPrincipalb64ToX509(rs.getString(4));
-				final String certPrincipal[]=cert.getCertX509_principal().getSubjectX500Principal().getName().split(","); //$NON-NLS-1$
-				java.util.Date expDatePrincipal= new java.util.Date();
+				final String certPrincipal[] = cert.getCertX509_principal().getSubjectX500Principal().getName().split(","); //$NON-NLS-1$
+				java.util.Date expDatePrincipal = new java.util.Date();
 				expDatePrincipal=cert.getCertX509_principal().getNotAfter();
 				cert.setCert_principal(certPrincipal[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDatePrincipal))); //$NON-NLS-1$
 			}
 			if(rs.getString(5)!=null && !"".equals(rs.getString(5))) {//$NON-NLS-1$
 				cert.setCertBkupb64ToX509(rs.getString(5));
-				final String certBkup[]=cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
+				final String certBkup[] = cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 				java.util.Date expDateBkup= new java.util.Date();
-				expDateBkup=cert.getCertX509_backup().getNotAfter();
+				expDateBkup = cert.getCertX509_backup().getNotAfter();
 				cert.setCert_backup(certBkup[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDateBkup))); //$NON-NLS-1$
 			}
-			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
+			if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 				cert.setHuella_principal(rs.getString(6));
 			}
 
-			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
+			if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 				cert.setHuella_backup(rs.getString(7));
 			}
 
 			data.add(Json.createObjectBuilder()
 					.add("id_certificado",cert.getId_certificado()) //$NON-NLS-1$
 					.add("nombre_cert", cert.getNombre_cert()) //$NON-NLS-1$
-					.add("fec_alta", Utils.getStringDateFormat(date!=null?date:rs.getDate(3))) //$NON-NLS-1$
-					.add("cert_principal", cert.getCert_principal()!=null?cert.getCert_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("cert_backup", cert.getCert_backup()!=null?cert.getCert_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("huella_principal", cert.getHuella_principal()!=null?cert.getHuella_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("huella_backup", cert.getHuella_backup()!=null?cert.getHuella_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("fec_alta", Utils.getStringDateFormat(date != null?date:rs.getDate(3))) //$NON-NLS-1$
+					.add("cert_principal", cert.getCert_principal() != null?cert.getCert_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("cert_backup", cert.getCert_backup() != null?cert.getCert_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_principal", cert.getHuella_principal() != null?cert.getHuella_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_backup", cert.getHuella_backup() != null?cert.getHuella_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
 					);
 
 		}
@@ -151,7 +151,7 @@ public class CertificatesDAO {
 
 		jsonObj.add("CertList", data); //$NON-NLS-1$
 
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -180,7 +180,7 @@ public class CertificatesDAO {
 	 */
 	public static String getCertificatesPag(final String start, final String total) throws SQLException, CertificateException, IOException {
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 
 		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_PAG);
@@ -188,45 +188,45 @@ public class CertificatesDAO {
 		st.setInt(2, Integer.parseInt(total));
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
-			Date date= null;
+			Date date = null;
 			final Timestamp timestamp = rs.getTimestamp(3);
 			if (timestamp != null) {
 				date = new Date(timestamp.getTime());
 			}
 
-			final CertificateFire cert= new CertificateFire();
+			final CertificateFire cert = new CertificateFire();
 			cert.setId_certificado(rs.getString(1));
 			cert.setNombre_cert(rs.getString(2));
 			cert.setFec_alta(rs.getDate(3));
-			if(rs.getString(4)!=null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
+			if(rs.getString(4) != null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
 				cert.setCertPrincipalb64ToX509(rs.getString(4));
-				final String certPrincipal[]=cert.getCertX509_principal().getSubjectX500Principal().getName().split(","); //$NON-NLS-1$
-				java.util.Date expDatePrincipal= new java.util.Date();
-				expDatePrincipal=cert.getCertX509_principal().getNotAfter();
+				final String certPrincipal[] = cert.getCertX509_principal().getSubjectX500Principal().getName().split(","); //$NON-NLS-1$
+				java.util.Date expDatePrincipal = new java.util.Date();
+				expDatePrincipal = cert.getCertX509_principal().getNotAfter();
 				cert.setCert_principal(certPrincipal[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDatePrincipal))); //$NON-NLS-1$
 			}
-			if(rs.getString(5)!=null && !"".equals(rs.getString(5))) { //$NON-NLS-1$
+			if(rs.getString(5) != null && !"".equals(rs.getString(5))) { //$NON-NLS-1$
 				cert.setCertBkupb64ToX509(rs.getString(5));
-				final String certBkup[]=cert.getCertX509_backup().getSubjectX500Principal().getName().split(","); //$NON-NLS-1$
-				java.util.Date expDateBkup= new java.util.Date();
-				expDateBkup=cert.getCertX509_backup().getNotAfter();
+				final String certBkup[] = cert.getCertX509_backup().getSubjectX500Principal().getName().split(","); //$NON-NLS-1$
+				java.util.Date expDateBkup = new java.util.Date();
+				expDateBkup = cert.getCertX509_backup().getNotAfter();
 				cert.setCert_backup(certBkup[0].concat("<br>Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDateBkup))); //$NON-NLS-1$
 			}
-			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
+			if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 				cert.setHuella_principal(rs.getString(6));
 			}
 
-			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
+			if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 				cert.setHuella_backup(rs.getString(7));
 			}
 			data.add(Json.createObjectBuilder()
 					.add("id_certificado",cert.getId_certificado()) //$NON-NLS-1$
 					.add("nombre_cert", cert.getNombre_cert()) //$NON-NLS-1$
-					.add("fec_alta", Utils.getStringDateFormat(date!=null?date:rs.getDate(3))) //$NON-NLS-1$
-					.add("cert_principal", cert.getCert_principal()!=null?cert.getCert_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("cert_backup", cert.getCert_backup()!=null?cert.getCert_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("huella_principal", cert.getHuella_principal()!=null?cert.getHuella_principal():"") //$NON-NLS-1$ //$NON-NLS-2$
-					.add("huella_backup", cert.getHuella_backup()!=null?cert.getHuella_backup():"") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("fec_alta", Utils.getStringDateFormat(date != null ? date:rs.getDate(3))) //$NON-NLS-1$
+					.add("cert_principal", cert.getCert_principal() != null ? cert.getCert_principal() : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("cert_backup", cert.getCert_backup() != null ? cert.getCert_backup() : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_principal", cert.getHuella_principal() !=null ? cert.getHuella_principal() : "") //$NON-NLS-1$ //$NON-NLS-2$
+					.add("huella_backup", cert.getHuella_backup() !=null ? cert.getHuella_backup() : "") //$NON-NLS-1$ //$NON-NLS-2$
 					);
 
 		}
@@ -268,19 +268,19 @@ public class CertificatesDAO {
 			cert.setId_certificado(rs.getString(1));
 			cert.setNombre_cert(rs.getString(2));
 			cert.setFec_alta(rs.getDate(3));
-			if(rs.getString(4)!=null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
+			if(rs.getString(4) != null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
 				cert.setCert_principal(rs.getString(4));
 				cert.setCertPrincipalb64ToX509(rs.getString(4));
 			}
-			if(rs.getString(5)!=null && !"".equals(rs.getString(5))) { //$NON-NLS-1$
+			if(rs.getString(5) != null && !"".equals(rs.getString(5))) { //$NON-NLS-1$
 				cert.setCert_backup(rs.getString(5));
 				cert.setCertBkupb64ToX509(rs.getString(5));
 			}
-			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
+			if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 				cert.setHuella_principal(rs.getString(6));
 			}
 
-			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
+			if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 				cert.setHuella_backup(rs.getString(7));
 			}
 		}
@@ -304,23 +304,23 @@ public class CertificatesDAO {
 
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
-			final CertificateFire cert= new CertificateFire();
+			final CertificateFire cert = new CertificateFire();
 			cert.setId_certificado(rs.getString(1));
 			cert.setNombre_cert(rs.getString(2));
 			cert.setFec_alta(rs.getDate(3));
-			if(rs.getString(4)!=null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
+			if(rs.getString(4) != null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
 				cert.setCert_principal(rs.getString(4));
 				cert.setCertPrincipalb64ToX509(rs.getString(4));
 			}
-			if(rs.getString(5)!=null && !"".equals(rs.getString(5))) { //$NON-NLS-1$
+			if(rs.getString(5) != null && !"".equals(rs.getString(5))) { //$NON-NLS-1$
 				cert.setCert_backup(rs.getString(5));
 				cert.setCertBkupb64ToX509(rs.getString(5));
 			}
-			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
+			if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 				cert.setHuella_principal(rs.getString(6));
 			}
 
-			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
+			if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 				cert.setHuella_backup(rs.getString(7));
 			}
 			lCert.add(cert);

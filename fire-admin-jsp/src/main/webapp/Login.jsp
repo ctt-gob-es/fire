@@ -10,12 +10,12 @@
 </head>
 	<body>
 		<% 	
-			response.setHeader("Cache-control", "no-cache");
-			response.setHeader("Cache-control", "no-store");
-			response.setDateHeader("Expires", 0);
-			response.setHeader("Pragma", "no-cache");
+			response.setHeader("Cache-control", "no-cache");//$NON-NLS-1$//$NON-NLS-2$
+			response.setHeader("Cache-control", "no-store");//$NON-NLS-1$//$NON-NLS-2$
+			response.setDateHeader("Expires", 0);//$NON-NLS-1$
+			response.setHeader("Pragma", "no-cache");//$NON-NLS-1$//$NON-NLS-2$
 			request.getSession().removeAttribute("initializedSession"); //$NON-NLS-1$
-			request.getSession().removeAttribute("user"); 
+			request.getSession().removeAttribute("user"); //$NON-NLS-1$
 			session.invalidate();
 			// Este parametro comprueba si el usuario ha introducido su nombre de usuario y contrasena
 			// En caso de que haya introducido datos erroneos, se recibe un "fail"

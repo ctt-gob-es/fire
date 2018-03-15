@@ -167,7 +167,7 @@ $(document)
 //									});
 
 					/*********************************SIN PAGINACIÓN******************************************/
-					$.get("processCertRequest.jsp?requestType="+ requestTypeCount, function(data) {
+					$.get("processCertRequest.jsp?requestType=" + requestTypeCount, function(data) {
 						var JSONData = JSON.parse(data);
 						totalRecords = JSONData.count;
 
@@ -216,40 +216,21 @@ $(document)
 						var htmlTableFoot = "</tbody></table>";
 
 						for (i = 0; i < recordsToFetch; ++i) {
-							htmlTableBody = htmlTableBody
-									+ "<tr><td>"
-									+ dataUndefined(JSONData.CertList[i].nombre_cert)
-									+ "</td>";
-							htmlTableBody = htmlTableBody
-									+ "<td>"
-									+ dataUndefined(JSONData.CertList[i].cert_principal)
-									+ "</td>";
-							htmlTableBody = htmlTableBody
-									+ "<td>"
-									+ dataUndefined(JSONData.CertList[i].cert_backup)
-									+ "</td>";
+							htmlTableBody = htmlTableBody + "<tr><td>" + dataUndefined(JSONData.CertList[i].nombre_cert) + "</td>";
+							htmlTableBody = htmlTableBody + "<td>" + dataUndefined(JSONData.CertList[i].cert_principal) + "</td>";
+							htmlTableBody = htmlTableBody + "<td>" + dataUndefined(JSONData.CertList[i].cert_backup) + "</td>";
 
 //							fecAlta = new Date(JSONData.CertList[i].fec_alta);
 //							htmlTableBody = htmlTableBody + "<td>"+ convertDateFormat(fecAlta) + "</td>";
 							htmlTableBody = htmlTableBody + "<td>"+ JSONData.CertList[i].fec_alta+ "</td>";														
 							
 							htmlTableBody = htmlTableBody + "<td>";
-							htmlTableBody = htmlTableBody
-									+ "<a href='NewCertificate.jsp?id-cert="
-									+ JSONData.CertList[i].id_certificado
-									+ "&op=0&nombre-cert="
-									+ JSONData.CertList[i].nombre_cert
-									+ "'><img src='../resources/img/details_icon.png'/></a>";
-							htmlTableBody = htmlTableBody
-									+ "<a href='NewCertificate.jsp?id-cert="
-									+ JSONData.CertList[i].id_certificado
-									+ "&op=2&nombre-cert="
-									+ JSONData.CertList[i].nombre_cert
-									+ "'><img src='../resources/img/editar_icon.png'/></a>";
-							htmlTableBody = htmlTableBody
-									+ "<a href='#'><img src='../resources/img/delete_icon.png' onclick='return confirmar(\""
-									+ JSONData.CertList[i].nombre_cert+"\","+JSONData.CertList[i].id_certificado
-									+ ",\"../deleteCert?id-cert=\")'/></a>";
+							htmlTableBody = htmlTableBody + "<a href='NewCertificate.jsp?id-cert=" + JSONData.CertList[i].id_certificado + "&op=0&nombre-cert="
+									+ JSONData.CertList[i].nombre_cert + "'><img src='../resources/img/details_icon.png'/></a>";
+							htmlTableBody = htmlTableBody + "<a href='NewCertificate.jsp?id-cert=" + JSONData.CertList[i].id_certificado + "&op=2&nombre-cert="
+									+ JSONData.CertList[i].nombre_cert + "'><img src='../resources/img/editar_icon.png'/></a>";
+							htmlTableBody = htmlTableBody + "<a href='#'><img src='../resources/img/delete_icon.png' onclick='return confirmar(\""
+									+ JSONData.CertList[i].nombre_cert+"\","+JSONData.CertList[i].id_certificado + ",\"../deleteCert?id-cert=\")'/></a>";
 							htmlTableBody = htmlTableBody + "</td></tr>";
 
 							currentIndex++;
@@ -334,12 +315,12 @@ $(document)
 
 	function confirmar(nombreCert, idCert, url) {	
 	
-		$.get("processCertRequest.jsp?requestType=countRecordsCertApp&id-cert="+idCert ,function(data){			
+		$.get("processCertRequest.jsp?requestType=countRecordsCertApp&id-cert=" + idCert ,function(data){			
 			var JSONData = JSON.parse(data);
 			totalRecords = JSONData.count;
 
 			if (totalRecords > 0) {			
-				alert("Error al dar de baja el certificado '"+nombreCert+"', tiene asociadas aplicaciones.");
+				alert("Error al dar de baja el certificado '"+ nombreCert + "', tiene asociadas aplicaciones.");
 			} else {
 				if (confirm('¿Está seguro de eliminar el certificado '+ nombreCert + '?')) {
 					document.location.href=url+idCert;

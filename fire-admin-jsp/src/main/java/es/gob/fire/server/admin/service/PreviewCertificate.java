@@ -27,7 +27,7 @@ public class PreviewCertificate extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_CER_PRINCIPAL = "fichero-firma-prin"; //$NON-NLS-1$
-	private static final String PARAM_CER_BKUP="fichero-firma-resp";//$NON-NLS-1$
+	private static final String PARAM_CER_BKUP = "fichero-firma-resp";//$NON-NLS-1$
 	private static final String PARAM_OP = "op"; //$NON-NLS-1$
 	private static final String X509 = "X.509"; //$NON-NLS-1$
 
@@ -56,23 +56,23 @@ public class PreviewCertificate extends HttpServlet {
 	@Override
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
-		/*Obtenemos el par�metro enviado del formulario junto con el Certificado*/
+		/*Obtenemos el parametro enviado del formulario junto con el Certificado*/
 		this.getParameters(request);
-		//Obtener el tipo de operaci�n 1-Alta 2-Edici�n
+		//Obtener el tipo de operacion 1-Alta 2-Edicion
 		final int op = Integer.parseInt(request.getParameter(PARAM_OP));
 
-		String txtCert=null;
-		if(this.getCert()!=null) {
-			Date expDate= new Date();
-			expDate=this.getCert().getNotAfter();
+		String txtCert = null;
+		if(this.getCert() != null) {
+			Date expDate = new Date();
+			expDate = this.getCert().getNotAfter();
 			txtCert = this.getCert().getSubjectX500Principal().getName().concat(", Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDate));		 //$NON-NLS-1$
 		}
 
-		if(txtCert!=null) {
+		if(txtCert != null) {
 			response.setContentType("text/html"); //$NON-NLS-1$
 			final String[] datCertificate=txtCert.split(","); //$NON-NLS-1$
-			String certData=""; //$NON-NLS-1$
-			for (int i=0;i<= datCertificate.length-1;i++){
+			String certData = ""; //$NON-NLS-1$
+			for (int i = 0; i <= datCertificate.length-1; i++){
 				certData=certData.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
 			}
 			response.getWriter().write(certData);
@@ -94,7 +94,7 @@ public class PreviewCertificate extends HttpServlet {
 	        final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
 	        for (final FileItem item : items) {
 
-	        	if (!item.isFormField() && (PARAM_CER_PRINCIPAL.equals(item.getFieldName()) || PARAM_CER_BKUP.equals(item.getFieldName()) )&& item.getInputStream()!=null && item.getSize() > 0L) {
+	        	if (!item.isFormField() && (PARAM_CER_PRINCIPAL.equals(item.getFieldName()) || PARAM_CER_BKUP.equals(item.getFieldName()) )&& item.getInputStream() != null && item.getSize() > 0L) {
 	        		final InputStream isFileContent = item.getInputStream();
 	        		this.setCert((X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(isFileContent));
 	        		isFileContent.close();
@@ -111,10 +111,18 @@ public class PreviewCertificate extends HttpServlet {
 	    }
 	}
 
+	/**
+	 * Obtiene el certificado
+	 * @return
+	 */
 	public final X509Certificate getCert() {
 		return this.cert;
 	}
 
+	/**
+	 * Establece el certificado
+	 * @param cert
+	 */
 	public final void setCert(final X509Certificate cert) {
 		this.cert = cert;
 	}

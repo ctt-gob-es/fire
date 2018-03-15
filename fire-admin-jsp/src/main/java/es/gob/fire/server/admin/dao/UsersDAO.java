@@ -37,19 +37,19 @@ public class UsersDAO {
 
 	private static final String ST_SELECT_PASSWD_BY_NAME = "SELECT clave FROM tb_usuarios WHERE nombre_usuario = ?"; //$NON-NLS-1$
 
-	private static final String ST_SELECT_USER_BY_ID="SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta, usu_defecto FROM tb_usuarios  WHERE id_usuario = ?";//$NON-NLS-1$
+	private static final String ST_SELECT_USER_BY_ID = "SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta, usu_defecto FROM tb_usuarios  WHERE id_usuario = ?";//$NON-NLS-1$
 
-	private static final String ST_SELECT_USER_BY_NAME="SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta, usu_defecto  FROM tb_usuarios  WHERE nombre_usuario = ?";//$NON-NLS-1$
+	private static final String ST_SELECT_USER_BY_NAME = "SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta, usu_defecto  FROM tb_usuarios  WHERE nombre_usuario = ?";//$NON-NLS-1$
 
 	private static final String ST_SELECT_ALL_USERS = "SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta, usu_defecto  FROM tb_usuarios ORDER BY id_usuario";//$NON-NLS-1$
 
-	private static final String ST_SELECT_ALL_USERS_COUNT="SELECT count(*) FROM tb_usuarios"; //$NON-NLS-1$
+	private static final String ST_SELECT_ALL_USERS_COUNT = "SELECT count(*) FROM tb_usuarios"; //$NON-NLS-1$
 
 	private static final String ST_SELECT_ALL_USERS_PAG = "SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta, usu_defecto FROM tb_usuarios ORDER BY id_usuario limit ?,?";//$NON-NLS-1$
 
-	private static final String ST_UDATE_USER_BY_ID= "UPDATE tb_usuarios SET  nombre=?, apellidos=?, correo_elec=?, telf_contacto=? WHERE id_usuario = ?";//$NON-NLS-1$
+	private static final String ST_UDATE_USER_BY_ID = "UPDATE tb_usuarios SET  nombre=?, apellidos=?, correo_elec=?, telf_contacto=? WHERE id_usuario = ?";//$NON-NLS-1$
 
-	private static final String ST_UDATE_PASSWD_BY_ID= "UPDATE tb_usuarios SET nombre_usuario=?, clave=? WHERE id_usuario = ?";//$NON-NLS-1$
+	private static final String ST_UDATE_PASSWD_BY_ID = "UPDATE tb_usuarios SET nombre_usuario=?, clave=? WHERE id_usuario = ?";//$NON-NLS-1$
 
 	private static final String ST_REMOVE_USER = "DELETE FROM tb_usuarios WHERE id_usuario = ?"; //$NON-NLS-1$
 
@@ -117,7 +117,7 @@ public class UsersDAO {
 	 * SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta FROM tb_usuarios  WHERE nombre_usuario = ?"
 	 */
 	public static User getUserByName(final String usrName) throws SQLException {
-		final User usr= new User();
+		final User usr = new User();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_USER_BY_NAME);
 			st.setString(1, usrName);
@@ -128,11 +128,11 @@ public class UsersDAO {
 				usr.setClave(rs.getString(3));
 				usr.setNombre(rs.getString(4));
 				usr.setApellidos(rs.getString(5));
-				if(rs.getString(6)!=null &&!"".equals(rs.getString(6))) { //$NON-NLS-1$
+				if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 					usr.setCorreo_elec(rs.getString(6));
 				}
 
-				if(rs.getString(7)!=null &&!"".equals(rs.getString(7))) { //$NON-NLS-1$
+				if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 					usr.setTelf_contacto(rs.getString(7));
 				}
 				usr.setRol(rs.getString(8));
@@ -155,7 +155,7 @@ public class UsersDAO {
 	 * @throws SQLException
 	 */
 	public static User getUser(final String idUser) throws SQLException {
-		final User usr= new User();
+		final User usr = new User();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_USER_BY_ID);
 			st.setString(1, idUser);
@@ -166,14 +166,14 @@ public class UsersDAO {
 				usr.setClave(rs.getString(3));
 				usr.setNombre(rs.getString(4));
 				usr.setApellidos(rs.getString(5));
-				if(rs.getString(6)!=null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
+				if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 					usr.setCorreo_elec(rs.getString(6));
 				}
-				if(rs.getString(7)!=null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
+				if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 					usr.setTelf_contacto(rs.getString(7));
 				}
 				usr.setRol(rs.getString(8));
-				usr.setFec_alta( rs.getDate(9));
+				usr.setFec_alta(rs.getDate(9));
 				usr.setUsu_defecto(String.valueOf(rs.getInt(10)));
 			}
 
@@ -203,10 +203,10 @@ public class UsersDAO {
 			usr.setClave(rs.getString(3));
 			usr.setNombre(rs.getString(4));
 			usr.setApellidos(rs.getString(5));
-			if(rs.getString(6)!=null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
+			if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 				usr.setCorreo_elec(rs.getString(6));
 			}
-			if(rs.getString(7)!=null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
+			if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
 				usr.setTelf_contacto(rs.getString(7));
 			}
 			usr.setRol(rs.getString(8));
@@ -224,12 +224,12 @@ public class UsersDAO {
 	public static String getUsersCount() {
 		int count=0;
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_ALL_USERS_COUNT);
 			final ResultSet rs = st.executeQuery();
 			if(rs.next()) {
-				count=rs.getInt(1);
+				count = rs.getInt(1);
 				jsonObj.add("count", count);  //$NON-NLS-1$
 			}
 			rs.close();
@@ -239,7 +239,7 @@ public class UsersDAO {
 			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de usuarios", e); //$NON-NLS-1$
 		}
 
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -279,10 +279,10 @@ public class UsersDAO {
 					.add("clave", rs.getString(3)) //$NON-NLS-1$
 					.add("nombre", rs.getString(4)) //$NON-NLS-1$
 					.add("apellidos", rs.getString(5)) //$NON-NLS-1$
-					.add("correo_elec", rs.getString(6)!=null && !"".equals(rs.getString(6))?rs.getString(6):"") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					.add("telf_contacto", rs.getString(7)!=null && !"".equals(rs.getString(7))?rs.getString(7):"") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					.add("correo_elec", rs.getString(6) != null && !"".equals(rs.getString(6)) ? rs.getString(6) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					.add("telf_contacto", rs.getString(7) != null && !"".equals(rs.getString(7)) ? rs.getString(7) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					.add("rol", rs.getString(8)) //$NON-NLS-1$
-					.add("fec_alta", Utils.getStringDateFormat(date!=null?date:rs.getDate(9))) //$NON-NLS-1$
+					.add("fec_alta", Utils.getStringDateFormat(date != null ? date : rs.getDate(9))) //$NON-NLS-1$
 					.add("usu_defecto", rs.getString(10)) //$NON-NLS-1$
 					);
 
@@ -290,7 +290,7 @@ public class UsersDAO {
 		rs.close();
 		st.close();
 		jsonObj.add("UsrList", data); //$NON-NLS-1$
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -309,7 +309,7 @@ public class UsersDAO {
 	 */
 	public static String getUsersPag(final String start, final String total) throws SQLException {
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 
 		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_ALL_USERS_PAG);
@@ -318,7 +318,7 @@ public class UsersDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 
-			Date date= null;
+			Date date = null;
 			final Timestamp timestamp = rs.getTimestamp(9);
 			if (timestamp != null) {
 				date = new Date(timestamp.getTime());
@@ -329,10 +329,10 @@ public class UsersDAO {
 					.add("clave", rs.getString(3)) //$NON-NLS-1$
 					.add("nombre", rs.getString(4)) //$NON-NLS-1$
 					.add("apellidos", rs.getString(5)) //$NON-NLS-1$
-					.add("correo_elec", rs.getString(6)!=null && !"".equals(rs.getString(6))?rs.getString(6):"") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					.add("telf_contacto", rs.getString(7)!=null && !"".equals(rs.getString(7))?rs.getString(7):"") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					.add("correo_elec", rs.getString(6) != null && !"".equals(rs.getString(6)) ? rs.getString(6) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					.add("telf_contacto", rs.getString(7) != null && !"".equals(rs.getString(7)) ? rs.getString(7) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					.add("rol", rs.getString(8)) //$NON-NLS-1$
-					.add("fec_alta", Utils.getStringDateFormat(date!=null?date:rs.getDate(9))) //$NON-NLS-1$
+					.add("fec_alta", Utils.getStringDateFormat(date != null ? date : rs.getDate(9))) //$NON-NLS-1$
 					.add("usu_defecto", rs.getString(10)) //$NON-NLS-1$
 					);
 
@@ -340,7 +340,7 @@ public class UsersDAO {
 		rs.close();
 		st.close();
 		jsonObj.add("UsrList", data); //$NON-NLS-1$
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());

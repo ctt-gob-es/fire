@@ -169,7 +169,7 @@ public class AplicationsDAO {
 	public static String getApplicationsJSON() throws SQLException {
 
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 
 		/*"SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre*/
@@ -188,7 +188,7 @@ public class AplicationsDAO {
 					.add("responsable", rs.getString(3)) //$NON-NLS-1$
 					.add("correo", rs.getString(4)) //$NON-NLS-1$
 					.add("telefono", rs.getString(5)) //$NON-NLS-1$
-					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date!=null?date:rs.getDate(6))) //$NON-NLS-1$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(6))) //$NON-NLS-1$
 					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
 					);
 		}
@@ -196,7 +196,7 @@ public class AplicationsDAO {
 		st.close();
 		jsonObj.add("AppList", data); //$NON-NLS-1$
 
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -211,13 +211,13 @@ public class AplicationsDAO {
 
 
 	/**
-	 * Obtiene el número de registros de la tabla tb_aplicaciones
+	 * Obtiene el n&uacute;mero de registros de la tabla tb_aplicaciones
 	 * @return
 	 * @throws SQLException
 	 */
 	public static String getApplicationsCount()throws SQLException {
 		int count=0;
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS_COUNT);
 			final ResultSet rs = st.executeQuery();
@@ -233,7 +233,7 @@ public class AplicationsDAO {
 			e.printStackTrace();
 		}
 
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -248,15 +248,15 @@ public class AplicationsDAO {
 
 	}
 	/**
-	 * Obtiene el número de registros de la tabla tb_aplicaciones para un identificador (id_certificado) de la tabla tb_certificados
+	 * Obtiene el n&uacute;mero de registros de la tabla tb_aplicaciones para un identificador (id_certificado) de la tabla tb_certificados
 	 * @param id
 	 * @return
 	 * @throws SQLException
 	 */
 	public static String getApplicationsCountByCertificate(final String id)throws SQLException {
-		int count=0;
+		int count = 0;
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_APPLICATIONS_COUNT_BYCERT);
 			st.setInt(1, Integer.parseInt(id));
@@ -271,7 +271,7 @@ public class AplicationsDAO {
 		catch(final Exception e){
 			e.printStackTrace();
 		}
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -295,7 +295,7 @@ public class AplicationsDAO {
 	public static String getApplicationsPag(final String start, final String total) throws SQLException {
 
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS_PAG);
@@ -315,7 +315,7 @@ public class AplicationsDAO {
 					.add("responsable", rs.getString(3)) //$NON-NLS-1$
 					.add("correo", rs.getString(4)) //$NON-NLS-1$
 					.add("telefono", rs.getString(5)) //$NON-NLS-1$
-					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date!=null?date:rs.getDate(6))) //$NON-NLS-1$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date != null ? date : rs.getDate(6))) //$NON-NLS-1$
 					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
 					);
 
@@ -324,7 +324,7 @@ public class AplicationsDAO {
 		st.close();
 		jsonObj.add("AppList", data); //$NON-NLS-1$
 
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -346,7 +346,7 @@ public class AplicationsDAO {
 	 */
 	public static String getApplicationsByCertificateJSON(final String id) throws SQLException {
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 
 		/*SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a,
@@ -357,7 +357,7 @@ public class AplicationsDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 
-			Date date= null;
+			Date date = null;
 			final Timestamp timestamp = rs.getTimestamp(6);
 			if (timestamp != null) {
 				date = new Date(timestamp.getTime());
@@ -368,7 +368,7 @@ public class AplicationsDAO {
 					.add("responsable", rs.getString(3)) //$NON-NLS-1$
 					.add("correo", rs.getString(4)) //$NON-NLS-1$
 					.add("telefono", rs.getString(5)) //$NON-NLS-1$
-					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date!=null?date:rs.getDate(6))) //$NON-NLS-1$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat( date != null ? date : rs.getDate(6))) //$NON-NLS-1$
 					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
 					);
 		}
@@ -376,7 +376,7 @@ public class AplicationsDAO {
 		st.close();
 		jsonObj.add("AppList", data); //$NON-NLS-1$
 
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());
@@ -391,7 +391,7 @@ public class AplicationsDAO {
 	public static String getApplicationsPagByCertificate(final String id, final String start, final String total) throws SQLException {
 
 
-		final JsonObjectBuilder jsonObj= Json.createObjectBuilder();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 
 		/*SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a,
@@ -413,7 +413,7 @@ public class AplicationsDAO {
 					.add("responsable", rs.getString(3)) //$NON-NLS-1$
 					.add("correo", rs.getString(4)) //$NON-NLS-1$
 					.add("telefono", rs.getString(5)) //$NON-NLS-1$
-					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date!=null?date:rs.getDate(6))) //$NON-NLS-1$
+					.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date != null ? date : rs.getDate(6))) //$NON-NLS-1$
 					.add("fk_certificado", rs.getString(7)) //$NON-NLS-1$
 					);
 
@@ -421,7 +421,7 @@ public class AplicationsDAO {
 		rs.close();
 		st.close();
 		jsonObj.add("AppList", data); //$NON-NLS-1$
-		final StringWriter writer= new StringWriter();
+		final StringWriter writer = new StringWriter();
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
 	        jw.writeObject(jsonObj.build());

@@ -4,11 +4,11 @@
   $(document).ready(function(){
 	 
             var totalRecords;
-            var recordsPerPage=5;
-            var recordsToFetch=recordsPerPage;
+            var recordsPerPage = 5;
+            var recordsToFetch = recordsPerPage;
             var totalPages;
-            var currentPage=1;
-            var currentIndex=0;
+            var currentPage = 1;
+            var currentIndex = 0;
             
 //            $.get("processUsrRequest.jsp?requestType=countRecords",function(data){
 //                var JSONData=JSON.parse(data);
@@ -131,15 +131,15 @@
 //            });
 
             /********************************************************/
-            $.get("processUsrRequest.jsp?requestType=countRecords",function(data){
-                var JSONData=JSON.parse(data);
+            $.get("processUsrRequest.jsp?requestType=countRecords", function(data){
+                var JSONData = JSON.parse(data);
              
-                totalRecords=JSONData.count;
+                totalRecords = JSONData.count;
                 alert(totalRecords);
                 if (totalRecords > 0) {
 					$("#data").html("");
-					$.get("processUsrRequest.jsp?requestType=All",function(data){
-	                	var JSONData=JSON.parse(data);
+					$.get("processUsrRequest.jsp?requestType=All", function(data){
+	                	var JSONData = JSON.parse(data);
 	                	printUsersTable(JSONData, totalRecords);       
 	              	
 	                });
@@ -151,55 +151,56 @@
             
             function printUsersTable(JSONData, recordsToFetch){
             	
-            	var htmlTableHead='<table class="admin-table"><thead><tr><th id="login_username">Usuario</th><th id="username">Nombre</th><th id="usersurname">Apellidos</th><th id="email">E-Mail</th><th id="telf">Telf. Contacto</th><th id="datetime">Fecha Alta</th><th id="actions">Acciones</th></tr></thead>';
-            	var htmlTableBody="";
-            	var htmlTableFoot='</table>';
+            	var htmlTableHead = '<table class="admin-table"><thead><tr><th id="login_username">Usuario</th><th id="username">Nombre</th><th id="usersurname">Apellidos</th><th id="email">E-Mail</th><th id="telf">Telf. Contacto</th><th id="datetime">Fecha Alta</th><th id="actions">Acciones</th></tr></thead>';
+            	var htmlTableBody = "";
+            	var htmlTableFoot = '</table>';
        		        		
-            	for(i=0;i<recordsToFetch;++i){
-            		htmlTableBody=htmlTableBody+'<tr><td headers="login_username">'+ dataUndefined(JSONData.UsrList[i].nombre_usuario)+'</td>';        
-            		htmlTableBody=htmlTableBody+'<td headers="username">'+dataUndefined(JSONData.UsrList[i].nombre)+'</td>'  				
-            		htmlTableBody=htmlTableBody+'<td headers="usersurname">'+dataUndefined(JSONData.UsrList[i].apellidos)+'</td>';
-            		htmlTableBody=htmlTableBody+'<td headers="email">'+ dataUndefined(JSONData.UsrList[i].correo_elec)+'</td>';            		
-            		htmlTableBody=htmlTableBody+'<td headers="telf">'+ dataUndefined(JSONData.UsrList[i].telf_contacto)+'</td>';
+            	for(i = 0; i < recordsToFetch; ++i){
+            		htmlTableBody = htmlTableBody + '<tr><td headers="login_username">' + dataUndefined(JSONData.UsrList[i].nombre_usuario) + '</td>';        
+            		htmlTableBody = htmlTableBody + '<td headers="username">' + dataUndefined(JSONData.UsrList[i].nombre) + '</td>'  				
+            		htmlTableBody = htmlTableBody + '<td headers="usersurname">' + dataUndefined(JSONData.UsrList[i].apellidos) + '</td>';
+            		htmlTableBody = htmlTableBody + '<td headers="email">' + dataUndefined(JSONData.UsrList[i].correo_elec) + '</td>';            		
+            		htmlTableBody = htmlTableBody + '<td headers="telf">' + dataUndefined(JSONData.UsrList[i].telf_contacto) + '</td>';
            		
 //            		fecAlta=new Date(JSONData.UsrList[i].fec_alta);
 //            		htmlTableBody=htmlTableBody+'<td headers="datetime">'+convertDateFormat(fecAlta)+'</td>';
             		
-            		htmlTableBody=htmlTableBody+'<td headers="datetime">'+JSONData.UsrList[i].fec_alta+'</td>'; 
-            		htmlTableBody=htmlTableBody+'<td headers="actions">';            		
-            		htmlTableBody=htmlTableBody+'<a href="NewUser.jsp?id-usr='+JSONData.UsrList[i].id_usuario+'&usr-name='+JSONData.UsrList[i].nombre_usuario+'&op=0"><img src="../resources/img/details_icon.png"/></a>';    				
-            		htmlTableBody=htmlTableBody+'<a href="NewUser.jsp?id-usr='+JSONData.UsrList[i].id_usuario+'&usr-name='+JSONData.UsrList[i].nombre_usuario+'&op=2"><img src="../resources/img/editar_icon.png"/></a>';
-            		if(JSONData.UsrList[i].usu_defecto=='0'){            		           		          			
-            			if($("#userLogged").html().trim()==JSONData.UsrList[i].nombre_usuario){
-            				htmlTableBody=htmlTableBody+'<a href="../deleteUsr?id-usr='+JSONData.UsrList[i].id_usuario+'&usr-name='+JSONData.UsrList[i].nombre_usuario+'"><img src="../resources/img/delete_icon.png" onclick="return confirmarUsuLogin(\''+JSONData.UsrList[i].nombre_usuario+'\')"/></a>';	
+            		htmlTableBody = htmlTableBody + '<td headers="datetime">' + JSONData.UsrList[i].fec_alta + '</td>'; 
+            		htmlTableBody = htmlTableBody + '<td headers="actions">';            		
+            		htmlTableBody = htmlTableBody + '<a href="NewUser.jsp?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario + '&op=0"><img src="../resources/img/details_icon.png"/></a>';    				
+            		htmlTableBody = htmlTableBody + '<a href="NewUser.jsp?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario + '&op=2"><img src="../resources/img/editar_icon.png"/></a>';
+            		if(JSONData.UsrList[i].usu_defecto == '0'){            		           		          			
+            			if($("#userLogged").html().trim() == JSONData.UsrList[i].nombre_usuario){
+            				htmlTableBody = htmlTableBody + '<a href="../deleteUsr?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario 
+            				+ '"><img src="../resources/img/delete_icon.png" onclick="return confirmarUsuLogin(\'' + JSONData.UsrList[i].nombre_usuario + '\')"/></a>';	
             			}
             			else{            				
-            				htmlTableBody=htmlTableBody+'<a href="../deleteUsr?id-usr='+JSONData.UsrList[i].id_usuario+'&usr-name='+JSONData.UsrList[i].nombre_usuario+'"><img src="../resources/img/delete_icon.png" onclick="return confirmar(\''+JSONData.UsrList[i].nombre_usuario+'\')"/></a>';	
+            				htmlTableBody = htmlTableBody + '<a href="../deleteUsr?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario + '"><img src="../resources/img/delete_icon.png" onclick="return confirmar(\'' + JSONData.UsrList[i].nombre_usuario + '\')"/></a>';	
             			}            			
             		}            		
-            		htmlTableBody=htmlTableBody+'</td></tr>';
+            		htmlTableBody = htmlTableBody + '</td></tr>';
             		
         		currentIndex++;
             	}
-            	$("#data").append(htmlTableHead+htmlTableBody+htmlTableFoot); 
+            	$("#data").append(htmlTableHead + htmlTableBody + htmlTableFoot); 
             	
             }
             
             function  convertDateFormat(date){
             	 var dd = date.getDate();
-                 var mm = date.getMonth()+1; 
+                 var mm = date.getMonth() + 1; 
                  var yyyy = date.getFullYear();
-                 if(dd<10) {
-                     dd='0'+dd;
+                 if(dd < 10) {
+                     dd = '0' + dd;
                  } 
-                 if(mm<10) {
-                     mm='0'+mm;
+                 if(mm < 10) {
+                     mm = '0' + mm;
                  } 
-                 return dd+"/"+mm+"/"+yyyy;
+                 return dd + "/" + mm + "/" + yyyy;
             }
            
             function dataUndefined(data){
-            	if(typeof data==="undefined"){
+            	if(typeof data === "undefined"){
             		return "";
             	}
             	else{
