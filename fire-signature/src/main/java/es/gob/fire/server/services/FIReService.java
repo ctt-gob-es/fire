@@ -29,7 +29,6 @@ import es.gob.fire.server.services.internal.RecoverSignManager;
 import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
-import es.gob.fire.services.fireLogger;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
@@ -45,7 +44,7 @@ public class FIReService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = -2304782878707695769L;
 
-	private static Logger LOGGER =null;// Logger.getLogger(FIReService.class.getName());
+	private final static Logger LOGGER = Logger.getLogger(FIReService.class.getName());
 
     // Parametros que necesitamos de la URL.
     private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
@@ -59,14 +58,10 @@ public class FIReService extends HttpServlet {
 
     	try {
 
-    		fireLogger.installLogger();
 	    	ConfigManager.checkInitialized();
-	    	LOGGER=Logger.getLogger(FIReService.class.getName());
-	    	LOGGER.info("configuración inicializada"); //$NON-NLS-1$
 
 		}
     	catch (final Exception e) {
-    		LOGGER=Logger.getLogger(FIReService.class.getName());
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
     		return;
     	}
