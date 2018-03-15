@@ -45,7 +45,7 @@ public class FIReService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = -2304782878707695769L;
 
-	private static final Logger LOGGER = Logger.getLogger(FIReService.class.getName());
+	private static Logger LOGGER =null;// Logger.getLogger(FIReService.class.getName());
 
     // Parametros que necesitamos de la URL.
     private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
@@ -58,16 +58,22 @@ public class FIReService extends HttpServlet {
     	super.init();
 
     	try {
+
     		fireLogger.installLogger();
 	    	ConfigManager.checkInitialized();
+	    	LOGGER=Logger.getLogger(FIReService.class.getName());
+	    	LOGGER.info("configuración inicializada"); //$NON-NLS-1$
+
 		}
     	catch (final Exception e) {
+    		LOGGER=Logger.getLogger(FIReService.class.getName());
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
     		return;
     	}
 
     	try {
 			LoggingHandler.install();
+			LOGGER.info("Log en base de datos instalado"); //$NON-NLS-1$
 		}
     	catch (final SecurityException e) {
 			LOGGER.log(Level.SEVERE, "No se ha podido instalar el log seguro", e); //$NON-NLS-1$

@@ -20,14 +20,8 @@ import java.util.logging.Logger;
 public class ConfigManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
-
-
-
-
-
 	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
 	private static final String PROP_LOGS_ROLLINGDATE = "logs.rollingDate"; //$NON-NLS-1$
-	private static final String PROP_LOGS_PACKAGES = "logs.packages"; //$NON-NLS-1$
 
 
 	/** Nombre del fichero de configuraci&oacute;n. */
@@ -116,9 +110,5 @@ public class ConfigManager {
 		return config;
 	}
 
-
-	public static String getPackages() {
-		return config.getProperty(PROP_LOGS_PACKAGES);
-	}
 
 }
