@@ -26,13 +26,13 @@ public partial class example_fire_recover_error : System.Web.UI.Page
         }
         catch (Exception ex)
         {
-            Error.Text = ex.Message;
+            ErrorMsg.Text = ex.Message;
             return;
         }
 
         // Mostramos los datos obtenidos
         Provider.Text = signature.getProviderName();
-        Error.Text = signature.getErrorCode() + " - " + signature.getErrorMessage();
+        ErrorMsg.Text = signature.getErrorCode() + " - " + signature.getErrorMessage();
     }
 
     /// <summary>Codifica en base64</summary>

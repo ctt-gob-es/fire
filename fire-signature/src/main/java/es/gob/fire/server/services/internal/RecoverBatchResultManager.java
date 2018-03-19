@@ -82,16 +82,10 @@ public class RecoverBatchResultManager {
 
         // Comprobamos que no se haya declarado ya un error
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
-        	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
-        	SessionCollector.removeSession(session);
         	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + errMessage); //$NON-NLS-1$
-        	sendResult(
-        			response,
-        			new TransactionResult(
-        					TransactionResult.RESULT_TYPE_BATCH,
-        					Integer.parseInt(errType),
-        					errMessage).encodeResult());
+        	SessionCollector.cleanSession(session);
+        	response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(), HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription());
         	return;
         }
 
@@ -206,14 +200,14 @@ public class RecoverBatchResultManager {
         		ret = connector.sign(remoteTrId);
         	}
         	catch(final FIReConnectorUnknownUserException e) {
-        		SessionCollector.cleanSession(session);
-        		LOGGER.warning("Usuario no reconocido: " + e); //$NON-NLS-1$
-        		response.sendError(HttpCustomErrors.NO_USER.getErrorCode());
+    			LOGGER.log(Level.SEVERE, "El usuario no esta dado de alta en el sistema", e); //$NON-NLS-1$
+                SessionCollector.removeSession(session);
+    			response.sendError(HttpCustomErrors.NO_USER.getErrorCode());
         		return;
         	}
         	catch(final Exception e) {
-        		SessionCollector.cleanSession(session);
         		LOGGER.log(Level.SEVERE, "Ocurrio un error durante la operacion de firma", e); //$NON-NLS-1$
+        		SessionCollector.removeSession(session);
         		response.sendError(HttpCustomErrors.SIGN_ERROR.getErrorCode());
         		return;
         	}
@@ -226,7 +220,7 @@ public class RecoverBatchResultManager {
         	}
         	catch (final Exception e) {
         		LOGGER.severe("No se ha podido decodificar el certificado del firmante: " + e); //$NON-NLS-1$
-        		SessionCollector.cleanSession(session);
+        		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"No se ha podido decodificar el certificado proporcionado: " + e); //$NON-NLS-1$
         		return;
@@ -238,7 +232,7 @@ public class RecoverBatchResultManager {
         	}
         	catch (final Exception e) {
         		LOGGER.severe("Parametros extra de configuracion de la firma mal formatos: " + e); //$NON-NLS-1$
-        		SessionCollector.cleanSession(session);
+        		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         				"Parametros extra de configuracion de la firma mal formatos: " + e); //$NON-NLS-1$
         		return;
@@ -250,7 +244,7 @@ public class RecoverBatchResultManager {
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error de codificacion en los datos de firma trifasica proporcionados", e); //$NON-NLS-1$
-        		SessionCollector.cleanSession(session);
+        		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"Error de codificacion en los datos de firma trifasica proporcionados: " + e //$NON-NLS-1$
         				);

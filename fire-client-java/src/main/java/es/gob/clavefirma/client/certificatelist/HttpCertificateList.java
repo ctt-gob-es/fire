@@ -26,6 +26,7 @@ import javax.json.JsonReader;
 import javax.json.JsonValue;
 
 import es.gob.clavefirma.client.ClientConfigFilesNotFoundException;
+import es.gob.clavefirma.client.ConnectionManager;
 import es.gob.clavefirma.client.HttpCertificateBlockedException;
 import es.gob.clavefirma.client.HttpForbiddenException;
 import es.gob.clavefirma.client.HttpNetworkException;
@@ -34,7 +35,6 @@ import es.gob.clavefirma.client.HttpOperationException;
 import es.gob.clavefirma.client.HttpWeakRegistryException;
 import es.gob.fire.client.Base64;
 import es.gob.fire.client.ConfigManager;
-import es.gob.fire.client.ConnectionManager;
 import es.gob.fire.client.HttpCustomErrors;
 import es.gob.fire.client.HttpError;
 

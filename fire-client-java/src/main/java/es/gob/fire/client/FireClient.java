@@ -811,13 +811,14 @@ public class FireClient {
         try {
         	responseJSON = this.conn.readUrl(this.serviceUrl, urlParameters, Method.GET);
         } catch (final HttpError e) {
-        	LOGGER.severe("Error en la llamada al servicio de firma de lote: " + e.getResponseDescription()); //$NON-NLS-1$
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
         		throw new HttpForbiddenException(e);
         	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
         		throw new HttpNetworkException(e);
         	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
         		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorDescription(), e);
         	} else {
         		throw new HttpOperationException(e.getResponseDescription(), e);
         	}

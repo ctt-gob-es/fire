@@ -16,9 +16,10 @@ package es.gob.fire.client;
  */
 public final class HttpForbiddenException extends HttpOperationException {
 
-    private static final long serialVersionUID = -2430443029411029555L;
+    /** Serial Id. */
+	private static final long serialVersionUID = -3001968868698178809L;
 
-    HttpForbiddenException() {
+	HttpForbiddenException() {
         super();
     }
 

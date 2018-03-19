@@ -16,9 +16,8 @@ package es.gob.fire.client;
  */
 public final class HttpWeakRegistryException extends HttpOperationException {
 
-
-    /** Serial ID. */
-	private static final long serialVersionUID = 2260930279933190233L;
+	/** Serial ID. */
+	private static final long serialVersionUID = -6238299869930902680L;
 
 	HttpWeakRegistryException() {
         super();

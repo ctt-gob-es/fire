@@ -61,7 +61,7 @@ import es.gob.fire.server.connector.WeakRegistryException;
 /** Implementaci&oacute;n del API interno de firma en la nube mediante los
  * certificados del servicio de custodia de Cl@ve Firma.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
-public final class ClaveFirmaConnector implements FIReConnector {
+public final class ClaveFirmaConnector extends FIReConnector {
 
     private static final String EX_MSG_INVALID_PROVIDER_NAME = "El par\u00E1metro no cumple con la longitud requerida. Verifique que no supera el m\u00E1ximo permitido o sea vac\u00EDo."; //$NON-NLS-1$
 
