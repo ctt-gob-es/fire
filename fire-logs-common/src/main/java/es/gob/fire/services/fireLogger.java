@@ -104,7 +104,7 @@ public class fireLogger {
 	        fileFolder.mkdirs();
 	    }
 
-	    final String dateFileName = folder + File.separator + dateForName + ".log"; //$NON-NLS-1$
+	    final String dateFileName = folder + File.separator +"fire_service_"+ dateForName + ".log"; //$NON-NLS-1$
 
 	    final boolean appendToFile = true;
 
