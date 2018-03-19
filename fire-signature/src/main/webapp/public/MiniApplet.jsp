@@ -456,10 +456,8 @@
 					<div class="cabecera-listaDocs">Nombre</div>
 				<% int i=1;
 				for (DocInfo docInfo : docInfos)  { %>
-
-					<div class="<%=i%2==0?"celda-listaDocs":"celda-listaDocs_Color"%>"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>
-					<div class="<%=i%2==0?"celda-listaDocs":"celda-listaDocs_Color"%>"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>					
-
+					<div class="<%=i%2==0?"celda-listaDocs":"celda-listaDocs_Color"%>"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>	
+					<div class="<%=i%2==0?"celda-listaDocs":"celda-listaDocs_Color"%>"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>									
 				<%i++; 
 				}%>				
 
