@@ -128,7 +128,7 @@
 					<% } else { %>
 						<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
 							<span class="arrow-left-white"></span>
-							<span >volver</span>
+							<span >Volver</span>
 						</a>
 					<% } %>
 					</div>

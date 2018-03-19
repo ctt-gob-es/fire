@@ -45,10 +45,10 @@
 .button_firmar {text-decoration: none;}
 .button_firmar:hover {text-decoration: underline; cursor:pointer;  }
 
-.button-volver {float: right;width: 80px;padding: 0.2em 0.3em 0.3em 1.2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
+.button-volver {float: right;width: 90px;padding: 0.4em 0.4em 0.4em 1.4em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; text-decoration: none;}/*cursor:pointer;  margin-top: 1em;*/
 .button-volver:hover {text-decoration: underline; cursor:pointer;}
 
-.button-cancelar {z-index:10; float: right;width: 80px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
+.button-cancelar {z-index:10; float: right;width: 90px;padding: 0.4em 0.4em 0.4em 1.4em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
 .button-cancelar:hover {text-decoration: underline;}
 
 .button-operacion {width: 170px;padding: 0.2em 1em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 1.2em 1em;font-size:22px;box-sizing: border-box;font-weight: bold;text-decoration: none;}
