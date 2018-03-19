@@ -16,9 +16,10 @@ package es.gob.fire.client;
  */
 public final class HttpNoUserException extends HttpOperationException {
 
-    private static final long serialVersionUID = -2430443029411029555L;
+    /** Serial Id. */
+	private static final long serialVersionUID = -759772137388280743L;
 
-    HttpNoUserException() {
+	HttpNoUserException() {
         super();
     }
 

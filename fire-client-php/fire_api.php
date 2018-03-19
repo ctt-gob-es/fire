@@ -265,9 +265,6 @@
 		if (empty($documentId)) {
             throw new InvalidArgumentException("El identificador del documento no puede ser nulo");
 		}
-		if (empty($documentB64)) {
-            throw new InvalidArgumentException("El documento no puede ser nulo");
-		}
 		
 		// Recodificamos los parametros que lo necesiten para asegurar la correcta transmision por URL
 		$b64SpC = array("+", "/"); 

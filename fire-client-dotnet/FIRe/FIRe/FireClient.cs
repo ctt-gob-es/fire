@@ -464,12 +464,6 @@ namespace FIRe
                     "El identificador del documento no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(documentB64))
-            {
-                throw new ArgumentException(
-                    "El documento a incluir no puede ser nulo"
-                );
-            }
 
             string url = this.config.getFireService();
 
@@ -479,7 +473,7 @@ namespace FIRe
                 .Replace(SUBJECTID, subjectId)
                 .Replace(TRANSACTION, transactionId)
                 .Replace(DOCID, documentId)
-                .Replace(DATA, documentB64.Replace('+', '-').Replace('/', '_'))
+                .Replace(DATA, documentB64 != null ? documentB64.Replace('+', '-').Replace('/', '_') : "")
                 .Replace(CONF, string.IsNullOrEmpty(confB64) ? "" : confB64.Replace('+', '-').Replace('/', '_'));
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
@@ -548,12 +542,6 @@ namespace FIRe
                     "El identificador del documento no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(documentB64))
-            {
-                throw new ArgumentException(
-                    "El documento a incluir no puede ser nulo"
-                );
-            }
             if (String.IsNullOrEmpty(op))
             {
                 throw new ArgumentException(
@@ -577,11 +565,9 @@ namespace FIRe
                 .Replace(COP, op)
                 .Replace(FORMAT, ft)
                 .Replace(PROP, string.IsNullOrEmpty(propB64) ? "" : propB64.Replace('+', '-').Replace('/', '_'))
-                .Replace(DATA, documentB64.Replace('+', '-').Replace('/', '_'))
+                .Replace(DATA, documentB64 != null ? documentB64.Replace('+', '-').Replace('/', '_') : "")
                 .Replace(CONF, string.IsNullOrEmpty(confB64) ? "" : confB64.Replace('+', '-').Replace('/', '_'));
-
-                
-
+            
             // Si se ha indicado un formato de upgrade, lo actualizamos; si no, lo eliminamos de la URL
             if (String.IsNullOrEmpty(upgrade))
             {
@@ -868,6 +854,8 @@ namespace FIRe
                             throw new DuplicateDocumentException("El identificador de documento ya existe en el lote", e);
                         case (HttpCustomErrors.INVALID_TRANSACTION):
                             throw new InvalidTransactionException("La transaccion no es valida o ha caducado", e);
+                        case (HttpCustomErrors.BATCH_NO_DOCUMENTS):
+                            throw new HttpOperationException("Se ha mandado a firmar un lote sin documentos", e);
                         case (HttpCustomErrors.BATCH_NO_SIGNED):
                             throw new BatchNoSignedException("El lote no se ha firmado", e);
                         case (HttpCustomErrors.BATCH_DOCUMENT_FAILED):

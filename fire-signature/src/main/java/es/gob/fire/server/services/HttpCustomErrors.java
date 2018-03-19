@@ -30,7 +30,7 @@ public enum HttpCustomErrors {
 	/** Se excede el l&iacute;mite de documentos establecido (com&uacute;nmente, el tama&ntilde;o de un lote). */
 	NUM_DOCUMENTS_EXCEEDED(526, "Se excedido el numero maximo de documentos permitidos"), //$NON-NLS-1$
 
-	/** Se indica un identificador de documento que ya est� dado de alta en el lote de firma. */
+	/** Se indica un identificador de documento que ya est&aacute; dado de alta en el lote de firma. */
 	DUPLICATE_DOCUMENT(527, "El identificador de documento ya existe en el lote"), //$NON-NLS-1$
 
 	/** La transaccion indicada no es valida o ya ha caducado. */
@@ -58,7 +58,10 @@ public enum HttpCustomErrors {
 	INVALID_BATCH_DOCUMENT(535, "El documento no existe en el lote"), //$NON-NLS-1$
 
 	/** Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes. */
-	BATCH_DOCUMENT_FAILED(536, "Fallo la firma del documento que se intenta recuperar"); //$NON-NLS-1$
+	BATCH_DOCUMENT_FAILED(536, "Fallo la firma del documento que se intenta recuperar"), //$NON-NLS-1$
+
+	/** Error devuelto cuando se solicita firmar un lote sin documentos. */
+	BATCH_NO_DOCUMENT(537, "Se intenta firmar un lote sin documentos"); //$NON-NLS-1$
 
 	private final int errorCode;
 	private final String errorDescription;

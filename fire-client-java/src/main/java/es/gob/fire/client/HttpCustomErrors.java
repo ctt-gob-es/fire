@@ -57,7 +57,10 @@ public enum HttpCustomErrors {
 	INVALID_BATCH_DOCUMENT(535, "El documento no existe en el lote"), //$NON-NLS-1$
 
 	/** Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes. */
-	BATCH_DOCUMENT_FAILED(536, "Fallo la firma del documento que se intenta recuperar"); //$NON-NLS-1$
+	BATCH_DOCUMENT_FAILED(536, "Fallo la firma del documento que se intenta recuperar"), //$NON-NLS-1$
+
+	/** Error devuelto cuando se solicita firmar un lote sin documentos. */
+	BATCH_NO_DOCUMENT(537, "Se intenta firmar un lote sin documentos"); //$NON-NLS-1$
 
 	private final int errorCode;
 	private final String errorDescription;

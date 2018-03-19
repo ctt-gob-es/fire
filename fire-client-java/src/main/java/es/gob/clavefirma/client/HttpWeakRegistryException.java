@@ -15,10 +15,12 @@ package es.gob.clavefirma.client;
  */
 public final class HttpWeakRegistryException extends HttpOperationException {
 
-
-    /** Serial ID. */
+	/** Serial ID. */
 	private static final long serialVersionUID = 2260930279933190233L;
 
+	/**
+	 * Indica que un usuario no puede tener certificados de firma.
+	 */
 	HttpWeakRegistryException() {
         super();
     }
