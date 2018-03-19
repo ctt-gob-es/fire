@@ -391,13 +391,13 @@
 					</div>
 					<div class="container_btn_operation">
 					<% if (originForced) { %>
-						<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
-							<span >Cancelar</span>
+						<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">							
+							<span >Cancelar</span>							
 						</a>
 					<% } else { %>
-						<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">
+						<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">							
 							<span class="arrow-left-white"></span>
-							<span >volver</span>
+							<span >Volver</span>							
 						</a>
 					<% } %>
 					</div>
