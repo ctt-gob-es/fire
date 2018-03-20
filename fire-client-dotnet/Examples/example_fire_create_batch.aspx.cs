@@ -5,7 +5,7 @@ public partial class example_fire_create_batch : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        
+        string appId = "B244E473466F";
         string conf = "redirectOkUrl=http://www.google.es\n" +	// URL a la que llegara si el usuario se autentica correctamente
                       "redirectErrorUrl=http://www.ibm.com";        // URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
         string confB64 = Base64Encode(conf);
@@ -14,7 +14,7 @@ public partial class example_fire_create_batch : System.Web.UI.Page
         FireTransactionIdResult loadResult;
         try
         {
-            loadResult = new FireClient("A418C37E84BA").createBatchProcess( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            loadResult = new FireClient(appId).createBatchProcess( // Identificador de la aplicacion (dada de alta previamente en el sistema)
                 "00001",        // DNI de la persona
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
                 "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)

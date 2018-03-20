@@ -614,6 +614,9 @@
 		else if ($http_code == 536) {
 			throw new InvalidBatchDocumentException("Fallo la firma del documento que se intenta recuperar");
 		}
+		else if ($http_code == 537) {
+			throw new HttpOperationException("Se intenta firmar un lote sin documentos");
+		}
 		else if ($http_code / 100 >= 3) {
 			throw new HttpOperationException("Error indeterminado (".$http_code.")");
 		}
