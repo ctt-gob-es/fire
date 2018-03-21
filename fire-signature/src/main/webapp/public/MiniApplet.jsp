@@ -398,7 +398,7 @@
 				</div>
 				
 				<div id="botones_error" class="botones">
-					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>
+					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>&nbsp;
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
 				</div>
 			</div>
@@ -454,19 +454,19 @@
 
 			</div>
 		</section>
-		<div class="container_btn_operation">
-					<% if (originForced) { %>
-						<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">							
-							<span >Cancelar</span>							
-						</a>
-					<% } else { %>
-						<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">							
-							<span class="arrow-left-white"></span>
-							<span >Volver</span>							
-						</a>
-					<% } %>
-			</div>
 		<% } %>
+		<div class="container_btn_operation">
+		<% if (originForced) { %>
+			<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">							
+				<span >Cancelar</span>							
+			</a>
+			<% } else { %>
+			<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">							
+				<span class="arrow-left-white"></span>
+				<span >Volver</span>							
+			</a>
+		<% } %>
+		</div>
 		
 	</main>
 
