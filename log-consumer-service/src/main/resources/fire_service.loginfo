@@ -1,0 +1,23 @@
+#############################################
+# Fichero de configuración de Logs    		# 
+#############################################
+
+#CODIFICACIÓN (UTF-8, UTF-16, ISO-8859-1, etc..) 
+#sólo un dato. 
+code=UTF-8
+
+#Niveles definidos en el log.(FINER,FINE,INFO,WARNING,SEVERE)
+levels=SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST
+
+#Formato de las fechas ()
+dateFormat=yyyy-mm-dd
+
+#Formato de las horas
+timeFormat=HH:mm:ss 
+
+#Carácter de separación
+charSplit=;
+
+
+#Patrón de las líneas del fichero Log.
+logPattern=# D:[DATE]; T:[TIME]; L:[LEVEL]; M:[MESSAGE] /n  CLASS:[CLASS]; METHOD:[METHOD]
