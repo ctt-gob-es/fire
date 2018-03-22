@@ -21,7 +21,7 @@
 .mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
 
 .contenido {display: block; width: 100%; margin: 0 auto; height: auto;  position: relative;z-index:9;}
-.container-title{ display:block; width:95%;position: relative; height:4em;}
+.container-title{ display:block; width:100%;position: relative; height:4em;}
 .container-title .title-head{display: block; width:100%;  text-align: center;}/*position: absolute;*/
 .container-title .title-button{display: grid; width:100%;  text-align: center;}/*position: absolute;*/
 
