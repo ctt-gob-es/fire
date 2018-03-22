@@ -64,7 +64,7 @@
 .clear {clear: both;}
 .no-float {float: none !important;}
 
-.container-box-title{width: 100%;margin: 2em; display: block;position: relative;}
+.container-box-title{width: 100%;margin-top: 2em; display: block;position: relative;}
 .container_tit{ width:100%;display:block;}
 .container_btn_operation {width: 100%; display: block; margin-top: 5em; text-align: center;}
 

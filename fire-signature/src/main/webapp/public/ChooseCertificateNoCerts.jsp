@@ -126,10 +126,10 @@
 				<div  class="container-box-title">
 					<div class="container_tit">
 						<h1 class="title"><span class="bold">No tiene certificados en <%=providerName%></span></h1>
-					</div>
-					
+					</div>		
 				</div>
-				<div class="container-box-error">
+				
+				<div class="container-box-error-new">
 					<div class="container-textbox-error">
 						<p class="text-error-box">Si lo desea puede emitir un nuevo certificado en la nube para firmar</p>
 					</div>
@@ -141,25 +141,25 @@
 							<input type="submit" class="button_firmar" value="Emitir certificado" />
 						</form>
 					</div>
-									
-				
-				<% if (!originForced) { %>
-			  		
-					<div id="certLocalText" class="container-textbox-error hide">					
-						<p class="text-error-box">Tambien puede firmar usando sus certificados locales (incluyendo DNIe).</p>
-					</div>								  				
-					<div  id="certLocalcontainer" class="error-box hide">
-						<form id="certLocal" action="chooseCertificateOriginService" class="hide">
-					  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-					  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>">
-					  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
-							<input type="submit" class="button_firmar" value="Usar certificado local" />
-						</form>
-					</div>
-									
-				<% } %>
 				</div>
+									
+				<% if (!originForced) { %>
+			  		<div class="container-box-error-local">
+						<div id="certLocalText" class="container-textbox-error hide">					
+							<p class="text-error-box">Tambien puede firmar usando sus certificados locales (incluyendo DNIe).</p>
+						</div>								  				
+						<div  id="certLocalcontainer" class="error-box hide">
+							<form id="certLocal" action="chooseCertificateOriginService" class="hide">
+						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>">
+						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
+								<input type="submit" class="button_firmar" value="Usar certificado local" />
+							</form>
+						</div>
+					</div>			
+				<% } %>
+				
 				
 				<div class="container_btn_operation">
 					<% if (originForced) { %>
