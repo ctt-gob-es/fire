@@ -29,9 +29,9 @@
 .contenido-firmar-listadocs {width: 740px; margin-left: auto; margin-right: auto; margin-top: 1.5em;}
 
 .contenido-firmar-listadocs .container-box{ width: 100%;top:0.5em;position: relative;text-align: left; background-color: #eeeeee;}
-.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;top:1em; position: relative;}
-.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
-.contenido-firmar .nota-firmar{position: relative;top: 1em;padding: 1em; }
+.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 1em;text-align: center; position: relative;}
+.contenido-firmar .container-firmar .button_firmar {width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
+.contenido-firmar .nota-firmar{position: relative;padding: 1em;text-align: center; }
 
 
 .titulo-listaDocs{display:block;font-size: large;text-align: center;margin-bottom: 0.5em;}
@@ -40,7 +40,7 @@
 
 
 .contenido-opciones {width: 100%; height:15%; display:block;position: relative;}
-.contenido-opciones .botones {margin: 0 auto;text-align: center;position: relative;top:1em;}
+.contenido-opciones .botones {margin: 0 auto;text-align: center;position: relative;top:2em;}
 .mensaje-error {color #707070;font-size: 22px;margin-bottom: 1em;text-align: center;position: relative;top:1em;}
 #errorMsg{text-align: center;}
 
@@ -96,9 +96,9 @@
 
 
 	.container_btn_operation {width: 100%; display: block; margin-top: 5em; text-align: center;}
-	.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 3em;text-align: center;top:2em;position: relative;}
+	.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 1em;text-align: center;position: relative;}
 	.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
-	.contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;}
+	.contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;text-align: center;}
 
 	.cabecera-listaDocs{display: inline-block;width: 40%;padding: 0.35em;font-weight: bold;text-align: left;padding-left: 0.8em;padding-top: 0.8em;}
 	.celda-listaDocs{display: inline-block;width: 40%;padding: 0.35em;margin: 0.1em;vertical-align: top;padding-left: 0.7em; padding-top: 0.2em;font-size: 12px;}
@@ -135,9 +135,9 @@
 .contenido-firmar {width: 500px; }
 .contenido-firmar-listadocs {width: 500px; margin-left: auto; margin-right: auto; margin-top: 1.5em;}
 
-.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;top: 1em;position: relative;}
-.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
-.contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;}
+.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 1em;text-align: center;position: relative;}
+.contenido-firmar .container-firmar .button_firmar {width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
+.contenido-firmar .nota-firmar{top: 1em;display: block;position: relative;text-align: center;}
 
 
 .cabecera-listaDocs{display: inline-block;width: 40%;padding: 0.35em;font-weight: bold;text-align: left;padding-left: 0.8em;padding-top: 0.8em;}
@@ -156,7 +156,7 @@
 	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 63%; color: #707070;margin-top: -0.20em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1em; padding-top:1em; padding-bottom:1em;}
+	
 		
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.2em; padding-top:1em; padding-bottom:0.3em;}
 	.container-title .title-button{display: inline-block; width:30%;position: absolute; right:1%;}
@@ -171,7 +171,7 @@
 	.contenido-firmar {width: 370px; }
 	.contenido-firmar-listadocs {width: 370px; margin-left: auto; margin-right: auto; margin-top: 1.5em;}
 	
-	.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
+	.contenido-firmar .container-firmar .button_firmar {width: 180px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
 	
 }
 
@@ -183,16 +183,16 @@
 	.mod_claim_text_sec { font-family: Verdana; font-size: 0.75em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1em; padding-top:1em; padding-bottom:1em;}
 		
-	.container_tit{ width:100%;display:block; margin-left: -2em;}
+	.container_tit{ width:100%;display:block; }
 	
   	.contenido-firmar {width: 270px;position: relative;}
-  	.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 2em;text-align: center;position: relative;top:2em;}
+  	.contenido-firmar .container-firmar {width: 100%; display: block; box-sizing: border-box; padding: 1.7em 0; margin-bottom: 1em;text-align: center;position: relative;}
 	.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 230px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:32px;box-sizing: border-box;font-weight: bold;}
-	.contenido-firmar .nota-firmar{display:block; top:1em;position: relative;}	
+	.contenido-firmar .nota-firmar{display:block; top:1em;position: relative;text-align: center;}	
 	
-	.contenido-firmar .container-firmar .button_firmar {margin 0 auto;width: 170px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
+	.contenido-firmar .container-firmar .button_firmar {width: 170px;padding: 0.2em 2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:22px;box-sizing: border-box;font-weight: bold;}
 	
-	.mensaje-error {color #707070;font-size: 14px;margin-bottom: 1em;text-align: center;position: relative;top:1em;}
+	.mensaje-error {color #707070;font-size: 14px;margin-bottom: 1em;text-align: center;position: relative;}
 	/*.button-operacion {width: 130px;padding: 0.2em 1em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 1.2em 1em;font-size:12px;box-sizing: border-box;font-weight: bold;text-decoration: none;}*/
 	
 	.button-operacion {width: 120px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin:  0 auto;font-size:15px;box-sizing: border-box;font-weight: bold;text-decoration: none; display: block;}

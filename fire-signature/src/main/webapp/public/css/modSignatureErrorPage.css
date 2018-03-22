@@ -22,7 +22,7 @@
 
 
 .contenido {display: block; width: 100%; margin: 0 auto; height: auto;  position: relative;z-index:9;text-align: center}/*width: 665px;min-height:40em;*/
-.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:0.5em; }
+.contenido .title {color: #dd5a00; text-align: center; margin-top: 1.5em; margin-bottom: 1.5em; font-weight: bold; font-size:1.5em; padding-top:0.5em; }
 .contenido .subtitle {color: #707070; text-align: center;margin: 0 auto; font-weight: bold; font-size:1em;padding-top:0.5em; }
 
 
