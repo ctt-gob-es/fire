@@ -114,15 +114,10 @@
 	
 			
 		<section class="contenido">		
-		<div class="container-title"  >
+		<div class="container-title">
 			<div class="title-head">
 				<h1 class="title">Seleccione el sistema de firma</h1>
-			</div>
-			<div class="title-button">				
-				<a href= "cancelOperationService?<%= cancelUrlParams %>" class="button-cancelar">
-					<div>Cancelar</div>
-				</a>
-			</div>
+			</div>	
 		</div>
 		
 		<div class="container-box">	
@@ -153,18 +148,19 @@
 							<%= userRegistered ? info.getDescription() : info.getNoRegisteredMessage() %>													
 						</p>
 					</div>
-					<form method="POST" action="chooseCertificateOriginService" id="form<%= info.getName() %>">
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= subjectId %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
-						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= info.getName() %>" />
-						<% if (unregistered != null) { %>
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED %>" value="<%= unregistered %>" />
-						<% } %>
-						<% if (op != null) { %>
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_OPERATION %>" value="<%= op %>" />
-						<% } %>
-						
+					<form method="POST" action="chooseCertificateOriginService" id="form<%= info.getName() %>" class="formProvider">
+						<div style="display: none"><!-- type="hidden" -->
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= subjectId %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= info.getName() %>" />
+							<% if (unregistered != null) { %>
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED %>" value="<%= unregistered %>" />
+							<% } %>
+							<% if (op != null) { %>
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_OPERATION %>" value="<%= op %>" />
+							<% } %>
+						</div>
 						<a class="button" title="<%= info.getHeader() %>" onclick="document.getElementById('form<%= info.getName() %>').submit();" href="javascript:{}">
 							<span>Acceder</span>
 							<span class="arrow-right arrow-right-inicio"></span>
@@ -174,6 +170,13 @@
 		<%
 		}
 		%>
+			</div>
+			<div class="container-title">
+				<div class="title-button">				
+					<a href= "cancelOperationService?<%= cancelUrlParams %>" class="button-cancelar">
+						<div>Cancelar</div>
+					</a>
+				</div>
 			</div>
 		</section>
 	</main>
@@ -187,7 +190,7 @@
 		</div>
 		<div class="footer_bottom wrapper">
 			<div class="comp_left">
-			  <p class="footer-text">&copy; 2017 Gobierno de Espa&ntilde;a - FIRe</p> 
+			  <p class="footer-text">&copy; 2018 Gobierno de Espa&ntilde;a - FIRe</p> 
 			</div>
 		</div>
 	</footer>

@@ -389,18 +389,7 @@
 					<div class="container_tit">
 						<h1 class="title"><span class="bold">Firma con certificado local</span></h1>
 					</div>
-					<div class="container_btn_operation">
-					<% if (originForced) { %>
-						<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">
-							<span >Cancelar</span>
-						</a>
-					<% } else { %>
-						<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">
-							<span class="arrow-left-white"></span>
-							<span >volver</span>
-						</a>
-					<% } %>
-					</div>
+					
 				</div>
 
 			<div class="contenido-opciones temp-hide" id="errorButtonsPanel"><!-- temp-hide -->
@@ -409,7 +398,7 @@
 				</div>
 				
 				<div id="botones_error" class="botones">
-					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>
+					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>&nbsp;
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
 				</div>
 			</div>
@@ -451,21 +440,33 @@
 		
 		<% if (docInfos != null && docInfos.length > 0) { %>
 		<section class="contenido-firmar-listadocs">
-			<div id="listDocs" class="container-box "><!-- no-float -->			
+			<div class="titulo-listaDocs" >Documentos a Firmar</div>
+			<div id="listDocs" class="container-box"><!-- no-float -->	
+					<div class="cabecera-listaDocs">Id. Documento</div>		
 					<div class="cabecera-listaDocs">Título</div>
-					<div class="cabecera-listaDocs">Nombre</div>
 				<% int i=1;
 				for (DocInfo docInfo : docInfos)  { %>
-
-					<div class="<%=i%2==0?"celda-listaDocs":"celda-listaDocs_Color"%>"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>
-					<div class="<%=i%2==0?"celda-listaDocs":"celda-listaDocs_Color"%>"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>					
-
+					<div class="celda-listaDocs"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>	
+					<div class="celda-listaDocs"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>	
+													
 				<%i++; 
 				}%>				
 
 			</div>
 		</section>
 		<% } %>
+		<div class="container_btn_operation">
+		<% if (originForced) { %>
+			<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">							
+				<span >Cancelar</span>							
+			</a>
+			<% } else { %>
+			<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">							
+				<span class="arrow-left-white"></span>
+				<span >Volver</span>							
+			</a>
+		<% } %>
+		</div>
 		
 	</main>
 
@@ -480,7 +481,7 @@
 		</div>
 		<div class="footer_bottom wrapper">
 			<div class="comp_left">
-			  <p class="footer-text">&copy; 2017 Gobierno de Espa&ntilde;a - FIRe</p> 
+			  <p class="footer-text">&copy; 2018 Gobierno de Espa&ntilde;a - FIRe</p> 
 			</div>
 		</div>
 	</footer>

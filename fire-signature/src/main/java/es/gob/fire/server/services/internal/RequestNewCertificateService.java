@@ -36,8 +36,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOGGER = Logger.getLogger(RequestNewCertificateService.class.getName());
-	
-	private static String originForced=null;
+
 
 	/**
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
@@ -47,7 +46,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId  = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
-		originForced = request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED);
+		final boolean originForced = Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
 
 		FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), true, false);
         if (session == null) {
@@ -128,19 +127,17 @@ public final class RequestNewCertificateService extends HttpServlet {
         }
         catch (final WeakRegistryException e) {
         	LOGGER.log(Level.SEVERE, "El usuario realizo un registro debil y no puede tener certificados de firma: " + e, e); //$NON-NLS-1$
-        	if (originForced!=null && Boolean.parseBoolean(originForced)) {
-        		ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_WEAK_REGISTRY, Boolean.parseBoolean(originForced),null);
-            	response.sendRedirect(errorUrlRedirection);
+        	if (originForced) {
+        		response.sendRedirect(errorUrlRedirection);
         	}
         	else {
-        		ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_WEAK_REGISTRY, false,null);
-        		request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response); //$NON-NLS-1$
+        		request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
         	}
-        	
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "Error desconocido en la generacion del certificado: " + e, e); //$NON-NLS-1$
+        	SessionCollector.removeSession(session);
         	response.sendError(
         			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error desconocido en la generacion del certificado: " + e); //$NON-NLS-1$

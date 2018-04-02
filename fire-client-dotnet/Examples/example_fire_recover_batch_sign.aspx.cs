@@ -8,24 +8,43 @@ public partial class example_fire_recover_batch_sign : System.Web.UI.Page
         string dataB64 = Base64Encode("Hola Mundo!!");
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
-        FireTransactionResult signature;
-        string transactionId = "ac335c7f-0696-46f7-b8c2-8016f6cbfc75";
+        string appId = "B244E473466F";
+        string transactionId = "d9ff68d2-71cb-47ea-87b9-497b66c3b3e7";
+        FireClient fireClient = new FireClient(appId);
+
+        FireTransactionResult signature1;
         try
         {
-            signature = new FireClient("A418C37E84BA").recoverBatchSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            signature1 = fireClient.recoverBatchSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
                 transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
                 "00001",        // Identificador del usuario
-                "1"             // Identificador del documentor del que se quiere obtener la firma
+                "1"             // Identificador del documento del que se quiere obtener la firma
             );
+
+            // Mostramos los datos obtenidos
+            DocumentSignature1.Text = System.Convert.ToBase64String(signature1.getResult());
         }
         catch (Exception ex)
         {
-            DocumentSignature.Text = ex.Message;
-            return;
+            DocumentSignature1.Text = ex.Message;
         }
 
-        // Mostramos los datos obtenidos
-        DocumentSignature.Text = System.Convert.ToBase64String(signature.getResult());
+        FireTransactionResult signature2;
+        try
+        {
+            signature2 = fireClient.recoverBatchSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
+                "00001",        // Identificador del usuario
+                "2"             // Identificador del documento del que se quiere obtener la firma
+            );
+
+            // Mostramos los datos obtenidos
+            DocumentSignature2.Text = System.Convert.ToBase64String(signature2.getResult());
+        }
+        catch (Exception ex)
+        {
+            DocumentSignature2.Text = ex.Message;
+        }
 
     }
 

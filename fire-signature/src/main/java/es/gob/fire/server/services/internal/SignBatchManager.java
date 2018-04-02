@@ -55,7 +55,15 @@ public class SignBatchManager {
     	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
     	if (session == null) {
     		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
-    		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
+    		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(), "La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
+    		return;
+    	}
+
+    	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
+    	if (batchResult == null || batchResult.documentsCount() == 0) {
+    		LOGGER.warning("Se ha pedido firmar un lote sin documentos. Se aborta la operacion."); //$NON-NLS-1$
+        	SessionCollector.removeSession(session);
+    		response.sendError(HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorCode(), HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorDescription());
     		return;
     	}
 

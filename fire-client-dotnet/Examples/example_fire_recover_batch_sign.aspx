@@ -10,7 +10,8 @@
 <body>
     <form id="form1" runat="server">
     <div>
-        <br /><b>Firma del documento:</b><br /> <asp:Label runat="server" id="DocumentSignature"></asp:Label>
+        <br /><b>Firma del documento 1:</b><br /> <asp:Label runat="server" id="DocumentSignature1"></asp:Label>
+        <br /><b>Firma del documento 2:</b><br /> <asp:Label runat="server" id="DocumentSignature2"></asp:Label>
     </div>
     </form>
 </body>

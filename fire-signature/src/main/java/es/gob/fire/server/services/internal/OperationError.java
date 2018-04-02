@@ -30,7 +30,8 @@ enum OperationError {
 	CERTIFICATES_SERVICE(101, "Error en la obtencion de los certificados"), //$NON-NLS-1$
 	CERTIFICATES_SERVICE_NETWORK(102, "Error al conectar con el servicio para la recuperacion de certificados"), //$NON-NLS-1$
 	CERTIFICATES_BLOCKED(103, "Los certificados del usuario estan bloqueados"), //$NON-NLS-1$
-	CERTIFICATES_WEAK_REGISTRY(104, "El usuario no puede poseer certificados de firma por haber realizado un registro debil"), //$NON-NLS-1$
+	CERTIFICATES_WEAK_REGISTRY(104, "El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente"), //$NON-NLS-1$
+	CERTIFICATES_NO_CERTS(105, "El usuario no dispone de certificados de firma ni puede generarlos desde FIRe"), //$NON-NLS-1$
 
 	// Errores propios de la operacion de firma
 	SIGN_SERVICE(201, "Error en la obtencion de la firma de los datos"), //$NON-NLS-1$
@@ -38,10 +39,7 @@ enum OperationError {
 	//SIGN_SERVICE_POSTSIGN(203, "Error al ejecutar la postfirma de los datos"), //$NON-NLS-1$
 	SIGN_SERVICE_NETWORK(205, "Error al conectar con el servicio para la generacion de la firma con la clave remota"), //$NON-NLS-1$
 
-	SIGN_MINIAPPLET(250, "Error al generar la firma con el cliente nativo"), //$NON-NLS-1$
-
-	// Errores propios de la operacion de lote
-	RECOVER_BATCH_NO_DOCUMENTS(302, "No se encontraron documentos en el lote"); //$NON-NLS-1$
+	SIGN_MINIAPPLET(250, "Error al generar la firma con el cliente nativo"); //$NON-NLS-1$
 
 	private int code;
 

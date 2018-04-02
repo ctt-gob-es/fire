@@ -48,7 +48,7 @@ import es.gob.fire.server.connector.WeakRegistryException;
 
 /** Servicio de pruebas con certificados en disco.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
-public class TestConnector implements FIReConnector {
+public class TestConnector extends FIReConnector {
 
 	private static final Logger LOGGER = Logger.getLogger(TestConnector.class.getName());
 
@@ -64,6 +64,10 @@ public class TestConnector implements FIReConnector {
 	private static final String PROP_TEST_SSL_TS_TYPE = "ssl.truststoreType"; //$NON-NLS-1$
 	private static final String PROP_TEST_SSL_TS_PASS = "ssl.truststorePass"; //$NON-NLS-1$
 
+    /** Identificador del par&aacute;metro con el que indicar si el proveedor debe permitir
+     * generar un nuevo certificado a sus usuarios cuando no tengan uno v&aacute;lido. */
+    private static final String PROP_ALLOW_REQUEST_NEW_CERT = "allowRequestNewCert"; //$NON-NLS-1$
+
 	private static final int HTTP_ERROR_NO_CERT = 522;
 	private static final int HTTP_ERROR_UNKNOWN_USER = 523;
 	private static final int HTTP_ERROR_BLOCKED_CERT = 524;
@@ -75,6 +79,8 @@ public class TestConnector implements FIReConnector {
 
     private String testUrlBase = null;
 
+   private boolean allowedNewCerts = true;
+
     @Override
 	public void init(final Properties config) {
 
@@ -83,7 +89,12 @@ public class TestConnector implements FIReConnector {
         // Configuramos la URL base de los servicios de prueba
         this.testUrlBase = config.getProperty(PROP_TEST_ENDPOINT);
         if (this.testUrlBase == null || this.testUrlBase.length() == 0) {
-        	LOGGER.warning("No se ha establecido la propiedad " + PROP_TEST_ENDPOINT + " se establece la ruta por defecto: " + DEFAULT_TEST_URL_BASE);
+        	LOGGER.warning(
+        			String.format(
+        					"No se ha establecido la propiedad %1s se establece la ruta por defecto: %2s", //$NON-NLS-1$
+        					PROP_TEST_ENDPOINT,
+        					DEFAULT_TEST_URL_BASE)
+        			);
         	this.testUrlBase = DEFAULT_TEST_URL_BASE;
         }
         else if (!this.testUrlBase.endsWith("/")) { //$NON-NLS-1$
@@ -112,6 +123,13 @@ public class TestConnector implements FIReConnector {
 			if (config.getProperty(PROP_TEST_SSL_TS_TYPE) != null) {
 				c.setProperty("javax.net.ssl.trustStoreType", config.getProperty(PROP_TEST_SSL_TS_TYPE)); //$NON-NLS-1$
 			}
+		}
+
+		// Se permitira la emision de nuevos certificados salvo que se configure
+		// expresamente el valor "false"
+		final String allowedValue = config.getProperty(PROP_ALLOW_REQUEST_NEW_CERT);
+		if (allowedValue != null && Boolean.FALSE.toString().equalsIgnoreCase(allowedValue)) {
+			this.allowedNewCerts = false;
 		}
 
 		try {
@@ -311,11 +329,6 @@ public class TestConnector implements FIReConnector {
 	}
 
 	@Override
-	public void endSign(final String transactionId) {
-		// No hacemos nada
-	}
-
-	@Override
 	public GenerateCertificateResult generateCertificate(final String subjectId)
 																throws FIReCertificateAvailableException,
 																FIReCertificateException,
@@ -396,6 +409,6 @@ public class TestConnector implements FIReConnector {
 
 	@Override
 	public boolean allowRequestNewCerts() {
-		return true;
+		return this.allowedNewCerts;
 	}
 }

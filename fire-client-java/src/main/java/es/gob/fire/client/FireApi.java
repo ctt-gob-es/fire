@@ -15,10 +15,10 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import es.gob.fire.client.ConnectionManager.Method;
+import es.gob.fire.client.HttpsConnection.Method;
 
 /**
- * Cliente de ClaveFirma v1.5. Debe recibir los siguientes datos:
+ * Cliente de FIRe v2.0.
  */
 public final class FireApi {
 
@@ -107,6 +107,8 @@ public final class FireApi {
 
     private static boolean initialized = false;
 
+    private static HttpsConnection conn = null;
+
     /**
      * Constructor privado para no permir la instanciaci&oacute;n
      */
@@ -139,7 +141,7 @@ public final class FireApi {
         LOGGER.info("Se usara el siguiente servicio de acceso a FIRe: " + SERVICE_URL); //$NON-NLS-1$
 
         try {
-			ConnectionManager.configureConnection(p);
+        	conn = HttpsConnection.getConnection(p);
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
@@ -309,8 +311,7 @@ public final class FireApi {
 
         final byte[] responseJSON;
         try {
-        	responseJSON = ConnectionManager.readUrl(
-                            SERVICE_URL, urlParameters, Method.POST);
+        	responseJSON = conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
         } catch (final HttpError e) {
             LOGGER.severe("Error en la llamada al servicio de firma: " + //$NON-NLS-1$
             			e.getResponseDescription());
@@ -381,7 +382,7 @@ public final class FireApi {
 
         TransactionResult result;
         try {
-        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.GET));
+        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, conn.readUrl(SERVICE_URL, urlParameters, Method.GET));
         } catch (final HttpError e) {
         	LOGGER.severe("Error en la llamada al servicio de recuperacion de firma: " + e.getResponseDescription()); //$NON-NLS-1$
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -428,7 +429,7 @@ public final class FireApi {
 
         byte[] signature;
         try {
-        	 signature = ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.GET);
+        	 signature = conn.readUrl(SERVICE_URL, urlParameters, Method.GET);
         } catch (final HttpError e) {
         	LOGGER.severe("Error en la llamada al servicio de recuperacion de firma: " + e.getResponseDescription()); //$NON-NLS-1$
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -541,8 +542,7 @@ public final class FireApi {
 
         final byte[] responseJSON;
         try {
-        	responseJSON = ConnectionManager.readUrl(
-                            SERVICE_URL, urlParameters, Method.POST);
+        	responseJSON = conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
         } catch (final HttpError e) {
             LOGGER.severe(
                             "Error en la llamada al servicio de firma: " + e.getResponseDescription() //$NON-NLS-1$
@@ -614,10 +614,10 @@ public final class FireApi {
         		.replace(TAG_VALUE_DATA, document != null ? Base64.encode(document, true) : "") //$NON-NLS-1$
                 .replace(TAG_VALUE_CONFIG, Utils.properties2Base64(config, true));
 
-        // Llamamos al servicio que, siempre que funcione, devolvera true. Si falla devolvera
-        // una excepcion de tipo HttpError
+        // Llamamos al servicio que, siempre que funcione, no hara nada. Si falla devolvera
+        // una excepcion
         try {
-        	ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.POST);
+        	conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
         } catch (final HttpError e) {
         	LOGGER.severe("Error en la llamada al servicio de carga de documentos en un lote con configuracion por defecto: " + e.getResponseDescription()); //$NON-NLS-1$
         	// Aplicacion no permitida
@@ -726,7 +726,7 @@ public final class FireApi {
         // Llamamos al servicio que, siempre que funcione, devolvera true. Si falla devolvera
         // una excepcion de tipo HttpError
         try {
-        	ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.POST);
+        	conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
         } catch (final HttpError e) {
         	LOGGER.severe("Error en la llamada al servicio de carga de documentos en un lote con configuracion propia: " + e.getResponseDescription()); //$NON-NLS-1$
         	// Aplicacion no permitida
@@ -795,7 +795,7 @@ public final class FireApi {
 
         final byte[] responseJSON;
         try {
-        	responseJSON = ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.GET);
+        	responseJSON = conn.readUrl(SERVICE_URL, urlParameters, Method.GET);
         } catch (final HttpError e) {
         	LOGGER.severe("Error en la llamada al servicio de firma de lote: " + e.getResponseDescription()); //$NON-NLS-1$
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -856,7 +856,7 @@ public final class FireApi {
 
     	byte[] batchResult = null;
     	try {
-    		batchResult = ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.GET);
+    		batchResult = conn.readUrl(SERVICE_URL, urlParameters, Method.GET);
     	} catch (final HttpError e) {
     		LOGGER.severe("Error en la llamada al servicio de recuperacion del resultado de firma de lote: " + e.getResponseDescription()); //$NON-NLS-1$
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -926,7 +926,7 @@ public final class FireApi {
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
     	try {
-    		return Float.parseFloat(new String(ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.GET)));
+    		return Float.parseFloat(new String(conn.readUrl(SERVICE_URL, urlParameters, Method.GET)));
     	} catch (final HttpError e) {
     		LOGGER.severe("Error en la consulta al servicio de recuperacion del progreso de un lote de firma: " + e.getResponseDescription()); //$NON-NLS-1$
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -984,7 +984,7 @@ public final class FireApi {
     			.replace(TAG_VALUE_DOCUMENT_ID, docId);
 
     	try {
-    		return TransactionResult.parse(TransactionResult.RESULT_TYPE_BATCH_SIGN, ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.GET));
+    		return TransactionResult.parse(TransactionResult.RESULT_TYPE_BATCH_SIGN, conn.readUrl(SERVICE_URL, urlParameters, Method.GET));
     	} catch (final HttpError e) {
     		LOGGER.severe("Error en la llamada al servicio de recuperacion de firma de lote: " + e.getResponseDescription()); //$NON-NLS-1$
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -1040,7 +1040,7 @@ public final class FireApi {
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
     	try {
-    		return TransactionResult.parse(TransactionResult.RESULT_TYPE_ERROR, ConnectionManager.readUrl(SERVICE_URL, urlParameters, Method.GET));
+    		return TransactionResult.parse(TransactionResult.RESULT_TYPE_ERROR, conn.readUrl(SERVICE_URL, urlParameters, Method.GET));
     	} catch (final HttpError e) {
     		LOGGER.severe("Error en la llamada al servicio de recuperacion de error: " + e.getResponseDescription()); //$NON-NLS-1$
     		if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {

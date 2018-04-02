@@ -82,7 +82,8 @@ public class MiniAppletSuccessService extends HttpServlet {
     			(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
     	if (connConfig == null || connConfig.getRedirectSuccessUrl() == null) {
     		LOGGER.warning("No se encontraron en la sesion las URL de redireccion para la operacion"); //$NON-NLS-1$
-    		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE, false, null);   		
+    		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
+    		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     		return;
     	}
 		final String redirectUrl = connConfig.getRedirectSuccessUrl();
@@ -105,7 +106,7 @@ public class MiniAppletSuccessService extends HttpServlet {
         		updateSingleResult(batchResult, afirmaBatchResultB64);
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al procesar el resultado de la firma de lote del Cliente @firma: " + e, e); //$NON-NLS-1$
-        		ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, false, "No se completo correctamente la firma del lote con certificado local");
+        		ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, true, "No se completo correctamente la firma del lote con certificado local");
         		response.sendRedirect(errorUrl);
         		return;
         	}

@@ -6,6 +6,9 @@ public partial class example_fire_sign : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
+
+        string appId = "B244E473466F";
+
         /*
         Dictionary<String, String> serviceConfig = new Dictionary<string, string>();
         serviceConfig.Add("fire_service", "https://servidorcentral:8443/fire-signature/fireService");
@@ -28,9 +31,9 @@ public partial class example_fire_sign : System.Web.UI.Page
         FireLoadResult loadResult;
         try
         {
-            //loadResult = new FireClient("A418C37E84BA", serviceConfig).sign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
-            loadResult = new FireClient("A418C37E84BA").sign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
-            //loadResult = FireApi.sign("A418C37E84BA",   // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            //loadResult = new FireClient(appId, serviceConfig).sign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            loadResult = new FireClient(appId).sign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            //loadResult = FireApi.sign(appId,          // Identificador de la aplicacion (dada de alta previamente en el sistema)
                 "00001",        // Identificador del usuario
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
                 "XAdES",        // Formato de firma (CAdES, XAdES, PAdES...)

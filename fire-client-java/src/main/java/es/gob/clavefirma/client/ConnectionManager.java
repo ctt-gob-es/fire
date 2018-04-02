@@ -7,12 +7,14 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.client;
+package es.gob.clavefirma.client;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
+import es.gob.fire.client.HttpsConnection;
 
 /**
  * Clase para la configuracion de la conexi&oacute;n con el componente central.
