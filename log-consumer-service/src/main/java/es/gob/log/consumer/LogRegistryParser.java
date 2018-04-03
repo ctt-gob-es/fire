@@ -25,23 +25,28 @@ public class LogRegistryParser {
 	 */
 	public LogRegistryParser(final LogInfo logInfo) {
 		this.parserFactory = ParticleParserFactory.getInstance(logInfo);
-		this.pParsers = buildParsersList(logInfo.getLogPattern(), this.parserFactory);
+		if (logInfo != null) {
+			this.pParsers = buildParsersList(logInfo.getLogPattern(), this.parserFactory);
 
-		// Si el ultimo analizador busca activamente nuevas lineas, le tenemos que indicar
-		// como idenficiar que se ha encontrado el inicio de un nuevo registro.
-		// En caso contrario, cuando terminemos de leer un registro tendremos que leer una
-		// linea (que ya sera del siguiente) para que pueda procesarse el nuevo registro
-		if (this.pParsers[this.pParsers.length - 1] instanceof ParticleParserUndefined) {
-			this.needActiveReadline = false;
-			((ParticleParserUndefined) this.pParsers[this.pParsers.length - 1])
-				.setInitialParser(
-						this.pParsers[0],
-						this.pParsers.length > 2 ? this.pParsers[1].getLimit() : null);
+			// Si el ultimo analizador busca activamente nuevas lineas, le tenemos que indicar
+			// como idenficiar que se ha encontrado el inicio de un nuevo registro.
+			// En caso contrario, cuando terminemos de leer un registro tendremos que leer una
+			// linea (que ya sera del siguiente) para que pueda procesarse el nuevo registro
+			if (this.pParsers[this.pParsers.length - 1] instanceof ParticleParserUndefined) {
+				this.needActiveReadline = false;
+				((ParticleParserUndefined) this.pParsers[this.pParsers.length - 1])
+					.setInitialParser(
+							this.pParsers[0],
+							this.pParsers.length > 2 ? this.pParsers[1].getLimit() : null);
+			}
+			else {
+				this.needActiveReadline = true;
+			}
 		}
 		else {
+			this.pParsers = null;
 			this.needActiveReadline = true;
 		}
-
 	}
 
 	/**
@@ -55,29 +60,31 @@ public class LogRegistryParser {
 	LogRegistry parse(final LogReader reader) throws IOException, InvalidRegistryFormatException {
 
 		final LogRegistry registry = new LogRegistry(reader.getCurrentLine().toString());
-		try {
-			for (int i = 0; i < this.pParsers.length; i++) {
-				this.pParsers[i].parse(
-						reader,
-						getLimit(i, this.pParsers),
-						registry);
+		if (this.pParsers != null) {
+			try {
+				for (int i = 0; i < this.pParsers.length; i++) {
+					this.pParsers[i].parse(
+							reader,
+							getLimit(i, this.pParsers),
+							registry);
+				}
 			}
+			catch (final InvalidRegistryFormatException e) {
+				// Si encontramos un registro sin el formato adecuado,
+				// lo comprendemos como un registro sin datos
+				e.setRegistry(registry);
 
-			// Si el ultimo parse no avanza la linea, lo hacemos nosotros
-			if (this.needActiveReadline) {
+				// Cargamos la siguiente linea para que se empiece a tratar
+				// como un registro nuevo
 				reader.readLine();
+
+				throw e;
 			}
 		}
-		catch (final InvalidRegistryFormatException e) {
-			// Si encontramos un registro sin el formato adecuado,
-			// lo comprendemos como un registro sin datos
-			e.setRegistry(registry);
 
-			// Cargamos la siguiente linea para que se empiece a tratar
-			// como un registro nuevo
+		// Si el ultimo parse no avanza la linea, lo hacemos nosotros
+		if (this.needActiveReadline) {
 			reader.readLine();
-
-			throw e;
 		}
 
 		return registry;
