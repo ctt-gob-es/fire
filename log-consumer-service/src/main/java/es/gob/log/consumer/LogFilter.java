@@ -1,14 +1,8 @@
 package es.gob.log.consumer;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.StandardOpenOption;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
 
 /**
  * Clase para la obtenci&oacute;n de logs de un fichero filtrados en base a una
@@ -164,54 +158,5 @@ public class LogFilter {
 	 */
 	public void close() throws IOException{
 		this.logReader.close();
-	}
-
-	public static void main(final String[] args) throws Exception {
-
-		Logger.getLogger(LogFilter.class.getName()).info("Este es mi log");
-
-//		LogInfo info;
-//		//try (FileInputStream fis = new FileInputStream("C:/Users/carlos.gamuci/Desktop/fire_service.loginfo")) {
-//		//try (FileInputStream fis = new FileInputStream("C:/Users/carlos.gamuci/Desktop/portafirma.loginfo")) {
-//		try (FileInputStream fis = new FileInputStream("C:/Users/carlos.gamuci/Desktop/logback_api.loginfo")) {
-//			info = new LogInfo();
-//			info.load(fis);
-//		}
-
-		final LogInfo info = null;
-
-		//final File logFile = new File("C:/Users/carlos.gamuci/Desktop/fire_service_2018-03-14-18-18.log");
-		//final File logFile = new File("C:/Users/carlos.gamuci/Desktop/portafirma.log");
-		//final File logFile = new File("C:/Users/carlos.gamuci/Desktop/logging_api.log");
-		final File logFile = new File("C:/Users/carlos.gamuci/Desktop/logback_api.log");
-
-		try (final AsynchronousFileChannel channel =
-				AsynchronousFileChannel.open(
-						logFile.toPath(),
-						StandardOpenOption.READ);) {
-
-			final LogReader reader = new FragmentedFileReader(channel, null); //info.getCharset());
-			final LogFilter filter = new LogFilter(info);
-			//final LogFilter filter = new LogFilter(new LogInfo());
-
-			filter.load(reader);
-
-			//final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
-			final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-			//final Date startDate = formatter.parse("2018-03-14 18:18:15");
-			final Date endDate = formatter.parse("16:07:00");
-
-			final Criteria criteria = new Criteria();
-//			criteria.setStartDate(startDate.getTime());
-			criteria.setEndDate(endDate.getTime());
-			//criteria.setLevel(1);
-
-			filter.setCriteria(criteria);
-
-			System.out.println("Listado de logs");
-
-			System.out.println(new String(filter.filter(100)));
-
-		}
 	}
 }

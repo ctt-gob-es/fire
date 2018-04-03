@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
  * Clase para la lectura completa de un fichero por medio cargas segmentadas
  * en memoria.
  */
-class FragmentedFileReader implements LogReader {
+public class FragmentedFileReader implements LogReader {
 
 	/** Car&aacute;cter de BOM. */
 	private static final int CHAR_BOM_PREFIX = 65279;

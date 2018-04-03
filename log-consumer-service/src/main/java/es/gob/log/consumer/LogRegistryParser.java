@@ -27,26 +27,16 @@ public class LogRegistryParser {
 		this.parserFactory = ParticleParserFactory.getInstance(logInfo);
 		if (logInfo != null) {
 			this.pParsers = buildParsersList(logInfo.getLogPattern(), this.parserFactory);
-
-			// Si el ultimo analizador busca activamente nuevas lineas, le tenemos que indicar
-			// como idenficiar que se ha encontrado el inicio de un nuevo registro.
-			// En caso contrario, cuando terminemos de leer un registro tendremos que leer una
-			// linea (que ya sera del siguiente) para que pueda procesarse el nuevo registro
-			if (this.pParsers[this.pParsers.length - 1] instanceof ParticleParserUndefined) {
-				this.needActiveReadline = false;
-				((ParticleParserUndefined) this.pParsers[this.pParsers.length - 1])
-					.setInitialParser(
-							this.pParsers[0],
-							this.pParsers.length > 2 ? this.pParsers[1].getLimit() : null);
-			}
-			else {
-				this.needActiveReadline = true;
-			}
 		}
 		else {
 			this.pParsers = null;
-			this.needActiveReadline = true;
 		}
+
+		// Tendremos que avanzar externamente hasta la siguiente linea, en caso de que no se
+		// analicen las lineas (ya que entonces no se leer nunca la siguiente para saber si se
+		// trata de parte del mismo registro) o si el ultimo parser este limitado a una linea
+		this.needActiveReadline = this.pParsers == null ||
+				!(this.pParsers[this.pParsers.length - 1] instanceof ParticleParserUndefined);
 	}
 
 	/**
@@ -65,7 +55,6 @@ public class LogRegistryParser {
 				for (int i = 0; i < this.pParsers.length; i++) {
 					this.pParsers[i].parse(
 							reader,
-							getLimit(i, this.pParsers),
 							registry);
 				}
 			}
@@ -91,7 +80,22 @@ public class LogRegistryParser {
 	}
 
 	private static ParticleParser[] buildParsersList(final String pattern, final ParticleParserFactory factory) {
-		return buildParsers(pattern, factory).toArray(new ParticleParser[0]);
+		final ParticleParser[] parsers = buildParsers(pattern, factory).toArray(new ParticleParser[0]);
+
+		// A cada uno de los parsers, le asignamos como limite el establecido por el parser siguiente.
+		// En el caso del ultimo, si este busca nuevas lineas, le asignaremos el propio parser, para que
+		// pueda identificarlas
+		for (int i = 0; i < parsers.length; i++) {
+
+			if (i + 1 < parsers.length) {
+				parsers[i].setNextLimit(parsers[i + 1].getLimit());
+			}
+			else if (parsers[parsers.length - 1] instanceof ParticleParserUndefined) {
+				((ParticleParserUndefined) parsers[parsers.length - 1]).setInitialParser(parsers[0]);
+			}
+		}
+
+		return parsers;
 	}
 
 	private static List<ParticleParser> buildParsers(final String pattern, final ParticleParserFactory factory) {
@@ -105,6 +109,9 @@ public class LogRegistryParser {
 				break;
 			}
 		}
+
+
+
 		return list;
 	}
 
@@ -133,20 +140,5 @@ public class LogRegistryParser {
 	private static List<ParticleParser> addList(final List<ParticleParser> list, final ParticleParser particle) {
 		list.add(particle);
 		return list;
-	}
-
-
-	/** Determina cual es la cadena que debe hacer de l&iacute;mite de
-	 * la part&iacute;cula actual.
-	 * @param i Indice de la particula actual.
-	 * @param pParsers Listado de analizadores.
-	 * @return Cadena a usar como limite o {@code null} si no se ha definido.
-	 */
-	private static String getLimit(final int i, final ParticleParser[] pParsers) {
-		String limit = null;
-		if (i + 1 < pParsers.length) {
-			limit = pParsers[i + 1].getLimit();
-		}
-		return limit;
 	}
 }

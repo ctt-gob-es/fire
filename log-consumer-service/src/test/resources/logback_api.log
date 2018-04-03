@@ -1,0 +1,3 @@
+﻿16:06:09.031 [main] INFO  chapters.configuration.MyApp1 - Entering application.
+16:06:09.046 [main] DEBUG chapters.configuration.Foo - Did it again!
+16:07:09.046 [main] INFO  chapters.configuration.MyApp1 - Exiting application.
