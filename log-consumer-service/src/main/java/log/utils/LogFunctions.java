@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +17,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Future;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -334,7 +336,7 @@ public class LogFunctions {
 		final File f = new File(DIR_LOGS);
 		String nameLogInfo = null;
 		if(f.exists()) {
-			//Obtnemos un listado filtrado con sólo los ficheros con extensión .loginfo
+			//bObtenrmos un listado filtrado con solo los ficheros con extensión .loginfo
 			final File[] files = f.listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(final File dir, final String name) {
@@ -349,9 +351,17 @@ public class LogFunctions {
 					return false;
 				}
 			});
+
+			File configFile = null;
 			if(files.length > 0) {
 				//Obtenemos el nombre del fichero que mas se aproxime al nombre fire_service_*.loginfo
 				for (int i = 0; i < files.length; i++){
+
+					if (logFileName.startsWith(files[i].getName().replace(FILE_EXT_LOGINFO, ""))) {
+						if (configFile != null && files[i].getName().length() > configFile.getName().length()) {
+							configFile = files[i];
+						}
+					}
 
 					if(files[i].getName().matches("^[A-Z][a-z]fire_services_*.loginfo")) {//coincide 100% //$NON-NLS-1$
 						fileNamesLoginfo[0] = files[i].getName();
@@ -460,6 +470,7 @@ public class LogFunctions {
 		  for (int i = 0; i <= indicePatron.length - 1; i++) {
 			  System.out.println(String.valueOf(i+1).concat(" ").concat(indiceTitulo[i]).concat(indicePatron[i])); //$NON-NLS-1$
 		  }
+
 		 //$NON-NLS-1$
 
 //		  final Path path = Paths.get("C:/LOGS/fire/2018-03-14-18-18.log"); //$NON-NLS-1$
@@ -495,6 +506,32 @@ public class LogFunctions {
 //				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //			}
+
+		  System.out.println("Aplicar patron"); //$NON-NLS-1$
+		  final Path path = Paths.get("C:/LOGS/fire/2018-03-14-18-18.log"); //$NON-NLS-1$
+
+		  AsynchronousFileChannel fileChannel = null;
+		  try {
+			  fileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.READ);
+		  } catch (final IOException e) {
+			  // TODO Auto-generated catch block
+			  e.printStackTrace();
+		  }
+
+		  final ByteBuffer buffer = ByteBuffer.allocate(1024);
+		  final long position = 0;
+		  if(fileChannel!=null) {
+			  final Future<Integer> operation = fileChannel.read(buffer, position);
+			  while(!operation.isDone()) {
+				  ;
+			  }
+			  buffer.flip();
+			  final byte[] data = new byte[buffer.limit()];
+			  buffer.get(data);
+			  System.out.println(new String(data));
+			  buffer.clear();
+		  }
+
 
 		  long possiton = 0L;
 		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$

@@ -2,22 +2,26 @@
 # Fichero de configuración de Logs    		# 
 #############################################
 
-#CODIFICACIÓN (UTF-8, UTF-16, ISO-8859-1, etc..) 
-#sólo un dato. 
-code=UTF-8
+# Juego de caracteres del log (UTF-8, UTF-16, ISO-8859-1, etc..) 
+charset=UTF-8
 
-#Niveles definidos en el log.(FINER,FINE,INFO,WARNING,SEVERE)
-levels=SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST
+# Niveles de log, en orden creciente de criticidad, separados por comas (',')
+levels=FINER,FINE,INFO,WARNING,SEVERE
 
-#Formato de las fechas ()
-dateFormat=yyyy-mm-dd
+# Formato de fecha/hora de las entradas del log.
+# IMPORTANTE: Si se utilizan nombres de mes y dia de la semana, es obligatorio que
+# el idioma de la JVM sea el mismo que el de la JVM que genero el log
+dateTimeFormat=yyyy-mm-dd HH:mm:ss
 
-#Formato de las horas
-timeFormat=HH:mm:ss 
-
-#Carácter de separación
-charSplit=;
-
-
-#Patrón de las líneas del fichero Log.
-logPattern=# D:[DATE]; T:[TIME]; L:[LEVEL]; M:[MESSAGE] /n  CLASS:[CLASS]; METHOD:[METHOD]
+# Patron de las lineas del log. Es un texto fijo que admite las siguientes particulas para
+# expresar la parte dinamica:
+#  - [DATE]  :  Fecha/hora de la entrada. Debe cumplir el formato indicado en "dateTimeFormat".
+#  - [LEVEL] :  Nivel de log de la entrada.
+#  - \n      :  Salto de linea indicado. En el log debe ser '\r\n' o '\n'. Un patr&oacute;n no puede
+#				empezar ni terminar con esta part&iacute;cula.
+#  - *		 :  Porcion de texto variable. Englobara al mensaje y cualquier otro fragmento variable
+#				del log. Salvo que sea lo ultimo que aparezca en el patron, debe estar seguido de una
+#				cadena fija o un salto de linea y ese fragmento no podra contener esa cadena ni saltos
+#				de linea.
+logPattern=# D:[DATE]; L:[LEVEL]; M:[MESSAGE] /n  CLASS:[CLASS]; METHOD:[METHOD]
+#logPattern= CLASS:*\n# D:[DATE]; L:[LEVEL];*
