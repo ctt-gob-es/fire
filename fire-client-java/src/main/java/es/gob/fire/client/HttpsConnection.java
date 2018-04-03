@@ -89,11 +89,12 @@ public class HttpsConnection {
 	/**
 	 * Obtiene una conexi&oacute;n Http/Https.
 	 * @param config Opciones de configuraci&oacute;n.
+	 * @return Devuelve la conexi&oacute;n configurada.
 	 * @throws IllegalArgumentException Cuando se configura un fichero de almac&eacute;n que no existe.
 	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.
 	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto.
 	 */
-	static HttpsConnection getConnection(final Properties config) throws IllegalArgumentException,
+	public static HttpsConnection getConnection(final Properties config) throws IllegalArgumentException,
 																		GeneralSecurityException,
 																		IOException {
 
@@ -260,6 +261,7 @@ public class HttpsConnection {
 		}
 
 		conn.connect();
+
 		final int resCode = conn.getResponseCode();
 		final String statusCode = Integer.toString(resCode);
 		if (statusCode.startsWith("4") || statusCode.startsWith("5")) { //$NON-NLS-1$ //$NON-NLS-2$

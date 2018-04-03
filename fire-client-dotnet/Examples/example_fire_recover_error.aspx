@@ -11,7 +11,7 @@
     <form id="form1" runat="server">
     <div>
         <br /><b>Proveedor:</b><br /> <asp:Label runat="server" id="Provider"></asp:Label>
-        <br /><b>Error:</b><br /> <asp:Label runat="server" id="Error"></asp:Label>
+        <br /><b>Error:</b><br /> <asp:Label runat="server" id="ErrorMsg"></asp:Label>
     </div>
     </form>
 </body>

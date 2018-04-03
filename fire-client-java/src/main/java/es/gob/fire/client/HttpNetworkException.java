@@ -16,9 +16,10 @@ package es.gob.fire.client;
  */
 public final class HttpNetworkException extends HttpOperationException {
 
-    private static final long serialVersionUID = -2430443029411029555L;
+    /** Serial Id. */
+	private static final long serialVersionUID = 5460965331472261684L;
 
-    HttpNetworkException() {
+	HttpNetworkException() {
         super();
     }
 

@@ -58,9 +58,9 @@ public class CancelOperationService extends HttpServlet {
 			return;
 		}
 
-		ErrorManager.setErrorToSession(session, OperationError.OPERATION_CANCELED, true,null);
-		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
+		ErrorManager.setErrorToSession(session, OperationError.OPERATION_CANCELED);
 
+		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 		response.sendRedirect(redirectErrorUrl);
 	}
 

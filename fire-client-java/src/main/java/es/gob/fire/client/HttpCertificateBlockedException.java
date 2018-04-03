@@ -15,9 +15,11 @@ package es.gob.fire.client;
  */
 public final class HttpCertificateBlockedException extends HttpOperationException {
 
-    private static final long serialVersionUID = -2430443029411029555L;
 
-    HttpCertificateBlockedException() {
+    /** Serial Id. */
+	private static final long serialVersionUID = 4353657884161773302L;
+
+	HttpCertificateBlockedException() {
         super();
     }
 

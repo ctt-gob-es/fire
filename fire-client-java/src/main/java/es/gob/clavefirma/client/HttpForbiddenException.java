@@ -16,9 +16,10 @@ package es.gob.clavefirma.client;
  */
 public final class HttpForbiddenException extends HttpOperationException {
 
-    private static final long serialVersionUID = -2430443029411029555L;
+    /** Serial ID. */
+	private static final long serialVersionUID = 5787961500583382861L;
 
-    HttpForbiddenException() {
+	HttpForbiddenException() {
         super();
     }
 

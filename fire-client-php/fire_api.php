@@ -265,9 +265,6 @@
 		if (empty($documentId)) {
             throw new InvalidArgumentException("El identificador del documento no puede ser nulo");
 		}
-		if (empty($documentB64)) {
-            throw new InvalidArgumentException("El documento no puede ser nulo");
-		}
 		
 		// Recodificamos los parametros que lo necesiten para asegurar la correcta transmision por URL
 		$b64SpC = array("+", "/"); 
@@ -616,6 +613,9 @@
 		}
 		else if ($http_code == 536) {
 			throw new InvalidBatchDocumentException("Fallo la firma del documento que se intenta recuperar");
+		}
+		else if ($http_code == 537) {
+			throw new HttpOperationException("Se intenta firmar un lote sin documentos");
 		}
 		else if ($http_code / 100 >= 3) {
 			throw new HttpOperationException("Error indeterminado (".$http_code.")");

@@ -15,9 +15,10 @@ package es.gob.clavefirma.client;
  */
 public final class HttpNoUserException extends HttpOperationException {
 
-    private static final long serialVersionUID = -2430443029411029555L;
+    /** Serial Id. */
+	private static final long serialVersionUID = -3702013498390712146L;
 
-    HttpNoUserException() {
+	HttpNoUserException() {
         super();
     }
 

@@ -35,14 +35,7 @@
 			<artifactId>fire-upgrade</artifactId>
 			<version>2.2-SNAPSHOT</version>
 		</dependency>
-		
-<!-- 		<dependency> -->
-<!-- 			<groupId>es.gob.fire</groupId> -->
-<!-- 			<artifactId>fire-logs-common</artifactId> -->
-<!-- 			<version>2.2-SNAPSHOT</version> -->
-<!-- 		</dependency> -->
-		
-		
+
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-common-libraries</artifactId>

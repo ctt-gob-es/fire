@@ -130,7 +130,7 @@ public final class SessionCollector {
      * asociados, pero no la propia sesion para permitir recuperar el mensaje de error.
      * @param fireSession Sesion que se desea limpiar.
      */
-    public static void cleanSession(final FireSession fireSession) {
+    static void cleanSession(final FireSession fireSession) {
     	if (fireSession == null) {
     		return;
     	}

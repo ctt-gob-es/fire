@@ -19,22 +19,21 @@
 .mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
 .mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
 
-.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1.8em; padding-top:1em; padding-bottom:1em;}
+.contenido .title {color: #dd5a00; text-align: center; margin: 0 auto; font-weight: bold; font-size:1.8em; padding-top:1em; padding-bottom:1em;}
 
 .contenido .cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px; float: left; width: 100%; display: block; box-sizing: border-box;}
 
-
-.container-box-title{width: 100%;margin: 2em; display: block;position: relative;}
-.container_tit{float: left; width:50%;display: inline-block;margin-left: 13em;}
-.container_btn_operation{float: right; width:20%;display: inline-block;margin-top: 1em;}
+.container-box-title{width: 100%;margin-top: 2em;margin-bottom:2em; display: block;position: relative;}
+.container_tit{ width:100%;display:block;}
+.container_btn_operation{ width:100%; display:block; margin-top: 18em; text-align: center;}
 
 .arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 1px;position: relative;right: 3px;}
 .arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.5em;}
 
-.button-volver {float: left;width: 80px;padding: 0.2em 0.3em 0.3em 1.2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
+.button-volver {width: 80px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
 .button-volver:hover {text-decoration: underline; cursor:pointer;}
 
-.button-cancelar {z-index:10; float: right;width: 80px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 14px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
+.button-cancelar { width: 80px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
 .button-cancelar:hover {text-decoration: underline;}
 
 .contenido .container-box-cert {display: block; width:600px; margin-left: auto; margin-right: auto; }/*min-width: 665px;   width:50%;margin-left: auto;margin-right: auto; */
@@ -70,7 +69,7 @@
 
 /*******************************************************************************************/
 @media screen and (max-width: 880px) and (min-width: 641px){ 
-	.container_tit{float: left; width:70%;display: inline-block;margin-left: 2.5em;}
+	.container_tit{width:100%;display:block;}
 	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
@@ -83,12 +82,12 @@
 	}
 /********************************/
 @media screen and (max-width: 640px)and (min-width: 591px) {
-	.container_tit{float: left; width:63%;display: inline-block;margin-left: 4em;}
+	.container_tit{ width:100%;display:block;}
 	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 1em; vertical-align: top;}
 	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.40em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;}
+	.contenido .title {color: #dd5a00; text-align: center; margin: 0 auto; font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;}
 	
 	.contenido .container-box-cert {display: block; width:440px; margin-left: auto; margin-right: auto; }
 	.contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width:50%;height: 50%;}
@@ -96,12 +95,12 @@
 	.contenido .cert-box .text-cert-box {font-size: 12px;color: #707070;line-height: 14px;}
 }
 @media screen and (max-width: 590px)and (min-width: 510px) { 
-	.container_tit{float: left; width:63%;display: inline-block;margin-left: 4em;}
+	.container_tit{ width:100%;display: block;}
 	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 1em; vertical-align: top;}
 	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.40em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.contenido .title {color: #dd5a00; text-align: left;font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;margin-left: -4em;}
+	.contenido .title {color: #dd5a00; text-align: center; font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;}
 	
 	.contenido .container-box-cert {display: block; width:440px; margin-left: auto; margin-right: auto; }
 	.contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width:50%;height: 50%;}
@@ -114,7 +113,7 @@
 	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 63%; color: #707070;margin-top: -0.20em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.contenido .title {color: #dd5a00; text-align: left;font-weight: bold; font-size:1em; padding-top:1em; padding-bottom:1em;margin-left: -3em;}
+	.contenido .title {color: #dd5a00; text-align: center;font-weight: bold; font-size:1em; padding-top:1em; padding-bottom:1em;}
 	
 	.contenido .container-box-cert {display: block; width:350px; margin-left: auto; margin-right: auto; }
 	.contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width:41px;height: 42px;}
@@ -124,11 +123,11 @@
 	.contenido .cert-box .button {border: 1px solid #707070; padding: 0.4em 0.6em; border-radius: 2em; margin: 0em auto; display: block; position: relative; color: #707070; text-decoration: none; font-size: 10px; width: 6em;}
 	.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 6px;position: absolute;right: 0.3em;}
 	
-	.button-volver {float: left;width: 70px;padding: 0.2em 0.3em 0.3em 1.2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 12px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
+	.button-volver {width: 70px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
 	
-	.container-box-title{width: 100%; display: block;position: relative;margin: 1.5em;}
-	.container_tit{float: left; width:70%;display: inline-block;margin-left: 2.5em;}
-	.container_btn_operation{float: right; width:20%;display: inline-block;margin-top: 1em;}
+	.container-box-title{width: 100%; display: block;position: relative;margin-top: 1.5em;margin-bottom: 1.5em;}
+	.container_tit{ width:100%;display:block;}
+	.container_btn_operation{ width:100%;display:block;margin-top: 15em;}
 	
 }
 
@@ -136,14 +135,14 @@
 
 	.contenido .cert-box .cert-box-left {display: inline-block;width: 18%;}
 	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.2em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.10em;}
+	.mod_claim_in_der { display: block;width: 95%; color: #707070;margin-top: 0.2em;}
 	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 0.8em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.contenido .title {color: #dd5a00; text-align: left;margin: 0 auto; font-weight: bold; font-size:1em; padding-top:1em; padding-bottom:1em;}
-	.container_tit{float: left; width:70%;display: inline-block;margin-left: 1em;}
-	.container-box-title{width: 100%; display: block;position: relative;margin: 0.5em;}
+	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1em; padding-top:1em; padding-bottom:1em;}
+	.container_tit{width:100%;display:block;}
+	.container-box-title{width: 100%; display: block;position: relative;margin-top: 1em;margin-bottom: 1em;}
 	
-	.contenido .container-box-cert {display: block; width:350px; margin-left: auto; margin-right: auto; }
+	.contenido .container-box-cert {display: block; width:100%; margin-left: auto; margin-right: auto; }
 	.contenido .cert-box .cert-box-left img {margin: 0 auto; display: block; margin-top:1em;width:41px;height: 42px;}
 	.contenido .cert-box .title-cert-box {font-size: 14px;font-weight: bold;}
 	.contenido .cert-box .text-cert-box {font-size: 10px;color: #707070;line-height: 12px;}
@@ -151,8 +150,8 @@
 	.contenido .cert-box .button {border: 1px solid #707070; padding: 0.4em 0.6em; border-radius: 2em; margin: 0em auto; display: block; position: relative; color: #707070; text-decoration: none; font-size: 10px; width: 6em;}
 	.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 6px;position: absolute;right: 0.3em;}
 	
-	.button-volver {float: left;width: 70px;padding: 0.2em 0.3em 0.3em 1.2em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 12px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
+	.button-volver {width: 70px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
 	
-	
+	.container_btn_operation{ width:100%;display:block;margin-top: 15em;}
 	
 }

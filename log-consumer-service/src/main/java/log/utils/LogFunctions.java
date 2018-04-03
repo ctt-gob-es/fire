@@ -1,11 +1,16 @@
 package log.utils;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -27,6 +32,7 @@ public class LogFunctions {
 	private static final String FILE_EXT_LOGINFO=".loginfo"; //$NON-NLS-1$
 	private static final String FILE_EXT_LCK=".lck"; //$NON-NLS-1$
 	private static final String DIR_LOGS="C:\\LOGS\\fire"; //$NON-NLS-1$
+	private static final int SIZE_OF_REPORT_ENTRY = 1024;
 	/**
 	 * M&eacute;todo de consulta de ficheros de logs.
 	 * @return Cadena de caracteres en formato JSON indicando el nombre de los ficheros log y su tama&ntilde;o
@@ -70,6 +76,251 @@ public class LogFunctions {
 		    return writer.toString();
 		}
 		return null;
+	}
+
+
+
+//	public static String tail2( final File file, final int lines) {
+//	    java.io.RandomAccessFile fileHandler = null;
+//	    try {
+//	        fileHandler = new java.io.RandomAccessFile( file, "r" );
+//	        final long fileLength = fileHandler.length() - 1;
+//	        final StringBuilder sb = new StringBuilder();
+//	        int line = 0;
+//
+//	        for(long filePointer = fileLength; filePointer != -1; filePointer--){
+//	            fileHandler.seek( filePointer );
+//	            final int readByte = fileHandler.readByte();
+//
+//	             if( readByte == 0xA ) {
+//	                if (filePointer < fileLength) {
+//	                    line = line + 1;
+//	                }
+//	            } else if( readByte == 0xD ) {
+//	                if (filePointer < fileLength-1) {
+//	                    line = line + 1;
+//	                }
+//	            }
+//	            if (line >= lines) {
+//	                break;
+//	            }
+//	            sb.append( ( char ) readByte );
+//	        }
+//
+//	        final String lastLine = sb.reverse().toString();
+//	        return lastLine;
+//	    } catch( final java.io.FileNotFoundException e ) {
+//	        e.printStackTrace();
+//	        return null;
+//	    } catch( final java.io.IOException e ) {
+//	        e.printStackTrace();
+//	        return null;
+//	    }
+//	    finally {
+//	        if (fileHandler != null ) {
+//				try {
+//	                fileHandler.close();
+//	            } catch (final IOException e) {
+//	            }
+//			}
+//	    }
+//	}
+
+
+	public static long getLogMore(final String logFileName, final int numLines, final long actPosition ) {
+		 String salida=null;
+		 final Path path = Paths.get(logFileName);
+		 int nLines = numLines;
+		 long positionResult = 0L;
+		  try (SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
+			  	ByteBuffer buf = null;
+		        final long totalSize = Files.size(path);
+		        final int totalNext =  (int) (totalSize / SIZE_OF_REPORT_ENTRY);
+		        final int [] positions = new int [totalNext];
+		        long nextPosition = 0L;
+		        int j = 0;
+		        /*Se inicializa el array de posiciones del fichero log completo*/
+		        for(int i = 0; i < totalNext; i++) {
+			        positions[i] = i * SIZE_OF_REPORT_ENTRY;
+			        if(totalSize > actPosition && positions[i] <= actPosition && actPosition > 0L) {
+			        	/*Actualizamos la siguiente posici&oacute;n respecto a la posici&oacute;n actual indicada*/
+			        	nextPosition = positions[i] + SIZE_OF_REPORT_ENTRY;
+			        	j = i + 1;
+			        }
+			    }
+
+		        /*Actualizamos la siguiente posici&oacute;n en caso de ser 0 (inicio del fichero) coincidir&aacute; con el tamano indicado de
+		         * partici&oacute;n*/
+		        if(actPosition <= 0L) {
+		        	nextPosition = SIZE_OF_REPORT_ENTRY;
+		        	j = 2;
+		        }
+		        /*Actualizamos la siguiente posici&oacute;n en caso de ser 0 (inicio del fichero) y n&uacute;mero de l&iacute;neas 0
+		         *  coincidir&aacute; con el tamano total del fichero para leer desde la posici&oacute;n actual hasta el final*/
+		        if(nLines <= 0 && actPosition <= 0L|| nLines <= 0 && actPosition > 0L) {
+		        	nextPosition = totalSize;
+		        }
+
+		        if(positions.length > 0) {
+		        	positionResult = nextPosition - actPosition;
+		        	buf =  ByteBuffer.allocate((int) positionResult);
+				    System.out.println("Lectura ----------- Siguentes lineas..."); //$NON-NLS-1$
+			        channel.position(actPosition);
+					channel.read(buf);
+					buf.flip();
+					byte[] data = new byte[buf.limit()];
+					buf.get(data);
+					int totalLines = getNumLines(data);
+					/**/
+					if(nLines <= 0) {
+						nLines = totalLines;
+					}
+					while (nLines > totalLines) {
+						positionResult = positions[j] - actPosition;
+						buf =  ByteBuffer.allocate((int) positionResult);
+						channel.position(actPosition);
+						channel.read(buf);
+						buf.flip();
+						data = new byte[buf.limit()];
+						buf.get(data);
+						totalLines = getNumLines(data);
+						j++;
+					}
+					salida = readLineInit(data, nLines, totalLines);
+					totalLines = getNumLines(salida.getBytes());
+
+					System.out.println(salida);
+					System.out.println("Leidas "+ totalLines + " líneas de log.");
+					buf.clear() ;
+					return positionResult;
+		        }
+
+
+		    } catch (final IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		return -1;
+	}
+
+	/**
+	 *
+	 * @param logFileName
+	 * @return
+	 */
+	public static long getLogTail(final String logFileName, final int numLines) {
+		 String salida=null;
+		 final Path path = Paths.get(logFileName);
+		  try (SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
+		        final long totalSize = Files.size(path);
+		        final int totalNext =  (int) (totalSize/SIZE_OF_REPORT_ENTRY);
+		        final int [] positions = new int [totalNext];
+		        for(int i = 0; i < totalNext; i++) {
+		        	positions[i] = i * SIZE_OF_REPORT_ENTRY;
+		        }
+		        if( positions.length > 0) {
+		        	ByteBuffer buf =  ByteBuffer.allocate((int) (totalSize-positions[positions.length-1]));
+				    System.out.println("Lectura ... Ultimas lineas..."); //$NON-NLS-1$
+			        channel.position(positions[positions.length-1]);
+					channel.read(buf);
+					buf.flip();
+					byte[] data = new byte[buf.limit()];
+					buf.get(data);
+					int totalLines = getNumLines(data);
+					int i = 1;
+					while (numLines > totalLines) {
+						i++;
+						buf =  ByteBuffer.allocate((int) (totalSize-positions[positions.length-i]));
+						channel.position(positions[positions.length-i]);
+						channel.read(buf);
+						buf.flip();
+						data = new byte[buf.limit()];
+						buf.get(data);
+						totalLines = getNumLines(data);
+					}
+
+					salida = readLineTail(data,numLines,totalLines);
+					totalLines = getNumLines(salida.getBytes());
+
+					System.out.println(salida);
+					System.out.println("Leidas "+totalLines+" líneas de log.");
+					buf.clear() ;
+					return totalSize;
+		        }
+
+
+		    } catch (final IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		return -1;
+	}
+
+
+
+
+
+	public static int getNumLines(final byte[] data)
+	{
+	 int numLineas=0;
+	  final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data)));
+	  String line=""; //$NON-NLS-1$
+	  try {
+		while ((line = reader.readLine()) != null)
+		  {
+			numLineas ++;
+		  }
+	  } catch (final IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	  }
+
+	  return numLineas;
+	}
+
+
+	public static String readLineTail( final byte[] data, final int lines, final int totalLines) {
+		 int numLineas=0;
+		 final int noReadLines = totalLines - lines;
+		 String linesDataRead =""; //$NON-NLS-1$
+		 final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data)));
+		 String line = ""; //$NON-NLS-1$
+		 try {
+			while ((line = reader.readLine()) != null)
+			  {
+				numLineas ++;
+				if(numLineas > noReadLines) {
+					linesDataRead =linesDataRead.concat(line).concat("\n");
+				}
+			  }
+		  } catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		  }
+		  return linesDataRead;
+	}
+
+	public static String readLineInit( final byte[] data, final int lines, final int totalLines) {
+		 int numLineas = 0;
+		 final int noReadLines = totalLines - lines;
+		 String linesDataRead =""; //$NON-NLS-1$
+		 final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data)));
+		 String line = ""; //$NON-NLS-1$
+		 try {
+			while ((line = reader.readLine()) != null)
+			  {
+				numLineas ++;
+				if(numLineas <= totalLines - noReadLines) {
+					linesDataRead =linesDataRead.concat(line).concat("\n");
+				}
+			  }
+		  } catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		  }
+		  return linesDataRead;
 	}
 
 	/**
@@ -167,7 +418,8 @@ public class LogFunctions {
 	  }
 
 
-	  public static void main(final String[] args) {
+	  @SuppressWarnings({ "unused", "cast" })
+	public static void main(final String[] args) {
 //		  final String salida =LogFunctions.getLogFiles();
 //		  if(salida!=null) {
 //			  System.out.println(salida);
@@ -218,6 +470,43 @@ public class LogFunctions {
 		  for (int i = 0; i <= indicePatron.length - 1; i++) {
 			  System.out.println(String.valueOf(i+1).concat(" ").concat(indiceTitulo[i]).concat(indicePatron[i])); //$NON-NLS-1$
 		  }
+
+		 //$NON-NLS-1$
+
+//		  final Path path = Paths.get("C:/LOGS/fire/2018-03-14-18-18.log"); //$NON-NLS-1$
+//		  try (SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
+//		        final long sizeTotal = Files.size(path);
+//		        final int totalNext =  (int) (sizeTotal/SIZE_OF_REPORT_ENTRY);
+//		        final int [] positions = new int [totalNext];
+//		        for(int i = 0; i < totalNext; i++) {
+//		        	positions[i] = i * SIZE_OF_REPORT_ENTRY;
+//		        }
+//		       ByteBuffer buf = ByteBuffer.allocate(SIZE_OF_REPORT_ENTRY);
+//		        if(positions != null && positions.length > 0) {
+//		        	 for(int i = 0; i < positions.length; i++) {
+//		        		 System.out.println("Lectura ----------- "+i);
+//			        	 channel.position(positions[i]);
+//					     channel.read(buf);
+//					     buf.flip();
+//					     if(i == positions.length-1) {
+//					    	 buf.clear();
+//					    	 buf= ByteBuffer.allocate((int) (sizeTotal-positions[i]));
+//					    	 channel.read(buf);
+//						     buf.flip();
+//					     }
+//					     final byte[] data = new byte[buf.limit()];
+//					     buf.get(data);
+//					     System.out.println(new String(data));
+//					     buf.clear();
+//
+//			        }
+//		        }
+//
+//		    } catch (final IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+
 		  System.out.println("Aplicar patron"); //$NON-NLS-1$
 		  final Path path = Paths.get("C:/LOGS/fire/2018-03-14-18-18.log"); //$NON-NLS-1$
 
@@ -244,8 +533,20 @@ public class LogFunctions {
 		  }
 
 
+		  long possiton = 0L;
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		 // possiton = getLogTail("C:/LOGS/fire/2018-03-14-18-18.log",40); //$NON-NLS-1$
 
-	  }
+
+//		  final File f= new File("C:/LOGS/fire/2018-03-14-18-18.log"); //$NON-NLS-1$
+//		  System.out.println("ultima linea");
+//		  final String numlinea=tail2(f, 4);
+//		  System.out.println(numlinea);
+  }
 
 
 

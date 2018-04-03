@@ -8,11 +8,13 @@
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="java.util.Map"%>
-
+<%@page import="es.gob.fire.server.services.internal.ProviderInfo"%>
+<%@page import="es.gob.fire.server.services.internal.ProviderManager"%>
 
 <%
 	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+	String providerName="el Proveedor";
 	
 	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, false, false);
 	if (fireSession == null) {
@@ -20,6 +22,10 @@
 		return;
 	}
 
+	final ProviderInfo info = ProviderManager.getProviderInfo(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN));
+	if (info != null && info.getTitle() != null) {
+		 providerName=info.getTitle();
+	}
 	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
 		fireSession = SessionCollector.getFireSession(trId, userId, session, false, true);
@@ -30,6 +36,7 @@
 	final String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+	
 	final boolean originForced = Boolean.parseBoolean(
 			fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 	
@@ -118,22 +125,11 @@
 			
 				<div  class="container-box-title">
 					<div class="container_tit">
-						<h1 class="title"><span class="bold">No tiene certificados en Cl@ve Firma</span></h1>
-					</div>
-					<div class="container_btn_operation">
-					<% if (originForced) { %>
-						<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
-							<span >Cancelar</span>
-						</a>
-					<% } else { %>
-						<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
-							<span class="arrow-left-white"></span>
-							<span >volver</span>
-						</a>
-					<% } %>
-					</div>
+						<h1 class="title"><span class="bold">No tiene certificados en <%=providerName%></span></h1>
+					</div>		
 				</div>
-				<div class="container-box-error">
+				
+				<div class="container-box-error-new">
 					<div class="container-textbox-error">
 						<p class="text-error-box">Si lo desea puede emitir un nuevo certificado en la nube para firmar</p>
 					</div>
@@ -142,28 +138,42 @@
 		  					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 		  					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>">
 			  				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_APPLICATION_ID %>" value="<%= appId %>">
-							<input type="submit" class="button_firmar" value="Emitir certificado en Cl@ve Firma" />
+							<input type="submit" class="button_firmar" value="Emitir certificado" />
 						</form>
 					</div>
-									
-				
-				<% if (!originForced) { %>
-			  		
-					<div id="certLocalText" class="container-textbox-error hide">					
-						<p class="text-error-box">Tambien puede firmar usando sus certificados locales (incluyendo DNIe).</p>
-					</div>								  				
-					<div  id="certLocalcontainer" class="error-box hide">
-						<form id="certLocal" action="chooseCertificateOriginService" class="hide">
-					  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-					  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>">
-					  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
-							<input type="submit" class="button_firmar" value="Usar certificado local" />
-						</form>
-					</div>
-									
-				<% } %>
 				</div>
+									
+				<% if (!originForced) { %>
+			  		<div class="container-box-error-local">
+						<div id="certLocalText" class="container-textbox-error hide">					
+							<p class="text-error-box">Tambien puede firmar usando sus certificados locales (incluyendo DNIe).</p>
+						</div>								  				
+						<div  id="certLocalcontainer" class="error-box hide">
+							<form id="certLocal" action="chooseCertificateOriginService" class="hide">
+						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>">
+						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
+								<input type="submit" class="button_firmar" value="Usar certificado local" />
+							</form>
+						</div>
+					</div>			
+				<% } %>
+				
+				
+				<div class="container_btn_operation">
+					<% if (originForced) { %>
+						<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
+							<span >Cancelar</span>
+						</a>
+					<% } else { %>
+						<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
+							<span class="arrow-left-white"></span>
+							<span >Volver</span>
+						</a>
+					<% } %>
+					</div>
+					
 			</section>
 		</main>
 	
@@ -177,7 +187,7 @@
 			</div>
 			<div class="footer_bottom wrapper">
 				<div class="comp_left">
-				  <p class="footer-text">&copy; 2017 Gobierno de Espa&ntilde;a - FIRe</p> 
+				  <p class="footer-text">&copy; 2018 Gobierno de Espa&ntilde;a - FIRe</p> 
 				</div>
 			</div>
 		</footer>

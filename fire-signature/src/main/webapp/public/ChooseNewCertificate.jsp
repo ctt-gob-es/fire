@@ -151,18 +151,7 @@
 				<div class="container_tit">
 					<h1 class="title"><span class="bold">Seleccione el certificado de firma</span></h1>
 				</div>
-				<div class="container_btn_operation">
-		<% if (originForced) { %>
-			<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
-				<span >Cancelar</span>
-			</a>
-		<% } else { %> 
-			<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
-				<span class="arrow-left-white"></span>
-				<span >volver</span>
-			</a>
-		<% } %>
-				</div>
+				
 			</div>
 		
 		
@@ -194,6 +183,18 @@
 				</div>
 				
 			</div>
+			<div class="container_btn_operation">
+			<% if (originForced) { %>
+				<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
+					<span >Cancelar</span>
+				</a>
+			<% } else { %> 
+				<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
+					<span class="arrow-left-white"></span>
+					<span >Volver</span>
+				</a>
+			<% } %>
+			</div>
 		</section>
 	</main>		
 	
@@ -207,7 +208,7 @@
 		</div>
 		<div class="footer_bottom wrapper">
 			<div class="comp_left">
-			  <p class="footer-text">&copy; 2017 Gobierno de Espa&ntilde;a - FIRe</p> 
+			  <p class="footer-text">&copy; 2018 Gobierno de Espa&ntilde;a - FIRe</p> 
 			</div>
 		</div>
 	</footer>

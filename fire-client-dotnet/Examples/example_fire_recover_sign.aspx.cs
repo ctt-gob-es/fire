@@ -7,21 +7,22 @@ public partial class example_fire_recover_sign : System.Web.UI.Page
     {
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionResult signature;
-        string transactionId = "09237210-64ac-4c38-8000-033f4812ba32";
+        string transactionId = "2b996a27-3622-4923-903b-f390cce98cfc";
+        string appId = "B244E473466F";
         try
         {
             
-                        signature = new FireClient("A418C37E84BA").recoverSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
-                            transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
-                            "00001",        // Identificador del usuario
-                            null            // Formato longevo
-                        );
+            signature = new FireClient(appId).recoverSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
+                "00001",        // Identificador del usuario
+                null            // Formato longevo
+            );
             
             /*
-            signature = FireApi.recoverSign("A418C37E84BA", // Identificador de la aplicacion (dada de alta previamente en el sistema)
-                            transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
-                            null            // Formato longevo
-                        );
+            signature = FireApi.recoverSign(appId, // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
+                null            // Formato longevo
+            );
             */
         }
         catch (Exception ex)
