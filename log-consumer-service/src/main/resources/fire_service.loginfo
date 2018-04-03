@@ -40,7 +40,9 @@ dateTimeFormat=yyyy-mm-dd HH:mm:ss
 #  - *		 :  Porcion de texto variable. Englobara al mensaje y cualquier otro fragmento variable
 #				del log. Puede ser el ultimo elemento del patron, o estar seguido de una
 #				cadena fija o un salto de linea. En caso de estar limitado por una cadena fija o un
-#				salto de linea, ese fragmento no podra contener esa cadena ni saltos de linea.
+#				salto de linea, ese fragmento no podra contener esa cadena ni saltos de linea. No
+# 				podra usarse para iniciar el patron si no va seguido de un delimitador.
+# No se pueden usar dos particulas iguales consecutivas.
 # Ejemplo de patrones:
 #  - Patron de los logs de FIRe:
 #		#*\n[DATE]; [LEVEL];*

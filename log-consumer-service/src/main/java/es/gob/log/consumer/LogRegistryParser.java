@@ -10,23 +10,25 @@ import java.util.List;
  */
 public class LogRegistryParser {
 
-	private final ParticleParser[] pParsers;
-
-	private final ParticleParserFactory parserFactory;
-
 	/** Indica si sera necesario leer activamente una nueva l&iacute;nea de
 	 * log al terminar de leer el registro.
 	 */
 	private final boolean needActiveReadline;
 
+	/** Listado de analizadores de particulas para identificar los registros. */
+	private final ParticleParser[] pParsers;
+
 	/**
-	 * Analizador de registros de log.
+	 * Establece la informaci&oacute;n para el an&aacute;lisis de los registros de log.
 	 * @param logInfo Informaci&oacute;n acerca del formato del log.
+	 * @throws InvalidPatternException Cuando en la informaci&oacute;n proporcionada se
+	 * indique un patr&oacute;n de registro no v&aacute;lido.
 	 */
-	public LogRegistryParser(final LogInfo logInfo) {
-		this.parserFactory = ParticleParserFactory.getInstance(logInfo);
+	LogRegistryParser(final LogInfo logInfo) throws InvalidPatternException {
+
 		if (logInfo != null) {
-			this.pParsers = buildParsersList(logInfo.getLogPattern(), this.parserFactory);
+			final ParticleParserFactory parserFactory = ParticleParserFactory.getInstance(logInfo);
+			this.pParsers = buildParsersList(logInfo.getLogPattern(), parserFactory);
 		}
 		else {
 			this.pParsers = null;
@@ -79,7 +81,7 @@ public class LogRegistryParser {
 		return registry;
 	}
 
-	private static ParticleParser[] buildParsersList(final String pattern, final ParticleParserFactory factory) {
+	private static ParticleParser[] buildParsersList(final String pattern, final ParticleParserFactory factory) throws InvalidPatternException {
 		final ParticleParser[] parsers = buildParsers(pattern, factory).toArray(new ParticleParser[0]);
 
 		// A cada uno de los parsers, le asignamos como limite el establecido por el parser siguiente.
@@ -94,6 +96,9 @@ public class LogRegistryParser {
 				((ParticleParserUndefined) parsers[parsers.length - 1]).setInitialParser(parsers[0]);
 			}
 		}
+
+		// Comprobamos que el patron sea correcto
+		ParticleParserFactory.checkPattern(parsers);
 
 		return parsers;
 	}
@@ -116,16 +121,16 @@ public class LogRegistryParser {
 	}
 
 	private static void parseParticle(final List<ParticleParser> list, final ParticleParserFactory factory,
-			final String text, final ParticlePattern pp) {
+			final String pattern, final ParticlePattern pp) {
 
-		final int idx = pp.indexOf(text);
+		final int idx = pp.indexOf(pattern);
 		if (idx > -1) {
 			if (idx > 0) {
-				addList(list, buildParsers(text.substring(0, idx), factory));
+				addList(list, buildParsers(pattern.substring(0, idx), factory));
 			}
-			addList(list, factory.build(pp, text));
-			if (idx + pp.getPatternLength() < text.length()) {
-				addList(list, buildParsers(text.substring(idx + pp.getPatternLength()), factory));
+			addList(list, factory.build(pp, pattern));
+			if (idx + pp.getPatternLength() < pattern.length()) {
+				addList(list, buildParsers(pattern.substring(idx + pp.getPatternLength()), factory));
 			}
 		}
 	}

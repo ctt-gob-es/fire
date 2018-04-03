@@ -338,4 +338,46 @@ public class ParticleParserFactory {
 			this.initialPParser = pParser;
 		}
 	}
+
+	public static void checkPattern(final ParticleParser[] parsers) throws InvalidPatternException {
+
+
+		for (int i = 0; i < parsers.length; i++) {
+
+			// La ultima particula del patron tiene consideraciones especiales, ya que no tiene a
+			// ningun otro que lo limite y puede extenderse multiples lineas
+			if (i == parsers.length - 1) {
+				if (parsers[i] instanceof ReturnCarriageParticleParser) {
+					throw new InvalidPatternException("La ultima particula del patron no puede ser retorno de carro"); //$NON-NLS-1$
+				}
+			}
+			else {
+				// Dentro del resto de particulas, el primero puede tener alguna comprobacion adicional
+				if (i == 0) {
+					if (parsers[i] instanceof ReturnCarriageParticleParser) {
+						throw new InvalidPatternException("La primera particula del patron no puede ser retorno de carro"); //$NON-NLS-1$
+					}
+					else if (parsers[i] instanceof UndefinedStringParser) {
+						if (parsers[i].nextLimit == null || parsers[i].nextLimit.equals(CR_STRING)) {
+							throw new InvalidPatternException("La primera particula del patron no puede ser una cadena indefinida a la que no siga un delimitador"); //$NON-NLS-1$
+						}
+					}
+				}
+
+				// Comprobaciones generales
+
+				// La cadena indefinida debe estar seguida de una cadena o un salto de linea
+				if (parsers[i] instanceof UndefinedStringParser) {
+					if (parsers[i].nextLimit == null) {
+						throw new InvalidPatternException("La particula de texto indefinido debe estar seguida por un delimitador o un salto de linea"); //$NON-NLS-1$
+					}
+				}
+
+				// No puede haber 2 particulas iguales seguidas
+				if (parsers[i].getClass().isInstance(parsers[i + 1])) {
+					throw new InvalidPatternException("No puede haber dos particulas iguales consecutivas"); //$NON-NLS-1$
+				}
+			}
+		}
+	}
 }

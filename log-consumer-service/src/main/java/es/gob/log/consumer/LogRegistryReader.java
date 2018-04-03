@@ -18,8 +18,10 @@ class LogRegistryReader {
 	/**
 	 * Construye el parse de entradas de registro.
 	 * @param logInfo Informaci&oacute;n del fichero de log.
+	 * @throws InvalidPatternException Cuando en la informaci&oacute;n proporcionada se
+	 * indique un patr&oacute;n de registro no v&aacute;lido.
 	 */
-	public LogRegistryReader(final LogInfo logInfo) {
+	public LogRegistryReader(final LogInfo logInfo) throws InvalidPatternException {
 		this.registryParser = new LogRegistryParser(logInfo);
 	}
 

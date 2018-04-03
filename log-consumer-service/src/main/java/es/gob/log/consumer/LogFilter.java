@@ -22,8 +22,10 @@ public class LogFilter {
 	 * Crea el filtro de logs.
 	 * @param logInfo Configuraci&oacute;n que se puede utilizar para determinar
 	 * el formato de los logs.
+	 * @throws InvalidPatternException Cuando en la informaci&oacute;n proporcionada se
+	 * indique un patr&oacute;n de registro no v&aacute;lido.
 	 */
-	public LogFilter(final LogInfo logInfo) {
+	public LogFilter(final LogInfo logInfo) throws InvalidPatternException {
 		this.registryReader = new LogRegistryReader(logInfo);
 	}
 
