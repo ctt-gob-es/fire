@@ -129,34 +129,39 @@ public class LogFunctions {
 		 String salida=null;
 		 final Path path = Paths.get(logFileName);
 		 int nLines = numLines;
+		 long positionResult = 0L;
 		  try (SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
 			  	ByteBuffer buf = null;
 		        final long totalSize = Files.size(path);
-		        final int totalNext =  (int) (totalSize/SIZE_OF_REPORT_ENTRY);
+		        final int totalNext =  (int) (totalSize / SIZE_OF_REPORT_ENTRY);
 		        final int [] positions = new int [totalNext];
 		        long nextPosition = 0L;
 		        int j = 0;
-
-
+		        /*Se inicializa el array de posiciones del fichero log completo*/
 		        for(int i = 0; i < totalNext; i++) {
 			        positions[i] = i * SIZE_OF_REPORT_ENTRY;
 			        if(totalSize > actPosition && positions[i] <= actPosition && actPosition > 0L) {
+			        	/*Actualizamos la siguiente posici&oacute;n respecto a la posici&oacute;n actual indicada*/
 			        	nextPosition = positions[i] + SIZE_OF_REPORT_ENTRY;
 			        	j = i + 1;
 			        }
 			    }
 
+		        /*Actualizamos la siguiente posici&oacute;n en caso de ser 0 (inicio del fichero) coincidir&aacute; con el tamano indicado de
+		         * partici&oacute;n*/
 		        if(actPosition <= 0L) {
 		        	nextPosition = SIZE_OF_REPORT_ENTRY;
 		        	j = 2;
 		        }
+		        /*Actualizamos la siguiente posici&oacute;n en caso de ser 0 (inicio del fichero) y n&uacute;mero de l&iacute;neas 0
+		         *  coincidir&aacute; con el tamano total del fichero para leer desde la posici&oacute;n actual hasta el final*/
 		        if(nLines <= 0 && actPosition <= 0L|| nLines <= 0 && actPosition > 0L) {
 		        	nextPosition = totalSize;
 		        }
 
-		        if(positions != null && positions.length > 0) {
-
-		        	buf =  ByteBuffer.allocate((int) (nextPosition - actPosition));
+		        if(positions.length > 0) {
+		        	positionResult = nextPosition - actPosition;
+		        	buf =  ByteBuffer.allocate((int) positionResult);
 				    System.out.println("Lectura ----------- Siguentes lineas..."); //$NON-NLS-1$
 			        channel.position(actPosition);
 					channel.read(buf);
@@ -164,11 +169,13 @@ public class LogFunctions {
 					byte[] data = new byte[buf.limit()];
 					buf.get(data);
 					int totalLines = getNumLines(data);
+					/**/
 					if(nLines <= 0) {
 						nLines = totalLines;
 					}
 					while (nLines > totalLines) {
-						buf =  ByteBuffer.allocate((int) (positions[j]-actPosition));
+						positionResult = positions[j] - actPosition;
+						buf =  ByteBuffer.allocate((int) positionResult);
 						channel.position(actPosition);
 						channel.read(buf);
 						buf.flip();
@@ -183,7 +190,7 @@ public class LogFunctions {
 					System.out.println(salida);
 					System.out.println("Leidas "+ totalLines + " líneas de log.");
 					buf.clear() ;
-					return positions[j];
+					return positionResult;
 		        }
 
 
@@ -191,8 +198,6 @@ public class LogFunctions {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-
 
 		return -1;
 	}
@@ -212,7 +217,7 @@ public class LogFunctions {
 		        for(int i = 0; i < totalNext; i++) {
 		        	positions[i] = i * SIZE_OF_REPORT_ENTRY;
 		        }
-		        if(positions != null && positions.length > 0) {
+		        if( positions.length > 0) {
 		        	ByteBuffer buf =  ByteBuffer.allocate((int) (totalSize-positions[positions.length-1]));
 				    System.out.println("Lectura ... Ultimas lineas..."); //$NON-NLS-1$
 			        channel.position(positions[positions.length-1]);
@@ -491,8 +496,12 @@ public class LogFunctions {
 //				e.printStackTrace();
 //			}
 
-		  long possiton = 2048L;
-		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",0,possiton); //$NON-NLS-1$
+		  long possiton = 0L;
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
+		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
 		 // possiton = getLogTail("C:/LOGS/fire/2018-03-14-18-18.log",40); //$NON-NLS-1$
 
 
