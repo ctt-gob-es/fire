@@ -15,7 +15,7 @@ CREATE TABLE `tb_aplicaciones` (
 CREATE TABLE `tb_certificados` (
   `id_certificado` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_cert` varchar(45) NOT NULL,
-  `fec_alta` datetime NOT NULL DEFAULT 0,
+  `fec_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `cert_principal` varchar(5000) DEFAULT NULL,
   `cert_backup` varchar(5000) DEFAULT NULL,
   `huella_principal` varchar(45) DEFAULT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE `tb_usuarios` (
   `nombre` varchar(45) NOT NULL COMMENT 'Nombre completo del usuario',
   `apellidos` varchar(120) NOT NULL COMMENT 'Apellidos del usuario',
   `correo_elec` varchar(45) DEFAULT NULL COMMENT 'Correo electrónico',
-  `fec_alta` datetime NOT NULL DEFAULT 0 COMMENT 'fecha de alta del usuario.',
+  `fec_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'fecha de alta del usuario.',
   `telf_contacto` varchar(45) DEFAULT NULL COMMENT 'Teléfono de contacto',
   `rol` varchar(45) NOT NULL DEFAULT 'admin' COMMENT 'Papel (rol) que desempeña dentro de la aplicación',
   `usu_defecto` tinyint(4) NOT NULL DEFAULT '0',
@@ -41,22 +41,11 @@ CREATE TABLE `tb_usuarios` (
 
 
 ALTER TABLE `tb_aplicaciones` 
-
 ADD INDEX `fk_certificado_idx` (`fk_certificado` ASC);
 
 ALTER TABLE `tb_aplicaciones` 
 ADD CONSTRAINT `fk_certificado`
-  
 FOREIGN KEY (`fk_certificado`)
   REFERENCES `tb_certificados` (`id_certificado`)
-  
 ON DELETE RESTRICT
-  ON UPDATE CASCADE;
-
-
-ALTER TABLE `tb_aplicaciones` 
-ADD CONSTRAINT `fk_certificado`
-  FOREIGN KEY (`fk_certificado`)
-  
-REFERENCES `tb_certificados` (`id_certificado`)
   ON UPDATE CASCADE;
