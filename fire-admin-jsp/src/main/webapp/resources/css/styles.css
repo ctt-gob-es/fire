@@ -206,6 +206,7 @@ ul li {
 }
 .admin-table td {
 	padding: 2px;
+	text-align: center;
 }
 
 .admin-table thead {
