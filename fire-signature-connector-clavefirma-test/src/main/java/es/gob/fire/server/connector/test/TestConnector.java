@@ -135,7 +135,7 @@ public class TestConnector extends FIReConnector {
 		try {
 			ConnectionManager.configureConnection(c);
 		} catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error configurando la conexion con el servicion de pruebas", e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "Error configurando la conexion con el servicio de pruebas", e); //$NON-NLS-1$
 		}
     }
 
