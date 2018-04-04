@@ -55,14 +55,14 @@ public class ParticleParserFactory {
 	}
 
 
-	private class StringParticleParser implements ParticleParser {
+	private class StringParticleParser extends ParticleParser {
 		private final String text;
 		public StringParticleParser(final String text) {
 			this.text = text;
 		}
 
 		@Override
-		public void parse(final LogReader reader, final String limit, final LogRegistry registry)
+		public void parse(final LogReader reader, final LogRegistry registry)
 				throws IOException, InvalidRegistryFormatException {
 
 			final CharBuffer line = reader.getCurrentLine();
@@ -80,7 +80,7 @@ public class ParticleParserFactory {
 		}
 	}
 
-	private class DateParticleParser implements ParticleParser {
+	private class DateParticleParser extends ParticleParser {
 
 		private final SimpleDateFormat formatter;
 
@@ -90,28 +90,41 @@ public class ParticleParserFactory {
 		}
 
 		@Override
-		public void parse(final LogReader reader, final String limit, final LogRegistry registry)
+		public void parse(final LogReader reader, final LogRegistry registry)
 				throws IOException, InvalidRegistryFormatException {
 
 			final CharBuffer line = reader.getCurrentLine();
 
 			Date date;
 			String dateText;
-			if (limit == null) {
+			if (this.nextLimit == null) {
 				dateText = line.toString();
 				final ParsePosition pos = new ParsePosition(0);
 				date = this.formatter.parse(dateText, pos);
 				line.position(line.position() + pos.getIndex());
 			}
 			else {
-				final int idx = line.toString().indexOf(limit);
-				final char[] dateTextChars = new char[idx];
-				line.get(dateTextChars);
-				dateText = new String(dateTextChars);
-				try {
-					date = this.formatter.parse(dateText);
-				} catch (final ParseException e) {
-					date = null;
+				if (this.nextLimit == CR_STRING) {
+					dateText = line.toString();
+					try {
+						date = this.formatter.parse(dateText);
+					} catch (final ParseException e) {
+						date = null;
+					}
+				}
+				else {
+					final int idx = line.toString().indexOf(this.nextLimit);
+					if (idx == -1) {
+						throw new InvalidRegistryFormatException("No se ha encontrado el limite de la fecha"); //$NON-NLS-1$
+					}
+					final char[] dateTextChars = new char[idx];
+					line.get(dateTextChars);
+					dateText = new String(dateTextChars);
+					try {
+						date = this.formatter.parse(dateText);
+					} catch (final ParseException e) {
+						date = null;
+					}
 				}
 			}
 
@@ -130,7 +143,7 @@ public class ParticleParserFactory {
 		}
 	}
 
-	private class LevelParticleParser implements ParticleParser {
+	private class LevelParticleParser extends ParticleParser {
 
 		private final String[] pLevels;
 		public LevelParticleParser(final String[] levels) {
@@ -138,7 +151,7 @@ public class ParticleParserFactory {
 		}
 
 		@Override
-		public void parse(final LogReader reader, final String limit, final LogRegistry registry)
+		public void parse(final LogReader reader, final LogRegistry registry)
 				throws IOException, InvalidRegistryFormatException {
 
 			if (this.pLevels == null) {
@@ -147,9 +160,15 @@ public class ParticleParserFactory {
 
 			int level = -1;
 			final CharBuffer line = reader.getCurrentLine();
-			if (limit != null) {
-				final int idx = line.toString().indexOf(limit);
-				if (idx != -1) {
+			if (this.nextLimit != null) {
+				if (this.nextLimit == CR_STRING) {
+					level = getLevel(line.toString());
+				}
+				else {
+					final int idx = line.toString().indexOf(this.nextLimit);
+					if (idx == -1) {
+						throw new InvalidRegistryFormatException("No se ha encontrado el limite del nivel"); //$NON-NLS-1$
+					}
 					final char[] levelChars = new char[idx];
 					line.get(levelChars);
 					level = getLevel(new String(levelChars));
@@ -193,7 +212,7 @@ public class ParticleParserFactory {
 					return i;
 				}
 			}
-			throw new InvalidRegistryFormatException("No se ha encontrado el nivel"); //$NON-NLS-1$
+			throw new InvalidRegistryFormatException("No se ha encontrado un nivel valido"); //$NON-NLS-1$
 		}
 
 		@Override
@@ -202,12 +221,12 @@ public class ParticleParserFactory {
 		}
 	}
 
-	private class ReturnCarriageParticleParser implements ParticleParser {
+	private class ReturnCarriageParticleParser extends ParticleParser {
 
 		public ReturnCarriageParticleParser() { }
 
 		@Override
-		public void parse(final LogReader reader, final String limit, final LogRegistry registry) throws IOException {
+		public void parse(final LogReader reader, final LogRegistry registry) throws IOException {
 
 			// Leemos una nueva linea a traves del lector
 			final CharBuffer line = reader.readLine();
@@ -222,22 +241,21 @@ public class ParticleParserFactory {
 		}
 	}
 
-	private class UndefinedStringParser implements ParticleParserUndefined {
+	private class UndefinedStringParser extends ParticleParserUndefined {
 
 		private ParticleParser initialPParser = null;
-		private String initialLimit = null;
 
 		public UndefinedStringParser() {}
 
 		@Override
-		public void parse(final LogReader reader, final String limit, final LogRegistry registry)
+		public void parse(final LogReader reader, final LogRegistry registry)
 				throws IOException, InvalidRegistryFormatException {
 
 			CharBuffer line = reader.getCurrentLine();
 
 			// En caso de que haya un limite, avanzamos en la linea hasta encontrarlo
-			if (limit != null) {
-				find(line, limit);
+			if (this.nextLimit != null) {
+				find(line, this.nextLimit);
 			}
 			// Si no lo hay, entendemos que estamos en el ultimo elemento del registro.
 			// Vamos leyendo lineas hasta encontrar una que empiece como un nuevo registro
@@ -257,7 +275,7 @@ public class ParticleParserFactory {
 
 		private boolean isNewRegistry(final LogReader reader) {
 			try {
-				this.initialPParser.parse(reader, this.initialLimit, null);
+				this.initialPParser.parse(reader, null);
 			} catch (final Exception e) {
 				return false;
 			}
@@ -316,9 +334,50 @@ public class ParticleParserFactory {
 		}
 
 		@Override
-		public void setInitialParser(final ParticleParser pParser, final String initialLimit) {
+		public void setInitialParser(final ParticleParser pParser) {
 			this.initialPParser = pParser;
-			this.initialLimit = initialLimit;
+		}
+	}
+
+	public static void checkPattern(final ParticleParser[] parsers) throws InvalidPatternException {
+
+
+		for (int i = 0; i < parsers.length; i++) {
+
+			// La ultima particula del patron tiene consideraciones especiales, ya que no tiene a
+			// ningun otro que lo limite y puede extenderse multiples lineas
+			if (i == parsers.length - 1) {
+				if (parsers[i] instanceof ReturnCarriageParticleParser) {
+					throw new InvalidPatternException("La ultima particula del patron no puede ser retorno de carro"); //$NON-NLS-1$
+				}
+			}
+			else {
+				// Dentro del resto de particulas, el primero puede tener alguna comprobacion adicional
+				if (i == 0) {
+					if (parsers[i] instanceof ReturnCarriageParticleParser) {
+						throw new InvalidPatternException("La primera particula del patron no puede ser retorno de carro"); //$NON-NLS-1$
+					}
+					else if (parsers[i] instanceof UndefinedStringParser) {
+						if (parsers[i].nextLimit == null || parsers[i].nextLimit.equals(CR_STRING)) {
+							throw new InvalidPatternException("La primera particula del patron no puede ser una cadena indefinida a la que no siga un delimitador"); //$NON-NLS-1$
+						}
+					}
+				}
+
+				// Comprobaciones generales
+
+				// La cadena indefinida debe estar seguida de una cadena o un salto de linea
+				if (parsers[i] instanceof UndefinedStringParser) {
+					if (parsers[i].nextLimit == null) {
+						throw new InvalidPatternException("La particula de texto indefinido debe estar seguida por un delimitador o un salto de linea"); //$NON-NLS-1$
+					}
+				}
+
+				// No puede haber 2 particulas iguales seguidas
+				if (parsers[i].getClass().isInstance(parsers[i + 1])) {
+					throw new InvalidPatternException("No puede haber dos particulas iguales consecutivas"); //$NON-NLS-1$
+				}
+			}
 		}
 	}
 }

@@ -1,0 +1,318 @@
+﻿mar 28, 2018 12:41:12 PM org.apache.tomcat.util.digester.SetPropertiesRule begin
+ADVERTENCIA: [SetPropertiesRule]{Server/Service/Engine/Host/Context} Setting property 'source' to 'org.eclipse.jst.j2ee.server:clavefirma-test-services' did not find a matching property.
+mar 28, 2018 12:41:12 PM org.apache.tomcat.util.digester.SetPropertiesRule begin
+ADVERTENCIA: [SetPropertiesRule]{Server/Service/Engine/Host/Context} Setting property 'source' to 'org.eclipse.jst.j2ee.server:fire-admin-jsp' did not find a matching property.
+mar 28, 2018 12:41:12 PM org.apache.tomcat.util.digester.SetPropertiesRule begin
+ADVERTENCIA: [SetPropertiesRule]{Server/Service/Engine/Host/Context} Setting property 'source' to 'org.eclipse.jst.j2ee.server:fire-signature' did not find a matching property.
+mar 28, 2018 12:41:12 PM org.apache.tomcat.util.digester.SetPropertiesRule begin
+ADVERTENCIA: [SetPropertiesRule]{Server/Service/Engine/Host/Context} Setting property 'source' to 'org.eclipse.jst.j2ee.server:fire-test-jsp' did not find a matching property.
+mar 28, 2018 12:41:12 PM org.apache.tomcat.util.digester.SetPropertiesRule begin
+ADVERTENCIA: [SetPropertiesRule]{Server/Service/Engine/Host/Context} Setting property 'source' to 'org.eclipse.jst.j2ee.server:fnmt-fire-service' did not find a matching property.
+mar 28, 2018 12:41:12 PM org.apache.tomcat.util.digester.SetPropertiesRule begin
+ADVERTENCIA: [SetPropertiesRule]{Server/Service/Engine/Host/Context} Setting property 'source' to 'org.eclipse.jst.jee.server:aesa-test' did not find a matching property.
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Server version:        Apache Tomcat/8.0.37
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Server built:          Sep 1 2016 10:01:52 UTC
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Server number:         8.0.37.0
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: OS Name:               Windows 8.1
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: OS Version:            6.3
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Architecture:          amd64
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Java Home:             C:\Program Files\Java\jdk1.8.0_121\jre
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: JVM Version:           1.8.0_121-b13
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: JVM Vendor:            Oracle Corporation
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: CATALINA_BASE:         C:\Users\carlos.gamuci\workspace_clavefirma\.metadata\.plugins\org.eclipse.wst.server.core\tmp0
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: CATALINA_HOME:         C:\Program Files\Apache\apache-tomcat-8.0.37
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Command line argument: -Dcatalina.base=C:\Users\carlos.gamuci\workspace_clavefirma\.metadata\.plugins\org.eclipse.wst.server.core\tmp0
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Command line argument: -Dcatalina.home=C:\Program Files\Apache\apache-tomcat-8.0.37
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Command line argument: -Dwtp.deploy=C:\Users\carlos.gamuci\workspace_clavefirma\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Command line argument: -Djava.endorsed.dirs=C:\Program Files\Apache\apache-tomcat-8.0.37\endorsed
+mar 28, 2018 12:41:12 PM org.apache.catalina.startup.VersionLoggerListener log
+INFORMACIÓN: Command line argument: -Dfile.encoding=Cp1252
+mar 28, 2018 12:41:12 PM org.apache.catalina.core.AprLifecycleListener lifecycleEvent
+INFORMACIÓN: La biblioteca nativa de Apache Tomcat basada en ARP que permite un rendimiento óptimo en entornos de desarrollo no ha sido hallada en java.library.path: C:\Program Files\Java\jdk1.8.0_121\bin;C:\windows\Sun\Java\bin;C:\windows\system32;C:\windows;C:\ProgramData\Oracle\Java\javapath;C:\Program Files\Java\jdk1.8.0_121\bin;C:\app\carlos.gamuci\product\11.2.0\dbhome_1\bin;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\Apache\apache-maven-3.3.9\bin;C:\Program Files\Git\cmd;C:\Program Files\MySQL\MySQL Utilities 1.6\;C:\Program Files\OpenVPN\bin;C:\windows\system32\config\systemprofile\.dnx\bin;C:\Program Files\Microsoft DNX\Dnvm\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\TortoiseGit\bin;C:\Program Files\Gemalto\Classic Client\BIN;C:\Program Files (x86)\Gemalto\Classic Client\BIN;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files (x86)\WiX Toolset v3.10\bin;C:\Program Files (x86)\Sennheiser\SoftphoneSDK\;C:\Program Files (x86)\Gpg4win\..\GnuPG\bin;C:\Program Files\AutoFirma\AutoFirma;.
+mar 28, 2018 12:41:12 PM org.apache.coyote.AbstractProtocol init
+INFORMACIÓN: Initializing ProtocolHandler ["http-nio-8080"]
+mar 28, 2018 12:41:12 PM org.apache.tomcat.util.net.NioSelectorPool getSharedSelector
+INFORMACIÓN: Using a shared selector for servlet write/read
+mar 28, 2018 12:41:12 PM org.apache.coyote.AbstractProtocol init
+INFORMACIÓN: Initializing ProtocolHandler ["http-nio-8443"]
+mar 28, 2018 12:41:13 PM org.apache.tomcat.util.net.NioSelectorPool getSharedSelector
+INFORMACIÓN: Using a shared selector for servlet write/read
+mar 28, 2018 12:41:13 PM org.apache.coyote.AbstractProtocol init
+INFORMACIÓN: Initializing ProtocolHandler ["ajp-nio-8009"]
+mar 28, 2018 12:41:13 PM org.apache.tomcat.util.net.NioSelectorPool getSharedSelector
+INFORMACIÓN: Using a shared selector for servlet write/read
+mar 28, 2018 12:41:13 PM org.apache.catalina.startup.Catalina load
+INFORMACIÓN: Initialization processed in 1677 ms
+mar 28, 2018 12:41:13 PM org.apache.catalina.core.StandardService startInternal
+INFORMACIÓN: Arrancando servicio Catalina
+mar 28, 2018 12:41:13 PM org.apache.catalina.core.StandardEngine startInternal
+INFORMACIÓN: Starting Servlet Engine: Apache Tomcat/8.0.37
+mar 28, 2018 12:41:14 PM org.apache.jasper.servlet.TldScanner scanJars
+INFORMACIÓN: Al menos un JAR, que se ha explorado buscando TLDs, aún no contenía TLDs. Activar historial de depuración para este historiador para una completa lista de los JARs que fueron explorados y de los que nos se halló TLDs. Saltarse JARs no necesarios durante la exploración puede dar lugar a una mejora de tiempo significativa en el arranque y compilación de JSP .
+mar 28, 2018 12:41:19 PM org.apache.jasper.servlet.TldScanner scanJars
+INFORMACIÓN: Al menos un JAR, que se ha explorado buscando TLDs, aún no contenía TLDs. Activar historial de depuración para este historiador para una completa lista de los JARs que fueron explorados y de los que nos se halló TLDs. Saltarse JARs no necesarios durante la exploración puede dar lugar a una mejora de tiempo significativa en el arranque y compilación de JSP .
+mar 28, 2018 12:41:19 PM org.apache.jasper.servlet.TldScanner scanJars
+INFORMACIÓN: Al menos un JAR, que se ha explorado buscando TLDs, aún no contenía TLDs. Activar historial de depuración para este historiador para una completa lista de los JARs que fueron explorados y de los que nos se halló TLDs. Saltarse JARs no necesarios durante la exploración puede dar lugar a una mejora de tiempo significativa en el arranque y compilación de JSP .
+mar 28, 2018 12:41:20 PM org.apache.jasper.servlet.TldScanner scanJars
+INFORMACIÓN: Al menos un JAR, que se ha explorado buscando TLDs, aún no contenía TLDs. Activar historial de depuración para este historiador para una completa lista de los JARs que fueron explorados y de los que nos se halló TLDs. Saltarse JARs no necesarios durante la exploración puede dar lugar a una mejora de tiempo significativa en el arranque y compilación de JSP .
+mar 28, 2018 12:41:20 PM org.apache.catalina.startup.ContextConfig processAnnotationsJar
+GRAVE: No puedo procesar la entrada de Jar [module-info.class] desde el Jar [file:/C:/Users/carlos.gamuci/workspace_clavefirma/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/aesa-test/WEB-INF/lib/javax.json-api-1.1.jar] para las anotaciones
+org.apache.tomcat.util.bcel.classfile.ClassFormatException: Invalid byte tag in constant pool: 19
+	at org.apache.tomcat.util.bcel.classfile.Constant.readConstant(Constant.java:97)
+	at org.apache.tomcat.util.bcel.classfile.ConstantPool.<init>(ConstantPool.java:54)
+	at org.apache.tomcat.util.bcel.classfile.ClassParser.readConstantPool(ClassParser.java:174)
+	at org.apache.tomcat.util.bcel.classfile.ClassParser.parse(ClassParser.java:83)
+	at org.apache.catalina.startup.ContextConfig.processAnnotationsStream(ContextConfig.java:2053)
+	at org.apache.catalina.startup.ContextConfig.processAnnotationsJar(ContextConfig.java:1999)
+	at org.apache.catalina.startup.ContextConfig.processAnnotationsUrl(ContextConfig.java:1969)
+	at org.apache.catalina.startup.ContextConfig.processAnnotations(ContextConfig.java:1923)
+	at org.apache.catalina.startup.ContextConfig.webConfig(ContextConfig.java:1166)
+	at org.apache.catalina.startup.ContextConfig.configureStart(ContextConfig.java:783)
+	at org.apache.catalina.startup.ContextConfig.lifecycleEvent(ContextConfig.java:307)
+	at org.apache.catalina.util.LifecycleSupport.fireLifecycleEvent(LifecycleSupport.java:95)
+	at org.apache.catalina.util.LifecycleBase.fireLifecycleEvent(LifecycleBase.java:90)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5213)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:145)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1407)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1397)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+
+mar 28, 2018 12:41:20 PM org.apache.jasper.servlet.TldScanner scanJars
+INFORMACIÓN: Al menos un JAR, que se ha explorado buscando TLDs, aún no contenía TLDs. Activar historial de depuración para este historiador para una completa lista de los JARs que fueron explorados y de los que nos se halló TLDs. Saltarse JARs no necesarios durante la exploración puede dar lugar a una mejora de tiempo significativa en el arranque y compilación de JSP .
+mar 28, 2018 12:41:21 PM org.apache.jasper.servlet.TldScanner scanJars
+INFORMACIÓN: Al menos un JAR, que se ha explorado buscando TLDs, aún no contenía TLDs. Activar historial de depuración para este historiador para una completa lista de los JARs que fueron explorados y de los que nos se halló TLDs. Saltarse JARs no necesarios durante la exploración puede dar lugar a una mejora de tiempo significativa en el arranque y compilación de JSP .
+mar 28, 2018 12:41:21 PM org.apache.jasper.servlet.TldScanner scanJars
+INFORMACIÓN: Al menos un JAR, que se ha explorado buscando TLDs, aún no contenía TLDs. Activar historial de depuración para este historiador para una completa lista de los JARs que fueron explorados y de los que nos se halló TLDs. Saltarse JARs no necesarios durante la exploración puede dar lugar a una mejora de tiempo significativa en el arranque y compilación de JSP .
+mar 28, 2018 12:41:21 PM org.apache.coyote.AbstractProtocol start
+INFORMACIÓN: Starting ProtocolHandler ["http-nio-8080"]
+mar 28, 2018 12:41:21 PM org.apache.coyote.AbstractProtocol start
+INFORMACIÓN: Starting ProtocolHandler ["http-nio-8443"]
+mar 28, 2018 12:41:21 PM org.apache.coyote.AbstractProtocol start
+INFORMACIÓN: Starting ProtocolHandler ["ajp-nio-8009"]
+mar 28, 2018 12:41:21 PM org.apache.catalina.startup.Catalina start
+INFORMACIÓN: Server startup in 8708 ms
+mar 28, 2018 12:42:38 PM es.gob.clavefirma.trustManagerClassName.TrustManagerClass checkClientTrusted
+INFORMACIÓN: Omitida comprobacion cliente de certificado para la operacion 'RSA': EMAILADDRESS=secretaria.redsara@seap.minhap.es, CN=NIF 48967668, OU=Red SARA, O=Ministerio de Hacienda y Administracion Publica, ST=Madrid, C=ES
+mar 28, 2018 12:42:40 PM es.gob.clavefirma.trustManagerClassName.TrustManagerClass checkClientTrusted
+INFORMACIÓN: Omitida comprobacion cliente de certificado para la operacion 'RSA': EMAILADDRESS=secretaria.redsara@seap.minhap.es, CN=NIF 48967668, OU=Red SARA, O=Ministerio de Hacienda y Administracion Publica, ST=Madrid, C=ES
+mar 28, 2018 12:42:40 PM es.gob.fire.test.webapp.SessionDataCleaner sessionCreated
+INFORMACIÓN: Iniciada sesion 7ED7AE2DCAB3A62233420FB26F9FAC15
+mar 28, 2018 12:42:41 PM es.gob.fire.test.webapp.SessionDataCleaner sessionCreated
+INFORMACIÓN: Iniciada sesion F36675078E7F65B857970C358E42DE44
+mar 28, 2018 12:42:49 PM es.gob.fire.client.ConfigManager loadConfig
+INFORMACIÓN: Se carga el fichero de configuracion del classpath
+mar 28, 2018 12:42:49 PM es.gob.fire.client.FireClient <init>
+INFORMACIÓN: Se usara el siguiente servicio de acceso a FIRe: https://servidorcentral:8443/fire-signature/fireService
+mar 28, 2018 12:42:49 PM es.gob.clavefirma.trustManagerClassName.TrustManagerClass checkClientTrusted
+INFORMACIÓN: Omitida comprobacion cliente de certificado para la operacion 'DSA': CN=App Prueba ClaveFirma, OU=SEAP, O=Gobierno de Espa¤a, L=Madrid, ST=Madrid, C=es
+mar 28, 2018 12:42:49 PM es.gob.fire.server.services.FIReService init
+INFORMACIÓN: Log en base de datos instalado
+mar 28, 2018 12:42:49 PM es.gob.fire.server.services.FIReService service
+INFORMACIÓN: Se realizara la validacion de aplicacion en la base de datos
+mar 28, 2018 12:42:50 PM es.gob.fire.signature.AplicationsDAO checkApplicationId
+INFORMACIÓN: Se ha identificado correctamente una peticion de la aplicacion: Prueba
+mar 28, 2018 12:42:50 PM es.gob.fire.server.services.FIReService service
+INFORMACIÓN: Se realizara la validacion del certificado
+mar 28, 2018 12:42:50 PM es.gob.fire.signature.AplicationsDAO checkThumbPrint
+INFORMACIÓN: La huella del certificado se encuentra registrada en el sistema: Rvj4OSJcB9Y9MAySczBVyKaqXpE=
+mar 28, 2018 12:42:50 PM es.gob.fire.server.services.internal.SessionCollector <clinit>
+INFORMACIÓN: No se configuro un gestor de sesiones. El componente central solo funcionara sobre despliegues en un unico nodo.
+mar 28, 2018 12:42:50 PM es.gob.fire.server.services.internal.TempFilesHelper storeTempData
+INFORMACIÓN: Almacenado temporal de datos en: C:\pruebas\temp_clavefirma\4342a983-0ebd-4254-9b42-a9d3881ba2c7
+mar 28, 2018 12:42:51 PM es.gob.clavefirma.trustManagerClassName.TrustManagerClass checkClientTrusted
+INFORMACIÓN: Omitida comprobacion cliente de certificado para la operacion 'RSA': EMAILADDRESS=secretaria.redsara@seap.minhap.es, CN=NIF 48967668, OU=Red SARA, O=Ministerio de Hacienda y Administracion Publica, ST=Madrid, C=ES
+mar 28, 2018 12:42:57 PM es.gob.clavefirma.trustManagerClassName.TrustManagerClass checkClientTrusted
+INFORMACIÓN: Omitida comprobacion cliente de certificado para la operacion 'RSA': EMAILADDRESS=secretaria.redsara@seap.minhap.es, CN=NIF 48967668, OU=Red SARA, O=Ministerio de Hacienda y Administracion Publica, ST=Madrid, C=ES
+mar 28, 2018 12:42:59 PM es.gob.fire.server.connector.FIReConnectorFactory getConnector
+INFORMACIÓN: Se usara el servicio es.gob.fire.server.connector.test.TestConnector
+mar 28, 2018 12:42:59 PM es.gob.fire.server.connector.test.TestConnector init
+INFORMACIÓN: Inicializamos es.gob.fire.server.connector.test.TestConnector
+mar 28, 2018 12:42:59 PM es.gob.fire.server.connector.test.TestConnector init
+ADVERTENCIA: Error configurando la conexion con el servicion de pruebas
+java.lang.IllegalArgumentException: El almacen de certificados de autenticacion SSL no existe o no puede leerse
+	at es.gob.fire.server.connector.test.ConnectionManager.configureConnection(ConnectionManager.java:110)
+	at es.gob.fire.server.connector.test.TestConnector.init(TestConnector.java:136)
+	at es.gob.fire.server.services.internal.ProviderManager.initTransacction(ProviderManager.java:58)
+	at es.gob.fire.server.services.internal.ChooseCertificateOriginService.signWithProvider(ChooseCertificateOriginService.java:161)
+	at es.gob.fire.server.services.internal.ChooseCertificateOriginService.service(ChooseCertificateOriginService.java:109)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:729)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:292)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:207)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:240)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:207)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:212)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:106)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:502)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:141)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:79)
+	at org.apache.catalina.valves.AbstractAccessLogValve.invoke(AbstractAccessLogValve.java:616)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:88)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:528)
+	at org.apache.coyote.http11.AbstractHttp11Processor.process(AbstractHttp11Processor.java:1100)
+	at org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:687)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1520)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.run(NioEndpoint.java:1476)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.lang.Thread.run(Thread.java:745)
+
+mar 28, 2018 12:42:59 PM es.gob.fire.server.connector.test.TestConnector initOperation
+INFORMACIÓN: Nueva transaccion con el conector es.gob.fire.server.connector.test.TestConnector
+mar 28, 2018 12:42:59 PM es.gob.fire.server.services.internal.ChooseCertificateOriginService signWithProvider
+GRAVE: Error indeterminado al recuperar los certificados del usuario 00001: java.lang.NullPointerException
+java.lang.NullPointerException
+	at es.gob.fire.server.connector.test.ConnectionManager.getConnection(ConnectionManager.java:212)
+	at es.gob.fire.server.connector.test.ConnectionManager.readUrl(ConnectionManager.java:297)
+	at es.gob.fire.server.connector.test.ConnectionManager.readUrlByGet(ConnectionManager.java:279)
+	at es.gob.fire.server.connector.test.TestConnector.getCertificates(TestConnector.java:173)
+	at es.gob.fire.server.services.internal.ChooseCertificateOriginService.signWithProvider(ChooseCertificateOriginService.java:165)
+	at es.gob.fire.server.services.internal.ChooseCertificateOriginService.service(ChooseCertificateOriginService.java:109)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:729)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:292)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:207)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:240)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:207)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:212)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:106)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:502)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:141)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:79)
+	at org.apache.catalina.valves.AbstractAccessLogValve.invoke(AbstractAccessLogValve.java:616)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:88)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:528)
+	at org.apache.coyote.http11.AbstractHttp11Processor.process(AbstractHttp11Processor.java:1100)
+	at org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:687)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1520)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.run(NioEndpoint.java:1476)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.lang.Thread.run(Thread.java:745)
+
+mar 28, 2018 12:44:06 PM es.gob.fire.server.services.storage.RetrieveService service
+INFORMACIÓN: == INICIO DE LA RECUPERACION ==
+mar 28, 2018 12:44:06 PM es.gob.fire.server.services.storage.RetrieveService retrieveSign
+INFORMACIÓN: Se solicita el fichero con el identificador: r6J6PbSsC5rgHuNcsPpM
+mar 28, 2018 12:44:06 PM es.gob.fire.server.services.storage.RetrieveService retrieveSign
+ADVERTENCIA: El fichero con el identificador 'r6J6PbSsC5rgHuNcsPpM' no existe: C:\pruebas\temp_clavefirma\afirma\r6J6PbSsC5rgHuNcsPpM
+mar 28, 2018 12:44:06 PM es.gob.fire.server.services.storage.RetrieveService service
+INFORMACIÓN: == FIN DE LA RECUPERACION ==
+mar 28, 2018 12:44:06 PM es.gob.fire.server.services.storage.RetrieveService service
+INFORMACIÓN: Limpiamos el directorio temporal
+mar 28, 2018 12:44:06 PM es.gob.fire.server.services.storage.RetrieveService service
+INFORMACIÓN: Fin de la limpieza
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: == INICIO FIRMA TRIFASICA ==
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Formato de firma seleccionado: CAdES
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Recuperamos el documento mediante el DocumentManager
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Recuperado documento de 72 octetos
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN:  == PREFIRMA en servidor
+mar 28, 2018 12:44:09 PM es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor preProcessPreSign
+INFORMACIÓN: Prefirma CAdES - Firma - INICIO
+mar 28, 2018 12:44:09 PM es.gob.afirma.core.misc.MimeHelper <init>
+ADVERTENCIA: No se pudo detectar el formato de los datos
+mar 28, 2018 12:44:09 PM es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor preProcessPreSign
+INFORMACIÓN: Se invocan las funciones internas de prefirma CAdES
+mar 28, 2018 12:44:09 PM es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor preProcessPreSign
+INFORMACIÓN: Se prepara la respuesta de la prefirma CAdES
+mar 28, 2018 12:44:09 PM es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor preProcessPreSign
+INFORMACIÓN: Prefirma CAdES - Firma - FIN
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Se ha calculado el resultado de la prefirma y se devuelve
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: == FIN PREFIRMA
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: == INICIO FIRMA TRIFASICA ==
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Formato de firma seleccionado: CAdES
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Recibidos los siguientes datos de sesion para 'post':
+<xml>
+ <firmas>
+  <firma Id="fb56dbd4-1fe8-43e6-b0d3-9d4def4027a8">
+   <param n="PRE">MYICfTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xODAzMjgxMDQ0MDlaMCQGCyqGSIb3DQEJEAIEMRUwEwwGYmluYXJ5BgkqhkiG9w0BBwEwLwYJKoZIhvcNAQkEMSIEIJNhdKTiHx/loL3Eu5uh3guFUeDfBjc2ikdnZOOprORKMIIB6gYLKoZIhvcNAQkQAi8xggHZMIIB1TCB0DCBzTANBglghkgBZQMEAgEFAAQggf+kDglrbPMsMIJFTSKs5PC7AJuZ8mmV61naNurkSCswgZkwgYykgYkwgYYxCzAJBgNVBAYTAkVTMTMwMQYDVQQKDCpDT05TT1JDSSBBRE1JTklTVFJBQ0lPIE9CRVJUQSBERSBDQVRBTFVOWUExKjAoBgNVBAsMIVNlcnZlaXMgUMO6YmxpY3MgZGUgQ2VydGlmaWNhY2nDszEWMBQGA1UEAwwNRUMtQ2l1dGFkYW5pYQIIZCfBQxI+TKowgf8wgfwGDCsGAQQB9XgBAwFWATCB6zAxBggrBgEFBQcCARYlaHR0cHM6Ly93d3cuYW9jLmNhdC9DQVRDZXJ0L1JlZ3VsYWNpbzCBtQYIKwYBBQUHAgIwgagMgaVDZXJ0aWZpY2F0IHBlcnNvbmFsIHJlY29uZWd1dCBk4oCZaWRlbnRpZmljYWNpw7MsIHhpZnJhdGdlIGkgc2lnbmF0dXJhIGF2YW7Dp2FkYSwgZGUgY2xhc3NlIDIuIEFkcmXDp2EgaSBOSUYgZGVsIHByZXN0YWRvcjogVmlhIExhaWV0YW5hIDI2IDA4MDAzIEJhcmNlbG9uYSBRMDgwMTE3NUE=</param>
+   <param n="PK1">MT4dJC1NX7NCj5nWGvKfuwBSgy8BCbM93XExGWxxM09pcCPYHkC/vP6A4BQXN2ONdzvWu7yaWC71CqvK3jgQB8+jYAh4plejej6aeUdy27wMVa0QAeHW9NIhtfA5Zchgz+Xlff6eyFeC/XxPzB8pZ6ji3n/FhCNSeyWgYd96ITVqx3tDVk8+L1Hh206u+EurN7dccMsTsjZSv5P9xRcy0H+s8CKubvhl80ekITN59+7Sf3aBEwxpZfD8JkYBKUonGmGbBqEuAZvk3Oz1TKFmML5GodIRKtStnZ0TbqYQYh+ultEvwqF1vkK6dtzunnPcUerugqdkOwTAlnd5rHfIOg==</param>
+   <param n="NEED_PRE">true</param>
+   <param n="NEED_DATA">true</param>
+  </firma>
+ </firmas>
+</xml>
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Recuperamos el documento mediante el DocumentManager
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Recuperado documento de 72 octetos
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN:  == POSTFIRMA en servidor
+mar 28, 2018 12:44:09 PM es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor preProcessPostSign
+INFORMACIÓN: Postfirma CAdES - Firma - INICIO
+mar 28, 2018 12:44:09 PM es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor preProcessPostSign
+INFORMACIÓN: Se invocan las funciones internas de postfirma CAdES
+mar 28, 2018 12:44:09 PM es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor preProcessPostSign
+INFORMACIÓN: Postfirma CAdES - Firma - FIN
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN:  Se ha calculado el resultado de la postfirma y se devuelve. Numero de bytes: 5953
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Almacenamos la firma mediante el DocumentManager
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.internal.TempFilesHelper storeTempData
+INFORMACIÓN: Almacenado temporal de datos en: C:\pruebas\temp_clavefirma\4342a983-0ebd-4254-9b42-a9d3881ba2c7
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: Documento almacenado
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.triphase.ClienteAfirmaSignatureService service
+INFORMACIÓN: == FIN POSTFIRMA ****
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.storage.StorageService service
+INFORMACIÓN:  == INICIO GUARDADO == 
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.storage.StorageService storeSign
+INFORMACIÓN: Se solicita guardar un fichero con el identificador: r6J6PbSsC5rgHuNcsPpM
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.storage.StorageService storeSign
+INFORMACIÓN: Se guardo correctamente el fichero: C:\pruebas\temp_clavefirma\afirma\r6J6PbSsC5rgHuNcsPpM
+mar 28, 2018 12:44:09 PM es.gob.fire.server.services.storage.StorageService service
+INFORMACIÓN: == FIN DEL GUARDADO ==
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.storage.RetrieveService service
+INFORMACIÓN: == INICIO DE LA RECUPERACION ==
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.storage.RetrieveService retrieveSign
+INFORMACIÓN: Se solicita el fichero con el identificador: r6J6PbSsC5rgHuNcsPpM
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.storage.RetrieveService retrieveSign
+INFORMACIÓN: Se recupera el fichero: r6J6PbSsC5rgHuNcsPpM
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.storage.RetrieveService service
+INFORMACIÓN: == FIN DE LA RECUPERACION ==
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.storage.RetrieveService service
+INFORMACIÓN: Limpiamos el directorio temporal
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.storage.RetrieveService service
+INFORMACIÓN: Fin de la limpieza
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.FIReService service
+INFORMACIÓN: Se realizara la validacion de aplicacion en la base de datos
+mar 28, 2018 12:44:10 PM es.gob.fire.signature.AplicationsDAO checkApplicationId
+INFORMACIÓN: Se ha identificado correctamente una peticion de la aplicacion: Prueba
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.FIReService service
+INFORMACIÓN: Se realizara la validacion del certificado
+mar 28, 2018 12:44:10 PM es.gob.fire.signature.AplicationsDAO checkThumbPrint
+INFORMACIÓN: La huella del certificado se encuentra registrada en el sistema: Rvj4OSJcB9Y9MAySczBVyKaqXpE=
+mar 28, 2018 12:44:10 PM es.gob.fire.server.services.internal.RecoverSignManager recoverSignature
+ADVERTENCIA: Ocurrio un error durante la operacion de firma: Error al obtener el certificado del usuario 00001 del  proveedor Clave Firma. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
+mar 28, 2018 12:44:11 PM org.apache.jsp.RecoverSign_jsp _jspService
+GRAVE: Error durante la operacion de recuperacion de firma: es.gob.fire.client.HttpOperationException: ERR-101: Error al obtener el certificado del usuario 00001 del  proveedor Clave Firma. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.

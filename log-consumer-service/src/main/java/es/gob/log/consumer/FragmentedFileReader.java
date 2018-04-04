@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -15,13 +16,16 @@ import java.util.concurrent.Future;
  * Clase para la lectura completa de un fichero por medio cargas segmentadas
  * en memoria.
  */
-class FragmentedFileReader implements LogReader {
+public class FragmentedFileReader implements LogReader {
 
 	/** Car&aacute;cter de BOM. */
 	private static final int CHAR_BOM_PREFIX = 65279;
 
 	/** Car&aacute;cter de fin. */
 	private static final int CHAR_NULL = 0;
+
+	/** Juego de caracteres por defecto. */
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	/** Buffer de 512Kb a modo de cache. */
 	private final ByteBuffer bBuffer;
@@ -47,12 +51,17 @@ class FragmentedFileReader implements LogReader {
 	/**
 	 * Crea el objeto para la carga de ficheros.
 	 * @param channel Canal para la lectura del fichero.
-	 * @param charset Conjunto de caracteres del fichero.
+	 * @param charset Conjunto de caracteres del fichero. Por defecto, UTF-8.
 	 */
 	public FragmentedFileReader(final AsynchronousFileChannel channel, final Charset charset) {
+
+		if (channel == null) {
+			throw new NullPointerException("El canal del lector no puede ser nulo"); //$NON-NLS-1$
+		}
+
 		this.bBuffer = ByteBuffer.allocate(512000);
 		this.channel = channel;
-		this.charset = charset;
+		this.charset = charset != null ? charset : DEFAULT_CHARSET;
 	}
 
 	@Override
