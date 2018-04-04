@@ -66,8 +66,9 @@ class FragmentedFileReader implements LogReader {
 	}
 
 	@Override
-	public void load() throws IOException {
+	public void load(final long position) throws IOException {
 
+		this.filePosition = position;
 		// Cacheamos un fragmento del fichero
 		final Future<Integer> readerProcess = this.channel.read(this.bBuffer, this.filePosition);
 
@@ -224,7 +225,7 @@ class FragmentedFileReader implements LogReader {
 	@Override
 	public void rewind() throws IOException {
 		this.filePosition = 0;
-		load();
+		load(this.filePosition);
 	}
 
 	@Override

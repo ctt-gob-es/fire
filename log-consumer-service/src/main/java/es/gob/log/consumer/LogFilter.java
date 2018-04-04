@@ -51,7 +51,7 @@ public class LogFilter {
 
 		this.logReader = reader;
 		this.logReader.setIgnoreEmptyLines(true);
-		this.logReader.load();
+		this.logReader.load(0);
 
 		this.registryReader.loadReader(this.logReader);
 
