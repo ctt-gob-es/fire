@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +16,6 @@ import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.Future;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -170,7 +168,7 @@ public class LogFunctions {
 					buf.flip();
 					byte[] data = new byte[buf.limit()];
 					buf.get(data);
-					int totalLines = getNumLines(data);
+					int totalLines = getNumLines(buf);
 					/**/
 					if(nLines <= 0) {
 						nLines = totalLines;
@@ -183,16 +181,16 @@ public class LogFunctions {
 						buf.flip();
 						data = new byte[buf.limit()];
 						buf.get(data);
-						totalLines = getNumLines(data);
+						totalLines = getNumLines(buf);
 						j++;
 					}
 					salida = readLineInit(data, nLines, totalLines);
-					totalLines = getNumLines(salida.getBytes());
+					//totalLines = getNumLines(salida.getBytes());
 
 					System.out.println(salida);
 					System.out.println("Leidas "+ totalLines + " líneas de log.");
 					buf.clear() ;
-					return positionResult;
+					return channel.position();
 		        }
 
 
@@ -211,6 +209,7 @@ public class LogFunctions {
 	 */
 	public static long getLogTail(final String logFileName, final int numLines) {
 		 String salida=null;
+		 byte[]  data=null;
 		 final Path path = Paths.get(logFileName);
 		  try (SeekableByteChannel channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
 		        final long totalSize = Files.size(path);
@@ -220,32 +219,26 @@ public class LogFunctions {
 		        	positions[i] = i * SIZE_OF_REPORT_ENTRY;
 		        }
 		        if( positions.length > 0) {
-		        	ByteBuffer buf =  ByteBuffer.allocate((int) (totalSize-positions[positions.length-1]));
-				    System.out.println("Lectura ... Ultimas lineas..."); //$NON-NLS-1$
-			        channel.position(positions[positions.length-1]);
-					channel.read(buf);
-					buf.flip();
-					byte[] data = new byte[buf.limit()];
-					buf.get(data);
-					int totalLines = getNumLines(data);
+					int totalLines = 0;
 					int i = 1;
 					while (numLines > totalLines) {
-						i++;
-						buf =  ByteBuffer.allocate((int) (totalSize-positions[positions.length-i]));
+						final ByteBuffer buf =  ByteBuffer.allocate((int) (totalSize-positions[positions.length-i]));
 						channel.position(positions[positions.length-i]);
 						channel.read(buf);
 						buf.flip();
 						data = new byte[buf.limit()];
 						buf.get(data);
-						totalLines = getNumLines(data);
+						totalLines = getNumLines(buf);
+						i++;
+						buf.clear() ;
 					}
 
 					salida = readLineTail(data,numLines,totalLines);
-					totalLines = getNumLines(salida.getBytes());
+					//totalLines = getNumLines(salida.getBytes());
 
 					System.out.println(salida);
 					System.out.println("Leidas "+totalLines+" líneas de log.");
-					buf.clear() ;
+
 					return totalSize;
 		        }
 
@@ -262,35 +255,41 @@ public class LogFunctions {
 
 
 
-	public static int getNumLines(final byte[] data)
+	public static int getNumLines(final ByteBuffer buffer)
 	{
-	 int numLineas=0;
-	  final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data)));
-	  String line=""; //$NON-NLS-1$
-	  try {
-		while ((line = reader.readLine()) != null)
-		  {
-			numLineas ++;
-		  }
-	  } catch (final IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	  }
+	 int numLineas = 0;
+	 for (int i = 0; i < buffer.remaining(); i++) {
+			final byte b = buffer.get();
+			if (b == '\n') {
+				numLineas++;
+			}
+	}
+//	  final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data)));
+//	  String line=""; //$NON-NLS-1$
+//	  try {
+//		while ((line = reader.readLine()) != null)
+//		  {
+//			numLineas ++;
+//		  }
+//	  } catch (final IOException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	  }
 
 	  return numLineas;
 	}
 
 
 	public static String readLineTail( final byte[] data, final int lines, final int totalLines) {
-		 int numLineas=0;
+		 int numLineas = 0;
 		 final int noReadLines = totalLines - lines;
-		 String linesDataRead =""; //$NON-NLS-1$
+		 String linesDataRead =  ""; //$NON-NLS-1$
 		 final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data)));
 		 String line = ""; //$NON-NLS-1$
 		 try {
 			while ((line = reader.readLine()) != null)
 			  {
-				numLineas ++;
+				numLineas++;
 				if(numLineas > noReadLines) {
 					linesDataRead =linesDataRead.concat(line).concat("\n");
 				}
@@ -315,6 +314,9 @@ public class LogFunctions {
 				if(numLineas <= totalLines - noReadLines) {
 					linesDataRead =linesDataRead.concat(line).concat("\n");
 				}
+				else {
+					break;
+				}
 			  }
 		  } catch (final IOException e) {
 			// TODO Auto-generated catch block
@@ -336,7 +338,7 @@ public class LogFunctions {
 		final File f = new File(DIR_LOGS);
 		String nameLogInfo = null;
 		if(f.exists()) {
-			//bObtenrmos un listado filtrado con solo los ficheros con extensión .loginfo
+			//Obtenrmos un listado filtrado con solo los ficheros con extensión .loginfo
 			final File[] files = f.listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(final File dir, final String name) {
@@ -507,30 +509,30 @@ public class LogFunctions {
 //				e.printStackTrace();
 //			}
 
-		  System.out.println("Aplicar patron"); //$NON-NLS-1$
-		  final Path path = Paths.get("C:/LOGS/fire/2018-03-14-18-18.log"); //$NON-NLS-1$
-
-		  AsynchronousFileChannel fileChannel = null;
-		  try {
-			  fileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.READ);
-		  } catch (final IOException e) {
-			  // TODO Auto-generated catch block
-			  e.printStackTrace();
-		  }
-
-		  final ByteBuffer buffer = ByteBuffer.allocate(1024);
-		  final long position = 0;
-		  if(fileChannel!=null) {
-			  final Future<Integer> operation = fileChannel.read(buffer, position);
-			  while(!operation.isDone()) {
-				  ;
-			  }
-			  buffer.flip();
-			  final byte[] data = new byte[buffer.limit()];
-			  buffer.get(data);
-			  System.out.println(new String(data));
-			  buffer.clear();
-		  }
+//		  System.out.println("Aplicar patron"); //$NON-NLS-1$
+//		  final Path path = Paths.get("C:/LOGS/fire/2018-03-14-18-18.log"); //$NON-NLS-1$
+//
+//		  AsynchronousFileChannel fileChannel = null;
+//		  try {
+//			  fileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.READ);
+//		  } catch (final IOException e) {
+//			  // TODO Auto-generated catch block
+//			  e.printStackTrace();
+//		  }
+//
+//		  final ByteBuffer buffer = ByteBuffer.allocate(1024);
+//		  final long position = 0;
+//		  if(fileChannel!=null) {
+//			  final Future<Integer> operation = fileChannel.read(buffer, position);
+//			  while(!operation.isDone()) {
+//				  ;
+//			  }
+//			  buffer.flip();
+//			  final byte[] data = new byte[buffer.limit()];
+//			  buffer.get(data);
+//			  System.out.println(new String(data));
+//			  buffer.clear();
+//		  }
 
 
 		  long possiton = 0L;
@@ -541,11 +543,6 @@ public class LogFunctions {
 		  possiton = getLogMore("C:/LOGS/fire/2018-03-14-18-18.log",20,possiton); //$NON-NLS-1$
 		 // possiton = getLogTail("C:/LOGS/fire/2018-03-14-18-18.log",40); //$NON-NLS-1$
 
-
-//		  final File f= new File("C:/LOGS/fire/2018-03-14-18-18.log"); //$NON-NLS-1$
-//		  System.out.println("ultima linea");
-//		  final String numlinea=tail2(f, 4);
-//		  System.out.println(numlinea);
   }
 
 
