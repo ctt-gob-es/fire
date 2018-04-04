@@ -20,7 +20,7 @@ $(document).ready(function(){
 					e.preventDefault();
 					$('label[for=old_passwd-usr]').css({color:'red'});
 					$('#old_passwd-usr').css({backgroundColor:'#fcc'});
-					msg = msg + "Debe introducir la clave antigüa\n";			
+					msg = msg + "Debe introducir la contraseña antigua\n";			
 					ok = false;
 					
 				}
@@ -28,7 +28,7 @@ $(document).ready(function(){
 					e.preventDefault();
 					$('label[for=passwd-usr_1]').css({color:'red'});
 					$('#passwd-usr_1').css({backgroundColor:'#fcc'});
-					msg = msg+ "Debe introducir la clave nueva\n";			
+					msg = msg+ "Debe introducir la contraseña nueva\n";			
 					ok= false;
 					
 				}
@@ -36,7 +36,7 @@ $(document).ready(function(){
 					e.preventDefault();
 					$('label[for=passwd-usr_2]').css({color:'red'});
 					$('#passwd-usr_2').css({backgroundColor:'#fcc'});
-					msg = msg + "Debe introducir repetir clave nueva\n";			
+					msg = msg + "Debe introducir repetir contraseña nueva\n";			
 					ok = false;
 					
 				}
@@ -49,7 +49,7 @@ $(document).ready(function(){
 					$('label[for=passwd-usr_2]').css({color:'red'});
 					$('#passwd-usr_1').css({backgroundColor:'#fcc'});			
 					$('#passwd-usr_2').css({backgroundColor:'#fcc'});
-					msg = msg + "Las claves introducidas debe ser iguales\n";
+					msg = msg + "Las contraseñas introducidas deben ser iguales\n";
 					ok = false;				
 				}
 				
