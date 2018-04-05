@@ -45,7 +45,6 @@ public class pruebaMain {
 								StandardOpenOption.READ);) {
 
 
-
 					final LogReader reader = new FragmentedFileReader(channel, info.getCharset());
 
 					final LogMore logMore = new LogMore(info);
