@@ -25,7 +25,14 @@ public interface LogReader {
 
 	/** Inicia el proceso de carga del log.
 	 * @throws IOException Cuando se produce un error durante la carga. */
-	void load(final long position) throws IOException;
+	void load() throws IOException;
+
+	/**
+	 * Inicia el proceso de carga del log indicando una posici&oacute;
+	 * @param position
+	 * @throws IOException
+	 */
+	public void load(final long position) throws IOException;
 
 	/**
 	 * Devuelve la l&iacute;nea actualmente cargada. Si nunca se ha cargado a&uacute;n una,

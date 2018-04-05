@@ -75,6 +75,11 @@ public class FragmentedFileReader implements LogReader {
 	}
 
 	@Override
+	public void load() throws IOException {
+		load(0);
+	}
+
+	@Override
 	public void load(final long position) throws IOException {
 
 		this.filePosition = position;
