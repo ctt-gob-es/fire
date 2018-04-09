@@ -247,4 +247,6 @@ public class FragmentedFileReader implements LogReader {
 		this.linesReader.close();
 		this.bBuffer.clear();
 	}
+
+
 }

@@ -39,8 +39,8 @@ public class LogTail {
 	 * @param numLines
 	 * @return
 	 */
-	public final String getLogTail(final int numLines) {
-		 String salida = null;
+	public final  byte[]  getLogTail(final int numLines) {
+		 String result = ""; //$NON-NLS-1$
 		 byte[]  data = null;
 		 /* Creamos el canal asociado al fichero , se podr&aacute; modificar suposi&oacute;n de lectura*/
 		  try (SeekableByteChannel channel = Files.newByteChannel(this.path, StandardOpenOption.READ)) {
@@ -64,7 +64,7 @@ public class LogTail {
 						buf.flip();
 						data = new byte[buf.limit()];
 						buf.get(data);
-						salida = this.readLine(data,numLines);
+						result = this.readLine(data,numLines);
 						buf.clear() ;
 						i++;
 					}
@@ -76,7 +76,7 @@ public class LogTail {
 				e.printStackTrace();
 			}
 
-			return salida;
+			return result.getBytes();
 
 	}
 
