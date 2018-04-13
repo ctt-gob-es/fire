@@ -28,7 +28,7 @@ public class LogMore {
 	 * @return
 	 * @throws IOException
 	 */
-	public   byte[]  getLogMore( final int numLines,final LogReader reader ) throws IOException {
+	public   byte[]  getLogMore( final int numLines, final LogReader reader ) throws IOException {
 
 		 if (reader == null) {
 				throw new IOException("No se ha cargado un fichero de log"); //$NON-NLS-1$
