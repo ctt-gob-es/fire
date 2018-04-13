@@ -197,6 +197,15 @@ public class LogService extends HttpServlet {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
 		final byte[] result = LogOpenServiceManager.process(req);
+		if(LogOpenServiceManager.getLinfo()!=null) {
+			session.setAttribute("LogInfo", LogOpenServiceManager.getLinfo()); //$NON-NLS-1$
+		}
+		if(LogOpenServiceManager.getChannel()!=null) {
+			session.setAttribute("Channel", LogOpenServiceManager.getChannel()); //$NON-NLS-1$
+		}
+		if(LogOpenServiceManager.getReader()!=null) {
+			session.setAttribute("Reader", LogOpenServiceManager.getReader());	 //$NON-NLS-1$
+		}
 		return result;
 	}
 
