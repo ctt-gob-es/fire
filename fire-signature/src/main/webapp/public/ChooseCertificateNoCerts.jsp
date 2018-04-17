@@ -14,7 +14,7 @@
 <%
 	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
-	String providerName="el Proveedor";
+	String providerName = null;
 	
 	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, false, false);
 	if (fireSession == null) {
@@ -125,7 +125,7 @@
 			
 				<div  class="container-box-title">
 					<div class="container_tit">
-						<h1 class="title"><span class="bold">No tiene certificados en <%=providerName%></span></h1>
+						<h1 class="title"><span class="bold">No tiene certificados en <%= providerName != null ? providerName : "el proveedor"%></span></h1>
 					</div>		
 				</div>
 				

@@ -113,11 +113,11 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		SessionCollector.commit(session);
 
 		try {
-			request.getRequestDispatcher(fireSignatureCS.PG_MINI_APPLET).forward(request, response);
+			request.getRequestDispatcher(FirePages.PG_MINI_APPLET).forward(request, response);
 			return;
 		} catch (final ServletException e) {
 			LOGGER.warning("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina."); //$NON-NLS-1$
-			response.sendRedirect(fireSignatureCS.PG_MINI_APPLET+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
+			response.sendRedirect(FirePages.PG_MINI_APPLET+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
 	}
@@ -167,7 +167,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 					response.sendRedirect(redirectErrorUrl);
 				}
 				else {
-					request.getRequestDispatcher(fireSignatureCS.PG_CHOOSE_CERTIFICATE_NOCERT).forward(request, response);
+					request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE_NOCERT).forward(request, response);
 				}
 				return;
 			}
@@ -185,7 +185,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				response.sendRedirect(redirectErrorUrl);
 			}
 			else {
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+				 request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
 			}
 			return;
 		}
@@ -196,7 +196,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				response.sendRedirect(redirectErrorUrl);
 			}
 			else {
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+				 request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
 			}
 			return;
 		}
@@ -207,7 +207,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				response.sendRedirect(redirectErrorUrl);
 			}
 			else {
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+				 request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
 			}
 			return;
 		}
@@ -218,7 +218,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				response.sendRedirect(redirectErrorUrl);
 			}
 			else {
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+				 request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
 			}
 			return;
 		}
@@ -229,7 +229,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				response.sendRedirect(redirectErrorUrl);
 			}
 			else {
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+				 request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
 			}
 			return;
 		}
@@ -240,7 +240,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				response.sendRedirect(redirectErrorUrl);
 			}
 			else {
-				 request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+				 request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
 			}
 			return;
 		}
@@ -250,12 +250,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		SessionCollector.commit(session);
 
 		try {
-			request.getRequestDispatcher(fireSignatureCS.PG_CHOOSE_CERTIFICATE).forward(request, response);
+			request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE).forward(request, response);
 			return;
 		}
 		catch (final ServletException e) {
 			LOGGER.warning("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a la misma pagina."); //$NON-NLS-1$
-			response.sendRedirect( fireSignatureCS.PG_CHOOSE_CERTIFICATE+"?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
+			response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE+"?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
 	}

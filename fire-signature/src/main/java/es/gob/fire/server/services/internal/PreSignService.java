@@ -376,7 +376,7 @@ public final class PreSignService extends HttpServlet {
         		response.sendRedirect(redirectErrorUrl);
         	}
         	else {
-        		request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+        		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
         	}
 
         	return;
@@ -388,7 +388,7 @@ public final class PreSignService extends HttpServlet {
         		response.sendRedirect(redirectErrorUrl);
         	}
         	else {
-        		request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+        		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
         	}
 
             return;
@@ -400,7 +400,7 @@ public final class PreSignService extends HttpServlet {
         		response.sendRedirect(redirectErrorUrl);
         	}
         	else {
-        		request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+        		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
         	}
 
             return;
