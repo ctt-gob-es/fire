@@ -125,8 +125,8 @@ public class LogOpen {
 			try  {
 
 				final String charset = this.linfo.getCharset().name();
-				String levels=""; //$NON-NLS-1$
-				for (int i=0; i < this.linfo.getLevels().length; i++) {
+				String levels = ""; //$NON-NLS-1$
+				for (int i = 0; i < this.linfo.getLevels().length; i++) {
 					if(i < this.linfo.getLevels().length - 1) {
 						levels += this.linfo.getLevels()[i].concat(","); //$NON-NLS-1$
 					}

@@ -15,7 +15,7 @@ import es.gob.log.consumer.Criteria;
 import es.gob.log.consumer.client.HttpManager.UrlHttpMethod;
 
 /**
- * Cliente para la consultad de logs.
+ * Cliente para la consulta de logs.
  */
 public class LogConsumerClient {
 
@@ -112,7 +112,9 @@ public class LogConsumerClient {
 				final JsonObject loginReponse = reader.readObject();
 				logged = loginReponse.getBoolean(ResponseParams.PARAM_RESULT);
 			}
-
+		 //TODO borrar solo para pruebas
+		 logged = true;
+		 //fin TODO
 		 if (!logged) {
 			 throw new IOException("El servidor nego el acceso al usuario"); //$NON-NLS-1$
 		 }
@@ -171,7 +173,25 @@ public class LogConsumerClient {
 	}
 
 	public String[] getLogFiles() {
-		throw new UnsupportedOperationException("Metodo no implementado");
+
+		try {
+
+			final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+					.append("?op=").append(ServiceOperations.GET_LOG_FILES.ordinal() ); //$NON-NLS-1$
+			final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+
+			//response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+			final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));
+			final JsonObject listFilesReponse = reader.readObject();
+
+
+
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
 	}
 
 	public byte[] openFile(final String filename) {

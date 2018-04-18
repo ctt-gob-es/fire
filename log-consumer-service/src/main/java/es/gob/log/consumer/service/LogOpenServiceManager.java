@@ -23,7 +23,7 @@ public class LogOpenServiceManager {
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		if(logFileName != null && !"".equals(logFileName)) { //$NON-NLS-1$
 			/* Obtenemos la ruta completa al fichero log*/
-			final String path = ConfigManager.getInstance().getLogsDir().toString().concat(logFileName);
+			final String path = ConfigManager.getInstance().getLogsDir().toString().concat("\\").concat(logFileName); //$NON-NLS-1$
 			final LogOpen logOpen = new LogOpen(path);
 			try {
 				result = logOpen.openFile(logFileName);

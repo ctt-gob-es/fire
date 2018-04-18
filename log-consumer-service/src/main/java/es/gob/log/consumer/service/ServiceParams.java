@@ -25,4 +25,14 @@ class ServiceParams {
 	/***Par&aacute;metro que indica la fecha y hora de b&uacute;squeda */
 	static final String SEARCH_DATETIME = "search_date"; //$NON-NLS-1$
 
+	/***Par&aacute;metro que indica la fecha y hora de b&uacute;squeda */
+	static final String START_DATETIME = "start_date"; //$NON-NLS-1$
+
+	/***Par&aacute;metro que indica la fecha y hora de b&uacute;squeda */
+	static final String END_DATETIME = "end_date"; //$NON-NLS-1$
+
+	/***Par&aacute;metro que indica el texto de b&uacute;squeda */
+	static final String LEVEL = "level"; //$NON-NLS-1$
+
+
 }
