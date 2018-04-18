@@ -116,6 +116,7 @@ public class pruebaMain {
 
 					int i = 2;
 
+
 					while (channel.position() < totalSize) {
 						logdown.open();
 						final byte[] finalResult = logdown.download(channel);
@@ -139,6 +140,7 @@ public class pruebaMain {
 
 					fzip.write(data);
 					fzip.close();
+
 //					final ZipOutputStream zout = new ZipOutputStream(fzip , info.getCharset());
 //					final ZipEntry zipName = new ZipEntry("logging_api.log"); //$NON-NLS-1$
 //

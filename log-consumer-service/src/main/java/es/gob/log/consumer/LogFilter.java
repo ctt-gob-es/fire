@@ -105,6 +105,10 @@ public class LogFilter {
 		return baos.toByteArray();
 	}
 
+
+
+
+
 	/**
 	 * Comprueba si una entrada de log cumple con ciertos criterios de b&uacute;squeda.
 	 * En caso de que la evaluaci&oacute;n del registro determine que ninguno de los

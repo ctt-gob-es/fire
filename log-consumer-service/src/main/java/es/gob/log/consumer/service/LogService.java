@@ -1,6 +1,7 @@
 package es.gob.log.consumer.service;
 
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import es.gob.log.consumer.LogInfo;
+import es.gob.log.consumer.LogReader;
 
 /**
  * Servicio de consulta de logs.
@@ -19,6 +23,8 @@ public class LogService extends HttpServlet {
 	private static final long serialVersionUID = -8162434026674748888L;
 
 	private static final Logger LOGGER = Logger.getLogger(LogService.class.getName());
+
+
 
 
 	@Override
@@ -49,7 +55,8 @@ public class LogService extends HttpServlet {
 
 		// Procesamos la peticion segun si requieren login o no
 		final int statusCode = HttpServletResponse.SC_OK;
-		byte[] result;
+		byte[] result = null;
+		boolean fileClosed = false;
 		try {
 			if (!needLogin(op)) {
 				switch (op) {
@@ -85,7 +92,7 @@ public class LogService extends HttpServlet {
 					break;
 				case CLOSE_FILE:
 					LOGGER.info("Solicitud entrante de cierre de fichero");
-					result = closeFile(req);
+					fileClosed = closeFile(req);
 					break;
 				case TAIL:
 					LOGGER.info("Solicitud entrante de consulta del final del log");
@@ -133,8 +140,14 @@ public class LogService extends HttpServlet {
 			return;
 		}
 
+
 		resp.setStatus(statusCode);
-		resp.getOutputStream().write(result);
+		if(!fileClosed) {
+			resp.getOutputStream().write(result);
+		}
+		else {
+			resp.getOutputStream().write(new String("Fichero cerrado").getBytes()); //$NON-NLS-1$
+		}
 		resp.getOutputStream().flush();
 	}
 
@@ -163,7 +176,9 @@ public class LogService extends HttpServlet {
 			logged = loggedValue != null ? ((Boolean) loggedValue).booleanValue() : false;
 		}
 
-		return logged;
+		//TODO sólo para pruebas descomentar posteriormente y borrar return true;
+		//return logged;
+		return true;
 	}
 
 	private static byte[] echo() {
@@ -205,12 +220,45 @@ public class LogService extends HttpServlet {
 		}
 		if(LogOpenServiceManager.getReader()!=null) {
 			session.setAttribute("Reader", LogOpenServiceManager.getReader());	 //$NON-NLS-1$
+			session.setAttribute("FilePosition", new Long(0L)); //$NON-NLS-1$
 		}
+
 		return result;
 	}
 
-	private static byte[] closeFile(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
+	private static boolean closeFile(final HttpServletRequest req) throws SessionException {
+		boolean result = false;
+		final HttpSession session = req.getSession(true);
+		if (session == null) {
+			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
+		}
+
+		try {
+			if((LogReader) session.getAttribute("Reader") != null){ //$NON-NLS-1$
+				((LogReader) session.getAttribute("Reader")).close(); //$NON-NLS-1$
+				session.removeAttribute("Reader"); //$NON-NLS-1$
+			}
+			if((AsynchronousFileChannel)session.getAttribute("Channel") != null) { //$NON-NLS-1$
+				((AsynchronousFileChannel)session.getAttribute("")).close();  //$NON-NLS-1$
+				session.removeAttribute("Channel"); //$NON-NLS-1$
+			}
+			if((LogInfo)session.getAttribute("LogInfo") != null) { //$NON-NLS-1$
+				session.removeAttribute("LogInfo"); //$NON-NLS-1$
+			}
+			if((Long) session.getAttribute("FilePosition") != null ) { //$NON-NLS-1$
+				session.removeAttribute("FilePosition"); //$NON-NLS-1$
+			}
+			if(session.getAttribute("Reader") == null && //$NON-NLS-1$
+			   session.getAttribute("Channel") == null && //$NON-NLS-1$
+			   session.getAttribute("LogInfo") == null) { //$NON-NLS-1$
+				result = true;
+			}
+
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	private static byte[] getLogTail(final HttpServletRequest req) throws SessionException{
@@ -221,7 +269,10 @@ public class LogService extends HttpServlet {
 		}
 
 		final byte[] result = LogTailServiceManager.process(req);
-		session.setAttribute("FilePosition", LogTailServiceManager.getPosition()); //$NON-NLS-1$
+
+		session.removeAttribute("FilePosition"); //$NON-NLS-1$
+		session.setAttribute("FilePosition", new Long(LogTailServiceManager.getPosition().longValue()));  //$NON-NLS-1$
+
 		return result;
 	}
 
@@ -231,16 +282,27 @@ public class LogService extends HttpServlet {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
 		final byte[] result = LogMoreServiceManager.process(req);
-		session.setAttribute("FilePosition", LogMoreServiceManager.getPosition()); //$NON-NLS-1$
 		return result;
 	}
 
-	private static byte[] getLogFiltered(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
+	private static byte[] getLogFiltered(final HttpServletRequest req) throws SessionException {
+		final HttpSession session = req.getSession(true);
+		if (session == null) {
+			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
+		}
+		final byte[] result = LogSearchServiceManager.process(req);
+		return result;
+
+
 	}
 
-	private static byte[] searchText(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
+	private static byte[] searchText(final HttpServletRequest req) throws SessionException {
+		final HttpSession session = req.getSession(true);
+		if (session == null) {
+			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
+		}
+		final byte[] result = LogSearchServiceManager.process(req);
+		return result;
 	}
 
 	private static byte[] compress(final HttpServletRequest req) {

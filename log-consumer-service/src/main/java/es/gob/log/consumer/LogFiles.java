@@ -12,9 +12,9 @@ import javax.json.JsonWriter;
 
 public class LogFiles {
 
-	private static final String FILE_EXT_LOGINFO=".loginfo"; //$NON-NLS-1$
-	private static final String FILE_EXT_LCK=".lck"; //$NON-NLS-1$
-	private static final String DIR_LOGS="C:\\LOGS\\fire"; //$NON-NLS-1$
+	private static final String FILE_EXT_LOGINFO = LogConstants.FILE_EXT_LOGINFO;
+	private static final String FILE_EXT_LCK = LogConstants.FILE_EXT_LCK;
+	private static final String DIR_LOGS = LogConstants.DIR_FILE_LOG;
 
 
 	public LogFiles() {

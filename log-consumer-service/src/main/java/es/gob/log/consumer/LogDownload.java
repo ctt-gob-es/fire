@@ -28,9 +28,9 @@ public class LogDownload {
 		this.zipentry =  new ZipEntry(this.fileName);
 	}
 
-	public final  byte[] download(final SeekableByteChannel channel) throws IOException {
+	public final  byte[] download2(final SeekableByteChannel channel) throws IOException {
 
-			final ByteBuffer buf =  ByteBuffer.allocate(1024);
+			final ByteBuffer buf =  ByteBuffer.allocate(LogConstants.PART_SIZE);
 			channel.read(buf);
 			buf.flip();
 			final byte[] data = new byte[buf.limit()];
@@ -62,31 +62,16 @@ public class LogDownload {
 	}
 
 
-	/*
-   Deflater deflater = new Deflater();
-   deflater.setInput(data);
-   ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-   deflater.finish();
-   byte[] buffer = new byte[1024];
-   while (!deflater.finished()) {
-    int count = deflater.deflate(buffer); // returns the generated code... index
-    outputStream.write(buffer, 0, count);
-   }
-   outputStream.close();
-   byte[] output = outputStream.toByteArray();
-   LOG.debug("Original: " + data.length / 1024 + " Kb");
-   LOG.debug("Compressed: " + output.length / 1024 + " Kb");
-   return output;  */
+	public final  byte[] download(final SeekableByteChannel channel) throws IOException {
 
-	public final  byte[] download2(final SeekableByteChannel channel) throws IOException {
-
-		final ByteBuffer buf =  ByteBuffer.allocate(1024);
+		final ByteBuffer buf =  ByteBuffer.allocate(LogConstants.PART_SIZE);
 		channel.read(buf);
 		buf.flip();
 		final byte[] data = new byte[buf.limit()];
 		buf.get(data);
 		final Deflater deflater = new Deflater();
 		deflater.setInput(data);
+
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
 		deflater.finish();
 		final byte[] buffer = new byte[1024];
@@ -95,9 +80,9 @@ public class LogDownload {
 		   outputStream.write(buffer, 0, count);
 		}
 		outputStream.close();
-		final byte[] output = outputStream.toByteArray();
+		final byte[] result = outputStream.toByteArray();
 
-		return output;
+		return result;
 
 	}
 }

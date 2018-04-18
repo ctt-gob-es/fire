@@ -3,27 +3,22 @@ package es.gob.log.consumer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.CharBuffer;
-import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 
 public class LogSearchText {
 
 	private final LogInfo logInfor;
 	private long filePosition;
-	private final Path path;
+	private final LogReader reader;
 
 	private String lineTextFound =  null;
 
 
 	/**Constructor
 	 * @throws InvalidPatternException */
-	public LogSearchText(final LogInfo logInfo,final String path) throws InvalidPatternException {
+	public LogSearchText(final LogInfo logInfo,final LogReader reader) throws InvalidPatternException {
 		this.logInfor = logInfo;
-		this.path = Paths.get(path);
+		this.reader = reader;
 		this.setFilePosition(0L);
 
 	}
@@ -49,14 +44,11 @@ public class LogSearchText {
 	 * @return
 	 */
 	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec) {
-		final Calendar calendar = null;
+
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (final AsynchronousFileChannel channel = AsynchronousFileChannel.open(this.path,
-				StandardOpenOption.READ);) {
+		try {
 
 			boolean found = false;
-			final LogReader reader = new FragmentedFileReader(channel, this.logInfor.getCharset());
-			reader.load();
 			/*Se obtiene la fecha de b&uacute;squeda pasada en milisegundos si se ha pasado por par&aacute;metro
 			 * y se obtiene la posici&oacute;n del comienzo de la l&iacute;nea en la que se encuentra la fecha indicada*/
 			if(dateTimeMillisec != -1) {
@@ -64,10 +56,10 @@ public class LogSearchText {
 				final Criteria crit = new Criteria();
 				crit.setStartDate(dateTimeMillisec);
 				final LogFilter filter = new LogFilter(this.logInfor);
-				filter.load(reader);
+				filter.load(this.reader);
 				filter.setCriteria(crit);
 				final byte[] firstLine = filter.filter(1);
-				if(firstLine!=null && firstLine.length > 0 ) {
+				if(firstLine != null && firstLine.length > 0 ) {
 					found = true;
 				}
 
@@ -80,7 +72,7 @@ public class LogSearchText {
 			/*Caso de haber encontrado la fecha o que no se haya pedido fecha,
 			 * se continua buscando la cadena de texto*/
 			if((found || dateTimeMillisec == -1) && text != null && !"".equals(text)) { //$NON-NLS-1$
-				found = this.search(text, reader);
+				found = this.search(text);
 				if(found) {
 					if(this.lineTextFound != null) {
 						baos.write(this.lineTextFound.getBytes());
@@ -90,14 +82,14 @@ public class LogSearchText {
 					if(baos.size() > 0 && baos.toByteArray() != null) {
 						linesReaded = this.countLines(baos.toByteArray());
 					}
-					baos.write(this.getText(reader, numLines - linesReaded));
+					baos.write(this.getText( numLines - linesReaded));
 				}
 			}
 
 			if (!found) {
 				baos.write( "Texto No encontrado".getBytes()); //$NON-NLS-1$
 			}
-			reader.close();
+			//reader.close();
 		}
 		catch (final IOException | InvalidPatternException | InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
@@ -112,9 +104,9 @@ public class LogSearchText {
 	 * @param text
 	 * @throws IOException
 	 */
-	private final boolean search(final String text, final LogReader reader) throws IOException {
+	private final boolean search(final String text) throws IOException {
 			CharBuffer cbLine;
-			while((cbLine = reader.readLine()) != null) {
+			while((cbLine = this.reader.readLine()) != null) {
 				cbLine.rewind();
 				final String line = cbLine.toString();
 				if(line.indexOf(text) != -1) {
@@ -125,11 +117,11 @@ public class LogSearchText {
 			return false;
 	}
 
-	private final byte[] getText(final LogReader reader, final int lines) throws IOException {
+	private final byte[] getText( final int lines) throws IOException {
 		String result = ""; //$NON-NLS-1$
 		CharBuffer cbLine;
 		int numLines = 1;
-		while(numLines < lines && (cbLine = reader.readLine()) != null) {
+		while(numLines < lines && (cbLine = this.reader.readLine()) != null) {
 			result = result.concat(cbLine.toString()).concat("\n"); //$NON-NLS-1$
 			numLines++;
 		}
