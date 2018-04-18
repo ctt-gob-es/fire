@@ -26,7 +26,7 @@ public class LogTail {
 
 	/**Constructor
 	 * @throws InvalidPatternException */
-	public LogTail(final LogInfo logInfo, final String path) throws InvalidPatternException {
+	public LogTail(final LogInfo logInfo, final String path)  {
 		this.logInfor = logInfo;
 		this.path = Paths.get(path);
 	}

@@ -61,12 +61,8 @@ public class LogSearchText {
 			 * y se obtiene la posici&oacute;n del comienzo de la l&iacute;nea en la que se encuentra la fecha indicada*/
 			if(dateTimeMillisec != -1) {
 
-//				final String logFormatDateTime = this.logInfor.getDateFormat();
-//				final DateFormat formatter = new SimpleDateFormat(logFormatDateTime);
-
 				final Criteria crit = new Criteria();
 				crit.setStartDate(dateTimeMillisec);
-//				crit.setEndDate(calendar.getTimeInMillis());
 				final LogFilter filter = new LogFilter(this.logInfor);
 				filter.load(reader);
 				filter.setCriteria(crit);

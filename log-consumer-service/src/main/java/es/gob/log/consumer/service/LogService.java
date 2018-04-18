@@ -76,35 +76,35 @@ public class LogService extends HttpServlet {
 
 				switch (op) {
 				case GET_LOG_FILES:
-					LOGGER.info("Solicitud entrande de listado de ficheros");
-					result = getLogFiles(req);
+					LOGGER.info("Solicitud entrante de listado de ficheros");
+					result = getLogFiles();
 					break;
 				case OPEN_FILE:
-					LOGGER.info("Solicitud entrande de apertura de fichero");
+					LOGGER.info("Solicitud entrante de apertura de fichero");
 					result = openFile(req);
 					break;
 				case CLOSE_FILE:
-					LOGGER.info("Solicitud entrande de cierre de fichero");
+					LOGGER.info("Solicitud entrante de cierre de fichero");
 					result = closeFile(req);
 					break;
 				case TAIL:
-					LOGGER.info("Solicitud entrande de consulta del final del log");
+					LOGGER.info("Solicitud entrante de consulta del final del log");
 					result = getLogTail(req);
 					break;
 				case GET_MORE:
-					LOGGER.info("Solicitud entrande de mas log");
+					LOGGER.info("Solicitud entrante de mas log");
 					result = getMoreLog(req);
 					break;
 				case SEARCH_TEXT:
-					LOGGER.info("Solicitud entrande de busqueda de texto");
+					LOGGER.info("Solicitud entrante de busqueda de texto");
 					result = searchText(req);
 					break;
 				case FILTER:
-					LOGGER.info("Solicitud entrande de filtrado de log");
+					LOGGER.info("Solicitud entrante de filtrado de log");
 					result = getLogFiltered(req);
 					break;
 				case DOWNLOAD:
-					LOGGER.info("Solicitud entrande de descarga de fichero");
+					LOGGER.info("Solicitud entrante de descarga de fichero");
 					result = download(req);
 					break;
 				default:
@@ -147,7 +147,7 @@ public class LogService extends HttpServlet {
 
 	private static boolean needLogin(final ServiceOperations op) {
 		// Las operaciones echo, peticion de login y validacion de login, son
-		// las unicas que pueden realizarse sin habes establecido logging.
+		// las unicas que pueden realizarse sin haber establecido logging.
 		return 	op != ServiceOperations.ECHO &&
 				op != ServiceOperations.REQUEST_LOGIN &&
 				op != ServiceOperations.VALIDATE_LOGIN;
@@ -181,29 +181,58 @@ public class LogService extends HttpServlet {
 	private static byte[] validateLogin(final HttpServletRequest req) throws SessionException {
 		final HttpSession session = req.getSession(false);
 		if (session == null) {
-			throw new SessionException("No se ha contrado una sesion iniciada"); //$NON-NLS-1$
+			throw new SessionException("No se ha encontrado una sesion iniciada"); //$NON-NLS-1$
 		}
 		return ValidationLoginManager.process(req, session);
 	}
 
-	private static byte[] getLogFiles(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
+	private static byte[] getLogFiles() {
+		final byte[] result = LogFilesServiceManager.process();
+		return result;
 	}
 
-	private static byte[] openFile(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
+	private static byte[] openFile(final HttpServletRequest req) throws SessionException {
+		final HttpSession session = req.getSession(true);
+		if (session == null) {
+			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
+		}
+		final byte[] result = LogOpenServiceManager.process(req);
+		if(LogOpenServiceManager.getLinfo()!=null) {
+			session.setAttribute("LogInfo", LogOpenServiceManager.getLinfo()); //$NON-NLS-1$
+		}
+		if(LogOpenServiceManager.getChannel()!=null) {
+			session.setAttribute("Channel", LogOpenServiceManager.getChannel()); //$NON-NLS-1$
+		}
+		if(LogOpenServiceManager.getReader()!=null) {
+			session.setAttribute("Reader", LogOpenServiceManager.getReader());	 //$NON-NLS-1$
+		}
+		return result;
 	}
 
 	private static byte[] closeFile(final HttpServletRequest req) {
 		throw new UnsupportedOperationException();
 	}
 
-	private static byte[] getLogTail(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
+	private static byte[] getLogTail(final HttpServletRequest req) throws SessionException{
+
+		final HttpSession session = req.getSession(true);
+		if (session == null) {
+			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
+		}
+
+		final byte[] result = LogTailServiceManager.process(req);
+		session.setAttribute("FilePosition", LogTailServiceManager.getPosition()); //$NON-NLS-1$
+		return result;
 	}
 
-	private static byte[] getMoreLog(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
+	private static byte[] getMoreLog(final HttpServletRequest req)throws SessionException {
+		final HttpSession session = req.getSession(true);
+		if (session == null) {
+			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
+		}
+		final byte[] result = LogMoreServiceManager.process(req);
+		session.setAttribute("FilePosition", LogMoreServiceManager.getPosition()); //$NON-NLS-1$
+		return result;
 	}
 
 	private static byte[] getLogFiltered(final HttpServletRequest req) {
