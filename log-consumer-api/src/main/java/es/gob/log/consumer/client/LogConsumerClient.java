@@ -2,14 +2,18 @@ package es.gob.log.consumer.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
+import javax.json.JsonWriter;
 
 import es.gob.log.consumer.Criteria;
 import es.gob.log.consumer.client.HttpManager.UrlHttpMethod;
@@ -95,7 +99,7 @@ public class LogConsumerClient {
 		try {
 			cipheredToken = Cipherer.cipher(token, cipherKey, iv);
 		} catch (final GeneralSecurityException e) {
-			throw new IOException("No se puso negociar la sesion con el servidor", e); //$NON-NLS-1$
+			throw new IOException("No se pudo negociar la sesion con el servidor", e); //$NON-NLS-1$
 		}
 
 		// Solicitamos validacion de login
@@ -112,9 +116,7 @@ public class LogConsumerClient {
 				final JsonObject loginReponse = reader.readObject();
 				logged = loginReponse.getBoolean(ResponseParams.PARAM_RESULT);
 			}
-		 //TODO borrar solo para pruebas
-		 logged = true;
-		 //fin TODO
+
 		 if (!logged) {
 			 throw new IOException("El servidor nego el acceso al usuario"); //$NON-NLS-1$
 		 }
@@ -172,38 +174,130 @@ public class LogConsumerClient {
 		return new String(response);
 	}
 
-	public String[] getLogFiles() {
-
+	/**
+	 *
+	 * @return
+	 */
+	public byte[] getLogFiles() {
+		final StringWriter result = new StringWriter();
 		try {
 
 			final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 					.append("?op=").append(ServiceOperations.GET_LOG_FILES.ordinal() ); //$NON-NLS-1$
 			final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 
-			//response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
-			final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));
-			final JsonObject listFilesReponse = reader.readObject();
+			if(response.statusCode == 200) {
+				final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));
+				final JsonObject listFilesReponse = reader.readObject();
+				reader.close();
+				result.write(listFilesReponse.toString());
+			}
+			else {
 
-
+				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message", "No existen ficheros con extension .log")); //$NON-NLS-1$ //$NON-NLS-2$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+		        jw.writeObject(jsonObj.build());
+		        jw.close();
+			}
 
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes();
+		}
 		return null;
 
 	}
 
+	/**
+	 *
+	 * @param filename
+	 * @return
+	 */
 	public byte[] openFile(final String filename) {
-		throw new UnsupportedOperationException("Metodo no implementado");
+		final StringWriter result = new StringWriter();
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+				.append("?op=").append(ServiceOperations.OPEN_FILE.ordinal()).append("&fname=").append(filename); //$NON-NLS-1$ //$NON-NLS-2$
+		HttpResponse response;
+		try {
+			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+			if(response.statusCode == 200) {
+				final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));
+				final JsonObject openFileReponse = reader.readObject();
+				reader.close();
+				result.write(openFileReponse.toString());
+			}
+			else {
+				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message", "No existen ficheros con extension .log")); //$NON-NLS-1$ //$NON-NLS-2$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+		        jw.writeObject(jsonObj.build());
+		        jw.close();
+			}
+
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes();
+		}
+		return null;
 	}
+
 
 	public byte[] closeFile() {
 		throw new UnsupportedOperationException("Metodo no implementado");
 	}
 
-	public static byte[] getLogTail(final int numLines) {
-		throw new UnsupportedOperationException("Metodo no implementado");
+	/**
+	 *
+	 * @param numLines
+	 * @return
+	 */
+	public  byte[] getLogTail(final int numLines, final String filename) {
+		final StringWriter result = new StringWriter();
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+				.append("?op=").append(ServiceOperations.TAIL.ordinal()) //$NON-NLS-1$
+				.append("&nlines=").append(numLines)  //$NON-NLS-1$
+				.append("&fname=").append(filename); //$NON-NLS-1$
+		HttpResponse response;
+		try {
+			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+			if(response.statusCode == 200) {
+				result.write(response.getContent().toString());
+			}
+			else {
+				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message", "No existen ficheros con extension .log")); //$NON-NLS-1$ //$NON-NLS-2$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+		        jw.writeObject(jsonObj.build());
+		        jw.close();
+			}
+
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes();
+		}
+		return null;
 	}
 
 	public byte[] getMoreLog(final int numLines) {

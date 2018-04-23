@@ -15,6 +15,7 @@ public class LogFilesServiceManager {
 		final LogFiles logfile = new LogFiles();
 		try {
 			result = logfile.getLogFiles();
+
 		} catch (final UnsupportedEncodingException e) {
 			LOGGER.log(Level.SEVERE,"No se ha podido obtener la lista de ficheros log.",e); //$NON-NLS-1$
 		}

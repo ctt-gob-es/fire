@@ -54,6 +54,13 @@
   	<servlet-name>DeleteCertificateService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.DeleteCertificateService</servlet-class>
   </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>LogAdminService</display-name>
+  	<servlet-name>LogAdminService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.LogAdminService</servlet-class>
+  </servlet>
   <servlet-mapping>
   	<servlet-name>NewUserService</servlet-name>
   	<url-pattern>/NewUserService</url-pattern>
@@ -81,6 +88,10 @@
   <servlet-mapping>
   	<servlet-name>DeleteCertificateService</servlet-name>
   	<url-pattern>/DeleteCertificateService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>LogAdminService</servlet-name>
+  	<url-pattern>/LogAdminService</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>Login.jsp</welcome-file>

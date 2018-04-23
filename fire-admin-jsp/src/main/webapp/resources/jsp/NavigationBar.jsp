@@ -8,7 +8,7 @@
 			<li id="header">				
 					<nav>
 						<ul class="nav">
-							<li><a href="">Usuarios</a>
+							<li><a>Usuarios</a>
 								<ul>
 									<li><a href="../User/UserPage.jsp" title="Gestiona las cuentas de usuarios permitiendo: visualizar, crear, modificar y eliminar.">Gesti&oacute;n</a></li>
 									<li><a href="../User/ChangePasswd.jsp?usr-name=<%= userLogged%>&op=3" title="Modificar contraseña del usuario logado">Cambio de contraseña</a></li>
@@ -20,11 +20,11 @@
 							<li><a href="../Certificate/CertificatePage.jsp" title="Gestiona los certificados permitiendo: visualizar, crear, modificar y eliminar.">Certificados</a>
 								
 							</li>
-<!-- 							<li><a href="">Logs</a> -->
-<!-- 								<ul> -->
-<!-- 									<li><a href="">Gesti&oacute;n</a></li>								 -->
-<!-- 								</ul> -->
-<!-- 							</li> -->
+							<li><a>Logs</a>
+								<ul>
+									<li><a href="../LogAdminService?op=3">Gesti&oacute;n de Logs</a></li>	<!-- //"../Logs/LogsMainPage.jsp"	 -->						
+								</ul>
+							</li>
 						</ul>
 					</nav>			
 			</li>	

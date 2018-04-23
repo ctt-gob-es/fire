@@ -1,5 +1,6 @@
 package es.gob.log.consumer.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.AsynchronousFileChannel;
 import java.util.logging.Level;
@@ -53,6 +54,14 @@ public class LogService extends HttpServlet {
 			return;
 		}
 
+
+		final File f = ConfigManager.getInstance().getLogsDir();
+		if (!f.exists()) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cargar el fichero de configuracion del servicio de consulta de logs"); //$NON-NLS-1$
+			return;
+		}
+
+
 		// Procesamos la peticion segun si requieren login o no
 		final int statusCode = HttpServletResponse.SC_OK;
 		byte[] result = null;
@@ -85,6 +94,10 @@ public class LogService extends HttpServlet {
 				case GET_LOG_FILES:
 					LOGGER.info("Solicitud entrante de listado de ficheros");
 					result = getLogFiles();
+					if(result == null) {
+						resp.sendError(HttpServletResponse.SC_NO_CONTENT, "No se han podido encontrar ficheros .log");
+						return;
+					}
 					break;
 				case OPEN_FILE:
 					LOGGER.info("Solicitud entrante de apertura de fichero");
@@ -176,9 +189,7 @@ public class LogService extends HttpServlet {
 			logged = loggedValue != null ? ((Boolean) loggedValue).booleanValue() : false;
 		}
 
-		//TODO sólo para pruebas descomentar posteriormente y borrar return true;
-		//return logged;
-		return true;
+		return logged;
 	}
 
 	private static byte[] echo() {

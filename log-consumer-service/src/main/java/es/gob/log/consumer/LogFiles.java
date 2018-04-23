@@ -9,6 +9,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
+import javax.servlet.http.HttpServletResponse;
 
 public class LogFiles {
 
@@ -45,23 +46,42 @@ public class LogFiles {
 					return false;
 				}
 			});
-			for (int i = 0; i < files.length; i++){
+			if( files.length > 0) {
+				for (int i = 0; i < files.length; i++){
+					data.add(Json.createObjectBuilder()
+							.add("Name",files[i].getName()) //$NON-NLS-1$
+							.add("Size", String.valueOf(files[i].length())) //$NON-NLS-1$
+					);
+				}
+				jsonObj.add("FileList", data); //$NON-NLS-1$
+				final StringWriter writer = new StringWriter();
+				try(final JsonWriter jw = Json.createWriter(writer)) {
+			        jw.writeObject(jsonObj.build());
+			        jw.close();
+			    }
+				catch (final Exception e) {
+					//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+				}
+				result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
+			}
+			else {
 				data.add(Json.createObjectBuilder()
-						.add("nombre",files[i].getName()) //$NON-NLS-1$
-						.add("tamanno", String.valueOf(files[i].length()/1024L).concat("Kbytes")) //$NON-NLS-1$ //$NON-NLS-2$
-				);
+						.add("Code",HttpServletResponse.SC_NO_CONTENT) //$NON-NLS-1$
+						.add("Message", "No se ha podido obtener la lista de ficheros log.")); //$NON-NLS-1$//$NON-NLS-2$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				final StringWriter writer = new StringWriter();
+				try(final JsonWriter jw = Json.createWriter(writer)) {
+			        jw.writeObject(jsonObj.build());
+			        jw.close();
+			    }
+				catch (final Exception e) {
+					//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+				}
+				result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
 			}
-			jsonObj.add("FileList", data); //$NON-NLS-1$
-			final StringWriter writer = new StringWriter();
 
-			try(final JsonWriter jw = Json.createWriter(writer)) {
-		        jw.writeObject(jsonObj.build());
-		        jw.close();
-		    }
-			catch (final Exception e) {
-				//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
-			}
-			result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
+
+
 		}
 		return result;
 	}

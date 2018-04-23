@@ -4,13 +4,13 @@ ul li {
     list-style-type: none;
 }
 
-/* ul li.field-text { */
-/* 	min-width: 180px; */
+ul li.field-text {
+	min-width: 180px;
 	
-/* } */
+}
 
 
-*{
+{
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 	margin:0;
 }
@@ -303,6 +303,7 @@ ul li {
 
 /**********Menu*****************/
 
+
 #header {
 	margin:auto;
 	width:500px;
@@ -320,6 +321,7 @@ ul li {
  
 			.nav > li {
 				float:left;
+				
 			}
 			
 			.nav li a {
@@ -328,10 +330,12 @@ ul li {
 				text-decoration:none;
 				padding:10px 12px;
 				display:block;
+				cursor: pointer;
 			}
 			
 			.nav li a:hover {
 				background-color:#434343;
+				cursor: pointer;
 			}
 			
 			.nav li ul {
@@ -342,6 +346,7 @@ ul li {
 			
 			.nav li:hover > ul {
 				display:block;
+				cursor: pointer;
 			}
 			
 			.nav li ul li {
@@ -352,3 +357,10 @@ ul li {
 				right:-140px;
 				top:0px;
 			}
+			
+/*JQUERY UI */	
+
+/* #selectable .ui-selecting { background: #FECA40; } */
+/* #selectable .ui-selected { background: #F39814; color: white; } */
+/* #selectable { list-style-type: none; margin: 0; padding: 0; width: 60%; } */
+/* #selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }		 */
