@@ -1,9 +1,12 @@
+<%@page import="javax.json.JsonNumber"%>
+<%@page import="java.util.Date"%>
 <%@page import="javax.json.JsonString"%>
 <%@page import="javax.json.JsonArray"%>
 <%@page import="javax.json.JsonReader"%>
 <%@page import="javax.json.Json"%>
 <%@page import="javax.json.JsonObject"%>
 <%@page import="java.io.ByteArrayInputStream"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
@@ -43,22 +46,31 @@ String nameSrv = "";//$NON-NLS-1$
 		}
 	} else {
 		styleError="style='display: none'";//$NON-NLS-1$
-		final JsonArray FileList = jsonObj.getJsonArray("FileList");
-		htmlData += "<table class='admin-table'><thead><tr><th id='fileName'>Nombre fichero</th><th id='Size'>Tama&ntilde;o</th><th id='actions'>Acciones</th></tr></thead>'";//$NON-NLS-1$
+		final JsonArray FileList = jsonObj.getJsonArray("FileList");//$NON-NLS-1$
+		htmlData += "<table class='admin-table'><thead><tr><th id='fileName'>Nombre fichero</th><th id='Date'>Fecha de modificaci&oacute;n</th><th id='Size'>Tama&ntilde;o</th><th id='actions'>Acciones</th></tr></thead>'";//$NON-NLS-1$
 		for (int i = 0; i < FileList.size(); i++) {
 			final JsonObject json = FileList.getJsonObject(i);
-			int size = Integer.parseInt(json.getString("Size"));
+			
+			//Tratamiento de la fecha de &uacute;tima actializaci&oacute;n
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");//$NON-NLS-1$
+			final JsonNumber longDateJSON = json.getJsonNumber("Date");//$NON-NLS-1$
+			Date date = new Date(longDateJSON.longValue());		
+			final String dateModif = sdf.format(date);
+			
+			//Tratramiento del tama&ntilde;o
+			final JsonNumber longSizeJSON = json.getJsonNumber("Size");//$NON-NLS-1$
+			long size = longSizeJSON.longValue();
 			String sSize = "";
 			if(size > 1024 && size < 1024000 ){
-				sSize = String.valueOf(size/1024).concat(" Kbytes");
+				sSize = String.valueOf(size/1024).concat(" Kbytes");//$NON-NLS-1$
 			}
 			else if(size > 1024000){
-				sSize = String.valueOf(size/1024000).concat(" Mbytes");
+				sSize = String.valueOf(size/1024000).concat(" Mbytes");//$NON-NLS-1$
 			}
 			else{
-				sSize = String.valueOf(size).concat(" bytes");
+				sSize = String.valueOf(size).concat(" bytes");//$NON-NLS-1$
 			}
-			htmlData += "<tr><td headers ='fileName'>" + json.getString("Name") + " </td><td headers ='Size'>" + sSize + 
+			htmlData += "<tr><td headers ='fileName'>" + json.getString("Name") + " </td><td headers ='Date'>" + dateModif + " </td><td headers ='Size'>" + sSize + //$NON-NLS-1$
 					"</td><td headers ='actions'><a href ='../LogAdminService?op=4&fname=" + json.getString("Name") +
 					"'><img src ='../resources/img/details_icon.png'/></a></tr>";
 		}

@@ -23,7 +23,8 @@ public class LogFiles {
 	}
 	/**
 	 * M&eacute;todo de consulta de ficheros de logs.
-	 * @return Array de bytes que contiene cadena de caracteres en formato JSON indicando el nombre de los ficheros log y su tama&ntilde;o
+	 * @return Array de bytes que contiene cadena de caracteres en formato JSON indicando el nombre de los ficheros log,
+	 *  fecha de &uacute;ltima actualizaci&oacute;n sin formato (long) y su tama&ntilde;o en bytes
 	 * @throws UnsupportedEncodingException
 	 */
 	public  byte[] getLogFiles() throws UnsupportedEncodingException {
@@ -50,7 +51,8 @@ public class LogFiles {
 				for (int i = 0; i < files.length; i++){
 					data.add(Json.createObjectBuilder()
 							.add("Name",files[i].getName()) //$NON-NLS-1$
-							.add("Size", String.valueOf(files[i].length())) //$NON-NLS-1$
+							.add("Date",files[i].lastModified()) //$NON-NLS-1$
+							.add("Size",files[i].length()) //$NON-NLS-1$
 					);
 				}
 				jsonObj.add("FileList", data); //$NON-NLS-1$
