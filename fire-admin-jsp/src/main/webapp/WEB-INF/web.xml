@@ -61,6 +61,13 @@
   	<servlet-name>LogAdminService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.LogAdminService</servlet-class>
   </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>LogServerService</display-name>
+  	<servlet-name>LogServerService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.LogServerService</servlet-class>
+  </servlet>
   <servlet-mapping>
   	<servlet-name>NewUserService</servlet-name>
   	<url-pattern>/NewUserService</url-pattern>
@@ -92,6 +99,10 @@
   <servlet-mapping>
   	<servlet-name>LogAdminService</servlet-name>
   	<url-pattern>/LogAdminService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>LogServerService</servlet-name>
+  	<url-pattern>/LogServerService</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>Login.jsp</welcome-file>

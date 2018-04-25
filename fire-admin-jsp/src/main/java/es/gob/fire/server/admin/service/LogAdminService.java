@@ -1,8 +1,13 @@
 package es.gob.fire.server.admin.service;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.logging.Logger;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,13 +44,24 @@ public class LogAdminService extends HttpServlet {
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 		final HttpSession session = request.getSession(false);
+		String url = "";//$NON-NLS-1$
+		String nameSrv = "";//$NON-NLS-1$
 //		RequestDispatcher dis = null;
 //		final ServletContext context = request.getServletContext();
-		final String codeInit  = "I9lUuX+iEvzAD/hwaU2MbQ=="; //$NON-NLS-1$ // I9lUuX+iEvzAD/hwaU2MbQ==
+		//final String codeInit  = "I9lUuX+iEvzAD/hwaU2MbQ=="; //$NON-NLS-1$ // I9lUuX+iEvzAD/hwaU2MbQ==
 		//D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=
-		final String url = "http://localhost:8080/log-consumer-service/Logservice"; //$NON-NLS-1$
-		final LogConsumerClient logclient = new LogConsumerClient();
-		logclient.init(url, codeInit);
+		if(request.getParameter(ServiceParams.PARAM_URL) != null && !"".equals(request.getParameter(ServiceParams.PARAM_URL))) { //$NON-NLS-1$
+			url = request.getParameter(ServiceParams.PARAM_URL);
+		}
+		if(request.getParameter(ServiceParams.PARAM_NAMESRV) != null && !"".equals(request.getParameter(ServiceParams.PARAM_NAMESRV))) { //$NON-NLS-1$
+			nameSrv = request.getParameter(ServiceParams.PARAM_NAMESRV);
+		}
+		final LogConsumerClient logclient = (LogConsumerClient) session.getAttribute("LOG_CLIENT"); //$NON-NLS-1$
+		if(logclient == null) {
+			LOGGER.warning("No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
+			return;
+		}
 		String result = null;
 
 		final String opString = request.getParameter("op"); //$NON-NLS-1$
@@ -66,11 +82,16 @@ public class LogAdminService extends HttpServlet {
 		}
 
 		switch (op) {
+		case ECHO:
+			result = echo(url);
+			response.getWriter().write(result);
+			break;
 		case GET_LOG_FILES:
 			LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
 			final byte datLogFiles[] = logclient.getLogFiles();
-			session.setAttribute("JSON", datLogFiles);
-			response.sendRedirect( request.getContextPath().toString().concat("/Logs/LogsFileList.jsp"));
+			session.setAttribute("JSON", datLogFiles); //$NON-NLS-1$
+			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?").//$NON-NLS-1$
+					concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(nameSrv) ); //$NON-NLS-1$
 //		    dis = context.getRequestDispatcher("/Logs/LogsMainPage.jsp"); //$NON-NLS-1$
 			break;
 		case OPEN_FILE:
@@ -127,6 +148,42 @@ public class LogAdminService extends HttpServlet {
 
 	}
 
+	/**
+	 *
+	 * @param url
+	 * @return
+	 */
+	protected final String echo(final String url) {
+		final LogConsumerClient lclient = new LogConsumerClient();
+		final StringWriter resultEcho = new StringWriter();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+		String result = ""; //$NON-NLS-1$
+		try {
+			result = lclient.echo(url);
+			data.add(Json.createObjectBuilder()
+					//.add("Code",response.getStatus()) //$NON-NLS-1$
+					.add("Message",result)); //$NON-NLS-1$
+			jsonObj.add("Ok", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(resultEcho);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	        result = resultEcho.toString();
+		}
+		catch (final IOException e) {
+			data.add(Json.createObjectBuilder()
+					//.add("Code",response.getStatus()) //$NON-NLS-1$
+					.add("Message", e.getMessage())); //$NON-NLS-1$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(resultEcho);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	        result = resultEcho.toString();
+		}
+
+		return result;
+
+	}
 
 
 

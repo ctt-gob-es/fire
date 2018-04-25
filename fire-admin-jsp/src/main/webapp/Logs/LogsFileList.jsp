@@ -4,6 +4,7 @@
 <%@page import="javax.json.Json"%>
 <%@page import="javax.json.JsonObject"%>
 <%@page import="java.io.ByteArrayInputStream"%>
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
 	String errorText = null;
@@ -17,6 +18,7 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
 String htmlData =""; //$NON-NLS-1$
 String htmlError = ""; //$NON-NLS-1$
 String styleError="";//$NON-NLS-1$
+String nameSrv = "";//$NON-NLS-1$
 //Logica para determinar si mostrar un resultado de operacion
 	
 	final byte[] sJSON = (byte[]) request.getSession().getAttribute("JSON"); //$NON-NLS-1$ 
@@ -29,6 +31,9 @@ String styleError="";//$NON-NLS-1$
 	final JsonObject jsonObj = reader.readObject();
 	reader.close();
 	
+	if(request.getParameter(ServiceParams.PARAM_NAMESRV) != null && !"".equals(request.getParameter(ServiceParams.PARAM_NAMESRV))){//$NON-NLS-1$
+		 nameSrv = request.getParameter(ServiceParams.PARAM_NAMESRV);
+	}
 	if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
 		styleError="style='display: block-inline;'";//$NON-NLS-1$
 		final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
@@ -85,7 +90,7 @@ String styleError="";//$NON-NLS-1$
 	
 		<div style="display: block-inline; text-align:center;">
 			<p id="descrp">
-			  Listado de ficheros log del sistema.
+			  Listado de ficheros log del servidor <%=nameSrv %>.
 			</p>
 		</div>
 		<div id="message" <%=styleError%>><%=htmlError%></div>				

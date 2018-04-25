@@ -22,7 +22,7 @@
 							</li>
 							<li><a>Logs</a>
 								<ul>
-									<li><a href="../LogAdminService?op=3">Gesti&oacute;n de Logs</a></li>	<!-- //"../Logs/LogsMainPage.jsp"	 -->						
+									<li><a href="../Logs/LogsMainPage.jsp">Gesti&oacute;n de Logs</a></li>							
 								</ul>
 							</li>
 						</ul>
