@@ -118,8 +118,10 @@ boolean time =  false;
 			<div id="contentlogResult" style="display:inline-block;width: 80%; height:400px; vertical-align: top; overflow-x: auto;overflow-y:auto;">		
 				<pre id="logResult">
 				</pre>
+				
 			</div>
-			<div id="operations" style="display:inline-block;width:18%; vertical-align: top;">
+			
+			<div id="operations" style="display:inline-block;width:18%; vertical-align: top; padding-left: 1em;">
 				   
 				    	<div id="lines">
 				    		<label for="Nlines">* L&iacute;neas</label>
@@ -208,9 +210,15 @@ boolean time =  false;
 					      	<%}%>	
 					      	</div>
 				      		<br><br>
-				      		<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip" onclick="download();" />
+				      			<div style="display: inline-block;width:49%;">
+					      		<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="location.href='LogsFileList.jsp?name-srv=<%=nameSrv%>';" />
+					      	</div>
+					      		<div style="display: inline-block;width:49%;">
+					      		<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip" onclick="download();" />
+					      	</div>			      					      		
 				      	</div><!-- all_buttons -->				    
 			</div>	<!-- operations -->	
+			
 		</div>	 <!-- main-content -->			    
    	</div><!-- containerLogsManager -->
 	
