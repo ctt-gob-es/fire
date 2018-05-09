@@ -87,13 +87,13 @@ public class LogSearchText {
 			}
 
 			if (!found) {
-				baos.write( "Texto No encontrado".getBytes()); //$NON-NLS-1$
+//				baos.write( "Texto No encontrado".getBytes()); //$NON-NLS-1$
+				return null;
 			}
 			//reader.close();
 		}
 		catch (final IOException | InvalidPatternException | InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return null;
 		}
 
 		return baos.toByteArray();

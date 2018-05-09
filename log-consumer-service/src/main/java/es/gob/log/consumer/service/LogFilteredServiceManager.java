@@ -27,11 +27,15 @@ public class LogFilteredServiceManager {
 
 		if(req.getParameter(ServiceParams.START_DATETIME) != null && !"".equals(req.getParameter(ServiceParams.START_DATETIME))) { //$NON-NLS-1$
 			final Long start_dateTime = new Long( Long.parseLong(req.getParameter(ServiceParams.START_DATETIME)));
-			crit.setStartDate(start_dateTime.longValue());
+			if(start_dateTime.longValue() > 0L) {
+				crit.setStartDate(start_dateTime.longValue());
+			}
 		}
 		if(req.getParameter(ServiceParams.END_DATETIME) != null && !"".equals(req.getParameter(ServiceParams.END_DATETIME))) { //$NON-NLS-1$
 			final Long end_datetime = new Long( Long.parseLong(req.getParameter(ServiceParams.END_DATETIME)));
-			crit.setEndDate(end_datetime.longValue());
+			if(end_datetime.longValue() > 0L) {
+				crit.setEndDate(end_datetime.longValue());
+			}
 		}
 		if(req.getParameter(ServiceParams.LEVEL) != null && !"".equals(req.getParameter(ServiceParams.LEVEL))){ //$NON-NLS-1$
 			final String level = req.getParameter(ServiceParams.LEVEL);

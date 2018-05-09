@@ -91,7 +91,7 @@
 							<label for="clave" style="color: #404040" >* Clave</label>
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
-							<input id="clave" type="txt" class="edit-txt"  name="clave" style="width: 80%;margin-top:3px;"
+							<input id="clave" type="password" class="edit-txt"  name="clave" style="width: 80%;margin-top:3px;"
 							value="<%= logSrv.getClave() != null ? logSrv.getClave() : empty %>"/>
 					</div>		
 				</div>
@@ -108,13 +108,13 @@
 					
 					<div style="display: inline-block; width: 25%;margin: 3px;">
 						<input class="menu-btn" name="echo-srv-btn" type="button" value="Comprobar conexi&oacute;n" title="Comprueba la conexi&oacute;n con el Servidor de Log" 
-						onclick="comprobarServidorLog()"/>
+						onclick="comprobarServidorLog();"/>
 					</div>					
 				</div>
 				<div style="margin: auto;width: 100%;padding: 3px;">
 					<div id="urlStatus" style="display: inline-block; width: 50%;margin: 3px;">
-						<div id="okIcon" style="display:none;"><span id="messageOk"></span><img alt="Incono indicando la conexión correcta de la url del servidor" src="../resources/img/comprobado_icon.png" width="16" height="16"></div>
-						<div id="NoOkIcon" style="display:none;"><span id="messageNoOk"></span><img alt="Incono indicando la conexión incorrecta de la url del servidor" src="../resources/img/sin_entrada_icon.png"></div>
+						<div id="okIcon" style="display:none;"><span id="messageOk"></span><img alt="Incono indicando la conexión correcta de la url del servidor" src="../resources/img/comprobado_icon.png" width="22px" height="22px"></div>
+						<div id="NoOkIcon" style="display:none;"><span id="messageNoOk"></span><img alt="Incono indicando la conexión incorrecta de la url del servidor" src="../resources/img/sin_entrada_icon.png" width="22px" height="22px"></div>
 					</div>  
 				</div>	
 				<br>

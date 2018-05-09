@@ -3,19 +3,20 @@ package es.gob.log.consumer.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
-import es.gob.log.consumer.Criteria;
 import es.gob.log.consumer.client.HttpManager.UrlHttpMethod;
 
 /**
@@ -28,6 +29,11 @@ public class LogConsumerClient {
 	private String serviceUrl = null;
 
 	private final HttpManager conn;
+
+	private  Charset charsetContent = StandardCharsets.UTF_8;
+
+
+
 
 	/**
 	 * Construye el cliente para la consulta de logs.
@@ -227,12 +233,23 @@ public class LogConsumerClient {
 				.append("?op=").append(ServiceOperations.OPEN_FILE.ordinal()).append("&fname=").append(filename); //$NON-NLS-1$ //$NON-NLS-2$
 		HttpResponse response;
 		try {
+
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 			if(response.statusCode == 200) {
 				final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));
 				final JsonObject openFileReponse = reader.readObject();
 				reader.close();
+				final JsonArray jsonarr =   openFileReponse.getJsonArray("LogInfo"); //$NON-NLS-1$
+				for(int i = 0; i < jsonarr.size(); i++) {
+					final JsonObject obj = jsonarr.getJsonObject(i);
+					if(obj.get("Charset")!=null) { //$NON-NLS-1$
+						final String charsetName = obj.get("Charset").toString().replace("\"", "");//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						this.setCharsetContent(Charset.forName(charsetName));
+					}
+				}
+
 				result.write(openFileReponse.toString());
+
 			}
 			else {
 				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -246,12 +263,12 @@ public class LogConsumerClient {
 		        jw.close();
 			}
 
+			if(result.getBuffer().length() > 0) {
+				return result.toString().getBytes(this.getCharsetContent());
+			}
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes();
 		}
 		return null;
 	}
@@ -268,6 +285,9 @@ public class LogConsumerClient {
 	 */
 	public  byte[] getLogTail(final int numLines, final String filename) {
 		final StringWriter result = new StringWriter();
+		final StringBuilder resultTail =new StringBuilder("");//$NON-NLS-1$
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.TAIL.ordinal()) //$NON-NLS-1$
 				.append("&nlines=").append(numLines)  //$NON-NLS-1$
@@ -275,44 +295,219 @@ public class LogConsumerClient {
 		HttpResponse response;
 		try {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
-			if(response.statusCode == 200) {
-				result.write(response.getContent().toString());
-			}
-			else {
-				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-				final JsonArrayBuilder data = Json.createArrayBuilder();
+
+			if(response.statusCode == 200 && response.getContent().length > 0) {
+				final byte[] resTail = response.getContent();
+				final String res = new String(resTail,this.getCharsetContent());
+				resultTail.append(res);
+
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
-						.add("Message", "No existen ficheros con extension .log")); //$NON-NLS-1$ //$NON-NLS-2$
+						.add("Result", resultTail.toString())); //$NON-NLS-1$
+				jsonObj.add("Tail",data ); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+			    jw.writeObject(jsonObj.build());
+			    jw.close();
+			}
+			else {
+				resultTail.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message", resultTail.toString())); //$NON-NLS-1$
 				jsonObj.add("Error", data); //$NON-NLS-1$
 				final JsonWriter jw = Json.createWriter(result);
-		        jw.writeObject(jsonObj.build());
-		        jw.close();
+			    jw.writeObject(jsonObj.build());
+			    jw.close();
 			}
 
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			resultTail.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+			data.add(Json.createObjectBuilder()
+					.add("Code",400) //$NON-NLS-1$
+					.add("Message", resultTail.toString())); //$NON-NLS-1$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(result);
+		    jw.writeObject(jsonObj.build());
+		    jw.close();
 		}
 		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes();
+			return result.toString().getBytes(this.getCharsetContent());
 		}
 		return null;
 	}
 
 	public byte[] getMoreLog(final int numLines) {
-		throw new UnsupportedOperationException("Metodo no implementado");
+		final StringWriter result = new StringWriter();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+		final StringBuilder resultMore = new StringBuilder("");//$NON-NLS-1$
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+				.append("?op=").append(ServiceOperations.GET_MORE.ordinal()) //$NON-NLS-1$
+				.append("&nlines=").append(numLines); //$NON-NLS-1$
+		HttpResponse response;
+		try {
+			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+
+			if(response.statusCode == 200 && response.getContent().length > 0) {
+				final byte[] resMore = response.getContent();
+				final String res = new String(resMore,this.getCharsetContent());
+				resultMore.append(res);
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Result", resultMore.toString())); //$NON-NLS-1$
+				jsonObj.add("More",data ); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+			    jw.writeObject(jsonObj.build());
+			    jw.close();
+			}
+			else {
+				resultMore.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message",resultMore.toString())); //$NON-NLS-1$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+			    jw.writeObject(jsonObj.build());
+			    jw.close();
+			}
+
+		} catch (final IOException e) {
+			resultMore.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+			data.add(Json.createObjectBuilder()
+					.add("Code",400) //$NON-NLS-1$
+					.add("Message", resultMore.toString())); //$NON-NLS-1$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(result);
+		    jw.writeObject(jsonObj.build());
+		    jw.close();
+		}
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes(this.getCharsetContent());
+		}
+		return null;
 	}
 
-	public byte[] getLogFiltered(final int numLines, final Criteria criteria) {
-		throw new UnsupportedOperationException("Metodo no implementado");
+	public byte[] getLogFiltered(final int numLines, final long startDate, final long endDate, final String level) {
+
+		final StringWriter result = new StringWriter();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+		final StringBuilder resultFilter = new StringBuilder("");//$NON-NLS-1$
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+				.append("?op=").append(ServiceOperations.FILTER.ordinal()) //$NON-NLS-1$
+				.append("&".concat(ServiceParams.NUM_LINES).concat("=")).append(numLines)//$NON-NLS-1$ //$NON-NLS-2$
+				.append("&".concat(ServiceParams.START_DATETIME).concat("=")).append(startDate)//$NON-NLS-1$ //$NON-NLS-2$
+				.append("&".concat(ServiceParams.END_DATETIME).concat("=")).append(endDate)//$NON-NLS-1$ //$NON-NLS-2$
+				.append("&".concat(ServiceParams.LEVEL).concat("=")).append(level)//$NON-NLS-1$ //$NON-NLS-2$
+				;
+		HttpResponse response;
+		try {
+
+			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+
+			if(response.statusCode == 200 && response.getContent().length > 0) {
+				final byte[] resFilter = response.getContent();
+				final String res = new String(resFilter,this.getCharsetContent());
+				resultFilter.append(res);
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Result", resultFilter.toString())); //$NON-NLS-1$
+				jsonObj.add("Filtered",data ); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+			    jw.writeObject(jsonObj.build());
+			    jw.close();
+			}
+			else {
+				resultFilter.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message",resultFilter.toString())); //$NON-NLS-1$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+			    jw.writeObject(jsonObj.build());
+			    jw.close();
+			}
+
+		} catch (final IOException e) {
+			resultFilter.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+			data.add(Json.createObjectBuilder()
+					.add("Code",400) //$NON-NLS-1$
+					.add("Message", resultFilter.toString())); //$NON-NLS-1$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(result);
+		    jw.writeObject(jsonObj.build());
+		    jw.close();
+		}
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes(this.getCharsetContent());
+		}
+		return null;
 	}
 
-	public byte[] searchText(final int numLines, final String text, final Date startDate) {
-		throw new UnsupportedOperationException("Metodo no implementado");
+	public byte[] searchText(final int numLines, final String text, final String startDate) {
+		final StringWriter result = new StringWriter();
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+		final StringBuilder resultSearch = new StringBuilder("");//$NON-NLS-1$
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+				.append("?op=").append(ServiceOperations.SEARCH_TEXT.ordinal()) //$NON-NLS-1$
+				.append("&".concat(ServiceParams.NUM_LINES).concat("=")).append(numLines)//$NON-NLS-1$ //$NON-NLS-2$
+				.append("&".concat(ServiceParams.SEARCH_TEXT).concat("=")).append(text.replaceAll(" ", "%20") )//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				.append("&".concat(ServiceParams.SEARCH_DATETIME).concat("=")).append(startDate); //$NON-NLS-1$ //$NON-NLS-2$
+		HttpResponse response;
+		try {
+
+			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+
+			if(response.statusCode == 200 && response.getContent().length > 0) {
+				final byte[] resSearch = response.getContent();
+				final String res = new String(resSearch,this.getCharsetContent());
+				resultSearch.append(res);
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Result", resultSearch.toString())); //$NON-NLS-1$
+				jsonObj.add("Search",data ); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+			    jw.writeObject(jsonObj.build());
+			    jw.close();
+			}
+			else {
+				resultSearch.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message",resultSearch.toString())); //$NON-NLS-1$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+			    jw.writeObject(jsonObj.build());
+			    jw.close();
+			}
+
+		} catch (final IOException e) {
+			resultSearch.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+			data.add(Json.createObjectBuilder()
+					.add("Code",400) //$NON-NLS-1$
+					.add("Message", resultSearch.toString())); //$NON-NLS-1$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(result);
+		    jw.writeObject(jsonObj.build());
+		    jw.close();
+		}
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes(this.getCharsetContent());
+		}
+		return null;
 	}
 
 	public byte[] download() {
 		throw new UnsupportedOperationException("Metodo no implementado");
 	}
+
+	public final Charset getCharsetContent() {
+		return this.charsetContent;
+	}
+	private final void setCharsetContent(final Charset charsetContent) {
+		this.charsetContent = charsetContent;
+	}
+
+
 }

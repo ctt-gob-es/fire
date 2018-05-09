@@ -58,7 +58,8 @@ function comprobarServidorLog(){
 	$( "#okIcon").hide();
 	$( "#messageNoOk" ).html("");	
 	$( "#messageOk" ).html("");
-	
+	$( "#urlStatus" ).show();
+
 	var url = $("#url").val();
 	$.post( "../LogAdminService?op=0&url="+url, function( data ) {
 		  var JSONData = JSON.parse(data);
@@ -70,7 +71,6 @@ function comprobarServidorLog(){
 			  $( "#okIcon").show();
 			  $( "#messageOk" ).html(JSONData.Ok[0].Message);
 		  }
-		 $( "#urlStatus" ).show();
-		 		 
+				 		 
 	});
 }

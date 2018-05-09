@@ -38,8 +38,9 @@ public class LogTail {
 	 * @param logFileName
 	 * @param numLines
 	 * @return
+	 * @throws IOException
 	 */
-	public final  byte[]  getLogTail(final int numLines) {
+	public final  String  getLogTail(final int numLines) throws IOException {// byte[]
 		 String result = ""; //$NON-NLS-1$
 		 byte[]  data = null;
 		 /* Creamos el canal asociado al fichero , se podr&aacute; modificar suposi&oacute;n de lectura*/
@@ -70,13 +71,9 @@ public class LogTail {
 					}
 		        }
 
+		    }
 
-		    } catch (final IOException e) {
-
-				e.printStackTrace();
-			}
-
-			return result.getBytes();
+			return result;
 
 	}
 
@@ -99,7 +96,7 @@ public class LogTail {
 			  {
 				numLines++;
 				if(numLines > totalLines - lines) {
-					linesDataRead =linesDataRead.concat(line).concat("\n"); //$NON-NLS-1$
+					linesDataRead = linesDataRead.concat(line).concat("\n"); //$NON-NLS-1$
 				}
 			  }
 			reader.close();

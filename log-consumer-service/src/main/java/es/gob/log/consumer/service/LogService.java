@@ -25,7 +25,7 @@ public class LogService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(LogService.class.getName());
 
-
+	private static int statusCode = HttpServletResponse.SC_OK;
 
 
 	@Override
@@ -63,22 +63,22 @@ public class LogService extends HttpServlet {
 
 
 		// Procesamos la peticion segun si requieren login o no
-		final int statusCode = HttpServletResponse.SC_OK;
+
 		byte[] result = null;
 		boolean fileClosed = false;
 		try {
 			if (!needLogin(op)) {
 				switch (op) {
 				case ECHO:
-					LOGGER.info("Solicitud entrando de comprobacion del servicio");
+					LOGGER.info("Solicitud entrando de comprobacion del servicio"); //$NON-NLS-1$
 					result = echo();
 					break;
 				case REQUEST_LOGIN:
-					LOGGER.info("Solicitud entrando de inicio de sesion");
+					LOGGER.info("Solicitud entrando de inicio de sesion"); //$NON-NLS-1$
 					result = requestLogin(req);
 					break;
 				case VALIDATE_LOGIN:
-					LOGGER.info("Solicitud entrante de validacion de sesion");
+					LOGGER.info("Solicitud entrante de validacion de sesion"); //$NON-NLS-1$
 					result = validateLogin(req);
 					break;
 				default:
@@ -92,39 +92,43 @@ public class LogService extends HttpServlet {
 
 				switch (op) {
 				case GET_LOG_FILES:
-					LOGGER.info("Solicitud entrante de listado de ficheros");
+					LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
 					result = getLogFiles();
 					if(result == null) {
-						resp.sendError(HttpServletResponse.SC_NO_CONTENT, "No se han podido encontrar ficheros .log");
+						resp.sendError(HttpServletResponse.SC_NO_CONTENT, "No se han podido encontrar ficheros .log"); //$NON-NLS-1$
 						return;
 					}
 					break;
 				case OPEN_FILE:
-					LOGGER.info("Solicitud entrante de apertura de fichero");
+					LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
 					result = openFile(req);
+					if(result==null || result.length <= 0) {
+						resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No se han podido abrir el fichero seleccionado .log"); //$NON-NLS-1$
+						return;
+					}
 					break;
 				case CLOSE_FILE:
-					LOGGER.info("Solicitud entrante de cierre de fichero");
+					LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
 					fileClosed = closeFile(req);
 					break;
 				case TAIL:
-					LOGGER.info("Solicitud entrante de consulta del final del log");
+					LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
 					result = getLogTail(req);
 					break;
 				case GET_MORE:
-					LOGGER.info("Solicitud entrante de mas log");
+					LOGGER.info("Solicitud entrante de mas log"); //$NON-NLS-1$
 					result = getMoreLog(req);
 					break;
 				case SEARCH_TEXT:
-					LOGGER.info("Solicitud entrante de busqueda de texto");
+					LOGGER.info("Solicitud entrante de busqueda de texto"); //$NON-NLS-1$
 					result = searchText(req);
 					break;
 				case FILTER:
-					LOGGER.info("Solicitud entrante de filtrado de log");
+					LOGGER.info("Solicitud entrante de filtrado de log"); //$NON-NLS-1$
 					result = getLogFiltered(req);
 					break;
 				case DOWNLOAD:
-					LOGGER.info("Solicitud entrante de descarga de fichero");
+					LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
 					result = download(req);
 					break;
 				default:
@@ -280,7 +284,9 @@ public class LogService extends HttpServlet {
 		}
 
 		final byte[] result = LogTailServiceManager.process(req);
-
+		if(LogTailServiceManager.getError() != null) {
+			setStatusCode(LogTailServiceManager.getError().getNumError());
+		}
 		session.removeAttribute("FilePosition"); //$NON-NLS-1$
 		session.setAttribute("FilePosition", new Long(LogTailServiceManager.getPosition().longValue()));  //$NON-NLS-1$
 
@@ -293,6 +299,9 @@ public class LogService extends HttpServlet {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
 		final byte[] result = LogMoreServiceManager.process(req);
+		if(LogMoreServiceManager.getError()!=null) {
+			setStatusCode(LogMoreServiceManager.getError().getNumError());
+		}
 		return result;
 	}
 
@@ -301,7 +310,7 @@ public class LogService extends HttpServlet {
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
-		final byte[] result = LogSearchServiceManager.process(req);
+		final byte[] result = LogFilteredServiceManager.process(req);
 		return result;
 
 
@@ -327,4 +336,15 @@ public class LogService extends HttpServlet {
 	private static byte[] download(final HttpServletRequest req) {
 		throw new UnsupportedOperationException();
 	}
+
+	private static final int getStatusCode() {
+		return statusCode;
+	}
+
+	private static final void setStatusCode(final int statusCode) {
+		LogService.statusCode = statusCode;
+	}
+
+
+
 }
