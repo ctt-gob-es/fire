@@ -60,9 +60,7 @@ boolean time =  false;
 		final JsonArray LogInfo = jsonObj.getJsonArray("LogInfo");  //$NON-NLS-1$
 		for(int i = 0; i < LogInfo.size(); i++){
 			final JsonObject json = LogInfo.getJsonObject(i);
-// 			if(json.get(ServiceParams.PARAM_CHARSET) != null) { 
-// 				charset = (json.get(ServiceParams.PARAM_CHARSET).toString().replace("\"", "")); //$NON-NLS-1$//$NON-NLS-2$ 
-// 			}
+
 			if(json.get(ServiceParams.PARAM_LEVELS) != null) { 
 				final String levels_ = json.get("Levels").toString().replace("\"", "");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				levels = levels_ .split(",");//$NON-NLS-1$
@@ -124,7 +122,7 @@ boolean time =  false;
 			<div id="operations" style="display:inline-block;width:18%; vertical-align: top;">
 				   
 				    	<div id="lines">
-				    		<label for="tailNlines">* L&iacute;neas</label>
+				    		<label for="Nlines">* L&iacute;neas</label>
 				    		<select id="Nlines" name ="Nlines">
 				    			<option >0</option> 
 				    			<%
@@ -153,7 +151,7 @@ boolean time =  false;
 				      		<div>
 					      		<div style="display: inline-block;width:49%;">
 					      		<% if(date){%>
-					      			<label for="startDate">* Fecha inicio</label>
+					      			<label for="startDate">Fecha inicio</label>
 					      			<input type="text" id="startDate" name="startDate" maxlength="10" size="10">
 					      		<%}%>
 					      		</div>

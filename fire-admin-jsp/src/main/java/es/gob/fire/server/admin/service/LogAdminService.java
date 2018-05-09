@@ -160,7 +160,7 @@ public class LogAdminService extends HttpServlet {
 			result = ""; //$NON-NLS-1$
 			final byte datSearchTxt[] = this.logclient.searchText(this.numlines, this.txt2search, this.datetime);
 			if(datSearchTxt != null && datSearchTxt.length > 0 ) {
-				final String res = new String(datSearchTxt);
+				final String res = new String(datSearchTxt,this.logclient.getCharsetContent());
 				result += res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
 				final String marc = "<span class='highlight'>" + this.txt2search + "</span>"; //$NON-NLS-1$ //$NON-NLS-2$
 				result = result.replace(this.txt2search, marc);

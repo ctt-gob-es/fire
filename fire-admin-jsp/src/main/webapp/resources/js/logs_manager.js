@@ -81,16 +81,22 @@
   * @returns
   */
  function getTail(nlines){
-	 var url = "../LogAdminService?op=6&nlines="+nlines+"&fname="+$("#fileName").text();
-	 $.post(url, function(data){		
-		 var JSONData = JSON.parse(data);
-		  if(JSONData.hasOwnProperty('Tail')){
-			  printResult(JSONData);  
-		  }
-		   else{
-			   printErrorResult(JSONData);  
-		   }      	            
-	}); 
+
+	 	var arrFields = ["Nlines"];
+
+	 	var ok = validateFields(arrFields);						
+		if(ok){
+			 var url = "../LogAdminService?op=6&nlines="+nlines+"&fname="+$("#fileName").text();
+			 $.post(url, function(data){		
+				 var JSONData = JSON.parse(data);
+				  if(JSONData.hasOwnProperty('Tail')){
+					  printResult(JSONData);  
+				  }
+				   else{
+					   printErrorResult(JSONData);  
+				   }      	            
+			}); 
+		}
  }
  
  /**
@@ -99,16 +105,21 @@
   * @returns
   */
  function getMore(nlines){
-	 var url = "../LogAdminService?op=7&nlines="+nlines;
-	 $.post(url, function(data){		
-		 var JSONData = JSON.parse(data);
-		  if(JSONData.hasOwnProperty('More')){
-			  printResult(JSONData);  
-		  }
-		   else {			   
-			   printErrorResult(JSONData);  
-		   }      	            
-	}); 
+	var arrFields = ["Nlines"];
+	var ok = validateFields(arrFields);						
+	if(ok){
+		 var url = "../LogAdminService?op=7&nlines="+nlines;
+		 $.post(url, function(data){		
+			 var JSONData = JSON.parse(data);
+			  if(JSONData.hasOwnProperty('More')){
+				  printResult(JSONData);  
+			  }
+			   else {			   
+				   printErrorResult(JSONData);  
+			   }      	            
+		}); 
+	}
+	
  }
 
  /**
@@ -120,19 +131,24 @@
   */
  function searchText(nlines, text, date){
 	 
-	 var DateTime =  getlongDateTime(date);
-	 
-	 var url = "../LogAdminService?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime;
+	var DateTime =  getlongDateTime(date);
+	var arrFields = ["search_txt"];
 
-	 $.post(url, function(data){		
-		 var JSONData = JSON.parse(data);
-		  if(JSONData.hasOwnProperty('Search')){
-		  	printResult(JSONData);  
-		  }
-		   else {
-		   	printErrorResult(JSONData);  
-		   }      	            
-	}); 
+	var ok = validateFields(arrFields);						
+	if(ok){
+		 var url = "../LogAdminService?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime;
+
+		 $.post(url, function(data){		
+			 var JSONData = JSON.parse(data);
+			  if(JSONData.hasOwnProperty('Search')){
+			  	printResult(JSONData);  
+			  }
+			   else {
+			   	printErrorResult(JSONData);  
+			   }      	            
+		}); 
+	}
+	
  }
  
  /**
@@ -148,18 +164,21 @@
 	 
 	 var startDateTime =  getlongDateTime(startDate);
 	 var endDateTime =  getlongDateTime(endDate);
-	 		 	 	 	
-	 var url = "../LogAdminService?op=9&nlines=" + nlines + "&start_date=" + startDateTime + "&end_date=" + endDateTime + "&level=" + level;
+	 var arrFields = ["Nlines","level_select"];
+	 var ok = validateFields(arrFields);						
+	if(ok){	 	
+		var url = "../LogAdminService?op=9&nlines=" + nlines + "&start_date=" + startDateTime + "&end_date=" + endDateTime + "&level=" + level;		 
+		 $.post(url, function(data){		
+			 var JSONData = JSON.parse(data);
+			  if(JSONData.hasOwnProperty('Filtered')){
+			  	printResult(JSONData);  
+			  }
+			   else {
+			   	printErrorResult(JSONData);  
+			  }      	            
+		});  
+	} 	 	
 	 
-	 $.post(url, function(data){		
-		 var JSONData = JSON.parse(data);
-		  if(JSONData.hasOwnProperty('Filtered')){
-		  	printResult(JSONData);  
-		  }
-		   else {
-		   	printErrorResult(JSONData);  
-		  }      	            
-	});  
  }
  
  
@@ -193,4 +212,59 @@
 	 var result = DateTime.getTime();
 	 
 	 return result;
+ }
+ 
+ /**
+  * Función de validación
+  * @param fields
+  * @returns
+  */
+ function validateFields(fields){
+	 
+	 $("label").each(function( index ) {
+			if (this.style.color = "red") {				
+			      this.style.color = "#000000";
+			      var idInput = $(this).attr('for');
+			      $('#'+idInput).css({backgroundColor:'#FFFFFF'});
+			    } 
+		});
+	 var ok = true;
+	 var msg = "";
+	 
+	 for ( i = 0; i < fields.length; i++ ){
+	
+		switch(String(fields[i])){
+		case "Nlines":
+			if($("#Nlines").val() == "0"){								
+				$('label[for=Nlines]').css({color:'red'});
+				$('#Nlines').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un número mayor de 0 líneas\n";
+				ok = false;			
+			}		
+			break;
+		case "search_txt":
+			if($("#search_txt").val() == ""){								
+				$('label[for=search_txt]').css({color:'red'});
+				$('#search_txt').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un texto para realizar la búsqueda.";
+				ok = false;			
+			}		
+			break;		
+		case "level_select":
+			if($("#level_select").val() == ""){								
+				$('label[for=search_txt]').css({color:'red'});
+				$('#level_select').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				ok = false;			
+			}
+			break;
+		}
+	 }
+	 
+	if(!ok){
+		alert(msg);
+	}	
+	 
+	 return ok;
+	  	 
  }

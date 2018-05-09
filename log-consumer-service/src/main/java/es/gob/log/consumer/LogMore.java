@@ -43,7 +43,7 @@ public class LogMore {
 				lines ++;
 			}
 
-			return result.getBytes();
+			return result.getBytes(reader.getCharset());
 
 	}
 

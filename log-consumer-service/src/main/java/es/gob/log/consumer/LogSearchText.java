@@ -75,7 +75,7 @@ public class LogSearchText {
 				found = this.search(text);
 				if(found) {
 					if(this.lineTextFound != null) {
-						baos.write(this.lineTextFound.getBytes());
+						baos.write(this.lineTextFound.getBytes(this.reader.getCharset()));
 						baos.write('\n');
 					}
 					int linesReaded = 0;
@@ -125,7 +125,7 @@ public class LogSearchText {
 			result = result.concat(cbLine.toString()).concat("\n"); //$NON-NLS-1$
 			numLines++;
 		}
-		return result.getBytes();
+		return result.getBytes(this.reader.getCharset());
 	}
 
 	private final int countLines(final byte[] data) {
