@@ -129,7 +129,7 @@ public class LogService extends HttpServlet {
 					break;
 				case DOWNLOAD:
 					LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
-					result = download(req);
+					result = download(req,resp);
 					break;
 				default:
 					LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
@@ -287,8 +287,6 @@ public class LogService extends HttpServlet {
 		if(LogTailServiceManager.getError() != null) {
 			setStatusCode(LogTailServiceManager.getError().getNumError());
 		}
-		session.removeAttribute("FilePosition"); //$NON-NLS-1$
-		session.setAttribute("FilePosition", new Long(LogTailServiceManager.getPosition().longValue()));  //$NON-NLS-1$
 
 		return result;
 	}
@@ -333,8 +331,17 @@ public class LogService extends HttpServlet {
 		throw new UnsupportedOperationException();
 	}
 
-	private static byte[] download(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
+	private static byte[] download(final HttpServletRequest req, final HttpServletResponse resp) throws SessionException {
+		final HttpSession session = req.getSession(true);
+		if (session == null) {
+			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
+		}
+		final byte[] result = LogDownloadServiceManager.process(req);
+		if(LogDownloadServiceManager.isHasMore()) {
+			resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+		}
+
+		return result;
 	}
 
 	private static final int getStatusCode() {

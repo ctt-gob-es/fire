@@ -24,7 +24,7 @@ String styleError = "";//$NON-NLS-1$
 String nameSrv = "";//$NON-NLS-1$
 String fileName = "";//$NON-NLS-1$
 String levels[] = null ;
-// String charset = "UTF-8";//$NON-NLS-1$
+
 boolean date = false;
 boolean time =  false;
 
@@ -91,7 +91,11 @@ boolean time =  false;
 	<link rel="stylesheet" href="../resources/css/jquery-ui.min.css">
 	<link rel="stylesheet" href="../resources/css/jquery-ui.theme.min.css">
 	<link rel="stylesheet" href="../resources/css/jquery.ui.timepicker.css">
+	<script type="text/javascript">
+		var file = '<%=fileName%>';
 		
+	</script>	
+			
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>
@@ -110,15 +114,13 @@ boolean time =  false;
 			<div id="selectedFile" style="display:inline-block;width:35%;">
 			 	 Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.
 			</div>
-			<div id="error-txt-log" style="display:none;width:60%;"></div>	
-			
+			<div id="error-txt-log" style="display:none;width:60%;"></div>
+			<div id="ok-txt-log" style="display:none;width:60%;"></div>			
 		</div>
 	
 		<div id="main-content" style="margin: auto; width: 100%;" >
-			<div id="contentlogResult" style="display:inline-block;width: 80%; height:400px; vertical-align: top; overflow-x: auto;overflow-y:auto;">		
-				<pre id="logResult">
-				</pre>
-				
+			<div id="contentlogResult" style="display:inline-block;width: 80%; height:450px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;">		
+				<pre id="logResult"></pre>
 			</div>
 			
 			<div id="operations" style="display:inline-block;width:18%; vertical-align: top; padding-left: 1em;">
@@ -214,12 +216,13 @@ boolean time =  false;
 					      		<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="location.href='LogsFileList.jsp?name-srv=<%=nameSrv%>';" />
 					      	</div>
 					      		<div style="display: inline-block;width:49%;">
-					      		<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip" onclick="download();" />
+					      		<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />
 					      	</div>			      					      		
 				      	</div><!-- all_buttons -->				    
 			</div>	<!-- operations -->	
 			
-		</div>	 <!-- main-content -->			    
+		</div>	 <!-- main-content -->
+		   
    	</div><!-- containerLogsManager -->
 	
 </body>

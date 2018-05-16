@@ -144,7 +144,7 @@ String numRec = "1";//$NON-NLS-1$
 
 	var obJson = <%=jsonData%>; 
 	var txtNumRec = '<%=numRec%>';
-	var nameServer = '<%=nameSrv %>';
+	var nameServer = '<%=nameSrv%>';
 	var total =  Math.ceil(txtNumRec / 10);
 	var dataJSON = '{"TotalPages":'+ total +',"ActualPage":1,"TotalRecords":'+txtNumRec+',"FileListRows":[';
 	for (i = 0; i < obJson.FileList.length; i++) {

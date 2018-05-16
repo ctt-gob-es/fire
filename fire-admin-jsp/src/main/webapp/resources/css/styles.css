@@ -60,6 +60,17 @@ ul li.field-text {
 	background-color: #FFAAAA;
 }
 
+#ok-txt-log {
+	color:green; 
+	font-size: 14px;
+	text-align: center;
+	padding: 2px;
+	display:inline-block;
+	font-weight: bold;
+	border: 2px solid green;
+	border-radius: 8px; 
+	background-color: #55FF55;
+}
 
 #success-txt {
 	color:green; 
@@ -412,4 +423,16 @@ background-color:#ffff80
 			}
 			
 /*JQUERY UI */	
-
+/*Download file*/
+ #progressbar {
+    margin-top: 20px;
+  }
+ 
+  .progress-label {
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+  }
+ 
+  .ui-dialog-titlebar-close {
+    display: none;
+  }

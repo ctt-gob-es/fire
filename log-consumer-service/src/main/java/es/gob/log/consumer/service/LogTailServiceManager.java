@@ -2,6 +2,8 @@ package es.gob.log.consumer.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,8 +14,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import es.gob.log.consumer.FragmentedFileReader;
 import es.gob.log.consumer.LogErrors;
 import es.gob.log.consumer.LogInfo;
+import es.gob.log.consumer.LogReader;
 import es.gob.log.consumer.LogTail;
 
 /**
@@ -44,6 +48,8 @@ public class LogTailServiceManager {
 		/* Obtenemos los par&aacute;metros*/
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		final String sNumLines = req.getParameter(ServiceParams.NUM_LINES);
+//		final LogReader reader_session = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
+//		final AsynchronousFileChannel channel_session = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
 
 
 		/*Comprobanmos el valor del par&aacute;metro LOG_FILE_NAME */
@@ -54,16 +60,21 @@ public class LogTailServiceManager {
 				/* Obtenemos la ruta completa al fichero log*/
 				final String path = ConfigManager.getInstance().getLogsDir().getCanonicalPath().toString().concat(File.separator).concat(logFileName);
 				if(info != null) {
-//					String resTail = ""; //$NON-NLS-1$
+					session.removeAttribute("Reader");//$NON-NLS-1$
+					session.removeAttribute("Channel");//$NON-NLS-1$
 					final LogTail lTail = new LogTail(info,path);
 					final int iNumLines = sNumLines.trim() != null  && !"".equals(sNumLines.trim()) ? Integer.parseInt(sNumLines.trim()) : 0; //$NON-NLS-1$
 					final String resTail = lTail.getLogTail(iNumLines);
-//					String resultTail = "";//$NON-NLS-1$
-//					for(int i = 0; i < resTail.length; i++){
-//						resultTail += (char)resTail[i];
-//				    }
+
 					result = resTail.getBytes(info.getCharset());
-					setPosition(lTail.getFilePosition());
+
+					final File logFile = new File(path);
+					final AsynchronousFileChannel channel = AsynchronousFileChannel.open(logFile.toPath(),StandardOpenOption.READ);
+					final LogReader reader = new FragmentedFileReader(channel, info.getCharset());
+					session.setAttribute("FilePosition",Long.valueOf(lTail.getFilePosition()) );//$NON-NLS-1$
+					session.setAttribute("Channel",channel); //$NON-NLS-1$
+					session.setAttribute("Reader", reader); //$NON-NLS-1$
+
 
 				}
 				else {
@@ -72,27 +83,14 @@ public class LogTailServiceManager {
 					error.setNumError(HttpServletResponse.SC_PRECONDITION_FAILED);
 					error.setMsgError("Es necesario abrir el fichero log anteriormente.");//$NON-NLS-1$
 					result = error.getMsgError().getBytes(info.getCharset());
-//					data.add(Json.createObjectBuilder()
-//							.add("Code",HttpServletResponse.SC_PRECONDITION_FAILED) //$NON-NLS-1$
-//							.add("Message", "Es necesario abrir el fichero log anteriormente.")); //$NON-NLS-1$ //$NON-NLS-2$
-//					jsonObj.add("Error", data); //$NON-NLS-1$
-//					final JsonWriter jw = Json.createWriter(result);
-//			        jw.writeObject(jsonObj.build());
-//			        jw.close();
+
 				}
 
 			}
 			catch (final NumberFormatException e) {
 				LOGGER.log(Level.SEVERE,"El par&aacute;metro nlines no es un n&uacute;mero entero",e); //$NON-NLS-1$
 
-//
-//				data.add(Json.createObjectBuilder()
-//						.add("Code",HttpServletResponse.SC_NOT_ACCEPTABLE) //$NON-NLS-1$
-//						.add("Message", "El parametro número de líneas no es un numero entero.")); //$NON-NLS-1$ //$NON-NLS-2$
-//				jsonObj.add("Error", data); //$NON-NLS-1$
-//				final JsonWriter jw = Json.createWriter(result);
-//		        jw.writeObject(jsonObj.build());
-//		        jw.close();
+
 		        error = new LogErrors();
 				error.setNumError(HttpServletResponse.SC_NOT_ACCEPTABLE);
 				error.setMsgError("El parametro nlines no es un n&uacte;mero entero"); //$NON-NLS-1$
@@ -110,14 +108,6 @@ public class LogTailServiceManager {
 				return result;
 
 
-//				data.add(Json.createObjectBuilder()
-//						.add("Code",HttpServletResponse.SC_BAD_REQUEST) //$NON-NLS-1$
-//						.add("Message", "No se ha podido cargar el fichero de log.")); //$NON-NLS-1$ //$NON-NLS-2$
-//				jsonObj.add("Error", data); //$NON-NLS-1$
-//				final JsonWriter jw = Json.createWriter(result);
-//		        jw.writeObject(jsonObj.build());
-//		        jw.close();
-
 			}
 
 		}
@@ -133,25 +123,15 @@ public class LogTailServiceManager {
 		result = error.getMsgError().getBytes(info.getCharset());
 		return result;
 
-//		data.add(Json.createObjectBuilder()
-//				.add("Code",HttpServletResponse.SC_BAD_REQUEST) //$NON-NLS-1$
-//				.add("Message", "Error al procesar la petición de leer las últimas líneas del fichero.")); //$NON-NLS-1$ //$NON-NLS-2$
-//		jsonObj.add("Error", data); //$NON-NLS-1$
-//		final JsonWriter jw = Json.createWriter(result);
-//        jw.writeObject(jsonObj.build());
-//        jw.close();
-//        LOGGER.log(Level.SEVERE,"Error al procesar la petición de leer las últimas líneas del fichero."); //$NON-NLS-1$
-
-
 	}
 
-	protected final static Long getPosition() {
-		return LogTailServiceManager.position;
-	}
+//	protected final static Long getPosition() {
+//		return LogTailServiceManager.position;
+//	}
 
-	private final static void setPosition(final long position) {
-		LogTailServiceManager.position = new Long (position);
-	}
+//	private final static void setPosition(final long position) {
+//		LogTailServiceManager.position = new Long (position);
+//	}
 
 	public static final LogErrors getError() {
 		return error;

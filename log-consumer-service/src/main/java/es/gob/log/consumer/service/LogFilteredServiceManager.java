@@ -16,7 +16,6 @@ import es.gob.log.consumer.LogReader;
 public class LogFilteredServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogFilteredServiceManager.class.getName());
-	private static Long position = new Long(0L);
 
 	public final static byte[] process(final HttpServletRequest req) {
 
@@ -46,16 +45,17 @@ public class LogFilteredServiceManager {
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
-		if(filePosition != null) {
-			setPosition(filePosition.longValue());
-		}
 
 		try {
-
+			if(filePosition != null && filePosition != Long.valueOf(0L)) {
+				reader.load(filePosition.longValue());
+			}
 			final LogFilter filter = new LogFilter(info);
 			filter.load(reader);
 			filter.setCriteria(crit);
 			result = filter.filter(Integer.parseInt(sNumLines));
+			session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
+			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
@@ -73,11 +73,5 @@ public class LogFilteredServiceManager {
 
 		return result;
 	}
-	protected final static Long getPosition() {
-		return LogFilteredServiceManager.position;
-	}
 
-	private final static void setPosition(final long position) {
-		LogFilteredServiceManager.position = new Long (position);
-	}
 }

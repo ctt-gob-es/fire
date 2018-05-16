@@ -37,7 +37,7 @@ public class LogMore {
 			// Leemos el numero de lineas solicitadas,
 			int lines = 0;
 			 CharBuffer lineReaded;
-			while ( lines < numLines && (lineReaded = reader.readLine()) != null) {
+			while ( lines <= numLines && (lineReaded = reader.readLine()) != null) {
 				lineReaded.rewind();
 				result = result.concat(lineReaded.toString()).concat("\n"); //$NON-NLS-1$
 				lines ++;
@@ -46,7 +46,6 @@ public class LogMore {
 			return result.getBytes(reader.getCharset());
 
 	}
-
 
 
 

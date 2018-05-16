@@ -237,6 +237,13 @@ public class FragmentedFileReader implements LogReader {
 	}
 
 	@Override
+	public final long getFilePosition() {
+		return this.filePosition;
+	}
+
+
+
+	@Override
 	public void rewind() throws IOException {
 		this.filePosition = 0;
 		load(this.filePosition);

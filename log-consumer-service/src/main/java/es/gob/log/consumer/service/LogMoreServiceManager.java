@@ -17,7 +17,7 @@ import es.gob.log.consumer.LogReader;
 public class LogMoreServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogMoreServiceManager.class.getName());
-	private static Long position = new Long(0L);
+
 	private static LogErrors error = null;
 
 
@@ -28,19 +28,22 @@ public class LogMoreServiceManager {
 		final HttpSession session = req.getSession(true);
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
-
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
-		if(filePosition != null) {
-			setPosition(filePosition.longValue());
-		}
 
-		try  {
+
+		try {
+
 			final int iNumLines = Integer.parseInt(sNumLines.trim());
-			if(getPosition().longValue() != 0L ) {
-				reader.load(getPosition().longValue());
+			if(filePosition != null && filePosition != Long.valueOf(0L)) {
+				reader.load(filePosition.longValue());
 			}
+
+
 			final LogMore logMore = new LogMore(info);
 			result = logMore.getLogMore(iNumLines,reader);
+			session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
+			session.setAttribute("Reader", reader); //$NON-NLS-1$
+
 		}
 		catch (final IOException e) {
 			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e); //$NON-NLS-1$
@@ -79,14 +82,6 @@ public class LogMoreServiceManager {
 
 	}
 
-
-	protected final static Long getPosition() {
-		return LogMoreServiceManager.position;
-	}
-
-	private final static void setPosition(final long position) {
-		LogMoreServiceManager.position = new Long (position);
-	}
 
 	public static final LogErrors getError() {
 		return error;

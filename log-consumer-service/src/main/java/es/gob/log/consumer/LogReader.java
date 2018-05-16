@@ -59,4 +59,10 @@ public interface LogReader {
 	 * @throws IOException Cuando ocurre alg&uacute;n error durante el cierre.
 	 */
 	 void close() throws IOException;
+
+	 /**
+	  * Obtiene del log indicando una posici&oacute;n
+	  * @return
+	  */
+	 public long getFilePosition() ;
 }

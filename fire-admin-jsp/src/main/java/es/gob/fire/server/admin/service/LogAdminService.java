@@ -1,6 +1,7 @@
 package es.gob.fire.server.admin.service;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.logging.Logger;
 
@@ -9,7 +10,6 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +44,6 @@ public class LogAdminService extends HttpServlet {
      */
     public LogAdminService() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
@@ -60,22 +59,31 @@ public class LogAdminService extends HttpServlet {
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 		final HttpSession session = request.getSession(false);
+		String result = null;
 
-		final RequestDispatcher dis = null;
-		final ServletContext context = request.getServletContext();
+		final RequestDispatcher rd=request.getRequestDispatcher("/Logs/LogsManager.jsp");   //$NON-NLS-1$
 
 		//final String codeInit  = "I9lUuX+iEvzAD/hwaU2MbQ=="; //$NON-NLS-1$ // I9lUuX+iEvzAD/hwaU2MbQ==
 		//D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=
 
-		this.getParameters(request, session);
-
-
-		String result = null;
+		try {
+			this.getParameters(request, session);
+		}
+		catch (final Exception e) {
+			LOGGER.warning("No se han podido recuperar correctamente los parametros."); //$NON-NLS-1$
+			final String jsonError = getJsonError("No se han podido recuperar correctamente los parametros.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+	        response.getWriter().write(jsonError);
+	        rd.include(request, response);
+			return;
+		}
 
 		final String opString = request.getParameter("op"); //$NON-NLS-1$
 		if (opString == null) {
+			final StringWriter error = new StringWriter();
 			LOGGER.warning("No se ha indicado codigo de operacion"); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha indicado codigo de operacion"); //$NON-NLS-1$
+			final String jsonError = getJsonError("No se ha indicado codigo de operacion", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+	        response.getWriter().write(jsonError);
+	        rd.include(request, response);
 			return;
 		}
 
@@ -85,14 +93,22 @@ public class LogAdminService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString)); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Codigo de operacion no soportado"); //$NON-NLS-1$
+
+			final String jsonError = getJsonError(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString), HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+	        response.getWriter().write(jsonError);
+	        rd.include(request, response);
+
 			return;
 		}
 
 
 		if(!op.equals(ServiceOperations.ECHO) && this.logclient == null) {
 			LOGGER.warning("No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
+
+			final String jsonError = getJsonError("No se ha indicado conexion con el servidor de log en sesion", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+	        response.getWriter().write(jsonError);
+	        rd.include(request, response);
+			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
 			return;
 		}
 
@@ -127,6 +143,9 @@ public class LogAdminService extends HttpServlet {
 			break;
 		case CLOSE_FILE:
 			LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
+			result = ""; //$NON-NLS-1$
+			this.logclient.closeFile();
+			//TODO Pte Implementar.
 			//fileClosed = closeFile(req);
 			break;
 		case TAIL:
@@ -186,19 +205,46 @@ public class LogAdminService extends HttpServlet {
 			break;
 		case DOWNLOAD:
 			LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
-			//result = download(req);
+			result = ""; //$NON-NLS-1$
+
+			final byte datDownload[] = this.logclient.download(this.getLogFileName());
+			if(datDownload != null && datDownload.length > 0 ) {
+
+				final String mimeType = "application/zip"; //$NON-NLS-1$
+				final int ipos = this.getLogFileName().lastIndexOf("."); //$NON-NLS-1$
+				final String zipfileName = this.getLogFileName().replace(this.getLogFileName().substring(ipos), ".zip"); //$NON-NLS-1$
+		        // Modificamos el contenido de la  respuesta
+		        response.setContentType(mimeType);
+		        response.setContentLength(datDownload.length);
+
+		        //Forzamos la descarga (valores de header)
+		        final String headerKey = "Content-Disposition"; //$NON-NLS-1$
+		        final String headerValue = String.format("attachment; filename=\"%s\"", zipfileName); //$NON-NLS-1$
+		        response.setHeader(headerKey, headerValue);
+
+		        // Obtenemos los datos de la respuesta
+		        final OutputStream outStream = response.getOutputStream();
+		        outStream.write(datDownload);
+		        outStream.flush();
+		        outStream.close();
+
+
+//				final FileOutputStream fos = new FileOutputStream("C:/temp/salida.zip");  //$NON-NLS-1$
+//				fos.write(datDownload);
+//				fos.flush();
+//				fos.close();
+			}
+
 			break;
 		default:
 			LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
+
+			final String jsonError = getJsonError("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+	        response.getWriter().write(jsonError);
+	        rd.include(request, response);
+			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
 			return;
 		}
-//		if(dis != null) {
-//			dis.forward(request, response);
-//		}
-
-//		response.getWriter().write(result);
-
 
 
 	}
@@ -240,7 +286,24 @@ public class LogAdminService extends HttpServlet {
 
 	}
 
-
+	/**
+	 * Devuelve un String con formato JSON
+	 * @param msgError
+	 * @return
+	 */
+	private final static String getJsonError(final String msgError, final int errorCode) {
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+		final StringWriter error = new StringWriter();
+		data.add(Json.createObjectBuilder()
+				.add("Code",errorCode) //$NON-NLS-1$
+				.add("Message", msgError)); //$NON-NLS-1$
+		jsonObj.add("Error", data); //$NON-NLS-1$
+		final JsonWriter jw = Json.createWriter(error);
+	    jw.writeObject(jsonObj.build());
+	    jw.close();
+        return error.toString();
+	}
 
 	private static ServiceOperations checkOperation(final String opString)
 			throws NumberFormatException, UnsupportedOperationException {
@@ -257,38 +320,40 @@ public class LogAdminService extends HttpServlet {
 	 */
 	private final void getParameters(final HttpServletRequest request, final HttpSession session) {
 
-		if(request.getParameter(ServiceParams.PARAM_URL) != null && !"".equals(request.getParameter(ServiceParams.PARAM_URL))) { //$NON-NLS-1$
-			this.url = request.getParameter(ServiceParams.PARAM_URL);
-		}
-		if(request.getParameter(ServiceParams.PARAM_NAMESRV) != null && !"".equals(request.getParameter(ServiceParams.PARAM_NAMESRV))) { //$NON-NLS-1$
-			this.nameSrv = request.getParameter(ServiceParams.PARAM_NAMESRV);
-		}
-		if(request.getParameter(ServiceParams.PARAM_FILENAME) != null && !"".equals(request.getParameter(ServiceParams.PARAM_FILENAME))) { //$NON-NLS-1$
-			this.logFileName = request.getParameter(ServiceParams.PARAM_FILENAME);
-		}
+			if(request.getParameter(ServiceParams.PARAM_URL) != null && !"".equals(request.getParameter(ServiceParams.PARAM_URL))) { //$NON-NLS-1$
+				this.url = request.getParameter(ServiceParams.PARAM_URL);
+			}
+			if(request.getParameter(ServiceParams.PARAM_NAMESRV) != null && !"".equals(request.getParameter(ServiceParams.PARAM_NAMESRV))) { //$NON-NLS-1$
+				this.nameSrv = request.getParameter(ServiceParams.PARAM_NAMESRV);
+			}
+			if(request.getParameter(ServiceParams.PARAM_FILENAME) != null && !"".equals(request.getParameter(ServiceParams.PARAM_FILENAME))) { //$NON-NLS-1$
+				this.logFileName = request.getParameter(ServiceParams.PARAM_FILENAME);
+			}
 
-		if(session.getAttribute("LOG_CLIENT")!=null) {
-			this.logclient = (LogConsumerClient) session.getAttribute("LOG_CLIENT"); //$NON-NLS-1$
-		}
-		if(request.getParameter(ServiceParams.PARAM_NLINES) != null && !"".equals(request.getParameter(ServiceParams.PARAM_NLINES))) { //$NON-NLS-1$
-			this.numlines = Integer.parseInt(request.getParameter(ServiceParams.PARAM_NLINES));
-		}
+			if(session.getAttribute("LOG_CLIENT")!=null) {
+				this.logclient = (LogConsumerClient) session.getAttribute("LOG_CLIENT"); //$NON-NLS-1$
+			}
+			if(request.getParameter(ServiceParams.PARAM_NLINES) != null && !"".equals(request.getParameter(ServiceParams.PARAM_NLINES))) { //$NON-NLS-1$
+				this.numlines = Integer.parseInt(request.getParameter(ServiceParams.PARAM_NLINES));
+			}
 
-		if(request.getParameter(ServiceParams.PARAM_TXT2SEARCH) != null && !"".equals(request.getParameter(ServiceParams.PARAM_TXT2SEARCH))) { //$NON-NLS-1$
-			this.txt2search = request.getParameter(ServiceParams.PARAM_TXT2SEARCH);
-		}
-		if(request.getParameter(ServiceParams.PARAM_SEARCHDATE) != null && !"".equals(request.getParameter(ServiceParams.PARAM_SEARCHDATE))) { //$NON-NLS-1$
-			this.datetime = request.getParameter(ServiceParams.PARAM_SEARCHDATE);
-		}
-		if(request.getParameter(ServiceParams.START_DATETIME) != null && !"".equals(request.getParameter(ServiceParams.START_DATETIME))) { //$NON-NLS-1$
-			this.setStartDateTime(Long.parseLong(request.getParameter(ServiceParams.START_DATETIME)));
-		}
-		if(request.getParameter(ServiceParams.END_DATETIME) != null && !"".equals(request.getParameter(ServiceParams.END_DATETIME))) { //$NON-NLS-1$
-			this.setEndDateTime(Long.parseLong(request.getParameter(ServiceParams.END_DATETIME)));
-		}
-		if(request.getParameter(ServiceParams.LEVEL) != null && !"".equals(request.getParameter(ServiceParams.LEVEL))) { //$NON-NLS-1$
-			this.setLevel(request.getParameter(ServiceParams.LEVEL));
-		}
+			if(request.getParameter(ServiceParams.PARAM_TXT2SEARCH) != null && !"".equals(request.getParameter(ServiceParams.PARAM_TXT2SEARCH))) { //$NON-NLS-1$
+				this.txt2search = request.getParameter(ServiceParams.PARAM_TXT2SEARCH);
+			}
+			if(request.getParameter(ServiceParams.PARAM_SEARCHDATE) != null && !"".equals(request.getParameter(ServiceParams.PARAM_SEARCHDATE))) { //$NON-NLS-1$
+				this.datetime = request.getParameter(ServiceParams.PARAM_SEARCHDATE);
+			}
+			if(request.getParameter(ServiceParams.START_DATETIME) != null && !"".equals(request.getParameter(ServiceParams.START_DATETIME))) { //$NON-NLS-1$
+				this.setStartDateTime(Long.parseLong(request.getParameter(ServiceParams.START_DATETIME)));
+			}
+			if(request.getParameter(ServiceParams.END_DATETIME) != null && !"".equals(request.getParameter(ServiceParams.END_DATETIME))) { //$NON-NLS-1$
+				this.setEndDateTime(Long.parseLong(request.getParameter(ServiceParams.END_DATETIME)));
+			}
+			if(request.getParameter(ServiceParams.LEVEL) != null && !"".equals(request.getParameter(ServiceParams.LEVEL))) { //$NON-NLS-1$
+				this.setLevel(request.getParameter(ServiceParams.LEVEL));
+			}
+
+
 	}
 
 

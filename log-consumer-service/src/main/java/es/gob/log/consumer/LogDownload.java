@@ -139,16 +139,16 @@ public class LogDownload {
 
 	public static void main(final String[] args) throws Exception {
 
-		final File dataFile = new File("C:/Users/carlos.gamuci/Desktop/Datos/test.pdf");
+		final File dataFile = new File("C:/Users/carlos.gamuci/Desktop/Datos/test.pdf"); //$NON-NLS-1$
 		final SeekableByteChannel channel = FileChannel.open(dataFile.toPath(), StandardOpenOption.READ);
 
 		final LogDownload donwloader = new LogDownload(dataFile.getName(), channel);
 
-		try (FileOutputStream fos = new FileOutputStream("C:/Users/carlos.gamuci/Desktop/salida.zip")) {
+		try (FileOutputStream fos = new FileOutputStream("C:/Users/carlos.gamuci/Desktop/salida.zip")) { //$NON-NLS-1$
 			while (donwloader.hasMore()) {
-				System.out.println("Descargamos fragmento");
+				System.out.println("Descargamos fragmento"); //$NON-NLS-1$
 				final byte[] fragment = donwloader.download();
-				System.out.println("Bytes: " + fragment.length);
+				System.out.println("Bytes: " + fragment.length); //$NON-NLS-1$
 				fos.write(fragment);
 			}
 		}

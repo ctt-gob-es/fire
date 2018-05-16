@@ -3,20 +3,7 @@
  */
  $(document).ready(function(){
 	 
-		 
-	 var url = "../LogAdminService?op=6&nlines=20&fname="+$("#fileName").text();
-	//Obtine las ultimas lineas por defecto al cargar la pagina
-   $.get(url, function(data){
-   	$("#logResult").html("");
-       var JSONData = JSON.parse(data);     
-     if(JSONData.hasOwnProperty('Error')){
-    	   printErrorResult(JSONData);  
-       } 
-     else{
-    	 printResult(JSONData);   
-     }
-  	   
-   }); 
+
 	 
    $( function() {
      $( "#startDate" ).datepicker({
@@ -32,6 +19,7 @@
    } );
 
    
+  
    
   });//fin de document ready
   
@@ -45,33 +33,48 @@
  function printErrorResult(JSONData){
 	var html = "";
 	$("#error-txt-log").html(html);
+	$("#ok-txt-log").html(html); 
+	 $("#ok-txt-log").hide();
 	html = JSONData.Error[0].Message;
 	$("#error-txt-log").append(html);
 	$("#error-txt-log").css('display:inline-block');
 	$("#error-txt-log").show();
 	 
  }
+ 
+ function printOkResult(JSONData){
+		var html = "";
+		$("#error-txt-log").html(html);
+		$("#error-txt-log").hide();
+		$("#ok-txt-log").html(html);
+		html = JSONData.Ok[0].Message;
+		$("#ok-txt-log").append(html);
+		$("#ok-txt-log").css('display:inline-block');
+		$("#ok-txt-log").show();
+		 
+	 }
  /**
   * 
   * @param JSONData
   * @returns
   */
  function printResult(JSONData){
-	 var html = "";
+	 var html = $("#logResult").val();
 	
 	 $("#error-txt-log").hide();
-	 $("#logResult").html("");
+	 $("#ok-txt-log").hide();
+//	 $("#logResult").html("");
 	 if(JSONData.hasOwnProperty('Tail')){
-		 html = JSONData.Tail[0].Result; 
+		 html += JSONData.Tail[0].Result; 
 	 }
 	 else if(JSONData.hasOwnProperty('More')){
-		 html = JSONData.More[0].Result;
+		 html += JSONData.More[0].Result;
 	 }
 	 else if(JSONData.hasOwnProperty('Search')){
-		 html = JSONData.Search[0].Result;
+		 html += JSONData.Search[0].Result;
 	 }
 	 else if(JSONData.hasOwnProperty('Filtered')){
-		 html = JSONData.Filtered[0].Result;
+		 html += JSONData.Filtered[0].Result;
 	 }
 	 $("#logResult").append(html);
   }
@@ -112,7 +115,8 @@
 		 $.post(url, function(data){		
 			 var JSONData = JSON.parse(data);
 			  if(JSONData.hasOwnProperty('More')){
-				  printResult(JSONData);  
+				  printResult(JSONData);
+				
 			  }
 			   else {			   
 				   printErrorResult(JSONData);  
@@ -252,7 +256,7 @@
 			break;		
 		case "level_select":
 			if($("#level_select").val() == ""){								
-				$('label[for=search_txt]').css({color:'red'});
+				$('label[for=level_select]').css({color:'red'});
 				$('#level_select').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir un nivel de log para filtrar.";
 				ok = false;			
@@ -265,6 +269,24 @@
 		alert(msg);
 	}	
 	 
-	 return ok;
-	  	 
+	 return ok;  	 
+ }
+ 
+ /**
+  * 
+  * @returns
+  */
+ function download(){
+	 var url = "../LogAdminService?op=10&fname=" + file;
+	 location.href = url;
+	 
+//	 $.post(url,function(data){	
+//		 if(data != null && typeof(data) != "undefined"){
+//			 var JSONData = JSON.parse(data);
+//			   if(JSONData.hasOwnProperty('Error')){
+//				   printErrorResult(JSONData);  
+//			   }			    
+//		 }
+//		    	             		   
+//	   });
  }

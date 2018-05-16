@@ -1,6 +1,7 @@
 package es.gob.log.consumer.client;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
@@ -273,9 +274,21 @@ public class LogConsumerClient {
 		return null;
 	}
 
-
-	public byte[] closeFile() {
-		throw new UnsupportedOperationException("Metodo no implementado");
+	/**
+	 *
+	 * @return
+	 * @throws IOException
+	 */
+	public boolean closeFile() throws IOException {
+		boolean result = false;
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+				.append("?op=").append(ServiceOperations.CLOSE_FILE.ordinal()); //$NON-NLS-1$
+		HttpResponse response;
+		response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+		if(response.statusCode == 200) {
+			result = true ;
+		}
+		return result;
 	}
 
 	/**
@@ -498,8 +511,28 @@ public class LogConsumerClient {
 		return null;
 	}
 
-	public byte[] download() {
-		throw new UnsupportedOperationException("Metodo no implementado");
+	public byte[] download(final String fileName) {
+		final ByteArrayOutputStream result = new ByteArrayOutputStream();
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+				.append("?op=").append(ServiceOperations.DOWNLOAD.ordinal()) //$NON-NLS-1$
+				.append("&".concat(ServiceParams.LOG_FILE_NAME).concat("=")).append(fileName);//$NON-NLS-1$ //$NON-NLS-2$
+		HttpResponse response;
+		//(FileOutputStream fos = new FileOutputStream("C:/Users/adolfo.navarro/Desktop/salida.zip"))
+		try  {
+			do {
+				response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+				final byte[] fragment = response.getContent();
+				result.write(fragment);
+				//fos.write(fragment);
+			}while(response.statusCode == 206);
+		} catch (final IOException e) {
+
+		}
+
+		if(result.size() > 0) {
+			return result.toByteArray();
+		}
+		return null;
 	}
 
 	public final Charset getCharsetContent() {
