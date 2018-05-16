@@ -83,7 +83,7 @@ public class ConfigManager {
 			if (is != null) {
 				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
 			}
-			throw new ClientConfigFilesNotFoundException("No se ha encontrado el fichero de propiedades" + PROPERTY_FILE, PROPERTY_FILE, e); //$NON-NLS-1$
+			throw new ClientConfigFilesNotFoundException("No se ha encontrado el fichero de propiedades " + PROPERTY_FILE, PROPERTY_FILE, e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No se pudo cargar el fichero de configuracion " + PROPERTY_FILE, e); //$NON-NLS-1$

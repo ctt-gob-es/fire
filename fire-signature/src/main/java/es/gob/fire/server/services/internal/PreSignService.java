@@ -137,7 +137,7 @@ public final class PreSignService extends HttpServlet {
 	        	}
 	        }
 	        catch (final Exception e) {
-	        	LOGGER.severe("Ocurrio un error grave al validar el identificador de la aplicaci&oacute;n :" +e); //$NON-NLS-1$
+	        	LOGGER.severe("Ocurrio un error grave al validar el identificador de la aplicacion:" + e); //$NON-NLS-1$
 	        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
 	        	response.sendRedirect(redirectErrorUrl);
 	        	return;

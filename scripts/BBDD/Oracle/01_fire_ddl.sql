@@ -1,5 +1,5 @@
 -- ********************************************************
--- **************** Creación de Tablas ********************
+-- **************** Creacion de Tablas ********************
 -- ********************************************************
 
 CREATE TABLE "TB_APLICACIONES" (
@@ -29,10 +29,10 @@ CREATE TABLE "TB_CERTIFICADOS" (
     constraint  "TB_CERTIFICADOS_PK" primary key ("ID_CERTIFICADO")
 );
 
-CREATE sequence "TB_CERTIFICADOS_SEQ"; 
+CREATE SEQUENCE "TB_CERTIFICADOS_SEQ"; 
 
 
-CREATE trigger "BI_TB_CERTIFICADOS"  
+CREATE OR REPLACE TRIGGER "BI_TB_CERTIFICADOS"  
   before insert on "TB_CERTIFICADOS"              
   for each row 
 begin  
@@ -40,7 +40,8 @@ begin
     select "TB_CERTIFICADOS_SEQ".nextval into :NEW."ID_CERTIFICADO" from dual;
   end if;
 end;
- 
+/
+
 ALTER TABLE  "TB_CERTIFICADOS" modify
 ("FEC_ALTA" TIMESTAMP default SYSDATE);
 
@@ -57,9 +58,9 @@ CREATE TABLE  "TB_USUARIOS"
 	"USU_DEFECTO" NUMBER(1,0) NOT NULL ENABLE, 
 	 CONSTRAINT "TB_USUARIOS_PK" PRIMARY KEY ("ID_USUARIO") ENABLE, 
 	 CONSTRAINT "TB_USUARIOS_UK1" UNIQUE ("NOMBRE_USUARIO") ENABLE
-   );
+   ) ;
 
-CREATE sequence "TB_USUARIOS_SEQ"; 
+CREATE SEQUENCE "TB_USUARIOS_SEQ"; 
 
 CREATE OR REPLACE TRIGGER  "BI_TB_USUARIOS" 
   before insert on "TB_USUARIOS"               
@@ -69,7 +70,7 @@ begin
     select "TB_USUARIOS_SEQ".nextval into :NEW."ID_USUARIO" from dual; 
   end if; 
 end; 
-
+/
 
 ALTER TRIGGER  "BI_TB_USUARIOS" ENABLE;
 
