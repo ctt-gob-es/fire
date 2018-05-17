@@ -63,7 +63,7 @@
 	
 	 $("#error-txt-log").hide();
 	 $("#ok-txt-log").hide();
-//	 $("#logResult").html("");
+
 	 if(JSONData.hasOwnProperty('Tail')){
 		 html += JSONData.Tail[0].Result; 
 	 }
@@ -279,14 +279,88 @@
  function download(){
 	 var url = "../LogAdminService?op=10&fname=" + file;
 	 location.href = url;
-	 
+ }
+ 
+ /**
+  * 
+  * @returns
+  */
+ function goReturn(){
+	 location.href = 'LogsFileList.jsp?name-srv=' + server;
+//	 var url = "../LogAdminService?op=5";
 //	 $.post(url,function(data){	
-//		 if(data != null && typeof(data) != "undefined"){
-//			 var JSONData = JSON.parse(data);
-//			   if(JSONData.hasOwnProperty('Error')){
-//				   printErrorResult(JSONData);  
-//			   }			    
-//		 }
-//		    	             		   
-//	   });
+//	 if(data != null && typeof(data) != "undefined"){
+//		 var JSONData = JSON.parse(data);
+//		   if(JSONData.hasOwnProperty('Error')){
+//			   printErrorResult(JSONData);  
+//		   }
+//		   else{
+//			   location.href = 'LogsFileList.jsp?name-srv=' + server;
+//		   }
+//	 }
+//	    	             		   
+//   });
+ }
+ 
+
+
+ 
+ /**
+  * 
+  * @returns
+  */
+ function reset(){
+	 var url = "../LogAdminService?op=5";
+	 $.post(url,function(data){	
+	 if(data != null && typeof(data) != "undefined"){
+		 var JSONData = JSON.parse(data);
+		   if(JSONData.hasOwnProperty('Error')){
+			   printErrorResult(JSONData);  
+		   }
+		   else{
+			   Clean();
+			   $("#logResult").html("");
+			   location.href = "../LogAdminService?op=4&fname=" + file + "&name-srv=" + server;				   
+		   }
+	 }   	             		   
+   });
+ }
+ 
+ 
+ /**
+  * Funcion que borra el contenido de los filtros
+  * @returns
+  */
+ function Clean(){
+
+	 $("input").each(function() {
+	    var type = this.type;	   
+	    if (type == "text"){
+	    	this.value = "";	   	
+	    }
+	    else if (type == 'checkbox' || type == 'radio'){
+	    	this.checked = false;
+	    }   
+	  });
+	 
+	 $("textarea").each(function() {		   
+		 this.value = "";	   			    		  	    
+		  });
+	 
+	 $("select").each(function() {		   
+		 this.selectedIndex = 0;   			    		  	    
+	 }); 
+ }
+ 
+ function closeFile(){
+	 var url = "../LogAdminService?op=5";
+	 $.post(url,function(data){	
+		 if(data != null && typeof(data) != "undefined"){
+			 var JSONData = JSON.parse(data);
+			   if(JSONData.hasOwnProperty('Error')){
+				   printErrorResult(JSONData);  
+			   }
+		 }
+		    	             		   
+	   });
  }

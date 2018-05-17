@@ -144,9 +144,16 @@ public class LogAdminService extends HttpServlet {
 		case CLOSE_FILE:
 			LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
-			this.logclient.closeFile();
-			//TODO Pte Implementar.
-			//fileClosed = closeFile(req);
+			final byte datCloseFiles[] = this.logclient.closeFile();
+			if(datCloseFiles != null && datCloseFiles.length > 0) {
+				final String res = new String(datCloseFiles,this.logclient.getCharsetContent());
+				result += res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
+			}
+			if(this.logclient != null && this.logclient.getCharsetContent()!= null){
+				response.setCharacterEncoding(this.logclient.getCharsetContent().toString());
+			}
+			response.getWriter().write(result);
+
 			break;
 		case TAIL:
 			LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$

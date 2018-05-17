@@ -95,7 +95,8 @@ public class LogService extends HttpServlet {
 					LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
 					result = getLogFiles();
 					if(result == null) {
-						resp.sendError(HttpServletResponse.SC_NO_CONTENT, "No se han podido encontrar ficheros .log"); //$NON-NLS-1$
+						resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+						//resp.sendError(HttpServletResponse.SC_NO_CONTENT, "No se han podido encontrar ficheros .log"); //$NON-NLS-1$
 						return;
 					}
 					break;
@@ -103,13 +104,18 @@ public class LogService extends HttpServlet {
 					LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
 					result = openFile(req);
 					if(result==null || result.length <= 0) {
-						resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No se han podido abrir el fichero seleccionado .log"); //$NON-NLS-1$
+						resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+						//resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No se han podido abrir el fichero seleccionado .log"); //$NON-NLS-1$
 						return;
 					}
 					break;
 				case CLOSE_FILE:
 					LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
+					resp.setStatus(HttpServletResponse.SC_OK);
 					fileClosed = closeFile(req);
+					if(!fileClosed) {
+						resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					}
 					break;
 				case TAIL:
 					LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
@@ -133,13 +139,15 @@ public class LogService extends HttpServlet {
 					break;
 				default:
 					LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-					resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
+					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
+					resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 					return;
 				}
 			}
 			else {
 				LOGGER.warning("Operacion no soportada sin login previo"); //$NON-NLS-1$
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
+				//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
+				resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
 		}
@@ -254,7 +262,7 @@ public class LogService extends HttpServlet {
 				session.removeAttribute("Reader"); //$NON-NLS-1$
 			}
 			if((AsynchronousFileChannel)session.getAttribute("Channel") != null) { //$NON-NLS-1$
-				((AsynchronousFileChannel)session.getAttribute("")).close();  //$NON-NLS-1$
+				((AsynchronousFileChannel)session.getAttribute("Channel")).close();  //$NON-NLS-1$
 				session.removeAttribute("Channel"); //$NON-NLS-1$
 			}
 			if((LogInfo)session.getAttribute("LogInfo") != null) { //$NON-NLS-1$

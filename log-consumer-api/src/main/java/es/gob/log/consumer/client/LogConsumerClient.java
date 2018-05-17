@@ -279,16 +279,38 @@ public class LogConsumerClient {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean closeFile() throws IOException {
-		boolean result = false;
+	public byte[] closeFile() throws IOException {
+		final StringWriter result = new StringWriter();
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.CLOSE_FILE.ordinal()); //$NON-NLS-1$
 		HttpResponse response;
 		response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
-		if(response.statusCode == 200) {
-			result = true ;
+		if( response.statusCode == 200) {
+			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+			final JsonArrayBuilder data = Json.createArrayBuilder();
+			data.add(Json.createObjectBuilder()
+					.add("Code",response.statusCode) //$NON-NLS-1$
+					.add("Message", "Fichero cerrado correctamente")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("OK", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(result);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
 		}
-		return result;
+		else {
+			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+			final JsonArrayBuilder data = Json.createArrayBuilder();
+			data.add(Json.createObjectBuilder()
+					.add("Code",response.statusCode) //$NON-NLS-1$
+					.add("Message", "Error al cerrar fichero log")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(result);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+		}
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes(this.getCharsetContent());
+		}
+		return null;
 	}
 
 	/**

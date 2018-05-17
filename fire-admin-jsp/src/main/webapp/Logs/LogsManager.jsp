@@ -93,6 +93,7 @@ boolean time =  false;
 	<link rel="stylesheet" href="../resources/css/jquery.ui.timepicker.css">
 	<script type="text/javascript">
 		var file = '<%=fileName%>';
+		var server = '<%=nameSrv%>';
 		
 	</script>	
 			
@@ -104,7 +105,7 @@ boolean time =  false;
 	<script src="../resources/js/logs_manager.js" type="text/javascript"></script>
 	
 </head>
-<body>
+<body onunload = "closeFile();">
 	<!-- Barra de navegacion -->
 	<jsp:include page="../resources/jsp/NavigationBar.jsp" />
 	
@@ -213,11 +214,19 @@ boolean time =  false;
 					      	</div>
 				      		<br><br>
 				      			<div style="display: inline-block;width:49%;">
-					      		<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="location.href='LogsFileList.jsp?name-srv=<%=nameSrv%>';" />
+					      		<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="goReturn();" />
 					      	</div>
 					      		<div style="display: inline-block;width:49%;">
 					      		<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />
-					      	</div>			      					      		
+					      		
+					      	</div>	
+					      		<br><br>
+				      			<div style="display: inline-block;width:49%;">
+					      		<input id="reset-button" class="btn-log" name="reset-button" type="button" value="Reiniciar" title="Reinicia todos los filtros y resultados aplicados al fichero log" onclick="reset();" />
+					      	</div>
+					      		<div style="display: inline-block;width:49%;">
+					      		<input id="clear-button" class="btn-log" name="clear-button" type="button" value="Borrar" title="Borra el contenido de los campos de filtrado"  onclick="Clean()" />
+					      	</div>		      					      		
 				      	</div><!-- all_buttons -->				    
 			</div>	<!-- operations -->	
 			
