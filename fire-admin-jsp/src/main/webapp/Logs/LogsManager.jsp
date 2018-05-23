@@ -88,9 +88,9 @@ boolean time =  false;
 	<title>Administraci&oacute;n FIRe</title>
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
-	<link rel="stylesheet" href="../resources/css/jquery-ui.min.css">
-	<link rel="stylesheet" href="../resources/css/jquery-ui.theme.min.css">
-	<link rel="stylesheet" href="../resources/css/jquery.ui.timepicker.css">
+	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.min.css">
+	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="../resources/jquery-ui/jquery.ui.timepicker.css">
 	<script type="text/javascript">
 		var file = '<%=fileName%>';
 		var server = '<%=nameSrv%>';
@@ -98,29 +98,36 @@ boolean time =  false;
 	</script>	
 			
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="../resources/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.ui.timepicker-es.js" type="text/javascript"></script>
-	<script src="../resources/js/jquery.ui.timepicker.js" type="text/javascript"></script>
+	<script src="../resources/jquery-ui/jquery.ui.timepicker.js" type="text/javascript"></script>
 	<script src="../resources/js/logs_manager.js" type="text/javascript"></script>
 	
 </head>
-<body onunload = "closeFile();">
+<body> <!--  onunload = "closeFile();" -->
 	<!-- Barra de navegacion -->
 	<jsp:include page="../resources/jsp/NavigationBar.jsp" />
 	
 	<!-- contenido -->
 	<div id="containerLogsManager">
 		<div id="subtitle" style="padding: 10px;width:100%;">
-			<div id="selectedFile" style="display:inline-block;width:35%;">
+		<div style="display: inline-block;width:8%;">
+				<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />					      		
+			</div>
+			<div id="selectedFile" style="display:inline-block;">
 			 	 Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.
 			</div>
-			<div id="error-txt-log" style="display:none;width:60%;"></div>
-			<div id="ok-txt-log" style="display:none;width:60%;"></div>			
+									      						   
+			<div id="error-txt-log" style="display:none;width:50%;"></div>
+			<div id="ok-txt-log" style="display:none;width:50%;"></div>			
 		</div>
 	
 		<div id="main-content" style="margin: auto; width: 100%;" >
-			<div id="contentlogResult" style="display:inline-block;width: 80%; height:450px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;">		
+			<div id="contentlogResult" style="display:inline-block;width: 80%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;">
+				<div id="advice" style="display:block; text-align: center;">					
+					<p>Para ver los resultados en esta p&aacute;gina debe usar las funciones de b&uacute;squeda y filtrado.</p>
+				</div>		
 				<pre id="logResult"></pre>
 			</div>
 			
@@ -128,57 +135,72 @@ boolean time =  false;
 				   
 				    	<div id="lines">
 				    		<label for="Nlines">* L&iacute;neas</label>
-				    		<select id="Nlines" name ="Nlines">
-				    			<option >0</option> 
-				    			<%
-				    				for(int i = 1 ; i <= 10; i++){
-				    					if(i<=10){
-				    				%>
-				    					<option ><%=i*10%></option> 
+				    		<select id="Nlines" name ="Nlines">				    		
+				    			<%for(int i = 2 ; i <= 10; i++){
+				    				if(i <= 10){%>
+				    					<option ><%=i * 10%></option> 
 				    				<%}
-				    				}
-				    				for(int i = 2 ; i <= 10; i++){
-			    						if(i<=10){
-			    					%>
-			    						<option ><%=i*100%></option> 
-			    					<%}
-			    					}%>
-				    			
+				    			}%>
+			    				<option >200</option> 			    								    			
 				    		</select>				      		
 				      	</div>	<!-- lines -->		      	
-				     	<br>
-				      	<div id="searchText" style="display:block; width:100%;" >
-				      		<label for="search_txt">* Texto a buscar</label>
-				      		<textarea id="search_txt"  name="search_txt" cols="20"></textarea>
-				      	</div><!-- searchText -->
-				      	<br>
+				     	
+				     	<fieldset><legend> B&uacute;squeda </legend>
+					      	<div id="searchText" style="display:block; width:100%;" >
+					      		<label for="search_txt">* Texto a buscar</label>
+					      		<textarea id="search_txt"  class="log_search" name="search_txt" cols="20"></textarea>
+					      		<div>
+						      		<div style="display: inline-block;width:49%;">
+						      		<% if(date){%>
+						      			<label for="search_StartDate">Fecha inicio</label>
+						      			<input type="text" id="search_StartDate" class="log_search" name="search_StartDate" maxlength="10" size="10">
+						      		<%}%>
+						      		</div>
+						      		<div style="display: inline-block;width:49%;">
+						      		<% if(time){%>
+						      			<label for="search_StartTime">Hora inicio</label>
+						      			<input type="text" id="search_StartTime" class="log_search" name="search_StartTime"  maxlength="8" size="8">	
+						      		<%}%>
+						      		</div>
+					      		</div>
+					      		<br>
+					      		<div>					      							      		
+					      			<div style="display: inline-block;width:49%;">
+					      				<input id="search-button" class="btn-log" name="search-button" type="button" value="Buscar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del texto buscado" onclick="searchText('logResult',$('#Nlines').val(),$('#search_txt').val(),$('#startDate').val() + ' '+  $('#startTime').val());" />
+					      			</div>
+					      			<div style="display: inline-block;width:49%;"><!-- <span class="ui-icon ui-icon-trash"></span> -->
+					      				<button id="clear-button_search"  name="clear-button_search"  title="Borra el contenido de los campos de b&uacute;squeda"  onclick="Clean('log_search')" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>
+					      			</div>	
+					      		</div>
+					      	</div><!-- searchText -->
+				      	</fieldset>
+				      	<fieldset><legend> Filtrado </legend>
 				      	<div id="dateTimes" style="display:block; width:100%;">
 				      		<div>
 					      		<div style="display: inline-block;width:49%;">
 					      		<% if(date){%>
 					      			<label for="startDate">Fecha inicio</label>
-					      			<input type="text" id="startDate" name="startDate" maxlength="10" size="10">
+					      			<input type="text" id="startDate" name="startDate" class="log_filter" maxlength="10" size="10">
 					      		<%}%>
 					      		</div>
 					      		<div style="display: inline-block;width:49%;">
 					      		<% if(time){%>
 					      			<label for="startTime">Hora inicio</label>
-					      			<input type="text" id="startTime" name="startTime"  maxlength="8" size="8">	
+					      			<input type="text" id="startTime" name="startTime" class="log_filter"  maxlength="8" size="8">	
 					      		<%}%>
 					      		</div>
-				      		</div>
-				      		<br>
+				      		</div>				      	
 				      		<div>
 					      		<div style="display: inline-block;width:49%;">
 					    		<% if(date){%>
 					    			<label for="endDate">Fecha fin</label>
-					      			<input type="text" id="endDate" name="endDate" maxlength="10" size="10">
+					      			<input type="text" id="endDate" name="endDate" class="log_filter" maxlength="10" size="10">
 					      		<%}%>
 					    		</div>
 					    		<div style="display: inline-block;width:49%;">
 					    		<% if(time){%>
 					    			<label for="endTime">Hora fin</label>
-					      			<input type="text" id="endTime" name="endTime"  maxlength="8" size="8">	
+					      			<input type="text" id="endTime" name="endTime" class="log_filter" maxlength="8" size="8">	
 					      		<%}%>	
 					    		</div>
 				    		</div>			      				      					      					      		      					      					      				      				      		
@@ -195,41 +217,34 @@ boolean time =  false;
 				    		<%} %>
 				    				      		
 				      	</div><!-- filtered -->
-				      	<br><br>
-				      	<div  id="all_buttons" style="display:block; width:100%;">
-					      	<div style="display: inline-block;width:49%;">
-					      		<input id="tail-button" class="btn-log" name="tail-button" type="button" value="&uacute;ltimas l&iacute;neas" title="Obtiene las &uacute;ltimas l&iacute;neas del fichero log" onclick="getTail($('#Nlines').val());" />
-					      	</div>
-					      	<div style="display: inline-block;width:49%;">			      		
-					      		<input id="more-button" class="btn-log" name="more-button" type="button" value="+ M&aacute;s" title="Obtiene las siguentes l&iacute;neas del fichero log" onclick="getMore($('#Nlines').val());" />
-					      	</div>
-				      		<br><br>
-					      	<div style="display: inline-block;width:49%;">
-					      		<input id="search-button" class="btn-log" name="search-button" type="button" value="Buscar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del texto buscado" onclick="searchText($('#Nlines').val(),$('#search_txt').val(),$('#startDate').val() + ' '+  $('#startTime').val());" />
-					      	</div>
+				      	<br>
+				      					      					      	
 					      	<div style="display: inline-block;width:49%;">
 					      	<%if(date || time || levels != null) {%>
-					      		<input id="filtered-button" class="btn-log" name="filtered-button" type="button" value="Filtrar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del filtro indicado" onclick="getFiltered($('#Nlines').val(), $('#startDate').val() + ' '+  $('#startTime').val(), $('#endDate').val() + ' '+  $('#endTime').val(), $('#level_select').val() );" />
+					      		<input id="filtered-button" class="btn-log" name="filtered-button" type="button" value="Filtrar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del filtro indicado" onclick="getFiltered('logResult',$('#Nlines').val(), $('#startDate').val() + ' '+  $('#startTime').val(), $('#endDate').val() + ' '+  $('#endTime').val(), $('#level_select').val() );" />
 					      	<%}%>	
 					      	</div>
-				      		<br><br>
-				      			<div style="display: inline-block;width:49%;">
-					      		<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="goReturn();" />
-					      	</div>
-					      		<div style="display: inline-block;width:49%;">
-					      		<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />
-					      		
+					      	<div style="display: inline-block;width:49%;">
+					      		<button id="clear-button_filter"  name="clear-button_filter"  title="Borra el contenido de los campos de filtrado"  onclick="Clean('log_filter')" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>					      		
 					      	</div>	
-					      		<br><br>
-				      			<div style="display: inline-block;width:49%;">
-					      		<input id="reset-button" class="btn-log" name="reset-button" type="button" value="Reiniciar" title="Reinicia todos los filtros y resultados aplicados al fichero log" onclick="reset();" />
-					      	</div>
-					      		<div style="display: inline-block;width:49%;">
-					      		<input id="clear-button" class="btn-log" name="clear-button" type="button" value="Borrar" title="Borra el contenido de los campos de filtrado"  onclick="Clean()" />
-					      	</div>		      					      		
-				      	</div><!-- all_buttons -->				    
+				      	</fieldset>				     
+				      			    
 			</div>	<!-- operations -->	
-			
+			<div id="actions" style="display:block;width:80%;padding-top: 0.5em;">
+				<div style="display: inline-block;width:10%;">
+					<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="goReturn();" />
+				</div>
+				<div style="display: inline-block;width:10%;">
+					<input id="reset-button" class="btn-log" name="reset-button" type="button" value="Recargar" title="Recarga el fichero log, limpiando filtros y resultados anteriores" onclick="reset('logResult');" />
+				</div>
+				<div style="display: inline-block;width:58%;"></div>
+				<div style="display: inline-block;width:10%;">
+					      		<input id="tail-button" class="btn-log" name="tail-button" type="button" value="&uacute;ltimas l&iacute;neas" title="Obtiene las &uacute;ltimas l&iacute;neas del fichero log" onclick="getTail('logResult',$('#Nlines').val());" />
+				</div>
+				<div style="display: inline-block;width:10%;">			      		
+					<input id="more-button" class="btn-log" name="more-button" type="button" value="+ M&aacute;s" title="Obtiene las siguentes l&iacute;neas del fichero log" onclick="getMore('logResult',$('#Nlines').val());" />
+				</div>
+			</div>
 		</div>	 <!-- main-content -->
 		   
    	</div><!-- containerLogsManager -->

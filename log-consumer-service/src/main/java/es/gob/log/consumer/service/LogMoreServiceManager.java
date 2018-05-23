@@ -47,34 +47,26 @@ public class LogMoreServiceManager {
 		}
 		catch (final IOException e) {
 			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e); //$NON-NLS-1$
-			error = new LogErrors();
-			error.setNumError(HttpServletResponse.SC_NOT_ACCEPTABLE);
-			error.setMsgError("No se ha podido leer el fichero");//$NON-NLS-1$
+			error = new LogErrors("No se ha podido leer el fichero",HttpServletResponse.SC_NOT_ACCEPTABLE);//$NON-NLS-1$
 			result = "No se ha podido leer el fichero".getBytes(info.getCharset()); //$NON-NLS-1$
 			return result;
 		}
 		catch (final InvalidPatternException e) {
 			LOGGER.log(Level.SEVERE,"El patrón indicado con la forma de los registros del log, no es válido",e); //$NON-NLS-1$
-			error = new LogErrors();
-			error.setNumError(HttpServletResponse.SC_NOT_ACCEPTABLE);
-			error.setMsgError("El patrón indicado con la forma de los registros del log, no es válido"); //$NON-NLS-1$
-			result = "El patrón indicado con la forma de los registros del log, no es válido".getBytes(info.getCharset()); //$NON-NLS-1$
+			error = new LogErrors("El patrón indicado con la forma de los registros del log, no es válido",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
 			return result;
 		}
 		catch (final NumberFormatException e) {
 			LOGGER.log(Level.SEVERE,"No el parametro nlines no es un numero entero",e); //$NON-NLS-1$
-			error = new LogErrors();
-			error.setNumError(HttpServletResponse.SC_NOT_ACCEPTABLE);
-			error.setMsgError("El patrón indicado con la forma de los registros del log, no es válido"); //$NON-NLS-1$
-			result = "El patrón indicado con la forma de los registros del log, no es válido".getBytes(info.getCharset()); //$NON-NLS-1$
+			error = new LogErrors("No el parametro nlines no es un numero entero",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
 			return result;
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,"Error en servidor.",e); //$NON-NLS-1$
-			error = new LogErrors();
-			error.setNumError(HttpServletResponse.SC_BAD_REQUEST);
-			error.setMsgError("Error en la respuesta del servidor."); //$NON-NLS-1$
-			result = "Error en la respuesta del servidor.".getBytes(info.getCharset()); //$NON-NLS-1$
+			error = new LogErrors("Error en la respuesta del servidor.",HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
 			return result;
 		}
 		return result;

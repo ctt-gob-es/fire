@@ -2,13 +2,16 @@ package es.gob.log.consumer.service;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import es.gob.log.consumer.Criteria;
 import es.gob.log.consumer.InvalidPatternException;
+import es.gob.log.consumer.LogErrors;
 import es.gob.log.consumer.LogFilter;
 import es.gob.log.consumer.LogInfo;
 import es.gob.log.consumer.LogReader;
@@ -16,8 +19,16 @@ import es.gob.log.consumer.LogReader;
 public class LogFilteredServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogFilteredServiceManager.class.getName());
+	private static  LogErrors error ;
+
+
 
 	public final static byte[] process(final HttpServletRequest req) {
+
+		if(getError()!=null && getError().getMsgError() != null && !"".equals(getError().getMsgError())) {
+			setError(null);
+		}
+
 
 		byte[] result = null;
 		final Criteria crit = new Criteria();
@@ -58,20 +69,37 @@ public class LogFilteredServiceManager {
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e); //$NON-NLS-1$
+			error = new LogErrors("No se ha podido leer el fichero",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
+			return result;
 		} catch (final InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE,"Error en la operación de filtrado",e); //$NON-NLS-1$
+			error = new LogErrors("Error en la operación de filtrado",HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
+			return result;
 		} catch (final ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE,"Error en la operación de filtrado",e); //$NON-NLS-1$
+			error = new LogErrors("Error en la operación de filtrado.",HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
+			return result;
 		} catch (final InvalidPatternException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE,"Error en la operación de filtrado, patron incorrecto",e); //$NON-NLS-1$
+			error = new LogErrors("No se ha podido leer el fichero, charaset incorrecto.",HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
+			return result;
 		}
 
 		return result;
 	}
+
+	public final static LogErrors getError() {
+		return LogFilteredServiceManager.error;
+	}
+
+	public final static void setError(final LogErrors error) {
+		LogFilteredServiceManager.error = error;
+	}
+
 
 }

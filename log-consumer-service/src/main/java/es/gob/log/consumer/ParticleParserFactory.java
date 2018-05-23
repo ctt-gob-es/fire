@@ -66,12 +66,15 @@ public class ParticleParserFactory {
 				throws IOException, InvalidRegistryFormatException {
 
 			final CharBuffer line = reader.getCurrentLine();
-			for (final char c : this.text.toCharArray()) {
-				if (c != line.get()) {
-					line.rewind();
-					throw new InvalidRegistryFormatException("Se encontro un texto distinto al esperado: " + line.toString()); //$NON-NLS-1$
+
+				for (final char c : this.text.toCharArray()) {
+					if (c != line.get()) {
+						line.rewind();
+						throw new InvalidRegistryFormatException("Se encontro un texto distinto al esperado: " + line.toString()); //$NON-NLS-1$
+					}
 				}
-			}
+
+
 		}
 
 		@Override
@@ -160,50 +163,56 @@ public class ParticleParserFactory {
 
 			int level = -1;
 			final CharBuffer line = reader.getCurrentLine();
-			if (this.nextLimit != null) {
-				if (this.nextLimit == CR_STRING) {
-					level = getLevel(line.toString());
-				}
-				else {
-					final int idx = line.toString().indexOf(this.nextLimit);
-					if (idx == -1) {
-						throw new InvalidRegistryFormatException("No se ha encontrado el limite del nivel"); //$NON-NLS-1$
-					}
-					final char[] levelChars = new char[idx];
-					line.get(levelChars);
-					level = getLevel(new String(levelChars));
-				}
-			}
 
-			// Si aun no se ha encontrado, buscamos activamente cada nivel aceptado
-			if (level < 0) {
-				// Marcamos la posicion para poder volver
-				line.mark();
-				char[] levelChars;
-				for (int i = 0; i < this.pLevels.length; i++) {
-					// Volvemos a la marca
-					line.reset();
-					levelChars = new char[this.pLevels[i].length()];
-					try {
+
+
+
+
+				if (this.nextLimit != null) {
+					if (this.nextLimit == CR_STRING) {
+						level = getLevel(line.toString());
+					}
+					else {
+						final int idx = line.toString().indexOf(this.nextLimit);
+						if (idx == -1) {
+							throw new InvalidRegistryFormatException("No se ha encontrado el limite del nivel"); //$NON-NLS-1$
+						}
+						final char[] levelChars = new char[idx];
 						line.get(levelChars);
-					}
-					catch (final BufferUnderflowException e) {
-						continue;
-					}
-					if (this.pLevels[i].equals(new String(levelChars))) {
-						level = i;
-						break;
+						level = getLevel(new String(levelChars));
 					}
 				}
-			}
 
-			if (level < 0) {
-				throw new InvalidRegistryFormatException("No se ha encontrado el nivel"); //$NON-NLS-1$
-			}
+				// Si aun no se ha encontrado, buscamos activamente cada nivel aceptado
+				if (level < 0) {
+					// Marcamos la posicion para poder volver
+					line.mark();
+					char[] levelChars;
+					for (int i = 0; i < this.pLevels.length; i++) {
+						// Volvemos a la marca
+						line.reset();
+						levelChars = new char[this.pLevels[i].length()];
+						try {
+							line.get(levelChars);
+						}
+						catch (final BufferUnderflowException e) {
+							continue;
+						}
+						if (this.pLevels[i].equals(new String(levelChars))) {
+							level = i;
+							break;
+						}
+					}
+				}
 
-			if (registry != null) {
-				registry.setLevel(level);
-			}
+				if (level < 0) {
+					throw new InvalidRegistryFormatException("No se ha encontrado el nivel"); //$NON-NLS-1$
+				}
+
+				if (registry != null) {
+					registry.setLevel(level);
+				}
+
 		}
 
 		private int getLevel(final String levelText) throws InvalidRegistryFormatException {
@@ -232,7 +241,9 @@ public class ParticleParserFactory {
 			final CharBuffer line = reader.readLine();
 
 			// Introducimos la nueva linea como parte del registro de log
-			registry.appendLogLine(line.toString());
+			if(line != null) {
+				registry.appendLogLine(line.toString());
+			}
 		}
 
 		@Override

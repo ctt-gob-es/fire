@@ -4,22 +4,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletResponse;
 
 public class LogSearchText {
 
 	private final LogInfo logInfor;
 	private long filePosition;
 	private final LogReader reader;
+	private  LogErrors error = null;
+
 
 	private String lineTextFound =  null;
 
-
+	private static final Logger LOGGER = Logger.getLogger(LogSearchText.class.getName());
 	/**Constructor
 	 * @throws InvalidPatternException */
 	public LogSearchText(final LogInfo logInfo,final LogReader reader) throws InvalidPatternException {
 		this.logInfor = logInfo;
 		this.reader = reader;
 		this.setFilePosition(0L);
+		this.error = null;
 
 	}
 
@@ -29,8 +36,9 @@ public class LogSearchText {
 	 * @param numLines
 	 * @param text
 	 * @return
+	 * @throws IOException
 	 */
-	public final  byte[] searchText(final int numLines, final String text) {
+	public final  byte[] searchText(final int numLines, final String text) throws IOException {
 		return this.searchText(numLines,text,-1);
 	}
 
@@ -42,12 +50,16 @@ public class LogSearchText {
 	 * @param text
 	 * @param date
 	 * @return
+	 * @throws IOException
 	 */
-	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec) {
+	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec) throws IOException {
 
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 
+			if(this.getError()!=null && this.getError().getMsgError()!= null && !"".equals(this.getError().getMsgError())) { //$NON-NLS-1$
+				this.setError(null);
+			}
 			boolean found = false;
 			/*Se obtiene la fecha de b&uacute;squeda pasada en milisegundos si se ha pasado por par&aacute;metro
 			 * y se obtiene la posici&oacute;n del comienzo de la l&iacute;nea en la que se encuentra la fecha indicada*/
@@ -87,15 +99,28 @@ public class LogSearchText {
 			}
 
 			if (!found) {
-//				baos.write( "Texto No encontrado".getBytes()); //$NON-NLS-1$
-				return null;
+				LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar."); //$NON-NLS-1$
+				this.error = new LogErrors("Error al procesar la petici&oacute;n buscar texto.",HttpServletResponse.SC_NOT_FOUND);			 //$NON-NLS-1$
+				baos.write(this.error.getMsgError().getBytes(this.logInfor.getCharset()));
 			}
 			//reader.close();
 		}
-		catch (final IOException | InvalidPatternException | InterruptedException | ExecutionException e) {
-			return null;
-		}
+		catch (final InvalidPatternException e) {// | InterruptedException | ExecutionException e) {
+			LOGGER.log(Level.SEVERE,"Error el patrón indicado con la forma de los registros del log, no es válido"); //$NON-NLS-1$
+			this.error = new LogErrors("El patrón indicado con la forma de los registros del log, no es válido.",HttpServletResponse.SC_PRECONDITION_FAILED); //$NON-NLS-1$
 
+			baos.write(this.error.getMsgError().getBytes(this.logInfor.getCharset()));
+		}
+		catch (final InterruptedException e) {
+			LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar."); //$NON-NLS-1$
+			this.error = new LogErrors("Error al procesar la petici&oacute;n buscar texto.",HttpServletResponse.SC_CONFLICT); //$NON-NLS-1$
+			baos.write(this.error.getMsgError().getBytes(this.logInfor.getCharset()));
+		}
+		catch (final ExecutionException e) {
+			LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar."); //$NON-NLS-1$
+			this.error = new LogErrors("Error al procesar la petici&oacute;n buscar texto.",HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+			baos.write(this.error.getMsgError().getBytes(this.logInfor.getCharset()));
+		}
 		return baos.toByteArray();
 	}
 
@@ -114,6 +139,7 @@ public class LogSearchText {
 					return true;
 				}
 			}
+			setFilePosition(this.reader.getFilePosition());
 			return false;
 	}
 
@@ -141,7 +167,7 @@ public class LogSearchText {
 	 * Obtiene la posici&oacute;n
 	 * @return
 	 */
-	protected final long getFilePosition() {
+	public final long getFilePosition() {
 		return this.filePosition;
 	}
 
@@ -153,5 +179,14 @@ public class LogSearchText {
 		this.filePosition = filePosition;
 	}
 
-
+	public  final LogErrors getError() {
+		return this.error;
+	}
+	/**
+	 * Establece la posici&oacute;n
+	 * @return
+	 */
+	public final void setError(final LogErrors error) {
+		this.error = error;
+	}
 }

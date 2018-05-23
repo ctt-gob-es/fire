@@ -61,6 +61,7 @@ class LogRegistryReader {
 				registry = e.getRegistry();
 			}
 		}
+
 		return registry;
 	}
 }

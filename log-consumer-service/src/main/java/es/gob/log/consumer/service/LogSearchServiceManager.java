@@ -37,6 +37,7 @@ public class LogSearchServiceManager {
 
 		try {
 			if(filePosition != null && filePosition != Long.valueOf(0L)) {
+
 				reader.load(filePosition.longValue());
 			}
 			final LogSearchText logSearch = new LogSearchText(info, reader);
@@ -46,21 +47,40 @@ public class LogSearchServiceManager {
 			else {
 				result = logSearch.searchText(Integer.parseInt(sNumLines) , text, sdateTime.longValue());
 			}
-			session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
-			session.setAttribute("Reader", reader); //$NON-NLS-1$
+
+			if(logSearch.getError() !=null && logSearch.getError().getMsgError() != null) {
+					if(logSearch.getFilePosition() > 0L) {
+						session.setAttribute("FilePosition",Long.valueOf(logSearch.getFilePosition())); //$NON-NLS-1$
+//						reader.load(logSearch.getFilePosition());
+//						session.setAttribute("Reader", reader); //$NON-NLS-1$
+					}
+
+					error = logSearch.getError();
+					logSearch.getError().setMsgError(null);
+
+				}
+			else {
+				session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
+				session.setAttribute("Reader", reader); //$NON-NLS-1$
+			}
+
 
 		} catch (final InvalidPatternException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e); //$NON-NLS-1$
+			error = new LogErrors("No se ha podido leer el fichero",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
+			return result;
 		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e); //$NON-NLS-1$
-			error = new LogErrors();
-			error.setNumError(HttpServletResponse.SC_NOT_ACCEPTABLE);
-			error.setMsgError("No se ha podido leer el fichero");//$NON-NLS-1$
-			result = "No se ha podido leer el fichero".getBytes(info.getCharset()); //$NON-NLS-1$
+			error = new LogErrors("No se ha podido leer el fichero",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
 			return result;
 		}
 
+		if(error != null && error.getMsgError() != null && !"".equals(error.getMsgError()) ) { //$NON-NLS-1$
+			result = error.getMsgError().getBytes(info.getCharset());
+			error = null;
+		}
 
 		return result;
 	}

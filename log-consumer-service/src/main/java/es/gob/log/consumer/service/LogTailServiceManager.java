@@ -3,6 +3,7 @@ package es.gob.log.consumer.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.AsynchronousFileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,32 +80,24 @@ public class LogTailServiceManager {
 				}
 				else {
 					LOGGER.log(Level.WARNING,"Es necesario abrir el fichero log anteriormente."); //$NON-NLS-1$
-					error = new LogErrors();
-					error.setNumError(HttpServletResponse.SC_PRECONDITION_FAILED);
-					error.setMsgError("Es necesario abrir el fichero log anteriormente.");//$NON-NLS-1$
-					result = error.getMsgError().getBytes(info.getCharset());
+					error = new LogErrors("Es necesario abrir el fichero log anteriormente.",HttpServletResponse.SC_PRECONDITION_FAILED); //$NON-NLS-1$
+					result = error.getMsgError().getBytes(StandardCharsets.UTF_8);
 
 				}
 
 			}
 			catch (final NumberFormatException e) {
-				LOGGER.log(Level.SEVERE,"El par&aacute;metro nlines no es un n&uacute;mero entero",e); //$NON-NLS-1$
-
-
-		        error = new LogErrors();
-				error.setNumError(HttpServletResponse.SC_NOT_ACCEPTABLE);
-				error.setMsgError("El parametro nlines no es un n&uacte;mero entero"); //$NON-NLS-1$
-				result = error.getMsgError().getBytes(info.getCharset());
+				LOGGER.log(Level.SEVERE,"El par&aacute;metro nlines no es un n&uacute;mero entero",e);  //$NON-NLS-1$
+		        error = new LogErrors("El parametro nlines no es un n&uacte;mero entero",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
+				result = error.getMsgError().getBytes(info!=null?info.getCharset():StandardCharsets.UTF_8);
 				return result;
 
 
 			} catch (final IOException e) {
 
 				LOGGER.log(Level.SEVERE,"No se ha podido cargar el fichero de log.",e); //$NON-NLS-1$
-			    error = new LogErrors();
-			    error.setNumError(HttpServletResponse.SC_BAD_REQUEST);
-				error.setMsgError("No se ha podido cargar el fichero de log."); //$NON-NLS-1$
-				result = error.getMsgError().getBytes(info.getCharset());
+			    error = new LogErrors("No se ha podido cargar el fichero de log.",HttpServletResponse.SC_BAD_REQUEST);//$NON-NLS-1$
+				result = error.getMsgError().getBytes(info!=null?info.getCharset():StandardCharsets.UTF_8);
 				return result;
 
 
@@ -117,10 +110,8 @@ public class LogTailServiceManager {
 		}
 
 		LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n de leer las &uacute;ltimas l&iacute;neas del fichero."); //$NON-NLS-1$
-		error = new LogErrors();
-		error.setNumError(HttpServletResponse.SC_BAD_REQUEST);
-		error.setMsgError("Error al procesar la petici&oacute;n de leer las &uacute;ltimas l&iacute;neas del fichero."); //$NON-NLS-1$
-		result = error.getMsgError().getBytes(info.getCharset());
+		error = new LogErrors("Error al procesar la petici&oacute;n de leer las &uacute;ltimas l&iacute;neas del fichero.",HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+		result = error.getMsgError().getBytes(info!=null?info.getCharset():StandardCharsets.UTF_8);
 		return result;
 
 	}

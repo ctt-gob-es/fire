@@ -2,15 +2,21 @@
  * 
  */
  $(document).ready(function(){
-	 
 
-	 
+	
    $( function() {
      $( "#startDate" ).datepicker({
        changeMonth: true,
        changeYear: true
      });
      $('#startTime').timepicker();
+     
+     $( "#search_StartDate" ).datepicker({
+         changeMonth: true,
+         changeYear: true
+       });
+       $('#search_StartTime').timepicker();
+     
      $( "#endDate" ).datepicker({
          changeMonth: true,
          changeYear: true
@@ -18,12 +24,23 @@
        $('#endTime').timepicker();
    } );
 
-   
-  
-   
+   $(window).on('beforeunload', function() {
+		 
+		 if(!isReset){
+			  closeFile();
+			  return '';			
+		 }
+		 return "salir sin cerrar";
+		});
+
+ 
   });//fin de document ready
-  
-  
+	var linesCount = 0;
+	var maxLines = 100;
+	var isReset = false;
+	var addResult = false;
+	var filterOp = 0;
+	var searchOp = 0;
  /*****************Funciones:******************************/
  
  /**
@@ -58,32 +75,47 @@
   * @param JSONData
   * @returns
   */
- function printResult(JSONData){
-	 var html = $("#logResult").val();
+ function printResult(idContainer, JSONData){
 	
+	 var data = "";
+	 var content = getResultLines($("#Nlines").val());
+	 $("#"+ idContainer ).html("");
 	 $("#error-txt-log").hide();
 	 $("#ok-txt-log").hide();
-
-	 if(JSONData.hasOwnProperty('Tail')){
-		 html += JSONData.Tail[0].Result; 
+	 $("#advice").hide();
+	 
+	 if(JSONData.hasOwnProperty('Tail')){		 
+		 data = JSONData.Tail[0].Result;		
+		 content = "";
 	 }
 	 else if(JSONData.hasOwnProperty('More')){
-		 html += JSONData.More[0].Result;
+		 data = JSONData.More[0].Result;
 	 }
 	 else if(JSONData.hasOwnProperty('Search')){
-		 html += JSONData.Search[0].Result;
+		 data = JSONData.Search[0].Result;
+		 if(!addResult){
+			 content = ""; 
+		 }
 	 }
 	 else if(JSONData.hasOwnProperty('Filtered')){
-		 html += JSONData.Filtered[0].Result;
+		 data = JSONData.Filtered[0].Result;
+		 if(!addResult){
+			 content = ""; 
+		 }
 	 }
-	 $("#logResult").append(html);
+	 
+	 var arrHtml = data.split("</br>");
+	 for (i = 0; i < arrHtml.length-1; i++) {
+		 content += "<div>" + arrHtml[i] + "</div>";		
+	 }
+	 $("#"+ idContainer).append(content);
   }
  /**
   * 
   * @param nlines
   * @returns
   */
- function getTail(nlines){
+ function getTail(idContainer,nlines){
 
 	 	var arrFields = ["Nlines"];
 
@@ -93,11 +125,12 @@
 			 $.post(url, function(data){		
 				 var JSONData = JSON.parse(data);
 				  if(JSONData.hasOwnProperty('Tail')){
-					  printResult(JSONData);  
+					  printResult(idContainer,JSONData);  
 				  }
 				   else{
 					   printErrorResult(JSONData);  
-				   }      	            
+				   }  
+				  addResult=false;
 			}); 
 		}
  }
@@ -107,7 +140,8 @@
   * @param nlines
   * @returns
   */
- function getMore(nlines){
+ function getMore(idContainer,nlines){
+
 	var arrFields = ["Nlines"];
 	var ok = validateFields(arrFields);						
 	if(ok){
@@ -115,8 +149,7 @@
 		 $.post(url, function(data){		
 			 var JSONData = JSON.parse(data);
 			  if(JSONData.hasOwnProperty('More')){
-				  printResult(JSONData);
-				
+				  printResult(idContainer,JSONData);			
 			  }
 			   else {			   
 				   printErrorResult(JSONData);  
@@ -133,24 +166,40 @@
   * @param nlines
   * @returns
   */
- function searchText(nlines, text, date){
-	 
+ function searchText(idContainer,nlines, text, date){
+	
 	var DateTime =  getlongDateTime(date);
 	var arrFields = ["search_txt"];
-
+	filterOp = 0;
 	var ok = validateFields(arrFields);						
 	if(ok){
 		 var url = "../LogAdminService?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime;
-
-		 $.post(url, function(data){		
-			 var JSONData = JSON.parse(data);
-			  if(JSONData.hasOwnProperty('Search')){
-			  	printResult(JSONData);  
-			  }
-			   else {
-			   	printErrorResult(JSONData);  
-			   }      	            
-		}); 
+		 if(searchOp == 0){
+			 addResult  = false;
+		 }
+		 else{
+			 addResult  = true; 
+		 }
+		 				
+		 var isFinal = markNextText(text,searchOp);
+		 
+		 if(isFinal || searchOp == 0){
+			 $.post(url, function(data){		
+				  var JSONData = JSON.parse(data);
+				  if(JSONData.hasOwnProperty('Search')){
+				  	printResult(idContainer,JSONData);
+				  	isFinal = markNextText(text,searchOp);
+				  
+				  	
+				  }
+				   else {
+				   	printErrorResult(JSONData);  
+				  }
+				  
+			});
+			 
+		 }
+		 
 	}
 	
  }
@@ -163,19 +212,26 @@
   * @param level
   * @returns
   */
- function getFiltered(nlines, startDate, endDate, level){
-	 
-	 
+ function getFiltered(idContainer,nlines, startDate, endDate, level){
+
 	 var startDateTime =  getlongDateTime(startDate);
 	 var endDateTime =  getlongDateTime(endDate);
 	 var arrFields = ["Nlines","level_select"];
 	 var ok = validateFields(arrFields);						
-	if(ok){	 	
+	if(ok){	
+		searchOp = 0;
+		if(filterOp == 0){
+			 addResult  = false;
+		 }
+		 else{
+			 addResult  = true; 
+		 }
+		filterOp = filterOp + 1;		
 		var url = "../LogAdminService?op=9&nlines=" + nlines + "&start_date=" + startDateTime + "&end_date=" + endDateTime + "&level=" + level;		 
 		 $.post(url, function(data){		
 			 var JSONData = JSON.parse(data);
 			  if(JSONData.hasOwnProperty('Filtered')){
-			  	printResult(JSONData);  
+			  	printResult(idContainer,JSONData);  
 			  }
 			   else {
 			   	printErrorResult(JSONData);  
@@ -192,30 +248,36 @@
   * @returns
   */
  function getlongDateTime(date){
-
+	 var result = -1;
 	 var day = date.substr (0,2);
 	 var month = date.substr (3,2);
 	 var year = date.substr(6,4);
-	 
+
 	 var hour = date.substr(11,2);
 	 var minute = date.substr(14,2);
 	 var seconds = date.substr(17,2);
 	 	 
 	 var DateTime =  new Date();
-	 DateTime.setFullYear(year, month - 1, day);
-	 
-	 if(hour != null && typeof hour != "undefined"){
-		 DateTime.setHours(hour); 
-	 }	 
-	 if(minute != null && typeof minute != "undefined"){
-		 DateTime.setMinutes(minute); 
+	 if(day != null && typeof day != "undefined"
+		 	&& month != null && typeof month != "undefined"
+			&& year != null && typeof year != "undefined"){
+		 DateTime.setFullYear(year, month - 1, day);
+	 }		 		 		 
+	 if(!isNaN(DateTime.getTime())){
+		 if(hour != null && typeof hour != "undefined"){
+			 DateTime.setHours(hour); 
+		 }	 
+		 if(minute != null && typeof minute != "undefined"){
+			 DateTime.setMinutes(minute); 
+		 }
+		 if(seconds != null && typeof seconds != "undefined"){
+			 DateTime.setSeconds(seconds); 
+		 }
+		  result = DateTime.getTime();			
 	 }
-	 if(seconds != null && typeof seconds != "undefined"){
-		 DateTime.setSeconds(seconds); 
-	 }
-	 var result = DateTime.getTime();
-	 
+
 	 return result;
+	
  }
  
  /**
@@ -285,21 +347,8 @@
   * 
   * @returns
   */
- function goReturn(){
-	 location.href = 'LogsFileList.jsp?name-srv=' + server;
-//	 var url = "../LogAdminService?op=5";
-//	 $.post(url,function(data){	
-//	 if(data != null && typeof(data) != "undefined"){
-//		 var JSONData = JSON.parse(data);
-//		   if(JSONData.hasOwnProperty('Error')){
-//			   printErrorResult(JSONData);  
-//		   }
-//		   else{
-//			   location.href = 'LogsFileList.jsp?name-srv=' + server;
-//		   }
-//	 }
-//	    	             		   
-//   });
+ function goReturn(){	
+	 location.href = 'LogsFileList.jsp?name-srv=' + server;	  
  }
  
 
@@ -309,18 +358,36 @@
   * 
   * @returns
   */
- function reset(){
+ function reset(idContainer){
+	 isReset = true;	
+	 addResult = false;
+	 filterOp = 0;
+	 searchOp = 0;
+	 linesCount = 0;
+
+	 var html = "";
+	 $("#error-txt-log").html(html);
+	 $("#ok-txt-log").html(html); 
+	 $("#ok-txt-log").hide();
+	 $("#error-txt-log").hide();
+				 
 	 var url = "../LogAdminService?op=5";
 	 $.post(url,function(data){	
 	 if(data != null && typeof(data) != "undefined"){
 		 var JSONData = JSON.parse(data);
 		   if(JSONData.hasOwnProperty('Error')){
-			   printErrorResult(JSONData);  
+			   printErrorResult(JSONData);
+			   isReset = false;
 		   }
-		   else{
-			   Clean();
-			   $("#logResult").html("");
-			   location.href = "../LogAdminService?op=4&fname=" + file + "&name-srv=" + server;				   
+		   else{			   	  
+			   $("#" + idContainer).html("");
+			   var urlOpen = "../LogAdminService?op=4&fname=" + file + "&name-srv=" + server + "&reset=yes";			   		 
+			   $.post(urlOpen,function(dat){	
+				   if(dat != null && typeof(dat) != "undefined"){
+					   isReset = true;
+					   $("#advice").show();
+				   }
+			   });			  
 		   }
 	 }   	             		   
    });
@@ -328,39 +395,96 @@
  
  
  /**
-  * Funcion que borra el contenido de los filtros
+  * Funcion que borra el contenido de los filtros del contenedor indicado
   * @returns
   */
- function Clean(){
+ function Clean(css_class){
 
-	 $("input").each(function() {
+	 $("." + css_class).each(function() {
 	    var type = this.type;	   
-	    if (type == "text"){
-	    	this.value = "";	   	
+	    if (type == 'checkbox' || type == 'radio'){
+	    	this.checked = false;   	
 	    }
-	    else if (type == 'checkbox' || type == 'radio'){
-	    	this.checked = false;
+	    else {
+	    	this.value = "";	    	
 	    }   
 	  });
 	 
-	 $("textarea").each(function() {		   
-		 this.value = "";	   			    		  	    
-		  });
-	 
-	 $("select").each(function() {		   
-		 this.selectedIndex = 0;   			    		  	    
-	 }); 
+//	 $("select").each(function() {		   
+//		 this.selectedIndex = 0;   			    		  	    
+//	 }); 
  }
  
  function closeFile(){
+	 
 	 var url = "../LogAdminService?op=5";
 	 $.post(url,function(data){	
 		 if(data != null && typeof(data) != "undefined"){
 			 var JSONData = JSON.parse(data);
-			   if(JSONData.hasOwnProperty('Error')){
-				   printErrorResult(JSONData);  
-			   }
-		 }
-		    	             		   
-	   });
+			 if(JSONData.hasOwnProperty('Error')){
+				 printErrorResult(JSONData); 
+				 
+			 }
+		}
+			    	             		   
+	});
+		
  }
+ 
+ /**
+  * 
+  * @param newLines
+  * @returns
+  */
+ function getResultLines(idContainer,newLines){
+	 var diffLines = 0;
+	 var resultLines = "";	
+	 if(parseInt(linesCount, 10) + parseInt(newLines, 10) <= parseInt(maxLines,10)){
+		 resultLines +=  $("#" + idContainer).html();			
+	 }
+	 else{
+		 var diffLines = (parseInt(linesCount, 10) + parseInt(newLines, 10)) - parseInt(maxLines,10);	
+		 var diff = diffLines;
+		 $("#" + idContainer + " > div").each(function () { 
+			 if(diff != 0){
+				 diff --;				
+			 }
+			 else{					 
+				 resultLines += "<div>" + $(this).html() + "</div>"; 			
+			 }
+		 });		
+	 }
+	 linesCount = (parseInt(linesCount, 10) + parseInt(newLines, 10))-parseInt(diffLines, 10);
+	 return resultLines;
+ }
+ 
+ /**
+  * 
+  * @param search_text
+  * @returns
+  */
+ function markNextText(search_text, next_position){
+	 var result = false;	
+	 var allSpans = $("pre > div > span");
+	 if(allSpans.length == 0){
+		 return result;
+	 }	
+	 allSpans.each(function(id){		 
+		 if(id == next_position){
+			 $(this).removeClass( "highlight" ).addClass( "nextHighLight" ); 
+		 }
+		 else if(id == next_position - 1 && next_position - 1 >= 0 ){
+			$(this).removeClass("nextHighLight").addClass("highlight" ); 	 
+		 }
+			 		
+	 });
+	 	 
+	 if(allSpans.length == next_position){
+		 result = true;; 
+	 }
+
+	 searchOp = searchOp + 1; 
+	 return result;
+	 
+ }
+ 

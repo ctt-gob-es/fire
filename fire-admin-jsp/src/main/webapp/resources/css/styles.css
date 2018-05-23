@@ -362,9 +362,11 @@ ul li.field-text {
 
 span.highlight
 {
-background-color:#ffff80
+	background-color:#ffff80
 }
-
+span.nextHighLight{
+	background-color:#80ffff
+}
 /**********Menu*****************/
 
 
@@ -422,17 +424,4 @@ background-color:#ffff80
 				top:0px;
 			}
 			
-/*JQUERY UI */	
-/*Download file*/
- #progressbar {
-    margin-top: 20px;
-  }
- 
-  .progress-label {
-    font-weight: bold;
-    text-shadow: 1px 1px 0 #fff;
-  }
- 
-  .ui-dialog-titlebar-close {
-    display: none;
-  }
+

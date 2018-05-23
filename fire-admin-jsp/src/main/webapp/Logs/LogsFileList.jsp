@@ -52,7 +52,7 @@ String numRec = "1";//$NON-NLS-1$
 			final JsonArray FileList = jsonObj.getJsonArray("FileList");//$NON-NLS-1$
 			jsonData += "{\"FileList\":[";//$NON-NLS-1$
 			
-// 			htmlData += "<table class='admin-table'><thead><tr><th id='fileName'>Nombre fichero</th><th id='Date'>Fecha de modificaci&oacute;n</th><th id='Size'>Tama&ntilde;o</th><th id='actions'>Acciones</th></tr></thead>'";//$NON-NLS-1$
+
 			numRec = String.valueOf(FileList.size()); 
 			for (int i = 0; i < FileList.size(); i++) {
 				final JsonObject json = FileList.getJsonObject(i);
@@ -76,9 +76,6 @@ String numRec = "1";//$NON-NLS-1$
 				else{
 					sSize = String.valueOf(size).concat(" bytes");//$NON-NLS-1$
 				}
-// 				htmlData += "<tr><td headers ='fileName'>" + json.getString("Name") + " </td><td headers ='Date'>" + dateModif + " </td><td headers ='Size'>" + sSize + //$NON-NLS-1$
-// 						"</td><td headers ='actions'><a href ='../LogAdminService?op=4&fname=" + json.getString("Name") +"&name-srv=" + nameSrv +
-// 						"'><img src ='../resources/img/details_icon.png'/></a></tr>";
 				
 				if(i != FileList.size() - 1){
 					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif + "\",\"Size\":\"" + sSize +"\"},";//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
@@ -87,7 +84,7 @@ String numRec = "1";//$NON-NLS-1$
 					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif + "\",\"Size\":\"" + sSize +"\"}]}";//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 				}	
 			}
-// 			htmlData += "</table>";
+
 		}
 		
 			
@@ -106,12 +103,12 @@ String numRec = "1";//$NON-NLS-1$
 	<title>Administraci&oacute;n FIRe</title>
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
-	<link rel="stylesheet" href="../resources/css/jquery-ui.min.css">
-	<link rel="stylesheet" href="../resources/css/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.min.css">
+	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.theme.min.css">
 	<link rel="stylesheet" href="../resources/css/ui.jqgrid.css">
 	
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="../resources/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
 	
 	<script src="../resources/js/grid.locale-es.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.jqGrid.min.js" type="text/javascript"></script>
@@ -130,7 +127,7 @@ String numRec = "1";//$NON-NLS-1$
 	<div id="container">
 		<div id="message" <%=styleError%>><%=htmlError%></div>				
 		<div id="data" style="display: block-inline; text-align:center;">		
-			<div id="jQGrid">
+			<div id="jQGrid" style="padding-left: 11%; padding-right:12%;">
 	 		 	<table id="list"></table>
 	  			<div id="page">
 	  			</div>
@@ -161,9 +158,9 @@ String numRec = "1";//$NON-NLS-1$
 	      colNames: ['Nombre fichero', 'Fecha de modificaci&oacute;n','Tama&ntilde;o'],
 	      colModel: [
 	    	
-	        { name: 'Name', width: "400",index:"id", align: 'left',sortable: true },
-	        { name: 'Date', width: "200", align: 'center',sortable: true },
-	        { name: 'Size', width: "200", align: 'right',sortable: true }
+	        { name: 'Name', width: "400",index:"id", align: 'left',sortable: true, search:false },
+	        { name: 'Date', width: "200", align: 'center',sortable: true , search:false},
+	        { name: 'Size', width: "200", align: 'right',sortable: true, search:false }
 	      ],
 	       
 	        pager: '#page',
@@ -190,9 +187,9 @@ String numRec = "1";//$NON-NLS-1$
 	        },
 	    });
 	    grid.jqGrid('navGrid', '#page',
-	        { add: false, edit: false, del: false }, {}, {}, {},
+	        { add: false, edit: false, del: false, search: false, refresh: false }, {}, {}, {},
 	        { multipleSearch: false, multipleGroup: false });
-// 	    grid.jqGrid('filterToolbar', { defaultSearch: 'cn', stringResult: true });
+
 		
 </script>
 

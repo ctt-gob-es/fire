@@ -2,6 +2,7 @@ package es.gob.log.consumer.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.channels.AsynchronousFileChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -95,8 +96,7 @@ public class LogService extends HttpServlet {
 					LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
 					result = getLogFiles();
 					if(result == null) {
-						resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-						//resp.sendError(HttpServletResponse.SC_NO_CONTENT, "No se han podido encontrar ficheros .log"); //$NON-NLS-1$
+						setStatusCode(HttpServletResponse.SC_NO_CONTENT);
 						return;
 					}
 					break;
@@ -104,22 +104,23 @@ public class LogService extends HttpServlet {
 					LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
 					result = openFile(req);
 					if(result==null || result.length <= 0) {
-						resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-						//resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No se han podido abrir el fichero seleccionado .log"); //$NON-NLS-1$
+						setStatusCode(HttpServletResponse.SC_NOT_FOUND);
 						return;
 					}
 					break;
 				case CLOSE_FILE:
 					LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
-					resp.setStatus(HttpServletResponse.SC_OK);
 					fileClosed = closeFile(req);
 					if(!fileClosed) {
-						resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						setStatusCode(HttpServletResponse.SC_BAD_REQUEST);
 					}
 					break;
 				case TAIL:
 					LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
 					result = getLogTail(req);
+					if(result==null || result.length <= 0) {
+						setStatusCode(HttpServletResponse.SC_BAD_REQUEST);
+					}
 					break;
 				case GET_MORE:
 					LOGGER.info("Solicitud entrante de mas log"); //$NON-NLS-1$
@@ -152,12 +153,15 @@ public class LogService extends HttpServlet {
 			}
 		}
 		catch (final SessionException e) {
-			LOGGER.log(
-					Level.WARNING,
+			LOGGER.log(Level.WARNING,
 					"Se solicito una operacion sin haber abierto sesion u ocurrio un error al abrirla", //$NON-NLS-1$
 					e);
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Sesion no iniciada"); //$NON-NLS-1$
 			return;
+		}
+		catch (final UnsupportedEncodingException e) {
+			resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+			LOGGER.log(Level.SEVERE,"La codificación no es valida.",e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
@@ -166,7 +170,7 @@ public class LogService extends HttpServlet {
 		}
 
 
-		resp.setStatus(statusCode);
+		resp.setStatus(getStatusCode());
 		if(!fileClosed) {
 			resp.getOutputStream().write(result);
 		}
@@ -224,12 +228,12 @@ public class LogService extends HttpServlet {
 		return ValidationLoginManager.process(req, session);
 	}
 
-	private static byte[] getLogFiles() {
+	private static byte[] getLogFiles() throws UnsupportedEncodingException {
 		final byte[] result = LogFilesServiceManager.process();
 		return result;
 	}
 
-	private static byte[] openFile(final HttpServletRequest req) throws SessionException {
+	private static byte[] openFile(final HttpServletRequest req) throws SessionException, IOException {
 		final HttpSession session = req.getSession(true);
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
@@ -249,7 +253,7 @@ public class LogService extends HttpServlet {
 		return result;
 	}
 
-	private static boolean closeFile(final HttpServletRequest req) throws SessionException {
+	private static boolean closeFile(final HttpServletRequest req) throws SessionException, IOException {
 		boolean result = false;
 		final HttpSession session = req.getSession(true);
 		if (session == null) {
@@ -258,7 +262,6 @@ public class LogService extends HttpServlet {
 
 		try {
 			if((LogReader) session.getAttribute("Reader") != null){ //$NON-NLS-1$
-				((LogReader) session.getAttribute("Reader")).close(); //$NON-NLS-1$
 				session.removeAttribute("Reader"); //$NON-NLS-1$
 			}
 			if((AsynchronousFileChannel)session.getAttribute("Channel") != null) { //$NON-NLS-1$
@@ -278,8 +281,8 @@ public class LogService extends HttpServlet {
 			}
 
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "No se ha cerrado correctamente el fichero : ".concat(e.getMessage())); //$NON-NLS-1$
+			throw new IOException();
 		}
 		return result;
 	}
@@ -317,9 +320,11 @@ public class LogService extends HttpServlet {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
 		final byte[] result = LogFilteredServiceManager.process(req);
+		if( LogFilteredServiceManager.getError() != null  && LogFilteredServiceManager.getError().getNumError() != 0) {
+			setStatusCode(LogFilteredServiceManager.getError().getNumError());
+		}
+
 		return result;
-
-
 	}
 
 	private static byte[] searchText(final HttpServletRequest req) throws SessionException {
@@ -328,6 +333,9 @@ public class LogService extends HttpServlet {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
 		final byte[] result = LogSearchServiceManager.process(req);
+		if(LogSearchServiceManager.getError() != null) {
+			setStatusCode(LogSearchServiceManager.getError().getNumError());
+		}
 		return result;
 	}
 

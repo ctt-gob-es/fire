@@ -42,13 +42,19 @@ public class LogOpen {
 	 * @return
 	 * @throws IOException
 	 */
-	public final byte[] openFile(final String logFileName) throws IOException {
+	public final byte[] openFile(final String logFileName) throws IOException  {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 
 		final String [] fileNamesLoginfo = {null,null,null,null,null} ;
-		final File f = ConfigManager.getInstance().getLogsDir().getCanonicalFile();
+		File f;
+		try {
+			f = ConfigManager.getInstance().getLogsDir().getCanonicalFile();
+		} catch (final IOException e1) {
+			LOGGER.log(Level.SEVERE, "Error al leer el fichero en la ruta indicada ".concat(e1.getMessage())); //$NON-NLS-1$
+			throw new IOException();
+		}
 
 		String nameLogInfo = logFileName.replace(LogConstants.FILE_EXT_LOG, ""); //$NON-NLS-1$
 
@@ -108,21 +114,26 @@ public class LogOpen {
 				}
 			}
 			// leer fichero loginfo y crear entidad LogInfo con los datos obtenidos del fichero
-
-			final String pathLogInfo = ConfigManager.getInstance().getLogsDir().getAbsolutePath().concat(File.separator).concat(nameLogInfo);
-			final File fLogInfo =  new File(pathLogInfo).getCanonicalFile();
-			// Abrir fichero log, se inicializa el canal y el lector.
-			try(FileInputStream fis = new FileInputStream(fLogInfo)) {
+			try {
+				final String pathLogInfo = ConfigManager.getInstance().getLogsDir().getAbsolutePath().concat(File.separator).concat(nameLogInfo);
+				final File fLogInfo =  new File(pathLogInfo).getCanonicalFile();
+				// Abrir fichero log, se inicializa el canal y el lector.
+				final FileInputStream fis = new FileInputStream(fLogInfo);
 				this.linfo = new LogInfo();
 				this.linfo.load(fis);
 				this.channel = AsynchronousFileChannel.open(this.path,StandardOpenOption.READ);
 				this.reader = new FragmentedFileReader(this.channel, this.linfo.getCharset());
 				this.reader.load(0L);
 			}
+			catch (final IOException e) {
+				LOGGER.log(Level.SEVERE, "Error al leer el fichero .loginfo en la ruta indicada ".concat(e.getMessage())); //$NON-NLS-1$
+				throw new IOException();
+			}
+
 
 			//Generamos el resultado en formato JSON de la salida
 			final StringWriter writer = new StringWriter();
-			try  {
+
 
 				final String charset = this.linfo.getCharset().name();
 				String levels = ""; //$NON-NLS-1$
@@ -148,14 +159,13 @@ public class LogOpen {
 				final JsonWriter jw = Json.createWriter(writer);
 		        jw.writeObject(jsonObj.build());
 		        jw.close();
-		    }
-			catch (final Exception e) {
-				LOGGER.log(Level.WARNING, "Error ", e); //$NON-NLS-1$
-			}
+
+
 		    try {
 				return writer.toString().getBytes(this.linfo.getCharset().name());
 			} catch (final UnsupportedEncodingException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "Error al pasar a bytes el resultado :".concat(e.getMessage())); //$NON-NLS-1$
+				throw new UnsupportedEncodingException();
 			}
 		}
 

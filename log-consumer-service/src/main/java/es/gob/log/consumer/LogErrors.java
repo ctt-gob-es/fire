@@ -7,6 +7,11 @@ public class LogErrors {
 
 
 
+	public LogErrors(final String msgError, final int numError) {
+		super();
+		this.msgError = msgError;
+		this.numError = numError;
+	}
 	public  final String getMsgError() {
 		return this.msgError;
 	}

@@ -10,15 +10,11 @@ public class LogFilesServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogFilesServiceManager.class.getName());
 
-	public final static byte[] process()  {
+	public final static byte[] process() throws UnsupportedEncodingException  {
+		LOGGER.log(Level.INFO, "Iniciado proceso de listar ficheros log"); //$NON-NLS-1$
 		byte[] result = null;
 		final LogFiles logfile = new LogFiles();
-		try {
-			result = logfile.getLogFiles();
-
-		} catch (final UnsupportedEncodingException e) {
-			LOGGER.log(Level.SEVERE,"No se ha podido obtener la lista de ficheros log.",e); //$NON-NLS-1$
-		}
+		result = logfile.getLogFiles();
 		return result;
 	}
 

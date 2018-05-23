@@ -37,6 +37,7 @@ public class LogAdminService extends HttpServlet {
 	private  String level = "";//$NON-NLS-1$
 	private  long startDateTime = 0L;
 	private  long endDateTime = 0L;
+	private boolean reset = false;
 
 
 	/**
@@ -57,7 +58,7 @@ public class LogAdminService extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException  {
 		final HttpSession session = request.getSession(false);
 		String result = null;
 
@@ -119,10 +120,25 @@ public class LogAdminService extends HttpServlet {
 			break;
 		case GET_LOG_FILES:
 			LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
-			final byte datLogFiles[] = this.logclient.getLogFiles();
-			session.setAttribute("JSON", datLogFiles); //$NON-NLS-1$
-			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
-					.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(this.nameSrv)); //$NON-NLS-1$
+			try {
+				final byte datLogFiles[] = this.logclient.getLogFiles();
+				if(datLogFiles != null) {
+					session.setAttribute("JSON", datLogFiles); //$NON-NLS-1$
+				}
+				response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
+						.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(this.nameSrv)); //$NON-NLS-1$
+			}
+			catch (final IOException e) {
+				LOGGER.severe("Error al obtener los ficheros log del servidor central"+ e.getMessage()); //$NON-NLS-1$
+				final String jsonError = getJsonError("Error al obtener los ficheros log del servidor central :" , HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+		        try {
+					response.getWriter().write(jsonError);
+					rd.include(request, response);
+				} catch (final IOException e1) {
+					LOGGER.severe("Error en la respuesta del mensaje:"+ e1.getMessage()); //$NON-NLS-1$
+				}
+
+			}
 
 			break;
 		case OPEN_FILE:
@@ -136,10 +152,14 @@ public class LogAdminService extends HttpServlet {
 			if(this.logclient != null && this.logclient.getCharsetContent()!= null){
 				response.setCharacterEncoding(this.logclient.getCharsetContent().toString());
 			}
-
-			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsManager.jsp?").concat(ServiceParams.PARAM_NAMESRV).concat("=")//$NON-NLS-1$ //$NON-NLS-2$
-					 .concat(this.nameSrv).concat("&").concat(ServiceParams.PARAM_FILENAME).concat("=").concat(this.logFileName)  //$NON-NLS-1$//$NON-NLS-2$
-					);
+			if(!isReset()) {
+				response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsManager.jsp?").concat(ServiceParams.PARAM_NAMESRV).concat("=")//$NON-NLS-1$ //$NON-NLS-2$
+					 .concat(this.nameSrv).concat("&").concat(ServiceParams.PARAM_FILENAME).concat("=").concat(this.logFileName));  //$NON-NLS-1$//$NON-NLS-2$
+			}
+			else {
+				response.getWriter().write(result);
+				setReset(false);
+			}
 			break;
 		case CLOSE_FILE:
 			LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
@@ -163,6 +183,7 @@ public class LogAdminService extends HttpServlet {
 				final String res = new String(datTailFile,this.logclient.getCharsetContent());
 				result += res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
 			}
+
 			if(this.logclient != null && this.logclient.getCharsetContent()!= null){
 				response.setCharacterEncoding(this.logclient.getCharsetContent().toString());
 			}
@@ -359,7 +380,9 @@ public class LogAdminService extends HttpServlet {
 			if(request.getParameter(ServiceParams.LEVEL) != null && !"".equals(request.getParameter(ServiceParams.LEVEL))) { //$NON-NLS-1$
 				this.setLevel(request.getParameter(ServiceParams.LEVEL));
 			}
-
+			if(request.getParameter(ServiceParams.PARAM_RESET) != null && !"".equals(request.getParameter(ServiceParams.PARAM_RESET))) { //$NON-NLS-1$
+				this.setReset(true);
+			}
 
 	}
 
@@ -426,6 +449,14 @@ public class LogAdminService extends HttpServlet {
 
 	private final void setStartDateTime(final long startDateTime) {
 			this.startDateTime = startDateTime;
+	}
+
+	private final boolean isReset() {
+		return this.reset;
+	}
+
+	private final void setReset(final boolean reset) {
+		this.reset = reset;
 	}
 
 

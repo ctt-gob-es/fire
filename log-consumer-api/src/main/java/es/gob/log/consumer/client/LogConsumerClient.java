@@ -182,62 +182,58 @@ public class LogConsumerClient {
 	}
 
 	/**
-	 *
-	 * @return
+	 *Obtenemos un listado de ficheros con extensión .log del servidor central en la ruta indicada
+	 * @return Cadena de bytes con formato JSON. En caso de exito: {"FileList":[{"Name":"nombre_ficghero.log","Date":datetime long format,"Size":bytes long format},etc...]},
+	 * en caso de Error el formato JSON es:{"Error":[{"Code":204,"Message":"No se ha podido obtener la lista de ficheros log."}]}
+	 * @throws IOException
 	 */
-	public byte[] getLogFiles() {
+	public byte[] getLogFiles() throws IOException {
 		final StringWriter result = new StringWriter();
-		try {
-
-			final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 					.append("?op=").append(ServiceOperations.GET_LOG_FILES.ordinal() ); //$NON-NLS-1$
-			final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+		final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 
-			if(response.statusCode == 200) {
-				final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));
+		if(response.statusCode == 200) {
+			try(final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));){
 				final JsonObject listFilesReponse = reader.readObject();
 				reader.close();
 				result.write(listFilesReponse.toString());
 			}
-			else {
+		}
+		else {
 
-				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-				final JsonArrayBuilder data = Json.createArrayBuilder();
-				data.add(Json.createObjectBuilder()
-						.add("Code",response.statusCode) //$NON-NLS-1$
-						.add("Message", "No existen ficheros con extension .log")); //$NON-NLS-1$ //$NON-NLS-2$
-				jsonObj.add("Error", data); //$NON-NLS-1$
-				final JsonWriter jw = Json.createWriter(result);
-		        jw.writeObject(jsonObj.build());
-		        jw.close();
+			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+			final JsonArrayBuilder data = Json.createArrayBuilder();
+			data.add(Json.createObjectBuilder()
+				.add("Code",response.statusCode) //$NON-NLS-1$
+				.add("Message", "No existen ficheros con extension .log")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			try(final JsonWriter jw = Json.createWriter(result);){
+				jw.writeObject(jsonObj.build());
+				jw.close();
 			}
-
-		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		if(result.getBuffer().length() > 0) {
 			return result.toString().getBytes();
 		}
 		return null;
-
 	}
 
 	/**
-	 *
+	 *Funci&oacute;n que se encarga de abrir el fichero log indicado como par&aacute;metro. Al mismo tiempo busca el fichero de configuraci&oacute;n loginfo, que pertenezca a dicho fichero log
+	 *y obtiene los datos indicados para manejar el fichro log
 	 * @param filename
-	 * @return
+	 * @return Cadena de bytes con formato JSON. En caso de exito por ejemplo:{"LogInfo":[{"Charset":"UTF-8","Levels":"INFORMACIÓN,ADVERTENCIA,GRAVE","Date":"true","Time":"true","DateTimeFormat":"MMM dd, yyyy hh:mm:ss a"}]}
+	 * En caso de error:{"Error":[{"Code":204,"Message":"No se ha podido abrir el fichero: filename"}]}
 	 */
-	public byte[] openFile(final String filename) {
+	public byte[] openFile(final String filename) throws IOException{
 		final StringWriter result = new StringWriter();
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.OPEN_FILE.ordinal()).append("&fname=").append(filename); //$NON-NLS-1$ //$NON-NLS-2$
 		HttpResponse response;
-		try {
-
-			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
-			if(response.statusCode == 200) {
-				final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));
+		response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+		if(response.statusCode == 200) {
+			try(final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));){
 				final JsonObject openFileReponse = reader.readObject();
 				reader.close();
 				final JsonArray jsonarr =   openFileReponse.getJsonArray("LogInfo"); //$NON-NLS-1$
@@ -248,35 +244,33 @@ public class LogConsumerClient {
 						this.setCharsetContent(Charset.forName(charsetName));
 					}
 				}
-
 				result.write(openFileReponse.toString());
-
 			}
-			else {
-				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-				final JsonArrayBuilder data = Json.createArrayBuilder();
-				data.add(Json.createObjectBuilder()
-						.add("Code",response.statusCode) //$NON-NLS-1$
-						.add("Message", "No existen ficheros con extension .log")); //$NON-NLS-1$ //$NON-NLS-2$
-				jsonObj.add("Error", data); //$NON-NLS-1$
-				final JsonWriter jw = Json.createWriter(result);
-		        jw.writeObject(jsonObj.build());
-		        jw.close();
-			}
-
-			if(result.getBuffer().length() > 0) {
-				return result.toString().getBytes(this.getCharsetContent());
-			}
-		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		else {
+			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+			final JsonArrayBuilder data = Json.createArrayBuilder();
+			data.add(Json.createObjectBuilder()
+				.add("Code",response.statusCode) //$NON-NLS-1$
+				.add("Message", "No se ha podido abrir el fichero: ".concat(filename))); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			try(final JsonWriter jw = Json.createWriter(result);){
+				jw.writeObject(jsonObj.build());
+				jw.close();
+			}
+		}
+
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes(this.getCharsetContent());
+		}
+
 		return null;
 	}
 
 	/**
-	 *
-	 * @return
+	 *Funci&oacute;n que cierra el fichero y borra variables ( Channel, Reader, LogInfo y FilePosition ) de sesi&oacute;n en servidor de logs.
+	 * @return Cadena de bytes con formato JSON. En caso de exito :{"OK":[{"Code":200,"Message":"Fichero cerrado correctamente"}]}
+	 * En caso de error:{"Error":[{"Code":204,"Message":"Error al cerrar fichero log"}]}
 	 * @throws IOException
 	 */
 	public byte[] closeFile() throws IOException {
@@ -292,9 +286,11 @@ public class LogConsumerClient {
 					.add("Code",response.statusCode) //$NON-NLS-1$
 					.add("Message", "Fichero cerrado correctamente")); //$NON-NLS-1$ //$NON-NLS-2$
 			jsonObj.add("OK", data); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(result);
-	        jw.writeObject(jsonObj.build());
-	        jw.close();
+			try(final JsonWriter jw = Json.createWriter(result);){
+				jw.writeObject(jsonObj.build());
+				jw.close();
+			}
+
 		}
 		else {
 			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -303,9 +299,10 @@ public class LogConsumerClient {
 					.add("Code",response.statusCode) //$NON-NLS-1$
 					.add("Message", "Error al cerrar fichero log")); //$NON-NLS-1$ //$NON-NLS-2$
 			jsonObj.add("Error", data); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(result);
-	        jw.writeObject(jsonObj.build());
-	        jw.close();
+			try(final JsonWriter jw = Json.createWriter(result);){
+				jw.writeObject(jsonObj.build());
+				jw.close();
+			}
 		}
 		if(result.getBuffer().length() > 0) {
 			return result.toString().getBytes(this.getCharsetContent());
@@ -314,8 +311,8 @@ public class LogConsumerClient {
 	}
 
 	/**
-	 *
-	 * @param numLines
+	 *Funci&oacute;n que obtiene el final del fichero correspondiente al n&uaute;mero de l&iaute;neas indicadas por par&aacute;metro
+	 * @param numLines ,filename
 	 * @return
 	 */
 	public  byte[] getLogTail(final int numLines, final String filename) {

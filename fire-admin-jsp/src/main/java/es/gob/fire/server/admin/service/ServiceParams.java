@@ -35,5 +35,6 @@ public class ServiceParams {
 	/***Par&aacute;metro que indica el texto de b&uacute;squeda */
 	static final String LEVEL = "level"; //$NON-NLS-1$
 
+	public static final String PARAM_RESET ="reset"; //$NON-NLS-1$
 
 }

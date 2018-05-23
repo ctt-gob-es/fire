@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -16,7 +18,7 @@ public class LogFiles {
 	private static final String FILE_EXT_LOGINFO = LogConstants.FILE_EXT_LOGINFO;
 	private static final String FILE_EXT_LCK = LogConstants.FILE_EXT_LCK;
 	private static final String DIR_LOGS = LogConstants.DIR_FILE_LOG;
-
+	private static final Logger LOGGER = Logger.getLogger(LogFiles.class.getName());
 
 	public LogFiles() {
 
@@ -27,7 +29,7 @@ public class LogFiles {
 	 *  fecha de &uacute;ltima actualizaci&oacute;n sin formato (long) y su tama&ntilde;o en bytes
 	 * @throws UnsupportedEncodingException
 	 */
-	public  byte[] getLogFiles() throws UnsupportedEncodingException {
+	public  byte[] getLogFiles() throws UnsupportedEncodingException  {
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 		byte[] result = null;
@@ -61,10 +63,12 @@ public class LogFiles {
 			        jw.writeObject(jsonObj.build());
 			        jw.close();
 			    }
-				catch (final Exception e) {
-					//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+				try {
+					result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
+				} catch (final UnsupportedEncodingException e) {
+					LOGGER.log(Level.SEVERE, "Error al codificar los bytes del resultado FileList".concat(e.getMessage())); //$NON-NLS-1$
+					throw new UnsupportedEncodingException();
 				}
-				result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
 			}
 			else {
 				data.add(Json.createObjectBuilder()
@@ -76,15 +80,17 @@ public class LogFiles {
 			        jw.writeObject(jsonObj.build());
 			        jw.close();
 			    }
-				catch (final Exception e) {
-					//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+
+				try {
+					result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
+				} catch (final UnsupportedEncodingException e) {
+					LOGGER.log(Level.SEVERE, "Error al codificar los bytes del resultado Error".concat(e.getMessage())); //$NON-NLS-1$
+					throw new UnsupportedEncodingException();
 				}
-				result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
 			}
 
-
-
 		}
+
 		return result;
 	}
 }
