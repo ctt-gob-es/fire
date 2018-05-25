@@ -26,6 +26,7 @@ public class LogSearchServiceManager {
 		//final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		final String sNumLines = req.getParameter(ServiceParams.NUM_LINES);
 		final String text = req.getParameter(ServiceParams.SEARCH_TEXT);
+		final boolean reset = Boolean.parseBoolean(req.getParameter(ServiceParams.PARAM_RESET));
 		Long sdateTime = null;
 		if(req.getParameter(ServiceParams.SEARCH_DATETIME) != null && !"".equals(req.getParameter(ServiceParams.SEARCH_DATETIME))) { //$NON-NLS-1$
 			sdateTime = new Long( Long.parseLong(req.getParameter(ServiceParams.SEARCH_DATETIME)));
@@ -42,10 +43,10 @@ public class LogSearchServiceManager {
 			}
 			final LogSearchText logSearch = new LogSearchText(info, reader);
 			if(sdateTime == null || sdateTime.longValue() < 0L) {
-				result = logSearch.searchText(Integer.parseInt(sNumLines) , text);
+				result = logSearch.searchText(Integer.parseInt(sNumLines) , text, reset);
 			}
 			else {
-				result = logSearch.searchText(Integer.parseInt(sNumLines) , text, sdateTime.longValue());
+				result = logSearch.searchText(Integer.parseInt(sNumLines) , text, sdateTime.longValue(),reset);
 			}
 
 			if(logSearch.getError() !=null && logSearch.getError().getMsgError() != null) {

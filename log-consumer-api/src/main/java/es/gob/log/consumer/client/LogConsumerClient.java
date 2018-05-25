@@ -182,7 +182,7 @@ public class LogConsumerClient {
 	}
 
 	/**
-	 *Obtenemos un listado de ficheros con extensión .log del servidor central en la ruta indicada
+	 *Obtenemos un listado de ficheros con extensi&oacute;n .log del servidor central en la ruta indicada
 	 * @return Cadena de bytes con formato JSON. En caso de exito: {"FileList":[{"Name":"nombre_ficghero.log","Date":datetime long format,"Size":bytes long format},etc...]},
 	 * en caso de Error el formato JSON es:{"Error":[{"Code":204,"Message":"No se ha podido obtener la lista de ficheros log."}]}
 	 * @throws IOException
@@ -223,7 +223,7 @@ public class LogConsumerClient {
 	 *Funci&oacute;n que se encarga de abrir el fichero log indicado como par&aacute;metro. Al mismo tiempo busca el fichero de configuraci&oacute;n loginfo, que pertenezca a dicho fichero log
 	 *y obtiene los datos indicados para manejar el fichro log
 	 * @param filename
-	 * @return Cadena de bytes con formato JSON. En caso de exito por ejemplo:{"LogInfo":[{"Charset":"UTF-8","Levels":"INFORMACIÓN,ADVERTENCIA,GRAVE","Date":"true","Time":"true","DateTimeFormat":"MMM dd, yyyy hh:mm:ss a"}]}
+	 * @return Cadena de bytes con formato JSON. En caso de exito por ejemplo:{"LogInfo":[{"Charset":"UTF-8","Levels":"INFORMACI&Oacute;N,ADVERTENCIA,GRAVE","Date":"true","Time":"true","DateTimeFormat":"MMM dd, yyyy hh:mm:ss a"}]}
 	 * En caso de error:{"Error":[{"Code":204,"Message":"No se ha podido abrir el fichero: filename"}]}
 	 */
 	public byte[] openFile(final String filename) throws IOException{
@@ -419,7 +419,7 @@ public class LogConsumerClient {
 		return null;
 	}
 
-	public byte[] getLogFiltered(final int numLines, final long startDate, final long endDate, final String level) {
+	public byte[] getLogFiltered(final int numLines, final long startDate, final long endDate, final String level, final boolean reset) {
 
 		final StringWriter result = new StringWriter();
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -431,7 +431,7 @@ public class LogConsumerClient {
 				.append("&".concat(ServiceParams.START_DATETIME).concat("=")).append(startDate)//$NON-NLS-1$ //$NON-NLS-2$
 				.append("&".concat(ServiceParams.END_DATETIME).concat("=")).append(endDate)//$NON-NLS-1$ //$NON-NLS-2$
 				.append("&".concat(ServiceParams.LEVEL).concat("=")).append(level)//$NON-NLS-1$ //$NON-NLS-2$
-				;
+				.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append(reset); //$NON-NLS-1$ //$NON-NLS-2$
 		HttpResponse response;
 		try {
 
@@ -476,7 +476,7 @@ public class LogConsumerClient {
 		return null;
 	}
 
-	public byte[] searchText(final int numLines, final String text, final String startDate) {
+	public byte[] searchText(final int numLines, final String text, final String startDate, final boolean reset) {
 		final StringWriter result = new StringWriter();
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
@@ -484,8 +484,9 @@ public class LogConsumerClient {
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.SEARCH_TEXT.ordinal()) //$NON-NLS-1$
 				.append("&".concat(ServiceParams.NUM_LINES).concat("=")).append(numLines)//$NON-NLS-1$ //$NON-NLS-2$
-				.append("&".concat(ServiceParams.SEARCH_TEXT).concat("=")).append(text.replaceAll(" ", "%20") )//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				.append("&".concat(ServiceParams.SEARCH_DATETIME).concat("=")).append(startDate); //$NON-NLS-1$ //$NON-NLS-2$
+				.append("&".concat(ServiceParams.SEARCH_TEXT).concat("=")).append(text.replaceAll(" ", "%20"))//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				.append("&".concat(ServiceParams.SEARCH_DATETIME).concat("=")).append(startDate) //$NON-NLS-1$ //$NON-NLS-2$
+				.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append(reset); //$NON-NLS-1$ //$NON-NLS-2$
 		HttpResponse response;
 		try {
 
@@ -544,7 +545,8 @@ public class LogConsumerClient {
 				result.write(fragment);
 				//fos.write(fragment);
 			}while(response.statusCode == 206);
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 
 		}
 

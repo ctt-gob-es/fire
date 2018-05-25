@@ -38,8 +38,8 @@ public class LogSearchText {
 	 * @return
 	 * @throws IOException
 	 */
-	public final  byte[] searchText(final int numLines, final String text) throws IOException {
-		return this.searchText(numLines,text,-1);
+	public final  byte[] searchText(final int numLines, final String text, final boolean reset) throws IOException {
+		return this.searchText(numLines,text,-1,reset);
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class LogSearchText {
 	 * @return
 	 * @throws IOException
 	 */
-	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec) throws IOException {
+	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec, final boolean reset) throws IOException {
 
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
@@ -60,6 +60,12 @@ public class LogSearchText {
 			if(this.getError()!=null && this.getError().getMsgError()!= null && !"".equals(this.getError().getMsgError())) { //$NON-NLS-1$
 				this.setError(null);
 			}
+
+			if(reset) {
+				this.reader.load();
+				this.setFilePosition(0L);
+			}
+
 			boolean found = false;
 			/*Se obtiene la fecha de b&uacute;squeda pasada en milisegundos si se ha pasado por par&aacute;metro
 			 * y se obtiene la posici&oacute;n del comienzo de la l&iacute;nea en la que se encuentra la fecha indicada*/

@@ -205,7 +205,7 @@ public class LogAdminService extends HttpServlet {
 		case SEARCH_TEXT:
 			LOGGER.info("Solicitud entrante de busqueda de texto"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
-			final byte datSearchTxt[] = this.logclient.searchText(this.numlines, this.txt2search, this.datetime);
+			final byte datSearchTxt[] = this.logclient.searchText(this.numlines, this.txt2search, this.datetime, this.isReset());
 			if(datSearchTxt != null && datSearchTxt.length > 0 ) {
 				final String res = new String(datSearchTxt,this.logclient.getCharsetContent());
 				result += res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
@@ -221,7 +221,7 @@ public class LogAdminService extends HttpServlet {
 			LOGGER.info("Solicitud entrante de filtrado de log"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
 
-			final byte datFiltered[] = this.logclient.getLogFiltered(this.numlines, this.getStartDateTime(), this.getEndDateTime(), this.getLevel());
+			final byte datFiltered[] = this.logclient.getLogFiltered(this.numlines, this.getStartDateTime(), this.getEndDateTime(), this.getLevel(), this.isReset());
 			if(datFiltered != null && datFiltered.length > 0 ) {
 				final String res = new String(datFiltered,this.logclient.getCharsetContent());
 				result += res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
@@ -382,6 +382,8 @@ public class LogAdminService extends HttpServlet {
 			}
 			if(request.getParameter(ServiceParams.PARAM_RESET) != null && !"".equals(request.getParameter(ServiceParams.PARAM_RESET))) { //$NON-NLS-1$
 				this.setReset(true);
+			}else {
+				this.setReset(false);
 			}
 
 	}

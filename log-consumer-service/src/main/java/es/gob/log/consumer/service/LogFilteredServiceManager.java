@@ -51,6 +51,9 @@ public class LogFilteredServiceManager {
 			final String level = req.getParameter(ServiceParams.LEVEL);
 			crit.setLevel(Integer.parseInt(level));
 		}
+
+		final boolean reset = Boolean.parseBoolean(req.getParameter(ServiceParams.PARAM_RESET));
+
 		//Obtenemos los datos guardados de sesion
 		final HttpSession session = req.getSession(true);
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
@@ -58,15 +61,18 @@ public class LogFilteredServiceManager {
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
 
 		try {
-			if(filePosition != null && filePosition != Long.valueOf(0L)) {
+			if(!reset && filePosition != null && filePosition != Long.valueOf(0L)) {
 				reader.load(filePosition.longValue());
+			}else {
+				reader.load();
 			}
+
 			final LogFilter filter = new LogFilter(info);
 			filter.load(reader);
 			filter.setCriteria(crit);
 			result = filter.filter(Integer.parseInt(sNumLines));
-			session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
-			session.setAttribute("Reader", reader); //$NON-NLS-1$
+			//session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
+			//session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e); //$NON-NLS-1$

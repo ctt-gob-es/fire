@@ -105,7 +105,7 @@ boolean time =  false;
 	<script src="../resources/js/logs_manager.js" type="text/javascript"></script>
 	
 </head>
-<body> <!--  onunload = "closeFile();" -->
+<body> 
 	<!-- Barra de navegacion -->
 	<jsp:include page="../resources/jsp/NavigationBar.jsp" />
 	
@@ -119,16 +119,17 @@ boolean time =  false;
 			 	 Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.
 			</div>
 									      						   
-			<div id="error-txt-log" style="display:none;width:50%;"></div>
-			<div id="ok-txt-log" style="display:none;width:50%;"></div>			
+			<div id="error-txt-log" style="display:none;width:50%;" onload="setIdErrorTxtLog($(this).attr('id'))"></div>
+			<div id="ok-txt-log" style="display:none;width:50%;" onload="setIdOkTxtLog($(this).attr('id'))"></div>			
 		</div>
 	
 		<div id="main-content" style="margin: auto; width: 100%;" >
-			<div id="contentlogResult" style="display:inline-block;width: 80%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;">
-				<div id="advice" style="display:block; text-align: center;">					
+			<div id="contentlogResult" style="display:inline-block;width: 80%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;"  >
+		
+				<div id="advice" style="display:block; text-align: center;" onload="setIdAdvice($(this).attr('id'))">					
 					<p>Para ver los resultados en esta p&aacute;gina debe usar las funciones de b&uacute;squeda y filtrado.</p>
 				</div>		
-				<pre id="logResult"></pre>
+				<pre id="logResult"onload="setIdContainer($(this).attr('id'))"></pre>
 			</div>
 			
 			<div id="operations" style="display:inline-block;width:18%; vertical-align: top; padding-left: 1em;">
@@ -166,7 +167,7 @@ boolean time =  false;
 					      		<br>
 					      		<div>					      							      		
 					      			<div style="display: inline-block;width:49%;">
-					      				<input id="search-button" class="btn-log" name="search-button" type="button" value="Buscar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del texto buscado" onclick="searchText('logResult',$('#Nlines').val(),$('#search_txt').val(),$('#startDate').val() + ' '+  $('#startTime').val());" />
+					      				<input id="search-button" class="btn-log" name="search-button" type="button" value="Buscar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del texto buscado" onclick="searchText($('#Nlines').val(),$('#search_txt').val(),$('#search_StartDate').val() + ' '+  $('#search_StartTime').val());" />
 					      			</div>
 					      			<div style="display: inline-block;width:49%;"><!-- <span class="ui-icon ui-icon-trash"></span> -->
 					      				<button id="clear-button_search"  name="clear-button_search"  title="Borra el contenido de los campos de b&uacute;squeda"  onclick="Clean('log_search')" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>
@@ -221,7 +222,7 @@ boolean time =  false;
 				      					      					      	
 					      	<div style="display: inline-block;width:49%;">
 					      	<%if(date || time || levels != null) {%>
-					      		<input id="filtered-button" class="btn-log" name="filtered-button" type="button" value="Filtrar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del filtro indicado" onclick="getFiltered('logResult',$('#Nlines').val(), $('#startDate').val() + ' '+  $('#startTime').val(), $('#endDate').val() + ' '+  $('#endTime').val(), $('#level_select').val() );" />
+					      		<input id="filtered-button" class="btn-log" name="filtered-button" type="button" value="Filtrar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del filtro indicado" onclick="getFiltered($('#Nlines').val(), $('#startDate').val() + ' '+  $('#startTime').val(), $('#endDate').val() + ' '+  $('#endTime').val(), $('#level_select').val() );" />
 					      	<%}%>	
 					      	</div>
 					      	<div style="display: inline-block;width:49%;">
@@ -235,14 +236,14 @@ boolean time =  false;
 					<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="goReturn();" />
 				</div>
 				<div style="display: inline-block;width:10%;">
-					<input id="reset-button" class="btn-log" name="reset-button" type="button" value="Recargar" title="Recarga el fichero log, limpiando filtros y resultados anteriores" onclick="reset('logResult');" />
+					<input id="reset-button" class="btn-log" name="reset-button" type="button" value="Recargar" title="Recarga el fichero log, limpiando filtros y resultados anteriores" onclick="reset();" />
 				</div>
 				<div style="display: inline-block;width:58%;"></div>
 				<div style="display: inline-block;width:10%;">
-					      		<input id="tail-button" class="btn-log" name="tail-button" type="button" value="&uacute;ltimas l&iacute;neas" title="Obtiene las &uacute;ltimas l&iacute;neas del fichero log" onclick="getTail('logResult',$('#Nlines').val());" />
+					      		<input id="tail-button" class="btn-log" name="tail-button" type="button" value="&uacute;ltimas l&iacute;neas" title="Obtiene las &uacute;ltimas l&iacute;neas del fichero log" onclick="getTail($('#Nlines').val());" />
 				</div>
 				<div style="display: inline-block;width:10%;">			      		
-					<input id="more-button" class="btn-log" name="more-button" type="button" value="+ M&aacute;s" title="Obtiene las siguentes l&iacute;neas del fichero log" onclick="getMore('logResult',$('#Nlines').val());" />
+					<input id="more-button" class="btn-log" name="more-button" type="button" value="+ M&aacute;s" title="Obtiene las siguentes l&iacute;neas del fichero log" onclick="getMore($('#Nlines').val());" />
 				</div>
 			</div>
 		</div>	 <!-- main-content -->
@@ -250,5 +251,11 @@ boolean time =  false;
    	</div><!-- containerLogsManager -->
 	
 </body>
-
+<script type="text/javascript">
+	setIdScrollElement('contentlogResult');
+	setIdContainer('logResult');
+	setIdErrorTxtLog('error-txt-log');
+	setIdOkTxtLog('ok-txt-log');
+	setIdAdvice('advice');
+</script>
 </html>
