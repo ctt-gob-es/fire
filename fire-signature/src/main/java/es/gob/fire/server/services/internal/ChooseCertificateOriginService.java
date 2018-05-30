@@ -162,12 +162,17 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			certificates = connector.getCertificates(subjectId);
 			if (certificates == null || certificates.length == 0) {
 				LOGGER.log(Level.WARNING, "El usuario no dispone de certificados y el conector no le permite generarlos"); //$NON-NLS-1$
-				ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_NO_CERTS, originForced && !connector.allowRequestNewCerts());
-				if (originForced && !connector.allowRequestNewCerts()) {
-					response.sendRedirect(redirectErrorUrl);
+				if (connector.allowRequestNewCerts()) {
+					request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE_NOCERT).forward(request, response);
 				}
 				else {
-					request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE_NOCERT).forward(request, response);
+					ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_NO_CERTS, originForced);
+					if (originForced) {
+						response.sendRedirect(redirectErrorUrl);
+					}
+					else {
+						request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
+					}
 				}
 				return;
 			}
