@@ -48,6 +48,7 @@ public class FragmentedFileReader implements LogReader {
 
 	private CharBuffer nextLine2 = null;
 
+	private boolean endFile = false;
 	/**
 	 * Crea el objeto para la carga de ficheros.
 	 * @param channel Canal para la lectura del fichero.
@@ -81,7 +82,7 @@ public class FragmentedFileReader implements LogReader {
 
 	@Override
 	public void load(final long position) throws IOException {
-
+		this.endFile = false;
 		this.filePosition = position;
 		// Cacheamos un fragmento del fichero
 		final Future<Integer> readerProcess = this.channel.read(this.bBuffer, this.filePosition);
@@ -153,6 +154,7 @@ public class FragmentedFileReader implements LogReader {
 				}
 				// Si no hay mas datos, entonces esta es la ultima linea
 				else {
+					this.endFile = true;
 					result = this.nextLine;
 					this.nextLine = null;
 					close();
@@ -253,6 +255,11 @@ public class FragmentedFileReader implements LogReader {
 	public void close() throws IOException {
 		this.linesReader.close();
 		this.bBuffer.clear();
+	}
+
+	@Override
+	public boolean isEndFile() {
+		return this.endFile;
 	}
 
 

@@ -169,8 +169,8 @@ public class LogService extends HttpServlet {
 			return;
 		}
 
-
 		resp.setStatus(getStatusCode());
+
 		if(!fileClosed) {
 			resp.getOutputStream().write(result);
 		}
@@ -297,6 +297,8 @@ public class LogService extends HttpServlet {
 		final byte[] result = LogTailServiceManager.process(req);
 		if(LogTailServiceManager.getError() != null) {
 			setStatusCode(LogTailServiceManager.getError().getNumError());
+		}else {
+			setStatusCode(HttpServletResponse.SC_OK);
 		}
 
 		return result;
@@ -310,6 +312,8 @@ public class LogService extends HttpServlet {
 		final byte[] result = LogMoreServiceManager.process(req);
 		if(LogMoreServiceManager.getError()!=null) {
 			setStatusCode(LogMoreServiceManager.getError().getNumError());
+		}else {
+			setStatusCode(HttpServletResponse.SC_OK);
 		}
 		return result;
 	}
@@ -322,6 +326,8 @@ public class LogService extends HttpServlet {
 		final byte[] result = LogFilteredServiceManager.process(req);
 		if( LogFilteredServiceManager.getError() != null  && LogFilteredServiceManager.getError().getNumError() != 0) {
 			setStatusCode(LogFilteredServiceManager.getError().getNumError());
+		}else {
+			setStatusCode(HttpServletResponse.SC_OK);
 		}
 
 		return result;
@@ -332,9 +338,16 @@ public class LogService extends HttpServlet {
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
+		LogSearchServiceManager.setError(null);
 		final byte[] result = LogSearchServiceManager.process(req);
 		if(LogSearchServiceManager.getError() != null) {
 			setStatusCode(LogSearchServiceManager.getError().getNumError());
+		}
+		else if(LogSearchServiceManager.getStatus() != HttpServletResponse.SC_OK) {
+			setStatusCode(LogSearchServiceManager.getStatus());
+		}
+		else {
+			setStatusCode(HttpServletResponse.SC_OK);
 		}
 		return result;
 	}

@@ -11,7 +11,9 @@ import java.nio.CharBuffer;
 public class LogMore {
 
 	private final   LogRegistryReader registryReader;
-	private final  long filePosition = 0L;
+	private long filePosition ;
+
+
 
 
 
@@ -42,7 +44,7 @@ public class LogMore {
 				result = result.concat(lineReaded.toString()).concat("\n"); //$NON-NLS-1$
 				lines ++;
 			}
-
+			setFilePosition(reader.getFilePosition());
 			return result.getBytes(reader.getCharset());
 
 	}
@@ -58,7 +60,9 @@ public class LogMore {
 	}
 
 
-
+	public final void setFilePosition(final long filePosition) {
+		this.filePosition = filePosition;
+	}
 
 
 

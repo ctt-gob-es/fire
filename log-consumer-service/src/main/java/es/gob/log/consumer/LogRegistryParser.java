@@ -18,6 +18,7 @@ public class LogRegistryParser {
 	/** Listado de analizadores de particulas para identificar los registros. */
 	private final ParticleParser[] pParsers;
 
+
 	/**
 	 * Establece la informaci&oacute;n para el an&aacute;lisis de los registros de log.
 	 * @param logInfo Informaci&oacute;n acerca del formato del log.
@@ -77,6 +78,7 @@ public class LogRegistryParser {
 		if (this.needActiveReadline) {
 			reader.readLine();
 		}
+
 
 		return registry;
 	}
@@ -146,4 +148,9 @@ public class LogRegistryParser {
 		list.add(particle);
 		return list;
 	}
+
+
+
+
+
 }

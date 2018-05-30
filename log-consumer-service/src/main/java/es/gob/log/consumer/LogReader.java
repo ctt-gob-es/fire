@@ -65,4 +65,10 @@ public interface LogReader {
 	  * @return
 	  */
 	 public long getFilePosition() ;
+
+	 /**
+	  * Indica si hemos llegado al final de la lectura del fichero
+	  * @return
+	  */
+	 public boolean isEndFile();
 }

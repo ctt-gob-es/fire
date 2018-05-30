@@ -278,35 +278,50 @@ public class LogConsumerClient {
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.CLOSE_FILE.ordinal()); //$NON-NLS-1$
 		HttpResponse response;
-		response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
-		if( response.statusCode == 200) {
-			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-			final JsonArrayBuilder data = Json.createArrayBuilder();
-			data.add(Json.createObjectBuilder()
-					.add("Code",response.statusCode) //$NON-NLS-1$
-					.add("Message", "Fichero cerrado correctamente")); //$NON-NLS-1$ //$NON-NLS-2$
-			jsonObj.add("OK", data); //$NON-NLS-1$
-			try(final JsonWriter jw = Json.createWriter(result);){
-				jw.writeObject(jsonObj.build());
-				jw.close();
-			}
+		try {
+			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+			if( response.statusCode == 200) {
+				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message", "Fichero cerrado correctamente")); //$NON-NLS-1$ //$NON-NLS-2$
+				jsonObj.add("OK", data); //$NON-NLS-1$
+				try(final JsonWriter jw = Json.createWriter(result);){
+					jw.writeObject(jsonObj.build());
+					jw.close();
+				}
 
+			}
+			else {
+				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message", "Error al cerrar fichero log")); //$NON-NLS-1$ //$NON-NLS-2$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				try(final JsonWriter jw = Json.createWriter(result);){
+					jw.writeObject(jsonObj.build());
+					jw.close();
+				}
+			}
+			if(result.getBuffer().length() > 0) {
+				return result.toString().getBytes(this.getCharsetContent());
+			}
 		}
-		else {
+		catch (final Exception e) {
 			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 			final JsonArrayBuilder data = Json.createArrayBuilder();
 			data.add(Json.createObjectBuilder()
-					.add("Code",response.statusCode) //$NON-NLS-1$
-					.add("Message", "Error al cerrar fichero log")); //$NON-NLS-1$ //$NON-NLS-2$
+					.add("Code",404) //$NON-NLS-1$
+					.add("Message", "Error al cerrar fichero log:".concat(e.getMessage()))); //$NON-NLS-1$ //$NON-NLS-2$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 			try(final JsonWriter jw = Json.createWriter(result);){
 				jw.writeObject(jsonObj.build());
 				jw.close();
 			}
 		}
-		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(this.getCharsetContent());
-		}
+
 		return null;
 	}
 
@@ -476,6 +491,7 @@ public class LogConsumerClient {
 		return null;
 	}
 
+	@SuppressWarnings("resource")
 	public byte[] searchText(final int numLines, final String text, final String startDate, final boolean reset) {
 		final StringWriter result = new StringWriter();
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -487,7 +503,7 @@ public class LogConsumerClient {
 				.append("&".concat(ServiceParams.SEARCH_TEXT).concat("=")).append(text.replaceAll(" ", "%20"))//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				.append("&".concat(ServiceParams.SEARCH_DATETIME).concat("=")).append(startDate) //$NON-NLS-1$ //$NON-NLS-2$
 				.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append(reset); //$NON-NLS-1$ //$NON-NLS-2$
-		HttpResponse response;
+		HttpResponse response = null;
 		try {
 
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
@@ -505,17 +521,20 @@ public class LogConsumerClient {
 			    jw.close();
 			}
 			else {
-				resultSearch.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+				final byte[] resSearch = response.getContent();
+				final String res = new String(resSearch,this.getCharsetContent());
+				resultSearch.append(res);
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
-						.add("Message",resultSearch.toString())); //$NON-NLS-1$
-				jsonObj.add("Error", data); //$NON-NLS-1$
+						.add("Message", resultSearch.toString())); //$NON-NLS-1$
+				jsonObj.add("Error",data ); //$NON-NLS-1$
 				final JsonWriter jw = Json.createWriter(result);
 			    jw.writeObject(jsonObj.build());
 			    jw.close();
 			}
 
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			resultSearch.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
 			data.add(Json.createObjectBuilder()
 					.add("Code",400) //$NON-NLS-1$
@@ -564,4 +583,17 @@ public class LogConsumerClient {
 	}
 
 
+
+//	 private static byte[] readStream(final InputStream input) throws IOException {
+//	        if (input == null) {
+//	            return new byte[0];
+//	        }
+//	        int nBytes;
+//	        final byte[] buffer = new byte[4096];
+//	        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//	        while ((nBytes = input.read(buffer)) != -1) {
+//	            baos.write(buffer, 0, nBytes);
+//	        }
+//	        return baos.toByteArray();
+//	    }
 }

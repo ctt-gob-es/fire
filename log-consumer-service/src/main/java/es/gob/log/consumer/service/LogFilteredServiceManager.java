@@ -61,18 +61,17 @@ public class LogFilteredServiceManager {
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
 
 		try {
-			if(!reset && filePosition != null && filePosition != Long.valueOf(0L)) {
-				reader.load(filePosition.longValue());
-			}else {
+			if(reset || filePosition != null &&  filePosition.longValue() == 0L) {
 				reader.load();
 			}
-
 			final LogFilter filter = new LogFilter(info);
 			filter.load(reader);
 			filter.setCriteria(crit);
 			result = filter.filter(Integer.parseInt(sNumLines));
-			//session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
-			//session.setAttribute("Reader", reader); //$NON-NLS-1$
+			if(filter.canHasMore()) {
+				session.setAttribute("FilePosition", new Long(filter.getFilePosition())); //$NON-NLS-1$
+			}
+			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e); //$NON-NLS-1$

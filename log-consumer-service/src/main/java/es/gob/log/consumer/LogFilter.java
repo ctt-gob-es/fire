@@ -18,6 +18,8 @@ public class LogFilter {
 
 	private boolean more = true;
 
+
+
 	/**
 	 * Crea el filtro de logs.
 	 * @param logInfo Configuraci&oacute;n que se puede utilizar para determinar
@@ -88,6 +90,7 @@ public class LogFilter {
 		int lines = 0;
 		while (this.more && lines < maxLines) {
 			final LogRegistry registry = this.registryReader.readRegistry();
+
 
 			// Si hemos llegado al final del log, el resultado solo contendra los
 			// registros obtenidos hasta el momento
@@ -169,4 +172,9 @@ public class LogFilter {
 	public void close() throws IOException{
 		this.logReader.close();
 	}
+
+	public long getFilePosition() {
+		return this.logReader.getFilePosition();
+	}
+
 }

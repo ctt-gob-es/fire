@@ -15,6 +15,8 @@ class LogRegistryReader {
 
 	private LogReader logReader = null;
 
+
+
 	/**
 	 * Construye el parse de entradas de registro.
 	 * @param logInfo Informaci&oacute;n del fichero de log.
@@ -55,6 +57,7 @@ class LogRegistryReader {
 			try {
 				// Procesamos la linea y se deja cargada la siguiente
 				registry = this.registryParser.parse(this.logReader);
+
 			}
 			catch (final InvalidRegistryFormatException e) {
 				LOGGER.warning("Error al procesar una entrada del fichero de log: " + e); //$NON-NLS-1$
@@ -64,4 +67,9 @@ class LogRegistryReader {
 
 		return registry;
 	}
+
+
+
+
 }
+

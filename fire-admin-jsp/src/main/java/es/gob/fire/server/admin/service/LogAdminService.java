@@ -209,8 +209,6 @@ public class LogAdminService extends HttpServlet {
 			if(datSearchTxt != null && datSearchTxt.length > 0 ) {
 				final String res = new String(datSearchTxt,this.logclient.getCharsetContent());
 				result += res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
-				final String marc = "<span class='highlight'>" + this.txt2search + "</span>"; //$NON-NLS-1$ //$NON-NLS-2$
-				result = result.replace(this.txt2search, marc);
 			}
 			if(this.logclient != null && this.logclient.getCharsetContent()!= null){
 				response.setCharacterEncoding(this.logclient.getCharsetContent().toString());

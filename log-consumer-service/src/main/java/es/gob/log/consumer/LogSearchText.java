@@ -14,8 +14,8 @@ public class LogSearchText {
 	private final LogInfo logInfor;
 	private long filePosition;
 	private final LogReader reader;
-	private  LogErrors error = null;
-
+//	private  LogErrors error = null;
+	private int status = HttpServletResponse.SC_OK;
 
 	private String lineTextFound =  null;
 
@@ -26,7 +26,7 @@ public class LogSearchText {
 		this.logInfor = logInfo;
 		this.reader = reader;
 		this.setFilePosition(0L);
-		this.error = null;
+//		this.error = null;
 
 	}
 
@@ -37,9 +37,12 @@ public class LogSearchText {
 	 * @param text
 	 * @return
 	 * @throws IOException
+	 * @throws InvalidPatternException
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public final  byte[] searchText(final int numLines, final String text, final boolean reset) throws IOException {
-		return this.searchText(numLines,text,-1,reset);
+	public final  byte[] searchText(final int numLines, final String text) throws IOException, InvalidPatternException, InterruptedException, ExecutionException {
+		return this.searchText(numLines,text,-1);
 	}
 
 	/**
@@ -51,82 +54,47 @@ public class LogSearchText {
 	 * @param date
 	 * @return
 	 * @throws IOException
+	 * @throws InvalidPatternException
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec, final boolean reset) throws IOException {
+	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec) throws IOException, InvalidPatternException, InterruptedException, ExecutionException {
 
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
 
-			if(this.getError()!=null && this.getError().getMsgError()!= null && !"".equals(this.getError().getMsgError())) { //$NON-NLS-1$
-				this.setError(null);
-			}
-
-			if(reset) {
-				this.reader.load();
-				this.setFilePosition(0L);
-			}
-
-			boolean found = false;
+		boolean found = false;
+		final LogFilter filter = new LogFilter(this.logInfor);
+		filter.load(this.reader);
 			/*Se obtiene la fecha de b&uacute;squeda pasada en milisegundos si se ha pasado por par&aacute;metro
 			 * y se obtiene la posici&oacute;n del comienzo de la l&iacute;nea en la que se encuentra la fecha indicada*/
-			if(dateTimeMillisec != -1) {
+		if(dateTimeMillisec != -1) {
+			final Criteria crit = new Criteria();
+			crit.setStartDate(dateTimeMillisec);
+			filter.setCriteria(crit);
+		}
 
-				final Criteria crit = new Criteria();
-				crit.setStartDate(dateTimeMillisec);
-				final LogFilter filter = new LogFilter(this.logInfor);
-				filter.load(this.reader);
-				filter.setCriteria(crit);
-				final byte[] firstLine = filter.filter(1);
-				if(firstLine != null && firstLine.length > 0 ) {
-					found = true;
-				}
-
-				if( new String(firstLine).indexOf(text) != -1) {
-					baos.write(firstLine);
-					baos.write('\n');
-					found = true;
-				}
+		while (!found && !this.reader.isEndFile()) {
+			final byte[] filteredLines = filter.filter(10);
+			if( new String(filteredLines).indexOf(text) != -1) {
+				baos.write(filteredLines);
+				found = true;
 			}
-			/*Caso de haber encontrado la fecha o que no se haya pedido fecha,
-			 * se continua buscando la cadena de texto*/
-			if((found || dateTimeMillisec == -1) && text != null && !"".equals(text)) { //$NON-NLS-1$
-				found = this.search(text);
-				if(found) {
-					if(this.lineTextFound != null) {
-						baos.write(this.lineTextFound.getBytes(this.reader.getCharset()));
-						baos.write('\n');
-					}
-					int linesReaded = 0;
-					if(baos.size() > 0 && baos.toByteArray() != null) {
-						linesReaded = this.countLines(baos.toByteArray());
-					}
-					baos.write(this.getText( numLines - linesReaded));
-				}
-			}
+		}
 
-			if (!found) {
-				LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar."); //$NON-NLS-1$
-				this.error = new LogErrors("Error al procesar la petici&oacute;n buscar texto.",HttpServletResponse.SC_NOT_FOUND);			 //$NON-NLS-1$
-				baos.write(this.error.getMsgError().getBytes(this.logInfor.getCharset()));
+		/* Se a&ntilde;aden el resto de l&iacute;neas */
+		if(found) {
+			int linesReaded = 0;
+			if(baos.size() > 0 && baos.toByteArray() != null) {
+				linesReaded = this.countLines(baos.toByteArray());
 			}
-			//reader.close();
+			baos.write(this.getText( numLines - linesReaded));
 		}
-		catch (final InvalidPatternException e) {// | InterruptedException | ExecutionException e) {
-			LOGGER.log(Level.SEVERE,"Error el patrón indicado con la forma de los registros del log, no es válido"); //$NON-NLS-1$
-			this.error = new LogErrors("El patrón indicado con la forma de los registros del log, no es válido.",HttpServletResponse.SC_PRECONDITION_FAILED); //$NON-NLS-1$
+		else {
+			LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
+			setStatus(HttpServletResponse.SC_ACCEPTED);
+			baos.write("No se han encontrado m&aacute;s ocurrencias en la b&uacute;squeda".getBytes(this.logInfor.getCharset()));//$NON-NLS-1$
+		}
 
-			baos.write(this.error.getMsgError().getBytes(this.logInfor.getCharset()));
-		}
-		catch (final InterruptedException e) {
-			LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar."); //$NON-NLS-1$
-			this.error = new LogErrors("Error al procesar la petici&oacute;n buscar texto.",HttpServletResponse.SC_CONFLICT); //$NON-NLS-1$
-			baos.write(this.error.getMsgError().getBytes(this.logInfor.getCharset()));
-		}
-		catch (final ExecutionException e) {
-			LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar."); //$NON-NLS-1$
-			this.error = new LogErrors("Error al procesar la petici&oacute;n buscar texto.",HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-			baos.write(this.error.getMsgError().getBytes(this.logInfor.getCharset()));
-		}
 		return baos.toByteArray();
 	}
 
@@ -141,11 +109,13 @@ public class LogSearchText {
 				cbLine.rewind();
 				final String line = cbLine.toString();
 				if(line.indexOf(text) != -1) {
+					setFilePosition(this.reader.getFilePosition());
+
 					this.lineTextFound = line;
 					return true;
 				}
 			}
-			setFilePosition(this.reader.getFilePosition());
+
 			return false;
 	}
 
@@ -157,6 +127,7 @@ public class LogSearchText {
 			result = result.concat(cbLine.toString()).concat("\n"); //$NON-NLS-1$
 			numLines++;
 		}
+		setFilePosition(this.reader.getFilePosition());
 		return result.getBytes(this.reader.getCharset());
 	}
 
@@ -185,14 +156,24 @@ public class LogSearchText {
 		this.filePosition = filePosition;
 	}
 
-	public  final LogErrors getError() {
-		return this.error;
+	public final int getStatus() {
+		return this.status;
 	}
+
+	public final void setStatus(final int status) {
+		this.status = status;
+	}
+
+//	public  final LogErrors getError() {
+//		return this.error;
+//	}
 	/**
 	 * Establece la posici&oacute;n
 	 * @return
 	 */
-	public final void setError(final LogErrors error) {
-		this.error = error;
-	}
+//	public final void setError(final LogErrors error) {
+//		this.error = error;
+//	}
+
+
 }

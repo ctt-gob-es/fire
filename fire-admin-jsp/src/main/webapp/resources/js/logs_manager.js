@@ -46,6 +46,7 @@
 	var linesCount = 0;
 	var isReset = false;
 	var addResult = false;
+	var isFinal = false;
 	var filterOp = 0;
 	var searchOp = 0;
 	var text2Search = "";
@@ -99,8 +100,8 @@
  function printResult(JSONData, nlines){
 	var moreWithSearch = false;
 	 var data = "";
-	 var content = getResultLines(nlines);//$("#Nlines").val()
-	 console.log("contenido anterior:"+content);
+	 var content = getResultLines(nlines);
+
 	 $("#" + idContainer ).html("");
 	 $("#" + idErrorTxtLog).hide();
 	 $("#" + idOkTxtLog).hide();
@@ -115,27 +116,20 @@
 	 else if(JSONData.hasOwnProperty('More')){
 		 data = JSONData.More[0].Result;
 		 if(oper === "Search"){
-			 moreWithSearch =true;
-			 var arrHtml = data.split("</br>");
-			 for (i = 0; i < arrHtml.length-1; i++) {	
-				 var line = "<div>" + arrHtml[i] + "</div>";
-				 line = line.replace (text2Search,"<span class='highlight'>" + text2Search + "</span>");
-				 content += line;		
-			 }
+			 moreWithSearch = true;
 		 }
 		 oper = "More";	 	
 	 }
 	 else if(JSONData.hasOwnProperty('Search')){
 		 oper = "Search";
 		 data = JSONData.Search[0].Result;
-		 console.log("addResult:"+addResult+ " searchOp:" + searchOp);
+			 
 		 if(!addResult){
 			 content = ""; 
 		 }
 		 if (content !== ""){
 			 content += points; 
 		 }
-		
 	 }
 	 else if(JSONData.hasOwnProperty('Filtered')){
 		 oper = "Filtered";
@@ -144,15 +138,22 @@
 			 content = ""; 
 		 }	 
 	 }
-	 if(!moreWithSearch){
-		 var arrHtml = data.split("</br>");
-		 for (i = 0; i < arrHtml.length-1; i++) { 
-			 content += "<div>" + arrHtml[i] + "</div>";		
-		 }
-	 }
-	
+		
+	var arrHtml = data.split("</br>");
+	for (i = 0; i < arrHtml.length-1; i++) { 
+	/*En el caso de ser la busqueda se selecciona el texto a buscar */
+		if (oper === "Search" || moreWithSearch){
+			var line = "<div>" + arrHtml[i] + "</div>";
+			line = line.replace (text2Search,"<span class='highlight'>" + text2Search + "</span>");
+			content += line;		
+		}
+		else{
+			content += "<div>" + arrHtml[i] + "</div>"; 
+		}	
+	}
+
+
 	 $("#"+ idContainer).append(content);	 
-	 console.log("content:"+content);
 	 
 	 $('#'+idScrollElement).scrollTop(scrollTopPosition);
 	 $('#'+idScrollElement).scrollLeft(scrollLefPosition);
@@ -222,7 +223,7 @@
 	var ok = validateFields(arrFields);						
 	if(ok){
 		 activeElement("more-button", true);
-		 var url = "../LogAdminService?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime + param_reset;
+		
 		 if(searchOp == 0){
 			 addResult  = false;
 		 }
@@ -230,10 +231,6 @@
 			 addResult  = true; 
 		 }
 			
-		 var isFinal = markNextText(text);
-		 console.log("Es final de la busqueda: " + isFinal + " Numero Operaciones busqueda : "+searchOp);
-		 console.log("texto anterior a buscar:"+text2Search+" texto nuevo a buscar:"+text);	
-		 console.log("Fecha anterior a buscar:"+date2Search+" fecha nuevo a buscar:"+DateTime);	
 		 
 		 if (text2Search !== text || date2Search != DateTime){
 			 addResult  = false;
@@ -249,25 +246,32 @@
 			 scrollLefPosition = 0;
 			 param_reset = "&reset=yes";
 		 }	
-		 
-		 if(isFinal ){ //|| searchOp == 0
-			 $.post(url, function(data){		
+		 var url = "../LogAdminService?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime + param_reset;
+
+		 if(isFinal || searchOp == 0){ 
+			 $.post(url, function(data,status){		
 				  var JSONData = JSON.parse(data);
+							 
 				  if(JSONData.hasOwnProperty('Search')){
+					console.log("Print Search ");
 				  	printResult(JSONData, nlines);
 				  	searchOp = 0;
 				  	isFinal = markNextText(text);
-				  	addResult  = true; 
-				  	console.log("Es final de la busqueda: " + isFinal);
+				  	
 				  }
 				   else {
-				   	printErrorResult(JSONData);  
-				  }
-				  
+					   if(JSONData.hasOwnProperty('Error')){
+						 	printErrorResult(JSONData);  
+					   }			
+				  }			  
 			});
 			 
 		 }
-		 
+		 else if ( !isFinal && searchOp > 0){
+				isFinal = markNextText(text);
+		 }
+		 		 
+		
 	}
 	
  }
@@ -536,7 +540,7 @@
 		 var diff = diffLines;
 		 $("#" + idContainer + " > div").each(function () { 			 
 			 if(diff != 0){
-				 contSpan += $(this).children("span").length;// $("span").length;
+				 contSpan += $(this).children("span").length;
 				 diff --;				
 			 }
 			 else{					 
@@ -599,7 +603,7 @@
 	 }
 	 setScrollLeftPosition($('#'+idScrollElement).scrollLeft());
 //	 console.log("Movimiento de  seleccion: scrollTopPosition : " + scrollTopPosition + " scrollLefPosition:" + scrollLefPosition);
-	 if(allSpans.length == next_position){
+	 if(allSpans.length == next_position){ //==
 		 console.log("allSpans.length: "+allSpans.length+ " next_position="+next_position);
 		 result = true;
 	 }	  

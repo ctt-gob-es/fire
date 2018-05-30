@@ -34,14 +34,14 @@ public class LogMoreServiceManager {
 		try {
 
 			final int iNumLines = Integer.parseInt(sNumLines.trim());
-			if(filePosition != null && filePosition != Long.valueOf(0L)) {
+			if(filePosition != null &&  filePosition.longValue() == 0L) {
 				reader.load(filePosition.longValue());
 			}
 
 
 			final LogMore logMore = new LogMore(info);
 			result = logMore.getLogMore(iNumLines,reader);
-			session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
+			session.setAttribute("FilePosition", new Long(logMore.getFilePosition())); //$NON-NLS-1$
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 		}
