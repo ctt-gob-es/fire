@@ -39,6 +39,13 @@ public class LogSearchServiceManager {
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
 
+		if(getError()!= null && getError().getMsgError() != null && !"".equals(getError().getMsgError())) { //$NON-NLS-1$
+			setError(null);
+		}
+		if (getStatus() != HttpServletResponse.SC_OK) {
+			setStatus(HttpServletResponse.SC_OK);
+		}
+
 		try {
 
 			if(reset || filePosition != null &&  filePosition.longValue() == 0L) {
@@ -55,15 +62,9 @@ public class LogSearchServiceManager {
 			}
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
-//			if(logSearch.getError() != null && logSearch.getError().getMsgError() != null) {
-//					error = logSearch.getError();
-//					session.setAttribute("FilePosition", Long.valueOf(0L)); //$NON-NLS-1$
-//			}
-//			else {
-				if(logSearch.getFilePosition() > 0L) {
+			if(logSearch.getFilePosition() > 0L) {
 					session.setAttribute("FilePosition",Long.valueOf(logSearch.getFilePosition())); //$NON-NLS-1$
-				}
-//			}
+			}
 				//throw new InvalidPatternException("Prueba"); //$NON-NLS-1$
 		} catch (final InvalidPatternException e) {
 			LOGGER.log(Level.SEVERE,"El patrón indicado con la forma de los registros del log, no es válido."); //$NON-NLS-1$

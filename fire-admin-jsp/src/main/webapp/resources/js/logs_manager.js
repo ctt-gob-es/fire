@@ -43,14 +43,22 @@
 	var points = "<div>. . . . . . . . . .</div><div>. . . . . . . . . .</div><div>. . . . . . . . . .</div>";
 	
 /**Variables Globales */	
-	var linesCount = 0;
+	
 	var isReset = false;
 	var addResult = false;
 	var isFinal = false;
+	
 	var filterOp = 0;
 	var searchOp = 0;
+	
 	var text2Search = "";
 	var date2Search = 0;
+	
+	var initDate2Filter = 0;
+	var endDate2Filter = 0;
+	var level2Filter = 0;
+	
+	var linesCount = 0;
 	var diffLines = 0;
 	var next_position = searchOp;
 	var scrollTopPosition = 0;
@@ -230,8 +238,7 @@
 		 else{
 			 addResult  = true; 
 		 }
-			
-		 
+					 
 		 if (text2Search !== text || date2Search != DateTime){
 			 addResult  = false;
 			 text2Search = text;
@@ -270,8 +277,7 @@
 		 else if ( !isFinal && searchOp > 0){
 				isFinal = markNextText(text);
 		 }
-		 		 
-		
+		 		 	
 	}
 	
  }
@@ -294,12 +300,35 @@
 		searchOp = 0;
 		activeElement("more-button", false);
 		if(filterOp == 0){
-			 addResult  = false;
-			 param_reset = "&reset=yes";
+			 addResult  = false;			
 		 }
 		 else{
 			 addResult  = true; 
 		 }
+		
+		console.log("startDate :"+startDate + " endDate :"+endDate+ " level:"+level);
+		
+		 if (initDate2Filter !== startDateTime || 
+			 endDate2Filter != endDateTime || 
+			 level2Filter !== level){
+			 
+			addResult  = false;
+			initDate2Filter = startDateTime;
+			endDate2Filter = endDateTime;
+			level2Filter = level;
+				 			 
+			linesCount = 0;							
+			filterOp = 0;
+			searchOp = 0;				
+			diffLines = 0;
+			next_position = searchOp;
+			scrollTopPosition = 0;
+			scrollLefPosition = 0;
+			param_reset = "&reset=yes";
+			console.log("param_reset "+param_reset);
+		 }	
+		
+		
 		filterOp = filterOp + 1;		
 		var url = "../LogAdminService?op=9&nlines=" + nlines + "&start_date=" + startDateTime + "&end_date=" + endDateTime + "&level=" + level + param_reset;		 
 		 $.post(url, function(data){		

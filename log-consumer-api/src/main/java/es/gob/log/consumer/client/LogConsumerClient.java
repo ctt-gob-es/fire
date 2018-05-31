@@ -357,7 +357,10 @@ public class LogConsumerClient {
 			    jw.close();
 			}
 			else {
-				resultTail.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+				final byte[] resTail = response.getContent();
+				final String res = new String(resTail,this.getCharsetContent());
+				resultTail.append(res);
+				//resultTail.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
 						.add("Message", resultTail.toString())); //$NON-NLS-1$
@@ -408,7 +411,10 @@ public class LogConsumerClient {
 			    jw.close();
 			}
 			else {
-				resultMore.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+				final byte[] resMore = response.getContent();
+				final String res = new String(resMore,this.getCharsetContent());
+				resultMore.append(res);
+				//resultMore.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
 						.add("Message",resultMore.toString())); //$NON-NLS-1$
@@ -419,6 +425,7 @@ public class LogConsumerClient {
 			}
 
 		} catch (final IOException e) {
+
 			resultMore.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
 			data.add(Json.createObjectBuilder()
 					.add("Code",400) //$NON-NLS-1$
@@ -465,7 +472,10 @@ public class LogConsumerClient {
 			    jw.close();
 			}
 			else {
-				resultFilter.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+				final byte[] resFilter = response.getContent();
+				final String res = new String(resFilter,this.getCharsetContent());
+				resultFilter.append(res);
+//				resultFilter.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
 						.add("Message",resultFilter.toString())); //$NON-NLS-1$

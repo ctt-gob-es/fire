@@ -130,24 +130,23 @@ public class LogOpen {
 				throw new IOException();
 			}
 
-
 			//Generamos el resultado en formato JSON de la salida
 			final StringWriter writer = new StringWriter();
+			final String charset = this.linfo.getCharset().name();
+			String levels = ""; //$NON-NLS-1$
 
-
-				final String charset = this.linfo.getCharset().name();
-				String levels = ""; //$NON-NLS-1$
-				for (int i = 0; i < this.linfo.getLevels().length; i++) {
-					if(i < this.linfo.getLevels().length - 1) {
-						levels += this.linfo.getLevels()[i].concat(","); //$NON-NLS-1$
-					}
-					else {
-						levels += this.linfo.getLevels()[i];
-					}
+			for (int i = 0; i < this.linfo.getLevels().length; i++) {
+				if(i < this.linfo.getLevels().length - 1) {
+					levels += this.linfo.getLevels()[i].concat(","); //$NON-NLS-1$
 				}
-				final String dateTimeFormat = this.linfo.getDateFormat();
-				final String date = this.linfo.hasDateComponent()?"true":"false"; //$NON-NLS-1$ //$NON-NLS-2$
-				final String time = this.linfo.hasTimeComponent()?"true":"false"; //$NON-NLS-1$ //$NON-NLS-2$
+				else {
+					levels += this.linfo.getLevels()[i];
+				}
+			}
+
+			final String dateTimeFormat = this.linfo.getDateFormat();
+			final String date = this.linfo.hasDateComponent() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
+			final String time = this.linfo.hasTimeComponent() ? "true" : "false"; //$NON-NLS-1$ //$NON-NLS-2$
 
 				data.add(Json.createObjectBuilder()
 						.add("Charset",charset) //$NON-NLS-1$

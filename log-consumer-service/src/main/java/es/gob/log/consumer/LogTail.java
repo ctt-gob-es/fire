@@ -83,8 +83,9 @@ public class LogTail {
 	 * @param data
 	 * @param lines
 	 * @return
+	 * @throws IOException
 	 */
-	private  String readLine( final byte[] data, final int lines) {
+	private  String readLine( final byte[] data, final int lines) throws IOException {
 		 int numLines = 0;
 		 String linesDataRead = ""; //$NON-NLS-1$
 
@@ -101,9 +102,6 @@ public class LogTail {
 			  }
 			reader.close();
 			setTotalBufferLines(numLines);
-		  } catch (final IOException e) {
-
-			e.printStackTrace();
 		  }
 
 		 return linesDataRead;
@@ -113,17 +111,15 @@ public class LogTail {
 	 * Obtiene el n&uacute;mero de l&iacute;neas del bloque de datos pasado como par&aacute;metro (data)
 	 * @param data
 	 * @return
+	 * @throws IOException
 	 */
-	private static  int getNumLines(final byte[] data) {
+	private static  int getNumLines(final byte[] data) throws IOException {
 		int numLines = 0;
 		 try (final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data)))){
 				while (reader.readLine() != null){
 					numLines++;
 				  }
 				reader.close();
-			  } catch (final IOException e) {
-
-				e.printStackTrace();
 			  }
 			 return numLines;
 	}

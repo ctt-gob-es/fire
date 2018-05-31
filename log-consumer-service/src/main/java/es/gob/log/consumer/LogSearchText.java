@@ -17,7 +17,7 @@ public class LogSearchText {
 //	private  LogErrors error = null;
 	private int status = HttpServletResponse.SC_OK;
 
-	private String lineTextFound =  null;
+//	private final String lineTextFound =  null;
 
 	private static final Logger LOGGER = Logger.getLogger(LogSearchText.class.getName());
 	/**Constructor
@@ -103,21 +103,21 @@ public class LogSearchText {
 	 * @param text
 	 * @throws IOException
 	 */
-	private final boolean search(final String text) throws IOException {
-			CharBuffer cbLine;
-			while((cbLine = this.reader.readLine()) != null) {
-				cbLine.rewind();
-				final String line = cbLine.toString();
-				if(line.indexOf(text) != -1) {
-					setFilePosition(this.reader.getFilePosition());
-
-					this.lineTextFound = line;
-					return true;
-				}
-			}
-
-			return false;
-	}
+//	private final boolean search(final String text) throws IOException {
+//			CharBuffer cbLine;
+//			while((cbLine = this.reader.readLine()) != null) {
+//				cbLine.rewind();
+//				final String line = cbLine.toString();
+//				if(line.indexOf(text) != -1) {
+//					setFilePosition(this.reader.getFilePosition());
+//
+//					this.lineTextFound = line;
+//					return true;
+//				}
+//			}
+//
+//			return false;
+//	}
 
 	private final byte[] getText( final int lines) throws IOException {
 		String result = ""; //$NON-NLS-1$

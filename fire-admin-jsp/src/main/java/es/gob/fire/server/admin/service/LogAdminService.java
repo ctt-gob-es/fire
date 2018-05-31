@@ -62,7 +62,7 @@ public class LogAdminService extends HttpServlet {
 		final HttpSession session = request.getSession(false);
 		String result = null;
 
-		final RequestDispatcher rd=request.getRequestDispatcher("/Logs/LogsManager.jsp");   //$NON-NLS-1$
+		final RequestDispatcher rd = request.getRequestDispatcher("/Logs/LogsManager.jsp");   //$NON-NLS-1$
 
 		//final String codeInit  = "I9lUuX+iEvzAD/hwaU2MbQ=="; //$NON-NLS-1$ // I9lUuX+iEvzAD/hwaU2MbQ==
 		//D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=
@@ -94,7 +94,6 @@ public class LogAdminService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString)); //$NON-NLS-1$
-
 			final String jsonError = getJsonError(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString), HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
 	        response.getWriter().write(jsonError);
 	        rd.include(request, response);
@@ -118,6 +117,7 @@ public class LogAdminService extends HttpServlet {
 			result = echo(this.url);
 			response.getWriter().write(result);
 			break;
+
 		case GET_LOG_FILES:
 			LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
 			try {
@@ -137,10 +137,9 @@ public class LogAdminService extends HttpServlet {
 				} catch (final IOException e1) {
 					LOGGER.severe("Error en la respuesta del mensaje:"+ e1.getMessage()); //$NON-NLS-1$
 				}
-
 			}
-
 			break;
+
 		case OPEN_FILE:
 			LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
@@ -161,6 +160,7 @@ public class LogAdminService extends HttpServlet {
 				setReset(false);
 			}
 			break;
+
 		case CLOSE_FILE:
 			LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
@@ -173,8 +173,8 @@ public class LogAdminService extends HttpServlet {
 				response.setCharacterEncoding(this.logclient.getCharsetContent().toString());
 			}
 			response.getWriter().write(result);
-
 			break;
+
 		case TAIL:
 			LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
@@ -197,7 +197,7 @@ public class LogAdminService extends HttpServlet {
 				final String res = new String(datMoreFile,this.logclient.getCharsetContent());
 				result = res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
 			}
-			if(this.logclient != null && this.logclient.getCharsetContent()!= null){
+			if(this.logclient != null && this.logclient.getCharsetContent() != null){
 				response.setCharacterEncoding(this.logclient.getCharsetContent().toString());
 			}
 			response.getWriter().write(result);

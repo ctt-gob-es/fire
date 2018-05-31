@@ -84,7 +84,8 @@ public class LogService extends HttpServlet {
 					break;
 				default:
 					LOGGER.warning("Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-					resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
+					resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					result = new String("Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio").getBytes(); //$NON-NLS-1$
 					return;
 				}
 			}
@@ -118,9 +119,6 @@ public class LogService extends HttpServlet {
 				case TAIL:
 					LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
 					result = getLogTail(req);
-					if(result==null || result.length <= 0) {
-						setStatusCode(HttpServletResponse.SC_BAD_REQUEST);
-					}
 					break;
 				case GET_MORE:
 					LOGGER.info("Solicitud entrante de mas log"); //$NON-NLS-1$
@@ -140,15 +138,15 @@ public class LogService extends HttpServlet {
 					break;
 				default:
 					LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-					//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
 					resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					result = new String("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio").getBytes(); //$NON-NLS-1$
 					return;
 				}
 			}
 			else {
 				LOGGER.warning("Operacion no soportada sin login previo"); //$NON-NLS-1$
-				//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
 				resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				result = new String("Operacion no soportada sin login previo").getBytes(); //$NON-NLS-1$
 				return;
 			}
 		}
@@ -161,11 +159,13 @@ public class LogService extends HttpServlet {
 		}
 		catch (final UnsupportedEncodingException e) {
 			resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+			result = new String("La codificación no es valida.").getBytes(); //$NON-NLS-1$
 			LOGGER.log(Level.SEVERE,"La codificación no es valida.",e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion"); //$NON-NLS-1$
+			result = new String("Ocurrio un error al procesar la peticion.").getBytes(); //$NON-NLS-1$
+//			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion"); //$NON-NLS-1$
 			return;
 		}
 
@@ -255,8 +255,10 @@ public class LogService extends HttpServlet {
 
 	private static boolean closeFile(final HttpServletRequest req) throws SessionException, IOException {
 		boolean result = false;
+		setStatusCode(HttpServletResponse.SC_OK);
 		final HttpSession session = req.getSession(true);
 		if (session == null) {
+			setStatusCode(HttpServletResponse.SC_NOT_ACCEPTABLE);
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
 
@@ -282,6 +284,7 @@ public class LogService extends HttpServlet {
 
 		} catch (final IOException e) {
 			LOGGER.log(Level.WARNING, "No se ha cerrado correctamente el fichero : ".concat(e.getMessage())); //$NON-NLS-1$
+			setStatusCode(HttpServletResponse.SC_NOT_ACCEPTABLE);
 			throw new IOException();
 		}
 		return result;
@@ -300,7 +303,6 @@ public class LogService extends HttpServlet {
 		}else {
 			setStatusCode(HttpServletResponse.SC_OK);
 		}
-
 		return result;
 	}
 
@@ -312,7 +314,11 @@ public class LogService extends HttpServlet {
 		final byte[] result = LogMoreServiceManager.process(req);
 		if(LogMoreServiceManager.getError()!=null) {
 			setStatusCode(LogMoreServiceManager.getError().getNumError());
-		}else {
+		}
+		else if(LogMoreServiceManager.getStatus() != HttpServletResponse.SC_OK) {
+			setStatusCode(LogMoreServiceManager.getStatus());
+		}
+		else {
 			setStatusCode(HttpServletResponse.SC_OK);
 		}
 		return result;
@@ -326,7 +332,10 @@ public class LogService extends HttpServlet {
 		final byte[] result = LogFilteredServiceManager.process(req);
 		if( LogFilteredServiceManager.getError() != null  && LogFilteredServiceManager.getError().getNumError() != 0) {
 			setStatusCode(LogFilteredServiceManager.getError().getNumError());
-		}else {
+		}else if (LogFilteredServiceManager.getStatus() != HttpServletResponse.SC_OK) {
+			setStatusCode(LogFilteredServiceManager.getStatus());
+		}
+		else {
 			setStatusCode(HttpServletResponse.SC_OK);
 		}
 

@@ -1,6 +1,7 @@
 package es.gob.log.consumer.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,15 +21,19 @@ public class LogFilteredServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogFilteredServiceManager.class.getName());
 	private static  LogErrors error ;
+	private static int status = HttpServletResponse.SC_OK;
+
 
 
 
 	public final static byte[] process(final HttpServletRequest req) {
 
-		if(getError()!=null && getError().getMsgError() != null && !"".equals(getError().getMsgError())) {
+		if(getError()!= null && getError().getMsgError() != null && !"".equals(getError().getMsgError())) {
 			setError(null);
 		}
-
+		if (getStatus() != HttpServletResponse.SC_OK) {
+			setStatus(HttpServletResponse.SC_OK);
+		}
 
 		byte[] result = null;
 		final Criteria crit = new Criteria();
@@ -64,12 +69,20 @@ public class LogFilteredServiceManager {
 			if(reset || filePosition != null &&  filePosition.longValue() == 0L) {
 				reader.load();
 			}
+
 			final LogFilter filter = new LogFilter(info);
 			filter.load(reader);
 			filter.setCriteria(crit);
 			result = filter.filter(Integer.parseInt(sNumLines));
 			if(filter.canHasMore()) {
 				session.setAttribute("FilePosition", new Long(filter.getFilePosition())); //$NON-NLS-1$
+			}
+			if(reader.isEndFile() && result != null && result.length <= 0) {
+				LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en el filtrado"); //$NON-NLS-1$
+				setStatus(HttpServletResponse.SC_ACCEPTED);
+				result = new String("No se han encontrado m&aacute;s ocurrencias en el filtrado").getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
+				session.setAttribute("Reader", reader); //$NON-NLS-1$
+				return result;
 			}
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
@@ -106,5 +119,11 @@ public class LogFilteredServiceManager {
 		LogFilteredServiceManager.error = error;
 	}
 
+	public static final int getStatus() {
+		return status;
+	}
 
+	public static final void setStatus(final int status) {
+		LogFilteredServiceManager.status = status;
+	}
 }
