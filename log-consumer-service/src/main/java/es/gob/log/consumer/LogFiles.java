@@ -2,9 +2,9 @@ package es.gob.log.consumer;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
+import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
 import javax.json.Json;
@@ -27,9 +27,9 @@ public class LogFiles {
 	 * M&eacute;todo de consulta de ficheros de logs.
 	 * @return Array de bytes que contiene cadena de caracteres en formato JSON indicando el nombre de los ficheros log,
 	 *  fecha de &uacute;ltima actualizaci&oacute;n sin formato (long) y su tama&ntilde;o en bytes
-	 * @throws UnsupportedEncodingException
+	 * @throws IOException
 	 */
-	public  byte[] getLogFiles() throws UnsupportedEncodingException  {
+	public  byte[] getLogFiles()  {
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 		byte[] result = null;
@@ -63,16 +63,11 @@ public class LogFiles {
 			        jw.writeObject(jsonObj.build());
 			        jw.close();
 			    }
-				try {
-					result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
-				} catch (final UnsupportedEncodingException e) {
-					LOGGER.log(Level.SEVERE, "Error al codificar los bytes del resultado FileList".concat(e.getMessage())); //$NON-NLS-1$
-					throw new UnsupportedEncodingException();
-				}
+				result = writer.toString().getBytes(Charset.defaultCharset());
 			}
 			else {
 				data.add(Json.createObjectBuilder()
-						.add("Code",HttpServletResponse.SC_NO_CONTENT) //$NON-NLS-1$
+						.add("Code",HttpServletResponse.SC_BAD_REQUEST) //$NON-NLS-1$
 						.add("Message", "No se ha podido obtener la lista de ficheros log.")); //$NON-NLS-1$//$NON-NLS-2$
 				jsonObj.add("Error", data); //$NON-NLS-1$
 				final StringWriter writer = new StringWriter();
@@ -80,13 +75,8 @@ public class LogFiles {
 			        jw.writeObject(jsonObj.build());
 			        jw.close();
 			    }
+				result = writer.toString().getBytes(Charset.defaultCharset());
 
-				try {
-					result = writer.toString().getBytes("UTF-8"); //$NON-NLS-1$
-				} catch (final UnsupportedEncodingException e) {
-					LOGGER.log(Level.SEVERE, "Error al codificar los bytes del resultado Error".concat(e.getMessage())); //$NON-NLS-1$
-					throw new UnsupportedEncodingException();
-				}
 			}
 
 		}

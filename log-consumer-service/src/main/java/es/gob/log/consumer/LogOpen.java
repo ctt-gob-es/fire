@@ -80,28 +80,22 @@ public class LogOpen {
 				//Obtenemos el nombre del fichero .loginfo que mas se aproxime al nombre del fichero de log
 				for (int i = 0; i < files.length; i++){
 
-//					if (logFileName.startsWith(files[i].getName().replace(LogConstants.FILE_EXT_LOGINFO, ""))) {
-//
-//						if (configFile != null && files[i].getName().length() > configFile.getName().length()) {
-//							configFile = files[i];
-//						}
-//					}
-
-					if(files[i].getName().matches("^[A-Z][a-z]".concat(nameLogInfo).concat("*.loginfo"))) {//coincide 100% //$NON-NLS-1$ //$NON-NLS-2$
+					if (logFileName.startsWith(files[i].getName().replace(LogConstants.FILE_EXT_LOGINFO, ""))) {
 						fileNamesLoginfo[0] = files[i].getName();
 					}
-					else if(files[i].getName().matches("^[A-Z][a-z]"+ nameLogInfo.trim().replace("_", "") +"*.loginfo") ) {//coincide 75% //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					else if(files[i].getName().matches("^[0-9][A-Z][a-z]".concat(nameLogInfo).concat("*.loginfo"))) {//coincide 100% //$NON-NLS-1$ //$NON-NLS-2$
 						fileNamesLoginfo[1] = files[i].getName();
 					}
-					else if(files[i].getName().matches("^[A-Z][a-z]"+nameLogInfo.trim()+"*.loginfo") && files[i].getName().replace(LogConstants.FILE_EXT_LOG, "").length() == nameLogInfo.length() ) {//coincide 50% //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					else if(files[i].getName().matches("^[0-9][A-Z][a-z]"+ nameLogInfo.trim().replace("_", "") +"*.loginfo") ) {//coincide 75% //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						fileNamesLoginfo[2] = files[i].getName();
 					}
-					else if(files[i].getName().matches("^[A-Z][a-z]*.loginfo")) {//coincide 0% //$NON-NLS-1$
+					else if(files[i].getName().matches("^[0-9][A-Z][a-z]"+nameLogInfo.trim()+"*.loginfo") && files[i].getName().replace(LogConstants.FILE_EXT_LOG, "").length() == nameLogInfo.length() ) {//coincide 50% //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						fileNamesLoginfo[3] = files[i].getName();
 					}
-					else {
+					else if(files[i].getName().matches("^[0-9][A-Z][a-z]*.loginfo")) {//coincide 0% //$NON-NLS-1$
 						fileNamesLoginfo[4] = files[i].getName();
 					}
+
 				}
 
 				if( fileNamesLoginfo.length > 0) {

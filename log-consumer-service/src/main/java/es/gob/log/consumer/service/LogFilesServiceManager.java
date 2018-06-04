@@ -1,6 +1,6 @@
 package es.gob.log.consumer.service;
 
-import java.io.UnsupportedEncodingException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,7 +10,7 @@ public class LogFilesServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogFilesServiceManager.class.getName());
 
-	public final static byte[] process() throws UnsupportedEncodingException  {
+	public final static byte[] process()  {
 		LOGGER.log(Level.INFO, "Iniciado proceso de listar ficheros log"); //$NON-NLS-1$
 		byte[] result = null;
 		final LogFiles logfile = new LogFiles();

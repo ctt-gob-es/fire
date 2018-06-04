@@ -192,7 +192,7 @@ public class LogAdminService extends HttpServlet {
 		case GET_MORE:
 			LOGGER.info("Solicitud entrante de mas log"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
-			final byte datMoreFile[] = this.logclient.getMoreLog(this.numlines);
+			final byte datMoreFile[] = this.logclient.getMoreLog(this.numlines, this.logFileName);
 			if(datMoreFile != null && datMoreFile.length > 0 ) {
 				final String res = new String(datMoreFile,this.logclient.getCharsetContent());
 				result = res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$

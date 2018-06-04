@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import es.gob.log.consumer.InvalidPatternException;
-import es.gob.log.consumer.LogErrors;
 import es.gob.log.consumer.LogInfo;
 import es.gob.log.consumer.LogReader;
 import es.gob.log.consumer.LogSearchText;
@@ -19,10 +18,10 @@ import es.gob.log.consumer.LogSearchText;
 public class LogSearchServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogTailServiceManager.class.getName());
-	private static LogErrors error = null;
-	private static int status = HttpServletResponse.SC_OK;
+//	private static LogErrors error = null;
+//	private static int status = HttpServletResponse.SC_OK;
 
-	public final static byte[] process(final HttpServletRequest req) {
+	public final static byte[] process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 
 		byte[] result = null;
 		/* Obtenemos los par&aacute;metros*/
@@ -39,12 +38,6 @@ public class LogSearchServiceManager {
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
 
-		if(getError()!= null && getError().getMsgError() != null && !"".equals(getError().getMsgError())) { //$NON-NLS-1$
-			setError(null);
-		}
-		if (getStatus() != HttpServletResponse.SC_OK) {
-			setStatus(HttpServletResponse.SC_OK);
-		}
 
 		try {
 
@@ -61,37 +54,42 @@ public class LogSearchServiceManager {
 				result = logSearch.searchText(Integer.parseInt(sNumLines) , text, sdateTime.longValue());
 			}
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
-
 			if(logSearch.getFilePosition() > 0L) {
-					session.setAttribute("FilePosition",Long.valueOf(logSearch.getFilePosition())); //$NON-NLS-1$
+				session.setAttribute("FilePosition",Long.valueOf(logSearch.getFilePosition())); //$NON-NLS-1$
 			}
-				//throw new InvalidPatternException("Prueba"); //$NON-NLS-1$
+
+			if(result == null) {
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se han encontrado más ocurrencias en la búsqueda"); //$NON-NLS-1$
+				result = "No se han encontrado más ocurrencias en la búsqueda".getBytes( info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
+			}
+
 		} catch (final InvalidPatternException e) {
-			LOGGER.log(Level.SEVERE,"El patrón indicado con la forma de los registros del log, no es válido."); //$NON-NLS-1$
-			error = new LogErrors("El patrón indicado con la forma de los registros del log, no es válido.",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
-			result = error.getMsgError().getBytes(StandardCharsets.UTF_8);
+			LOGGER.log(Level.SEVERE,"El patr&oacute;n indicado con la forma de los registros del log, no es v&aacute;lido.",e.getMessage()); //$NON-NLS-1$
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "El patrón indicado con la forma de los registros del log, no es válido."); //$NON-NLS-1$
+			result = "El patrón indicado con la forma de los registros del log, no es válido.".getBytes( info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
 			return result;
 		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero"); //$NON-NLS-1$
-			error = new LogErrors("No se ha podido leer el fichero",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
-			result = error.getMsgError().getBytes( StandardCharsets.UTF_8);
+			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e.getMessage()); //$NON-NLS-1$
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido leer el fichero"); //$NON-NLS-1$
+			result = "No se ha podido leer el fichero".getBytes( info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
 			return result;
 		}
 		catch (final InterruptedException e) {
-			LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar. "); //$NON-NLS-1$
-			error = new LogErrors("Error al procesar la petici&oacute;n buscar texto.".concat(e.getMessage()),HttpServletResponse.SC_CONFLICT); //$NON-NLS-1$
-			result = error.getMsgError().getBytes(info.getCharset());
+			LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar. ",e.getMessage()); //$NON-NLS-1$
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al procesar la petición buscar."); //$NON-NLS-1$
+			result ="Error al procesar la petición buscar.".getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
 		}
 		catch (final ExecutionException e) {
-			LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar."); //$NON-NLS-1$
-			error = new LogErrors("Error al procesar la petici&oacute;n buscar texto.",HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-			result = error.getMsgError().getBytes(info.getCharset());
+			LOGGER.log(Level.SEVERE,"Error al procesar la petici&oacute;n buscar.",e.getMessage()); //$NON-NLS-1$
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al procesar la petición buscar."); //$NON-NLS-1$
+			result = "Error al procesar la petición buscar.".getBytes( info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
 			return result;
+
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero"); //$NON-NLS-1$
-			error = new LogErrors("No se ha podido leer el fichero",HttpServletResponse.SC_NOT_ACCEPTABLE); //$NON-NLS-1$
-			result = error.getMsgError().getBytes( StandardCharsets.UTF_8);
+			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e.getMessage()); //$NON-NLS-1$
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al procesar la petición buscar."); //$NON-NLS-1$
+			result = "Error al procesar la petición buscar.".getBytes( info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
 			return result;
 		}
 
@@ -99,24 +97,24 @@ public class LogSearchServiceManager {
 	}
 
 
-	public static final LogErrors getError() {
-		return error;
-	}
-
-
-	public static final void setError(final LogErrors error) {
-		LogSearchServiceManager.error = error;
-	}
-
-
-	public final static int getStatus() {
-		return LogSearchServiceManager.status;
-	}
-
-
-	public final static void setStatus(final int status) {
-		LogSearchServiceManager.status = status;
-	}
+//	public static final LogErrors getError() {
+//		return error;
+//	}
+//
+//
+//	public static final void setError(final LogErrors error) {
+//		LogSearchServiceManager.error = error;
+//	}
+//
+//
+//	public final static int getStatus() {
+//		return LogSearchServiceManager.status;
+//	}
+//
+//
+//	public final static void setStatus(final int status) {
+//		LogSearchServiceManager.status = status;
+//	}
 
 
 

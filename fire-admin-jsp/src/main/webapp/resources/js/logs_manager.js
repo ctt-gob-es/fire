@@ -202,7 +202,7 @@
 	var arrFields = ["Nlines"];
 	var ok = validateFields(arrFields);						
 	if(ok){
-		 var url = "../LogAdminService?op=7&nlines="+nlines;
+		 var url = "../LogAdminService?op=7&nlines="+nlines+"&fname="+$("#fileName").text();
 		 $.post(url, function(data){		
 			 var JSONData = JSON.parse(data);
 			  if(JSONData.hasOwnProperty('More')){

@@ -198,15 +198,15 @@ public class LogServerService extends HttpServlet {
 				this.logSrv.setId(Integer.parseInt(request.getParameter(LogServerService.PARAM_IDSRV)));
 			}
 		}
-		if(request.getParameter(LogServerService.PARAM_NAMESRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_NAMESRV))) {
+		if(request.getParameter(LogServerService.PARAM_NAMESRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_NAMESRV))) { //$NON-NLS-1$
 			this.setNombreSrv(request.getParameter(LogServerService.PARAM_NAMESRV));
 			this.logSrv.setNombre(this.getNombreSrv());
 		}
-		if(request.getParameter(LogServerService.PARAM_PASSSRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_PASSSRV))) {
+		if(request.getParameter(LogServerService.PARAM_PASSSRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_PASSSRV))) { //$NON-NLS-1$
 			this.setClave(request.getParameter(LogServerService.PARAM_PASSSRV));
 			this.logSrv.setClave(this.getClave());
 		}
-		if(request.getParameter(LogServerService.PARAM_URLSRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_URLSRV))) {
+		if(request.getParameter(LogServerService.PARAM_URLSRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_URLSRV))) { //$NON-NLS-1$
 			this.setUrlSrv(request.getParameter(LogServerService.PARAM_URLSRV));
 			this.logSrv.setUrl(this.getUrlSrv());
 		}
@@ -232,6 +232,7 @@ public class LogServerService extends HttpServlet {
 		}
 		catch (final IOException e) {
 			LOGGER.warning("No se ha podido iniciar el servidor seleccionado. Error:"+e.getMessage()); //$NON-NLS-1$
+			return connect;
 		}
 		return connect;
 

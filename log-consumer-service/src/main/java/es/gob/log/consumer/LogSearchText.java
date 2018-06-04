@@ -7,17 +7,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.http.HttpServletResponse;
-
 public class LogSearchText {
 
 	private final LogInfo logInfor;
 	private long filePosition;
 	private final LogReader reader;
-//	private  LogErrors error = null;
-	private int status = HttpServletResponse.SC_OK;
+//	private int status = HttpServletResponse.SC_OK;
 
-//	private final String lineTextFound =  null;
 
 	private static final Logger LOGGER = Logger.getLogger(LogSearchText.class.getName());
 	/**Constructor
@@ -26,7 +22,6 @@ public class LogSearchText {
 		this.logInfor = logInfo;
 		this.reader = reader;
 		this.setFilePosition(0L);
-//		this.error = null;
 
 	}
 
@@ -85,39 +80,20 @@ public class LogSearchText {
 		if(found) {
 			int linesReaded = 0;
 			if(baos.size() > 0 && baos.toByteArray() != null) {
-				linesReaded = this.countLines(baos.toByteArray());
+				linesReaded = LogSearchText.countLines(baos.toByteArray());
 			}
 			baos.write(this.getText( numLines - linesReaded));
 		}
 		else {
 			LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
-			setStatus(HttpServletResponse.SC_ACCEPTED);
-			baos.write("No se han encontrado m&aacute;s ocurrencias en la b&uacute;squeda".getBytes(this.logInfor.getCharset()));//$NON-NLS-1$
+			return null;
+//			setStatus(HttpServletResponse.SC_ACCEPTED);
+//			baos.write("No se han encontrado m&aacute;s ocurrencias en la b&uacute;squeda".getBytes(this.logInfor.getCharset()));//$NON-NLS-1$
 		}
 
 		return baos.toByteArray();
 	}
 
-	/**
-	 * Establece (setFilePosition()) la posici&oacute;n del comienzo de la l&iacute;nea en la que se encuentra el texto indicado
-	 * @param text
-	 * @throws IOException
-	 */
-//	private final boolean search(final String text) throws IOException {
-//			CharBuffer cbLine;
-//			while((cbLine = this.reader.readLine()) != null) {
-//				cbLine.rewind();
-//				final String line = cbLine.toString();
-//				if(line.indexOf(text) != -1) {
-//					setFilePosition(this.reader.getFilePosition());
-//
-//					this.lineTextFound = line;
-//					return true;
-//				}
-//			}
-//
-//			return false;
-//	}
 
 	private final byte[] getText( final int lines) throws IOException {
 		String result = ""; //$NON-NLS-1$
@@ -131,7 +107,7 @@ public class LogSearchText {
 		return result.getBytes(this.reader.getCharset());
 	}
 
-	private final int countLines(final byte[] data) {
+	private final static int countLines(final byte[] data) {
 		int numLines = 0;
 		for (int i = 0; i < data.length; i++ ) {
 			if(data[i] == '\n') {
@@ -156,24 +132,15 @@ public class LogSearchText {
 		this.filePosition = filePosition;
 	}
 
-	public final int getStatus() {
-		return this.status;
-	}
-
-	public final void setStatus(final int status) {
-		this.status = status;
-	}
-
-//	public  final LogErrors getError() {
-//		return this.error;
+//	public final int getStatus() {
+//		return this.status;
 //	}
-	/**
-	 * Establece la posici&oacute;n
-	 * @return
-	 */
-//	public final void setError(final LogErrors error) {
-//		this.error = error;
+//
+//	public final void setStatus(final int status) {
+//		this.status = status;
 //	}
+
+
 
 
 }
