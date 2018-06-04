@@ -91,6 +91,7 @@ public class LogFilter {
 		while (this.more && lines < maxLines) {
 			final LogRegistry registry = this.registryReader.readRegistry();
 
+			System.out.println("lineas: " + registry.linesCount());
 
 			// Si hemos llegado al final del log, el resultado solo contendra los
 			// registros obtenidos hasta el momento

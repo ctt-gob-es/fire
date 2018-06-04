@@ -108,11 +108,13 @@ public class LogInfo {
 		}
 
 		this.logPattern = config.getProperty(PROPERTY_LOG_PATTERN, DEFAULT_LOG_PATTERN);
-		this.dateFormat = config.getProperty(PROPERTY_DATE_FORMAT, DEFAULT_DATE_FORMAT);
+		this.dateFormat = config.getProperty(PROPERTY_DATE_FORMAT,DEFAULT_DATE_FORMAT);
+		//final String levelsText = config.getProperty(PROPERTY_LEVELS, DEFAULT_LEVELS);
 		this.levels = config.getProperty(PROPERTY_LEVELS, DEFAULT_LEVELS).split(LEVELS_SEPARATOR);
+		//this.levels = config.getProperty(PROPERTY_LEVELS, DEFAULT_LEVELS);
 
-		this.hasDate = identifyDateTimeComponent(this.dateFormat, DATE_FORMAT_CHARSET);
-		this.hasTime = identifyDateTimeComponent(this.dateFormat, TIME_FORMAT_CHARSET);
+		this.hasDate = this.dateFormat != null ? identifyDateTimeComponent(this.dateFormat, DATE_FORMAT_CHARSET) : false;
+		this.hasTime = this.dateFormat != null ? identifyDateTimeComponent(this.dateFormat, TIME_FORMAT_CHARSET) : false;
 	}
 
 	/**

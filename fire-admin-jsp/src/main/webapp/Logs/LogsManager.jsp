@@ -27,6 +27,7 @@ String levels[] = null ;
 
 boolean date = false;
 boolean time =  false;
+boolean filter = true;
 
 //Logica para determinar si mostrar un resultado de operacion
 	
@@ -61,10 +62,17 @@ boolean time =  false;
 		for(int i = 0; i < LogInfo.size(); i++){
 			final JsonObject json = LogInfo.getJsonObject(i);
 
-			if(json.get(ServiceParams.PARAM_LEVELS) != null) { 
+			if(json.get(ServiceParams.PARAM_LEVELS) != null && !"".equals(json.get(ServiceParams.PARAM_LEVELS).toString().trim())) { //$NON-NLS-1$
 				final String levels_ = json.get("Levels").toString().replace("\"", "");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				levels = levels_ .split(",");//$NON-NLS-1$
 			}
+// 			else{
+// 				filter = false;
+// 			}
+			if(levels == null || (levels != null && levels.length > 0 &&  "".equals(levels[0].trim()))){//$NON-NLS-1$
+				filter = false;
+			}
+
 			if(json.get("Date") != null && !"".equals(json.get("Date").toString()) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 					&& "\"true\"".equals(json.get("Date").toString())) { //$NON-NLS-1$//$NON-NLS-2$ 
 				date = true;
@@ -94,7 +102,8 @@ boolean time =  false;
 	<script type="text/javascript">
 		var file = '<%=fileName%>';
 		var server = '<%=nameSrv%>';
-		
+
+	
 	</script>	
 			
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
@@ -175,6 +184,7 @@ boolean time =  false;
 					      		</div>
 					      	</div><!-- searchText -->
 				      	</fieldset>
+				      	<% if (filter){ %>
 				      	<fieldset><legend> Filtrado </legend>
 				      	<div id="dateTimes" style="display:block; width:100%;">
 				      		<div>
@@ -228,7 +238,8 @@ boolean time =  false;
 					      	<div style="display: inline-block;width:49%;">
 					      		<button id="clear-button_filter"  name="clear-button_filter"  title="Borra el contenido de los campos de filtrado"  onclick="Clean('log_filter')" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>					      		
 					      	</div>	
-				      	</fieldset>				     
+				      	</fieldset>	
+				      	<%}%>			     
 				      			    
 			</div>	<!-- operations -->	
 			<div id="actions" style="display:block;width:80%;padding-top: 0.5em;">
