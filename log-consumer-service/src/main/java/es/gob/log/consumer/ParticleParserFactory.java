@@ -164,54 +164,50 @@ public class ParticleParserFactory {
 			int level = -1;
 			final CharBuffer line = reader.getCurrentLine();
 
-
-
-
-
-				if (this.nextLimit != null) {
-					if (this.nextLimit == CR_STRING) {
-						level = getLevel(line.toString());
+			if (this.nextLimit != null) {
+				if (this.nextLimit == CR_STRING) {
+					level = getLevel(line.toString());
+				}
+				else {
+					final int idx = line.toString().indexOf(this.nextLimit);
+					if (idx == -1) {
+						throw new InvalidRegistryFormatException("No se ha encontrado el limite del nivel"); //$NON-NLS-1$
 					}
-					else {
-						final int idx = line.toString().indexOf(this.nextLimit);
-						if (idx == -1) {
-							throw new InvalidRegistryFormatException("No se ha encontrado el limite del nivel"); //$NON-NLS-1$
-						}
-						final char[] levelChars = new char[idx];
+					final char[] levelChars = new char[idx];
+					line.get(levelChars);
+					level = getLevel(new String(levelChars));
+				}
+			}
+
+			// Si aun no se ha encontrado, buscamos activamente cada nivel aceptado
+			if (level < 0) {
+				// Marcamos la posicion para poder volver
+				line.mark();
+				char[] levelChars;
+				for (int i = 0; i < this.pLevels.length; i++) {
+					// Volvemos a la marca
+					line.reset();
+					levelChars = new char[this.pLevels[i].length()];
+					try {
 						line.get(levelChars);
-						level = getLevel(new String(levelChars));
+					}
+					catch (final BufferUnderflowException e) {
+						continue;
+					}
+					if (this.pLevels[i].equals(new String(levelChars))) {
+						level = i;
+						break;
 					}
 				}
+			}
 
-				// Si aun no se ha encontrado, buscamos activamente cada nivel aceptado
-				if (level < 0) {
-					// Marcamos la posicion para poder volver
-					line.mark();
-					char[] levelChars;
-					for (int i = 0; i < this.pLevels.length; i++) {
-						// Volvemos a la marca
-						line.reset();
-						levelChars = new char[this.pLevels[i].length()];
-						try {
-							line.get(levelChars);
-						}
-						catch (final BufferUnderflowException e) {
-							continue;
-						}
-						if (this.pLevels[i].equals(new String(levelChars))) {
-							level = i;
-							break;
-						}
-					}
-				}
+			if (level < 0) {
+				throw new InvalidRegistryFormatException("No se ha encontrado el nivel"); //$NON-NLS-1$
+			}
 
-				if (level < 0) {
-					throw new InvalidRegistryFormatException("No se ha encontrado el nivel"); //$NON-NLS-1$
-				}
-
-				if (registry != null) {
-					registry.setLevel(level);
-				}
+			if (registry != null) {
+				registry.setLevel(level);
+			}
 
 		}
 
@@ -285,6 +281,14 @@ public class ParticleParserFactory {
 		}
 
 		private boolean isNewRegistry(final LogReader reader) {
+
+			// Para evitar bucles, en el caso de que la siguiente particula
+			// sea esta misma (el patron es un solo asterisco), devolvemos
+			// true para que cada linea sea un nuevo registro
+			if (this.initialPParser == this) {
+				return true;
+			}
+
 			try {
 				this.initialPParser.parse(reader, null);
 			} catch (final Exception e) {
@@ -350,6 +354,13 @@ public class ParticleParserFactory {
 		}
 	}
 
+	/**
+	 * Comprueba si el patr&oacute;n cumple una serie de reglas que determinan si es
+	 * v&aacute;lido o no.
+	 * @param parsers Analizadores de las distintas part&iacute;culas encontradas dentro
+	 * del patr&oacute;n.
+	 * @throws InvalidPatternException Cuando el patr&oacute;n no es v&aacute;lido.
+	 */
 	public static void checkPattern(final ParticleParser[] parsers) throws InvalidPatternException {
 
 

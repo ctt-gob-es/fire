@@ -35,13 +35,11 @@ public class LogRegistryParser {
 			this.pParsers = null;
 		}
 
-		// Tendremos que avanzar externamente hasta la siguiente linea, en caso de que no se
-		// analicen las lineas (ya que entonces no se leer nunca la siguiente para saber si se
-		// trata de parte del mismo registro) o si el ultimo parser este limitado a una linea
-//		this.needActiveReadline = this.pParsers == null ||
-//				!(this.pParsers[this.pParsers.length - 1] instanceof ParticleParserUndefined);
-		this.needActiveReadline = true;
-
+		// En caso de que el ultimo elemento del patron no admita registros de un numero indeterminado
+		// de lineas, la lectura del patron siempre terminaria al final de una linea. En ese caso,
+		// tendremos que avanzar activamente a la siguiente linea antes de leer un nuevo registro
+		this.needActiveReadline = this.pParsers == null ||
+				!(this.pParsers[this.pParsers.length - 1] instanceof ParticleParserUndefined);
 	}
 
 	/**

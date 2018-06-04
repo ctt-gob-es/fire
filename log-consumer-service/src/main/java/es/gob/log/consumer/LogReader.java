@@ -61,14 +61,15 @@ public interface LogReader {
 	 void close() throws IOException;
 
 	 /**
-	  * Obtiene del log indicando una posici&oacute;n
-	  * @return
+	  * Obtiene la posici&oacute;n actual dentro del log.
+	  * @return Posici&oacute;n en el log.
 	  */
 	 public long getFilePosition() ;
 
 	 /**
-	  * Indica si hemos llegado al final de la lectura del fichero
-	  * @return
+	  * Indica si hemos llegado al final de la lectura del fichero.
+	  * @return {@code true} si la posicion actual es el fin de fichero, {@code false} en
+	  * caso contrario.
 	  */
 	 public boolean isEndFile();
 }

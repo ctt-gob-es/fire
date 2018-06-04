@@ -91,8 +91,6 @@ public class LogFilter {
 		while (this.more && lines < maxLines) {
 			final LogRegistry registry = this.registryReader.readRegistry();
 
-			System.out.println("lineas: " + registry.linesCount());
-
 			// Si hemos llegado al final del log, el resultado solo contendra los
 			// registros obtenidos hasta el momento
 			if (registry == null) {
@@ -174,6 +172,10 @@ public class LogFilter {
 		this.logReader.close();
 	}
 
+	/**
+	 * Recupera la posici&oacute;n actual dentro del fichero.
+	 * @return Posici&oacute;n en el fichero.
+	 */
 	public long getFilePosition() {
 		return this.logReader.getFilePosition();
 	}
