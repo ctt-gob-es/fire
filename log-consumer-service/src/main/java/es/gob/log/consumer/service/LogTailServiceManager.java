@@ -63,7 +63,6 @@ public class LogTailServiceManager {
 					result = resTail.getBytes(info.getCharset());
 					session.setAttribute("FilePosition",Long.valueOf(lTail.getFilePosition()));//$NON-NLS-1$
 
-
 				}
 				else {
 					LOGGER.log(Level.WARNING,"Es necesario abrir el fichero log anteriormente."); //$NON-NLS-1$

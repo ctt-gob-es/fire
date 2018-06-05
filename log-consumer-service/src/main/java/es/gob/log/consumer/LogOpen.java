@@ -109,12 +109,18 @@ public class LogOpen {
 			}
 			// leer fichero loginfo y crear entidad LogInfo con los datos obtenidos del fichero
 			try {
+				this.linfo = new LogInfo();
 				final String pathLogInfo = ConfigManager.getInstance().getLogsDir().getAbsolutePath().concat(File.separator).concat(nameLogInfo);
 				final File fLogInfo =  new File(pathLogInfo).getCanonicalFile();
-				// Abrir fichero log, se inicializa el canal y el lector.
-				final FileInputStream fis = new FileInputStream(fLogInfo);
-				this.linfo = new LogInfo();
-				this.linfo.load(fis);
+				if(fLogInfo != null) {
+					// Abrir fichero log, se inicializa el canal y el lector.
+					try(final FileInputStream fis = new FileInputStream(fLogInfo);){
+						this.linfo.load(fis);
+						fis.close();
+					}
+
+				}
+
 				this.channel = AsynchronousFileChannel.open(this.path,StandardOpenOption.READ);
 				this.reader = new FragmentedFileReader(this.channel, this.linfo.getCharset());
 				this.reader.load(0L);
@@ -168,7 +174,9 @@ public class LogOpen {
 				throw new UnsupportedEncodingException();
 			}
 		}
+		else {
 
+		}
 		return null;
 	}
 

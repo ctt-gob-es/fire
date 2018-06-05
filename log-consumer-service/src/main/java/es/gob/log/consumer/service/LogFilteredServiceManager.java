@@ -64,6 +64,7 @@ public class LogFilteredServiceManager {
 
 		try {
 			if(reset || filePosition != null &&  filePosition.longValue() == 0L) {
+				reader.close();
 				reader.load();
 			}
 

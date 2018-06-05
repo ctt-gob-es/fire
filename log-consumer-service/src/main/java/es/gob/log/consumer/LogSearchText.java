@@ -12,7 +12,6 @@ public class LogSearchText {
 	private final LogInfo logInfor;
 	private long filePosition;
 	private final LogReader reader;
-//	private int status = HttpServletResponse.SC_OK;
 
 
 	private static final Logger LOGGER = Logger.getLogger(LogSearchText.class.getName());
@@ -78,6 +77,7 @@ public class LogSearchText {
 
 		/* Se a&ntilde;aden el resto de l&iacute;neas */
 		if(found) {
+
 			int linesReaded = 0;
 			if(baos.size() > 0 && baos.toByteArray() != null) {
 				linesReaded = LogSearchText.countLines(baos.toByteArray());
@@ -100,6 +100,7 @@ public class LogSearchText {
 		CharBuffer cbLine;
 		int numLines = 1;
 		while(numLines < lines && (cbLine = this.reader.readLine()) != null) {
+			cbLine.rewind();
 			result = result.concat(cbLine.toString()).concat("\n"); //$NON-NLS-1$
 			numLines++;
 		}
@@ -132,13 +133,6 @@ public class LogSearchText {
 		this.filePosition = filePosition;
 	}
 
-//	public final int getStatus() {
-//		return this.status;
-//	}
-//
-//	public final void setStatus(final int status) {
-//		this.status = status;
-//	}
 
 
 

@@ -64,12 +64,15 @@ boolean filter = true;
 
 			if(json.get(ServiceParams.PARAM_LEVELS) != null && !"".equals(json.get(ServiceParams.PARAM_LEVELS).toString().trim())) { //$NON-NLS-1$
 				final String levels_ = json.get("Levels").toString().replace("\"", "");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				levels = levels_ .split(",");//$NON-NLS-1$
+				if(levels_ != null && !"".equals(levels_.trim())){
+					levels = levels_ .split(",");//$NON-NLS-1$
+				}
+				else{
+					filter = false;
+				}				
 			}
-// 			else{
-// 				filter = false;
-// 			}
-			if(levels == null || (levels != null && levels.length > 0 &&  "".equals(levels[0].trim()))){//$NON-NLS-1$
+
+			if(levels == null || (levels != null && levels.length == 1 &&  "".equals(levels[0].trim()))){//$NON-NLS-1$
 				filter = false;
 			}
 

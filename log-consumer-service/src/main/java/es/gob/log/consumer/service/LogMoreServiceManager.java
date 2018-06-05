@@ -1,10 +1,7 @@
 package es.gob.log.consumer.service;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import es.gob.log.consumer.FragmentedFileReader;
 import es.gob.log.consumer.LogInfo;
 import es.gob.log.consumer.LogMore;
 import es.gob.log.consumer.LogReader;
@@ -21,9 +17,6 @@ public class LogMoreServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogMoreServiceManager.class.getName());
 
-//	private static LogErrors error = null;
-//
-//	private static int status = HttpServletResponse.SC_OK;
 
 	public final static byte[] process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException  {
 
@@ -32,34 +25,17 @@ public class LogMoreServiceManager {
 		final String sNumLines = req.getParameter(ServiceParams.NUM_LINES);
 		final HttpSession session = req.getSession(true);
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
-		LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
+		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
-		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
-//		if(getError()!= null && getError().getMsgError() != null && !"".equals(getError().getMsgError())) { //$NON-NLS-1$
-//			setError(null);
-//		}
-//		if (getStatus() != HttpServletResponse.SC_OK) {
-//			setStatus(HttpServletResponse.SC_OK);
-//		}
 
 		try {
 
 			final int iNumLines = Integer.parseInt(sNumLines.trim());
-			if(filePosition != null &&  filePosition.longValue() == 0L) {//&&  filePosition.longValue() == 0L
+			if(filePosition != null &&  (filePosition.longValue() == 0L || filePosition.longValue()  >= reader.getFilePosition())) {
+				reader.close();
 				reader.load(filePosition.longValue());
 			}
-			else if(filePosition != null && filePosition.longValue()  >= reader.getFilePosition()) {
-				final String path = ConfigManager.getInstance().getLogsDir().getCanonicalPath().toString().concat(File.separator).concat(logFileName);
-				session.removeAttribute("Reader");//$NON-NLS-1$
-				session.removeAttribute("Channel");//$NON-NLS-1$
-				final File logFile = new File(path);
-				final AsynchronousFileChannel channel = AsynchronousFileChannel.open(logFile.toPath(),StandardOpenOption.READ);
-				reader = new FragmentedFileReader(channel, info.getCharset());
-				reader.load(filePosition.longValue());
-				session.setAttribute("Channel",channel); //$NON-NLS-1$
-				session.setAttribute("Reader", reader); //$NON-NLS-1$
 
-			}
 			final LogMore logMore = new LogMore();
 			result = logMore.getLogMore(iNumLines,reader);
 
@@ -101,27 +77,6 @@ public class LogMoreServiceManager {
 
 
 	}
-
-
-//	public static final LogErrors getError() {
-//		return error;
-//	}
-//
-//
-//	public static final void setError(final LogErrors error) {
-//		LogMoreServiceManager.error = error;
-//	}
-//
-//	public final static int getStatus() {
-//		return LogMoreServiceManager.status;
-//	}
-//
-//	public final static void setStatus(final int status) {
-//		LogMoreServiceManager.status = status;
-//	}
-
-
-
 
 
 }

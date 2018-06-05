@@ -42,7 +42,8 @@ public class LogSearchServiceManager {
 		try {
 
 			if(reset || filePosition != null &&  filePosition.longValue() == 0L) {
-				 reader.rewind() ;
+				reader.close();
+				reader.load();
 			}
 
 			final LogSearchText logSearch = new LogSearchText(info, reader);
