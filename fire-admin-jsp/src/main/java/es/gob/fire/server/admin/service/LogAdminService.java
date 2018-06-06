@@ -1,13 +1,19 @@
 package es.gob.fire.server.admin.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.logging.Logger;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 import javax.json.JsonWriter;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -232,27 +238,74 @@ public class LogAdminService extends HttpServlet {
 		case DOWNLOAD:
 			LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
-
+			String path = ""; //$NON-NLS-1$
 			final byte datDownload[] = this.logclient.download(this.getLogFileName());
 			if(datDownload != null && datDownload.length > 0 ) {
 
-				final String mimeType = "application/zip"; //$NON-NLS-1$
-				final int ipos = this.getLogFileName().lastIndexOf("."); //$NON-NLS-1$
-				final String zipfileName = this.getLogFileName().replace(this.getLogFileName().substring(ipos), ".zip"); //$NON-NLS-1$
-		        // Modificamos el contenido de la  respuesta
-		        response.setContentType(mimeType);
-		        response.setContentLength(datDownload.length);
+				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datDownload));
+				final JsonObject jsonObj = reader.readObject();
+				reader.close();
 
-		        //Forzamos la descarga (valores de header)
-		        final String headerKey = "Content-Disposition"; //$NON-NLS-1$
-		        final String headerValue = String.format("attachment; filename=\"%s\"", zipfileName); //$NON-NLS-1$
-		        response.setHeader(headerKey, headerValue);
+				if(jsonObj.getJsonArray("Download") != null){	//$NON-NLS-1$
+					final JsonArray download = jsonObj.getJsonArray("Download"); //$NON-NLS-1$
+					final JsonObject json = download.getJsonObject(0);
+					if(json.get("Path") != null && !"".equals(json.get("Path").toString().trim())) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						path = json.get("Path").toString(); //$NON-NLS-1$
 
-		        // Obtenemos los datos de la respuesta
-		        final OutputStream outStream = response.getOutputStream();
-		        outStream.write(datDownload);
-		        outStream.flush();
-		        outStream.close();
+
+						final String mimeType = "application/zip"; //$NON-NLS-1$
+						final int ipos = this.getLogFileName().lastIndexOf("."); //$NON-NLS-1$
+						final String zipfileName = this.getLogFileName().replace(this.getLogFileName().substring(ipos), ".zip"); //$NON-NLS-1$
+				        // Modificamos el contenido de la  respuesta
+				        response.setContentType(mimeType);
+
+
+				        //Forzamos la descarga (valores de header)
+				        final String headerKey = "Content-Disposition"; //$NON-NLS-1$
+				        final String headerValue = String.format("attachment; filename=\"%s\"", zipfileName); //$NON-NLS-1$
+				        response.setHeader(headerKey, headerValue);
+
+				        // Obtenemos los datos de la respuesta
+				        //final OutputStream outStream = response.getOutputStream();
+
+				        final byte[] buffer = new byte[8 * 1024];
+				        final File f =  new File(path.replaceAll("\"", ""));
+				        int tam = 0;
+				        if (f.exists()) {
+				        	tam = (int) f.length();
+				        }
+						final FileInputStream input = new FileInputStream(f);
+						response.setContentLength(tam);
+						try {
+						 // final OutputStream output = new FileOutputStream(zipfileName);
+							final OutputStream output = response.getOutputStream();
+						  try {
+						    int bytesRead;
+						    while ((bytesRead = input.read(buffer)) != -1) {
+						      output.write(buffer, 0, bytesRead);
+						    }
+						  } finally {
+							output.flush();
+						    output.close();
+						  }
+						} finally {
+						  input.close();
+						}
+
+
+
+//				        outStream.write(datDownload);
+//				        outStream.flush();
+//				        outStream.close();
+
+					}
+
+				}
+				else {
+					response.getWriter().write(result);
+					break;
+				}
+
 
 
 //				final FileOutputStream fos = new FileOutputStream("C:/temp/salida.zip");  //$NON-NLS-1$

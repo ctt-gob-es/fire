@@ -2,6 +2,8 @@ package es.gob.log.consumer.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
@@ -600,20 +602,22 @@ public class LogConsumerClient {
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.DOWNLOAD.ordinal()) //$NON-NLS-1$
 				.append("&".concat(ServiceParams.LOG_FILE_NAME).concat("=")).append(fileName);//$NON-NLS-1$ //$NON-NLS-2$
-		HttpResponse response;
-		//(FileOutputStream fos = new FileOutputStream("C:/Users/adolfo.navarro/Desktop/salida.zip"))
-		try  {
+
+		int status = 200;
+		try(final FileOutputStream fos = new FileOutputStream("C:/Users/adolfo.navarro/Desktop/"+fileName+".zip");)  { //$NON-NLS-1$ //$NON-NLS-2$
 			do {
-				response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+				final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 				if(response.getContent().length > 0) {
 					final byte[] fragment = response.getContent();
-					result.write(fragment);
+					fos.write(fragment);
+					//result.write(fragment);
 				}
-				//fos.write(fragment);
-			}while(response.statusCode == 206);
+				status = response.statusCode;
+			}while(status == 206);
+			fos.close();
 		}
 		catch (final IOException e) {
-			resultDownload.append("Error"); //$NON-NLS-1$
+			resultDownload.append("Error la bajar el fichero"); //$NON-NLS-1$
 			data.add(Json.createObjectBuilder()
 					.add("Code",400) //$NON-NLS-1$
 					.add("Message", resultDownload.toString())); //$NON-NLS-1$
@@ -622,7 +626,27 @@ public class LogConsumerClient {
 		    jw.writeObject(jsonObj.build());
 		    jw.close();
 		}
-
+		final File ficherozip = new File("C:/Users/adolfo.navarro/Desktop/"+fileName+".zip");
+		if (ficherozip.exists()) {
+			resultDownload.append("C:/Users/adolfo.navarro/Desktop/"+fileName+".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+			data.add(Json.createObjectBuilder()
+					.add("Code",200) //$NON-NLS-1$
+					.add("Path", resultDownload.toString())); //$NON-NLS-1$
+			jsonObj.add("Download", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(result);
+		    jw.writeObject(jsonObj.build());
+		    jw.close();
+		}
+		else {
+			resultDownload.append("Error al guardar el fichero"); //$NON-NLS-1$
+			data.add(Json.createObjectBuilder()
+					.add("Code",400) //$NON-NLS-1$
+					.add("Message", resultDownload.toString())); //$NON-NLS-1$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+			final JsonWriter jw = Json.createWriter(result);
+		    jw.writeObject(jsonObj.build());
+		    jw.close();
+		}
 		if(result.size() > 0) {
 			return result.toByteArray();
 		}

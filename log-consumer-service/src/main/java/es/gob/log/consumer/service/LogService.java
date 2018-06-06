@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import es.gob.log.consumer.LogDownload;
 import es.gob.log.consumer.LogInfo;
 import es.gob.log.consumer.LogReader;
 
@@ -171,13 +173,13 @@ public class LogService extends HttpServlet {
 			return;
 		}
 		catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e.getMessage()); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
 			result = new String("Ocurrio un error al procesar la peticion").getBytes(); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion de tratamiento del fichero"); //$NON-NLS-1$
 			return;
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e.getMessage()); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
 			result = new String("Ocurrio un error al procesar la peticion.").getBytes(); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion"); //$NON-NLS-1$
 			return;
@@ -391,9 +393,22 @@ public class LogService extends HttpServlet {
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
+
 		final byte[] result = LogDownloadServiceManager.process(req, resp);
 		if(LogDownloadServiceManager.isHasMore()) {
-			resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+			setStatusCode(HttpServletResponse.SC_PARTIAL_CONTENT);
+		}
+		else {
+			if ((SeekableByteChannel)session.getAttribute("ChannelDownload") != null) { //$NON-NLS-1$
+				try(final SeekableByteChannel chanel = (SeekableByteChannel)session.getAttribute("ChannelDownload");){ //$NON-NLS-1$
+				chanel.close();
+				session.removeAttribute("ChannelDownload"); //$NON-NLS-1$
+				}
+			}
+			if((LogDownload)session.getAttribute("Download") != null){ //$NON-NLS-1$
+				session.removeAttribute("Download"); //$NON-NLS-1$
+			}
+			setStatusCode(HttpServletResponse.SC_OK);
 		}
 
 		return result;

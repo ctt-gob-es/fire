@@ -1,15 +1,11 @@
 package es.gob.log.consumer;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.StandardOpenOption;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -30,7 +26,7 @@ public class LogDownload {
 	private ByteArrayOutputStream bos;
 	private ZipOutputStream zipOutputStream;
 	private boolean closed;
-
+	private long position;
 
 	/**
 	 * Construye el objeto para la descarga de un fichero de log comprimido. Se trata
@@ -45,12 +41,12 @@ public class LogDownload {
 		this.zipOutputStream = null;
 		this.closed = false;
 
-		try {
-			this.channel.position(0);
-		}
-		catch (final Exception e) {
-			LOGGER.warning("No se ha podido establecer la posicion del canal a su inicio: " + e); //$NON-NLS-1$
-		}
+//		try {
+//			this.channel.position(0);
+//		}
+//		catch (final Exception e) {
+//			LOGGER.warning("No se ha podido establecer la posicion del canal a su inicio: " + e); //$NON-NLS-1$
+//		}
 	}
 
 	/**
@@ -74,9 +70,10 @@ public class LogDownload {
 		if (this.zipOutputStream == null) {
 			prepareOutput();
 			// Comprobamos que la posicion este al inicio de la
-			if (this.channel.position() != 0) {
-				this.channel.position(0);
-			}
+
+//			if (this.channel.position() != 0) {
+//				this.channel.position(0);
+//			}
 		}
 
 		// Comprimimos un fragmento de los datos
@@ -101,7 +98,9 @@ public class LogDownload {
 		// que los siguientes fragmentos no se acumulen con este
 		final byte[] fragment = this.bos.toByteArray();
 		this.bos.reset();
-
+		if (this.channel.position() > 0 && this.channel.position() < this.channel.size()) {
+			this.setPosition(this.channel.position());
+		}
 		return fragment;
 	}
 
@@ -137,23 +136,35 @@ public class LogDownload {
 		return !this.closed && this.channel.position() != this.channel.size();
 	}
 
-	public static void main(final String[] args) throws Exception {
 
-		final File dataFile = new File("C:/Users/carlos.gamuci/Desktop/Datos/test.pdf"); //$NON-NLS-1$
-		final SeekableByteChannel channel = FileChannel.open(dataFile.toPath(), StandardOpenOption.READ);
 
-		final LogDownload donwloader = new LogDownload(dataFile.getName(), channel);
 
-		try (FileOutputStream fos = new FileOutputStream("C:/Users/carlos.gamuci/Desktop/salida.zip")) { //$NON-NLS-1$
-			while (donwloader.hasMore()) {
-				System.out.println("Descargamos fragmento"); //$NON-NLS-1$
-				final byte[] fragment = donwloader.download();
-				System.out.println("Bytes: " + fragment.length); //$NON-NLS-1$
-				fos.write(fragment);
-			}
-		}
-
-		channel.close();
+	public final long getPosition() {
+		return this.position;
 	}
+
+	public final void setPosition(final long position) {
+		this.position = position;
+	}
+
+	// TODO código de prueba pte borrar.
+//	public static void main(final String[] args) throws Exception {
+//
+//		final File dataFile = new File("C:/Tests/142525063585832817.auditDaily.log"); //$NON-NLS-1$
+//		final SeekableByteChannel channel = FileChannel.open(dataFile.toPath(), StandardOpenOption.READ);
+//
+//		final LogDownload donwloader = new LogDownload(dataFile.getName(), channel);
+//
+//		try (FileOutputStream fos = new FileOutputStream("C:/Users/adolfo.navarro/Desktop/142525063585832817.auditDaily.log.zip")) { //$NON-NLS-1$
+//			while (donwloader.hasMore()) {
+//				System.out.println("Descargamos fragmento"); //$NON-NLS-1$
+//				final byte[] fragment = donwloader.download();
+//				System.out.println("Bytes: " + fragment.length); //$NON-NLS-1$
+//				fos.write(fragment);
+//			}
+//		}
+//
+//		channel.close();
+//	}
 
 }
