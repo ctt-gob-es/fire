@@ -72,4 +72,10 @@ public interface LogReader {
 	  * caso contrario.
 	  */
 	 public boolean isEndFile();
+
+	 /**
+	  * Estaqblece el indicador de si hemos llegado al final de la lectura del fichero.
+	  * @return
+	  */
+	 public void setEndFile(final boolean endOfFile);
 }

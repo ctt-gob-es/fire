@@ -149,12 +149,10 @@ boolean filter = true;
 				    	<div id="lines">
 				    		<label for="Nlines">* L&iacute;neas</label>
 				    		<select id="Nlines" name ="Nlines">				    		
-				    			<%for(int i = 2 ; i <= 10; i++){
-				    				if(i <= 10){%>
-				    					<option ><%=i * 10%></option> 
-				    				<%}
-				    			}%>
-			    				<option >200</option> 			    								    			
+				    			<option >50</option>
+				    			<option >100</option>
+				    			<option >200</option>
+			    				<option >500</option> 			    								    			
 				    		</select>				      		
 				      	</div>	<!-- lines -->		      	
 				     	

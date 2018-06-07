@@ -1,6 +1,7 @@
 package es.gob.log.consumer.service;
 
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,14 +28,19 @@ public class LogMoreServiceManager {
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
+		final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
 
 		try {
 
 			final int iNumLines = Integer.parseInt(sNumLines.trim());
-			if(filePosition != null &&  (filePosition.longValue() == 0L || filePosition.longValue()  >= reader.getFilePosition())) {
+			//Comprobamos que el fichero de log no se ha modificado en el trascurso de haber pulsado anteriormente la funci&oacute;n
+			//Tail, y pueda haber m&aacute;s lineas, en ese caso se cierra el reader para cargarlo en la nueva posici&oacute;n
+			if( filePosition != null && channel.size() >  filePosition.longValue() ) {
 				reader.close();
 				reader.load(filePosition.longValue());
+				reader.setEndFile(false);
 			}
+			//Si es el final de fichero se indica con un mensaje
 			if(reader.isEndFile()) {
 				LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
 				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No existen más líneas en este momento para este fichero log");//$NON-NLS-1$
@@ -45,7 +51,7 @@ public class LogMoreServiceManager {
 
 			final LogMore logMore = new LogMore();
 			result = logMore.getLogMore(iNumLines,reader);
-
+			//Si es el final de fichero se indica con un mensaje
 			 if (result != null && result.length <= 0) {
 					LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
 					resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No existen más líneas en este momento para este fichero log");//$NON-NLS-1$

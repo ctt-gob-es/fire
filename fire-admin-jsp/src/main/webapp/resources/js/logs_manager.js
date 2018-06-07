@@ -39,7 +39,7 @@
  
  /**Constantes*/
 	
-	var maxLines = 100;
+	var maxLines = 600;
 	var points = "<div>. . . . . . . . . .</div><div>. . . . . . . . . .</div><div>. . . . . . . . . .</div>";
 	
 /**Variables Globales */	
@@ -63,6 +63,7 @@
 	var next_position = searchOp;
 	var scrollTopPosition = 0;
 	var scrollLefPosition = 0;
+	var param_reset = "";
 	var  oper = "";
 	/** Elementos del DOM (id) utilizados en las funciones*/
 	var idContainer = "";
@@ -192,7 +193,8 @@
   * @returns
   */
  function getTail(nlines){
-
+	 	searchOp = 0;
+	 	filterOp = 0;
 	 	var arrFields = ["Nlines"];
 
 	 	var ok = validateFields(arrFields);						
@@ -243,7 +245,7 @@
   * @returns
   */
  function searchText(nlines, text, date){
-	var param_reset = "";
+	
 	var DateTime =  getlongDateTime(date);
 	
 	var arrFields = ["search_txt"];
@@ -253,25 +255,15 @@
 		 activeElement("more-button", true);
 		
 		 if(searchOp == 0){
-			 addResult  = false;
+			 resetSearch( text, DateTime)
 		 }
 		 else{
 			 addResult  = true; 
+			 param_reset = "";
 		 }
 					 
 		 if (text2Search !== text || date2Search != DateTime){
-			 addResult  = false;
-			 text2Search = text;
-			 date2Search = DateTime;
-			 isFinal = true;			 			 
-			 linesCount = 0;							
-			 filterOp = 0;
-			 searchOp = 0;				
-			 diffLines = 0;
-			 next_position = searchOp;
-			 scrollTopPosition = 0;
-			 scrollLefPosition = 0;
-			 param_reset = "&reset=yes";
+			 resetSearch(text, DateTime)
 		 }	
 		 var url = "../LogAdminService?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime + param_reset;
 
@@ -311,7 +303,7 @@
   * @returns
   */
  function getFiltered(nlines, startDate, endDate, level){
-	 var param_reset = "";
+
 	 var startDateTime =  getlongDateTime(startDate);
 	 var endDateTime =  getlongDateTime(endDate);
 	 var arrFields = ["Nlines","level_select"];
@@ -320,10 +312,11 @@
 		searchOp = 0;
 		activeElement("more-button", false);
 		if(filterOp == 0){
-			 addResult  = false;			
+			resetFilter(startDateTime, endDateTime, level);			
 		 }
 		 else{
 			 addResult  = true; 
+			 param_reset = "";
 		 }
 		
 		console.log("startDate :"+startDate + " endDate :"+endDate+ " level:"+level);
@@ -331,24 +324,10 @@
 		 if (initDate2Filter !== startDateTime || 
 			 endDate2Filter != endDateTime || 
 			 level2Filter !== level){
-			 
-			addResult  = false;
-			initDate2Filter = startDateTime;
-			endDate2Filter = endDateTime;
-			level2Filter = level;
-				 			 
-			linesCount = 0;							
-			filterOp = 0;
-			searchOp = 0;				
-			diffLines = 0;
-			next_position = searchOp;
-			scrollTopPosition = 0;
-			scrollLefPosition = 0;
-			param_reset = "&reset=yes";
-			console.log("param_reset "+param_reset);
+			 resetFilter(startDateTime, endDateTime, level);		
+			
 		 }	
-		
-		
+			
 		filterOp = filterOp + 1;		
 		var url = "../LogAdminService?op=9&nlines=" + nlines + "&start_date=" + startDateTime + "&end_date=" + endDateTime + "&level=" + level + param_reset;		 
 		 $.post(url, function(data){		
@@ -549,6 +528,7 @@
   * @returns
   */
  function goReturn(){	
+	 reset();
 	 location.href = 'LogsFileList.jsp?name-srv=' + server;	  
  }
  
@@ -743,6 +723,43 @@
 	 }
  }
  
+ /**
+  * 
+  * @returns
+  */
+ function resetSearch(text,DateTime){
+	 addResult  = false;
+	 text2Search = text;
+	 date2Search = DateTime;
+	 isFinal = true;			 			 
+	 linesCount = 0;							
+	 filterOp = 0;
+	 searchOp = 0;				
+	 diffLines = 0;
+	 next_position = searchOp;
+	 scrollTopPosition = 0;
+	 scrollLefPosition = 0;
+	 param_reset = "&reset=yes";
+ }
+ /**
+  * 
+  * @returns
+  */
+  function resetFilter(startDateTime, endDateTime, level){
+	  addResult  = false;
+		initDate2Filter = startDateTime;
+		endDate2Filter = endDateTime;
+		level2Filter = level;
+			 			 
+		linesCount = 0;							
+		filterOp = 0;
+		searchOp = 0;				
+		diffLines = 0;
+		next_position = searchOp;
+		scrollTopPosition = 0;
+		scrollLefPosition = 0;
+		param_reset = "&reset=yes";
+  }
  
  /*******Inicializar variables globales  *****/
  

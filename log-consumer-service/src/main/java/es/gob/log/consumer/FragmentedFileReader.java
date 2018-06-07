@@ -48,7 +48,7 @@ public class FragmentedFileReader implements LogReader {
 
 	private CharBuffer nextLine2 = null;
 
-	private boolean endFile = false;
+	private  boolean endFile = false;
 	/**
 	 * Crea el objeto para la carga de ficheros.
 	 * @param channel Canal para la lectura del fichero.
@@ -83,13 +83,7 @@ public class FragmentedFileReader implements LogReader {
 	@Override
 	public void load(final long position) throws IOException {
 		this.filePosition = position;
-		if(this.channel.size() > this.filePosition) {
-			this.endFile = false;
-		}
-		else
-		{
-			this.endFile = true;
-		}
+
 		// Cacheamos un fragmento del fichero
 		final Future<Integer> readerProcess = this.channel.read(this.bBuffer, this.filePosition);
 
@@ -98,6 +92,7 @@ public class FragmentedFileReader implements LogReader {
 		final int readedCount;
 		try {
 			readedCount =  readerProcess.get().intValue();
+
 		}
 		catch (InterruptedException | ExecutionException e) {
 			throw new IOException("Se interrumpio la carga del fichero", e); //$NON-NLS-1$
@@ -267,6 +262,14 @@ public class FragmentedFileReader implements LogReader {
 	public boolean isEndFile() {
 		return this.endFile;
 	}
+
+	@Override
+	public void setEndFile( final boolean endOfFile) {
+		this.endFile = endOfFile;
+
+	}
+
+
 
 
 }
