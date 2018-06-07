@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.logging.Logger;
 
 import javax.json.Json;
@@ -237,17 +238,20 @@ public class LogAdminService extends HttpServlet {
 			break;
 		case DOWNLOAD:
 			LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
+			long time_start, time_end;
+			time_start = System.currentTimeMillis();
+
 			result = ""; //$NON-NLS-1$
 			String path = ""; //$NON-NLS-1$
-			final byte datDownload[] = this.logclient.download(this.getLogFileName());
+			final byte datDownload[] = this.logclient.download(this.getLogFileName(),this.isReset());
 			if(datDownload != null && datDownload.length > 0 ) {
 
 				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datDownload));
 				final JsonObject jsonObj = reader.readObject();
 				reader.close();
 
-				if(jsonObj.getJsonArray("Download") != null){	//$NON-NLS-1$
-					final JsonArray download = jsonObj.getJsonArray("Download"); //$NON-NLS-1$
+				if(jsonObj.getJsonArray("Ok") != null){	//$NON-NLS-1$
+					final JsonArray download = jsonObj.getJsonArray("Ok"); //$NON-NLS-1$
 					final JsonObject json = download.getJsonObject(0);
 					if(json.get("Path") != null && !"".equals(json.get("Path").toString().trim())) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						path = json.get("Path").toString(); //$NON-NLS-1$
@@ -269,51 +273,46 @@ public class LogAdminService extends HttpServlet {
 				        //final OutputStream outStream = response.getOutputStream();
 
 				        final byte[] buffer = new byte[8 * 1024];
-				        final File f =  new File(path.replaceAll("\"", ""));
+				        final File f =  new File(path.replaceAll("\"", "")); //$NON-NLS-1$ //$NON-NLS-2$
 				        int tam = 0;
 				        if (f.exists()) {
 				        	tam = (int) f.length();
+				        	final FileInputStream input = new FileInputStream(f);
+				        	response.setContentLength(tam);
+							try {
+							 // final OutputStream output = new FileOutputStream(zipfileName);//guarda a fichero
+								final OutputStream output = response.getOutputStream();//gestiona la descarga el navegador
+							  try {
+							    int bytesRead;
+							    while ((bytesRead = input.read(buffer)) != -1) {
+							      output.write(buffer, 0, bytesRead);
+							    }
+							  } finally {
+								output.flush();
+							    output.close();
+							  }
+							} finally {
+							  input.close();
+							}
+
+							if(response.isCommitted()) {
+								Files.deleteIfExists(f.toPath());
+							}
 				        }
-						final FileInputStream input = new FileInputStream(f);
-						response.setContentLength(tam);
-						try {
-						 // final OutputStream output = new FileOutputStream(zipfileName);
-							final OutputStream output = response.getOutputStream();
-						  try {
-						    int bytesRead;
-						    while ((bytesRead = input.read(buffer)) != -1) {
-						      output.write(buffer, 0, bytesRead);
-						    }
-						  } finally {
-							output.flush();
-						    output.close();
-						  }
-						} finally {
-						  input.close();
-						}
-
-
-
-//				        outStream.write(datDownload);
-//				        outStream.flush();
-//				        outStream.close();
 
 					}
-
 				}
 				else {
+					final String res = new String(datDownload,this.logclient.getCharsetContent());
+					result += res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
 					response.getWriter().write(result);
 					break;
 				}
 
-
-
-//				final FileOutputStream fos = new FileOutputStream("C:/temp/salida.zip");  //$NON-NLS-1$
-//				fos.write(datDownload);
-//				fos.flush();
-//				fos.close();
 			}
 
+			time_end = System.currentTimeMillis();
+			System.out.println("Downloaded :"+ ( time_end - time_start )/1000 +" sec");
 			break;
 		default:
 			LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$

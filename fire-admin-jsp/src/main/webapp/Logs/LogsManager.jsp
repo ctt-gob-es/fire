@@ -123,14 +123,14 @@ boolean filter = true;
 	
 	<!-- contenido -->
 	<div id="containerLogsManager">
-		<div id="subtitle" style="padding: 10px;width:100%;">
-		<div style="display: inline-block;width:8%;">
+		<div id="subtitle" style="padding: 10px;width:100%;height=42;">
+			<div id="btnContainer" style="display: inline-block;width:8%;">				
 				<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />					      		
 			</div>
-			<div id="selectedFile" style="display:inline-block;">
-			 	 Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.
-			</div>
-									      						   
+			<div id="selectedFile" style="display:inline-block;width:40%; height=42;">		 
+			 	 Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.			 	
+			</div>	
+			<div id="progress_download" style="display:none;"><img  style="vertical-align: middle;" alt="Icono animado cargando fichero" src="../resources/img/load.gif" height="42" width="55" >Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.</div>				      						   
 			<div id="error-txt-log" style="display:none;width:50%;" onload="setIdErrorTxtLog($(this).attr('id'))"></div>
 			<div id="ok-txt-log" style="display:none;width:50%;" onload="setIdOkTxtLog($(this).attr('id'))"></div>			
 		</div>

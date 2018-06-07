@@ -593,24 +593,32 @@ public class LogConsumerClient {
 		return null;
 	}
 
-	public byte[] download(final String fileName) {
+	public byte[] download(final String fileName, final boolean reset ) {
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 		final StringBuilder resultDownload = new StringBuilder("");//$NON-NLS-1$
 
 		final ByteArrayOutputStream result = new ByteArrayOutputStream();
-		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+		StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.DOWNLOAD.ordinal()) //$NON-NLS-1$
-				.append("&".concat(ServiceParams.LOG_FILE_NAME).concat("=")).append(fileName);//$NON-NLS-1$ //$NON-NLS-2$
+				.append("&".concat(ServiceParams.LOG_FILE_NAME).concat("=")).append(fileName)//$NON-NLS-1$ //$NON-NLS-2$
+				.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append(reset); //$NON-NLS-1$ //$NON-NLS-2$;
 
 		int status = 200;
 		try(final FileOutputStream fos = new FileOutputStream("C:/Users/adolfo.navarro/Desktop/"+fileName+".zip");)  { //$NON-NLS-1$ //$NON-NLS-2$
+			int cont = 0;
 			do {
 				final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+				cont ++;
 				if(response.getContent().length > 0) {
 					final byte[] fragment = response.getContent();
 					fos.write(fragment);
-					//result.write(fragment);
+				}
+				if(cont > 0) {
+					urlBuilder = new StringBuilder(this.serviceUrl)
+					.append("?op=").append(ServiceOperations.DOWNLOAD.ordinal()) //$NON-NLS-1$
+					.append("&".concat(ServiceParams.LOG_FILE_NAME).concat("=")).append(fileName)//$NON-NLS-1$ //$NON-NLS-2$
+					.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append("false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$;
 				}
 				status = response.statusCode;
 			}while(status == 206);
@@ -631,8 +639,9 @@ public class LogConsumerClient {
 			resultDownload.append("C:/Users/adolfo.navarro/Desktop/"+fileName+".zip"); //$NON-NLS-1$ //$NON-NLS-2$
 			data.add(Json.createObjectBuilder()
 					.add("Code",200) //$NON-NLS-1$
-					.add("Path", resultDownload.toString())); //$NON-NLS-1$
-			jsonObj.add("Download", data); //$NON-NLS-1$
+					.add("Path", resultDownload.toString()) //$NON-NLS-1$
+					.add("Message","Fichero " + fileName + ".zip, bajado correctamente")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			jsonObj.add("Ok", data); //$NON-NLS-1$
 			final JsonWriter jw = Json.createWriter(result);
 		    jw.writeObject(jsonObj.build());
 		    jw.close();

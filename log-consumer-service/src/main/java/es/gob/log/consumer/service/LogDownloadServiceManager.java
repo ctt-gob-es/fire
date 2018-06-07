@@ -31,6 +31,7 @@ public class LogDownloadServiceManager {
 		SeekableByteChannel channel = null;
 		LogDownload download = null;
 		try{
+
 		Long fileDownloadPosition = new Long(0L);
 		if((Long) session.getAttribute("FileDownloadPos") != null ) { //$NON-NLS-1$
 			fileDownloadPosition = (Long)session.getAttribute("FileDownloadPos"); //$NON-NLS-1$

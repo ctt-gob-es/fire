@@ -35,11 +35,18 @@ public class LogMoreServiceManager {
 				reader.close();
 				reader.load(filePosition.longValue());
 			}
+			if(reader.isEndFile()) {
+				LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No existen más líneas en este momento para este fichero log");//$NON-NLS-1$
+				result = new String("No existen m&aacute;s l&iacute;neas en este momento para este fichero log").getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
+				session.setAttribute("Reader", reader); //$NON-NLS-1$
+				return result;
+			}
 
 			final LogMore logMore = new LogMore();
 			result = logMore.getLogMore(iNumLines,reader);
 
-			 if (reader.isEndFile() && result != null && result.length <= 0) {
+			 if (result != null && result.length <= 0) {
 					LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
 					resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No existen más líneas en este momento para este fichero log");//$NON-NLS-1$
 					result = new String("No existen m&aacute;s l&iacute;neas en este momento para este fichero log").getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$

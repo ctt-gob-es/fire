@@ -38,7 +38,7 @@ public class LogService extends HttpServlet {
 
 	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-
+		final HttpSession session = req.getSession(true);
 		final String opString = req.getParameter(ServiceParams.OPERATION);
 
 		if (opString == null) {
@@ -160,6 +160,7 @@ public class LogService extends HttpServlet {
 			}
 		}
 		catch (final SessionException e) {
+			removeDownloadSessions(session) ;
 			LOGGER.log(Level.WARNING,"Se solicito una operacion sin haber abierto sesion u ocurrio un error al abrirla",e); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Sesion no iniciada"); //$NON-NLS-1$
 			result = new String("Sesion no iniciada").getBytes(); //$NON-NLS-1$
@@ -173,12 +174,14 @@ public class LogService extends HttpServlet {
 			return;
 		}
 		catch (final IOException e) {
+			removeDownloadSessions(session) ;
 			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
 			result = new String("Ocurrio un error al procesar la peticion").getBytes(); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion de tratamiento del fichero"); //$NON-NLS-1$
 			return;
 		}
 		catch (final Exception e) {
+			removeDownloadSessions(session) ;
 			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
 			result = new String("Ocurrio un error al procesar la peticion.").getBytes(); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion"); //$NON-NLS-1$
@@ -394,20 +397,16 @@ public class LogService extends HttpServlet {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
 
+		final boolean reset = Boolean.parseBoolean(req.getParameter(ServiceParams.PARAM_RESET));
+		if(reset) {
+			removeDownloadSessions(session) ;
+		}
 		final byte[] result = LogDownloadServiceManager.process(req, resp);
 		if(LogDownloadServiceManager.isHasMore()) {
 			setStatusCode(HttpServletResponse.SC_PARTIAL_CONTENT);
 		}
 		else {
-			if ((SeekableByteChannel)session.getAttribute("ChannelDownload") != null) { //$NON-NLS-1$
-				try(final SeekableByteChannel chanel = (SeekableByteChannel)session.getAttribute("ChannelDownload");){ //$NON-NLS-1$
-				chanel.close();
-				session.removeAttribute("ChannelDownload"); //$NON-NLS-1$
-				}
-			}
-			if((LogDownload)session.getAttribute("Download") != null){ //$NON-NLS-1$
-				session.removeAttribute("Download"); //$NON-NLS-1$
-			}
+			removeDownloadSessions(session) ;
 			setStatusCode(HttpServletResponse.SC_OK);
 		}
 
@@ -422,6 +421,21 @@ public class LogService extends HttpServlet {
 		LogService.statusCode = statusCode;
 	}
 
+	private static final void removeDownloadSessions(final HttpSession session ) throws IOException {
+		if ((SeekableByteChannel)session.getAttribute("ChannelDownload") != null) { //$NON-NLS-1$
+			try(final SeekableByteChannel chanel = (SeekableByteChannel)session.getAttribute("ChannelDownload");){ //$NON-NLS-1$
+			chanel.close();
+			session.removeAttribute("ChannelDownload"); //$NON-NLS-1$
+			}
+		}
+		if((LogDownload)session.getAttribute("Download") != null){ //$NON-NLS-1$
+			session.removeAttribute("Download"); //$NON-NLS-1$
+		}
+
+		if((Long) session.getAttribute("FileDownloadPos") != null ) { //$NON-NLS-1$
+			session.removeAttribute("FileDownloadPos"); //$NON-NLS-1$
+		}
+	}
 
 
 }

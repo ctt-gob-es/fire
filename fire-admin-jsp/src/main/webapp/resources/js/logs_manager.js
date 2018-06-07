@@ -70,6 +70,8 @@
 	var idErrorTxtLog = "";
 	var idOkTxtLog = "";
 	var idAdvice = "";
+	var idProgress = "progress_download";
+
 	 
  /*****************Funciones:******************************/
  
@@ -100,6 +102,24 @@
 		$("#" + idOkTxtLog).show();
 		 
 	 }
+ 
+ function displayProgressBar(display){	 
+	 if (display == 1){		
+		$("#" + idProgress).css('display:inline-block');
+		$("#" + idProgress).show();
+		$("#btnContainer").hide(); 
+		$("#selectedFile").hide();
+	 }
+	 else if(display == 0){		
+		$("#" + idProgress).css('display:none');
+		$("#" + idProgress).hide();
+		$("#btnContainer").show(); 
+		$("#selectedFile").show();
+
+	 }			
+	
+ }
+ 
  /**
   * 
   * @param JSONData
@@ -454,8 +474,74 @@
   * @returns
   */
  function download(){
-	 var url = "../LogAdminService?op=10&fname=" + file;
-	 location.href = url;
+	 
+	 var url = "../LogAdminService?op=10&fname=" + file + "&reset=yes";
+	 //var progressBar = document.getElementById("progress");
+	 displayProgressBar(1);
+	 /*Este codigo funciona*/
+	 var xhr = new XMLHttpRequest();
+	 xhr.open("POST", url, true);
+	 xhr.responseType = "arraybuffer";
+	 xhr.onload = function () {
+		 var filename = "";
+	     var disposition = xhr.getResponseHeader('Content-Disposition');
+	     if (disposition && disposition.indexOf('attachment') !== -1) {
+	         var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+	         var matches = filenameRegex.exec(disposition);
+	         if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+	     }
+	         var type = xhr.getResponseHeader('Content-Type');
+	         var blob = typeof File === 'function'
+	             ? new File([this.response], filename, { type: type })
+	             : new Blob([this.response], { type: type });
+	         if (typeof window.navigator.msSaveBlob !== 'undefined') {
+	             // IE workaround for "HTML7007: One or more blob URLs were revoked by closing 
+	        	 //the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+	             window.navigator.msSaveBlob(blob, filename);
+	         } else {
+	             var URL = window.URL || window.webkitURL;
+	             var downloadUrl = URL.createObjectURL(blob);
+	
+	             if (filename) {
+	                 // use HTML5 a[download] attribute to specify filename
+	                 var a = document.createElement("a");
+	                 // safari doesn't support this yet
+	                 if (typeof a.download === 'undefined') {
+	                     window.location = downloadUrl;
+	                 } else {
+	                     a.href = downloadUrl;
+	                     a.download = filename;
+	                     document.body.appendChild(a);
+	                     a.click();
+	                 }
+	             } else {
+	                 window.location = downloadUrl;
+	             }
+	         }	       
+	         
+	     // La respuesta es de otro tipo, Json por ejemplo
+//         else{
+//         }
+
+	 };
+//	 xhr.onprogress = function(e) {
+//	     if (e.lengthComputable) {
+//	         progressBar.max = e.total;
+//	         progressBar.value = e.loaded;	         	               	         
+//	     }
+//	 };
+//	 xhr.onloadstart = function(e) {
+	    //progressBar.value = 0;
+//		 printProgressBar();
+//	 };
+	 xhr.onloadend = function(e) {
+		 displayProgressBar(0);
+	 };
+	
+	xhr.send();  
+	
+	 	 	
+	 //location.href = url;
  }
  
  /**
@@ -714,4 +800,8 @@
  
  function setIdAdvice(id){
 	 idAdvice = id;
+ }
+ 
+ function setIdProgrees(id){
+	 idProgress = id;
  }
