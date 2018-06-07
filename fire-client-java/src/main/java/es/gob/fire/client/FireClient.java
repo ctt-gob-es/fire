@@ -146,13 +146,45 @@ public class FireClient {
 	 * <i>client_config.properties</i> del directorio configurado a trav&eacute;s
 	 * de propiedades del sistema o del <i>classpath</i>.<br/>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
-	 * Javadoc de la clase.
+	 * Javadoc de la clase ({@link FireClient}).
 	 * @param appId Identificador de aplicaci&oacute;n.
 	 * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero
 	 * de configuraci&oacute;n.
 	 */
 	public FireClient(final String appId) throws ClientConfigFilesNotFoundException {
-		this(appId, ConfigManager.loadConfig());
+		this(appId, ConfigManager.loadConfig(), null);
+	}
+
+	/**
+	 * Construye el cliente de FIRe a partir de la configuraci&oacute;n proporcionada.<br/>
+	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
+	 * Javadoc de la clase ({@link FireClient}).
+	 * @param appId Identificador de aplicaci&oacute;n.
+	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br/>
+	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
+	 * Javadoc de la clase ({@link FireClient}).
+	 */
+	public FireClient(final String appId, final Properties config) {
+		this(appId, config, null);
+	}
+
+	/**
+	 * Construye el cliente de FIRe cargando la configuraci&oacute;n para la
+	 * conexi&oacute;n con el componente central del fichero
+	 * <i>client_config.properties</i> del directorio configurado a trav&eacute;s
+	 * de propiedades del sistema o del <i>classpath</i>.<br/>
+	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
+	 * Javadoc de la clase ({@link FireClient}).
+	 * @param appId Identificador de aplicaci&oacute;n.
+	 * @param decipher Objeto para el descifrado de las contrase&ntilde;as definidas en el
+	 * objeto de propiedades. Si se pasa {@code null}, se entender&aacute;a que las
+	 * contrase&ntildes;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
+	 * tener la forma {@ciphered: PASSWORD_CIFRADA_EN_BASE64 }.
+	 * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero
+	 * de configuraci&oacute;n.
+	 */
+	public FireClient(final String appId, final PasswordDecipher decipher) throws ClientConfigFilesNotFoundException {
+		this(appId, ConfigManager.loadConfig(), decipher);
 	}
 
 	/**
@@ -160,9 +192,13 @@ public class FireClient {
 	 * @param appId Identificador de aplicaci&oacute;n.
 	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br/>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
-	 * Javadoc de la clase.
+	 * Javadoc de la clase ({@link FireClient}).
+	 * @param decipher Objeto para el descifrado de las contrase&ntilde;as definidas en el
+	 * objeto de propiedades. Si se pasa {@code null}, se entender&aacute;a que las
+	 * contrase&ntildes;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
+	 * tener la forma {@ciphered: PASSWORD_CIFRADA_EN_BASE64 }.
 	 */
-	public FireClient(final String appId, final Properties config) {
+	public FireClient(final String appId, final Properties config, final PasswordDecipher decipher) {
 
     	this.appId = appId;
     	if (this.appId == null) {
@@ -181,7 +217,7 @@ public class FireClient {
         LOGGER.info("Se usara el siguiente servicio de acceso a FIRe: " + this.serviceUrl); //$NON-NLS-1$
 
         try {
-			this.conn = HttpsConnection.getConnection(config);
+			this.conn = HttpsConnection.getConnection(config, decipher);
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$

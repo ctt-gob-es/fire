@@ -40,7 +40,7 @@ public class ConnectionManager {
 		if (conn != null) {
 			return;
 		}
-		conn = HttpsConnection.getConnection(config);
+		conn = HttpsConnection.getConnection(config, null);
 	}
 
 	/**

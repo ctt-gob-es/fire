@@ -170,7 +170,7 @@ public class ConfigManager {
 	 */
 	public FireClient getFireClient(final String appId) throws ClientConfigFilesNotFoundException {
 		if (this.fireClient == null) {
-			this.fireClient = new FireClient(appId);
+			this.fireClient = new FireClient(appId, new FakePasswordDecipher());
 		}
 		return this.fireClient;
 	}

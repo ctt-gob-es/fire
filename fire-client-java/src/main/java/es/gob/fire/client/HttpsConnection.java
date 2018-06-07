@@ -89,17 +89,19 @@ public class HttpsConnection {
 	/**
 	 * Obtiene una conexi&oacute;n Http/Https.
 	 * @param config Opciones de configuraci&oacute;n.
+	 * @param decipher Descifrador encargado de descifrar las contrase&ntilde;as de
+	 * los almacenes de claves y certificados de confianza.
 	 * @return Devuelve la conexi&oacute;n configurada.
 	 * @throws IllegalArgumentException Cuando se configura un fichero de almac&eacute;n que no existe.
 	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.
 	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto.
 	 */
-	public static HttpsConnection getConnection(final Properties config) throws IllegalArgumentException,
+	public static HttpsConnection getConnection(final Properties config, final PasswordDecipher decipher) throws IllegalArgumentException,
 																		GeneralSecurityException,
 																		IOException {
 
 		final HttpsConnection conn = new HttpsConnection();
-		conn.configureConnection(config);
+		conn.configureConnection(config, decipher);
 
 		return conn;
 	}
@@ -107,15 +109,17 @@ public class HttpsConnection {
 	/**
 	 * Configura la conexi&oacute;n con el componente central.
 	 * @param config Opciones de configuraci&oacute;n.
+	 * @param decipher Descifrador encargado de descifrar las contrase&ntilde;as de
+	 * los almacenes de claves y certificados de confianza.
 	 * @throws IllegalArgumentException Cuando se configura un fichero de almac&eacute;n que no existe.
 	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.
 	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto.
 	 */
-	private void configureConnection(final Properties config) throws IllegalArgumentException, GeneralSecurityException, IOException {
+	private void configureConnection(final Properties config, final PasswordDecipher decipher) throws IllegalArgumentException, GeneralSecurityException, IOException {
 
 		// Inicializamos el KeyStore
 		KeyStore ks = null;
-		char[] ksPassword = null;
+		KeyStorePassword ksPassword = null;
         final String keyStore = config.getProperty(KEYSTORE_PROPERTY);
         if (keyStore != null) {
         	final File ksFile = new File(keyStore);
@@ -131,12 +135,12 @@ public class HttpsConnection {
         	if (ksPasswordText == null) {
         		throw new IllegalArgumentException("No se ha indicado la clave del almacen SSL"); //$NON-NLS-1$
         	}
-        	ksPassword = ksPasswordText.toCharArray();
+        	ksPassword = new KeyStorePassword(ksPasswordText, decipher);
 
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
 
         	final FileInputStream ksFis = new FileInputStream(new File(keyStore));
-        	ks.load(ksFis, ksPassword);
+        	ks.load(ksFis, ksPassword.getPassword());
         	ksFis.close();
         }
 
@@ -158,20 +162,20 @@ public class HttpsConnection {
 
             	final String tsType = config.getProperty(TRUSTSTORE_TYPE_PROPERTY, KeyStore.getDefaultType());
 
-                final String tsPassword = config.getProperty(TRUSTSTORE_PASS_PROPERTY);
-                if (tsPassword == null) {
+                final String tsPasswordText = config.getProperty(TRUSTSTORE_PASS_PROPERTY);
+                if (tsPasswordText == null) {
                 	throw new IllegalArgumentException("No se ha indicado la clave del almacen de confianza SSL"); //$NON-NLS-1$
                 }
 
                 ts = KeyStore.getInstance(tsType);
                 final FileInputStream tsFis = new FileInputStream(new File(trustStore));
-                ts.load(tsFis, tsPassword.toCharArray());
+                ts.load(tsFis, new KeyStorePassword(tsPasswordText, decipher).getPassword());
                 tsFis.close();
         	}
         }
 
         if (ks != null || ts != null || acceptAllCert) {
-        	initContext(ks, ksPassword, ts, acceptAllCert);
+        	initContext(ks, ksPassword != null ? ksPassword.getPassword() : null, ts, acceptAllCert);
         }
 	}
 
