@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-signature</artifactId>
-	<version>2.2</version>
+	<version>2.3-SNAPSHOT</version>
 	<packaging>war</packaging>
 	
 	<name>fire-signature</name>
@@ -33,37 +33,37 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-upgrade</artifactId>
-			<version>2.2</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-common-libraries</artifactId>
-			<version>2.2</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-document</artifactId>
-			<version>2.2</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-connector</artifactId>
-			<version>2.2</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-connector-clavefirma</artifactId>
-			<version>2.2</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-connector-clavefirma-test</artifactId>
-			<version>2.2</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

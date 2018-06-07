@@ -10,6 +10,8 @@
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 
+ /* ================= Componente distribuido PHP de FIRe (Version 2.3) ================= */
+ 
 	// Definimos la url del servicio de FIRe
 	define ("SERVICEURL","https://127.0.0.1:8443/fire-signature/fireService");
 	
