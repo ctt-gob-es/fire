@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-client</artifactId>
-	<version>2.2</version>
+	<version>2.3-SNAPSHOT</version>
 	<name>fire-client</name>
 		
 	<properties>
