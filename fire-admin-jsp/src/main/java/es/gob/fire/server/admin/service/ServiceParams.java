@@ -38,4 +38,7 @@ public class ServiceParams {
 	/***Par&aacute;metro que indica si se tiene que reiniciar*/
 	public static final String PARAM_RESET ="reset"; //$NON-NLS-1$
 
+	/***Par&aacute;metro que indica menasaje de texto a mostrar*/
+	public static final String PARAM_MSG ="msg"; //$NON-NLS-1$
+
 }

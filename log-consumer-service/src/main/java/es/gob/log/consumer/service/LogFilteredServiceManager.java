@@ -19,8 +19,7 @@ import es.gob.log.consumer.LogReader;
 public class LogFilteredServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogFilteredServiceManager.class.getName());
-//	private static  LogErrors error ;
-//	private static int status = HttpServletResponse.SC_OK;
+	private static boolean hasMore = false;
 
 
 	public final static byte[] process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -114,19 +113,11 @@ public class LogFilteredServiceManager {
 		return result;
 	}
 
-//	public final static LogErrors getError() {
-//		return LogFilteredServiceManager.error;
-//	}
-//
-//	public final static void setError(final LogErrors error) {
-//		LogFilteredServiceManager.error = error;
-//	}
-//
-//	public static final int getStatus() {
-//		return status;
-//	}
-//
-//	public static final void setStatus(final int status) {
-//		LogFilteredServiceManager.status = status;
-//	}
+	public static final boolean isHasMore() {
+		return hasMore;
+	}
+
+	private static final void setHasMore(final boolean hasMore) {
+		LogFilteredServiceManager.hasMore = hasMore;
+	}
 }

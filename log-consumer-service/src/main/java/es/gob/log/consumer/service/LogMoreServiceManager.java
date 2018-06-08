@@ -17,7 +17,7 @@ import es.gob.log.consumer.LogReader;
 public class LogMoreServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogMoreServiceManager.class.getName());
-
+	private static boolean hasMore = false;
 
 	public final static byte[] process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException  {
 
@@ -91,5 +91,12 @@ public class LogMoreServiceManager {
 
 	}
 
+	public static final boolean isHasMore() {
+		return hasMore;
+	}
+
+	private static final void setHasMore(final boolean hasMore) {
+		LogMoreServiceManager.hasMore = hasMore;
+	}
 
 }

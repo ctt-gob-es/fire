@@ -18,8 +18,7 @@ import es.gob.log.consumer.LogSearchText;
 public class LogSearchServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogTailServiceManager.class.getName());
-//	private static LogErrors error = null;
-//	private static int status = HttpServletResponse.SC_OK;
+	private static boolean hasMore = false;
 
 	public final static byte[] process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 
@@ -37,7 +36,8 @@ public class LogSearchServiceManager {
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
-
+		//final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
+//		Integer nlines =  new Integer(0);
 
 		try {
 
@@ -47,14 +47,29 @@ public class LogSearchServiceManager {
 				reader.setEndFile(false);
 			}
 
+//			if ((Integer)session.getAttribute("nLinesRead") != null ) { //$NON-NLS-1$
+//				nlines = (Integer)session.getAttribute("nLinesRead"); //$NON-NLS-1$
+//			}
+
+
 			final LogSearchText logSearch = new LogSearchText(info, reader);
 
 			if(sdateTime == null || sdateTime.longValue() < 0L) {
-				result = logSearch.searchText(Integer.parseInt(sNumLines) , text);
+				result = logSearch.searchText(Integer.parseInt(sNumLines), text);//Integer.parseInt(sNumLines) - nlines.intValue()
 			}
 			else {
 				result = logSearch.searchText(Integer.parseInt(sNumLines) , text, sdateTime.longValue());
 			}
+//			session.setAttribute("nLinesRead", new Integer(logSearch.getnLinesReaded())); //$NON-NLS-1$
+
+//			if(logSearch.getnLinesReaded() + nlines.intValue() == Integer.parseInt(sNumLines) || reader.getFilePosition() == channel.size() ) {
+//				setHasMore(false);
+//			}
+//			else if(logSearch.getnLinesReaded() + nlines.intValue() < Integer.parseInt(sNumLines) && reader.getFilePosition() != channel.size()) {
+//				setHasMore(true);
+//				reader.setEndFile(false);
+//			}
+
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 			if(logSearch.getFilePosition() > 0L) {
 				session.setAttribute("FilePosition",Long.valueOf(logSearch.getFilePosition())); //$NON-NLS-1$
@@ -99,25 +114,13 @@ public class LogSearchServiceManager {
 	}
 
 
-//	public static final LogErrors getError() {
-//		return error;
-//	}
-//
-//
-//	public static final void setError(final LogErrors error) {
-//		LogSearchServiceManager.error = error;
-//	}
-//
-//
-//	public final static int getStatus() {
-//		return LogSearchServiceManager.status;
-//	}
-//
-//
-//	public final static void setStatus(final int status) {
-//		LogSearchServiceManager.status = status;
-//	}
+	public static final boolean isHasMore() {
+		return hasMore;
+	}
 
+	private static final void setHasMore(final boolean hasMore) {
+		LogSearchServiceManager.hasMore = hasMore;
+	}
 
 
 

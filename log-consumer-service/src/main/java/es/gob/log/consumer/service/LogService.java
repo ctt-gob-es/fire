@@ -106,7 +106,7 @@ public class LogService extends HttpServlet {
 					break;
 				case OPEN_FILE:
 					LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
-					result = openFile(req);
+					result = openFile(req,resp);
 					if(result == null || result.length <= 0) {
 						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido abrir el fichero log indicado"); //$NON-NLS-1$
 						result = new String("No se ha podido abrir el fichero log indicado").getBytes(); //$NON-NLS-1$
@@ -253,12 +253,12 @@ public class LogService extends HttpServlet {
 		return result;
 	}
 
-	private static byte[] openFile(final HttpServletRequest req) throws SessionException, IOException {
+	private static byte[] openFile(final HttpServletRequest req, final HttpServletResponse resp) throws SessionException, IOException {
 		final HttpSession session = req.getSession(true);
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
-		final byte[] result = LogOpenServiceManager.process(req);
+		final byte[] result = LogOpenServiceManager.process(req, resp);
 		if(LogOpenServiceManager.getLinfo()!=null) {
 			session.setAttribute("LogInfo", LogOpenServiceManager.getLinfo()); //$NON-NLS-1$
 		}
@@ -369,15 +369,16 @@ public class LogService extends HttpServlet {
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
-//		LogSearchServiceManager.setError(null);
+
 		final byte[] result = LogSearchServiceManager.process(req,resp);
-//		if(LogSearchServiceManager.getError() != null) {
-//			setStatusCode(LogSearchServiceManager.getError().getNumError());
-//		}
-//		else if(LogSearchServiceManager.getStatus() != HttpServletResponse.SC_OK) {
-//			setStatusCode(LogSearchServiceManager.getStatus());
+
+//		if(LogSearchServiceManager.isHasMore()) {
+//			setStatusCode(HttpServletResponse.SC_PARTIAL_CONTENT);
 //		}
 //		else {
+//			if ((Integer)session.getAttribute("nLinesRead") != null ) { //$NON-NLS-1$
+//				session.removeAttribute("nLinesRead"); //$NON-NLS-1$
+//			}
 //			setStatusCode(HttpServletResponse.SC_OK);
 //		}
 		return result;

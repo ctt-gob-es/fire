@@ -49,6 +49,8 @@ public class FragmentedFileReader implements LogReader {
 	private CharBuffer nextLine2 = null;
 
 	private  boolean endFile = false;
+
+	//private  int nLinesReaded = 0;
 	/**
 	 * Crea el objeto para la carga de ficheros.
 	 * @param channel Canal para la lectura del fichero.
@@ -64,6 +66,8 @@ public class FragmentedFileReader implements LogReader {
 		this.channel = channel;
 		this.charset = charset != null ? charset : DEFAULT_CHARSET;
 	}
+
+
 
 	@Override
 	public void setIgnoreEmptyLines(final boolean ignoreEmptyLines) {
@@ -170,7 +174,7 @@ public class FragmentedFileReader implements LogReader {
 		}
 
 		this.line = result;
-
+		//setnLinesReaded(getnLinesReaded() + 1);
 		return result;
 	}
 
@@ -269,7 +273,13 @@ public class FragmentedFileReader implements LogReader {
 
 	}
 
-
+//	public final int getnLinesReaded() {
+//		return this.nLinesReaded;
+//	}
+//
+//	public final void setnLinesReaded(final int nLinesReaded) {
+//		this.nLinesReaded = nLinesReaded;
+//	}
 
 
 }

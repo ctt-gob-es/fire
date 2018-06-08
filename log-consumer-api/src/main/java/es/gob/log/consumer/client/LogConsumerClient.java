@@ -277,14 +277,15 @@ public class LogConsumerClient {
 			}
 		}
 		else {
+
 			final byte[] resOpenFile = response.getContent();
-			final String res = new String(resOpenFile,this.getCharsetContent());
-			result.append(res);
+			final String res = getSendErrorMessage(new String(resOpenFile,this.getCharsetContent()));
+			//result.append(res);
 			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 			final JsonArrayBuilder data = Json.createArrayBuilder();
 			data.add(Json.createObjectBuilder()
 				.add("Code",response.statusCode) //$NON-NLS-1$
-				.add("Message",  getSendErrorMessage(result.toString()))); //$NON-NLS-1$
+				.add("Message",  res)); //$NON-NLS-1$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 			try(final JsonWriter jw = Json.createWriter(result);){
 				jw.writeObject(jsonObj.build());
@@ -547,7 +548,30 @@ public class LogConsumerClient {
 				.append("&".concat(ServiceParams.SEARCH_DATETIME).concat("=")).append(startDate) //$NON-NLS-1$ //$NON-NLS-2$
 				.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append(reset); //$NON-NLS-1$ //$NON-NLS-2$
 		HttpResponse response = null;
+
 		try {
+//			int status = 200;
+//			int cont = 0;
+//
+//			do {
+//				cont ++;
+//				response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+//				if(response.getContent().length > 0) {
+//					final byte[] fragment = response.getContent();
+//					final String res = new String(fragment,this.getCharsetContent());
+//					resultSearch.append(res);
+//				}
+//				if(cont > 0) {
+//					urlBuilder =new StringBuilder(this.serviceUrl)
+//							.append("?op=").append(ServiceOperations.SEARCH_TEXT.ordinal()) //$NON-NLS-1$
+//							.append("&".concat(ServiceParams.NUM_LINES).concat("=")).append(numLines)//$NON-NLS-1$ //$NON-NLS-2$
+//							.append("&".concat(ServiceParams.SEARCH_TEXT).concat("=")).append(text.replaceAll(" ", "%20"))//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//							.append("&".concat(ServiceParams.SEARCH_DATETIME).concat("=")).append(startDate) //$NON-NLS-1$ //$NON-NLS-2$
+//							.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append("false"); //$NON-NLS-1$ //$NON-NLS-2$
+//				}
+//				status = response.statusCode;
+//			}while(status == 206);
+
 
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 

@@ -39,6 +39,7 @@ String numRec = "1";//$NON-NLS-1$
 		if(request.getParameter("name-srv") != null && !"".equals(request.getParameter("name-srv"))){//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 			 nameSrv = request.getParameter("name-srv");//$NON-NLS-1$
 		}
+	
 		if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
 			styleError="style='display: block-inline;'";//$NON-NLS-1$
 			final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
@@ -46,8 +47,16 @@ String numRec = "1";//$NON-NLS-1$
 				final JsonObject json = Error.getJsonObject(i);
 				htmlError += "<p id='error-txt'>" + "Error:" +String.valueOf(json.getInt("Code")) + "  " + json.getString("Message") + "</p>";//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			}
-		} else {
-			styleError="style='display: none'";//$NON-NLS-1$
+		} 
+		else {
+			if(request.getParameter("msg") != null && !"".equals(request.getParameter("msg"))){//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+				styleError="style='display: block-inline;'";//$NON-NLS-1$
+				htmlError += "<p id='error-txt'>" + request.getParameter("msg") + "</p>";//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+			}
+			else{
+				styleError="style='display: none'";//$NON-NLS-1$
+			}
+			
 			
 			final JsonArray FileList = jsonObj.getJsonArray("FileList");//$NON-NLS-1$
 			jsonData += "{\"FileList\":[";//$NON-NLS-1$
@@ -86,7 +95,8 @@ String numRec = "1";//$NON-NLS-1$
 			}
 
 		}
-		
+				
+	
 			
 	}
 

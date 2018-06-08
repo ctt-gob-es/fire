@@ -45,7 +45,7 @@ public class LogAdminService extends HttpServlet {
 	private  long startDateTime = 0L;
 	private  long endDateTime = 0L;
 	private boolean reset = false;
-
+	private String message = "";//$NON-NLS-1$
 
 	/**
      * @see HttpServlet#HttpServlet()
@@ -132,8 +132,17 @@ public class LogAdminService extends HttpServlet {
 				if(datLogFiles != null) {
 					session.setAttribute("JSON", datLogFiles); //$NON-NLS-1$
 				}
-				response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
+
+				if(this.getMessage() != null && !"".equals(this.getMessage())) { //$NON-NLS-1$
+					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
+					.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(this.nameSrv) //$NON-NLS-1$
+					.concat("&").concat(ServiceParams.PARAM_MSG).concat("=").concat(this.getMessage())//$NON-NLS-1$ //$NON-NLS-2$
+					);
+				}
+				else {
+					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
 						.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(this.nameSrv)); //$NON-NLS-1$
+				}
 			}
 			catch (final IOException e) {
 				LOGGER.severe("Error al obtener los ficheros log del servidor central"+ e.getMessage()); //$NON-NLS-1$
@@ -153,19 +162,36 @@ public class LogAdminService extends HttpServlet {
 			final byte datOpenFiles[] = this.logclient.openFile(this.logFileName);
 
 			if(datOpenFiles != null && datOpenFiles.length > 0) {
-				session.setAttribute("JSON_LOGINFO", datOpenFiles); //$NON-NLS-1$
+				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datOpenFiles));
+				final JsonObject jsonObj = reader.readObject();
+				reader.close();
+
+				if(this.logclient != null && this.logclient.getCharsetContent()!= null){
+					response.setCharacterEncoding(this.logclient.getCharsetContent().toString());
+				}
+
+				if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
+					final JsonArray Error = jsonObj.getJsonArray("Error"); //$NON-NLS-1$
+					response.sendRedirect(request.getContextPath().toString().concat("/LogAdminService?op=3")//$NON-NLS-1$
+							.concat("&").concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(this.nameSrv)//$NON-NLS-1$ //$NON-NLS-2$
+							.concat("&").concat(ServiceParams.PARAM_MSG).concat("=").concat(Error.getJsonObject(0).getString("Message"))//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							);
+				}
+				else {
+					session.setAttribute("JSON_LOGINFO", datOpenFiles); //$NON-NLS-1$
+
+					if(!isReset()) {
+						response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsManager.jsp?").concat(ServiceParams.PARAM_NAMESRV).concat("=")//$NON-NLS-1$ //$NON-NLS-2$
+							 .concat(this.nameSrv).concat("&").concat(ServiceParams.PARAM_FILENAME).concat("=").concat(this.logFileName));  //$NON-NLS-1$//$NON-NLS-2$
+					}
+					else {
+						response.getWriter().write(result);
+						setReset(false);
+					}
+
+				}
 			}
-			if(this.logclient != null && this.logclient.getCharsetContent()!= null){
-				response.setCharacterEncoding(this.logclient.getCharsetContent().toString());
-			}
-			if(!isReset()) {
-				response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsManager.jsp?").concat(ServiceParams.PARAM_NAMESRV).concat("=")//$NON-NLS-1$ //$NON-NLS-2$
-					 .concat(this.nameSrv).concat("&").concat(ServiceParams.PARAM_FILENAME).concat("=").concat(this.logFileName));  //$NON-NLS-1$//$NON-NLS-2$
-			}
-			else {
-				response.getWriter().write(result);
-				setReset(false);
-			}
+
 			break;
 
 		case CLOSE_FILE:
@@ -435,6 +461,12 @@ public class LogAdminService extends HttpServlet {
 			}else {
 				this.setReset(false);
 			}
+			if(request.getParameter(ServiceParams.PARAM_MSG) != null && !"".equals(request.getParameter(ServiceParams.PARAM_MSG))) { //$NON-NLS-1$
+				this.setMessage(request.getParameter(ServiceParams.PARAM_MSG));
+			}
+			else {
+				this.setMessage(null);
+			}
 
 	}
 
@@ -509,6 +541,14 @@ public class LogAdminService extends HttpServlet {
 
 	private final void setReset(final boolean reset) {
 		this.reset = reset;
+	}
+
+	private final String getMessage() {
+		return this.message;
+	}
+
+	private final void setMessage(final String message) {
+		this.message = message;
 	}
 
 

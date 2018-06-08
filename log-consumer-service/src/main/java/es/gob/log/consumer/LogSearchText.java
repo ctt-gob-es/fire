@@ -12,6 +12,7 @@ public class LogSearchText {
 	private final LogInfo logInfor;
 	private long filePosition;
 	private final LogReader reader;
+	private int nLinesReaded = 0;
 
 
 	private static final Logger LOGGER = Logger.getLogger(LogSearchText.class.getName());
@@ -83,6 +84,7 @@ public class LogSearchText {
 				linesReaded = LogSearchText.countLines(baos.toByteArray());
 			}
 			baos.write(this.getText( numLines - linesReaded));
+			setnLinesReaded(getnLinesReaded() + linesReaded);
 		}
 		else {
 			LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
@@ -105,6 +107,8 @@ public class LogSearchText {
 			numLines++;
 		}
 		setFilePosition(this.reader.getFilePosition());
+		setnLinesReaded(getnLinesReaded() + numLines);
+
 		return result.getBytes(this.reader.getCharset());
 	}
 
@@ -131,6 +135,14 @@ public class LogSearchText {
 	 */
 	private final void setFilePosition(final long filePosition) {
 		this.filePosition = filePosition;
+	}
+
+	public final int getnLinesReaded() {
+		return this.nLinesReaded;
+	}
+
+	private final void setnLinesReaded(final int nLinesReaded) {
+		this.nLinesReaded = nLinesReaded;
 	}
 
 

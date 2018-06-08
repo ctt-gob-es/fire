@@ -112,13 +112,12 @@ public class LogOpen {
 				this.linfo = new LogInfo();
 				final String pathLogInfo = ConfigManager.getInstance().getLogsDir().getAbsolutePath().concat(File.separator).concat(nameLogInfo);
 				final File fLogInfo =  new File(pathLogInfo).getCanonicalFile();
-				if(fLogInfo != null) {
+				if(fLogInfo.exists()) {
 					// Abrir fichero log, se inicializa el canal y el lector.
 					try(final FileInputStream fis = new FileInputStream(fLogInfo);){
 						this.linfo.load(fis);
 						fis.close();
 					}
-
 				}
 
 				this.channel = AsynchronousFileChannel.open(this.path,StandardOpenOption.READ);
@@ -174,9 +173,7 @@ public class LogOpen {
 				throw new UnsupportedEncodingException();
 			}
 		}
-		else {
 
-		}
 		return null;
 	}
 

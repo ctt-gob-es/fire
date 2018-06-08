@@ -57,6 +57,8 @@ boolean filter = true;
 			final JsonObject json = Error.getJsonObject(i);
 			htmlError += "<p id='error-txt'>" + "Error:" +String.valueOf(json.getInt("Code")) + "  " + json.getString("Message") + "</p>";//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
 		}
+		
+		return;
 	} else if(jsonObj.getJsonArray("LogInfo") != null){	//$NON-NLS-1$
 		final JsonArray LogInfo = jsonObj.getJsonArray("LogInfo");  //$NON-NLS-1$
 		for(int i = 0; i < LogInfo.size(); i++){

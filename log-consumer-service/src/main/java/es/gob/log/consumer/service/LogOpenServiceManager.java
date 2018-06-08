@@ -2,10 +2,12 @@ package es.gob.log.consumer.service;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousFileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import es.gob.log.consumer.LogInfo;
 import es.gob.log.consumer.LogOpen;
@@ -18,7 +20,7 @@ public class LogOpenServiceManager {
 	private static LogReader reader;
 	private static AsynchronousFileChannel channel;
 
-	public final static byte [] process(final HttpServletRequest req) throws IOException  {
+	public final static byte [] process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException  {
 		byte [] result = null;
 		/* Obtenemos los par&aacute;metros*/
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
@@ -34,8 +36,10 @@ public class LogOpenServiceManager {
 					setReader(logOpen.getReader());
 				}
 			} catch (final IOException e) {
-				LOGGER.log(Level.SEVERE, "Error al abrir el fichero ".concat(logFileName).concat(" : ".concat(e.getMessage()))); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new IOException();
+				LOGGER.log(Level.SEVERE, "Error al abrir el fichero ".concat(logFileName)); //$NON-NLS-1$
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al abrir el fichero ".concat(logFileName));//$NON-NLS-1$
+				result = "\"Error en la respuesta del servidor".getBytes(logOpen.getLinfo() != null ? logOpen.getLinfo().getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
+				return result;
 			}
 		}
 
