@@ -18,6 +18,8 @@ import java.io.IOException;
  */
 public final class Verify {
 
+	private static PlatformWsHelper defaultConn = null;
+
     /**
      * Constructor privado para no permir la instanciaci&oacute;n
      */
@@ -49,9 +51,42 @@ public final class Verify {
             final String afirmaAppName) throws PlatformWsException,
             IOException, VerifyException, ConfigFileNotFoundException {
 
+    	if (defaultConn == null) {
+    		defaultConn = new PlatformWsHelper();
+    		defaultConn.init();
+    	}
+
+    	return vertifyCertificate(defaultConn, cert, afirmaAppName);
+    }
+
+    /**
+     * Verifica el estado de un certificado usando la Plataforma Afirma.
+     * @param conn
+     * 			  Conexi&oacute;n con la Plataforma @firma.
+     * @param cert
+     *            Certificado.
+     * @param afirmaAppName
+     *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
+     * @return Respuesta del servicio de validaci&oacute;n.
+     * @throws IOException
+     *             Si hay problemas en los tratamientos de datos o lectura de
+     *             opciones de configuraci&oacute;n.
+     * @throws PlatformWsException
+     *             Si hay problemas con los servicios Web de la plataforma
+     *             Afirma.
+     * @throws VerifyException
+     *             Si hay problemas en la propia validaci&oacute;n del
+     *             certificado.
+     * @throws ConfigFileNotFoundException
+     * 			   Cuando no se puede cargar el fichero de configuraci&oacute;n.
+     */
+    public static VerifyResponse vertifyCertificate(final PlatformWsHelper conn,
+    		final byte[] cert, final String afirmaAppName) throws PlatformWsException,
+            IOException, VerifyException, ConfigFileNotFoundException {
+
         final String inputDss = VerifyUtils.createCertVerifyDss(cert,
                 afirmaAppName);
-        final byte[] response = PlatformWsHelper.getInstance().doPlatformCall(inputDss,
+        final byte[] response = conn.doPlatformCall(inputDss,
                 PlatformWsHelper.SERVICE_CERTVERIFY);
 
         try {

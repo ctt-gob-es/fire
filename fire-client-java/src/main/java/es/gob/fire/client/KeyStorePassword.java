@@ -52,7 +52,7 @@ public class KeyStorePassword {
 	 * Comprueba si la cadena de la contrase&ntilde;a se corresponde con el de una
 	 * contrase&ntilde;a cifrada.
 	 * @param text Cadena de contrase&ntilde;a.
-	 * @return {@code true}, si la contrase&ntilde;a est&aacute; cifrada, y {@code false},
+	 * @return {@code true} si la contrase&ntilde;a est&aacute; cifrada. {@code false},
 	 * en caso contrario.
 	 */
 	private static boolean checkCipheredPassword(final String text) {

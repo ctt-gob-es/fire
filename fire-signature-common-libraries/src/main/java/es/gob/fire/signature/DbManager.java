@@ -132,4 +132,13 @@ public class DbManager {
 
 		return c.prepareStatement(statement);
 	}
+
+	/**
+	 * Indica si la conexi&oacute;n a base de datos esta conigurada y puede usarse.
+	 * @return {@code true} si la conexi&oacute;n a base de datos puede usarse.
+	 * {@code false} en caso contrario.
+	 */
+	public static boolean isConfigured() {
+		return conn != null;
+	}
 }

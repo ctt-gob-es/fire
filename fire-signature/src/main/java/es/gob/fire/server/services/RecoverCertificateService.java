@@ -24,7 +24,6 @@ import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.GoogleAnalitycs;
-import es.gob.fire.signature.LoggingHandler;
 
 /** Servlet que recupera un certificado recien creado. */
 public final class RecoverCertificateService extends HttpServlet {
@@ -49,19 +48,11 @@ public final class RecoverCertificateService extends HttpServlet {
     	super.init();
 
     	try {
-	    	ConfigManager.checkInitialized();
+	    	ConfigManager.checkConfiguration();
 		}
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
     		return;
-    	}
-
-    	try {
-			LoggingHandler.install();
-		} catch (final SecurityException e) {
-			LOGGER.log(Level.SEVERE, "No se ha podido instalar el log seguro", e); //$NON-NLS-1$
-		} catch (final Throwable e){
-    		LOGGER.log(Level.SEVERE, "No se ha podido cargar la configuracion del log y no se generara el log seguro", e); //$NON-NLS-1$
     	}
 
     	if (analytics == null && ConfigManager.getGoogleAnalyticsTrackingId() != null) {
@@ -84,14 +75,16 @@ public final class RecoverCertificateService extends HttpServlet {
     protected void service(final HttpServletRequest request,
     					   final HttpServletResponse response) throws IOException {
 
-    	try {
-	    	ConfigManager.checkInitialized();
+		if (!ConfigManager.isInitialized()) {
+			try {
+				ConfigManager.checkConfiguration();
+			}
+			catch (final ConfigFilesException e) {
+				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
+				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
+				return;
+			}
 		}
-    	catch (final ConfigFilesException e) {
-    		LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-    		response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
-    		return;
-    	}
 
     	final RequestParameters params = RequestParameters.extractParameters(request);
 

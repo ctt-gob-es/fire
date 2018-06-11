@@ -20,43 +20,14 @@
 			<artifactId>fire-signature-connector</artifactId>
 			<version>2.3-SNAPSHOT</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-signature-common-libraries</artifactId>
-			<version>2.3-SNAPSHOT</version>
-			
-			<exclusions>
-				<exclusion>
-					<groupId>es.gob.afirma</groupId>
-					<artifactId>afirma-lib-jmimemagic</artifactId>
-				</exclusion>
-		
-				<exclusion>
-					<groupId>es.gob.afirma</groupId>
-					<artifactId>afirma-server-triphase-signer-core</artifactId>
-				</exclusion>
-	
-				<exclusion>
-					<groupId>es.gob.afirma</groupId>
-					<artifactId>afirma-crypto-core-pkcs7-tsp</artifactId>
-				</exclusion>
 
-			    <exclusion>
-					<groupId>com.dmurph</groupId>
-		  			<artifactId>JGoogleAnalyticsTracker</artifactId>
-				</exclusion>
-
-			</exclusions>
-		</dependency>
-	
 		<dependency>
 			<groupId>es.gob.afirma</groupId>
 			<artifactId>afirma-core</artifactId>
 			<version>1.6</version>
 			<exclusions>
 				<exclusion>
-					<groupId>es.gob.afirma</groupId>
+					<groupId>es.gob.afirma.lib</groupId>
 					<artifactId>afirma-lib-jmimemagic</artifactId>
 				</exclusion>
 			</exclusions>

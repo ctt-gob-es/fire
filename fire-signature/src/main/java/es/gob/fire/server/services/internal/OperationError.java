@@ -39,7 +39,8 @@ enum OperationError {
 	//SIGN_SERVICE_POSTSIGN(203, "Error al ejecutar la postfirma de los datos"), //$NON-NLS-1$
 	SIGN_SERVICE_NETWORK(205, "Error al conectar con el servicio para la generacion de la firma con la clave remota"), //$NON-NLS-1$
 
-	SIGN_MINIAPPLET(250, "Error al generar la firma con el cliente nativo"); //$NON-NLS-1$
+	SIGN_MINIAPPLET(250, "Error al generar la firma con el cliente nativo"), //$NON-NLS-1$
+	SIGN_MINIAPPLET_BATCH(251, "No se completo correctamente la firma del lote con certificado local"); //$NON-NLS-1$
 
 	private int code;
 

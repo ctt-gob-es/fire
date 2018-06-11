@@ -11,10 +11,15 @@ package es.gob.fire.signature;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.decipher.PropertyDecipher;
 
 /**
  * Manejador que gestiona la configuraci&oacute;n de la aplicaci&oacute;n.
@@ -26,6 +31,8 @@ public class ConfigManager {
 	private static final String PROP_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
 
 	private static final String PROP_DB_CONNECTION = "bbdd.conn"; //$NON-NLS-1$
+
+	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 
 	private static final String PROP_ANALYTICS_ID = "google.trackingId"; //$NON-NLS-1$
 
@@ -74,7 +81,6 @@ public class ConfigManager {
 	private static final String PROP_HTTP_CERT_ATTR = "http.cert.attr"; //$NON-NLS-1$
 
 	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
-	private static final String USE_BBDD = "usebbdd"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
 	private static final String PROP_CHECK_APPLICATION = "security.checkApplication"; //$NON-NLS-1$
 
@@ -83,10 +89,8 @@ public class ConfigManager {
 	/** Cadena utilizada para separar valores dentro de una propiedad. */
 	private static final String VALUES_SEPARATOR = ","; //$NON-NLS-1$
 
-	/** Nombre del fichero de configuraci&oacute;n. */
-	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
-
-	private static Properties config = null;
+	private static final String PREFIX_CIPHERED_TEXT = "{@ciphered:"; //$NON-NLS-1$
+	private static final String SUFIX_CIPHERED_TEXT = "}"; //$NON-NLS-1$
 
 	/** N&uacute;mero que identifica cuando el valor de configuraci&oacute;n que indica que
 	 * el n&uacute;mero de documentos no est&aacute; limitado. */
@@ -94,6 +98,16 @@ public class ConfigManager {
 
 	/** Ruta del directorio por defecto para el guardado de temporales (directorio temporal del sistema). */
 	private static String DEFAULT_TMP_DIR;
+
+	/** Nombre del fichero de configuraci&oacute;n. */
+	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
+
+	private static Properties config = null;
+
+	private static boolean initialized = false;
+
+	private static PropertyDecipher decipherImpl = null;
+
 
 	static {
 		try {
@@ -126,6 +140,22 @@ public class ConfigManager {
 				LOGGER.severe("No se pudo cargar el fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
 				throw new ConfigFilesException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
 			}
+
+			if (config.containsKey(PARAM_CIPHER_CLASS)) {
+				final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
+				if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
+					try {
+						final Class<?> decipherClass = Class.forName(decipherClassname);
+						final Object decipher = decipherClass.newInstance();
+						if (PropertyDecipher.class.isInstance(decipher)) {
+							decipherImpl = (PropertyDecipher) decipher;
+						}
+					}
+					catch (final Exception e) {
+						LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
+					}
+				}
+			}
 		}
 	}
 
@@ -137,7 +167,7 @@ public class ConfigManager {
 	 * @return Listado de proveedores configurados.
 	 */
 	public static ProviderElement[] getProviders() {
-		final String providers = config.getProperty(PROP_PROVIDERS_LIST);
+		final String providers = getProperty(PROP_PROVIDERS_LIST);
 		if (providers == null) {
 			return new ProviderElement[0];
 		}
@@ -161,7 +191,7 @@ public class ConfigManager {
 	 * @return Clase de conexi&oacute;n del proveedor.
 	 */
 	public static String getProviderClass(final String name) {
-		return config.getProperty(PREFIX_PROP_PROVIDER + name);
+		return getProperty(PREFIX_PROP_PROVIDER + name);
 	}
 
 	/**
@@ -169,7 +199,7 @@ public class ConfigManager {
 	 * @return Tracking Id de Google Analytics.
 	 */
 	public static String getGoogleAnalyticsTrackingId() {
-		return config.getProperty(PROP_ANALYTICS_ID);
+		return getProperty(PROP_ANALYTICS_ID);
 	}
 
 	/**
@@ -177,7 +207,7 @@ public class ConfigManager {
 	 * @return Clase de conexi&oacute;n.
 	 */
 	public static String getJdbcDriverString() {
-		return config.getProperty(PROP_DB_DRIVER);
+		return getProperty(PROP_DB_DRIVER);
 	}
 
 	/**
@@ -185,7 +215,7 @@ public class ConfigManager {
 	 * @return Cadena de conexi&oacute;n con la base de datos.
 	 */
 	public static String getDataBaseConnectionString() {
-		return config.getProperty(PROP_DB_CONNECTION);
+		return getProperty(PROP_DB_CONNECTION);
 	}
 
 	/**
@@ -193,7 +223,7 @@ public class ConfigManager {
 	 * @return Cadena de conexi&oacute;n con la base de datos.
 	 */
 	public static String getAfirmaAplicationId() {
-		return config.getProperty(PROP_AFIRMA_ID);
+		return getProperty(PROP_AFIRMA_ID);
 	}
 
 	/**
@@ -202,7 +232,7 @@ public class ConfigManager {
 	 * {@code false} en caso contrario.
 	 */
 	public static boolean isAlternativeXmlDSigActive() {
-		return Boolean.parseBoolean(config.getProperty(PROP_ALTERNATIVE_XMLDSIG));
+		return Boolean.parseBoolean(getProperty(PROP_ALTERNATIVE_XMLDSIG));
 	}
 
 	/**
@@ -213,7 +243,7 @@ public class ConfigManager {
 	 */
 	public static int getBatchMaxDocuments() {
 		try {
-			return Integer.parseInt(config.getProperty(PROP_BATCH_MAX_DOCUMENTS));
+			return Integer.parseInt(getProperty(PROP_BATCH_MAX_DOCUMENTS));
 		}
 		catch (final Exception e) {
 			LOGGER.warning("Se encontro un valor invalido para la propiedad '" + //$NON-NLS-1$
@@ -232,7 +262,7 @@ public class ConfigManager {
 	 */
 	public static int getTempsTimeout() {
 		try {
-			return Integer.parseInt(config.getProperty(PROP_FIRE_TEMP_TIMEOUT, Integer.toString(DEFAULT_FIRE_TEMP_TIMEOUT))) * 1000;
+			return Integer.parseInt(getProperty(PROP_FIRE_TEMP_TIMEOUT, Integer.toString(DEFAULT_FIRE_TEMP_TIMEOUT))) * 1000;
 		}
 		catch (final Exception e) {
 			LOGGER.warning("Se encontro un valor invalido para la propiedad '" + //$NON-NLS-1$
@@ -244,9 +274,11 @@ public class ConfigManager {
 
 	/**
 	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
-	 * @throws ConfigFilesException Si no encuentra el fichero login.properties.
+	 * @throws ConfigFilesException Si no encuentra el fichero config.properties.
 	 */
-	public static void checkInitialized() throws ConfigFilesException {
+	public static void checkConfiguration() throws ConfigFilesException {
+
+		initialized = false;
 
 		loadConfig();
 
@@ -281,6 +313,17 @@ public class ConfigManager {
 				throw new ConfigFilesException("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE + " para la verificacion del certificado de auteticacion", CONFIG_FILE); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
+
+		initialized = true;
+	}
+
+	/**
+	 * Indica que la configuracion ya se comprob&oacute; y est&aacute; operativa.
+	 * @return {@code true} cuando ya se ha cargado la configuraci&oacute;n y comprobado
+	 * que es correcta.
+	 */
+	public static boolean isInitialized() {
+		return initialized;
 	}
 
 	/**
@@ -288,7 +331,7 @@ public class ConfigManager {
 	 * @return el certificado.
 	 */
 	public static String getCert(){
-		return config.getProperty(PROP_CERTIFICATE);
+		return getProperty(PROP_CERTIFICATE);
 	}
 
 	/**
@@ -296,7 +339,7 @@ public class ConfigManager {
 	 * @return identificador de la aplicaci&oacute;n.
 	 */
 	public static String getAppId(){
-		return config.getProperty(PROP_APP_ID);
+		return getProperty(PROP_APP_ID);
 	}
 
 	/**
@@ -305,7 +348,7 @@ public class ConfigManager {
 	 * temporal del sistema. En caso de error, devolver&aacute; {@code null}.
 	 */
 	public static String getTempDir() {
-		return config.getProperty(PROP_TEMP_DIR, DEFAULT_TMP_DIR);
+		return getProperty(PROP_TEMP_DIR, DEFAULT_TMP_DIR);
 	}
 
 	/**
@@ -338,7 +381,7 @@ public class ConfigManager {
 	 * @return El valor del par&aacute;metro security.checkCertificate.
 	 */
 	public static boolean isCheckCertificateNeeded() {
-		return 	Boolean.parseBoolean(config.getProperty(PROP_CHECK_CERTIFICATE, Boolean.TRUE.toString()));
+		return 	Boolean.parseBoolean(getProperty(PROP_CHECK_CERTIFICATE, Boolean.TRUE.toString()));
 	}
 
 	/**
@@ -346,7 +389,7 @@ public class ConfigManager {
 	 * @return El valor del par&aacute;metro security.checkApplication.
 	 */
 	public static boolean isCheckApplicationNeeded() {
-		return 	Boolean.parseBoolean(config.getProperty(PROP_CHECK_APPLICATION, Boolean.TRUE.toString()));
+		return 	Boolean.parseBoolean(getProperty(PROP_CHECK_APPLICATION, Boolean.TRUE.toString()));
 	}
 
 	private static void checkProviders(final ProviderElement[] providers) {
@@ -383,15 +426,7 @@ public class ConfigManager {
 	 * @return El par&aacute;metro usetsp.
 	 */
 	public static boolean existUseTsp(){
-		return 	Boolean.parseBoolean(config.getProperty(USE_TSP, Boolean.FALSE.toString()));
-	}
-
-	/**
-	 * Recupera si el log se guarda en base de datos
-	 * @return El par&aacute;metro usebbdd.
-	 */
-	public static boolean isUsedLoggingBd(){
-		return 	Boolean.parseBoolean(config.getProperty(USE_BBDD, Boolean.FALSE.toString()));
+		return 	Boolean.parseBoolean(getProperty(USE_TSP, Boolean.FALSE.toString()));
 	}
 
 	/**
@@ -403,7 +438,7 @@ public class ConfigManager {
 	public static int getAfirmaTempsTimeout() {
 		try {
 			return config.containsKey(PROP_CLIENTEAFIRMA_TEMP_TIMEOUT) ?
-					Integer.parseInt(config.getProperty(PROP_CLIENTEAFIRMA_TEMP_TIMEOUT)) : DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT;
+					Integer.parseInt(getProperty(PROP_CLIENTEAFIRMA_TEMP_TIMEOUT)) : DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT;
 		} catch (final Exception e) {
 			LOGGER.warning("Tiempo de expiracion invalido en el fichero de configuracion, se usara " + DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT); //$NON-NLS-1$
 			return DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT;
@@ -417,7 +452,7 @@ public class ConfigManager {
 	 * {@code false} en caso contrario.
 	 */
 	public static boolean getClienteAfirmaForceAutoFirma() {
-			return Boolean.parseBoolean(config.getProperty(PROP_CLIENTEAFIRMA_FORCE_AUTOFIRMA));
+			return Boolean.parseBoolean(getProperty(PROP_CLIENTEAFIRMA_FORCE_AUTOFIRMA));
 	}
 
 	/**
@@ -427,7 +462,7 @@ public class ConfigManager {
 	 * {@code true} en caso contrario.
 	 */
 	public static boolean getClienteAfirmaForceNative() {
-		return !Boolean.FALSE.toString().equalsIgnoreCase(config.getProperty(PROP_CLIENTEAFIRMA_FORCE_NATIVE));
+		return !Boolean.FALSE.toString().equalsIgnoreCase(getProperty(PROP_CLIENTEAFIRMA_FORCE_NATIVE));
 	}
 
 	/**
@@ -445,7 +480,7 @@ public class ConfigManager {
 			}
 		}
 
-		return config.getProperty(PROP_FIRE_PAGES_TITLE, ""); //$NON-NLS-1$
+		return getProperty(PROP_FIRE_PAGES_TITLE, ""); //$NON-NLS-1$
 	}
 
 	/**
@@ -463,7 +498,7 @@ public class ConfigManager {
 			}
 		}
 
-		return config.getProperty(PROP_FIRE_PAGES_LOGO_URL);
+		return getProperty(PROP_FIRE_PAGES_LOGO_URL);
 	}
 
 	/**
@@ -483,7 +518,7 @@ public class ConfigManager {
 			}
 		}
 
-		return config.getProperty(PROP_DOCUMENT_MANAGER_PREFIX + docManager);
+		return getProperty(PROP_DOCUMENT_MANAGER_PREFIX + docManager);
 	}
 
 	/**
@@ -503,7 +538,7 @@ public class ConfigManager {
 			}
 		}
 
-		return config.getProperty(PROP_SESSIONS_DAO);
+		return getProperty(PROP_SESSIONS_DAO);
 	}
 
 
@@ -523,7 +558,7 @@ public class ConfigManager {
 	 		}
 	 	}
 
-	 	return config.getProperty(PROP_FIRE_PUBLIC_URL);
+	 	return getProperty(PROP_FIRE_PUBLIC_URL);
 	 }
 
 	 /**
@@ -542,6 +577,117 @@ public class ConfigManager {
 				 return null;
 			 }
 		 }
-		 return config.getProperty(PROP_HTTP_CERT_ATTR);
+		 return getProperty(PROP_HTTP_CERT_ATTR);
 	 }
+
+	/**
+	 * Indica si se ha configurado un objeto para el descifrado de propiedades
+	 * en los ficheros de configuraci&oacute;n.
+	 * @return {@code true} si se ha definido el objeto de descifrado. {@code false}
+	 * en caso contrario.
+	 */
+	public static boolean hasDecipher() {
+		return decipherImpl != null;
+	}
+
+	/**
+	 * Recupera una propiedad del fichero de configuraci&oacute;n y devuelve su
+	 * valor habi&eacute;ndolo descifrado si era necesario.
+	 * @param key Clave de la propiedad.
+	 * @return Valor descifrado de la propiedad o {@code null} si la propiedad no estaba definida.
+	 */
+	private static String getProperty(final String key) {
+		return getProperty(key, null);
+	}
+
+	/**
+	 * Recupera una propiedad del fichero de configuraci&oacute;n y devuelve su
+	 * valor habi&eacute;ndolo descifrado si era necesario.
+	 * @param key Clave de la propiedad.
+	 * @param defaultValue Valor por defecto que devolver en caso de que la propiedad no exista
+	 * o que se produzca un error al extraerla.
+	 * @return Valor descifrado de la propiedad o {@code null} si la propiedad no estaba definida.
+	 */
+	private static String getProperty(final String key, final String defaultValue) {
+		return getDecipheredProperty(config, key, defaultValue);
+	}
+
+	/**
+	 * Recupera una propiedad de un objeto de configuraci&oacute;n y devuelve su
+	 * valor habi&eacute;ndolo descifrado si era necesario.
+	 * @param properties Objeto de configuraci&oacute;n del que obtener el valor.
+	 * @param key Clave de la propiedad.
+	 * @param defaultValue Valor por defecto que devolver en caso de que la propiedad no exista
+	 * o que se produzca un error al extraerla.
+	 * @return Valor descifrado de la propiedad o {@code null} si la propiedad no estaba definida.
+	 */
+	public static String getDecipheredProperty(final Properties properties, final String key, final String defaultValue) {
+		String value = properties.getProperty(key);
+		if (decipherImpl != null && value != null) {
+			while (isCiphered(value)) {
+				try {
+					value = decipherFragment(value);
+				} catch (final IOException e) {
+					if (defaultValue != null) {
+						LOGGER.log(
+								Level.WARNING,
+								String.format(
+										"Ocurrio un error al descifrar un fragmento de la propiedad %1s. Se usara el valor %2s", //$NON-NLS-1$
+										key,
+										defaultValue),
+								e);
+						value = defaultValue;
+					}
+					else {
+						LOGGER.log(
+								Level.WARNING,
+								String.format(
+										"Ocurrio un error al descifrar un fragmento de la propiedad %1s. Se usara el valor predefinido.", //$NON-NLS-1$
+										key)
+								);
+					}
+					break;
+				}
+			}
+		}
+
+		if (value == null) {
+			value = defaultValue;
+		}
+		return value;
+	}
+
+
+
+	/**
+	 * Comprueba si una cadena de texto tiene alg&uacute;n fragmento cifrado.
+	 * @param text Cadena de texto.
+	 * @return {@code true} si la cadena contiene fragmentos cifrados. {@code false},
+	 * en caso contrario.
+	 */
+	private static boolean isCiphered(final String text) {
+
+		if (text == null) {
+			return false;
+		}
+
+		final int idx = text.indexOf(PREFIX_CIPHERED_TEXT);
+		return idx != -1 && text.indexOf(SUFIX_CIPHERED_TEXT, idx + PREFIX_CIPHERED_TEXT.length()) != -1;
+	}
+
+	/**
+	 * Texto cifrado del que descifrar un fragmento.
+	 * @param text Texto con los marcadores que se&ntilde;alan que hay un fragmento cifrado.
+	 * @return  Texto con un framento descifrado.
+	 * @throws IOException Cuando ocurre un error al descifrar los datos.
+	 */
+	private static String decipherFragment(final String text) throws IOException {
+		final int idx1 = text.indexOf(PREFIX_CIPHERED_TEXT);
+		final int idx2 = text.indexOf(SUFIX_CIPHERED_TEXT, idx1);
+		final String base64Text = text.substring(idx1 + PREFIX_CIPHERED_TEXT.length(), idx2).trim();
+
+		return text.substring(0, idx1) +
+				decipherImpl.decipher(Base64.decode(base64Text)) +
+				text.substring(idx2 + SUFIX_CIPHERED_TEXT.length());
+	}
 }

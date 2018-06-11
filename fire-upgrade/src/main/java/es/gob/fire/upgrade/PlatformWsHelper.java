@@ -25,13 +25,10 @@ import org.apache.axis.Handler;
 import org.apache.axis.client.Call;
 import org.apache.axis.client.Service;
 
-final class PlatformWsHelper {
-
-    private static Handler REQUEST_HANDLER;
-    private static String WEB_SERVICES_TIMEOUT;
-
-    static String SERVICE_SIGNUPGRADE;
-    static String SERVICE_CERTVERIFY;
+/**
+ * Clase para la conexi&oacute;n con la Plataforma @firma.
+ */
+public final class PlatformWsHelper {
 
     static final String CONFIG_FILE = "platform.properties" ;//$NON-NLS-1$
 
@@ -42,15 +39,30 @@ final class PlatformWsHelper {
 	 * de configuraci&oacute;n. Se utiliza si no se ha establecido la nueva variable. */
 	private static final String ENVIRONMENT_VAR_CONFIG_DIR_OLD = "clavefirma.config.path"; //$NON-NLS-1$
 
-    private final String AFIRMA_ENDPOINT;
-
-    private static PlatformWsHelper instance = null;
-
     private static final Logger LOGGER = Logger.getLogger(PlatformWsHelper.class.getName());
 
-    private PlatformWsHelper() throws ConfigFileNotFoundException {
+    private static Handler REQUEST_HANDLER;
+    private static String WEB_SERVICES_TIMEOUT;
 
-    	final Properties config = loadConfig();
+    static String SERVICE_SIGNUPGRADE;
+    static String SERVICE_CERTVERIFY;
+
+    private String AFIRMA_ENDPOINT;
+
+    /**
+     * Inicializa el objeto para que pueda conectar con la Plataforma @firma.
+     * @throws ConfigFileNotFoundException Cuando no encuentra el fichero de configuraci&oacute;n.
+     */
+    void init() throws ConfigFileNotFoundException {
+    	init(loadConfig());
+    }
+
+    /**
+     * Inicializa el objeto para que pueda conectar con la Plataforma @firma.
+     * @param config Configuraci&oacute;n a partir de la cual realizar la
+     * conexi&oacute;n con la Plataforma @firma.
+     */
+    public void init(final Properties config) {
 
         setSystemParameters(
                 config.getProperty("com.trustedstore.path"), //$NON-NLS-1$
@@ -87,19 +99,6 @@ final class PlatformWsHelper {
                 .getProperty("webservices.service.certverify"); //$NON-NLS-1$
 
         this.AFIRMA_ENDPOINT = config.getProperty("webservices.endpoint"); //$NON-NLS-1$
-    }
-
-    /**
-     * Recupera la instancia &uacute;nica de la clase de utilidad.
-     * @return Instancia de la clase de utilidad.
-     * @throws ConfigFileNotFoundException Cuando no se ha encontrado el fichero de configuraci&oacute;n necesario.
-     * @throws IOException Cuando ocurre alg&uacute;n error durante la configuraci&oacute;n de la instancia.
-     */
-    public static PlatformWsHelper getInstance() throws ConfigFileNotFoundException, IOException {
-    	if (instance == null) {
-    		instance = new PlatformWsHelper();
-    	}
-    	return instance;
     }
 
     byte[] doPlatformCall(final String inputDss, final String serviceName)

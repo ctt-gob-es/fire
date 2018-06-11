@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.connector.FIReSignatureException;
-import es.gob.fire.signature.FIReInvalidRequestOperationException;
 
 /**
  * Servicio para la recuperacion de un certificado recien creado.
@@ -54,7 +53,7 @@ public class TestRecoverCertificateService extends HttpServlet {
 		final File transactionFile = new File(TestHelper.getDataFolder(), transactionId);
 		if (!transactionFile.isFile() || !transactionFile.canRead()) {
 			LOGGER.log(Level.WARNING, "La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception e = new FIReInvalidRequestOperationException("La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
+			final Exception e = new FIReSignatureException("La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
 			throw new ServletException(e);
 		}
 

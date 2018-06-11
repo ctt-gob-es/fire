@@ -53,9 +53,17 @@ public class ProviderManager {
 		// Obtenemos el fichero de configuracion del proveedor
 		final Properties providerConfig = loadProviderConfig(providerName);
 
+		// Si se ha definido una clase para el descifrado de constrasenas, actualizamos
+		// el objeto con los valores descifrados de cada una de ellas
+		if (ConfigManager.hasDecipher()) {
+			for (final String key : providerConfig.keySet().toArray(new String[providerConfig.size()])) {
+				providerConfig.setProperty(key, ConfigManager.getDecipheredProperty(providerConfig, key, null));
+			}
+		}
+
 		// Inicializamos el proveedor
 		final FIReConnector connector = FIReConnectorFactory.getConnector(providerClass);
-		connector.init((Properties) providerConfig.clone());
+		connector.init(providerConfig);
 
 		// Inicializamos la transaccion
 		connector.initOperation(transactionConfig);
@@ -85,8 +93,8 @@ public class ProviderManager {
 	}
 
 	/**
-	 * Obtiene la informaci&oacute;n necesaria de un proveedor para poder mostrarle
-	 * al usuario para que identifique su uso.
+	 * Obtiene la informaci&oacute;n necesaria de un proveedor para pod&eacute;rsela
+	 * mostrar a un usuario y que as&iacute; identifique su uso.
 	 * @param providerName Nombre del proveedor.
 	 * @return Informaci&oacute;n del proveedor.
 	 */
