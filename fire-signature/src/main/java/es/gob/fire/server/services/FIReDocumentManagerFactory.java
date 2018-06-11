@@ -109,6 +109,13 @@ public class FIReDocumentManagerFactory {
 							"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
 				}
 
+				// Desciframos las claves del fichero de configuracion si es necesario
+				if (config != null && ConfigManager.hasDecipher()) {
+					for (final String key : config.keySet().toArray(new String[config.size()])) {
+						config.setProperty(key, ConfigManager.getDecipheredProperty(config, key, null));
+					}
+				}
+
 				try {
 					docManager.init(config);
 				}

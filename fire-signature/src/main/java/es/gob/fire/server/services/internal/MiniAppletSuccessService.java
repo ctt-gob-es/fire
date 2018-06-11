@@ -106,7 +106,7 @@ public class MiniAppletSuccessService extends HttpServlet {
         		updateSingleResult(batchResult, afirmaBatchResultB64);
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al procesar el resultado de la firma de lote del Cliente @firma: " + e, e); //$NON-NLS-1$
-        		ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, true, "No se completo correctamente la firma del lote con certificado local");
+        		ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET_BATCH, true, null);
         		response.sendRedirect(errorUrl);
         		return;
         	}

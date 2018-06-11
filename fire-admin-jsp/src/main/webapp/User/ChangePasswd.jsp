@@ -68,7 +68,7 @@
 				<div style="margin: auto;width: 60%;padding: 5px;">
 					<div style="display: inline-block; width: 30%;margin: 5px;">
 						<!-- Label para la accesibilidad de la pagina -->
-						<label for="old_passwd-usr" style="color: #404040" >* Clave antigüa</label>
+						<label for="old_passwd-usr" style="color: #404040" >* Contraseña antigua</label>
 					</div>
 					<div  style="display: inline-block; width: 60%;margin: 5px;">
 							<input id="old_passwd-usr" type="password" class="edit-txt"  name="old_passwd-usr" style="width: 80%;margin-top:3px;"
@@ -78,7 +78,7 @@
 				<div style="margin: auto;width: 60%;padding: 5px;">
 					<div style="display: inline-block; width: 30%;margin: 5px;">
 						<!-- Label para la accesibilidad de la pagina -->
-						<label for="passwd-usr_1" style="color: #404040" >* Clave nueva</label>
+						<label for="passwd-usr_1" style="color: #404040" >* Contraseña nueva</label>
 					</div>
 					<div  style="display: inline-block; width: 60%;margin: 5px;">
 							<input id="passwd-usr_1" type="password" class="edit-txt"  name="passwd-usr_1" style="width: 80%;margin-top:3px;"
@@ -88,7 +88,7 @@
 				<div style="margin: auto;width: 60%;padding: 5px;">
 					<div style="display: inline-block; width: 30%;margin: 5px;">
 						<!-- Label para la accesibilidad de la pagina -->
-						<label for="passwd-usr_2" style="color: #404040" >* Repetir clave nueva</label>
+						<label for="passwd-usr_2" style="color: #404040" >* Repetir contraseña nueva</label>
 					</div>
 					<div  style="display: inline-block; width: 60%;margin: 5px;">
 							<input id="passwd-usr_2" type="password" class="edit-txt"  name="passwd-usr_2" style="width: 80%;margin-top:3px;"

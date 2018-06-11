@@ -10,11 +10,13 @@
 package es.gob.fire.server.services;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.ConfigFileNotFoundException;
 import es.gob.fire.upgrade.PlatformWsException;
+import es.gob.fire.upgrade.PlatformWsHelper;
 import es.gob.fire.upgrade.Upgrade;
 import es.gob.fire.upgrade.UpgradeResponseException;
 import es.gob.fire.upgrade.UpgradeTarget;
@@ -26,6 +28,8 @@ import es.gob.fire.upgrade.UpgradeTarget;
 public class AfirmaUpgrader {
 
 	private static final Logger LOGGER = Logger.getLogger(AfirmaUpgrader.class.getName());
+
+	private static PlatformWsHelper conn = null;
 
 	/**
 	 * Actualiza una firma utilizando la Plataforma @firma. Si no se indica formato de
@@ -44,10 +48,29 @@ public class AfirmaUpgrader {
 
 		LOGGER.info("Actualizando firma al formato: " + upgradeFormat); //$NON-NLS-1$
 
+		if (conn == null) {
+			Properties config;
+			try {
+				config = PlatformWsHelper.loadConfig();
+			}
+			catch (final Exception e) {
+				throw new UpgradeException("No se encontro la configuracion para la conexion con @firma", e); //$NON-NLS-1$
+			}
+			if (ConfigManager.hasDecipher()) {
+				for (final String key : config.keySet().toArray(new String[config.size()])) {
+					config.setProperty(key, ConfigManager.getDecipheredProperty(config, key, null));
+				}
+			}
+
+			conn = new PlatformWsHelper();
+			conn.init(config);
+		}
+
 		byte[] upgradedSignature;
 		final String afirmaId = ConfigManager.getAfirmaAplicationId();
         try {
         	upgradedSignature = Upgrade.signUpgradeCreate(
+        			conn,
         			signature,
         			UpgradeTarget.getUpgradeTarget(upgradeFormat),
         			afirmaId);

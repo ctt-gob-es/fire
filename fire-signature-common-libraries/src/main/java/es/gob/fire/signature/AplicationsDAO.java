@@ -47,9 +47,7 @@ public class AplicationsDAO {
 	public static boolean checkApplicationId(final String appId) throws SQLException, DBConnectionException {
 
 		// si no hay cadena de conexion comprobamos del fichero de configuracion.
-		if (ConfigManager.getJdbcDriverString() == null || ConfigManager.getJdbcDriverString().isEmpty() ||
-			ConfigManager.getDataBaseConnectionString() == null || ConfigManager.getDataBaseConnectionString().isEmpty() ||
-			ConfigManager.getDataBaseConnectionString().equals("none")) { //$NON-NLS-1$
+		if (!DbManager.isConfigured()) {
 			return ConfigManager.getAppId().equals(appId);
 		}
 
@@ -96,9 +94,7 @@ public class AplicationsDAO {
 	public static boolean checkThumbPrint(final String appId, final String thumb) throws SQLException, CertificateException, IOException, NoSuchAlgorithmException, DBConnectionException {
 
 		// si no hay cadena de conexion comprobamos del fichero de configuracion.
-		if (ConfigManager.getJdbcDriverString() == null || ConfigManager.getJdbcDriverString().isEmpty() ||
-			ConfigManager.getDataBaseConnectionString() == null || ConfigManager.getDataBaseConnectionString().isEmpty() ||
-			ConfigManager.getDataBaseConnectionString().equals("none")) { //$NON-NLS-1$
+		if (!DbManager.isConfigured()) {
 
 			// TODO: Comprobar si realmente es necesario componer el certificado y no basta con decodificarlo
 			final X509Certificate cer = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate //$NON-NLS-1$

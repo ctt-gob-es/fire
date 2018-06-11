@@ -18,6 +18,8 @@ import java.io.IOException;
  */
 public final class Upgrade {
 
+	private static PlatformWsHelper defaultConn = null;
+
     /**
      * Constructor privado para no permir la instanciaci&oacute;n
      */
@@ -50,12 +52,53 @@ public final class Upgrade {
             final UpgradeTarget format, final String afirmaAppName)
             throws IOException, PlatformWsException, UpgradeResponseException, ConfigFileNotFoundException {
 
+    	if (defaultConn == null) {
+    		defaultConn = new PlatformWsHelper();
+    		defaultConn.init();
+    	}
+
+        return signUpgradeCreate(defaultConn, data, format, afirmaAppName);
+    }
+
+    /**
+     * Actualiza una firma AdES.
+     * @param conn
+     * 			  Conexi&oacute;n a usar para el acceso a la Plataforma @firma.
+     * @param data
+     *            Firma a actualizar.
+     * @param format
+     *            Formato de actualizaci&oacute;n.
+     * @param afirmaAppName
+     *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
+     * @return Firma actualizada.
+     * @throws IOException
+     *             Si hay problemas en los tratamientos de datos o lectura de
+     *             opciones de configuraci&oacute;n.
+     * @throws PlatformWsException
+     *             Si hay problemas con los servicios Web de mejora de firmas.
+     * @throws UpgradeResponseException
+     *             Si el servicio Web de mejora de firmas env&iacute;a una
+     *             respuesta de error.
+     * @throws ConfigFileNotFoundException
+     * 			   Cuando no se puede cargar el fichero de configuraci&oacute;n.
+     */
+    public static byte[] signUpgradeCreate(final PlatformWsHelper conn, final byte[] data,
+            final UpgradeTarget format, final String afirmaAppName)
+            throws IOException, PlatformWsException, UpgradeResponseException, ConfigFileNotFoundException {
+
+    	// Es incompatible la configuracion de dos conexiones contra la Plataforma @firma porque
+    	// la conexion establece propiedades del sistema en el momento de crearse y se pisarian
+    	// al haber mas de una. Si se creo la por defecto, no se puede usar una externa y viceversa.
+    	if (defaultConn != null && defaultConn != conn) {
+    		throw new IOException("No se puede configurar simultaneamente una conexion propia y la conexion por defecto contra la Plataforma @firma"); //$NON-NLS-1$
+    	}
+
         final String inputDss = DssServicesUtils.createSignUpgradeDss(
         		data,
         		format,
         		afirmaAppName);
 
-        final byte[] response = PlatformWsHelper.getInstance().doPlatformCall(
+        final byte[] response = conn.doPlatformCall(
         		inputDss,
                 PlatformWsHelper.SERVICE_SIGNUPGRADE);
 

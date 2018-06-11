@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
-	<version>2.2-SNAPSHOT</version>
+	<version>2.3-SNAPSHOT</version>
 	<artifactId>fire-artifacts</artifactId>
 	<packaging>pom</packaging>
 	<name>fire-artifacts</name>
@@ -53,6 +53,7 @@
 		<module>fire-signature-connector-clavefirma</module>
 		<module>fire-signature-connector-clavefirma-test</module>
 		<module>fire-signature-document</module>
+		<module>fire-signature-password</module>
 		<module>fire-test-jsp</module>
 		<module>fire-upgrade</module>
 	</modules>

@@ -131,7 +131,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         		response.sendRedirect(errorUrlRedirection);
         	}
         	else {
-        		request.getRequestDispatcher(fireSignatureCS.PG_SIGNATURE_ERROR).forward(request, response);
+        		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
         	}
         	return;
         }

@@ -60,14 +60,14 @@ $(document).ready(function(){
 			e.preventDefault();
 			$('label[for=passwd-usr]').css({color:'red'});
 			$('#passwd-usr').css({backgroundColor:'#fcc'});
-			msg = msg + "Debe introducir una clave para el usuario\n";
+			msg = msg + "Debe introducir una contraseña para el usuario\n";
 			ok = false;
 		}
 		if(op == 1 && $("#passwd-usr-copy").val() == ""){
 			e.preventDefault();
 			$('label[for=passwd-usr-copy]').css({color:'red'});
 			$('#passwd-usr-copy').css({backgroundColor:'#fcc'});
-			msg = msg + "Debe introducir repetir clave para el usuario\n";
+			msg = msg + "Debe introducir repetir contraseña para el usuario\n";
 			ok = false;
 		}
 		if(op == 1 && $("#passwd-usr").val() !="" 
@@ -78,7 +78,7 @@ $(document).ready(function(){
 			$('label[for=passwd-usr-copy]').css({color:'red'});
 			$('#passwd-usr').css({backgroundColor:'#fcc'});			
 			$('#passwd-usr-copy').css({backgroundColor:'#fcc'});
-			msg = msg + "Las claves introducidas debe ser iguales\n";
+			msg = msg + "Las contraseñas introducidas debe ser iguales\n";
 			ok = false;
 		}
 		

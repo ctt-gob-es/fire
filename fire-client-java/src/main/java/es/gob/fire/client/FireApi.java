@@ -109,6 +109,8 @@ public final class FireApi {
 
     private static HttpsConnection conn = null;
 
+    private static PasswordDecipher passwordDecipher = null;
+
     /**
      * Constructor privado para no permir la instanciaci&oacute;n
      */
@@ -141,11 +143,22 @@ public final class FireApi {
         LOGGER.info("Se usara el siguiente servicio de acceso a FIRe: " + SERVICE_URL); //$NON-NLS-1$
 
         try {
-        	conn = HttpsConnection.getConnection(p);
+        	conn = HttpsConnection.getConnection(p, passwordDecipher);
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 		}
+    }
+
+	/**
+	 * Configura el objeto encargado de descifrar las contrase&ntilde;as encontradas
+	 * en el fichero de configuraci&oacute;n para el uso de los almacenes de claves.
+	 * Si no se establece, se utilizar&aacute;a la misma cadena encontrada en el
+	 * fichero de coinfiguraci&oacute;n.
+	 * @param decipher Objeto para el descifrado.
+	 */
+    public static void setPasswordDecipher(final PasswordDecipher decipher) {
+    	passwordDecipher = decipher;
     }
 
     /**

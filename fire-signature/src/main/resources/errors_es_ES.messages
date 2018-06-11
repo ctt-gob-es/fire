@@ -23,5 +23,8 @@
 202=Error al prefirmar los datos. Compruebe que la configuracion de firma aplicada es correcta.
 203=Error al ejecutar la postfirma de los datos.
 205=Error al conectar con el proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
-250=Error al realizar una firma con certificado local.
+206=No se complet&oacute; correctamente la firma del lote con certificado local.
 
+# Errores con el Cliente @firma
+250=Error al realizar una firma con certificado local.
+251=No se complet&oacute; correctamente la firma del lote con certificado local

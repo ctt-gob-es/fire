@@ -103,7 +103,7 @@
 			<div style="margin: auto;width: 100%;padding: 3px;">	
 					<div style="display: inline-block; width: 20%;margin: 3px;">
 						<!-- Label para la accesibilidad de la pagina -->
-						<label for="passwd-usr" style="color: #404040" >* Clave</label>
+						<label for="passwd-usr" style="color: #404040" >* Contraseña</label>
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
 						<input id="passwd-usr" type="password" class="edit-txt"  name="passwd-usr" style="width: 80%;margin-top:3px;"
@@ -111,7 +111,7 @@
 					</div>
 					<div style="display: inline-block; width: 10%;margin: 3px;">
 						<!-- Label para la accesibilidad de la pagina -->
-						<label for="passwd-usr-copy" style="color: #404040" >* Repetir clave</label>
+						<label for="passwd-usr-copy" style="color: #404040" >* Repetir contraseña</label>
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
 						<input id="passwd-usr-copy" type="password" class="edit-txt"  name="passwd-usr-copy" style="width: 80%;margin-top:3px;"

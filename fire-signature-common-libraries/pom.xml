@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.gob.fire</groupId>
   <artifactId>fire-signature-common-libraries</artifactId>
-  <version>2.2-SNAPSHOT</version>
+  <version>2.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>fire-signature-common-libraries</name>
@@ -15,6 +15,12 @@
   </properties>
 
   	<dependencies>
+
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+  			<artifactId>fire-signature-decipher</artifactId>
+  			<version>2.3-SNAPSHOT</version>
+		</dependency>
 	
 		<dependency>
 			<groupId>es.gob.afirma</groupId>
