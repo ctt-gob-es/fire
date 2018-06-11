@@ -5,7 +5,6 @@
 $(document).ready(function(){
 	
 	
-		
 	/*Validación de campos del formulario*/
 	$("#formLogServer").submit(function(e){
 	
@@ -36,11 +35,25 @@ $(document).ready(function(){
 			msg = msg + "Debe introducir la clave\n";
 			ok = false;
 		}
+		
+		
+		
 		if($("#url").val() == ""){
 			e.preventDefault();
 			$('label[for=url]').css({color:'red'});
 			$('#url').css({backgroundColor:'#fcc'});
 			msg = msg + "Debe introducir una dirección URL\n";
+			ok = false;
+		}
+				
+		
+		var urlvalid = ValidURL($("#url").val());
+		
+		if(!urlvalid){
+			e.preventDefault();
+			$('label[for=url]').css({color:'red'});
+			$('#url').css({backgroundColor:'#fcc'});
+			msg = msg + "Debe introducir una dirección URL válida (dirección del servicio sin parámetros)\n";
 			ok = false;
 		}
 		if(!ok){
@@ -70,7 +83,18 @@ function comprobarServidorLog(){
 		  else if(JSONData.hasOwnProperty('Ok')){
 			  $( "#okIcon").show();
 			  $( "#messageOk" ).html(JSONData.Ok[0].Message);
-		  }
-				 		 
+		  }		 		 
 	});
 }
+
+
+function ValidURL(url) {
+
+	//Patron validación de url sín los parámetros (? = &) 
+	var pattern = /^([a-z][a-z0-9\*\-\.]*):\/\/(?:(?:(?:[\w\.\-\+!$&'\(\)*\+,;=]|%[0-9a-f]{2})+:)*(?:[\w\.\-\+%!$&'\(\)*\+,;=]|%[0-9a-f]{2})+@)?(?:(?:[a-z0-9\-\.]|%[0-9a-f]{2})+|(?:\[(?:[0-9a-f]{0,4}:)*(?:[0-9a-f]{0,4})\]))(?::[0-9]+)?(?:[\/|\?](?:[\w#!:\.\+@!$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})*)?$/g;	  
+	if(!pattern.test(url)) {	
+	    return false;
+	 } else {		
+		 return true;
+	  }
+	}

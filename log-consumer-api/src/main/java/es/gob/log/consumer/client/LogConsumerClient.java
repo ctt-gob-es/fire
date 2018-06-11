@@ -180,8 +180,8 @@ public class LogConsumerClient {
 	 * @return Respuesta del servicio al saludo.
 	 * @throws IOException Cuando no es posible contactar con el servicio.
 	 */
-	public String echo(final String serverUrl) throws IOException {
-
+	public String echo(final String serverUrl) throws IOException  {
+		final StringWriter result = new StringWriter();
 		if (serverUrl == null) {
 			throw new NullPointerException("No se ha indicado la URL de redireccion"); //$NON-NLS-1$
 		}
@@ -189,21 +189,61 @@ public class LogConsumerClient {
 		final StringBuilder requestUrl = new StringBuilder(serverUrl)
 				.append("?op=").append(ServiceOperations.ECHO.ordinal()); //$NON-NLS-1$
 
-		HttpResponse result;
-		try {
-			result = this.conn.readUrl(requestUrl.toString(), HttpManager.UrlHttpMethod.GET);
-		}
-		catch (final IOException e) {
-			throw new IOException("No se ha podido conectar con el servicio indicado", e);
-		}
+		HttpResponse response;
+			response = this.conn.readUrl(requestUrl.toString(), HttpManager.UrlHttpMethod.GET);
 
-		final byte[] response = result.getContent();
-		if (response == null) {
-			throw new IOException("El servicio no respondio a la peticion realizada"); //$NON-NLS-1$
+			if(response.statusCode == 200) {
+
+				final byte[] resEcho = response.getContent();
+				final String res = new String(resEcho,this.getCharsetContent());
+				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+						.add("Code",response.statusCode) //$NON-NLS-1$
+						.add("Message", res)); //$NON-NLS-1$
+				jsonObj.add("Ok",data ); //$NON-NLS-1$
+				final JsonWriter jw = Json.createWriter(result);
+				jw.writeObject(jsonObj.build());
+				jw.close();
+
+			}
+			else if(response.statusCode == 404) {
+
+				//final byte[] resEcho = response.getContent();
+				final String res = new String("No se ha podido conectar a la ruta indicada."); //$NON-NLS-1$
+				//result.append(res);
+				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+					.add("Code",response.statusCode) //$NON-NLS-1$
+					.add("Message", res)); //$NON-NLS-1$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				try(final JsonWriter jw = Json.createWriter(result);){
+					jw.writeObject(jsonObj.build());
+					jw.close();
+				}
+			}
+			else {
+
+				final byte[] resEcho = response.getContent();
+				final String res = getSendErrorMessage(new String(resEcho,this.getCharsetContent()));
+				//result.append(res);
+				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+					.add("Code",response.statusCode) //$NON-NLS-1$
+					.add("Message", res)); //$NON-NLS-1$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+				try(final JsonWriter jw = Json.createWriter(result);){
+					jw.writeObject(jsonObj.build());
+					jw.close();
+				}
+			}
+
+		if(result.getBuffer().length() > 0) {
+			return result.toString();
 		}
-
-
-		return new String(response);
+		return null;
 	}
 
 	/**

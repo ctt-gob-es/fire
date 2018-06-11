@@ -173,8 +173,9 @@
 	/*En el caso de ser la busqueda se selecciona el texto a buscar */
 		if (oper === "Search" || moreWithSearch){
 			var line = "<div>" + arrHtml[i] + "</div>";
-			line = line.replace (text2Search,"<span class='highlight'>" + text2Search + "</span>");
-			content += line;		
+			var text2replace = "<span class='highlight'>" + text2Search + "</span>";
+			var newline = line.replace (new RegExp(text2Search, 'g'),text2replace);		
+			content += newline;		
 		}
 		else{
 			content += "<div>" + arrHtml[i] + "</div>"; 

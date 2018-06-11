@@ -144,26 +144,17 @@ public class LogServerService extends HttpServlet {
 					break;
 			}
 		} catch (final SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			isOk = false;
+			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		} catch (final GeneralSecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			isOk = false;
+			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		catch (final IOException e) {
-			// TODO: handle exception
+			isOk = false;
+			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
-//		//Seleci&oacute;n de respuesta segun datos solicitados
-//		if(!"".equals(data)) { //$NON-NLS-1$
-//			response.getWriter().write(data);
-//		}
-//		else if(connect) {
-//			response.sendRedirect(request.getContextPath().toString().concat("/LogAdminService?op=3")); //$NON-NLS-1$
-//		}
-//		else {
-//			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-//		}
 	}
 
 	/**

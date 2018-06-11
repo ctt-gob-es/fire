@@ -107,8 +107,6 @@ boolean filter = true;
 	<script type="text/javascript">
 		var file = '<%=fileName%>';
 		var server = '<%=nameSrv%>';
-
-	
 	</script>	
 			
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>

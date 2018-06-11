@@ -1,3 +1,4 @@
+<%@page import="java.io.StringReader"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO"%>
 <%@page import="es.gob.fire.server.admin.conf.DbManager"%>
@@ -6,16 +7,39 @@
 <%@page import="es.gob.fire.server.admin.message.MessageResultManager" %>
 <%@page import="es.gob.fire.server.admin.entity.User" %>
 <%@page import="es.gob.fire.server.admin.tool.Utils" %>
+<%@page import="javax.json.JsonString"%>
+<%@page import="javax.json.JsonArray"%>
+<%@page import="javax.json.JsonReader"%>
+<%@page import="javax.json.Json"%>
+<%@page import="javax.json.JsonObject"%>
+<%@page import="java.io.ByteArrayInputStream"%>
+
 <%@page import="java.util.List" %>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%  String errorText = null;
 
 final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-final String usrLogged= (String) request.getSession().getAttribute("user");
+final String usrLogged= (String) request.getSession().getAttribute("user");//$NON-NLS-1$
 if (state == null || !Boolean.parseBoolean((String) state)) {
 	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 	return;
 }
+
+final String jsonError = (String) request.getSession().getAttribute("ERROR_JSON"); //$NON-NLS-1$ 
+if(jsonError != null){
+	final JsonReader reader = Json.createReader(new StringReader(jsonError));
+	final JsonObject jsonObj = reader.readObject();
+	reader.close();
+	if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
+		final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
+		for(int i = 0; i < Error.size(); i++){
+			final JsonObject json = Error.getJsonObject(i);
+			errorText = "Error:" +String.valueOf(json.getInt("Code")) + "  " + json.getString("Message");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
+		}	
+	} 
+}
+session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
+
 
 
 
@@ -50,12 +74,6 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
 	<div id="menu-bar">
 		<input class="menu-btn" name="add-serv-btn" type="button" value="Alta de servidor" title="Crear un nuevo servidor de log" onclick="location.href='./LogServer.jsp?act=2'"/>
 	</div>
-	<% if(errorText != null) { %>
-		<p id="error-txt"><%= errorText %></p> 
-	<%
-		errorText = null;
-	  }
-	%>
 		<div style="display: block-inline; text-align:center;">
 			<p id="descrp">
 			  Servidores de Log, dados de alta en el sistema.
@@ -66,7 +84,7 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
 				<p id="<%=
 						mr.isOk() ? "success-txt" : "error-txt"  //$NON-NLS-1$ //$NON-NLS-2$
 						%>">
-					<%= mr.getMessage() %>
+					<%=mr.isOk() ?  mr.getMessage() : errorText != null ? mr.getMessage()+ ". " + errorText : mr.getMessage()%>
 				</p>
 			<% } %>
 			

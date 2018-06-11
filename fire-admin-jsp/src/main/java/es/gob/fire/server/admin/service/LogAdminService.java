@@ -16,7 +16,6 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -69,19 +68,20 @@ public class LogAdminService extends HttpServlet {
 		final HttpSession session = request.getSession(false);
 		String result = null;
 
-		final RequestDispatcher rd = request.getRequestDispatcher("/Logs/LogsManager.jsp");   //$NON-NLS-1$
-
 		//final String codeInit  = "I9lUuX+iEvzAD/hwaU2MbQ=="; //$NON-NLS-1$ // I9lUuX+iEvzAD/hwaU2MbQ==
 		//D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=
+		final String stringOp = "seleccion"; //$NON-NLS-1$
+		final boolean isOk = false;
 
 		try {
 			this.getParameters(request, session);
+
 		}
 		catch (final Exception e) {
 			LOGGER.warning("No se han podido recuperar correctamente los parametros."); //$NON-NLS-1$
 			final String jsonError = getJsonError("No se han podido recuperar correctamente los parametros.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-	        response.getWriter().write(jsonError);
-	        rd.include(request, response);
+			session.setAttribute("ERROR_JSON", jsonError); //$NON-NLS-1$
+			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			return;
 		}
 
@@ -90,8 +90,7 @@ public class LogAdminService extends HttpServlet {
 			final StringWriter error = new StringWriter();
 			LOGGER.warning("No se ha indicado codigo de operacion"); //$NON-NLS-1$
 			final String jsonError = getJsonError("No se ha indicado codigo de operacion", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-	        response.getWriter().write(jsonError);
-	        rd.include(request, response);
+	        response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			return;
 		}
 
@@ -102,20 +101,17 @@ public class LogAdminService extends HttpServlet {
 		catch (final Exception e) {
 			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString)); //$NON-NLS-1$
 			final String jsonError = getJsonError(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString), HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-	        response.getWriter().write(jsonError);
-	        rd.include(request, response);
-
+			session.setAttribute("ERROR_JSON", jsonError); //$NON-NLS-1$
+	        response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			return;
 		}
 
 
 		if(!op.equals(ServiceOperations.ECHO) && this.logclient == null) {
 			LOGGER.warning("No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
-
 			final String jsonError = getJsonError("No se ha indicado conexion con el servidor de log en sesion", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-	        response.getWriter().write(jsonError);
-	        rd.include(request, response);
-			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
+			session.setAttribute("ERROR_JSON", jsonError); //$NON-NLS-1$
+			response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			return;
 		}
 
@@ -148,8 +144,8 @@ public class LogAdminService extends HttpServlet {
 				LOGGER.severe("Error al obtener los ficheros log del servidor central"+ e.getMessage()); //$NON-NLS-1$
 				final String jsonError = getJsonError("Error al obtener los ficheros log del servidor central :" , HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
 		        try {
-					response.getWriter().write(jsonError);
-					rd.include(request, response);
+					session.setAttribute("ERROR_JSON", jsonError); //$NON-NLS-1$
+					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				} catch (final IOException e1) {
 					LOGGER.severe("Error en la respuesta del mensaje:"+ e1.getMessage()); //$NON-NLS-1$
 				}
@@ -342,10 +338,9 @@ public class LogAdminService extends HttpServlet {
 			break;
 		default:
 			LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-
 			final String jsonError = getJsonError("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-	        response.getWriter().write(jsonError);
-	        rd.include(request, response);
+			session.setAttribute("ERROR_JSON", jsonError); //$NON-NLS-1$
+	        response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
 			return;
 		}
@@ -366,26 +361,18 @@ public class LogAdminService extends HttpServlet {
 		String result = ""; //$NON-NLS-1$
 		try {
 			result = lclient.echo(url);
-			data.add(Json.createObjectBuilder()
-					//.add("Code",response.getStatus()) //$NON-NLS-1$
-					.add("Message",result)); //$NON-NLS-1$
-			jsonObj.add("Ok", data); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(resultEcho);
-	        jw.writeObject(jsonObj.build());
-	        jw.close();
-	        result = resultEcho.toString();
 		}
 		catch (final IOException e) {
+			 final String res = new String("No se ha podido conectar a la ruta indicada."); //$NON-NLS-1$
 			data.add(Json.createObjectBuilder()
-					//.add("Code",response.getStatus()) //$NON-NLS-1$
-					.add("Message", e.getMessage())); //$NON-NLS-1$
+					.add("Code",404) //$NON-NLS-1$
+					.add("Message", res)); //$NON-NLS-1$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 			final JsonWriter jw = Json.createWriter(resultEcho);
 	        jw.writeObject(jsonObj.build());
 	        jw.close();
 	        result = resultEcho.toString();
 		}
-
 		return result;
 
 	}
@@ -434,7 +421,7 @@ public class LogAdminService extends HttpServlet {
 				this.logFileName = request.getParameter(ServiceParams.PARAM_FILENAME);
 			}
 
-			if(session.getAttribute("LOG_CLIENT")!=null) {
+			if(session.getAttribute("LOG_CLIENT") != null) { //$NON-NLS-1$
 				this.logclient = (LogConsumerClient) session.getAttribute("LOG_CLIENT"); //$NON-NLS-1$
 			}
 			if(request.getParameter(ServiceParams.PARAM_NLINES) != null && !"".equals(request.getParameter(ServiceParams.PARAM_NLINES))) { //$NON-NLS-1$
