@@ -115,18 +115,31 @@
   * @param display
   * @returns
   */
- function displayProgressBar(display){	 
+ function displayProgressBar(display){	
+	 var btnActives = $(".btn-log");
+	 var btnInActives = $(".btn-log_inactive");
 	 if (display == 1){		
 		$("#" + idProgress).css('display:inline-block');
 		$("#" + idProgress).show();
 		$("#btnContainer").hide(); 
 		$("#selectedFile").hide();
+		
+		btnActives.each(function(id){					 
+			 if($(this).attr("id") !== "back-button" && $(this).attr("id") !== "download-button"){
+				 activeElement($(this).attr("id"), false); 
+			 }			
+		 });
+		
 	 }
 	 else if(display == 0){		
 		$("#" + idProgress).css('display:none');
 		$("#" + idProgress).hide();
 		$("#btnContainer").show(); 
 		$("#selectedFile").show();
+		
+		btnInActives.each(function(id){					 			
+			activeElement($(this).attr("id"), true); 						
+		 });
 
 	 }			
 	
@@ -477,12 +490,14 @@
   */
  function download(){
 	 
+	 
 	 var url = "../LogAdminService?op=10&fname=" + file + "&reset=yes";
 	 displayProgressBar(1);	
 	 var xhr = new XMLHttpRequest();
 	 xhr.open("POST", url, true);
 	 xhr.responseType = "arraybuffer";
 	 xhr.onload = function () {
+		 				 
 		 var filename = "";
 	     var disposition = xhr.getResponseHeader('Content-Disposition');
 	     if (disposition && disposition.indexOf('attachment') !== -1) {
@@ -531,15 +546,16 @@
 //	     }
 //	 };
 //	 xhr.onloadstart = function(e) {
-	    //progressBar.value = 0;
-//		 printProgressBar();
+//		
+//		
 //	 };
 	 xhr.onloadend = function(e) {
 		 displayProgressBar(0);
 	 };
 	
 	xhr.send();  
-		 	 	
+	
+	
  }
  
  /**
