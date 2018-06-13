@@ -222,7 +222,7 @@ public class LogServerService extends HttpServlet {
 			connect = true;
 		}
 		catch (final IOException e) {
-			LOGGER.warning("No se ha podido iniciar el servidor seleccionado. Error:"+e.getMessage()); //$NON-NLS-1$
+			LOGGER.warning(e.getMessage());
 			return connect;
 		}
 		return connect;

@@ -66,7 +66,7 @@ boolean filter = true;
 
 			if(json.get(ServiceParams.PARAM_LEVELS) != null && !"".equals(json.get(ServiceParams.PARAM_LEVELS).toString().trim())) { //$NON-NLS-1$
 				final String levels_ = json.get("Levels").toString().replace("\"", "");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				if(levels_ != null && !"".equals(levels_.trim())){
+				if(levels_ != null && !"".equals(levels_.trim())){//$NON-NLS-1$
 					levels = levels_ .split(",");//$NON-NLS-1$
 				}
 				else{
@@ -252,7 +252,7 @@ boolean filter = true;
 				</div>
 				<div style="display: inline-block;width:58%;"></div>
 				<div style="display: inline-block;width:10%;">
-					      		<input id="tail-button" class="btn-log" name="tail-button" type="button" value="&uacute;ltimas l&iacute;neas" title="Obtiene las &uacute;ltimas l&iacute;neas del fichero log" onclick="getTail($('#Nlines').val());" />
+					      		<input id="tail-button" class="btn-log" name="tail-button" type="button" value="&Uacute;ltimas l&iacute;neas" title="Obtiene las &uacute;ltimas l&iacute;neas del fichero log" onclick="getTail($('#Nlines').val());" />
 				</div>
 				<div style="display: inline-block;width:10%;">			      		
 					<input id="more-button" class="btn-log" name="more-button" type="button" value="+ M&aacute;s" title="Obtiene las siguentes l&iacute;neas del fichero log" onclick="getMore($('#Nlines').val());" />
@@ -269,5 +269,6 @@ boolean filter = true;
 	setIdErrorTxtLog('error-txt-log');
 	setIdOkTxtLog('ok-txt-log');
 	setIdAdvice('advice');
+	openLog = true;
 </script>
 </html>

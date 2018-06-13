@@ -94,6 +94,7 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
+		//Comprobamos que el c&oacute;digo de operaci&oacute;n sea correcto
 		ServiceOperations op;
 		try {
 			op = checkOperation(opString);
@@ -106,7 +107,7 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
-
+		//Comprobamos que se haya iniciado la conexi&oacute;n con el servidor
 		if(!op.equals(ServiceOperations.ECHO) && this.logclient == null) {
 			LOGGER.warning("No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
 			final String jsonError = getJsonError("No se ha indicado conexion con el servidor de log en sesion", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
@@ -115,6 +116,7 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
+		// Selecionamos la operai&oacute;n a realizar respecto al c&oacute;digo recivido.
 		switch (op) {
 		case ECHO:
 			result = echo(this.url);
@@ -136,8 +138,20 @@ public class LogAdminService extends HttpServlet {
 					);
 				}
 				else {
-					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
+					//en el casode recivir un error, redigige a LogsMainPage para mostrar el mensaje
+					//en caso contrario, redigige a LogsFileList para mostrar los ficheros encontrados.
+					final JsonReader reader = Json.createReader(new ByteArrayInputStream(datLogFiles));
+					final JsonObject jsonObj = reader.readObject();
+					reader.close();
+					if(jsonObj.getJsonArray("Error") != null){  //$NON-NLS-1$
+						session.setAttribute("ERROR_JSON", new String (datLogFiles)); //$NON-NLS-1$
+						response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+					}
+					else {
+						response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
 						.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(this.nameSrv)); //$NON-NLS-1$
+					}
+
 				}
 			}
 			catch (final IOException e) {
@@ -349,7 +363,9 @@ public class LogAdminService extends HttpServlet {
 	}
 
 	/**
-	 *
+	 * Funci&oacute;n que obtiene la respuesta del servidor si hay comunicaci&oacute;n a trv&eacute;s
+	 * del api devolviendo un String con formato JSON, tanto si la comunicaci&oacute;n ha sido correcta
+	 * como si ha habido un error.
 	 * @param url
 	 * @return
 	 */

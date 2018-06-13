@@ -53,7 +53,7 @@
 		<module>fire-signature-connector-clavefirma</module>
 		<module>fire-signature-connector-clavefirma-test</module>
 		<module>fire-signature-document</module>
-		<module>fire-signature-password</module>
+		<module>fire-signature-decipher</module>
 		<module>fire-test-jsp</module>
 		<module>fire-upgrade</module>
 	</modules>

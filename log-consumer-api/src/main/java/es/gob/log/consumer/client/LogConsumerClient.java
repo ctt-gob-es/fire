@@ -87,71 +87,61 @@ public class LogConsumerClient {
 
 		final StringWriter result = new StringWriter();
 
-		if(response.statusCode == 200 && response.getContent().length > 0) {
-			try (final JsonReader reader = Json.createReader(
-					new ByteArrayInputStream(response.getContent()));) {
-				final JsonObject loginReponse = reader.readObject();
-				final String tokenEncoded = loginReponse.getString(ResponseParams.PARAM_TOKEN);
-				if (tokenEncoded != null) {
-					token = Base64.decode(tokenEncoded);
-				}
-				final String ivEncoded = loginReponse.getString(ResponseParams.PARAM_IV);
-				if (ivEncoded != null) {
-					iv = Base64.decode(ivEncoded);
-				}
-			}
-
-		}
-		else {
-			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-			final JsonArrayBuilder data = Json.createArrayBuilder();
-			final byte[] resLogin = response.getContent();
-			final String res = new String(resLogin,this.getCharsetContent());
-			result.append(res);
-			data.add(Json.createObjectBuilder()
-					.add("Code",response.statusCode) //$NON-NLS-1$
-					.add("Message", getSendErrorMessage(result.toString()))); //$NON-NLS-1$
-			jsonObj.add("Error",data ); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(result);
-		    jw.writeObject(jsonObj.build());
-		    jw.close();
-		}
-
-
-		if (token == null || iv == null) {
-			throw new IOException("No se ha obtenido el token de autenticacion y la configuracion necesaria"); //$NON-NLS-1$
-		}
-
-		// Procesamos el token
-		final byte[] cipherKey = Base64.decode(keyB64);
-		byte[] cipheredToken;
 		try {
-			cipheredToken = Cipherer.cipher(token, cipherKey, iv);
-		} catch (final GeneralSecurityException e) {
-			throw new IOException("No se pudo negociar la sesion con el servidor", e); //$NON-NLS-1$
-		}
 
-		// Solicitamos validacion de login
-		 urlBuilder = new StringBuilder(this.serviceUrl)
-					.append("?op=").append(ServiceOperations.VALIDATE_LOGIN.ordinal()) //$NON-NLS-1$
-					.append("&sc=").append(Base64.encode(cipheredToken, true)); //$NON-NLS-1$
-
-		 response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.POST);
-
-		// Procesamos la respuesta
-		 boolean logged = false;
-
-		if(response.statusCode == 200 && response.getContent().length > 0) {
-				 try (final JsonReader reader = Json.createReader(
-							new ByteArrayInputStream(response.getContent()));) {
-						final JsonObject loginReponse = reader.readObject();
-						logged = loginReponse.getBoolean(ResponseParams.PARAM_RESULT);
+			if(response.statusCode == 200 && response.getContent().length > 0) {
+				try (final JsonReader reader = Json.createReader(
+						new ByteArrayInputStream(response.getContent()));) {
+					final JsonObject loginReponse = reader.readObject();
+					final String tokenEncoded = loginReponse.getString(ResponseParams.PARAM_TOKEN);
+					if (tokenEncoded != null) {
+						token = Base64.decode(tokenEncoded);
 					}
+					final String ivEncoded = loginReponse.getString(ResponseParams.PARAM_IV);
+					if (ivEncoded != null) {
+						iv = Base64.decode(ivEncoded);
+					}
+				}
+
 			}
 
-		 if (!logged) {
-			 throw new IOException("El servidor nego el acceso al usuario"); //$NON-NLS-1$
-		 }
+			if (token == null || iv == null) {
+				throw new IOException("No se ha obtenido el token de autenticacion y la configuracion necesaria"); //$NON-NLS-1$
+			}
+
+			// Procesamos el token
+			final byte[] cipherKey = Base64.decode(keyB64);
+			byte[] cipheredToken;
+			try {
+				cipheredToken = Cipherer.cipher(token, cipherKey, iv);
+			} catch (final GeneralSecurityException e) {
+					throw new IOException("No se pudo negociar la sesion con el servidor", e); //$NON-NLS-1$
+			}
+			// Solicitamos validacion de login
+			urlBuilder = new StringBuilder(this.serviceUrl)
+						.append("?op=").append(ServiceOperations.VALIDATE_LOGIN.ordinal()) //$NON-NLS-1$
+						.append("&sc=").append(Base64.encode(cipheredToken, true)); //$NON-NLS-1$
+
+			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.POST);
+
+			// Procesamos la respuesta
+			boolean logged = false;
+
+			if(response.statusCode == 200 && response.getContent().length > 0) {
+				try (final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));) {
+					final JsonObject loginReponse = reader.readObject();
+					logged = loginReponse.getBoolean(ResponseParams.PARAM_RESULT);
+				}
+			}
+
+			if (!logged) {
+				throw new IOException("El servidor nego el acceso al usuario"); //$NON-NLS-1$
+			}
+		}
+		catch (final IOException e) {
+			throw new IOException(e.getLocalizedMessage());
+		}
+
 	}
 
 	/**
@@ -289,8 +279,8 @@ public class LogConsumerClient {
 	}
 
 	/**
-	 *Funci&oacute;n que se encarga de abrir el fichero log indicado como par&aacute;metro. Al mismo tiempo busca el fichero de configuraci&oacute;n loginfo, que pertenezca a dicho fichero log
-	 *y obtiene los datos indicados para manejar el fichro log
+	 * Funci&oacute;n que se encarga de abrir el fichero log indicado como par&aacute;metro. Al mismo tiempo busca el fichero de configuraci&oacute;n loginfo, que pertenezca a dicho fichero log
+	 * y obtiene los datos indicados para manejar el fichro log
 	 * @param filename
 	 * @return Cadena de bytes con formato JSON. En caso de exito por ejemplo:{"LogInfo":[{"Charset":"UTF-8","Levels":"INFORMACI&Oacute;N,ADVERTENCIA,GRAVE","Date":"true","Time":"true","DateTimeFormat":"MMM dd, yyyy hh:mm:ss a"}]}
 	 * En caso de error:{"Error":[{"Code":204,"Message":"No se ha podido abrir el fichero: filename"}]}
@@ -352,6 +342,7 @@ public class LogConsumerClient {
 				.append("?op=").append(ServiceOperations.CLOSE_FILE.ordinal()); //$NON-NLS-1$
 		HttpResponse response;
 		try {
+
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 			if( response.statusCode == 200) {
 				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -381,9 +372,7 @@ public class LogConsumerClient {
 					jw.close();
 				}
 			}
-			if(result.getBuffer().length() > 0) {
-				return result.toString().getBytes(this.getCharsetContent());
-			}
+
 		}
 		catch (final Exception e) {
 			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -398,6 +387,9 @@ public class LogConsumerClient {
 			}
 		}
 
+		if(result.getBuffer().length() > 0) {
+			return result.toString().getBytes(this.getCharsetContent());
+		}
 		return null;
 	}
 
@@ -461,6 +453,12 @@ public class LogConsumerClient {
 		return null;
 	}
 
+	/**
+	 *
+	 * @param numLines
+	 * @param filename
+	 * @return
+	 */
 	public byte[] getMoreLog(final int numLines, final String filename) {
 		final StringWriter result = new StringWriter();
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();

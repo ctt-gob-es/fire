@@ -86,7 +86,6 @@ public class LogService extends HttpServlet {
 				default:
 					LOGGER.warning("Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
 					resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-//					resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 					result = new String("Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio").getBytes(); //$NON-NLS-1$
 					return;
 				}
@@ -146,7 +145,6 @@ public class LogService extends HttpServlet {
 				default:
 					LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
 					resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-//					resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 					result = new String("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio").getBytes(); //$NON-NLS-1$
 					return;
 				}
@@ -154,7 +152,6 @@ public class LogService extends HttpServlet {
 			else {
 				LOGGER.warning("Operacion no soportada sin login previo"); //$NON-NLS-1$
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
-//				resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				result = new String("Operacion no soportada sin login previo").getBytes(); //$NON-NLS-1$
 				return;
 			}
@@ -167,7 +164,6 @@ public class LogService extends HttpServlet {
 			return;
 		}
 		catch (final UnsupportedEncodingException e) {
-//			resp.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 			result = new String("La codificación no es valida.").getBytes(); //$NON-NLS-1$
 			LOGGER.log(Level.SEVERE,"La codificación no es valida.",e); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "La codificación no es valida."); //$NON-NLS-1$
@@ -200,6 +196,13 @@ public class LogService extends HttpServlet {
 		resp.getOutputStream().flush();
 	}
 
+	/**
+	 * Funci&oacute;n que comprueba el c&oacute;digo de operaci&oacute;n
+	 * @param opString
+	 * @return
+	 * @throws NumberFormatException
+	 * @throws UnsupportedOperationException
+	 */
 	private static ServiceOperations checkOperation(final String opString)
 			throws NumberFormatException, UnsupportedOperationException {
 
@@ -207,6 +210,12 @@ public class LogService extends HttpServlet {
 		return ServiceOperations.parseOperation(op);
 	}
 
+	/**
+	 *  Funci&oacute;n que comprueba que el c&oacute;digo de operaci&oacute;n corresponde a al grupo
+	 *  de operaciones que necesitan logarse.
+	 * @param op
+	 * @return true en caso de necesitar login, false en caso contrario
+	 */
 	private static boolean needLogin(final ServiceOperations op) {
 		// Las operaciones echo, peticion de login y validacion de login, son
 		// las unicas que pueden realizarse sin haber establecido logging.
@@ -215,6 +224,11 @@ public class LogService extends HttpServlet {
 				op != ServiceOperations.VALIDATE_LOGIN;
 	}
 
+	/**
+	 *  Funci&oacute;n que comprueba que se haya logado en sessi&oacute;n
+	 * @param req
+	 * @return
+	 */
 	private static boolean checkLogin(final HttpServletRequest req) {
 
 		boolean logged = false;
@@ -228,10 +242,20 @@ public class LogService extends HttpServlet {
 		return logged;
 	}
 
+	/**
+	 * Funci&oacute;n que devuelve una cadena con formato en byte[]
+	 * @return
+	 */
 	private static byte[] echo() {
 		return EchoServiceManager.process();
 	}
 
+	/**
+	 * Funci&oacute;n que retorna una cadena de bytes en formato Json con los datos del token generado,idsesion
+	 * @param req
+	 * @return
+	 * @throws SessionException
+	 */
 	private static byte[] requestLogin(final HttpServletRequest req) throws SessionException {
 		final HttpSession session = req.getSession();
 		if (session == null) {
@@ -240,6 +264,12 @@ public class LogService extends HttpServlet {
 		return RequestLoginManager.process(session);
 	}
 
+	/**
+	 * Funci&oacute;n que retorna una cadena de bytes en formato Json indicando si es correcto el login.
+	 * @param req
+	 * @return
+	 * @throws SessionException
+	 */
 	private static byte[] validateLogin(final HttpServletRequest req) throws SessionException {
 		final HttpSession session = req.getSession(false);
 		if (session == null) {
@@ -247,12 +277,25 @@ public class LogService extends HttpServlet {
 		}
 		return ValidationLoginManager.process(req, session);
 	}
-
+	/**
+	 * Funci&oacute;n que retorna una cadena de bytes en formato Json con el resultado de los ficheros con extendi&oacute;n log
+	 * exitentes en el servidor con los datos nombre, fecha y tama&ntilde;o en caso de no encontrar ficheros la cadena en formato json
+	 * lo indica como mensaje de error.
+	 * @return
+	 */
 	private static byte[] getLogFiles ()  {
 		final byte[] result = LogFilesServiceManager.process();
 		return result;
 	}
 
+	/**
+	 *
+	 * @param req
+	 * @param resp
+	 * @return
+	 * @throws SessionException
+	 * @throws IOException
+	 */
 	private static byte[] openFile(final HttpServletRequest req, final HttpServletResponse resp) throws SessionException, IOException {
 		final HttpSession session = req.getSession(true);
 		if (session == null) {
@@ -318,11 +361,6 @@ public class LogService extends HttpServlet {
 
 		final byte[] result = LogTailServiceManager.process(req,resp);
 
-//		if(LogTailServiceManager.getError() != null) {
-//			setStatusCode(LogTailServiceManager.getError().getNumError());
-//		}else {
-//			setStatusCode(HttpServletResponse.SC_OK);
-//		}
 		return result;
 	}
 
@@ -333,15 +371,6 @@ public class LogService extends HttpServlet {
 		}
 		final byte[] result = LogMoreServiceManager.process(req,resp);
 
-//		if(LogMoreServiceManager.getError()!=null) {
-//			setStatusCode(LogMoreServiceManager.getError().getNumError());
-//		}
-//		else if(LogMoreServiceManager.getStatus() != HttpServletResponse.SC_OK) {
-//			setStatusCode(LogMoreServiceManager.getStatus());
-//		}
-//		else {
-//			setStatusCode(HttpServletResponse.SC_OK);
-//		}
 		return result;
 	}
 
@@ -351,15 +380,6 @@ public class LogService extends HttpServlet {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
 		}
 		final byte[] result = LogFilteredServiceManager.process(req, resp);
-
-//		if( LogFilteredServiceManager.getError() != null  && LogFilteredServiceManager.getError().getNumError() != 0) {
-//			setStatusCode(LogFilteredServiceManager.getError().getNumError());
-//		}else if (LogFilteredServiceManager.getStatus() != HttpServletResponse.SC_OK) {
-//			setStatusCode(LogFilteredServiceManager.getStatus());
-//		}
-//		else {
-//			setStatusCode(HttpServletResponse.SC_OK);
-//		}
 
 		return result;
 	}
@@ -372,15 +392,6 @@ public class LogService extends HttpServlet {
 
 		final byte[] result = LogSearchServiceManager.process(req,resp);
 
-//		if(LogSearchServiceManager.isHasMore()) {
-//			setStatusCode(HttpServletResponse.SC_PARTIAL_CONTENT);
-//		}
-//		else {
-//			if ((Integer)session.getAttribute("nLinesRead") != null ) { //$NON-NLS-1$
-//				session.removeAttribute("nLinesRead"); //$NON-NLS-1$
-//			}
-//			setStatusCode(HttpServletResponse.SC_OK);
-//		}
 		return result;
 	}
 

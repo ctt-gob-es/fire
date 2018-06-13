@@ -77,7 +77,7 @@
  /*****************Funciones:******************************/
  
  /**
-  * 
+  * Muestra en pantalla el mensaje de error indicado en el objeto JSON que se le pasa.
   * @returns
   */
  function printErrorResult(JSONData){
@@ -92,6 +92,11 @@
 	 
  }
  
+ /**
+  * Muestra en pantalla el mensaje de Ok indicado en el objeto JSON que se le pasa.
+  * @param JSONData
+  * @returns
+  */
  function printOkResult(JSONData){
 		var html = "";
 		$("#" + idErrorTxtLog).html(html);
@@ -104,6 +109,12 @@
 		 
 	 }
  
+ /**
+  * Visualiza en pantalla la imagen de cargar en lugar del bot&oacute;n en caso de que la variable display = 1
+  * en caso contrario se vuelve a visualizar el bot&oacute;n en luga de la imagen de carga.
+  * @param display
+  * @returns
+  */
  function displayProgressBar(display){	 
 	 if (display == 1){		
 		$("#" + idProgress).css('display:inline-block');
@@ -122,12 +133,14 @@
  }
  
  /**
-  * 
-  * @param JSONData
+  * Muestra en pantalla el resultado de las operaciones (Tail, More, Search y Filter) sobre el fichero de log.
+  * que se le pasan desde el objeto JSON 
+  * @param JSONData, nlines
   * @returns
   */
  function printResult(JSONData, nlines){
-	var moreWithSearch = false;
+	 
+	 var moreWithSearch = false;
 	 var data = "";
 	 var content = getResultLines(nlines);
 
@@ -189,7 +202,8 @@
 	 $('#'+idScrollElement).scrollLeft(scrollLefPosition);
   }
  /**
-  * 
+  * Funci&oacute;n Ajax que llama a la operac&oacute;n Tail indicando el n&uacute;mero de lineas que se
+  * quieren obtener
   * @param nlines
   * @returns
   */
@@ -216,7 +230,8 @@
  }
  
  /**
-  * 
+  * Funci&oacute;n Ajax que llama a la operac&oacute;n More indicando el n&uacute;mero de lineas que se
+  * quieren obtener 
   * @param nlines
   * @returns
   */
@@ -240,6 +255,8 @@
  }
 
  /**
+  * Funci&oacute;n Ajax que llama a la operac&oacute;n Search indicando el n&uacute;mero de lineas que se
+  * quieren obtener, el texto a buscar y la fecha desde la que se quiere encontrar el texto
   * @param nlines
   * @param text
   * @param date
@@ -296,7 +313,8 @@
  }
  
  /**
-  * 
+  * Funci&oacute;n Ajax que llama a la operac&oacute;n Filter indicando el n&uacute;mero de lineas que se
+  * quieren obtener, el nivel del registro a filtrar y las fechas desde las que se quieren filtrar los registros 
   * @param nlines
   * @param startDate
   * @param endDate
@@ -346,7 +364,7 @@
  
  
  /**
-  * funcion que devuelve objeto fecha (Date), respecto de los datos de entrada (date) con formato (dd/mm/yyyy HH:mm:ss)
+  * funci&oacute;n que devuelve objeto fecha (Date), respecto de los datos de entrada (date) con formato (dd/mm/yyyy HH:mm:ss)
   * @param date
   * @returns
   */
@@ -396,7 +414,9 @@
  }
  
  /**
-  * Función de validación
+  * Funci&oacute;n de validaci&oacute;n de los campos pasados como un array de nombres,
+  * en caso de no tener valor los marca en rojo y muestra un mensaje alert
+  * en paralla.
   * @param fields
   * @returns
   */
@@ -450,15 +470,15 @@
  }
  
  /**
-  * 
+  * Funci&oacute;n que llama a la operaci&oacute;n download mediante post con el objeto XMLHttpRequest
+  * que comprueba la cabecera devuelta por el response si tiene datos adjuntos para ejecutar 
+  * autom&aacute;ticamente un enlace al fichero devuelto.
   * @returns
   */
  function download(){
 	 
 	 var url = "../LogAdminService?op=10&fname=" + file + "&reset=yes";
-	 //var progressBar = document.getElementById("progress");
-	 displayProgressBar(1);
-	 /*Este codigo funciona*/
+	 displayProgressBar(1);	
 	 var xhr = new XMLHttpRequest();
 	 xhr.open("POST", url, true);
 	 xhr.responseType = "arraybuffer";
@@ -519,13 +539,12 @@
 	 };
 	
 	xhr.send();  
-	
-	 	 	
-	 //location.href = url;
+		 	 	
  }
  
  /**
-  * 
+  * Funci&oacute;n recarga la p&aacute;gina he inicializa las variables y se carga la p&aacute;gina anterior
+  * en la que se muestra el listado de ficheros log del servidor seleccionado anteriormente.
   * @returns
   */
  function goReturn(){	
@@ -537,7 +556,7 @@
 
  
  /**
-  * 
+  * Funci&oacute;n recarga la p&aacute;gina he inicializa las variables 
   * @returns
   */
  function reset(){
@@ -602,8 +621,13 @@
 //	 $("select").each(function() {		   
 //		 this.selectedIndex = 0;   			    		  	    
 //	 }); 
+	// param_reset = "&reset=yes";
  }
  
+ /**
+  * Funci&oacute;n Ajax que llama a la operac&oacute;n Close 
+  * @returns
+  */
  function closeFile(){
 	 
 	 var url = "../LogAdminService?op=5";
@@ -621,7 +645,12 @@
  }
  
  /**
+  * Funci&oacute;n que obtiene las l&iacute;neas que est&aacute;n en pantalla anteriores a la nueva operaci&oacute;n
+  * teniendo en cuenta, el maximo de lineas a mostrar en pantalla, esto es no se obtienen
+  * las l&iacute;neas anteriomente impresas en pantalla correspondientes a la diferencia de las lineas anterioemres + nuevas lineas y  maximo de lineas.
   * 
+  *  Al mismo tiempo se inicializa la siguiente posici&oacute;n de las marcas de span usadas para las b&uacute;squedas, 
+  *  ya que al añadir m&aacute;s lineas y quitar la diferencia, la posici&oacute;n de la b&uacute;squeda se ha modificado. 
   * @param newLines
   * @returns
   */
@@ -645,13 +674,15 @@
 		 });		
 	 }
 	 linesCount = (parseInt(linesCount, 10) + parseInt(newLines, 10))-parseInt(diffLines, 10);
-	 console.log(" contSpan: "+contSpan)
 	 next_position = next_position - contSpan;
 	 return resultLines;
  }
  
  /**
-  * 
+  * Funci&oacute;n que marca de otro color el texto buscado en el que se encuentra en pantalla la posici&oacute;n
+  * actual (next_position), seg&uacute;n se llame en sucesivas ocasiones a esta funci&oacute;n se ir&aacute;n marcando
+  * las siguientes ocurrencias encontradas en la busqueda controlando la posici&oacute;n del scroll seg&uacute;n
+  * la posici&oacute;n actual del resultado de la busqueda seleccionada.
   * @param search_text Texto a buscar
   * @returns
   */
@@ -661,7 +692,6 @@
 	 var elementTopPos;
 	 var elementLeftPos;
 	 
-	 console.log("seleccion next_position : " + next_position );
 	 if(allSpans.length == 0){
 		 return result;
 	 }
@@ -699,8 +729,7 @@
 	 }
 	 setScrollLeftPosition($('#'+idScrollElement).scrollLeft());
 //	 console.log("Movimiento de  seleccion: scrollTopPosition : " + scrollTopPosition + " scrollLefPosition:" + scrollLefPosition);
-	 if(allSpans.length == next_position){ //==
-		 console.log("allSpans.length: "+allSpans.length+ " next_position="+next_position);
+	 if(allSpans.length == next_position){ //==		
 		 result = true;
 	 }	  
 	 return result;
@@ -725,7 +754,7 @@
  }
  
  /**
-  * 
+  * Reinicia las variables globales usadas en la operaci&oacute;n de B&uacute;squeda.
   * @returns
   */
  function resetSearch(text,DateTime){
@@ -743,7 +772,7 @@
 	 param_reset = "&reset=yes";
  }
  /**
-  * 
+  * Reinicia las variables globales usadas en la operaci&oacute;n de Filtrado.
   * @returns
   */
   function resetFilter(startDateTime, endDateTime, level){

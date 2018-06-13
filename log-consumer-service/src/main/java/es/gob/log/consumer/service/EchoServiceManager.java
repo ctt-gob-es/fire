@@ -6,6 +6,10 @@ public class EchoServiceManager {
 
 	private static final String SERVICE_VERSION = "1.0"; //$NON-NLS-1$
 
+	/**
+	 * Obtiene una cadena de bytes predefinida
+	 * @return cadena de bytes con formato "Gestion Logs v%s"
+	 */
 	public static byte[] process() {
 
 		//TODO: El numero de version del servicio habria que cogerlo del Manifest
