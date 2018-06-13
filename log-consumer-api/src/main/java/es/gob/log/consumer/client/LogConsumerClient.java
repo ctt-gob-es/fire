@@ -85,7 +85,6 @@ public class LogConsumerClient {
 		byte[] token = null;
 		byte[] iv = null;
 
-		final StringWriter result = new StringWriter();
 
 		try {
 
@@ -139,7 +138,7 @@ public class LogConsumerClient {
 			}
 		}
 		catch (final IOException e) {
-			throw new IOException(e.getLocalizedMessage());
+			throw new IOException(e.getLocalizedMessage(), e);
 		}
 
 	}
@@ -197,7 +196,7 @@ public class LogConsumerClient {
 				jw.close();
 
 			}
-			else if(response.statusCode == 404) {
+			else {
 
 				//final byte[] resEcho = response.getContent();
 				final String res = new String("No se ha podido conectar a la ruta indicada."); //$NON-NLS-1$
@@ -213,22 +212,7 @@ public class LogConsumerClient {
 					jw.close();
 				}
 			}
-			else {
 
-				final byte[] resEcho = response.getContent();
-				final String res = getSendErrorMessage(new String(resEcho,this.getCharsetContent()));
-				//result.append(res);
-				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-				final JsonArrayBuilder data = Json.createArrayBuilder();
-				data.add(Json.createObjectBuilder()
-					.add("Code",response.statusCode) //$NON-NLS-1$
-					.add("Message", res)); //$NON-NLS-1$
-				jsonObj.add("Error", data); //$NON-NLS-1$
-				try(final JsonWriter jw = Json.createWriter(result);){
-					jw.writeObject(jsonObj.build());
-					jw.close();
-				}
-			}
 
 		if(result.getBuffer().length() > 0) {
 			return result.toString();
@@ -588,28 +572,6 @@ public class LogConsumerClient {
 		HttpResponse response = null;
 
 		try {
-//			int status = 200;
-//			int cont = 0;
-//
-//			do {
-//				cont ++;
-//				response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
-//				if(response.getContent().length > 0) {
-//					final byte[] fragment = response.getContent();
-//					final String res = new String(fragment,this.getCharsetContent());
-//					resultSearch.append(res);
-//				}
-//				if(cont > 0) {
-//					urlBuilder =new StringBuilder(this.serviceUrl)
-//							.append("?op=").append(ServiceOperations.SEARCH_TEXT.ordinal()) //$NON-NLS-1$
-//							.append("&".concat(ServiceParams.NUM_LINES).concat("=")).append(numLines)//$NON-NLS-1$ //$NON-NLS-2$
-//							.append("&".concat(ServiceParams.SEARCH_TEXT).concat("=")).append(text.replaceAll(" ", "%20"))//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-//							.append("&".concat(ServiceParams.SEARCH_DATETIME).concat("=")).append(startDate) //$NON-NLS-1$ //$NON-NLS-2$
-//							.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append("false"); //$NON-NLS-1$ //$NON-NLS-2$
-//				}
-//				status = response.statusCode;
-//			}while(status == 206);
-
 
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 
@@ -740,7 +702,13 @@ public class LogConsumerClient {
 	private static String getSendErrorMessage(final String errorPage) {
 		final int beginIndex = errorPage.indexOf("<b>Message</b>") + "<b>Message</b>".length(); //$NON-NLS-1$ //$NON-NLS-2$
 		final int endIndex = errorPage.indexOf("</p>", beginIndex); //$NON-NLS-1$
-		final String result = errorPage.substring(beginIndex, endIndex);
+		String result = "Error en la operaci&oacute;n"; //$NON-NLS-1$
+		try {
+			result = errorPage.substring(beginIndex, endIndex);
+		}
+		catch (final IndexOutOfBoundsException e) {
+			return result;
+		}
 		return result;
 	}
 
