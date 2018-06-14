@@ -111,7 +111,9 @@
  
  /**
   * Visualiza en pantalla la imagen de cargar en lugar del bot&oacute;n en caso de que la variable display = 1
-  * en caso contrario se vuelve a visualizar el bot&oacute;n en luga de la imagen de carga.
+  * en caso contrario se vuelve a visualizar el bot&oacute;n en lugar de la imagen de carga.
+  * Al mismo tiempo se desactivan los botones de tail, more, search, filter y reset cuando se visualiza la imagen de load
+  * y se vuelve a activar cuando se deja de visualizar la imagen de load.
   * @param display
   * @returns
   */
@@ -128,8 +130,7 @@
 			 if($(this).attr("id") !== "back-button" && $(this).attr("id") !== "download-button"){
 				 activeElement($(this).attr("id"), false); 
 			 }			
-		 });
-		
+		 });	
 	 }
 	 else if(display == 0){		
 		$("#" + idProgress).css('display:none');
@@ -435,6 +436,8 @@
   */
  function validateFields(fields){
 	 
+	 var datePattern = /^(?:3[01]|[12][0-9]|0?[1-9])([\-/.])(0?[1-9]|1[1-2])\1\d{4}$/;
+	 var timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
 	 $("label").each(function( index ) {
 			if (this.style.color = "red") {				
 			      this.style.color = "#000000";
@@ -472,6 +475,56 @@
 				ok = false;			
 			}
 			break;
+				
+		case "search_StartDate":
+			if($("#search_StartDate").val() != "" && datePattern.test($("#search_StartDate").val())){								
+				$('label[for=search_StartDate]').css({color:'red'});
+				$('#search_StartDate').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				ok = false;			
+			}
+			break;
+		case "search_StartTime":
+			if($("#search_StartTime").val() != "" && timePattern.test($("#search_StartTime").val())){								
+				$('label[for=search_StartTime]').css({color:'red'});
+				$('#search_StartTime').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				ok = false;			
+			}
+			break;
+		case "startDate":
+			if($("#startDate").val() != "" && datePattern.test($("#startDate").val())){								
+				$('label[for=startDate]').css({color:'red'});
+				$('#startDate').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				ok = false;			
+			}
+			break;	
+		case "startTime":
+			if($("#startTime").val() != "" && timePattern.test($("#startTime").val())){								
+				$('label[for=startTime]').css({color:'red'});
+				$('#startTime').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				ok = false;			
+			}
+			break;	
+		case "endDate":
+			if($("#endDate").val() != "" && datePattern.test($("#endDate").val())){								
+				$('label[for=endDate]').css({color:'red'});
+				$('#endDate').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				ok = false;			
+			}
+			break;	
+		case "endTime":
+			if($("#endTime").val() != "" && timePattern.test($("#endTime").val())){								
+				$('label[for=endTime]').css({color:'red'});
+				$('#endTime').css({backgroundColor:'#fcc'});
+				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				ok = false;			
+			}
+			break;	
+			
 		}
 	 }
 	 
