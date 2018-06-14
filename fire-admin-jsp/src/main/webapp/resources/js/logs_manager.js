@@ -33,7 +33,8 @@
 		 return "salir sin cerrar";
 		});
 
- 
+   
+
    
   });//fin de document ready
  
@@ -65,6 +66,12 @@
 	var scrollLefPosition = 0;
 	var param_reset = "";
 	var  oper = "";
+	var arrFieldsFilter = ["level_select","Nlines"]; 
+	var arrFieldsSearch = ["search_txt"]; 
+
+
+	 
+	 
 	/** Elementos del DOM (id) utilizados en las funciones*/
 	var idContainer = "";
 	var idScrollElement = "";
@@ -280,9 +287,8 @@
 	
 	var DateTime =  getlongDateTime(date);
 	
-	var arrFields = ["search_txt"];
 	filterOp = 0;
-	var ok = validateFields(arrFields);						
+	var ok = validateFields(arrFieldsSearch);						
 	if(ok){
 		 activeElement("more-button", true);
 		
@@ -337,10 +343,10 @@
   */
  function getFiltered(nlines, startDate, endDate, level){
 
-	 var startDateTime =  getlongDateTime(startDate);
-	 var endDateTime =  getlongDateTime(endDate);
-	 var arrFields = ["Nlines","level_select"];
-	 var ok = validateFields(arrFields);						
+	var startDateTime =  getlongDateTime(startDate);
+	var endDateTime =  getlongDateTime(endDate);	
+	var ok = validateFields(arrFieldsFilter);
+	 
 	if(ok){	
 		searchOp = 0;
 		activeElement("more-button", false);
@@ -436,8 +442,8 @@
   */
  function validateFields(fields){
 	 
-	 var datePattern = /^(?:3[01]|[12][0-9]|0?[1-9])([\-/.])(0?[1-9]|1[1-2])\1\d{4}$/;
-	 var timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+	 var datePattern = /^(?:3[01]|[12][0-9]|0?[1-9])([\-/.])(0?[1-9]|1[1-2])\1\d{4}$/g;
+	 var timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/g;
 	 $("label").each(function( index ) {
 			if (this.style.color = "red") {				
 			      this.style.color = "#000000";
@@ -449,7 +455,7 @@
 	 var msg = "";
 	 
 	 for ( i = 0; i < fields.length; i++ ){
-	
+		
 		switch(String(fields[i])){
 		case "Nlines":
 			if($("#Nlines").val() == "0"){								
@@ -477,50 +483,53 @@
 			break;
 				
 		case "search_StartDate":
+			
 			if($("#search_StartDate").val() != "" && datePattern.test($("#search_StartDate").val())){								
 				$('label[for=search_StartDate]').css({color:'red'});
 				$('#search_StartDate').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				msg = msg + "Debe introducir una fecha de inicio para la búsqueda, con un formato correcto dd/MM/yyyy.";
 				ok = false;			
 			}
 			break;
 		case "search_StartTime":
-			if($("#search_StartTime").val() != "" && timePattern.test($("#search_StartTime").val())){								
+									
+			if($("#search_StartTime").val() != "" && ! timePattern.test($("#search_StartTime").val())){
+				
 				$('label[for=search_StartTime]').css({color:'red'});
 				$('#search_StartTime').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				msg = msg + "Debe introducir una Hora de inicio para la búsqueda, con un formato correcto HH:mm:ss o HH:mm .";
 				ok = false;			
 			}
 			break;
 		case "startDate":
-			if($("#startDate").val() != "" && datePattern.test($("#startDate").val())){								
+			if($("#startDate").val() != "" && ! datePattern.test($("#startDate").val())){								
 				$('label[for=startDate]').css({color:'red'});
 				$('#startDate').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				msg = msg + "Debe introducir una fecha de inicio para el filtrado, formato correcto dd/MM/yyyy .";
 				ok = false;			
 			}
 			break;	
 		case "startTime":
-			if($("#startTime").val() != "" && timePattern.test($("#startTime").val())){								
+			if($("#startTime").val() != "" && ! timePattern.test($("#startTime").val())){								
 				$('label[for=startTime]').css({color:'red'});
 				$('#startTime').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				msg = msg + "Debe introducir una Hora de inicio para el filtrado, un formato  correcto HH:mm:ss o HH:mm.";
 				ok = false;			
 			}
 			break;	
 		case "endDate":
-			if($("#endDate").val() != "" && datePattern.test($("#endDate").val())){								
+			if($("#endDate").val() != "" && ! datePattern.test($("#endDate").val())){								
 				$('label[for=endDate]').css({color:'red'});
 				$('#endDate').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				msg = msg + "Debe introducir una fecha de fin para el filtrado, formato correcto dd/MM/yyyy.";
 				ok = false;			
 			}
 			break;	
 		case "endTime":
-			if($("#endTime").val() != "" && timePattern.test($("#endTime").val())){								
+			if($("#endTime").val() != "" && ! timePattern.test($("#endTime").val())){								
 				$('label[for=endTime]').css({color:'red'});
 				$('#endTime').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				msg = msg + "Debe introducir una Hora de fin para el filtrado, un formato  correcto HH:mm:ss o HH:mm.";
 				ok = false;			
 			}
 			break;	

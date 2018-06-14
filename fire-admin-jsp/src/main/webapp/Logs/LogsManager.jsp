@@ -156,7 +156,7 @@ boolean filter = true;
 				    		</select>				      		
 				      	</div>	<!-- lines -->		      	
 				     	
-				     	<fieldset><legend> B&uacute;squeda </legend>
+				     	<fieldset  id ="setSearch"><legend> B&uacute;squeda </legend>
 					      	<div id="searchText" style="display:block; width:100%;" >
 					      		<label for="search_txt">* Texto a buscar</label>
 					      		<textarea id="search_txt"  class="log_search" name="search_txt" cols="20"></textarea>
@@ -186,7 +186,7 @@ boolean filter = true;
 					      	</div><!-- searchText -->
 				      	</fieldset>
 				      	<% if (filter){ %>
-				      	<fieldset><legend> Filtrado </legend>
+				      	<fieldset id ="setFilter"><legend> Filtrado </legend>
 				      	<div id="dateTimes" style="display:block; width:100%;">
 				      		<div>
 					      		<div style="display: inline-block;width:49%;">
@@ -270,5 +270,17 @@ boolean filter = true;
 	setIdOkTxtLog('ok-txt-log');
 	setIdAdvice('advice');
 	openLog = true;
+	
+	
+	//Inicializa el array de campos del filtrado
+	var arrfilter = $("#setFilter input").toArray();
+	for(i = 0 ; i< arrfilter.length ; i++){
+		arrFieldsFilter.push(arrfilter[i].id);
+	}
+	//Inicializa el array de campos de la busqueda
+	var arrsearch = $("#setSearch input").toArray();
+	for(i = 0 ; i< arrsearch.length ; i++){
+		arrFieldsSearch.push(arrsearch[i].id);
+	}
 </script>
 </html>
