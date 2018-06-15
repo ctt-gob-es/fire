@@ -29,6 +29,7 @@ import es.gob.fire.server.services.internal.RecoverSignManager;
 import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
+import es.gob.fire.services.FireLogger;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
@@ -44,6 +45,8 @@ public class FIReService extends HttpServlet {
 	private static final long serialVersionUID = -2304782878707695769L;
 
 	private final static Logger LOGGER = Logger.getLogger(FIReService.class.getName());
+	 private static Logger LOGGER_APP = null;
+	 private static Logger LOGGER_ALGOL  = null;
 
     // Parametros que necesitamos de la URL.
     private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
@@ -57,6 +60,10 @@ public class FIReService extends HttpServlet {
 
     	try {
 	    	ConfigManager.checkConfiguration();
+	    	FireLogger.installLogger("APLI");  //$NON-NLS-1$
+	    	LOGGER_APP = FireLogger.getLogger();
+	    	FireLogger.installLogger("ALGOL");  //$NON-NLS-1$
+	    	LOGGER_ALGOL = FireLogger.getLogger();
 		}
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
@@ -124,6 +131,9 @@ public class FIReService extends HttpServlet {
         else {
         	LOGGER.warning("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
         }
+
+    	LOGGER_APP.warning(appId +";"+ operation + ";"); //$NON-NLS-1$ //$NON-NLS-2$ //TODO pruebas
+    	LOGGER_ALGOL.fine(appId +";"+ operation + ";"); //$NON-NLS-1$ //$NON-NLS-2$ //TODO pruebas
 
     	if (ConfigManager.isCheckCertificateNeeded()){
     		LOGGER.info("Se realizara la validacion del certificado"); //$NON-NLS-1$

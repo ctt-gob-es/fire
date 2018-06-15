@@ -19,7 +19,7 @@ import java.util.logging.SimpleFormatter;
  * @author Adolfo.Navarro
  *
  */
-public class fireLogger {
+public class FireLogger {
 
 	static Logger logger ;
 	static FileHandler fh;
@@ -36,24 +36,32 @@ public class fireLogger {
 	private static final long SEG_HORA = 60L * 60L;
 	private static final long SEG_MIN = 60L;
 	private static TimeUnit timeUnit = TimeUnit.SECONDS;
+	private static String logName = null;
+
 
 	/**
 	 * funci&oacute;n principal que inicializa el logger para toda la aplicaci&oacute;n
-	 * Uso: fireLogger.installLogger();
+	 * Uso: fireLogger.installLogger(statisticsName);
 	 * Necesario indicar par&aacute;metros en fichero config_logger.properties
 	 */
-	public static void installLogger() {
+	public static void installLogger(final String logParticleName) {
 
-		final Logger LOGGER = Logger.getLogger(fireLogger.class.getName());
+		final Logger LOGGER = Logger.getLogger(FireLogger.class.getName());
 
+		if(logParticleName != null && !"".equals(logParticleName)) { //$NON-NLS-1$
+			setLogName(logParticleName);
+    	}
 		//leemos fichero de configuracion
 		try {
 	    	ConfigManager.checkInitialized();
+
 		}
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion del log: " + e); //$NON-NLS-1$
     		return;
     	}
+
+
 
 		if (ConfigManager.getLogsDir() != null && !"".equals(ConfigManager.getLogsDir()) //$NON-NLS-1$
 			&& ConfigManager.getRollingDate() != null && !"".equals(ConfigManager.getRollingDate())) { //$NON-NLS-1$
@@ -104,7 +112,7 @@ public class fireLogger {
 	        fileFolder.mkdirs();
 	    }
 
-	    final String dateFileName = folder + File.separator +"fire_service_"+ dateForName + ".log"; //$NON-NLS-1$
+	    final String dateFileName = folder + File.separator + "FIRe" + getLogName() + "_" + dateForName + ".log"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	    final boolean appendToFile = true;
 
@@ -234,7 +242,7 @@ public class fireLogger {
 			*/
          fh.setFormatter(new SimpleFormatter() {
 
-	          private static final String format = "%1$tF %1$tT;%3$s%n"; //$NON-NLS-1$
+	          private static final String format = "%1$tF %1$tT;%2$s%n"; //$NON-NLS-1$
 
 	          @Override
 	          public synchronized String format(final LogRecord lr) {
@@ -245,4 +253,18 @@ public class fireLogger {
 	          }
 	      });
 	 }
+
+
+
+	public static final Logger getLogger() {
+		return logger;
+	}
+
+	private final static String getLogName() {
+		return FireLogger.logName;
+	}
+
+	private final static void setLogName(final String logName) {
+		FireLogger.logName = logName;
+	}
 }
