@@ -44,9 +44,9 @@ public class FIReService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = -2304782878707695769L;
 
-	private final static Logger LOGGER = Logger.getLogger(FIReService.class.getName());
-	 private static Logger LOGGER_APP = null;
-	 private static Logger LOGGER_ALGOL  = null;
+	private static Logger LOGGER = Logger.getLogger(FIReService.class.getName());
+	private static Logger LOGGER_TRANS = Logger.getLogger(FIReService.class.getName());
+	private static Logger LOGGER_SING  = Logger.getLogger(FIReService.class.getName());
 
     // Parametros que necesitamos de la URL.
     private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
@@ -60,10 +60,17 @@ public class FIReService extends HttpServlet {
 
     	try {
 	    	ConfigManager.checkConfiguration();
-	    	FireLogger.installLogger("APLI");  //$NON-NLS-1$
-	    	LOGGER_APP = FireLogger.getLogger();
-	    	FireLogger.installLogger("ALGOL");  //$NON-NLS-1$
-	    	LOGGER_ALGOL = FireLogger.getLogger();
+
+	    	final FireLogger fl = new FireLogger(""); //$NON-NLS-1$
+	    	LOGGER = fl.getLogger();
+
+	    	final FireLogger flt = new FireLogger("TRANSACTION"); //$NON-NLS-1$
+	    	LOGGER_TRANS = flt.getLogger();
+
+	    	final FireLogger fls = new FireLogger("SIGNATURE"); //$NON-NLS-1$
+	    	LOGGER_SING = fls.getLogger();
+
+
 		}
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
@@ -132,8 +139,9 @@ public class FIReService extends HttpServlet {
         	LOGGER.warning("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
         }
 
-    	LOGGER_APP.warning(appId +";"+ operation + ";"); //$NON-NLS-1$ //$NON-NLS-2$ //TODO pruebas
-    	LOGGER_ALGOL.fine(appId +";"+ operation + ";"); //$NON-NLS-1$ //$NON-NLS-2$ //TODO pruebas
+    	//TODO Pruebas
+    	LOGGER_TRANS.info(appId +";"+ operation + ";"); //$NON-NLS-1$ //$NON-NLS-2$
+    	LOGGER_SING.info(appId +";"+ operation + ";"); //$NON-NLS-1$ //$NON-NLS-2$
 
     	if (ConfigManager.isCheckCertificateNeeded()){
     		LOGGER.info("Se realizara la validacion del certificado"); //$NON-NLS-1$

@@ -147,6 +147,8 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
 
+//        LOGGER_TRANS.info(appId + ";" + op + ";");  //$NON-NLS-1$//$NON-NLS-2$
+//        LOGGER_SIGN.info(format + ";" + algorithm + ";"); //$NON-NLS-1$ //$NON-NLS-2$
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
         FIReDocumentManager docManager;

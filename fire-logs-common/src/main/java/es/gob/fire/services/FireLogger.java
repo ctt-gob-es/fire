@@ -21,8 +21,8 @@ import java.util.logging.SimpleFormatter;
  */
 public class FireLogger {
 
-	static Logger logger ;
-	static FileHandler fh;
+	private Logger logger = null;
+	static FileHandler fh = null;
 
 	private static final String DIARIA = "DIARIA"; //$NON-NLS-1$
 	private static final String HORARIA = "HORARIA"; //$NON-NLS-1$
@@ -44,11 +44,11 @@ public class FireLogger {
 	 * Uso: fireLogger.installLogger(statisticsName);
 	 * Necesario indicar par&aacute;metros en fichero config_logger.properties
 	 */
-	public static void installLogger(final String logParticleName) {
+	public void installLogger(final String logParticleName) {
 
 		final Logger LOGGER = Logger.getLogger(FireLogger.class.getName());
 
-		if(logParticleName != null && !"".equals(logParticleName)) { //$NON-NLS-1$
+		if(logParticleName != null ) { // && !"".equals(logParticleName)
 			setLogName(logParticleName);
     	}
 		//leemos fichero de configuracion
@@ -66,8 +66,8 @@ public class FireLogger {
 		if (ConfigManager.getLogsDir() != null && !"".equals(ConfigManager.getLogsDir()) //$NON-NLS-1$
 			&& ConfigManager.getRollingDate() != null && !"".equals(ConfigManager.getRollingDate())) { //$NON-NLS-1$
 
-		    if(logger == null){
-		        initLogger(); //inicializamos el logger si es la primera vez y esta a nulo.
+		    if(this.getLogger() == null){
+		        initLogger(logParticleName); //inicializamos el logger si es la primera vez y esta a nulo.
 
 		        //Se crea un hilo que se ejecuta periodicamente segun el parametro indicado en el fichero de configuracion (DIARIA, HORARIA, POR_MINUTOS)
 		        final ScheduledThreadPoolExecutor sch = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
@@ -76,13 +76,13 @@ public class FireLogger {
 
 		            @Override
 		            public void run() {
-		            	fh.flush();
-			            fh.close();
-			            logger.removeHandler(fh);
+		            	FireLogger.fh.flush();
+			            FireLogger.fh.close();
+			          getLogger().removeHandler(FireLogger.fh);
 			            try {
 							 	setFileHandlerFormater();
-			                    logger.addHandler(fh);
-			                    logger.info("######## INICIO LOG ########"); //$NON-NLS-1$
+							 	getLogger().addHandler(FireLogger.fh);
+							 	getLogger().info("######## INICIO LOG ########"); //$NON-NLS-1$
 			                } catch (final SecurityException e) {
 			                    e.printStackTrace();
 			                } catch (final IOException e) {
@@ -113,30 +113,37 @@ public class FireLogger {
 	    }
 
 	    final String dateFileName = folder + File.separator + "FIRe" + getLogName() + "_" + dateForName + ".log"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
 	    final boolean appendToFile = true;
-
 	    return new FileHandler(dateFileName, appendToFile);
 	}
 
 	/**
 	 * Se inicializa el logger com&uacute;n a todos los packages
 	 */
-	static void initLogger(){
+	private void initLogger(final String nameLogger){ //se cambia static por private
 
-	    logger = Logger.getLogger(""); //$NON-NLS-1$
+		final Logger mylogger = Logger.getLogger(nameLogger);
+		this.setLogger(mylogger);
 
 	    try {
 	    		setFileHandlerFormater();
-	 	        logger.addHandler(fh);
-	 	        logger.info("Logs de Fire Inicializado..."); //$NON-NLS-1$
+	    		getLogger().addHandler(FireLogger.fh);
+	    		this.logger.info("Logs de Fire Inicializado..."); //$NON-NLS-1$
 
 	 	    } catch (final SecurityException e) {
-	 	        logger.warning("Problema al inicializar del logger... " + e.getMessage()); //$NON-NLS-1$
+	 	    	this.logger.warning("Problema al inicializar del logger... " + e.getMessage()); //$NON-NLS-1$
 	 	    } catch (final IOException e) {
-	 	        logger.warning("Problema al inicializar del  logger... " + e.getMessage()); //$NON-NLS-1$
+	 	    	this.logger.warning("Problema al inicializar del  logger... " + e.getMessage()); //$NON-NLS-1$
 	 	    }
 
+	}
+
+	public final Logger getLogger() {
+		return this.logger;
+	}
+
+	private final void setLogger(final Logger logger) {
+		this.logger = logger;
 	}
 
 	/**
@@ -216,12 +223,13 @@ public class FireLogger {
 	}
 
 	 /**
-	  * Se inicializa el FileHandler con el formato de las lineas a %1$tF %1$tT;%3$s%n
+	  * Se inicializa el FileHandler con el formato de las lineas a %1$tF %1$tT;%2$s%n
 	  * @throws SecurityException
 	  * @throws IOException
 	  */
 	 static void setFileHandlerFormater() throws SecurityException, IOException {
-		 fh = createFilehandler(getLogFileName());
+
+		setFh(createFilehandler(getLogFileName()));
 
          /*	# %1  date: un objeto Date que representa la hora del evento del registro.
 				# %2  fuente - una cadena que representa al que llama, si está disponible; de lo contrario, el nombre del logger.
@@ -240,7 +248,7 @@ public class FireLogger {
 	                      lr.getSourceMethodName()
 	              );
 			*/
-         fh.setFormatter(new SimpleFormatter() {
+       getFh().setFormatter(new SimpleFormatter() {
 
 	          private static final String format = "%1$tF %1$tT;%2$s%n"; //$NON-NLS-1$
 
@@ -256,8 +264,21 @@ public class FireLogger {
 
 
 
-	public static final Logger getLogger() {
-		return logger;
+
+	public FireLogger(final String loggerName ) {
+		super();
+		this.installLogger(loggerName);
+	}
+
+
+
+
+	private final static FileHandler getFh() {
+		return FireLogger.fh;
+	}
+
+	private final static void setFh(final FileHandler fh) {
+		FireLogger.fh = fh;
 	}
 
 	private final static String getLogName() {
