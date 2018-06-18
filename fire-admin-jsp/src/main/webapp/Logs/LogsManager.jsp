@@ -108,7 +108,7 @@ boolean filter = true;
 		var file = '<%=fileName%>';
 		var server = '<%=nameSrv%>';
 	</script>	
-			
+	
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../resources/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>
@@ -131,8 +131,9 @@ boolean filter = true;
 			 	 Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.			 	
 			</div>	
 			<div id="progress_download" style="display:none;"><img  style="vertical-align: middle;" alt="Icono animado cargando fichero" src="../resources/img/load.gif" height="42" width="55" >Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.</div>				      						   
-			<div id="error-txt-log" style="display:none;width:50%;" onload="setIdErrorTxtLog($(this).attr('id'))"></div>
-			<div id="ok-txt-log" style="display:none;width:50%;" onload="setIdOkTxtLog($(this).attr('id'))"></div>			
+			<div id="error-txt-log" style="display:none;width:50%;" onload="setIdErrorTxtLog($(this).attr('id'))"></div>			
+			<div id="ok-txt-log" class="success-log"  style="display:none;width:50%;" onload="setIdOkTxtLog($(this).attr('id'))"></div>
+			<div id="msg-txt-log" class="success-log" style="display:none;width:50%;" >Se ha realizado una nueva consulta.</div>					
 		</div>
 	
 		<div id="main-content" style="margin: auto; width: 100%;" >

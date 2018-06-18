@@ -60,7 +60,7 @@ ul li.field-text {
 	background-color: #FFAAAA;
 }
 
-#ok-txt-log {
+.success-log{
 	color:green; 
 	font-size: 14px;
 	text-align: center;
@@ -71,6 +71,8 @@ ul li.field-text {
 	border-radius: 8px; 
 	background-color: #55FF55;
 }
+
+
 
 #success-txt {
 	color:green; 

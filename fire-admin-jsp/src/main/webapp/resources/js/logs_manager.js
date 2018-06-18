@@ -32,9 +32,7 @@
 		 }
 		 return "salir sin cerrar";
 		});
-
-   
-
+  
    
   });//fin de document ready
  
@@ -79,6 +77,7 @@
 	var idOkTxtLog = "";
 	var idAdvice = "";
 	var idProgress = "progress_download";
+	var idMsgTxtLog = "msg-txt-log";
 
 	 
  /*****************Funciones:******************************/
@@ -115,6 +114,8 @@
 		$("#" + idOkTxtLog).show();
 		 
 	 }
+ 
+
  
  /**
   * Visualiza en pantalla la imagen de cargar en lugar del bot&oacute;n en caso de que la variable display = 1
@@ -170,7 +171,12 @@
 	 $("#" + idOkTxtLog).hide();
 	 $("#" + idAdvice).hide();
 	 
-	 if(JSONData.hasOwnProperty('Tail')){		 
+	 
+	 
+	 
+	 if(JSONData.hasOwnProperty('Tail')){
+		 
+		 $("#" + idMsgTxtLog).fadeIn("slow");
 		 data = JSONData.Tail[0].Result;		
 		 content = "";
 		 oper = "Tail";
@@ -184,6 +190,11 @@
 		 oper = "More";	 	
 	 }
 	 else if(JSONData.hasOwnProperty('Search')){
+	
+		
+		if(searchOp == 0){
+			$("#" + idMsgTxtLog).fadeIn("slow");
+		}		 	
 		 oper = "Search";
 		 data = JSONData.Search[0].Result;
 			 
@@ -195,6 +206,10 @@
 		 }
 	 }
 	 else if(JSONData.hasOwnProperty('Filtered')){
+		
+		if(filterOp == 1){
+			$("#" + idMsgTxtLog).fadeIn("slow");
+		}
 		 oper = "Filtered";
 		 data = JSONData.Filtered[0].Result;
 		 if(!addResult){
@@ -215,12 +230,17 @@
 			content += "<div>" + arrHtml[i] + "</div>"; 
 		}	
 	}
-
+	 $("#" + idMsgTxtLog).fadeOut(4000);
 
 	 $("#"+ idContainer).append(content);	 
 	 
-	 $('#'+idScrollElement).scrollTop(scrollTopPosition);
-	 $('#'+idScrollElement).scrollLeft(scrollLefPosition);
+//	 alert($('#'+idScrollElement).scrollTop());
+	 
+//	 $('#'+idScrollElement).scrollTop(scrollTopPosition);
+//	 $('#'+idScrollElement).scrollLeft(scrollLefPosition);
+	 
+	 console.log("scrollTopPosition: "+scrollTopPosition);
+	
   }
  /**
   * Funci&oacute;n Ajax que llama a la operac&oacute;n Tail indicando el n&uacute;mero de lineas que se
@@ -231,6 +251,7 @@
  function getTail(nlines){
 	 	searchOp = 0;
 	 	filterOp = 0;
+		$('#'+idScrollElement).scrollTop(0);
 	 	var arrFields = ["Nlines"];
 
 	 	var ok = validateFields(arrFields);						
@@ -351,6 +372,7 @@
 		searchOp = 0;
 		activeElement("more-button", false);
 		if(filterOp == 0){
+			$('#'+idScrollElement).scrollTop(0);
 			resetFilter(startDateTime, endDateTime, level);			
 		 }
 		 else{
@@ -364,7 +386,7 @@
 			 endDate2Filter != endDateTime || 
 			 level2Filter !== level){
 			 resetFilter(startDateTime, endDateTime, level);		
-			
+			 console.log("startDate :"+startDate + " endDate :"+endDate+ " level:"+level);
 		 }	
 			
 		filterOp = filterOp + 1;		
@@ -458,6 +480,7 @@
 		
 		switch(String(fields[i])){
 		case "Nlines":
+			
 			if($("#Nlines").val() == "0"){								
 				$('label[for=Nlines]').css({color:'red'});
 				$('#Nlines').css({backgroundColor:'#fcc'});
@@ -466,6 +489,7 @@
 			}		
 			break;
 		case "search_txt":
+			
 			if($("#search_txt").val() == ""){								
 				$('label[for=search_txt]').css({color:'red'});
 				$('#search_txt').css({backgroundColor:'#fcc'});
@@ -474,6 +498,7 @@
 			}		
 			break;		
 		case "level_select":
+			
 			if($("#level_select").val() == ""){								
 				$('label[for=level_select]').css({color:'red'});
 				$('#level_select').css({backgroundColor:'#fcc'});
@@ -484,7 +509,7 @@
 				
 		case "search_StartDate":
 			
-			if($("#search_StartDate").val() != "" && datePattern.test($("#search_StartDate").val())){								
+			if($("#search_StartDate").val() != "" && !datePattern.test($("#search_StartDate").val())){								
 				$('label[for=search_StartDate]').css({color:'red'});
 				$('#search_StartDate').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una fecha de inicio para la búsqueda, con un formato correcto dd/MM/yyyy.";
@@ -492,8 +517,9 @@
 			}
 			break;
 		case "search_StartTime":
-									
-			if($("#search_StartTime").val() != "" && ! timePattern.test($("#search_StartTime").val())){
+			
+			var pattern = timePattern.test($("#search_StartTime").val());
+			if($("#search_StartTime").val() != "" && !pattern){
 				
 				$('label[for=search_StartTime]').css({color:'red'});
 				$('#search_StartTime').css({backgroundColor:'#fcc'});
@@ -502,7 +528,9 @@
 			}
 			break;
 		case "startDate":
-			if($("#startDate").val() != "" && ! datePattern.test($("#startDate").val())){								
+			
+			var pattern = datePattern.test($("#startDate").val());
+			if($("#startDate").val() != "" && !pattern){								
 				$('label[for=startDate]').css({color:'red'});
 				$('#startDate').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una fecha de inicio para el filtrado, formato correcto dd/MM/yyyy .";
@@ -510,15 +538,19 @@
 			}
 			break;	
 		case "startTime":
-			if($("#startTime").val() != "" && ! timePattern.test($("#startTime").val())){								
+			
+			var pattern = timePattern.test($("#startTime").val());			
+			if($("#startTime").val() != "" && !pattern){								
 				$('label[for=startTime]').css({color:'red'});
 				$('#startTime').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una Hora de inicio para el filtrado, un formato  correcto HH:mm:ss o HH:mm.";
 				ok = false;			
 			}
 			break;	
-		case "endDate":
-			if($("#endDate").val() != "" && ! datePattern.test($("#endDate").val())){								
+		case "endDate":		
+			
+			var pattern = datePattern.test($("#endDate").val());
+			if($("#endDate").val() != "" && ! pattern){								
 				$('label[for=endDate]').css({color:'red'});
 				$('#endDate').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una fecha de fin para el filtrado, formato correcto dd/MM/yyyy.";
@@ -526,7 +558,9 @@
 			}
 			break;	
 		case "endTime":
-			if($("#endTime").val() != "" && ! timePattern.test($("#endTime").val())){								
+			
+			var pattern = timePattern.test($("#endTime").val());
+			if($("#endTime").val() != "" && !pattern){								
 				$('label[for=endTime]').css({color:'red'});
 				$('#endTime').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una Hora de fin para el filtrado, un formato  correcto HH:mm:ss o HH:mm.";
