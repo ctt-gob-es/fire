@@ -29,7 +29,7 @@ import es.gob.fire.server.services.internal.RecoverSignManager;
 import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
-import es.gob.fire.services.FireLogger;
+import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
@@ -44,9 +44,11 @@ public class FIReService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = -2304782878707695769L;
 
-	private static Logger LOGGER = Logger.getLogger(FIReService.class.getName());
-	private static Logger LOGGER_TRANS = Logger.getLogger(FIReService.class.getName());
-	private static Logger LOGGER_SING  = Logger.getLogger(FIReService.class.getName());
+	//private static FireSignLogger fSignLogger = FireSignLogger.getFireSignLogger();
+
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+
+
 
     // Parametros que necesitamos de la URL.
     private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
@@ -60,17 +62,6 @@ public class FIReService extends HttpServlet {
 
     	try {
 	    	ConfigManager.checkConfiguration();
-
-	    	final FireLogger fl = new FireLogger(""); //$NON-NLS-1$
-	    	LOGGER = fl.getLogger();
-
-	    	final FireLogger flt = new FireLogger("TRANSACTION"); //$NON-NLS-1$
-	    	LOGGER_TRANS = flt.getLogger();
-
-	    	final FireLogger fls = new FireLogger("SIGNATURE"); //$NON-NLS-1$
-	    	LOGGER_SING = fls.getLogger();
-
-
 		}
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
@@ -110,6 +101,8 @@ public class FIReService extends HttpServlet {
     	final String appId     = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
         final String operation = params.getParameter(PARAMETER_NAME_OPERATION);
 
+
+
     	if (ConfigManager.isCheckApplicationNeeded()) {
 
         	if (appId == null || appId.isEmpty()) {
@@ -139,9 +132,6 @@ public class FIReService extends HttpServlet {
         	LOGGER.warning("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
         }
 
-    	//TODO Pruebas
-    	LOGGER_TRANS.info(appId +";"+ operation + ";"); //$NON-NLS-1$ //$NON-NLS-2$
-    	LOGGER_SING.info(appId +";"+ operation + ";"); //$NON-NLS-1$ //$NON-NLS-2$
 
     	if (ConfigManager.isCheckCertificateNeeded()){
     		LOGGER.info("Se realizara la validacion del certificado"); //$NON-NLS-1$
@@ -184,40 +174,40 @@ public class FIReService extends HttpServlet {
 
     	try {
     		switch (op) {
-    		case SIGN:
-    			SignOperationManager.sign(request, params, response);
-    			break;
-    		case RECOVER_SIGN:
-    			RecoverSignManager.recoverSignature(params, response);
-    			break;
-    		case RECOVER_SIGN_RESULT:
-    			RecoverSignResultManager.recoverSignature(params, response);
-    			break;
-    		case CREATE_BATCH:
-    			CreateBatchManager.createBatch(request, params, response);
-    			break;
-    		case ADD_DOCUMENT_TO_BATCH:
-    			AddDocumentBatchManager.addDocument(params, response);
-    			break;
-    		case SIGN_BATCH:
-    			SignBatchManager.signBatch(request, params, response);
-    			break;
-    		case RECOVER_BATCH:
-    			RecoverBatchResultManager.recoverResult(params, response);
-    			break;
-    		case RECOVER_BATCH_STATE:
-    			RecoverBatchStateManager.recoverState(params, response);
-    			break;
-    		case RECOVER_SIGN_BATCH:
-    			RecoverBatchSignatureManager.recoverSignature(params, response);
-    			break;
-    		case RECOVER_ERROR:
-    			RecoverErrorManager.recoverError(params, response);
-    			break;
-    		default:
-    			LOGGER.warning("Operacion no soportada: " + op.name()); //$NON-NLS-1$
-    			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-    			break;
+	    		case SIGN:
+	    			SignOperationManager.sign(request, params, response);
+	    			break;
+	    		case RECOVER_SIGN:
+	    			RecoverSignManager.recoverSignature(params, response);
+	    			break;
+	    		case RECOVER_SIGN_RESULT:
+	    			RecoverSignResultManager.recoverSignature(params, response);
+	    			break;
+	    		case CREATE_BATCH:
+	    			CreateBatchManager.createBatch(request, params, response);
+	    			break;
+	    		case ADD_DOCUMENT_TO_BATCH:
+	    			AddDocumentBatchManager.addDocument(params, response);
+	    			break;
+	    		case SIGN_BATCH:
+	    			SignBatchManager.signBatch(request, params, response);
+	    			break;
+	    		case RECOVER_BATCH:
+	    			RecoverBatchResultManager.recoverResult(params, response);
+	    			break;
+	    		case RECOVER_BATCH_STATE:
+	    			RecoverBatchStateManager.recoverState(params, response);
+	    			break;
+	    		case RECOVER_SIGN_BATCH:
+	    			RecoverBatchSignatureManager.recoverSignature(params, response);
+	    			break;
+	    		case RECOVER_ERROR:
+	    			RecoverErrorManager.recoverError(params, response);
+	    			break;
+	    		default:
+	    			LOGGER.warning("Operacion no soportada: " + op.name()); //$NON-NLS-1$
+	    			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	    			break;
     		}
     	}
     	catch (final Exception e) {

@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.AOUtil;
+import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -29,7 +30,8 @@ import es.gob.fire.signature.ConfigManager;
  */
 public final class TempFilesHelper {
 
-    private static final Logger LOGGER = Logger.getLogger(TempFilesHelper.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//    private static final Logger LOGGER = Logger.getLogger(TempFilesHelper.class.getName());
 
     private static final String DEFAULT_PREFIX = "fire-"; //$NON-NLS-1$
 

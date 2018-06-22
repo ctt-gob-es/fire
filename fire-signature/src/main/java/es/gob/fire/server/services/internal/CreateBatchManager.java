@@ -20,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.server.services.statistics.TransactionLogger;
 
 /**
  * Manejador que gestiona las peticiones de creaci&oacute;n de un lote de firma, al que posteriormente
@@ -27,8 +30,10 @@ import es.gob.fire.server.services.RequestParameters;
  */
 public class CreateBatchManager {
 
-	private static final Logger LOGGER = Logger.getLogger(CreateBatchManager.class.getName());
-
+//	private static final Logger LOGGER = Logger.getLogger(CreateBatchManager.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger();
 	/**
 	 * Create un lote de firma.
 	 * @param request Petici&oacute;n para la creaci&oacute;n del lote.
@@ -49,6 +54,7 @@ public class CreateBatchManager {
 		final String extraParamsB64	= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 		final String configB64		= params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
 		final String upgrade		= params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
+
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
 		if (subjectId == null || subjectId.isEmpty()) {
@@ -133,6 +139,7 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_ID, transactionId);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
 
+
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
         FIReDocumentManager docManager;
@@ -141,11 +148,15 @@ public class CreateBatchManager {
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session, false);
+        	TRANSLOGGER.log(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No existe el gestor de documentos"); //$NON-NLS-1$
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session, false);
+        	TRANSLOGGER.log(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cargar el gestor de documentos"); //$NON-NLS-1$
         	return;
         }

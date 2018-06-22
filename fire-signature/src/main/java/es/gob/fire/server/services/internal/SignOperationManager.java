@@ -24,6 +24,8 @@ import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.server.services.statistics.SignatureLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -32,8 +34,9 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class SignOperationManager {
 
-	private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
-
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	//private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
 	/**
 	 * Inicia la operaci&oacute;n de firma asociada al componente central.
 	 * @param request Solicitud HTTP.
@@ -147,6 +150,8 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
 
+
+
 //        LOGGER_TRANS.info(appId + ";" + op + ";");  //$NON-NLS-1$//$NON-NLS-2$
 //        LOGGER_SIGN.info(format + ";" + algorithm + ";"); //$NON-NLS-1$ //$NON-NLS-2$
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
@@ -157,12 +162,14 @@ public class SignOperationManager {
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session, false);
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session, false);
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
@@ -175,6 +182,7 @@ public class SignOperationManager {
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "El documento enviado a firmar no esta bien codificado", e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         			"El documento enviado a firmar no esta bien codificado"); //$NON-NLS-1$
         	return;
@@ -192,6 +200,7 @@ public class SignOperationManager {
         }
 
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
+
         SessionCollector.commit(session);
 
         // Obtenemos los datos a firmar a partir de los datos proporcionados
@@ -202,6 +211,7 @@ public class SignOperationManager {
         }
         catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, "Error al obtener los datos a firmar", e); //$NON-NLS-1$
+    		SIGNLOGGER.log(session, false);
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"Error al obtener los datos a firmar"); //$NON-NLS-1$
     		return;
@@ -209,6 +219,7 @@ public class SignOperationManager {
 
     	if (data == null) {
     		LOGGER.severe("No se han podido obtener los datos a firmar"); //$NON-NLS-1$
+    		SIGNLOGGER.log(session, false);
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"No se han podido obtener los datos a firmar"); //$NON-NLS-1$
     		return;
@@ -220,6 +231,7 @@ public class SignOperationManager {
         }
         catch (final Exception e) {
         	LOGGER.severe("Error en el guardado temporal de los datos a firmar: " + e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session, false);
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;

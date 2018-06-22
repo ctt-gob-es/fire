@@ -25,6 +25,8 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.document.DefaultFIReDocumentManager;
+import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.server.services.statistics.TransactionLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -32,8 +34,9 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class AddDocumentBatchManager {
 
-	private static final Logger LOGGER = Logger.getLogger(AddDocumentBatchManager.class.getName());
-
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(AddDocumentBatchManager.class.getName());
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger();
     /**
      * Agrega un nuevo documento a un lote de firma.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
@@ -84,6 +87,7 @@ public class AddDocumentBatchManager {
         final FIReDocumentManager documentManager = (FIReDocumentManager) session.getObject(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER);
     	if (documentManager instanceof DefaultFIReDocumentManager && (dataB64 == null || dataB64.isEmpty())) {
     		LOGGER.warning("No se ha proporcionado el documento a firmar ni un gestor de documentos del que recuperarlo"); //$NON-NLS-1$
+    		TRANSLOGGER.log(session, false);
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"No se ha proporcionado el documento a firmar"); //$NON-NLS-1$
     		return;
@@ -102,6 +106,7 @@ public class AddDocumentBatchManager {
         	}
         	catch (final Exception e) {
         		LOGGER.warning("El documento enviado a firmar no esta bien codificado: " + e); //$NON-NLS-1$
+        		TRANSLOGGER.log(session, false);
         		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         				"El documento enviado a firmar no esta bien codificado"); //$NON-NLS-1$
         		return;
@@ -117,12 +122,14 @@ public class AddDocumentBatchManager {
     	}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, "Error en la carga de los datos a agregar al lote", e); //$NON-NLS-1$
+    		TRANSLOGGER.log(session, false);
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"Error en la carga de los datos a agregar al lote"); //$NON-NLS-1$
     		return;
     	}
     	if (data == null) {
     		LOGGER.warning("No se han podido obtener los datos para agregarlos al lote de firma"); //$NON-NLS-1$
+    		TRANSLOGGER.log(session, false);
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"No se han podido obtener los datos para agregarlos al lote de firma"); //$NON-NLS-1$
     		return;
@@ -136,6 +143,7 @@ public class AddDocumentBatchManager {
 
         if (batchResult.hasDocument(docId)) {
         	LOGGER.warning("El identificador de documento indicado ya existe en el lote"); //$NON-NLS-1$
+        	TRANSLOGGER.log(session, false);
         	response.sendError(HttpCustomErrors.DUPLICATE_DOCUMENT.getErrorCode());
         	return;
         }
@@ -145,6 +153,7 @@ public class AddDocumentBatchManager {
         final int maxDocuments = ConfigManager.getBatchMaxDocuments();
         if (maxDocuments != ConfigManager.UNLIMITED_NUM_DOCUMENTS && batchResult.documentsCount() >= maxDocuments) {
         	LOGGER.warning("Se ha excedido el numero maximo de documentos permitido en el lote"); //$NON-NLS-1$
+        	TRANSLOGGER.log(session, false);
         	response.sendError(HttpCustomErrors.NUM_DOCUMENTS_EXCEEDED.getErrorCode());
         	return;
         }
@@ -156,6 +165,7 @@ public class AddDocumentBatchManager {
         }
         catch (final Exception e) {
         	LOGGER.severe("Error en el guardado temporal de los datos a firmar: " + e); //$NON-NLS-1$
+        	TRANSLOGGER.log(session, false);
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         	return;
         }

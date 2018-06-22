@@ -22,7 +22,7 @@ import java.util.logging.SimpleFormatter;
 public class FireLogger {
 
 	private Logger logger = null;
-	static FileHandler fh = null;
+	protected FileHandler fh = null;
 
 	private static final String DIARIA = "DIARIA"; //$NON-NLS-1$
 	private static final String HORARIA = "HORARIA"; //$NON-NLS-1$
@@ -36,7 +36,17 @@ public class FireLogger {
 	private static final long SEG_HORA = 60L * 60L;
 	private static final long SEG_MIN = 60L;
 	private static TimeUnit timeUnit = TimeUnit.SECONDS;
-	private static String logName = null;
+	private String logName = null;
+	final Logger _LOGGER = Logger.getLogger(FireLogger.class.getName());
+
+	 /**
+	  * Constructor
+	  * @param loggerName
+	  */
+	public FireLogger(final String loggerName ) {
+		super();
+		this.installLogger(loggerName);
+	}
 
 
 	/**
@@ -46,9 +56,7 @@ public class FireLogger {
 	 */
 	public void installLogger(final String logParticleName) {
 
-		final Logger LOGGER = Logger.getLogger(FireLogger.class.getName());
-
-		if(logParticleName != null ) { // && !"".equals(logParticleName)
+		if(logParticleName != null ) {
 			setLogName(logParticleName);
     	}
 		//leemos fichero de configuracion
@@ -57,11 +65,9 @@ public class FireLogger {
 
 		}
     	catch (final Exception e) {
-    		LOGGER.severe("Error al cargar la configuracion del log: " + e); //$NON-NLS-1$
+    		this._LOGGER.severe("Error al cargar la configuracion del log: " + e); //$NON-NLS-1$
     		return;
     	}
-
-
 
 		if (ConfigManager.getLogsDir() != null && !"".equals(ConfigManager.getLogsDir()) //$NON-NLS-1$
 			&& ConfigManager.getRollingDate() != null && !"".equals(ConfigManager.getRollingDate())) { //$NON-NLS-1$
@@ -76,20 +82,20 @@ public class FireLogger {
 
 		            @Override
 		            public void run() {
-		            	FireLogger.fh.flush();
-			            FireLogger.fh.close();
-			          getLogger().removeHandler(FireLogger.fh);
+		            	getFh().flush();
+		            	getFh().close();
+			          getLogger().removeHandler(getFh());
 			            try {
 							 	setFileHandlerFormater();
-							 	getLogger().addHandler(FireLogger.fh);
+							 	getLogger().addHandler(getFh());
 							 	getLogger().info("######## INICIO LOG ########"); //$NON-NLS-1$
 			                } catch (final SecurityException e) {
-			                    e.printStackTrace();
+			                	FireLogger.this._LOGGER.severe("Error en hilo del Log :".concat(e.getMessage())); //$NON-NLS-1$
 			                } catch (final IOException e) {
-
-								e.printStackTrace();
+			                	FireLogger.this._LOGGER.severe("Error en hilo del Log :".concat(e.getMessage())); //$NON-NLS-1$
 			                }
-			            };
+			            }
+
 		        };
 		        sch.scheduleAtFixedRate(renameLoggerFile, getSecondsInitialDelay(), getSecondsRelaunchPeriod(), timeUnit);
 		    }
@@ -104,7 +110,7 @@ public class FireLogger {
 	 * @throws SecurityException
 	 * @throws IOException
 	 */
-	static FileHandler createFilehandler(final String dateForName) throws SecurityException, IOException{
+	final FileHandler createFilehandler(final String dateForName) throws SecurityException, IOException{
 	    final String folder = ConfigManager.getLogsDir();
 	    final File fileFolder = new File(folder);
 
@@ -127,24 +133,18 @@ public class FireLogger {
 
 	    try {
 	    		setFileHandlerFormater();
-	    		getLogger().addHandler(FireLogger.fh);
-	    		this.logger.info("Logs de Fire Inicializado..."); //$NON-NLS-1$
+	    		getLogger().addHandler(this.getFh());
+	    		this.logger.info("Log de Fire"+ nameLogger + " Inicializado"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	 	    } catch (final SecurityException e) {
-	 	    	this.logger.warning("Problema al inicializar del logger... " + e.getMessage()); //$NON-NLS-1$
+	 	    	FireLogger.this._LOGGER.warning("Problema al inicializar del logger... " + e.getMessage()); //$NON-NLS-1$
 	 	    } catch (final IOException e) {
-	 	    	this.logger.warning("Problema al inicializar del  logger... " + e.getMessage()); //$NON-NLS-1$
+	 	    	FireLogger.this._LOGGER.warning("Problema al inicializar del  logger... " + e.getMessage()); //$NON-NLS-1$
 	 	    }
 
 	}
 
-	public final Logger getLogger() {
-		return this.logger;
-	}
 
-	private final void setLogger(final Logger logger) {
-		this.logger = logger;
-	}
 
 	/**
 	 * Obtiene el nombre del fichero de log seg&uacute;n par&aacute;metro del fichero de configuraci&oacute;n
@@ -227,9 +227,9 @@ public class FireLogger {
 	  * @throws SecurityException
 	  * @throws IOException
 	  */
-	 static void setFileHandlerFormater() throws SecurityException, IOException {
+	 void setFileHandlerFormater() throws SecurityException, IOException {
 
-		setFh(createFilehandler(getLogFileName()));
+		this.setFh(createFilehandler(getLogFileName()));
 
          /*	# %1  date: un objeto Date que representa la hora del evento del registro.
 				# %2  fuente - una cadena que representa al que llama, si está disponible; de lo contrario, el nombre del logger.
@@ -248,7 +248,7 @@ public class FireLogger {
 	                      lr.getSourceMethodName()
 	              );
 			*/
-       getFh().setFormatter(new SimpleFormatter() {
+		this.getFh().setFormatter(new SimpleFormatter() {
 
 	          private static final String format = "%1$tF %1$tT;%2$s%n"; //$NON-NLS-1$
 
@@ -264,28 +264,27 @@ public class FireLogger {
 
 
 
-
-	public FireLogger(final String loggerName ) {
-		super();
-		this.installLogger(loggerName);
+	public final Logger getLogger() {
+		return this.logger;
 	}
 
-
-
-
-	private final static FileHandler getFh() {
-		return FireLogger.fh;
+	private final void setLogger(final Logger logger) {
+		this.logger = logger;
 	}
 
-	private final static void setFh(final FileHandler fh) {
-		FireLogger.fh = fh;
+	protected final  FileHandler getFh() {
+		return 	this.fh;
 	}
 
-	private final static String getLogName() {
-		return FireLogger.logName;
+	protected final  void setFh(final FileHandler fh) {
+		this.fh = fh;
 	}
 
-	private final static void setLogName(final String logName) {
-		FireLogger.logName = logName;
+	private final  String getLogName() {
+		return this.logName;
+	}
+
+	private final  void setLogName(final String logName) {
+		this.logName = logName;
 	}
 }

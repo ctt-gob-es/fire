@@ -23,10 +23,16 @@ import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
 import es.gob.fire.server.services.UpgradeException;
+import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.server.services.statistics.TransactionLogger;
 
 class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
-	private static final Logger LOGGER = Logger.getLogger(FIRePostSignaturesThread.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger();
+//	private static final Logger LOGGER = Logger.getLogger(FIRePostSignaturesThread.class.getName());
 
 	private final String appId;
 
@@ -46,6 +52,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
 	private final FIReDocumentManager docManager;
 
+	private final FireSession sesion;
+
 	/**
 	 * Construye un hilo que se encargar&aacute; de componer la firma electr&oacute;nica
 	 * realizada con el certificado en la nube y la actualizar&aacute; al formato avanzado
@@ -63,7 +71,7 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 	 */
 	public FIRePostSignaturesThread(final String appId, final String docId, final BatchResult batchResult,
 			final String algorithm, final SignBatchConfig signConfig, final X509Certificate signingCert,
-			final Map<String, byte[]> pkcs1s, final TriphaseData partialTd, final FIReDocumentManager docManager) {
+			final Map<String, byte[]> pkcs1s, final TriphaseData partialTd, final FIReDocumentManager docManager, final FireSession session) {
 
 		this.appId = appId;
 		this.docId = docId;
@@ -74,6 +82,7 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 		this.pkcs1s = pkcs1s;
 		this.partialTd = partialTd;
 		this.docManager = docManager;
+		this.sesion = session;
 	}
 
 	@Override
@@ -81,6 +90,7 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
     	if (this.batchResult.isSignFailed(this.docId)) {
     		setFailed(true);
+    		SIGNLOGGER.log(this.sesion, false);
     		interrupt();
     		return;
 		}
@@ -89,6 +99,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     	// al detectar que nos han interrumpido desde afuera
     	if (isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
+    		SIGNLOGGER.log(this.sesion, false);
+    		TRANSLOGGER.log(this.sesion, false);
     		return;
     	}
 
@@ -101,6 +113,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
         catch (final Exception e) {
         	LOGGER.warning("No se encuentran los datos a firmar: " + e); //$NON-NLS-1$
         	this.batchResult.setErrorResult(this.docId, BatchResult.DATA_NOT_FOUND);
+        	SIGNLOGGER.log(this.sesion, false);
+        	TRANSLOGGER.log(this.sesion, false);
         	setFailed(true);
         	interrupt();
     		return;
@@ -108,6 +122,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
     	if (isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
+    		SIGNLOGGER.log(this.sesion, false);
+    		TRANSLOGGER.log(this.sesion, false);
     		return;
     	}
 
@@ -128,6 +144,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
     	if (isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
+    		SIGNLOGGER.log(this.sesion, false);
+    		TRANSLOGGER.log(this.sesion, false);
     		return;
     	}
 
@@ -151,6 +169,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     						") y el formato (" + this.signConfig.getFormat() + ")", e //$NON-NLS-1$ //$NON-NLS-2$
     				);
     		this.batchResult.setErrorResult(this.docId, BatchResult.POSTSIGN_ERROR);
+    		SIGNLOGGER.log(this.sesion, false);
+    		TRANSLOGGER.log(this.sesion, false);
     		setFailed(true);
     		interrupt();
     		return;
@@ -158,6 +178,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
     	if (isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
+    		SIGNLOGGER.log(this.sesion, false);
+    		TRANSLOGGER.log(this.sesion, false);
     		return;
     	}
 
@@ -168,6 +190,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     	catch (final UpgradeException e) {
     		LOGGER.log(Level.SEVERE, "Error al actualizar la firma con docId: " + this.docId, e); //$NON-NLS-1$
     		this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
+    		SIGNLOGGER.log(this.sesion, false);
+    		TRANSLOGGER.log(this.sesion, false);
     		setFailed(true);
     		interrupt();
     		return;
@@ -184,6 +208,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, "Error al postprocesar con el FIReDocumentManager la firma del documento: " + this.docId, e); //$NON-NLS-1$
     			this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
+    			SIGNLOGGER.log(this.sesion, false);
+    			TRANSLOGGER.log(this.sesion, false);
     			setFailed(true);
     			interrupt();
     			return;
@@ -200,6 +226,8 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     	catch (final Exception e) {
     		LOGGER.severe("Error al almacenar la firma en el directorio temporal: " + e); //$NON-NLS-1$
     		this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
+    		SIGNLOGGER.log(this.sesion, false);
+    		TRANSLOGGER.log(this.sesion, false);
     		setFailed(true);
     		interrupt();
     		return;
@@ -207,8 +235,14 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
     	if (isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
+    		SIGNLOGGER.log(this.sesion, false);
+    		TRANSLOGGER.log(this.sesion, false);
     		return;
     	}
+
+    	//Se registra firma correcta.
+    	SIGNLOGGER.log(this.sesion, true);
+
 
     	// Registrar en el listado de resultados el de la operacion
     	this.batchResult.setSuccessResult(this.docId);

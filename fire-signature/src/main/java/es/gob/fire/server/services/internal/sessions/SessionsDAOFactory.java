@@ -11,6 +11,8 @@ package es.gob.fire.server.services.internal.sessions;
 
 import java.util.logging.Logger;
 
+import es.gob.fire.server.services.statistics.FireSignLogger;
+
 /**
  * Factor&iacute;a para la obtenci&oacute;n de gestores de sesiones que
  * posibiliten disponer de varios servidores sin memoria compartida entre los
@@ -18,7 +20,8 @@ import java.util.logging.Logger;
  */
 public class SessionsDAOFactory {
 
-	private static final Logger LOGGER = Logger.getLogger(SessionsDAOFactory.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(SessionsDAOFactory.class.getName());
 
 	private static final String DAO_FILESYSTEM = "filesystem"; //$NON-NLS-1$
 

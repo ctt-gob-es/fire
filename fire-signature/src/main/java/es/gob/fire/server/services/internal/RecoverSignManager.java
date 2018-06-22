@@ -35,6 +35,8 @@ import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.server.services.statistics.SignatureLogger;
 
 
 /**
@@ -42,8 +44,9 @@ import es.gob.fire.server.services.ServiceUtil;
  * de ser preciso, y la devoluci&oacute;n al cliente.
  */
 public class RecoverSignManager {
-
-	private static final Logger LOGGER = Logger.getLogger(RecoverSignManager.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	//private static final Logger LOGGER = Logger.getLogger(RecoverSignManager.class.getName());
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
 
 	/**
 	 * Finaliza un proceso de firma y devuelve el resultado del mismo.
@@ -86,6 +89,7 @@ public class RecoverSignManager {
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
         	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
+        	SIGNLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
         	LOGGER.warning("Ocurrio un error durante la operacion de firma: " + errMessage); //$NON-NLS-1$
         	sendResult(
@@ -124,6 +128,7 @@ public class RecoverSignManager {
         }
         catch (final Exception e) {
         	LOGGER.severe("No se ha podido decodificar el certificado del firmante: " + e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "No se ha podido decodificar el certificado proporcionado: " + e); //$NON-NLS-1$
@@ -137,6 +142,7 @@ public class RecoverSignManager {
         }
         catch (final Exception e) {
         	LOGGER.severe("Parametros extra de configuracion de la firma mal formatos: " + e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     "Parametros extra de configuracion de la firma mal formatos: " + e); //$NON-NLS-1$
@@ -154,6 +160,7 @@ public class RecoverSignManager {
         	}
         	catch (final Exception e) {
         		LOGGER.warning("No se encuentra la firma generada: " + e); //$NON-NLS-1$
+        		SIGNLOGGER.log(session, false);
             	SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "Ha caducado la sesion"); //$NON-NLS-1$
         		return;
@@ -165,6 +172,7 @@ public class RecoverSignManager {
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al actualizar la firma de la transaccion: " + transactionId, e); //$NON-NLS-1$
+        		SIGNLOGGER.log(session, false);
             	SessionCollector.removeSession(session);
             	response.sendError(HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
         		return;
@@ -176,6 +184,7 @@ public class RecoverSignManager {
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al postprocesar con el FIReDocumentManager la firma del documento", e); //$NON-NLS-1$
+        		SIGNLOGGER.log(session, false);
         		SessionCollector.removeSession(session);
             	response.sendError(HttpCustomErrors.SAVING_ERROR.getErrorCode());
     			return;
@@ -187,13 +196,16 @@ public class RecoverSignManager {
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al almacenar la firma despues de haberla completado", e); //$NON-NLS-1$
+        		SIGNLOGGER.log(session, false);
             	SessionCollector.removeSession(session);
             	response.sendError(HttpCustomErrors.SAVING_ERROR.getErrorCode());
     			return;
         	}
 
+
         	// Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
         	session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_RECOVER);
+        	SIGNLOGGER.log(session,true);
         	SessionCollector.commit(session);
 
         	// Enviamos la firma electronica como resultado
@@ -211,6 +223,7 @@ public class RecoverSignManager {
         }
         catch (final Exception e) {
         	LOGGER.warning("No se encuentra la firma parcial generada: " + e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session,false);
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
         			"Ha caducado la sesion" //$NON-NLS-1$
@@ -220,6 +233,7 @@ public class RecoverSignManager {
 
     	if (connConfig == null) {
     		LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
+    		SIGNLOGGER.log(session,false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
    					"No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
    			return;
@@ -232,6 +246,7 @@ public class RecoverSignManager {
         }
         catch (final FIReConnectorFactoryException e) {
             LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
+            SIGNLOGGER.log(session,false);
             SessionCollector.removeSession(session);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
@@ -243,12 +258,14 @@ public class RecoverSignManager {
         }
 		catch(final FIReConnectorUnknownUserException e) {
 			LOGGER.log(Level.WARNING, "El usuario no esta dado de alta en el sistema", e); //$NON-NLS-1$
+			SIGNLOGGER.log(session,false);
             SessionCollector.removeSession(session);
 			response.sendError(HttpCustomErrors.NO_USER.getErrorCode());
 	        return;
 		}
 		catch(final Exception e) {
 			LOGGER.log(Level.WARNING, "Error durante el proceso de firma", e); //$NON-NLS-1$
+			SIGNLOGGER.log(session,false);
 			SessionCollector.removeSession(session);
 			response.sendError(HttpCustomErrors.SIGN_ERROR.getErrorCode());
 			return;
@@ -260,6 +277,7 @@ public class RecoverSignManager {
         }
         catch (final Exception e) {
             LOGGER.log(Level.SEVERE, "Error de codificacion en los datos de firma trifasica proporcionados", e); //$NON-NLS-1$
+            SIGNLOGGER.log(session,false);
             SessionCollector.removeSession(session);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
@@ -288,6 +306,7 @@ public class RecoverSignManager {
         		Level.WARNING, "Error durante la postfirma. Verifique la operacion criptografica (" + //$NON-NLS-1$
         				cop + ") y el formato (" + format + ")", e //$NON-NLS-1$ //$NON-NLS-2$
             );
+            SIGNLOGGER.log(session,false);
             SessionCollector.removeSession(session);
             response.sendError(HttpCustomErrors.POSTSIGN_ERROR.getErrorCode());
             return;
@@ -299,6 +318,7 @@ public class RecoverSignManager {
 		}
 		catch (final Exception e) {
             LOGGER.log(Level.WARNING, "Error al actualizar la firma de la transaccion: " + transactionId, e); //$NON-NLS-1$
+            SIGNLOGGER.log(session,false);
             response.sendError(HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
             return;
 		}
@@ -314,6 +334,7 @@ public class RecoverSignManager {
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "Error en el guardado de la firma del documento " + docId + //$NON-NLS-1$
         			" de la transaccion: " + transactionId, e); //$NON-NLS-1$
+        	SIGNLOGGER.log(session,false);
             SessionCollector.removeSession(session);
 			response.sendError(HttpCustomErrors.SAVING_ERROR.getErrorCode());
 			return;
@@ -325,11 +346,13 @@ public class RecoverSignManager {
     	}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, "Error al almacenar la firma despues de haberla completado", e); //$NON-NLS-1$
+    		SIGNLOGGER.log(session,false);
         	SessionCollector.removeSession(session);
         	response.sendError(HttpCustomErrors.SAVING_ERROR.getErrorCode());
 			return;
     	}
 
+    	SIGNLOGGER.log(session,true);
         // Enviamos la firma electronica como resultado
         sendResult(response, buildResult(providerName));
 	}

@@ -17,6 +17,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.statistics.FireSignLogger;
 
 
 /**
@@ -25,7 +26,8 @@ import es.gob.fire.server.services.RequestParameters;
  */
 public class RecoverErrorManager {
 
-	private static final Logger LOGGER = Logger.getLogger(RecoverErrorManager.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(RecoverErrorManager.class.getName());
 
 	/**
 	 * Obtiene el error detectado durante la transacci&oacute;n.

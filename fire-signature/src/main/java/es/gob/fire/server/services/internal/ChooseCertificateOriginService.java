@@ -27,6 +27,9 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.WeakRegistryException;
+import es.gob.fire.server.services.statistics.Browser;
+import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.server.services.statistics.SignatureLogger;
 
 
 /**
@@ -37,7 +40,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = -1367908808211903695L;
 
-	private static final Logger LOGGER = Logger.getLogger(ChooseCertificateOriginService.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
+//	private static final Logger LOGGER = Logger.getLogger(ChooseCertificateOriginService.class.getName());
 
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
@@ -87,6 +92,11 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
 		}
 
+
+		final String userAgent = request.getHeader("user-agent"); //$NON-NLS-1$
+	    final Browser browser =  Browser.identify(userAgent);
+	    session.setAttribute(ServiceParams.SESSION_PARAM_BROWSER, browser);
+
 		// Agregamos a la sesion el origen del certificado
 		session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, origin);
 
@@ -117,9 +127,11 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			return;
 		} catch (final ServletException e) {
 			LOGGER.warning("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina."); //$NON-NLS-1$
+			SIGNLOGGER.log(session, false);
 			response.sendRedirect(FirePages.PG_MINI_APPLET+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
+
 	}
 
 	/**
@@ -145,6 +157,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$
+			SIGNLOGGER.log(session, false);
 			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(errorUrl);
 
@@ -179,12 +192,14 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch(final FIReConnectorFactoryException e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
+			SIGNLOGGER.log(session, false);
 			ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
 			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
 		catch(final FIReCertificateException e) {
 			LOGGER.log(Level.SEVERE, "No se ha podido recuperar los certificados del usuario " + subjectId + ": " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
+			SIGNLOGGER.log(session, false);
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -196,6 +211,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch(final FIReConnectorNetworkException e) {
 			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
+			SIGNLOGGER.log(session, false);
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE_NETWORK, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -207,6 +223,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch(final CertificateBlockedException e) {
 			LOGGER.log(Level.WARNING, "Los certificados del usuario " + subjectId + " estan bloqueados: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			SIGNLOGGER.log(session, false);
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_BLOCKED, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -218,6 +235,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch(final WeakRegistryException e) {
 			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " realizo un registro debil: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			SIGNLOGGER.log(session, false);
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_WEAK_REGISTRY, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -229,6 +247,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch(final FIReConnectorUnknownUserException e) {
 			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no esta registrado en el sistema: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			SIGNLOGGER.log(session, false);
 			ErrorManager.setErrorToSession(session, OperationError.UNKNOWN_USER, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -240,6 +259,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch(final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error indeterminado al recuperar los certificados del usuario " + subjectId + ": " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
+			SIGNLOGGER.log(session, false);
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);

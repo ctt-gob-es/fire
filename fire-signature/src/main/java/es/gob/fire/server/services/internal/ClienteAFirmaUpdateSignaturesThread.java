@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.server.services.statistics.FireSignLogger;
 
 /**
  * Hilo que ejecuta la carga, actualizaci&oacute;n y guardado de una firma de lote
@@ -25,7 +26,8 @@ import es.gob.fire.server.services.ServiceUtil;
  */
 public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread {
 
-	private static final Logger LOGGER = Logger.getLogger(ClienteAFirmaUpdateSignaturesThread.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(ClienteAFirmaUpdateSignaturesThread.class.getName());
 
 	private final String appId;
 

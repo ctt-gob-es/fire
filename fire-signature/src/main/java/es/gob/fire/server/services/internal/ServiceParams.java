@@ -125,6 +125,9 @@ public class ServiceParams {
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el mensaje de error obtenido. */
 	public static final String SESSION_PARAM_ERROR_MESSAGE = "errormsg"; //$NON-NLS-1$
 
+	 /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el navegador usado del cliente. */
+	public static final String SESSION_PARAM_BROWSER = "browser"; //$NON-NLS-1$
+
 	/** Par&aacute;metro usado para configurar que se debe utilizar un certificado local. */
     public static final String CERTIFICATE_ORIGIN_LOCAL = "local"; //$NON-NLS-1$
 

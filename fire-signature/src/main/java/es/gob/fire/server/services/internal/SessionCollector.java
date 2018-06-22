@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.internal.sessions.SessionsDAO;
 import es.gob.fire.server.services.internal.sessions.SessionsDAOFactory;
+import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -30,8 +31,8 @@ public final class SessionCollector {
 	/** N&uacute;mero de veces que se puden buscar sesiones antes de buscar aquellas que estan caducadas. */
 	private static final int MAX_USE_TO_CLEANING = 250;
 
-	private static final Logger LOGGER = Logger.getLogger(SessionCollector.class.getName());
-
+//	private static final Logger LOGGER = Logger.getLogger(SessionCollector.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
     private static final Map<String, FireSession> sessions = new HashMap<>();
 
     private static int uses = 0;

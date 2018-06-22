@@ -17,14 +17,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.services.statistics.FireSignLogger;
+
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
  */
 public class MiniAppletErrorService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final Logger LOGGER = Logger.getLogger(MiniAppletErrorService.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(MiniAppletErrorService.class.getName());
 
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {

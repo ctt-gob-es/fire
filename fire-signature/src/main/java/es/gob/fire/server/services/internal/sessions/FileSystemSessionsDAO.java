@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.internal.FireSession;
+import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -35,7 +36,8 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class FileSystemSessionsDAO implements SessionsDAO {
 
-	private static final Logger LOGGER = Logger.getLogger(FileSystemSessionsDAO.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(FileSystemSessionsDAO.class.getName());
 
 	private static final String SESSIONS_TEMP_DIR = "sessions"; //$NON-NLS-1$
 

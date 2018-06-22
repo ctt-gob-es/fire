@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactory;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.ProviderElement;
@@ -28,7 +29,8 @@ public class ProviderManager {
 
 	private static final String LOCAL_PROVIDER_INFO_PATH = "/es/gob/fire/server/resources/local_provider.properties"; //$NON-NLS-1$
 
-	private static final Logger LOGGER = Logger.getLogger(ProviderManager.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(ProviderManager.class.getName());
 
 	/** Nombre del proveedor local. */
 	public static final String PROVIDER_NAME_LOCAL = "local"; //$NON-NLS-1$

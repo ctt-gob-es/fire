@@ -25,6 +25,7 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.services.ProviderLegacy;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.server.services.statistics.FireSignLogger;
 
 /**
  * Manejador de la operaci&oacute;n de recuperaci&oacute;n de los certificados
@@ -34,8 +35,8 @@ import es.gob.fire.server.services.ServiceUtil;
  */
 public class RecoverCertificateManager {
 
-	private static final Logger LOGGER = Logger.getLogger(RecoverCertificateManager.class.getName());
-
+//	private static final Logger LOGGER = Logger.getLogger(RecoverCertificateManager.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
     // Parametros que necesitamos de la URL.
     private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_CONFIG = "config"; //$NON-NLS-1$

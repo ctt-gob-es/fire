@@ -5,6 +5,7 @@ package es.gob.fire.server.services.internal;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigFileLoader;
 /**
  * Clase que gestiona los mensajes de erroes. Carga el fichero de configuraci&oacute;n del fichero errors_es_ES.messages.
@@ -13,7 +14,8 @@ import es.gob.fire.signature.ConfigFileLoader;
  */
 public class ErrorManager {
 
-	private static final Logger LOGGER = Logger.getLogger(ErrorManager.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(ErrorManager.class.getName());
 
 	private static final String ERR_FILE = "errors_es_ES.messages"; //$NON-NLS-1$
 
