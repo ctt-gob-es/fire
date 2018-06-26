@@ -34,7 +34,6 @@ public class LogOpenServiceManager {
 					setLinfo(logOpen.getLinfo());
 					setChannel(logOpen.getChannel());
 					setReader(logOpen.getReader());
-
 				}
 			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE, "Error al abrir el fichero ".concat(logFileName)); //$NON-NLS-1$

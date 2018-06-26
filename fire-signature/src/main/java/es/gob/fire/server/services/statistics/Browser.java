@@ -32,7 +32,7 @@ public class Browser {
 	 */
 	public static Browser identify( final String userAgent) {
 
-
+//Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393
 		//FIREFOX
 		if (userAgent.contains(BRNAME_FIREFOX) && !userAgent.contains(BRNAME_SEAMONKEY)){
 			final String version = userAgent.substring(userAgent.indexOf(BRNAME_FIREFOX) + BRNAME_FIREFOX.length(), userAgent.length());
@@ -51,7 +51,7 @@ public class Browser {
 		}
 		//EDGE
 		else if(userAgent.contains(BRNAME_EDGE)) {
-			final String version = userAgent.substring(userAgent.indexOf(BRNAME_EDGE), userAgent.lastIndexOf("", userAgent.indexOf(BRNAME_EDGE))); //$NON-NLS-1$
+			final String version = userAgent.substring(userAgent.indexOf(BRNAME_EDGE) + BRNAME_EDGE.length());
 			browser =  new Browser(Browsers.EDGE.getId(), version);
 		}
 		//CHROME

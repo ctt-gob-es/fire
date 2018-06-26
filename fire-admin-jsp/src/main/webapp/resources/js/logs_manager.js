@@ -469,7 +469,7 @@
 			if($("#search_txt").val() == ""){								
 				$('label[for=search_txt]').css({color:'red'});
 				$('#search_txt').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir un texto para realizar la búsqueda.";
+				msg = msg + "Debe introducir un texto para realizar la búsqueda.\n";
 				ok = false;			
 			}		
 			break;		
@@ -477,7 +477,7 @@
 			if($("#level_select").val() == ""){								
 				$('label[for=level_select]').css({color:'red'});
 				$('#level_select').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir un nivel de log para filtrar.";
+				msg = msg + "Debe introducir un nivel de log para filtrar.\n";
 				ok = false;			
 			}
 			break;
@@ -487,7 +487,7 @@
 			if($("#search_StartDate").val() != "" && datePattern.test($("#search_StartDate").val())){								
 				$('label[for=search_StartDate]').css({color:'red'});
 				$('#search_StartDate').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir una fecha de inicio para la búsqueda, con un formato correcto dd/MM/yyyy.";
+				msg = msg + "Debe introducir una fecha de inicio para la búsqueda, con un formato correcto dd/MM/yyyy.\n";
 				ok = false;			
 			}
 			break;
@@ -497,7 +497,7 @@
 				
 				$('label[for=search_StartTime]').css({color:'red'});
 				$('#search_StartTime').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir una Hora de inicio para la búsqueda, con un formato correcto HH:mm:ss o HH:mm .";
+				msg = msg + "Debe introducir una Hora de inicio para la búsqueda, con un formato correcto HH:mm:ss o HH:mm .\n";
 				ok = false;			
 			}
 			break;
@@ -505,7 +505,7 @@
 			if($("#startDate").val() != "" && ! datePattern.test($("#startDate").val())){								
 				$('label[for=startDate]').css({color:'red'});
 				$('#startDate').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir una fecha de inicio para el filtrado, formato correcto dd/MM/yyyy .";
+				msg = msg + "Debe introducir una fecha de inicio para el filtrado, formato correcto dd/MM/yyyy .\n";
 				ok = false;			
 			}
 			break;	
@@ -513,7 +513,7 @@
 			if($("#startTime").val() != "" && ! timePattern.test($("#startTime").val())){								
 				$('label[for=startTime]').css({color:'red'});
 				$('#startTime').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir una Hora de inicio para el filtrado, un formato  correcto HH:mm:ss o HH:mm.";
+				msg = msg + "Debe introducir una Hora de inicio para el filtrado, un formato  correcto HH:mm:ss o HH:mm.\n";
 				ok = false;			
 			}
 			break;	
@@ -521,7 +521,7 @@
 			if($("#endDate").val() != "" && ! datePattern.test($("#endDate").val())){								
 				$('label[for=endDate]').css({color:'red'});
 				$('#endDate').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir una fecha de fin para el filtrado, formato correcto dd/MM/yyyy.";
+				msg = msg + "Debe introducir una fecha de fin para el filtrado, formato correcto dd/MM/yyyy.\n";
 				ok = false;			
 			}
 			break;	
@@ -529,7 +529,7 @@
 			if($("#endTime").val() != "" && ! timePattern.test($("#endTime").val())){								
 				$('label[for=endTime]').css({color:'red'});
 				$('#endTime').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir una Hora de fin para el filtrado, un formato  correcto HH:mm:ss o HH:mm.";
+				msg = msg + "Debe introducir una Hora de fin para el filtrado, un formato  correcto HH:mm:ss o HH:mm.\n";
 				ok = false;			
 			}
 			break;	
