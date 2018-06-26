@@ -20,6 +20,7 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.server.services.statistics.TransactionLogger;
 
 
 /**
@@ -31,6 +32,7 @@ public class RecoverSignResultManager {
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	//private static final Logger LOGGER = Logger.getLogger(RecoverSignResultManager.class.getName());
 	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger();
 
 	/**
 	 * Finaliza un proceso de firma y devuelve el resultado del mismo.
@@ -73,6 +75,7 @@ public class RecoverSignResultManager {
         	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
         	SIGNLOGGER.log(session,false);
+        	TRANSLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
         	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + errMessage); //$NON-NLS-1$
         	sendResult(
@@ -93,13 +96,14 @@ public class RecoverSignResultManager {
         catch (final Exception e) {
         	LOGGER.warning("No se encuentra la firma generada: " + e); //$NON-NLS-1$
         	SIGNLOGGER.log(session, false);
+        	TRANSLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "Ha caducado la sesion"); //$NON-NLS-1$
         	return;
         }
         // Se registra resultado de operacion firma
         SIGNLOGGER.log(session, true);
-
+        TRANSLOGGER.log(session, true);
         // Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
         SessionCollector.removeSession(session);
 

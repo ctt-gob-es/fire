@@ -2,7 +2,7 @@ package es.gob.fire.server.services.statistics;
 
 public class TransactionCube {
 
-	private Integer idAplicacion;
+	private String idAplicacion;
 	private Integer idOperacion;
 	private String  proveedor;
 	private  boolean ProveedorForzado = false;
@@ -25,7 +25,7 @@ public class TransactionCube {
 	 * @param idProveedor
 	 * @param proveedorForzado
 	 */
-	public TransactionCube(final Integer idAplicacion, final Integer idOperacion, final String proveedor,
+	public TransactionCube(final String idAplicacion, final Integer idOperacion, final String proveedor,
 			final boolean proveedorForzado, final boolean resultTransact) {
 		super();
 		this.idAplicacion = idAplicacion;
@@ -39,10 +39,10 @@ public class TransactionCube {
 
 	/* Propiedades */
 
-	protected final Integer getIdAplicacion() {
+	protected final String getIdAplicacion() {
 		return this.idAplicacion;
 	}
-	protected final void setIdAplicacion(final Integer idAplicacion) {
+	protected final void setIdAplicacion(final String idAplicacion) {
 		this.idAplicacion = idAplicacion;
 	}
 	protected final Integer getIdOperacion() {
@@ -85,7 +85,7 @@ public class TransactionCube {
 		String result = new String();
 
 		if(this.getIdAplicacion() != null) {
-			result  = result.concat(String.valueOf(this.getIdAplicacion())).concat(";");//$NON-NLS-1$
+			result  = result.concat(this.getIdAplicacion()).concat(";");//$NON-NLS-1$
 		}
 		if(this.getIdOperacion() != null) {
 			result  = result.concat(String.valueOf(this.getIdOperacion())).concat(";");//$NON-NLS-1$

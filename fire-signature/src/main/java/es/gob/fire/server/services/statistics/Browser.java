@@ -61,7 +61,7 @@ public class Browser {
 		}
 		//SAFARI
 		else if(userAgent.contains(BRNAME_SAFARI) && !userAgent.contains(BRNAME_CHROMIUN) && !userAgent.contains(BRNAME_CHROME)) {
-			final String version = userAgent.substring(userAgent.indexOf(BRNAME_SAFARI)+BRNAME_SAFARI.length());
+			final String version = userAgent.substring(userAgent.indexOf(BRNAME_SAFARI) + BRNAME_SAFARI.length());
 			browser =  new Browser(Browsers.SAFARI.getId(), version);
 		}
 		//OPERA

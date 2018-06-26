@@ -36,7 +36,7 @@ public class TransactionLogger {
 		this.getTransactCube().setResultTransaction(result);
 
 		if(fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID))) { //$NON-NLS-1$
-			final Integer idAplication = Integer.valueOf(fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID));
+			final String idAplication = fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 			this.getTransactCube().setIdAplicacion(idAplication);
 		}
 		if(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION))) { //$NON-NLS-1$

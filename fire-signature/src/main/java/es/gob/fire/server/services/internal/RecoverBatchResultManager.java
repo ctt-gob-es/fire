@@ -187,6 +187,7 @@ public class RecoverBatchResultManager {
         	if (connConfig == null) {
         		LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
         		SIGNLOGGER.log(session, false);
+        		TRANSLOGGER.log(session, false);
         		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         				"No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
         		return;
@@ -362,11 +363,10 @@ public class RecoverBatchResultManager {
             session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE.toString());
             session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
             session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_RECOVER);
+            // Se registra que la transac&oacute;n a sido correcta
+          TRANSLOGGER.log(session, true);
             SessionCollector.commit(session);
         }
-
-        //Se registra que la transac&oacute;n a sido correcta
-        TRANSLOGGER.log(session, true);
 
         // Enviamos el XML resultado de la firma del lote
         sendResult(response, batchResult.encode());
