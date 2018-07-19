@@ -26,12 +26,13 @@ import es.gob.fire.server.services.UpgradeException;
 import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.server.services.statistics.SignatureLogger;
 import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.signature.ConfigManager;
 
 class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
 //	private static final Logger LOGGER = Logger.getLogger(FIRePostSignaturesThread.class.getName());
 
 	private final String appId;

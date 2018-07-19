@@ -36,7 +36,7 @@ public class AddDocumentBatchManager {
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 //	private static final Logger LOGGER = Logger.getLogger(AddDocumentBatchManager.class.getName());
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger();
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
     /**
      * Agrega un nuevo documento a un lote de firma.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.

@@ -21,6 +21,7 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.signature.ConfigManager;
 
 
 /**
@@ -31,7 +32,7 @@ public class RecoverBatchSignatureManager {
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 //	private static final Logger LOGGER = Logger.getLogger(RecoverBatchSignatureManager.class.getName());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 
 	/**
 	 * Devuelve el resultado de una firma concreta de un lote. Si es necesario, actualiza la firma.

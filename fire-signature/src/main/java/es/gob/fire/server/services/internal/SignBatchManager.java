@@ -30,8 +30,8 @@ public class SignBatchManager {
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 //	private static final Logger LOGGER = Logger.getLogger(SignBatchManager.class.getName());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
     /**
      * Inicia el proceso de firma de un lote.
 	 * @param request Petici&oacute;n de firma del lote.

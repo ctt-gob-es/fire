@@ -1,6 +1,23 @@
+
+
+<%@page import="es.gob.fire.signature.ConfigManager" %>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
 	final String userLogged = (String)request.getSession().getAttribute("user");//$NON-NLS-1$ 
+	boolean statistic = false;
+	try {
+    	ConfigManager.checkConfiguration();
+	}
+	catch (final Exception e) {	
+		statistic = false;
+	}
+	
+	
+	if(ConfigManager.getConfigStatistics()!= null && !"".equals(ConfigManager.getConfigStatistics()) ){//$NON-NLS-1$ 
+		if(Integer.parseInt(ConfigManager.getConfigStatistics()) == 2){
+			statistic = true;
+		}
+	}
 %>
 <div class="menubarPosition">
 		<ul id="menubar">
@@ -20,11 +37,12 @@
 							<li><a class="enl_mnu" href="../Certificate/CertificatePage.jsp" title="Gestiona los certificados permitiendo: visualizar, crear, modificar y eliminar.">Certificados</a>
 								
 							</li>
-							<li><a class="enl_mnu" href="../Logs/LogsMainPage.jsp">Logs</a>
-<!-- 								<ul> -->
-<!-- 									<li><a href="../Logs/LogsMainPage.jsp">Gesti&oacute;n de Logs</a></li>							 -->
-<!-- 								</ul> -->
+							<li><a class="enl_mnu" href="../Logs/LogsMainPage.jsp" title="Gestiona los servidores de Logs permitiendo: visualizar, crear, modificar, eliminar y conectarse al servidor para la gestión del fichero seleccionado.">Logs</a>
 							</li>
+							<% if(statistic){ %>						
+							<li><a class="enl_mnu" href="../Statistics/StatisticsMainPage.jsp"  title="Consulta de datos estadísticos de las transacciones de firma realizadas." >Estad&iacute;sticas</a>
+							</li>
+							<% }%>
 						</ul>
 					</nav>			
 			</li>	

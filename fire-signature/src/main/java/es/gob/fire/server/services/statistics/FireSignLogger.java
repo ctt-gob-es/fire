@@ -15,10 +15,11 @@ public class FireSignLogger {
 	}
 
 	public final static FireSignLogger getFireSignLogger() {
-		if (fireSignLogger == null) {
-			fireSignLogger =  new FireSignLogger();
-		}
+			if (fireSignLogger == null) {
+				fireSignLogger =  new FireSignLogger();
+			}
 		return fireSignLogger;
+
 	}
 
 	public final FireLogger getFireLogger() {

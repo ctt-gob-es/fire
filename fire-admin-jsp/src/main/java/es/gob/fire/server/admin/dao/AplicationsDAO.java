@@ -62,9 +62,9 @@ public class AplicationsDAO {
 
 	private static final String ST_SELECT_APPLICATIONS_BYCERT = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=? ORDER BY nombre "; //$NON-NLS-1$
 
-	private static final String STATEMENT_SELECT_APPLICATIONS_COUNT="SELECT count(*) FROM tb_aplicaciones"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_APPLICATIONS_COUNT = "SELECT count(*) FROM tb_aplicaciones"; //$NON-NLS-1$
 
-	private static final String ST_SELECT_APPLICATIONS_COUNT_BYCERT="SELECT count(*) FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=?"; //$NON-NLS-1$
+	private static final String ST_SELECT_APPLICATIONS_COUNT_BYCERT = "SELECT count(*) FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=?"; //$NON-NLS-1$
 
 	private static final String STATEMENT_SELECT_APPLICATION_BYID = "SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado FROM tb_aplicaciones WHERE id= ?"; //$NON-NLS-1$
 

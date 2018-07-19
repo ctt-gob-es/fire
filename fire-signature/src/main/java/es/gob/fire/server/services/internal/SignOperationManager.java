@@ -36,7 +36,7 @@ public class SignOperationManager {
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	//private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 	/**
 	 * Inicia la operaci&oacute;n de firma asociada al componente central.
 	 * @param request Solicitud HTTP.
@@ -151,9 +151,6 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
 
 
-
-//        LOGGER_TRANS.info(appId + ";" + op + ";");  //$NON-NLS-1$//$NON-NLS-2$
-//        LOGGER_SIGN.info(format + ";" + algorithm + ";"); //$NON-NLS-1$ //$NON-NLS-2$
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
         FIReDocumentManager docManager;

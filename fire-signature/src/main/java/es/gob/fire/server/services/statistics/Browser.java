@@ -20,7 +20,7 @@ public class Browser {
 	private static String BRNAME_SEAMONKEY = "Seamonkey/"; //$NON-NLS-1$
 	private static String BRNAME_CHROMIUN =  "Chromium/"; //$NON-NLS-1$
 
-	private Browser(final int id, final String version) {
+	public Browser(final int id, final String version) {
 		this.id = id;
 		this.version = version;
 	}

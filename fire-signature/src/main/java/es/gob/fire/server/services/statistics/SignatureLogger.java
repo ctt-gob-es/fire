@@ -1,8 +1,18 @@
 package es.gob.fire.server.services.statistics;
 
+import java.sql.SQLException;
+
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
+import es.gob.fire.server.services.statistics.dao.AlgorithmsDAO;
+import es.gob.fire.server.services.statistics.dao.FormatsDAO;
+import es.gob.fire.server.services.statistics.dao.ProvidersDAO;
+import es.gob.fire.server.services.statistics.entity.Algorithm;
+import es.gob.fire.server.services.statistics.entity.Format;
+import es.gob.fire.server.services.statistics.entity.Provider;
+import es.gob.fire.server.services.statistics.entity.SignatureCube;
 import es.gob.fire.services.FireLogger;
+import es.gob.fire.signature.DBConnectionException;
 
 public class SignatureLogger {
 
@@ -14,7 +24,7 @@ public class SignatureLogger {
 
 	private SignatureCube signCube;
 
-	private static String PROV_OTRO = "OTRO"; //$NON-NLS-1$
+	private static int OTRO = 99;
 
 
 	/**
@@ -25,40 +35,21 @@ public class SignatureLogger {
 	}
 
 
-	public final static SignatureLogger getSignatureLogger() {
-		if(signlogger == null) {
-			signlogger =  new SignatureLogger();
+	public final static SignatureLogger getSignatureLogger(final String confStatistics) {
+		int conf = 0;
+		if(confStatistics != null && !"".equals(confStatistics)) {//$NON-NLS-1$
+			conf = Integer.parseInt(confStatistics);
 		}
-		return signlogger;
+		if (conf != 0) {
+			if(signlogger == null) {
+				signlogger =  new SignatureLogger();
+			}
+			return signlogger;
+		}
+		return null;
 	}
 
-	public final void log(final Browser browser,final String sSignFormat,final String sSignAlgorithm,final String provider ,final boolean result) {
 
-		if(getSignCube() == null) {
-			this.setSingCube(new SignatureCube());
-		}
-
-		if(browser != null) {
-			this.getSignCube().setNavegador(browser);
-		}
-
-		if(sSignFormat != null && !"".equals(sSignFormat)) { //$NON-NLS-1$
-			this.getSignCube().setSignFormat(SignatureFormats.getId(sSignFormat));
-		}
-
-		if(sSignAlgorithm != null && !"".equals(sSignAlgorithm)) { //$NON-NLS-1$
-			this.getSignCube().setSignAlgorithm(SignatureAlgorithms.getId(sSignAlgorithm));
-		}
-
-		if(provider != null && !"".equals(provider)) { //$NON-NLS-1$
-			this.getSignCube().setProveedor(provider);
-		}
-
-		this.getSignCube().setResultSign(result);
-
-
-		this.getFireLogger().getLogger().info(this.getSignCube().toString());
-	}
 
 	public final void log(final FireSession fireSesion, final boolean result) {
 
@@ -74,34 +65,53 @@ public class SignatureLogger {
 		final Browser browser = (Browser) fireSesion.getObject(ServiceParams.SESSION_PARAM_BROWSER);
 		this.getSignCube().setNavegador(browser);
 
-		if(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT) != null &&
-				!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT))) { //$NON-NLS-1$
-			 final String sSignFormat = fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT);
-			 this.getSignCube().setSignFormat(SignatureFormats.getId(sSignFormat));
-		}
-		if(fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM) != null &&
-				!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM))) { //$NON-NLS-1$
-			final String sSignAlgorithm =  fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-			this.getSignCube().setSignAlgorithm(SignatureAlgorithms.getId(sSignAlgorithm));
-		}
+		try {
+			if(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT) != null &&
+					!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT))) { //$NON-NLS-1$
+				 final String sSignFormat = fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT);
+				 final Format format = FormatsDAO.getFormatByName(sSignFormat);
+				 this.getSignCube().setIdFormat(format.getIdFormato());
+			}
+			else {
+				 this.getSignCube().setIdFormat(OTRO);
+			}
+			if(fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM) != null &&
+					!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM))) { //$NON-NLS-1$
+				final String sSignAlgorithm =  fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
+				final Algorithm algorithm = AlgorithmsDAO.getAlgorithmByName(sSignAlgorithm);
+				this.getSignCube().setIdAlgorithm(algorithm.getIdAlgoritmo());
+			}
+			else {
+				this.getSignCube().setIdAlgorithm(OTRO);
+			}
 
-		if(fireSesion.getObject(ServiceParams.SESSION_PARAM_PROVIDERS) != null ) {
-			 provsSession = (String []) fireSesion.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
-		}
-		if(fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN) != null &&
-				!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN))) { //$NON-NLS-1$
-			 prov = fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		}
+			if(fireSesion.getObject(ServiceParams.SESSION_PARAM_PROVIDERS) != null ) {
+				 provsSession = (String []) fireSesion.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
+			}
+			if(fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN) != null &&
+					!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN))) { //$NON-NLS-1$
+				 prov = fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+			}
 
-
-		if(prov != null && !"".equals(prov)) { //$NON-NLS-1$
-			this.getSignCube().setProveedor(prov);
+			if(prov != null && !"".equals(prov)) { //$NON-NLS-1$
+				Provider provider = new Provider();
+				provider = ProvidersDAO.getProviderByName(prov);
+				this.getSignCube().setIdProveedor( provider.getIdProveedor());
+			}
+			else if(provsSession != null && provsSession.length == 1) {
+				Provider provider = new Provider();
+				provider = ProvidersDAO.getProviderByName(provsSession[0]);
+				this.getSignCube().setIdProveedor( provider.getIdProveedor());
+			}
+			else {
+				this.getSignCube().setIdProveedor(OTRO);
+			}
 		}
-		else if(provsSession != null && provsSession.length == 1) {
-			this.getSignCube().setProveedor(provsSession[0]);
+		catch (final SQLException e) {
+			// TODO: handle exception
 		}
-		else {
-			this.getSignCube().setProveedor(PROV_OTRO);
+		catch (final DBConnectionException e) {
+			// TODO: handle exception
 		}
 
 		this.getFireLogger().getLogger().info(this.getSignCube().toString());

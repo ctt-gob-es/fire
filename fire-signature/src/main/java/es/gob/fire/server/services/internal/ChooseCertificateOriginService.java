@@ -30,6 +30,7 @@ import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.statistics.Browser;
 import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.signature.ConfigManager;
 
 
 /**
@@ -41,7 +42,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	private static final long serialVersionUID = -1367908808211903695L;
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 //	private static final Logger LOGGER = Logger.getLogger(ChooseCertificateOriginService.class.getName());
 
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$

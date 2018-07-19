@@ -108,6 +108,21 @@ public class DbManager {
 	}
 
 	/**
+	 * Realiza a acci&oacute;n de commit desde la &uacute;ltima acci&oacute;n de commit o rollback anterior
+	 * @throws SQLException
+	 */
+	public static void runCommit() throws SQLException {
+		getConnection().commit();
+	}
+	/**
+	 * Deshace todos los cambios de la actual transacci&oacute;n
+	 * @throws SQLException
+	 */
+	public static void runRollBack() throws SQLException {
+		getConnection().rollback();
+	}
+
+	/**
 	 * Cierra la conexi&oacute;n con la base de datos.
 	 * @throws SQLException Cuando ocurre un error al cerrar la conexi&oacute;n.
 	 */
@@ -132,6 +147,24 @@ public class DbManager {
 
 		return c.prepareStatement(statement);
 	}
+
+	/**
+	 * Prepara una sentencia SQL para ser ejecutada.
+	 * @param statement Sentencia SQL.
+	 * @param autoCommit true or false
+	 * @return Sentencia SQL.
+	 * @throws SQLException Cuando se produce un error al preparar la sentencia.
+	 * @throws DBConnectionException Cuando no se ha podido inicializar la conexion con base de datos.
+	 */
+	public static PreparedStatement prepareStatement(final String statement, final boolean autoCommit) throws SQLException, DBConnectionException {
+		final Connection c = getConnection();
+		if (c == null)  {
+			throw new DBConnectionException("No se ha encontrado una conexion abierta contra la base de datos"); //$NON-NLS-1$
+		}
+		c.setAutoCommit(autoCommit);
+		return c.prepareStatement(statement);
+	}
+
 
 	/**
 	 * Indica si la conexi&oacute;n a base de datos esta conigurada y puede usarse.

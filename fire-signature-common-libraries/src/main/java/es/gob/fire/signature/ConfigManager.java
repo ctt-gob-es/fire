@@ -102,6 +102,14 @@ public class ConfigManager {
 	/** Nombre del fichero de configuraci&oacute;n. */
 	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
 
+	/**Configuraci&oacute;n de las estad&iacute;sticas*/
+	private static final String CONFIG_STATISTICS ="statistics"; //$NON-NLS-1$
+
+	/**Configuraci&oacute;n de la hora de comienzo de carga de estad&iacute;sticas*/
+	private static final String CONFIG_STATISTICS_STARTTIME ="statistics.start_time"; //$NON-NLS-1$
+
+	private static final String PATTERN_TIME = "^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$"; //$NON-NLS-1$
+
 	private static Properties config = null;
 
 	private static boolean initialized = false;
@@ -350,6 +358,44 @@ public class ConfigManager {
 	public static String getTempDir() {
 		return getProperty(PROP_TEMP_DIR, DEFAULT_TMP_DIR);
 	}
+
+
+	/**
+	 * Devuelve la configuración de las estadísticas
+	 * @return Dato num&eacute;rico de 0, 1 y 2
+	 *  En caso de error, devolver&aacute; {@code null}.
+	 */
+	public static String getConfigStatistics() {
+		int conf;
+		try {
+			conf = Integer.parseInt(getProperty(CONFIG_STATISTICS));
+			if(conf > 2 || conf < 0) {
+				conf = 0;
+			}
+		}
+		catch (final NumberFormatException e) {
+			conf = 0;
+		}
+		return String.valueOf(conf);
+	}
+
+
+	/**
+	 * Devuelve la configuración de la hora de la carga a  la base de datos
+	 * @return Dato hora con formato 00:00:00
+	 *  En caso de no obtener un dato con formato correcto o nulo devolverá la cadena 00:00:00
+	 */
+	public static String getStatisticsStartTime() {
+		 String time =  getProperty(CONFIG_STATISTICS_STARTTIME);
+		 if (time == null || "".equals(time)) { //$NON-NLS-1$
+			 time = "00:00:00";	 //$NON-NLS-1$
+		 }
+		 else if(!time.matches(PATTERN_TIME)) { //
+			 time = "00:00:00";	 //$NON-NLS-1$
+		}
+		return time;
+	}
+
 
 	/**
 	 * Obtiene el directorio temporal para el almacenamiento de temporales del Cliente @firma.

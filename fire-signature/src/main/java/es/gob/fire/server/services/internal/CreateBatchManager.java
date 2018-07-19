@@ -23,6 +23,7 @@ import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.server.services.statistics.SignatureLogger;
 import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.signature.ConfigManager;
 
 /**
  * Manejador que gestiona las peticiones de creaci&oacute;n de un lote de firma, al que posteriormente
@@ -32,8 +33,8 @@ public class CreateBatchManager {
 
 //	private static final Logger LOGGER = Logger.getLogger(CreateBatchManager.class.getName());
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger();
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger();
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
 	/**
 	 * Create un lote de firma.
 	 * @param request Petici&oacute;n para la creaci&oacute;n del lote.

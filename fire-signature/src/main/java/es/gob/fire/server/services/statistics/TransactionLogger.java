@@ -1,8 +1,14 @@
 package es.gob.fire.server.services.statistics;
 
+import java.sql.SQLException;
+
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
+import es.gob.fire.server.services.statistics.dao.ProvidersDAO;
+import es.gob.fire.server.services.statistics.entity.Provider;
+import es.gob.fire.server.services.statistics.entity.TransactionCube;
 import es.gob.fire.services.FireLogger;
+import es.gob.fire.signature.DBConnectionException;
 
 public class TransactionLogger {
 
@@ -11,7 +17,7 @@ public class TransactionLogger {
 
 	private static String LOGGER_NAME = "TRANSACTION"; //$NON-NLS-1$
 
-	private static String PROV_OTRO = "OTRO"; //$NON-NLS-1$
+	private static int OTRO = 99;
 
 	private static TransactionLogger transactlogger;
 
@@ -39,9 +45,11 @@ public class TransactionLogger {
 			final String idAplication = fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 			this.getTransactCube().setIdAplicacion(idAplication);
 		}
-		if(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION))) { //$NON-NLS-1$
-			final Integer idOperation = Integer.valueOf(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION));
-			this.getTransactCube().setIdOperacion(idOperation);
+		if(fireSesion.getString(ServiceParams.SESSION_PARAM_TYPE_OPERATION) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_TYPE_OPERATION))) { //$NON-NLS-1$
+
+			final Operations op = Operations.getOperation(fireSesion.getString(ServiceParams.SESSION_PARAM_TYPE_OPERATION));
+			this.getTransactCube().setIdOperacion(new Integer(op.getId()));
+
 		}
 
 		if(fireSesion.getObject(ServiceParams.SESSION_PARAM_PROVIDERS) != null ) {
@@ -56,30 +64,54 @@ public class TransactionLogger {
 			provForced = fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
 		}
 
-		if(provForced != null && !"".equals(provForced)) { //$NON-NLS-1$
-			this.getTransactCube().setProveedor(provForced);
-			this.getTransactCube().setProveedorForzado(true);
+		try {
+			if(provForced != null && !"".equals(provForced)) { //$NON-NLS-1$
+				final Provider provider =  ProvidersDAO.getProviderByName(provForced);
+				this.getTransactCube().setIdProveedor(provider.getIdProveedor());
+				this.getTransactCube().setProveedorForzado(true);
+			}
+			else if(prov != null && !"".equals(prov)) { //$NON-NLS-1$
+				final Provider provider =  ProvidersDAO.getProviderByName(prov);
+				this.getTransactCube().setIdProveedor(provider.getIdProveedor());
+			}
+			else if(provsSession != null && provsSession.length == 1) {
+				final Provider provider =  ProvidersDAO.getProviderByName(provsSession[0]);
+				this.getTransactCube().setIdProveedor(provider.getIdProveedor());
+				this.getTransactCube().setProveedorForzado(true);
+			}
+			else {
+				this.getTransactCube().setIdProveedor(OTRO);
+			}
 		}
-		else if(prov != null && !"".equals(prov)) { //$NON-NLS-1$
-			this.getTransactCube().setProveedor(prov);
+		catch (final SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		else if(provsSession != null && provsSession.length == 1) {
-			this.getTransactCube().setProveedor(provsSession[0]);
-			this.getTransactCube().setProveedorForzado(true);
+		catch (final DBConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		else {
-			this.getTransactCube().setProveedor(PROV_OTRO);
+		catch (final NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		this.getFireLogger().getLogger().info(this.getTransactCube().toString());
 	}
 
 
-	public static final TransactionLogger getTransactLogger() {
-		if(transactlogger == null) {
-			transactlogger = new TransactionLogger();
+	public static final TransactionLogger getTransactLogger(final String confStatistics) {
+		int conf = 0;
+		if(confStatistics != null && !"".equals(confStatistics)) {//$NON-NLS-1$
+			conf = Integer.parseInt(confStatistics);
 		}
-		return transactlogger;
+		if (conf != 0) {
+			if(transactlogger == null) {
+				transactlogger = new TransactionLogger();
+			}
+			return transactlogger;
+		}
+		return null;
 	}
 
 

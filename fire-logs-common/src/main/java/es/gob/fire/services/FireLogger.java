@@ -134,7 +134,7 @@ public class FireLogger {
 	    try {
 	    		setFileHandlerFormater();
 	    		getLogger().addHandler(this.getFh());
-	    		this.logger.info("Log de Fire"+ nameLogger + " Inicializado"); //$NON-NLS-1$ //$NON-NLS-2$
+	    		//this.logger.info("Log de Fire"+ nameLogger + " Inicializado"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	 	    } catch (final SecurityException e) {
 	 	    	FireLogger.this._LOGGER.warning("Problema al inicializar del logger... " + e.getMessage()); //$NON-NLS-1$

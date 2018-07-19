@@ -68,6 +68,8 @@ public class ServiceParams {
 
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de operaci&oacute;n. */
     public static final String SESSION_PARAM_OPERATION = "op"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID del tipo de operaci&oacute;n. 1- firma simple 2-firma por lotes */
+    public static final String SESSION_PARAM_TYPE_OPERATION = "typeop"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de aplicaci&oacute;n. */
     public static final String SESSION_PARAM_APPLICATION_ID = "appid"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el nombre de aplicaci&oacute;n. */
