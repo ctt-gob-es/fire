@@ -4,28 +4,52 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
-	<artifactId>fire-logs-common</artifactId>
-	<version>2.3-SNAPSHOT</version>
-	<name>fire-logs-common</name>
-		
+	<artifactId>fire-statistics-cmd</artifactId>
+	<version>0.1-SNAPSHOT</version>
+	
+	
+	<name>fire-statistics-cmd</name>
+	<description></description>
+	
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-		<jdk.version>1.7</jdk.version>
+		<jdk.version>1.8</jdk.version>
 	</properties>
 
 	<dependencies>
+	
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-statistics-common</artifactId>
+			<version>2.2-SNAPSHOT</version>
+		</dependency>
 		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency>		
 
 	</dependencies>
 	
 	<build>
 		<plugins>
+		
+			<!-- Eclipse project -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<!-- Always download and attach dependencies source code -->
+					<downloadSources>false</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+					<!-- Avoid type mvn eclipse:eclipse -Dwtpversion=2.0 -->
+					<wtpversion>2.0</wtpversion>
+				</configuration>
+			</plugin>
+		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -38,13 +62,13 @@
 		</plugins>
 		<resources>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>src/main/resources/</directory>
 				<excludes>
 					<exclude>*.properties</exclude>
+					<exclude>SafeCert_GateWay_@Firma_Desarrollo.p12</exclude>
 				</excludes>
 				<filtering>false</filtering>
 			</resource>
 		</resources>
-		
 	</build>
 </project>

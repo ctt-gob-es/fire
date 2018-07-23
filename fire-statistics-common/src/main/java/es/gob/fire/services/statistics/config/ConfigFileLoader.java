@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.services;
+package es.gob.fire.services.statistics.config;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,8 +48,8 @@ public class ConfigFileLoader {
 				final File configFile = new File(configDir, configFilename).getCanonicalFile();
 				// Comprobamos que se trate de un fichero sobre el que tengamos permisos y que no
 				// nos hayamos salido del directorio de configuracion indicado
-				if (configFile.isFile() && configFile.canRead() && configFile.getParent() != null
-						&& configDir.replace('\\', '/').startsWith(configFile.getParent().replace('\\', '/'))) {
+				if (configFile.isFile() && configFile.canRead()
+						&& configDir.replace('\\', '/').startsWith(configFile.getParent().replace('\\', '/')))  {
 					try (InputStream is = new FileInputStream(configFile);) {
 						config.load(is);
 						loaded = true;
@@ -82,6 +82,4 @@ public class ConfigFileLoader {
 
 		return config;
 	}
-
-
 }

@@ -1,4 +1,4 @@
-package es.gob.fire.server.services.statistics;
+package es.gob.fire.services.statistics;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,12 +18,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import es.gob.fire.server.services.statistics.dao.SignaturesDAO;
-import es.gob.fire.server.services.statistics.dao.TransactionsDAO;
-import es.gob.fire.server.services.statistics.entity.SignatureCube;
-import es.gob.fire.server.services.statistics.entity.TransactionCube;
-import es.gob.fire.signature.DBConnectionException;
-import es.gob.fire.signature.DbManager;
+import es.gob.fire.services.statistics.config.ConfigFilesException;
+import es.gob.fire.services.statistics.config.ConfigManager;
+import es.gob.fire.services.statistics.config.DBConnectionException;
+import es.gob.fire.services.statistics.config.DbManager;
+import es.gob.fire.services.statistics.dao.SignaturesDAO;
+import es.gob.fire.services.statistics.dao.TransactionsDAO;
+import es.gob.fire.services.statistics.entity.SignatureCube;
+import es.gob.fire.services.statistics.entity.TransactionCube;
+
 
 public class FireStatistics {
 
@@ -39,11 +42,11 @@ public class FireStatistics {
 	private static final String FILE_TRANS = "FIReTRANSACTION";//$NON-NLS-1$
 	private static final String FILE_EXT_LCK = ".lck"; //$NON-NLS-1$
 	final static SimpleDateFormat formater =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
+	private static  String logPath = null;
 
-
-	public FireStatistics() {
+	public FireStatistics(final String path) {
 		super();
-		// TODO Auto-generated constructor stub
+		FireStatistics.setLogPath(path);
 	}
 
 	/**
@@ -53,6 +56,8 @@ public class FireStatistics {
 	 */
 	public final void init(final String startTime) {
 		this.setStartTime(startTime);
+
+
 
 		 //Se crea un hilo que se ejecuta periodicamente segun el parametro indicado en el fichero de configuracion (S)
         final ScheduledThreadPoolExecutor sch = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
@@ -66,6 +71,8 @@ public class FireStatistics {
         		 String [] result = null;
         		 final String startProcess = formater.format(new Date());
 	            try {
+	            	ConfigManager.checkConfiguration();
+
 					 //Obtenemos la ultima fecha de carga de estadisticas y su estado:
 	            	//1 true  cargado, 0 false No se cargo
 	            	// del fichero FIReSTATISTICS.log
@@ -98,6 +105,8 @@ public class FireStatistics {
 					LOGGER.severe("Error en hilo del proceso de carga de estadisticas lanzado ["+ startProcess + "]  :".concat(e.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
 				} catch (final DBConnectionException e) {
 					LOGGER.severe("Error en hilo del proceso de carga de estadisticas lanzado ["+ startProcess + "]  :".concat(e.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
+				} catch (final ConfigFilesException e) {
+					LOGGER.severe("Error en hilo del proceso de carga de estadisticas lanzado ["+ startProcess + "]  :".concat(e.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
 				}
             }
 
@@ -111,11 +120,14 @@ public class FireStatistics {
 	 */
 	public final void init() {
 
+
+
 		Date lastLoadDate = null;
 		boolean loaded = false;
         String [] result = null;
         final String startProcess = formater.format(new Date());
         try {
+        	ConfigManager.checkConfiguration();
         	//Obtenemos la ultima fecha de carga de estadisticas y su estado:
 	        //1 true  cargado, 0 false No se cargo
 	        // del fichero FIReSTATISTICS.log
@@ -130,6 +142,7 @@ public class FireStatistics {
 	        }
 	        result = exeLoadStatistics(lastLoadDate);
 	        final boolean resultProcess = writeStatisticFile(result);
+
 	        if(resultProcess) {
 	        	System.out.println("Proceso de carga de estadisticas lanzado ["+ startProcess + "] =  Correcto.");  //$NON-NLS-1$//$NON-NLS-2$
 	            LOGGER.info("Proceso de carga de estadisticas lanzado ["+ startProcess + "] =  Correcto."); //$NON-NLS-1$ //$NON-NLS-2$
@@ -148,6 +161,8 @@ public class FireStatistics {
 	    	LOGGER.severe("Error en hilo del proceso de carga de estadisticas lanzado ["+ startProcess + "]  :".concat(e.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
 	    } catch (final DBConnectionException e) {
 	    	LOGGER.severe("Error en hilo del proceso de carga de estadisticas lanzado ["+ startProcess + "]  :".concat(e.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (final ConfigFilesException e) {
+			LOGGER.severe("Error en hilo del proceso de carga de estadisticas lanzado ["+ startProcess + "]  :".concat(e.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 	}
@@ -186,7 +201,7 @@ public class FireStatistics {
 		  File f;
 		  String lastLine[] = null;
 			try {
-				f = new File(es.gob.fire.services.ConfigManager.getLogsDir().concat(File.separator).concat(FILE_ST_NAME)).getCanonicalFile();
+				f = new File(getLogPath().concat(File.separator).concat(FILE_ST_NAME)).getCanonicalFile();//es.gob.fire.services.ConfigManager.getLogsDir()
 				if(f.exists()) {
 					final BufferedReader br = new BufferedReader(new FileReader(f));
 					String last = br.readLine();
@@ -200,7 +215,7 @@ public class FireStatistics {
 					throw new IOException();
 				}
 			} catch (final IOException e1) {
-				LOGGER.log(Level.SEVERE, "Error al leer el fichero".concat(FILE_ST_NAME).concat(" en la ruta ").concat(es.gob.fire.services.ConfigManager.getLogsDir())); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.log(Level.SEVERE, "Error al leer el fichero".concat(FILE_ST_NAME).concat(" en la ruta ").concat(getLogPath())); //$NON-NLS-1$ //$NON-NLS-2$
 				throw new IOException();
 			}
 
@@ -250,7 +265,7 @@ public class FireStatistics {
 		    c.set(Calendar.SECOND, 0);
 		    c.set(Calendar.MILLISECOND, 0);
 		  	final Date today = c.getTime();
-			final File f = new File(es.gob.fire.services.ConfigManager.getLogsDir());
+			final File f = new File(getLogPath());
 			if(f.exists()) {
 				final File[] files = f.listFiles(new FilenameFilter() {
 					@Override
@@ -308,7 +323,7 @@ public class FireStatistics {
 		  File f;
 		  int totalReg = 0;
 			try {
-				f = new File(es.gob.fire.services.ConfigManager.getLogsDir().concat(File.separator).concat(fileName)).getCanonicalFile();
+				f = new File(getLogPath().concat(File.separator).concat(fileName)).getCanonicalFile();
 				if(f.exists()) {
 					final BufferedReader br = new BufferedReader(new FileReader(f));
 					while (br.readLine()!= null) {
@@ -320,7 +335,7 @@ public class FireStatistics {
 					throw new IOException();
 				}
 			} catch (final IOException e1) {
-				LOGGER.log(Level.SEVERE, "Error al leer el fichero en la ruta indicada ".concat(e1.getMessage())); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "Error al leer el fichero".concat(fileName).concat(" en la ruta indicada ").concat(getLogPath())); //$NON-NLS-1$ //$NON-NLS-2$
 				throw new IOException();
 			}
 		  return totalReg;
@@ -336,15 +351,17 @@ public class FireStatistics {
 	 * @throws IOException
 	 * @throws DBConnectionException
 	 * @throws ParseException
+	 * @throws es.gob.fire.services.statistics.config.DBConnectionException
+	 * @throws NumberFormatException
 	   */
-	static final String insertStatisticDB(final String fileName, final int totalReg) throws SQLException, IOException, DBConnectionException, ParseException {
+	static final String insertStatisticDB(final String fileName, final int totalReg) throws SQLException, IOException, DBConnectionException, ParseException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException {
 
 		 final File f;
 		 int regInserted = 0;
 		 String result = null;
 
 		 if(fileName != null && !"".equals(fileName) ) {  //$NON-NLS-1$
-			f = new File(es.gob.fire.services.ConfigManager.getLogsDir().concat(File.separator).concat(fileName)).getCanonicalFile();
+			f = new File(getLogPath().concat(File.separator).concat(fileName)).getCanonicalFile();
 			if(f.exists()) {
 				final BufferedReader br = new BufferedReader(new FileReader(f));
 				String registry;
@@ -390,7 +407,7 @@ public class FireStatistics {
 		boolean res = false;
 		int count = 0;
 		if(result != null && result.length > 0) {
-			final FileWriter fw = new FileWriter(es.gob.fire.services.ConfigManager.getLogsDir().concat(File.separator).concat(FILE_ST_NAME),true);
+			final FileWriter fw = new FileWriter(getLogPath().concat(File.separator).concat(FILE_ST_NAME),true);
 			final PrintWriter pw = new PrintWriter(fw);
 			for (int i = 0; i < result.length; i++) {
 				pw.println(result[i]);
@@ -412,6 +429,14 @@ public class FireStatistics {
 	}
 	private final void setStartTime(final String startTime) {
 		this.startTime = startTime;
+	}
+
+	public  final static String getLogPath() {
+		return FireStatistics.logPath;
+	}
+
+	private final static void setLogPath(final String logPath) {
+		FireStatistics.logPath = logPath;
 	}
 
 
