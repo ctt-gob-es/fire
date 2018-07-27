@@ -144,7 +144,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$
+			LOGGER.warning("No se encontro en la sesion la URL de redireccion de error para la operacion"); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(errorUrl);
 

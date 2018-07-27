@@ -82,8 +82,7 @@ public final class SessionCollector {
     }
 
     /**
-     * Elimina por completo una nueva sesi&oacute;n
-     * y sus ficheros temporales.
+     * Elimina por completo una sesi&oacute;n y sus ficheros temporales.
      * @param fireSession Sesi&oacute;n que hay que eliminar.
      */
     public static void removeSession(final FireSession fireSession) {
