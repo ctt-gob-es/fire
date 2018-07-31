@@ -23,9 +23,9 @@ import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
 import es.gob.fire.server.services.UpgradeException;
-import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.server.services.statistics.SignatureLogger;
 import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 class FIRePostSignaturesThread extends ConcurrentProcessThread {

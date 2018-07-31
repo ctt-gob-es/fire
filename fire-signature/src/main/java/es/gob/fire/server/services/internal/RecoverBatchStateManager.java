@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 
 
 /**

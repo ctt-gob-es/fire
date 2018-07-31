@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 
 /**
  * Hilo que ejecuta la carga, actualizaci&oacute;n y guardado de una firma de lote

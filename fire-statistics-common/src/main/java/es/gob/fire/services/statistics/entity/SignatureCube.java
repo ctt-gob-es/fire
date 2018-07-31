@@ -4,16 +4,14 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Logger;
 
 import es.gob.fire.services.statistics.Browser;
-import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.services.statistics.config.DBConnectionException;
 import es.gob.fire.services.statistics.dao.ProvidersDAO;
 
 
 public class SignatureCube {
-	static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	//static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private Date fecha;
 	private int idFormat;
 	private int idAlgorithm;

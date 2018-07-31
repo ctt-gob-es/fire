@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.internal.FireSession;
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**

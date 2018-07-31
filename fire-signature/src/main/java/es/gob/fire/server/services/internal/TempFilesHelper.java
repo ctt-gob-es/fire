@@ -21,7 +21,7 @@ import java.nio.file.Files;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.AOUtil;
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**

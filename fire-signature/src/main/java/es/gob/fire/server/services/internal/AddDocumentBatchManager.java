@@ -25,8 +25,8 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.document.DefaultFIReDocumentManager;
-import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**

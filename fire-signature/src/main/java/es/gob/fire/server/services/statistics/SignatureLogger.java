@@ -4,19 +4,22 @@ import java.sql.SQLException;
 
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
-import es.gob.fire.server.services.statistics.dao.AlgorithmsDAO;
-import es.gob.fire.server.services.statistics.dao.FormatsDAO;
-import es.gob.fire.server.services.statistics.dao.ProvidersDAO;
-import es.gob.fire.server.services.statistics.entity.Algorithm;
-import es.gob.fire.server.services.statistics.entity.Format;
-import es.gob.fire.server.services.statistics.entity.Provider;
-import es.gob.fire.server.services.statistics.entity.SignatureCube;
 import es.gob.fire.services.FireLogger;
-import es.gob.fire.signature.DBConnectionException;
+import es.gob.fire.services.statistics.Browser;
+import es.gob.fire.services.statistics.config.ConfigManager;
+import es.gob.fire.services.statistics.dao.AlgorithmsDAO;
+import es.gob.fire.services.statistics.dao.FormatsDAO;
+import es.gob.fire.services.statistics.dao.ProvidersDAO;
+import es.gob.fire.services.statistics.entity.Algorithm;
+import es.gob.fire.services.statistics.entity.Format;
+import es.gob.fire.services.statistics.entity.Provider;
+import es.gob.fire.services.statistics.entity.SignatureCube;
 
 public class SignatureLogger {
 
 	private static String LOGGER_NAME = "SIGNATURE"; //$NON-NLS-1$
+
+	private static String ROLLDATE = "DIARIA"; //$NON-NLS-1$
 
 	private FireLogger fireLogger ;
 
@@ -31,7 +34,7 @@ public class SignatureLogger {
 	 * Constructor
 	 */
 	private SignatureLogger() {
-		this.setFireLogger(new FireLogger(LOGGER_NAME));
+		this.setFireLogger(new FireLogger(LOGGER_NAME, ConfigManager.getStatisticsDir(),ROLLDATE));
 	}
 
 
@@ -110,8 +113,9 @@ public class SignatureLogger {
 		catch (final SQLException e) {
 			// TODO: handle exception
 		}
-		catch (final DBConnectionException e) {
-			// TODO: handle exception
+		catch (final es.gob.fire.services.statistics.config.DBConnectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		this.getFireLogger().getLogger().info(this.getSignCube().toString());

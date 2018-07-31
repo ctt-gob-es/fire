@@ -31,9 +31,9 @@ import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
-import es.gob.fire.server.services.statistics.FireSignLogger;
-import es.gob.fire.server.services.statistics.FireStatistics;
 import es.gob.fire.server.services.statistics.Operations;
+import es.gob.fire.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireStatistics;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
@@ -48,7 +48,6 @@ public class FIReService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = -2304782878707695769L;
 
-	//private static FireSignLogger fSignLogger = FireSignLogger.getFireSignLogger();
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 
@@ -66,18 +65,20 @@ public class FIReService extends HttpServlet {
 
     	try {
 	    	ConfigManager.checkConfiguration();
+	    	es.gob.fire.services.statistics.config.ConfigManager.checkConfiguration();
 		}
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
     		return;
     	}
 
-    	//TODO Codigo para inicializar las stadisticas
+    	// Codigo para inicializar las estadisticas
 		try {
-			final int configStatistic = Integer.valueOf(ConfigManager.getConfigStatistics()).intValue() ;
-			if(configStatistic > 0) {
-				firest = new FireStatistics();
-				final String startTime = ConfigManager.getStatisticsStartTime();
+			final int configStatistic = Integer.valueOf(es.gob.fire.services.statistics.config.ConfigManager.getConfigStatistics()).intValue() ;
+			final String st_path = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsDir();
+			if(configStatistic > 0 && st_path != null && !"".equals(st_path)) { //$NON-NLS-1$
+				firest = new FireStatistics(st_path);
+				final String startTime = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsStartTime();
 				firest.init(startTime);
 			}
 		}

@@ -28,8 +28,8 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.statistics.Browser;
-import es.gob.fire.server.services.statistics.FireSignLogger;
 import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 

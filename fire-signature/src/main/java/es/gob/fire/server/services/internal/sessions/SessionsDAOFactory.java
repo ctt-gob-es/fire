@@ -11,7 +11,7 @@ package es.gob.fire.server.services.internal.sessions;
 
 import java.util.logging.Logger;
 
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 
 /**
  * Factor&iacute;a para la obtenci&oacute;n de gestores de sesiones que

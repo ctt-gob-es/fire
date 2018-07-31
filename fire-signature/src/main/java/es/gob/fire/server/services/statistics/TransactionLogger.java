@@ -4,11 +4,12 @@ import java.sql.SQLException;
 
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
-import es.gob.fire.server.services.statistics.dao.ProvidersDAO;
-import es.gob.fire.server.services.statistics.entity.Provider;
-import es.gob.fire.server.services.statistics.entity.TransactionCube;
 import es.gob.fire.services.FireLogger;
-import es.gob.fire.signature.DBConnectionException;
+import es.gob.fire.services.statistics.config.ConfigManager;
+import es.gob.fire.services.statistics.config.DBConnectionException;
+import es.gob.fire.services.statistics.dao.ProvidersDAO;
+import es.gob.fire.services.statistics.entity.Provider;
+import es.gob.fire.services.statistics.entity.TransactionCube;
 
 public class TransactionLogger {
 
@@ -16,6 +17,8 @@ public class TransactionLogger {
 	private FireLogger fireLogger ;
 
 	private static String LOGGER_NAME = "TRANSACTION"; //$NON-NLS-1$
+
+	private static String ROLLDATE = "DIARIA"; //$NON-NLS-1$
 
 	private static int OTRO = 99;
 
@@ -25,7 +28,7 @@ public class TransactionLogger {
 
 
 	private TransactionLogger() {
-		this.setFireLogger(new FireLogger(LOGGER_NAME));
+		this.setFireLogger(new FireLogger(LOGGER_NAME, ConfigManager.getStatisticsDir(),ROLLDATE));
 	}
 
 

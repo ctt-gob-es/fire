@@ -37,24 +37,39 @@ public class FireLogger {
 	private static final long SEG_MIN = 60L;
 	private static TimeUnit timeUnit = TimeUnit.SECONDS;
 	private String logName = null;
+	private  String path_filelog = null;
+	private static  String rollingDate = null ;
+
+
+
+
 	final Logger _LOGGER = Logger.getLogger(FireLogger.class.getName());
 
 	 /**
-	  * Constructor
+	  * Constructor con el nombre del Logger, los valores de configuraci&oacute;n se indican desde el fichero logger_config.properties
 	  * @param loggerName
 	  */
 	public FireLogger(final String loggerName ) {
 		super();
-		this.installLogger(loggerName);
+		this.installLogger(loggerName,null,null);
 	}
 
+	 /**
+	  * Constructor con el nombre del Logger y la ruta de creaci&oacute;n del fichero log y el tiempo de rotado:
+	  * DIARIA,HORARIA, POR_MINUTOS
+	  * @param loggerName
+	  */
+	public FireLogger(final String loggerName, final String path, final String rollingDate ) {
+		super();
+		this.installLogger(loggerName,path,rollingDate);
+	}
 
 	/**
 	 * funci&oacute;n principal que inicializa el logger para toda la aplicaci&oacute;n
 	 * Uso: fireLogger.installLogger(statisticsName);
 	 * Necesario indicar par&aacute;metros en fichero config_logger.properties
 	 */
-	public void installLogger(final String logParticleName) {
+	public void installLogger(final String logParticleName, final String path, final String rollingDate) {
 
 		if(logParticleName != null ) {
 			setLogName(logParticleName);
@@ -69,8 +84,21 @@ public class FireLogger {
     		return;
     	}
 
-		if (ConfigManager.getLogsDir() != null && !"".equals(ConfigManager.getLogsDir()) //$NON-NLS-1$
-			&& ConfigManager.getRollingDate() != null && !"".equals(ConfigManager.getRollingDate())) { //$NON-NLS-1$
+		// obtenemos el path y el rollingDate
+		if(path != null && !"".equals(path)) { //$NON-NLS-1$
+			this.setPath_filelog(path);
+		}else if(ConfigManager.getLogsDir() != null && !"".equals(ConfigManager.getLogsDir())) { //$NON-NLS-1$
+			this.setPath_filelog(ConfigManager.getLogsDir());
+		}
+
+		if(rollingDate != null && !"".equals(rollingDate)){ //$NON-NLS-1$
+			FireLogger.setRollingDate(rollingDate);
+		}else if(ConfigManager.getRollingDate() != null && !"".equals(ConfigManager.getRollingDate())) { //$NON-NLS-1$
+			FireLogger.setRollingDate(ConfigManager.getRollingDate());
+		}
+
+
+		if (this.getPath_filelog() != null && FireLogger.getRollingDate() != null)  {
 
 		    if(this.getLogger() == null){
 		        initLogger(logParticleName); //inicializamos el logger si es la primera vez y esta a nulo.
@@ -111,14 +139,14 @@ public class FireLogger {
 	 * @throws IOException
 	 */
 	final FileHandler createFilehandler(final String dateForName) throws SecurityException, IOException{
-	    final String folder = ConfigManager.getLogsDir();
-	    final File fileFolder = new File(folder);
+
+	    final File fileFolder = new File(this.getPath_filelog());
 
 	    if(!fileFolder.exists()){
 	        fileFolder.mkdirs();
 	    }
 
-	    final String dateFileName = folder + File.separator + "FIRe" + getLogName() + "_" + dateForName + ".log"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	    final String dateFileName = this.getPath_filelog() + File.separator + "FIRe" + getLogName() + "_" + dateForName + ".log"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	    final boolean appendToFile = true;
 	    return new FileHandler(dateFileName, appendToFile);
 	}
@@ -154,12 +182,13 @@ public class FireLogger {
 	 * @return
 	 */
 	static String getLogFileName() {
-		if(ConfigManager.getRollingDate().equals(DIARIA)) {
+
+		if(getRollingDate().equals(DIARIA)) {
 			final SimpleDateFormat format = new SimpleDateFormat(PATTR_DIARIA);
 			return format.format(new java.sql.Date(System.currentTimeMillis()));
 
 		}
-		else if(ConfigManager.getRollingDate().equals(HORARIA)) {
+		else if(getRollingDate().equals(HORARIA)) {
 			final SimpleDateFormat format = new SimpleDateFormat(PATTR_HORARIA);
 			return format.format(new java.sql.Date(System.currentTimeMillis()));
 
@@ -179,7 +208,7 @@ public class FireLogger {
 		final Calendar c = Calendar.getInstance();
 	    final long now = c.getTimeInMillis();
 
-		if(ConfigManager.getRollingDate().equals(DIARIA)) {
+		if(getRollingDate().equals(DIARIA)) {
 			c.set(Calendar.HOUR_OF_DAY, 0);
 		    c.set(Calendar.MINUTE, 0);
 		    c.set(Calendar.SECOND, 0);
@@ -188,7 +217,7 @@ public class FireLogger {
 		    final long secondsPassedToday = passed / 1000;
 			return SEG_DIA - secondsPassedToday;
 		}
-		else if(ConfigManager.getRollingDate().equals(HORARIA)) {
+		else if(getRollingDate().equals(HORARIA)) {
 		    c.set(Calendar.MINUTE, 0);
 		    c.set(Calendar.SECOND, 0);
 		    c.set(Calendar.MILLISECOND, 0);
@@ -211,10 +240,10 @@ public class FireLogger {
 	  * @return
 	  */
 	 static long getSecondsRelaunchPeriod() {
-		if(ConfigManager.getRollingDate().equals(DIARIA)) {
+		if(getRollingDate().equals(DIARIA)) {
 			return SEG_DIA;
 		}
-		else if(ConfigManager.getRollingDate().equals(HORARIA)) {
+		else if(getRollingDate().equals(HORARIA)) {
 			return SEG_HORA;
 		}
 		else {
@@ -232,11 +261,11 @@ public class FireLogger {
 		this.setFh(createFilehandler(getLogFileName()));
 
          /*	# %1  date: un objeto Date que representa la hora del evento del registro.
-				# %2  fuente - una cadena que representa al que llama, si está disponible; de lo contrario, el nombre del logger.
+				# %2  fuente - una cadena que representa al que llama, si est&aacute; disponible; de lo contrario, el nombre del logger.
 				# %3  registrador - el nombre del logger.
 				# %4  nivel - el nivel de registro.
-				# %5  mensaje: el mensaje de registro formateado devuelto por el método Formatter.formatMessage (LogRecord). Utiliza el formato java.text y no usa el argumento de formato java.util.Formatter.
-				# %7  throw - una cadena que representa el throwable asociado con el registro de registro y su backtrace que comienza con un carácter de nueva línea, si lo hay; de lo contrario, una cadena vacía.
+				# %5  mensaje: el mensaje de registro formateado devuelto por el m&eacute;todo Formatter.formatMessage (LogRecord). Utiliza el formato java.text y no usa el argumento de formato java.util.Formatter.
+				# %7  throw - una cadena que representa el throwable asociado con el registro de registro y su backtrace que comienza con un car&aacute;cter de nueva l&iacute;nea, si lo hay; de lo contrario, una cadena vac&iacute;a.
 				# java.util.logging.SimpleFormatter.format=%4$s: %5$s [%1$tc]%n
 				java.util.logging.SimpleFormatter.format="%4$s %1$tF %1$tT %2$s %5$s %n"
 				//Ejemplo extendido --> "# D:%1$tF; T:%1$tT; L:%2$s; M:%3$s%n CLASS:%4$s; METHOD:%5$s %n"
@@ -287,4 +316,21 @@ public class FireLogger {
 	private final  void setLogName(final String logName) {
 		this.logName = logName;
 	}
+
+	private final String getPath_filelog() {
+		return this.path_filelog;
+	}
+
+	private final void setPath_filelog(final String path_filelog) {
+		this.path_filelog = path_filelog;
+	}
+
+	private static final String getRollingDate() {
+		return rollingDate;
+	}
+
+	private static final void setRollingDate(final String rollingDate) {
+		FireLogger.rollingDate = rollingDate;
+	}
+
 }

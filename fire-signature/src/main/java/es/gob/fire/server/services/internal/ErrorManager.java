@@ -5,7 +5,7 @@ package es.gob.fire.server.services.internal;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigFileLoader;
 /**
  * Clase que gestiona los mensajes de erroes. Carga el fichero de configuraci&oacute;n del fichero errors_es_ES.messages.

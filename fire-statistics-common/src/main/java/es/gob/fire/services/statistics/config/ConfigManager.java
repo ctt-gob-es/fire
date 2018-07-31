@@ -109,6 +109,9 @@ public class ConfigManager {
 	/**Configuraci&oacute;n de la hora de comienzo de carga de estad&iacute;sticas*/
 	private static final String CONFIG_STATISTICS_STARTTIME ="statistics.start_time"; //$NON-NLS-1$
 
+	/**Configuraci&oacute;n del directorio donde se almacenan los ficheros de  estad&iacute;sticas*/
+	private static final String CONFIG_STATISTICS_DIR ="statistics.dir"; //$NON-NLS-1$
+
 	private static final String PATTERN_TIME = "^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$"; //$NON-NLS-1$
 
 	private static Properties config = null;
@@ -362,7 +365,7 @@ public class ConfigManager {
 
 
 	/**
-	 * Devuelve la configuración de las estadísticas
+	 * Devuelve la configuraci&oacute;n de las estad&iacute;sticas
 	 * @return Dato num&eacute;rico de 0, 1 y 2
 	 *  En caso de error, devolver&aacute; {@code null}.
 	 */
@@ -382,9 +385,9 @@ public class ConfigManager {
 
 
 	/**
-	 * Devuelve la configuración de la hora de la carga a  la base de datos
+	 * Devuelve la configuraci&oacute;n de la hora de la carga a  la base de datos
 	 * @return Dato hora con formato 00:00:00
-	 *  En caso de no obtener un dato con formato correcto o nulo devolverá la cadena 00:00:00
+	 *  En caso de no obtener un dato con formato correcto o nulo devolver&aacute; la cadena 00:00:00
 	 */
 	public static String getStatisticsStartTime() {
 		 String time =  getProperty(CONFIG_STATISTICS_STARTTIME);
@@ -396,6 +399,16 @@ public class ConfigManager {
 		}
 		return time;
 	}
+
+	/**
+	 * Devuelve el directorio configurado para el guardado de estad&iacute;sticas.
+	 * @return Ruta del directorio de estad&iacute;sticas o, si no se configuro, el directorio
+	 * temporal del sistema. En caso de error, devolver&aacute; {@code null}.
+	 */
+	public static String getStatisticsDir() {
+		return getProperty(CONFIG_STATISTICS_DIR, DEFAULT_TMP_DIR);
+	}
+
 
 
 	/**

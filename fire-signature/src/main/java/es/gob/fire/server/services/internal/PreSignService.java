@@ -38,7 +38,7 @@ import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigManager;
 

@@ -7,7 +7,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 
 /**
  * Informaci&oacute;n necesaria de un proveedor para permitir su correcto uso

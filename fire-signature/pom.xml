@@ -69,9 +69,14 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-logs-common</artifactId>
-			<version>2.2-SNAPSHOT</version>
+			<version>2.3-SNAPSHOT</version>
 		</dependency>
 
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-statistics-common</artifactId>
+			<version>2.3-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>es.fnmt.fire</groupId>

@@ -25,7 +25,7 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.services.ProviderLegacy;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 
 /**
  * Manejador de la operaci&oacute;n de recuperaci&oacute;n de los certificados

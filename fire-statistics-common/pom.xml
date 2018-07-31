@@ -39,6 +39,8 @@
 			<version>2.3-SNAPSHOT</version>
 		</dependency>
 		
+	
+		
 		<dependency>
     		<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>

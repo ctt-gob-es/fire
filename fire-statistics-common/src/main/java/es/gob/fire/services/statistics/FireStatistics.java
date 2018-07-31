@@ -44,6 +44,10 @@ public class FireStatistics {
 	final static SimpleDateFormat formater =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 	private static  String logPath = null;
 
+	/**
+	 * Constructor del Objeto de estad&iacute;sticas se le indica la ruta donde se encuentran los ficheros.
+	 * @param path
+	 */
 	public FireStatistics(final String path) {
 		super();
 		FireStatistics.setLogPath(path);
