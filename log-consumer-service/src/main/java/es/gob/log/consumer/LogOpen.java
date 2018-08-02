@@ -38,8 +38,13 @@ public class LogOpen {
 	}
 
 	/**
-	 *
-	 * @return
+	 * Busca el fichero con extensi&oacute;n .loginfo cuyo nombre m&aacute;s se le parezca al fichero seleccionado y si lo encuentra lo carga con las
+	 *	propiedades leidas de dicho fichero loginfo, en caso contrario al crear el objeto loginfo lo inicializa
+	 *	con las propiedades por defecto.
+	 * @return Devuelve: array de bytes con la informaci&oacute;n obtenida del fichero .loginfo perteneciente o
+	 * asociado al fichero de log indicado como par&aacute;metro,  {@code null}
+	 *  si la ruta no existente al fichero de log indicada en el fichero log_consumer_config.properties
+	 *  en la propiedad logs.dir no existe.
 	 * @throws IOException
 	 */
 	public final byte[] openFile(final String logFileName) throws IOException  {
@@ -80,7 +85,7 @@ public class LogOpen {
 				//Obtenemos el nombre del fichero .loginfo que mas se aproxime al nombre del fichero de log
 				for (int i = 0; i < files.length; i++){
 
-					if (logFileName.startsWith(files[i].getName().replace(LogConstants.FILE_EXT_LOGINFO, ""))) {
+					if (logFileName.startsWith(files[i].getName().replace(LogConstants.FILE_EXT_LOGINFO, ""))) { //$NON-NLS-1$
 						fileNamesLoginfo[0] = files[i].getName();
 					}
 					else if(files[i].getName().matches("^[0-9][A-Z][a-z]".concat(nameLogInfo).concat("*.loginfo"))) {//coincide 100% //$NON-NLS-1$ //$NON-NLS-2$

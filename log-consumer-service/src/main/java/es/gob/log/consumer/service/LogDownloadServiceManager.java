@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import es.gob.log.consumer.LogConstants;
 import es.gob.log.consumer.LogDownload;
 
 
@@ -23,10 +22,10 @@ public class LogDownloadServiceManager {
 
 
 
-	public final static byte[] process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+	public final static byte[] process(final HttpServletRequest req, final HttpServletResponse resp, final String pathLogs) throws IOException {
 		byte[] result = null;
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
-		final File dataFile = new File(LogConstants.DIR_FILE_LOG.concat("\\").concat(logFileName)); //$NON-NLS-1$
+		final File dataFile = new File(pathLogs.concat("\\").concat(logFileName)); //$NON-NLS-1$
 		final HttpSession session = req.getSession(true);
 		SeekableByteChannel channel = null;
 		LogDownload download = null;

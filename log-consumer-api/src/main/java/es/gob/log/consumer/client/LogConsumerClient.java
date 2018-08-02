@@ -617,7 +617,7 @@ public class LogConsumerClient {
 		return null;
 	}
 
-	public byte[] download(final String fileName, final boolean reset ) {
+	public byte[] download(final String fileName, final boolean reset, final String pathDownloadTemp ) {
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 		final StringBuilder resultDownload = new StringBuilder("");//$NON-NLS-1$
@@ -629,7 +629,7 @@ public class LogConsumerClient {
 				.append("&".concat(ServiceParams.PARAM_RESET).concat("=")).append(reset); //$NON-NLS-1$ //$NON-NLS-2$;
 
 		int status = 200;
-		try(final FileOutputStream fos = new FileOutputStream("C:/Users/adolfo.navarro/Desktop/"+fileName+".zip");)  { //$NON-NLS-1$ //$NON-NLS-2$
+		try(final FileOutputStream fos = new FileOutputStream(pathDownloadTemp + fileName + ".zip");)  { //$NON-NLS-1$
 			int cont = 0;
 			do {
 				final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
@@ -658,9 +658,9 @@ public class LogConsumerClient {
 		    jw.writeObject(jsonObj.build());
 		    jw.close();
 		}
-		final File ficherozip = new File("C:/Users/adolfo.navarro/Desktop/"+fileName+".zip");
+		final File ficherozip = new File(pathDownloadTemp + fileName + ".zip"); //$NON-NLS-1$
 		if (ficherozip.exists()) {
-			resultDownload.append("C:/Users/adolfo.navarro/Desktop/"+fileName+".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+			resultDownload.append(pathDownloadTemp + fileName + ".zip"); //$NON-NLS-1$
 			data.add(Json.createObjectBuilder()
 					.add("Code",200) //$NON-NLS-1$
 					.add("Path", resultDownload.toString()) //$NON-NLS-1$

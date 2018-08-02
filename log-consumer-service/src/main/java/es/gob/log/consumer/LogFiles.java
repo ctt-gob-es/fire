@@ -17,7 +17,7 @@ public class LogFiles {
 
 	private static final String FILE_EXT_LOGINFO = LogConstants.FILE_EXT_LOGINFO;
 	private static final String FILE_EXT_LCK = LogConstants.FILE_EXT_LCK;
-	private static final String DIR_LOGS = LogConstants.DIR_FILE_LOG;
+
 	private static final Logger LOGGER = Logger.getLogger(LogFiles.class.getName());
 
 	public LogFiles() {
@@ -26,16 +26,17 @@ public class LogFiles {
 	/**
 	 * M&eacute;todo de consulta de ficheros de logs.
 	 * @return Array de bytes que contiene cadena de caracteres en formato JSON indicando el nombre de los ficheros log,
-	 *  fecha de &uacute;ltima actualizaci&oacute;n sin formato (long) y su tama&ntilde;o en bytes
+	 *  fecha de &uacute;ltima actualizaci&oacute;n sin formato (long) y su tama&ntilde;o en bytes. Devuelve {@code null}
+	 *  si se ha indicado como par&aacute;metro de entrada una ruta no existente o nula.
 	 * @throws IOException
 	 */
-	public  byte[] getLogFiles()  {
+	public  byte[] getLogFiles(final File pathLogs)  {
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 		byte[] result = null;
-		final File f = new File(DIR_LOGS);
-		if(f.exists()) {
-			final File[] files = f.listFiles(new FilenameFilter() {
+		//final File f = new File(DIR_LOGS);
+		if(pathLogs == null || pathLogs.exists()) {
+			final File[] files = pathLogs.listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(final File dir, final String name) {
 					if(name.lastIndexOf(".") > 0) { //$NON-NLS-1$

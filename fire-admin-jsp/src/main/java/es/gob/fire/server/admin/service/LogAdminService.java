@@ -22,9 +22,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import es.gob.fire.server.admin.conf.ConfigManager;
+import es.gob.fire.server.admin.message.AdminFilesNotFoundException;
 import es.gob.log.consumer.client.LogConsumerClient;
 import es.gob.log.consumer.client.ServiceOperations;
-
 /**
  * Servlet implementation class LogAdminService
  */
@@ -45,6 +46,7 @@ public class LogAdminService extends HttpServlet {
 	private  long endDateTime = 0L;
 	private boolean reset = false;
 	private String message = "";//$NON-NLS-1$
+
 
 	/**
      * @see HttpServlet#HttpServlet()
@@ -73,7 +75,10 @@ public class LogAdminService extends HttpServlet {
 		final String stringOp = "seleccion"; //$NON-NLS-1$
 		final boolean isOk = false;
 
+
 		try {
+
+
 			this.getParameters(request, session);
 
 		}
@@ -276,10 +281,30 @@ public class LogAdminService extends HttpServlet {
 			LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
 			long time_start, time_end;
 			time_start = System.currentTimeMillis();
+			String tempLogsDir = null;
+			try {
+				ConfigManager.initialize();
+				tempLogsDir = ConfigManager.getLogsTempDir();
+				if(tempLogsDir == null || tempLogsDir.equals("")) { //$NON-NLS-1$
+					LOGGER.warning("No se encuentra configurada la variable logs.tempdir del fichero de configuración .properties"); //$NON-NLS-1$
+					final String jsonError = getJsonError("No se encuentra configurada la variable logs.tempdir del fichero de configuración .properties", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+					session.setAttribute("ERROR_JSON", jsonError); //$NON-NLS-1$
+					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+					return;
+				}
+
+			} catch (final AdminFilesNotFoundException e) {
+				LOGGER.severe("Error no se encuentra el fichero de configuración .properties"); //$NON-NLS-1$
+				final String jsonError = getJsonError("No se han podido recuperar correctamente el fichero de configuración .properties.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+				session.setAttribute("ERROR_JSON", jsonError); //$NON-NLS-1$
+				response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				return;
+			}
 
 			result = ""; //$NON-NLS-1$
 			String path = ""; //$NON-NLS-1$
-			final byte datDownload[] = this.logclient.download(this.getLogFileName(),this.isReset());
+
+			final byte datDownload[] = this.logclient.download(this.getLogFileName(), this.isReset(), tempLogsDir);
 			if(datDownload != null && datDownload.length > 0 ) {
 
 				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datDownload));
@@ -348,7 +373,7 @@ public class LogAdminService extends HttpServlet {
 			}
 
 			time_end = System.currentTimeMillis();
-			System.out.println("Downloaded :"+ ( time_end - time_start )/1000 +" sec");
+			System.out.println("Downloaded :"+ ( time_end - time_start )/1000 +" sec"); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 		default:
 			LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$

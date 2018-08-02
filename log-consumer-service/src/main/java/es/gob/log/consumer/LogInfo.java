@@ -2,6 +2,7 @@ package es.gob.log.consumer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
@@ -11,7 +12,12 @@ import java.util.logging.Logger;
 /**
  * Informaci&oacute;n sobre el log.
  */
-public class LogInfo {
+public class LogInfo implements Serializable {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 

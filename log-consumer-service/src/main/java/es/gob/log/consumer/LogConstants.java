@@ -17,8 +17,6 @@ public class LogConstants {
 	/**Indica la extensi&oacute;n de lo ficheros de log en uso*/
 	public static final String FILE_EXT_LCK=".lck"; //$NON-NLS-1$
 
-	/** Indica el directorio de los ficheros de log*/
-	public static final String DIR_FILE_LOG = "C:\\Tests"; //$NON-NLS-1$
 
 	/** Indica la extensi&oacute;n de los ficheros comprimidos*/
 	public static final String FILE_EXT__ZIP = ".zip"; //$NON-NLS-1$

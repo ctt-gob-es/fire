@@ -1,6 +1,7 @@
 package es.gob.log.consumer.service;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
@@ -13,13 +14,25 @@ import es.gob.log.consumer.LogInfo;
 import es.gob.log.consumer.LogOpen;
 import es.gob.log.consumer.LogReader;
 
-public class LogOpenServiceManager {
+public class LogOpenServiceManager implements Serializable {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 3381831208944096820L;
 	private static final Logger LOGGER = Logger.getLogger(LogOpenServiceManager.class.getName());
 	private static  LogInfo linfo;
 	private static LogReader reader;
 	private static AsynchronousFileChannel channel;
 
+	/**
+	 *Lanza el proceso de obtener los datos loginfo asociado al fichero log indicado por
+	 *par&aacute;metro "fname" de HttpServletRequest (req)
+	 * @param req
+	 * @param resp
+	 * @return  {@code null} Si el par&aacute;metro "fname" de HttpServletRequest (req) es nulo o vacio
+	 * @throws IOException
+	 */
 	public final static byte [] process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException  {
 		byte [] result = null;
 		/* Obtenemos los par&aacute;metros*/
@@ -27,6 +40,12 @@ public class LogOpenServiceManager {
 		if(logFileName != null && !"".equals(logFileName)) { //$NON-NLS-1$
 			/* Obtenemos la ruta completa al fichero log*/
 			final String path = ConfigManager.getInstance().getLogsDir().toString().concat("\\").concat(logFileName); //$NON-NLS-1$
+			if(path == null || path.equals("")) { //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "Error al abrir el fichero ".concat(logFileName)); //$NON-NLS-1$
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al abrir el fichero ".concat(logFileName));//$NON-NLS-1$
+				result = "\"Error en la respuesta del servidor".getBytes( StandardCharsets.UTF_8); //$NON-NLS-1$
+				return result;
+			}
 			final LogOpen logOpen = new LogOpen(path);
 			try {
 				result = logOpen.openFile(logFileName);

@@ -413,6 +413,11 @@
  function getlongDateTime(date){
 	 var result = -1;
 
+	 if(date == null || typeof date === 'undefined' || date.trim()==""){
+		 return result;
+	 }
+	
+
 	 var day = date.substr (0,2);
 	 var month = date.substr (3,2);
 	 var year = date.substr(6,4);

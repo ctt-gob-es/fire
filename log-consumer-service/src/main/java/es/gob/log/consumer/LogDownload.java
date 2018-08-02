@@ -41,12 +41,7 @@ public class LogDownload {
 		this.zipOutputStream = null;
 		this.closed = false;
 
-//		try {
-//			this.channel.position(0);
-//		}
-//		catch (final Exception e) {
-//			LOGGER.warning("No se ha podido establecer la posicion del canal a su inicio: " + e); //$NON-NLS-1$
-//		}
+
 	}
 
 	/**
@@ -69,11 +64,6 @@ public class LogDownload {
 
 		if (this.zipOutputStream == null) {
 			prepareOutput();
-			// Comprobamos que la posicion este al inicio de la
-
-//			if (this.channel.position() != 0) {
-//				this.channel.position(0);
-//			}
 		}
 
 		// Comprimimos un fragmento de los datos
@@ -146,25 +136,5 @@ public class LogDownload {
 	public final void setPosition(final long position) {
 		this.position = position;
 	}
-
-	// TODO código de prueba pte borrar.
-//	public static void main(final String[] args) throws Exception {
-//
-//		final File dataFile = new File("C:/Tests/142525063585832817.auditDaily.log"); //$NON-NLS-1$
-//		final SeekableByteChannel channel = FileChannel.open(dataFile.toPath(), StandardOpenOption.READ);
-//
-//		final LogDownload donwloader = new LogDownload(dataFile.getName(), channel);
-//
-//		try (FileOutputStream fos = new FileOutputStream("C:/Users/adolfo.navarro/Desktop/142525063585832817.auditDaily.log.zip")) { //$NON-NLS-1$
-//			while (donwloader.hasMore()) {
-//				System.out.println("Descargamos fragmento"); //$NON-NLS-1$
-//				final byte[] fragment = donwloader.download();
-//				System.out.println("Bytes: " + fragment.length); //$NON-NLS-1$
-//				fos.write(fragment);
-//			}
-//		}
-//
-//		channel.close();
-//	}
 
 }

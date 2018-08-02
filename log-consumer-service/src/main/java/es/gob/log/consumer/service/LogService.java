@@ -58,8 +58,9 @@ public class LogService extends HttpServlet {
 			return;
 		}
 
-		final File f = ConfigManager.getInstance().getLogsDir();
-		if (!f.exists()) {
+		final File pathLogs = ConfigManager.getInstance().getLogsDir();
+
+		if (pathLogs == null || !pathLogs.exists()) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cargar el fichero de configuracion del servicio de consulta de logs"); //$NON-NLS-1$
 			return;
 		}
@@ -96,7 +97,7 @@ public class LogService extends HttpServlet {
 				switch (op) {
 				case GET_LOG_FILES:
 					LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
-					result = getLogFiles();
+					result = getLogFiles(pathLogs);
 					if(result == null) {
 						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se han encontrado ficheros log en el servidor indicado"); //$NON-NLS-1$
 						result = new String("No se han encontrado ficheros log en el servidor indicado").getBytes(); //$NON-NLS-1$
@@ -140,7 +141,7 @@ public class LogService extends HttpServlet {
 					break;
 				case DOWNLOAD:
 					LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
-					result = download(req,resp);
+					result = download(req, resp, pathLogs);
 					break;
 				default:
 					LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
@@ -283,8 +284,8 @@ public class LogService extends HttpServlet {
 	 * lo indica como mensaje de error.
 	 * @return
 	 */
-	private static byte[] getLogFiles ()  {
-		final byte[] result = LogFilesServiceManager.process();
+	private static byte[] getLogFiles (final File pathLogs)  {
+		final byte[] result = LogFilesServiceManager.process(pathLogs);
 		return result;
 	}
 
@@ -395,15 +396,8 @@ public class LogService extends HttpServlet {
 		return result;
 	}
 
-	private static byte[] compress(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
-	}
 
-	private static byte[] compressChecking(final HttpServletRequest req) {
-		throw new UnsupportedOperationException();
-	}
-
-	private static byte[] download(final HttpServletRequest req, final HttpServletResponse resp) throws SessionException, IOException {
+	private static byte[] download(final HttpServletRequest req, final HttpServletResponse resp, final File pathLogs) throws SessionException, IOException {
 		final HttpSession session = req.getSession(true);
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
@@ -413,7 +407,7 @@ public class LogService extends HttpServlet {
 		if(reset) {
 			removeDownloadSessions(session) ;
 		}
-		final byte[] result = LogDownloadServiceManager.process(req, resp);
+		final byte[] result = LogDownloadServiceManager.process(req, resp, pathLogs.getPath());
 		if(LogDownloadServiceManager.isHasMore()) {
 			setStatusCode(HttpServletResponse.SC_PARTIAL_CONTENT);
 		}
