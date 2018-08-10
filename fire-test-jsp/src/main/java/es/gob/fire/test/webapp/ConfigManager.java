@@ -9,7 +9,6 @@
  */
 package es.gob.fire.test.webapp;
 
-import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +24,8 @@ import es.gob.fire.client.FireClient;
 public class ConfigManager {
 
 	private static final String CONFIG_FILE_PATH = "/test-app.properties"; //$NON-NLS-1$
+
+	private static final String CONFIG_FILE = "test-app.properties"; //$NON-NLS-1$
 
 	private static final String PROP_APP_ID = "appId"; //$NON-NLS-1$
 
@@ -42,6 +43,8 @@ public class ConfigManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
 
+	private static Properties config = null;
+
 	/**
 	 * Obtenemos una instancia del manejador de configuraci&oacute;n.
 	 * @return Manejador de configuraci&oacute;n.
@@ -53,30 +56,62 @@ public class ConfigManager {
 		return instance;
 	}
 
-	private final Properties config;
 
 	private FireClient fireClient = null;
 
 	private ConfigManager() {
 
-		final InputStream is = ConfigManager.class.getResourceAsStream(CONFIG_FILE_PATH);
-
-		this.config = new Properties();
-
 		try {
-			this.config.load(is);
+			checkInitialized();
+
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "No se ha podido cargar la configuracion de la aplicacion: " + e, e); //$NON-NLS-1$
 		}
-		try {
-			is.close();
-		}
-		catch (final Exception e) {
-			LOGGER.warning("Error desconocido al cerrar el fichero de configuracion: " + e); //$NON-NLS-1$
-		    // No se ha podido cerrar
+
+	}
+
+
+
+	/**
+	 * Carga el fichero de configuraci&oacute;n del m&oacute;dulo.
+	 * @throws ConfigFilesException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n.
+	 */
+	private static void loadConfig() throws  ConfigFilesException {
+
+		if (config == null) {
+			try {
+				config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
+			}
+			catch (final Exception e) {
+				LOGGER.severe("No se pudo cargar el fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
+				throw new ConfigFilesException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
+			}
 		}
 	}
+
+
+
+	/**
+	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
+	 * @throws ConfigFilesException Si no encuentra el fichero login.properties.
+	 */
+	private static void checkInitialized() throws ConfigFilesException {
+
+		loadConfig();
+
+		if (config == null) {
+			LOGGER.severe("No se ha encontrado el fichero de configuracion de la conexion"); //$NON-NLS-1$
+			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion de la conexion", CONFIG_FILE); //$NON-NLS-1$
+		}
+
+
+	}
+
+
+
+
+
 
 	/**
 	 * Recupera el identificador de la aplicaci&oacute;n.
@@ -84,8 +119,8 @@ public class ConfigManager {
 	 */
 	public String getAppId() {
 		String appId = null;
-		if (this.config != null) {
-			appId = this.config.getProperty(PROP_APP_ID);
+		if (ConfigManager.config != null) {
+			appId = ConfigManager.config.getProperty(PROP_APP_ID);
 		}
 		return appId;
 	}
@@ -96,8 +131,8 @@ public class ConfigManager {
 	 */
 	public String getAppName() {
 		String appName = null;
-		if (this.config != null) {
-			appName = this.config.getProperty(PROP_APP_NAME);
+		if (ConfigManager.config != null) {
+			appName = ConfigManager.config.getProperty(PROP_APP_NAME);
 		}
 		return appName;
 	}
@@ -109,8 +144,8 @@ public class ConfigManager {
 	 */
 	public String addUrlBase(final String relativeUrl) {
 		String urlBase = null;
-		if (this.config != null) {
-			urlBase = this.config.getProperty(PROP_URL_BASE);
+		if (ConfigManager.config != null) {
+			urlBase = ConfigManager.config.getProperty(PROP_URL_BASE);
 		}
 		if (urlBase == null) {
 			return relativeUrl;
@@ -127,8 +162,8 @@ public class ConfigManager {
 	 */
 	public String getTempDir() {
 		String tmpDir = null;
-		if (this.config != null) {
-			tmpDir = this.config.getProperty(PROP_TMP_DIR);
+		if (ConfigManager.config != null) {
+			tmpDir = ConfigManager.config.getProperty(PROP_TMP_DIR);
 		}
 		return tmpDir;
 	}
@@ -142,8 +177,8 @@ public class ConfigManager {
 	 */
 	public String getProcedureName() {
 		String procName = null;
-		if (this.config != null) {
-			procName = this.config.getProperty(PROP_PROCEDURE_NAME);
+		if (ConfigManager.config != null) {
+			procName = ConfigManager.config.getProperty(PROP_PROCEDURE_NAME);
 		}
 		return procName;
 	}
@@ -155,8 +190,8 @@ public class ConfigManager {
 	 */
 	public String getCertOrigin() {
 		String origin = null;
-		if (this.config != null) {
-			origin = this.config.getProperty(PROP_CERTIFICATE_ORIGIN);
+		if (ConfigManager.config != null) {
+			origin = ConfigManager.config.getProperty(PROP_CERTIFICATE_ORIGIN);
 		}
 		return origin;
 	}
