@@ -88,7 +88,7 @@
 							<label for="es-ltv-ft">ES-LTV</label><br>
 			   	</fieldset>
 
-				<input id="extraparams-conf" type="hidden" name="extraParams" value="bW9kZT1pbXBsaWNpdA=="/> <!-- ExtraParams (mode=implicit) en Base64 URL SAFE -->
+				<input id="extraparams-conf" type="hidden" name="extraParams" value="bW9kZT1pbXBsaWNpdApmaWx0ZXJzPW5vbmV4cGlyZWQ6"/> <!-- ExtraParams (mode=implicit y filters=nonexpired:) en Base64 -->
 
 				<div style="margin-top:30px;text-align: center; ">
 					<input  id="submit-btn"  type="submit" value="AGREGAR DOCUMENTOS AL LOTE">

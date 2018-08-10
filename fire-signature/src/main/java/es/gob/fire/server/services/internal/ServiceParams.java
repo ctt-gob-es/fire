@@ -92,6 +92,8 @@ public class ServiceParams {
     public static final String SESSION_PARAM_FORMAT = "format"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con las propiedades para la configuraci&oacute;n de la firma de base 64. */
     public static final String SESSION_PARAM_EXTRA_PARAM = "properties"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el listado de filtros para la firma con certificado local. */
+    public static final String SESSION_PARAM_FILTERS = "filters"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el formato avanzado de actualizaci&oacute;n de la firma. */
     public static final String SESSION_PARAM_UPGRADE = "upgrade"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el documento de propiedades para la redirecci&oacute;n del usuario. */

@@ -11,6 +11,7 @@ package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.ServiceUtil;
 
 /**
  * Manejador que gestiona las peticiones de creaci&oacute;n de un lote de firma, al que posteriormente
@@ -40,15 +42,15 @@ public class CreateBatchManager {
 		throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
-		final String op				= params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
-		final String appId			= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
-		final String subjectId		= params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
-		final String cop			= params.getParameter(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION);
-		final String algorithm		= params.getParameter(ServiceParams.HTTP_PARAM_ALGORITHM);
-		final String format 		= params.getParameter(ServiceParams.HTTP_PARAM_FORMAT);
-		final String extraParamsB64	= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
-		final String configB64		= params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
-		final String upgrade		= params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
+		final String op			= params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
+		final String appId		= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
+		final String subjectId	= params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String cop		= params.getParameter(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION);
+		final String algorithm	= params.getParameter(ServiceParams.HTTP_PARAM_ALGORITHM);
+		final String format 	= params.getParameter(ServiceParams.HTTP_PARAM_FORMAT);
+		final String configB64	= params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
+		final String upgrade	= params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
+		String extraParamsB64	= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
 		if (subjectId == null || subjectId.isEmpty()) {
@@ -77,6 +79,17 @@ public class CreateBatchManager {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha indicado el formato de firma"); //$NON-NLS-1$
 			return;
+		}
+
+		// Si se especificaron filtros de certificados para su uso con el
+		// Cliente @firma, se habran indicado junto a las propiedades por defecto
+		// de configuracion para las firmas del lote. Extraemos los filtros de esas
+		// propiedades (si los hubiese) y los almacenamos por separado
+		String filters = null;
+		if (extraParamsB64 != null) {
+			final Properties extraParams = ServiceUtil.base642Properties(extraParamsB64);
+			filters = MiniAppletHelper.extractCertFiltersParams(extraParams);
+			extraParamsB64 = ServiceUtil.properties2Base64(extraParams);
 		}
 
 		TransactionConfig connConfig = null;
@@ -127,6 +140,7 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
         session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParamsB64);
+        session.setAttribute(ServiceParams.SESSION_PARAM_FILTERS, filters != null ? filters.toString() : null);
         session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, upgrade);
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
