@@ -11,6 +11,7 @@ package es.gob.fire.test.webapp;
 
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.fire.client.ClientConfigFilesNotFoundException;
@@ -66,7 +67,7 @@ public class ConfigManager {
 			this.config.load(is);
 		}
 		catch (final Exception e) {
-			LOGGER.warning("No se ha podido cargar la configuracion de la aplicacion: " + e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "No se ha podido cargar la configuracion de la aplicacion: " + e, e); //$NON-NLS-1$
 		}
 		try {
 			is.close();
