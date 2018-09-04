@@ -28,21 +28,26 @@ public class LogMoreServiceManager {
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
+		final Long fileSize = (Long) session.getAttribute("FileSize"); //$NON-NLS-1$
 		final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
 
 		try {
 
 			final int iNumLines = Integer.parseInt(sNumLines.trim());
+
 			//Comprobamos que el fichero de log no se ha modificado en el trascurso de haber pulsado anteriormente la funci&oacute;n
 			//Tail, y pueda haber m&aacute;s lineas, en ese caso se cierra el reader para cargarlo en la nueva posici&oacute;n
-			if( filePosition != null && channel.size() >  filePosition.longValue() ) {
-				reader.close();
-				reader.load(filePosition.longValue());
+			if( channel.size() > fileSize.longValue() && reader.isEndFile()) {
+				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
 				reader.setEndFile(false);
+				if(filePosition.longValue() > 0L) {
+					reader.reload(filePosition.longValue());
+				}
+
 			}
 			//Si es el final de fichero se indica con un mensaje
 			if(reader.isEndFile()) {
-				LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
+				LOGGER.log(Level.INFO,"No se han encontrado más ocurrencias en la  búsqueda"); //$NON-NLS-1$
 				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No existen más líneas en este momento para este fichero log");//$NON-NLS-1$
 				result = new String("No existen m&aacute;s l&iacute;neas en este momento para este fichero log").getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
 				session.setAttribute("Reader", reader); //$NON-NLS-1$
@@ -50,18 +55,21 @@ public class LogMoreServiceManager {
 			}
 
 			final LogMore logMore = new LogMore();
-			result = logMore.getLogMore(iNumLines,reader);
+//			logMore.setFilePosition(filePosition != null ? filePosition.longValue() : 0);
+			result = logMore.getLogMore(iNumLines, reader);
 			//Si es el final de fichero se indica con un mensaje
 			 if (result != null && result.length <= 0) {
-					LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en la  b&uacute;squeda"); //$NON-NLS-1$
+					LOGGER.log(Level.INFO,"No se han encontrado más ocurrencias en la  búsqueda"); //$NON-NLS-1$
 					resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No existen más líneas en este momento para este fichero log");//$NON-NLS-1$
 					result = new String("No existen m&aacute;s l&iacute;neas en este momento para este fichero log").getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
 					session.setAttribute("Reader", reader); //$NON-NLS-1$
 					return result;
 			}
 
-			session.setAttribute("FilePosition", new Long(logMore.getFilePosition())); //$NON-NLS-1$
+			session.setAttribute("FilePosition",new Long(reader.getFilePosition())); //$NON-NLS-1$
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
+
+
 		}
 		catch (final IOException e) {
 			LOGGER.log(Level.SEVERE,"No se ha podido leer el fichero",e); //$NON-NLS-1$
@@ -69,23 +77,27 @@ public class LogMoreServiceManager {
 			if (reader.isEndFile()){
 				 msg = "No existen más líneas en este momento para este fichero log"; //$NON-NLS-1$
 			}
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);
+			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);
 			result = msg.getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8);
+
 			return result;
 		}
 		catch (final NumberFormatException e) {
 			LOGGER.log(Level.SEVERE,"No el parametro nlines no es un numero entero",e); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No el parametro nlines no es un numero entero");//$NON-NLS-1$
 			result = "No el parametro nlines no es un numero entero".getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
+
 			return result;
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,"Error en servidor.",e); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error en la respuesta del servidor");//$NON-NLS-1$
 			result = "\"Error en la respuesta del servidor".getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
+
 			return result;
 
 		}
+
 		return result;
 
 

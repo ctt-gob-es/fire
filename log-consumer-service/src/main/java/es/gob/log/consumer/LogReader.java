@@ -28,11 +28,16 @@ public interface LogReader {
 	void load() throws IOException;
 
 	/**
-	 * Inicia el proceso de carga del log indicando una posici&oacute;
+	 * Inicia el proceso de carga del log indicando una posici&oacute;n
 	 * @param position
 	 * @throws IOException
 	 */
 	public void load(final long position) throws IOException;
+
+	/** Inicia el proceso de carga del log.
+	 * @throws IOException Cuando se produce un error durante la carga. */
+	void reload(final long position) throws IOException;
+
 
 	/**
 	 * Devuelve la l&iacute;nea actualmente cargada. Si nunca se ha cargado a&uacute;n una,
@@ -66,6 +71,13 @@ public interface LogReader {
 	  */
 	 public long getFilePosition() ;
 
+
+	 /**
+	  * Obtiene la posici&oacute;n actual dentro del log.
+	  * @return Posici&oacute;n en el log.
+	  */
+	 public long getFileFragmentedPosition() ;
+
 	 /**
 	  * Indica si hemos llegado al final de la lectura del fichero.
 	  * @return {@code true} si la posicion actual es el fin de fichero, {@code false} en
@@ -78,4 +90,27 @@ public interface LogReader {
 	  * @return
 	  */
 	 public void setEndFile(final boolean endOfFile);
+
+	 /**
+	  * Obtiene las lineas leidas
+	  * @return
+	  */
+	 public int getLinesReaded();
+
+	 /**
+	  * Establece el las lineas leidas
+	  */
+	 public void setLinesReaded(final int linesReaded);
+
+	 /**
+	  * Obtiene las lineas que se van a leer
+	  * @return
+	  */
+	 public int getLinesToRead();
+
+	 /**
+	  * Establece que se van a leer
+	  */
+	 public void setLinesToRead(final int linesReaded);
+
 }

@@ -308,6 +308,7 @@ public class LogService extends HttpServlet {
 		}
 		if(LogOpenServiceManager.getChannel()!=null) {
 			session.setAttribute("Channel", LogOpenServiceManager.getChannel()); //$NON-NLS-1$
+			session.setAttribute("FileSize", new Long (LogOpenServiceManager.getChannel().size())); //$NON-NLS-1$
 		}
 		if(LogOpenServiceManager.getReader()!=null) {
 			session.setAttribute("Reader", LogOpenServiceManager.getReader());	 //$NON-NLS-1$

@@ -38,6 +38,8 @@ public class FragmentedFileReader implements LogReader {
 
 	private long filePosition = 0;
 
+	private long fileFragmentPosition = 0;
+
 	private boolean moreData = true;
 
 	private BufferedReader linesReader = null;
@@ -50,7 +52,10 @@ public class FragmentedFileReader implements LogReader {
 
 	private  boolean endFile = false;
 
-	//private  int nLinesReaded = 0;
+	private  int linesReaded = 0;
+
+	private  int linesToRead = 0;
+
 	/**
 	 * Crea el objeto para la carga de ficheros.
 	 * @param channel Canal para la lectura del fichero.
@@ -61,6 +66,7 @@ public class FragmentedFileReader implements LogReader {
 		if (channel == null) {
 			throw new NullPointerException("El canal del lector no puede ser nulo"); //$NON-NLS-1$
 		}
+
 
 		this.bBuffer = ByteBuffer.allocate(512000);
 		this.channel = channel;
@@ -81,21 +87,33 @@ public class FragmentedFileReader implements LogReader {
 
 	@Override
 	public void load() throws IOException {
-		load(0);
+		load(0L);
 	}
 
 	@Override
 	public void load(final long position) throws IOException {
-		this.filePosition = position;
+
+		setLinesReaded(0);
+		setLinesToRead(0);
+		setEndFile(false);
+
+		this.fileFragmentPosition = position;
 
 		// Cacheamos un fragmento del fichero
-		final Future<Integer> readerProcess = this.channel.read(this.bBuffer, this.filePosition);
+
+
+		//this.bBuffer.limit((int)this.channel.size());
+		final Future<Integer> readerProcess = this.channel.read(this.bBuffer, this.fileFragmentPosition);
 
 		// Esperamos a que termine la lectura (espera intrinseca del get()) y vemos
 		// cuanto hemos leido
-		final int readedCount;
+
 		try {
-			readedCount =  readerProcess.get().intValue();
+			//se establece el numero de lineas que van a ser leidas en el fragmento cargado;
+			setLinesToRead(readerProcess.get().intValue());
+			if(getLinesToRead() == -1) {
+				throw new IOException("No hay datos a leer en este momento"); //$NON-NLS-1$
+			}
 
 		}
 		catch (InterruptedException | ExecutionException e) {
@@ -104,12 +122,13 @@ public class FragmentedFileReader implements LogReader {
 
 		// Si se ha leido menos de la capacidad del buffer, es que hemos
 		// llegado al final del fichero
-		if (readedCount < this.bBuffer.capacity()) {
+
+		if (getLinesToRead() < this.bBuffer.capacity()) {
 			this.moreData = false;
 		}
 
 		// Actualizamos la posicion del fichero
-		this.filePosition += readedCount;
+		this.fileFragmentPosition += getLinesToRead();
 
 		// Preparamos un lector para la carga de lineas concretas y cargamos las dos primeras. Esta logica
 		// presupone que la longitud de las dos lineas no excede el tamano del buffer
@@ -123,6 +142,10 @@ public class FragmentedFileReader implements LogReader {
 		}
 		this.nextLine2 = readNewLine();
 	}
+
+
+
+
 
 	@Override
 	public CharBuffer getCurrentLine() {
@@ -138,6 +161,10 @@ public class FragmentedFileReader implements LogReader {
 		}
 
 		CharBuffer result = null;
+
+		if(this.endFile) {
+			return result;
+		}
 
 		// Solo devolveremos una linea si ya la tenemos cargada (o al menos en parte)
 		if (this.nextLine != null) {
@@ -174,7 +201,13 @@ public class FragmentedFileReader implements LogReader {
 		}
 
 		this.line = result;
-		//setnLinesReaded(getnLinesReaded() + 1);
+
+		//Comprobamos que el acumulado de las lineas leidas son iguales a las lineas cargadas que se iban a leer
+		// en dicho caso hemos llegado al final de las lineas que se tenian que leer.
+		if(getLinesReaded() >= getLinesToRead() && this.nextLine == null ) {//getLinesReaded() > getLinesToRead()
+			this.endFile = true;
+		}
+
 		return result;
 	}
 
@@ -186,20 +219,62 @@ public class FragmentedFileReader implements LogReader {
 	 */
 	private CharBuffer readNewLine() throws IOException {
 
-		String newLine = this.linesReader.readLine();
+		boolean moreLines = true;
+
+		final CharBuffer  line1 = CharBuffer.allocate(12000);
+
+
+		Character next_character = new Character((char) this.linesReader.read());
+		final Character nIntro =  new Character('\n');
+		final Character rIntro =  new Character('\r');
+
+		while (next_character.charValue() != -1) {
+
+			if(next_character.compareTo(rIntro) == 0 ) {
+				setLinesReaded(getLinesReaded() + 2);
+				final int next = this.linesReader.read();
+				break;
+			}
+			if(next_character.compareTo(nIntro) == 0 ) {
+				setLinesReaded(getLinesReaded() + 1);
+				break;
+			}
+
+			setLinesReaded(getLinesReaded() + 1);
+			line1.append(next_character.charValue());
+			final String line = line1.toString();
+			if(getLinesReaded() > getLinesToRead() ) {
+				setLinesReaded(getLinesReaded() - 1 );
+				this.filePosition += getLinesReaded();
+				moreLines = false;
+				break;
+			}
+
+			next_character = new Character((char) this.linesReader.read());
+
+
+		}
+//
+//		//String newLine = this.linesReader.readLine();
+		line1.flip();
+		final String newLine = line1.toString();
+		//System.out.println("Linea leida = " + newLine);
+		line1.clear();
+//		final String newLine = sbLine.toString();
 
 		// Si el ultimo caracter de la linea es el del fin de fichero, cortamos la linea
 		// para no incluir ninguno de estos caracteres
-		if (newLine != null && newLine.length() > 0) {
-			if (newLine.charAt(newLine.length() - 1) == CHAR_NULL) {
-				int i = 0;
-				while (newLine.charAt(i) != CHAR_NULL) {
-					i++;
-				}
-				newLine = newLine.substring(0,  i);
-			}
-		}
-		return newLine != null ? CharBuffer.wrap(newLine) : null;
+//		if (newLine != null && newLine.length() > 0) {
+//
+//			if (newLine.charAt(newLine.length() - 1) == CHAR_NULL) {
+//				int i = 0;
+//				while (newLine.charAt(i) != CHAR_NULL) {
+//					i++;
+//				}
+//				newLine = newLine.substring(0,  i);
+//			}
+//		}
+		return newLine != null && moreLines  ? CharBuffer.wrap(newLine) : null;
 	}
 
 	/**
@@ -212,14 +287,15 @@ public class FragmentedFileReader implements LogReader {
 		// Retrasamos la posicion del fichero hasta el principio de la linea actual, para volver a
 		// leer este trozo de linea en el nuevo fragmento
 		final int remainingBytes = this.charset.encode(this.nextLine).flip().limit();
-		this.filePosition -= remainingBytes;
+		this.fileFragmentPosition -= remainingBytes;
 
 		// Cacheamos un nuevo fragmento del fichero
-		final Future<Integer> readerProcess = this.channel.read(this.bBuffer, this.filePosition);
+		final Future<Integer> readerProcess = this.channel.read(this.bBuffer, this.fileFragmentPosition);
 
 		// Esperamos a que termine la lectura (espera intrinseca del get()) y vemos
 		// cuanto hemos leido
 		final int readedCount = 0;
+
 		try {
 			readerProcess.get().intValue();
 		}
@@ -229,18 +305,35 @@ public class FragmentedFileReader implements LogReader {
 
 		// Si se ha leido menos de la capacidad del buffer, es que hemos
 		// llegado al final del fichero
-		if (readedCount < this.bBuffer.capacity()) {
+		if (readedCount < this.bBuffer.capacity()) { //readedCount < this.bBuffer.capacity()
 			this.moreData = false;
 		}
 
 		// Actualizamos la posicion en el fichero
-		this.filePosition += readedCount;
+		this.fileFragmentPosition += readedCount;//readedCount
 
 		// Cerramos la conexion
 		this.linesReader.close();
 
 		// Preparamos el nuevo lector de lineas
 		this.linesReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(this.bBuffer.array()), this.charset));
+
+		//inicializamos la posición dentro
+	}
+
+
+	@Override
+	public void reload(final long position) throws IOException {
+//		if(getLinesReaded() > position) {
+//			setLinesReaded(getLinesReaded() - 1);
+//			this.filePosition += getLinesReaded();
+//		}
+		if(this.filePosition < position) {
+			this.filePosition = position;
+		}
+		final long currentFilePosition = this.filePosition;
+		close();
+		load(currentFilePosition);
 	}
 
 	@Override
@@ -248,16 +341,20 @@ public class FragmentedFileReader implements LogReader {
 		return this.filePosition;
 	}
 
-
+	@Override
+	public long getFileFragmentedPosition() {
+		return this.fileFragmentPosition;
+	}
 
 	@Override
 	public void rewind() throws IOException {
-		this.filePosition = 0;
-		load(this.filePosition);
+		this.fileFragmentPosition = 0;
+		load(this.fileFragmentPosition);
 	}
 
 	@Override
 	public void close() throws IOException {
+
 		this.linesReader.close();
 		this.bBuffer.clear();
 	}
@@ -273,13 +370,48 @@ public class FragmentedFileReader implements LogReader {
 
 	}
 
-//	public final int getnLinesReaded() {
-//		return this.nLinesReaded;
-//	}
-//
-//	public final void setnLinesReaded(final int nLinesReaded) {
-//		this.nLinesReaded = nLinesReaded;
-//	}
+
+
+	@Override
+	public int getLinesReaded() {
+		return this.linesReaded;
+	}
+
+
+	@Override
+	public void setLinesReaded(final int linesReaded) {
+		this.linesReaded = linesReaded;
+
+	}
+
+
+
+	@Override
+	public int getLinesToRead() {
+		return this.linesToRead;
+	}
+
+
+
+	@Override
+	public void setLinesToRead(final int linesToRead) {
+		this.linesToRead = linesToRead;
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

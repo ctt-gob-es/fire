@@ -2,6 +2,7 @@ package es.gob.log.consumer.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +47,7 @@ public class LogTailServiceManager {
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		final String sNumLines = req.getParameter(ServiceParams.NUM_LINES);
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
-//		final AsynchronousFileChannel channel_session = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
+		final AsynchronousFileChannel channel_session = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
 //		if(getError()!= null && getError().getMsgError() != null && !"".equals(getError().getMsgError())) { //$NON-NLS-1$
 //			setError(null);
 //		}
@@ -63,6 +64,7 @@ public class LogTailServiceManager {
 					final String resTail = lTail.getLogTail(iNumLines);
 					result = resTail.getBytes(info.getCharset());
 					session.setAttribute("FilePosition",Long.valueOf(lTail.getFilePosition()));//$NON-NLS-1$
+					session.setAttribute("FileSize", new Long (channel_session.size())); //$NON-NLS-1$
 					reader.setEndFile(true);
 					session.setAttribute("Reader",reader);//$NON-NLS-1$
 				}
