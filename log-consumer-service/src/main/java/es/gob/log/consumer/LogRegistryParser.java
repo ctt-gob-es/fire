@@ -52,6 +52,10 @@ public class LogRegistryParser {
 	 */
 	LogRegistry parse(final LogReader reader) throws IOException, InvalidRegistryFormatException {
 
+		if(reader.isEndFile()) {
+			return null;
+		}
+
 		final LogRegistry registry = new LogRegistry(reader.getCurrentLine().toString());
 		if (this.pParsers != null) {
 			try {

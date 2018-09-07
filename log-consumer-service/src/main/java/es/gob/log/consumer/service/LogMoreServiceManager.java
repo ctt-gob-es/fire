@@ -40,10 +40,9 @@ public class LogMoreServiceManager {
 			if( channel.size() > fileSize.longValue() && reader.isEndFile()) {
 				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
 				reader.setEndFile(false);
-				if(filePosition.longValue() > 0L) {
+				if(filePosition != null && filePosition.longValue() > 0L) {
 					reader.reload(filePosition.longValue());
 				}
-
 			}
 			//Si es el final de fichero se indica con un mensaje
 			if(reader.isEndFile()) {

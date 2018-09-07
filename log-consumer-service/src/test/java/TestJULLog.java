@@ -28,7 +28,7 @@ public class TestJULLog {
 				final LogReader reader = new FragmentedFileReader(channel, StandardCharsets.UTF_8);
 				final LogFilter filter = new LogFilter(new LogInfo());
 
-				filter.load(reader);
+				filter.loadReaderToFilter(reader);
 
 				final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				final Date startDate = formatter.parse("2018-03-28 12:41:13");

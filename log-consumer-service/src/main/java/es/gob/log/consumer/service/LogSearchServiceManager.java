@@ -1,6 +1,7 @@
 package es.gob.log.consumer.service;
 
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -36,44 +37,37 @@ public class LogSearchServiceManager {
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
-		//final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
-//		Integer nlines =  new Integer(0);
+		final Long fileSize = (Long) session.getAttribute("FileSize");  //$NON-NLS-1$
+		final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
+
 
 		try {
 
-			if(reset || filePosition != null &&  filePosition.longValue() == 0L) {
+			if(reset ) {// || filePosition != null &&  filePosition.longValue() == 0L
 				reader.close();
 				reader.load();
 				reader.setEndFile(false);
 			}
 
-//			if ((Integer)session.getAttribute("nLinesRead") != null ) { //$NON-NLS-1$
-//				nlines = (Integer)session.getAttribute("nLinesRead"); //$NON-NLS-1$
-//			}
+			if( channel.size() > fileSize.longValue() && reader.isEndFile()) {
+				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
+				if(filePosition != null && filePosition.longValue() > 0L) {
+					reader.reload(filePosition.longValue());
+				}
+			}
 
-
-			final LogSearchText logSearch = new LogSearchText(info, reader);
+			final LogSearchText logSearch = new LogSearchText(info);
 
 			if(sdateTime == null || sdateTime.longValue() < 0L) {
-				result = logSearch.searchText(Integer.parseInt(sNumLines), text);//Integer.parseInt(sNumLines) - nlines.intValue()
+				result = logSearch.searchText(Integer.parseInt(sNumLines), text, reader);//Integer.parseInt(sNumLines) - nlines.intValue()
 			}
 			else {
-				result = logSearch.searchText(Integer.parseInt(sNumLines) , text, sdateTime.longValue());
+				result = logSearch.searchText(Integer.parseInt(sNumLines) , text, sdateTime.longValue(), reader);
 			}
-//			session.setAttribute("nLinesRead", new Integer(logSearch.getnLinesReaded())); //$NON-NLS-1$
 
-//			if(logSearch.getnLinesReaded() + nlines.intValue() == Integer.parseInt(sNumLines) || reader.getFilePosition() == channel.size() ) {
-//				setHasMore(false);
-//			}
-//			else if(logSearch.getnLinesReaded() + nlines.intValue() < Integer.parseInt(sNumLines) && reader.getFilePosition() != channel.size()) {
-//				setHasMore(true);
-//				reader.setEndFile(false);
-//			}
 
+			session.setAttribute("FilePosition",new Long(reader.getFilePosition())); //$NON-NLS-1$
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
-			if(logSearch.getFilePosition() > 0L) {
-				session.setAttribute("FilePosition",Long.valueOf(logSearch.getFilePosition())); //$NON-NLS-1$
-			}
 
 			if(result == null) {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se han encontrado más ocurrencias en la búsqueda"); //$NON-NLS-1$

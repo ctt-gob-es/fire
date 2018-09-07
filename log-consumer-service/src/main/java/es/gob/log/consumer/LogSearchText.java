@@ -11,16 +11,15 @@ public class LogSearchText {
 
 	private final LogInfo logInfor;
 	private long filePosition;
-	private final LogReader reader;
 	private int nLinesReaded = 0;
 
 
 	private static final Logger LOGGER = Logger.getLogger(LogSearchText.class.getName());
 	/**Constructor
 	 * @throws InvalidPatternException */
-	public LogSearchText(final LogInfo logInfo,final LogReader reader) throws InvalidPatternException {
+	public LogSearchText(final LogInfo logInfo) throws InvalidPatternException {
 		this.logInfor = logInfo;
-		this.reader = reader;
+
 		this.setFilePosition(0L);
 
 	}
@@ -36,8 +35,8 @@ public class LogSearchText {
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
-	public final  byte[] searchText(final int numLines, final String text) throws IOException, InvalidPatternException, InterruptedException, ExecutionException {
-		return this.searchText(numLines,text,-1);
+	public final  byte[] searchText(final int numLines, final String text,final LogReader reader) throws IOException, InvalidPatternException, InterruptedException, ExecutionException {
+		return this.searchText(numLines,text,-1,reader);
 	}
 
 	/**
@@ -53,13 +52,14 @@ public class LogSearchText {
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
-	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec) throws IOException, InvalidPatternException, InterruptedException, ExecutionException {
+	public final  byte[] searchText(final int numLines, final String text, final long dateTimeMillisec, final LogReader reader) throws IOException, InvalidPatternException, InterruptedException, ExecutionException {
 
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		boolean found = false;
 		final LogFilter filter = new LogFilter(this.logInfor);
-		filter.load(this.reader);
+
+		filter.loadReaderToSearch(reader);
 			/*Se obtiene la fecha de b&uacute;squeda pasada en milisegundos si se ha pasado por par&aacute;metro
 			 * y se obtiene la posici&oacute;n del comienzo de la l&iacute;nea en la que se encuentra la fecha indicada*/
 		if(dateTimeMillisec != -1) {
@@ -68,8 +68,8 @@ public class LogSearchText {
 			filter.setCriteria(crit);
 		}
 
-		while (!found && !this.reader.isEndFile()) {
-			final byte[] filteredLines = filter.filter(10);
+		while (!found && !reader.isEndFile()) {
+			final byte[] filteredLines = filter.filter(2);
 			if( new String(filteredLines).indexOf(text) != -1) {
 				baos.write(filteredLines);
 				found = true;
@@ -83,7 +83,7 @@ public class LogSearchText {
 			if(baos.size() > 0 && baos.toByteArray() != null) {
 				linesReaded = LogSearchText.countLines(baos.toByteArray());
 			}
-			baos.write(this.getText( numLines - linesReaded));
+			baos.write(this.getText(numLines - linesReaded, reader));
 			setnLinesReaded(getnLinesReaded() + linesReaded);
 		}
 		else {
@@ -97,19 +97,23 @@ public class LogSearchText {
 	}
 
 
-	private final byte[] getText( final int lines) throws IOException {
+	private final byte[] getText( final int lines, final LogReader reader) throws IOException {
 		String result = ""; //$NON-NLS-1$
 		CharBuffer cbLine;
 		int numLines = 1;
-		while(numLines < lines && (cbLine = this.reader.readLine()) != null) {
+		if(reader.getCurrentLine() != null) {
+			result = result.concat(reader.getCurrentLine().toString()).concat("\n"); //$NON-NLS-1$
+		}
+
+		while(numLines < lines && (cbLine = reader.readLine()) != null) {
 			cbLine.rewind();
 			result = result.concat(cbLine.toString()).concat("\n"); //$NON-NLS-1$
 			numLines++;
 		}
-		setFilePosition(this.reader.getFilePosition());
+		//setFilePosition(this.reader.getLinesToRead());
 		setnLinesReaded(getnLinesReaded() + numLines);
 
-		return result.getBytes(this.reader.getCharset());
+		return result.getBytes(reader.getCharset());
 	}
 
 	private final static int countLines(final byte[] data) {

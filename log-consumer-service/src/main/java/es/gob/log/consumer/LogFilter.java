@@ -39,7 +39,7 @@ public class LogFilter {
 	 * @throws InterruptedException Cuando la carga del fichero se ve interrumpida.
 	 * @throws ExecutionException Cuando se produce un error al cargar el fichero.
 	 */
-	public void load(final LogReader reader)
+	private void load(final LogReader reader)
 			throws IOException, InterruptedException, ExecutionException {
 
 		if (this.logReader != null) {
@@ -49,14 +49,46 @@ public class LogFilter {
 		this.logReader = reader;
 		this.logReader.setIgnoreEmptyLines(true);
 
-		if(this.logReader.getFilePosition() <= 0L) {
+		if(this.logReader.getFileFragmentedPosition() <= 0L) {//getFilePosition()
 			this.logReader.load();
 		}
 
-
-		this.registryReader.loadReader(this.logReader);
-
 		this.more = true;
+	}
+
+	/**
+	 * Carga lector de logs.Avanzando siempre a la siguiente l&inea
+	 * @param reader
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	public void loadReaderToSearch(final LogReader reader) throws IOException, InterruptedException, ExecutionException {
+
+		load(reader);
+		this.registryReader.loadReader(this.logReader);
+	}
+
+	/**
+	 * Carga lector de logs.
+	 * Avanzando  a la siguiente l&iacute;nea, en el caso de ser una nueva cargar o recarga del registro.
+	 * No avanza a la siguiente l&iacute;nea si dentro de cada carga se piden m&aacute;s datos para mostrar.
+	 * @param reader
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	public void loadReaderToFilter(final LogReader reader) throws IOException, InterruptedException, ExecutionException {
+
+		load(reader);
+
+		if(this.logReader.getCurrentLine() == null || this.logReader.getCurrentLine() != null && this.logReader.isReloaded() ) {
+			this.registryReader.loadReader(this.logReader);
+		}
+		else  {
+			this.registryReader.load(this.logReader);
+		}
+
 	}
 
 	/**
@@ -110,8 +142,6 @@ public class LogFilter {
 
 		return baos.toByteArray();
 	}
-
-
 
 
 

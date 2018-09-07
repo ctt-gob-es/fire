@@ -35,7 +35,7 @@ public class TestLogbackLog {
 				final LogReader reader = new FragmentedFileReader(channel, info.getCharset());
 				final LogFilter filter = new LogFilter(info);
 
-				filter.load(reader);
+				filter.loadReaderToFilter(reader);
 
 				final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 				final Date endDate = formatter.parse("16:07:00");

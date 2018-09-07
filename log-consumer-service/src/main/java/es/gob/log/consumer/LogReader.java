@@ -95,22 +95,37 @@ public interface LogReader {
 	  * Obtiene las lineas leidas
 	  * @return
 	  */
-	 public int getLinesReaded();
+	 public int getCharactersReaded();
 
 	 /**
 	  * Establece el las lineas leidas
 	  */
-	 public void setLinesReaded(final int linesReaded);
+	 public void setCharactersReaded(final int linesReaded);
 
 	 /**
 	  * Obtiene las lineas que se van a leer
 	  * @return
 	  */
-	 public int getLinesToRead();
+	 public int getCharactersToRead();
 
 	 /**
 	  * Establece que se van a leer
 	  */
-	 public void setLinesToRead(final int linesReaded);
+	 public void setCharactersToRead(final int linesReaded);
+
+
+
+	 /**
+	  * Indica si hemos llegado al final de la lectura del fichero.
+	  * @return {@code true} si la posicion actual es el fin de fichero, {@code false} en
+	  * caso contrario.
+	  */
+	 public boolean isReloaded();
+
+	 /**
+	  * Estaqblece el indicador de si hemos llegado al final de la lectura del fichero.
+	  * @return
+	  */
+	 public void setReloaded(final boolean reloaded);
 
 }

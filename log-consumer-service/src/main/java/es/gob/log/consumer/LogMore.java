@@ -39,7 +39,7 @@ public class LogMore {
 			}
 
 			// Leemos el numero de lineas solicitadas,
-			int lines = 0;
+			int lines = 1;
 			 CharBuffer lineReaded;
 
 			while ( lines <= numLines && (lineReaded = reader.readLine()) != null) {

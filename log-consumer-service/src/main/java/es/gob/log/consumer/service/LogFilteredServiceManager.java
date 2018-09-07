@@ -1,6 +1,7 @@
 package es.gob.log.consumer.service;
 
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -54,21 +55,34 @@ public class LogFilteredServiceManager {
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
+		final Long fileSize = (Long) session.getAttribute("FileSize");  //$NON-NLS-1$
+		final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
 
 		try {
-			if(reset || filePosition != null &&  filePosition.longValue() == 0L) {
-				reader.close();
-				reader.load();
-				reader.setEndFile(false);
-			}
 
 			final LogFilter filter = new LogFilter(info);
-			filter.load(reader);
+
+			/*Se carga el registro en el caso de ser la primera vez que entra al proceso*/
+			if(reset ) {
+				reader.close();
+				reader.load();
+			}
+			/*Se recarga el registro en caso de que el tamanno del fichero haya aumentado*/
+			if(channel.size() > fileSize.longValue() && reader.isEndFile()) {
+				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
+				if(filePosition != null && filePosition.longValue() > 0L) {
+					reader.reload(filePosition.longValue());
+				}
+			}
+
+			filter.loadReaderToFilter(reader);
 			filter.setCriteria(crit);
 			result = filter.filter(Integer.parseInt(sNumLines));
+
 			if(filter.canHasMore()) {
 				session.setAttribute("FilePosition", new Long(filter.getFilePosition())); //$NON-NLS-1$
 			}
+
 			if( result != null && result.length <= 0) {
 				session.setAttribute("Reader", reader); //$NON-NLS-1$
 				LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en el filtrado"); //$NON-NLS-1$
@@ -77,13 +91,6 @@ public class LogFilteredServiceManager {
 				return result;
 			}
 
-//			if(!reader.isEndFile() && result != null && result.length <= 0) {
-//				session.setAttribute("Reader", reader); //$NON-NLS-1$
-//				LOGGER.log(Level.INFO,"No se han encontrado m&aacute;s ocurrencias en el filtrado"); //$NON-NLS-1$
-//				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se han encontrado más ocurrencias en el filtrado"); //$NON-NLS-1$
-//				result = new String("No se han encontrado m&aacute;s ocurrencias en el filtrado").getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
-//				return result;
-//			}
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 		} catch (final IOException e) {

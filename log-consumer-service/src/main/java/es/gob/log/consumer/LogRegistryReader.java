@@ -28,7 +28,7 @@ class LogRegistryReader {
 	}
 
 	/**
-	 * Carga el lector de logs para poder
+	 * Carga el lector de logs avanzando una nueva l&iacute;nea
 	 * @param reader Lector de logs.
 	 * @throws IOException Cuando no se puede leer del log.
 	 */
@@ -38,10 +38,20 @@ class LogRegistryReader {
 
 		// Leemos una linea del fichero para dejarla cargada
 		try {
+
 			this.logReader.readLine();
+
 		} catch (final IOException e) {
 			throw new IOException("Error en la carga del lector de logs", e); //$NON-NLS-1$
 		}
+	}
+
+	/**
+	 * Carga el lector de logs.
+	 * @param reader
+	 */
+	public void load(final LogReader reader)  {//throws IOException
+		this.logReader = reader;
 	}
 
 	/**
@@ -53,7 +63,7 @@ class LogRegistryReader {
 
 		// Si hay contenido en el log, comenzamos a procesarlo
 		LogRegistry registry = null;
-		if (this.logReader.getCurrentLine() != null) {
+		if (this.logReader.getCurrentLine() != null ) {
 			try {
 				// Procesamos la linea y se deja cargada la siguiente
 				registry = this.registryParser.parse(this.logReader);
