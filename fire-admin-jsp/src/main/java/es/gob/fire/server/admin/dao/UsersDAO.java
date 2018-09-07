@@ -5,12 +5,12 @@ import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +53,7 @@ public class UsersDAO {
 
 	private static final String ST_REMOVE_USER = "DELETE FROM tb_usuarios WHERE id_usuario = ?"; //$NON-NLS-1$
 
-	private static final String ST_INSERT_USER = "INSERT INTO tb_usuarios(nombre_usuario, clave, nombre, apellidos, correo_elec, telf_contacto) VALUES (?,?,?,?,?,?)"; //$NON-NLS-1$
+	private static final String ST_INSERT_USER = "INSERT INTO tb_usuarios(nombre_usuario, clave, nombre, apellidos, correo_elec, fec_alta, telf_contacto) VALUES (?,?,?,?,?,?,?)"; //$NON-NLS-1$
 	/**
 	 * Comprueba contra base de datos que la contrase&ntilde;a indicada se corresponda
 	 * con la del usuario administrador del sistema indicado.
@@ -419,9 +419,8 @@ public class UsersDAO {
 		st.setString(3, name);
 		st.setString(4, surname);
 		st.setString(5, email);
-		st.setString(6, telf);
-
-
+		st.setDate(6, new Date(new java.util.Date().getTime()));
+		st.setString(7, telf);
 		st.execute();
 		LOGGER.info("Damos de alta el usuario '" + userName ); //$NON-NLS-1$
 

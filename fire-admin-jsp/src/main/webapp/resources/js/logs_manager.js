@@ -380,13 +380,13 @@
 			 param_reset = "";
 		 }
 		
-		console.log("startDate :"+startDate + " endDate :"+endDate+ " level:"+level);
+		//console.log("startDate :"+startDate + " endDate :"+endDate+ " level:"+level);
 		
 		 if (initDate2Filter !== startDateTime || 
 			 endDate2Filter != endDateTime || 
 			 level2Filter !== level){
 			 resetFilter(startDateTime, endDateTime, level);		
-			 console.log("startDate :"+startDate + " endDate :"+endDate+ " level:"+level);
+			// console.log("startDate :"+startDate + " endDate :"+endDate+ " level:"+level);
 		 }	
 			
 		filterOp = filterOp + 1;		
