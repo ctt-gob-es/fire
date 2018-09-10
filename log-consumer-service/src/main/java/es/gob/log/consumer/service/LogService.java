@@ -341,6 +341,9 @@ public class LogService extends HttpServlet {
 			if((Long) session.getAttribute("FilePosition") != null ) { //$NON-NLS-1$
 				session.removeAttribute("FilePosition"); //$NON-NLS-1$
 			}
+			if((Long) session.getAttribute("FileSize") != null ) { //$NON-NLS-1$
+				session.removeAttribute("FileSize"); //$NON-NLS-1$
+			}
 			if(session.getAttribute("Reader") == null && //$NON-NLS-1$
 			   session.getAttribute("Channel") == null && //$NON-NLS-1$
 			   session.getAttribute("LogInfo") == null) { //$NON-NLS-1$

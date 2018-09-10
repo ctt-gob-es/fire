@@ -26,8 +26,7 @@ import es.gob.log.consumer.LogTail;
 public class LogTailServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogTailServiceManager.class.getName());
-//	private static Long position = new Long(0L);
-//	private static LogErrors error = null;
+
 	/**
 	 *
 	 * @param req
@@ -48,9 +47,7 @@ public class LogTailServiceManager {
 		final String sNumLines = req.getParameter(ServiceParams.NUM_LINES);
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
 		final AsynchronousFileChannel channel_session = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
-//		if(getError()!= null && getError().getMsgError() != null && !"".equals(getError().getMsgError())) { //$NON-NLS-1$
-//			setError(null);
-//		}
+
 
 		/*Comprobanmos el valor del par&aacute;metro LOG_FILE_NAME */
 		if(logFileName != null && !"".equals(logFileName)) { //$NON-NLS-1$

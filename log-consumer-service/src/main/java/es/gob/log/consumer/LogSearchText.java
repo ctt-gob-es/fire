@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 public class LogSearchText {
 
 	private final LogInfo logInfor;
-	private long filePosition;
+//	private long filePosition;
 	private int nLinesReaded = 0;
 
 
@@ -20,7 +20,7 @@ public class LogSearchText {
 	public LogSearchText(final LogInfo logInfo) throws InvalidPatternException {
 		this.logInfor = logInfo;
 
-		this.setFilePosition(0L);
+//		this.setFilePosition(0L);
 
 	}
 
@@ -129,17 +129,17 @@ public class LogSearchText {
 	 * Obtiene la posici&oacute;n
 	 * @return
 	 */
-	public final long getFilePosition() {
-		return this.filePosition;
-	}
+//	public final long getFilePosition() {
+//		return this.filePosition;
+//	}
 
 	/**
 	 * Establece la posici&oacute;n
 	 * @return
 	 */
-	private final void setFilePosition(final long filePosition) {
-		this.filePosition = filePosition;
-	}
+//	private final void setFilePosition(final long filePosition) {
+//		this.filePosition = filePosition;
+//	}
 
 	public final int getnLinesReaded() {
 		return this.nLinesReaded;

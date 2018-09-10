@@ -54,9 +54,9 @@ public class LogFilteredServiceManager {
 		final HttpSession session = req.getSession(true);
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
-		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
 		final Long fileSize = (Long) session.getAttribute("FileSize");  //$NON-NLS-1$
 		final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
+		 Long filePosition =(Long)session.getAttribute("FilePosition");//$NON-NLS-1$
 
 		try {
 
@@ -66,12 +66,17 @@ public class LogFilteredServiceManager {
 			if(reset ) {
 				reader.close();
 				reader.load();
+				//Reset de la posicion de sesion de tail
+				if(filePosition != null && filePosition.longValue() > 0L) {
+					filePosition = new Long(0L);
+					session.setAttribute("FilePosition", filePosition); //$NON-NLS-1$
+				}
 			}
 			/*Se recarga el registro en caso de que el tamanno del fichero haya aumentado*/
 			if(channel.size() > fileSize.longValue() && reader.isEndFile()) {
 				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
-				if(filePosition != null && filePosition.longValue() > 0L) {
-					reader.reload(filePosition.longValue());
+				if(reader.getFilePosition() > 0L) {
+					reader.reload(reader.getFilePosition());
 				}
 			}
 
@@ -79,9 +84,6 @@ public class LogFilteredServiceManager {
 			filter.setCriteria(crit);
 			result = filter.filter(Integer.parseInt(sNumLines));
 
-			if(filter.canHasMore()) {
-				session.setAttribute("FilePosition", new Long(filter.getFilePosition())); //$NON-NLS-1$
-			}
 
 			if( result != null && result.length <= 0) {
 				session.setAttribute("Reader", reader); //$NON-NLS-1$

@@ -12,18 +12,10 @@ import java.util.logging.Logger;
  */
 public class LogMore {
 
-//	private final   LogRegistryReader registryReader;
-	private long filePosition ;
-
 
 	private static final Logger LOGGER = Logger.getLogger(LogMore.class.getName());
 
 
-	/**Constructor
-	 * @throws InvalidPatternException */
-//	public LogMore(final LogInfo logInfo) throws InvalidPatternException {
-//		this.registryReader = new LogRegistryReader(logInfo);
-//	}
 
 	/**
 	 *
@@ -49,25 +41,10 @@ public class LogMore {
 
 			}
 
-			//setFilePosition(reader.getFilePosition());
 			return result.getBytes(reader.getCharset());
 
 	}
 
-
-
-	/**
-	 *
-	 * @return
-	 */
-	public final  long getFilePosition() {
-		return this.filePosition;
-	}
-
-
-	public final void setFilePosition(final long filePosition) {
-		this.filePosition = filePosition;
-	}
 
 
 }

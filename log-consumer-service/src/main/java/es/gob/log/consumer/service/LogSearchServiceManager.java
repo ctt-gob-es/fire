@@ -25,7 +25,7 @@ public class LogSearchServiceManager {
 
 		byte[] result = null;
 		/* Obtenemos los par&aacute;metros*/
-		//final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
+
 		final String sNumLines = req.getParameter(ServiceParams.NUM_LINES);
 		final String text = req.getParameter(ServiceParams.SEARCH_TEXT);
 		final boolean reset = Boolean.parseBoolean(req.getParameter(ServiceParams.PARAM_RESET));
@@ -36,23 +36,27 @@ public class LogSearchServiceManager {
 		final HttpSession session = req.getSession(true);
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
-		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
 		final Long fileSize = (Long) session.getAttribute("FileSize");  //$NON-NLS-1$
 		final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
+		Long filePosition =(Long)session.getAttribute("FilePosition");//$NON-NLS-1$
 
 
 		try {
 
-			if(reset ) {// || filePosition != null &&  filePosition.longValue() == 0L
+			if(reset) {
 				reader.close();
 				reader.load();
-				reader.setEndFile(false);
+				//Reset de la posicion de sesion de tail
+				if(filePosition != null && filePosition.longValue() > 0L) {
+					filePosition = new Long(0L);
+					session.setAttribute("FilePosition", filePosition); //$NON-NLS-1$
+				}
 			}
 
 			if( channel.size() > fileSize.longValue() && reader.isEndFile()) {
 				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
-				if(filePosition != null && filePosition.longValue() > 0L) {
-					reader.reload(filePosition.longValue());
+				if(reader.getFilePosition() > 0L) {
+					reader.reload(reader.getFilePosition());
 				}
 			}
 
@@ -66,7 +70,6 @@ public class LogSearchServiceManager {
 			}
 
 
-			session.setAttribute("FilePosition",new Long(reader.getFilePosition())); //$NON-NLS-1$
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 			if(result == null) {

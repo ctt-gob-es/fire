@@ -202,12 +202,6 @@ public class LogFilter {
 		this.logReader.close();
 	}
 
-	/**
-	 * Recupera la posici&oacute;n actual dentro del fichero.
-	 * @return Posici&oacute;n en el fichero.
-	 */
-	public long getFilePosition() {
-		return this.logReader.getFilePosition();
-	}
+
 
 }

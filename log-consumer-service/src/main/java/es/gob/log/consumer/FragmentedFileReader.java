@@ -116,9 +116,9 @@ public class FragmentedFileReader implements LogReader {
 			//se establece el numero de lineas que van a ser leidas en el fragmento cargado;
 			setCharactersToRead(readerProcess.get().intValue());
 			if(getCharactersToRead() == -1) {
-				throw new IOException("No hay datos a leer en este momento"); //$NON-NLS-1$
+				this.setEndFile(true);
+				return;
 			}
-
 		}
 		catch (InterruptedException | ExecutionException e) {
 			throw new IOException("Se interrumpio la carga del fichero", e); //$NON-NLS-1$

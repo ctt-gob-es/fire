@@ -27,8 +27,8 @@ public class LogMoreServiceManager {
 		final HttpSession session = req.getSession(true);
 		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
 		final LogReader reader = (LogReader)session.getAttribute("Reader"); //$NON-NLS-1$
-		final Long filePosition = (Long) session.getAttribute("FilePosition"); //$NON-NLS-1$
 		final Long fileSize = (Long) session.getAttribute("FileSize"); //$NON-NLS-1$
+		Long filePosition =(Long)session.getAttribute("FilePosition");//$NON-NLS-1$
 		final AsynchronousFileChannel channel = (AsynchronousFileChannel)session.getAttribute("Channel"); //$NON-NLS-1$
 
 		try {
@@ -40,9 +40,28 @@ public class LogMoreServiceManager {
 			if( channel.size() > fileSize.longValue() && reader.isEndFile()) {
 				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
 				reader.setEndFile(false);
+
 				if(filePosition != null && filePosition.longValue() > 0L) {
-					reader.reload(filePosition.longValue());
+
+					if(reader.getFilePosition() > 0L && reader.getFilePosition() > filePosition.longValue()) {
+							reader.reload(reader.getFilePosition());
+						}
+					//Si la posicion de Tail es superior a la posicion del reader entonces es que se ha realizado la funcion de tail
+					//y la ultima posicion es la guardada en session con FilePosition
+					else if(reader.getFilePosition() > 0L && reader.getFilePosition() < filePosition.longValue() ) {
+						reader.reload(filePosition.longValue());
+					}
+					else {
+						reader.reload(filePosition.longValue());
+					}
+					//Reset de la posicion de sesion de tail
+					filePosition = new Long(0L);
+					session.setAttribute("FilePosition", filePosition); //$NON-NLS-1$
 				}
+				else if(reader.getFilePosition() > 0L) {
+					reader.reload(reader.getFilePosition());
+				}
+
 			}
 			//Si es el final de fichero se indica con un mensaje
 			if(reader.isEndFile()) {
@@ -54,7 +73,6 @@ public class LogMoreServiceManager {
 			}
 
 			final LogMore logMore = new LogMore();
-//			logMore.setFilePosition(filePosition != null ? filePosition.longValue() : 0);
 			result = logMore.getLogMore(iNumLines, reader);
 			//Si es el final de fichero se indica con un mensaje
 			 if (result != null && result.length <= 0) {
@@ -65,7 +83,6 @@ public class LogMoreServiceManager {
 					return result;
 			}
 
-			session.setAttribute("FilePosition",new Long(reader.getFilePosition())); //$NON-NLS-1$
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 
@@ -76,9 +93,9 @@ public class LogMoreServiceManager {
 			if (reader.isEndFile()){
 				 msg = "No existen más líneas en este momento para este fichero log"; //$NON-NLS-1$
 			}
+
 			//resp.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);
 			result = msg.getBytes(info != null ? info.getCharset() : StandardCharsets.UTF_8);
-
 			return result;
 		}
 		catch (final NumberFormatException e) {
