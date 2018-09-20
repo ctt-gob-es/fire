@@ -299,12 +299,12 @@
 			function showErrorOptions() {
 				hideProgress(); 
 				// Ocultamos el boton de firmar
-				document.getElementById("buttonSign").style.display = "none";
+				document.getElementById("signButtonsPanel").style.display = "none";
 				
 				// Mostramos los botones de accion y llevamos el foco hasta ellos
 				document.getElementById("errorMsg").style.display = "block";
 				document.getElementById("errorButtonsPanel").style.display = "block";
-				document.getElementById("buttonSign2").focus();
+				document.getElementById("buttonRetry").focus();
 			}
 
 			/**
@@ -401,13 +401,13 @@
 				<h2 id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
 				</div>
 				
-				<div id="botones_error" class="botones">
-					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>&nbsp;
+				<div id="containerError" class="botones">
+					<input id="buttonRetry" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>&nbsp;
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
 				</div>
 			</div>
 				
-			<div id="container_firmar" Class="container-firmar "> 
+			<div id="signButtonsPanel" Class="container-firmar "> 
 				<form name="formSign" id="formSign" method="POST" action="miniappletSuccessService">
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />

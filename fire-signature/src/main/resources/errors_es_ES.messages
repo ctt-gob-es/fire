@@ -16,7 +16,7 @@
 102=Error al conectar con el servicio del proveedor PARAM_PROVIDER , para obtener los certificados del usuario  PARAM_USER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
 103=Los certificados del usuario PARAM_USER del proveedor PARAM_PROVIDER est&aacute;n bloqueados. Consulte con su proveedor si esta condición es temporal o necesita de algún trámite externo. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
 104=El usuario PARAM_USER realiz&oacute; un registro no fehaciente con el proveedor PARAM_PROVIDER y no tiene certificados de firma emitidos.  Es posible que no pueda disponer de estos certificados o que necesite cumplimentar alg&uacute;n requisito con dicho proveedor. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
-105=El usuario PARAM_USER no tiene certificados de firma y el conector no no permite generarlos al vuelo. 
+105=El usuario PARAM_USER no tiene certificados de firma y el conector no permite generarlos al vuelo. 
 
 # Errores propios de la operacion de firma
 201=Error durante la operaci&oacute;n de firma del proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.

@@ -131,7 +131,7 @@
 						<h3 class="subtitle"><span class="bold"><%=errorMsg%></span></h3>
 					</div>
 				
-					<div id="botones_error" class="botones">
+					<div id="containerError" class="botones">
 						<div class="containerbutton">
 						<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
 								<span >Cancelar</span>

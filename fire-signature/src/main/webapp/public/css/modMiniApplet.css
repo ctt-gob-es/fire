@@ -40,7 +40,7 @@
 
 
 .contenido-opciones {width: 100%; height:15%; display:block;position: relative;}
-.contenido-opciones .botones {margin: 0 auto;text-align: center;position: relative;top:2em;}
+.contenido-opciones .botones {margin: 0 auto;text-align: center;margin-top:4em;}
 .mensaje-error {color #707070;font-size: 22px;margin-bottom: 1em;text-align: center;position: relative;top:1em;}
 #errorMsg{text-align: center;}
 
