@@ -18,6 +18,9 @@ public class SignatureCube {
 	private int idProveedor;
 	private Browser navegador;
 	private boolean resultSign = false ;
+	private String id_transaccion;
+	private Long size = new Long(0L);
+	private int idImprovedFormat;
 	private static int OTRO = 99;
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 
@@ -28,7 +31,7 @@ public class SignatureCube {
 
 
 	public SignatureCube(final Date fecha ,final int idFormat, final int idAlgorithm, final int idProveedor,
-			final Browser navegador, final boolean resultsign) {
+			final Browser navegador, final boolean resultsign, final String id_tr, final int idImprovedFormat) {
 		super();
 		this.fecha = fecha;
 		this.idFormat = idFormat;
@@ -36,6 +39,8 @@ public class SignatureCube {
 		this.idProveedor = idProveedor;
 		this.navegador = navegador;
 		this.resultSign = resultsign;
+		this.id_transaccion= id_tr;
+		this.idImprovedFormat= idImprovedFormat;
 	}
 
 
@@ -91,6 +96,33 @@ public class SignatureCube {
 		this.resultSign = resultSign;
 	}
 
+	public String getId_transaccion() {
+		return this.id_transaccion;
+	}
+
+	public void setId_transaccion(final String id_transaccion) {
+		this.id_transaccion = id_transaccion;
+	}
+
+
+	public final Long getSize() {
+		return this.size;
+	}
+
+	public final void setSize(final Long size) {
+		this.size = size;
+	}
+
+
+	public final int getIdImprovedFormat() {
+		return this.idImprovedFormat;
+	}
+
+	public final void setIdImprovedFormat(final int idImprovedFormat) {
+		this.idImprovedFormat = idImprovedFormat;
+	}
+
+
 
 	public final static SignatureCube parse(final String registry) throws ParseException, NumberFormatException, SQLException, DBConnectionException {
 		SignatureCube sign = null;
@@ -112,31 +144,34 @@ public class SignatureCube {
 				else {
 					return null;
 				}
-				//Algoritmo
+				//Formato Mejorado
 				if(!cube[2].isEmpty()) {
-					sign.setIdAlgorithm(Integer.parseInt(cube[2]));
+					sign.setIdImprovedFormat(Integer.parseInt(cube[2]));
+				}
+
+				//Algoritmo
+				if(!cube[3].isEmpty()) {
+					sign.setIdAlgorithm(Integer.parseInt(cube[3]));
 				}
 				else {
 					return null;
 				}
 				//Proveedor
-				if(!cube[3].isEmpty()) {
-					final Provider provider  = ProvidersDAO.getProviderById(Integer.parseInt(cube[3]));
+				if(!cube[4].isEmpty()) {
+					final Provider provider  = ProvidersDAO.getProviderById(Integer.parseInt(cube[4]));
 					if(provider != null && provider.getIdProveedor() != 0) {
 						sign.setIdProveedor(provider.getIdProveedor());
 					}
 					else {
 						sign.setIdProveedor(OTRO);
 					}
-
-
 				}
 				else {
 					return null;
 				}
 				//Navegador
-				if(!cube[4].isEmpty()) {
-					final String[] nav = cube[4].split("/"); //$NON-NLS-1$
+				if(!cube[5].isEmpty()) {
+					final String[] nav = cube[5].split("/"); //$NON-NLS-1$
 					final Browser brow = new Browser(Integer.parseInt(nav[0]) , nav[1]);
 					sign.setNavegador(brow);
 				}
@@ -144,8 +179,8 @@ public class SignatureCube {
 					return null;
 				}
 				//Resultado de la firma
-				if(!cube[5].isEmpty()) {
-					if(cube[5].equals("1")) { //$NON-NLS-1$
+				if(!cube[6].isEmpty()) {
+					if(cube[6].equals("1")) { //$NON-NLS-1$
 						sign.setResultSign(true);
 					}
 					else {
@@ -154,6 +189,20 @@ public class SignatureCube {
 				}
 				else {
 					return null;
+				}
+				//Id Tr
+				if(!cube[7].isEmpty()) {
+					sign.setId_transaccion(cube[7]);
+				}
+				else {
+					return null;
+				}
+				//Tamaño de la firma
+				if(!cube[8].isEmpty()) {
+					sign.setSize(new Long(Long.parseLong(cube[8])));
+				}
+				else {
+					sign.setSize(new Long(0L));
 				}
 			}
 		}
@@ -171,6 +220,7 @@ public class SignatureCube {
 		String result = new String();
 
 		result  = result.concat(this.getIdFormat() != 0 ? String.valueOf(this.getIdFormat()) : String.valueOf(OTRO) ).concat(";");//$NON-NLS-1$
+		result  = result.concat(this.getIdImprovedFormat() != 0 ? String.valueOf(this.getIdImprovedFormat()) : "" ).concat(";");//$NON-NLS-1$ //$NON-NLS-2$
 		result  = result.concat(this.getIdAlgorithm() != 0 ? String.valueOf(this.getIdAlgorithm()) :  String.valueOf(OTRO) ).concat(";");//$NON-NLS-1$
 		result  = result.concat(this.getIdProveedor() != 0 ?  String.valueOf(this.getIdProveedor()) :  String.valueOf(OTRO) ).concat(";");//$NON-NLS-1$
 		if(getNavegador() != null) {
@@ -180,9 +230,11 @@ public class SignatureCube {
 		else {
 			result  = result.concat(String.valueOf(OTRO)).concat("/-;"); //$NON-NLS-1$
 		}
-		result  = result.concat(this.isResultSign() ? "1":"0" );  //$NON-NLS-1$//$NON-NLS-2$
-
+		result  = result.concat(this.isResultSign() ? "1":"0" ).concat(";");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		result  = result.concat(this.getId_transaccion() != null ? this.getId_transaccion() :"0" ).concat(";");  //$NON-NLS-1$ //$NON-NLS-2$
+		result  = result.concat(this.getSize().longValue() != 0L ? String.valueOf(this.getSize()) :"0" );  //$NON-NLS-1$
 		return result;
 	}
+
 
 }

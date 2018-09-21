@@ -30,7 +30,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.services.statistics.SignatureLogger;
 import es.gob.fire.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.config.ConfigManager;
 
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
@@ -40,7 +42,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-//	private static final Logger LOGGER = Logger.getLogger(MiniAppletSuccessService.class.getName());
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
@@ -105,7 +107,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 
         	// Actualizamos el resultado del lote con el resultado reportado el Cliente @firma
         	try {
-        		updateSingleResult(batchResult, afirmaBatchResultB64);
+        		updateSingleResult(batchResult, afirmaBatchResultB64,session);
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al procesar el resultado de la firma de lote del Cliente @firma: " + e, e); //$NON-NLS-1$
         		ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET_BATCH, true, null);
@@ -132,7 +134,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 	 * @throws Exception Cuando ocurre alg&uacute;n error al procesar el resultado devuelto por
 	 * 		   el Cliente @firma.
 	 */
-	private static void updateSingleResult(final BatchResult batchResult, final String afirmaBatchResultB64) throws Exception {
+	private static void updateSingleResult(final BatchResult batchResult, final String afirmaBatchResultB64, final  FireSession session ) throws Exception {
 
 		final byte[] afirmaResultXml = Base64.decode(afirmaBatchResultB64);
 		final Document afirmaResultDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
@@ -151,6 +153,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 				}
 				else {
 					batchResult.setErrorResult(docId, translateAfirmaError(asr.getError()));
+					SIGNLOGGER.log(session, false,docId );
 				}
 			}
 		}

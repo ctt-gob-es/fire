@@ -75,7 +75,7 @@ public class RecoverSignResultManager {
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
         	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
-        	SIGNLOGGER.log(session,false);
+        	SIGNLOGGER.log(session, false, null);
         	TRANSLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
         	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + errMessage); //$NON-NLS-1$
@@ -96,14 +96,14 @@ public class RecoverSignResultManager {
         }
         catch (final Exception e) {
         	LOGGER.warning("No se encuentra la firma generada: " + e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false);
+        	SIGNLOGGER.log(session, false, null);
         	TRANSLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "Ha caducado la sesion"); //$NON-NLS-1$
         	return;
         }
         // Se registra resultado de operacion firma
-        SIGNLOGGER.log(session, true);
+        SIGNLOGGER.log(session, false, null);
         TRANSLOGGER.log(session, true);
         // Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
         SessionCollector.removeSession(session);

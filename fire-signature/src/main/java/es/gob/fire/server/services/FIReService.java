@@ -76,7 +76,7 @@ public class FIReService extends HttpServlet {
 		try {
 			final int configStatistic = Integer.valueOf(es.gob.fire.services.statistics.config.ConfigManager.getConfigStatistics()).intValue() ;
 			final String st_path = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsDir();
-			if(configStatistic > 0 && st_path != null && !"".equals(st_path)) { //$NON-NLS-1$
+			if(configStatistic == 2 && st_path != null && !"".equals(st_path)) { //$NON-NLS-1$
 				firest = new FireStatistics(st_path);
 				final String startTime = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsStartTime();
 				firest.init(startTime);

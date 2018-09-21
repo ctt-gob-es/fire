@@ -67,7 +67,7 @@ public class SignBatchManager {
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
     		LOGGER.warning("Se ha pedido firmar un lote sin documentos. Se aborta la operacion."); //$NON-NLS-1$
-    		SIGNLOGGER.log(session, false);
+    		SIGNLOGGER.log(session, false, null);
     		TRANSLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
     		response.sendError(HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorCode(), HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorDescription());
@@ -90,7 +90,7 @@ public class SignBatchManager {
 		// Listamos los certificados del usuario
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning("No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
-			SIGNLOGGER.log(session, false);
+			SIGNLOGGER.log(session, false, null);
 			TRANSLOGGER.log(session, false);
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$

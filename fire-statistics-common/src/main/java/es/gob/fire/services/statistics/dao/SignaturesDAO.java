@@ -2,6 +2,7 @@ package es.gob.fire.services.statistics.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 import es.gob.fire.services.statistics.config.DBConnectionException;
@@ -15,7 +16,7 @@ public class SignaturesDAO {
 	//private static final String ST_SELECT_SIGN_BYDATE = "SELECT fecha,id_formato ,id_algoritmo, id_proveedor,id_navegador,version_navegador  FROM tb_firmas f WHERE f.fecha = ? "; //$NON-NLS-1$
 
 	/**Inserta */
-	private static final String ST_INSERT_SIGNATURE = "INSERT INTO TB_FIRMAS (fecha, id_formato ,id_algoritmo, id_proveedor, id_navegador, version_navegador) VALUES(?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
+	private static final String ST_INSERT_SIGNATURE = "INSERT INTO TB_FIRMAS (fecha, id_formato ,id_formato_mejorado, id_algoritmo, id_proveedor, id_navegador, version_navegador, correcta, id_transaccion, tamanno) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 //	public static List<SignatureCube> getSignatureCubeByDate(final Date fecha) throws SQLException, DBConnectionException{
 //
@@ -51,10 +52,14 @@ public class SignaturesDAO {
 			final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_SIGNATURE,false);
 			st.setDate(1, new java.sql.Date( sign.getFecha().getTime()));
 			st.setInt(2, sign.getIdFormat());
-			st.setInt(3, sign.getIdAlgorithm());
-			st.setInt(4, sign.getIdProveedor());
-			st.setInt(5,  Integer.parseInt(sign.getNavegador().getId()));
-			st.setString(6, sign.getNavegador().getVersion());
+			st.setInt(3, sign.getIdImprovedFormat());
+			st.setInt(4, sign.getIdAlgorithm());
+			st.setInt(5, sign.getIdProveedor());
+			st.setInt(6,  Integer.parseInt(sign.getNavegador().getId()));
+			st.setString(7, sign.getNavegador().getVersion());
+			st.setString (8, Boolean.toString(sign.isResultSign()));
+			st.setString(9, sign.getId_transaccion());
+			st.setLong(10, sign.getSize().longValue());
 			totalInsertReg = totalInsertReg + st.executeUpdate();
 			st.close();
 		}
@@ -78,10 +83,19 @@ public class SignaturesDAO {
 		try(final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_SIGNATURE,false);){
 			st.setTimestamp (1, new java.sql.Timestamp(signature.getFecha().getTime()));
 			st.setInt(2, signature.getIdFormat());
-			st.setInt(3, signature.getIdAlgorithm());
-			st.setInt(4, signature.getIdProveedor());
-			st.setInt(5,  Integer.parseInt(signature.getNavegador().getId()));
-			st.setString(6, signature.getNavegador().getVersion());
+			if(signature.getIdImprovedFormat() !=  0) {
+				st.setInt(3,  signature.getIdImprovedFormat());
+			}
+			else {
+				st.setNull(3,Types.INTEGER);
+			}
+			st.setInt(4, signature.getIdAlgorithm());
+			st.setInt(5, signature.getIdProveedor());
+			st.setInt(6,  Integer.parseInt(signature.getNavegador().getId()));
+			st.setString(7, signature.getNavegador().getVersion());
+			st.setString (8, Boolean.toString(signature.isResultSign()));
+			st.setString(9, signature.getId_transaccion());
+			st.setLong(10, signature.getSize().longValue());
 			totalInsertReg = st.executeUpdate();
 			st.close();
 		}

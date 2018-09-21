@@ -41,6 +41,7 @@ public class FireStatistics {
 	private static final String FILE_SIGN = "FIReSIGNATURE";//$NON-NLS-1$
 	private static final String FILE_TRANS = "FIReTRANSACTION";//$NON-NLS-1$
 	private static final String FILE_EXT_LCK = ".lck"; //$NON-NLS-1$
+	private static final String FILE_EXT_LOG = ".log"; //$NON-NLS-1$
 	final static SimpleDateFormat formater =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 	private static  String logPath = null;
 
@@ -88,6 +89,9 @@ public class FireStatistics {
 	            		if(lastLoad[1].equals("1")) { //$NON-NLS-1$
 	            			loaded = true;
 	            		}
+	            	}
+	            	else {
+	            		//lastLoadDate =
 	            	}
 	            	result = exeLoadStatistics(lastLoadDate);
 	            	final boolean resultProcess = writeStatisticFile(result);
@@ -284,7 +288,8 @@ public class FireStatistics {
 								if(lastDate != null) {
 									final Date lastLoadDate = format.parse(format.format(lastDate));
 				                	if(dateFile.before(today) && dateFile.after(lastLoadDate)
-				                		&& !ext.equalsIgnoreCase(FILE_EXT_LCK) && (name.contains(FILE_SIGN) || name.contains(FILE_TRANS))) {
+				                		&& ext.equalsIgnoreCase(FILE_EXT_LOG)
+				                		&& !ext.equalsIgnoreCase(FILE_EXT_LCK) && ext.length() == 4 && (name.contains(FILE_SIGN) || name.contains(FILE_TRANS))) {
 										return true;
 									}
 				                }
@@ -294,7 +299,8 @@ public class FireStatistics {
 				                	cDateFile.setTime(dateFile);
 				                	cToday.setTime(today);
 				                	if(cDateFile.get(Calendar.DAY_OF_YEAR) == cToday.get(Calendar.DAY_OF_YEAR -1)
-				                		&& !ext.equalsIgnoreCase(FILE_EXT_LCK) && (name.contains(FILE_SIGN) || name.contains(FILE_TRANS))) {
+				                		&& ext.equalsIgnoreCase(FILE_EXT_LOG)
+				                		&& !ext.equalsIgnoreCase(FILE_EXT_LCK) && ext.length() == 4 && (name.contains(FILE_SIGN) || name.contains(FILE_TRANS))) {
 				                		return true;
 				                	}
 				                }

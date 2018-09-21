@@ -135,6 +135,7 @@ public class AddDocumentBatchManager {
     		return;
     	}
 
+
     	// Recuperamos el listado de documentos del lote o lo creamos si este es el primero
         BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         if (batchResult == null) {
@@ -162,6 +163,7 @@ public class AddDocumentBatchManager {
 
         try {
         	TempFilesHelper.storeTempData(filename, data);
+        	docInfo.setSize(TempFilesHelper.getFileSize());
         }
         catch (final Exception e) {
         	LOGGER.severe("Error en el guardado temporal de los datos a firmar: " + e); //$NON-NLS-1$

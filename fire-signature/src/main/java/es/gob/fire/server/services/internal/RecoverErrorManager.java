@@ -27,6 +27,7 @@ import es.gob.fire.services.statistics.FireSignLogger;
 public class RecoverErrorManager {
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+
 //	private static final Logger LOGGER = Logger.getLogger(RecoverErrorManager.class.getName());
 
 	/**
@@ -39,8 +40,9 @@ public class RecoverErrorManager {
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
-		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String transactionId 	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String subjectId 		= params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+
 
         // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
@@ -58,6 +60,8 @@ public class RecoverErrorManager {
     		sendResult(response, buildErrorResult(session, OperationError.INVALID_SESSION));
     		return;
         }
+
+
 
         // Comprobamos si se declaro un error o si este es desconocido
         if (!session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
@@ -81,6 +85,8 @@ public class RecoverErrorManager {
 
         // Recuperamos la informacion de error y eliminamos la sesion
         final TransactionResult result = buildErrorResult(session);
+
+
         SessionCollector.removeSession(session);
     	sendResult(response, result);
 	}

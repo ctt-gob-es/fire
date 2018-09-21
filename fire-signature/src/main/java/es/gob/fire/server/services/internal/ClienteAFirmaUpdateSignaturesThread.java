@@ -92,8 +92,13 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
         			(String) this.defaultConfig.getString(ServiceParams.SESSION_PARAM_UPGRADE);
         try {
         	signature = AfirmaUpgrader.upgradeSignature(signature, upgradeFormat);
+
+        	if(AfirmaUpgrader.getUpgradedFormat() != null && this.batchResult.getSignConfig(this.docId) != null) {
+    			this.batchResult.getSignConfig(this.docId).setUpgrade(AfirmaUpgrader.getUpgradedFormat());
+    		}
         }
         catch (final Exception e) {
+        	LOGGER.log(Level.WARNING, "Error en la actualizacion de la firma", e); //$NON-NLS-1$
         	this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
         	setFailed(true);
         	interrupt();

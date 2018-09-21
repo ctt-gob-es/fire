@@ -13,7 +13,7 @@ public class TransactionsDAO {
 	//private static final String ST_SELECT_TRANS_BYDATE = "SELECT fecha, id_aplicacion, id_operacion, id_proveedor, proveedor_forzado  FROM tb_transacciones t where t.fecha = ? "; //$NON-NLS-1$
 
 	/**SQL Inserta una transaccion*/
-	private static final String ST_INSERT_TRANSACTION = "INSERT INTO TB_TRANSACCIONES (fecha, id_aplicacion, id_operacion, id_proveedor, proveedor_forzado) VALUES (?, ?, ?, ?, ?)";//$NON-NLS-1$
+	private static final String ST_INSERT_TRANSACTION = "INSERT INTO TB_TRANSACCIONES (fecha, id_aplicacion, id_operacion, id_proveedor, proveedor_forzado, correcta, id_transaccion) VALUES (?, ?, ?, ?, ?, ?, ?)";//$NON-NLS-1$
 
 
 	/**
@@ -32,6 +32,8 @@ public class TransactionsDAO {
 		st.setInt(3, transaction.getIdOperacion().intValue());
 		st.setInt(4, transaction.getIdProveedor());
 		st.setString (5, Boolean.toString(transaction.isProveedorForzado()));
+		st.setString (6, Boolean.toString(transaction.isResultTransaction()));
+		st.setString(7, transaction.getId_transaccion());
 		totalInsertReg = st.executeUpdate();
 		st.close();
 

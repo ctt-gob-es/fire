@@ -385,7 +385,7 @@ public class ConfigManager {
 
 
 	/**
-	 * Devuelve la configuraci&oacute;n de la hora de la carga a  la base de datos
+	 * Devuelve la configuraci&oacute;n de la hora de la carga a la base de datos
 	 * @return Dato hora con formato 00:00:00
 	 *  En caso de no obtener un dato con formato correcto o nulo devolver&aacute; la cadena 00:00:00
 	 */

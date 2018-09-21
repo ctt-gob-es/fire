@@ -17,6 +17,7 @@ public class TransactionCube {
 	private static int OTRO = 99;
 	private  boolean ProveedorForzado = false;
 	private  boolean resultTransaction = false;
+	private String id_transaccion;
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 	/**
 	 * Constructor
@@ -36,7 +37,7 @@ public class TransactionCube {
 	 * @param proveedorForzado
 	 */
 	public TransactionCube(final Date fecha ,final String idAplicacion, final Integer idOperacion, final int idProveedor,
-			final boolean proveedorForzado, final boolean resultTransact) {
+			final boolean proveedorForzado, final boolean resultTransact, final String id_tr) {
 		super();
 		this.fecha = fecha;
 		this.idAplicacion = idAplicacion;
@@ -44,6 +45,7 @@ public class TransactionCube {
 		this.idProveedor = idProveedor;
 		this.ProveedorForzado = proveedorForzado;
 		this.resultTransaction = resultTransact;
+		this.id_transaccion = id_tr;
 	}
 
 
@@ -89,6 +91,14 @@ public class TransactionCube {
 
 	public final void setFecha(final Date fecha) {
 		this.fecha = fecha;
+	}
+
+	public String getId_transaccion() {
+		return this.id_transaccion;
+	}
+
+	public void setId_transaccion(final String id_transaccion) {
+		this.id_transaccion = id_transaccion;
 	}
 
 
@@ -156,6 +166,13 @@ public class TransactionCube {
 				else {
 					return null;
 				}
+				//Id Tr
+				if(!cube[6].isEmpty()) {
+					trans.setId_transaccion(cube[6]);
+				}
+				else {
+					return null;
+				}
 			}
 		}
 		return trans;
@@ -187,7 +204,12 @@ public class TransactionCube {
 			result  = result.concat(String.valueOf(OTRO)).concat(";");//$NON-NLS-1$
 		}
 		result  = result.concat(this.isProveedorForzado() ? "1":"0" ).concat(";");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		result  = result.concat(this.isResultTransaction() ? "1":"0" );  //$NON-NLS-1$//$NON-NLS-2$
+		result  = result.concat(this.isResultTransaction() ? "1":"0" ).concat(";");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		result  = result.concat(this.getId_transaccion() != null ? this.getId_transaccion() : "0" );  //$NON-NLS-1$
 		return result;
 	}
+
+
+
+
 }

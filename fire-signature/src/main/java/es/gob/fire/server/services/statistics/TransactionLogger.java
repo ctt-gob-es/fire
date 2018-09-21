@@ -2,6 +2,7 @@ package es.gob.fire.server.services.statistics;
 
 import java.sql.SQLException;
 
+import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.services.FireLogger;
@@ -44,13 +45,20 @@ public class TransactionLogger {
 
 		this.getTransactCube().setResultTransaction(result);
 
+		if(fireSesion.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_ID) != null
+				&& !"".equals(fireSesion.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_ID))) { //$NON-NLS-1$
+				final String id_tr = fireSesion.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
+				this.getTransactCube().setId_transaccion(id_tr != null ? id_tr : "0"); //$NON-NLS-1$
+			}
+
+
 		if(fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID))) { //$NON-NLS-1$
 			final String idAplication = fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 			this.getTransactCube().setIdAplicacion(idAplication);
 		}
-		if(fireSesion.getString(ServiceParams.SESSION_PARAM_TYPE_OPERATION) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_TYPE_OPERATION))) { //$NON-NLS-1$
-
-			final Operations op = Operations.getOperation(fireSesion.getString(ServiceParams.SESSION_PARAM_TYPE_OPERATION));
+		if(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION))) { //$NON-NLS-1$
+			final FIReServiceOperation fsop = FIReServiceOperation.parse(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
+			final Operations op = Operations.parse(fsop);
 			this.getTransactCube().setIdOperacion(new Integer(op.getId()));
 
 		}

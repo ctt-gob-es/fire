@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.server.services.statistics.TransactionLogger;
 import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
@@ -33,6 +34,7 @@ public class RecoverBatchSignatureManager {
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 //	private static final Logger LOGGER = Logger.getLogger(RecoverBatchSignatureManager.class.getName());
 	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
 
 	/**
 	 * Devuelve el resultado de una firma concreta de un lote. Si es necesario, actualiza la firma.
@@ -102,6 +104,7 @@ public class RecoverBatchSignatureManager {
         // Obtenemos el resultado de firma del lote
         final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         if (batchResult == null || batchResult.documentsCount() == 0) {
+        	TRANSLOGGER.log(session, false);
             LOGGER.severe("No se han encontrado registrados los documentos del lote"); //$NON-NLS-1$
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -112,6 +115,7 @@ public class RecoverBatchSignatureManager {
         // Si fallo la operacion de firma o la firma ya se recupero (momento en el
         // que se marca como erroneo), se notifica un error en la operacion
         if (batchResult.isSignFailed(docId)) {
+        	SIGNLOGGER.log(session, false, docId);
             LOGGER.severe("El documento solicitado ya se recupero o no se firmo correctamente"); //$NON-NLS-1$
         	response.sendError(HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorCode(),
         			HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorDescription());
@@ -120,6 +124,7 @@ public class RecoverBatchSignatureManager {
 
         final String docFilename = batchResult.getDocumentReference(docId);
         if (docFilename == null) {
+        	SIGNLOGGER.log(session, false, docId);
             LOGGER.severe("El documento solicitado no estaba en el lote de firma"); //$NON-NLS-1$
         	response.sendError(HttpCustomErrors.INVALID_BATCH_DOCUMENT.getErrorCode(),
         			HttpCustomErrors.INVALID_BATCH_DOCUMENT.getErrorDescription());
@@ -134,6 +139,7 @@ public class RecoverBatchSignatureManager {
         	LOGGER.severe("No se encuentra la firma del documento: " + e); //$NON-NLS-1$
         	batchResult.setErrorResult(docId, BatchResult.ERROR_RECOVERING);
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
+        	SIGNLOGGER.log(session, false, docId);
         	SessionCollector.commit(session);
         	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
         			"No se encuentra la firma del documento. Es posible que haya caducado o que ya se hubiese recuperado."); //$NON-NLS-1$
@@ -142,6 +148,19 @@ public class RecoverBatchSignatureManager {
 
         // Actualizamos el estado para que quede registrado que no se puede volver a recuperar
         batchResult.setErrorResult(docId, BatchResult.RECOVERED);
+
+//        final DocInfo docinf = batchResult.getDocInfo(docId);
+//        if(docinf != null) {
+//        	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, docinf.getSize());
+//        }
+//        final SignBatchConfig signConfig = batchResult.getSignConfig(docId);
+//        if(signConfig != null) {
+//			session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT_CONFIG, signConfig.getFormat());
+//			if(signConfig.getUpgrade() != null) {
+//				session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE,signConfig.getUpgrade());
+//			}
+//		}
+        SIGNLOGGER.log(session, true, docId);
 
         // Revisamos si queda alguna firma valida sin recuperar, en cuyo caso,
         // eliminamos la sesion. Si no, actualizamos el estado
@@ -152,7 +171,7 @@ public class RecoverBatchSignatureManager {
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SessionCollector.commit(session);
         }
-    	SIGNLOGGER.log(session, true);
+
         // Enviamos la firma electronica como resultado
         sendResult(response, signature);
 	}

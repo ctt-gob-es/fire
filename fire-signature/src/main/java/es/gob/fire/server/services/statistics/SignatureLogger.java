@@ -2,16 +2,21 @@ package es.gob.fire.server.services.statistics;
 
 import java.sql.SQLException;
 
+import es.gob.fire.server.services.DocInfo;
+import es.gob.fire.server.services.internal.BatchResult;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
+import es.gob.fire.server.services.internal.SignBatchConfig;
 import es.gob.fire.services.FireLogger;
 import es.gob.fire.services.statistics.Browser;
 import es.gob.fire.services.statistics.config.ConfigManager;
 import es.gob.fire.services.statistics.dao.AlgorithmsDAO;
 import es.gob.fire.services.statistics.dao.FormatsDAO;
+import es.gob.fire.services.statistics.dao.ImprovedFormatsDAO;
 import es.gob.fire.services.statistics.dao.ProvidersDAO;
 import es.gob.fire.services.statistics.entity.Algorithm;
 import es.gob.fire.services.statistics.entity.Format;
+import es.gob.fire.services.statistics.entity.ImprovedFormat;
 import es.gob.fire.services.statistics.entity.Provider;
 import es.gob.fire.services.statistics.entity.SignatureCube;
 
@@ -54,7 +59,7 @@ public class SignatureLogger {
 
 
 
-	public final void log(final FireSession fireSesion, final boolean result) {
+	public final void log(final FireSession fireSesion, final boolean result, final String docId) {
 
 		 String[] provsSession = null;
 		 String prov =  null;
@@ -65,11 +70,44 @@ public class SignatureLogger {
 
 		this.getSignCube().setResultSign(result);
 
-		final Browser browser = (Browser) fireSesion.getObject(ServiceParams.SESSION_PARAM_BROWSER);
-		this.getSignCube().setNavegador(browser);
 
 		try {
-			if(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT) != null &&
+
+			//Navegador
+			final Browser browser = (Browser) fireSesion.getObject(ServiceParams.SESSION_PARAM_BROWSER);
+			this.getSignCube().setNavegador(browser);
+			// Se tratan los datos, de los docuemnto de firma por lotes
+			if(docId != null) {
+				final BatchResult batchResult = (BatchResult) fireSesion.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
+				if(batchResult != null && batchResult.documentsCount() > 0) {
+					final DocInfo docinf = batchResult.getDocInfo(docId);
+			        if(docinf != null) {
+			        	fireSesion.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, docinf.getSize());
+			        }
+			        final SignBatchConfig signConfig = batchResult.getSignConfig(docId);
+			        if(signConfig != null) {
+			        	fireSesion.setAttribute(ServiceParams.SESSION_PARAM_FORMAT_CONFIG, signConfig.getFormat());
+						if(signConfig.getUpgrade() != null) {
+							fireSesion.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE,signConfig.getUpgrade());
+						}
+					}
+				}
+
+			}
+
+			if(fireSesion.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_ID) != null
+					&& !"".equals(fireSesion.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_ID))) { //$NON-NLS-1$
+					final String id_tr = fireSesion.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
+					this.getSignCube().setId_transaccion(id_tr != null ? id_tr : "0"); //$NON-NLS-1$
+			}
+
+			if(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT_CONFIG) != null &&
+					!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT_CONFIG))) { //$NON-NLS-1$
+				 final String sSignFormat = fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT_CONFIG);
+				 final Format format = FormatsDAO.getFormatByName(sSignFormat);
+				 this.getSignCube().setIdFormat(format.getIdFormato());
+			}
+			else if(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT) != null &&
 					!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT))) { //$NON-NLS-1$
 				 final String sSignFormat = fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT);
 				 final Format format = FormatsDAO.getFormatByName(sSignFormat);
@@ -78,6 +116,18 @@ public class SignatureLogger {
 			else {
 				 this.getSignCube().setIdFormat(OTRO);
 			}
+
+			if(fireSesion.getString(ServiceParams.SESSION_PARAM_UPGRADE) != null &&
+					!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_UPGRADE))) { //$NON-NLS-1$
+				 final String sSignImprovedFormat = fireSesion.getString(ServiceParams.SESSION_PARAM_UPGRADE);
+				 final ImprovedFormat impformat = ImprovedFormatsDAO.getFormatByName(sSignImprovedFormat);
+				 this.getSignCube().setIdImprovedFormat(impformat.getIdFormatoMejorado());
+			}
+			else {
+				 this.getSignCube().setIdImprovedFormat(0);//Ninguno
+			}
+
+
 			if(fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM) != null &&
 					!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM))) { //$NON-NLS-1$
 				final String sSignAlgorithm =  fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
@@ -109,6 +159,14 @@ public class SignatureLogger {
 			else {
 				this.getSignCube().setIdProveedor(OTRO);
 			}
+
+			if(fireSesion.getObject(ServiceParams.SESSION_PARAM_DOCSIZE) != null) {
+				final Long size = (Long)fireSesion.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
+				this.getSignCube().setSize(size);
+			}else {
+				this.getSignCube().setSize(new Long(0L));
+			}
+
 		}
 		catch (final SQLException e) {
 			// TODO: handle exception
@@ -119,6 +177,9 @@ public class SignatureLogger {
 		}
 
 		this.getFireLogger().getLogger().info(this.getSignCube().toString());
+
+		fireSesion.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, null);
+		fireSesion.setAttribute(ServiceParams.SESSION_PARAM_FORMAT_CONFIG, null);
 	}
 
 

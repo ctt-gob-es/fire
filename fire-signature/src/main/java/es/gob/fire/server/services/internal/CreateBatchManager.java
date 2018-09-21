@@ -149,14 +149,14 @@ public class CreateBatchManager {
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false);
+        	SIGNLOGGER.log(session, false, null);
         	TRANSLOGGER.log(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No existe el gestor de documentos"); //$NON-NLS-1$
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false);
+        	SIGNLOGGER.log(session, false, null);
         	TRANSLOGGER.log(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cargar el gestor de documentos"); //$NON-NLS-1$
         	return;

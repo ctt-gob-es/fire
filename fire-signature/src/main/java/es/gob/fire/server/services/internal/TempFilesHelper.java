@@ -37,6 +37,8 @@ public final class TempFilesHelper {
 
     private static File TMPDIR;
 
+    private static  Long fileSize = 0L;
+
     static {
 
         final String defaultDir = System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
@@ -144,7 +146,17 @@ public final class TempFilesHelper {
         bos.close();
         fos.close();
         LOGGER.info("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
+        setFileSize(new Long(f.length()));
         return f.getName();
     }
+
+	public final static  Long getFileSize() {
+		return fileSize;
+	}
+
+	private final static  void setFileSize(final Long fileSize) {
+		TempFilesHelper.fileSize = fileSize;
+	}
+
 
 }
