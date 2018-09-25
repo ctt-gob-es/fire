@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.afirma.core.misc.AOUtil;
@@ -41,6 +42,7 @@ public final class TestPrincipal {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testGetCertificate() throws Exception {
 		final X509Certificate[] certs;
 		try {
@@ -63,6 +65,7 @@ public final class TestPrincipal {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testLoadData() throws Exception {
 
 		final FIReConnector nbh = new ClaveFirmaConnector();
@@ -102,6 +105,7 @@ public final class TestPrincipal {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testSignData() throws Exception {
 
 		final FIReConnector nbh = new ClaveFirmaConnector();
@@ -189,6 +193,7 @@ public final class TestPrincipal {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testGenerateNewCertificate() throws Exception {
 
 		final String subjectId = "52044291Y"; //$NON-NLS-1$

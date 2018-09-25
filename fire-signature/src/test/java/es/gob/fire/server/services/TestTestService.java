@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.afirma.core.misc.AOUtil;
@@ -43,6 +44,7 @@ public final class TestTestService {
 	 * @throws Exception */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testLoadData() throws Exception {
 		final FIReConnector testService = new TestConnector();
 		System.out.println(
@@ -61,6 +63,7 @@ public final class TestTestService {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testGetCertificates() throws Exception {
 		final FIReConnector testService = new TestConnector();
 		final X509Certificate[] certs = testService.getCertificates("00001"); //$NON-NLS-1$
@@ -73,6 +76,7 @@ public final class TestTestService {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testSignData() throws Exception {
 
 		final FIReConnector nbh = new TestConnector();
