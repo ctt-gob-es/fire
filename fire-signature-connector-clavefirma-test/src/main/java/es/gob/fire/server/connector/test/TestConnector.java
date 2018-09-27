@@ -128,9 +128,8 @@ public class TestConnector extends FIReConnector {
 		// Se permitira la emision de nuevos certificados salvo que se configure
 		// expresamente el valor "false"
 		final String allowedValue = config.getProperty(PROP_ALLOW_REQUEST_NEW_CERT);
-		if (allowedValue != null && Boolean.FALSE.toString().equalsIgnoreCase(allowedValue)) {
-			this.allowedNewCerts = false;
-		}
+		this.allowedNewCerts = allowedValue == null ||
+				!Boolean.FALSE.toString().equalsIgnoreCase(allowedValue);
 
 		try {
 			ConnectionManager.configureConnection(c);
