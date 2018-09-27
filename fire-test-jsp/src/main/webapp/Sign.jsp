@@ -87,6 +87,8 @@
 							<label for="es-a-ft" >ES-A</label><br>
 						<input id="es-t-ft" type="radio" name="upgrade" value="ES-T"/>
 							<label for="es-t-ft">ES-T</label><br>
+						<input id="t-level-ft" type="radio" name="upgrade" value="T-LEVEL"/>
+							<label for="t-level-ft">T-LEVEL</label><br>
 						<input id="es-ltv-ft" type="radio" name="upgrade" value="ES-LTV"/>
 							<label for="es-ltv-ft">ES-LTV</label><br>
 			   	</fieldset>
