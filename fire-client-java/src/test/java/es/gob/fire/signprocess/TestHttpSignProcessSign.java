@@ -9,6 +9,7 @@
  */
 package es.gob.fire.signprocess;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.clavefirma.client.signprocess.HttpSignProcess;
@@ -22,6 +23,7 @@ public final class TestHttpSignProcessSign {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testPAdES() throws Exception {
 
 		final byte[] data = Utils.getDataFromInputStream(
@@ -52,6 +54,7 @@ public final class TestHttpSignProcessSign {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testXAdES() throws Exception {
 
 		final byte[] data = Utils.getDataFromInputStream(

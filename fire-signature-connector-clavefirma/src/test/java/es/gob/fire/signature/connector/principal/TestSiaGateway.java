@@ -17,6 +17,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Properties;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.openlandsw.rss.gateway.CertificateInfo;
@@ -50,6 +51,7 @@ public class TestSiaGateway {
 	 */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testQueryCertificates() throws Exception {
 
 		final Properties gatewayConfig = new Properties();

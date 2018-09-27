@@ -12,6 +12,7 @@ package es.gob.fire.cliente.certificatelist;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.clavefirma.client.certificatelist.HttpCertificateList;
@@ -23,6 +24,7 @@ public class TestHttpCertificateList {
      * @throws Exception En cualquier error. */
     @SuppressWarnings("static-method")
     @Test
+    @Ignore
     public void testCertificateRetrieval() throws Exception {
         final List<X509Certificate> list = HttpCertificateList.getList("1", "52020201C"); //$NON-NLS-1$ //$NON-NLS-2$
         System.out.println("Numero de certificados obtenidos: " + list.size()); //$NON-NLS-1$
@@ -35,6 +37,7 @@ public class TestHttpCertificateList {
      * @throws Exception En cualquier error. */
     @SuppressWarnings("static-method")
     @Test
+    @Ignore
     public void testCertificateRetrievalTest() throws Exception {
         final List<X509Certificate> list = HttpCertificateList.getList("1", "00001"); //$NON-NLS-1$ //$NON-NLS-2$
         System.out.println("Numero de certificados obtenidos: " + list.size()); //$NON-NLS-1$

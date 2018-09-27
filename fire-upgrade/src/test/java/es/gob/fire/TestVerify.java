@@ -11,6 +11,7 @@ package es.gob.fire;
 
 import java.io.ByteArrayOutputStream;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.fire.upgrade.Verify;
@@ -26,6 +27,7 @@ public final class TestVerify {
 	 * @throws Exception en cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testVerifyCert() throws Exception {
 
 		final java.io.InputStream input = TestVerify.class.getResourceAsStream("/redsara.es.der"); //$NON-NLS-1$
