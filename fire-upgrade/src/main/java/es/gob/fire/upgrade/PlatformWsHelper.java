@@ -17,7 +17,6 @@ import java.rmi.RemoteException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import javax.xml.namespace.QName;
 import javax.xml.rpc.ServiceException;
 
 import org.apache.axis.AxisFault;
@@ -120,7 +119,8 @@ public final class PlatformWsHelper {
                 + serviceName));
 
         final String servicioDSS = "verify"; //$NON-NLS-1$
-        call.setOperationName(new QName("http://soapinterop.org/", servicioDSS)); //$NON-NLS-1$
+        //call.setOperationName(new QName("http://soapinterop.org/", servicioDSS)); //$NON-NLS-1$
+        call.setOperationName(servicioDSS);
         call.setTimeout(new Integer(WEB_SERVICES_TIMEOUT));
         call.setClientHandlers(REQUEST_HANDLER, null);
 
