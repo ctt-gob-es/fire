@@ -11,12 +11,13 @@ import java.util.logging.Logger;
 import es.gob.fire.server.admin.message.AdminFilesNotFoundException;
 import es.gob.fire.server.decipher.PropertyDecipher;
 
-class ConfigManager {
+public class ConfigManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
 
 	private static final String PARAM_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
 	private static final String PARAM_DB_CONN = "bbdd.conn"; //$NON-NLS-1$
+	private static final String PARAM_LOGS_TEMP_DIR = "logs.tempdir";//$NON-NLS-1$
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 	private static final String CONFIG_FILE = "admin_config.properties";//$NON-NLS-1$
 
@@ -39,7 +40,7 @@ class ConfigManager {
 	 * Carga la configuraci&oacute;n del m&oacute;dulo.
 	 * @throws AdminFilesNotFoundException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n.
 	 */
-	static void initialize() throws AdminFilesNotFoundException {
+	public static void initialize() throws AdminFilesNotFoundException {
 
 		// Si ya esta cargada, se evita repetir el proceso
 		if (config != null) {
@@ -207,4 +208,27 @@ class ConfigManager {
 				decipherImpl.decipher(Base64.decode(base64Text)) +
 				text.substring(idx2 + SUFIX_CIPHERED_TEXT.length());
 	}
+
+	public static String getLogsTempDir() {
+
+		String pathTempLogs;
+		try {
+			pathTempLogs = getProperty(PARAM_LOGS_TEMP_DIR);
+		}
+		catch (final Exception e) {
+			LOGGER.severe(String.format("Error al descifrar la propiedad %1s", PARAM_LOGS_TEMP_DIR)); //$NON-NLS-1$
+			return null;
+		}
+
+		if (pathTempLogs == null) {
+			LOGGER.log(
+					Level.SEVERE,
+					String.format(
+							"No se ha encontrado la ruta ('%1s') al directorio temporal de ficheros logs, en el fichero de configuracion", //$NON-NLS-1$
+							PARAM_LOGS_TEMP_DIR));
+		}
+		return pathTempLogs;
+	}
+
+
 }

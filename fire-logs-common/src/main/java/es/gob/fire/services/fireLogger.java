@@ -208,7 +208,7 @@ public class fireLogger {
 	}
 
 	 /**
-	  * Se inicializa el FileHandler con el formato de las lineas a # D:%1$tF; T:%1$tT; L:%2$s; M:%3$s%n CLASS:%4$s; METHOD:%5$s %n
+	  * Se inicializa el FileHandler con el formato de las lineas a %1$tF %1$tT;%3$s%n
 	  * @throws SecurityException
 	  * @throws IOException
 	  */
@@ -223,18 +223,24 @@ public class fireLogger {
 				# %7  throw - una cadena que representa el throwable asociado con el registro de registro y su backtrace que comienza con un carácter de nueva línea, si lo hay; de lo contrario, una cadena vacía.
 				# java.util.logging.SimpleFormatter.format=%4$s: %5$s [%1$tc]%n
 				java.util.logging.SimpleFormatter.format="%4$s %1$tF %1$tT %2$s %5$s %n"
-			*/
-         fh.setFormatter(new SimpleFormatter() {
-	          private static final String format = "# D:%1$tF; T:%1$tT; L:%2$s; M:%3$s%n CLASS:%4$s; METHOD:%5$s %n"; //$NON-NLS-1$
-
-	          @Override
-	          public synchronized String format(final LogRecord lr) {
-	              return String.format(format,
+				//Ejemplo extendido --> "# D:%1$tF; T:%1$tT; L:%2$s; M:%3$s%n CLASS:%4$s; METHOD:%5$s %n"
+				 *  return String.format(format,
 	                      new Date(lr.getMillis()),
 	                      lr.getLevel().getName(),
 	                      lr.getMessage(),
 	                      lr.getSourceClassName(),
 	                      lr.getSourceMethodName()
+	              );
+			*/
+         fh.setFormatter(new SimpleFormatter() {
+
+	          private static final String format = "%1$tF %1$tT;%3$s%n"; //$NON-NLS-1$
+
+	          @Override
+	          public synchronized String format(final LogRecord lr) {
+	              return String.format(format,
+	                      new Date(lr.getMillis()),
+	                      lr.getMessage()
 	              );
 	          }
 	      });

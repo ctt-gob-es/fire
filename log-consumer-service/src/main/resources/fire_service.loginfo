@@ -2,22 +2,53 @@
 # Fichero de configuración de Logs    		# 
 #############################################
 
-#CODIFICACIÓN (UTF-8, UTF-16, ISO-8859-1, etc..) 
-#sólo un dato. 
-code=UTF-8
+# Juego de caracteres del log (UTF-8, UTF-16, ISO-8859-1, etc..) 
+charset=UTF-8
 
-#Niveles definidos en el log.(FINER,FINE,INFO,WARNING,SEVERE)
-levels=SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST
+# Niveles de log, en orden creciente de criticidad, separados por comas (',')
+# Ejemplos:
+#  - Niveles de log usados en el FIRe:
+#		FINE,INFO,WARNING,SEVERE
+#  - Niveles de log de Java Logging API:
+#		FINEST,FINER,FINE,CONFIG,INFO,WARNING,SEVERE
+#  - Niveles de log de Logback y Log4J:
+# 		TRACE,DEBUG,INFO,WARN,ERROR
 
-#Formato de las fechas ()
-dateFormat=yyyy-mm-dd
+levels=FINE,INFO,WARNING,SEVERE
 
-#Formato de las horas
-timeFormat=HH:mm:ss 
+# Formato de fecha/hora de las entradas del log. El formato se basa en el definido por el
+# SimpleDateFormat de Java (https://docs.oracle.com/javase/tutorial/i18n/format/simpleDateFormat.html).
+# Ejemplo de patrones:
+# - Patron de fecha de los logs de FIRe:
+#		yyyy-mm-dd HH:mm:ss
+# - Patron de fecha por defecto de Java Logging API (Valor por defecto):
+#		MMM dd, yyyy hh:mm:ss a
+# - Patron de fecha por defecto de Logback y Log4J:
+#		HH:mm:ss.SSS
+#		
+# IMPORTANTE: Si se utilizan nombres de mes y dia de la semana, es obligatorio que
+# el idioma de la JVM sea el mismo que el de la JVM que genero el log
 
-#Carácter de separación
-charSplit=;
+dateTimeFormat=yyyy-mm-dd HH:mm:ss
 
+# Patron de las lineas del log. Es un texto fijo que admite las siguientes particulas para
+# expresar la parte dinamica:
+#  - [DATE]  :  Fecha/hora de la entrada. Debe cumplir el formato indicado en "dateTimeFormat".
+#  - [LEVEL] :  Nivel de log de la entrada.
+#  - \n      :  Salto de linea indicado. En el log debe ser '\r\n' o '\n'. Un patr&oacute;n no puede
+#				empezar ni terminar con esta part&iacute;cula.
+#  - *		 :  Porcion de texto variable. Englobara al mensaje y cualquier otro fragmento variable
+#				del log. Puede ser el ultimo elemento del patron, o estar seguido de una
+#				cadena fija o un salto de linea. En caso de estar limitado por una cadena fija o un
+#				salto de linea, ese fragmento no podra contener esa cadena ni saltos de linea. No
+# 				podra usarse para iniciar el patron si no va seguido de un delimitador.
+# No se pueden usar dos particulas iguales consecutivas.
+# Ejemplo de patrones:
+#  - Patron de los logs de FIRe:
+#		#*\n[DATE]; [LEVEL];*
+#  - Patron de los logs en texto plano por defecto de la Java Logging API:
+#		[DATE]*\n[LEVEL]:*
+# - Patron de los logs por defecto de Logback y Log4J:
+#		[DATE] [*] [LEVEL] *
 
-#Patrón de las líneas del fichero Log.
-logPattern=# D:[DATE]; T:[TIME]; L:[LEVEL]; M:[MESSAGE] /n  CLASS:[CLASS]; METHOD:[METHOD]
+logPattern= #*\n[DATE]; [LEVEL];*
