@@ -12,6 +12,7 @@ package es.gob.fire.server.services.internal;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,7 +25,7 @@ import es.gob.afirma.core.misc.AOUtil;
 import es.gob.fire.signature.ConfigManager;
 
 /**
- * @author carlos.gamuci
+ * Clase con m&eacute;todos de ayuda para la gesti&oacute;n de ficheros temporales.
  *
  */
 public final class TempFilesHelper {
@@ -145,4 +146,45 @@ public final class TempFilesHelper {
         return f.getName();
     }
 
+    /**
+     * Recorre el directorio temporal eliminando los ficheros que hayan sobrepasado el tiempo
+     * indicado sin haber sido modificados.
+     * @param timeout Tiempo en milisegundos que debe haber transcurrido desde la &uacute;ltima
+     * modificaci&oacute;n de un fichero para considerarse caducado.
+     */
+    public static void cleanExpiredFiles(final long timeout) {
+
+    	for (final File tempFile : TMPDIR.listFiles(new ExpiredFileFilter(timeout))) {
+    		try {
+    			Files.delete(tempFile.toPath());
+    		}
+    		catch (final Exception e) {
+    			LOGGER.warning("No se pudo eliminar el fichero caducado " + tempFile.getAbsolutePath() + //$NON-NLS-1$
+    					": " + e); //$NON-NLS-1$
+    		}
+    	}
+    }
+
+    /**
+     * Filtro de ficheros para la obtenci&oacute;n de ficheros de datos
+     * que se hayan modificado hace m&aacute;s del tiempo indicado.
+     */
+    private static class ExpiredFileFilter implements FileFilter {
+
+    	private final long timeoutMillis;
+
+    	/**
+    	 * Tiempo m&aacute;ximo de vigencia de un fichero.
+    	 * @param timeout Tiempo de vigencia en milisegundos.
+    	 */
+    	public ExpiredFileFilter(final long timeout) {
+    		this.timeoutMillis = timeout;
+		}
+
+		@Override
+		public boolean accept(final File pathname) {
+			return pathname.isFile() && System.currentTimeMillis() > pathname.lastModified() + this.timeoutMillis;
+		}
+
+    }
 }

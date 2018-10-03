@@ -80,6 +80,8 @@ public class ConfigManager {
 
 	private static final String PROP_HTTP_CERT_ATTR = "http.cert.attr"; //$NON-NLS-1$
 
+	private static final String DEFAULT_HTTP_CERT_ATTR = "x-clientcert"; //$NON-NLS-1$
+
 	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
 	private static final String PROP_CHECK_APPLICATION = "security.checkApplication"; //$NON-NLS-1$
@@ -577,7 +579,7 @@ public class ConfigManager {
 				 return null;
 			 }
 		 }
-		 return getProperty(PROP_HTTP_CERT_ATTR);
+		 return getProperty(PROP_HTTP_CERT_ATTR, DEFAULT_HTTP_CERT_ATTR);
 	 }
 
 	/**

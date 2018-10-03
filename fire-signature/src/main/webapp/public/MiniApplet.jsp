@@ -1,4 +1,5 @@
 
+<%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.DocInfo"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
@@ -59,8 +60,9 @@
 	// Valores en la operacion de lote
 	String preSignBatchUrl = null;
 	String postSignBatchUrl = null;
+	String certFilters = null;
 	String batchXmlB64 = null;
-
+	
 	// Obtenemos la URL de la pagina para obtener la URL base a partir de la cual
 	// acceder a varios servicios y recursos
 	String baseUrl = request.getRequestURL().toString();
@@ -75,6 +77,7 @@
 		defaultConfig.setExtraParamsB64(extraParamsB64);
 		defaultConfig.setUpgrade(upgrade);
 		
+		certFilters = fireSession.getString(ServiceParams.SESSION_PARAM_FILTERS);
 		batchResult = (BatchResult) fireSession.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
 		final String stopOnError = fireSession.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR);
 		
@@ -196,14 +199,15 @@
 				var batchXmlB64 = "<%= batchXmlB64 %>";
 				var preSignUrl = "<%= preSignBatchUrl %>";
 				var postSignUrl = "<%= postSignBatchUrl %>";
-	
-				try {					
+				var certFilters = "<%= certFilters %>";
+
+				try {
 					showProgress();
 					MiniApplet.signBatch(
 						batchXmlB64,
 						preSignUrl,
 						postSignUrl,
-						null, // ExtraParams para establecer filtro de certificados
+						certFilters,
 						sendBatchResultCallback,
 						sendErrorCallback);
 	
@@ -295,12 +299,12 @@
 			function showErrorOptions() {
 				hideProgress(); 
 				// Ocultamos el boton de firmar
-				document.getElementById("buttonSign").style.display = "none";
+				document.getElementById("signButtonsPanel").style.display = "none";
 				
 				// Mostramos los botones de accion y llevamos el foco hasta ellos
 				document.getElementById("errorMsg").style.display = "block";
 				document.getElementById("errorButtonsPanel").style.display = "block";
-				document.getElementById("buttonSign2").focus();
+				document.getElementById("buttonRetry").focus();
 			}
 
 			/**
@@ -397,13 +401,13 @@
 				<h2 id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
 				</div>
 				
-				<div id="botones_error" class="botones">
-					<input id="buttonSign2" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>&nbsp;
+				<div id="containerError" class="botones">
+					<input id="buttonRetry" type="button" class="button-operacion" value="Reintentar" onclick="<%= formFunction %>"/>&nbsp;
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
 				</div>
 			</div>
 				
-			<div id="container_firmar" Class="container-firmar "> 
+			<div id="signButtonsPanel" Class="container-firmar "> 
 				<form name="formSign" id="formSign" method="POST" action="miniappletSuccessService">
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
@@ -505,35 +509,7 @@
 
 		// Actualizamos el texto de requisitos
 		updateRequirementsText();
-		
-		//Modificamos la posición del botón firmar y el mensaje junto con los botones de error
-// 		var listaDocs=document.getElementById("listDocs");
-		
-// 		if(listaDocs== null || typeof listaDocs==="undefined"){	
-			
-// 			var botonFirma = document.getElementById("container_firmar");
-// 			var msgError = document.getElementById("mensaje_error");
-// 			var btnErr = document.getElementById("botones_error");
-			
-// 			botonFirma.style.top="8em";
-// 			btnErr.style.top="10em";
-// 		}
-		
-		//Función que controla el tamaño de la pantalla para posicionar el texto de error
-		//cuando el ancho la pantalla es menor de 420px
-// 		if (matchMedia) {
-// 			const winsize = window.matchMedia( "(min-width: 420px)" );
-// 			winsize.addListener(windowChange);
-// 			windowChange(winsize);
-// 			}
-// 		function windowChange(winsize){
-// 			if(winsize.matches){
-// 				msgError.style.top="3em";
-// 			}
-// 			else{
-// 				msgError.style.top="6em";
-// 			}
-// 		}
+
 		
 		/** Muestra y actualiza el dialogo de progreso. */
 		function showProgress() {

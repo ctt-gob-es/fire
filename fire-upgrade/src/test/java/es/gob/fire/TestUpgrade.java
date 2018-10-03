@@ -12,6 +12,7 @@ package es.gob.fire;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.fire.upgrade.Upgrade;
@@ -25,6 +26,7 @@ public final class TestUpgrade {
 	 * @throws Exception en cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testSignUpgrade() throws Exception {
 
 		final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_detached_bin.xml"); //$NON-NLS-1$

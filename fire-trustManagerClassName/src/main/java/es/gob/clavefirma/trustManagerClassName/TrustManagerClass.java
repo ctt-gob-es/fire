@@ -11,7 +11,6 @@ package es.gob.clavefirma.trustManagerClassName;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.logging.Logger;
 
 import javax.net.ssl.X509TrustManager;
 
@@ -21,7 +20,6 @@ import javax.net.ssl.X509TrustManager;
  */
 public class TrustManagerClass implements X509TrustManager
 {
-  private static final Logger LOGGER = Logger.getLogger("es.gob.clavefirma"); //$NON-NLS-1$
 
   /**
    * Constructor vac&iacute;o
@@ -34,14 +32,14 @@ public class TrustManagerClass implements X509TrustManager
 public void checkClientTrusted(final X509Certificate[] chain, final String authType)
     throws CertificateException
   {
-    LOGGER.info("Omitida comprobacion cliente de certificado para la operacion '" + authType + "'" + (chain != null && chain.length > 0 ? ": " + chain[0].getSubjectX500Principal() : ""));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	  // Aceptamos todas las conexiones
   }
 
   @Override
 public void checkServerTrusted(final X509Certificate[] chain, final String authType)
     throws CertificateException
   {
-    LOGGER.info("Omitida comprobacion servidor de certificado para la operacion '" + authType + "'" + (chain != null && chain.length > 0 ? ": " + chain[0].getSubjectX500Principal() : "")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	  // Aceptamos todas las conexiones
   }
 
   @Override

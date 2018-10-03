@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +32,11 @@ import es.gob.fire.signature.ConfigManager;
  * lugar para el guardado y lectura de datos de sesi&oacute;n. Este mecanismo
  * puede conllevar un uso intensivo de la unidad de disco y problemas de
  * inconsistencia si un retardo de escritura en disco permitiese que se buscase
- * una sesi&oacute;n antes de que terminase de grabarse.
+ * una sesi&oacute;n antes de que terminase de grabarse.<br>
+ * El borrado de sesiones de disco caducadas debe llevarse a cabo a trav&eacute;s
+ * del proceso de gesti&oacute;n de sesiones pero esta clase incluye su propia
+ * l&oacute;gica para el borrado de sesiones hu&eacute;rfanas que no se borraron en
+ * su momento. Al instanciar el DAO se inicia el proceso de borrado de sesiones caducadas.
  */
 public class FileSystemSessionsDAO implements SessionsDAO {
 
@@ -42,8 +47,8 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	/** N&uacute;mero de usos maximos antes de realizar una limpieza de sesiones abandonadas en disco. */
 	private static final int MAX_USES = 2000;
 
-	/** Tiempo maximo que puede estar en disco una sesi&oacute;n. */
-	private static final long MAX_SESSION_PERIOD = 2*60*60*1000; // 2 Horas
+	/** Tiempo m&aacute;ximo por defecto que puede estar en disco una sesi&oacute;n. */
+	private static final long DEFAULT_MAX_SESSION_PERIOD = 30*60*1000; // 30 Minutos
 
 	/** Directorio de sesiones. */
 	private final File dir;
@@ -85,10 +90,8 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 		final File sessionFile = new File(this.dir, id);
 
 		final Map<String, Object> sessionData;
-		try (final FileInputStream fis = new FileInputStream(sessionFile);) {
-			try (ObjectInputStream ois = new ObjectInputStream(fis)) {
-				sessionData = (Map<String, Object>) ois.readObject();
-			}
+		try {
+			sessionData = loadSessionData(sessionFile);
 		}
 		catch (final FileNotFoundException e) {
 			LOGGER.warning("No se encontro en disco la sesion: " + id); //$NON-NLS-1$
@@ -104,6 +107,23 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 		// de vigencia para obtener la misma fecha de caducidad
 		return FireSession.newSession(id, sessionData, session,
 				sessionFile.lastModified() + ConfigManager.getTempsTimeout());
+	}
+
+	/**
+	 * Carga de un fichero de sesi&oacute;n los datos que contiene.
+	 * @param sessionFile Fichero de sesi&oacute;n.
+	 * @return Datos contenidos en la sesi&oacute;n del fichero.
+	 * @throws FileNotFoundException Cuando no se encuentra el fichero.
+	 * @throws Exception Cuando ocurre un error durante la carga de la sesi&oacute;n.
+	 */
+	private static Map<String, Object> loadSessionData(final File sessionFile) throws FileNotFoundException, Exception {
+
+		final Map<String, Object> sessionData;
+		try (final FileInputStream fis = new FileInputStream(sessionFile);
+				final ObjectInputStream ois = new ObjectInputStream(fis)) {
+			sessionData = (Map<String, Object>) ois.readObject();
+		}
+		return sessionData;
 	}
 
 	@Override
@@ -122,8 +142,10 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	public void removeSession(final String id) {
 		try {
 			Files.delete(new File(this.dir, id).toPath());
+		} catch (final NoSuchFileException e) {
+			// No hacemos nada
 		} catch (final IOException e) {
-			LOGGER.warning("No se pudo eliminar la sesion " + id); //$NON-NLS-1$
+			LOGGER.warning("No se pudo eliminar de disco la sesion " + id); //$NON-NLS-1$
 		}
 	}
 
@@ -154,7 +176,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 
 			final long currentTime = System.currentTimeMillis();
 			for (final File file : files) {
-				if (currentTime > file.lastModified() + MAX_SESSION_PERIOD) {
+				if (currentTime > file.lastModified() + DEFAULT_MAX_SESSION_PERIOD) {
 					try {
 						Files.deleteIfExists(file.toPath());
 					} catch (final IOException e) {

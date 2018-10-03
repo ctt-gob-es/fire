@@ -12,6 +12,7 @@ package es.gob.fire.signprocess;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.clavefirma.client.certificatelist.HttpCertificateList;
@@ -32,6 +33,7 @@ public final class TestLoadData {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
+	@Ignore
 	public void testClientLoadData() throws Exception {
 
 		final X509Certificate cert = HttpCertificateList.getList(APP_ID, SUBJECT).get(0);

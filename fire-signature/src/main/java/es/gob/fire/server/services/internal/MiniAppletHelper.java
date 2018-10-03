@@ -33,6 +33,11 @@ public class MiniAppletHelper {
 	 * al que actualizar las firmas en el proceso de firma trif&aacute;sico. */
 	public static final String PARAM_CONFIG_UPGRADE = "upgradeFormat"; //$NON-NLS-1$
 
+	private static final String AFIRMA_EXTRAPARAM_FILTER = "filter"; //$NON-NLS-1$
+	private static final String AFIRMA_EXTRAPARAM_FILTERS = "filters"; //$NON-NLS-1$
+	private static final String AFIRMA_EXTRAPARAM_ORDER_FILTERS_PREFIX = "filters."; //$NON-NLS-1$
+
+
 	/**
 	 * Crea el fichero de firma de lote para su uso por parte del Cliente @firma.
 	 * @param stopOnError Indica si se debe detener el proceso de firma al encontrar un error.
@@ -88,5 +93,29 @@ public class MiniAppletHelper {
 			.append("</").append(XML_ELEMENT_EXTRAPARAMS).append(">\n </singlesign>"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return sb.toString();
+	}
+
+	/**
+	 * Extrae de las propiedades de configuraci&oacute;n del Cliente @firma las
+	 * propiedades correspondientes a los filtros de certificados.
+	 * @param extraParams Propiedades de configuracion. Se modifica el objeto de entrada
+	 * eliminando las propiedades de los certificados.
+	 * @return Cadena de texto con las claves y propiedades concatenadas para la
+	 * configruaci&oacute;n de los filtros de certificados.
+	 */
+	static String extractCertFiltersParams(final Properties extraParams) {
+		final StringBuilder filters = new StringBuilder();
+		for (final String k : extraParams.keySet().toArray(new String[extraParams.size()])) {
+			if (k.equals(AFIRMA_EXTRAPARAM_FILTER) ||
+					k.equals(AFIRMA_EXTRAPARAM_FILTERS) ||
+					k.startsWith(AFIRMA_EXTRAPARAM_ORDER_FILTERS_PREFIX)) {
+				if (filters.length() != 0) {
+					filters.append("\\n"); //$NON-NLS-1$
+				}
+				filters.append(k).append("=").append(extraParams.getProperty(k)); //$NON-NLS-1$
+				extraParams.remove(k);
+			}
+		}
+		return filters.length() != 0 ? filters.toString() : null;
 	}
 }

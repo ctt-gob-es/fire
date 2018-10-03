@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.signature.ConfigManager;
 
 /**
  * Servicio para la obtenci&oaucte;n de un fichero de despliegue JNLP
@@ -54,8 +55,11 @@ public class AutoFirmaJnlpService extends HttpServlet {
 		final String arg = request.getParameter(PARAM_ARGUMENT);
 		final String osName = request.getParameter(PARAM_OS_NAME);
 		// Devolvemos al usuario la pagina a la que debe dirigir al usuario
-        String codebase = request.getRequestURL().toString();
-        codebase = codebase.substring(0, codebase.toString().lastIndexOf('/') + 1);
+		String publicCodeBase = ConfigManager.getPublicContextUrl();
+		if (publicCodeBase == null || publicCodeBase.isEmpty()){
+			publicCodeBase = request.getRequestURL().toString();
+			publicCodeBase = publicCodeBase.substring(0, publicCodeBase.toString().lastIndexOf('/') + 1);
+		}
 
 		// Cargamos la plantilla del JNLP
 		String template = loadJnlpTemplate();
@@ -74,7 +78,7 @@ public class AutoFirmaJnlpService extends HttpServlet {
 		response.addHeader("Content-Type", "application/x-java-jnlp-file"); //$NON-NLS-1$ //$NON-NLS-2$
 		response.getWriter().append(
 				template
-				.replace(TEMPLATE_REPLACE_CODEBASE, codebase)
+				.replace(TEMPLATE_REPLACE_CODEBASE, publicCodeBase)
 				.replace(TEMPLATE_REPLACE_ARGUMENT, arg != null && !arg.isEmpty() ?
 						"<argument>" + new String(Base64.decode(arg, true), StandardCharsets.UTF_8) + "</argument>" : "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		response.flushBuffer();

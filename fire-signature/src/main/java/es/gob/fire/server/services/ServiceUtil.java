@@ -70,7 +70,7 @@ public final class ServiceUtil {
 
     	p.load(new InputStreamReader(
     			new ByteArrayInputStream(
-    					Base64.decode(base64, base64.indexOf('-') > 0 || base64.indexOf('_') > 0)
+    					Base64.decode(base64, base64.indexOf('-') > -1 || base64.indexOf('_') > -1)
     					),
     			StandardCharsets.UTF_8));
 

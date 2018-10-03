@@ -14,9 +14,9 @@ var originalXMLHttpRequest = window.XMLHttpRequest;
 
 var MiniApplet = ( function ( window, undefined ) {
 
-		var VERSION = "1.6";
+		var VERSION = "1.6.4";
 
-		var JAR_NAME = 'miniapplet-full_1_6.jar';
+		var JAR_NAME = 'miniapplet-full_1_6_4.jar';
 
 		var JAVA_ARGUMENTS = '-Xms512M -Xmx512M ';
 
@@ -197,6 +197,12 @@ var MiniApplet = ( function ( window, undefined ) {
 		function isOldInternetExplorer() {
 			return !!(navigator.userAgent.match(/MSIE/));
 		}
+		
+		/** Indica si el navegador es Internet Explorer 7 o inferior. */
+		function isInternetExplorer7orLower() {
+			var myNav = navigator.userAgent.toLowerCase();
+			return 7 >= (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+		}
 
 		function isFirefoxUAM() {
 		    return navigator.userAgent.indexOf("UAM") > 0;
@@ -252,7 +258,7 @@ var MiniApplet = ( function ( window, undefined ) {
          * completar el proceso de firma.
          */
         function needNativeAppInstalled() {
-        	return forceAFirma || isLinux() || isAndroid() || isIOS();
+        	return forceAFirma || isLinux() || isFirefox() || isAndroid() || isIOS();
         }
 
         /**
@@ -494,7 +500,7 @@ var MiniApplet = ( function ( window, undefined ) {
 
 			// Si estamos claramente en un sistema movil o que no permite la ejecucion de Java,
 			// cargamos directamente el Cliente JavaScript
-			if (isAndroid() || isIOS() || isWindowsRT() || isChrome() || isEdge()) {
+			if (isAndroid() || isIOS() || isWindowsRT() || isChrome() || isFirefox() || isEdge()) {
 				cargarAppAfirma(base, defaultKeyStore);
 				return;
 			}
@@ -761,14 +767,12 @@ var MiniApplet = ( function ( window, undefined ) {
 			
 			if (clientType == TYPE_APPLET) {
 				try {
-					
 					var filenameDataBase64Pair = buildData(clienteFirma.getFileNameContentBase64(title, extensions, description, filePath));
-					var sepPos = filenameDataBase64Pair.indexOf('|');
 					if (successCallback == undefined || successCallback == null) {
-						return filenameDataBase64Pair.substring(sepPos + 1);
+						return filenameDataBase64Pair;
 					}
-					var singlePair = [filenameDataBase64Pair];
-					successCallback(singlePair);
+					var sepPos = filenameDataBase64Pair.indexOf('|');
+					successCallback(filenameDataBase64Pair.substring(0, sepPos), filenameDataBase64Pair.substring(sepPos + 1));
 				} catch(e) {
 					if (errorCallback == undefined || errorCallback == null) {
 						throw e;
@@ -798,11 +802,25 @@ var MiniApplet = ( function ( window, undefined ) {
 			if (clientType == TYPE_APPLET) {
 				
 				try {
-					
 					var filenameDataBase64Pairs = buildData(clienteFirma.getMultiFileNameContentBase64(title, extensions, description, filePath));
-					
-					successCallback(filenameDataBase64Pairs)
-					
+					if (successCallback == undefined || successCallback == null) {
+						return filenameDataBase64Pairs;
+					}
+
+					var fileNameArray = new Array();
+					var dataB64Array = new Array();
+					for (i = 0; i < filenameDataBase64Pairs.length; i++) {
+						var sepPos = filenameDataBase64Pairs[i].indexOf("|");
+						if (sepPos == -1) {
+							fileNameArray.push(filenameDataBase64Pairs[i]);
+							dataB64Array.push("");
+						}
+						else {
+							fileNameArray.push(filenameDataBase64Pairs[i].substring(0, sepPos));
+							dataB64Array.push(filenameDataBase64Pairs[i].substring(sepPos + 1));
+						}
+					}
+					successCallback(fileNameArray, dataB64Array);
 				} catch(e) {
 					if (errorCallback == undefined || errorCallback == null) {
 						throw e;
@@ -817,8 +835,9 @@ var MiniApplet = ( function ( window, undefined ) {
 		
 		var getCurrentLog = function (successCallback, errorCallback) {
 			forceLoad();
-			
-			var error =	" === JAVASCRIPT INFORMATION === " +
+						
+			if (clientType == TYPE_APPLET) {
+				var log = " === JAVASCRIPT INFORMATION === " +
 				"\nnavigator.appCodeName: " + navigator.appCodeName +
 				"\nnavigator.appName: " +  navigator.appName +
 				"\nnavigator.appVersion: " + navigator.appVersion +
@@ -827,26 +846,21 @@ var MiniApplet = ( function ( window, undefined ) {
 				"\nnavigator.javaEnabled(): " + navigator.javaEnabled() +
 				"\nscreen.width: " + (window.screen ? screen.width : 0) +
 				"\nscreen.height: " + (window.screen ? screen.height : 0) +
-				"\n\n   === CLIENTE LOG === \n" + 
-				clienteFirma.getCurrentLog();
-			
-			if (clientType == TYPE_APPLET) {
+				"\n\n   === CLIENTE LOG === \n";
 				try {
-					
-					var log = buildData(clienteFirma.getCurrentLog());
-					
-					if (successCallback == undefined || successCallback == null) {
-						return filenameDataBase64Pair.substring(sepPos + 1);
-					}
-					
-					successCallback(log);
-					
+					log += buildData(clienteFirma.getCurrentLog());
 				} catch(e) {
 					if (errorCallback == undefined || errorCallback == null) {
 						throw e;
 					}
-					errorCallback(error);
+					errorCallback(clienteFirma.getErrorType(), clienteFirma.getErrorMessage());
+					return;
 				}
+				
+				if (successCallback == undefined || successCallback == null) {
+					return log;
+				}
+				successCallback(log);
 			}
 			else {
 				clienteFirma.getCurrentLog(successCallback, errorCallback)
@@ -1110,9 +1124,12 @@ var MiniApplet = ( function ( window, undefined ) {
 			widthAttr.value = 1;
 			iframeElem.setAttributeNode(widthAttr);
 			
-			var styleAttr = document.createAttribute("style");
-			styleAttr.value = "display: none;";
-			iframeElem.setAttributeNode(styleAttr);
+			// Ocultamos el frame en los sistemas en los que podemos mediante CSS
+			if (!isInternetExplorer7orLower()) {
+				var styleAttr = document.createAttribute("style");
+				styleAttr.value = "display: none;";
+				iframeElem.setAttributeNode(styleAttr);
+			}
 
 			document.body.appendChild(iframeElem);				
 		}
@@ -1233,6 +1250,9 @@ var MiniApplet = ( function ( window, undefined ) {
 			/* Caracteres validos para los ID de sesion */
 			var VALID_CHARS_TO_ID = "1234567890abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+			/* URL de la operacion que se solicita actualmente. */
+			var currentOperationUrl = null;
+			
 			/* Genera un identificador de sesion. */
 			function generateNewIdSession () {
 				var ID_LENGTH = 20;
@@ -1548,8 +1568,8 @@ var MiniApplet = ( function ( window, undefined ) {
 				var data = new Object();
 				data.op = generateDataKeyValue("op", loadId);
 				data.title = generateDataKeyValue("title", title);
-				data.extensions = generateDataKeyValue("extensions", extensions);
-				data.description = generateDataKeyValue("description", description);
+				data.extensions = generateDataKeyValue("exts", extensions);
+				data.description = generateDataKeyValue("desc", description);
 				data.filePath = generateDataKeyValue("filePath", filePath);
 				data.multiload = generateDataKeyValue("multiload", multiload);
 				return data;
@@ -1571,12 +1591,20 @@ var MiniApplet = ( function ( window, undefined ) {
 			* peticion sea aceptada.
 			*/
 			function executeEchoByService (currentPort, url, timeoutResetCounter, semaphore) {
+
+				
+				// Almacenamos la URL en una propiedad global que se mantendra siempre actualizada porque
+				// al invocar muchas peticiones consecutivas, en caso de introducir un retardo con setTimeout,
+				// queremos que las peticiones se realicen siempre para la ultima operacion establecida y no
+				// la que hubiese antes de empezar la espera (lo que ocurriria si le pasasemos la URL como
+				// parametro).
+				currentOperationUrl = url;
+				
 				var httpRequest = getHttpRequest();
 				httpRequest.open("POST", URL_REQUEST + currentPort + "/afirma", true);
 				httpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				httpRequest.onreadystatechange = function() {
 					if (httpRequest.readyState == 4 && httpRequest.status == 200 && Base64.decode(httpRequest.responseText, true) == "OK" && !connection) {
-						//console.log("puerto asignado puerto:" + currentPort);
 						port = currentPort;
 						urlHttpRequest = URL_REQUEST + port + "/afirma";
 						connection = true;
@@ -1584,18 +1612,17 @@ var MiniApplet = ( function ( window, undefined ) {
 							semaphore.locked = true;
 						}
 						// Comprobamos si es una operacion de seleccion de certificado
-						isSelectCertOperation = url.indexOf("afirma://selectcert") > -1;
+						isSelectCertOperation = currentOperationUrl.indexOf("afirma://selectcert") > -1;
 						// Comprobamos si es una operacion de guardado.
-						isSaveOperation = url.indexOf("afirma://save") > -1;
+						isSaveOperation = currentOperationUrl.indexOf("afirma://save") > -1;
 						// Comprobamos si es una operacion de firma por lotes
-						isBatchOperation = url.indexOf("afirma://batch") > -1;
+						isBatchOperation = currentOperationUrl.indexOf("afirma://batch") > -1;
 						// Comprobamos si es una operacion criptografica mas guardado del resultado
-						isOpAndSaveOperation = url.indexOf("afirma://signandsave") > -1;
-						executeOperationByService(url);
+						isOpAndSaveOperation = currentOperationUrl.indexOf("afirma://signandsave") > -1;
+						executeOperationByService();
 					}
 					else if ((!semaphore || !semaphore.locked) && !connection && httpRequest.readyState != 2 && httpRequest.readyState != 3) {
 						timeoutResetCounter--;
-						//console.log("Quedan " + timeoutResetCounter + " peticiones a " + currentPort)
 						
 						// Si ya se conecto antes con la aplicacion pero ahora llevamos la mitad de los intentos
 						// sin conectar, consideramos que se ha tumbado y hay que relanzarla
@@ -1605,7 +1632,7 @@ var MiniApplet = ( function ( window, undefined ) {
 								semaphore.locked = true;
 							}
 							timeoutResetCounter = MiniApplet.AUTOFIRMA_CONNECTION_RETRIES;
-							execAppIntent(url);							
+							execAppIntent(currentOperationUrl);							
 						}
 						// Si hemos agotado todos los reintentos consideramos que la aplicacion no esta instalada
 						else if (timeoutResetCounter == 0) {
@@ -1619,7 +1646,7 @@ var MiniApplet = ( function ( window, undefined ) {
 						}
 						// Aun quedan reintentos
 						else {
-							setTimeout(executeEchoByService, MiniApplet.AUTOFIRMA_LAUNCHING_TIME, currentPort, url, timeoutResetCounter, semaphore);
+							setTimeout(executeEchoByServiceDelayed, MiniApplet.AUTOFIRMA_LAUNCHING_TIME, currentPort, timeoutResetCounter, semaphore);
 						}
 					}
 				}
@@ -1632,13 +1659,25 @@ var MiniApplet = ( function ( window, undefined ) {
 					//console.log("probamos puerto " +currentPort)
 				}
 			}
+
+			/** Funcion que ejecuta la llamada a la funcion eco previa a una llamada de operacion
+			 * de tal forma que esta preparada para ser lanzada desde un setTimeout. Esta funcion
+			 * toma la URL de la operacion de la variable global "currentOperationUrl" ya que, en
+			 * una ejecucion rapida de firmas en serie, si se pasase por parametro, en el momento
+			 * de la ejecucion podria ejecutar la operacion con una URL de una operacion anterior. */
+			function executeEchoByServiceDelayed (currentPort, timeoutResetCounter, semaphore) {
+				executeEchoByService (currentPort, currentOperationUrl, timeoutResetCounter, semaphore);
+			}
+			
 			
 			/**
 			* Comprueba si hay que dividir los datos que se se mandan a la aplicacion nativa.
 			* Si hay que dividirlos se llama a la funcion executeOperationRecursive.
 			* Si cabe en un solo envio se manda directamente.
 			*/
-			function executeOperationByService (url) {
+			function executeOperationByService () {
+				
+				var url = currentOperationUrl;
 				
 				// Si el envio se debe fragmentar, llamamos a una funcion que se encarga
 				// de mandar la peticion recursivamente
@@ -1676,7 +1715,7 @@ var MiniApplet = ( function ( window, undefined ) {
 						}
 						// Volvemos a mandar la peticion si no manda texto en la respuesta y la peticion esta en estado ready
 						else if (httpRequest.responseText == "" && httpRequest.status == 0 && httpRequest.readyState == 0) {
-							setTimeout(executeOperationByService, WAITING_TIME, url);
+							setTimeout(executeOperationByService, WAITING_TIME);
 						}
 					}
 				}
@@ -1937,12 +1976,22 @@ var MiniApplet = ( function ( window, undefined ) {
 				}
 				
 				// Vengo de getCurrentLog
-				if (data.indexOf("<log>") > 0) {
-					successCallback(data);
+				if (data.length > 150 && data.substr(0, 150).indexOf("<log>") != -1) {
+					var log = " === JAVASCRIPT INFORMATION === " +
+					"\nnavigator.appCodeName: " + navigator.appCodeName +
+					"\nnavigator.appName: " +  navigator.appName +
+					"\nnavigator.appVersion: " + navigator.appVersion +
+					"\nnavigator.platform: " + navigator.platform +
+					"\nnavigator.userAgent: " + navigator.userAgent+
+					"\nnavigator.javaEnabled(): " + navigator.javaEnabled() +
+					"\nscreen.width: " + (window.screen ? screen.width : 0) +
+					"\nscreen.height: " + (window.screen ? screen.height : 0) +
+					"\n\n   === CLIENTE LOG === \n" + data;
+					successCallback(log);
 					return;
 				}
 				
-				// Compruebo si se trata de una operacin de carga/multicarga (load).
+				// Compruebo si se trata de una operacion de carga/multicarga (load).
 				// El separador "|"  distingue los pares "filename-1:dataBase64-1|filename-2:dataBase64-2...", uno por cada archivo cargado.
 				// Devolveremos un array en el que cada posicion sera uno de estos pares: "filename-n:dataBase64-n".
 				// La funcion de callback realizara el tratamiento deseado,
@@ -2010,7 +2059,9 @@ var MiniApplet = ( function ( window, undefined ) {
 			}
 			
 			function errorServiceResponseFunction(exception, message){
-				errorCallback(exception, message);
+				if (errorCallback) {
+					errorCallback(exception, message);
+				}
 			}
 			
 			function successBatchResponseFunction (data) {
@@ -2066,8 +2117,8 @@ var MiniApplet = ( function ( window, undefined ) {
 				data.op = generateDataKeyValue ("op", "save");
 				data.title = generateDataKeyValue ("title", title);
 				data.filename = generateDataKeyValue ("filename", filename);
-				data.extension = generateDataKeyValue ("extension", extension);
-				data.description = generateDataKeyValue ("description", description);
+				data.extension = generateDataKeyValue ("exts", extension);
+				data.description = generateDataKeyValue ("desc", description);
 				data.dat = generateDataKeyValue ("dat",  dataB64 == "" ? null : dataB64);
 				
 				return data;
@@ -2292,7 +2343,45 @@ var MiniApplet = ( function ( window, undefined ) {
 			 * Implementada en el applet Java de firma
 			 */
 			function selectCertificate (extraParams, successCallback, errorCallback) {
-				throwException(UnsupportedOperationException, "La operacion de seleccion de certificados no esta soportada");
+			
+				var idSession = generateNewIdSession();
+				var cipherKey = generateCipherKey();
+
+				var opId = "selectcert";
+				
+				var i = 0;
+				var params = new Array();
+				params[i++] = {key:"ver", value:PROTOCOL_VERSION};
+				params[i++] = {key:"op", value:opId};
+				
+				if (idSession != null && idSession != undefined) {		params[i++] = {key:"id", value:idSession}; }
+				if (cipherKey != null && cipherKey != undefined) {		params[i++] = {key:"key", value:cipherKey}; }
+				if (defaultKeyStore != null &&
+						defaultKeyStore != undefined) {					params[i++] = {key:"keystore", value:defaultKeyStore};
+																		params[i++] = {key:"ksb64", value:Base64.encode(defaultKeyStore)}; }
+				if (storageServletAddress != null &&
+						storageServletAddress != undefined) {			params[i++] = {key:"stservlet", value:storageServletAddress}; }
+				if (extraParams != null && extraParams != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(extraParams)}; }
+				if (!isAndroid() && !isIOS()) {							params[i++] = {key:"aw", value:"true"}; } // Espera activa
+			
+				var url = buildUrl(opId, params);
+
+				// Si la URL es muy larga, realizamos un preproceso para que los datos se suban al
+				// servidor y la aplicacion nativa los descargue, en lugar de pasarlos directamente 
+				if (isURLTooLong(url)) {
+					if (storageServletAddress == null || storageServletAddress == undefined) {
+						throwException("java.lang.IllegalArgumentException", "No se ha indicado la direccion del servlet para el guardado de datos");
+						return;
+					}
+					else if (retrieverServletAddress == null || retrieverServletAddress == undefined) {
+						throwException("java.lang.IllegalArgumentException", "No se ha indicado la direccion del servlet para la recuperacion de datos");
+						return;
+					}
+					sendDataAndExecAppIntent(idSession, cipherKey, storageServletAddress, retrieverServletAddress, opId, params, successCallback, errorCallback)
+				}
+				else {
+					execAppIntent(url, idSession, cipherKey, successCallback, errorCallback);
+				}
 			}
 			
 			/**
@@ -2357,6 +2446,7 @@ var MiniApplet = ( function ( window, undefined ) {
 				if (format != null && format != undefined) {			params[i++] = {key:"format", value:format}; }
 				if (algorithm != null && algorithm != undefined) {		params[i++] = {key:"algorithm", value:algorithm}; }
 				if (extraParams != null && extraParams != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(extraParams)}; }
+				if (!isAndroid() && !isIOS()) {							params[i++] = {key:"aw", value:"true"}; } // Espera activa
 				if (dataB64 != null) {									params[i++] = {key:"dat", value:dataB64}; }
 			
 				var url = buildUrl(signId, params);
@@ -2420,6 +2510,7 @@ var MiniApplet = ( function ( window, undefined ) {
 				if (extraParams != null && extraParams != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(extraParams)}; }
 				if (outputFileName != null &&
 						outputFileName != undefined) {					params[i++] = {key:"filename", value:outputFileName}; }
+				if (!isAndroid() && !isIOS()) {							params[i++] = {key:"aw", value:"true"}; } // Espera activa
 				if (dataB64 != null) {									params[i++] = {key:"dat", value:dataB64}; }
 			
 				var url = buildUrl(opId, params);
@@ -2474,6 +2565,7 @@ var MiniApplet = ( function ( window, undefined ) {
 				if (batchPostSignerUrl != null &&
 						batchPostSignerUrl != undefined) {				params[i++] = {key:"batchpostsignerurl", value:batchPostSignerUrl}; }
 				if (extraParams != null && extraParams != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(extraParams)}; }
+				if (!isAndroid() && !isIOS()) {							params[i++] = {key:"aw", value:"true"}; } // Espera activa
 				if (batchB64 != null) {									params[i++] = {key:"dat", value:batchB64}; }
 
 				var url = buildUrl(opId, params);
@@ -2534,8 +2626,10 @@ var MiniApplet = ( function ( window, undefined ) {
 				if (filename != null && filename != undefined) {		params[i++] = {key:"filename", value:filename}; }
 				if (extension != null && extension != undefined) {		params[i++] = {key:"extension", value:extension}; }
 				if (description != null && description != undefined) {	params[i++] = {key:"description", value:description}; }
+				if (!isAndroid() && !isIOS()) {							params[i++] = {key:"aw", value:"true"}; } // Espera activa
 				if (dataB64 != null && dataB64 != undefined && dataB64 != "") {			params[i++] = {key:"dat", value:dataB64}; }
-
+				
+				
 				var url = buildUrl(opId, params);
 
 				// Si la URL es muy larga, realizamos un preproceso para que los datos se suban al
@@ -2779,7 +2873,6 @@ var MiniApplet = ( function ( window, undefined ) {
 				// Si no se pide cargar la aplicacion nativa, ni el entorno lo requiere y
 				// si se ha configurado el servicio JNLP, cargamos la aplicacion JNLP
 				if (!needNativeAppInstalled() && !!jnlpServiceAddress) {
-					// En las llamadas al JNLP sustituimos los ampersands para que no den problemas al formar el JNLP
 					openUrl("jnlp" + jnlpServiceAddress.substring(4) + "?os=" + getOSName() + '&arg=' + Base64.encode(intentURL, true));
 				}
 				// En caso contrario, desplegamos la version nativa
@@ -2867,7 +2960,10 @@ var MiniApplet = ( function ( window, undefined ) {
 
 			/**
 			 * Ejecuta el metodo de error si el html recuperado es tal o el metodo de exito si no lo es,
-			 * en cuyo caso previamente descifrara el resultado. 
+			 * en cuyo caso previamente descifrara el resultado. Si el valor recuperado no es ni el
+			 * de exito ni el de error, indicara si se debe seguir esperando por un resultado. En caso
+			 * de indicar false, no se esperara mas; en caso de true, se seguira con la espera; y si se
+			 * de vuelve "reset" se debera reiniciar la espera.
 			 * @param html Resultado obtenido.
 			 * @param cipherKey Clave para el descifrado del resultado si no es un error.
 			 * @param successCallback Metodo a ejecutar en caso de exito.
@@ -2882,6 +2978,13 @@ var MiniApplet = ( function ( window, undefined ) {
 					return true;
 				}
 
+				// Si se obtiene el mensaje de espera, es que el cliente se ha levantado y ha iniciado el proceso.
+				// Siempre que obtengamos este resultado, deberemos reiniciar el tiempo de espera, ya que la aplicacion
+				// sigue activa y nos pide mas tiempo
+				if (html.substr(0, 5).toLowerCase() == "#wait") {
+					return "reset";
+				}
+				
 				// Si se obtiene otro mensaje de error, se deja de intentar y se ejecuta la funcion callback de error
 				if (html.substr(0, 4).toLowerCase() == "err-" && html.indexOf(":=") != -1) {
 					errorMessage = html.substring(html.indexOf(":=") + 2);
@@ -2982,7 +3085,12 @@ var MiniApplet = ( function ( window, undefined ) {
 						if (httpRequest.status == 200) {
 							var needContinue = successResponseFunction(httpRequest.responseText, cipherKey, successCallback, errorCallback);
 							if (needContinue) {
-								setTimeout(retrieveRequest, 4000, httpRequest, url, params.replace("&it=" + (iterations-1), "&it=" + iterations), cipherKey, successCallback, errorCallback);
+								// En caso de que la respuesta sea "reset", se reinicia la espera
+								var oldIterations = iterations-1;
+								if (needContinue == "reset") {
+									iterations = 0;
+								}
+								setTimeout(retrieveRequest, 4000, httpRequest, url, params.replace("&it=" + (oldIterations), "&it=" + iterations), cipherKey, successCallback, errorCallback);
 							}
 						}
 						else {

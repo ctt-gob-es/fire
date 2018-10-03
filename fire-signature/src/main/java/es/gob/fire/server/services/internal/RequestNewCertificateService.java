@@ -27,6 +27,7 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.signature.ConfigManager;
 
 /**
  * Servlet implementation class RequestNewCertificateService
@@ -71,12 +72,16 @@ public final class RequestNewCertificateService extends HttpServlet {
     	// Creamos una configuracion igual a la de firma para la generacion de certificado
     	// y establecemos que la URL de redireccion en caso de exito sea la de recuperacion
     	// del certificado generado
-        String localUrlBase = request.getRequestURL().toString();
-        localUrlBase = localUrlBase.substring(0, localUrlBase.toString().lastIndexOf('/') + 1);
+    	String redirectUrlBase = ConfigManager.getPublicContextUrl();
+		if (redirectUrlBase == null || redirectUrlBase.isEmpty()){
+			redirectUrlBase = request.getRequestURL().toString();
+			redirectUrlBase = redirectUrlBase.substring(0, redirectUrlBase.toString().lastIndexOf('/') + 1);
+		}
+		redirectUrlBase += "/public/"; //$NON-NLS-1$
 
         final TransactionConfig requestCertConfig = (TransactionConfig) connConfig.clone();
         requestCertConfig.setRedirectSuccessUrl(
-        		localUrlBase + "ChooseNewCertificate.jsp?" + //$NON-NLS-1$
+        		redirectUrlBase + "ChooseNewCertificate.jsp?" + //$NON-NLS-1$
         				ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
         				ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId); //$NON-NLS-1$
 

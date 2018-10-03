@@ -13,21 +13,26 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * Hilo para la eliminaci&oacute;n de sesiones caducadas.
+ * Hilo para la eliminaci&oacute;n de sesiones y datos caducados.
  */
 public class ExpiredSessionCleanerThread extends Thread {
 
 	private final String[] ids;
 	private final Map<String, FireSession> sessions;
+	private final int timeout;
 
 	/**
 	 * Construye el objeto para la eliminaci&oacute;n de sesiones caducadas.
 	 * @param ids Identificadores de las sesiones que se tienen que evaluar.
 	 * @param sessions Mapa con todas las sesiones.
+	 * @param tempTimeout Tiempo de caducidad de los ficheros temporales.
 	 */
-	public ExpiredSessionCleanerThread(final String[] ids, final Map<String, FireSession> sessions) {
+	public ExpiredSessionCleanerThread(final String[] ids,
+			final Map<String, FireSession> sessions,
+			final int tempTimeout) {
 		this.ids = ids;
 		this.sessions = sessions;
+		this.timeout = tempTimeout;
 	}
 
 	@Override
@@ -35,11 +40,16 @@ public class ExpiredSessionCleanerThread extends Thread {
 
 		FireSession session;
 		final long currentTime = new Date().getTime();
+
+		// Eliminamos la sesiones caducadas y sus datos asociados
     	for (final String id : this.ids) {
     		session = this.sessions.get(id);
     		if (session != null && currentTime > session.getExpirationTime()) {
     			SessionCollector.removeSession(session);
     		}
     	}
+
+    	// Eliminamos los datos caducados
+    	TempFilesHelper.cleanExpiredFiles(this.timeout);
 	}
 }
