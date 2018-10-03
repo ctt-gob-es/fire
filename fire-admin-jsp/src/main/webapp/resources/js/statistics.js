@@ -109,7 +109,8 @@ $(document).ready(function(){
 		var captionSt = "";
 		var totIncorrectas = 0;
 		var totCorrectas = 0;
-		var userData ='"userdata":{"ID_APP":"","NOMBRE":"Total:","Country":"Total","Price":"19521.68","Quantity":""}'
+		var userData ='"userdata":{';	
+		// "ID_APP":"","NOMBRE":"Total:","Country":"Total","Price":"19521.68","Quantity":""}'
 		
 		if(obJson.TransByApp != null){
 		
