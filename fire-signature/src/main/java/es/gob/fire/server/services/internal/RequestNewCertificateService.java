@@ -77,6 +77,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 			redirectUrlBase = request.getRequestURL().toString();
 			redirectUrlBase = redirectUrlBase.substring(0, redirectUrlBase.toString().lastIndexOf('/') + 1);
 		}
+		redirectUrlBase += "/public/"; //$NON-NLS-1$
 
         final TransactionConfig requestCertConfig = (TransactionConfig) connConfig.clone();
         requestCertConfig.setRedirectSuccessUrl(
