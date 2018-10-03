@@ -197,7 +197,7 @@ public class SignatureCube {
 				else {
 					return null;
 				}
-				//Tamaño de la firma
+				//Tama&ntilde;o de la firma
 				if(!cube[8].isEmpty()) {
 					sign.setSize(new Long(Long.parseLong(cube[8])));
 				}

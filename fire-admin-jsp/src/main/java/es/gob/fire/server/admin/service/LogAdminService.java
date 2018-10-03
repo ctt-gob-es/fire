@@ -138,7 +138,7 @@ public class LogAdminService extends HttpServlet {
 					);
 				}
 				else {
-					//en el casode recivir un error, redigige a LogsMainPage para mostrar el mensaje
+					//en el caso de recivir un error, redigige a LogsMainPage para mostrar el mensaje
 					//en caso contrario, redigige a LogsFileList para mostrar los ficheros encontrados.
 					final JsonReader reader = Json.createReader(new ByteArrayInputStream(datLogFiles));
 					final JsonObject jsonObj = reader.readObject();

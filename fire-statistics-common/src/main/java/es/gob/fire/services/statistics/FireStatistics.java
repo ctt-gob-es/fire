@@ -42,6 +42,8 @@ public class FireStatistics {
 	private static final String FILE_TRANS = "FIReTRANSACTION";//$NON-NLS-1$
 	private static final String FILE_EXT_LCK = ".lck"; //$NON-NLS-1$
 	private static final String FILE_EXT_LOG = ".log"; //$NON-NLS-1$
+	/** Nombre del fichero de configuraci&oacute;n. */
+	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
 	final static SimpleDateFormat formater =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 	private static  String logPath = null;
 
@@ -76,7 +78,7 @@ public class FireStatistics {
         		 String [] result = null;
         		 final String startProcess = formater.format(new Date());
 	            try {
-	            	ConfigManager.checkConfiguration();
+	            	ConfigManager.checkConfiguration(CONFIG_FILE);
 
 					 //Obtenemos la ultima fecha de carga de estadisticas y su estado:
 	            	//1 true  cargado, 0 false No se cargo
@@ -135,7 +137,7 @@ public class FireStatistics {
         String [] result = null;
         final String startProcess = formater.format(new Date());
         try {
-        	ConfigManager.checkConfiguration();
+        	ConfigManager.checkConfiguration(CONFIG_FILE);
         	//Obtenemos la ultima fecha de carga de estadisticas y su estado:
 	        //1 true  cargado, 0 false No se cargo
 	        // del fichero FIReSTATISTICS.log
@@ -239,8 +241,10 @@ public class FireStatistics {
 	 * @throws IOException
 	 * @throws DBConnectionException
 	 * @throws SQLException
+	 * @throws ConfigFilesException
+	 * @throws NumberFormatException
 	   */
-	  static final String [] exeLoadStatistics(final Date date) throws ParseException, IOException, SQLException, DBConnectionException {
+	  static final String [] exeLoadStatistics(final Date date) throws ParseException, IOException, SQLException, DBConnectionException, NumberFormatException, ConfigFilesException {
 		  String [] result = null;
 		  //Obtiene la lista de ficheros para ejecutar la carga.
 		  final String [] listFiles = getStatisticsFiles(date);
@@ -363,8 +367,9 @@ public class FireStatistics {
 	 * @throws ParseException
 	 * @throws es.gob.fire.services.statistics.config.DBConnectionException
 	 * @throws NumberFormatException
+	 * @throws ConfigFilesException
 	   */
-	static final String insertStatisticDB(final String fileName, final int totalReg) throws SQLException, IOException, DBConnectionException, ParseException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException {
+	static final String insertStatisticDB(final String fileName, final int totalReg) throws SQLException, IOException, DBConnectionException, ParseException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException, ConfigFilesException {
 
 		 final File f;
 		 int regInserted = 0;

@@ -2,10 +2,42 @@
 <%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResult" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResultManager" %>   
-
+<%@page import="javax.json.JsonString"%>
+<%@page import="javax.json.JsonArray"%>
+<%@page import="javax.json.JsonReader"%>
+<%@page import="javax.json.Json"%>
+<%@page import="javax.json.JsonObject"%>
+<%@page import="java.io.StringReader"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-	String errorText = null;
+String errorText = null;
+String numRec = "1";//$NON-NLS-1$
+final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
+final String usrLogged= (String) request.getSession().getAttribute("user");//$NON-NLS-1$
+if (state == null || !Boolean.parseBoolean((String) state)) {
+	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+	return;
+}
+
+final String jsonError = (String) request.getSession().getAttribute("ERROR_JSON"); //$NON-NLS-1$ 
+if(jsonError != null){
+	final JsonReader reader = Json.createReader(new StringReader(jsonError));
+	final JsonObject jsonObj = reader.readObject();
+	reader.close();
+	if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
+		final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
+		for(int i = 0; i < Error.size(); i++){
+			final JsonObject json = Error.getJsonObject(i);
+			errorText = "Error:" +String.valueOf(json.getInt("Code")) + "  " + json.getString("Message");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
+		}	
+	} 
+}
+session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
+
+
+
+	final String jsonData = (String)request.getAttribute("TRBYAPP");//$NON-NLS-1$ 
+
 
 	//Logica para determinar si mostrar un resultado de operacion
 	String op = request.getParameter("op"); //$NON-NLS-1$
@@ -22,8 +54,16 @@
 <title>Gesti&oacute;n de servidores de Log FIRe</title>
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
-	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>	
+	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.min.css">
+	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="../resources/css/ui.jqgrid.css">
 	
+	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="../resources/js/grid.locale-es.js" type="text/javascript"></script>
+	<script src="../resources/js/jquery.jqGrid.min.js" type="text/javascript"></script>	
+	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>	
+	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>	
+		
 </head>
 <body>
 <script>
@@ -32,31 +72,66 @@
 <!-- Barra de navegacion -->
 	<jsp:include page="../resources/jsp/NavigationBar.jsp" />
 		
-	<!-- contenido -->
-	<div id="container">
-	
-	<div id="menu-bar">
-<!-- 		<input class="menu-btn" name="add-serv-btn" type="button" value="Alta de servidor" title="Crear un nuevo servidor de log" onclick="location.href='./LogServer.jsp?act=2'"/> -->
-	</div>
-		<div style="display: block-inline; text-align:center;">
-			<p id="descrp">
-			  Estad&iacute;sticas del sistema.
-			</p>
-		</div>
-		
-			<% if(mr != null) { %>
-				<p id="<%=
-						mr.isOk() ? "success-txt" : "error-txt"  //$NON-NLS-1$ //$NON-NLS-2$
-						%>">
-					<%=mr.isOk() ?  mr.getMessage() : errorText != null ? mr.getMessage()+ ". " + errorText : mr.getMessage()%>
-				</p>
-			<% } %>
+		<!-- contenido -->
+	<div id="containerQueryManager">
+		<div id="subtitle" style="padding: 5px;width:100%;height= 42;">
+			<form id ="formStatictics" name="formStatictics" method="post" action="../StatisticsService" >
+				<div id="selectedQuery" style="display:inline-block;">		 
+				 	<label for = "select_query" >* Consulta:</label>
+					<select id = "select_query" name = "select_query" >	
+						<option value = "0" selected></option>			    		
+					    <option value = "1">Transacciones finalizadas por cada aplicaci&oacute;n</option>
+					    <option value = "2">Transacciones finalizadas  por cada origen de certificados/proveedor.</option>
+					    <option value = "3">Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n</option>
+				    	<option value = "4">Transacciones realizadas seg&uacute;n el tipo de transacci&oacute;n (simple o lote)</option>
+				    	<option value = "5">Documentos firmados por cada aplicaci&oacute;n.</option>
+				    	<option value = "6">Documentos firmados por cada origen de certificados/proveedor.</option>
+				    	<option value = "7">Documentos firmados en cada formato de firma.</option>
+				    	<option value = "8">Documentos que utilizan cada formato de firma longevo.</option> 			    								    			
+					</select>													      						      					 				
+				</div>
+				<div style="display: inline-block; padding-left:1em;">
+						<label for="start_date" >* Fecha:</label>
+	    				<input name="start_date" id="start_date" class="date-picker" size="5em" />
+				</div>
+				<div style = "display: inline-block; padding-left:1em;">
+					<button id="accept-button"  name="accept-button"  title="Ejecuta la consulta indicada en los campos de Consulta y Fecha" type="submit"><span class="ui-icon ui-icon-play"></span>Aceptar</button>
+				</div>	
+				<div style = "display: inline-block; padding-left:0.5em;">
+					<button id="clear-button"   name="clear-button"  title="Borra el contenido de los campos de Consulta y Fecha" type="reset" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>	
+				</div >
+			</form>
 			
-		<div id="data">		
+<!-- 			<div id="progress_download" style="display:none;"> -->
+<!-- 				<img  style="vertical-align: middle;" alt="Icono animado cargando fichero" src="../resources/img/load.gif" height="42" width="55" > -->
+<!-- 				Consulta <span id="fileName"></span> del servidor <span id="ServerName"></span>.			 -->
+<!-- 			</div>				      						    -->
+			<div id="error-txt-log" style="display:none;width:30%;" onload="setIdErrorTxtQuery($(this).attr('id'))"></div>
+			<div id="ok-txt-log" style="display:none;width:30%;" onload="setIdOkTxtQuery($(this).attr('id'))"></div>			
 		</div>
-
-   	</div>
+	
+		<div id="main-content" style="margin: auto; width: 100%;" >
+			<div id="contentQueryResult" style="display:inline-block;width: 98%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;"  >
+		
+				<div id="advice" style="display:block; text-align: center;" onload="setIdAdvice($(this).attr('id'))">					
+					<p>Para ver los resultados en esta p&aacute;gina debe  seleccionar "Consulta" y "Fecha" .</p>
+				</div>		
+				<pre id="QueryResult"onload="setIdContainer($(this).attr('id'))"></pre>
+				<!-- Tabla de datos -->
+				<div id="data" style="display: block-inline; text-align:center;">		
+					<div id="jQGrid" style="padding-left: 11%; padding-right:12%;">
+	 		 			<table id="resultQuery"></table>
+	  					<div id="page"></div>
+	 				</div>
+ 				</div>
+				
+			</div>
+						
+		</div>	 <!-- main-content -->
+		   
+   	</div><!-- containerLogsManager -->
 
 </body>
-<!-- <script src="../resources/js/log_server.js" type="text/javascript"></script> -->
+
+<script src="../resources/js/statistics.js" type="text/javascript"></script>	
 </html>

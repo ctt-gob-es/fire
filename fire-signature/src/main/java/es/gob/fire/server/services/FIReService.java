@@ -56,7 +56,8 @@ public class FIReService extends HttpServlet {
     // Parametros que necesitamos de la URL.
     private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_OPERATION = "op"; //$NON-NLS-1$
-
+	/** Nombre del fichero de configuraci&oacute;n. */
+	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     private static GoogleAnalitycs analytics = null;
 
     @Override
@@ -65,7 +66,7 @@ public class FIReService extends HttpServlet {
 
     	try {
 	    	ConfigManager.checkConfiguration();
-	    	es.gob.fire.services.statistics.config.ConfigManager.checkConfiguration();
+	    	es.gob.fire.services.statistics.config.ConfigManager.checkConfiguration(CONFIG_FILE);
 		}
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$

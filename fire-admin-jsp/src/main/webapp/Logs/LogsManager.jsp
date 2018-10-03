@@ -123,7 +123,7 @@ boolean filter = true;
 	
 	<!-- contenido -->
 	<div id="containerLogsManager">
-		<div id="subtitle" style="padding: 10px;width:100%;height=42;">
+		<div id="subtitle" style="padding: 10px;width:100%;height= 42;">
 			<div id="btnContainer" style="display: inline-block;width:8%;">				
 				<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />					      		
 			</div>
