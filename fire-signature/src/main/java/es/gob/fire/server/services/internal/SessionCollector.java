@@ -23,7 +23,13 @@ import es.gob.fire.signature.ConfigManager;
 
 /**
  * Gestiona las transacciones de firma de la aplicaciones almacenando los datos de cada
- * una en sesiones.
+ * una en sesiones. Las sesiones pueden guardarse tanto en memoria como en un espacio
+ * compartido por varias instancias de la aplicaci&oacute;n a trav&eacute;s de un DAO.
+ * Esta clase gestiona autom&aacute;ticamente el borrado de sesiones caducadas en memoria y
+ * en el espacio compartido. Los datos temporales de las sesiones caducadas solo se
+ * eliminar&aacute;n a partir de las sesiones almacenadas en memoria, ya que, de hacerlo
+ * para las sesiones del espacio compartido, se solicitar&iacute;a su borrado desde cada uno
+ * de los nodos del sistema.
  */
 public final class SessionCollector {
 
@@ -40,6 +46,11 @@ public final class SessionCollector {
 
     static {
 
+    	// Ejecutamos el proceso de borrado de sesiones caducadas (que no habra ninguna)
+    	// y temporales
+    	cleanExpiredSessions();
+
+    	// Cargamos el DAO de sesiones compartidas
     	final String daoType = ConfigManager.getSessionsDao();
     	if (daoType == null || daoType.isEmpty()) {
     		LOGGER.info("No se configuro un gestor de sesiones. " //$NON-NLS-1$
@@ -58,7 +69,8 @@ public final class SessionCollector {
     }
 
     /**
-     * Busca una sesion en el pool de sesiones para eliminarla.
+     * Busca una sesion en el pool de sesiones para eliminarla junto con sus datos temporales.
+     * Si se establecio tambien un DAO de sesiones compatidas, se elimina tambien del mismo.
      * @param id Identificador de la sesi&oacute;n.
      */
     public static void removeSession(final String id) {
@@ -66,8 +78,10 @@ public final class SessionCollector {
     		return;
     	}
 
-    	// Eliminamos la sesion de la memoria del servidor
+    	// Buscamos la sesion en la memoria del servidor
     	final FireSession fireSession = sessions.get(id);
+
+    	// Eliminamos los datos de la session (si los encontramos) y la propia session
     	if (fireSession != null) {
     		removeAssociattedTempFiles(fireSession);
     		fireSession.invalidate();
@@ -123,6 +137,23 @@ public final class SessionCollector {
     }
 
     /**
+     * Elimina los ficheros temporales asociados a la sesi&oacute;n.
+     * @param session Sesi&oacute;n de la que eliminar los ficheros temporales.
+     */
+    public static void cleanTempFiles(final FireSession session) {
+
+    	if (session.containsAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT)) {
+    		final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
+    		if (batchResult != null) {
+    			final Iterator<String> it = batchResult.iterator();
+    			while (it.hasNext()) {
+    				TempFilesHelper.deleteTempData(batchResult.getDocumentReference(it.next()));
+    			}
+    		}
+    	}
+    }
+
+    /**
      * Elimina los datos de sesi&oacute;n (salvo mensajes de error, el indicador sobre si
      * en alg&uacute;n momento se cedi&oacute; el control de la transacci&oacute;n en
      * cuesti&oacute;n y el identificador del usuario) y los ficheros temporales
@@ -156,7 +187,7 @@ public final class SessionCollector {
      */
     private static void cleanExpiredSessions() {
         final ExpiredSessionCleanerThread t = new ExpiredSessionCleanerThread(
-        		sessions.keySet().toArray(new String[sessions.size()]), sessions);
+        		sessions.keySet().toArray(new String[sessions.size()]), sessions, ConfigManager.getTempsTimeout());
         t.start();
     }
 
@@ -353,7 +384,7 @@ public final class SessionCollector {
     	final FireSession fireSession = sessions.get(id);
     	if (fireSession != null) {
     		if (fireSession.isExpired()) {
-    			removeSession(id);
+    			removeSession(fireSession);
     			return null;
     		}
     	}

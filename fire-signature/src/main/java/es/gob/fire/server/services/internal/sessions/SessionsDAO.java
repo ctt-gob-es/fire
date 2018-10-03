@@ -33,7 +33,8 @@ public interface SessionsDAO {
 	boolean existsSession(String id);
 
 	/**
-	 * Recupera una sesi&oacute;n.
+	 * Recupera una sesi&oacute;n. Esto implica construir el propio objeto de sesi&oacute;n y
+	 * renovar su periodo de validez.
 	 * @param id Identificador de la sesi&oacute;n.
 	 * @param session Sesi&oacute;n web en la que se debe sustentar la sesi&oacute;n.
 	 * @return Sesi&oacute;n recuperada o {@code null} si no existe la sesi&oacute;n
@@ -46,5 +47,4 @@ public interface SessionsDAO {
 	 * @param id Identificador de la sesi&oacute;n.
 	 */
 	void removeSession(String id);
-
 }
