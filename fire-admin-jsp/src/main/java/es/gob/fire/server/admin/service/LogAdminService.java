@@ -3,15 +3,10 @@ package es.gob.fire.server.admin.service;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.json.Json;
@@ -179,40 +174,6 @@ public class LogAdminService extends HttpServlet {
 		case OPEN_FILE:
 			LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
-			//TODO codigo de prueba, inserción de lineas en fichero (insertar en LogAdminService.java en CASE OPEN_FILE)
-		 	final ScheduledThreadPoolExecutor sch = (ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(1);
-		 	final String nombrefichero = "C:/Tests/"+ this.logFileName; //$NON-NLS-1$
-	        final Runnable renameLoggerFile = new Runnable(){
-	        	 FileWriter fichero = null;
-		         PrintWriter pw = null;
-		         int j = 0;
-	            @Override
-	            public void run() {
-
-		            try {
-		            	 if (null != this.fichero) {
-				              this.fichero.close();
-				           }
-		            	 this.fichero = new FileWriter( nombrefichero ,true);
-				         this.pw = new PrintWriter(this.fichero);
-				         for (int i = 0; i < 10; i++) {
-				        	this.pw.println("mar 28, 2018 12:41:44 PM org.apache.catalina.core.StandardEngine startInternal " + this.j); //$NON-NLS-1$
-							this.pw.println("INFORMACIÓN: Arrancando servicio Catalina " + this.j); //$NON-NLS-1$
-							this.j++;
-						}
-
-		            } catch (final SecurityException e) {
-		                    e.printStackTrace();
-		            } catch (final IOException e) {
-							e.printStackTrace();
-		            }
-		       };
-	        };
-	        sch.scheduleAtFixedRate(renameLoggerFile, 60L, 40L, TimeUnit.SECONDS);
-
-		//TODO fin codigo prueba
-
-
 			final byte datOpenFiles[] = this.logclient.openFile(this.logFileName);
 
 			if(datOpenFiles != null && datOpenFiles.length > 0) {
