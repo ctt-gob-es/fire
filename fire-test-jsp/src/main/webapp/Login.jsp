@@ -29,7 +29,7 @@
 			<div style="display: block-inline;text-align:center;">
 				<img src="img/dni_icon_login.png" alt="Imagen esquem&aacute;tica de un usuario" height="80" width="80" style="margin-top:-40px;">
 				<p id="descrp" style="margin-top:20px">
-				 Introduzca el usuario con el desee firmar.
+				 Introduzca el usuario con el que desee firmar.
 				</p>
 			</div>
 			<%if(loginFail) {%>

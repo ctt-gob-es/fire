@@ -143,7 +143,7 @@ public class SignatureService extends HttpServlet {
 
 		} catch (final Exception e) {
 			LOGGER.error("Error durante la operacion de firma", e); //$NON-NLS-1$
-	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$));
+	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode("Error en la llamada a la operacion de firma:<br>" + e.toString(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$));
 	    	return;
 		}
 

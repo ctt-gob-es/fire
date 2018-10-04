@@ -62,7 +62,7 @@ public class SignBatchService extends HttpServlet {
 			signOperationResult = ConfigManager.getInstance().getFireClient(appId).signBatch(transactionId, userId, stopOnError);
 		} catch (final Exception e) {
 			LOGGER.error("Error durante la operacion de firma del lote", e); //$NON-NLS-1$
-			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
+			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode("Error en la llamada a la operacion de creacion de lote:<br>" + e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 
