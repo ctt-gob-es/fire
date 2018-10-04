@@ -13,8 +13,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manejador para la obtenci&oacute;n de los valores del fichero de configuraci&oacute;n.
@@ -32,7 +33,7 @@ public class ConfigManager {
 	 * de configuraci&oacute;n. Se utiliza si no se ha establecido la nueva variable. */
 	private static final String ENVIRONMENT_VAR_CONFIG_DIR_OLD = "clavefirma.config.path"; //$NON-NLS-1$
 
-	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
 
 	private static Properties config = null;
 
@@ -59,14 +60,13 @@ public class ConfigManager {
 			if (configDir != null) {
 				final File configFile = new File(configDir, PROPERTY_FILE).getCanonicalFile();
 				if (!configFile.isFile() || !configFile.canRead()) {
-					LOGGER.warning(
-							"No se encontro el fichero " + PROPERTY_FILE + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configFile.getAbsolutePath() + //$NON-NLS-1$
-									"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+					LOGGER.warn(
+							"No se encontro el fichero {} en el directorio configurado en la variable {}: {}\n" + //$NON-NLS-1$
+							"Se buscara en el CLASSPATH", PROPERTY_FILE, ENVIRONMENT_VAR_CONFIG_DIR, configFile.getAbsolutePath()); //$NON-NLS-1$
 				}
 				else {
 					is = new FileInputStream(configFile);
-					LOGGER.info("Se carga un fichero de configuracion externo: " + configFile.getAbsolutePath()); //$NON-NLS-1$
+					LOGGER.info("Se carga un fichero de configuracion externo: {}", configFile.getAbsolutePath()); //$NON-NLS-1$
 				}
 			}
 
@@ -79,14 +79,14 @@ public class ConfigManager {
 			is.close();
 		}
 		catch(final NullPointerException e){
-			LOGGER.severe("No se ha encontrado el fichero de configuracion: " + e); //$NON-NLS-1$
+			LOGGER.error("No se ha encontrado el fichero de configuracion: ", e); //$NON-NLS-1$
 			if (is != null) {
 				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
 			}
 			throw new ClientConfigFilesNotFoundException("No se ha encontrado el fichero de propiedades " + PROPERTY_FILE, PROPERTY_FILE, e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "No se pudo cargar el fichero de configuracion " + PROPERTY_FILE, e); //$NON-NLS-1$
+			LOGGER.error("No se pudo cargar el fichero de configuracion {}", PROPERTY_FILE, e); //$NON-NLS-1$
 			if (is != null) {
 				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
 			}

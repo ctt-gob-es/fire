@@ -12,14 +12,15 @@ package es.gob.fire.test.webapp;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.CreateBatchResult;
 
@@ -31,7 +32,7 @@ public class CreateBatchService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = 9216217964645644004L;
 
-	private static final Logger LOGGER = Logger.getLogger(CreateBatchService.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(CreateBatchService.class);
 
 	private static final String REDIRECT_SUCCESS_PAGE = "RecoverBatch.jsp"; //$NON-NLS-1$
 	private static final String REDIRECT_ERROR_PAGE = "ErrorTransactionPage.jsp"; //$NON-NLS-1$
@@ -97,7 +98,7 @@ public class CreateBatchService extends HttpServlet {
 			createBatchResult = ConfigManager.getInstance().getFireClient(appId).createBatchProcess(
 					userId, op, format, algorithm, extraparams, upgrade, confProperties);
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Ocurrio un error al crear un lote", e); //$NON-NLS-1$
+			LOGGER.error("Ocurrio un error al crear un lote", e); //$NON-NLS-1$
 			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
