@@ -35,9 +35,6 @@ public class LogConsumerClient {
 
 	private  Charset charsetContent = StandardCharsets.UTF_8;
 
-
-
-
 	/**
 	 * Construye el cliente para la consulta de logs.
 	 */
@@ -184,7 +181,7 @@ public class LogConsumerClient {
 			if(response.statusCode == 200) {
 
 				final byte[] resEcho = response.getContent();
-				final String res = new String(resEcho,this.getCharsetContent());
+				final String res = new String(resEcho,getCharsetContent());
 				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 				final JsonArrayBuilder data = Json.createArrayBuilder();
 				data.add(Json.createObjectBuilder()
@@ -242,7 +239,7 @@ public class LogConsumerClient {
 		else {
 
 			final byte[] resLogfiles = response.getContent();
-			final String res = new String(resLogfiles,this.getCharsetContent());
+			final String res = new String(resLogfiles,getCharsetContent());
 			result.append(res);
 
 			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -284,7 +281,7 @@ public class LogConsumerClient {
 					final JsonObject obj = jsonarr.getJsonObject(i);
 					if(obj.get("Charset")!=null) { //$NON-NLS-1$
 						final String charsetName = obj.get("Charset").toString().replace("\"", "");//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						this.setCharsetContent(Charset.forName(charsetName));
+						setCharsetContent(Charset.forName(charsetName));
 					}
 				}
 				result.write(openFileReponse.toString());
@@ -293,7 +290,7 @@ public class LogConsumerClient {
 		else {
 
 			final byte[] resOpenFile = response.getContent();
-			final String res = getSendErrorMessage(new String(resOpenFile,this.getCharsetContent()));
+			final String res = getSendErrorMessage(new String(resOpenFile,getCharsetContent()));
 			//result.append(res);
 			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 			final JsonArrayBuilder data = Json.createArrayBuilder();
@@ -308,7 +305,7 @@ public class LogConsumerClient {
 		}
 
 		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(this.getCharsetContent());
+			return result.toString().getBytes(getCharsetContent());
 		}
 
 		return null;
@@ -343,7 +340,7 @@ public class LogConsumerClient {
 			}
 			else {
 				final byte[] resCloseFile = response.getContent();
-				final String res = new String(resCloseFile,this.getCharsetContent());
+				final String res = new String(resCloseFile,getCharsetContent());
 				result.append(res);
 				final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 				final JsonArrayBuilder data = Json.createArrayBuilder();
@@ -371,10 +368,7 @@ public class LogConsumerClient {
 			}
 		}
 
-		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(this.getCharsetContent());
-		}
-		return null;
+		return result.toString().getBytes(getCharsetContent());
 	}
 
 	/**
@@ -397,7 +391,7 @@ public class LogConsumerClient {
 
 			if(response.statusCode == 200 && response.getContent().length > 0) {
 				final byte[] resTail = response.getContent();
-				final String res = new String(resTail,this.getCharsetContent());
+				final String res = new String(resTail,getCharsetContent());
 				resultTail.append(res);
 
 				data.add(Json.createObjectBuilder()
@@ -410,7 +404,7 @@ public class LogConsumerClient {
 			}
 			else {
 				final byte[] resTail = response.getContent();
-				final String res = new String(resTail,this.getCharsetContent());
+				final String res = new String(resTail,getCharsetContent());
 				result.append(res);
 				data.add(Json.createObjectBuilder()
 					.add("Code",response.statusCode) //$NON-NLS-1$
@@ -432,7 +426,7 @@ public class LogConsumerClient {
 		    jw.close();
 		}
 		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(this.getCharsetContent());
+			return result.toString().getBytes(getCharsetContent());
 		}
 		return null;
 	}
@@ -458,7 +452,7 @@ public class LogConsumerClient {
 
 			if(response.statusCode == 200 && response.getContent().length > 0) {
 				final byte[] resMore = response.getContent();
-				final String res = new String(resMore,this.getCharsetContent());
+				final String res = new String(resMore,getCharsetContent());
 				resultMore.append(res);
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
@@ -470,7 +464,7 @@ public class LogConsumerClient {
 			}
 			else {
 				final byte[] resMore = response.getContent();
-				final String res = new String(resMore,this.getCharsetContent());
+				final String res = new String(resMore,getCharsetContent());
 				resultMore.append(res);
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
@@ -493,7 +487,7 @@ public class LogConsumerClient {
 		    jw.close();
 		}
 		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(this.getCharsetContent());
+			return result.toString().getBytes(getCharsetContent());
 		}
 		return null;
 	}
@@ -518,7 +512,7 @@ public class LogConsumerClient {
 
 			if(response.statusCode == 200 && response.getContent().length > 0) {
 				final byte[] resFilter = response.getContent();
-				final String res = new String(resFilter,this.getCharsetContent());
+				final String res = new String(resFilter,getCharsetContent());
 				resultFilter.append(res);
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
@@ -530,7 +524,7 @@ public class LogConsumerClient {
 			}
 			else {
 				final byte[] resFilter = response.getContent();
-				final String res = new String(resFilter,this.getCharsetContent());
+				final String res = new String(resFilter,getCharsetContent());
 				resultFilter.append(res);
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
@@ -552,7 +546,7 @@ public class LogConsumerClient {
 		    jw.close();
 		}
 		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(this.getCharsetContent());
+			return result.toString().getBytes(getCharsetContent());
 		}
 		return null;
 	}
@@ -577,7 +571,7 @@ public class LogConsumerClient {
 
 			if(response.statusCode == 200 && response.getContent().length > 0) {
 				final byte[] resSearch = response.getContent();
-				final String res = new String(resSearch,this.getCharsetContent());
+				final String res = new String(resSearch,getCharsetContent());
 				resultSearch.append(res);
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
@@ -589,7 +583,7 @@ public class LogConsumerClient {
 			}
 			else {
 				final byte[] resSearch = response.getContent();
-				final String res = new String(resSearch,this.getCharsetContent());
+				final String res = new String(resSearch,getCharsetContent());
 				resultSearch.append(res);
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
@@ -612,7 +606,7 @@ public class LogConsumerClient {
 		    jw.close();
 		}
 		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(this.getCharsetContent());
+			return result.toString().getBytes(getCharsetContent());
 		}
 		return null;
 	}

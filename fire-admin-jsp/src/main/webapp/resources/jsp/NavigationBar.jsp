@@ -1,6 +1,13 @@
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-	final String userLogged = (String)request.getSession().getAttribute("user");//$NON-NLS-1$ 
+
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
+	final String userLogged = (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 %>
 <div class="menubarPosition">
 		<ul id="menubar">

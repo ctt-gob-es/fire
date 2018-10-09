@@ -82,7 +82,7 @@ public class NewCertificateService extends HttpServlet {
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
 		/*Obtenemos los parametros enviados del formulario junto con el Certificado*/
-		this.getParameters(request);
+		getParameters(request);
 		//Obtener el tipo de operacion 1-Alta 2-Edicion
 		final int op = Integer.parseInt(request.getParameter(PARAM_OP));
 		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
@@ -95,32 +95,32 @@ public class NewCertificateService extends HttpServlet {
 
 			//Comprobar que se ha cargado el Certificado principal nuevo.
 			//Obtenemos la huella de dicho certificado
-			if(this.getCert_prin() != null) {
-				final byte[] der = this.getCert_prin().getEncoded();
+			if(getCert_prin() != null) {
+				final byte[] der = getCert_prin().getEncoded();
 				md.update(der);
 				digest = md.digest();
-				this.setHuella_prin(Base64.encode(digest));
+				setHuella_prin(Base64.encode(digest));
 			}
-			if(this.getCert_resp() != null) {
-				final byte[] der = this.getCert_resp().getEncoded();
+			if(getCert_resp() != null) {
+				final byte[] der = getCert_resp().getEncoded();
 				md.update(der);
 				digest = md.digest();
-				this.setHuella_resp(Base64.encode(digest));
+				setHuella_resp(Base64.encode(digest));
 			}
 
 
 
 			boolean isOk = true;
-			if (this.getName() == null && this.getCert_prin() == null && this.getCert_resp() == null ) {
+			if (getName() == null && getCert_prin() == null && getCert_resp() == null ) {
 				LOGGER.log(Level.SEVERE,
 						"No se han proporcionado todos los datos requeridos para el alta del certificado (nombre y certificado principal)"); //$NON-NLS-1$
 				isOk = false;
 			} else {
 				// nuevo certificado
 				if (op == 1){
-				LOGGER.info("Alta del certificado con nombre: " + this.getName()); //$NON-NLS-1$
+				LOGGER.info("Alta del certificado con nombre: " + getName()); //$NON-NLS-1$
 					try {
-						CertificatesDAO.createCertificate(this.getName(), this.getB64Cert_prin(), this.getHuella_prin(), this.getB64Cert_resp(), this.getHuella_resp());
+						CertificatesDAO.createCertificate(getName(), getB64Cert_prin(), getHuella_prin(), getB64Cert_resp(), getHuella_resp());
 
 					} catch (final Exception e) {
 						LOGGER.log(Level.SEVERE, "Error en el alta del certificado", e); //$NON-NLS-1$
@@ -129,12 +129,12 @@ public class NewCertificateService extends HttpServlet {
 				}
 				// editar certificado
 				else if (op == 2){
-					LOGGER.info("Edicion del certificado con nombre: " + this.getName()); //$NON-NLS-1$
+					LOGGER.info("Edicion del certificado con nombre: " + getName()); //$NON-NLS-1$
 
-					final String b64CertPrin = this.getB64Cert_prin() != null ? this.getB64Cert_prin() : null;
-					final String b64CertResp = this.getB64Cert_resp() != null ? this.getB64Cert_resp() : null;
+					final String b64CertPrin = getB64Cert_prin() != null ? getB64Cert_prin() : null;
+					final String b64CertResp = getB64Cert_resp() != null ? getB64Cert_resp() : null;
 
-					CertificatesDAO.updateCertificate(this.getIdCert(), this.getName(), b64CertPrin, this.getHuella_prin(), b64CertResp, this.getHuella_resp() );
+					CertificatesDAO.updateCertificate(getIdCert(), getName(), b64CertPrin, getHuella_prin(), b64CertResp, getHuella_resp() );
 
 				}
 
@@ -148,11 +148,11 @@ public class NewCertificateService extends HttpServlet {
 		}
 		catch (final IllegalArgumentException e){
 			LOGGER.log(Level.SEVERE,"Ha ocurrido un error con el base64 : " + e, e); //$NON-NLS-1$
-			response.sendRedirect("Certificate/NewCertificate.jsp?error=true&name=" + this.getName() + "&op=" + op); //$NON-NLS-1$ //$NON-NLS-2$
+			response.sendRedirect("Certificate/NewCertificate.jsp?error=true&name=" + getName() + "&op=" + op); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		catch (final CertificateException e){
 			LOGGER.log(Level.SEVERE,"Ha ocurrido un error al decodificar el certificado : " + e, e); //$NON-NLS-1$
-			response.sendRedirect("Certificate/NewCertificate.jsp?error=true&name=" + this.getName() + "&op=" + op); //$NON-NLS-1$ //$NON-NLS-2$
+			response.sendRedirect("Certificate/NewCertificate.jsp?error=true&name=" + getName() + "&op=" + op); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,"Ha ocurrido un error crear la aplicacion : " + e, e); //$NON-NLS-1$
@@ -172,52 +172,52 @@ public class NewCertificateService extends HttpServlet {
 	 */
 	private void getParameters(final HttpServletRequest req) throws IOException, ServletException {
 
-		this.setB64Cert_prin(null);
-		this.setB64Cert_resp(null);
-		this.setCert_prin(null);
-		this.setCert_resp(null);
-		this.setHuella_prin(null);
-		this.setHuella_resp(null);
+		setB64Cert_prin(null);
+		setB64Cert_resp(null);
+		setCert_prin(null);
+		setCert_resp(null);
+		setHuella_prin(null);
+		setHuella_resp(null);
 
 		try {
 			if(req.getParameter(PARAM_ID) != null && !"".equals(req.getParameter(PARAM_ID))) {//$NON-NLS-1$
-				this.setIdCert(req.getParameter(PARAM_ID));
+				setIdCert(req.getParameter(PARAM_ID));
 			}
 
 	        final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
 	        for (final FileItem item : items) {
 	        	if (item.isFormField() && PARAM_NAME.equals(item.getFieldName())) {
-	        		this.setName(item.getString());
+	        		setName(item.getString());
 	        	}
 	        	else if (!item.isFormField() && PARAM_CER_PRIN.equals(item.getFieldName()) && item.getInputStream() != null && item.getSize() > 0L) {
 	        		final InputStream isFileContent = item.getInputStream();
-	        		this.setCert_prin((X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(isFileContent));
+	        		setCert_prin((X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(isFileContent));
 	        		isFileContent.close();
 	        		final InputStream isCert = item.getInputStream();
 	        		final byte[] bCert = Utils.getDataFromInputStream(isCert);
-	        		this.setB64Cert_prin(Base64.encode(bCert));
+	        		setB64Cert_prin(Base64.encode(bCert));
 	        		isCert.close();
 	        		}
 	        	else if (!item.isFormField() && PARAM_CER_RESP.equals(item.getFieldName()) && item.getInputStream() != null && item.getSize() > 0L) {
 	        		final InputStream isFileContent = item.getInputStream();
-	        		this.setCert_resp((X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(isFileContent));
+	        		setCert_resp((X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(isFileContent));
 	        		isFileContent.close();
 	        		final InputStream isCert = item.getInputStream();
 	        		final byte[] bCert = Utils.getDataFromInputStream(isCert);
-	        		this.setB64Cert_resp(Base64.encode(bCert));
+	        		setB64Cert_resp(Base64.encode(bCert));
 	        		isCert.close();
 	        		}
 	        	else if (item.isFormField() && PARAM_CERB64PRIM.equals(item.getFieldName()) && item.getSize() > 0L) {
 	        		final CertificateFactory certFactory = CertificateFactory.getInstance(X509);
 	        		final X509Certificate cert = (X509Certificate)certFactory.generateCertificate(new ByteArrayInputStream(Base64.decode(item.getString())));
-	        		this.setCert_prin(cert);
-	        		this.setB64Cert_prin(item.getString());
+	        		setCert_prin(cert);
+	        		setB64Cert_prin(item.getString());
 	        		}
 	        	else if (item.isFormField() && PARAM_CERB64RESP.equals(item.getFieldName()) && item.getSize() > 0L) {
 	        		final CertificateFactory certFactory = CertificateFactory.getInstance(X509);
 	        		final X509Certificate cert = (X509Certificate)certFactory.generateCertificate(new ByteArrayInputStream(Base64.decode(item.getString())));
-	        		this.setCert_resp(cert);
-	        		this.setB64Cert_resp(item.getString());
+	        		setCert_resp(cert);
+	        		setB64Cert_resp(item.getString());
 	        		}
 	        	}
 		}
@@ -281,7 +281,6 @@ public class NewCertificateService extends HttpServlet {
 	}
 	/**
 	 * Establece los datos del certificado principal en Base64
-	 * @return
 	 */
 	private final void setB64Cert_prin(final String b64Cert_prin) {
 		this.b64Cert_prin = b64Cert_prin;
@@ -309,7 +308,6 @@ public class NewCertificateService extends HttpServlet {
 	}
 	/**
 	 * Establece la huella del certificado principal
-	 * @return
 	 */
 	private final void setHuella_prin(final String huella_prin) {
 		this.huella_prin = huella_prin;
@@ -323,7 +321,6 @@ public class NewCertificateService extends HttpServlet {
 	}
 	/**
 	 * Establece la huella del certificado respaldo
-	 * @return
 	 */
 	private final void setHuella_resp(final String huella_resp) {
 		this.huella_resp = huella_resp;
@@ -337,7 +334,6 @@ public class NewCertificateService extends HttpServlet {
 	}
 	/**
 	 * Establece el id del certificado
-	 * @return
 	 */
 	private final void setIdCert(final String idCert) {
 		this.idCert = idCert;

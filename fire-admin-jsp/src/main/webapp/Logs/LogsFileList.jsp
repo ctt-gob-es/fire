@@ -10,27 +10,33 @@
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
 	String errorText = null;
 
-final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-final String usrLogged= (String) request.getSession().getAttribute("user");//$NON-NLS-1$
-if (state == null || !Boolean.parseBoolean((String) state)) {
-	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-	return;
-}
-String htmlData =""; //$NON-NLS-1$
-String htmlError = ""; //$NON-NLS-1$
-String styleError="";//$NON-NLS-1$
-String nameSrv = "";//$NON-NLS-1$
-String numRec = "1";//$NON-NLS-1$
-//Logica para determinar si mostrar un resultado de operacion
+	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
+	final String usrLogged= (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
+	if (state == null || !Boolean.parseBoolean((String) state)) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+	String htmlData =""; //$NON-NLS-1$
+	String htmlError = ""; //$NON-NLS-1$
+	String styleError="";//$NON-NLS-1$
+	String nameSrv = "";//$NON-NLS-1$
+	String numRec = "1";//$NON-NLS-1$
+	//Logica para determinar si mostrar un resultado de operacion
 	
-	final byte[] sJSON = (byte[]) request.getSession().getAttribute("JSON"); //$NON-NLS-1$ 
+	final byte[] sJSON = (byte[]) session.getAttribute(ServiceParams.SESSION_ATTR_JSON); 
 	if(sJSON == null){
 		response.sendRedirect("../LogAdminService?op=3"); //$NON-NLS-1$
 		return;
 	}
-	session.removeAttribute("JSON"); //$NON-NLS-1$
+	session.removeAttribute(ServiceParams.SESSION_ATTR_JSON);
 	final JsonReader reader = Json.createReader(new ByteArrayInputStream(sJSON));
 	final JsonObject jsonObj = reader.readObject();
 	reader.close();
@@ -93,15 +99,8 @@ String numRec = "1";//$NON-NLS-1$
 					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif + "\",\"Size\":\"" + sSize +"\"}]}";//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 				}	
 			}
-
 		}
-				
-	
-			
 	}
-
-
-	
 
 %>
 

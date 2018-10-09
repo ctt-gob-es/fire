@@ -1,6 +1,12 @@
 <%@page import="es.gob.fire.server.admin.dao.CertificatesDAO" %>
 <%@page import="es.gob.fire.server.admin.dao.AplicationsDAO" %>
 <%
+
+if (session == null) {
+	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+	return;
+}
+
 String req = request.getParameter("requestType");//$NON-NLS-1$ 
 String id = request.getParameter("id-cert");//$NON-NLS-1$ 
 String data = "";//$NON-NLS-1$ 

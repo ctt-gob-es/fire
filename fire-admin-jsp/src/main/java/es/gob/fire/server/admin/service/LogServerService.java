@@ -83,7 +83,7 @@ public class LogServerService extends HttpServlet {
 					&& this.logSrv.getUrl() != null && !"".equals(this.logSrv.getUrl()) && //$NON-NLS-1$
 					this.logSrv.getClave() != null && !"".equals(this.logSrv.getClave())) { //$NON-NLS-1$
 						final LogConsumerClient logclient = new LogConsumerClient();
-						if(this.connectServer(logclient, request)) {
+						if(connectServer(logclient, request)) {
 							isOk = true;
 							response.sendRedirect(request.getContextPath().toString().concat("/LogAdminService?op=3&").concat(PARAM_NAMESRV).concat("=").concat(this.logSrv.getNombre())); //$NON-NLS-1$ //$NON-NLS-2$
 						}
@@ -173,13 +173,13 @@ public class LogServerService extends HttpServlet {
 	 */
 	private void getParameters(final HttpServletRequest request) {
 		if(request.getParameter(LogServerService.PARAM_ACTION) != null && !"".equals(request.getParameter(LogServerService.PARAM_ACTION))) { //$NON-NLS-1$
-			this.setAction(Integer.parseInt(request.getParameter(LogServerService.PARAM_ACTION)));
+			setAction(Integer.parseInt(request.getParameter(LogServerService.PARAM_ACTION)));
 		}
 		if(request.getParameter(LogServerService.PARAM_IDSRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_IDSRV))) { //$NON-NLS-1$
-			this.setId_servidor(request.getParameter(LogServerService.PARAM_IDSRV));
-			if(this.getAction() != 2 && this.getAction() != 3) {
+			setId_servidor(request.getParameter(LogServerService.PARAM_IDSRV));
+			if(getAction() != 2 && getAction() != 3) {
 				try {
-					this.logSrv = LogServersDAO.selectLogServer(this.getId_servidor());
+					this.logSrv = LogServersDAO.selectLogServer(getId_servidor());
 				} catch (final SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -190,16 +190,16 @@ public class LogServerService extends HttpServlet {
 			}
 		}
 		if(request.getParameter(LogServerService.PARAM_NAMESRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_NAMESRV))) { //$NON-NLS-1$
-			this.setNombreSrv(request.getParameter(LogServerService.PARAM_NAMESRV));
-			this.logSrv.setNombre(this.getNombreSrv());
+			setNombreSrv(request.getParameter(LogServerService.PARAM_NAMESRV));
+			this.logSrv.setNombre(getNombreSrv());
 		}
 		if(request.getParameter(LogServerService.PARAM_PASSSRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_PASSSRV))) { //$NON-NLS-1$
-			this.setClave(request.getParameter(LogServerService.PARAM_PASSSRV));
-			this.logSrv.setClave(this.getClave());
+			setClave(request.getParameter(LogServerService.PARAM_PASSSRV));
+			this.logSrv.setClave(getClave());
 		}
 		if(request.getParameter(LogServerService.PARAM_URLSRV) != null && !"".equals(request.getParameter(LogServerService.PARAM_URLSRV))) { //$NON-NLS-1$
-			this.setUrlSrv(request.getParameter(LogServerService.PARAM_URLSRV));
-			this.logSrv.setUrl(this.getUrlSrv());
+			setUrlSrv(request.getParameter(LogServerService.PARAM_URLSRV));
+			this.logSrv.setUrl(getUrlSrv());
 		}
 
 
@@ -218,7 +218,7 @@ public class LogServerService extends HttpServlet {
 		try {
 			logclient.init(this.logSrv.getUrl(), this.logSrv.getClave());
 			final HttpSession session = request.getSession();
-			session.setAttribute("LOG_CLIENT", logclient); //$NON-NLS-1$
+			session.setAttribute(ServiceParams.SESSION_ATTR_LOG_CLIENT, logclient);
 			connect = true;
 		}
 		catch (final IOException e) {

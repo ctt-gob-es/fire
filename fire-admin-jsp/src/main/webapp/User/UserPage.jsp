@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO"%>
 <%@page import="es.gob.fire.server.admin.conf.DbManager"%>
 <%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
@@ -9,10 +10,16 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
+
+if (session == null) {
+	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+	return;
+}
+
 String errorText = null;
 
-final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-final String usrLogged= (String) request.getSession().getAttribute("user");
+final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
+final String usrLogged= (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 if (state == null || !Boolean.parseBoolean((String) state)) {
 	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 	return;

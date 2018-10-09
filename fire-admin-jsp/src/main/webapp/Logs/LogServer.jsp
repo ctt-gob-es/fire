@@ -1,5 +1,6 @@
 
 
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.LogServersDAO" %>
 <%@page import="es.gob.fire.server.admin.entity.LogServer" %>
 
@@ -7,8 +8,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-	final String usrLogged= (String) request.getSession().getAttribute("user");//$NON-NLS-1$
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
+	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
+	final String usrLogged= (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 	if (state == null || !Boolean.parseBoolean((String) state)) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
@@ -33,7 +39,7 @@
 			subTitle = "Inserte los datos del nuevo servidor."; //$NON-NLS-1$
 			break;
 		case 3:		
-			title = "Editar servidor ".concat(logSrv.getNombre()).concat(" ").concat(logSrv.getUrl()); //$NON-NLS-1$
+			title = "Editar servidor ".concat(logSrv.getNombre()).concat(" ").concat(logSrv.getUrl()); //$NON-NLS-1$ //$NON-NLS-2$
 			subTitle = "Modifique los datos que desee editar."; //$NON-NLS-1$
 			break;
 		case 5:
@@ -139,9 +145,9 @@
 		</form>
 		<script>
 			//bloqueamos los campos en caso de que sea una operacion de solo lectura
-			document.getElementById("name-srv").disabled = <%= act == 5 ? "true" : "false" %>
-			document.getElementById("url").disabled = <%= act == 5 ? "true" : "false" %>
-			document.getElementById("clave").disabled = <%= act == 5 ? "true" : "false" %> 
+			document.getElementById("name-srv").disabled = <%= act == 5 %>
+			document.getElementById("url").disabled = <%= act == 5 %>
+			document.getElementById("clave").disabled = <%= act == 5 %> 
 			
 																
 		</script>

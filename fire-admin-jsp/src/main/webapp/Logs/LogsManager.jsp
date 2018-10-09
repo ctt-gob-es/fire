@@ -10,33 +10,39 @@
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
 	String errorText = null;
 
-final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-final String usrLogged= (String) request.getSession().getAttribute("user");//$NON-NLS-1$
-if (state == null || !Boolean.parseBoolean((String) state)) {
-	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-	return;
-}
-String htmlData = ""; //$NON-NLS-1$
-String htmlError = ""; //$NON-NLS-1$
-String styleError = "";//$NON-NLS-1$
-String nameSrv = "";//$NON-NLS-1$
-String fileName = "";//$NON-NLS-1$
-String levels[] = null ;
-
-boolean date = false;
-boolean time =  false;
-boolean filter = true;
-
-//Logica para determinar si mostrar un resultado de operacion
+	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
+	final String usrLogged= (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
+	if (state == null || !Boolean.parseBoolean((String) state)) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+	String htmlData = ""; //$NON-NLS-1$
+	String htmlError = ""; //$NON-NLS-1$
+	String styleError = "";//$NON-NLS-1$
+	String nameSrv = "";//$NON-NLS-1$
+	String fileName = "";//$NON-NLS-1$
+	String levels[] = null ;
 	
-	final byte[] jsonLOGINFO = (byte[]) request.getSession().getAttribute("JSON_LOGINFO"); //$NON-NLS-1$ 
+	boolean date = false;
+	boolean time =  false;
+	boolean filter = true;
+	
+	//Logica para determinar si mostrar un resultado de operacion
+	
+	final byte[] jsonLOGINFO = (byte[]) session.getAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO); 
 	if(jsonLOGINFO == null){
 		response.sendRedirect("../LogAdminService?op=3"); //$NON-NLS-1$
 		return;
 	}
-	session.removeAttribute("JSON_LOGINFO"); //$NON-NLS-1$
+	session.removeAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO);
 	
 	final JsonReader reader = Json.createReader(new ByteArrayInputStream(jsonLOGINFO));
 	final JsonObject jsonObj = reader.readObject();
@@ -64,7 +70,7 @@ boolean filter = true;
 		for(int i = 0; i < LogInfo.size(); i++){
 			final JsonObject json = LogInfo.getJsonObject(i);
 
-			if(json.get(ServiceParams.PARAM_LEVELS) != null && !"".equals(json.get(ServiceParams.PARAM_LEVELS).toString().trim())) { //$NON-NLS-1$
+			if(json.get(ServiceParams.PARAM_PARAM_LEVELS) != null && !"".equals(json.get(ServiceParams.PARAM_PARAM_LEVELS).toString().trim())) { //$NON-NLS-1$
 				final String levels_ = json.get("Levels").toString().replace("\"", "");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 				if(levels_ != null && !"".equals(levels_.trim())){//$NON-NLS-1$
 					levels = levels_ .split(",");//$NON-NLS-1$

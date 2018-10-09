@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.conf.DbManager"%>
 <%@page import="es.gob.fire.server.admin.dao.CertificatesDAO" %>
 <%@page import="es.gob.fire.server.admin.entity.CertificateFire" %>
@@ -9,13 +10,19 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
+
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
 	String user = "";//$NON-NLS-1$
 	String errorText = null;
 	try {
 		DbManager.initialize();
 	}
 	catch (AdminFilesNotFoundException e){
-		response.sendRedirect("../Error/FileNotFound.jsp?file=" + AdminFilesNotFoundException.getFileName()); //$NON-NLS-1$
+		response.sendRedirect("../Error/FileNotFound.jsp?file=" + e.getFileName()); //$NON-NLS-1$
 		return;
 	}
 	catch (Exception e){
@@ -23,7 +30,7 @@
 		return;
 	}
 
-	Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
+	Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
 	if (state == null) {
 		// Leemos la contrasena de entrada
 		String psswd = request.getParameter("password"); //$NON-NLS-1$
@@ -36,8 +43,8 @@
 
 
 		// Marcamos la sesion como iniciada 
-		request.getSession().setAttribute("initializedSession", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-		request.getSession().setAttribute("user", user);//$NON-NLS-1$ 
+		session.setAttribute("initializedSession", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		session.setAttribute(ServiceParams.SESSION_ATTR_USER, user);
 	}
 	else if (!"true".equals(state)) { //$NON-NLS-1$
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
@@ -89,7 +96,7 @@
 				<p id="<%=
 						mr.isOk() ? "success-txt" : "error-txt"  //$NON-NLS-1$ //$NON-NLS-2$
 						%>">
-					<%= msg != null && !"".equals(msg) ? mr.getMessage().concat(msg) : mr.getMessage() %>
+					<%= msg != null && !msg.isEmpty() ? mr.getMessage().concat(msg) : mr.getMessage() %>
 				</p>
 			<% } %>
 		<div id="data" style="display: block-inline; text-align:center;">

@@ -42,7 +42,7 @@ public class DeleteUserService extends HttpServlet {
 		final String idUser = request.getParameter(PARAM_ID);
 		final String user_name = request.getParameter(PARAM_USRNAME);
 		final HttpSession session = request.getSession();
-		final String loggedUsr = (String) session.getAttribute("user"); //$NON-NLS-1$
+		final String loggedUsr = (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 
 		LOGGER.info("Baja del usuario con ID: " + idUser + " Nombre:" + user_name); //$NON-NLS-1$ //$NON-NLS-2$
 
