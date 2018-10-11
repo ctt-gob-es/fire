@@ -11,7 +11,6 @@ package es.gob.fire.server.services;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.ConfigFileNotFoundException;
@@ -26,8 +25,6 @@ import es.gob.fire.upgrade.UpgradeTarget;
  * con la Plataforma @firma.
  */
 public class AfirmaUpgrader {
-
-	private static final Logger LOGGER = Logger.getLogger(AfirmaUpgrader.class.getName());
 
 	private static PlatformWsHelper conn = null;
 
@@ -45,8 +42,6 @@ public class AfirmaUpgrader {
 		if (upgradeFormat == null || upgradeFormat.isEmpty()) {
 			return signature;
 		}
-
-		LOGGER.info("Actualizando firma al formato: " + upgradeFormat); //$NON-NLS-1$
 
 		if (conn == null) {
 			Properties config;

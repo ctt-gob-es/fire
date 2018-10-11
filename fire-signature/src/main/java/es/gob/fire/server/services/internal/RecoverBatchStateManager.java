@@ -38,6 +38,7 @@ public class RecoverBatchStateManager {
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
+		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
@@ -48,7 +49,7 @@ public class RecoverBatchStateManager {
             return;
         }
 
-        LOGGER.fine(String.format("TrId %1s: RecoverBatchStateManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
@@ -77,9 +78,10 @@ public class RecoverBatchStateManager {
         	}
     	}
 
+		LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve el estado del lote", appId, transactionId)); //$NON-NLS-1$
+
     	final String progress = Float.toString(1 - (float) pending / numOperations);
     	sendResult(response, progress.getBytes());
-    	return;
 	}
 
 	/**

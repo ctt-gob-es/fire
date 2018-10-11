@@ -256,25 +256,6 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera el tiempo que debe transcurrir antes de considerar caducados los ficheros
-	 * temporales almacenados durante un proceso de firma de lote. Si no se encuentra
-	 * configurado un valor, se usara el valor por defecto.
-	 * @return N&uacute;mero de milisegundos que como m&iacute;nimo se almacenar&aacute;n los
-	 * ficheros temporales.
-	 */
-	public static int getTempsTimeout() {
-		try {
-			return Integer.parseInt(getProperty(PROP_FIRE_TEMP_TIMEOUT, Integer.toString(DEFAULT_FIRE_TEMP_TIMEOUT))) * 1000;
-		}
-		catch (final Exception e) {
-			LOGGER.warning("Se encontro un valor invalido para la propiedad '" + //$NON-NLS-1$
-					PROP_FIRE_TEMP_TIMEOUT +
-					"' del fichero de configuracion"); //$NON-NLS-1$
-			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
-		}
-	}
-
-	/**
 	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
 	 * @throws ConfigFilesException Si no encuentra el fichero config.properties.
 	 */
@@ -329,7 +310,8 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Devuelve el certificado del fichero de propiedades en caso de que no se encuentre la cadena conexi&oacute;n a la base de datos
+	 * Devuelve el certificado del fichero de propiedades en caso de que no se encuentre la
+	 * cadena conexi&oacute;n a la base de datos.
 	 * @return el certificado.
 	 */
 	public static String getCert(){
@@ -337,7 +319,8 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Devuelve el identificador de la aplicaci&oacute;n en caso de que se encuentre la cadena conexi&oacute;n a la base de datos
+	 * Devuelve el identificador de la aplicaci&oacute;n en caso de que no se encuentre la
+	 * cadena conexi&oacute;n a la base de datos.
 	 * @return identificador de la aplicaci&oacute;n.
 	 */
 	public static String getAppId(){
@@ -432,18 +415,41 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera el tiempo en segundos que puede almacenarse un fichero de intercambio del Cliente Afirma
-	 * antes de considerarse caducado.
-	 * @return Tiempo m&aacute;ximo en segundos que puede tardarse en recoger un fichero antes de que
+	 * Recupera el tiempo en milisegundos que debe transcurrir antes de considerar caducados los
+	 * ficheros temporales almacenados durante un proceso de firma de lote. Si no se encuentra
+	 * configurado un valor, se usara el valor por defecto.
+	 * @return N&uacute;mero de milisegundos que como m&iacute;nimo se almacenar&aacute;n los
+	 * ficheros temporales.
+	 */
+	public static long getTempsTimeout() {
+		try {
+			return Long.parseLong(getProperty(PROP_FIRE_TEMP_TIMEOUT, Integer.toString(DEFAULT_FIRE_TEMP_TIMEOUT)))
+					* 1000;
+		}
+		catch (final Exception e) {
+			LOGGER.warning("Tiempo de expiracion invalido en la propiedad '" + PROP_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
+					"' del fichero de configuracion. Se usaran " + DEFAULT_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
+					"segundos"); //$NON-NLS-1$
+			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
+		}
+	}
+
+	/**
+	 * Recupera el tiempo en milisegundos que puede almacenarse un fichero de intercambio del Cliente Afirma
+	 * antes de considerarse caducado. El tipo se carga de la configuraci&oacute;n en donde se indica
+	 * en segundo.
+	 * @return Tiempo m&aacute;ximo en milisegundos que puede tardarse en recoger un fichero antes de que
 	 * caduque.
 	 */
-	public static int getAfirmaTempsTimeout() {
+	public static long getAfirmaTempsTimeout() {
 		try {
-			return config.containsKey(PROP_CLIENTEAFIRMA_TEMP_TIMEOUT) ?
-					Integer.parseInt(getProperty(PROP_CLIENTEAFIRMA_TEMP_TIMEOUT)) : DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT;
+			return Long.parseLong(getProperty(PROP_CLIENTEAFIRMA_TEMP_TIMEOUT, Integer.toString(DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT)))
+					* 1000;
 		} catch (final Exception e) {
-			LOGGER.warning("Tiempo de expiracion invalido en el fichero de configuracion, se usara " + DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT); //$NON-NLS-1$
-			return DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT;
+			LOGGER.warning("Tiempo de expiracion invalido en la propiedad '" + PROP_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
+					"' del fichero de configuracion. Se usaran " + DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
+					"segundos"); //$NON-NLS-1$
+			return DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT * 1000;
 		}
 	}
 

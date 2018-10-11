@@ -34,7 +34,7 @@ final class TempStoreFileSystem {
 	public static void store(final byte[] dataToSave, final SingleSign ss, final String batchId) throws IOException {
 		final String filename = getFilename(ss, batchId);
 		TempFilesHelper.storeTempData(filename, dataToSave);
-		LOGGER.info("Firma '" + ss.getId() + "' almacenada temporalmente en " + filename); //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.fine("Firma '" + ss.getId() + "' almacenada temporalmente en " + filename); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static byte[] retrieve(final SingleSign ss, final String batchId) throws IOException {

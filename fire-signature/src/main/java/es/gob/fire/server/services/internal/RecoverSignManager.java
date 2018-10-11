@@ -67,7 +67,7 @@ public class RecoverSignManager {
             return;
         }
 
-        LOGGER.fine(String.format("TrId %1s: RecoverSignManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
@@ -147,6 +147,8 @@ public class RecoverSignManager {
         // completa y la podemos procesar y devolver
         if (ServiceParams.CERTIFICATE_ORIGIN_LOCAL.equals(providerName)) {
 
+        	LOGGER.info(String.format("App %1s: TrId %2s: Se firmo con certificado local y ya se puede devolver la firma", appId, transactionId)); //$NON-NLS-1$
+
         	// Recuperamos la respuesta del temporal en el que lo almacenamos
         	byte[] signResult;
         	try {
@@ -159,18 +161,24 @@ public class RecoverSignManager {
         		return;
         	}
 
+        	LOGGER.info(String.format("App %1s: TrId %2s: Firma cargada", appId, transactionId)); //$NON-NLS-1$
+
         	// Se actualiza si esta definido el formato de actualizacion
-        	try {
-        		signResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
-        	}
-        	catch (final Exception e) {
-        		LOGGER.log(Level.SEVERE, "Error al actualizar la firma de la transaccion: " + transactionId, e); //$NON-NLS-1$
-            	SessionCollector.removeSession(session);
-            	response.sendError(HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
-        		return;
+        	if (upgrade != null && !upgrade.isEmpty()) {
+        		LOGGER.info(String.format("App %1s: TrId %2s: Se actualiza la firma al formato %3s", appId, transactionId, upgrade)); //$NON-NLS-1$
+        		try {
+        			signResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
+        		}
+        		catch (final Exception e) {
+        			LOGGER.log(Level.SEVERE, "Error al actualizar la firma de la transaccion: " + transactionId, e); //$NON-NLS-1$
+        			SessionCollector.removeSession(session);
+        			response.sendError(HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
+        			return;
+        		}
         	}
 
         	// Operamos con la firma tal como lo indique el DocumentManager
+        	LOGGER.info(String.format("App %1s: TrId %2s: Se postprocesa la firma con el DocumentManager", appId, transactionId)); //$NON-NLS-1$
         	try {
         		signResult = docManager.storeDocument(docId, appId, signResult, signerCert, format, extraParams);
         	}
@@ -181,7 +189,10 @@ public class RecoverSignManager {
     			return;
         	}
 
-        	// Guardamos la firma resultante para devolverla despues
+        	// Guardamos la firma resultante para devolverla despues, ya que en un primer
+        	// momento solo responderemos con el resultado de la operacion y no con la propia
+        	// firma generada
+        	LOGGER.info(String.format("App %1s: TrId %2s: Se almacena temporalmente el resultado de la operacion", appId, transactionId)); //$NON-NLS-1$
         	try {
         		TempFilesHelper.storeTempData(transactionId, signResult);
         	}
@@ -196,7 +207,9 @@ public class RecoverSignManager {
         	session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_RECOVER);
         	SessionCollector.commit(session);
 
-        	// Enviamos la firma electronica como resultado
+        	LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve la informacion del resultado de la operacion", appId, transactionId)); //$NON-NLS-1$
+
+        	// Enviamos el resultado de la operacion (tipo de operacion y proveedor utilizado)
         	sendResult(response, buildResult(providerName));
         	return;
         }
@@ -204,6 +217,8 @@ public class RecoverSignManager {
 
         // En el caso de firma con un certificado en la nube, todavia tendremos que
         // componer la propia firma
+
+    	LOGGER.info(String.format("App %1s: TrId %2s: Se firmo con el proveedor %3s y es necesario recuperar el PKCS#1 resultante y completar la firma", appId, transactionId, providerName)); //$NON-NLS-1$
 
         final byte[] data;
         try {
@@ -224,6 +239,8 @@ public class RecoverSignManager {
    					"No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
    			return;
     	}
+
+    	LOGGER.info(String.format("App %1s: TrId %2s: Se solicita el PKCS#1 al proveedor %3s", appId, transactionId, providerName)); //$NON-NLS-1$
 
         // Obtenemos el conector con el backend ya configurado
         final FIReConnector connector;
@@ -271,6 +288,8 @@ public class RecoverSignManager {
             FIReTriHelper.addPkcs1ToTriSign(ret.get(key), key, td);
         }
 
+    	LOGGER.info(String.format("App %1s: TrId %2s: Se completa el proceso de firma", appId, transactionId)); //$NON-NLS-1$
+
         byte[] signResult;
         try {
             signResult = FIReTriHelper.getPostSign(
@@ -294,20 +313,24 @@ public class RecoverSignManager {
         }
 
 		// Se actualiza si esta definido el formato de actualizacion
-		try {
-			signResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
-		}
-		catch (final Exception e) {
-            LOGGER.log(Level.WARNING, "Error al actualizar la firma de la transaccion: " + transactionId, e); //$NON-NLS-1$
-            response.sendError(HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
-            return;
-		}
+        if (upgrade != null && !upgrade.isEmpty()) {
+        	LOGGER.info(String.format("App %1s: TrId %2s: Se actualiza la firma al formato %3s", appId, transactionId, upgrade)); //$NON-NLS-1$
+        	try {
+        		signResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
+        	}
+        	catch (final Exception e) {
+        		LOGGER.log(Level.WARNING, "Error al actualizar la firma de la transaccion: " + transactionId, e); //$NON-NLS-1$
+        		response.sendError(HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
+        		return;
+        	}
+        }
 
         // Notificamos al conector que ha terminado la operacion para que libere recursos y
         // cierre la transaccion
         connector.endSign(remoteTrId);
 
         // Operamos con la firma tal como lo indique el DocumentManager
+    	LOGGER.info(String.format("App %1s: TrId %2s: Se postprocesa la firma con el DocumentManager", appId, transactionId)); //$NON-NLS-1$
         try {
         	signResult = docManager.storeDocument(docId, appId, signResult, signerCert, format, extraParams);
         }
@@ -319,7 +342,10 @@ public class RecoverSignManager {
 			return;
 		}
 
-    	// Guardamos la firma resultante para devolverla despues
+    	// Guardamos la firma resultante para devolverla despues, ya que en un primer
+    	// momento solo responderemos con el resultado de la operacion y no con la propia
+    	// firma generada
+        LOGGER.info(String.format("App %1s: TrId %2s: Se almacena temporalmente el resultado de la operacion", appId, transactionId)); //$NON-NLS-1$
     	try {
     		TempFilesHelper.storeTempData(transactionId, signResult);
     	}
@@ -330,7 +356,9 @@ public class RecoverSignManager {
 			return;
     	}
 
-        // Enviamos la firma electronica como resultado
+    	LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve la informacion del resultado de la operacion", appId, transactionId)); //$NON-NLS-1$
+
+    	// Enviamos el resultado de la operacion (tipo de operacion y proveedor utilizado)
         sendResult(response, buildResult(providerName));
 	}
 

@@ -75,6 +75,8 @@ public final class RecoverCertificateService extends HttpServlet {
     protected void service(final HttpServletRequest request,
     					   final HttpServletResponse response) throws IOException {
 
+		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
+
 		if (!ConfigManager.isInitialized()) {
 			try {
 				ConfigManager.checkConfiguration();
@@ -94,13 +96,13 @@ public final class RecoverCertificateService extends HttpServlet {
 
     	// Comprobacion de la aplicacion solicitante
         if (ConfigManager.isCheckApplicationNeeded()) {
+        	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
         	if (appId == null || appId.isEmpty()) {
         		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
 
-    		LOGGER.info("Se realizara la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
     		try {
     			if (!AplicationsDAO.checkApplicationId(appId)) {
     				LOGGER.warning("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion"); //$NON-NLS-1$
@@ -115,11 +117,11 @@ public final class RecoverCertificateService extends HttpServlet {
     		}
     	}
     	else {
-    		LOGGER.warning("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
+    		LOGGER.fine("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
     	}
 
     	if (ConfigManager.isCheckCertificateNeeded()) {
-    		LOGGER.info("Se realizara la validacion del certificado"); //$NON-NLS-1$
+    		LOGGER.fine("Se realizara la validacion del certificado"); //$NON-NLS-1$
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
@@ -130,7 +132,7 @@ public final class RecoverCertificateService extends HttpServlet {
 			}
     	}
     	else {
-    		LOGGER.warning("No se validara el certificado");//$NON-NLS-1$
+    		LOGGER.fine("No se validara el certificado");//$NON-NLS-1$
     	}
 
     	if (analytics != null) {

@@ -19,17 +19,17 @@ public class ExpiredSessionCleanerThread extends Thread {
 
 	private final String[] ids;
 	private final Map<String, FireSession> sessions;
-	private final int timeout;
+	private final long timeout;
 
 	/**
 	 * Construye el objeto para la eliminaci&oacute;n de sesiones caducadas.
 	 * @param ids Identificadores de las sesiones que se tienen que evaluar.
 	 * @param sessions Mapa con todas las sesiones.
-	 * @param tempTimeout Tiempo de caducidad de los ficheros temporales.
+	 * @param tempTimeout Tiempo de caducidad en milisegundos de los ficheros temporales.
 	 */
 	public ExpiredSessionCleanerThread(final String[] ids,
 			final Map<String, FireSession> sessions,
-			final int tempTimeout) {
+			final long tempTimeout) {
 		this.ids = ids;
 		this.sessions = sessions;
 		this.timeout = tempTimeout;

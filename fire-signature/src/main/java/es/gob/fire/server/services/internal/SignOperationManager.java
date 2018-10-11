@@ -108,6 +108,9 @@ public class SignOperationManager {
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
 		}
+
+		LOGGER.info(String.format("App %1s: TrId null: Peticion bien formada", appId)); //$NON-NLS-1$
+
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
         // Se obtiene el listado final de proveedores para la operacion, filtrando la
@@ -133,7 +136,7 @@ public class SignOperationManager {
 		final FireSession session = SessionCollector.createFireSession(request.getSession());
 		final String transactionId = session.getTransactionId();
 
-		LOGGER.fine(String.format("TrId %1s: SignOperationManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Iniciada transaccion de tipo FIRMA", appId, transactionId)); //$NON-NLS-1$
 
         // Guardamos en la sesion la configuracion de la operacion
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
@@ -192,6 +195,8 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         SessionCollector.commit(session);
 
+        LOGGER.info(String.format("App %1s: TrId %2s: Se inicia la carga de los datos", appId, transactionId)); //$NON-NLS-1$
+
         // Obtenemos los datos a firmar a partir de los datos proporcionados
         // mediante del DocumentManager que corresponda
         byte[] data;
@@ -223,6 +228,8 @@ public class SignOperationManager {
         	return;
 		}
 
+        LOGGER.info(String.format("App %1s: TrId %2s: Generamos la URL de redireccion", appId, transactionId)); //$NON-NLS-1$
+
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		String redirectUrlBase = ConfigManager.getPublicContextUrl();
@@ -251,6 +258,8 @@ public class SignOperationManager {
         			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$
         			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos la URL de redireccion con el ID de transaccion", appId, transactionId)); //$NON-NLS-1$
 
         sendResult(response, result);
 	}

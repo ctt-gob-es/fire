@@ -38,6 +38,7 @@ public class SignBatchManager {
     		throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
+		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
     	final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
     	final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String stopOnError = params.getParameter(ServiceParams.HTTP_PARAM_BATCH_STOP_ON_ERROR);
@@ -50,7 +51,7 @@ public class SignBatchManager {
     		return;
     	}
 
-    	LOGGER.fine(String.format("TrId %1s: SignBatchManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
     	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
     	if (session == null) {
@@ -76,7 +77,6 @@ public class SignBatchManager {
     	// el mismo usuario el que crease la transaccion y el que ahora dice ser
     	final String currentUserId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 
-
         final TransactionConfig connConfig =
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
@@ -87,6 +87,16 @@ public class SignBatchManager {
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
 		}
+
+        // Configuramos en la sesion si se debe detener el proceso de error cuando se encuentre uno
+        // para tenerlo en cuenta en este paso y los siguientes
+        session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR, stopOnError);
+        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
+        SessionCollector.commit(session);
+
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Generamos la URL de redireccion", appId, transactionId)); //$NON-NLS-1$
+
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
@@ -109,12 +119,6 @@ public class SignBatchManager {
         	redirectUrl = "ChooseCertificateOrigin.jsp?" + ServiceParams.HTTP_PARAM_OPERATION + "=" + ServiceParams.OPERATION_BATCH; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        // Configuramos en la sesion si se debe detener el proceso de error cuando se encuentre uno
-        // para tenerlo en cuenta en este paso y los siguientes
-        session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR, stopOnError);
-        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
-        SessionCollector.commit(session);
-
         // Devolvemos la pagina a la que debe dirigir al usuario
         final SignOperationResult result = new SignOperationResult(
         		transactionId,
@@ -122,6 +126,8 @@ public class SignBatchManager {
         			"&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + currentUserId + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos la URL de redireccion con el ID de transaccion", appId, transactionId)); //$NON-NLS-1$
 
         sendResult(response, result);
 	}

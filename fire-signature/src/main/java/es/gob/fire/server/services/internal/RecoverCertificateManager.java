@@ -36,10 +36,6 @@ public class RecoverCertificateManager {
 
 	private static final Logger LOGGER = Logger.getLogger(RecoverCertificateManager.class.getName());
 
-    // Parametros que necesitamos de la URL.
-    private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
-    private static final String PARAMETER_NAME_CONFIG = "config"; //$NON-NLS-1$
-
 	/**
 	 * Ejecuta una operacion de recuperaci&oacute;n del certificado generado
 	 * en servidor. Este metodo s&oacute;lo se utiliza desde el servicio Legacy
@@ -53,13 +49,25 @@ public class RecoverCertificateManager {
 			final RequestParameters params,
             final HttpServletResponse response) throws IOException {
 
-        final String transactionId = params.getParameter(PARAMETER_NAME_TRANSACTION_ID);
-        final String configB64  = params.getParameter(PARAMETER_NAME_CONFIG);
+		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
+        final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+        final String configB64  = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
+
+		// Comprobamos que se hayan proporcionado los parametros indispensables
+        if (transactionId == null || transactionId.isEmpty()) {
+        	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
+        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
     	Properties config = null;
     	if (configB64 != null && configB64.length() > 0) {
     		config = ServiceUtil.base642Properties(configB64);
     	}
+
+    	LOGGER.info(String.format("App %1s: TrId %2s: Recuperamos el certificado de usuario", appId, transactionId)); //$NON-NLS-1$
 
     	byte[] newCertEncoded;
         try {
@@ -84,6 +92,8 @@ public class RecoverCertificateManager {
             );
             return;
         }
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos el Certificado generado")); //$NON-NLS-1$
 
         // El servicio devuelve el resultado de la operacion de firma.
         final OutputStream output = ((ServletResponse) response).getOutputStream();

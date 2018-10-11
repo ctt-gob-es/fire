@@ -119,15 +119,14 @@ public final class PreSignService extends HttpServlet {
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
         // Comprobaciones de seguridad
-    	if (appId == null || appId.isEmpty()) {
-            LOGGER.warning("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
-            SessionCollector.removeSession(session);
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
     	if (ConfigManager.isCheckApplicationNeeded()) {
-        	LOGGER.info("Se realizara la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
+        	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
+        	if (appId == null || appId.isEmpty()) {
+                LOGGER.warning("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
+                SessionCollector.removeSession(session);
+                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
 	        try {
 	        	if (!AplicationsDAO.checkApplicationId(appId)) {
 	        		LOGGER.warning("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion"); //$NON-NLS-1$
@@ -144,7 +143,7 @@ public final class PreSignService extends HttpServlet {
 	        }
         }
         else {
-        	LOGGER.warning("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
+        	LOGGER.info("No se realiza la validacion de aplicacion"); //$NON-NLS-1$
         }
 
     	// Comprobaciones

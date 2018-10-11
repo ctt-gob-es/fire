@@ -45,9 +45,19 @@ public final class RequestNewCertificateService extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
+		final String appId  = request.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId  = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final boolean originForced = Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
+
+		// Comprobamos que se hayan proporcionado los parametros indispensables
+        if (transactionId == null || transactionId.isEmpty()) {
+        	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
+        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
 		FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), true, false);
         if (session == null) {
@@ -84,6 +94,8 @@ public final class RequestNewCertificateService extends HttpServlet {
         		redirectUrlBase + "ChooseNewCertificate.jsp?" + //$NON-NLS-1$
         				ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
         				ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId); //$NON-NLS-1$
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Solicitamos generar un nuevo certificado de usuario", appId, transactionId)); //$NON-NLS-1$
 
         final GenerateCertificateResult gcr;
         try {
@@ -157,12 +169,8 @@ public final class RequestNewCertificateService extends HttpServlet {
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_GEN);
         SessionCollector.commit(session);
 
+        LOGGER.info(String.format("App %1s: TrId %2s: Redirigimos a la URL de emision del certificado", appId, transactionId)); //$NON-NLS-1$
+
         response.sendRedirect(redirectUrl);
 	}
-
-//	private static void setErrorToSession(final FireSession session, final OperationError error) {
-//		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-//		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
-//		SessionCollector.commit(session);
-//	}
 }

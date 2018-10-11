@@ -53,7 +53,7 @@ public final class SessionCollector {
     	// Cargamos el DAO de sesiones compartidas
     	final String daoType = ConfigManager.getSessionsDao();
     	if (daoType == null || daoType.isEmpty()) {
-    		LOGGER.info("No se configuro un gestor de sesiones. " //$NON-NLS-1$
+    		LOGGER.warning("No se configuro un gestor de sesiones. " //$NON-NLS-1$
     				+ "El componente central solo funcionara sobre despliegues en un unico nodo."); //$NON-NLS-1$
     	}
     	else {
@@ -187,7 +187,9 @@ public final class SessionCollector {
      */
     private static void cleanExpiredSessions() {
         final ExpiredSessionCleanerThread t = new ExpiredSessionCleanerThread(
-        		sessions.keySet().toArray(new String[sessions.size()]), sessions, ConfigManager.getTempsTimeout());
+        		sessions.keySet().toArray(new String[sessions.size()]),
+        		sessions,
+        		ConfigManager.getTempsTimeout());
         t.start();
     }
 

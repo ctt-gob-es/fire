@@ -38,6 +38,7 @@ public class RecoverSignResultManager {
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
+		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
@@ -48,7 +49,7 @@ public class RecoverSignResultManager {
             return;
         }
 
-        LOGGER.fine(String.format("TrId %1s: RecoverSignResultManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
@@ -80,6 +81,7 @@ public class RecoverSignResultManager {
         }
 
         // Recuperamos el resultado de la firma
+		LOGGER.info(String.format("App %1s: TrId %2s: Se carga la firma resultante", appId, transactionId)); //$NON-NLS-1$
         byte[] signResult;
         try {
         	signResult = TempFilesHelper.retrieveAndDeleteTempData(transactionId);
@@ -93,6 +95,8 @@ public class RecoverSignResultManager {
 
         // Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
         SessionCollector.removeSession(session);
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve la firma", appId, transactionId)); //$NON-NLS-1$
 
         // Enviamos la firma electronica como resultado
         sendResult(response, signResult);

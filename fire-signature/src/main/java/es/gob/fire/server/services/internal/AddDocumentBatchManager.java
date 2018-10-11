@@ -50,6 +50,14 @@ public class AddDocumentBatchManager {
     	final String docId			= params.getParameter(ServiceParams.HTTP_PARAM_DOCUMENT_ID);
     	final String dataB64		= params.getParameter(ServiceParams.HTTP_PARAM_DATA);
 
+    	// Comprobamos que se hayan proporcionado los parametros indispensables
+    	if (transactionId == null || transactionId.isEmpty()) {
+    		LOGGER.warning("No se ha proporcionado el identificado de la transaccion"); //$NON-NLS-1$
+    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+    				"No se ha proporcionado el identificador de la transaccion"); //$NON-NLS-1$
+    		return;
+    	}
+
     	SignBatchConfig config;
     	try {
     		config = getParticularConfig(params);
@@ -63,15 +71,7 @@ public class AddDocumentBatchManager {
 
     	final DocInfo docInfo = getDocInfo(params);
 
-    	// Comprobamos que se hayan prorcionado los parametros indispensables
-    	if (transactionId == null || transactionId.isEmpty()) {
-    		LOGGER.warning("No se ha proporcionado el identificado de la transaccion"); //$NON-NLS-1$
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"No se ha proporcionado el identificador de la transaccion"); //$NON-NLS-1$
-    		return;
-    	}
-
-    	LOGGER.fine(String.format("TrId %1s: AddDocumentBatchManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
     	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
     	if (session == null) {
@@ -88,7 +88,6 @@ public class AddDocumentBatchManager {
     				"No se ha proporcionado el documento a firmar"); //$NON-NLS-1$
     		return;
     	}
-
 
     	final String format = config != null ? config.getFormat() :
     		session.getString(ServiceParams.SESSION_PARAM_FORMAT);
@@ -110,6 +109,8 @@ public class AddDocumentBatchManager {
         else {
         	docReferenceId = docId.getBytes(StandardCharsets.UTF_8);
         }
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Se inicia la carga de los datos", appId, transactionId)); //$NON-NLS-1$
 
     	byte[] data;
     	try {
@@ -149,6 +150,8 @@ public class AddDocumentBatchManager {
         	return;
         }
 
+        LOGGER.info(String.format("App %1s: TrId %2s: Se almacenan los datos en servidor", appId, transactionId)); //$NON-NLS-1$
+
         final String filename = transactionId + "_" + docId; //$NON-NLS-1$
 
         try {
@@ -159,6 +162,9 @@ public class AddDocumentBatchManager {
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         	return;
         }
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Agregamos los datos al lote", appId, transactionId)); //$NON-NLS-1$
+
 
         // Si se establecio una configuracion particular para esta firma,
         // introducimos el formato de actualizacion, como parte de los
@@ -184,7 +190,8 @@ public class AddDocumentBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         SessionCollector.commit(session);
 
-        // Devolvemos el resultado de la operacion
+        LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos el resultado de la operacion", appId, transactionId)); //$NON-NLS-1$
+
         response.getWriter().print(Boolean.TRUE.toString());
     }
 

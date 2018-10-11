@@ -81,7 +81,7 @@ public final class SignSaverFile {
 			LOGGER.info("Guardada finalmente la firma '" + sign.getId() + "' en: " + this.filename); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		else {
-			LOGGER.info(
+			LOGGER.warning(
 				"El guardado esta deshabilitado. La ruta de guadado solicitada es: " +  this.filename //$NON-NLS-1$
 			);
 		}

@@ -142,7 +142,7 @@ public final class TempFilesHelper {
         bos.write(data);
         bos.close();
         fos.close();
-        LOGGER.info("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
+        LOGGER.fine("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
         return f.getName();
     }
 
