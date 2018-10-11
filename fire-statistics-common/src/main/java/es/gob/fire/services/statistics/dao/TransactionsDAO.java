@@ -52,15 +52,16 @@ public class TransactionsDAO {
 			" GROUP BY t.id_aplicacion ";//$NON-NLS-1$
 
 	/**Transacciones realizadas seg&uacute;n el tipo de transacci&oacute;n (simple o lote). (Filtrado por a&ntilde;o y mes)*/
-	private static final String TRANSACTIONS_BYOPERATION = "SELECT " + //$NON-NLS-1$
+	private static final String TRANSACTIONS_BYOPERATION = "SELECT a.nombre, " + //$NON-NLS-1$
 		" sum(case when t.id_operacion = 1 then (case when t.correcta = 'true' then 1 else 0 end) else 0 end )FirmasSimplesCorrectas," + //$NON-NLS-1$
 		" sum(case when t.id_operacion = 1 then (case when t.correcta = 'false' then 1 else 0 end) else 0 end )FirmasSimplesINCorrectas," + 	//$NON-NLS-1$
 		" sum(case when t.id_operacion = 2 then (case when t.correcta = 'true' then 1 else 0 end) else 0 end )FirmasLotesCorrectas," + //$NON-NLS-1$
 		" sum(case when t.id_operacion = 2 then (case when t.correcta = 'false' then 1 else 0 end) else 0 end )FirmasLotesINCorrectas" + //$NON-NLS-1$
-		" FROM tb_transacciones t" + //$NON-NLS-1$
-		" WHERE year(t.fecha) = ?" + //$NON-NLS-1$
-		" AND month(t.fecha) = ?";//$NON-NLS-1$
-
+		" FROM tb_transacciones t, tb_aplicaciones a " + //$NON-NLS-1$
+		" WHERE year(t.fecha) = ? " + //$NON-NLS-1$
+		" AND month(t.fecha) = ? " + //$NON-NLS-1$
+		" AND t.id_aplicacion = a.id " +  //$NON-NLS-1$
+		" GROUP BY a.nombre";//$NON-NLS-1$
 
 	/**
 	 *
@@ -108,11 +109,10 @@ public class TransactionsDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			data.add(Json.createObjectBuilder()
-					.add("ID_APP", rs.getString(1)) //$NON-NLS-1$
 					.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
 					.add("INCORRECTAS", rs.getString(3)) //$NON-NLS-1$
 					.add("CORRECTAS", rs.getString(4)) //$NON-NLS-1$
-
+					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(3))+Integer.parseInt(rs.getString(4)))) //$NON-NLS-1$
 					);
 		}
 		rs.close();
@@ -152,9 +152,10 @@ public class TransactionsDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			data.add(Json.createObjectBuilder()
-					.add("p.nombre", rs.getString(1)) //$NON-NLS-1$
+					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
 					.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
-					.add("CORRECTAS ", rs.getString(3)) //$NON-NLS-1$
+					.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
 					);
 		}
 		rs.close();
@@ -194,9 +195,8 @@ public class TransactionsDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			data.add(Json.createObjectBuilder()
+					.add("NOMBRE", rs.getString(3)) //$NON-NLS-1$
 					.add("Kbytes", rs.getString(1)) //$NON-NLS-1$
-					.add("id_app", rs.getString(2)) //$NON-NLS-1$
-					.add("nombre_app ", rs.getString(3)) //$NON-NLS-1$
 					);
 		}
 		rs.close();
@@ -237,11 +237,13 @@ public class TransactionsDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			data.add(Json.createObjectBuilder()
-					.add("FirmasSimplesCorrectas", rs.getString(1)) //$NON-NLS-1$
-					.add("FirmasSimplesINCorrectas", rs.getString(2)) //$NON-NLS-1$
-					.add("FirmasLotesCorrectas ", rs.getString(3)) //$NON-NLS-1$
-					.add("FirmasLotesINCorrectas  ", rs.getString(4)) //$NON-NLS-1$
-
+					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
+					.add("FirmasSimplesCorrectas", rs.getString(2)) //$NON-NLS-1$
+					.add("FirmasSimplesINCorrectas", rs.getString(3)) //$NON-NLS-1$
+					.add("TOTAL_SIMPLES", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
+					.add("FirmasLotesCorrectas", rs.getString(4)) //$NON-NLS-1$
+					.add("FirmasLotesINCorrectas", rs.getString(5)) //$NON-NLS-1$
+					.add("TOTAL_LOTES", String.valueOf( Integer.parseInt(rs.getString(4))+Integer.parseInt(rs.getString(5)))) //$NON-NLS-1$
 					);
 		}
 		rs.close();

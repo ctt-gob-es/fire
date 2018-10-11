@@ -47,22 +47,22 @@ public class SignaturesDAO {
 
 	/**Documentos firmados en cada formato de firma. (Filtrado por a&ntilde;o y mes)*/
 	private static final String SIGNATURES_BYFORMAT = "SELECT fr.nombre, " + //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'false' then 1 else 0 end ) AS INCORRECTAS," + //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'true' then 1 else 0 end ) AS CORRECTAS," + 	//$NON-NLS-1$
-			" FROM tb_firmas f, tb_formatos fr" + //$NON-NLS-1$
-			" WHERE	f.id_formato = fr.id_formato" + //$NON-NLS-1$
-			" AND year(f.fecha) = ?" + //$NON-NLS-1$
-			" AND month(f.fecha) = ?" + //$NON-NLS-1$
-			" GROUP BY fr.nombre";//$NON-NLS-1$
+			" SUM(CASE When f.correcta = 'false' then 1 else 0 end ) AS INCORRECTAS, " + //$NON-NLS-1$
+			" SUM(CASE When f.correcta = 'true' then 1 else 0 end ) AS CORRECTAS " + 	//$NON-NLS-1$
+			" FROM tb_firmas f, tb_formatos fr " + //$NON-NLS-1$
+			" WHERE	f.id_formato = fr.id_formato " + //$NON-NLS-1$
+			" AND year(f.fecha) = ? " + //$NON-NLS-1$
+			" AND month(f.fecha) = ? " + //$NON-NLS-1$
+			" GROUP BY fr.nombre ";//$NON-NLS-1$
 
 	/**Documentos que utilizan cada formato de firma longevo. (Filtrado por a&ntilde;o y mes)*/
 	private static final String SIGNMATURES_BYLONGLIVE_FORMAT = "SELECT fm.nombre, " +  //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'false' then 1 else 0 end ) AS INCORRECTAS," +  //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'true' then 1 else 0 end ) AS CORRECTAS" +  //$NON-NLS-1$
-			" FROM tb_firmas f, tb_formatos_mejorados fm" +   //$NON-NLS-1$
-			" WHERE 	f.id_formato_mejorado = fm.id_formato_mejorado" +  //$NON-NLS-1$
-			" AND year(f.fecha) = ?" +  //$NON-NLS-1$
-			" AND month(f.fecha) = ?" +  //$NON-NLS-1$
+			" SUM(CASE When f.correcta = 'false' then 1 else 0 end ) AS INCORRECTAS, " +  //$NON-NLS-1$
+			" SUM(CASE When f.correcta = 'true' then 1 else 0 end ) AS CORRECTAS " +  //$NON-NLS-1$
+			" FROM tb_firmas f, tb_formatos_mejorados fm " +   //$NON-NLS-1$
+			" WHERE f.id_formato_mejorado = fm.id_formato_mejorado " +  //$NON-NLS-1$
+			" AND year(f.fecha) = ? " +  //$NON-NLS-1$
+			" AND month(f.fecha) = ? " +  //$NON-NLS-1$
 			" GROUP BY f.id_formato_mejorado"; //$NON-NLS-1$
 
 	/**
@@ -150,9 +150,10 @@ public class SignaturesDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			data.add(Json.createObjectBuilder()
-					.add("p.nombre", rs.getString(1)) //$NON-NLS-1$
+					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
 					.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
-					.add("CORRECTAS ", rs.getString(3)) //$NON-NLS-1$
+					.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
 					);
 		}
 		rs.close();
@@ -192,10 +193,10 @@ public class SignaturesDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			data.add(Json.createObjectBuilder()
-					.add("a.id", rs.getString(1)) //$NON-NLS-1$
-					.add("a.nombre", rs.getString(2)) //$NON-NLS-1$
+					.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
 					.add("INCORRECTAS", rs.getString(3)) //$NON-NLS-1$
-					.add("CORRECTAS ", rs.getString(4)) //$NON-NLS-1$
+					.add("CORRECTAS", rs.getString(4)) //$NON-NLS-1$
+					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(3))+Integer.parseInt(rs.getString(4)))) //$NON-NLS-1$
 					);
 		}
 		rs.close();
@@ -234,9 +235,10 @@ public class SignaturesDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			data.add(Json.createObjectBuilder()
-					.add("fr.nombre", rs.getString(1)) //$NON-NLS-1$
+					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
 					.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
-					.add("CORRECTAS ", rs.getString(3)) //$NON-NLS-1$
+					.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
 					);
 		}
 		rs.close();
@@ -274,9 +276,10 @@ public class SignaturesDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 			data.add(Json.createObjectBuilder()
-					.add("fm.nombre", rs.getString(1)) //$NON-NLS-1$
+					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
 					.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
-					.add("CORRECTAS ", rs.getString(3)) //$NON-NLS-1$
+					.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
 					);
 		}
 		rs.close();

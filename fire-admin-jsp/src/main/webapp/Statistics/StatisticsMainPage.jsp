@@ -62,8 +62,12 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 	<script src="../resources/js/grid.locale-es.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.jqGrid.min.js" type="text/javascript"></script>	
 	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>	
-	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>	
-		
+	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>
+	<script src="../resources/js/Chart.min.js" type="text/javascript"></script>		
+	<!-- Load pdfmake, jszip lib files -->
+	<script type="text/javascript" language="javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.20/build/pdfmake.min.js">	</script>
+	<script type="text/javascript" language="javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.20/build/vfs_fonts.js"></script>
+	<script type="text/javascript" language="javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
 </head>
 <body>
 <script>
@@ -100,6 +104,11 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 				<div style = "display: inline-block; padding-left:0.5em;">
 					<button id="clear-button"   name="clear-button"  title="Borra el contenido de los campos de Consulta y Fecha" type="reset" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>	
 				</div >
+				<label> Exportar :</label>
+		  		<button id="csv">CSV</button>
+				<button id="excel">Excel</button>
+				<button id="pdf">PDF</button>&nbsp;&nbsp;
+<!-- 				<button id="getimages">Get Charts Images</button> -->
 			</form>
 			
 <!-- 			<div id="progress_download" style="display:none;"> -->
@@ -111,20 +120,25 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 		</div>
 	
 		<div id="main-content" style="margin: auto; width: 100%;" >
-			<div id="contentQueryResult" style="display:inline-block;width: 98%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;"  >
+			<div id="contentQueryResult" style="width: 98%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;"  >
 		
-				<div id="advice" style="display:block; text-align: center;" onload="setIdAdvice($(this).attr('id'))">					
-					<p>Para ver los resultados en esta p&aacute;gina debe  seleccionar "Consulta" y "Fecha" .</p>
-				</div>		
-				<pre id="QueryResult"onload="setIdContainer($(this).attr('id'))"></pre>
-				<!-- Tabla de datos -->
-				<div id="data" style="display: block-inline; text-align:center;">		
-					<div id="jQGrid" style="padding-left: 11%; padding-right:12%;">
-	 		 			<table id="resultQuery"></table>
-	  					<div id="page"></div>
-	 				</div>
- 				</div>
-				
+<!-- 				<div id="advice" style="display:block; text-align: center;" onload="setIdAdvice($(this).attr('id'))">					 -->
+<!-- 					<p>Para ver los resultados en esta p&aacute;gina debe  seleccionar "Consulta" y "Fecha" .</p> -->
+<!-- 				</div>		 -->
+<!-- 				<pre id="QueryResult"onload="setIdContainer($(this).attr('id'))"></pre> -->
+					<!-- Graficos de datos -->	
+					<div id="ChartsContend" style="display: inline-block; width:49%;"><br>						
+					</div>
+<!-- 					<div id="LinksImages"></div>	 -->
+					<!-- Tabla de datos -->			
+					<div id="data" style=" display: inline-block;text-align:center;width:49%;position: absolute;">
+						<br>										
+						<div id="jQGrid" style="padding-left: 2%; padding-right:2%;">
+		 		 			<table id="resultQuery"></table>
+		  					<div id="page"></div>		  					
+		 				</div>
+ 					</div>
+										
 			</div>
 						
 		</div>	 <!-- main-content -->
