@@ -3,12 +3,17 @@
  */
 
 $(function() {
+	var yearDef = new Date().getFullYear();
+	var monthDef = new Date().getMonth()-1;
+
+	
      $('.date-picker').datepicker(
                     {
                         dateFormat: "mm/yy",
                         changeMonth: true,
-                        changeYear: true,
+                        changeYear: true,                 
                         showButtonPanel: true,
+                        defaultDate: new Date(yearDef, monthDef, 1),
                         onClose: function(dateText, inst) {
 
 
@@ -19,13 +24,12 @@ $(function() {
                             if (isDonePressed()){
                                 var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
                                 var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-                                $(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');
-                                
-                                 $('.date-picker').focusout()//Added to remove focus from datepicker input box on selecting date
+                                $(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');                               
+                                $('.date-picker').focusout()//Added to remove focus from datepicker input box on selecting date
                             }
                         },
                         beforeShow : function(input, inst) {
-
+                        
                             inst.dpDiv.addClass('month_year_datepicker')
 
                             if ((datestr = $(this).val()).length > 0) {
@@ -42,6 +46,8 @@ $(function() {
 /*Funcion para la validacion*/
 
 $(document).ready(function(){
+
+	
 	
 	/**Colores definidos para el gráfico de transaciones y firmas correctas*/
 	var goodColors = ["#B40404","#B45F04","#AEB404","#04B404","#04B4AE","#0404B4","#8904B1","#B40486","#B40431","#585858"];
@@ -101,6 +107,14 @@ $(document).ready(function(){
 			var posting = $.post( url, {select_query : query , start_date : date});			
 			posting.done(function( data ) { 
 			
+				//Se recorren los campos de consulta y fecha para colocarlos en blanco ya que la consulta es correcta
+				$( "label" ).each(function( index ) {
+					this.style.color = "#000000";
+					var idInput=$(this).attr('for');
+					$('#'+idInput).css({backgroundColor:'#FFFFFF'});    
+				});
+				
+										
 				var obJson = JSON.parse(data);				
 				var numReg = 0;
 				var total = 0;
@@ -118,6 +132,17 @@ $(document).ready(function(){
 				var columnNames = new Array("");
 				var columnModel =  new Array("");
 			
+				if(obJson.Error){ //No tiene datos, mostramos mensaje de Error
+					printErrorResult(obJson);
+					return;
+				}
+				
+				//se habilitan los botones de exportar
+				disabledExportsButtons(false);
+				//Si anteriormente ha habido un error se limpian los mensajes de la pantalla
+				var html = "";	
+				$("#error-txt").html(html);
+				$("#error-txt").hide();
 				
 				switch (Number(query)){
 					case 1: //"Transacciones finalizadas por cada aplicacion"
@@ -143,7 +168,6 @@ $(document).ready(function(){
 							
 							chartDataGood = oJSONGood.TransByApp.map(function(e){return e.CORRECTAS});							
 							chartDataBad = oJSONBad.TransByApp.map(function(e){return e.INCORRECTAS});
-
 						}
 						else{
 							var sumOthersGood = 0;
@@ -201,7 +225,7 @@ $(document).ready(function(){
 						numReg = obJson.TransByApp.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "TransByAppRows";
-						captionSt = "Transacciones finalizadas por cada aplicaci&oacute;n";
+						captionSt = "Transacciones finalizadas por cada aplicaci&oacute;n a "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.TransByApp.length; i++) {
@@ -222,7 +246,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'center',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -311,7 +335,7 @@ $(document).ready(function(){
 						numReg = obJson.TransByProv.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "TransByProvRows";
-						captionSt = "Transacciones finalizadas  por cada origen de certificados/proveedor.";
+						captionSt = "Transacciones finalizadas  por cada origen de certificados/proveedor a "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.TransByProv.length; i++) {
@@ -333,7 +357,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'center',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -404,7 +428,7 @@ $(document).ready(function(){
 						numReg = obJson.TransByDocSize.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "TransByDocSizeRows";
-						captionSt = "Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n";
+						captionSt = "Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n a "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.TransByDocSize.length; i++) {												
@@ -559,7 +583,7 @@ $(document).ready(function(){
 						numReg = obJson.TransByOperation.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "TransByOperationRows";
-						captionSt = "Transacciones finalizadas por cada operaci&oacute;n (simple o lote)";
+						captionSt = "Transacciones finalizadas por cada operaci&oacute;n (simple o lote) a "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.TransByOperation.length; i++) {
@@ -683,7 +707,7 @@ $(document).ready(function(){
 						numReg = obJson.SignByApp.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "SignByAppRows";
-						captionSt = "Firmas finalizadas por cada aplicaci&oacute;n";
+						captionSt = "Firmas finalizadas por cada aplicaci&oacute;n a "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.SignByApp.length; i++) {
@@ -704,7 +728,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'center',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -815,7 +839,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'center',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -926,7 +950,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'center',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -1079,21 +1103,22 @@ $(document).ready(function(){
 						//Introducimos en la definición del documento PDF las imágenes de los Gráficos
 //						var chart1;
 //						var chart2;
-//						var col;
-						for(i = 0; i < arrChartsJPG.length; i++){
-//							if(i % 2 == 0){
-//								chart1 = {image:arrChartsJPG[i], width:200};
-//							}
-//							if(i % 2 == 1){
-//								chart2 = {image:arrChartsJPG[i], width:200};
-//								col = columns[  {width:'auto',text:chart1},
-//												{width:'auto',text:chart2}];
-//								doc.content.push(col);
-//							}
-							var chart = {image:arrChartsJPG[i], width:200};
-							doc.content.push(chart);
-													
+						var images =  new Array();
+						for(i = 0; i < arrChartsJPG.length; i++){						
+							images.push({image:arrChartsJPG[i], width:200});
+							if(i % 2 == 1){
+								doc.content.push({columns:images});
+								images = new Array();
+							}
+							//doc.content.push(col);
 						}
+						if(images.length == 1){
+							doc.content.push({columns:images});
+						}
+//							var chart = {image:arrChartsJPG[i], width:200};
+							//doc.content.push({columns:images});
+													
+						
 					},
 					customSettings: null,
 					download: 'download',
@@ -1258,13 +1283,20 @@ $(document).ready(function(){
 	 * Inicializa los campos de consulta y borra los resultados anteriores.
 	 */
 	function resetFunction() {
-		$( "label" ).each(function( index ) {
+		$("label").each(function( index ) {
 			this.style.color = "#000000";
 			var idInput=$(this).attr('for');
 			$('#'+idInput).css({backgroundColor:'#FFFFFF'});    
 		});
 		$("#jQGrid").html("");
 		$("#ChartsContend").html("");
+		//se deshabilitan los botones de exportar
+		
+		disabledExportsButtons(true);
+		
+		var html = "";	
+		$("#error-txt").html(html);
+		$("#error-txt").hide();
 	}
 	
 	/**
@@ -1286,5 +1318,27 @@ $(document).ready(function(){
 		   });
 		}
 	
+	
+	 /**
+	  * Muestra en pantalla el mensaje de error indicado en el objeto JSON que se le pasa.
+	  * @returns
+	  */
+	 function printErrorResult(JSONData){
+		var html = "";	
+		$("#error-txt").html(html);
+		html = JSONData.Error[0].Message;
+		$("#error-txt").append(html);
+		$("#error-txt").css('display:inline-block');
+		$("#error-txt").show();	
+		disabledExportsButtons(true);
+		$("#jQGrid").html("");
+		$("#ChartsContend").html("");
+	 }
+	
+	 function disabledExportsButtons(disabled){
+		 $("#actionButtons > button").each(function(){
+				$(this).prop('disabled',disabled);
+			});
+	 }
 	
 }); //fin document ready!

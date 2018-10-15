@@ -78,8 +78,15 @@ public class StatisticsService extends HttpServlet {
 			case 1://Transacciones finalizadas por cada aplicacion
 				try {
 					result = TransactionsDAO.getTransactionsByAppJSON(this.year.intValue(), this.month.intValue());
+//					final JsonReader reader = Json.createReader(new StringReader(result));
+//					final JsonObject jsonObj = reader.readObject();
+//					reader.close();
+//					if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
+
 				} catch (SQLException | DBConnectionException | ConfigFilesException e) {
 					// TODO REspuesta de error
+					LOGGER.warning("No se han podido recuperar correctamente los parametros."); //$NON-NLS-1$
+					final String jsonError = getJsonError("No se han podido recuperar correctamente los parametros.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
 					e.printStackTrace();
 				}
 				break;
@@ -143,6 +150,8 @@ public class StatisticsService extends HttpServlet {
 			default:
 				break;
 		}
+
+
 
 		if (result != null) {
 			response.getWriter().write(result);

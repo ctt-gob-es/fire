@@ -107,17 +107,30 @@ public class TransactionsDAO {
 		st.setInt(1, year);
 		st.setInt(2, month);
 		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
-			data.add(Json.createObjectBuilder()
-					.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
-					.add("INCORRECTAS", rs.getString(3)) //$NON-NLS-1$
-					.add("CORRECTAS", rs.getString(4)) //$NON-NLS-1$
-					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(3))+Integer.parseInt(rs.getString(4)))) //$NON-NLS-1$
-					);
+		if(rs.last()) {
+			rs.beforeFirst();
+			while (rs.next()) {
+				data.add(Json.createObjectBuilder()
+						.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
+						.add("INCORRECTAS", rs.getString(3)) //$NON-NLS-1$
+						.add("CORRECTAS", rs.getString(4)) //$NON-NLS-1$
+						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(3))+Integer.parseInt(rs.getString(4)))) //$NON-NLS-1$
+						);
+			}
+			jsonObj.add("TransByApp", data); //$NON-NLS-1$
 		}
+		else {
+			//No tiene registros
+			data.add(Json.createObjectBuilder()
+					.add("Code", 204) //$NON-NLS-1$
+					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
+		}
+
 		rs.close();
 		st.close();
-		jsonObj.add("TransByApp", data); //$NON-NLS-1$
+
+
 
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
@@ -150,17 +163,30 @@ public class TransactionsDAO {
 		st.setInt(1, year);
 		st.setInt(2, month);
 		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
-			data.add(Json.createObjectBuilder()
+
+		if(rs.last()) {
+			rs.beforeFirst();
+
+			while (rs.next()) {
+				data.add(Json.createObjectBuilder()
 					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
 					.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
 					.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
 					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
 					);
+			}
+			jsonObj.add("TransByProv", data); //$NON-NLS-1$
+		}
+		else {
+			//No tiene registros
+			data.add(Json.createObjectBuilder()
+					.add("Code", 204) //$NON-NLS-1$
+					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
 		st.close();
-		jsonObj.add("TransByProv", data); //$NON-NLS-1$
+
 
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
@@ -193,15 +219,27 @@ public class TransactionsDAO {
 		st.setInt(1, year);
 		st.setInt(2, month);
 		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
+		if(rs.last()) {
+			rs.beforeFirst();
+
+			while (rs.next()) {
+				data.add(Json.createObjectBuilder()
+						.add("NOMBRE", rs.getString(3)) //$NON-NLS-1$
+						.add("Kbytes", rs.getString(1)) //$NON-NLS-1$
+						);
+			}
+			jsonObj.add("TransByDocSize", data); //$NON-NLS-1$
+		}
+		else {
+			//No tiene registros
 			data.add(Json.createObjectBuilder()
-					.add("NOMBRE", rs.getString(3)) //$NON-NLS-1$
-					.add("Kbytes", rs.getString(1)) //$NON-NLS-1$
-					);
+					.add("Code", 204) //$NON-NLS-1$
+					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
 		st.close();
-		jsonObj.add("TransByDocSize", data); //$NON-NLS-1$
+
 
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
@@ -235,20 +273,31 @@ public class TransactionsDAO {
 		st.setInt(1, year);
 		st.setInt(2, month);
 		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
+		if(rs.last()) {
+			rs.beforeFirst();
+			while (rs.next()) {
+				data.add(Json.createObjectBuilder()
+						.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
+						.add("FirmasSimplesCorrectas", rs.getString(2)) //$NON-NLS-1$
+						.add("FirmasSimplesINCorrectas", rs.getString(3)) //$NON-NLS-1$
+						.add("TOTAL_SIMPLES", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
+						.add("FirmasLotesCorrectas", rs.getString(4)) //$NON-NLS-1$
+						.add("FirmasLotesINCorrectas", rs.getString(5)) //$NON-NLS-1$
+						.add("TOTAL_LOTES", String.valueOf( Integer.parseInt(rs.getString(4))+Integer.parseInt(rs.getString(5)))) //$NON-NLS-1$
+						);
+			}
+			jsonObj.add("TransByOperation", data); //$NON-NLS-1$
+		}
+		else {
+			//No tiene registros
 			data.add(Json.createObjectBuilder()
-					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
-					.add("FirmasSimplesCorrectas", rs.getString(2)) //$NON-NLS-1$
-					.add("FirmasSimplesINCorrectas", rs.getString(3)) //$NON-NLS-1$
-					.add("TOTAL_SIMPLES", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
-					.add("FirmasLotesCorrectas", rs.getString(4)) //$NON-NLS-1$
-					.add("FirmasLotesINCorrectas", rs.getString(5)) //$NON-NLS-1$
-					.add("TOTAL_LOTES", String.valueOf( Integer.parseInt(rs.getString(4))+Integer.parseInt(rs.getString(5)))) //$NON-NLS-1$
-					);
+					.add("Code", 204) //$NON-NLS-1$
+					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
 		st.close();
-		jsonObj.add("TransByOperation", data); //$NON-NLS-1$
+
 
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);

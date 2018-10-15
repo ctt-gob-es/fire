@@ -148,17 +148,28 @@ public class SignaturesDAO {
 		st.setInt(1, year);
 		st.setInt(2, month);
 		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
+		if(rs.last()) {
+			rs.beforeFirst();
+			while (rs.next()) {
+				data.add(Json.createObjectBuilder()
+						.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
+						.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
+						.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
+						);
+			}
+			jsonObj.add("SignByProv", data); //$NON-NLS-1$
+		}
+		else {
+			//No tiene registros
 			data.add(Json.createObjectBuilder()
-					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
-					.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
-					.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
-					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
-					);
+					.add("Code", 204) //$NON-NLS-1$
+					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
 		st.close();
-		jsonObj.add("SignByProv", data); //$NON-NLS-1$
+
 
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
@@ -191,17 +202,28 @@ public class SignaturesDAO {
 		st.setInt(1, year);
 		st.setInt(2, month);
 		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
+		if(rs.last()) {
+			rs.beforeFirst();
+			while (rs.next()) {
+				data.add(Json.createObjectBuilder()
+						.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
+						.add("INCORRECTAS", rs.getString(3)) //$NON-NLS-1$
+						.add("CORRECTAS", rs.getString(4)) //$NON-NLS-1$
+						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(3))+Integer.parseInt(rs.getString(4)))) //$NON-NLS-1$
+						);
+			}
+			jsonObj.add("SignByApp", data); //$NON-NLS-1$
+		}
+		else {
+			//No tiene registros
 			data.add(Json.createObjectBuilder()
-					.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
-					.add("INCORRECTAS", rs.getString(3)) //$NON-NLS-1$
-					.add("CORRECTAS", rs.getString(4)) //$NON-NLS-1$
-					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(3))+Integer.parseInt(rs.getString(4)))) //$NON-NLS-1$
-					);
+					.add("Code", 204) //$NON-NLS-1$
+					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
 		st.close();
-		jsonObj.add("SignByApp", data); //$NON-NLS-1$
+
 
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
@@ -233,17 +255,28 @@ public class SignaturesDAO {
 		st.setInt(1, year);
 		st.setInt(2, month);
 		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
+		if(rs.last()) {
+			rs.beforeFirst();
+			while (rs.next()) {
+				data.add(Json.createObjectBuilder()
+						.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
+						.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
+						.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
+						);
+			}
+			jsonObj.add("SignByFormat", data); //$NON-NLS-1$
+		}
+		else {
+			//No tiene registros
 			data.add(Json.createObjectBuilder()
-					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
-					.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
-					.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
-					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
-					);
+					.add("Code", 204) //$NON-NLS-1$
+					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
 		st.close();
-		jsonObj.add("SignByFormat", data); //$NON-NLS-1$
+
 
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);
@@ -274,17 +307,28 @@ public class SignaturesDAO {
 		st.setInt(1, year);
 		st.setInt(2, month);
 		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
+		if(rs.last()) {
+			rs.beforeFirst();
+			while (rs.next()) {
+				data.add(Json.createObjectBuilder()
+						.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
+						.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
+						.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
+						);
+			}
+			jsonObj.add("SignByLongLiveFormat", data); //$NON-NLS-1$
+		}
+		else {
+			//No tiene registros
 			data.add(Json.createObjectBuilder()
-					.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
-					.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
-					.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
-					.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
-					);
+					.add("Code", 204) //$NON-NLS-1$
+					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
 		st.close();
-		jsonObj.add("SignByLongLiveFormat", data); //$NON-NLS-1$
+
 
 		try  {
 			final JsonWriter jw = Json.createWriter(writer);

@@ -54,10 +54,14 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 <title>Gesti&oacute;n de servidores de Log FIRe</title>
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
-	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.min.css">
-	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="../resources/css/jqueryUI/jquery-ui.min.css">
+	<link rel="stylesheet" href="../resources/css/jqueryUI/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="../resources/css/jqueryUI/jquery.ui.timepicker.css">
 	<link rel="stylesheet" href="../resources/css/ui.jqgrid.css">
-	
+	<style>
+		.ui-datepicker-calendar {display: none;}    
+	</style>
+
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../resources/js/grid.locale-es.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.jqGrid.min.js" type="text/javascript"></script>	
@@ -78,11 +82,11 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 		
 		<!-- contenido -->
 	<div id="containerQueryManager">
-		<div id="subtitle" style="padding: 5px;width:100%;height= 42;">
+		<div id="subtitle" style="padding: 5px; height: 55px;background-color: #eeeeee;">
 			<form id ="formStatictics" name="formStatictics" method="post" action="../StatisticsService" >
 				<div id="selectedQuery" style="display:inline-block;">		 
 				 	<label for = "select_query" >* Consulta:</label>
-					<select id = "select_query" name = "select_query" >	
+					<select id = "select_query" name = "select_query">	
 						<option value = "0" selected></option>			    		
 					    <option value = "1">Transacciones finalizadas por cada aplicaci&oacute;n</option>
 					    <option value = "2">Transacciones finalizadas  por cada origen de certificados/proveedor.</option>
@@ -92,7 +96,7 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 				    	<option value = "6">Documentos firmados por cada origen de certificados/proveedor.</option>
 				    	<option value = "7">Documentos firmados en cada formato de firma.</option>
 				    	<option value = "8">Documentos que utilizan cada formato de firma longevo.</option> 			    								    			
-					</select>													      						      					 				
+					</select>																	      						      					 				
 				</div>
 				<div style="display: inline-block; padding-left:1em;">
 						<label for="start_date" >* Fecha:</label>
@@ -104,27 +108,22 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 				<div style = "display: inline-block; padding-left:0.5em;">
 					<button id="clear-button"   name="clear-button"  title="Borra el contenido de los campos de Consulta y Fecha" type="reset" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>	
 				</div >
-				<label> Exportar :</label>
-		  		<button id="csv">CSV</button>
-				<button id="excel">Excel</button>
-				<button id="pdf">PDF</button>&nbsp;&nbsp;
-<!-- 				<button id="getimages">Get Charts Images</button> -->
+				<div id ="actionButtons"  style = "display: inline-block; padding-left:0.5em;">
+					<label> Exportar :</label>
+		  			<button id="csv" title="Exporta los datos del resultado a un fichero con formato CSV" disabled>CSV</button>&nbsp;
+					<button id="excel" title="Exporta los datos del resultado a un fichero con formato Excel xlsx"disabled>Excel</button>&nbsp;
+					<button id="pdf" title="Exporta los datos del resultado a un fichero con formato PDF" disabled>PDF</button>
+				</div>
+				
 			</form>
-			
-<!-- 			<div id="progress_download" style="display:none;"> -->
-<!-- 				<img  style="vertical-align: middle;" alt="Icono animado cargando fichero" src="../resources/img/load.gif" height="42" width="55" > -->
-<!-- 				Consulta <span id="fileName"></span> del servidor <span id="ServerName"></span>.			 -->
-<!-- 			</div>				      						    -->
-			<div id="error-txt-log" style="display:none;width:30%;" onload="setIdErrorTxtQuery($(this).attr('id'))"></div>
-			<div id="ok-txt-log" style="display:none;width:30%;" onload="setIdOkTxtQuery($(this).attr('id'))"></div>			
+			<div id="error-txt" style="display:none;" ></div>
+			<div id="ok-txt" style="display:none;"> </div>			
 		</div>
 	
-		<div id="main-content" style="margin: auto; width: 100%;" >
-			<div id="contentQueryResult" style="width: 98%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; background-color: #FFFFFF;"  >
+		<div id="main-content" style="margin: auto; width: 100%; background-color:: #eeeeee;" >
+			<div id="contentQueryResult" style="width: 98%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; "  ><!-- background-color: #FFFFFF; -->
 		
-<!-- 				<div id="advice" style="display:block; text-align: center;" onload="setIdAdvice($(this).attr('id'))">					 -->
-<!-- 					<p>Para ver los resultados en esta p&aacute;gina debe  seleccionar "Consulta" y "Fecha" .</p> -->
-<!-- 				</div>		 -->
+
 <!-- 				<pre id="QueryResult"onload="setIdContainer($(this).attr('id'))"></pre> -->
 					<!-- Graficos de datos -->	
 					<div id="ChartsContend" style="display: inline-block; width:49%;"><br>						
@@ -133,7 +132,7 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 					<!-- Tabla de datos -->			
 					<div id="data" style=" display: inline-block;text-align:center;width:49%;position: absolute;">
 						<br>										
-						<div id="jQGrid" style="padding-left: 2%; padding-right:2%;">
+						<div id="jQGrid" style="padding-left: 2%; padding-right:2%; z-index: -1;">
 		 		 			<table id="resultQuery"></table>
 		  					<div id="page"></div>		  					
 		 				</div>

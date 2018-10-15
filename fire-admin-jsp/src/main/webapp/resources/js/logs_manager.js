@@ -5,22 +5,13 @@
 
 	
    $( function() {
-     $( "#startDate" ).datepicker({
-       changeMonth: true,
-       changeYear: true
-     });
+     $( "#startDate" ).datepicker();
      $('#startTime').timepicker();
      
-     $( "#search_StartDate" ).datepicker({
-         changeMonth: true,
-         changeYear: true
-       });
+     $( "#search_StartDate" ).datepicker();
        $('#search_StartTime').timepicker();
      
-     $( "#endDate" ).datepicker({
-         changeMonth: true,
-         changeYear: true
-       });
+     $( "#endDate" ).datepicker();
        $('#endTime').timepicker();
    } );
 
