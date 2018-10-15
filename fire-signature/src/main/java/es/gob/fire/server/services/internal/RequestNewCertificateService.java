@@ -82,12 +82,7 @@ public final class RequestNewCertificateService extends HttpServlet {
     	// Creamos una configuracion igual a la de firma para la generacion de certificado
     	// y establecemos que la URL de redireccion en caso de exito sea la de recuperacion
     	// del certificado generado
-    	String redirectUrlBase = ConfigManager.getPublicContextUrl();
-		if (redirectUrlBase == null || redirectUrlBase.isEmpty()){
-			redirectUrlBase = request.getRequestURL().toString();
-			redirectUrlBase = redirectUrlBase.substring(0, redirectUrlBase.toString().lastIndexOf('/') + 1);
-		}
-		redirectUrlBase += "/public/"; //$NON-NLS-1$
+    	final String redirectUrlBase = getPublicContext(request.getRequestURL().toString());
 
         final TransactionConfig requestCertConfig = (TransactionConfig) connConfig.clone();
         requestCertConfig.setRedirectSuccessUrl(
@@ -172,5 +167,22 @@ public final class RequestNewCertificateService extends HttpServlet {
         LOGGER.info(String.format("App %1s: TrId %2s: Redirigimos a la URL de emision del certificado", appId, transactionId)); //$NON-NLS-1$
 
         response.sendRedirect(redirectUrl);
+	}
+
+	private static String getPublicContext(final String requestUrl) {
+		String redirectUrlBase = ConfigManager.getPublicContextUrl();
+		if ((redirectUrlBase == null || redirectUrlBase.isEmpty()) && requestUrl != null) {
+			redirectUrlBase = requestUrl.substring(0, requestUrl.lastIndexOf('/'));
+		}
+
+		if (redirectUrlBase != null && !redirectUrlBase.endsWith("/public/")) { //$NON-NLS-1$
+			if (redirectUrlBase.endsWith("/public")) { //$NON-NLS-1$
+				redirectUrlBase += "/"; //$NON-NLS-1$
+			}
+			else {
+				redirectUrlBase += "/public/"; //$NON-NLS-1$
+			}
+		}
+		return redirectUrlBase;
 	}
 }

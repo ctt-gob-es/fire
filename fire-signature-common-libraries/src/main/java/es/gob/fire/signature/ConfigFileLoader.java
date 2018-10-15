@@ -55,23 +55,26 @@ public class ConfigFileLoader {
 				if (configFile.isFile() && configFile.canRead() && configDir.startsWith(configFile.getParent())) {
 					try (InputStream is = new FileInputStream(configFile);) {
 						config.load(is);
-						loaded = true;
 					}
+					loaded = true;
+					LOGGER.info("Se cargo el fichero de configuracion " + configFile.getAbsolutePath()); //$NON-NLS-1$
 				}
 				else {
 					LOGGER.warning(
 							"El fichero " + configFilename + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ". El fichero debe encontrase dentro del directorio '" + configDir + //$NON-NLS-1$
-							"'.\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+									ENVIRONMENT_VAR_CONFIG_DIR + ". El fichero debia encontrase en el directorio " + configDir); //$NON-NLS-1$
 				}
 			}
 
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio
 			if (!loaded) {
+				LOGGER.info("Se busca en el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
 				try (InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilename);) {
 					if (is == null) {
+						LOGGER.severe("No se ha encontrado el fichero de configuracion en el classpath"); //$NON-NLS-1$
 						throw new FileNotFoundException();
 					}
+					LOGGER.info("Se ha cargado desde el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
 					config.load(is);
 				}
 			}

@@ -333,6 +333,16 @@ public class ConfigManager {
 	 * temporal del sistema. En caso de error, devolver&aacute; {@code null}.
 	 */
 	public static String getTempDir() {
+
+		if (config == null) {
+			try {
+				loadConfig();
+			} catch (final ConfigFilesException e) {
+				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				return null;
+			}
+		}
+
 		return getProperty(PROP_TEMP_DIR, DEFAULT_TMP_DIR);
 	}
 

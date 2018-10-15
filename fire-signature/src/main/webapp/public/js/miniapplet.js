@@ -114,9 +114,12 @@ var MiniApplet = ( function ( window, undefined ) {
 		// Tiempo de espera entre los intentos de conexion con autofirma por socket
 		var AUTOFIRMA_LAUNCHING_TIME = 2000;
 
-		// Reintentos de conexion totales para detectar que esta instalado AutoFirma por socket
+		// Reintentos de conexion para detectar que esta instalado AutoFirma por socket
+		// Por defecto, se usara este valor, pero puede usarse otro, en caso de detectar
+		// Internet Explorer, debido a que este detecta varios errores por cada intento de
+		// conexion
 		var AUTOFIRMA_CONNECTION_RETRIES = 15;
-
+		
 		// Variable que se puede configurar para forzar el uso del modo de comunicacion por servidor intermedio
 		// entre la pagina web y AutoFirma
 		var forceWSMode = false;
@@ -1229,6 +1232,9 @@ var MiniApplet = ( function ( window, undefined ) {
 			 * de 1Mb, asi que se reduce este a un valor seguro para ese navegador. */
 			var URL_MAX_SIZE = isInternetExplorer() ? 12000 : isFirefox() ? 458752 : 1048576;
 			
+			/* Intentos de conexion a traves del socket antes de determinar que AutoFirma no esta disponible. */
+			var CONNECTION_RETRIES = AUTOFIRMA_CONNECTION_RETRIES;
+			
 			/* Indica si se ha establecido la conexion o no */
 			var connection = false;
 		
@@ -1468,7 +1474,7 @@ var MiniApplet = ( function ( window, undefined ) {
 			}
 			
 			function execAppIntent (url) {
-				
+			
 				// Primera ejecucion, no hay puerto definido
 				if (port == "") {
 					// Calculamos los puertos
@@ -1481,7 +1487,7 @@ var MiniApplet = ( function ( window, undefined ) {
 				// Se ha ejecutado anteriormente y tenemos un puerto calculado.
 				else {
 					connection = false;
-					executeEchoByService (port, url, MiniApplet.AUTOFIRMA_CONNECTION_RETRIES)
+					executeEchoByService (port, url, CONNECTION_RETRIES)
 				}
 			}
 			
@@ -1576,12 +1582,14 @@ var MiniApplet = ( function ( window, undefined ) {
 			}
 			
 			function executeEchoByServiceByPort (ports, url) {
+				
 				connection = false;
 				var semaphore = new Object();
 				semaphore.locked = false;
-				executeEchoByService (ports[0], url, MiniApplet.AUTOFIRMA_CONNECTION_RETRIES, semaphore);
-				executeEchoByService (ports[1], url, MiniApplet.AUTOFIRMA_CONNECTION_RETRIES, semaphore);
-				executeEchoByService (ports[2], url, MiniApplet.AUTOFIRMA_CONNECTION_RETRIES, semaphore);
+				
+				executeEchoByService (ports[0], url, CONNECTION_RETRIES, semaphore);
+				executeEchoByService (ports[1], url, CONNECTION_RETRIES, semaphore);
+				executeEchoByService (ports[2], url, CONNECTION_RETRIES, semaphore);
 			}
 
 			/**
@@ -1591,7 +1599,6 @@ var MiniApplet = ( function ( window, undefined ) {
 			* peticion sea aceptada.
 			*/
 			function executeEchoByService (currentPort, url, timeoutResetCounter, semaphore) {
-
 				
 				// Almacenamos la URL en una propiedad global que se mantendra siempre actualizada porque
 				// al invocar muchas peticiones consecutivas, en caso de introducir un retardo con setTimeout,
@@ -1605,6 +1612,7 @@ var MiniApplet = ( function ( window, undefined ) {
 				httpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				httpRequest.onreadystatechange = function() {
 					if (httpRequest.readyState == 4 && httpRequest.status == 200 && Base64.decode(httpRequest.responseText, true) == "OK" && !connection) {
+						
 						port = currentPort;
 						urlHttpRequest = URL_REQUEST + port + "/afirma";
 						connection = true;
@@ -1621,17 +1629,23 @@ var MiniApplet = ( function ( window, undefined ) {
 						isOpAndSaveOperation = currentOperationUrl.indexOf("afirma://signandsave") > -1;
 						executeOperationByService();
 					}
-					else if ((!semaphore || !semaphore.locked) && !connection && httpRequest.readyState != 2 && httpRequest.readyState != 3) {
+					// Cuando falla la conexion con el puerto, Internet Explorer devuelve: readyState 1 y status 0;
+					// mientras que el resto: readyState 4 y status 0. Por eso debemos admitir ambos valores
+					else if ((!semaphore || !semaphore.locked) && !connection && (httpRequest.readyState == 4 || (httpRequest.readyState == 1 && port != ""))) {
 						timeoutResetCounter--;
 						
-						// Si ya se conecto antes con la aplicacion pero ahora llevamos la mitad de los intentos
-						// sin conectar, consideramos que se ha tumbado y hay que relanzarla
-						if (port != "" && timeoutResetCounter < MiniApplet.AUTOFIRMA_CONNECTION_RETRIES/2) {
-							port = "";
+						// Si ya se conecto antes con la aplicacion (por eso el puerto tiene valor) pero ahora
+						// hemos alcanzado el numero de intentos maximo y no hemos conectado, consideramos que
+						// se ha tumbado la aplicacion y hay que relanzarla
+						if (port != "" && timeoutResetCounter < CONNECTION_RETRIES/2) {
+
 							if (semaphore) {
 								semaphore.locked = true;
 							}
-							timeoutResetCounter = MiniApplet.AUTOFIRMA_CONNECTION_RETRIES;
+							
+							port = "";
+							timeoutResetCounter = CONNECTION_RETRIES;
+							
 							execAppIntent(currentOperationUrl);							
 						}
 						// Si hemos agotado todos los reintentos consideramos que la aplicacion no esta instalada
@@ -1700,7 +1714,6 @@ var MiniApplet = ( function ( window, undefined ) {
 						if (httpRequest.readyState == 4 && Base64.decode(httpRequest.responseText) != "") {
 							successServiceResponseFunction(Base64.decode(httpRequest.responseText));
 						}
-						return;
 					}
 					// El resto de operaciones deben componer el resultado
 					else {
@@ -1726,7 +1739,7 @@ var MiniApplet = ( function ( window, undefined ) {
 					}
 					// error desconocido 
 					else {
-						errorServiceResponseFunction("java.lang.IOException", "Ocurrio un error de red en la llamada al servicio de firma "+e.target.statusText);
+						errorServiceResponseFunction("java.lang.IOException", "Ocurrio un error de red en la llamada al servicio de firma " + e.target.statusText);
 					}
 				}
 				// se anade EOF para que cuando el socket SSL lea la peticion del buffer sepa que ha llegado al final y no se quede en espera
@@ -1815,8 +1828,9 @@ var MiniApplet = ( function ( window, undefined ) {
 					}
 					else {
 						if (httpRequest.readyState == 4 && httpRequest.status == 200 && httpRequest.responseText != "") {
-							if(Base64.decode(httpRequest.responseText) == "MEMORY_ERROR"){
+							if (Base64.decode(httpRequest.responseText) == "MEMORY_ERROR") {
 								successServiceResponseFunction(Base64.decode(httpRequest.responseText));
+								return;
 							}
 							totalResponseRequest = "";
 							addFragmentRequest (1, Base64.decode(httpRequest.responseText, true));

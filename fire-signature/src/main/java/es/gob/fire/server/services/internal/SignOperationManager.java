@@ -232,12 +232,7 @@ public class SignOperationManager {
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
-		String redirectUrlBase = ConfigManager.getPublicContextUrl();
-		if (redirectUrlBase == null || redirectUrlBase.isEmpty()){
-			redirectUrlBase = request.getRequestURL().toString();
-			redirectUrlBase = redirectUrlBase.substring(0, redirectUrlBase.lastIndexOf('/'));
-		}
-		redirectUrlBase += "/public/"; //$NON-NLS-1$
+		final String redirectUrlBase = getPublicContext(request.getRequestURL().toString());
 
         // Si hay proveedor disponible, se selecciona automaticamente;
         // si no, se envia a la pagina de seleccion de proveedor
@@ -262,6 +257,23 @@ public class SignOperationManager {
         LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos la URL de redireccion con el ID de transaccion", appId, transactionId)); //$NON-NLS-1$
 
         sendResult(response, result);
+	}
+
+	private static String getPublicContext(final String requestUrl) {
+		String redirectUrlBase = ConfigManager.getPublicContextUrl();
+		if ((redirectUrlBase == null || redirectUrlBase.isEmpty()) && requestUrl != null) {
+			redirectUrlBase = requestUrl.substring(0, requestUrl.lastIndexOf('/'));
+		}
+
+		if (redirectUrlBase != null && !redirectUrlBase.endsWith("/public/")) { //$NON-NLS-1$
+			if (redirectUrlBase.endsWith("/public")) { //$NON-NLS-1$
+				redirectUrlBase += "/"; //$NON-NLS-1$
+			}
+			else {
+				redirectUrlBase += "/public/"; //$NON-NLS-1$
+			}
+		}
+		return redirectUrlBase;
 	}
 
 //	private static void setErrorToSession(final FireSession session, final OperationError error) {
