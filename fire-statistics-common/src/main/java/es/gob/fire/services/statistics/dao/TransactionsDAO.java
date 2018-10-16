@@ -123,7 +123,7 @@ public class TransactionsDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+					.add("Message","No existen registros para la consulta 'Transacciones finalizadas correctamente/ incorrectamente por cada aplicaci&oacute;n' a fecha: " + String.valueOf(month) +"/" + String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 
@@ -181,7 +181,7 @@ public class TransactionsDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+					.add("Message","No existen registros la consulta 'Transacciones finalizadas correctamente/ incorrectamente por cada origen de certificados/proveedor' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+"."));    //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
@@ -225,7 +225,7 @@ public class TransactionsDAO {
 			while (rs.next()) {
 				data.add(Json.createObjectBuilder()
 						.add("NOMBRE", rs.getString(3)) //$NON-NLS-1$
-						.add("Kbytes", rs.getString(1)) //$NON-NLS-1$
+						.add("Kbytes", String.valueOf(Math.round(Double.parseDouble(rs.getString(1))))) //$NON-NLS-1$
 						);
 			}
 			jsonObj.add("TransByDocSize", data); //$NON-NLS-1$
@@ -234,7 +234,7 @@ public class TransactionsDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+					.add("Message","No existen registros para la consulta 'Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
@@ -292,7 +292,7 @@ public class TransactionsDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para esta consulta")); //$NON-NLS-1$ //$NON-NLS-2$
+					.add("Message","No existen registros para la consulta 'Transacciones realizadas seg&uacute;n el tipo de transacci&oacute;n (simple o lote)' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();

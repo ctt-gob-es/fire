@@ -58,9 +58,8 @@ public class StatisticsService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.warning("No se han podido recuperar correctamente los parametros."); //$NON-NLS-1$
-//			final String jsonError = getJsonError("No se han podido recuperar correctamente los parametros.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-//			session.setAttribute("ERROR_JSON", jsonError); //$NON-NLS-1$
-//			response.sendRedirect(request.getContextPath().toString().concat("/Statistics/StatisticsMainPage.jsp?op=").concat(stringOp).concat("&r=") + (isOk ? "1" : "0") + "&ent=sta"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			final String jsonError = getJsonError("No se han podido recuperar correctamente los parametros.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+			response.getWriter().write(jsonError);
 			return;
 		}
 
@@ -69,25 +68,25 @@ public class StatisticsService extends HttpServlet {
 		}
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
+			final String jsonError = getJsonError("Error al cargar la configuracion.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+			response.getWriter().write(jsonError);
     		return;
     	}
 
 
 		switch(this.getConsulta().intValue()) {
 
-			case 1://Transacciones finalizadas por cada aplicacion
+			case 1://Transacciones finalizadas por cada aplicación
 				try {
 					result = TransactionsDAO.getTransactionsByAppJSON(this.year.intValue(), this.month.intValue());
-//					final JsonReader reader = Json.createReader(new StringReader(result));
-//					final JsonObject jsonObj = reader.readObject();
-//					reader.close();
-//					if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
-
-				} catch (SQLException | DBConnectionException | ConfigFilesException e) {
-					// TODO REspuesta de error
+				} catch ( DBConnectionException | ConfigFilesException e) {
+					// TODO Respuesta de error
 					LOGGER.warning("No se han podido recuperar correctamente los parametros."); //$NON-NLS-1$
 					final String jsonError = getJsonError("No se han podido recuperar correctamente los parametros.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
 					e.printStackTrace();
+				}
+				catch(final SQLException e) {
+
 				}
 				break;
 			case 2://Transacciones finalizadas  por cada origen de certificados/proveedor.

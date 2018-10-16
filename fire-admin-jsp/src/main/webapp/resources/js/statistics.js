@@ -207,8 +207,8 @@ $(document).ready(function(){
 						/**Dibujar las graficas**/
 						
 						var sLabel = "Transacciones";
-						var textGood = 'Transacciones finalizadas correctas por aplicacion';
-						var textBad = 'Transacciones finalizadas incorrectas por aplicación';										
+						var textGood = 'Transacciones correctas por aplicación';
+						var textBad = 'Transacciones incorrectas por aplicación';										
 																
 						var idCanvasGood = "chartGood";
 						var idCanvasBad = "chartBad";
@@ -317,8 +317,8 @@ $(document).ready(function(){
 						/**Dibujar las graficas**/
 						
 						var sLabel = "Transacciones";
-						var textGood = 'Transacciones finalizadas correctas por proveedor';
-						var textBad = 'Transacciones finalizadas incorrectas por proveedor';							
+						var textGood = 'Transacciones correctas por proveedor';
+						var textBad = 'Transacciones incorrectas por proveedor';							
 						
 						var idCanvasGood = "chartGood";
 						var idCanvasBad = "chartBad";
@@ -559,9 +559,9 @@ $(document).ready(function(){
 						/**Dibujar las graficas**/
 						
 						var sLabel = "Transacciones";
-						var textGoodSimple = 'Transacciones Simples correctas por aplicacion';
+						var textGoodSimple = 'Transacciones Simples correctas por aplicación';
 						var textBadSimple = 'Transacciones Simples incorrectas por aplicación';
-						var textGoodBatch = 'Transacciones Lote correctas por aplicacion';
+						var textGoodBatch = 'Transacciones Lote correctas por aplicación';
 						var textBadBatch = 'Transacciones Lote incorrectas por aplicación';
 						
 						var idCanvasGoodSimple = "chartGoodSimple";
@@ -630,7 +630,7 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Documentos firmados por cada aplicacion a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Documentos firmados por cada aplicación a '+ $("#start_date").val()+ '.';
 						fileNamePDF = "DocFirmadosPorAplicacion.pdf";
 						fileNameExcel = "DocFirmadosPorAplicacion.xlsx";
 						fileNameCSV =  "DocFirmadosPorAplicacion.csv";
@@ -689,7 +689,7 @@ $(document).ready(function(){
 						/**Dibujar las graficas**/
 						
 						var sLabel = "Firmas";
-						var textGood = 'Firmas finalizadas correctas por aplicacion';
+						var textGood = 'Firmas finalizadas correctas por aplicación';
 						var textBad = 'Firmas finalizadas incorrectas por aplicación';										
 																
 						var idCanvasGood = "chartGood";
@@ -1101,8 +1101,6 @@ $(document).ready(function(){
 					description:descriptionPDF,
 					onBeforeExport : function(doc) {
 						//Introducimos en la definición del documento PDF las imágenes de los Gráficos
-//						var chart1;
-//						var chart2;
 						var images =  new Array();
 						for(i = 0; i < arrChartsJPG.length; i++){						
 							images.push({image:arrChartsJPG[i], width:200});
@@ -1110,15 +1108,11 @@ $(document).ready(function(){
 								doc.content.push({columns:images});
 								images = new Array();
 							}
-							//doc.content.push(col);
 						}
 						if(images.length == 1){
 							doc.content.push({columns:images});
 						}
-//							var chart = {image:arrChartsJPG[i], width:200};
-							//doc.content.push({columns:images});
-													
-						
+																		
 					},
 					customSettings: null,
 					download: 'download',
@@ -1131,7 +1125,7 @@ $(document).ready(function(){
 			});
 			
 			/**
-			 * Evento del boton Exportar a Excel, lógica para crear el docuemnto xslx
+			 * Evento del boton Exportar a Excel, lógica para crear el documento xslx
 			 */
 			$("#excel").on("click", function(){				
 				$("#resultQuery").jqGrid("exportToExcel",{
@@ -1144,7 +1138,7 @@ $(document).ready(function(){
 			});
 			
 			/**
-			 *Evento del boton Exportar a texto con formato CSV, lógica para crear el docuemnto csv 
+			 *Evento del boton Exportar a texto con formato CSV, lógica para crear el documento csv 
 			 */
 			$("#csv").on("click", function(){						
 				$("#resultQuery").jqGrid("exportToCsv",{
