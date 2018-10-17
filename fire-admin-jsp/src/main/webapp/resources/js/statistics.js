@@ -1072,7 +1072,10 @@ $(document).ready(function(){
 					
 				}
 			
-			});
+			}).fail(function() {
+				var json ={Error:[{Code:204,Message:"Error al recivir los datos del servidor"}]};
+				printErrorResult(json);
+			  });
 		}
 		
 		
@@ -1328,7 +1331,10 @@ $(document).ready(function(){
 		$("#jQGrid").html("");
 		$("#ChartsContend").html("");
 	 }
-	
+	/**
+	 * Habilita y deshabilita la propiedad disabled de los botones de acción de exportar
+	 * an CSV, EXCEL y PDF
+	 */
 	 function disabledExportsButtons(disabled){
 		 $("#actionButtons > button").each(function(){
 				$(this).prop('disabled',disabled);

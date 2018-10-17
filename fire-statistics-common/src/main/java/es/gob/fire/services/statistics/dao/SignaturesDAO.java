@@ -179,6 +179,7 @@ public class SignaturesDAO {
 		catch (final Exception e) {
 			//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de servidores de log", e); //$NON-NLS-1$
 		}
+
 		return writer.toString();
 
 	}
@@ -233,6 +234,7 @@ public class SignaturesDAO {
 		catch (final Exception e) {
 			//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de servidores de log", e); //$NON-NLS-1$
 		}
+
 		return writer.toString();
 
 	}
@@ -286,8 +288,8 @@ public class SignaturesDAO {
 		catch (final Exception e) {
 			//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de servidores de log", e); //$NON-NLS-1$
 		}
-		return writer.toString();
 
+		return writer.toString();
 	}
 	/**
 	 * Obtiene el total de documentos firmados correctamente e incorrectamente por cada formato de firma longevo (Filtrado por a&ntilde;o y mes)
@@ -338,6 +340,7 @@ public class SignaturesDAO {
 		catch (final Exception e) {
 			//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de servidores de log", e); //$NON-NLS-1$
 		}
+
 		return writer.toString();
 
 	}

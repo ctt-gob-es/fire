@@ -140,6 +140,7 @@ public class TransactionsDAO {
 		catch (final Exception e) {
 			//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de servidores de log", e); //$NON-NLS-1$
 		}
+
 		return writer.toString();
 
 	}
@@ -196,6 +197,7 @@ public class TransactionsDAO {
 		catch (final Exception e) {
 			//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de servidores de log", e); //$NON-NLS-1$
 		}
+
 		return writer.toString();
 
 	}
@@ -249,6 +251,7 @@ public class TransactionsDAO {
 		catch (final Exception e) {
 			//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de servidores de log", e); //$NON-NLS-1$
 		}
+
 		return writer.toString();
 
 	}
@@ -307,6 +310,7 @@ public class TransactionsDAO {
 		catch (final Exception e) {
 			//LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de servidores de log", e); //$NON-NLS-1$
 		}
+
 		return writer.toString();
 
 	}

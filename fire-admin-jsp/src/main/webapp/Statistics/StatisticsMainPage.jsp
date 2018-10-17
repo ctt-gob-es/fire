@@ -19,31 +19,7 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
 	return;
 }
 
-final String jsonError = (String) request.getSession().getAttribute("ERROR_JSON"); //$NON-NLS-1$ 
-if(jsonError != null){
-	final JsonReader reader = Json.createReader(new StringReader(jsonError));
-	final JsonObject jsonObj = reader.readObject();
-	reader.close();
-	if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
-		final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
-		for(int i = 0; i < Error.size(); i++){
-			final JsonObject json = Error.getJsonObject(i);
-			errorText = "Error:" +String.valueOf(json.getInt("Code")) + "  " + json.getString("Message");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
-		}	
-	} 
-}
-session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 
-
-
-	final String jsonData = (String)request.getAttribute("TRBYAPP");//$NON-NLS-1$ 
-
-
-	//Logica para determinar si mostrar un resultado de operacion
-	String op = request.getParameter("op"); //$NON-NLS-1$
-	String result = request.getParameter("r"); //$NON-NLS-1$
-	String entity= request.getParameter("ent"); //$NON-NLS-1$
-	MessageResult mr = MessageResultManager.analizeResponse(op, result,entity);
 		
 %> 
     
@@ -69,9 +45,9 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>
 	<script src="../resources/js/Chart.min.js" type="text/javascript"></script>		
 	<!-- Load pdfmake, jszip lib files -->
-	<script type="text/javascript" language="javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.20/build/pdfmake.min.js">	</script>
-	<script type="text/javascript" language="javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.20/build/vfs_fonts.js"></script>
-	<script type="text/javascript" language="javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+	<script type="text/javascript" language="javascript" src="../resources/js/pdfmake.min.js">	</script>
+	<script type="text/javascript" language="javascript" src="../resources/js/vfs_fonts.js"></script>
+	<script type="text/javascript" language="javascript" src="../resources/js/jszip.min.js"></script>
 </head>
 <body>
 <script>
@@ -116,19 +92,15 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 				</div>
 				
 			</form>
-			<div id="error-txt" style="display:none;" ></div>
-			<div id="ok-txt" style="display:none;"> </div>			
+			<div id="error-txt" style="display:none;" ></div>		
 		</div>
 	
 		<div id="main-content" style="margin: auto; width: 100%; background-color:: #eeeeee;" >
 			<div id="contentQueryResult" style="width: 98%; height:420px; vertical-align: top; overflow-x: auto;overflow-y:auto; "  ><!-- background-color: #FFFFFF; -->
 		
-
-<!-- 				<pre id="QueryResult"onload="setIdContainer($(this).attr('id'))"></pre> -->
 					<!-- Graficos de datos -->	
 					<div id="ChartsContend" style="display: inline-block; width:49%;"><br>						
 					</div>
-<!-- 					<div id="LinksImages"></div>	 -->
 					<!-- Tabla de datos -->			
 					<div id="data" style=" display: inline-block;text-align:center;width:49%;position: absolute;">
 						<br>										
