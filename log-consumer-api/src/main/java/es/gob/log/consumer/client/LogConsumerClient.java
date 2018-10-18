@@ -37,6 +37,8 @@ public class LogConsumerClient {
 
 	/**
 	 * Construye el cliente para la consulta de logs.
+	 * @param disableSslChecks Deshabilita las comprobaciones sobre el certificado
+	 * SSL servidor.
 	 */
 	public LogConsumerClient() {
 		this.conn = new HttpManager();
@@ -229,7 +231,7 @@ public class LogConsumerClient {
 					.append("?op=").append(ServiceOperations.GET_LOG_FILES.ordinal() ); //$NON-NLS-1$
 		final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 
-		if(response.statusCode == 200) {
+		if (response.statusCode == 200) {
 			try(final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));){
 				final JsonObject listFilesReponse = reader.readObject();
 				reader.close();
@@ -239,13 +241,13 @@ public class LogConsumerClient {
 		else {
 
 			final byte[] resLogfiles = response.getContent();
-			final String res = new String(resLogfiles,getCharsetContent());
+			final String res = new String(resLogfiles, getCharsetContent());
 			result.append(res);
 
 			final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 			final JsonArrayBuilder data = Json.createArrayBuilder();
 			data.add(Json.createObjectBuilder()
-				.add("Code",response.statusCode) //$NON-NLS-1$
+				.add("Code", response.statusCode) //$NON-NLS-1$
 				.add("Message", getSendErrorMessage(result.toString()))); //$NON-NLS-1$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 			try(final JsonWriter jw = Json.createWriter(result);){
@@ -265,14 +267,15 @@ public class LogConsumerClient {
 	 * @param filename
 	 * @return Cadena de bytes con formato JSON. En caso de exito por ejemplo:{"LogInfo":[{"Charset":"UTF-8","Levels":"INFORMACI&Oacute;N,ADVERTENCIA,GRAVE","Date":"true","Time":"true","DateTimeFormat":"MMM dd, yyyy hh:mm:ss a"}]}
 	 * En caso de error:{"Error":[{"Code":204,"Message":"No se ha podido abrir el fichero: filename"}]}
+	 *@throws IOException Cuando no se pueda conectar con el servicio.
 	 */
-	public byte[] openFile(final String filename) throws IOException{
+	public byte[] openFile(final String filename) throws IOException {
 		final StringWriter result = new StringWriter();
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.OPEN_FILE.ordinal()).append("&fname=").append(filename); //$NON-NLS-1$ //$NON-NLS-2$
 		HttpResponse response;
 		response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
-		if(response.statusCode == 200) {
+		if (response.statusCode == 200) {
 			try(final JsonReader reader = Json.createReader(new ByteArrayInputStream(response.getContent()));){
 				final JsonObject openFileReponse = reader.readObject();
 				reader.close();
@@ -373,7 +376,8 @@ public class LogConsumerClient {
 
 	/**
 	 *Funci&oacute;n que obtiene el final del fichero correspondiente al n&uaute;mero de l&iaute;neas indicadas por par&aacute;metro
-	 * @param numLines ,filename
+	 * @param numLines
+	 * @param filename
 	 * @return
 	 */
 	public  byte[] getLogTail(final int numLines, final String filename) {
@@ -492,6 +496,14 @@ public class LogConsumerClient {
 		return null;
 	}
 
+	/**
+	 * @param numLines
+	 * @param startDate
+	 * @param endDate
+	 * @param level
+	 * @param reset
+	 * @return
+	 */
 	public byte[] getLogFiltered(final int numLines, final long startDate, final long endDate, final String level, final boolean reset) {
 
 		final StringWriter result = new StringWriter();
@@ -551,7 +563,13 @@ public class LogConsumerClient {
 		return null;
 	}
 
-	@SuppressWarnings("resource")
+	/**
+	 * @param numLines
+	 * @param text
+	 * @param startDate
+	 * @param reset
+	 * @return
+	 */
 	public byte[] searchText(final int numLines, final String text, final String startDate, final boolean reset) {
 		final StringWriter result = new StringWriter();
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -582,8 +600,10 @@ public class LogConsumerClient {
 			    jw.close();
 			}
 			else {
+				// Los mensaje de error son enviados directamente por el servidor, asi que no dependen
+				// de la codificacion del fichero que se procesa. Siempre se usara UTF-8.
 				final byte[] resSearch = response.getContent();
-				final String res = new String(resSearch,getCharsetContent());
+				final String res = new String(resSearch, StandardCharsets.UTF_8);
 				resultSearch.append(res);
 				data.add(Json.createObjectBuilder()
 						.add("Code",response.statusCode) //$NON-NLS-1$
@@ -611,6 +631,12 @@ public class LogConsumerClient {
 		return null;
 	}
 
+	/**
+	 * @param fileName
+	 * @param reset
+	 * @param pathDownloadTemp
+	 * @return
+	 */
 	public byte[] download(final String fileName, final boolean reset, final String pathDownloadTemp ) {
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
@@ -680,6 +706,9 @@ public class LogConsumerClient {
 		return null;
 	}
 
+	/**
+	 * @return
+	 */
 	public final Charset getCharsetContent() {
 		return this.charsetContent;
 	}
@@ -694,16 +723,19 @@ public class LogConsumerClient {
 	 * @return
 	 */
 	private static String getSendErrorMessage(final String errorPage) {
-		final int beginIndex = errorPage.indexOf("<b>Message</b>") + "<b>Message</b>".length(); //$NON-NLS-1$ //$NON-NLS-2$
-		final int endIndex = errorPage.indexOf("</p>", beginIndex); //$NON-NLS-1$
-		String result = "Error en la operaci&oacute;n"; //$NON-NLS-1$
-		try {
-			result = errorPage.substring(beginIndex, endIndex);
-		}
-		catch (final IndexOutOfBoundsException e) {
-			return result;
-		}
-		return result;
+		LOGGER.info(" ==== PAGINA DE ERROR:\n" + errorPage);
+//		final int beginIndex = errorPage.indexOf("<b>Message</b>") + "<b>Message</b>".length(); //$NON-NLS-1$ //$NON-NLS-2$
+//		final int endIndex = errorPage.indexOf("</p>", beginIndex); //$NON-NLS-1$
+//		String result;
+//		try {
+//			result = errorPage.substring(beginIndex, endIndex);
+//		}
+//		catch (final IndexOutOfBoundsException e) {
+//			result = "Error en la operaci&oacute;n"; //$NON-NLS-1$
+//		}
+//		return result;
+
+		return errorPage;
 	}
 
 

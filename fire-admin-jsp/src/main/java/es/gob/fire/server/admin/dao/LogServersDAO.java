@@ -31,16 +31,16 @@ import es.gob.fire.server.admin.entity.LogServer;
 public class LogServersDAO {
 
 	/**Lista todos los registros de la tabla tb_servidores_log, Consulta : SELECT id_servidor, nombre, url_servicio_log, clave FROM tb_servidores_log*/
-	private static final String STMT_ALL_SERVER = "SELECT id_servidor, nombre, url_servicio_log, clave FROM tb_servidores_log"; //$NON-NLS-1$
+	private static final String STMT_ALL_SERVER = "SELECT id_servidor, nombre, url_servicio_log FROM tb_servidores_log"; //$NON-NLS-1$
 
 	/**Obtiene un registro de la tabla tb_servidores_log por id_servidor, Consulta: SELECT id_servidor, nombre, url_servicio_log, clave FROM tb_servidores_log WHERE id_servidor = ?*/
-	private static final String STMT_SERVER_BYID = "SELECT id_servidor, nombre, url_servicio_log, clave FROM tb_servidores_log WHERE id_servidor = ?"; //$NON-NLS-1$
+	private static final String STMT_SERVER_BYID = "SELECT id_servidor, nombre, url_servicio_log, clave, verificar_ssl FROM tb_servidores_log WHERE id_servidor = ?"; //$NON-NLS-1$
 
 	/**Instrucci&oacute;n de Inserci&oacute;n : INSERT INTO tb_servidores_log (nombre, url_servicio_log,clave) VALUES(?,?,?)*/
-	private static final String STMT_INSERT_SERVER = "INSERT INTO tb_servidores_log (nombre, url_servicio_log,clave) VALUES(?,?,?)"; //$NON-NLS-1$
+	private static final String STMT_INSERT_SERVER = "INSERT INTO tb_servidores_log (nombre, url_servicio_log,clave,verificar_ssl) VALUES(?,?,?,?)"; //$NON-NLS-1$
 
 	/**Instrucci&oacute;n de Actualizaci&oacute;n : UPDATE tb_servidores_log SET nombre=?, url_servicio_log = ?, clave = ?  WHERE id_servidor = ?)*/
-	private static final String STMT_UPDATE_SERVER = "UPDATE tb_servidores_log SET nombre=?, url_servicio_log = ?, clave = ?  WHERE id_servidor = ?"; //$NON-NLS-1$
+	private static final String STMT_UPDATE_SERVER = "UPDATE tb_servidores_log SET nombre=?, url_servicio_log = ?, clave = ?, verificar_ssl = ?  WHERE id_servidor = ?"; //$NON-NLS-1$
 
 	/**Instrucci&oacute;n de eliminaci&oacute;n: DELETE FROM tb_servidores_log WHERE id_servidor=?*/
 	private static final String STMT_DELETE_SERVER = "DELETE FROM tb_servidores_log WHERE id_servidor = ?"; //$NON-NLS-1$
@@ -64,7 +64,6 @@ public class LogServersDAO {
 					.add("id_servidor", rs.getInt(1)) //$NON-NLS-1$
 					.add("nombre", rs.getString(2)) //$NON-NLS-1$
 					.add("url_servicio_log", rs.getString(3)) //$NON-NLS-1$
-					//.add("clave", rs.getString(4)) //$NON-NLS-1$
 					);
 		}
 		rs.close();
@@ -98,6 +97,7 @@ public class LogServersDAO {
 			result.setNombre(rs.getString(2));
 			result.setUrl(rs.getString(3));
 			result.setClave(rs.getString(4));
+			result.setVerificarSsl(rs.getBoolean(5));
 		}
 		rs.close();
 		st.close();
@@ -105,22 +105,25 @@ public class LogServersDAO {
 
 	}
 
-
-
 	/**
-	 *Agrega un nuevo servidor de log.
-	 * @param nombre nombre significativo del servidor.
-	 * @param url_servicio url completa del servicio proporcionado por el servidor de gestion de logs.
-	 * @throws SQLException
-	 * @throws GeneralSecurityException
+	 * Agrega un nuevo servidor de log.
+	 * @param nombre Nombre descriptivo del servidor.
+	 * @param url_servicio URL completa del servicio proporcionado por el servidor de gestion de logs.
+	 * @param clave Clave para la validaci&oacute;n de la conexi&oacute;n.
+	 * @param verificarSsl Indica si se debe verificar el certificado SSL del servidor.
+	 * @return Devuelve 0 si no se pudo dar de alta el servidor y un valor mayor a 0 si s&iacute;
+	 * se pudo.
+	 * @throws SQLException Cuando ocurre algun error durante la sensaci&oacute;n.
+	 * @throws GeneralSecurityException Cuando ocurri&oacute; un problema de permisos.
 	 */
-	public static int createLogServer(final String nombre, final String url_servicio, final String clave)  throws SQLException, GeneralSecurityException {
+	public static int createLogServer(final String nombre, final String url_servicio, final String clave, final boolean verificarSsl)  throws SQLException, GeneralSecurityException {
 
 		final PreparedStatement st = DbManager.prepareStatement(STMT_INSERT_SERVER);
 
 		st.setString(1, nombre);
 		st.setString(2, url_servicio);
 		st.setString(3, clave);
+		st.setBoolean(4, verificarSsl);
 
 		LOGGER.info("Damos de alta el servidor '" + nombre + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		final int result = st.executeUpdate();
@@ -134,15 +137,21 @@ public class LogServersDAO {
 	 * @param id
 	 * @param nombre
 	 * @param url
+	 * @param clave Clave para el acceso al servidor.
+	 * @param verificarSsl Indica si se debe verificar el certificado SSL del servidor.
+	 * @return Devuelve 0 si no se pudo actualizar el servidor y un valor mayor a 0 si s&iacute;
+	 * se pudo.
 	 * @throws SQLException
 	 */
-	public static int updateLogServer (final String id, final String nombre, final String url,final String clave) throws SQLException{
+	public static int updateLogServer (final String id, final String nombre, final String url,
+			final String clave, final boolean verificarSsl) throws SQLException{
 		final PreparedStatement st = DbManager.prepareStatement(STMT_UPDATE_SERVER);
 
 		st.setString(1, nombre);
 		st.setString(2, url);
 		st.setString(3, clave);
-		st.setString(4, id);
+		st.setBoolean(4, verificarSsl);
+		st.setString(5, id);
 
 		LOGGER.info("Actualizamos el servidor '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
 		final int result = st.executeUpdate();
@@ -153,6 +162,8 @@ public class LogServersDAO {
 	/**
 	 * Elimina un servidor de la tabla tb_servidores_log
 	 * @param id
+	 * @return Devuelve 0 si no se pudo eliminar el servidor y un valor mayor a 0 si s&iacute;
+	 * se pudo.
 	 * @throws SQLException
 	 */
 	public static int removeServer(final String id) throws SQLException {

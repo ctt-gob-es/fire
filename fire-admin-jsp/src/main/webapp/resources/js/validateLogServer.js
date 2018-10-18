@@ -74,7 +74,8 @@ function comprobarServidorLog(){
 	$( "#urlStatus" ).show();
 
 	var url = $("#url").val();
-	$.post( "../LogAdminService?op=0&url="+url, function( data ) {
+	var verifySsl = $("#verifyssl").prop('checked') ? "true" : "false";
+	$.post( "../LogAdminService?op=0&url="+url+"&verifyssl="+verifySsl, function( data ) {
 		  var JSONData = JSON.parse(data);
 		  if(JSONData.hasOwnProperty('Error')){
 			  $( "#NoOkIcon" ).show();

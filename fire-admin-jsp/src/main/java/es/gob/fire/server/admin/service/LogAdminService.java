@@ -68,15 +68,6 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
-		// Cargamos el cliente para la consulta de logs
-		if(session.getAttribute(ServiceParams.SESSION_ATTR_LOG_CLIENT) == null) {
-			LOGGER.warning("No se encontro el cliente log en la sesion"); //$NON-NLS-1$
-			response.sendRedirect("Login.jsp?login=fail"); //$NON-NLS-1$
-			return;
-		}
-
-		final LogConsumerClient logClient = (LogConsumerClient) session.getAttribute(ServiceParams.SESSION_ATTR_LOG_CLIENT);
-
 		// Cargamos los parametros de la peticion
 		Parameters params;
 		try {
@@ -99,7 +90,7 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
-		//Comprobamos que el c&oacute;digo de operaci&oacute;n sea correcto
+		// Comprobamos que el c&oacute;digo de operaci&oacute;n sea correcto
 		ServiceOperations op;
 		try {
 			op = checkOperation(opString);
@@ -112,10 +103,19 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
-		// Comprobamos que se haya iniciado la conexion con el servidor
-		if(!op.equals(ServiceOperations.ECHO)) {
-			LOGGER.warning("No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
-			final String jsonError = buildJsonError("No se ha indicado conexion con el servidor de log en sesion", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+		// Si es una peticion real y no una comprobacion, cargamos el cliente para la consulta de logs
+		LogConsumerClient logClient = null;
+		if (op.equals(ServiceOperations.ECHO)) {
+			logClient = new LogConsumerClient();
+			logClient.setDisableSslChecks(!params.isVerifySsl());
+		}
+		else {
+			logClient = (LogConsumerClient) session.getAttribute(ServiceParams.SESSION_ATTR_LOG_CLIENT);
+		}
+
+		if (logClient == null) {
+			LOGGER.warning("No se pudo recuperar el cliente para el acceso a los logs"); //$NON-NLS-1$
+			final String jsonError = buildJsonError("No se pudo recuperar el cliente para el acceso a los logs", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
 			session.setAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON, jsonError);
 			response.sendRedirect(getSelectionResultUrl(request, false));
 			return;
@@ -125,7 +125,8 @@ public class LogAdminService extends HttpServlet {
 		String result;
 		switch (op) {
 		case ECHO:
-			result = echo(params.getUrl());
+			LOGGER.info("Solicitud entrante de comprobacion de servidor"); //$NON-NLS-1$
+			result = echo(logClient, params.getUrl());
 			response.getWriter().write(result);
 			break;
 
@@ -177,15 +178,17 @@ public class LogAdminService extends HttpServlet {
 			final byte[] datOpenFiles = logClient.openFile(params.getLogFileName());
 
 			if (datOpenFiles != null && datOpenFiles.length > 0) {
+
 				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datOpenFiles));
 				final JsonObject jsonObj = reader.readObject();
 				reader.close();
 
 				if (jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
 					final JsonArray jsonError = jsonObj.getJsonArray("Error"); //$NON-NLS-1$
-					response.sendRedirect(request.getContextPath().toString().concat("/LogAdminService?op=3")//$NON-NLS-1$
-							.concat("&").concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(params.getNameSrv())//$NON-NLS-1$ //$NON-NLS-2$
-							.concat("&").concat(ServiceParams.PARAM_MSG).concat("=").concat(jsonError.getJsonObject(0).getString("Message"))//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					response.sendRedirect(request.getContextPath() +
+							"/LogAdminService?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+							"&" + ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv() + //$NON-NLS-1$ //$NON-NLS-2$
+							"&" + ServiceParams.PARAM_MSG + "=" + jsonError.getJsonObject(0).getString("Message")//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							);
 					return;
 				}
@@ -193,8 +196,9 @@ public class LogAdminService extends HttpServlet {
 				session.setAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO, datOpenFiles);
 
 				if (!params.isReset()) {
-					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsManager.jsp?").concat(ServiceParams.PARAM_NAMESRV).concat("=")//$NON-NLS-1$ //$NON-NLS-2$
-						 .concat(params.getNameSrv()).concat("&").concat(ServiceParams.PARAM_FILENAME).concat("=").concat(params.getLogFileName()));  //$NON-NLS-1$//$NON-NLS-2$
+					response.sendRedirect(request.getContextPath() + "/Logs/LogsManager.jsp?" + //$NON-NLS-1$
+						ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv() + //$NON-NLS-1$
+						 "&" + ServiceParams.PARAM_FILENAME + "=" + params.getLogFileName());  //$NON-NLS-1$//$NON-NLS-2$
 					return;
 				}
 
@@ -424,11 +428,12 @@ public class LogAdminService extends HttpServlet {
 	 * Funci&oacute;n que obtiene la respuesta del servidor si hay comunicaci&oacute;n a trav&eacute;s
 	 * del api devolviendo un String con formato JSON, tanto si la comunicaci&oacute;n ha sido correcta
 	 * como si ha habido un error.
+	 * @param lclient Cliente para el acceso al servidor de logs.
 	 * @param url
 	 * @return
 	 */
-	protected final static String echo(final String url) {
-		final LogConsumerClient lclient = new LogConsumerClient();
+	protected final static String echo(final LogConsumerClient lclient, final String url) {
+
 		String result;
 		try {
 			result = lclient.echo(url);
@@ -482,6 +487,8 @@ public class LogAdminService extends HttpServlet {
 					!request.getParameter(ServiceParams.PARAM_URL).isEmpty()) {
 				params.setUrl(request.getParameter(ServiceParams.PARAM_URL));
 			}
+			params.setVerifySsl(Boolean.parseBoolean(request.getParameter(ServiceParams.PARAM_VERIFY_SSL)));
+
 			if(request.getParameter(ServiceParams.PARAM_NAMESRV) != null &&
 					!request.getParameter(ServiceParams.PARAM_NAMESRV).isEmpty()) {
 				params.setNameSrv(request.getParameter(ServiceParams.PARAM_NAMESRV));
@@ -530,6 +537,7 @@ public class LogAdminService extends HttpServlet {
 
 	static class Parameters {
 		private String url = "";//$NON-NLS-1$
+		private boolean verifySsl = true;
 		private String nameSrv = "";//$NON-NLS-1$
 		private String logFileName = "";//$NON-NLS-1$
 		private int numlines = 0;
@@ -546,6 +554,12 @@ public class LogAdminService extends HttpServlet {
 		}
 		public void setUrl(final String url) {
 			this.url = url;
+		}
+		public boolean isVerifySsl() {
+			return this.verifySsl;
+		}
+		public void setVerifySsl(final boolean verifySsl) {
+			this.verifySsl = verifySsl;
 		}
 		public String getNameSrv() {
 			return this.nameSrv;

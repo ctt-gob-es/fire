@@ -8,6 +8,8 @@ public class ServiceParams {
 
 	public static final String PARAM_URL = "url"; //$NON-NLS-1$
 
+	public static final String PARAM_VERIFY_SSL = "verifyssl";
+
 	public static final String PARAM_FILENAME = "fname";//$NON-NLS-1$
 
 	public static final String PARAM_NLINES = "nlines";//$NON-NLS-1$
@@ -53,9 +55,10 @@ public class ServiceParams {
 	/** Atributo de sesi&oacute;n para el guardado del objeto de consulta de logs. */
 	public static final String SESSION_ATTR_LOG_CLIENT = "LOG_CLIENT"; //$NON-NLS-1$
 
-	/** Atributo de sesi&oacute;n para el guardado del objeto de consulta de logs. */
+	/** Atributo de sesi&oacute;n para el guardado del valor bandera que indica que el usuario
+	 * completo correctamente la autenticaci&oacute;n. */
 	public static final String SESSION_ATTR_INITIALIZED = "initializedSession"; //$NON-NLS-1$
 
-	/** Atributo de sesi&oacute;n para el guardado del objeto de consulta de logs. */
+	/** Atributo de sesi&oacute;n para el guardado del nombre de usuario logueado. */
 	public static final String SESSION_ATTR_USER = "user"; //$NON-NLS-1$
 }
