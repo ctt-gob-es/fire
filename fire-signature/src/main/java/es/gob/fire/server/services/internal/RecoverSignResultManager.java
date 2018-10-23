@@ -103,7 +103,7 @@ public class RecoverSignResultManager {
         	return;
         }
         // Se registra resultado de operacion firma
-        SIGNLOGGER.log(session, false, null);
+        SIGNLOGGER.log(session, true, null);
         TRANSLOGGER.log(session, true);
         // Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
         SessionCollector.removeSession(session);

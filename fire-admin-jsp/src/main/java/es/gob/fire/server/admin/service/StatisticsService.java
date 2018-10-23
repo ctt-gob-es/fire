@@ -2,6 +2,7 @@ package es.gob.fire.server.admin.service;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -236,11 +237,8 @@ public class StatisticsService extends HttpServlet {
 				return;
 		}
 
-		if (result != null) {
-			response.getWriter().write(result);
-		}
 
-
+		response.getOutputStream().write(result.getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**

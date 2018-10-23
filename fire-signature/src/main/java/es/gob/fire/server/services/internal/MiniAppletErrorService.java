@@ -10,7 +10,6 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -72,17 +71,17 @@ public class MiniAppletErrorService extends HttpServlet {
     	}
     	else {
 
-    		if(op.getId()== 1) {
-    			SIGNLOGGER.log(session, false, null);
-    		}
-    		else {
-    			 final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
-    				final Iterator<String> it = batchResult.iterator();
-    				while (it.hasNext()) {
-    					final String docId = it.next();
-    					SIGNLOGGER.log(session, false, docId);
-    				}
-    		}
+//    		if(op.getId()== 1) {
+//    			SIGNLOGGER.log(session, false, null);
+//    		}
+//    		else {
+//    			 final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
+//    				final Iterator<String> it = batchResult.iterator();
+//    				while (it.hasNext()) {
+//    					final String docId = it.next();
+//    					SIGNLOGGER.log(session, false, docId);
+//    				}
+//    		}
         	ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, true, errorMessage);
         	errorUrl = connConfig.getRedirectErrorUrl();
     	}

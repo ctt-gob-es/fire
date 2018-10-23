@@ -18,7 +18,9 @@ import java.util.logging.Logger;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.server.services.statistics.SignatureLogger;
 import es.gob.fire.services.statistics.FireSignLogger;
+import es.gob.fire.signature.ConfigManager;
 
 /**
  * Hilo que ejecuta la carga, actualizaci&oacute;n y guardado de una firma de lote
@@ -28,6 +30,7 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
 
 	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 //	private static final Logger LOGGER = Logger.getLogger(ClienteAFirmaUpdateSignaturesThread.class.getName());
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 
 	private final String appId;
 
@@ -99,6 +102,7 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
         }
         catch (final Exception e) {
         	LOGGER.log(Level.WARNING, "Error en la actualizacion de la firma", e); //$NON-NLS-1$
+        	SIGNLOGGER.log(this.defaultConfig, false, this.docId);
         	this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
         	setFailed(true);
         	interrupt();

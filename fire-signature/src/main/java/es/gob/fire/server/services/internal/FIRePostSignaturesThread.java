@@ -262,9 +262,6 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     		return;
     	}
 
-    	//Se registra firma correcta.
-    	//SIGNLOGGER.log(this.sesion, true);
-
 
     	// Registrar en el listado de resultados el de la operacion
     	this.batchResult.setSuccessResult(this.docId);

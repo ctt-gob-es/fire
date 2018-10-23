@@ -340,7 +340,8 @@ public class FireStatistics {
 				f = new File(getLogPath().concat(File.separator).concat(fileName)).getCanonicalFile();
 				if(f.exists()) {
 					final BufferedReader br = new BufferedReader(new FileReader(f));
-					while (br.readLine()!= null) {
+					String registry;
+					while ((registry = br.readLine()) != null && !registry.isEmpty()) {
 						totalReg ++;
 					}
 					br.close();
@@ -382,17 +383,22 @@ public class FireStatistics {
 				String registry;
 				if(fileName.contains(FILE_SIGN)) {
 					while ((registry = br.readLine()) != null) {
-						final SignatureCube sign =  SignatureCube.parse(registry);
-						if(sign != null) {
-							regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
+						if(!registry.isEmpty()) {
+							final SignatureCube sign =  SignatureCube.parse(registry);
+							if(sign != null) {
+								regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
+							}
 						}
+
 					}
 				}
 				else if(fileName.contains(FILE_TRANS)) {
 					while ((registry = br.readLine()) != null) {
-						final TransactionCube trans =  TransactionCube.parse(registry);
-						if(trans != null) {
-							regInserted = regInserted +  TransactionsDAO.insertTransaction(trans);
+						if(!registry.isEmpty()) {
+							final TransactionCube trans =  TransactionCube.parse(registry);
+							if(trans != null) {
+								regInserted = regInserted +  TransactionsDAO.insertTransaction(trans);
+							}
 						}
 					}
 				}
@@ -400,14 +406,14 @@ public class FireStatistics {
 			}
 		}
 
-		if(regInserted == totalReg) {
+//		if(regInserted == totalReg) {
 			DbManager.runCommit();
 			result = formater.format(new Date()).concat(";1"); //$NON-NLS-1$
-		}
-		else {
-			DbManager.runRollBack();
-			result = formater.format(new Date()).concat(";0"); //$NON-NLS-1$
-		}
+//		}
+//		else {
+//			DbManager.runRollBack();
+//			result = formater.format(new Date()).concat(";0"); //$NON-NLS-1$
+//		}
 
 		return result;
 	}

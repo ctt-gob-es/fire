@@ -27,6 +27,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
+import es.gob.fire.client.ClientConfigFilesNotFoundException;
 import es.gob.fire.client.SignOperationResult;
 
 /**
@@ -141,10 +142,16 @@ public class SignatureService extends HttpServlet {
 					Base64.encode(data, true),
 					confProperties);
 
-		} catch (final Exception e) {
+		}
+		catch(final ClientConfigFilesNotFoundException e ) {
+			LOGGER.log(Level.SEVERE, "Error durante la operacion de firma: " + e, e); //$NON-NLS-1$
+	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$));
+	    	return;
+		}
+		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,
 					"Error durante la operacion de firma: " + e, e); //$NON-NLS-1$
-	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$));
+	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.toString(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$));
 	    	return;
 		}
 

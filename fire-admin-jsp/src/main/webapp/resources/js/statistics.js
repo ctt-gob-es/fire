@@ -90,7 +90,7 @@ $(document).ready(function(){
 			e.preventDefault();
 			$('label[for=start_date]').css({color:'red'});
 			$('#start_date').css({backgroundColor:'#fcc'});
-			msg = msg + "Debe introducir una Fecha, (mes y año)\n";
+			msg = msg + "Debe introducir un Mes, (mes / año)\n";
 			ok = false;
 		}
 														
@@ -103,8 +103,8 @@ $(document).ready(function(){
 			    query = $form.find( "select[name='select_query']" ).val(),
 			    date = $form.find( "input[name='start_date']" ).val(),
 			    url = $form.attr( "action" );
-			
-			var posting = $.post( url, {select_query : query , start_date : date});			
+			var contentType =  "application/json; charset=utf-8"; 			
+			var posting = $.post( url,{select_query : query , start_date : date},contentType);			
 			posting.done(function( data ) { 
 			
 				//Se recorren los campos de consulta y fecha para colocarlos en blanco ya que la consulta es correcta
@@ -149,22 +149,25 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Transacciones finalizadas por cada aplicación a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Transacciones finalizadas por cada aplicación para el Mes '+ $("#start_date").val()+ '.';
 						fileNamePDF = "TransacionesPorAplicacion.pdf";
 						fileNameExcel = "TransacionesPorAplicacion.xlsx";
 						fileNameCSV =  "TransacionesPorAplicacion.csv";
 											
 						/****** GRAFICAS *********/	
 						
-						ordenarAsc(obJson.TransByApp, 'CORRECTAS');
-						var oJSONGood = obJson;
-						ordenarAsc(obJson.TransByApp, 'INCORRECTAS');
-						var oJSONBad = obJson;
+												
+						var oJSONGood = JSON.parse(JSON.stringify(obJson));
+						var oJSONBad = JSON.parse(JSON.stringify(obJson));
 						
-						chartLabelsGood = oJSONGood.TransByApp.map(function(e){return e.NOMBRE});
-						chartLabelsBad = oJSONBad.TransByApp.map(function(e){return e.NOMBRE});
+						ordenarDesc(oJSONGood.TransByApp, 'CORRECTAS');											
+						ordenarDesc(oJSONBad.TransByApp, 'INCORRECTAS');
 						
-						if(chartLabelsGood.length <= 9){
+						
+						if(oJSONGood.TransByApp.length <= 9){
+							
+							chartLabelsGood = oJSONGood.TransByApp.map(function(e){return e.NOMBRE});
+							chartLabelsBad = oJSONBad.TransByApp.map(function(e){return e.NOMBRE});
 							
 							chartDataGood = oJSONGood.TransByApp.map(function(e){return e.CORRECTAS});							
 							chartDataBad = oJSONBad.TransByApp.map(function(e){return e.INCORRECTAS});
@@ -172,15 +175,17 @@ $(document).ready(function(){
 						else{
 							var sumOthersGood = 0;
 							var sumOthersBad = 0;
-							for(i = 0; i < chartLabelsGood.length; i++){
+							for(i = 0; i < oJSONGood.TransByApp.length; i++){
 								if(i < 9){
+									chartLabelsGood[i] = oJSONGood.TransByApp[i].NOMBRE;
+									chartLabelsBad[i] = oJSONBad.TransByApp[i].NOMBRE;
+									
 									chartDataGood[i] = oJSONGood.TransByApp[i].CORRECTAS;
 									chartDataBad[i] = oJSONBad.TransByApp[i].INCORRECTAS;
 								}
 								else{
 									sumOthersGood += Number(oJSONGood.TransByApp[i].CORRECTAS);
 									sumOthersBad += Number(oJSONBad.TransByApp[i].INCORRECTAS);
-									chartLabels.splice(i,1);
 								}
 							}							
 							chartDataGood[9] = sumOthersGood;
@@ -225,7 +230,7 @@ $(document).ready(function(){
 						numReg = obJson.TransByApp.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "TransByAppRows";
-						captionSt = "Transacciones finalizadas por cada aplicaci&oacute;n a "+ $("#start_date").val()+ ".";
+						captionSt = "Transacciones finalizadas por cada aplicaci&oacute;n para el Mes "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.TransByApp.length; i++) {
@@ -246,7 +251,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -259,22 +264,25 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Transacciones finalizadas por cada origen de certificados/proveedor a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Transacciones finalizadas por cada origen de certificados/proveedor para el Mes '+ $("#start_date").val()+ '.';
 						fileNamePDF = "TransacionesPorProveedor.pdf";
 						fileNameExcel = "TransacionesPorProveedor.xlsx";
 						fileNameCSV =  "TransacionesPorProveedor.csv";
 											
 						/****** GRAFICAS *********/	
 						
-						ordenarAsc(obJson.TransByProv, 'CORRECTAS');
-						var oJSONGood = obJson;
-						ordenarAsc(obJson.TransByProv, 'INCORRECTAS');
-						var oJSONBad = obJson;
 						
-						chartLabelsGood = oJSONGood.TransByProv.map(function(e){return e.NOMBRE});
-						chartLabelsBad = oJSONBad.TransByProv.map(function(e){return e.NOMBRE});
+						var oJSONGood = JSON.parse(JSON.stringify(obJson));
+						var oJSONBad = JSON.parse(JSON.stringify(obJson));
 						
-						if(chartLabelsGood.length <= 9){
+						ordenarDesc(oJSONGood.TransByProv, 'CORRECTAS');											
+						ordenarDesc(oJSONBad.TransByProv, 'INCORRECTAS');
+						
+																	
+						if(oJSONGood.TransByProv.length <= 9){
+							
+							chartLabelsGood = oJSONGood.TransByProv.map(function(e){return e.NOMBRE});
+							chartLabelsBad = oJSONBad.TransByProv.map(function(e){return e.NOMBRE});
 							
 							chartDataGood = oJSONGood.TransByProv.map(function(e){return e.CORRECTAS});							
 							chartDataBad = oJSONBad.TransByProv.map(function(e){return e.INCORRECTAS});
@@ -291,7 +299,6 @@ $(document).ready(function(){
 								else{
 									sumOthersGood += Number(oJSONGood.TransByProv[i].CORRECTAS);
 									sumOthersBad += Number(oJSONBad.TransByProv[i].INCORRECTAS);
-									chartLabels.splice(i,1);
 								}
 							}							
 							chartDataGood[9] = sumOthersGood;
@@ -335,7 +342,7 @@ $(document).ready(function(){
 						numReg = obJson.TransByProv.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "TransByProvRows";
-						captionSt = "Transacciones finalizadas  por cada origen de certificados/proveedor a "+ $("#start_date").val()+ ".";
+						captionSt = "Transacciones finalizadas  por cada origen de certificados/proveedor para el Mes "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.TransByProv.length; i++) {
@@ -357,7 +364,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -370,29 +377,31 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Transacciones según el tamaño de los datos de cada aplicación a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Transacciones según el tamaño de los datos de cada aplicación para el Mes '+ $("#start_date").val()+ '.';
 						fileNamePDF = "TamañoTransacionesPorAplicacion.pdf";
 						fileNameExcel = "TamañoTransacionesPorAplicacion.xlsx";
 						fileNameCSV =  "TamañoTransacionesPorAplicacion.csv";
 											
 						/****** GRAFICAS *********/	
+						var oJSONGood = JSON.parse(JSON.stringify(obJson));
+						ordenarDesc(oJSONGood.TransByDocSize, 'MB');
+									
 						
-						ordenarAsc(obJson.TransByDocSize, 'Kbytes');
-						var oJSONGood = obJson;					
-						chartLabelsGood = oJSONGood.TransByDocSize.map(function(e){return e.NOMBRE});
 						
-						if(chartLabelsGood.length <= 9){						
-							chartDataGood = oJSONGood.TransByDocSize.map(function(e){return e.Kbytes});							
+						if(oJSONGood.TransByDocSize.length <= 9){	
+							chartLabelsGood = oJSONGood.TransByDocSize.map(function(e){return e.NOMBRE});
+							chartDataGood = oJSONGood.TransByDocSize.map(function(e){return e.MB});							
 						}
 						else{
 							var sumOthersGood = 0;
-							for(i = 0; i < chartLabelsGood.length; i++){
+							for(i = 0; i < oJSONGood.TransByDocSize.length; i++){
 								if(i < 9){
-									chartDataGood[i] = oJSONGood.TransByDocSize[i].Kbytes;
+									chartLabelsGood[i] = oJSONGood.TransByDocSize[i].NOMBRE;
+									chartDataGood[i] = oJSONGood.TransByDocSize[i].MB;
 								}
 								else{
-									sumOthersGood += Number(oJSONGood.TransByDocSize[i].Kbytes);
-									chartLabels.splice(i,1);
+									sumOthersGood += Number(oJSONGood.TransByDocSize[i].MB);
+
 								}
 							}							
 							chartDataGood[9] = sumOthersGood;
@@ -428,11 +437,11 @@ $(document).ready(function(){
 						numReg = obJson.TransByDocSize.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "TransByDocSizeRows";
-						captionSt = "Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n a "+ $("#start_date").val()+ ".";
+						captionSt = "Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n para el Mes "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.TransByDocSize.length; i++) {												
-							totGood += Number(obJson.TransByDocSize[i].Kbytes);													
+							totGood += Number(obJson.TransByDocSize[i].MB);													
 							if (i != obJson.TransByDocSize.length -1){							
 								dataJSON += JSON.stringify(obJson.TransByDocSize[i]).trim() + ",";
 							}
@@ -441,13 +450,13 @@ $(document).ready(function(){
 						    }							
 						}
 						sumTotal = totGood;
-						userData =',"userdata":{"NOMBRE":"Total", "Kbytes":"'+sumTotal+'"}}';
+						userData =',"userdata":{"NOMBRE":"Total", "MB":"'+(sumTotal).toFixed(2)+'"}}';
 						dataJSON = dataJSON + userData;
 								
-						columnNames = ['Nombre', 'Kbytes'];
+						columnNames = ['Nombre', 'MB'];
 						columnModel =[
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
-					        { name: 'Kbytes',index:'Kbytes', width: '300', align: 'right',sortable: true, search:false } 				        
+					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
+					        { name: 'MB',index:'MB', width: '300', align: 'right',sortable: true, search:false } 				        
 					        ];		
 						
 						printTableData(columnNames,columnModel,dataJSON,rootSt,captionSt,null);	
@@ -455,7 +464,7 @@ $(document).ready(function(){
 						/************/
 						
 						break;
-					case 4:		//Transacciones realizadas seg&uacute;n el tipo de transacci&oacute;n (simple o lote)
+					case 4:		//Transacciones realizadas según el tipo de transacción (simple o lote)
 						
 						var chartLabelsGoodSimple = new Array("");
 						var chartLabelsBadSimple = new Array("");
@@ -476,78 +485,112 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Transacciones realizadas según el tipo de transacción (Simple o lote) a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Transacciones realizadas según el tipo de transacción (Simple o lote) para el Mes '+ $("#start_date").val()+ '.';
 						fileNamePDF = "TransacionesPorOperacion.pdf";
 						fileNameExcel = "TransacionesPorOperacion.xlsx";
 						fileNameCSV =  "TransacionesPorOperacion.csv";
 											
 						/****** GRAFICAS *********/	
 						
-						ordenarAsc(obJson.TransByOperation, 'FirmasSimplesCorrectas');
-						var oJSONGoodSimple = obJson;
-						ordenarAsc(obJson.TransByOperation, 'FirmasSimplesINCorrectas');
-						var oJSONBadSimple = obJson;
-						ordenarAsc(obJson.TransByOperation, 'FirmasLotesCorrectas');
-						var oJSONGoodBatch = obJson;
-						ordenarAsc(obJson.TransByOperation, 'FirmasLotesINCorrectas');
-						var oJSONBadBatch = obJson;
-																	
-						chartLabelsGoodSimple = oJSONGoodSimple.TransByOperation.map(function(e){return e.NOMBRE});
-						chartLabelsBadSimple = oJSONBadSimple.TransByOperation.map(function(e){return e.NOMBRE});
+						var oJSONGoodSimple = JSON.parse(JSON.stringify(obJson));
+						ordenarDesc(oJSONGoodSimple.TransByOperation, 'FirmasSimplesCorrectas');
 						
-						chartLabelsGoodBatch = oJSONGoodBatch.TransByOperation.map(function(e){return e.NOMBRE});
-						chartLabelsBadBatch = oJSONBadBatch.TransByOperation.map(function(e){return e.NOMBRE});
+						var oJSONBadSimple = JSON.parse(JSON.stringify(obJson));
+						ordenarDesc(oJSONBadSimple.TransByOperation, 'FirmasSimplesINCorrectas');
 						
-						if(chartLabelsGoodSimple.length <= 9){
-							
-							chartDataGoodSimple = oJSONGoodSimple.TransByOperation.map(function(e){return e.FirmasSimplesCorrectas});							
-							chartDataBadSimple = oJSONBadSimple.TransByOperation.map(function(e){return e.FirmasSimplesINCorrectas});
-							
-							chartDataGoodBatch = oJSONGoodBatch.TransByOperation.map(function(e){return e.FirmasLotesCorrectas});							
-							chartDataBadBatch = oJSONBadBatch.TransByOperation.map(function(e){return e.FirmasLotesINCorrectas});
-
+						var oJSONGoodBatch =  JSON.parse(JSON.stringify(obJson));
+						ordenarDesc(oJSONGoodBatch.TransByOperation, 'FirmasLotesCorrectas');
+						
+						var oJSONBadBatch = JSON.parse(JSON.stringify(obJson));
+						ordenarDesc(oJSONBadBatch.TransByOperation, 'FirmasLotesINCorrectas');
+																								
+						//Tratamiento operaciones Simples Correctas.
+						if(oJSONGoodSimple.TransByOperation.length <= 9){							
+							chartLabelsGoodSimple = oJSONGoodSimple.TransByOperation.map(function(e){return e.NOMBRE});													
+							chartDataGoodSimple = oJSONGoodSimple.TransByOperation.map(function(e){return e.FirmasSimplesCorrectas});													
 						}
-						else{
-							var sumOthersGoodSimple = 0;
-							var sumOthersBadSimple = 0;
-							var sumOthersGoodBatch = 0;
-							var sumOthersBadBatch = 0;
-							
-							for(i = 0; i < chartLabelsGoodSimple.length; i++){
-								if(i < 9){
-									chartDataGoodSimple[i] = oJSONGoodSimple.TransByOperation[i].FirmasSimplesCorrectas;
-									chartDataBadSimple[i] = oJSONBadSimple.TransByOperation[i].FirmasSimplesINCorrectas;
-									
-									chartDataGoodBatch[i] = oJSONGoodBatch.TransByOperation[i].FirmasLotesCorrectas;
-									chartDataBadBatch[i] = oJSONBadBatch.TransByOperation[i].FirmasLotesINCorrectas;
+						else{							
+							var sumOthersGoodSimple = 0;											
+							for(i = 0; i < oJSONGoodSimple.TransByOperation.length; i++){
+								if(i < 9){									
+									chartLabelsGoodSimple[i] = oJSONGoodSimple.TransByOperation[i].NOMBRE;																		
+									chartDataGoodSimple[i] = oJSONGoodSimple.TransByOperation[i].FirmasSimplesCorrectas;									
 								}
-								else{
-									sumOthersGoodSimple += Number(oJSONGoodSimple.TransByOperation[i].FirmasSimplesCorrectas);
-									sumOthersBadSimple += Number(oJSONBadSimple.TransByOperation[i].FirmasSimplesINCorrectas);
-									
-									sumOthersGoodBatch += Number(oJSONGoodBatch.TransByOperation[i].FirmasLotesCorrectas);
-									sumOthersBadBatch += Number(oJSONBadBatch.TransByOperation[i].FirmasLotesINCorrectas);
-									chartLabels.splice(i,1);
+								else{									
+									sumOthersGoodSimple += Number(oJSONGoodSimple.TransByOperation[i].FirmasSimplesCorrectas);																		
 								}
 							}							
-							chartDataGood[9] = sumOthersGoodSimple;
-							chartDataBad[9] = sumOthersBadSimple;
-							chartDataGood[9] = sumOthersGoodBatch;
-							chartDataBad[9] = sumOthersBadBatch;
+							chartDataGood[9] = sumOthersGoodSimple;						
+							chartDataGoodSimple.splice(9,0,"OTRAS");							
+						}
 							
-							chartDataGoodSimple.splice(9,0,"OTRAS");
-							chartLabelsBadSimple.splice(9,0,"OTRAS");
-							
-							chartLabelsGoodBatch.splice(9,0,"OTRAS");
-							chartDataBadBatch.splice(9,0,"OTRAS");
+						//Tratamiento operaciones Simples Incorrectas.
+						if(oJSONBadSimple.TransByOperation.length <= 9){							
+							chartLabelsBadSimple = oJSONBadSimple.TransByOperation.map(function(e){return e.NOMBRE});														
+							chartDataBadSimple = oJSONBadSimple.TransByOperation.map(function(e){return e.FirmasSimplesINCorrectas});
+
+						}
+						else{							
+							var sumOthersBadSimple = 0;							
+							for(i = 0; i < oJSONBadSimple.TransByOperation.length; i++){
+								if(i < 9){									
+									chartLabelsBadSimple[i] = oJSONBadSimple.TransByOperation[i].NOMBRE;
+									chartDataBadSimple[i] = oJSONBadSimple.TransByOperation[i].FirmasSimplesINCorrectas;
+								}
+								else{
+									sumOthersBadSimple += Number(oJSONBadSimple.TransByOperation[i].FirmasSimplesINCorrectas);									
+								}
+							}
+							chartDataBad[9] = sumOthersBadSimple;							
+							chartLabelsBadSimple.splice(9,0,"OTRAS");							
 						}
 												
+						//Tratamiento operaciones Lote Correctas
+						if(oJSONGoodBatch.TransByOperation.length <= 9){																			
+							chartLabelsGoodBatch = oJSONGoodBatch.TransByOperation.map(function(e){return e.NOMBRE});																					
+							chartDataGoodBatch = oJSONGoodBatch.TransByOperation.map(function(e){return e.FirmasLotesCorrectas});													
+						}
+						else{
+							var sumOthersGoodBatch = 0;							
+							for(i = 0; i < oJSONGoodBatch.TransByOperation.length; i++){
+								if(i < 9){							
+									chartLabelsGoodBatch[i] = oJSONGoodBatch.TransByOperation[i].NOMBRE;																	
+									chartDataGoodBatch[i] = oJSONGoodBatch.TransByOperation[i].FirmasLotesCorrectas;									
+								}
+								else{									
+									sumOthersGoodBatch += Number(oJSONGoodBatch.TransByOperation[i].FirmasLotesCorrectas);
+								}
+							}							
+							chartDataGood[9] = sumOthersGoodBatch;							
+							chartLabelsGoodBatch.splice(9,0,"OTRAS");
+						}
+						
+						//Tratamiento operaciones Lote Incorrectas
+						if(oJSONBadBatch.TransByOperation.length <= 9){																										
+							chartLabelsBadBatch = oJSONBadBatch.TransByOperation.map(function(e){return e.NOMBRE});																										
+							chartDataBadBatch = oJSONBadBatch.TransByOperation.map(function(e){return e.FirmasLotesINCorrectas});
+						}
+						else{
+							var sumOthersBadBatch = 0;						
+							for(i = 0; i < oJSONBadBatch.TransByOperation.length; i++){
+								if(i < 9){																
+									chartLabelsBadBatch[i] = oJSONBadBatch.TransByOperation[i].NOMBRE;																		
+									chartDataBadBatch[i] = oJSONBadBatch.TransByOperation[i].FirmasLotesINCorrectas;
+								}
+								else{																		
+									sumOthersBadBatch += Number(oJSONBadBatch.TransByOperation[i].FirmasLotesINCorrectas);
+								}
+							}							
+							chartDataBad[9] = sumOthersBadBatch;
+							chartDataBadBatch.splice(9,0,"OTRAS");
+						}
+						
 						var backGroundGood = [""];
 						var backGroundBad = [""];
 					
 						//Obtenemos los colores a mostrar por aplicación 
 						// hasta um maximo de 10 colores correspondiendo el último al grupo de "OTRAS" ( Aplicaciones )
-						for(i = 0; i < chartLabelsGoodSimple.length; i++){
+						for(i = 0; i < oJSONGoodBatch.TransByOperation.length; i++){
 							if(i <= 9){
 								backGroundGood[i]=goodColors[i];
 								backGroundBad[i]=badColors[i];
@@ -583,7 +626,7 @@ $(document).ready(function(){
 						numReg = obJson.TransByOperation.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "TransByOperationRows";
-						captionSt = "Transacciones finalizadas por cada operaci&oacute;n (simple o lote) a "+ $("#start_date").val()+ ".";
+						captionSt = "Transacciones finalizadas por cada operaci&oacute;n (simple o lote) para el Mes "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.TransByOperation.length; i++) {
@@ -630,39 +673,41 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Documentos firmados por cada aplicación a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Documentos firmados por cada aplicación para el Mes '+ $("#start_date").val()+ '.';
 						fileNamePDF = "DocFirmadosPorAplicacion.pdf";
 						fileNameExcel = "DocFirmadosPorAplicacion.xlsx";
 						fileNameCSV =  "DocFirmadosPorAplicacion.csv";
 											
 						/****** GRAFICAS *********/	
+																
+						var oJSONGood = JSON.parse(JSON.stringify(obJson));
+						var oJSONBad = JSON.parse(JSON.stringify(obJson));
 						
-						ordenarAsc(obJson.SignByApp, 'CORRECTAS');
-						var oJSONGood = obJson;
-						ordenarAsc(obJson.SignByApp, 'INCORRECTAS');
-						var oJSONBad = obJson;
-						
-						chartLabelsGood = oJSONGood.SignByApp.map(function(e){return e.NOMBRE});
-						chartLabelsBad = oJSONBad.SignByApp.map(function(e){return e.NOMBRE});
-						
-						if(chartLabelsGood.length <= 9){
+						ordenarDesc(oJSONGood.SignByApp, 'CORRECTAS');											
+						ordenarDesc(oJSONBad.SignByApp, 'INCORRECTAS');
+																					
+						if(oJSONGood.SignByApp.length <= 9){
+							
+							chartLabelsGood = oJSONGood.SignByApp.map(function(e){return e.NOMBRE});
+							chartLabelsBad = oJSONBad.SignByApp.map(function(e){return e.NOMBRE});
 							
 							chartDataGood = oJSONGood.SignByApp.map(function(e){return e.CORRECTAS});							
 							chartDataBad = oJSONBad.SignByApp.map(function(e){return e.INCORRECTAS});
-
 						}
 						else{
 							var sumOthersGood = 0;
 							var sumOthersBad = 0;
-							for(i = 0; i < chartLabelsGood.length; i++){
-								if(i < 9){
+							for(i = 0; i < oJSONGood.SignByApp.length; i++){
+								if(i < 9){								
+									chartLabelsGood[i] = oJSONGood.SignByApp[i].NOMBRE;
+									chartLabelsBad[i] = oJSONBad.SignByApp[i].NOMBRE;
+									
 									chartDataGood[i] = oJSONGood.SignByApp[i].CORRECTAS;
 									chartDataBad[i] = oJSONBad.SignByApp[i].INCORRECTAS;
 								}
 								else{
 									sumOthersGood += Number(oJSONGood.SignByApp[i].CORRECTAS);
 									sumOthersBad += Number(oJSONBad.SignByApp[i].INCORRECTAS);
-									chartLabels.splice(i,1);
 								}
 							}							
 							chartDataGood[9] = sumOthersGood;
@@ -676,7 +721,7 @@ $(document).ready(function(){
 					
 						//Obtenemos los colores a mostrar por aplicación 
 						// hasta um maximo de 10 colores correspondiendo el último al grupo de "OTRAS" ( Aplicaciones )
-						for(i = 0; i < chartLabelsGood.length; i++){
+						for(i = 0; i < oJSONGood.SignByApp.length; i++){
 							if(i <= 9){
 								backGroundGood[i]=goodColors[i];
 								backGroundBad[i]=badColors[i];
@@ -689,8 +734,8 @@ $(document).ready(function(){
 						/**Dibujar las graficas**/
 						
 						var sLabel = "Firmas";
-						var textGood = 'Firmas finalizadas correctas por aplicación';
-						var textBad = 'Firmas finalizadas incorrectas por aplicación';										
+						var textGood = 'Firmas correctas por aplicación';
+						var textBad = 'Firmas incorrectas por aplicación';										
 																
 						var idCanvasGood = "chartGood";
 						var idCanvasBad = "chartBad";
@@ -707,7 +752,7 @@ $(document).ready(function(){
 						numReg = obJson.SignByApp.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "SignByAppRows";
-						captionSt = "Firmas finalizadas por cada aplicaci&oacute;n a "+ $("#start_date").val()+ ".";
+						captionSt = "Firmas finalizadas por cada aplicaci&oacute;n para el Mes "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.SignByApp.length; i++) {
@@ -728,7 +773,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -741,22 +786,24 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Documentos firmados por cada origen de certificados/proveedor a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Documentos firmados por cada origen de certificados/proveedor para el Mes '+ $("#start_date").val()+ '.';
 						fileNamePDF = "DocFirmadosPorProveedor.pdf";
 						fileNameExcel = "DocFirmadosPorProveedor.xlsx";
 						fileNameCSV =  "DocFirmadosPorProveedor.csv";
 											
 						/****** GRAFICAS *********/	
 						
-						ordenarAsc(obJson.SignByProv, 'CORRECTAS');
-						var oJSONGood = obJson;
-						ordenarAsc(obJson.SignByProv, 'INCORRECTAS');
-						var oJSONBad = obJson;
+						var oJSONGood = JSON.parse(JSON.stringify(obJson));
+						var oJSONBad = JSON.parse(JSON.stringify(obJson));
 						
-						chartLabelsGood = oJSONGood.SignByProv.map(function(e){return e.NOMBRE});
-						chartLabelsBad = oJSONBad.SignByProv.map(function(e){return e.NOMBRE});
+						ordenarDesc(oJSONGood.SignByProv, 'CORRECTAS');											
+						ordenarDesc(oJSONBad.SignByProv, 'INCORRECTAS');
+												
+
 						
 						if(chartLabelsGood.length <= 9){
+							chartLabelsGood = oJSONGood.SignByProv.map(function(e){return e.NOMBRE});
+							chartLabelsBad = oJSONBad.SignByProv.map(function(e){return e.NOMBRE});
 							
 							chartDataGood = oJSONGood.SignByProv.map(function(e){return e.CORRECTAS});							
 							chartDataBad = oJSONBad.SignByProv.map(function(e){return e.INCORRECTAS});
@@ -767,13 +814,15 @@ $(document).ready(function(){
 							var sumOthersBad = 0;
 							for(i = 0; i < chartLabelsGood.length; i++){
 								if(i < 9){
+									chartLabelsGood[i] = oJSONGood.SignByProv[i].NOMBRE;
+									chartLabelsBad[i] = oJSONBad.SignByProv[i].NOMBRE;
+									
 									chartDataGood[i] = oJSONGood.SignByProv[i].CORRECTAS;
 									chartDataBad[i] = oJSONBad.SignByProv[i].INCORRECTAS;
 								}
 								else{
 									sumOthersGood += Number(oJSONGood.SignByProv[i].CORRECTAS);
 									sumOthersBad += Number(oJSONBad.SignByProv[i].INCORRECTAS);
-									chartLabels.splice(i,1);
 								}
 							}							
 							chartDataGood[9] = sumOthersGood;
@@ -800,8 +849,8 @@ $(document).ready(function(){
 						/**Dibujar las graficas**/
 						
 						var sLabel = "Firmas";
-						var textGood = 'Firmas finalizadas correctas por proveedor';
-						var textBad = 'Firmas finalizadas incorrectas por proveedor';										
+						var textGood = 'Firmas correctas por proveedor';
+						var textBad = 'Firmas incorrectas por proveedor';										
 																
 						var idCanvasGood = "chartGood";
 						var idCanvasBad = "chartBad";
@@ -818,7 +867,7 @@ $(document).ready(function(){
 						numReg = obJson.SignByProv.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "SignByProvRows";
-						captionSt = 'Firmas finalizadas por cada proveedor a '+ $("#start_date").val()+ '.';
+						captionSt = 'Firmas finalizadas por cada proveedor para el Mes '+ $("#start_date").val()+ '.';
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.SignByProv.length; i++) {
@@ -839,7 +888,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -852,22 +901,23 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Documentos firmados en cada formato de firma a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Documentos firmados en cada formato de firma para el Mes '+ $("#start_date").val()+ '.';
 						fileNamePDF = "DocFirmadosPorFormato.pdf";
 						fileNameExcel = "DocFirmadosPorFormato.xlsx";
 						fileNameCSV =  "DocFirmadosPorFormato.csv";
 											
 						/****** GRAFICAS *********/	
 						
-						ordenarAsc(obJson.SignByFormat, 'CORRECTAS');
-						var oJSONGood = obJson;
-						ordenarAsc(obJson.SignByFormat, 'INCORRECTAS');
-						var oJSONBad = obJson;
+						var oJSONGood = JSON.parse(JSON.stringify(obJson));
+						var oJSONBad = JSON.parse(JSON.stringify(obJson));
 						
-						chartLabelsGood = oJSONGood.SignByFormat.map(function(e){return e.NOMBRE});
-						chartLabelsBad = oJSONBad.SignByFormat.map(function(e){return e.NOMBRE});
+						ordenarDesc(oJSONGood.SignByFormat, 'CORRECTAS');											
+						ordenarDesc(oJSONBad.SignByFormat, 'INCORRECTAS');
+											
 						
-						if(chartLabelsGood.length <= 9){
+						if(obJson.SignByFormat.length <= 9){
+							chartLabelsGood = oJSONGood.SignByFormat.map(function(e){return e.NOMBRE});
+							chartLabelsBad = oJSONBad.SignByFormat.map(function(e){return e.NOMBRE});
 							
 							chartDataGood = oJSONGood.SignByFormat.map(function(e){return e.CORRECTAS});							
 							chartDataBad = oJSONBad.SignByFormat.map(function(e){return e.INCORRECTAS});
@@ -876,7 +926,7 @@ $(document).ready(function(){
 						else{
 							var sumOthersGood = 0;
 							var sumOthersBad = 0;
-							for(i = 0; i < chartLabelsGood.length; i++){
+							for(i = 0; i < obJson.SignByFormat.length; i++){
 								if(i < 9){
 									chartDataGood[i] = oJSONGood.SignByFormat[i].CORRECTAS;
 									chartDataBad[i] = oJSONBad.SignByFormat[i].INCORRECTAS;
@@ -884,7 +934,6 @@ $(document).ready(function(){
 								else{
 									sumOthersGood += Number(oJSONGood.SignByFormat[i].CORRECTAS);
 									sumOthersBad += Number(oJSONBad.SignByFormat[i].INCORRECTAS);
-									chartLabels.splice(i,1);
 								}
 							}							
 							chartDataGood[9] = sumOthersGood;
@@ -898,7 +947,7 @@ $(document).ready(function(){
 					
 						//Obtenemos los colores a mostrar por aplicación 
 						// hasta um maximo de 10 colores correspondiendo el último al grupo de "OTRAS" ( Aplicaciones )
-						for(i = 0; i < chartLabelsGood.length; i++){
+						for(i = 0; i < obJson.SignByFormat.length; i++){
 							if(i <= 9){
 								backGroundGood[i]=goodColors[i];
 								backGroundBad[i]=badColors[i];
@@ -911,8 +960,8 @@ $(document).ready(function(){
 						/**Dibujar las graficas**/
 						
 						var sLabel = "Firmas";
-						var textGood = 'Firmas finalizadas correctas por formato';
-						var textBad = 'Firmas finalizadas incorrectas por formato';										
+						var textGood = 'Firmas correctas por formato';
+						var textBad = 'Firmas incorrectas por formato';										
 																
 						var idCanvasGood = "chartGood";
 						var idCanvasBad = "chartBad";
@@ -929,7 +978,7 @@ $(document).ready(function(){
 						numReg = obJson.SignByFormat.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "SignByFormatRows";
-						captionSt = 'Firmas finalizadas por cada formato a '+ $("#start_date").val()+ '.';
+						captionSt = 'Firmas finalizadas por cada formato para el Mes '+ $("#start_date").val()+ '.';
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.SignByFormat.length; i++) {
@@ -950,7 +999,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'left',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -963,23 +1012,24 @@ $(document).ready(function(){
 						
 						/******* INFORMES *********/
 						titlePDF = "Informe de Estadísticas de Fire";
-						descriptionPDF = 'Documentos firmados en cada formato longevo a '+ $("#start_date").val()+ '.';
+						descriptionPDF = 'Documentos firmados en cada formato longevo para el Mes '+ $("#start_date").val()+ '.';
 						fileNamePDF = "DocFirmadosPorFormatoLongevo.pdf";
 						fileNameExcel = "DocFirmadosPorFormatoLongevo.xlsx";
 						fileNameCSV =  "DocFirmadosPorFormatoLongevo.csv";
 											
 						/****** GRAFICAS *********/	
 						
-						ordenarAsc(obJson.SignByLongLiveFormat, 'CORRECTAS');
-						var oJSONGood = obJson;
-						ordenarAsc(obJson.SignByLongLiveFormat, 'INCORRECTAS');
-						var oJSONBad = obJson;
+						var oJSONGood = JSON.parse(JSON.stringify(obJson));
+						var oJSONBad = JSON.parse(JSON.stringify(obJson));
 						
-						chartLabelsGood = oJSONGood.SignByLongLiveFormat.map(function(e){return e.NOMBRE});
-						chartLabelsBad = oJSONBad.SignByLongLiveFormat.map(function(e){return e.NOMBRE});
+						ordenarDesc(oJSONGood.SignByLongLiveFormat, 'CORRECTAS');											
+						ordenarDesc(oJSONBad.SignByLongLiveFormat, 'INCORRECTAS');					
 						
-						if(chartLabelsGood.length <= 9){
-							
+
+						
+						if(oJSONGood.SignByLongLiveFormat.length <= 9){
+							chartLabelsGood = oJSONGood.SignByLongLiveFormat.map(function(e){return e.NOMBRE});
+							chartLabelsBad = oJSONBad.SignByLongLiveFormat.map(function(e){return e.NOMBRE});
 							chartDataGood = oJSONGood.SignByLongLiveFormat.map(function(e){return e.CORRECTAS});							
 							chartDataBad = oJSONBad.SignByLongLiveFormat.map(function(e){return e.INCORRECTAS});
 
@@ -987,15 +1037,17 @@ $(document).ready(function(){
 						else{
 							var sumOthersGood = 0;
 							var sumOthersBad = 0;
-							for(i = 0; i < chartLabelsGood.length; i++){
+							for(i = 0; i < oJSONGood.SignByLongLiveFormat.length; i++){
 								if(i < 9){
+									chartLabelsGood[i] = oJSONGood.SignByLongLiveFormat[i].NOMBRE;
+									chartLabelsBad[i] = oJSONBad.SignByLongLiveFormat[i].NOMBRE;
+									
 									chartDataGood[i] = oJSONGood.SignByLongLiveFormat[i].CORRECTAS;
 									chartDataBad[i] = oJSONBad.SignByLongLiveFormat[i].INCORRECTAS;
 								}
 								else{
 									sumOthersGood += Number(oJSONGood.SignByLongLiveFormat[i].CORRECTAS);
 									sumOthersBad += Number(oJSONBad.SignByLongLiveFormat[i].INCORRECTAS);
-									chartLabels.splice(i,1);
 								}
 							}							
 							chartDataGood[9] = sumOthersGood;
@@ -1009,7 +1061,7 @@ $(document).ready(function(){
 					
 						//Obtenemos los colores a mostrar por aplicación 
 						// hasta um maximo de 10 colores correspondiendo el último al grupo de "OTRAS" ( Aplicaciones )
-						for(i = 0; i < chartLabelsGood.length; i++){
+						for(i = 0; i < oJSONGood.SignByLongLiveFormat.length; i++){
 							if(i <= 9){
 								backGroundGood[i]=goodColors[i];
 								backGroundBad[i]=badColors[i];
@@ -1040,7 +1092,7 @@ $(document).ready(function(){
 						numReg = obJson.SignByLongLiveFormat.length;		
 						total =  Math.ceil(numReg / 10);
 						rootSt = "SignByLongLiveFormatRows";
-						captionSt = 'Firmas finalizadas por cada formato longevo a '+ $("#start_date").val()+ '.';
+						captionSt = 'Firmas finalizadas por cada formato longevo para el Mes '+ $("#start_date").val()+ '.';
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
 												
 						for (i = 0; i < obJson.SignByLongLiveFormat.length; i++) {
@@ -1061,7 +1113,7 @@ $(document).ready(function(){
 								
 						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
 						columnModel =[				    	 	
-					        { name: 'NOMBRE',index:'NOMBRE', width: '200', align: 'center',sortable: true , search:false}, 
+					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'center',sortable: true , search:false}, 
 					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
@@ -1259,7 +1311,7 @@ $(document).ready(function(){
 		    });
 		    
 		$("#resultQuery").jqGrid('navGrid', '#page',
-		        { add: false, edit: false, del: false, search: false, refresh: true }, {}, {}, {},
+		        { add: false, edit: false, del: false, search: false, refresh: false }, {}, {}, {},
 		        { multipleSearch: false, multipleGroup: false });
 		
 		if(group != null){

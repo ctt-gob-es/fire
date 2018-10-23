@@ -1,6 +1,7 @@
 package es.gob.fire.services.statistics.dao;
 
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,8 +27,8 @@ public class TransactionsDAO {
 	/**Transacciones finalizadas correctamente/ incorrectamente por cada aplicaci&oacute;n(Filtrado por a&ntilde;o y mes)*/
 	private static final String TRANSACTIONS_BYAPP = "SELECT  t.id_aplicacion AS ID_APP, " +  //$NON-NLS-1$
 			" a.nombre AS NOMBRE_APP," + //$NON-NLS-1$
-			" SUM(CASE When t.correcta = 'false' then 1 end) AS INCORRECTAS, " + //$NON-NLS-1$
-			" SUM(CASE When t.correcta = 'true' then 1 end) AS CORRECTAS " + //$NON-NLS-1$
+			" SUM(CASE When t.correcta = 'false' then 1 else 0 end) AS INCORRECTAS, " + //$NON-NLS-1$
+			" SUM(CASE When t.correcta = 'true' then 1 else 0 end) AS CORRECTAS " + //$NON-NLS-1$
 			" FROM tb_transacciones t, tb_aplicaciones a " + //$NON-NLS-1$
 			" WHERE t.id_aplicacion = a.id " + //$NON-NLS-1$
 			" AND year(t.fecha) = ? " + //$NON-NLS-1$
@@ -35,8 +36,8 @@ public class TransactionsDAO {
 			" GROUP BY ID_APP";//$NON-NLS-1$
 	/**Transacciones finalizadas correctamente/ incorrectamente por cada origen de certificados/proveedor. (Filtrado por a&ntilde;o y mes)*/
 	private static final String TRANSACTIONS_BYPROVIDER = "SELECT p.nombre AS PROVEEDOR," +//$NON-NLS-1$
-		    " SUM(CASE When t.correcta = 'false' then 1 end) AS INCORRECTAS," +//$NON-NLS-1$
-			" SUM(CASE When t.correcta = 'true' then 1 end) AS CORRECTAS "	+    //$NON-NLS-1$
+		    " SUM(CASE When t.correcta = 'false' then 1 else 0 end) AS INCORRECTAS," +//$NON-NLS-1$
+			" SUM(CASE When t.correcta = 'true' then 1 else 0 end) AS CORRECTAS "	+    //$NON-NLS-1$
 			" FROM tb_transacciones t,  tb_proveedores p " +//$NON-NLS-1$
 			" WHERE t.id_proveedor = p.id_proveedor " + //$NON-NLS-1$
 			" AND year(t.fecha) = ? "+//$NON-NLS-1$
@@ -96,8 +97,10 @@ public class TransactionsDAO {
 	 * @throws SQLException
 	 * @throws DBConnectionException
 	 * @throws ConfigFilesException
+	 * @throws UnsupportedEncodingException
+	 * @throws NumberFormatException
 	 */
-	public static String getTransactionsByAppJSON(final int year, final int month) throws SQLException, DBConnectionException, ConfigFilesException{
+	public static String getTransactionsByAppJSON(final int year, final int month) throws SQLException, DBConnectionException, ConfigFilesException, NumberFormatException, UnsupportedEncodingException{
 
 		final StringWriter writer = new StringWriter();
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
@@ -123,7 +126,7 @@ public class TransactionsDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para la consulta 'Transacciones finalizadas correctamente/ incorrectamente por cada aplicaci&oacute;n' a fecha: " + String.valueOf(month) +"/" + String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.add("Message","No existen registros para la consulta 'Transacciones finalizadas correctamente/ incorrectamente por cada aplicaci&oacute;n' para el Mes: " + String.valueOf(month) +"/" + String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 
@@ -182,7 +185,7 @@ public class TransactionsDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros la consulta 'Transacciones finalizadas correctamente/ incorrectamente por cada origen de certificados/proveedor' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+"."));    //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+					.add("Message","No existen registros la consulta 'Transacciones finalizadas correctamente/ incorrectamente por cada origen de certificados/proveedor' para el Mes: " + String.valueOf(month) +"/"+ String.valueOf(year)+"."));    //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
@@ -227,7 +230,7 @@ public class TransactionsDAO {
 			while (rs.next()) {
 				data.add(Json.createObjectBuilder()
 						.add("NOMBRE", rs.getString(3)) //$NON-NLS-1$
-						.add("Kbytes", String.valueOf(Math.round(Double.parseDouble(rs.getString(1))))) //$NON-NLS-1$
+						.add("MB", String.valueOf( Math.round( Double.parseDouble(rs.getString(1))/1024 * 100.0) / 100.0 )) //$NON-NLS-1$
 						);
 			}
 			jsonObj.add("TransByDocSize", data); //$NON-NLS-1$
@@ -236,7 +239,7 @@ public class TransactionsDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para la consulta 'Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.add("Message","No existen registros para la consulta 'Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n' para el Mes: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
@@ -295,7 +298,7 @@ public class TransactionsDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para la consulta 'Transacciones realizadas seg&uacute;n el tipo de transacci&oacute;n (simple o lote)' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.add("Message","No existen registros para la consulta 'Transacciones realizadas seg&uacute;n el tipo de transacci&oacute;n (simple o lote)' para el Mes: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();

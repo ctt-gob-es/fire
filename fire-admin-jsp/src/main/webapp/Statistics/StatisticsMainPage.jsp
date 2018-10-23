@@ -62,8 +62,7 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
 			<form id ="formStatictics" name="formStatictics" method="post" action="../StatisticsService" >
 				<div id="selectedQuery" style="display:inline-block;">		 
 				 	<label for = "select_query" >* Consulta:</label>
-					<select id = "select_query" name = "select_query">	
-						<option value = "0" selected></option>			    		
+					<select id = "select_query" name = "select_query">							    		
 					    <option value = "1">Transacciones finalizadas por cada aplicaci&oacute;n</option>
 					    <option value = "2">Transacciones finalizadas  por cada origen de certificados/proveedor.</option>
 					    <option value = "3">Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n</option>
@@ -75,14 +74,14 @@ if (state == null || !Boolean.parseBoolean((String) state)) {
 					</select>																	      						      					 				
 				</div>
 				<div style="display: inline-block; padding-left:1em;">
-						<label for="start_date" >* Fecha:</label>
+						<label for="start_date" >* Mes:</label>
 	    				<input name="start_date" id="start_date" class="date-picker" size="5em" />
 				</div>
 				<div style = "display: inline-block; padding-left:1em;">
-					<button id="accept-button"  name="accept-button"  title="Ejecuta la consulta indicada en los campos de Consulta y Fecha" type="submit"><span class="ui-icon ui-icon-play"></span>Aceptar</button>
+					<button id="accept-button"  name="accept-button"  title="Ejecuta la consulta indicada en los campos de Consulta y Mes" type="submit"><span class="ui-icon ui-icon-play"></span>Aceptar</button>
 				</div>	
 				<div style = "display: inline-block; padding-left:0.5em;">
-					<button id="clear-button"   name="clear-button"  title="Borra el contenido de los campos de Consulta y Fecha" type="reset" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>	
+					<button id="clear-button"   name="clear-button"  title="Borra el contenido de los campos de Consulta y Mes" type="reset" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>	
 				</div >
 				<div id ="actionButtons"  style = "display: inline-block; padding-left:0.5em;">
 					<label> Exportar :</label>

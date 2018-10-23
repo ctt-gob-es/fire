@@ -128,7 +128,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			return;
 		} catch (final ServletException e) {
 			LOGGER.warning("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina."); //$NON-NLS-1$
-//			SIGNLOGGER.log(session, false);
+
 			response.sendRedirect(FirePages.PG_MINI_APPLET+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
@@ -193,14 +193,14 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch(final FIReConnectorFactoryException e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
-//			SIGNLOGGER.log(session, false);
+
 			ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
 			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
 		catch(final FIReCertificateException e) {
 			LOGGER.log(Level.SEVERE, "No se ha podido recuperar los certificados del usuario " + subjectId + ": " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
-//			SIGNLOGGER.log(session, false);
+
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -212,7 +212,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch(final FIReConnectorNetworkException e) {
 			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
-//			SIGNLOGGER.log(session, false);
+
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE_NETWORK, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);

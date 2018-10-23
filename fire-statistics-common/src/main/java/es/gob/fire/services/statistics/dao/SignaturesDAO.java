@@ -164,7 +164,7 @@ public class SignaturesDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para la consulta 'Documentos firmados por cada origen de certificados/proveedor' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.add("Message","No existen registros para la consulta 'Documentos firmados por cada origen de certificados/proveedor' para el Mes: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
@@ -219,7 +219,7 @@ public class SignaturesDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para la consulta 'Documentos firmados correctamente / incorrectamente por cada aplicaci&oacute;n' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.add("Message","No existen registros para la consulta 'Documentos firmados correctamente / incorrectamente por cada aplicaci&oacute;n' para el Mes: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
@@ -273,7 +273,7 @@ public class SignaturesDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para la consulta 'Documentos firmados en cada formato de firma' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.add("Message","No existen registros para la consulta 'Documentos firmados en cada formato de firma' para el Mes: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
@@ -325,7 +325,7 @@ public class SignaturesDAO {
 			//No tiene registros
 			data.add(Json.createObjectBuilder()
 					.add("Code", 204) //$NON-NLS-1$
-					.add("Message","No existen registros para la consulta 'Documentos que utilizan cada formato de firma longevo' a fecha: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.add("Message","No existen registros para la consulta 'Documentos que utilizan cada formato de firma longevo' para el Mes: " + String.valueOf(month) +"/"+ String.valueOf(year)+".")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			jsonObj.add("Error", data); //$NON-NLS-1$
 		}
 		rs.close();
