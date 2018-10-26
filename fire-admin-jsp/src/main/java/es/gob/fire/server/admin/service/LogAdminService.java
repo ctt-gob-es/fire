@@ -94,7 +94,7 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
-		//Comprobamos que el c&oacute;digo de operaci&oacute;n sea correcto
+		//Comprobamos que el código de operación sea correcto
 		ServiceOperations op;
 		try {
 			op = checkOperation(opString);
@@ -107,7 +107,7 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
-		//Comprobamos que se haya iniciado la conexi&oacute;n con el servidor
+		//Comprobamos que se haya iniciado la conexión con el servidor
 		if(!op.equals(ServiceOperations.ECHO) && this.logclient == null) {
 			LOGGER.warning("No se ha indicado conexion con el servidor de log en sesion"); //$NON-NLS-1$
 			final String jsonError = getJsonError("No se ha indicado conexion con el servidor de log en sesion", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
@@ -116,7 +116,7 @@ public class LogAdminService extends HttpServlet {
 			return;
 		}
 
-		// Selecionamos la operai&oacute;n a realizar respecto al c&oacute;digo recivido.
+		// Selecionamos la operaión a realizar respecto al código recivido.
 		switch (op) {
 		case ECHO:
 			result = echo(this.url);

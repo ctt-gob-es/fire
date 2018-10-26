@@ -63,7 +63,7 @@
             
         });
 	function confirmar(nombreSrv) { 
-		   if (confirm('¿Está seguro de eliminar el usuario '+nombreSrv+'?')) { 
+		   if (confirm('¿Está seguro de eliminar el servidor '+nombreSrv+'?')) { 
 		      document.tuformulario.submit();
 		      return true;
 		   }

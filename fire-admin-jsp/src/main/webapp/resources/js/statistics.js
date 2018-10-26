@@ -270,8 +270,7 @@ $(document).ready(function(){
 						fileNameCSV =  "TransacionesPorProveedor.csv";
 											
 						/****** GRAFICAS *********/	
-						
-						
+												
 						var oJSONGood = JSON.parse(JSON.stringify(obJson));
 						var oJSONBad = JSON.parse(JSON.stringify(obJson));
 						
@@ -453,7 +452,7 @@ $(document).ready(function(){
 						userData =',"userdata":{"NOMBRE":"Total", "MB":"'+(sumTotal).toFixed(2)+'"}}';
 						dataJSON = dataJSON + userData;
 								
-						columnNames = ['Nombre', 'MB'];
+						columnNames = ['Nombre', 'Megabyte'];
 						columnModel =[
 					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
 					        { name: 'MB',index:'MB', width: '300', align: 'right',sortable: true, search:false } 				        

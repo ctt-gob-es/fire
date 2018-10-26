@@ -120,7 +120,7 @@ public class LogServerService extends HttpServlet {
 					}
 					break;
 				case 4: // Eliminar
-
+					stringOp = "baja"; //$NON-NLS-1$
 					final int resultDML = LogServersDAO.removeServer(this.id_servidor);
 					if(resultDML > 0) {//Resultado correcto
 						isOk = true;

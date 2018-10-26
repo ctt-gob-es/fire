@@ -139,7 +139,7 @@ public class AplicationsDAO {
 	 */
 	public static List<Application> getApplications() throws SQLException {
 
-		final List<Application> result = new ArrayList<Application>();
+		final List<Application> result = new ArrayList<>();
 
 		/*"SELECT id, nombre, responsable, resp_correo, resp_telefono, fecha_alta, fk_certificado  FROM tb_aplicaciones ORDER BY nombre*/
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APPLICATIONS);
