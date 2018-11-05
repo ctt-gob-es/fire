@@ -26,7 +26,7 @@ public class LogDownloadServiceManager {
 		byte[] result = null;
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		final File dataFile = new File(pathLogs.concat("\\").concat(logFileName)); //$NON-NLS-1$
-		final HttpSession session = req.getSession(true);
+		final HttpSession session = req.getSession(false);
 		SeekableByteChannel channel = null;
 		LogDownload download = null;
 		try{

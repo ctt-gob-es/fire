@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +39,7 @@ public class LogService extends HttpServlet {
 
 	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		final HttpSession session = req.getSession(true);
+
 		final String opString = req.getParameter(ServiceParams.OPERATION);
 
 		if (opString == null) {
@@ -73,11 +74,11 @@ public class LogService extends HttpServlet {
 			if (!needLogin(op)) {
 				switch (op) {
 				case ECHO:
-					LOGGER.info("Solicitud entrando de comprobacion del servicio"); //$NON-NLS-1$
+					LOGGER.info("Solicitud entrante de comprobacion del servicio"); //$NON-NLS-1$
 					result = echo();
 					break;
 				case REQUEST_LOGIN:
-					LOGGER.info("Solicitud entrando de inicio de sesion"); //$NON-NLS-1$
+					LOGGER.info("Solicitud entrante de inicio de sesion"); //$NON-NLS-1$
 					result = requestLogin(req);
 					break;
 				case VALIDATE_LOGIN:
@@ -87,29 +88,25 @@ public class LogService extends HttpServlet {
 				default:
 					LOGGER.warning("Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
 					resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-					result = new String("Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio").getBytes(); //$NON-NLS-1$
 					return;
 				}
 			}
 			// Comprobamos si el usuario esta registrado
 			else if (checkLogin(req)) {
-
 				switch (op) {
 				case GET_LOG_FILES:
 					LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
 					result = getLogFiles(pathLogs);
 					if(result == null) {
 						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se han encontrado ficheros log en el servidor indicado"); //$NON-NLS-1$
-						result = new String("No se han encontrado ficheros log en el servidor indicado").getBytes(); //$NON-NLS-1$
 						return;
 					}
 					break;
 				case OPEN_FILE:
 					LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
-					result = openFile(req,resp);
+					result = openFile(req, resp);
 					if(result == null || result.length <= 0) {
 						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido abrir el fichero log indicado"); //$NON-NLS-1$
-						result = new String("No se ha podido abrir el fichero log indicado").getBytes(); //$NON-NLS-1$
 						return;
 					}
 					fileClosed = false;
@@ -119,25 +116,24 @@ public class LogService extends HttpServlet {
 					fileClosed = closeFile(req);
 					if(!fileClosed) {
 						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cerrar el fichero log"); //$NON-NLS-1$
-						result = new String("No se ha podido cerrar el fichero log").getBytes(); //$NON-NLS-1$
 						return;
 					}
 					break;
 				case TAIL:
 					LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
-					result = getLogTail(req,resp);
+					result = getLogTail(req);
 					break;
 				case GET_MORE:
 					LOGGER.info("Solicitud entrante de mas log"); //$NON-NLS-1$
-					result = getMoreLog(req, resp);
+					result = getMoreLog(req);
 					break;
 				case SEARCH_TEXT:
 					LOGGER.info("Solicitud entrante de busqueda de texto"); //$NON-NLS-1$
-					result = searchText(req,resp);
+					result = searchText(req, resp);
 					break;
 				case FILTER:
 					LOGGER.info("Solicitud entrante de filtrado de log"); //$NON-NLS-1$
-					result = getLogFiltered(req,resp);
+					result = getLogFiltered(req);
 					break;
 				case DOWNLOAD:
 					LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
@@ -146,42 +142,47 @@ public class LogService extends HttpServlet {
 				default:
 					LOGGER.warning("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
 					resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"Operacion no soportada. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
-					result = new String("Operacion no soportada. Este resultado refleja un problema en el codigo del servicio").getBytes(); //$NON-NLS-1$
 					return;
 				}
 			}
 			else {
 				LOGGER.warning("Operacion no soportada sin login previo"); //$NON-NLS-1$
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo"); //$NON-NLS-1$
-				result = new String("Operacion no soportada sin login previo").getBytes(); //$NON-NLS-1$
 				return;
 			}
 		}
+		catch (final NoResultException e) {
+			LOGGER.log(Level.INFO, "Se notifica al cliente que no se pudo obtener un resultado"); //$NON-NLS-1$
+			sendControlledError(resp, e.getLocalizedMessage());
+			return;
+		}
+		catch (final IllegalArgumentException e) {
+			removeDownloadSessions(req) ;
+			LOGGER.log(Level.WARNING, "Se envio una peticion con parametros no validos: " + e); //$NON-NLS-1$
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Se envio una peticion con parametros no validos"); //$NON-NLS-1$
+			return;
+		}
 		catch (final SessionException e) {
-			removeDownloadSessions(session) ;
+			removeDownloadSessions(req) ;
 			LOGGER.log(Level.WARNING,"Se solicito una operacion sin haber abierto sesion u ocurrio un error al abrirla",e); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Sesion no iniciada"); //$NON-NLS-1$
-			result = new String("Sesion no iniciada").getBytes(); //$NON-NLS-1$
 			return;
 		}
 		catch (final UnsupportedEncodingException e) {
-			result = new String("La codificación no es valida.").getBytes(); //$NON-NLS-1$
 			LOGGER.log(Level.SEVERE,"La codificación no es valida.",e); //$NON-NLS-1$
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "La codificación no es valida."); //$NON-NLS-1$
 			return;
 		}
 		catch (final IOException e) {
-			removeDownloadSessions(session) ;
+			removeDownloadSessions(req);
 			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
-			result = new String("Ocurrio un error al procesar la peticion").getBytes(); //$NON-NLS-1$
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion de tratamiento del fichero"); //$NON-NLS-1$
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion"); //$NON-NLS-1$
 			return;
 		}
 		catch (final Exception e) {
-			removeDownloadSessions(session) ;
-			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
-			result = new String("Ocurrio un error al procesar la peticion.").getBytes(); //$NON-NLS-1$
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error al procesar la peticion"); //$NON-NLS-1$
+			removeDownloadSessions(req) ;
+			LOGGER.log(Level.SEVERE, "Ocurrio un error desconocido al procesar la peticion", e); //$NON-NLS-1$
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ocurrio un error desconocido al procesar la peticion"); //$NON-NLS-1$
 			return;
 		}
 
@@ -298,10 +299,9 @@ public class LogService extends HttpServlet {
 	 * @throws IOException
 	 */
 	private static byte[] openFile(final HttpServletRequest req, final HttpServletResponse resp) throws SessionException, IOException {
-		final HttpSession session = req.getSession(true);
-		if (session == null) {
-			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
-		}
+
+		final HttpSession session = req.getSession(false);
+
 		final byte[] result = LogOpenServiceManager.process(req, resp);
 		if(LogOpenServiceManager.getLinfo()!=null) {
 			session.setAttribute("LogInfo", LogOpenServiceManager.getLinfo()); //$NON-NLS-1$
@@ -318,14 +318,11 @@ public class LogService extends HttpServlet {
 		return result;
 	}
 
-	private static boolean closeFile(final HttpServletRequest req) throws SessionException, IOException {
+	private static boolean closeFile(final HttpServletRequest req) throws IOException {
 		boolean result = false;
 		setStatusCode(HttpServletResponse.SC_OK);
-		final HttpSession session = req.getSession(true);
-		if (session == null) {
-			setStatusCode(HttpServletResponse.SC_NOT_ACCEPTABLE);
-			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
-		}
+
+		final HttpSession session = req.getSession(false);
 
 		try {
 			if((LogReader) session.getAttribute("Reader") != null){ //$NON-NLS-1$
@@ -357,66 +354,35 @@ public class LogService extends HttpServlet {
 		return result;
 	}
 
-	private static byte[] getLogTail(final HttpServletRequest req,  final HttpServletResponse resp) throws SessionException, IOException{
-
-		final HttpSession session = req.getSession(true);
-		if (session == null) {
-			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
-		}
-
-		final byte[] result = LogTailServiceManager.process(req,resp);
-
-		return result;
+	private static byte[] getLogTail(final HttpServletRequest req) throws IOException{
+		return LogTailServiceManager.process(req);
 	}
 
-	private static byte[] getMoreLog(final HttpServletRequest req, final HttpServletResponse resp)throws SessionException, IOException {
-		final HttpSession session = req.getSession(true);
-		if (session == null) {
-			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
-		}
-		final byte[] result = LogMoreServiceManager.process(req,resp);
-
-		return result;
+	private static byte[] getMoreLog(final HttpServletRequest req)throws IOException, NoResultException {
+		return LogMoreServiceManager.process(req);
 	}
 
-	private static byte[] getLogFiltered(final HttpServletRequest req, final HttpServletResponse resp) throws SessionException, IOException {
-		final HttpSession session = req.getSession(true);
-		if (session == null) {
-			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
-		}
-		final byte[] result = LogFilteredServiceManager.process(req, resp);
-
-		return result;
+	private static byte[] getLogFiltered(final HttpServletRequest req) throws IOException, NoResultException {
+		return LogFilteredServiceManager.process(req);
 	}
 
-	private static byte[] searchText(final HttpServletRequest req,final HttpServletResponse resp) throws SessionException, IOException {
-		final HttpSession session = req.getSession(true);
-		if (session == null) {
-			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
-		}
-
-		final byte[] result = LogSearchServiceManager.process(req,resp);
-
-		return result;
+	private static byte[] searchText(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, NoResultException {
+		return LogSearchServiceManager.process(req);
 	}
 
 
-	private static byte[] download(final HttpServletRequest req, final HttpServletResponse resp, final File pathLogs) throws SessionException, IOException {
-		final HttpSession session = req.getSession(true);
-		if (session == null) {
-			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
-		}
+	private static byte[] download(final HttpServletRequest req, final HttpServletResponse resp, final File pathLogs) throws IOException {
 
 		final boolean reset = Boolean.parseBoolean(req.getParameter(ServiceParams.PARAM_RESET));
 		if(reset) {
-			removeDownloadSessions(session) ;
+			removeDownloadSessions(req) ;
 		}
 		final byte[] result = LogDownloadServiceManager.process(req, resp, pathLogs.getPath());
 		if(LogDownloadServiceManager.isHasMore()) {
 			setStatusCode(HttpServletResponse.SC_PARTIAL_CONTENT);
 		}
 		else {
-			removeDownloadSessions(session) ;
+			removeDownloadSessions(req) ;
 			setStatusCode(HttpServletResponse.SC_OK);
 		}
 
@@ -431,7 +397,12 @@ public class LogService extends HttpServlet {
 		LogService.statusCode = statusCode;
 	}
 
-	private static final void removeDownloadSessions(final HttpSession session ) throws IOException {
+	private static final void removeDownloadSessions(final HttpServletRequest request) throws IOException {
+		final HttpSession session = request.getSession(false);
+		if (session == null) {
+			return;
+		}
+
 		if ((SeekableByteChannel)session.getAttribute("ChannelDownload") != null) { //$NON-NLS-1$
 			try(final SeekableByteChannel chanel = (SeekableByteChannel)session.getAttribute("ChannelDownload");){ //$NON-NLS-1$
 			chanel.close();
@@ -447,5 +418,13 @@ public class LogService extends HttpServlet {
 		}
 	}
 
+	private static void sendControlledError(final HttpServletResponse response, final String message) throws IOException {
 
+		LOGGER.info(" ======== PASAMOS POR DONDE TENEMOS QUE PASAR: " + message);
+
+		response.setStatus(220);
+		response.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
+		response.getOutputStream().flush();
+		return;
+	}
 }

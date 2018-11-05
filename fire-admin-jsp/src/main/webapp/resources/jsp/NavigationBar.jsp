@@ -1,6 +1,13 @@
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-	final String userLogged = (String)request.getSession().getAttribute("user");//$NON-NLS-1$ 
+
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
+	final String userLogged = (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 %>
 <div class="menubarPosition">
 		<ul id="menubar">
@@ -37,7 +44,7 @@
 		</div>	
 	</div>
 <script type="text/javascript">
-	//Comprueba cada vez que se pulsa en un enlace del menu, si se ha abiero el fichero log
+	// Comprueba cada vez que se pulsa en un enlace del menu, si se ha abierto el fichero log
 	// en ese caso lanza la función de cerrar fichero log.
 	// Solo se lanza cuando este menu esta la pagina LogsManager.jsp
 	var openLog = false; 

@@ -56,6 +56,8 @@
 		<module>fire-signature-decipher</module>
 		<module>fire-test-jsp</module>
 		<module>fire-upgrade</module>
+		<module>log-consumer-api</module>
+		<module>log-consumer-service</module>
 	</modules>
 
 	<dependencies>

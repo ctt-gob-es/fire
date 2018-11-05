@@ -44,9 +44,9 @@ public class Utils {
     }
 
     /**
-     *
-     * @param date
-     * @return
+     * Obtiene la fecha formateada.
+     * @param date Fecha a formatear.
+     * @return Cadena de texto con la fecha.
      */
     public static String getStringDateFormat(final Date date) {
 

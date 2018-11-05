@@ -1,3 +1,4 @@
+<%@page import="es.gob.log.consumer.client.ServiceOperations"%>
 <%@page import="javax.json.JsonNumber"%>
 <%@page import="java.util.Date"%>
 <%@page import="javax.json.JsonString"%>
@@ -10,86 +11,100 @@
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-	String errorText = null;
-
-final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-final String usrLogged= (String) request.getSession().getAttribute("user");//$NON-NLS-1$
-if (state == null || !Boolean.parseBoolean((String) state)) {
-	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-	return;
-}
-String htmlData = ""; //$NON-NLS-1$
-String htmlError = ""; //$NON-NLS-1$
-String styleError = "";//$NON-NLS-1$
-String nameSrv = "";//$NON-NLS-1$
-String fileName = "";//$NON-NLS-1$
-String levels[] = null ;
-
-boolean date = false;
-boolean time =  false;
-boolean filter = true;
-
-//Logica para determinar si mostrar un resultado de operacion
-	
-	final byte[] jsonLOGINFO = (byte[]) request.getSession().getAttribute("JSON_LOGINFO"); //$NON-NLS-1$ 
-	if(jsonLOGINFO == null){
-		response.sendRedirect("../LogAdminService?op=3"); //$NON-NLS-1$
+	if (session == null ||
+			!Boolean.parseBoolean((String) session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED))) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
 	}
-	session.removeAttribute("JSON_LOGINFO"); //$NON-NLS-1$
 	
-	final JsonReader reader = Json.createReader(new ByteArrayInputStream(jsonLOGINFO));
-	final JsonObject jsonObj = reader.readObject();
-	reader.close();
-	
-	if(request.getParameter(ServiceParams.PARAM_NAMESRV) != null && !"".equals(request.getParameter(ServiceParams.PARAM_NAMESRV))){//$NON-NLS-1$
-		 nameSrv = request.getParameter(ServiceParams.PARAM_NAMESRV);
+	String nameSrv = request.getParameter(ServiceParams.PARAM_NAMESRV);
+	if (nameSrv == null) {
+		nameSrv = ""; //$NON-NLS-1$
 	}
-	if(request.getParameter(ServiceParams.PARAM_FILENAME) != null && !"".equals(request.getParameter(ServiceParams.PARAM_FILENAME))){//$NON-NLS-1$
-		fileName = request.getParameter(ServiceParams.PARAM_FILENAME);
+	String fileName = request.getParameter(ServiceParams.PARAM_FILENAME);
+	if (fileName == null) {
+		fileName = ""; //$NON-NLS-1$
 	}
+
+	String errorMsg = ""; //$NON-NLS-1$
+	String[] levels = null ;
 	
+	boolean date = false;
+	boolean time =  false;
+	boolean filter = true;
 	
-	if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
-		styleError="style='display: block-inline;'";//$NON-NLS-1$
-		final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
-		for(int i = 0; i < Error.size(); i++){
-			final JsonObject json = Error.getJsonObject(i);
-			htmlError += "<p id='error-txt'>" + "Error:" +String.valueOf(json.getInt("Code")) + "  " + json.getString("Message") + "</p>";//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
-		}
+	// Logica para determinar si mostrar un resultado de operacion
+	
+	final byte[] jsonLogInfo = (byte[]) session.getAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO); 
+	if (jsonLogInfo == null){
+		response.sendRedirect("../LogAdminService?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+				"&name-srv=" + nameSrv); //$NON-NLS-1$
+		return;
+	}
+	session.removeAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO);
+	
+	try {
+		final JsonReader reader = Json.createReader(new ByteArrayInputStream(jsonLogInfo));
+		final JsonObject jsonObj = reader.readObject();
+		reader.close();
 		
-		return;
-	} else if(jsonObj.getJsonArray("LogInfo") != null){	//$NON-NLS-1$
-		final JsonArray LogInfo = jsonObj.getJsonArray("LogInfo");  //$NON-NLS-1$
-		for(int i = 0; i < LogInfo.size(); i++){
-			final JsonObject json = LogInfo.getJsonObject(i);
-
-			if(json.get(ServiceParams.PARAM_LEVELS) != null && !"".equals(json.get(ServiceParams.PARAM_LEVELS).toString().trim())) { //$NON-NLS-1$
-				final String levels_ = json.get("Levels").toString().replace("\"", "");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				if(levels_ != null && !"".equals(levels_.trim())){//$NON-NLS-1$
-					levels = levels_ .split(",");//$NON-NLS-1$
+		if (jsonObj.getJsonArray("LogInfo") != null) {	//$NON-NLS-1$
+			final JsonArray LogInfo = jsonObj.getJsonArray("LogInfo");  //$NON-NLS-1$
+			for (int i = 0; i < LogInfo.size(); i++){
+				final JsonObject json = LogInfo.getJsonObject(i);
+	
+				if (json.get(ServiceParams.PARAM_PARAM_LEVELS) != null && !"".equals(json.get(ServiceParams.PARAM_PARAM_LEVELS).toString().trim())) { //$NON-NLS-1$
+					final String levelsList = json.get("Levels").toString().replace("\"", "");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					if (levelsList != null && !"".equals(levelsList.trim())){//$NON-NLS-1$
+						levels = levelsList.split(",");//$NON-NLS-1$
+					}
+					else {
+						filter = false;
+					}				
 				}
-				else{
+	
+				if (levels == null || (levels != null && levels.length == 1 &&  "".equals(levels[0].trim()))){//$NON-NLS-1$
 					filter = false;
-				}				
+				}
+	
+				if (json.get("Date") != null && !"".equals(json.get("Date").toString()) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+						&& "\"true\"".equals(json.get("Date").toString())) { //$NON-NLS-1$//$NON-NLS-2$ 
+					date = true;
+				}
+				if(json.get("Time")!=null&& !"".equals(json.get("Time").toString()) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+						&& "\"true\"".equals(json.get("Time").toString())) { //$NON-NLS-1$//$NON-NLS-2$ 
+					time = true;
+				}						
 			}
-
-			if(levels == null || (levels != null && levels.length == 1 &&  "".equals(levels[0].trim()))){//$NON-NLS-1$
-				filter = false;
-			}
-
-			if(json.get("Date") != null && !"".equals(json.get("Date").toString()) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					&& "\"true\"".equals(json.get("Date").toString())) { //$NON-NLS-1$//$NON-NLS-2$ 
-				date = true;
-			}
-			if(json.get("Time")!=null&& !"".equals(json.get("Time").toString()) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					&& "\"true\"".equals(json.get("Time").toString())) { //$NON-NLS-1$//$NON-NLS-2$ 
-				time = true;
-			}						
 		}
-		styleError="style='display: none'";//$NON-NLS-1$	
+		else {
+			if (jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
+				final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
+				for (int i = 0; i < Error.size(); i++) {
+					final JsonObject json = Error.getJsonObject(i);
+					errorMsg += "Error: " + json.getInt("Code") + "  " + json.getString("Message") + "<br/>"; //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
+				}
+				errorMsg = errorMsg.replace("\"", "").replace("'", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
+			else {
+				errorMsg = "No se ha recibido la información de formato del fichero";
+			}
+			// Bloqueamos el uso de las funciones para las que son necesarias el
+			// formato de fichero
+			date = false;
+			time =  false;
+			filter = false;
+		}
+	} catch(Exception e) {
+		
+		errorMsg = "No se pudo cargarla la información de formato del fichero";
+		
+		// Bloqueamos el uso de las funciones para las que son necesarias el
+		// formato de fichero
+		date = false;
+		time =  false;
+		filter = false;
 	}
-
 
 %>
 
@@ -125,11 +140,11 @@ boolean filter = true;
 	<div id="containerLogsManager">
 		<div id="subtitle" style="padding: 10px;width:100%;height=42;">
 			<div id="btnContainer" style="display: inline-block;width:8%;">				
-				<input id="download-button" class="btn-log" name="download-button" type="button" value="Download" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />					      		
+				<input id="download-button" class="btn-log" name="download-button" type="button" value="Descargar" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />					      		
 			</div>
 			<div id="selectedFile" style="display:inline-block;width:40%; height=42;">		 
 			 	 Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.			 	
-			</div>	
+			</div>
 			<div id="progress_download" style="display:none;"><img  style="vertical-align: middle;" alt="Icono animado cargando fichero" src="../resources/img/load.gif" height="42" width="55" >Fichero <span id="fileName"><%=fileName%></span> del servidor <span id="ServerName"><%=nameSrv%></span>.</div>				      						   
 			<div id="error-txt-log" style="display:none;width:50%;" onload="setIdErrorTxtLog($(this).attr('id'))"></div>			
 			<div id="ok-txt-log" class="success-log"  style="display:none;width:50%;" onload="setIdOkTxtLog($(this).attr('id'))"></div>
@@ -245,9 +260,12 @@ boolean filter = true;
 				      			    
 			</div>	<!-- operations -->	
 			<div id="actions" style="display:block;width:80%;padding-top: 0.5em;">
-				<div style="display: inline-block;width:10%;">
-					<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="goReturn();" />
-				</div>
+				<form id="back-button-form" method="GET" action="LogsFileList.jsp">
+					<div style="display: inline-block;width:10%;">
+						<input id="back-button-name-srv" name="name-srv" type="hidden" />
+						<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="goReturn(server);" />
+					</div>
+				</form>
 				<div style="display: inline-block;width:10%;">
 					<input id="reset-button" class="btn-log" name="reset-button" type="button" value="Recargar" title="Recarga el fichero log, limpiando filtros y resultados anteriores" onclick="reset();" />
 				</div>
@@ -271,17 +289,22 @@ boolean filter = true;
 	setIdOkTxtLog('ok-txt-log');
 	setIdAdvice('advice');
 	openLog = true;
-	
-	
-	//Inicializa el array de campos del filtrado
+
+	/* Inicializa el array de campos del filtrado */
 	var arrfilter = $("#setFilter input").toArray();
 	for(i = 0 ; i< arrfilter.length ; i++){
 		arrFieldsFilter.push(arrfilter[i].id);
 	}
-	//Inicializa el array de campos de la busqueda
+	/* Inicializa el array de campos de la busqueda */
 	var arrsearch = $("#setSearch input").toArray();
 	for(i = 0 ; i< arrsearch.length ; i++){
 		arrFieldsSearch.push(arrsearch[i].id);
 	}
+	
+	var error = "<%= errorMsg %>"; /* Se carga dinamicamente */
+	if (error) {
+		printErrorText(error);
+	}
+	
 </script>
 </html>

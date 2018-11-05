@@ -14,13 +14,14 @@ package es.gob.fire.server.admin.message;
  */
 public class MessageResultManager {
 
-	private static final String OP_ALTA = "alta"; //$NON-NLS-1$
 
-	private static final String OP_BAJA = "baja"; //$NON-NLS-1$
+	private static final String OP_SELECC = "1"; //$NON-NLS-1$
 
-	private static final String OP_EDICION = "edicion"; //$NON-NLS-1$
+	private static final String OP_ALTA = "2"; //$NON-NLS-1$
 
-	private static final String OP_SELECC = "seleccion"; //$NON-NLS-1$
+	private static final String OP_EDICION = "3"; //$NON-NLS-1$
+
+	private static final String OP_BAJA = "4"; //$NON-NLS-1$
 
 	private static final String OP_CLAVE = "clave";//$NON-NLS-1$
 
@@ -128,8 +129,8 @@ public class MessageResultManager {
 		else if (OP_SELECC.equals(op)) {
 			 if(entity.equals(ENT_SRV)){
 				msg = ok ?
-				"El Servidor de logs ha sido seleccionado correctamente" : //$NON-NLS-1$
-					"Error al seleccionar el Servidor de logs"; //$NON-NLS-1$
+				"Se ha conectado correctamente con el servidor de logs" : //$NON-NLS-1$
+					"Error al conectar con el servidor de logs"; //$NON-NLS-1$
 			}
 		}
 		else {
