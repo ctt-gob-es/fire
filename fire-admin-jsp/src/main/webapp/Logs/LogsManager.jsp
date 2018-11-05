@@ -160,7 +160,7 @@
 				<pre id="logResult"onload="setIdContainer($(this).attr('id'))"></pre>
 			</div>
 			
-			<div id="operations" style="display:inline-block;width:18%; vertical-align: top; padding-left: 1em;">
+			<div id="operations" style="display:inline-block;width:19%; vertical-align: top; padding-left: 0.2em;">
 				   
 				    	<div id="lines">
 				    		<label for="Nlines">* L&iacute;neas</label>
@@ -172,18 +172,18 @@
 				    		</select>				      		
 				      	</div>	<!-- lines -->		      	
 				     	
-				     	<fieldset  id ="setSearch"><legend> B&uacute;squeda </legend>
+				     	<fieldset  id ="setSearch" style="margin-bottom: 1em;"><legend> B&uacute;squeda </legend>
 					      	<div id="searchText" style="display:block; width:100%;" >
 					      		<label for="search_txt">* Texto a buscar</label>
 					      		<textarea id="search_txt"  class="log_search" name="search_txt" cols="20"></textarea>
 					      		<div>
-						      		<div style="display: inline-block;width:49%;">
+						      		<div style="display: inline-block;width:48%;">
 						      		<% if(date){%>
 						      			<label for="search_StartDate">Fecha inicio</label>
 						      			<input type="text" id="search_StartDate" class="log_search" name="search_StartDate" maxlength="10" size="10">
 						      		<%}%>
 						      		</div>
-						      		<div style="display: inline-block;width:49%;">
+						      		<div style="display: inline-block;width:48%;">
 						      		<% if(time){%>
 						      			<label for="search_StartTime">Hora inicio</label>
 						      			<input type="text" id="search_StartTime" class="log_search" name="search_StartTime"  maxlength="8" size="8">	
@@ -192,10 +192,10 @@
 					      		</div>
 					      		<br>
 					      		<div>					      							      		
-					      			<div style="display: inline-block;width:49%;">
+					      			<div style="display: inline-block;width:48%;">
 					      				<input id="search-button" class="btn-log" name="search-button" type="button" value="Buscar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del texto buscado" onclick="searchText($('#Nlines').val(),$('#search_txt').val(),$('#search_StartDate').val() + ' '+  $('#search_StartTime').val());" />
 					      			</div>
-					      			<div style="display: inline-block;width:49%;"><!-- <span class="ui-icon ui-icon-trash"></span> -->
+					      			<div style="display: inline-block;width:48%;"><!-- <span class="ui-icon ui-icon-trash"></span> -->
 					      				<button id="clear-button_search"  name="clear-button_search"  title="Borra el contenido de los campos de b&uacute;squeda"  onclick="Clean('log_search')" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>
 					      			</div>	
 					      		</div>
@@ -205,13 +205,13 @@
 				      	<fieldset id ="setFilter"><legend> Filtrado </legend>
 				      	<div id="dateTimes" style="display:block; width:100%;">
 				      		<div>
-					      		<div style="display: inline-block;width:49%;">
+					      		<div style="display: inline-block;width:48%;">
 					      		<% if(date){%>
 					      			<label for="startDate">Fecha inicio</label>
 					      			<input type="text" id="startDate" name="startDate" class="log_filter" maxlength="10" size="10">
 					      		<%}%>
 					      		</div>
-					      		<div style="display: inline-block;width:49%;">
+					      		<div style="display: inline-block;width:48%;">
 					      		<% if(time){%>
 					      			<label for="startTime">Hora inicio</label>
 					      			<input type="text" id="startTime" name="startTime" class="log_filter"  maxlength="8" size="8">	
@@ -219,13 +219,13 @@
 					      		</div>
 				      		</div>				      	
 				      		<div>
-					      		<div style="display: inline-block;width:49%;">
+					      		<div style="display: inline-block;width:48%;">
 					    		<% if(date){%>
 					    			<label for="endDate">Fecha fin</label>
 					      			<input type="text" id="endDate" name="endDate" class="log_filter" maxlength="10" size="10">
 					      		<%}%>
 					    		</div>
-					    		<div style="display: inline-block;width:49%;">
+					    		<div style="display: inline-block;width:48%;">
 					    		<% if(time){%>
 					    			<label for="endTime">Hora fin</label>
 					      			<input type="text" id="endTime" name="endTime" class="log_filter" maxlength="8" size="8">	
@@ -247,12 +247,12 @@
 				      	</div><!-- filtered -->
 				      	<br>
 				      					      					      	
-					      	<div style="display: inline-block;width:49%;">
+					      	<div style="display: inline-block;width:48%;">
 					      	<%if(date || time || levels != null) {%>
 					      		<input id="filtered-button" class="btn-log" name="filtered-button" type="button" value="Filtrar" title="Obtiene las  l&iacute;neas del fichero log en donde se encuentra la primera ocurrencia del filtro indicado" onclick="getFiltered($('#Nlines').val(), $('#startDate').val() + ' '+  $('#startTime').val(), $('#endDate').val() + ' '+  $('#endTime').val(), $('#level_select').val() );" />
 					      	<%}%>	
 					      	</div>
-					      	<div style="display: inline-block;width:49%;">
+					      	<div style="display: inline-block;width:48%;">
 					      		<button id="clear-button_filter"  name="clear-button_filter"  title="Borra el contenido de los campos de filtrado"  onclick="Clean('log_filter')" ><span class="ui-icon ui-icon-trash"></span>Limpiar</button>					      		
 					      	</div>	
 				      	</fieldset>	
@@ -260,12 +260,12 @@
 				      			    
 			</div>	<!-- operations -->	
 			<div id="actions" style="display:block;width:80%;padding-top: 0.5em;">
-				<form id="back-button-form" method="GET" action="LogsFileList.jsp">
-					<div style="display: inline-block;width:10%;">
+				<div style="display: inline-block;width:10%;">
+					<form id="back-button-form" method="GET" action="LogsFileList.jsp">					
 						<input id="back-button-name-srv" name="name-srv" type="hidden" />
-						<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="goReturn(server);" />
-					</div>
-				</form>
+						<input id="back-button" class="btn-log" name="back-button" type="button" value="Volver" title="Retorna al listado de ficheros log." onclick="goReturn(server);" />					
+					</form>
+				</div>
 				<div style="display: inline-block;width:10%;">
 					<input id="reset-button" class="btn-log" name="reset-button" type="button" value="Recargar" title="Recarga el fichero log, limpiando filtros y resultados anteriores" onclick="reset();" />
 				</div>
