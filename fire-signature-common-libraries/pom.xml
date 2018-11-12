@@ -25,19 +25,19 @@
 		<dependency>
 			<groupId>es.gob.afirma</groupId>
 			<artifactId>afirma-core</artifactId>
-			<version>1.6</version>
+			<version>1.6.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>es.gob.afirma</groupId>
 			<artifactId>afirma-server-triphase-signer-core</artifactId>
-			<version>1.6</version>
+			<version>1.6.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>es.gob.afirma</groupId>
 			<artifactId>afirma-crypto-core-pkcs7-tsp</artifactId>
-			<version>1.6</version>
+			<version>1.6.2</version>
 		</dependency>
 
 	    <dependency>
