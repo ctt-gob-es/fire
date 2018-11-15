@@ -63,12 +63,23 @@
 	String certFilters = null;
 	String batchXmlB64 = null;
 	
-	// Obtenemos la URL de la pagina para obtener la URL base a partir de la cual
-	// acceder a varios servicios y recursos
-	String baseUrl = request.getRequestURL().toString();
-	if (baseUrl != null) {
-		baseUrl = baseUrl.substring(0, baseUrl.toString().lastIndexOf('/') + 1);
+	// Para la carga de recursos y acceso a los servicios, obtenemos la URL publica
+	// configurada o, si no se establecio, se toma la URL base de la pagina actual
+	String baseUrl = ConfigManager.getPublicContextUrl();
+	if ((baseUrl == null || baseUrl.isEmpty()) && request.getRequestURL() != null) {
+		String requestUrl = request.getRequestURL().toString();
+		baseUrl = requestUrl.substring(0, requestUrl.lastIndexOf('/') + 1);
 	}
+
+	if (baseUrl != null && !baseUrl.endsWith("/public/")) { //$NON-NLS-1$
+		if (baseUrl.endsWith("/public")) { //$NON-NLS-1$
+			baseUrl += "/"; //$NON-NLS-1$
+		}
+		else {
+			baseUrl += "/public/"; //$NON-NLS-1$
+		}
+	}
+
 	BatchResult batchResult = null;
 	if (isBatchOperation) {
 		final SignBatchConfig defaultConfig = new SignBatchConfig();
