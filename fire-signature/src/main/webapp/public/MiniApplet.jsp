@@ -223,8 +223,7 @@
 						sendErrorCallback);
 	
 				} catch (e) {
-					sendErrorCallback(MiniApplet.getErrorType(), MiniApplet
-							.getErrorMessage());
+					sendErrorCallback(MiniApplet.getErrorType(), MiniApplet.getErrorMessage());
 				}
 			}
 		
