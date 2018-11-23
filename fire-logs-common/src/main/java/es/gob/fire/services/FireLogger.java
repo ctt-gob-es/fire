@@ -19,7 +19,7 @@ import java.util.logging.SimpleFormatter;
  * @author Adolfo.Navarro
  *
  */
-public class fireLogger {
+public class FireLogger {
 
 	static Logger logger ;
 	static FileHandler fh;
@@ -44,7 +44,7 @@ public class fireLogger {
 	 */
 	public static void installLogger() {
 
-		final Logger LOGGER = Logger.getLogger(fireLogger.class.getName());
+		final Logger LOGGER = Logger.getLogger(FireLogger.class.getName());
 
 		//leemos fichero de configuracion
 		try {
