@@ -1,7 +1,8 @@
+<%@page import="org.slf4j.LoggerFactory"%>
+<%@page import="org.slf4j.Logger"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="es.gob.fire.test.webapp.Base64"%>
 <%@page import="es.gob.fire.test.webapp.BatchHelper"%>
-<%@page import="java.util.logging.Logger"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -24,8 +25,8 @@
 		    	signature = BatchHelper.recoverBatchSign(request);
 		    }
 		    catch (Exception e) {
-				Logger.getLogger("es.gob.fire.test.webapp").severe( //$NON-NLS-1$
-						"Error al recuperar una firma del lote: " + e); //$NON-NLS-1$
+				LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
+						"Error al recuperar una firma del lote: {}", e.toString()); //$NON-NLS-1$
 		    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 		    }
 		%>

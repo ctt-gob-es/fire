@@ -10,10 +10,12 @@
 package es.gob.fire.test.webapp;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.BatchResult;
 import es.gob.fire.client.ClientConfigFilesNotFoundException;
@@ -26,7 +28,7 @@ import es.gob.fire.client.TransactionResult;
  */
 public class BatchHelper {
 
-	private static Logger LOGGER = Logger.getLogger(BatchHelper.class.getName());
+	private static Logger LOGGER = LoggerFactory.getLogger(BatchHelper.class);
 
 	/**
 	 * Recupera el resultado de la firma del lote.
@@ -59,7 +61,7 @@ public class BatchHelper {
         	batchResult = ConfigManager.getInstance().getFireClient(appId).recoverBatchResult(transactionId, userId);
         }
         catch (final ClientConfigFilesNotFoundException e) {
-        	LOGGER.severe("No se encontro el fichero de configuracion del componente cliente FIRe: " + e); //$NON-NLS-1$
+        	LOGGER.error("No se encontro el fichero de configuracion del componente cliente FIRe", e); //$NON-NLS-1$
         	throw new IOException("No se encontro el fichero de configuracion del componente cliente FIRe", e); //$NON-NLS-1$
 		}
 
@@ -105,7 +107,7 @@ public class BatchHelper {
         	result = ConfigManager.getInstance().getFireClient(appId).recoverBatchSign(transactionId, userId, docId);
         }
         catch (final ClientConfigFilesNotFoundException e) {
-        	LOGGER.severe("No se encontro el fichero de configuracion del componente cliente FIRe: " + e); //$NON-NLS-1$
+        	LOGGER.error("No se encontro el fichero de configuracion del componente cliente FIRe", e); //$NON-NLS-1$
         	throw new IOException("No se encontro el fichero de configuracion del componente cliente FIRe", e); //$NON-NLS-1$
 		}
 

@@ -14,8 +14,6 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,6 +24,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.SignOperationResult;
 
@@ -37,7 +37,7 @@ public class SignatureService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = 1991462934952495784L;
 
-	private static final Logger LOGGER = Logger.getLogger(SignatureService.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(SignatureService.class);
 
 	private static final String REDIRECT_SUCCESS_PAGE = "RecoverSign.jsp"; //$NON-NLS-1$
 	private static final String REDIRECT_ERROR_PAGE = "ErrorTransactionPage.jsp"; //$NON-NLS-1$
@@ -142,9 +142,8 @@ public class SignatureService extends HttpServlet {
 					confProperties);
 
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE,
-					"Error durante la operacion de firma: " + e, e); //$NON-NLS-1$
-	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$));
+			LOGGER.error("Error durante la operacion de firma", e); //$NON-NLS-1$
+	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode("Error en la llamada a la operacion de firma:<br>" + e.toString(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$));
 	    	return;
 		}
 

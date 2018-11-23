@@ -10,11 +10,11 @@
 package es.gob.fire.test.webapp;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.ClientConfigFilesNotFoundException;
 import es.gob.fire.client.HttpOperationException;
@@ -75,9 +75,9 @@ public class ErrorHelper {
         try {
         	result = ConfigManager.getInstance().getFireClient(appId).recoverErrorResult(transactionId, subjectId);
 		} catch (final ClientConfigFilesNotFoundException e) {
-			Logger.getLogger(ErrorHelper.class.getName()).log(
-					Level.SEVERE, "No se encuentra el fichero de configuracion del cliente Cl@ve Firma", e); //$NON-NLS-1$
-			throw new IOException("No se encuentra el fichero de configuracion del cliente Cl@ve Firma", e); //$NON-NLS-1$
+			LoggerFactory.getLogger(ErrorHelper.class).error(
+					"No se encuentra el fichero de configuracion del componente distribuido de FIRe", e); //$NON-NLS-1$
+			throw new IOException("No se encuentra el fichero de configuracion del componente distribuido de FIRe", e); //$NON-NLS-1$
 		}
         return  result;
     }

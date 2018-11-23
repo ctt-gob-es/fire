@@ -99,7 +99,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
-		LOGGER.info("== INICIO FIRMA TRIFASICA =="); //$NON-NLS-1$
+		LOGGER.fine("== INICIO FIRMA TRIFASICA =="); //$NON-NLS-1$
 
 		final Map<String, String> parameters = new HashMap<>();
 		final String[] params;
@@ -145,7 +145,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 		// Obtenemos el formato de firma
 		final String format = parameters.get(PARAM_NAME_FORMAT);
-		LOGGER.info("Formato de firma seleccionado: " + format); //$NON-NLS-1$
+		LOGGER.fine("Formato de firma seleccionado: " + format); //$NON-NLS-1$
 		if (format == null) {
 			LOGGER.warning("No se ha indicado formato de firma"); //$NON-NLS-1$
 			sendResponse(response, ErrorManager.getErrorMessage(4));
@@ -200,7 +200,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		if (sessionData != null) {
-			LOGGER.info("Recibidos los siguientes datos de sesion para '" + operation + "':\n" + new String(sessionData)); //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.fine("Recibidos los siguientes datos de sesion para '" + operation + "':\n" + new String(sessionData)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		// Obtenemos el certificado
@@ -235,9 +235,9 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		final String docId = parameters.get(PARAM_NAME_DOCID);
 		if (docId != null) {
 			try {
-				LOGGER.info("Recuperamos el documento mediante el DocumentManager"); //$NON-NLS-1$
+				LOGGER.fine("Recuperamos el documento mediante el DocumentManager"); //$NON-NLS-1$
 				docBytes = DOC_MANAGER.getDocument(docId, signerCertChain, extraParams);
-				LOGGER.info(
+				LOGGER.fine(
 					"Recuperado documento de " + docBytes.length + " octetos" //$NON-NLS-1$ //$NON-NLS-2$
 				);
 			}
@@ -298,7 +298,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 		if (PARAM_VALUE_OPERATION_PRESIGN.equalsIgnoreCase(operation)) {
 
-			LOGGER.info(" == PREFIRMA en servidor"); //$NON-NLS-1$
+			LOGGER.fine(" == PREFIRMA en servidor"); //$NON-NLS-1$
 
 			final TriphaseData preRes;
 			try {
@@ -340,7 +340,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 					throw new AOException("No se reconoce el codigo de sub-operacion: " + subOperation); //$NON-NLS-1$
 				}
 
-				LOGGER.info("Se ha calculado el resultado de la prefirma y se devuelve"); //$NON-NLS-1$
+				LOGGER.fine("Se ha calculado el resultado de la prefirma y se devuelve"); //$NON-NLS-1$
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la prefirma: " + e, e); //$NON-NLS-1$
@@ -350,11 +350,11 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			sendResponse(response, Base64.encode(preRes.toString().getBytes(StandardCharsets.UTF_8), true));
 
-			LOGGER.info("== FIN PREFIRMA"); //$NON-NLS-1$
+			LOGGER.fine("== FIN PREFIRMA"); //$NON-NLS-1$
 		}
 		else if (PARAM_VALUE_OPERATION_POSTSIGN.equalsIgnoreCase(operation)) {
 
-			LOGGER.info(" == POSTFIRMA en servidor"); //$NON-NLS-1$
+			LOGGER.fine(" == POSTFIRMA en servidor"); //$NON-NLS-1$
 
 			final byte[] signedDoc;
 			try {
@@ -410,10 +410,10 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 				extraParams.setProperty(PARAM_NAME_FORMAT, format);
 			}
 
-			LOGGER.info(" Se ha calculado el resultado de la postfirma y se devuelve. Numero de bytes: " + signedDoc.length); //$NON-NLS-1$
+			LOGGER.fine(" Se ha calculado el resultado de la postfirma y se devuelve. Numero de bytes: " + signedDoc.length); //$NON-NLS-1$
 
 			// Devolvemos al servidor documental el documento firmado
-			LOGGER.info("Almacenamos la firma mediante el DocumentManager"); //$NON-NLS-1$
+			LOGGER.fine("Almacenamos la firma mediante el DocumentManager"); //$NON-NLS-1$
 			final String newDocId;
 			try {
 				newDocId = DOC_MANAGER.storeDocument(docId, signerCertChain, signedDoc, extraParams);
@@ -428,14 +428,14 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 				sendResponse(response, ErrorManager.getErrorMessage(10) + ": " + e); //$NON-NLS-1$
 				return;
 			}
-			LOGGER.info("Documento almacenado"); //$NON-NLS-1$
+			LOGGER.fine("Documento almacenado"); //$NON-NLS-1$
 
 			sendResponse(
 					response,
 					new StringBuilder(newDocId.length() + SUCCESS.length()).
 						append(SUCCESS).append(newDocId).toString());
 
-			LOGGER.info("== FIN POSTFIRMA ****"); //$NON-NLS-1$
+			LOGGER.fine("== FIN POSTFIRMA ****"); //$NON-NLS-1$
 		}
 		else {
 			sendResponse(response, ErrorManager.getErrorMessage(11));

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.AOUtil;
@@ -42,18 +43,26 @@ public final class TempFilesHelper {
 
         try {
             final String tmpDir = ConfigManager.getTempDir();
-            final File f = new File(tmpDir != null && tmpDir.trim().length() > 0 ? tmpDir.trim() : defaultDir);
-            if (!f.isDirectory() || !f.canRead() || !f.canWrite()) {
+            final File f = tmpDir != null && tmpDir.trim().length() > 0 ? new File(tmpDir.trim()) : null;
+            if (f == null || !f.isDirectory()) {
                 LOGGER.severe(
-                		"El directorio temporal configurado (" + f.getAbsolutePath() + //$NON-NLS-1$
-                		") no es valido, se usaran el por defecto: " + defaultDir); //$NON-NLS-1$
+                		"El directorio temporal configurado (" + //$NON-NLS-1$
+                		(f != null ? f.getAbsolutePath() : null) +
+                		") no es valido, se usara el por defecto: " + defaultDir); //$NON-NLS-1$
                 TMPDIR = new File(defaultDir);
+            } else if (!f.canRead() || !f.canWrite()) {
+            	LOGGER.severe(
+                		"El directorio temporal configurado (" + f.getAbsolutePath() + //$NON-NLS-1$
+                		") no tiene permiso de lectura/escritura, se usara el por defecto: " + defaultDir); //$NON-NLS-1$
+            	TMPDIR = new File(defaultDir);
             } else {
+                LOGGER.info("Se usara el directorio temporal configurado: " + f.getAbsolutePath()); //$NON-NLS-1$
                 TMPDIR = f;
             }
         }
         catch (final Exception e) {
-        	LOGGER.severe("No se ha podido cargar la configuracion del modulo: " + e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, "No se ha podido cargar la configuracion del modulo", e); //$NON-NLS-1$
+        	LOGGER.warning("Se usara el directorio temporal por defecto: " + defaultDir); //$NON-NLS-1$
         	TMPDIR = new File(defaultDir);
         }
     }
@@ -142,7 +151,7 @@ public final class TempFilesHelper {
         bos.write(data);
         bos.close();
         fos.close();
-        LOGGER.info("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
+        LOGGER.fine("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
         return f.getName();
     }
 

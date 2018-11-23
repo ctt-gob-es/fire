@@ -60,7 +60,7 @@ public final class StorageService extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
-		LOGGER.info(" == INICIO GUARDADO == "); //$NON-NLS-1$
+		LOGGER.fine(" == INICIO GUARDADO == "); //$NON-NLS-1$
 
 		// Leemos la entrada
 		int n;
@@ -109,7 +109,7 @@ public final class StorageService extends HttpServlet {
 			out.println(ErrorManager.genError(ErrorManager.ERROR_UNSUPPORTED_OPERATION_NAME));
 		}
 		out.flush();
-		LOGGER.info("== FIN DEL GUARDADO =="); //$NON-NLS-1$
+		LOGGER.fine("== FIN DEL GUARDADO =="); //$NON-NLS-1$
 	}
 
 	/**
@@ -127,7 +127,7 @@ public final class StorageService extends HttpServlet {
 			return;
 		}
 
-		LOGGER.info("Se solicita guardar un fichero con el identificador: " + id); //$NON-NLS-1$
+		LOGGER.fine("Se solicita guardar un fichero con el identificador: " + id); //$NON-NLS-1$
 
 		// Si no se indican los datos, se transmite el error en texto plano a traves del fichero generado
 		String dataText = URLDecoder.decode(params.get(PARAMETER_NAME_DATA), DEFAULT_ENCODING);
@@ -150,7 +150,7 @@ public final class StorageService extends HttpServlet {
 			return;
 		}
 
-		LOGGER.info("Se guardo correctamente el fichero: " + outFile.getAbsolutePath()); //$NON-NLS-1$
+		LOGGER.fine("Se guardo correctamente el fichero: " + outFile.getAbsolutePath()); //$NON-NLS-1$
 
 		out.print(SUCCESS);
 	}

@@ -37,6 +37,7 @@ public class RecoverErrorManager {
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
+		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
@@ -47,7 +48,7 @@ public class RecoverErrorManager {
             return;
         }
 
-        LOGGER.fine(String.format("TrId %1s: RecoverErrorManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
@@ -76,6 +77,8 @@ public class RecoverErrorManager {
         	sendResult(response, result);
         	return;
         }
+
+        LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve el error identificado", appId, transactionId)); //$NON-NLS-1$
 
         // Recuperamos la informacion de error y eliminamos la sesion
         final TransactionResult result = buildErrorResult(session);

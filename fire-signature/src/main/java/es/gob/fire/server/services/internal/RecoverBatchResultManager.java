@@ -65,7 +65,7 @@ public class RecoverBatchResultManager {
             return;
         }
 
-        LOGGER.fine(String.format("TrId %1s: RecoverBatchManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
@@ -134,6 +134,8 @@ public class RecoverBatchResultManager {
         final String origin	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
         if (ServiceParams.CERTIFICATE_ORIGIN_LOCAL.equals(origin)) {
 
+        	LOGGER.info(String.format("App %1s: TrId %2s: Se firmo con certificado local y ya se dispone de las firmas del lote", appId, transactionId)); //$NON-NLS-1$
+
             // Recuperamos el objeto con el estado actual de cada firma (aun no procesadas)
         	batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         	if (batchResult == null || batchResult.documentsCount() == 0) {
@@ -162,12 +164,17 @@ public class RecoverBatchResultManager {
         	}
 
         	if (needPostProcess) {
+        		LOGGER.info(String.format("App %1s: TrId %2s: Se actualizan las firmas que lo necesitan", appId, transactionId)); //$NON-NLS-1$
         		upgradeLocalSignatures(appId, batchResult, docManager, session, stopOnError);
         	}
         }
 
         // Firma en la nube
         else {
+
+        	LOGGER.info(String.format("App %1s: TrId %2s: Se firmo con el proveedor %3s y es necesario recuperar el PKCS#1 de las firmas para completar el trabajo", appId, transactionId, origin)); //$NON-NLS-1$
+
+
         	final TransactionConfig connConfig	=
         			(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         	if (connConfig == null) {
@@ -194,6 +201,8 @@ public class RecoverBatchResultManager {
         	// que nos indicaba que habiamos sido redirigidos para evitar confundir posibles
         	// errores futuros con esta misma transaccion.
         	session.removeAttribute(ServiceParams.SESSION_PARAM_REDIRECTED);
+
+        	LOGGER.info(String.format("App %1s: TrId %2s: Se solicita el PKCS#1 al proveedor %3s", appId, transactionId, origin)); //$NON-NLS-1$
 
         	final Map<String, byte[]> ret;
         	try {
@@ -319,6 +328,8 @@ public class RecoverBatchResultManager {
         	// cierre la transaccion
         	connector.endSign(remoteTrId);
         }
+
+    	LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos el resultado de la operacion", appId, transactionId)); //$NON-NLS-1$
 
         // Si todas las firmas fallaron, damos por terminada la transaccion y eliminamos la sesion.
         if (isAllFailed(batchResult)) {

@@ -81,6 +81,8 @@ public class CreateBatchManager {
 			return;
 		}
 
+		LOGGER.info(String.format("App %1s: TrId null: Peticion bien formada", appId)); //$NON-NLS-1$
+
 		// Si se especificaron filtros de certificados para su uso con el
 		// Cliente @firma, se habran indicado junto a las propiedades por defecto
 		// de configuracion para las firmas del lote. Extraemos los filtros de esas
@@ -130,7 +132,7 @@ public class CreateBatchManager {
         final FireSession session = SessionCollector.createFireSession(request.getSession());
         final String transactionId = session.getTransactionId();
 
-        LOGGER.fine(String.format("TrId %1s: CreateBatchManager", transactionId)); //$NON-NLS-1$
+		LOGGER.info(String.format("App %1s: TrId %2s: Iniciada transaccion de tipo LOTE", appId, transactionId)); //$NON-NLS-1$
 
         // Guardamos los datos recibidos en la sesion
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
@@ -167,6 +169,8 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER, docManager);
 
         SessionCollector.commit(session);
+
+		LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve el identificador de sesion a la aplicacion", appId, transactionId)); //$NON-NLS-1$
 
         sendResult(response, new CreateBatchResult(transactionId));
 	}

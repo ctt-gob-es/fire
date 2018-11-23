@@ -39,6 +39,7 @@ public class RecoverBatchSignatureManager {
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
+		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String docId = params.getParameter(ServiceParams.HTTP_PARAM_DOCUMENT_ID);
@@ -50,13 +51,13 @@ public class RecoverBatchSignatureManager {
             return;
         }
 
-        LOGGER.fine(String.format("TrId %1s: RecoverBatchSignatureManager", transactionId)); //$NON-NLS-1$
-
         if (docId == null || docId.isEmpty()) {
         	LOGGER.warning("No se ha proporcionado el ID del documento"); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
+
+		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
@@ -94,6 +95,10 @@ public class RecoverBatchSignatureManager {
         	return;
         }
 
+
+
+		LOGGER.info(String.format("App %1s: TrId %2s: Comprobamos el estado de la firma", appId, transactionId)); //$NON-NLS-1$
+
         // Obtenemos el resultado de firma del lote
         final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         if (batchResult == null || batchResult.documentsCount() == 0) {
@@ -105,7 +110,7 @@ public class RecoverBatchSignatureManager {
         }
 
         // Si fallo la operacion de firma o la firma ya se recupero (momento en el
-        // que se marca como erroneo), se notifica un error en la operacion
+        // que se marca como erroneo el resultado), se notifica un error en la operacion
         if (batchResult.isSignFailed(docId)) {
             LOGGER.severe("El documento solicitado ya se recupero o no se firmo correctamente"); //$NON-NLS-1$
         	response.sendError(HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorCode(),
@@ -121,6 +126,8 @@ public class RecoverBatchSignatureManager {
         	return;
         }
 
+        // Recuperamos el resultado de la firma
+        LOGGER.info(String.format("App %1s: TrId %2s: Se carga la firma resultante", appId, transactionId)); //$NON-NLS-1$
         byte[] signature;
         try {
         	signature = TempFilesHelper.retrieveAndDeleteTempData(docFilename);
@@ -148,7 +155,8 @@ public class RecoverBatchSignatureManager {
         	SessionCollector.commit(session);
         }
 
-        // Enviamos la firma electronica como resultado
+        LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve la firma", appId, transactionId)); //$NON-NLS-1$
+
         sendResult(response, signature);
 	}
 

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.gob.fire</groupId>
   <artifactId>fire-signature-connector-clavefirma</artifactId>
-  <version>2.3-SNAPSHOT</version>
+  <version>2.3</version>
   <packaging>jar</packaging>
 
   <name>fire-signature-connector-clavefirma</name>
@@ -20,13 +20,13 @@
 		<dependency>
 			<groupId>es.gob.afirma</groupId>
 			<artifactId>afirma-core</artifactId>
-			<version>1.6</version>
+			<version>1.6.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-connector</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>2.3</version>
 		</dependency>
 		
 		<dependency>

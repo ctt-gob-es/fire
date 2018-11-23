@@ -66,7 +66,7 @@ public class AplicationsDAO {
 
 		boolean result;
 		if (rs.next()) {
-			LOGGER.info("Se ha identificado correctamente una peticion de la aplicacion: " + rs.getString(1)); //$NON-NLS-1$
+			LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + rs.getString(1)); //$NON-NLS-1$
 			result = true;
 		}
 		else {
@@ -125,11 +125,11 @@ public class AplicationsDAO {
 
 		boolean result;
 		if (!rs.next()) {
-			LOGGER.warning("No se ha podido leer la huella: " + thumb); //$NON-NLS-1$
+			LOGGER.warning("No se ha podido leer la huella del certificado: " + thumb); //$NON-NLS-1$
 			result = false;
 		}
 		else {
-			LOGGER.info("La huella del certificado se encuentra registrada en el sistema: " + thumb); //$NON-NLS-1$
+			LOGGER.fine("La huella del certificado se encuentra registrada en el sistema: " + thumb); //$NON-NLS-1$
 			result = rs.getInt(1) > 0;
 		}
 

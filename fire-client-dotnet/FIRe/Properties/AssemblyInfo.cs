@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("FIRe")]
 [assembly: AssemblyDescription("Componente distribuido .NET de FIRe")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Ministerio de Hacienda y Función Pública")]
+[assembly: AssemblyCompany("Ministerio de Política Territorial y Función Pública")]
 [assembly: AssemblyProduct("FIRe")]
-[assembly: AssemblyCopyright("Copyright © Ministerio de Hacienda y Función Pública 2018")]
+[assembly: AssemblyCopyright("Copyright © Ministerio de Política Territorial y Función Pública 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

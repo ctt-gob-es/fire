@@ -9,9 +9,6 @@
 <%@page import="java.util.Properties"%>
 
 <%
-/*******************/
-
-	
 
 	String subjectId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
@@ -22,15 +19,13 @@
 		return;
 	}
 	
-	FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, true, true);
+	// Nos aseguramos de tener cargada la ultima version de la sesion
+	FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, true);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
 	}
-	
-	// Nos aseguramos de tener cargada la ultima version de la sesion
-	fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, true);
-	
+
 	// Identificador del usuario
 	String userId = fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 	

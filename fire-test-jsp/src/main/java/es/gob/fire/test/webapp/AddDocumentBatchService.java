@@ -15,8 +15,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,6 +26,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.DuplicateDocumentException;
 import es.gob.fire.client.FireClient;
@@ -41,7 +41,7 @@ public class AddDocumentBatchService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = 1117256372054541704L;
 
-	private static final Logger LOGGER = Logger.getLogger(AddDocumentBatchService.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(AddDocumentBatchService.class);
 
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
@@ -58,7 +58,7 @@ public class AddDocumentBatchService extends HttpServlet {
 
 		final String transactionId = (String) session.getAttribute("transactionId"); //$NON-NLS-1$
 		if (transactionId == null) {
-			LOGGER.severe("No se ha encontrado id de transaccion iniciada"); //$NON-NLS-1$
+			LOGGER.error("No se ha encontrado id de transaccion iniciada"); //$NON-NLS-1$
 			response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 			return;
 		}
@@ -73,19 +73,19 @@ public class AddDocumentBatchService extends HttpServlet {
 			return;
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "No se han podido obtener los datos del documento", e); //$NON-NLS-1$
+			LOGGER.error("No se han podido obtener los datos del documento", e); //$NON-NLS-1$
 			request.getRequestDispatcher("AddDocumentToBatch.jsp?error=errordocument").forward(request, response); //$NON-NLS-1$
 			return;
 		}
 
 		if (doc.getId() == null || doc.getId().isEmpty()) {
-			LOGGER.warning("No se ha establecido un identificado para el documento"); //$NON-NLS-1$
+			LOGGER.warn("No se ha establecido un identificado para el documento"); //$NON-NLS-1$
 			request.getRequestDispatcher("AddDocumentToBatch.jsp?attributes=fail&error=noid").forward(request, response); //$NON-NLS-1$
 			return;
 		}
 
 		if (doc.getData() == null || doc.getData().length == 0) {
-			LOGGER.warning("No se ha adjuntado el documento al formulario"); //$NON-NLS-1$
+			LOGGER.warn("No se ha adjuntado el documento al formulario"); //$NON-NLS-1$
 			request.getRequestDispatcher("AddDocumentToBatch.jsp?attributes=fail&error=nodocument").forward(request, response); //$NON-NLS-1$
 			return;
 		}
@@ -107,15 +107,15 @@ public class AddDocumentBatchService extends HttpServlet {
 				fireClient.addDocumentToBatch(transactionId, userId, doc.getId(), doc.getData(), config);
 			}
 		} catch (final DuplicateDocumentException e) {
-			LOGGER.log(Level.SEVERE, "El identificador de documento ya se utilizo para otro documento del lote", e); //$NON-NLS-1$
+			LOGGER.error("El identificador de documento ya se utilizo para otro documento del lote", e); //$NON-NLS-1$
 			request.getRequestDispatcher("AddDocumentToBatch.jsp?error=duplid").forward(request, response); //$NON-NLS-1$
 			return;
 		} catch (final NumDocumentsExceededException e) {
-			LOGGER.log(Level.SEVERE, "Se excedio el numero maximo de documentos configurados para el lote", e); //$NON-NLS-1$
+			LOGGER.error("Se excedio el numero maximo de documentos configurados para el lote", e); //$NON-NLS-1$
 			request.getRequestDispatcher("AddDocumentToBatch.jsp?error=maxdocs").forward(request, response); //$NON-NLS-1$
 			return;
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Ocurrio un error al agregar el documento al lote", e); //$NON-NLS-1$
+			LOGGER.error("Ocurrio un error al agregar el documento al lote", e); //$NON-NLS-1$
 			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}

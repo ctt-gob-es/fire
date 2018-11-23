@@ -79,6 +79,9 @@ public final class CertificateService extends HttpServlet {
     protected void service(final HttpServletRequest request,
     		               final HttpServletResponse response) throws IOException {
 
+
+		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
+
 		if (!ConfigManager.isInitialized()) {
 			try {
 				ConfigManager.checkConfiguration();
@@ -93,15 +96,17 @@ public final class CertificateService extends HttpServlet {
     	final RequestParameters params = RequestParameters.extractParameters(request);
 
     	final String appId = params.getParameter(PARAM_APPLICATION_ID);
-        if (appId == null || "".equals(appId)) { //$NON-NLS-1$
-        	LOGGER.severe("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
-            return;
-        }
 
         if (ConfigManager.isCheckApplicationNeeded()){
-        	LOGGER.info("Se realizara la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
+        	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
+
+            if (appId == null || "".equals(appId)) { //$NON-NLS-1$
+            	LOGGER.severe("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
+        		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                        "No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
+                return;
+            }
+
         	try {
 	        	if (!AplicationsDAO.checkApplicationId(appId)) {
 	        		LOGGER.warning(
@@ -121,11 +126,11 @@ public final class CertificateService extends HttpServlet {
 	        }
         }
         else{
-        	LOGGER.warning("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
+        	LOGGER.fine("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
         }
 
     	if (ConfigManager.isCheckCertificateNeeded()){
-    		LOGGER.info("Se realizara la validacion del certificado"); //$NON-NLS-1$
+    		LOGGER.fine("Se realizara la validacion del certificado"); //$NON-NLS-1$
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 	    		ServiceUtil.checkValidCertificate(appId, certificates);
@@ -137,7 +142,7 @@ public final class CertificateService extends HttpServlet {
 			}
     	}
     	else {
-    		LOGGER.warning("No se validara el certificado cliente");//$NON-NLS-1$
+    		LOGGER.fine("No se validara el certificado cliente");//$NON-NLS-1$
     	}
 
     	if (analytics != null) {

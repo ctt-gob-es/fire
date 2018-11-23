@@ -48,7 +48,7 @@ public final class RetrieveService extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
-		LOGGER.info("== INICIO DE LA RECUPERACION =="); //$NON-NLS-1$
+		LOGGER.fine("== INICIO DE LA RECUPERACION =="); //$NON-NLS-1$
 
 		final String operation = request.getParameter(PARAMETER_NAME_OPERATION);
 		final String syntaxVersion = request.getParameter(PARAMETER_NAME_SYNTAX_VERSION);
@@ -78,12 +78,11 @@ public final class RetrieveService extends HttpServlet {
 			out.println(ErrorManager.genError(ErrorManager.ERROR_UNSUPPORTED_OPERATION_NAME));
 		}
 		out.flush();
-		LOGGER.info("== FIN DE LA RECUPERACION =="); //$NON-NLS-1$
+		LOGGER.fine("== FIN DE LA RECUPERACION =="); //$NON-NLS-1$
 
 		// Antes de salir revisamos todos los ficheros y eliminamos los caducados.
-		LOGGER.info("Limpiamos el directorio temporal"); //$NON-NLS-1$
+		LOGGER.fine("Limpiamos el directorio temporal"); //$NON-NLS-1$
 		removeExpiredFiles();
-		LOGGER.info("Fin de la limpieza"); //$NON-NLS-1$
 	}
 
 	/** Recupera la firma del servidor.
@@ -99,7 +98,7 @@ public final class RetrieveService extends HttpServlet {
 			return;
 		}
 
-		LOGGER.info("Se solicita el fichero con el identificador: " + id); //$NON-NLS-1$
+		LOGGER.fine("Se solicita el fichero con el identificador: " + id); //$NON-NLS-1$
 
 		final File inFile = new File(ConfigManager.getAfirmaTempDir(), id);
 
@@ -133,7 +132,7 @@ public final class RetrieveService extends HttpServlet {
 				final InputStream fis = new FileInputStream(inFile);
 				out.println(new String(getDataFromInputStream(fis)));
 				fis.close();
-				LOGGER.info("Se recupera el fichero: " + inFile.getName()); //$NON-NLS-1$
+				LOGGER.fine("Se recupera el fichero: " + inFile.getName()); //$NON-NLS-1$
 			}
 			catch (final IOException e) {
 				LOGGER.severe(ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
@@ -166,8 +165,15 @@ public final class RetrieveService extends HttpServlet {
 			}
 	}
 
-	private static boolean isExpired(final File file, final int expirationTimeLimit) {
-		return System.currentTimeMillis() - file.lastModified() > expirationTimeLimit * 1000;
+	/**
+	 * Comprueba si un fichero est&eacute; caducado con respecto al tiempo indicado.
+	 * @param file Fichero que se desea comprobar.
+	 * @param expirationTimeLimit Tiempo l&iacute;mite en milisegundos que debe
+	 * transcurrir para considerar caducada una petici&oacute;n.
+	 * @return {@code true} si el fichero ha caducado, {@code false} en caso contrario.
+	 */
+	private static boolean isExpired(final File file, final long expirationTimeLimit) {
+		return System.currentTimeMillis() - file.lastModified() > expirationTimeLimit;
 	}
 
 	private static final int BUFFER_SIZE = 4096;

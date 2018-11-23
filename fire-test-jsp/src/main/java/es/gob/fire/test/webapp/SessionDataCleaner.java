@@ -10,12 +10,14 @@
 package es.gob.fire.test.webapp;
 
 import java.io.File;
-import java.util.logging.Logger;
 
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Borra los datos en disco de la sesi&oacute;n de firma.
@@ -38,7 +40,7 @@ public final class SessionDataCleaner implements HttpSessionListener {
      */
     public static final String TRIPHASE_DATA_FILENAME_TAG = "triphasedatafile"; //$NON-NLS-1$
 
-    private static final Logger LOGGER = Logger.getLogger(SessionDataCleaner.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionDataCleaner.class);
 
     @Override
     public void sessionCreated(final HttpSessionEvent hse) {
@@ -57,9 +59,7 @@ public final class SessionDataCleaner implements HttpSessionListener {
                     final File dataFile = new File(dataFilename);
                     if (dataFile.exists()) {
                         if (!dataFile.delete()) {
-                            SessionDataCleaner.LOGGER
-                                    .severe("No se ha podido eliminar el objeto de datos " + dataFilename //$NON-NLS-1$
-                                    );
+                            LOGGER.error("No se ha podido eliminar el objeto de datos {}", dataFilename); //$NON-NLS-1$
                         }
                     }
                 }
@@ -69,9 +69,7 @@ public final class SessionDataCleaner implements HttpSessionListener {
                     final File dataFile = new File(triphaseDataFilename);
                     if (dataFile.exists()) {
                         if (!dataFile.delete()) {
-                            SessionDataCleaner.LOGGER
-                                    .severe("No se ha podido eliminar el objeto de datos " + triphaseDataFilename //$NON-NLS-1$
-                                    );
+                            LOGGER.warn("No se ha podido eliminar el objeto de datos {}", triphaseDataFilename); //$NON-NLS-1$
                         }
                     }
                 }

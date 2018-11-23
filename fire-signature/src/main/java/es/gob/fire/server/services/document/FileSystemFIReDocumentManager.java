@@ -63,7 +63,7 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	public byte[] getDocument(final byte[] docId, final String appId, final String format, final Properties extraParams) throws IOException {
 
 		final String id = new String(docId, StandardCharsets.UTF_8);
-		LOGGER.info("Recuperamos el documento con identificador: " + (id.length() > 20 ? id.substring(0, 20) + "..." : id)); //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.fine("Recuperamos el documento con identificador: " + (id.length() > 20 ? id.substring(0, 20) + "..." : id)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		final File file = new File(this.inDir, id);
 
@@ -73,7 +73,7 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
     		);
 		}
 
-		LOGGER.info("Buscamos el fichero: " + printShortPath(file)); //$NON-NLS-1$
+		LOGGER.fine("Buscamos el fichero: " + printShortPath(file)); //$NON-NLS-1$
 
 		if (!file.exists()) {
 			throw new IOException("No se puede cargar el documento, no existe"); //$NON-NLS-1$
@@ -171,7 +171,7 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 			throw e;
 		}
 
-		LOGGER.info("Escribiendo el fichero: " + file.getAbsolutePath()); //$NON-NLS-1$
+		LOGGER.fine("Escribiendo el fichero: " + file.getAbsolutePath()); //$NON-NLS-1$
 		return newId.getBytes(StandardCharsets.UTF_8);
 	}
 

@@ -174,7 +174,7 @@
 			<div class="container-title">
 				<div class="title-button">				
 					<a href= "cancelOperationService?<%= cancelUrlParams %>" class="button-cancelar">
-						<div>Cancelar</div>
+						<span>Cancelar</span>
 					</a>
 				</div>
 			</div>

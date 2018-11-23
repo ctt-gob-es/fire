@@ -15,7 +15,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Clase para la carga de ficheros de configuraci&oacute;n.
@@ -26,7 +28,7 @@ public class ConfigFileLoader {
 	private static final String ENVIRONMENT_VAR_CONFIG_DIR = "fire.config.path"; //$NON-NLS-1$
 
 
-	private static final Logger LOGGER = Logger.getLogger(ConfigFileLoader.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFileLoader.class);
 
 	/**
 	 * Carga un fichero de configuraci&oacute;n del directorio configurado
@@ -54,10 +56,10 @@ public class ConfigFileLoader {
 						is.close();
 				}
 				else {
-					LOGGER.warning(
-							"El fichero " + configFilename + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ". El fichero debe encontrase dentro del directorio '" + configDir + //$NON-NLS-1$
-							"'.\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+					LOGGER.warn(
+							"El fichero {} no existe o no pudo leerse del directorio configurado en la variable {}. " + //$NON-NLS-1$
+									 "El fichero debe encontrase dentro del directorio '{}'.\n" + //$NON-NLS-1$
+									 "Se buscara en el CLASSPATH.", configFilename, ENVIRONMENT_VAR_CONFIG_DIR, configDir); //$NON-NLS-1$
 				}
 			}
 
