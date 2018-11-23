@@ -4,6 +4,12 @@
 <%@page import="es.gob.fire.server.admin.tool.Utils" %>
 <%@page import="java.util.Date"%>
 <%
+
+if (session == null) {
+	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+	return;
+}
+
 String req = request.getParameter("requestType");//$NON-NLS-1$
 String data = "";//$NON-NLS-1$
 

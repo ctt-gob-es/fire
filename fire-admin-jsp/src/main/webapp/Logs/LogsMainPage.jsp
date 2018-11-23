@@ -16,34 +16,39 @@
 
 <%@page import="java.util.List" %>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%  String errorText = null;
+<%
 
-final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-final String usrLogged= (String) request.getSession().getAttribute("user");//$NON-NLS-1$
-if (state == null || !Boolean.parseBoolean((String) state)) {
-	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-	return;
-}
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
 
-final String jsonError = (String) request.getSession().getAttribute("ERROR_JSON"); //$NON-NLS-1$ 
-if(jsonError != null){
-	final JsonReader reader = Json.createReader(new StringReader(jsonError));
-	final JsonObject jsonObj = reader.readObject();
-	reader.close();
-	if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
-		final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
-		for(int i = 0; i < Error.size(); i++){
-			final JsonObject json = Error.getJsonObject(i);
-			errorText = "Error:" +String.valueOf(json.getInt("Code")) + "  " + json.getString("Message");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
-		}	
-	} 
-}
-session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
+	String errorText = null;
 
-
-
-
-//Logica para determinar si mostrar un resultado de operacion
+	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
+	final String usrLogged= (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
+	if (state == null || !Boolean.parseBoolean((String) state)) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+	
+	final String jsonError = (String) session.getAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON);
+	if(jsonError != null){
+		final JsonReader reader = Json.createReader(new StringReader(jsonError));
+		final JsonObject jsonObj = reader.readObject();
+		reader.close();
+		if(jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
+			final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
+			for(int i = 0; i < Error.size(); i++){
+				final JsonObject json = Error.getJsonObject(i);
+				errorText = "Error:" +String.valueOf(json.getInt("Code")) + "  " + json.getString("Message");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
+			}	
+		} 
+	}
+	session.removeAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON);
+	
+	
+	//Logica para determinar si mostrar un resultado de operacion
 	String op = request.getParameter("op"); //$NON-NLS-1$
 	String result = request.getParameter("r"); //$NON-NLS-1$
 	String entity= request.getParameter("ent"); //$NON-NLS-1$
@@ -84,7 +89,9 @@ session.removeAttribute("ERROR_JSON"); //$NON-NLS-1$
 				<p id="<%=
 						mr.isOk() ? "success-txt" : "error-txt"  //$NON-NLS-1$ //$NON-NLS-2$
 						%>">
-					<%=mr.isOk() ?  mr.getMessage() : errorText != null ? mr.getMessage()+ ". " + errorText : mr.getMessage()%>
+					<%=
+					errorText != null ? mr.getMessage() + ". " + errorText : mr.getMessage() //$NON-NLS-1$
+					%>
 				</p>
 			<% } %>
 			

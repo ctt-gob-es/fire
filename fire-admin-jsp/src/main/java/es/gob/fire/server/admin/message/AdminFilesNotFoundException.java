@@ -17,26 +17,39 @@ package es.gob.fire.server.admin.message;
 public class AdminFilesNotFoundException extends Exception{
 
 	private static final long serialVersionUID = 1L;
-	private static String fileName;
+
+	private String fileName;
+
 	protected AdminFilesNotFoundException() {
         super();
     }
 
+	/**
+	 * Informa de que no se encuentra un fichero de configuraci&oacute;n.
+	 * @param msg Mensaje de error.
+	 * @param filename Fichero que no se encontr&oacute;.
+	 */
 	public AdminFilesNotFoundException(final String msg, final String filename) {
 		super(msg);
-		fileName = filename;
+		this.fileName = filename;
     }
 
+	/**
+	 * Informa de que no se encuentra un fichero de configuraci&oacute;n.
+	 * @param msg Mensaje de error.
+	 * @param filename Fichero que no se encontr&oacute;.
+	 * @param cause Causa origen del error.
+	 */
 	public AdminFilesNotFoundException(final String msg, final String filename, final Throwable cause) {
 		super(msg, cause);
-		fileName = filename;
+		this.fileName = filename;
     }
 
 	/**
 	 * @return El nombre del fichero que no se ha encontrado en el sistema.
 	 */
-	public static String getFileName(){
-		return AdminFilesNotFoundException.fileName;
+	public String getFileName(){
+		return this.fileName;
 	}
 
 }

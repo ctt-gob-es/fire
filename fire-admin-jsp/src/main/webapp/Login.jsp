@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -9,20 +10,23 @@
 	<link rel="stylesheet" href="./resources/css/styles.css"/>
 </head>
 	<body>
-		<% 	
+		<%
 			response.setHeader("Cache-control", "no-cache");//$NON-NLS-1$//$NON-NLS-2$
 			response.setHeader("Cache-control", "no-store");//$NON-NLS-1$//$NON-NLS-2$
 			response.setDateHeader("Expires", 0);//$NON-NLS-1$
 			response.setHeader("Pragma", "no-cache");//$NON-NLS-1$//$NON-NLS-2$
-			request.getSession().removeAttribute("initializedSession"); //$NON-NLS-1$
-			request.getSession().removeAttribute("user"); //$NON-NLS-1$
-			session.invalidate();
+			
+			if (session != null) {
+				session.removeAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
+				session.removeAttribute(ServiceParams.SESSION_ATTR_USER);
+				session.invalidate();
+			}
 			// Este parametro comprueba si el usuario ha introducido su nombre de usuario y contrasena
 			// En caso de que haya introducido datos erroneos, se recibe un "fail"
 			String login = request.getParameter("login"); //$NON-NLS-1$
 			boolean loginFail = false;
-			if(login != null) {
-				if(login.equals("fail")) { //$NON-NLS-1$
+			if (login != null) {
+				if (login.equals("fail")) { //$NON-NLS-1$
 					loginFail = true;
 				}
 			}

@@ -84,18 +84,22 @@
  
  /**
   * Muestra en pantalla el mensaje de error indicado en el objeto JSON que se le pasa.
-  * @returns
   */
  function printErrorResult(JSONData){
-	var html = "";
-	$("#" + idErrorTxtLog).html(html);
-	$("#" + idOkTxtLog).html(html); 
+	printErrorText(JSONData.Error[0].Message);
+ }
+ 
+ /**
+  * Muestra en pantalla un mensaje de error.
+  */
+ function printErrorText(errorText){
+	$("#" + idErrorTxtLog).html("");
+	$("#" + idOkTxtLog).html(""); 
 	$("#" + idOkTxtLog).hide();
-	html = JSONData.Error[0].Message;
-	$("#" + idErrorTxtLog).append(html);
+	$("#" + idMsgTxtLog).hide();
+	$("#" + idErrorTxtLog).append(errorText);
 	$("#" + idErrorTxtLog).css('display:inline-block');
 	$("#" + idErrorTxtLog).show();
-	 
  }
  
  /**
@@ -176,7 +180,9 @@
 	 
 	 if(JSONData.hasOwnProperty('Tail')){
 		 
-		 $("#" + idMsgTxtLog).fadeIn("slow");
+		 if ($("#" + idMsgTxtLog).is(":hidden")) {
+		 	$("#" + idMsgTxtLog).fadeIn("slow");
+		 }
 		 data = JSONData.Tail[0].Result;		
 		 content = "";
 		 oper = "Tail";
@@ -192,7 +198,7 @@
 	 else if(JSONData.hasOwnProperty('Search')){
 	
 		
-		if(searchOp == 0){
+		if(searchOp == 0 && $("#" + idMsgTxtLog).is(":hidden")) {
 			$("#" + idMsgTxtLog).fadeIn("slow");
 		}		 	
 		 oper = "Search";
@@ -207,7 +213,7 @@
 	 }
 	 else if(JSONData.hasOwnProperty('Filtered')){
 		
-		if(filterOp == 1){
+		if(filterOp == 1 && $("#" + idMsgTxtLog).is(":hidden")){
 			$("#" + idMsgTxtLog).fadeIn("slow");
 		}
 		 oper = "Filtered";
@@ -216,10 +222,10 @@
 			 content = ""; 
 		 }	 
 	 }
-		
+
 	var arrHtml = data.split("</br>");
 	for (i = 0; i < arrHtml.length-1; i++) { 
-	/*En el caso de ser la busqueda se selecciona el texto a buscar */
+		/* En el caso de ser la busqueda se selecciona el texto a buscar */
 		if (oper === "Search" || moreWithSearch){
 			var line = "<div>" + arrHtml[i] + "</div>";
 			var text2replace = "<span class='highlight'>" + text2Search + "</span>";
@@ -327,19 +333,20 @@
 		 var url = "../LogAdminService?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime + param_reset;
 
 		 if(isFinal || searchOp == 0){ 
-			 $.post(url, function(data,status){		
-				  var JSONData = JSON.parse(data);
-							 
-				  if(JSONData.hasOwnProperty('Search')){
+			 $.post(url, function(data,status){
+
+				  var jsonData = JSON.parse(data);
+
+				  if(jsonData.hasOwnProperty('Search')){
 					console.log("Print Search ");
-				  	printResult(JSONData, nlines);
+				  	printResult(jsonData, nlines);
 				  	searchOp = 0;
 				  	isFinal = markNextText(text);
 				  	
 				  }
 				   else {
-					   if(JSONData.hasOwnProperty('Error')){
-						 	printErrorResult(JSONData);  
+					   if(jsonData.hasOwnProperty('Error')){
+						 	printErrorResult(jsonData);  
 					   }			
 				  }			  
 			});
@@ -664,9 +671,11 @@
   * en la que se muestra el listado de ficheros log del servidor seleccionado anteriormente.
   * @returns
   */
- function goReturn(){	
+ function goReturn(server){	
 	 reset();
-	 location.href = 'LogsFileList.jsp?name-srv=' + server;	  
+	 //location.href = 'LogsFileList.jsp?name-srv=' + server;
+	 $('#back-button-name-srv').val(server);
+	 $('#back-button-form').submit();
  }
  
 
@@ -695,7 +704,7 @@
 	 $("#" + idOkTxtLog).html(html); 
 	 $("#" + idOkTxtLog).hide();
 	 activeElement("more-button", true);
-				 
+
 	 var url = "../LogAdminService?op=5";
 	 $.post(url,function(data){	
 	 if(data != null && typeof(data) != "undefined"){

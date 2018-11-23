@@ -5,6 +5,7 @@ public class LogServer {
 	private int id;
 	private String nombre;
 	private String url;
+	private boolean verificarSsl = true;
 	private String clave;
 
 
@@ -57,6 +58,24 @@ public class LogServer {
 	}
 
 	/**
+	 * Indica si se debe verificar el certificado SSL servidor.
+	 * @return {@code true} si debe verificarse el certificado,
+	 * {@code false} en caso contrario.
+	 */
+	public boolean isVerificarSsl() {
+		return this.verificarSsl;
+	}
+
+	/**
+	 * Establece si se debe verificar el certificado SSL servidor.
+	 * @param verificarSsl {@code true} si debe verificarse el certificado,
+	 * {@code false} en caso contrario.
+	 */
+	public void setVerificarSsl(final boolean verificarSsl) {
+		this.verificarSsl = verificarSsl;
+	}
+
+	/**
 	 * Obtiene la clave de conexi&oacute;n con el servidor
 	 * @return
 	 */
@@ -71,8 +90,4 @@ public class LogServer {
 	public final void setClave(final String clave) {
 		this.clave = clave;
 	}
-
-
-
-
 }

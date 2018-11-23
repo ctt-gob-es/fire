@@ -261,26 +261,13 @@ class HttpManager {
 		byte[] content = null;
 
 		if (statusCode.startsWith("4") || statusCode.startsWith("5")) { //$NON-NLS-1$ //$NON-NLS-2$
-			if (uri.getProtocol().equals(HTTPS)) {
-				enableSslChecks();
-			}
-//			throw new HttpError(
-//				resCode,
-//				conn.getResponseMessage(),
-//				readStream(conn.getErrorStream()),
-//				url
-//			);
-
 			content = readStream(conn.getErrorStream());
 		}
 		else {
-			try (
-					final InputStream is = conn.getInputStream();
-				) {
-					content = readStream(is);
-				}
+			try (final InputStream is = conn.getInputStream(); ) {
+				content = readStream(is);
+			}
 		}
-
 
 		if (this.disabledSslChecks && uri.getProtocol().equals(HTTPS)) {
 			enableSslChecks();

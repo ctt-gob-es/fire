@@ -1,18 +1,24 @@
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO" %>
 <%
-String req=request.getParameter("requestType");
-String data="";
 
-if(req.equals("countRecords")){
-    data= UsersDAO.getUsersCount();
+if (session == null) {
+	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+	return;
 }
-if(req.equals("All")){
-    data= UsersDAO.getUsersJSON();
+
+String req = request.getParameter("requestType"); //$NON-NLS-1$
+String data = ""; //$NON-NLS-1$
+
+if (req.equals("countRecords")){ //$NON-NLS-1$
+    data = UsersDAO.getUsersCount();
 }
-if(req.equals("getRecords")){
-	String start=request.getParameter("currentIndex");
-	String total=request.getParameter("recordsToFetch");
-	data= UsersDAO.getUsersPag(start, total);
+if (req.equals("All")){ //$NON-NLS-1$
+    data = UsersDAO.getUsersJSON();
+}
+if (req.equals("getRecords")){ //$NON-NLS-1$
+	String start = request.getParameter("currentIndex"); //$NON-NLS-1$
+	String total = request.getParameter("recordsToFetch"); //$NON-NLS-1$
+	data = UsersDAO.getUsersPag(start, total);
 }
 
 out.print(data);
