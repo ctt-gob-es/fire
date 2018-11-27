@@ -257,8 +257,8 @@ public class StatisticsService extends HttpServlet {
 	 */
 	private final void getParameters(final HttpServletRequest request) throws Exception {
 
-		if(request.getParameter(ServiceParams.START_DATE) != null && !"".equals(request.getParameter(ServiceParams.START_DATE))) { //$NON-NLS-1$
-			final String fecha[] = request.getParameter(ServiceParams.START_DATE).split("/"); //$NON-NLS-1$
+		if(request.getParameter(ServiceParams.PARAM_START_DATETIME) != null && !"".equals(request.getParameter(ServiceParams.PARAM_START_DATETIME))) { //$NON-NLS-1$
+			final String fecha[] = request.getParameter(ServiceParams.PARAM_START_DATETIME).split("/"); //$NON-NLS-1$
 			this.setMonth(new Integer(Integer.parseInt(fecha[0])));
 			this.setYear(new Integer(Integer.parseInt(fecha[1])));
 		}

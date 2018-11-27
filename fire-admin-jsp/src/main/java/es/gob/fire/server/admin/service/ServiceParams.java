@@ -61,4 +61,10 @@ public class ServiceParams {
 
 	/** Atributo de sesi&oacute;n para el guardado del nombre de usuario logueado. */
 	public static final String SESSION_ATTR_USER = "user"; //$NON-NLS-1$
+
+	/***Par&aacute;metro que indica la consulta seleccionada para las estad&iacute;sticas */
+	public static final String PARAM_SELECT_QUERY = "select_query";//$NON-NLS-1$
+
+
+
 }

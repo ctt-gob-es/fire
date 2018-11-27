@@ -32,7 +32,6 @@ import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
 import es.gob.fire.server.services.statistics.Operations;
-import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.services.statistics.FireStatistics;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
@@ -47,7 +46,7 @@ public class FIReService extends HttpServlet {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = -2304782878707695769L;
-
+	private static final Logger LOGGER = Logger.getLogger(FIReService.class.getName());
 
 	private static FireStatistics firest;
     // Parametros que necesitamos de la URL.
@@ -66,7 +65,7 @@ public class FIReService extends HttpServlet {
 	    	es.gob.fire.services.statistics.config.ConfigManager.checkConfiguration(CONFIG_FILE);
 		}
     	catch (final Exception e) {
-    		
+
     		LOGGER.severe("No se pudo cargar la configuracion del componente central de FIRe: " + e); //$NON-NLS-1$
     		return;
     	}
