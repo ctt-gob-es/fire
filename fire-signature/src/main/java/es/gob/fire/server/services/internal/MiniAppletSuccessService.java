@@ -31,7 +31,6 @@ import org.w3c.dom.NodeList;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.services.statistics.config.ConfigManager;
 
 /**
@@ -40,8 +39,8 @@ import es.gob.fire.services.statistics.config.ConfigManager;
 public class MiniAppletSuccessService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-
-	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	private static final Logger LOGGER = Logger.getLogger(MiniAppletSuccessService.class.getName());
+//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$

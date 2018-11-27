@@ -24,10 +24,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
-import es.gob.fire.client.ClientConfigFilesNotFoundException;
 import es.gob.fire.client.SignOperationResult;
 
 /**
@@ -141,8 +140,8 @@ public class SignatureService extends HttpServlet {
 					extraparams,
 					Base64.encode(data, true),
 					confProperties);
-
-
+		}
+		catch (final Exception e) {
 			LOGGER.error("Error durante la operacion de firma", e); //$NON-NLS-1$
 	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode("Error en la llamada a la operacion de firma:<br>" + e.toString(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$));
 	    	return;

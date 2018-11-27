@@ -28,7 +28,6 @@ import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.services.statistics.FireSignLogger;
 
 /**
  * Manejador de la operaci&oacute;n de generaci&oacute;n de certificados. Esta clase
@@ -37,8 +36,8 @@ import es.gob.fire.services.statistics.FireSignLogger;
  */
 public class GenerateCertificateManager {
 
-	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-//	private static final Logger LOGGER = Logger.getLogger(GenerateCertificateManager.class.getName());
+//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	private static final Logger LOGGER = Logger.getLogger(GenerateCertificateManager.class.getName());
 
 	/**
 	 * Ejecuta una operacion de generaci&oacute;n de certificado en servidor.

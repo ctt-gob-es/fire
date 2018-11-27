@@ -19,7 +19,6 @@ import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -27,6 +26,8 @@ import es.gob.fire.signature.ConfigManager;
  * generada con el Cliente @firma.
  */
 public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread {
+
+	private static final Logger LOGGER = Logger.getLogger(ClienteAFirmaUpdateSignaturesThread.class.getName());
 
 	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 

@@ -27,7 +27,7 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.HttpCustomErrors;
-import es.gob.fire.services.statistics.FireSignLogger;
+import es.gob.fire.signature.ConfigManager;
 
 /**
  * Servlet implementation class RequestNewCertificateService
@@ -36,7 +36,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-
+	private static final Logger LOGGER = Logger.getLogger(RequestNewCertificateService.class.getName());
 
 	/**
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)

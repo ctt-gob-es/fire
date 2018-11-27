@@ -19,7 +19,8 @@ import java.util.logging.SimpleFormatter;
  * @author Adolfo.Navarro
  *
  */
-public class FireLogger {
+public class FireLogger  {
+
 
 	static Logger logger ;
 	static FileHandler fh;

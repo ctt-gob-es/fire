@@ -17,7 +17,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.services.statistics.FireSignLogger;
 
 
 /**
@@ -26,7 +25,7 @@ import es.gob.fire.services.statistics.FireSignLogger;
  */
 public class RecoverErrorManager {
 
-
+	private static final Logger LOGGER = Logger.getLogger(RecoverErrorManager.class.getName());
 
 
 

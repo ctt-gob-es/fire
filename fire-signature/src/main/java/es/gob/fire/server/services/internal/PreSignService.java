@@ -39,7 +39,6 @@ import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigManager;
 
@@ -49,8 +48,8 @@ public final class PreSignService extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-//    private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
+//    private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+    private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
     private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(es.gob.fire.services.statistics.config.ConfigManager.getConfigStatistics());
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 

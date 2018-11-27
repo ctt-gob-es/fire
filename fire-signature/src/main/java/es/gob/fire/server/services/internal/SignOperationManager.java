@@ -25,7 +25,6 @@ import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -34,8 +33,8 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class SignOperationManager {
 
-	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-	//private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
+//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
 	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 	/**
 	 * Inicia la operaci&oacute;n de firma asociada al componente central.

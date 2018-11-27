@@ -7,7 +7,6 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.services.statistics.FireSignLogger;
 
 /**
  * Informaci&oacute;n necesaria de un proveedor para permitir su correcto uso
@@ -45,8 +44,8 @@ public class ProviderInfo {
 
 	private static final String DATA_URI_IMAGE_HEADER = "image/png;base64,"; //$NON-NLS-1$
 
-	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-//	private static final Logger LOGGER = Logger.getLogger(ProviderInfo.class.getName());
+//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	private static final Logger LOGGER = Logger.getLogger(ProviderInfo.class.getName());
 
 	private final String name;
 	private final Properties config;

@@ -23,7 +23,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.AOUtil;
-import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -32,6 +31,7 @@ import es.gob.fire.signature.ConfigManager;
  */
 public final class TempFilesHelper {
 
+	private static final Logger LOGGER = Logger.getLogger(TempFilesHelper.class.getName());
 
     private static final String DEFAULT_PREFIX = "fire-"; //$NON-NLS-1$
 

@@ -10,7 +10,6 @@ import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.statistics.Operations;
 import es.gob.fire.server.services.statistics.SignatureLogger;
 import es.gob.fire.server.services.statistics.TransactionLogger;
-import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.services.statistics.config.ConfigFileLoader;
 import es.gob.fire.services.statistics.config.ConfigManager;
 /**
@@ -20,8 +19,8 @@ import es.gob.fire.services.statistics.config.ConfigManager;
  */
 public class ErrorManager {
 
-	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-//	private static final Logger LOGGER = Logger.getLogger(ErrorManager.class.getName());
+//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	private static final Logger LOGGER = Logger.getLogger(ErrorManager.class.getName());
 	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
 	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
 	private static final String ERR_FILE = "errors_es_ES.messages"; //$NON-NLS-1$
