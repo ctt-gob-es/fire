@@ -12,6 +12,8 @@ package es.gob.fire.server.services;
 import java.io.IOException;
 import java.util.Properties;
 
+import es.gob.fire.server.services.internal.SignConstants;
+import es.gob.fire.server.services.statistics.ImprovedSignatureFormats;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.ConfigFileNotFoundException;
 import es.gob.fire.upgrade.PlatformWsException;
@@ -28,6 +30,9 @@ public class AfirmaUpgrader {
 
 	private static PlatformWsHelper conn = null;
 
+	private static String upgradedFormat = null;
+
+
 	/**
 	 * Actualiza una firma utilizando la Plataforma @firma. Si no se indica formato de
 	 * actualizaci&oacute;n, se devuelve la propia firma.
@@ -42,7 +47,7 @@ public class AfirmaUpgrader {
 		if (upgradeFormat == null || upgradeFormat.isEmpty()) {
 			return signature;
 		}
-
+		setUpgradedFormat(null);
 		if (conn == null) {
 			Properties config;
 			try {
@@ -69,6 +74,19 @@ public class AfirmaUpgrader {
         			signature,
         			UpgradeTarget.getUpgradeTarget(upgradeFormat),
         			afirmaId);
+        	final String[] result = Upgrade.getUpgradeResult().split(":"); //$NON-NLS-1$
+        	if(result != null && result.length > 0) {
+        		for(int i = 0; i <= result.length - 1; i++) {
+            		if(!ImprovedSignatureFormats.getId(result[i]).equals(SignConstants.SIGN_LONGFORMATS_IDOTROS)) {
+            			setUpgradedFormat(result[i].toUpperCase());
+            		}
+            	}
+        		if(getUpgradedFormat() == null ) {
+        			setUpgradedFormat(SignConstants.SIGN_LONGFORMATS_OTROS);
+            	}
+        	}
+
+
         } catch (final PlatformWsException e) {
         	throw new UpgradeException("Error de conexion con la Plataforma @firma para la actualizacion de la firma", e); //$NON-NLS-1$
         } catch (final UpgradeResponseException e) {
@@ -84,4 +102,18 @@ public class AfirmaUpgrader {
 
         return upgradedSignature;
 	}
+
+
+	public static final String getUpgradedFormat() {
+		return upgradedFormat;
+	}
+
+
+	private static final void setUpgradedFormat(final String upgradedFormat) {
+		AfirmaUpgrader.upgradedFormat = upgradedFormat;
+	}
+
+
+
+
 }

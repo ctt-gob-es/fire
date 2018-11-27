@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
+import es.gob.fire.services.statistics.FireSignLogger;
 
 
 /**
@@ -23,7 +24,8 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
  */
 class FIReHelper {
 
-	private static final Logger LOGGER = Logger.getLogger(FIReHelper.class.getName());
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(FIReHelper.class.getName());
 
 	/**
 	 * Conecta con el servicio de custodia de certificados en la nube para comprobar si

@@ -247,6 +247,8 @@ public final class SignService extends HttpServlet {
         // Si se ha definido un formato de actualizacion de la firma, se actualizara
         try {
         	signResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
+
+
         } catch (final UpgradeException e) {
         	LOGGER.log(Level.SEVERE, "Error al actualizar la firma de la transaccion: " + transactId, e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,

@@ -68,6 +68,8 @@ public class ServiceParams {
 
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de operaci&oacute;n. */
     public static final String SESSION_PARAM_OPERATION = "op"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID del tipo de operaci&oacute;n. 1- firma simple 2-firma por lotes */
+    public static final String SESSION_PARAM_TYPE_OPERATION = "typeop"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de aplicaci&oacute;n. */
     public static final String SESSION_PARAM_APPLICATION_ID = "appid"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el nombre de aplicaci&oacute;n. */
@@ -96,6 +98,10 @@ public class ServiceParams {
     public static final String SESSION_PARAM_FILTERS = "filters"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el formato avanzado de actualizaci&oacute;n de la firma. */
     public static final String SESSION_PARAM_UPGRADE = "upgrade"; //$NON-NLS-1$
+
+
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el formato de firma configurado */
+    public static final String SESSION_PARAM_FORMAT_CONFIG = "format_config"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el documento de propiedades para la redirecci&oacute;n del usuario. */
     public static final String SESSION_PARAM_CONNECTION_CONFIG = "config"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el */
@@ -126,6 +132,12 @@ public class ServiceParams {
     public static final String SESSION_PARAM_ERROR_TYPE = "errortype"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el mensaje de error obtenido. */
 	public static final String SESSION_PARAM_ERROR_MESSAGE = "errormsg"; //$NON-NLS-1$
+
+	 /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el navegador usado del cliente. */
+	public static final String SESSION_PARAM_BROWSER = "browser"; //$NON-NLS-1$
+
+	 /** Par&aacute;metro usado para el guardado del tama&ntilde;o de los datos a firmar en sesi&oacute;n */
+	public static final String SESSION_PARAM_DOCSIZE = "docsize"; //$NON-NLS-1$
 
 	/** Par&aacute;metro usado para configurar que se debe utilizar un certificado local. */
     public static final String CERTIFICATE_ORIGIN_LOCAL = "local"; //$NON-NLS-1$

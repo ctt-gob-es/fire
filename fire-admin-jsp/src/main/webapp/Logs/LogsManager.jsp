@@ -116,19 +116,19 @@
 	<title>Administraci&oacute;n FIRe</title>
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
-	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.min.css">
-	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.theme.min.css">
-	<link rel="stylesheet" href="../resources/jquery-ui/jquery.ui.timepicker.css">
+	<link rel="stylesheet" href="../resources/css/jqueryUI/jquery-ui.min.css">
+	<link rel="stylesheet" href="../resources/css/jqueryUI/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="../resources/css/jqueryUI/jquery.ui.timepicker.css">
 	<script type="text/javascript">
 		var file = '<%=fileName%>';
 		var server = '<%=nameSrv%>';
 	</script>	
 	
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-	<script src="../resources/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.ui.timepicker-es.js" type="text/javascript"></script>
-	<script src="../resources/jquery-ui/jquery.ui.timepicker.js" type="text/javascript"></script>
+	<script src="../resources/js/jquery.ui.timepicker.js" type="text/javascript"></script>
 	<script src="../resources/js/logs_manager.js" type="text/javascript"></script>
 	
 </head>
@@ -138,7 +138,7 @@
 	
 	<!-- contenido -->
 	<div id="containerLogsManager">
-		<div id="subtitle" style="padding: 10px;width:100%;height=42;">
+		<div id="subtitle" style="padding: 10px;width:100%;height= 42;">
 			<div id="btnContainer" style="display: inline-block;width:8%;">				
 				<input id="download-button" class="btn-log" name="download-button" type="button" value="Descargar" title="Obtiene el fichero log completo en formato .zip"  onclick="download();" />					      		
 			</div>

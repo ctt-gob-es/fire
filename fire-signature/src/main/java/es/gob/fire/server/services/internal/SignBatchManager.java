@@ -18,6 +18,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -25,8 +28,10 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class SignBatchManager {
 
-	private static final Logger LOGGER = Logger.getLogger(SignBatchManager.class.getName());
-
+	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+//	private static final Logger LOGGER = Logger.getLogger(SignBatchManager.class.getName());
+	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
     /**
      * Inicia el proceso de firma de un lote.
 	 * @param request Petici&oacute;n de firma del lote.
@@ -63,6 +68,8 @@ public class SignBatchManager {
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
     		LOGGER.warning("Se ha pedido firmar un lote sin documentos. Se aborta la operacion."); //$NON-NLS-1$
+    		SIGNLOGGER.log(session, false, null);
+    		TRANSLOGGER.log(session, false);
         	SessionCollector.removeSession(session);
     		response.sendError(HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorCode(), HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorDescription());
     		return;
@@ -83,6 +90,8 @@ public class SignBatchManager {
 		// Listamos los certificados del usuario
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning("No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
+			SIGNLOGGER.log(session, false, null);
+			TRANSLOGGER.log(session, false);
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;

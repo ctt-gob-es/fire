@@ -20,6 +20,8 @@ public final class Upgrade {
 
 	private static PlatformWsHelper defaultConn = null;
 
+	private static String upgradeResult = null;
+
     /**
      * Constructor privado para no permir la instanciaci&oacute;n
      */
@@ -123,7 +125,18 @@ public final class Upgrade {
         	throw new UpgradeResponseException(vr.getMajorCode(),
         			vr.getMinorCode(), "No se ha actualizado al formato solicitado. Formato recibido: " + vr.getSignatureForm()); //$NON-NLS-1$
         }
-
+        setUpgradeResult(vr.getSignatureForm());
         return vr.getUpgradedSignature();
     }
+
+	public final static String getUpgradeResult() {
+		return Upgrade.upgradeResult;
+	}
+
+	private static final void setUpgradeResult(final String upgradeResult) {
+		Upgrade.upgradeResult = upgradeResult;
+	}
+
+
+
 }

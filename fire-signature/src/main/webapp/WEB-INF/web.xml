@@ -115,6 +115,13 @@
   	<servlet-name>AutoFirmaJnlpService</servlet-name>
   	<servlet-class>es.gob.fire.server.services.autofirma.AutoFirmaJnlpService</servlet-class>
   </servlet>
+  <servlet>
+  	<description>
+  	</description>
+  	<display-name>StatisticsService</display-name>
+  	<servlet-name>StatisticsService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.statistics.StatisticsService</servlet-class>
+  </servlet>
 
   <servlet-mapping>
   	<servlet-name>fireService</servlet-name>
@@ -187,5 +194,9 @@
   <servlet-mapping>
   	<servlet-name>AutoFirmaJnlpService</servlet-name>
   	<url-pattern>/public/afirma/afirmaJnlpService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>StatisticsService</servlet-name>
+  	<url-pattern>/StatisticsService</url-pattern>
   </servlet-mapping>
 </web-app>

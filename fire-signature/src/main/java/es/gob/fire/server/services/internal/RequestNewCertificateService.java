@@ -27,7 +27,7 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.HttpCustomErrors;
-import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.services.statistics.FireSignLogger;
 
 /**
  * Servlet implementation class RequestNewCertificateService
@@ -36,7 +36,6 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER = Logger.getLogger(RequestNewCertificateService.class.getName());
 
 
 	/**
@@ -168,6 +167,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
         response.sendRedirect(redirectUrl);
 	}
+
 
 	private static String getPublicContext(final String requestUrl) {
 		String redirectUrlBase = ConfigManager.getPublicContextUrl();

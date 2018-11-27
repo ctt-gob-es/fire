@@ -78,10 +78,10 @@
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
 	<link rel="stylesheet" href="../resources/css/jquery-ui.min.css">
-	<link rel="stylesheet" href="../resources/css/datatables.min.css">
+<!-- 	<link rel="stylesheet" href="../resources/css/datatables.min.css"> -->
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
-	<script src="../resources/js/datatables.min.js" type="text/javascript"></script>
+<!-- 	<script src="../resources/js/datatables.min.js" type="text/javascript"></script> -->
 
 		
 </head>

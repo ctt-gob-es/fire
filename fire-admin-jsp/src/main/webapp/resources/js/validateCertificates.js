@@ -38,7 +38,11 @@ $(document).ready(function(){
  			ok = false;
  		}
  		
-		if($("#cert-prin").html() == "" && $("#cert-resp").html() == ""  && op==2){
+	
+ 		var cert1 = $("#cert-prin").html().trim();
+ 		var cert2 = $("#cert-resp").html().trim();
+ 				
+		if(cert1.length == 0 && cert2.length == 0  && op==2){
  			$('label[for=fichero-firma-prin]').css({color:'red'}); 			
 			$('#fichero-firma-prin').css({backgroundColor:'#fcc'});
 			$('label[for=fichero-firma-resp]').css({color:'red'}); 			

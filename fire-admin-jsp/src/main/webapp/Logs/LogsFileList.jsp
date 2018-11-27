@@ -102,12 +102,12 @@
 	<title>Administraci&oacute;n FIRe</title>
 	<link rel="shortcut icon" href="../resources/img/cert.png">
 	<link rel="stylesheet" href="../resources/css/styles.css">
-	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.min.css">
-	<link rel="stylesheet" href="../resources/jquery-ui/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="../resources/css/jqueryUI/jquery-ui.min.css">
+	<link rel="stylesheet" href="../resources/css/jqueryUI/jquery-ui.theme.min.css">
 	<link rel="stylesheet" href="../resources/css/ui.jqgrid.css">
 	
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-	<script src="../resources/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
 	
 	<script src="../resources/js/grid.locale-es.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.jqGrid.min.js" type="text/javascript"></script>

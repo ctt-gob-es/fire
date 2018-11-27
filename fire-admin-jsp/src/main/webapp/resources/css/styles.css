@@ -449,3 +449,5 @@ span.nextHighLight{
 			}
 			
 
+/********************/
+.ui-datepicker{ z-index: 9999 !important;}

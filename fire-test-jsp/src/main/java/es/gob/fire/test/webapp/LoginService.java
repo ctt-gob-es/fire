@@ -43,6 +43,8 @@ public class LoginService extends HttpServlet {
 
 		request.getSession().setAttribute("user", userId); //$NON-NLS-1$
 
+		request.getSession().setAttribute("UserAgent", request.getHeader("user-agent"));  //$NON-NLS-1$ //$NON-NLS-2$
+
 		response.sendRedirect("SelectOperation.jsp"); //$NON-NLS-1$
 	}
 }

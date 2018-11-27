@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.AOUtil;
+import es.gob.fire.services.statistics.FireSignLogger;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -31,11 +32,12 @@ import es.gob.fire.signature.ConfigManager;
  */
 public final class TempFilesHelper {
 
-    private static final Logger LOGGER = Logger.getLogger(TempFilesHelper.class.getName());
 
     private static final String DEFAULT_PREFIX = "fire-"; //$NON-NLS-1$
 
     private static File TMPDIR;
+
+    private static  Long fileSize = 0L;
 
     static {
 
@@ -152,10 +154,18 @@ public final class TempFilesHelper {
         bos.close();
         fos.close();
         LOGGER.fine("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
+        setFileSize(new Long(f.length()));
         return f.getName();
     }
 
-    /**
+	public final static  Long getFileSize() {
+		return fileSize;
+	}
+
+	private final static  void setFileSize(final Long fileSize) {
+		TempFilesHelper.fileSize = fileSize;
+	}
+  /**
      * Recorre el directorio temporal eliminando los ficheros que hayan sobrepasado el tiempo
      * indicado sin haber sido modificados.
      * @param timeout Tiempo en milisegundos que debe haber transcurrido desde la &uacute;ltima
@@ -195,5 +205,4 @@ public final class TempFilesHelper {
 			return pathname.isFile() && System.currentTimeMillis() > pathname.lastModified() + this.timeoutMillis;
 		}
 
-    }
-}
+    }}

@@ -18,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.internal.AddDocumentBatchManager;
 import es.gob.fire.server.services.internal.CreateBatchManager;
@@ -30,6 +31,9 @@ import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
+import es.gob.fire.server.services.statistics.Operations;
+import es.gob.fire.services.statistics.FireSignLogger;
+import es.gob.fire.services.statistics.FireStatistics;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
@@ -44,8 +48,13 @@ public class FIReService extends HttpServlet {
 	/** Serial Id. */
 	private static final long serialVersionUID = -2304782878707695769L;
 
-	private final static Logger LOGGER = Logger.getLogger(FIReService.class.getName());
 
+	private static FireStatistics firest;
+    // Parametros que necesitamos de la URL.
+    private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
+    private static final String PARAMETER_NAME_OPERATION = "op"; //$NON-NLS-1$
+	/** Nombre del fichero de configuraci&oacute;n. */
+	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
     private static GoogleAnalitycs analytics = null;
 
     @Override
@@ -54,11 +63,27 @@ public class FIReService extends HttpServlet {
 
     	try {
 	    	ConfigManager.checkConfiguration();
+	    	es.gob.fire.services.statistics.config.ConfigManager.checkConfiguration(CONFIG_FILE);
 		}
     	catch (final Exception e) {
+    		
     		LOGGER.severe("No se pudo cargar la configuracion del componente central de FIRe: " + e); //$NON-NLS-1$
     		return;
     	}
+
+    	// Codigo para inicializar las estadisticas
+		try {
+			final int configStatistic = Integer.valueOf(es.gob.fire.services.statistics.config.ConfigManager.getConfigStatistics()).intValue() ;
+			final String st_path = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsDir();
+			if(configStatistic == 2 && st_path != null && !"".equals(st_path)) { //$NON-NLS-1$
+				firest = new FireStatistics(st_path);
+				final String startTime = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsStartTime();
+				firest.init(startTime);
+			}
+		}
+		catch (final Exception e) {
+			LOGGER.warning("Error al cargar la configuracion de estadisticas: " + e); //$NON-NLS-1$
+		}
 
     	if (analytics == null && ConfigManager.getGoogleAnalyticsTrackingId() != null) {
     		try {
@@ -98,10 +123,12 @@ public class FIReService extends HttpServlet {
         final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
         final String trId      = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 
+
+
     	if (ConfigManager.isCheckApplicationNeeded()) {
         	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
         	if (appId == null || appId.isEmpty()) {
-        		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en la peticion"); //$NON-NLS-1$
+            		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en la peticion"); //$NON-NLS-1$
                 response.sendError(
             		HttpServletResponse.SC_BAD_REQUEST,
                     "No se ha proporcionado el identificador de la aplicacion" //$NON-NLS-1$
@@ -125,6 +152,7 @@ public class FIReService extends HttpServlet {
         else {
         	LOGGER.fine("No se realiza la validacion de aplicacion"); //$NON-NLS-1$
         }
+
 
     	if (ConfigManager.isCheckCertificateNeeded()){
     		LOGGER.fine("Se realizara la validacion del certificado"); //$NON-NLS-1$
@@ -152,6 +180,10 @@ public class FIReService extends HttpServlet {
         FIReServiceOperation op;
         try {
         	op = FIReServiceOperation.parse(operation);
+        	final Operations typeOp =  Operations.parse(op);
+        	final HttpSession sesion = request.getSession();
+        	sesion.setAttribute(ServiceParams.SESSION_PARAM_TYPE_OPERATION, typeOp.toString());
+
         }
         catch (final Exception e) {
             LOGGER.warning("Se ha indicado un id de operacion incorrecto: + e"); //$NON-NLS-1$

@@ -25,9 +25,7 @@ public class ConfigFileLoader {
 	/** Variable de entorno que determina el directorio en el que buscar el fichero de configuraci&oacute;n. */
 	private static final String ENVIRONMENT_VAR_CONFIG_DIR = "fire.config.path"; //$NON-NLS-1$
 
-	/** Variable de entorno antigua que determinaba el directorio en el que buscar el fichero
-	 * de configuraci&oacute;n. Se utiliza si no se ha establecido la nueva variable. */
-	private static final String ENVIRONMENT_VAR_CONFIG_DIR_OLD = "clavefirma.config.path"; //$NON-NLS-1$
+
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigFileLoader.class.getName());
 
@@ -44,15 +42,14 @@ public class ConfigFileLoader {
 		boolean loaded = false;
 		final Properties config = new Properties();
 		try {
-			String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
-			if (configDir == null) {
-				configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
-			}
+			final String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
+
 			if (configDir != null) {
 				final File configFile = new File(configDir, configFilename).getCanonicalFile();
 				// Comprobamos que se trate de un fichero sobre el que tengamos permisos y que no
 				// nos hayamos salido del directorio de configuracion indicado
-				if (configFile.isFile() && configFile.canRead() && configDir.startsWith(configFile.getParent())) {
+				if (configFile.isFile() && configFile.canRead() && configFile.getParent() != null
+						&& configDir.replace('\\', '/').startsWith(configFile.getParent().replace('\\', '/'))) {
 					try (InputStream is = new FileInputStream(configFile);) {
 						config.load(is);
 						loaded = true;
@@ -85,4 +82,6 @@ public class ConfigFileLoader {
 
 		return config;
 	}
+
+
 }

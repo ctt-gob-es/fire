@@ -26,8 +26,11 @@ public class DocInfo implements Serializable {
 
 	private static final String PROPERTY_DOC_NAME = "docName"; //$NON-NLS-1$
 
+	//private static final String PROPERTY_DOC_SIZE ="docSize"; //$NON-NLS-1$
+
 	private String title = null;
 	private String name = null;
+	private Long size = null;
 
 
 	/**
@@ -52,6 +55,16 @@ public class DocInfo implements Serializable {
 
 	private void setTitle(final String title) {
 		this.title = title;
+	}
+
+
+
+	public final Long getSize() {
+		return this.size;
+	}
+
+	public final void setSize(final Long size) {
+		this.size = size;
 	}
 
 	/**

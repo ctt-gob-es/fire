@@ -17,6 +17,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.services.statistics.FireSignLogger;
 
 
 /**
@@ -25,7 +26,9 @@ import es.gob.fire.server.services.RequestParameters;
  */
 public class RecoverErrorManager {
 
-	private static final Logger LOGGER = Logger.getLogger(RecoverErrorManager.class.getName());
+
+
+
 
 	/**
 	 * Obtiene el error detectado durante la transacci&oacute;n.
@@ -40,6 +43,7 @@ public class RecoverErrorManager {
 		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+
 
         // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
@@ -57,6 +61,8 @@ public class RecoverErrorManager {
     		sendResult(response, buildErrorResult(session, OperationError.INVALID_SESSION));
     		return;
         }
+
+
 
         // Comprobamos si se declaro un error o si este es desconocido
         if (!session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
@@ -82,6 +88,8 @@ public class RecoverErrorManager {
 
         // Recuperamos la informacion de error y eliminamos la sesion
         final TransactionResult result = buildErrorResult(session);
+
+
         SessionCollector.removeSession(session);
     	sendResult(response, result);
 	}
