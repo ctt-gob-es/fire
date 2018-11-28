@@ -19,7 +19,7 @@ levels=TRACE,DEBUG,INFO,WARN,ERROR
 # SimpleDateFormat de Java (https://docs.oracle.com/javase/tutorial/i18n/format/simpleDateFormat.html).
 # Ejemplo de patrones:
 # - Patron de fecha de los logs de FIRe:
-#		yyyy-mm-dd HH:mm:ss
+#		yyyy-MM-dd HH:mm:ss
 # - Patron de fecha por defecto de Java Logging API (Valor por defecto):
 #		MMM dd, yyyy hh:mm:ss a
 # - Patron de fecha por defecto de Logback:
