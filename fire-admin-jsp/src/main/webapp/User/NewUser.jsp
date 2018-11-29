@@ -1,5 +1,6 @@
 
 
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO" %>
 <%@page import="es.gob.fire.server.admin.entity.User" %>
 
@@ -7,13 +8,19 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-	final String usrLogged= (String) request.getSession().getAttribute("user");//$NON-NLS-1$
+
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
+	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
+	final String usrLogged= (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 	if (state == null || !Boolean.parseBoolean((String) state)) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
 	}
-	final String empty="";
+	final String EMPTY = ""; //$NON-NLS-1$
 	String idUsr = request.getParameter("id-usr");//$NON-NLS-1$
 	final int op = Integer.parseInt(request.getParameter("op"));//$NON-NLS-1$
 
@@ -37,7 +44,7 @@
 			subTitle = "Inserte los datos del nuevo usuario."; //$NON-NLS-1$
 			break;
 		case 2:		
-			title = "Editar usuario ".concat(usr.getNombre()).concat(" ").concat(usr.getApellidos()); //$NON-NLS-1$
+			title = "Editar usuario ".concat(usr.getNombre()).concat(" ").concat(usr.getApellidos()); //$NON-NLS-1$ //$NON-NLS-2$
 			subTitle = "Modifique los datos que desee editar."; //$NON-NLS-1$
 			break;
 		default:
@@ -72,7 +79,7 @@
 		</div>
 		
 		<p>Los campos con * son obligatorios</p>
-			<form id="formUser" method="post" action="../newUser?op=<%=op%>&idUser=<%=usr.getId_usuario()!=null?usr.getId_usuario():empty%>"> 
+			<form id="formUser" method="post" action="../newUser?op=<%=op%>&idUser=<%=usr.getId_usuario()!=null?usr.getId_usuario():EMPTY%>"> 
 			
 <!-- 			<div style="margin: auto;width: 100%;padding: 3px;"> -->
 <!-- 					<div style="display: inline-block; width: 20%;margin: 3px;"> -->
@@ -81,7 +88,7 @@
 <!-- 					</div> -->
 <!-- 					<div  style="display: inline-block; width: 70%;margin: 3px;"> -->
 <!-- 						<input id="role-usr" class="edit-txt" type="text" name="role-usr" style="width: 34%;margin-top:3px;"  -->
-<%-- 						value="<%= usr.getRol()!= null ? usr.getRol(): empty %>"> --%>
+<%-- 						value="<%= usr.getRol()!= null ? usr.getRol(): EMPTY %>"> --%>
 <!-- 					</div>	 -->
 <!-- 			</div> -->
 			
@@ -95,7 +102,7 @@
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
 						<input id="login-usr" class="edit-txt" type="text" name="login-usr" style="width: 80%;margin-top:3px;" 
-						value="<%= usr.getNombre_usuario()!= null ? usr.getNombre_usuario(): empty %>"> 
+						value="<%= usr.getNombre_usuario()!= null ? usr.getNombre_usuario(): EMPTY %>"> 
 					</div>
 				</div>									
 				<%} %>
@@ -128,7 +135,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 						<input id="usr-name" class="edit-txt" type="text" name="usr-name" style="width: 80%;margin-top:3px;" 
-						value="<%= usr.getNombre()!= null ? usr.getNombre(): empty %>"> 
+						value="<%= usr.getNombre()!= null ? usr.getNombre(): EMPTY %>"> 
 				</div>
 					
 				<div style="display: inline-block; width: 10%;margin: 3px;">
@@ -137,7 +144,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 					<input id="usr-surname" class="edit-txt" type="text" name="usr-surname" style="width: 80%;margin-top:3px;" 
-						value="<%= usr.getApellidos()!= null ? usr.getApellidos(): empty %>"> 
+						value="<%= usr.getApellidos()!= null ? usr.getApellidos(): EMPTY %>"> 
 				</div>						
 			</div>	
 			
@@ -148,7 +155,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 						<input id="email" class="edit-txt" type="text" name="email" style="width: 80%;margin-top:3px;" 
-						value="<%= usr.getCorreo_elec()!= null ? usr.getCorreo_elec(): empty %>"> 
+						value="<%= usr.getCorreo_elec()!= null ? usr.getCorreo_elec(): EMPTY %>"> 
 				</div>
 					
 				<div style="display: inline-block; width: 10%;margin: 3px;">
@@ -157,7 +164,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 					<input id="telf-contact" class="edit-txt" type="text" name="telf-contact" style="width: 80%;margin-top:10px;" 
-						value="<%= usr.getTelf_contacto()!= null ? usr.getTelf_contacto(): empty %>"> 
+						value="<%= usr.getTelf_contacto()!= null ? usr.getTelf_contacto(): EMPTY %>"> 
 				</div>						
 			</div>	
 			<fieldset class="fieldset-clavefirma" >			
@@ -168,8 +175,8 @@
 		   		
 		   		<% 
 		   		if (op > 0) {
-		   			final String msg = (op == 1 ) ? "Crear usuario" : "Guardar cambios";   //$NON-NLS-1$ 
-					final String tit= (op == 1 ) ? "Crea nuevo usuario":"Guarda las modificaciones realizadas";//$NON-NLS-2$
+		   			final String msg = (op == 1 ) ? "Crear usuario" : "Guardar cambios"; //$NON-NLS-1$ //$NON-NLS-2$
+					final String tit= (op == 1 ) ? "Crea nuevo usuario" : "Guarda las modificaciones realizadas"; //$NON-NLS-1$ //$NON-NLS-2$
 		   		%>
 			   		
 			   		<div  style="display: inline-block; width: 45%;margin: 3px;">
@@ -181,12 +188,12 @@
 		</form>
 		<script>
 			//bloqueamos los campos en caso de que sea una operacion de solo lectura
-			document.getElementById("login-usr").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("role-usr").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("usr-name").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("usr-surname").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("email").disabled = <%= op == 0 ? "true" : "false" %>
-			document.getElementById("telf-contact").disabled = <%= op == 0 ? "true" : "false" %>
+			document.getElementById("login-usr").disabled = <%= op == 0 %>
+			document.getElementById("role-usr").disabled = <%= op == 0 %>
+			document.getElementById("usr-name").disabled = <%= op == 0 %>
+			document.getElementById("usr-surname").disabled = <%= op == 0 %>
+			document.getElementById("email").disabled = <%= op == 0 %>
+			document.getElementById("telf-contact").disabled = <%= op == 0 %>
 																
 		</script>
    	</div>

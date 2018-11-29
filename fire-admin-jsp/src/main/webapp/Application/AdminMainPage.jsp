@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO"%>
 <%@page import="es.gob.fire.server.admin.conf.DbManager"%>
@@ -11,6 +12,11 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+	
 	String user = "";//$NON-NLS-1$
 	String errorText = null;
 	try {
@@ -18,7 +24,7 @@
 		
 	}
 	catch (AdminFilesNotFoundException e){
-		response.sendRedirect("../Error/FileNotFound.jsp?file=" + AdminFilesNotFoundException.getFileName()); //$NON-NLS-1$
+		response.sendRedirect("../Error/FileNotFound.jsp?file=" + e.getFileName()); //$NON-NLS-1$
 		return;
 	}
 	catch (Exception e){
@@ -26,7 +32,7 @@
 		return;
 	}
 
-	Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
+	Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED); //$NON-NLS-1$
 	if (state == null) {
 		// Leemos la contrasena de entrada
 		String psswd = request.getParameter("password"); //$NON-NLS-1$
@@ -49,8 +55,8 @@
 		}
 
 		// Marcamos la sesion como iniciada 
-		request.getSession().setAttribute("initializedSession", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-		request.getSession().setAttribute("user", user);//$NON-NLS-1$ 
+		session.setAttribute(ServiceParams.SESSION_ATTR_INITIALIZED, "true"); //$NON-NLS-1$
+		session.setAttribute(ServiceParams.SESSION_ATTR_USER, user);
 	}
 	else if (!"true".equals(state)) { //$NON-NLS-1$
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
@@ -61,10 +67,7 @@
 	String result = request.getParameter("r"); //$NON-NLS-1$
 	String entity= request.getParameter("ent"); //$NON-NLS-1$
 	MessageResult mr = MessageResultManager.analizeResponse(op, result,entity);
-	
-	
-	
-	
+
 %>
 
 <!DOCTYPE html>

@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO"%>
 <%@page import="es.gob.fire.server.admin.conf.DbManager"%>
 <%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
@@ -8,8 +9,13 @@
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-	final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
-	final String loggedUsr=(String)request.getSession().getAttribute("user"); //$NON-NLS-1$
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
+	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
+	final String loggedUsr=(String)session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 
 		
 	if (state == null || !Boolean.parseBoolean((String) state) || loggedUsr==null ) {
@@ -21,12 +27,12 @@
 	
 	
 	final String title = "Modificar contraseña"; //$NON-NLS-1$
-	final String subTitle = "Modificar contraseña del usuario ".concat(usr.getNombre()).concat(" ").concat(usr.getApellidos());//$NON-NLS-1$
+	final String subTitle = "Modificar contraseña del usuario ".concat(usr.getNombre()).concat(" ").concat(usr.getApellidos());//$NON-NLS-1$ //$NON-NLS-2$
 	
 	
 	
 	final String msg = "Guardar cambios";   //$NON-NLS-1$ 
-	final String tit= "Guarda las modificaciones realizadas";//$NON-NLS-2$
+	final String tit = "Guarda las modificaciones realizadas"; //$NON-NLS-1$
 %>
 <!DOCTYPE html>
 <html>

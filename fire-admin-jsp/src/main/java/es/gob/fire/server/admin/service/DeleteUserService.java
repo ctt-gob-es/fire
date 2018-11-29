@@ -42,7 +42,7 @@ public class DeleteUserService extends HttpServlet {
 		final String idUser = request.getParameter(PARAM_ID);
 		final String user_name = request.getParameter(PARAM_USRNAME);
 		final HttpSession session = request.getSession();
-		final String loggedUsr = (String) session.getAttribute("user"); //$NON-NLS-1$
+		final String loggedUsr = (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 
 		LOGGER.info("Baja del usuario con ID: " + idUser + " Nombre:" + user_name); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -66,8 +66,8 @@ public class DeleteUserService extends HttpServlet {
 				isOk = false;
 			}
 		}
-		//Comprobar que el usuario que se borra es el mismo que est� logado,
-		//en ese caso se cierra la sesi�n redirigiendo a la p�gina de Login.jsp
+		// Comprobar que el usuario que se borra es el mismo que esta autenticado,
+		// en ese caso se cierra la sesion redirigiendo a la pagina de Login.jsp
 		if(isOk && loggedUsr != null && !"".equals(loggedUsr) && loggedUsr.equals(user_name)){ //$NON-NLS-1$
 			response.sendRedirect("Login.jsp?"); //$NON-NLS-1$
 		}

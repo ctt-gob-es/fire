@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.CertificatesDAO"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
@@ -12,7 +13,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
+
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
+	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
 	if (state == null || !Boolean.parseBoolean((String) state)) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
@@ -227,7 +234,7 @@
 		   		<% 
 		   		if (op > 0) {
 		   			final String msg = (op == 1 ) ? "Crear aplicaci&oacute;n" : "Guardar cambios";   //$NON-NLS-1$ //$NON-NLS-2$
-					final String tit= (op == 1 ) ? "Crea nueva aplicación":"Guarda las modificaciones realizadas";
+					final String tit= (op == 1 ) ? "Crea nueva aplicación" : "Guarda las modificaciones realizadas";   //$NON-NLS-1$ //$NON-NLS-2$
 		   		%>
 			   		
 			   		<div  style="display: inline-block; width: 35%;margin: 3px">
@@ -241,11 +248,11 @@
 		</form>
 		<script>
 			//bloqueamos los campos en caso de que sea una operacion de solo lectura
-			document.getElementById("nombre-app").disabled = <%=  op == 0 ? "true" : "false" %>
-			document.getElementById("email-resp").disabled = <%=  op == 0 ? "true" : "false" %>
-			document.getElementById("nombre-resp").disabled = <%=  op == 0 ? "true" : "false" %>
-			document.getElementById("telf-resp").disabled = <%=  op == 0 ? "true" : "false" %>
-			document.getElementById("id-certificate").disabled = <%=  op == 0 ? "true" : "false" %>
+			document.getElementById("nombre-app").disabled = <%=  op == 0 %>
+			document.getElementById("email-resp").disabled = <%=  op == 0 %>
+			document.getElementById("nombre-resp").disabled = <%=  op == 0 %>
+			document.getElementById("telf-resp").disabled = <%=  op == 0 %>
+			document.getElementById("id-certificate").disabled = <%=  op == 0 %>
 		
 		</script>
    	</div>

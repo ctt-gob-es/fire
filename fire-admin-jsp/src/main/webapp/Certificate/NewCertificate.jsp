@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
 <%@page import="java.util.List" %>
@@ -11,7 +12,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	final Object state = request.getSession().getAttribute("initializedSession"); //$NON-NLS-1$
+
+	if (session == null) {
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
+	}
+
+	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
 	if (state == null || !Boolean.parseBoolean((String) state)) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
@@ -224,7 +231,7 @@
 						<%} %>	
 					</div>											
 					<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
-						<%if(certDataPrincipal != null && !"".equals(certDataPrincipal)){ %>
+						<%if (certDataPrincipal != null && !certDataPrincipal.isEmpty()) { %>
 							<p><%= certDataPrincipal %></p>							
 						<%}%>						
 					</div>
@@ -248,7 +255,7 @@
 					</div>
 								
 					<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
-						<%if(certDataBkup != null && !"".equals(certDataBkup)){ %>
+						<%if(certDataBkup != null && !certDataBkup.isEmpty()) { %>
 							<p><%= certDataBkup %></p>						
 						<%}%>
 					</div>					
@@ -262,7 +269,7 @@
 									
 						<div  style="display: inline-block; width: 20%;margin:3px;">
 							<textarea style="display:none;" id="b64CertPrin" name="b64CertPrin"><%= b64CertPrin%></textarea>
-							<%if(certDataPrincipal != null && !"".equals(certDataPrincipal)){ %>	
+							<%if(certDataPrincipal != null && !certDataPrincipal.isEmpty()){ %>	
 							<input id="CertPrincipal-button" class="btn-borrar-cert" name="add-usr-btn" type="button" value="Descargar .cer" 
 							title="Descargar certificado en fichero con formato .cer" onclick="downLoadCert('b64CertPrin','1')" />
 							<%}%>
@@ -270,7 +277,7 @@
 						
 					</div>											
 					<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
-						<%if(certDataPrincipal != null && !"".equals(certDataPrincipal)){ %>
+						<%if(certDataPrincipal != null && !certDataPrincipal.isEmpty()){ %>
 							<p><%= certDataPrincipal %></p>							
 						<%}%>						
 					</div>
@@ -282,7 +289,7 @@
 						</div>															
 						<div  style="display: inline-block; width: 20%;margin: 3px;">						
 							<textarea style="display:none;" id="b64CertBkup" name="b64CertBkup"><%= b64CertBkup%></textarea>
-							<%if(certDataBkup != null && !"".equals(certDataBkup)){ %>	
+							<%if(certDataBkup != null && !certDataBkup.isEmpty()){ %>	
 							<input id="CertBkup-button" class="btn-borrar-cert" name="add-usr-btn" type="button" value="Descargar .cer" title="Descargar certificado en fichero con formato .cer" onclick="downLoadCert('b64CertBkup','2')" />
 							<%}%>
 						</div>					
@@ -334,7 +341,7 @@
 	
 		<script>
 			//bloqueamos los campos en caso de que sea una operacion de solo lectura
-			document.getElementById("nombre-cer").disabled = <%= op == 0 ? "true" : "false" %>			
+			document.getElementById("nombre-cer").disabled = <%= op == 0 %>			
 					
 			// quitamos los espacios en blanco que se han agregado en el certificado
 			//document.getElementById("cert-prin").value = document.getElementById("cert-prin").value.trim();

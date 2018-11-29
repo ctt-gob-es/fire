@@ -14,11 +14,14 @@ package es.gob.fire.server.admin.message;
  */
 public class MessageResultManager {
 
-	private static final String OP_ALTA = "alta"; //$NON-NLS-1$
 
-	private static final String OP_BAJA = "baja"; //$NON-NLS-1$
+	private static final String OP_SELECC = "1"; //$NON-NLS-1$
 
-	private static final String OP_EDICION = "edicion"; //$NON-NLS-1$
+	private static final String OP_ALTA = "2"; //$NON-NLS-1$
+
+	private static final String OP_EDICION = "3"; //$NON-NLS-1$
+
+	private static final String OP_BAJA = "4"; //$NON-NLS-1$
 
 	private static final String OP_CLAVE = "clave";//$NON-NLS-1$
 
@@ -29,6 +32,8 @@ public class MessageResultManager {
 	private static final String ENT_APP = "app";//$NON-NLS-1$
 
 	private static final String ENT_CER = "cer";//$NON-NLS-1$
+
+	private static final String ENT_SRV = "srv"; //$NON-NLS-1$
 
 	/**
 	 * Analiza la respuesta de una operaci&oacute;n.
@@ -61,6 +66,11 @@ public class MessageResultManager {
 						"El Certificado ha sido dado de alta correctamente" : //$NON-NLS-1$
 							"Error al dar de alta al Certificado"; //$NON-NLS-1$
 			}
+			else if(entity.equals(ENT_SRV)){
+				msg = ok ?
+						"El Servidor de logs ha sido dado de alta correctamente" : //$NON-NLS-1$
+							"Error al dar de alta al servidor de logs"; //$NON-NLS-1$
+			}
 
 		}
 		else if (OP_BAJA.equals(op)) {
@@ -80,6 +90,11 @@ public class MessageResultManager {
 				"El Certificado ha sido dado de baja correctamente" : //$NON-NLS-1$
 					"Error al dar de baja al certificado"; //$NON-NLS-1$
 			}
+			else if(entity.equals(ENT_SRV)){
+				msg = ok ?
+				"El Servidor de logs ha sido dado de baja correctamente" : //$NON-NLS-1$
+					"Error al dar de baja al Servidor de logs"; //$NON-NLS-1$
+			}
 		}
 		else if (OP_EDICION.equals(op)) {
 			if( entity.equals(ENT_APP)){
@@ -97,6 +112,11 @@ public class MessageResultManager {
 						"El Certificado ha sido editado correctamente" : //$NON-NLS-1$
 						"Error al realizar la edicion del certificado"; //$NON-NLS-1$
 			}
+			else if(entity.equals(ENT_SRV)){
+				msg = ok ?
+						"El Servidor de logs ha sido editado correctamente" : //$NON-NLS-1$
+						"Error al realizar la edicion del Servidor de logs"; //$NON-NLS-1$
+			}
 
 		}
 		else if(OP_CLAVE.equals(op)) {
@@ -104,6 +124,13 @@ public class MessageResultManager {
 				msg = ok ?
 						"El Usuario ha cambiado su clave correctamente" : //$NON-NLS-1$
 						"Error al cambiar la clave del usuario"; //$NON-NLS-1$
+			}
+		}
+		else if (OP_SELECC.equals(op)) {
+			 if(entity.equals(ENT_SRV)){
+				msg = ok ?
+				"Se ha conectado correctamente con el servidor de logs" : //$NON-NLS-1$
+					"Error al conectar con el servidor de logs"; //$NON-NLS-1$
 			}
 		}
 		else {

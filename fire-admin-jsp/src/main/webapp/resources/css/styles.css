@@ -4,13 +4,13 @@ ul li {
     list-style-type: none;
 }
 
-/* ul li.field-text { */
-/* 	min-width: 180px; */
+ul li.field-text {
+	min-width: 180px;
 	
-/* } */
+}
 
 
-*{
+{
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 	margin:0;
 }
@@ -25,6 +25,17 @@ ul li {
 	min-height:475px;
 	height:100%;
 }
+
+#containerLogsManager {
+	min-width:750px; 
+	width:95%;
+	margin:0 auto; 
+	margin-top:10px;
+	background: #eeeeee;
+	padding: 5px;
+	min-height:475px;
+	height:100%;
+}
 #error-txt {
 	color:red; 
 	font-size: 14px;
@@ -36,6 +47,32 @@ ul li {
 	border-radius: 8px; 
 	background-color: #FFAAAA;
 }
+
+#error-txt-log {
+	color:red; 
+	font-size: 14px;
+	text-align: center;
+	padding: 2px;
+	display:inline-block;
+	font-weight: bold;
+	border: 2px solid red;
+	border-radius: 8px; 
+	background-color: #FFAAAA;
+}
+
+.success-log{
+	color:green; 
+	font-size: 14px;
+	text-align: center;
+	padding: 2px;
+	display:inline-block;
+	font-weight: bold;
+	border: 2px solid green;
+	border-radius: 8px; 
+	background-color: #55FF55;
+}
+
+
 
 #success-txt {
 	color:green; 
@@ -300,9 +337,62 @@ ul li {
 				0px 3px 5px black;
 	text-shadow:0,5px 0,5px 0,5px white;	
 }
+.btn-log {
+	padding:5px; 
+	background:#820606; 
+	border:1px solid #632206; 
+	border-radius: 10px; 
+	color:#FFFFFF; 
+	width: 90px;
+	text-align: center;
+	box-shadow: 0px 3px 0px #C54949,
+					0px 0px 20px black;
+	-webkit-transition:all 0.2s ease;
+	text-shadow:1px 1px 1px black;
+	cursor:pointer;
+	text-decoration:none;
+}
+.btn-log :active {
+	width: 90px;
+	position:relative;
+	top:3px;
+	box-shadow: 0px 1px 0px #8A0808,
+				0px 3px 5px black;
+	text-shadow:0,5px 0,5px 0,5px white;	
+}
 
+.btn-log_inactive {
+	padding:5px; 
+	background:#808080; 
+	border:1px solid #353334; 
+	border-radius: 10px; 
+	color:#e6e6e6; 
+	width: 90px;
+	text-align: center;
+	box-shadow: 0px 3px 0px #e6e6e6,
+					0px 0px 20px black;
+	-webkit-transition:all 0.2s ease;
+	text-shadow:1px 1px 1px black;
+	cursor:pointer;
+	text-decoration:none;
+}
 
+#selectedFile{
+	 text-align:left;
+	 display:inline-block;
+	 width:30%;
+	 color: #808080
+}
+
+span.highlight
+{
+	background-color:#ffff80
+}
+span.nextHighLight{
+	background-color:#80ffff
+}
 /**********Menu*****************/
+
 
 #header {
 	margin:auto;
@@ -321,6 +411,7 @@ ul li {
  
 			.nav > li {
 				float:left;
+				
 			}
 			
 			.nav li a {
@@ -329,10 +420,12 @@ ul li {
 				text-decoration:none;
 				padding:10px 12px;
 				display:block;
+				cursor: pointer;
 			}
 			
 			.nav li a:hover {
 				background-color:#434343;
+				cursor: pointer;
 			}
 			
 			.nav li ul {
@@ -343,6 +436,7 @@ ul li {
 			
 			.nav li:hover > ul {
 				display:block;
+				cursor: pointer;
 			}
 			
 			.nav li ul li {
@@ -353,3 +447,5 @@ ul li {
 				right:-140px;
 				top:0px;
 			}
+			
+
