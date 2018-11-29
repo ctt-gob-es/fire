@@ -25,7 +25,8 @@ public class LogDownloadServiceManager {
 	public final static byte[] process(final HttpServletRequest req, final HttpServletResponse resp, final String pathLogs) throws IOException {
 		byte[] result = null;
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
-		final File dataFile = new File(pathLogs.concat("\\").concat(logFileName)); //$NON-NLS-1$
+		final File dataFile = new File(pathLogs.concat(File.separator).concat(logFileName));
+
 		final HttpSession session = req.getSession(false);
 		SeekableByteChannel channel = null;
 		LogDownload download = null;

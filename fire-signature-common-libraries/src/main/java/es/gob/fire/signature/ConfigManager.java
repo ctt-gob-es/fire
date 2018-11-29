@@ -356,7 +356,7 @@ public class ConfigManager {
 
 
 	/**
-	 * Devuelve la configuración de las estadísticas
+	 * Devuelve la configuraci&oacute;n de las estad&iacute;sticas
 	 * @return Dato num&eacute;rico de 0, 1 y 2
 	 *  En caso de error, devolver&aacute; {@code null}.
 	 */
@@ -376,9 +376,9 @@ public class ConfigManager {
 
 
 	/**
-	 * Devuelve la configuración de la hora de la carga a  la base de datos
+	 * Devuelve la configuraci&oacute;n de la hora de la carga a  la base de datos
 	 * @return Dato hora con formato 00:00:00
-	 *  En caso de no obtener un dato con formato correcto o nulo devolverá la cadena 00:00:00
+	 *  En caso de no obtener un dato con formato correcto o nulo devolver&aacute; la cadena 00:00:00
 	 */
 	public static String getStatisticsStartTime() {
 		 String time =  getProperty(CONFIG_STATISTICS_STARTTIME);
