@@ -30,8 +30,8 @@ import es.gob.fire.services.statistics.entity.TransactionCube;
 
 public class FireStatistics {
 
-	static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-
+//	static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+	static Logger LOGGER = Logger.getLogger(FireStatistics.class.getName());
 	private String startTime = null;
 	private static final long SEG_DIA = 24L * 60L *60L;
 	private static final long SEG_HORA = 60L * 60L;
