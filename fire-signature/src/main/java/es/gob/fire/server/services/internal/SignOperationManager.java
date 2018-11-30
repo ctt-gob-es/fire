@@ -161,14 +161,12 @@ public class SignOperationManager {
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
@@ -235,7 +233,6 @@ public class SignOperationManager {
         }
         catch (final Exception e) {
         	LOGGER.severe("Error en el guardado temporal de los datos a firmar: " + e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;

@@ -93,7 +93,7 @@ public class ErrorManager {
 			 // Obtenemos la operacion (SIGN o BATCH)
 	        final FIReServiceOperation fsop = FIReServiceOperation.parse(session.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
 			final Operations op = Operations.parse(fsop);
-			if(op.getId()!= 1) { // Operacion por Lote
+			if(op.getId() != 1) { // Operacion por Lote
 				final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
  				final Iterator<String> it = batchResult.iterator();
  				while (it.hasNext()) {

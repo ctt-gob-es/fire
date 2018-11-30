@@ -19,8 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.statistics.Operations;
-import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.services.statistics.config.ConfigManager;
 
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
@@ -30,7 +28,7 @@ public class MiniAppletErrorService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 //	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletErrorService.class.getName());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+
 
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
@@ -71,17 +69,6 @@ public class MiniAppletErrorService extends HttpServlet {
     	}
     	else {
 
-//    		if(op.getId()== 1) {
-//    			SIGNLOGGER.log(session, false, null);
-//    		}
-//    		else {
-//    			 final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
-//    				final Iterator<String> it = batchResult.iterator();
-//    				while (it.hasNext()) {
-//    					final String docId = it.next();
-//    					SIGNLOGGER.log(session, false, docId);
-//    				}
-//    		}
         	ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, true, errorMessage);
         	errorUrl = connConfig.getRedirectErrorUrl();
     	}
