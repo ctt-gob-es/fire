@@ -36,6 +36,7 @@ public class MiniAppletHelper {
 	private static final String AFIRMA_EXTRAPARAM_FILTER = "filter"; //$NON-NLS-1$
 	private static final String AFIRMA_EXTRAPARAM_FILTERS = "filters"; //$NON-NLS-1$
 	private static final String AFIRMA_EXTRAPARAM_ORDER_FILTERS_PREFIX = "filters."; //$NON-NLS-1$
+	private static final String AFIRMA_EXTRAPARAM_HEADLESS = "headless"; //$NON-NLS-1$
 
 
 	/**
@@ -108,7 +109,8 @@ public class MiniAppletHelper {
 		for (final String k : extraParams.keySet().toArray(new String[extraParams.size()])) {
 			if (k.equals(AFIRMA_EXTRAPARAM_FILTER) ||
 					k.equals(AFIRMA_EXTRAPARAM_FILTERS) ||
-					k.startsWith(AFIRMA_EXTRAPARAM_ORDER_FILTERS_PREFIX)) {
+					k.startsWith(AFIRMA_EXTRAPARAM_ORDER_FILTERS_PREFIX) ||
+					k.equals(AFIRMA_EXTRAPARAM_HEADLESS)) {
 				if (filters.length() != 0) {
 					filters.append("\\n"); //$NON-NLS-1$
 				}
