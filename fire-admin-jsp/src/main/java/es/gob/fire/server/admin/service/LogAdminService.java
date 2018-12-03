@@ -37,7 +37,7 @@ public class LogAdminService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(LogAdminService.class.getName());
 
-	private static final String OPERATION_SELECTION = "seleccion"; //$NON-NLS-1$
+	private static final String OPERATION_SELECTION = "1"; //$NON-NLS-1$
 
 	/**
      * @see HttpServlet#HttpServlet()
