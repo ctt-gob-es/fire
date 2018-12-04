@@ -501,7 +501,7 @@
 			}		
 			break;
 		case "search_txt":
-			
+	
 			if($("#search_txt").val() == ""){								
 				$('label[for=search_txt]').css({color:'red'});
 				$('#search_txt').css({backgroundColor:'#fcc'});
@@ -521,7 +521,8 @@
 				
 		case "search_StartDate":
 			
-			if($("#search_StartDate").val() != "" && !datePattern.test($("#search_StartDate").val())){								
+			var dateValue = $("#search_StartDate").val().trim();			
+			if(dateValue != "" &&  datePattern.test(dateValue) == false){								
 				$('label[for=search_StartDate]').css({color:'red'});
 				$('#search_StartDate').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una fecha de inicio para la búsqueda, con un formato correcto dd/MM/yyyy.\n";
@@ -530,54 +531,62 @@
 			break;
 		case "search_StartTime":
 			
-			var pattern = timePattern.test($("#search_StartTime").val());
-			if($("#search_StartTime").val() != "" && !pattern){
-				
+			var timeValue = $("#search_StartTime").val().trim();
+			if(timeValue != "" && timePattern.test(timeValue) == false){				
 				$('label[for=search_StartTime]').css({color:'red'});
 				$('#search_StartTime').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una Hora de inicio para la búsqueda, con un formato correcto HH:mm:ss o HH:mm .\n";
 				ok = false;			
 			}
 			break;
-		case "startDate":
-			
-			var pattern = datePattern.test($("#startDate").val());
-			if($("#startDate").val() != "" && !pattern){								
+		case "startDate":			
+			var dateValue = $("#startDate").val() .trim();	
+			if(dateValue != "" &&  datePattern.test(dateValue) == false){
 				$('label[for=startDate]').css({color:'red'});
 				$('#startDate').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una fecha de inicio para el filtrado, formato correcto dd/MM/yyyy .\n";
 				ok = false;			
 			}
-			break;	
-		case "startTime":
+			console.log ("startDate ok="+ok);
+			console.log ("startDate value=#"+$("#startDate").val()+"#");
+			console.log ("startDate datePattern="+ datePattern.test($("#startDate").val())); 
 			
-			var pattern = timePattern.test($("#startTime").val());			
-			if($("#startTime").val() != "" && !pattern){								
+		case "startTime":			
+			var timeValue = $("#startTime").val().trim();
+			if(timeValue != "" &&  timePattern.test(timeValue) == false){
 				$('label[for=startTime]').css({color:'red'});
 				$('#startTime').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una Hora de inicio para el filtrado, un formato  correcto HH:mm:ss o HH:mm.\n";
 				ok = false;			
 			}
-			break;	
-		case "endDate":		
+			console.log ("startTime ok="+ok);
+			console.log ("startTime value=#"+$("#startTime").val()+"#");
+			console.log ("startTime timePattern="+ timePattern.test($("#startTime").val())); 
 			
-			var pattern = datePattern.test($("#endDate").val());
-			if($("#endDate").val() != "" && ! pattern){								
+			break;	
+		case "endDate":					
+			var dateValue = $("#endDate").val().trim();	
+			if($("#endDate").val() != "" &&  datePattern.test($("#endDate").val()) == false){
 				$('label[for=endDate]').css({color:'red'});
 				$('#endDate').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una fecha de fin para el filtrado, formato correcto dd/MM/yyyy.\n";
 				ok = false;			
 			}
+			console.log ("endDate ok="+ok);
+			console.log ("endDate value=#"+$("#endDate").val()+"#");
+			console.log ("endDate datePattern="+ datePattern.test($("#endDate").val())); 
 			break;	
 		case "endTime":
-			
-			var pattern = timePattern.test($("#endTime").val());
-			if($("#endTime").val() != "" && !pattern){								
+			var timeValue = $("#endTime").val().trim();
+			if(timeValue != "" && timePattern.test(timeValue) == false){
 				$('label[for=endTime]').css({color:'red'});
 				$('#endTime').css({backgroundColor:'#fcc'});
 				msg = msg + "Debe introducir una Hora de fin para el filtrado, un formato  correcto HH:mm:ss o HH:mm.\n";
 				ok = false;			
 			}
+			console.log ("endTime ok="+ok);
+			console.log ("endTime value=#"+$("#endTime").val()+"#");
+			console.log ("endTime timePattern="+ timePattern.test($("#endTime").val())); 
 			break;	
 			
 		}
@@ -597,8 +606,7 @@
   * @returns
   */
  function download(){
-	 
-	 
+	  
 	 var url = "../LogAdminService?op=10&fname=" + file + "&reset=yes";
 	 displayProgressBar(1);	
 	 var xhr = new XMLHttpRequest();
@@ -678,8 +686,6 @@
 	 $('#back-button-form').submit();
  }
  
-
-
  
  /**
   * Funci&oacute;n recarga la p&aacute;gina he inicializa las variables 
