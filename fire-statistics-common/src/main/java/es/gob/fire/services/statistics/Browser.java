@@ -5,8 +5,9 @@ package es.gob.fire.services.statistics;
  */
 public class Browser {
 
-	private final int id;
-	private final String version;
+	private  int id;
+	private String version;
+	private String name;
 	private static Browser browser;
 
 	private static String BRNAME_FIREFOX = "Firefox/"; //$NON-NLS-1$
@@ -20,9 +21,22 @@ public class Browser {
 	private static String BRNAME_SEAMONKEY = "Seamonkey/"; //$NON-NLS-1$
 	private static String BRNAME_CHROMIUN =  "Chromium/"; //$NON-NLS-1$
 
-	public Browser(final int id, final String version) {
+	private static String FIREFOX = "Firefox"; //$NON-NLS-1$
+	private static String IE = "Internet Explorer"; //$NON-NLS-1$
+	private static String EDGE = "Edge"; //$NON-NLS-1$
+	private static String CHROME = "Chrome"; //$NON-NLS-1$
+	private static String SAFARI = "Safari"; //$NON-NLS-1$
+	private static String OPERA = "Opera"; //$NON-NLS-1$
+	private static String OTRO = "OTRO"; //$NON-NLS-1$
+
+	public Browser() {
+	}
+
+
+	public Browser(final int id, final String version, final String name) {
 		this.id = id;
 		this.version = version;
+		this.name = name;
 	}
 
 	/** Identifica un navegador web a trav&eacute;s de las cabeceras de las
@@ -36,7 +50,7 @@ public class Browser {
 		//FIREFOX
 		if (userAgent.contains(BRNAME_FIREFOX) && !userAgent.contains(BRNAME_SEAMONKEY)){
 			final String version = userAgent.substring(userAgent.indexOf(BRNAME_FIREFOX) + BRNAME_FIREFOX.length(), userAgent.length());
-			browser =  new Browser(Browsers.FIREFOX.getId(), version);
+			browser =  new Browser(Browsers.FIREFOX.getId(), version, FIREFOX);
 		}
 		//IE
 		else if(userAgent.contains(BRNAME_IE)) {
@@ -47,37 +61,37 @@ public class Browser {
 					version = ua_part[i].substring(BRNAME_IE.length() + 1).trim();
 				}
 			}
-			browser =  new Browser(Browsers.INTERNET_EXPLORER.getId(), version);
+			browser =  new Browser(Browsers.INTERNET_EXPLORER.getId(), version, IE);
 		}
 		//EDGE
 		else if(userAgent.contains(BRNAME_EDGE)) {
 			final String version = userAgent.substring(userAgent.indexOf(BRNAME_EDGE) + BRNAME_EDGE.length());
-			browser =  new Browser(Browsers.EDGE.getId(), version);
+			browser =  new Browser(Browsers.EDGE.getId(), version, EDGE);
 		}
 		//CHROME
 		else if(userAgent.contains(BRNAME_CHROME) && !userAgent.contains(BRNAME_CHROMIUN) && !userAgent.contains(BRNAME_OPERA) && !userAgent.contains(BRNAME_OPERA2)) {
 			final String version = userAgent.substring(userAgent.indexOf(BRNAME_CHROME) + BRNAME_CHROME.length(), userAgent.indexOf(BRNAME_SAFARI));
-			browser =  new Browser(Browsers.CHROME.getId(), version);
+			browser =  new Browser(Browsers.CHROME.getId(), version, CHROME);
 		}
 		//SAFARI
 		else if(userAgent.contains(BRNAME_SAFARI) && !userAgent.contains(BRNAME_CHROMIUN) && !userAgent.contains(BRNAME_CHROME)) {
 			final String version = userAgent.substring(userAgent.indexOf(BRNAME_SAFARI) + BRNAME_SAFARI.length());
-			browser =  new Browser(Browsers.SAFARI.getId(), version);
+			browser =  new Browser(Browsers.SAFARI.getId(), version, SAFARI);
 		}
 		//OPERA
 		else if(userAgent.contains(BRNAME_OPERA)) {
 			final String version = userAgent.substring(userAgent.indexOf(BRNAME_OPERA) + BRNAME_OPERA.length());
-			browser =  new Browser(Browsers.OPERA.getId(), version);
+			browser =  new Browser(Browsers.OPERA.getId(), version, OPERA);
 		}
 		//OPERA
 		else if(userAgent.contains(BRNAME_OPERA2)) {
 			final String version = userAgent.substring(userAgent.indexOf(BRNAME_OPERA2) + BRNAME_OPERA2.length());
-			browser =  new Browser(Browsers.OPERA.getId(), version);
+			browser =  new Browser(Browsers.OPERA.getId(), version, OPERA);
 		}
 		//OTRO
 		else {
 			final String version = "XYZ"; //$NON-NLS-1$
-			browser =  new Browser(Browsers.OTHER.getId(), version);
+			browser =  new Browser(Browsers.OTHER.getId(), version, OTRO);
 		}
 		return browser;
 
@@ -91,6 +105,16 @@ public class Browser {
 		return Integer.toString(this.id);
 	}
 
+	public final void setId(final int id) {
+		this.id = id;
+	}
+
+
+	public final void setVersion(final String version) {
+		this.version = version;
+	}
+
+
 	/**
 	 * Recupera la versi&oacute;n del navegador.
 	 * @return Versi&oacute;n del navegador.
@@ -98,4 +122,20 @@ public class Browser {
 	public String getVersion() {
 		return this.version;
 	}
+	/**
+	 * Recupera el nombre del navegador
+	 * @return
+	 */
+	public final String getName() {
+		return this.name;
+	}
+	/**
+	 * Establece el nombre del navegador
+	 * @param name
+	 */
+	public final void setName(final String name) {
+		this.name = name;
+	}
+
+
 }

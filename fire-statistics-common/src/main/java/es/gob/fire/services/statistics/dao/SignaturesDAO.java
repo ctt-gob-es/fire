@@ -4,7 +4,6 @@ import java.io.StringWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.List;
 
 import javax.json.Json;
@@ -20,7 +19,10 @@ public class SignaturesDAO {
 
 
 	/**Inserta */
-	private static final String ST_INSERT_SIGNATURE = "INSERT INTO TB_FIRMAS (fecha, id_formato ,id_formato_mejorado, id_algoritmo, id_proveedor, id_navegador, version_navegador, correcta, id_transaccion, tamanno) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
+	private static final String ST_INSERT_SIGNATURE = "INSERT INTO TB_FIRMAS " //$NON-NLS-1$
+			+ "(fecha, formato ,formato_mejorado, algoritmo, proveedor, " //$NON-NLS-1$
+			+ "navegador, correcta, id_transaccion, total) " //$NON-NLS-1$
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 	/*Consultas estadisticas de firmas*/
 
@@ -77,15 +79,14 @@ public class SignaturesDAO {
 		for(final SignatureCube sign : sinatures) {
 			final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_SIGNATURE,false);
 			st.setDate(1, new java.sql.Date( sign.getFecha().getTime()));
-			st.setInt(2, sign.getIdFormat());
-			st.setInt(3, sign.getIdImprovedFormat());
-			st.setInt(4, sign.getIdAlgorithm());
-			st.setInt(5, sign.getIdProveedor());
-			st.setInt(6,  Integer.parseInt(sign.getNavegador().getId()));
-			st.setString(7, sign.getNavegador().getVersion());
-			st.setString (8, Boolean.toString(sign.isResultSign()));
-			st.setString(9, sign.getId_transaccion());
-			st.setLong(10, sign.getSize().longValue());
+			st.setString(2, sign.getFormat().getNombre());
+			st.setString(3, sign.getImprovedFormat().getNombre());
+			st.setString(4, sign.getAlgorithm().getNombre());
+			st.setString(5, sign.getProveedor().getNombre());
+			st.setString(6, sign.getNavegador().getName());
+			st.setString (7, Boolean.toString(sign.isResultSign()));
+			st.setString(8, sign.getId_transaccion());
+			st.setLong(9, sign.getTotal().longValue());
 			totalInsertReg = totalInsertReg + st.executeUpdate();
 			st.close();
 		}
@@ -108,20 +109,27 @@ public class SignaturesDAO {
 
 		try(final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_SIGNATURE,false);){
 			st.setTimestamp (1, new java.sql.Timestamp(signature.getFecha().getTime()));
-			st.setInt(2, signature.getIdFormat());
-			if(signature.getIdImprovedFormat() !=  0) {
-				st.setInt(3,  signature.getIdImprovedFormat());
+
+
+			st.setString(2, signature.getFormat().getNombre());
+			if(signature.getImprovedFormat() !=  null && ! signature.getImprovedFormat().getNombre().isEmpty()) {
+				st.setString(3, signature.getImprovedFormat().getNombre());
 			}
-			else {
-				st.setNull(3,Types.INTEGER);
-			}
-			st.setInt(4, signature.getIdAlgorithm());
-			st.setInt(5, signature.getIdProveedor());
-			st.setInt(6,  Integer.parseInt(signature.getNavegador().getId()));
-			st.setString(7, signature.getNavegador().getVersion());
-			st.setString (8, Boolean.toString(signature.isResultSign()));
-			st.setString(9, signature.getId_transaccion());
-			st.setLong(10, signature.getSize().longValue());
+			st.setString(4, signature.getAlgorithm().getNombre());
+			st.setString(5, signature.getProveedor().getNombre());
+			st.setString(6, signature.getNavegador().getName());
+			st.setString (7, Boolean.toString(signature.isResultSign()));
+			st.setString(8, signature.getId_transaccion());
+			st.setLong(9, signature.getTotal().longValue());
+
+
+//			if(signature.getIdImprovedFormat() !=  0) {
+//				st.setInt(3,  signature.getIdImprovedFormat());
+//			}
+//			else {
+//				st.setNull(3,Types.INTEGER);
+//			}
+
 			totalInsertReg = st.executeUpdate();
 			st.close();
 		}

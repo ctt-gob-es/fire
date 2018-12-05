@@ -13,15 +13,16 @@ import es.gob.fire.services.statistics.dao.ProvidersDAO;
 public class SignatureCube {
 	//static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private Date fecha;
-	private int idFormat;
-	private int idAlgorithm;
-	private int idProveedor;
+	private Format format;
+	private Algorithm algorithm;
+	private Provider proveedor;
 	private Browser navegador;
 	private boolean resultSign = false ;
 	private String id_transaccion;
 	private Long size = new Long(0L);
-	private int idImprovedFormat;
-	private static int OTRO = 99;
+	private ImprovedFormat improvedFormat;
+	private Long total = 0L;
+	private static String OTRO = "OTRO"; //$NON-NLS-1$
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 
 	public SignatureCube() {
@@ -30,17 +31,17 @@ public class SignatureCube {
 
 
 
-	public SignatureCube(final Date fecha ,final int idFormat, final int idAlgorithm, final int idProveedor,
-			final Browser navegador, final boolean resultsign, final String id_tr, final int idImprovedFormat) {
+	public SignatureCube(final Date fecha ,final Format format, final Algorithm algorithm, final Provider proveedor,
+			final Browser navegador, final boolean resultsign, final String id_tr, final ImprovedFormat improvedFormat) {
 		super();
 		this.fecha = fecha;
-		this.idFormat = idFormat;
-		this.idAlgorithm = idAlgorithm;
-		this.idProveedor = idProveedor;
+		this.format = format;
+		this.algorithm = algorithm;
+		this.proveedor = proveedor;
 		this.navegador = navegador;
 		this.resultSign = resultsign;
 		this.id_transaccion= id_tr;
-		this.idImprovedFormat= idImprovedFormat;
+		this.improvedFormat= improvedFormat;
 	}
 
 
@@ -56,28 +57,28 @@ public class SignatureCube {
 		this.fecha = fecha;
 	}
 
-	public final int getIdFormat() {
-		return this.idFormat;
+	public final Format getFormat() {
+		return this.format;
 	}
 
-	public final void setIdFormat(final int idFormat) {
-		this.idFormat = idFormat;
+	public final void setFormat(final Format format) {
+		this.format = format;
 	}
 
-	public final int getIdAlgorithm() {
-		return this.idAlgorithm;
+	public final Algorithm getAlgorithm() {
+		return this.algorithm;
 	}
 
-	public final void setIdAlgorithm(final int idAlgorithm) {
-		this.idAlgorithm = idAlgorithm;
+	public final void setAlgorithm(final Algorithm algorithm) {
+		this.algorithm = algorithm;
 	}
 
-	public final int getIdProveedor() {
-		return this.idProveedor;
+	public final Provider getProveedor() {
+		return this.proveedor;
 	}
 
-	public final void setIdProveedor(final int idProveedor) {
-		this.idProveedor = idProveedor;
+	public final void setProveedor(final Provider proveedor) {
+		this.proveedor = proveedor;
 	}
 
 	public final Browser getNavegador() {
@@ -114,12 +115,20 @@ public class SignatureCube {
 	}
 
 
-	public final int getIdImprovedFormat() {
-		return this.idImprovedFormat;
+	public final ImprovedFormat getImprovedFormat() {
+		return this.improvedFormat;
 	}
 
-	public final void setIdImprovedFormat(final int idImprovedFormat) {
-		this.idImprovedFormat = idImprovedFormat;
+	public final void setImprovedFormat(final ImprovedFormat improvedFormat) {
+		this.improvedFormat = improvedFormat;
+	}
+
+	public final Long getTotal() {
+		return this.total;
+	}
+
+	public final void setTotal(final Long total) {
+		this.total = total;
 	}
 
 
@@ -139,31 +148,39 @@ public class SignatureCube {
 				}
 				//Formato
 				if(!cube[1].isEmpty()) {
-					sign.setIdFormat(Integer.parseInt(cube[1]));
+					final Format f = new Format();
+					f.setNombre(cube[1]);
+					sign.setFormat(f);
 				}
 				else {
 					return null;
 				}
 				//Formato Mejorado
 				if(!cube[2].isEmpty()) {
-					sign.setIdImprovedFormat(Integer.parseInt(cube[2]));
+					final ImprovedFormat impFormat = new ImprovedFormat();
+					impFormat.setNombre(cube[2]);
+					sign.setImprovedFormat(impFormat);
 				}
 
 				//Algoritmo
 				if(!cube[3].isEmpty()) {
-					sign.setIdAlgorithm(Integer.parseInt(cube[3]));
+					final Algorithm alg = new Algorithm();
+					alg.setNombre(cube[3]);
+					sign.setAlgorithm(alg);
 				}
 				else {
 					return null;
 				}
 				//Proveedor
 				if(!cube[4].isEmpty()) {
-					final Provider provider  = ProvidersDAO.getProviderById(Integer.parseInt(cube[4]));
+					final Provider provider  = ProvidersDAO.getProviderByName(cube[4]);
 					if(provider != null && provider.getIdProveedor() != 0) {
-						sign.setIdProveedor(provider.getIdProveedor());
+						sign.setProveedor(provider);
 					}
 					else {
-						sign.setIdProveedor(OTRO);
+						final Provider p =  new Provider();
+						p.setNombre(OTRO);
+						sign.setProveedor(p);
 					}
 				}
 				else {
@@ -171,9 +188,9 @@ public class SignatureCube {
 				}
 				//Navegador
 				if(!cube[5].isEmpty()) {
-					final String[] nav = cube[5].split("/"); //$NON-NLS-1$
-					final Browser brow = new Browser(Integer.parseInt(nav[0]) , nav[1]);
-					sign.setNavegador(brow);
+					final Browser b = new Browser();
+					b.setName(cube[5]);
+					sign.setNavegador(b);
 				}
 				else {
 					return null;
@@ -219,16 +236,15 @@ public class SignatureCube {
 
 		String result = new String();
 
-		result  = result.concat(this.getIdFormat() != 0 ? String.valueOf(this.getIdFormat()) : String.valueOf(OTRO) ).concat(";");//$NON-NLS-1$
-		result  = result.concat(this.getIdImprovedFormat() != 0 ? String.valueOf(this.getIdImprovedFormat()) : "" ).concat(";");//$NON-NLS-1$ //$NON-NLS-2$
-		result  = result.concat(this.getIdAlgorithm() != 0 ? String.valueOf(this.getIdAlgorithm()) :  String.valueOf(OTRO) ).concat(";");//$NON-NLS-1$
-		result  = result.concat(this.getIdProveedor() != 0 ?  String.valueOf(this.getIdProveedor()) :  String.valueOf(OTRO) ).concat(";");//$NON-NLS-1$
+		result  = result.concat(this.getFormat() != null && !this.getFormat().getNombre().isEmpty() ? this.getFormat().getNombre() : OTRO ).concat(";");//$NON-NLS-1$
+		result  = result.concat(this.getImprovedFormat() != null  && !this.getImprovedFormat().getNombre().isEmpty()  ? this.getImprovedFormat().getNombre() : "" ).concat(";");//$NON-NLS-1$ //$NON-NLS-2$
+		result  = result.concat(this.getAlgorithm() != null && !this.getAlgorithm().getNombre().isEmpty() ? this.getAlgorithm().getNombre() : OTRO ).concat(";");//$NON-NLS-1$
+		result  = result.concat(this.getProveedor() != null && !this.getProveedor().getNombre().isEmpty() ?  this.getProveedor().getNombre() :  OTRO ).concat(";");//$NON-NLS-1$
 		if(getNavegador() != null) {
-			result  = result.concat(getNavegador().getId() != null ? getNavegador().getId() :  String.valueOf(OTRO)).concat("/")//$NON-NLS-1$
-					.concat(getNavegador().getVersion() != null ? getNavegador().getVersion() :"-" ).concat(";");//$NON-NLS-1$ //$NON-NLS-2$
+			result  = result.concat(getNavegador().getName().isEmpty() ? getNavegador().getName() : OTRO).concat(";");//$NON-NLS-1$
 		}
 		else {
-			result  = result.concat(String.valueOf(OTRO)).concat("/-;"); //$NON-NLS-1$
+			result  = result.concat(OTRO).concat(";"); //$NON-NLS-1$
 		}
 		result  = result.concat(this.isResultSign() ? "1":"0" ).concat(";");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		result  = result.concat(this.getId_transaccion() != null ? this.getId_transaccion() :"0" ).concat(";");  //$NON-NLS-1$ //$NON-NLS-2$
