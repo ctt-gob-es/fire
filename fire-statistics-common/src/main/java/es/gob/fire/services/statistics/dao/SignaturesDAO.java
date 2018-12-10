@@ -79,10 +79,10 @@ public class SignaturesDAO {
 		for(final SignatureCube sign : sinatures) {
 			final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_SIGNATURE,false);
 			st.setDate(1, new java.sql.Date( sign.getFecha().getTime()));
-			st.setString(2, sign.getFormat().getNombre());
-			st.setString(3, sign.getImprovedFormat().getNombre());
-			st.setString(4, sign.getAlgorithm().getNombre());
-			st.setString(5, sign.getProveedor().getNombre());
+			st.setString(2, sign.getFormat());
+			st.setString(3, sign.getImprovedFormat());
+			st.setString(4, sign.getAlgorithm());
+			st.setString(5, sign.getProveedor());
 			st.setString(6, sign.getNavegador().getName());
 			st.setString (7, Boolean.toString(sign.isResultSign()));
 			st.setString(8, sign.getId_transaccion());
@@ -111,12 +111,12 @@ public class SignaturesDAO {
 			st.setTimestamp (1, new java.sql.Timestamp(signature.getFecha().getTime()));
 
 
-			st.setString(2, signature.getFormat().getNombre());
-			if(signature.getImprovedFormat() !=  null && ! signature.getImprovedFormat().getNombre().isEmpty()) {
-				st.setString(3, signature.getImprovedFormat().getNombre());
+			st.setString(2, signature.getFormat());
+			if(signature.getImprovedFormat() !=  null && ! signature.getImprovedFormat().isEmpty()) {
+				st.setString(3, signature.getImprovedFormat());
 			}
-			st.setString(4, signature.getAlgorithm().getNombre());
-			st.setString(5, signature.getProveedor().getNombre());
+			st.setString(4, signature.getAlgorithm());
+			st.setString(5, signature.getProveedor());
 			st.setString(6, signature.getNavegador().getName());
 			st.setString (7, Boolean.toString(signature.isResultSign()));
 			st.setString(8, signature.getId_transaccion());

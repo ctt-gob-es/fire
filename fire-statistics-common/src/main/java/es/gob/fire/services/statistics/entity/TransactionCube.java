@@ -6,18 +6,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import es.gob.fire.services.statistics.config.DBConnectionException;
-import es.gob.fire.services.statistics.dao.ProvidersDAO;
 
 public class TransactionCube {
 
 	private Date fecha;
-	private String idAplicacion;
-	private Integer idOperacion;
-	private int  idProveedor;
-	private static int OTRO = 99;
+	private String aplicacion;
+	private String operacion;
+	private String  proveedor;
+	private static String OTRO = "Otro"; //$NON-NLS-1$
 	private  boolean ProveedorForzado = false;
 	private  boolean resultTransaction = false;
 	private String id_transaccion;
+	private Long total = 0L;
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 	/**
 	 * Constructor
@@ -36,13 +36,13 @@ public class TransactionCube {
 	 * @param idProveedor
 	 * @param proveedorForzado
 	 */
-	public TransactionCube(final Date fecha ,final String idAplicacion, final Integer idOperacion, final int idProveedor,
+	public TransactionCube(final Date fecha ,final String aplicacion, final String operacion, final String proveedor,
 			final boolean proveedorForzado, final boolean resultTransact, final String id_tr) {
 		super();
 		this.fecha = fecha;
-		this.idAplicacion = idAplicacion;
-		this.idOperacion = idOperacion;
-		this.idProveedor = idProveedor;
+		this.aplicacion = aplicacion;
+		this.operacion = operacion;
+		this.proveedor = proveedor;
 		this.ProveedorForzado = proveedorForzado;
 		this.resultTransaction = resultTransact;
 		this.id_transaccion = id_tr;
@@ -50,58 +50,17 @@ public class TransactionCube {
 
 
 
-	/* Propiedades */
-
-	public final String getIdAplicacion() {
-		return this.idAplicacion;
-	}
-	public final void setIdAplicacion(final String idAplicacion) {
-		this.idAplicacion = idAplicacion;
-	}
-	public final Integer getIdOperacion() {
-		return this.idOperacion;
-	}
-	public final void setIdOperacion(final Integer idOperacion) {
-		this.idOperacion = idOperacion;
-	}
-	public final int getIdProveedor() {
-		return this.idProveedor;
-	}
-	public final void setIdProveedor(final int idProveedor) {
-		this.idProveedor = idProveedor;
-	}
-	public final boolean isProveedorForzado() {
-		return this.ProveedorForzado;
-	}
-	public final void setProveedorForzado(final boolean proveedorForzado) {
-		this.ProveedorForzado = proveedorForzado;
-	}
-
-	public final boolean isResultTransaction() {
-		return this.resultTransaction;
-	}
-
-	public final void setResultTransaction(final boolean resultTransaction) {
-		this.resultTransaction = resultTransaction;
-	}
-
-	public final Date getFecha() {
-		return this.fecha;
-	}
-
-	public final void setFecha(final Date fecha) {
-		this.fecha = fecha;
-	}
-
-	public String getId_transaccion() {
-		return this.id_transaccion;
-	}
-
-	public void setId_transaccion(final String id_transaccion) {
-		this.id_transaccion = id_transaccion;
-	}
 
 
+	/**
+	 * Obtiene un objeto TransactionCube de la lectura de un registro con formato, del log FIReTRANSACTION
+	 * @param registry
+	 * @return
+	 * @throws ParseException
+	 * @throws SQLException
+	 * @throws NumberFormatException
+	 * @throws DBConnectionException
+	 */
 	public final static TransactionCube parse(final String registry) throws ParseException, SQLException, NumberFormatException, DBConnectionException {
 		TransactionCube trans = null;
 		if(registry != null && !"".equals(registry) && registry.contains(";")) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -117,30 +76,24 @@ public class TransactionCube {
 				}
 				//Aplicacion
 				if(!cube[1].isEmpty()) {
-					trans.setIdAplicacion(cube[1]);
+					trans.setAplicacion(cube[1]);
 				}
 				else {
 					return null;
 				}
 				//Operacion
 				if(!cube[2].isEmpty()) {
-					trans.setIdOperacion(Integer.valueOf(cube[2]));
+					trans.setOperacion(cube[2]);
 				}
 				else {
 					return null;
 				}
 				//Proveedor
 				if(!cube[3].isEmpty()) {
-					final Provider provider  = ProvidersDAO.getProviderById(Integer.parseInt(cube[3]));
-					if(provider != null && provider.getIdProveedor() != 0) {
-						trans.setIdProveedor(provider.getIdProveedor());
-					}
-					else {
-						trans.setIdProveedor(OTRO);
-					}
+					trans.setProveedor(cube[3]);
 				}
 				else {
-					return null;
+					trans.setProveedor(OTRO);
 				}
 				//Proveedor forzado
 				if(!cube[4].isEmpty()) {
@@ -180,7 +133,7 @@ public class TransactionCube {
 
 	/**
 	 * Devuelve un string con las propiedades del objeto
-	 * con el formato "IdAplicacion;IdOperacion;IdProveedor;proveedorForzado;resultSign"
+	 * con el formato "Aplicacion;Operacion;Proveedor;proveedorForzado;resultSign"
 	 * proveedorForzado => 0 si es false, 1 si es true.
 	 * resultSign => 0 si es false, 1 si es true.
 	 */
@@ -188,20 +141,20 @@ public class TransactionCube {
 	public final String toString(){
 		String result = new String();
 
-		if(this.getIdAplicacion() != null) {
-			result  = result.concat(this.getIdAplicacion()).concat(";");//$NON-NLS-1$
+		if(this.getAplicacion() != null) {
+			result  = result.concat(this.getAplicacion()).concat(";");//$NON-NLS-1$
 		}
-		if(this.getIdOperacion() != null) {
-			result  = result.concat(String.valueOf(this.getIdOperacion())).concat(";");//$NON-NLS-1$
-		}
-		else {
-			result  = result.concat(String.valueOf(OTRO)).concat(";");//$NON-NLS-1$
-		}
-		if(this.getIdProveedor() != 0) {
-			result  = result.concat(String.valueOf(this.getIdProveedor())).concat(";");//$NON-NLS-1$
+		if(this.getOperacion() != null) {
+			result  = result.concat(String.valueOf(this.getOperacion())).concat(";");//$NON-NLS-1$
 		}
 		else {
-			result  = result.concat(String.valueOf(OTRO)).concat(";");//$NON-NLS-1$
+			result  = result.concat(OTRO).concat(";");//$NON-NLS-1$
+		}
+		if(this.getProveedor() != null  && !this.getProveedor().isEmpty()) {
+			result  = result.concat(this.getProveedor()).concat(";");//$NON-NLS-1$
+		}
+		else {
+			result  = result.concat(OTRO).concat(";");//$NON-NLS-1$
 		}
 		result  = result.concat(this.isProveedorForzado() ? "1":"0" ).concat(";");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		result  = result.concat(this.isResultTransaction() ? "1":"0" ).concat(";");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
@@ -209,7 +162,63 @@ public class TransactionCube {
 		return result;
 	}
 
+	/* Propiedades  Getter & Setter*/
 
+	public final String getAplicacion() {
+		return this.aplicacion;
+	}
+	public final void setAplicacion(final String aplicacion) {
+		this.aplicacion = aplicacion;
+	}
+	public final String getOperacion() {
+		return this.operacion;
+	}
+	public final void setOperacion(final String operacion) {
+		this.operacion = operacion;
+	}
+	public final String getProveedor() {
+		return this.proveedor;
+	}
+	public final void setProveedor(final String proveedor) {
+		this.proveedor = proveedor;
+	}
+	public final boolean isProveedorForzado() {
+		return this.ProveedorForzado;
+	}
+	public final void setProveedorForzado(final boolean proveedorForzado) {
+		this.ProveedorForzado = proveedorForzado;
+	}
 
+	public final boolean isResultTransaction() {
+		return this.resultTransaction;
+	}
+
+	public final void setResultTransaction(final boolean resultTransaction) {
+		this.resultTransaction = resultTransaction;
+	}
+
+	public final Date getFecha() {
+		return this.fecha;
+	}
+
+	public final void setFecha(final Date fecha) {
+		this.fecha = fecha;
+	}
+
+	public String getId_transaccion() {
+		return this.id_transaccion;
+	}
+
+	public void setId_transaccion(final String id_transaccion) {
+		this.id_transaccion = id_transaccion;
+	}
+
+	public final Long getTotal() {
+		return this.total;
+	}
+
+	public final void setTotal(final Long total) {
+		this.total = total;
+	}
 
 }

@@ -8,8 +8,8 @@ import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.services.FireLogger;
 import es.gob.fire.services.statistics.config.ConfigManager;
 import es.gob.fire.services.statistics.config.DBConnectionException;
-import es.gob.fire.services.statistics.dao.ProvidersDAO;
-import es.gob.fire.services.statistics.entity.Provider;
+import es.gob.fire.services.statistics.dao.AplicationsDAO;
+import es.gob.fire.services.statistics.entity.Application;
 import es.gob.fire.services.statistics.entity.TransactionCube;
 
 public class TransactionLogger {
@@ -21,7 +21,7 @@ public class TransactionLogger {
 
 	private static String ROLLDATE = "DIARIA"; //$NON-NLS-1$
 
-	private static int OTRO = 99;
+	private static String OTRO = "Otro"; //$NON-NLS-1$
 
 	private static TransactionLogger transactlogger;
 
@@ -33,6 +33,11 @@ public class TransactionLogger {
 	}
 
 
+	/**
+	 *
+	 * @param fireSesion
+	 * @param result
+	 */
 	public final void log(final FireSession fireSesion, final boolean result) {
 
 		 String[] provsSession = null;
@@ -47,64 +52,60 @@ public class TransactionLogger {
 
 		if(fireSesion.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_ID) != null
 				&& !"".equals(fireSesion.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_ID))) { //$NON-NLS-1$
-				final String id_tr = fireSesion.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-				this.getTransactCube().setId_transaccion(id_tr != null ? id_tr : "0"); //$NON-NLS-1$
-			}
-
+			final String id_tr = fireSesion.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
+			this.getTransactCube().setId_transaccion(id_tr != null ? id_tr : "0"); //$NON-NLS-1$
+		}
 
 		if(fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID))) { //$NON-NLS-1$
-			final String idAplication = fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
-			this.getTransactCube().setIdAplicacion(idAplication);
+			final String idaplication = fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+			Application app;
+			try {
+				app = AplicationsDAO.selectApplication(idaplication);
+				this.getTransactCube().setAplicacion(app.getNombre());
+			} catch (final SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (final DBConnectionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
+
 		if(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION) != null && !"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION))) { //$NON-NLS-1$
 			final FIReServiceOperation fsop = FIReServiceOperation.parse(fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
 			final Operations op = Operations.parse(fsop);
-			this.getTransactCube().setIdOperacion(new Integer(op.getId()));
+			this.getTransactCube().setOperacion(op.name());
 
 		}
 
 		if(fireSesion.getObject(ServiceParams.SESSION_PARAM_PROVIDERS) != null ) {
 			 provsSession = (String []) fireSesion.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
 		}
+
 		if(fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN) != null &&
 				!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN))) { //$NON-NLS-1$
 			 prov = fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
 		}
+
 		if(fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED) != null &&
 				!"".equals(fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED))) { //$NON-NLS-1$
 			provForced = fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
 		}
 
-		try {
-			if(provForced != null && !"".equals(provForced)) { //$NON-NLS-1$
-				final Provider provider =  ProvidersDAO.getProviderByName(provForced);
-				this.getTransactCube().setIdProveedor(provider.getIdProveedor());
-				this.getTransactCube().setProveedorForzado(true);
-			}
-			else if(prov != null && !"".equals(prov)) { //$NON-NLS-1$
-				final Provider provider =  ProvidersDAO.getProviderByName(prov);
-				this.getTransactCube().setIdProveedor(provider.getIdProveedor());
-			}
-			else if(provsSession != null && provsSession.length == 1) {
-				final Provider provider =  ProvidersDAO.getProviderByName(provsSession[0]);
-				this.getTransactCube().setIdProveedor(provider.getIdProveedor());
-				this.getTransactCube().setProveedorForzado(true);
-			}
-			else {
-				this.getTransactCube().setIdProveedor(OTRO);
-			}
+		if(provForced != null && !"".equals(provForced)) { //$NON-NLS-1$
+			this.getTransactCube().setProveedor(provForced);
+			this.getTransactCube().setProveedorForzado(true);
 		}
-		catch (final SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		else if(prov != null && !"".equals(prov)) { //$NON-NLS-1$
+			this.getTransactCube().setProveedor(prov);
 		}
-		catch (final DBConnectionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		else if(provsSession != null && provsSession.length == 1) {
+			this.getTransactCube().setProveedor(provsSession[0]);
+			this.getTransactCube().setProveedorForzado(true);
 		}
-		catch (final NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		else {
+			this.getTransactCube().setProveedor(OTRO);
 		}
 
 		this.getFireLogger().getLogger().info(this.getTransactCube().toString());

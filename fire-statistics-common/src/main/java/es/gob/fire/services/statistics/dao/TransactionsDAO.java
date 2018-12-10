@@ -20,7 +20,9 @@ public class TransactionsDAO {
 
 
 	/**SQL Inserta una transaccion*/
-	private static final String ST_INSERT_TRANSACTION = "INSERT INTO TB_TRANSACCIONES (fecha, id_aplicacion, id_operacion, id_proveedor, proveedor_forzado, correcta, id_transaccion) VALUES (?, ?, ?, ?, ?, ?, ?)";//$NON-NLS-1$
+	private static final String ST_INSERT_TRANSACTION = "INSERT INTO TB_TRANSACCIONES " //$NON-NLS-1$
+			+ "(fecha, aplicacion, operacion, proveedor, proveedor_forzado, tamanno, correcta, total)" //$NON-NLS-1$
+			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";//$NON-NLS-1$
 
 
 	/*Consultas estadisticas de transacciones*/
@@ -34,6 +36,7 @@ public class TransactionsDAO {
 			" AND year(t.fecha) = ? " + //$NON-NLS-1$
 			" AND month(t.fecha) = ? " + //$NON-NLS-1$
 			" GROUP BY ID_APP";//$NON-NLS-1$
+
 	/**Transacciones finalizadas correctamente/ incorrectamente por cada origen de certificados/proveedor. (Filtrado por a&ntilde;o y mes)*/
 	private static final String TRANSACTIONS_BYPROVIDER = "SELECT p.nombre AS PROVEEDOR," +//$NON-NLS-1$
 		    " SUM(CASE When t.correcta = 'false' then 1 else 0 end) AS INCORRECTAS," +//$NON-NLS-1$
@@ -43,6 +46,7 @@ public class TransactionsDAO {
 			" AND year(t.fecha) = ? "+//$NON-NLS-1$
 			" AND month(t.fecha) = ? "+//$NON-NLS-1$
 			" GROUP BY t.id_proveedor";//$NON-NLS-1$
+
 	/**Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n (Filtrado por a&ntilde;o y mes)*/
 	private static final String TRANSACTIONS_BYDOCSIZE = "SELECT SUM(f.tamanno)/1024 AS Kbytes, t.id_aplicacion AS id_app, a.nombre AS nombre_app " +//$NON-NLS-1$
 			" FROM tb_transacciones t, tb_aplicaciones a, tb_firmas f " +//$NON-NLS-1$
@@ -77,12 +81,12 @@ public class TransactionsDAO {
 
 		final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_TRANSACTION,false);
 		st.setTimestamp(1, new java.sql.Timestamp(transaction.getFecha().getTime()));
-		st.setString(2, transaction.getIdAplicacion());
-		st.setInt(3, transaction.getIdOperacion().intValue());
-		st.setInt(4, transaction.getIdProveedor());
+		st.setString(2, transaction.getAplicacion());
+		st.setString(3, transaction.getOperacion());
+		st.setString(4, transaction.getProveedor());
 		st.setString (5, Boolean.toString(transaction.isProveedorForzado()));
 		st.setString (6, Boolean.toString(transaction.isResultTransaction()));
-		st.setString(7, transaction.getId_transaccion());
+		st.setLong(7, transaction.getTotal().longValue());
 		totalInsertReg = st.executeUpdate();
 		st.close();
 

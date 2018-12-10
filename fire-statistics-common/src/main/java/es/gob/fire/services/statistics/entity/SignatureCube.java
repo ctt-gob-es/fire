@@ -7,20 +7,19 @@ import java.util.Date;
 
 import es.gob.fire.services.statistics.Browser;
 import es.gob.fire.services.statistics.config.DBConnectionException;
-import es.gob.fire.services.statistics.dao.ProvidersDAO;
 
 
 public class SignatureCube {
 	//static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private Date fecha;
-	private Format format;
-	private Algorithm algorithm;
-	private Provider proveedor;
+	private String format;
+	private String algorithm;
+	private String proveedor;
 	private Browser navegador;
 	private boolean resultSign = false ;
 	private String id_transaccion;
 	private Long size = new Long(0L);
-	private ImprovedFormat improvedFormat;
+	private String improvedFormat;
 	private Long total = 0L;
 	private static String OTRO = "OTRO"; //$NON-NLS-1$
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
@@ -31,8 +30,8 @@ public class SignatureCube {
 
 
 
-	public SignatureCube(final Date fecha ,final Format format, final Algorithm algorithm, final Provider proveedor,
-			final Browser navegador, final boolean resultsign, final String id_tr, final ImprovedFormat improvedFormat) {
+	public SignatureCube(final Date fecha ,final String format, final String algorithm, final String proveedor,
+			final Browser navegador, final boolean resultsign, final String id_tr, final String improvedFormat) {
 		super();
 		this.fecha = fecha;
 		this.format = format;
@@ -48,91 +47,15 @@ public class SignatureCube {
 
 
 
-
-	public final Date getFecha() {
-		return this.fecha;
-	}
-
-	public final void setFecha(final Date fecha) {
-		this.fecha = fecha;
-	}
-
-	public final Format getFormat() {
-		return this.format;
-	}
-
-	public final void setFormat(final Format format) {
-		this.format = format;
-	}
-
-	public final Algorithm getAlgorithm() {
-		return this.algorithm;
-	}
-
-	public final void setAlgorithm(final Algorithm algorithm) {
-		this.algorithm = algorithm;
-	}
-
-	public final Provider getProveedor() {
-		return this.proveedor;
-	}
-
-	public final void setProveedor(final Provider proveedor) {
-		this.proveedor = proveedor;
-	}
-
-	public final Browser getNavegador() {
-		return this.navegador;
-	}
-
-	public final void setNavegador(final Browser navegador) {
-		this.navegador = navegador;
-	}
-
-	public final boolean isResultSign() {
-		return this.resultSign;
-	}
-
-	public final void setResultSign(final boolean resultSign) {
-		this.resultSign = resultSign;
-	}
-
-	public String getId_transaccion() {
-		return this.id_transaccion;
-	}
-
-	public void setId_transaccion(final String id_transaccion) {
-		this.id_transaccion = id_transaccion;
-	}
-
-
-	public final Long getSize() {
-		return this.size;
-	}
-
-	public final void setSize(final Long size) {
-		this.size = size;
-	}
-
-
-	public final ImprovedFormat getImprovedFormat() {
-		return this.improvedFormat;
-	}
-
-	public final void setImprovedFormat(final ImprovedFormat improvedFormat) {
-		this.improvedFormat = improvedFormat;
-	}
-
-	public final Long getTotal() {
-		return this.total;
-	}
-
-	public final void setTotal(final Long total) {
-		this.total = total;
-	}
-
-
-
+	/**
+	 * Obtiene un objeto SignatureCube de la lectura de un registro con formato, del log FIReSIGNATURE
+	 * @param registry
+	 * @return
+	 * @throws ParseException
+	 * @throws NumberFormatException
+	 * @throws SQLException
+	 * @throws DBConnectionException
+	 */
 	public final static SignatureCube parse(final String registry) throws ParseException, NumberFormatException, SQLException, DBConnectionException {
 		SignatureCube sign = null;
 		if(registry != null && !"".equals(registry) && registry.contains(";")) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -148,43 +71,29 @@ public class SignatureCube {
 				}
 				//Formato
 				if(!cube[1].isEmpty()) {
-					final Format f = new Format();
-					f.setNombre(cube[1]);
-					sign.setFormat(f);
+					sign.setFormat(cube[1]);
 				}
 				else {
-					return null;
+					 sign.setFormat(OTRO);
 				}
 				//Formato Mejorado
 				if(!cube[2].isEmpty()) {
-					final ImprovedFormat impFormat = new ImprovedFormat();
-					impFormat.setNombre(cube[2]);
-					sign.setImprovedFormat(impFormat);
+					sign.setImprovedFormat(cube[2]);
 				}
 
 				//Algoritmo
 				if(!cube[3].isEmpty()) {
-					final Algorithm alg = new Algorithm();
-					alg.setNombre(cube[3]);
-					sign.setAlgorithm(alg);
+					sign.setAlgorithm(cube[3]);
 				}
 				else {
-					return null;
+					sign.setAlgorithm(OTRO);
 				}
 				//Proveedor
 				if(!cube[4].isEmpty()) {
-					final Provider provider  = ProvidersDAO.getProviderByName(cube[4]);
-					if(provider != null && provider.getIdProveedor() != 0) {
-						sign.setProveedor(provider);
-					}
-					else {
-						final Provider p =  new Provider();
-						p.setNombre(OTRO);
-						sign.setProveedor(p);
-					}
+					sign.setProveedor(cube[4]);
 				}
 				else {
-					return null;
+					sign.setProveedor(OTRO);
 				}
 				//Navegador
 				if(!cube[5].isEmpty()) {
@@ -228,7 +137,7 @@ public class SignatureCube {
 
 	/**
 	 * Devuelve un string con las propiedades del objeto
-	 * con el formato "IdFormato;IdAlgoritmo;IdProveedor;idNavegador-Version;resultSign"
+	 * con el formato "Formato;Algoritmo;Proveedor;Navegador;resultSign"
 	 * siendo resultSign 0 si no se realizo la firma o hubo un error y 1 si termino la firma correctamente.
 	 */
 	@Override
@@ -236,10 +145,10 @@ public class SignatureCube {
 
 		String result = new String();
 
-		result  = result.concat(this.getFormat() != null && !this.getFormat().getNombre().isEmpty() ? this.getFormat().getNombre() : OTRO ).concat(";");//$NON-NLS-1$
-		result  = result.concat(this.getImprovedFormat() != null  && !this.getImprovedFormat().getNombre().isEmpty()  ? this.getImprovedFormat().getNombre() : "" ).concat(";");//$NON-NLS-1$ //$NON-NLS-2$
-		result  = result.concat(this.getAlgorithm() != null && !this.getAlgorithm().getNombre().isEmpty() ? this.getAlgorithm().getNombre() : OTRO ).concat(";");//$NON-NLS-1$
-		result  = result.concat(this.getProveedor() != null && !this.getProveedor().getNombre().isEmpty() ?  this.getProveedor().getNombre() :  OTRO ).concat(";");//$NON-NLS-1$
+		result  = result.concat(this.getFormat() != null && !this.getFormat().isEmpty() ? this.getFormat() : OTRO ).concat(";");//$NON-NLS-1$
+		result  = result.concat(this.getImprovedFormat() != null  && !this.getImprovedFormat().isEmpty()  ? this.getImprovedFormat() : "" ).concat(";");//$NON-NLS-1$ //$NON-NLS-2$
+		result  = result.concat(this.getAlgorithm() != null && !this.getAlgorithm().isEmpty() ? this.getAlgorithm() : OTRO ).concat(";");//$NON-NLS-1$
+		result  = result.concat(this.getProveedor() != null && !this.getProveedor().isEmpty() ?  this.getProveedor() :  OTRO ).concat(";");//$NON-NLS-1$
 		if(getNavegador() != null) {
 			result  = result.concat(getNavegador().getName().isEmpty() ? getNavegador().getName() : OTRO).concat(";");//$NON-NLS-1$
 		}
@@ -251,6 +160,131 @@ public class SignatureCube {
 		result  = result.concat(this.getSize().longValue() != 0L ? String.valueOf(this.getSize()) :"0" );  //$NON-NLS-1$
 		return result;
 	}
+
+
+
+	/**Getter & Setter*/
+
+	/**
+	 * Obtiene la fecha
+	 * @return
+	 */
+	public final Date getFecha() {
+		return this.fecha;
+	}
+	/**
+	 * Establece la fecha
+	 * @param fecha
+	 */
+	public final void setFecha(final Date fecha) {
+		this.fecha = fecha;
+	}
+	/**
+	 * Obtiene el formtato del cubo de la firma
+	 * @return
+	 */
+	public final String getFormat() {
+		return this.format;
+	}
+	/**
+	 * Establece el formtato del cubo de la firma
+	 * @param format
+	 */
+	public final void setFormat(final String format) {
+		this.format = format;
+	}
+	/**
+	 * Obtiene el algoritmo del cubo de la firma
+	 * @return
+	 */
+	public final String getAlgorithm() {
+		return this.algorithm;
+	}
+	/**
+	 *Establece el algoritmo del cubo de la firma
+	 * @param algorithm
+	 */
+	public final void setAlgorithm(final String algorithm) {
+		this.algorithm = algorithm;
+	}
+	/**
+	 * Obtiene el proveedor del cubo de la firma
+	 * @return
+	 */
+	public final String getProveedor() {
+		return this.proveedor;
+	}
+	/**
+	 * Establece el proveedor del cubo de la firma
+	 * @param proveedor
+	 */
+	public final void setProveedor(final String proveedor) {
+		this.proveedor = proveedor;
+	}
+	/**
+	 * Obtiene el Navegador  del cubo de la firma
+	 * @return
+	 */
+	public final Browser getNavegador() {
+		return this.navegador;
+	}
+	/**
+	 *  Establece el Navegador  del cubo de la firma
+	 * @param navegador
+	 */
+	public final void setNavegador(final Browser navegador) {
+		this.navegador = navegador;
+	}
+	/**
+	 *
+	 * @return
+	 */
+	public final boolean isResultSign() {
+		return this.resultSign;
+	}
+	/**
+	 *
+	 * @param resultSign
+	 */
+	public final void setResultSign(final boolean resultSign) {
+		this.resultSign = resultSign;
+	}
+
+	public String getId_transaccion() {
+		return this.id_transaccion;
+	}
+
+	public void setId_transaccion(final String id_transaccion) {
+		this.id_transaccion = id_transaccion;
+	}
+
+
+	public final Long getSize() {
+		return this.size;
+	}
+
+	public final void setSize(final Long size) {
+		this.size = size;
+	}
+
+
+	public final String getImprovedFormat() {
+		return this.improvedFormat;
+	}
+
+	public final void setImprovedFormat(final String improvedFormat) {
+		this.improvedFormat = improvedFormat;
+	}
+
+	public final Long getTotal() {
+		return this.total;
+	}
+
+	public final void setTotal(final Long total) {
+		this.total = total;
+	}
+
+
 
 
 }
