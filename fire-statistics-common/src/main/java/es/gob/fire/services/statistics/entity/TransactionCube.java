@@ -17,7 +17,8 @@ public class TransactionCube {
 	private  boolean ProveedorForzado = false;
 	private  boolean resultTransaction = false;
 	private String id_transaccion;
-	private Long total = 0L;
+	private Long total = 1L;
+	private Long size = new Long(0L);
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 	/**
 	 * Constructor
@@ -219,6 +220,14 @@ public class TransactionCube {
 
 	public final void setTotal(final Long total) {
 		this.total = total;
+	}
+
+	public final Long getSize() {
+		return this.size;
+	}
+
+	public final void setSize(final Long size) {
+		this.size = size;
 	}
 
 }

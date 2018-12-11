@@ -12,6 +12,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +26,7 @@ import es.gob.fire.services.statistics.config.DBConnectionException;
 import es.gob.fire.services.statistics.config.DbManager;
 import es.gob.fire.services.statistics.dao.SignaturesDAO;
 import es.gob.fire.services.statistics.dao.TransactionsDAO;
+import es.gob.fire.services.statistics.entity.ApplicationSize;
 import es.gob.fire.services.statistics.entity.SignatureCube;
 import es.gob.fire.services.statistics.entity.TransactionCube;
 
@@ -129,8 +132,6 @@ public class FireStatistics {
 	 * Lanza la ejecuci&oacute;n de la carga de datos de los fichero de estadisticas a la base de datos.
 	 */
 	public final void init() {
-
-
 
 		Date lastLoadDate = null;
 		boolean loaded = false;
@@ -358,8 +359,6 @@ public class FireStatistics {
 
 	  /**
 	   * Funci&oacute;n que inserta los registros de los ficheros log pasados por par&aacute;metro
-	   * y compueba que el n&uacute;mero de los registros insertados sean iguales, en caso contrario se deshace
-	   * operaci&oacute;n de inserci&oacute;n.
 	   * @param fileName
 	   * @return
 	 * @throws SQLException
@@ -375,6 +374,9 @@ public class FireStatistics {
 		 final File f;
 		 int regInserted = 0;
 		 String result = null;
+		 final HashMap<Integer , SignatureCube> hashSign = new  HashMap<>();
+		 final HashMap<String , TransactionCube> hashTrans = new  HashMap<>();
+		 final HashMap<String, ApplicationSize> hashAppSize =  new HashMap<>();
 
 		 if(fileName != null && !"".equals(fileName) ) {  //$NON-NLS-1$
 			f = new File(getLogPath().concat(File.separator).concat(fileName)).getCanonicalFile();
@@ -382,22 +384,91 @@ public class FireStatistics {
 				final BufferedReader br = new BufferedReader(new FileReader(f));
 				String registry;
 				if(fileName.contains(FILE_SIGN)) {
+					int key = 1;
+					//Se lee registro de FIReSIGNATURE
 					while ((registry = br.readLine()) != null) {
 						if(!registry.isEmpty()) {
+							//se obtiene el objeto SignatureCube del registro
 							final SignatureCube sign =  SignatureCube.parse(registry);
+							final ApplicationSize appSize = new ApplicationSize();
 							if(sign != null) {
-								regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
+								//Se rellena el mapa de las firmas
+								if(hashSign.isEmpty()) {
+									//Si es la primera vez se introduce el primer objeto
+									hashSign.put(new Integer(key), sign);
+								}
+								else {
+									//Buscamos si existe otro objeto firma con los mismos datos anteriormente
+									final Integer k =  searchSignature(hashSign,sign);
+									if(k != null) {
+										final SignatureCube sign2 = hashSign.get(k);
+										final long total1 = sign.getTotal().longValue();
+										final long total2 = sign2.getTotal().longValue();
+										sign.setTotal(new Long (total1 + total2));
+										hashSign.remove(k);
+										hashSign.put(k, sign);
+									}
+									else {
+										hashSign.put(new Integer(key), sign);
+									}
+								}
+								//Rellenamos el mapa del tamaño por aplicación de cada transacción
+								appSize.setId_Transaction(sign.getId_transaccion());
+								appSize.setSize(sign.getSize());
+								if(hashAppSize.isEmpty()) {
+									hashAppSize.put(appSize.getId_Transaction(), appSize);
+								}
+								else if(hashAppSize.get(appSize.getId_Transaction()) != null) {
+									final ApplicationSize app = hashAppSize.get(appSize.getId_Transaction());
+									final long tam1 = app.getSize().longValue();
+									final long tam2 = appSize.getSize().longValue();
+									appSize.setSize(new Long (tam1 + tam2));
+									hashAppSize.remove(appSize.getId_Transaction());
+									hashAppSize.put(appSize.getId_Transaction(), appSize);
+								}
+								else {
+									hashAppSize.put(appSize.getId_Transaction(), appSize);
+								}
 							}
 						}
-
+						key ++;
 					}
+
 				}
 				else if(fileName.contains(FILE_TRANS)) {
 					while ((registry = br.readLine()) != null) {
 						if(!registry.isEmpty()) {
 							final TransactionCube trans =  TransactionCube.parse(registry);
 							if(trans != null) {
-								regInserted = regInserted +  TransactionsDAO.insertTransaction(trans);
+
+								//Rellenamos el mapa de Transacciones
+								if(hashTrans.isEmpty()) {
+									//Si es la primera vez se introduce el primer objeto
+									hashTrans.put(trans.getId_transaccion(), trans);
+								}
+								else {
+									//Buscamos si existe otro objeto transacción con los mismos datos anteriormente
+									final String k =  searchTransaction(hashTrans, trans);
+									if(k != null) {
+										final TransactionCube trans2 = hashTrans.get(k);
+										final long total1 = trans.getTotal().longValue();
+										final long total2 = trans2.getTotal().longValue();
+										trans.setTotal(new Long (total1 + total2));
+										hashTrans.remove(k);
+										hashTrans.put(k, trans);
+									}
+									else {
+										hashTrans.put(trans.getId_transaccion(), trans);
+									}
+								}
+
+								if(hashAppSize.get(trans.getId_transaccion()) != null) {
+									final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
+									appSize.setApplication(trans.getAplicacion());
+									hashAppSize.remove(trans.getId_transaccion());
+									hashAppSize.put(trans.getId_transaccion(), appSize);
+								}
+
 							}
 						}
 					}
@@ -406,15 +477,22 @@ public class FireStatistics {
 			}
 		}
 
-//		if(regInserted == totalReg) {
-			DbManager.runCommit();
-			result = formater.format(new Date()).concat(";1"); //$NON-NLS-1$
-//		}
-//		else {
-//			DbManager.runRollBack();
-//			result = formater.format(new Date()).concat(";0"); //$NON-NLS-1$
-//		}
+		 //Leemos los mapas y se procede a realizar las inserciones en la BBDD.
 
+
+		 for (final Map.Entry<Integer, SignatureCube> objSign : hashSign.entrySet()) {
+			 final SignatureCube sign = objSign.getValue();
+			 regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
+		 }
+		 for (final Map.Entry<String, TransactionCube> objTrans : hashTrans.entrySet()) {
+			final TransactionCube trans = objTrans.getValue();
+			final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
+			trans.setSize(appSize.getSize());
+			regInserted = regInserted +  TransactionsDAO.insertTransaction(trans);
+		 }
+
+		DbManager.runCommit();
+		result = formater.format(new Date()).concat(";1"); //$NON-NLS-1$
 		return result;
 	}
 
@@ -442,6 +520,150 @@ public class FireStatistics {
 			}
 		}
 		return res;
+	}
+
+	/**
+	 * Compara dos objetos firma
+	 * @param sign1
+	 * @param sign2
+	 * @return true si son iguales , false si son distintos
+	 */
+	static final boolean compareSignature(final SignatureCube sign1, final SignatureCube sign2) {
+		boolean result = false;
+		if(sign1 != null && sign2 != null) {
+			//Comparar algoritmo
+			if(!sign1.getAlgorithm().isEmpty() && !sign2.getAlgorithm().isEmpty()
+					&& sign1.getAlgorithm().equals(sign2.getAlgorithm())) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+			//Comparar formato
+			if(!sign1.getFormat().isEmpty() && !sign2.getFormat().isEmpty()
+					&& sign1.getFormat().equals(sign2.getFormat())) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+			//Comparar formato mejorado
+			if(!sign1.getImprovedFormat().isEmpty() && !sign2.getImprovedFormat().isEmpty()
+					&& sign1.getImprovedFormat().equals(sign2.getImprovedFormat())) {
+				result = true;
+			}
+			//Comparar proveedor
+			if(!sign1.getProveedor().isEmpty() && !sign2.getProveedor().isEmpty()
+					&& sign1.getProveedor().equals(sign2.getProveedor())) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+			//Comparar navegador
+			if(!sign1.getNavegador().getName().isEmpty() && !sign2.getNavegador().getName().isEmpty()
+					&& sign1.getNavegador().getName().equals(sign2.getNavegador().getName())) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+
+			if( sign1.isResultSign() && sign2.isResultSign()) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+
+		}
+
+		return result;
+	}
+
+	/**
+	 * Compara dos objetos transacción
+	 * @param trans1
+	 * @param trans2
+	 * @return true si son iguales , false si son distintos
+	 */
+	static final boolean compareTransaction(final TransactionCube trans1, final TransactionCube trans2) {
+		boolean result = false;
+		if(trans1 != null && trans2 != null) {
+			//Comparar aplicación
+			if(!trans1.getAplicacion().isEmpty() && !trans2.getAplicacion().isEmpty()
+					&& trans1.getAplicacion().equals(trans2.getAplicacion())) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+			//Comparar operación
+			if(!trans1.getOperacion().isEmpty() && !trans2.getOperacion().isEmpty()
+					&& trans1.getOperacion().equals(trans2.getOperacion())) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+			//Comparar proveedor
+			if(!trans1.getProveedor().isEmpty() && !trans2.getProveedor().isEmpty()
+					&& trans1.getProveedor().equals(trans2.getProveedor())) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+
+			//Comparar proveedor forzado
+			if(trans1.isProveedorForzado() && trans2.isProveedorForzado()) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+			//Comparar resultado
+			if(trans1.isResultTransaction() && trans2.isResultTransaction()) {
+				result = true;
+			}
+			else {
+				return  false;
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 *
+	 * @param hash
+	 * @param sign
+	 * @return
+	 */
+	static final Integer searchSignature(final HashMap<Integer, SignatureCube> hash, final SignatureCube sign) {
+		for (final Map.Entry<Integer, SignatureCube> objSign : hash.entrySet()) {
+			final SignatureCube sign2 = objSign.getValue();
+			if(compareSignature(sign2,sign)) {
+				return objSign.getKey();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 *
+	 * @param hash
+	 * @param trans
+	 * @return
+	 */
+	static final String  searchTransaction(final HashMap<String, TransactionCube> hash, final TransactionCube trans) {
+		for (final Map.Entry<String, TransactionCube> objTrans : hash.entrySet()) {
+			final TransactionCube trans2 = objTrans.getValue();
+			if(compareTransaction(trans2, trans)) {
+				return objTrans.getKey();
+			}
+		}
+		return null;
 	}
 
 

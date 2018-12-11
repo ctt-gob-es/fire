@@ -20,7 +20,7 @@ public class SignatureCube {
 	private String id_transaccion;
 	private Long size = new Long(0L);
 	private String improvedFormat;
-	private Long total = 0L;
+	private Long total = 1L;
 	private static String OTRO = "OTRO"; //$NON-NLS-1$
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 
@@ -150,7 +150,7 @@ public class SignatureCube {
 		result  = result.concat(this.getAlgorithm() != null && !this.getAlgorithm().isEmpty() ? this.getAlgorithm() : OTRO ).concat(";");//$NON-NLS-1$
 		result  = result.concat(this.getProveedor() != null && !this.getProveedor().isEmpty() ?  this.getProveedor() :  OTRO ).concat(";");//$NON-NLS-1$
 		if(getNavegador() != null) {
-			result  = result.concat(getNavegador().getName().isEmpty() ? getNavegador().getName() : OTRO).concat(";");//$NON-NLS-1$
+			result  = result.concat(! getNavegador().getName().isEmpty() ? getNavegador().getName() : OTRO).concat(";");//$NON-NLS-1$
 		}
 		else {
 			result  = result.concat(OTRO).concat(";"); //$NON-NLS-1$
