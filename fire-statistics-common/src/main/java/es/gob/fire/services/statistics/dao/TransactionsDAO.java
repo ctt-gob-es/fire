@@ -22,7 +22,7 @@ public class TransactionsDAO {
 	/**SQL Inserta una transaccion*/
 	private static final String ST_INSERT_TRANSACTION = "INSERT INTO TB_TRANSACCIONES " //$NON-NLS-1$
 			+ "(fecha, aplicacion, operacion, proveedor, proveedor_forzado, tamanno, correcta, total)" //$NON-NLS-1$
-			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";//$NON-NLS-1$
+			+ " VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)";//$NON-NLS-1$
 
 
 	/*Consultas estadisticas de transacciones*/
@@ -80,13 +80,15 @@ public class TransactionsDAO {
 		int totalInsertReg = 0;
 
 		final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_TRANSACTION,false);
+
 		st.setTimestamp(1, new java.sql.Timestamp(transaction.getFecha().getTime()));
 		st.setString(2, transaction.getAplicacion());
 		st.setString(3, transaction.getOperacion());
 		st.setString(4, transaction.getProveedor());
 		st.setString (5, Boolean.toString(transaction.isProveedorForzado()));
-		st.setString (6, Boolean.toString(transaction.isResultTransaction()));
-		st.setLong(7, transaction.getTotal().longValue());
+		st.setLong(6, transaction.getSize().longValue());
+		st.setString (7, Boolean.toString(transaction.isResultTransaction()));
+		st.setLong(8, transaction.getTotal().longValue());
 		totalInsertReg = st.executeUpdate();
 		st.close();
 

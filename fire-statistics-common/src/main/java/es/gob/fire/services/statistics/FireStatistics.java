@@ -50,6 +50,11 @@ public class FireStatistics {
 	final static SimpleDateFormat formater =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //$NON-NLS-1$
 	private static  String logPath = null;
 
+	private static final HashMap<Integer , SignatureCube> hashSign = new  HashMap<>();
+	private static final HashMap<String , TransactionCube> hashTrans = new  HashMap<>();
+	private static final HashMap<String, ApplicationSize> hashAppSize =  new HashMap<>();
+
+
 	/**
 	 * Constructor del Objeto de estad&iacute;sticas se le indica la ruta donde se encuentran los ficheros.
 	 * @param path
@@ -253,7 +258,14 @@ public class FireStatistics {
 			  result = new String[listFiles.length];
 			  for (int i = 0; i < listFiles.length; i++) {
 				  final int totalReg = countFileReg(listFiles[i]);
-				  result[i] = insertStatisticDB(listFiles[i],totalReg);
+				  result[i] = prepareStatisticDB(listFiles[i],totalReg);
+				  if(!hashSign.isEmpty() && !hashTrans.isEmpty() && !hashAppSize.isEmpty()) {
+					  insertStatisticDB();
+					  hashSign.clear();
+					  hashTrans.clear();
+					  hashAppSize.clear();
+				  }
+
 			  }
 		  }
 
@@ -358,7 +370,8 @@ public class FireStatistics {
 	  }
 
 	  /**
-	   * Funci&oacute;n que inserta los registros de los ficheros log pasados por par&aacute;metro
+	   * Funci&oacute;n que prepara los registros de los ficheros log pasados por par&aacute;metro en mapas hash
+	   * para ser insertados en la BBDD.
 	   * @param fileName
 	   * @return
 	 * @throws SQLException
@@ -369,14 +382,12 @@ public class FireStatistics {
 	 * @throws NumberFormatException
 	 * @throws ConfigFilesException
 	   */
-	static final String insertStatisticDB(final String fileName, final int totalReg) throws SQLException, IOException, DBConnectionException, ParseException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException, ConfigFilesException {
+	static final String prepareStatisticDB(final String fileName, final int totalReg) throws SQLException, IOException, DBConnectionException, ParseException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException, ConfigFilesException {
 
 		 final File f;
-		 int regInserted = 0;
+
 		 String result = null;
-		 final HashMap<Integer , SignatureCube> hashSign = new  HashMap<>();
-		 final HashMap<String , TransactionCube> hashTrans = new  HashMap<>();
-		 final HashMap<String, ApplicationSize> hashAppSize =  new HashMap<>();
+
 
 		 if(fileName != null && !"".equals(fileName) ) {  //$NON-NLS-1$
 			f = new File(getLogPath().concat(File.separator).concat(fileName)).getCanonicalFile();
@@ -412,7 +423,7 @@ public class FireStatistics {
 										hashSign.put(new Integer(key), sign);
 									}
 								}
-								//Rellenamos el mapa del tamaño por aplicación de cada transacción
+								//Rellenamos el mapa del size por aplicacion de cada transaccion
 								appSize.setId_Transaction(sign.getId_transaccion());
 								appSize.setSize(sign.getSize());
 								if(hashAppSize.isEmpty()) {
@@ -447,7 +458,7 @@ public class FireStatistics {
 									hashTrans.put(trans.getId_transaccion(), trans);
 								}
 								else {
-									//Buscamos si existe otro objeto transacción con los mismos datos anteriormente
+									//Buscamos si existe otro objeto transaccion con los mismos datos anteriormente
 									final String k =  searchTransaction(hashTrans, trans);
 									if(k != null) {
 										final TransactionCube trans2 = hashTrans.get(k);
@@ -477,24 +488,44 @@ public class FireStatistics {
 			}
 		}
 
-		 //Leemos los mapas y se procede a realizar las inserciones en la BBDD.
+		result = formater.format(new Date()).concat(";1"); //$NON-NLS-1$
+		return result;
+	}
 
-
+	/**
+	 *	Lee los mapas y se procede a realizar las inserciones en la BBDD
+	 * @param totalReg
+	 * @return
+	 * @throws SQLException
+	 * @throws DBConnectionException
+	 * @throws NumberFormatException
+	 * @throws es.gob.fire.services.statistics.config.DBConnectionException
+	 * @throws ConfigFilesException
+	 */
+	static final int insertStatisticDB() throws SQLException, DBConnectionException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException, ConfigFilesException {
+		 //.
+		 int regInserted = 0;
 		 for (final Map.Entry<Integer, SignatureCube> objSign : hashSign.entrySet()) {
 			 final SignatureCube sign = objSign.getValue();
 			 regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
 		 }
+
 		 for (final Map.Entry<String, TransactionCube> objTrans : hashTrans.entrySet()) {
 			final TransactionCube trans = objTrans.getValue();
 			final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
-			trans.setSize(appSize.getSize());
+			if(appSize != null && appSize.getSize() != null ) {
+				trans.setSize(appSize.getSize()) ;
+			}
+			else {
+				trans.setSize(new Long (0L));
+			}
 			regInserted = regInserted +  TransactionsDAO.insertTransaction(trans);
 		 }
 
 		DbManager.runCommit();
-		result = formater.format(new Date()).concat(";1"); //$NON-NLS-1$
-		return result;
+		return regInserted;
 	}
+
 
 	/**
 	 * Escribe el resultado de la carga en el fichero FIReSTATISTICS.log
@@ -532,44 +563,51 @@ public class FireStatistics {
 		boolean result = false;
 		if(sign1 != null && sign2 != null) {
 			//Comparar algoritmo
-			if(!sign1.getAlgorithm().isEmpty() && !sign2.getAlgorithm().isEmpty()
-					&& sign1.getAlgorithm().equals(sign2.getAlgorithm())) {
+			if(sign1.getAlgorithm()!= null && sign2.getAlgorithm() != null &&
+					!sign1.getAlgorithm().isEmpty() && !sign2.getAlgorithm().isEmpty() &&
+					sign1.getAlgorithm().equals(sign2.getAlgorithm())) {
 				result = true;
 			}
 			else {
 				return  false;
 			}
 			//Comparar formato
-			if(!sign1.getFormat().isEmpty() && !sign2.getFormat().isEmpty()
-					&& sign1.getFormat().equals(sign2.getFormat())) {
+			if(sign1.getFormat()!= null && sign2.getFormat() != null &&
+					!sign1.getFormat().isEmpty() && !sign2.getFormat().isEmpty() &&
+					sign1.getFormat().equals(sign2.getFormat())) {
 				result = true;
 			}
 			else {
 				return  false;
 			}
 			//Comparar formato mejorado
-			if(!sign1.getImprovedFormat().isEmpty() && !sign2.getImprovedFormat().isEmpty()
-					&& sign1.getImprovedFormat().equals(sign2.getImprovedFormat())) {
+			if(sign1.getImprovedFormat() != null && sign2.getImprovedFormat() != null &&
+					!sign1.getImprovedFormat().isEmpty() && !sign2.getImprovedFormat().isEmpty() &&
+					sign1.getImprovedFormat().equals(sign2.getImprovedFormat())) {
 				result = true;
 			}
 			//Comparar proveedor
-			if(!sign1.getProveedor().isEmpty() && !sign2.getProveedor().isEmpty()
-					&& sign1.getProveedor().equals(sign2.getProveedor())) {
+			if(sign1.getProveedor() != null && sign2.getProveedor() != null &&
+					!sign1.getProveedor().isEmpty() && !sign2.getProveedor().isEmpty() &&
+					sign1.getProveedor().equals(sign2.getProveedor())) {
 				result = true;
 			}
 			else {
 				return  false;
 			}
 			//Comparar navegador
-			if(!sign1.getNavegador().getName().isEmpty() && !sign2.getNavegador().getName().isEmpty()
-					&& sign1.getNavegador().getName().equals(sign2.getNavegador().getName())) {
+			if(sign1.getNavegador() != null && sign1.getNavegador().getName() != null &&
+					sign2.getNavegador() != null && sign2.getNavegador().getName() != null &&
+					!sign1.getNavegador().getName().isEmpty() && !sign2.getNavegador().getName().isEmpty() &&
+					sign1.getNavegador().getName().equals(sign2.getNavegador().getName())) {
+
 				result = true;
 			}
 			else {
 				return  false;
 			}
-
-			if( sign1.isResultSign() && sign2.isResultSign()) {
+			//Comparar resultados
+			if(!(sign1.isResultSign() ^ sign2.isResultSign())) {
 				result = true;
 			}
 			else {
@@ -582,7 +620,7 @@ public class FireStatistics {
 	}
 
 	/**
-	 * Compara dos objetos transacción
+	 * Compara dos objetos transacci&oacute;n
 	 * @param trans1
 	 * @param trans2
 	 * @return true si son iguales , false si son distintos
@@ -590,25 +628,28 @@ public class FireStatistics {
 	static final boolean compareTransaction(final TransactionCube trans1, final TransactionCube trans2) {
 		boolean result = false;
 		if(trans1 != null && trans2 != null) {
-			//Comparar aplicación
-			if(!trans1.getAplicacion().isEmpty() && !trans2.getAplicacion().isEmpty()
-					&& trans1.getAplicacion().equals(trans2.getAplicacion())) {
+			//Comparar aplicacion
+			if(trans1.getAplicacion() != null && trans2.getAplicacion() != null &&
+					!trans1.getAplicacion().isEmpty() && !trans2.getAplicacion().isEmpty() &&
+					trans1.getAplicacion().equals(trans2.getAplicacion())) {
 				result = true;
 			}
 			else {
 				return  false;
 			}
-			//Comparar operación
-			if(!trans1.getOperacion().isEmpty() && !trans2.getOperacion().isEmpty()
-					&& trans1.getOperacion().equals(trans2.getOperacion())) {
+			//Comparar operacion
+			if(trans1.getOperacion() != null && trans2.getOperacion() != null &&
+					!trans1.getOperacion().isEmpty() && !trans2.getOperacion().isEmpty() &&
+					trans1.getOperacion().equals(trans2.getOperacion())) {
 				result = true;
 			}
 			else {
 				return  false;
 			}
 			//Comparar proveedor
-			if(!trans1.getProveedor().isEmpty() && !trans2.getProveedor().isEmpty()
-					&& trans1.getProveedor().equals(trans2.getProveedor())) {
+			if(trans1.getProveedor() != null && trans2.getProveedor() != null &&
+					!trans1.getProveedor().isEmpty() && !trans2.getProveedor().isEmpty() &&
+					trans1.getProveedor().equals(trans2.getProveedor())) {
 				result = true;
 			}
 			else {
@@ -616,14 +657,14 @@ public class FireStatistics {
 			}
 
 			//Comparar proveedor forzado
-			if(trans1.isProveedorForzado() && trans2.isProveedorForzado()) {
+			if(!(trans1.isProveedorForzado() ^ trans2.isProveedorForzado())) {
 				result = true;
 			}
 			else {
 				return  false;
 			}
 			//Comparar resultado
-			if(trans1.isResultTransaction() && trans2.isResultTransaction()) {
+			if(!(trans1.isResultTransaction() ^ trans2.isResultTransaction())) {
 				result = true;
 			}
 			else {

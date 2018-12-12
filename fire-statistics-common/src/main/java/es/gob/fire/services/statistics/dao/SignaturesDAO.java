@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 import javax.json.Json;
@@ -21,8 +22,8 @@ public class SignaturesDAO {
 	/**Inserta */
 	private static final String ST_INSERT_SIGNATURE = "INSERT INTO TB_FIRMAS " //$NON-NLS-1$
 			+ "(fecha, formato ,formato_mejorado, algoritmo, proveedor, " //$NON-NLS-1$
-			+ "navegador, correcta, id_transaccion, total) " //$NON-NLS-1$
-			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
+			+ "navegador, correcta, total) " //$NON-NLS-1$
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 	/*Consultas estadisticas de firmas*/
 
@@ -85,8 +86,7 @@ public class SignaturesDAO {
 			st.setString(5, sign.getProveedor());
 			st.setString(6, sign.getNavegador().getName());
 			st.setString (7, Boolean.toString(sign.isResultSign()));
-			st.setString(8, sign.getId_transaccion());
-			st.setLong(9, sign.getTotal().longValue());
+			st.setLong(8, sign.getTotal().longValue());
 			totalInsertReg = totalInsertReg + st.executeUpdate();
 			st.close();
 		}
@@ -109,27 +109,18 @@ public class SignaturesDAO {
 
 		try(final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_SIGNATURE,false);){
 			st.setTimestamp (1, new java.sql.Timestamp(signature.getFecha().getTime()));
-
-
 			st.setString(2, signature.getFormat());
 			if(signature.getImprovedFormat() !=  null && ! signature.getImprovedFormat().isEmpty()) {
 				st.setString(3, signature.getImprovedFormat());
+			}
+			else {
+				st.setNull(3,Types.VARCHAR);
 			}
 			st.setString(4, signature.getAlgorithm());
 			st.setString(5, signature.getProveedor());
 			st.setString(6, signature.getNavegador().getName());
 			st.setString (7, Boolean.toString(signature.isResultSign()));
-			st.setString(8, signature.getId_transaccion());
-			st.setLong(9, signature.getTotal().longValue());
-
-
-//			if(signature.getIdImprovedFormat() !=  0) {
-//				st.setInt(3,  signature.getIdImprovedFormat());
-//			}
-//			else {
-//				st.setNull(3,Types.INTEGER);
-//			}
-
+			st.setLong(8, signature.getTotal().longValue());
 			totalInsertReg = st.executeUpdate();
 			st.close();
 		}
