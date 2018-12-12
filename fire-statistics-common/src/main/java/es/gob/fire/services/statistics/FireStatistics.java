@@ -385,9 +385,7 @@ public class FireStatistics {
 	static final String prepareStatisticDB(final String fileName, final int totalReg) throws SQLException, IOException, DBConnectionException, ParseException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException, ConfigFilesException {
 
 		 final File f;
-
 		 String result = null;
-
 
 		 if(fileName != null && !"".equals(fileName) ) {  //$NON-NLS-1$
 			f = new File(getLogPath().concat(File.separator).concat(fileName)).getCanonicalFile();
@@ -426,6 +424,7 @@ public class FireStatistics {
 								//Rellenamos el mapa del size por aplicacion de cada transaccion
 								appSize.setId_Transaction(sign.getId_transaccion());
 								appSize.setSize(sign.getSize());
+
 								if(hashAppSize.isEmpty()) {
 									hashAppSize.put(appSize.getId_Transaction(), appSize);
 								}
@@ -455,6 +454,10 @@ public class FireStatistics {
 								//Rellenamos el mapa de Transacciones
 								if(hashTrans.isEmpty()) {
 									//Si es la primera vez se introduce el primer objeto
+									final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
+									if(appSize != null && appSize.getSize() != null) {
+										trans.setSize(appSize.getSize());
+									}
 									hashTrans.put(trans.getId_transaccion(), trans);
 								}
 								else {
@@ -464,11 +467,22 @@ public class FireStatistics {
 										final TransactionCube trans2 = hashTrans.get(k);
 										final long total1 = trans.getTotal().longValue();
 										final long total2 = trans2.getTotal().longValue();
+										final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
+										final ApplicationSize appSize2 = hashAppSize.get(k);
+										if(appSize != null && appSize.getSize() != null && appSize2 != null && appSize2.getSize() != null) {
+											final long size1 = appSize.getSize().longValue();
+											final long size2 = appSize2.getSize().longValue();
+											trans.setSize(new Long(size1 + size2));
+										}
 										trans.setTotal(new Long (total1 + total2));
 										hashTrans.remove(k);
 										hashTrans.put(k, trans);
 									}
 									else {
+										final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
+										if(appSize != null && appSize.getSize() != null) {
+											trans.setSize(appSize.getSize());
+										}
 										hashTrans.put(trans.getId_transaccion(), trans);
 									}
 								}
@@ -507,19 +521,19 @@ public class FireStatistics {
 		 int regInserted = 0;
 		 for (final Map.Entry<Integer, SignatureCube> objSign : hashSign.entrySet()) {
 			 final SignatureCube sign = objSign.getValue();
-			 regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
+			 if(sign != null) {
+				 regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
+			 }
 		 }
 
 		 for (final Map.Entry<String, TransactionCube> objTrans : hashTrans.entrySet()) {
 			final TransactionCube trans = objTrans.getValue();
-			final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
-			if(appSize != null && appSize.getSize() != null ) {
-				trans.setSize(appSize.getSize()) ;
+			if(trans != null) {
+				if( trans.getSize() == null ) {
+					trans.setSize(new Long (0L));
+				}
+				regInserted = regInserted +  TransactionsDAO.insertTransaction(trans);
 			}
-			else {
-				trans.setSize(new Long (0L));
-			}
-			regInserted = regInserted +  TransactionsDAO.insertTransaction(trans);
 		 }
 
 		DbManager.runCommit();
