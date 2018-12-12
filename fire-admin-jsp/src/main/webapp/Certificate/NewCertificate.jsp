@@ -38,10 +38,9 @@
 	String subTitle = ""; //$NON-NLS-1$
 	String certDataPrincipal = "";//$NON-NLS-1$
 	String certDataBkup = "";//$NON-NLS-1$
-	CertificateFire cer;
 	switch (op) {
 		case 0:
-			title = "Ver el certificado ".concat(nameCert);//$NON-NLS-1$
+			title = "Ver el certificado " + nameCert;//$NON-NLS-1$
 			subTitle = ""; //$NON-NLS-1$
 			break;
 		case 1:
@@ -49,38 +48,44 @@
 			subTitle = "Inserte los datos del nuevo certificado."; //$NON-NLS-1$
 			break;
 		case 2:
-			title = "Editar el certificado ".concat(nameCert); //$NON-NLS-1$
+			title = "Editar el certificado " + nameCert; //$NON-NLS-1$
 			subTitle = "Modifique los datos que desee editar"; //$NON-NLS-1$
 			break;
 		default:
 			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 			return;
 	}
-	cer = id != null ? CertificatesDAO.selectCertificateByID (id): new CertificateFire();
-		
-	if(cer.getCertX509_principal() != null && !"".equals(cer.getCertX509_principal()) && cer.getCert_principal() != null //$NON-NLS-1$
-			&& !"".equals(cer.getCert_principal())){//$NON-NLS-1$
-		b64CertPrin=cer.getCert_principal();
-		final String[] datCertificate = (cer.getCertX509_principal().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
-		for (int i = 0 ; i <= datCertificate.length-1; i++){
-			certDataPrincipal=certDataPrincipal.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
-		}
-		//fecha caducidad
-		Date fecha = new Date();
-		fecha = cer.getCertX509_principal().getNotAfter();		
-		certDataPrincipal=certDataPrincipal.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));//$NON-NLS-1$
+	
+	CertificateFire cer;
+	if (id != null) {
+		cer = CertificatesDAO.selectCertificateByID (id);
 	}
-	if(cer.getCertX509_backup() != null && !"".equals(cer.getCertX509_backup()) //$NON-NLS-1$
-			&& cer.getCert_backup() != null && !"".equals(cer.getCert_backup())){//$NON-NLS-1$
-		b64CertBkup = cer.getCert_backup();
-		final String[] datCertificate = (cer.getCertX509_backup().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
+	if (cer == null) {
+		cer = new CertificateFire();
+	}
+
+	if (cer.getX509Principal() != null && !"".equals(cer.getX509Principal()) && //$NON-NLS-1$
+			cer.getCertPrincipal() != null && !"".equals(cer.getCertPrincipal())){ //$NON-NLS-1$
+		b64CertPrin = cer.getCertPrincipal();
+		final String[] datCertificate = (cer.getX509Principal().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
+		for (int i = 0 ; i <= datCertificate.length-1; i++){
+			certDataPrincipal = certDataPrincipal + datCertificate[i] + "</br>";//$NON-NLS-1$
+		}
+		//fecha caducidad
+		Date fecha = cer.getX509Principal().getNotAfter();		
+		certDataPrincipal += "Fecha de Caducidad = " + Utils.getStringDateFormat(fecha);//$NON-NLS-1$
+	}
+	if (cer.getX509Backup() != null && !"".equals(cer.getX509Backup()) && //$NON-NLS-1$
+			cer.getCertBackup() != null && !"".equals(cer.getCertBackup())){//$NON-NLS-1$
+		b64CertBkup = cer.getCertBackup();
+		final String[] datCertificate = (cer.getX509Backup().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
 		for (int i = 0; i<= datCertificate.length-1; i++){
-			certDataBkup=certDataBkup.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
+			certDataBkup = certDataBkup + datCertificate[i] + "</br>"; //$NON-NLS-1$
 		}
 		//fecha caducidad
 		Date fecha = new Date();
-		fecha = cer.getCertX509_backup().getNotAfter();		
-		certDataBkup = certDataBkup.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));//$NON-NLS-1$
+		fecha = cer.getX509Backup().getNotAfter();		
+		certDataBkup += "Fecha de Caducidad = " + Utils.getStringDateFormat(fecha);//$NON-NLS-1$
 	}
 
 %>
@@ -196,7 +201,7 @@
 			Los campos con [*] al menos uno es obligatorio
 		<%} %>
 		</p>
-			<form id="frmCertificate" method="POST" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId_certificado() != null ? cer.getId_certificado() : empty%>" enctype="multipart/form-data" onsubmit="isCert()">
+			<form id="frmCertificate" method="POST" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId() != null ? cer.getId() : empty%>" enctype="multipart/form-data" onsubmit="isCert()">
 							
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				<div style="display: inline-block; width: 20%;margin: 3px;">

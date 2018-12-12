@@ -22,14 +22,21 @@
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
 	}
-	User usr;	
-	usr =  UsersDAO.getUserByName(loggedUsr);
-	
-	
-	final String title = "Modificar contraseña"; //$NON-NLS-1$
-	final String subTitle = "Modificar contraseña del usuario ".concat(usr.getNombre()).concat(" ").concat(usr.getApellidos());//$NON-NLS-1$ //$NON-NLS-2$
-	
-	
+	User usr = null;
+	try {
+		usr = UsersDAO.getUserByName(loggedUsr);
+	}
+	catch (Exception e) {
+		usr = null;
+	}
+	String nombre = ""; //$NON-NLS-1$
+	String apellidos = ""; //$NON-NLS-1$
+	if (usr != null) {
+		nombre = usr.getNombre();
+		apellidos = usr.getApellidos();
+	}
+	final String title = "Modificar contrase&ntilde;a"; //$NON-NLS-1$
+	final String subTitle = "Modificar contrase&ntilde;a del usuario " + nombre + " " + apellidos; //$NON-NLS-1$ //$NON-NLS-2$
 	
 	final String msg = "Guardar cambios";   //$NON-NLS-1$ 
 	final String tit = "Guarda las modificaciones realizadas"; //$NON-NLS-1$
@@ -59,7 +66,7 @@
 		</div>
 			
 		<p>Los campos con * son obligatorios</p>
-			<form id="frmChangePass" method="POST" action="../modifyPasswdUser?id-usr=<%=usr.getId_usuario() %>&nombre-usr=<%=usr.getNombre_usuario() %>&op=3">
+			<form id="frmChangePass" method="POST" action="../modifyPasswdUser?id-usr=<%=usr.getId() %>&nombre-usr=<%= nombre %>&op=3">
 			
 				<div style="margin: auto;width: 60%;padding: 5px;">
 					<div style="display: inline-block; width: 30%;margin: 5px;">
@@ -68,7 +75,7 @@
 					</div>
 					<div  style="display: inline-block; width: 60%;margin: 5px;">
 						<input id="nombre-usr" class="edit-txt" type="text" name="nombre-usr" style="width: 80%;margin-top:3px;" 
-						value="<%=usr.getNombre_usuario() %>"> 
+						value="<%= nombre %>"> 
 					</div>	
 				</div>
 				<div style="margin: auto;width: 60%;padding: 5px;">

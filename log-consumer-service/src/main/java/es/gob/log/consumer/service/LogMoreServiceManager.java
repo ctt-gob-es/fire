@@ -11,16 +11,19 @@ import javax.servlet.http.HttpSession;
 import es.gob.log.consumer.LogMore;
 import es.gob.log.consumer.LogReader;
 
+/**
+ * Manejador del servicio para la obtenci&oacute;n de m&aacute;s l&iacute;neas de un log.
+ */
 public class LogMoreServiceManager {
 
 	private static final Logger LOGGER = Logger.getLogger(LogMoreServiceManager.class.getName());
-	private static boolean hasMore = false;
 
 	/**
-	 * @param req
-	 * @return
-	 * @throws IOException
-	 * @throws NoResultException
+	 * Procesa una petici&oacute;n para la obtenci&oacute;n de m&aacute;s l&iacute;neas de un log.
+	 * @param req Petici&oacute;n HTTP.
+	 * @return Bytes de las nuevas l&iacute;neas del log.
+	 * @throws IOException Cuando ocurre un error durante la lectura.
+	 * @throws NoResultException Si se alcanz&oacute; el final del log.
 	 */
 	public final static byte[] process(final HttpServletRequest req) throws IOException, NoResultException  {
 
@@ -78,8 +81,7 @@ public class LogMoreServiceManager {
 				throw new NoResultException("No existen más líneas en este momento");//$NON-NLS-1$
 			}
 
-			final LogMore logMore = new LogMore();
-			result = logMore.getLogMore(iNumLines, reader);
+			result = LogMore.getLogMore(iNumLines, reader);
 
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 		}
@@ -88,35 +90,23 @@ public class LogMoreServiceManager {
 			throw e;
 		}
 		catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "No se ha podido leer el fichero",e); //$NON-NLS-1$
-			String msg = "No se ha podido leer el fichero"; //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "No se ha podido leer el fichero", e); //$NON-NLS-1$
 			if (reader.isEndFile()){
-				 msg = "No existen más líneas en este momento"; //$NON-NLS-1$
+				 throw new NoResultException("No existen m\u00E1s l\u00EDneas en este momento", e); //$NON-NLS-1$
 			}
-			throw new NoResultException(msg, e);
+			throw new IOException("No se ha podido leer el fichero", e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error desconocido al procesar la petición de obtener más líneas", e); //$NON-NLS-1$
-			throw new NoResultException("Error desconocido al procesar la petición de obtener más líneas", e);//$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error desconocido al procesar la peticion de obtener más lineas", e); //$NON-NLS-1$
+			throw new IOException("Error desconocido al procesar la petici\u00F3n de obtener mas l\u00EDneas", e);//$NON-NLS-1$
 		}
 
 		// Si no se han obtenido resultados, se indica con un mensaje
 		if (result != null && result.length <= 0) {
-			LOGGER.log(Level.INFO, "No se han encontrado más líneas en el fichero"); //$NON-NLS-1$
-			throw new NoResultException("No se han encontrado más líneas en el fichero"); //$NON-NLS-1$
+			LOGGER.log(Level.INFO, "No se han encontrado mas lineas en el fichero"); //$NON-NLS-1$
+			throw new NoResultException("No se han encontrado m\u00E1s l\u00EDneas en el fichero"); //$NON-NLS-1$
 		}
 
 		return result;
-
-
 	}
-
-	public static final boolean isHasMore() {
-		return hasMore;
-	}
-
-	private static final void setHasMore(final boolean hasMore) {
-		LogMoreServiceManager.hasMore = hasMore;
-	}
-
 }

@@ -304,7 +304,11 @@ public class LogServerService extends HttpServlet {
 			connect = true;
 		}
 		catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Error al conectar con el servidor", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al conectar con el servidor de logs", e); //$NON-NLS-1$
+			return connect;
+		}
+		catch (final SecurityException e) {
+			LOGGER.log(Level.SEVERE, "El servidor de logs rechazo la conexion", e); //$NON-NLS-1$
 			return connect;
 		}
 		return connect;

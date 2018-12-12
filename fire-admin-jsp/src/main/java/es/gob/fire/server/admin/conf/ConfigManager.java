@@ -11,13 +11,17 @@ import java.util.logging.Logger;
 import es.gob.fire.server.admin.message.AdminFilesNotFoundException;
 import es.gob.fire.server.decipher.PropertyDecipher;
 
+/**
+ * Manejador para la consulta de la configuraci&oacute;n en fichero. La configuraci&oacute;n
+ * se lee &uacute;nicamente al inicio del servicio.
+ */
 public class ConfigManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
 
 	private static final String PARAM_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
 	private static final String PARAM_DB_CONN = "bbdd.conn"; //$NON-NLS-1$
-	private static final String PARAM_LOGS_TEMP_DIR = "logs.tempdir";//$NON-NLS-1$
+	private static final String PARAM_TEMP_DIR = "tempdir";//$NON-NLS-1$
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 	private static final String CONFIG_FILE = "admin_config.properties";//$NON-NLS-1$
 
@@ -34,6 +38,26 @@ public class ConfigManager {
 	private static Properties config = null;
 
 	private static PropertyDecipher decipherImpl = null;
+
+	/** Ruta del directorio por defecto para el guardado de temporales (directorio temporal del sistema). */
+	private static String DEFAULT_TMP_DIR;
+
+	static {
+		try {
+			DEFAULT_TMP_DIR = System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
+		}
+		catch (final Exception e) {
+			try {
+				DEFAULT_TMP_DIR = File.createTempFile("tmp", null).getParentFile().getAbsolutePath(); //$NON-NLS-1$
+			}
+			catch (final Exception e1) {
+				DEFAULT_TMP_DIR = null;
+				LOGGER.warning(
+					"No se ha podido cargar un directorio temporal por defecto, se debera configurar expresamente en el fichero de propiedades: "  + e1 //$NON-NLS-1$
+				);
+			}
+		}
+	}
 
 
 	/**
@@ -209,26 +233,25 @@ public class ConfigManager {
 				text.substring(idx2 + SUFIX_CIPHERED_TEXT.length());
 	}
 
-	public static String getLogsTempDir() {
+	/**
+	 * Obtiene el directorio temporal configurado.
+	 * @return Ruta del directorio temporal.
+	 */
+	public static String getTempDir() {
 
 		String pathTempLogs;
 		try {
-			pathTempLogs = getProperty(PARAM_LOGS_TEMP_DIR);
+			pathTempLogs = getProperty(PARAM_TEMP_DIR);
 		}
 		catch (final Exception e) {
-			LOGGER.severe(String.format("Error al descifrar la propiedad %1s", PARAM_LOGS_TEMP_DIR)); //$NON-NLS-1$
-			return null;
+			LOGGER.severe(String.format("Error al descifrar la propiedad %1s. Se usara el directorio temporal del sistema", PARAM_TEMP_DIR)); //$NON-NLS-1$
+			pathTempLogs = null;
 		}
 
 		if (pathTempLogs == null) {
-			LOGGER.log(
-					Level.SEVERE,
-					String.format(
-							"No se ha encontrado la ruta ('%1s') al directorio temporal de ficheros logs, en el fichero de configuracion", //$NON-NLS-1$
-							PARAM_LOGS_TEMP_DIR));
+			pathTempLogs = DEFAULT_TMP_DIR;
+			LOGGER.info("Se utilizara el directorio temporal del sistema: " + DEFAULT_TMP_DIR); //$NON-NLS-1$
 		}
 		return pathTempLogs;
 	}
-
-
 }

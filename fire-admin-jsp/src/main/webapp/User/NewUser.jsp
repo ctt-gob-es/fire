@@ -8,7 +8,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-
 	if (session == null) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
@@ -25,15 +24,19 @@
 	final int op = Integer.parseInt(request.getParameter("op"));//$NON-NLS-1$
 
 	// op = 0 -> Solo lectura, no se puede modificar nada
-	// op = 1 -> nuev0 usuario
+	// op = 1 -> nuevo usuario
 	// op = 2 -> editar usuario
 	String title = ""; //$NON-NLS-1$
 	String subTitle = ""; //$NON-NLS-1$
 	
-	User usr;
-	usr = idUsr != null ? UsersDAO.getUser(idUsr) : new User();
-	
-	
+	User usr = null;
+	if (idUsr != null) {
+		usr = UsersDAO.getUser(idUsr);
+	}
+	if (usr == null) {
+		usr = new User();
+	}
+
 	switch (op) {
 		case 0:
 			title = "Ver usuario " + idUsr;//$NON-NLS-1$
@@ -43,8 +46,8 @@
 			title = "Alta de nuevo usuario"; //$NON-NLS-1$
 			subTitle = "Inserte los datos del nuevo usuario."; //$NON-NLS-1$
 			break;
-		case 2:		
-			title = "Editar usuario ".concat(usr.getNombre()).concat(" ").concat(usr.getApellidos()); //$NON-NLS-1$ //$NON-NLS-2$
+		case 2:
+			title = "Editar usuario " + usr.getNombre() + " " + usr.getApellidos(); //$NON-NLS-1$ //$NON-NLS-2$
 			subTitle = "Modifique los datos que desee editar."; //$NON-NLS-1$
 			break;
 		default:
@@ -79,7 +82,7 @@
 		</div>
 		
 		<p>Los campos con * son obligatorios</p>
-			<form id="formUser" method="post" action="../newUser?op=<%=op%>&idUser=<%=usr.getId_usuario()!=null?usr.getId_usuario():EMPTY%>"> 
+			<form id="formUser" method="post" action="../newUser?op=<%=op%>&idUser=<%= usr.getId() != null ? usr.getId() : EMPTY%>"> 
 			
 <!-- 			<div style="margin: auto;width: 100%;padding: 3px;"> -->
 <!-- 					<div style="display: inline-block; width: 20%;margin: 3px;"> -->
@@ -102,7 +105,7 @@
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
 						<input id="login-usr" class="edit-txt" type="text" name="login-usr" style="width: 80%;margin-top:3px;" 
-						value="<%= usr.getNombre_usuario()!= null ? usr.getNombre_usuario(): EMPTY %>"> 
+						value="<%= usr.getNombre() != null ? usr.getNombre(): EMPTY %>"> 
 					</div>
 				</div>									
 				<%} %>
@@ -155,7 +158,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 						<input id="email" class="edit-txt" type="text" name="email" style="width: 80%;margin-top:3px;" 
-						value="<%= usr.getCorreo_elec()!= null ? usr.getCorreo_elec(): EMPTY %>"> 
+						value="<%= usr.getCorreo() != null ? usr.getCorreo(): EMPTY %>"> 
 				</div>
 					
 				<div style="display: inline-block; width: 10%;margin: 3px;">
@@ -164,12 +167,12 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 					<input id="telf-contact" class="edit-txt" type="text" name="telf-contact" style="width: 80%;margin-top:10px;" 
-						value="<%= usr.getTelf_contacto()!= null ? usr.getTelf_contacto(): EMPTY %>"> 
+						value="<%= usr.getTelefono() != null ? usr.getTelefono(): EMPTY %>"> 
 				</div>						
 			</div>	
 			<fieldset class="fieldset-clavefirma" >			
-		   	<div style="margin: auto;width: 50%;padding: 3px; margin-top: 5px;">
-				<div style="display: inline-block; width: 45%;margin: 3px;">
+		   	<div style="margin: auto;width: 50%; padding: 3px; margin-top: 5px;">
+				<div style="display: inline-block; width: 45%; margin: 3px;">
 					<input class="menu-btn" name="add-usr-btn" type="button" value="Volver" title="Volver a la p&aacute;gina de Usuarios" onclick="location.href='UserPage.jsp'"/>
 				</div>
 		   		

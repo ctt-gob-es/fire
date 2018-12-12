@@ -348,8 +348,8 @@ public class LogService extends HttpServlet {
 			}
 
 		} catch (final IOException e) {
-			LOGGER.log(Level.WARNING, "No se ha cerrado correctamente el fichero : ".concat(e.getMessage())); //$NON-NLS-1$
-			throw new IOException();
+			LOGGER.log(Level.WARNING, "No se ha cerrado correctamente el fichero: " + e); //$NON-NLS-1$
+			throw e;
 		}
 		return result;
 	}
@@ -419,9 +419,6 @@ public class LogService extends HttpServlet {
 	}
 
 	private static void sendControlledError(final HttpServletResponse response, final String message) throws IOException {
-
-		LOGGER.info(" ======== PASAMOS POR DONDE TENEMOS QUE PASAR: " + message);
-
 		response.setStatus(220);
 		response.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
 		response.getOutputStream().flush();

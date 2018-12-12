@@ -1,5 +1,8 @@
 package es.gob.log.consumer.client;
 
+/**
+ * Valores que pueden recibirse en las estructuras de respuesta del servidor.
+ */
 class ResponseParams {
 
 	/** Token de inicio de sesi&oacute;n. */

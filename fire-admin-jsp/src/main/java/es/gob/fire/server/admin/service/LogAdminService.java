@@ -140,9 +140,9 @@ public class LogAdminService extends HttpServlet {
 
 				// En caso de exito, redirigimos a LogsFileList para mostrar los ficheros encontrados
 				if (params.getMessage() != null && !params.getMessage().isEmpty()) {
-					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
-						.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(params.getNameSrv()) //$NON-NLS-1$
-						.concat("&").concat(ServiceParams.PARAM_MSG).concat("=").concat(params.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
+					response.sendRedirect(request.getContextPath().toString() + "/Logs/LogsFileList.jsp?"//$NON-NLS-1$
+						+ ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv() //$NON-NLS-1$
+						+ "&" + ServiceParams.PARAM_MSG + "=" + params.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 					return;
 				}
 
@@ -156,8 +156,8 @@ public class LogAdminService extends HttpServlet {
 					response.sendRedirect(getSelectionResultUrl(request, false));
 					return;
 				}
-				response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
-						.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(params.getNameSrv())); //$NON-NLS-1$
+				response.sendRedirect(request.getContextPath().toString() + "/Logs/LogsFileList.jsp?"//$NON-NLS-1$
+						+ ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv()); //$NON-NLS-1$
 				return;
 			}
 			catch (final IOException e) {
@@ -308,7 +308,7 @@ public class LogAdminService extends HttpServlet {
 			String tempLogsDir = null;
 			try {
 				ConfigManager.initialize();
-				tempLogsDir = ConfigManager.getLogsTempDir();
+				tempLogsDir = ConfigManager.getTempDir();
 				if (tempLogsDir == null || tempLogsDir.equals("")) { //$NON-NLS-1$
 					LOGGER.warning("No se encuentra configurada la variable logs.tempdir del fichero de configuración .properties"); //$NON-NLS-1$
 					final String jsonError = buildJsonError("No se encuentra configurada la variable logs.tempdir del fichero de configuración .properties", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
@@ -364,7 +364,6 @@ public class LogAdminService extends HttpServlet {
 				        	final FileInputStream input = new FileInputStream(f);
 				        	response.setContentLength(tam);
 							try {
-							 // final OutputStream output = new FileOutputStream(zipfileName);//guarda a fichero
 								final OutputStream output = response.getOutputStream();//gestiona la descarga el navegador
 							  try {
 							    int bytesRead;
@@ -429,7 +428,7 @@ public class LogAdminService extends HttpServlet {
 	 * del api devolviendo un String con formato JSON, tanto si la comunicaci&oacute;n ha sido correcta
 	 * como si ha habido un error.
 	 * @param lclient Cliente para el acceso al servidor de logs.
-	 * @param url
+	 * @param url URL del
 	 * @return
 	 */
 	protected final static String echo(final LogConsumerClient lclient, final String url) {

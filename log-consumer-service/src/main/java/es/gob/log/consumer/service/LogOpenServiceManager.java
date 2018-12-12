@@ -1,5 +1,6 @@
 package es.gob.log.consumer.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.channels.AsynchronousFileChannel;
@@ -39,10 +40,10 @@ public class LogOpenServiceManager implements Serializable {
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		if(logFileName != null && !"".equals(logFileName)) { //$NON-NLS-1$
 			/* Obtenemos la ruta completa al fichero log*/
-			final String path = ConfigManager.getInstance().getLogsDir().toString().concat("\\").concat(logFileName); //$NON-NLS-1$
+			final String path = new File(ConfigManager.getInstance().getLogsDir(), logFileName).getAbsolutePath();
 			if(path == null || path.equals("")) { //$NON-NLS-1$
-				LOGGER.log(Level.SEVERE, "Error al abrir el fichero ".concat(logFileName)); //$NON-NLS-1$
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al abrir el fichero ".concat(logFileName));//$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "Error al abrir el fichero " + logFileName); //$NON-NLS-1$
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al abrir el fichero " + logFileName);//$NON-NLS-1$
 				result = "\"Error en la respuesta del servidor".getBytes( StandardCharsets.UTF_8); //$NON-NLS-1$
 				return result;
 			}
@@ -56,8 +57,8 @@ public class LogOpenServiceManager implements Serializable {
 
 				}
 			} catch (final IOException e) {
-				LOGGER.log(Level.SEVERE, "Error al abrir el fichero ".concat(logFileName)); //$NON-NLS-1$
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al abrir el fichero ".concat(logFileName));//$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "Error al abrir el fichero " + logFileName); //$NON-NLS-1$
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al abrir el fichero " + logFileName);//$NON-NLS-1$
 				result = "\"Error en la respuesta del servidor".getBytes(logOpen.getLinfo() != null ? logOpen.getLinfo().getCharset() : StandardCharsets.UTF_8); //$NON-NLS-1$
 				return result;
 			}

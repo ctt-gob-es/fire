@@ -39,175 +39,169 @@ public class NewAppService extends HttpServlet {
 	private static final String PARAM_CERTID = "id-certificate"; //$NON-NLS-1$
 	private static final String PARAM_OP = "op"; //$NON-NLS-1$
 
-
-	private String name = null;
-	private String res = null;
-	private String email = null;
-	private String tel = null;
-	private String idcertificate = null;
-
-
 	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		req.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
-		/*Obtenemos los par�metros enviados del formulario junto con el Certificado*/
-		this.getParameters(req);
-
-		//Obtener el tipo de operacion 1-Alta 2-Edicion
-		final int op = Integer.parseInt(req.getParameter(PARAM_OP));
-		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
-
+		// Obtenemos el tipo de operacion 1-Alta 2-Edicion
+		int op;
 		try {
-
-			boolean isOk = true;
-			if (this.getName() == null || this.getRes() == null) {
-				LOGGER.log(Level.SEVERE,
-						"No se han proporcionado todos los datos requeridos para el alta de la aplicacion (nombre y responsable)"); //$NON-NLS-1$
-				isOk = false;
-			} else {
-				// nueva aplicacion
-				if (op == 1){
-				LOGGER.info("Alta de la aplicacion con nombre: " + this.getName()); //$NON-NLS-1$
-					try {
-						AplicationsDAO.createApplication(this.getName(), this.getRes(), this.getEmail(), this.getTel(), this.getIdcertificate());
-					} catch (final Exception e) {
-						LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
-						isOk = false;
-					}
-				}
-				// editar aplicacion
-				else if (op == 2){
-					LOGGER.info("Edicion de la aplicacion con nombre: " + this.getName()); //$NON-NLS-1$
-
-					AplicationsDAO.updateApplication(req.getParameter("iddApp"), this.getName(), this.getRes(), this.getEmail(), this.getTel(), this.getIdcertificate());//$NON-NLS-1$
-				}
-
-				else{
-					throw new IllegalStateException("Estado no permitido");//$NON-NLS-1$
-				}
-
+			op = Integer.parseInt(req.getParameter(PARAM_OP));
+			if (op != 1 && op != 2) {
+				throw new IllegalArgumentException();
 			}
-
-			resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=" + (isOk ? "1" : "0") + "&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		}
-		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE,"Ha ocurrido un error crear la aplicacion : " + e, e); //$NON-NLS-1$
+		} catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de operacion no soportado: " + req.getParameter(PARAM_OP)); //$NON-NLS-1$
 			resp.sendRedirect("Application/AdminMainPage.jsp?op=alta&r=0&ent=app"); //$NON-NLS-1$
+			return;
 		}
 
+		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$;
 
+		// Obtenemos los parametros enviados del formulario junto con el Certificado
+		final Parameters params = getParameters(req);
 
+		if (params.getName() == null || params.getRes() == null) {
+			LOGGER.log(Level.SEVERE,
+					"No se han proporcionado todos los datos requeridos para la aplicacion (nombre y responsable)"); //$NON-NLS-1$
+			resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
+		}
+
+		// Nueva aplicacion
+		if (op == 1) {
+			LOGGER.info("Alta de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
+			try {
+				AplicationsDAO.createApplication(params.getName(), params.getRes(), params.getEmail(), params.getTel(), params.getIdcertificate());
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
+				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
+			}
+		}
+		// Editar aplicacion
+		else if (op == 2) {
+			LOGGER.info("Edicion de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
+			try {
+				AplicationsDAO.updateApplication(req.getParameter("iddApp"), params.getName(), params.getRes(), params.getEmail(), params.getTel(), params.getIdcertificate());//$NON-NLS-1$
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error en la actualizacion de la aplicacion", e); //$NON-NLS-1$
+				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
+			}
+		}
+
+		resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=1&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
-	 * Procedimiento que obtine los datos de los par�metros enviados desde el formulario para a�adir aplicaci�n.
-	 * Par�metros: nombre-app, nombre-resp,email-resp, telf-resp y
-	 * @param req
-	 * @throws IOException
-	 * @throws ServletException
+	 * Procedimiento que obtine los datos de los par&aacute;metros reconocidos del
+	 * formulario para a&ntilde;adir aplicaci&oacute;n.
+	 * Par&aacute;metros: nombre-app, nombre-resp,email-resp, telf-resp y id-certificate.
+	 * @param req Petici&oacute;n HTTP.
 	 */
-	private void getParameters(final HttpServletRequest req) throws IOException, ServletException {
-		this.setName(null);
-		this.setRes(null);
-		this.setEmail(null);
-		this.setTel(null);
-		this.setIdcertificate(null);
+	private Parameters getParameters(final HttpServletRequest req) {
+
+		final Parameters params = new Parameters();
 
 		if(req.getParameter(PARAM_NAME) != null && !"".equals(req.getParameter(PARAM_NAME))) { //$NON-NLS-1$
-			this.setName(req.getParameter(PARAM_NAME));
+			params.setName(req.getParameter(PARAM_NAME));
 		}
 		if(req.getParameter(PARAM_RESP) != null && !"".equals(req.getParameter(PARAM_RESP))) {//$NON-NLS-1$
-			this.setRes(req.getParameter(PARAM_RESP));
+			params.setRes(req.getParameter(PARAM_RESP));
 		}
 		if(req.getParameter(PARAM_EMAIL) != null && !"".equals(req.getParameter(PARAM_EMAIL))) {//$NON-NLS-1$
-			this.setEmail(req.getParameter(PARAM_EMAIL));
+			params.setEmail(req.getParameter(PARAM_EMAIL));
 		}
 		if(req.getParameter(PARAM_TEL) != null && !"".equals(req.getParameter(PARAM_TEL))) {//$NON-NLS-1$
-			this.setTel(req.getParameter(PARAM_TEL));
+			params.setTel(req.getParameter(PARAM_TEL));
 		}
 		if(req.getParameter(PARAM_CERTID) != null && !"".equals(req.getParameter(PARAM_CERTID))) {//$NON-NLS-1$
-			this.setIdcertificate(req.getParameter(PARAM_CERTID));
+			params.setIdcertificate(req.getParameter(PARAM_CERTID));
+		}
+		return params;
+	}
+
+	class Parameters {
+
+		private String name = null;
+		private String res = null;
+		private String email = null;
+		private String tel = null;
+		private String idcertificate = null;
+
+		/**
+		 * Obtiene el nombre de la aplicaci&ácute;n
+		 * @return
+		 */
+		String getName() {
+			return this.name;
+		}
+		/**
+		 *  Establece el nombre de la aplicaci&ácute;n
+		 * @param name
+		 */
+		void setName(final String name) {
+			this.name = name;
 		}
 
+		/**
+		 * Obtiene el nombre del responsable
+		 * @return
+		 */
+		String getRes() {
+			return this.res;
+		}
+		/**
+		 *  Establece el nombre del responsable
+		 * @param res
+		 */
+		void setRes(final String res) {
+			this.res = res;
+		}
+		/**
+		 * Obtiene el e-mail del responsable
+		 * @return
+		 */
+		String getEmail() {
+			return this.email;
+		}
+		/**
+		 * Establece el e-mail del responsable
+		 * @param email
+		 */
+		void setEmail(final String email) {
+			this.email = email;
+		}
+		/**
+		 * Obtiene el tel&eacute;fono del responsable
+		 * @return
+		 */
+		String getTel() {
+			return this.tel;
+		}
+		/**
+		 * Establece el tel&eacute;fono del responsable
+		 * @param tel
+		 */
+		void setTel(final String tel) {
+			this.tel = tel;
+		}
+		/**
+		 * Obtiene el id del certificado
+		 * @return
+		 */
+		final String getIdcertificate() {
+			return this.idcertificate;
+		}
+		/**
+		 * Establece el id del certificado
+		 * @param idcertificate
+		 */
+		final void setIdcertificate(final String idcertificate) {
+			this.idcertificate = idcertificate;
+		}
 	}
-
-	// Getters and Setters
-	/**
-	 * Obtiene el nombre de la aplicaci&ácute;n
-	 * @return
-	 */
-	private String getName() {
-		return this.name;
-	}
-	/**
-	 *  Establece el nombre de la aplicaci&ácute;n
-	 * @param name
-	 */
-	private void setName(final String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Obtiene el nombre del responsable
-	 * @return
-	 */
-	private String getRes() {
-		return this.res;
-	}
-	/**
-	 *  Establece el nombre del responsable
-	 * @param res
-	 */
-	private void setRes(final String res) {
-		this.res = res;
-	}
-	/**
-	 * Obtiene el e-mail del responsable
-	 * @return
-	 */
-	private String getEmail() {
-		return this.email;
-	}
-	/**
-	 * Establece el e-mail del responsable
-	 * @param email
-	 */
-	private void setEmail(final String email) {
-		this.email = email;
-	}
-	/**
-	 * Obtiene el tel&eacute;fono del responsable
-	 * @return
-	 */
-	private String getTel() {
-		return this.tel;
-	}
-	/**
-	 * Establece el tel&eacute;fono del responsable
-	 * @param tel
-	 */
-	private void setTel(final String tel) {
-		this.tel = tel;
-	}
-	/**
-	 * Obtiene el id del certificado
-	 * @return
-	 */
-	private final String getIdcertificate() {
-		return this.idcertificate;
-	}
-	/**
-	 * Establece el id del certificado
-	 * @param idcertificate
-	 */
-	private final void setIdcertificate(final String idcertificate) {
-		this.idcertificate = idcertificate;
-	}
-
-
-
-
 }
