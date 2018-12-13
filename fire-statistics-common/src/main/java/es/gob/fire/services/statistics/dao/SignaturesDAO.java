@@ -22,51 +22,44 @@ public class SignaturesDAO {
 	/**Inserta */
 	private static final String ST_INSERT_SIGNATURE = "INSERT INTO TB_FIRMAS " //$NON-NLS-1$
 			+ "(fecha, formato ,formato_mejorado, algoritmo, proveedor, " //$NON-NLS-1$
-			+ "navegador, correcta, total) " //$NON-NLS-1$
-			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
+			+ "navegador, correcta, total, aplicacion) " //$NON-NLS-1$
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 	/*Consultas estadisticas de firmas*/
 
 	/**Documentos firmados correctamente / incorrectamente por cada aplicaci&oacute;n. (Filtrado por a&ntilde;o y mes)*/
-	private static final String SIGNATURES_BYAPP = "SELECT a.id, a.nombre," +//$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'false' then 1 else 0 end ) AS INCORRECTAS," +//$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'true' then 1 else 0 end ) AS CORRECTAS" +//$NON-NLS-1$
-			" FROM tb_firmas f, tb_aplicaciones a, tb_transacciones t" +//$NON-NLS-1$
-			" WHERE	a.id = t.id_aplicacion" +//$NON-NLS-1$
-			" AND t.id_transaccion = f.id_transaccion" +//$NON-NLS-1$
-			" AND year(f.fecha) = ?" +//$NON-NLS-1$
-			" AND month(f.fecha) = ?" +//$NON-NLS-1$
-			" GROUP BY a.id";//$NON-NLS-1$
+	private static final String SIGNATURES_BYAPP = "SELECT f.aplicacion, "+ //$NON-NLS-1$
+			" SUM(CASE When f.correcta = 'false' then f.total else 0 end ) AS INCORRECTAS, "+ //$NON-NLS-1$
+			" SUM(CASE When f.correcta = 'true' then f.total else 0 end ) AS CORRECTAS " + //$NON-NLS-1$
+			" FROM tb_firmas f "+ //$NON-NLS-1$
+			" WHERE	year(f.fecha) = ? "+ //$NON-NLS-1$
+			" AND month(f.fecha) = ? "+ //$NON-NLS-1$
+			" GROUP BY f.aplicacion "; //$NON-NLS-1$
 
 	/**Documentos firmados por cada origen de certificados/proveedor. (Filtrado por a&ntilde;o y mes)*/
-	private static final String SIGNATURES_BYPROVIDER = "SELECT p.nombre, " + //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'false' then 1 else 0 end ) AS INCORRECTAS," + //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'true' then 1 else 0 end ) AS CORRECTAS" + 	//$NON-NLS-1$
-			" FROM tb_firmas f, tb_proveedores p" + //$NON-NLS-1$
-			" WHERE	f.id_proveedor = p.id_proveedor	" + //$NON-NLS-1$
-			" AND year(f.fecha) = ?" + //$NON-NLS-1$
-			" AND month(f.fecha) = ?" + //$NON-NLS-1$
-			" GROUP BY p.nombre";//$NON-NLS-1$
+	private static final String SIGNATURES_BYPROVIDER = "SELECT f.proveedor, "+ //$NON-NLS-1$
+			 " SUM(CASE When f.correcta = 'false' then f.total else 0 end ) AS INCORRECTAS, "+ //$NON-NLS-1$
+			 " SUM(CASE When f.correcta = 'true' then f.total else 0 end ) AS CORRECTAS "+ //$NON-NLS-1$
+			 " FROM tb_firmas f "+ //$NON-NLS-1$
+			 " WHERE year(f.fecha) = ? AND month(f.fecha) = ? "+ //$NON-NLS-1$
+			 " GROUP BY f.proveedor"; //$NON-NLS-1$
+
 
 	/**Documentos firmados en cada formato de firma. (Filtrado por a&ntilde;o y mes)*/
-	private static final String SIGNATURES_BYFORMAT = "SELECT fr.nombre, " + //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'false' then 1 else 0 end ) AS INCORRECTAS, " + //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'true' then 1 else 0 end ) AS CORRECTAS " + 	//$NON-NLS-1$
-			" FROM tb_firmas f, tb_formatos fr " + //$NON-NLS-1$
-			" WHERE	f.id_formato = fr.id_formato " + //$NON-NLS-1$
-			" AND year(f.fecha) = ? " + //$NON-NLS-1$
-			" AND month(f.fecha) = ? " + //$NON-NLS-1$
-			" GROUP BY fr.nombre ";//$NON-NLS-1$
+	private static final String SIGNATURES_BYFORMAT = "SELECT f.formato,"+  //$NON-NLS-1$
+			 " SUM(CASE When f.correcta = 'false' then f.total else 0 end ) AS INCORRECTAS, "+ //$NON-NLS-1$
+			 " SUM(CASE When f.correcta = 'true' then f.total else 0 end ) AS CORRECTAS "+ //$NON-NLS-1$
+			 " FROM tb_firmas f "+ //$NON-NLS-1$
+			 " WHERE year(f.fecha) = ? AND month(f.fecha) = ? "+ //$NON-NLS-1$
+			 " GROUP BY f.formato "; //$NON-NLS-1$
 
 	/**Documentos que utilizan cada formato de firma longevo. (Filtrado por a&ntilde;o y mes)*/
-	private static final String SIGNMATURES_BYLONGLIVE_FORMAT = "SELECT fm.nombre, " +  //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'false' then 1 else 0 end ) AS INCORRECTAS, " +  //$NON-NLS-1$
-			" SUM(CASE When f.correcta = 'true' then 1 else 0 end ) AS CORRECTAS " +  //$NON-NLS-1$
-			" FROM tb_firmas f, tb_formatos_mejorados fm " +   //$NON-NLS-1$
-			" WHERE f.id_formato_mejorado = fm.id_formato_mejorado " +  //$NON-NLS-1$
-			" AND year(f.fecha) = ? " +  //$NON-NLS-1$
-			" AND month(f.fecha) = ? " +  //$NON-NLS-1$
-			" GROUP BY f.id_formato_mejorado"; //$NON-NLS-1$
+	private static final String SIGNMATURES_BYLONGLIVE_FORMAT = "SELECT f.formato_mejorado, "+  //$NON-NLS-1$
+			 " SUM(CASE When f.correcta = 'false' then f.total else 0 end ) AS INCORRECTAS, " + //$NON-NLS-1$
+			 " SUM(CASE When f.correcta = 'true' then f.total else 0 end ) AS CORRECTAS "+ //$NON-NLS-1$
+			 " FROM tb_firmas f "+ //$NON-NLS-1$
+			 " WHERE f.formato_mejorado IS NOT NULL AND  year(f.fecha) = ? AND month(f.fecha) = ? "+  //$NON-NLS-1$
+			 " GROUP BY f.formato_mejorado "; //$NON-NLS-1$
 
 	/**
 	 * Inserta un listado de firmas en el cubo
@@ -87,6 +80,7 @@ public class SignaturesDAO {
 			st.setString(6, sign.getNavegador().getName());
 			st.setString (7, Boolean.toString(sign.isResultSign()));
 			st.setLong(8, sign.getTotal().longValue());
+			st.setString(9, sign.getAplicacion());
 			totalInsertReg = totalInsertReg + st.executeUpdate();
 			st.close();
 		}
@@ -121,6 +115,7 @@ public class SignaturesDAO {
 			st.setString(6, signature.getNavegador().getName());
 			st.setString (7, Boolean.toString(signature.isResultSign()));
 			st.setLong(8, signature.getTotal().longValue());
+			st.setString(9, signature.getAplicacion());
 			totalInsertReg = st.executeUpdate();
 			st.close();
 		}
@@ -206,10 +201,10 @@ public class SignaturesDAO {
 			rs.beforeFirst();
 			while (rs.next()) {
 				data.add(Json.createObjectBuilder()
-						.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
-						.add("INCORRECTAS", rs.getString(3)) //$NON-NLS-1$
-						.add("CORRECTAS", rs.getString(4)) //$NON-NLS-1$
-						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(3))+Integer.parseInt(rs.getString(4)))) //$NON-NLS-1$
+						.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
+						.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
+						.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
 						);
 			}
 			jsonObj.add("SignByApp", data); //$NON-NLS-1$

@@ -27,46 +27,37 @@ public class TransactionsDAO {
 
 	/*Consultas estadisticas de transacciones*/
 	/**Transacciones finalizadas correctamente/ incorrectamente por cada aplicaci&oacute;n(Filtrado por a&ntilde;o y mes)*/
-	private static final String TRANSACTIONS_BYAPP = "SELECT  t.id_aplicacion AS ID_APP, " +  //$NON-NLS-1$
-			" a.nombre AS NOMBRE_APP," + //$NON-NLS-1$
-			" SUM(CASE When t.correcta = 'false' then 1 else 0 end) AS INCORRECTAS, " + //$NON-NLS-1$
-			" SUM(CASE When t.correcta = 'true' then 1 else 0 end) AS CORRECTAS " + //$NON-NLS-1$
-			" FROM tb_transacciones t, tb_aplicaciones a " + //$NON-NLS-1$
-			" WHERE t.id_aplicacion = a.id " + //$NON-NLS-1$
-			" AND year(t.fecha) = ? " + //$NON-NLS-1$
-			" AND month(t.fecha) = ? " + //$NON-NLS-1$
-			" GROUP BY ID_APP";//$NON-NLS-1$
+	private static final String TRANSACTIONS_BYAPP = "SELECT  t.aplicacion AS NOMBRE_APP, " + //$NON-NLS-1$
+			" SUM(CASE When t.correcta = 'false' then t.total else 0 end) AS INCORRECTAS, " + //$NON-NLS-1$
+			" SUM(CASE When t.correcta = 'true' then t.total  else 0 end) AS CORRECTAS " + //$NON-NLS-1$
+			" FROM tb_transacciones t " + //$NON-NLS-1$
+			" WHERE year(t.fecha) = ? AND month(t.fecha) = ? " + //$NON-NLS-1$
+			" GROUP BY NOMBRE_APP "; //$NON-NLS-1$
 
 	/**Transacciones finalizadas correctamente/ incorrectamente por cada origen de certificados/proveedor. (Filtrado por a&ntilde;o y mes)*/
-	private static final String TRANSACTIONS_BYPROVIDER = "SELECT p.nombre AS PROVEEDOR," +//$NON-NLS-1$
-		    " SUM(CASE When t.correcta = 'false' then 1 else 0 end) AS INCORRECTAS," +//$NON-NLS-1$
-			" SUM(CASE When t.correcta = 'true' then 1 else 0 end) AS CORRECTAS "	+    //$NON-NLS-1$
-			" FROM tb_transacciones t,  tb_proveedores p " +//$NON-NLS-1$
-			" WHERE t.id_proveedor = p.id_proveedor " + //$NON-NLS-1$
-			" AND year(t.fecha) = ? "+//$NON-NLS-1$
-			" AND month(t.fecha) = ? "+//$NON-NLS-1$
-			" GROUP BY t.id_proveedor";//$NON-NLS-1$
+	private static final String TRANSACTIONS_BYPROVIDER = "SELECT t.proveedor AS PROVEEDOR, " +  //$NON-NLS-1$
+			" SUM(CASE When t.correcta = 'false' then t.total else 0 end) AS INCORRECTAS, " +  //$NON-NLS-1$
+			" SUM(CASE When t.correcta = 'true' then t.total else 0 end) AS CORRECTAS " +  //$NON-NLS-1$
+			" FROM tb_transacciones t " +  //$NON-NLS-1$
+			" WHERE  year(t.fecha) = ? AND month(t.fecha) = ? " +  //$NON-NLS-1$
+			" GROUP BY t.proveedor"; //$NON-NLS-1$
 
 	/**Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n (Filtrado por a&ntilde;o y mes)*/
-	private static final String TRANSACTIONS_BYDOCSIZE = "SELECT SUM(f.tamanno)/1024 AS Kbytes, t.id_aplicacion AS id_app, a.nombre AS nombre_app " +//$NON-NLS-1$
-			" FROM tb_transacciones t, tb_aplicaciones a, tb_firmas f " +//$NON-NLS-1$
-			" WHERE t.id_aplicacion = a.id " +//$NON-NLS-1$
-			" AND f.id_transaccion = t.id_transaccion " +//$NON-NLS-1$
-			" AND year(t.fecha) = ? " +//$NON-NLS-1$
-			" AND month(t.fecha) = ? " +//$NON-NLS-1$
-			" GROUP BY t.id_aplicacion ";//$NON-NLS-1$
+	private static final String TRANSACTIONS_BYDOCSIZE = "SELECT SUM(t.tamanno)/1024 AS Kbytes, t.aplicacion AS nombre_app " + //$NON-NLS-1$
+			" FROM tb_transacciones t "+ //$NON-NLS-1$
+			" WHERE  year(t.fecha) = ? AND month(t.fecha) = ? "+  //$NON-NLS-1$
+			" GROUP BY t.aplicacion"; //$NON-NLS-1$
 
 	/**Transacciones realizadas seg&uacute;n el tipo de transacci&oacute;n (simple o lote). (Filtrado por a&ntilde;o y mes)*/
-	private static final String TRANSACTIONS_BYOPERATION = "SELECT a.nombre, " + //$NON-NLS-1$
-		" sum(case when t.id_operacion = 1 then (case when t.correcta = 'true' then 1 else 0 end) else 0 end )FirmasSimplesCorrectas," + //$NON-NLS-1$
-		" sum(case when t.id_operacion = 1 then (case when t.correcta = 'false' then 1 else 0 end) else 0 end )FirmasSimplesINCorrectas," + 	//$NON-NLS-1$
-		" sum(case when t.id_operacion = 2 then (case when t.correcta = 'true' then 1 else 0 end) else 0 end )FirmasLotesCorrectas," + //$NON-NLS-1$
-		" sum(case when t.id_operacion = 2 then (case when t.correcta = 'false' then 1 else 0 end) else 0 end )FirmasLotesINCorrectas" + //$NON-NLS-1$
-		" FROM tb_transacciones t, tb_aplicaciones a " + //$NON-NLS-1$
-		" WHERE year(t.fecha) = ? " + //$NON-NLS-1$
-		" AND month(t.fecha) = ? " + //$NON-NLS-1$
-		" AND t.id_aplicacion = a.id " +  //$NON-NLS-1$
-		" GROUP BY a.nombre";//$NON-NLS-1$
+	private static final String TRANSACTIONS_BYOPERATION = "SELECT t.aplicacion, "+ //$NON-NLS-1$
+			 " sum(case when t.operacion = 'SIGN' then (case when t.correcta = 'true' then t.total else 0 end) else 0 end )FirmasSimplesCorrectas,"+ //$NON-NLS-1$
+			 " sum(case when t.operacion = 'SIGN' then (case when t.correcta = 'false' then t.total else 0 end) else 0 end )FirmasSimplesINCorrectas,"+ //$NON-NLS-1$
+			 " sum(case when t.operacion = 'BATCH' then (case when t.correcta = 'true' then t.total else 0 end) else 0 end )FirmasLotesCorrectas,"+ //$NON-NLS-1$
+			 " sum(case when t.operacion = 'BATCH' then (case when t.correcta = 'false' then t.total else 0 end) else 0 end )FirmasLotesINCorrectas"+ //$NON-NLS-1$
+			 " FROM tb_transacciones t"+ //$NON-NLS-1$
+			 " WHERE year(t.fecha) = ? "+  //$NON-NLS-1$
+			 " AND month(t.fecha) = ? "+		 //$NON-NLS-1$
+			 " GROUP BY t.aplicacion" ; //$NON-NLS-1$
 
 	/**
 	 *
@@ -120,10 +111,10 @@ public class TransactionsDAO {
 			rs.beforeFirst();
 			while (rs.next()) {
 				data.add(Json.createObjectBuilder()
-						.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
-						.add("INCORRECTAS", rs.getString(3)) //$NON-NLS-1$
-						.add("CORRECTAS", rs.getString(4)) //$NON-NLS-1$
-						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(3))+Integer.parseInt(rs.getString(4)))) //$NON-NLS-1$
+						.add("NOMBRE", rs.getString(1)) //$NON-NLS-1$
+						.add("INCORRECTAS", rs.getString(2)) //$NON-NLS-1$
+						.add("CORRECTAS", rs.getString(3)) //$NON-NLS-1$
+						.add("TOTAL", String.valueOf( Integer.parseInt(rs.getString(2))+Integer.parseInt(rs.getString(3)))) //$NON-NLS-1$
 						);
 			}
 			jsonObj.add("TransByApp", data); //$NON-NLS-1$
@@ -235,7 +226,7 @@ public class TransactionsDAO {
 
 			while (rs.next()) {
 				data.add(Json.createObjectBuilder()
-						.add("NOMBRE", rs.getString(3)) //$NON-NLS-1$
+						.add("NOMBRE", rs.getString(2)) //$NON-NLS-1$
 						.add("MB", String.valueOf( Math.round( Double.parseDouble(rs.getString(1))/1024 * 100.0) / 100.0 )) //$NON-NLS-1$
 						);
 			}

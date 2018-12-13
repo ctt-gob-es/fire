@@ -522,6 +522,8 @@ public class FireStatistics {
 		 for (final Map.Entry<Integer, SignatureCube> objSign : hashSign.entrySet()) {
 			 final SignatureCube sign = objSign.getValue();
 			 if(sign != null) {
+				 final ApplicationSize appSize = hashAppSize.get(sign.getId_transaccion());
+				 sign.setAplicacion(appSize.getApplication());
 				 regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
 			 }
 		 }

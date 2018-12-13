@@ -12,6 +12,7 @@ import es.gob.fire.services.statistics.config.DBConnectionException;
 public class SignatureCube {
 	//static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private Date fecha;
+	private String aplicacion;
 	private String format;
 	private String algorithm;
 	private String proveedor;
@@ -31,7 +32,7 @@ public class SignatureCube {
 
 
 	public SignatureCube(final Date fecha ,final String format, final String algorithm, final String proveedor,
-			final Browser navegador, final boolean resultsign, final String id_tr, final String improvedFormat) {
+			final Browser navegador, final boolean resultsign, final String id_tr, final String improvedFormat, final String aplicacion) {
 		super();
 		this.fecha = fecha;
 		this.format = format;
@@ -39,8 +40,9 @@ public class SignatureCube {
 		this.proveedor = proveedor;
 		this.navegador = navegador;
 		this.resultSign = resultsign;
-		this.id_transaccion= id_tr;
-		this.improvedFormat= improvedFormat;
+		this.id_transaccion = id_tr;
+		this.improvedFormat = improvedFormat;
+		this.aplicacion = aplicacion;
 	}
 
 
@@ -284,7 +286,12 @@ public class SignatureCube {
 		this.total = total;
 	}
 
-
+	public final String getAplicacion() {
+		return this.aplicacion;
+	}
+	public final void setAplicacion(final String aplicacion) {
+		this.aplicacion = aplicacion;
+	}
 
 
 }
