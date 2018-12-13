@@ -27,8 +27,6 @@ public class TransactionCube {
 		super();
 	}
 
-
-
 	/**
 	 * Constructor
 	 * @param fecha
@@ -48,9 +46,6 @@ public class TransactionCube {
 		this.resultTransaction = resultTransact;
 		this.id_transaccion = id_tr;
 	}
-
-
-
 
 
 	/**

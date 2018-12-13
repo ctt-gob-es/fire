@@ -517,11 +517,12 @@ public class FireStatistics {
 	 * @throws ConfigFilesException
 	 */
 	static final int insertStatisticDB() throws SQLException, DBConnectionException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException, ConfigFilesException {
-		 //.
+
 		 int regInserted = 0;
 		 for (final Map.Entry<Integer, SignatureCube> objSign : hashSign.entrySet()) {
 			 final SignatureCube sign = objSign.getValue();
 			 if(sign != null) {
+				 //Se asigna el nombre de la aplicación a la firma antes de insertar el dato en la tabla t_firmas
 				 final ApplicationSize appSize = hashAppSize.get(sign.getId_transaccion());
 				 sign.setAplicacion(appSize.getApplication());
 				 regInserted = regInserted +  SignaturesDAO.insertSignature(sign);
@@ -623,6 +624,10 @@ public class FireStatistics {
 				return  false;
 			}
 			//Comparar resultados
+			/*EXNOR:NOT OR EXCLUSIVE
+			 * true ^ true = true
+			 * false ^ false = true
+			 * */
 			if(!(sign1.isResultSign() ^ sign2.isResultSign())) {
 				result = true;
 			}
@@ -673,6 +678,10 @@ public class FireStatistics {
 			}
 
 			//Comparar proveedor forzado
+			/*EXNOR:NOT OR EXCLUSIVE
+			 * true ^ true = true
+			 * false ^ false = true
+			 * */
 			if(!(trans1.isProveedorForzado() ^ trans2.isProveedorForzado())) {
 				result = true;
 			}
@@ -680,6 +689,10 @@ public class FireStatistics {
 				return  false;
 			}
 			//Comparar resultado
+			/*EXNOR:NOT OR EXCLUSIVE
+			 * true ^ true = true
+			 * false ^ false = true
+			 * */
 			if(!(trans1.isResultTransaction() ^ trans2.isResultTransaction())) {
 				result = true;
 			}
@@ -692,10 +705,11 @@ public class FireStatistics {
 	}
 
 	/**
-	 *
+	 * Busca un objeto SignatureCube en el mapa que se le pasa por par&aacute;metro, que sea igual al
+	 * objeto SignatureCube que se pasa por par&aacute;metro.
 	 * @param hash
 	 * @param sign
-	 * @return
+	 * @return Devuelve la clave del objeto si se ha encontrado, si no devuelve un nulo.
 	 */
 	static final Integer searchSignature(final HashMap<Integer, SignatureCube> hash, final SignatureCube sign) {
 		for (final Map.Entry<Integer, SignatureCube> objSign : hash.entrySet()) {
@@ -708,10 +722,11 @@ public class FireStatistics {
 	}
 
 	/**
-	 *
+	 *Busca un objeto TransactionCube en el mapa que se le pasa por par&aacute;metro, que sea igual al
+	 * objeto TransactionCube que se pasa por par&aacute;metro.
 	 * @param hash
 	 * @param trans
-	 * @return
+	 * @return Devuelve la clave del objeto si se ha encontrado, si no devuelve un nulo.
 	 */
 	static final String  searchTransaction(final HashMap<String, TransactionCube> hash, final TransactionCube trans) {
 		for (final Map.Entry<String, TransactionCube> objTrans : hash.entrySet()) {
