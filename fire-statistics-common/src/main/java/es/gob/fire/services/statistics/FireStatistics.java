@@ -65,8 +65,8 @@ public class FireStatistics {
 	}
 
 	/**
-	 * Lanza la ejecuci&oacute;n de la carga de datos de los fichero de estadisticas a la base de datos, a la
-	 * hora indicada por par√°metro.
+	 * Lanza la ejecuci&oacute;n de la carga de datos de los fichero de estad&iacute;sticas a la base de datos, a la
+	 * hora indicada por par&aacute;metro.
 	 * @param startTime
 	 */
 	public final void init(final String startTime) {
@@ -250,6 +250,8 @@ public class FireStatistics {
 	 * @throws ConfigFilesException
 	 * @throws NumberFormatException
 	   */
+	  //TODO Revisar metodo de lectura de listado de ficheros, para que pueda cargar primero el FIReSIGNATURE y despues el FIReTRANSACTION de una fecha y continuar con los otros ficheros por fecha
+	  // actualmente 14/12/2018 los carga todos seguidos
 	  static final String [] exeLoadStatistics(final Date date) throws ParseException, IOException, SQLException, DBConnectionException, NumberFormatException, ConfigFilesException {
 		  String [] result = null;
 		  //Obtiene la lista de ficheros para ejecutar la carga.
@@ -259,6 +261,7 @@ public class FireStatistics {
 			  for (int i = 0; i < listFiles.length; i++) {
 				  final int totalReg = countFileReg(listFiles[i]);
 				  result[i] = prepareStatisticDB(listFiles[i],totalReg);
+				  //TODO ojo revisar esta funcion ya que ahora sÛlo cargaria un fichero de transaction en caso de haber varios ficheros de transactions y signature.
 				  if(!hashSign.isEmpty() && !hashTrans.isEmpty() && !hashAppSize.isEmpty()) {
 					  insertStatisticDB();
 					  hashSign.clear();
@@ -382,6 +385,7 @@ public class FireStatistics {
 	 * @throws NumberFormatException
 	 * @throws ConfigFilesException
 	   */
+	  //TODO: Revisar el reellenado de los mapas hash de tamanno por si se puede quedar algun dato nulo
 	static final String prepareStatisticDB(final String fileName, final int totalReg) throws SQLException, IOException, DBConnectionException, ParseException, NumberFormatException, es.gob.fire.services.statistics.config.DBConnectionException, ConfigFilesException {
 
 		 final File f;
@@ -486,7 +490,8 @@ public class FireStatistics {
 										hashTrans.put(trans.getId_transaccion(), trans);
 									}
 								}
-
+								//Se actualiza el nombre de la aplicaciÛn en el mapa hash que tiene los tamannos de las transacciones
+								// ya que antes de esto el valor del nombre de la aplicaciÛn en el objeto ApplicationSize es nulo.
 								if(hashAppSize.get(trans.getId_transaccion()) != null) {
 									final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
 									appSize.setApplication(trans.getAplicacion());
