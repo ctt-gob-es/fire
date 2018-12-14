@@ -431,73 +431,77 @@ public class LogConsumerClient {
 	}
 
 	/**
-	 *
-	 * @param numLines
-	 * @param filename
-	 * @return
+	 * Obtiene las siguientes entradas de log que continuan con los criterios de la
+	 * consulta anterior (&uacute;ltimas l&iacute;neas, filtrado o b&uacute;squeda).
+	 * @param numLines N&uacute;mero de l&iacute;neas.
+	 * @param filename Nombre del fichero.
+	 * @return Bytes de las siguientes l&iacute;neas acordes a la consulta anterior.
 	 */
 	public byte[] getMoreLog(final int numLines, final String filename) {
-		final StringWriter result = new StringWriter();
-		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-		final JsonArrayBuilder data = Json.createArrayBuilder();
-		final StringBuilder resultMore = new StringBuilder("");//$NON-NLS-1$
+
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.GET_MORE.ordinal()) //$NON-NLS-1$
 				.append("&nlines=").append(numLines) //$NON-NLS-1$
 				.append("&fname=").append(filename);  //$NON-NLS-1$
+
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+
 		HttpResponse response;
 		try {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 
-			if(response.statusCode == 200 && response.getContent().length > 0) {
-				final byte[] resMore = response.getContent();
-				final String res = new String(resMore, getCharsetContent());
-				resultMore.append(res);
+			if (response.statusCode == 200 && response.getContent().length > 0) {
+				final String resultMore = new String(response.getContent(), getCharsetContent());
+				final JsonArrayBuilder data = Json.createArrayBuilder();
 				data.add(Json.createObjectBuilder()
-						.add("Code",response.statusCode) //$NON-NLS-1$
-						.add("Result", resultMore.toString())); //$NON-NLS-1$
-				jsonObj.add("More",data ); //$NON-NLS-1$
-				final JsonWriter jw = Json.createWriter(result);
-			    jw.writeObject(jsonObj.build());
-			    jw.close();
+						.add("Code", response.statusCode) //$NON-NLS-1$
+						.add("Result", resultMore)); //$NON-NLS-1$
+				jsonObj.add("More", data ); //$NON-NLS-1$
 			}
 			else {
-				final byte[] resMore = response.getContent();
-				final String res = new String(resMore, getCharsetContent());
-				resultMore.append(res);
+				final String resultMore = new String(response.getContent(), getCharsetContent());
+				final JsonArrayBuilder data = Json.createArrayBuilder();
 				data.add(Json.createObjectBuilder()
-						.add("Code",response.statusCode) //$NON-NLS-1$
-						.add("Message", getLegibleErrorMessage(resultMore.toString()))); //$NON-NLS-1$
+						.add("Code", response.statusCode) //$NON-NLS-1$
+						.add("Message", getLegibleErrorMessage(resultMore))); //$NON-NLS-1$
 				jsonObj.add("Error", data); //$NON-NLS-1$
-				final JsonWriter jw = Json.createWriter(result);
-			    jw.writeObject(jsonObj.build());
-			    jw.close();
 			}
-
 		} catch (final IOException e) {
-
-			resultMore.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+			final String resultMore = "No se han podido obtener datos del fichero log."; //$NON-NLS-1$
+			final JsonArrayBuilder data = Json.createArrayBuilder();
 			data.add(Json.createObjectBuilder()
-					.add("Code",400) //$NON-NLS-1$
-					.add("Message", resultMore.toString())); //$NON-NLS-1$
+					.add("Code", 400) //$NON-NLS-1$
+					.add("Message", resultMore)); //$NON-NLS-1$
 			jsonObj.add("Error", data); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(result);
-		    jw.writeObject(jsonObj.build());
-		    jw.close();
 		}
-		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(getCharsetContent());
+
+		// Creamos la respuesta JSON
+		final StringWriter result = new StringWriter();
+		final JsonWriter jw = Json.createWriter(result);
+	    jw.writeObject(jsonObj.build());
+	    jw.close();
+
+		if (result.getBuffer().length() == 0) {
+			LOGGER.warning("No se obtuvo nada del log"); //$NON-NLS-1$
+			return null;
 		}
-		return null;
+
+		return result.toString().getBytes(getCharsetContent());
 	}
 
 	/**
-	 * @param numLines
-	 * @param startDate
-	 * @param endDate
-	 * @param level
-	 * @param reset
-	 * @return
+	 * Obtiene una serie de registros del log que se atienen a los requisitos especificados
+	 * de nivel de log, fecha m&iacute;nima en la que se imprimi&oacute; y fecha m&aacute;xima.
+	 * @param numLines N&uacute;mero de l&iacute;neas que se quieren visualizar. Si un registro
+	 * contuviese varias l&iacute;neas, se podr&iacute;an obtener m&aacute;s l&iacute;neas de las
+	 * solicitadas.
+	 * @param startDate Fecha m&iacute;nima de los logs a mostrar.
+	 * @param endDate Fecha m&aacute;xima de los logs a mostrar.
+	 * @param level Nivel de log m&iacute;nimo.
+	 * @param reset Indica que se reinicie el log. Esto se debe usar cuando se llame a esta
+	 * operaci&oacute;n despu&eacute;s de otra distinta o cuando hayan cambiado los criterios desde
+	 * la consulta anterior.
+	 * @return Bytes de las l&iacute;neas recuperadas del log.
 	 */
 	public byte[] getLogFiltered(final int numLines, final long startDate, final long endDate, final String level, final boolean reset) {
 
@@ -559,84 +563,85 @@ public class LogConsumerClient {
 	}
 
 	/**
-	 * @param numLines
-	 * @param text
-	 * @param startDate
-	 * @param reset
-	 * @return
+	 * Busca las l&iacute;neas de log en las que se encuentra una cadena de texto. Se
+	 * obtendr&aacute;n todos los registros hasta el n&uacute;mero de l&iacute;neas
+	 * indicado a partir del primero en el que se encuentre la cadena.
+	 * @param numLines &Ntilde;umero de l&iacute;neas a mostrar.
+	 * @param text Texto a buscar.
+	 * @param startDate Fecha de inicio m&iacute;nima en la que se imprimi&oacute;o el log.
+	 * @param reset Indica que se reinicie el log. Esto se debe usar cuando se llame a esta
+	 * operaci&oacute;n despu&eacute;s de otra distinta o cuando hayan cambiado los criterios desde
+	 * la consulta anterior.
+	 * @return Bytes de las l&iacute;neas resultantes de la b&uacute;squeda.
 	 */
 	public byte[] searchText(final int numLines, final String text, final String startDate, final boolean reset) {
-		final StringWriter result = new StringWriter();
-		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-		final JsonArrayBuilder data = Json.createArrayBuilder();
-		final StringBuilder resultSearch = new StringBuilder("");//$NON-NLS-1$
+
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.SEARCH_TEXT.ordinal()) //$NON-NLS-1$
 				.append("&").append(ServiceParams.NUM_LINES).append("=").append(numLines)//$NON-NLS-1$ //$NON-NLS-2$
 				.append("&").append(ServiceParams.SEARCH_TEXT).append("=").append(text.replaceAll(" ", "%20"))//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				.append("&").append(ServiceParams.SEARCH_DATETIME).append("=").append(startDate) //$NON-NLS-1$ //$NON-NLS-2$
 				.append("&").append(ServiceParams.PARAM_RESET).append("=").append(reset); //$NON-NLS-1$ //$NON-NLS-2$
-		HttpResponse response = null;
 
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+
+		HttpResponse response;
 		try {
-
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 
 			if(response.statusCode == 200 && response.getContent().length > 0) {
-				final byte[] resSearch = response.getContent();
-				final String res = new String(resSearch, getCharsetContent());
-				resultSearch.append(res);
+				final String res = new String(response.getContent(), getCharsetContent());
+				final JsonArrayBuilder data = Json.createArrayBuilder();
 				data.add(Json.createObjectBuilder()
-						.add("Code",response.statusCode) //$NON-NLS-1$
-						.add("Result", resultSearch.toString())); //$NON-NLS-1$
-				jsonObj.add("Search",data ); //$NON-NLS-1$
-				final JsonWriter jw = Json.createWriter(result);
-			    jw.writeObject(jsonObj.build());
-			    jw.close();
+						.add("Code", response.statusCode) //$NON-NLS-1$
+						.add("Result", res)); //$NON-NLS-1$
+				jsonObj.add("Search", data ); //$NON-NLS-1$
 			}
 			else {
-				// Los mensaje de error son enviados directamente por el servidor, asi que no dependen
+				// Los mensajes de error son enviados directamente por el servidor, asi que no dependen
 				// de la codificacion del fichero que se procesa. Siempre se usara UTF-8.
-				final byte[] resSearch = response.getContent();
-				final String res = new String(resSearch, StandardCharsets.UTF_8);
-				resultSearch.append(res);
+				final String res = new String(response.getContent(), StandardCharsets.UTF_8);
+				final JsonArrayBuilder data = Json.createArrayBuilder();
 				data.add(Json.createObjectBuilder()
-						.add("Code",response.statusCode) //$NON-NLS-1$
-						.add("Message", getLegibleErrorMessage(resultSearch.toString()))); //$NON-NLS-1$
-				jsonObj.add("Error",data ); //$NON-NLS-1$
-				final JsonWriter jw = Json.createWriter(result);
-			    jw.writeObject(jsonObj.build());
-			    jw.close();
+						.add("Code", response.statusCode) //$NON-NLS-1$
+						.add("Message", getLegibleErrorMessage(res))); //$NON-NLS-1$
+				jsonObj.add("Error", data ); //$NON-NLS-1$
 			}
 
 		}
 		catch (final IOException e) {
-			resultSearch.append("No se han podido obtener datos del fichero log."); //$NON-NLS-1$
+			final String res = "No se han podido obtener datos del fichero log."; //$NON-NLS-1$
+			final JsonArrayBuilder data = Json.createArrayBuilder();
 			data.add(Json.createObjectBuilder()
-					.add("Code",400) //$NON-NLS-1$
-					.add("Message", resultSearch.toString())); //$NON-NLS-1$
+					.add("Code", 400) //$NON-NLS-1$
+					.add("Message", res)); //$NON-NLS-1$
 			jsonObj.add("Error", data); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(result);
-		    jw.writeObject(jsonObj.build());
-		    jw.close();
 		}
-		if(result.getBuffer().length() > 0) {
-			return result.toString().getBytes(getCharsetContent());
+
+		final StringWriter result = new StringWriter();
+		final JsonWriter jw = Json.createWriter(result);
+	    jw.writeObject(jsonObj.build());
+	    jw.close();
+
+		if(result.getBuffer().length() == 0) {
+			LOGGER.warning("No se obtuvo nada del log"); //$NON-NLS-1$
+			return null;
 		}
-		return null;
+		return result.toString().getBytes(getCharsetContent());
 	}
 
 	/**
 	 * Descarga el fichero indicado.
 	 * @param fileName Nombre del fichero.
-	 * @param reset
-	 * @param pathDownloadTemp
-	 * @return
+	 * @param reset Indica que se reinicie el log. Esto se debe usar cuando se llame a esta
+	 * operaci&oacute;n despu&eacute;s de otra distinta o cuando hayan cambiado los criterios desde
+	 * la consulta anterior.
+	 * @param pathDownload Directorio de descarga del fichero.
+	 * @return Bytes de la estructura JSON en la que se notifica del resultado de la descarga.
 	 */
-	public byte[] download(final String fileName, final boolean reset, final String pathDownloadTemp ) {
+	public byte[] download(final String fileName, final boolean reset, final String pathDownload) {
+
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-		final JsonArrayBuilder data = Json.createArrayBuilder();
-		final StringBuilder resultDownload = new StringBuilder("");//$NON-NLS-1$
 
 		final ByteArrayOutputStream result = new ByteArrayOutputStream();
 		StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
@@ -644,8 +649,11 @@ public class LogConsumerClient {
 				.append("&").append(ServiceParams.LOG_FILE_NAME).append("=").append(fileName)//$NON-NLS-1$ //$NON-NLS-2$
 				.append("&").append(ServiceParams.PARAM_RESET).append("=").append(reset); //$NON-NLS-1$ //$NON-NLS-2$;
 
+		boolean readed = false;
 		int status = 200;
-		try (final FileOutputStream fos = new FileOutputStream(new File(pathDownloadTemp, fileName + ".zip"));)  { //$NON-NLS-1$
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(new File(pathDownload, fileName + ".zip")); //$NON-NLS-1$
 			int cont = 0;
 			do {
 				final HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
@@ -663,43 +671,52 @@ public class LogConsumerClient {
 				status = response.statusCode;
 			} while(status == 206);
 			fos.close();
+			readed = true;
 		}
 		catch (final IOException e) {
-			resultDownload.append("Error la bajar el fichero"); //$NON-NLS-1$
+
+			if (fos != null) {
+				try { fos.close(); } catch (final Exception ex) { /* No hacemos nada */ }
+			}
+
+			final String res = "Error la bajar el fichero"; //$NON-NLS-1$
+			final JsonArrayBuilder data = Json.createArrayBuilder();
 			data.add(Json.createObjectBuilder()
-					.add("Code",400) //$NON-NLS-1$
-					.add("Message", resultDownload.toString())); //$NON-NLS-1$
+					.add("Code", 400) //$NON-NLS-1$
+					.add("Message", res)); //$NON-NLS-1$
 			jsonObj.add("Error", data); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(result);
-		    jw.writeObject(jsonObj.build());
-		    jw.close();
 		}
-		final File ficherozip = new File(pathDownloadTemp + fileName + ".zip"); //$NON-NLS-1$
-		if (ficherozip.exists()) {
-			resultDownload.append(pathDownloadTemp + fileName + ".zip"); //$NON-NLS-1$
-			data.add(Json.createObjectBuilder()
-					.add("Code",200) //$NON-NLS-1$
-					.add("Path", resultDownload.toString()) //$NON-NLS-1$
-					.add("Message","Fichero " + fileName + ".zip, bajado correctamente")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			jsonObj.add("Ok", data); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(result);
-		    jw.writeObject(jsonObj.build());
-		    jw.close();
+
+		if (readed) {
+			final File ficherozip = new File(pathDownload, fileName + ".zip"); //$NON-NLS-1$
+			if (ficherozip.exists()) {
+				final String res = "Fichero " + fileName + ".zip, descargado correctamente"; //$NON-NLS-1$ //$NON-NLS-2$
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+						.add("Code", 200) //$NON-NLS-1$
+						.add("Path", ficherozip.getAbsolutePath()) //$NON-NLS-1$
+						.add("Message", res)); //$NON-NLS-1$
+				jsonObj.add("Ok", data); //$NON-NLS-1$
+			}
+			else {
+				final String res = "Error al guardar el fichero"; //$NON-NLS-1$
+				final JsonArrayBuilder data = Json.createArrayBuilder();
+				data.add(Json.createObjectBuilder()
+						.add("Code", 400) //$NON-NLS-1$
+						.add("Message", res)); //$NON-NLS-1$
+				jsonObj.add("Error", data); //$NON-NLS-1$
+			}
 		}
-		else {
-			resultDownload.append("Error al guardar el fichero"); //$NON-NLS-1$
-			data.add(Json.createObjectBuilder()
-					.add("Code",400) //$NON-NLS-1$
-					.add("Message", resultDownload.toString())); //$NON-NLS-1$
-			jsonObj.add("Error", data); //$NON-NLS-1$
-			final JsonWriter jw = Json.createWriter(result);
-		    jw.writeObject(jsonObj.build());
-		    jw.close();
+
+		final JsonWriter jw = Json.createWriter(result);
+	    jw.writeObject(jsonObj.build());
+	    jw.close();
+
+		if(result.size() == 0) {
+			LOGGER.warning("No se pudo descargar el fichero"); //$NON-NLS-1$
+			return null;
 		}
-		if(result.size() > 0) {
-			return result.toByteArray();
-		}
-		return null;
+		return result.toByteArray();
 	}
 
 	/**

@@ -6,6 +6,9 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Clase para el cifrado del token de inicio de sesi&oacute;n.
+ */
 class Cipherer {
 
 	private static final String CIPHER_CONFIG = "AES/CBC/PKCS5PADDING"; //$NON-NLS-1$
