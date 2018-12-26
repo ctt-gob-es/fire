@@ -16,11 +16,11 @@ public class ConfigManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
 
-	private static final String CONFIG_FILENAME = "log_consumer_config.properties"; //$NON-NLS-1$
+	private static final String CONFIG_FILENAME = "logconsumer.properties"; //$NON-NLS-1$
 
 	private static final String ENVIRONMENT_VAR_CONFIG_DIR = "logconsumer.config.path"; //$NON-NLS-1$
 
-	private static final String PROP_CIPHER_KEY = "cipher.key"; //$NON-NLS-1$
+	private static final String PROP_AUTHORIZATION_KEY = "auth.key"; //$NON-NLS-1$
 
 	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
 
@@ -115,11 +115,11 @@ public class ConfigManager {
 	 */
 	public byte[] getCipherKey() {
 
-		final String encodedKey = this.config.getProperty(PROP_CIPHER_KEY);
+		final String encodedKey = this.config.getProperty(PROP_AUTHORIZATION_KEY);
 		try {
 			return Base64.decode(encodedKey);
 		} catch (final IOException e) {
-			LOGGER.warning("La clave de cifrado no esta correctamente codificada. Se ignorara: " + e); //$NON-NLS-1$
+			LOGGER.severe("La clave de autorizacion no esta correctamente codificada: " + e); //$NON-NLS-1$
 			return null;
 		}
 	}
@@ -131,6 +131,6 @@ public class ConfigManager {
 	public File getLogsDir() {
 
 		final String directory = this.config.getProperty(PROP_LOGS_DIR);
-		return new File(directory);
+		return directory != null ? new File(directory) : null;
 	}
 }

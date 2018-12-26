@@ -5,8 +5,6 @@ public class LogErrors {
 	private  String msgError = null;
 	private  int numError = 0;
 
-
-
 	public LogErrors(final String msgError, final int numError) {
 		super();
 		this.msgError = msgError;

@@ -32,79 +32,75 @@ public class LogTail {
 	}
 
 	/**
-	 *Permite consultar las últimas líneas de un fichero de log.
-	 *Se almacena la posición en la que se termina de leer (final del fichero) para que en una próxima llamada a getMoreLog(String log)
-	 *se pueda continuar cargando desde ese punto.
-	 * @param logFileName
-	 * @param numLines
-	 * @return
-	 * @throws IOException
+	 * Permite consultar las &uacute;ltimas l&iacute;neas de un fichero de log.
+	 * Se almacena la posici&oacute;n en la que se termina de leer (final del fichero) para que
+	 * en una pr&oacute;xima llamada a getMoreLog(String log) se pueda continuar cargando desde
+	 * ese punto.
+	 * @param numLines N&uacute;mero de l&iacute;neas m&aacute;ximas a recuperar.
+	 * @return &Uacute;ltimas l&iacute;neas del fichero.
+	 * @throws IOException Cuando ocurre un error durante la lectura del fichero.
 	 */
-	public final  String  getLogTail(final int numLines) throws IOException {// byte[]
-		 String result = ""; //$NON-NLS-1$
-		 byte[]  data = null;
-		 /* Creamos el canal asociado al fichero , se podr&aacute; modificar suposi&oacute;n de lectura*/
-		  try (SeekableByteChannel channel = Files.newByteChannel(this.path, StandardOpenOption.READ)) {
-			  	/*Obtenemos el tama&ntilde;o del fichero,
-			  	 * creamos un array con las posiciones obtenidas de la divisi&oacute;n del fichero en partes (PART_SIZE)*/
-		        final long totalSize = Files.size(this.path);
-		        setFilePosition(totalSize);
-		        final int totalNext =  (int) (totalSize/this.PART_SIZE);
-		        final int [] positions = new int [totalNext];
-		        for(int i = 0; i < totalNext; i++) {
-		        	positions[i] = i * this.PART_SIZE;
-		        }
-		        if( positions.length > 0) {
-					int i = 1;
-					/*Leemos el fichero n veces hasta obtener el n&uacute;mero de l&iacute;neas indicadas,
-					 * obteniendo en cada lectura un nuevo bloque del fichero*/
-					while (numLines > getTotalBufferLines()  && i <= positions.length) {
-						final ByteBuffer buf =  ByteBuffer.allocate((int) totalSize - positions[positions.length - i]);
-						channel.position(positions[positions.length - i]);
-						channel.read(buf);
-						buf.flip();
-						data = new byte[buf.limit()];
-						buf.get(data);
-						result = this.readLine(data,numLines);
-						buf.clear() ;
-						i++;
-					}
-		        }
-
-		    }
-
-			return result;
-
+	public final StringBuilder getLogTail(final int numLines) throws IOException {
+		StringBuilder result = new StringBuilder();
+		// Creamos el canal asociado al fichero
+		try (SeekableByteChannel channel = Files.newByteChannel(this.path, StandardOpenOption.READ)) {
+			// Obtenemos el tamano del fichero. Creamos un array con las posiciones
+			// obtenidas de la division del fichero en partes (PART_SIZE)
+			final long totalSize = Files.size(this.path);
+			setFilePosition(totalSize);
+			final int totalNext =  (int) (totalSize/this.PART_SIZE);
+			final int [] positions = new int [totalNext];
+			for (int i = 0; i < totalNext; i++) {
+				positions[i] = i * this.PART_SIZE;
+			}
+			if (positions.length > 0) {
+				int i = 1;
+				// Leemos el fichero n veces hasta obtener el numero de lineas indicadas,
+				// obteniendo en cada lectura un nuevo bloque del fichero
+				while (numLines > getTotalBufferLines()  && i <= positions.length) {
+					final ByteBuffer buf =  ByteBuffer.allocate((int) totalSize - positions[positions.length - i]);
+					channel.position(positions[positions.length - i]);
+					channel.read(buf);
+					buf.flip();
+					final byte[]  data = new byte[buf.limit()];
+					buf.get(data);
+					//XXX: Esto carece de sentido, ya que en cada iteracion del bucle se
+					// pisaria el objeto. Hay que revisarlo.
+					result = readLines(data, numLines);
+					buf.clear() ;
+					i++;
+				}
+			}
+		}
+		return result;
 	}
 
 	/**
-	 * Obtiene el m&aacute;ximo n&uacute;mero de l&iacute;neas del bloque de datos pasado como par&aacute;metro (data)
-	 * hasta completar  el n&uacute;mero indicado en el par&aacute;metro (lines)
-	 * @param data
-	 * @param lines
-	 * @return
-	 * @throws IOException
+	 * Obtiene el m&aacute;ximo n&uacute;mero de l&iacute;neas del bloque de datos pasado como
+	 * par&aacute;metro (data) hasta completar  el n&uacute;mero indicado en el par&aacute;metro
+	 * (lines).
+	 * @param data Datos de los que leer.
+	 * @param lines N&uacute;mero de l&iacute;neas que leer.
+	 * @return L&iacute;neas le&iacute;das.
+	 * @throws IOException Cuando falla la lectura.
 	 */
-	private  String readLine( final byte[] data, final int lines) throws IOException {
-		 int numLines = 0;
-		 String linesDataRead = ""; //$NON-NLS-1$
-
-		 String line = ""; //$NON-NLS-1$
-		 try (final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data), this.logInfor.getCharset()))){
+	private  StringBuilder readLines(final byte[] data, final int lines) throws IOException {
+		final StringBuilder linesDataRead = new StringBuilder();
+		try (	final ByteArrayInputStream bais = new ByteArrayInputStream(data);
+				final InputStreamReader isr = new InputStreamReader(bais, this.logInfor.getCharset());
+				final BufferedReader reader = new BufferedReader (isr)) {
+			String line;
+			int numLines = 0;
 			final int totalLines = getNumLines(data);
-			numLines = 0;
-			while ((line = reader.readLine()) != null)
-			  {
+			while ((line = reader.readLine()) != null) {
 				numLines++;
-				if(numLines > totalLines - lines) {
-					linesDataRead = linesDataRead.concat(line).concat("\n"); //$NON-NLS-1$
+				if (numLines > totalLines - lines) {
+					linesDataRead.append(line).append('\n');
 				}
-			  }
-			reader.close();
+			}
 			setTotalBufferLines(numLines);
-		  }
-
-		 return linesDataRead;
+		}
+		return linesDataRead;
 	}
 
 	/**
@@ -115,13 +111,14 @@ public class LogTail {
 	 */
 	private static  int getNumLines(final byte[] data) throws IOException {
 		int numLines = 0;
-		 try (final BufferedReader reader = new BufferedReader (new InputStreamReader(new ByteArrayInputStream(data)))){
-				while (reader.readLine() != null){
-					numLines++;
-				  }
-				reader.close();
-			  }
-			 return numLines;
+		try (	final ByteArrayInputStream bais = new ByteArrayInputStream(data);
+				final InputStreamReader isr = new InputStreamReader(bais);
+				final BufferedReader reader = new BufferedReader (isr)) {
+			while (reader.readLine() != null){
+				numLines++;
+			}
+		}
+		return numLines;
 	}
 
 	/**
@@ -155,8 +152,4 @@ public class LogTail {
 	private final  void setTotalBufferLines(final int totalBufferLines) {
 		this.totalBufferLines = totalBufferLines;
 	}
-
-
-
-
 }

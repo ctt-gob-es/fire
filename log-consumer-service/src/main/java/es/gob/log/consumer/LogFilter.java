@@ -2,7 +2,6 @@ package es.gob.log.consumer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Clase para la obtenci&oacute;n de logs de un fichero filtrados en base a una
@@ -36,11 +35,9 @@ public class LogFilter {
 	 * cierra antes de abrir el nuevo.
 	 * @param reader Lector de logs.
 	 * @throws IOException Cuando se produce un error durante la apertura del fichero.
-	 * @throws InterruptedException Cuando la carga del fichero se ve interrumpida.
-	 * @throws ExecutionException Cuando se produce un error al cargar el fichero.
 	 */
 	private void load(final LogReader reader)
-			throws IOException, InterruptedException, ExecutionException {
+			throws IOException {
 
 		if (this.logReader != null) {
 			this.logReader.close();
@@ -60,10 +57,8 @@ public class LogFilter {
 	 * Carga lector de logs.Avanzando siempre a la siguiente l&inea
 	 * @param reader
 	 * @throws IOException
-	 * @throws InterruptedException
-	 * @throws ExecutionException
 	 */
-	public void loadReaderToSearch(final LogReader reader) throws IOException, InterruptedException, ExecutionException {
+	public void loadReaderToSearch(final LogReader reader) throws IOException {
 
 		load(reader);
 		this.registryReader.loadReader(this.logReader);
@@ -75,10 +70,8 @@ public class LogFilter {
 	 * No avanza a la siguiente l&iacute;nea si dentro de cada carga se piden m&aacute;s datos para mostrar.
 	 * @param reader
 	 * @throws IOException
-	 * @throws InterruptedException
-	 * @throws ExecutionException
 	 */
-	public void loadReaderToFilter(final LogReader reader) throws IOException, InterruptedException, ExecutionException {
+	public void loadReaderToFilter(final LogReader reader) throws IOException {
 
 		load(reader);
 

@@ -3,6 +3,7 @@ package es.gob.log.consumer.service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -12,11 +13,16 @@ import javax.json.JsonObjectBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+/**
+ * Clase para el procesado de las peticiones de validaci&oacute;n de login.
+ */
 public class ValidationLoginManager {
 
 	private static final String CIPHER_CONFIG = "AES/CBC/PKCS5PADDING"; //$NON-NLS-1$
 
 	private static final String CIPHER_ALGORITHM = "AES"; //$NON-NLS-1$
+
+	private static final Logger LOGGER = Logger.getLogger(ValidationLoginManager.class.getName());
 
 	public static byte[] process(final HttpServletRequest req, final HttpSession session)
 			throws SessionException {
@@ -48,6 +54,7 @@ public class ValidationLoginManager {
 			decipheredToken = decipherCryptoToken(cipheredToken, iv);
 		}
 		catch (final Exception e) {
+			LOGGER.severe("No ha sido posible descifrar el token de conexion: " + e); //$NON-NLS-1$
 			throw new SessionException("La informacion de acceso proporcionada no es valida", e); //$NON-NLS-1$
 		}
 
@@ -67,7 +74,9 @@ public class ValidationLoginManager {
 			throws	GeneralSecurityException {
 
 		final byte[] cipherKey = ConfigManager.getInstance().getCipherKey();
-
+		if (cipherKey == null) {
+			throw new GeneralSecurityException("No se ha encontrado una clave con la que descifrar el token de conexion"); //$NON-NLS-1$
+		}
 		return decipher(cipheredToken, cipherKey, iv);
 	}
 

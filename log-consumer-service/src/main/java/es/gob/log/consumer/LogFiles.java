@@ -2,9 +2,9 @@ package es.gob.log.consumer;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.json.Json;
@@ -20,67 +20,62 @@ public class LogFiles {
 
 	private static final Logger LOGGER = Logger.getLogger(LogFiles.class.getName());
 
-	public LogFiles() {
-
-	}
 	/**
-	 * M&eacute;todo de consulta de ficheros de logs.
-	 * @return Array de bytes que contiene cadena de caracteres en formato JSON indicando el nombre de los ficheros log,
-	 *  fecha de &uacute;ltima actualizaci&oacute;n sin formato (long) y su tama&ntilde;o en bytes. Devuelve {@code null}
-	 *  si se ha indicado como par&aacute;metro de entrada una ruta no existente o nula.
-	 * @throws IOException
+	 * M&eacute;todo de consulta de ficheros de logs. Obtiene el nombre de los ficheros,
+	 *  la fecha de la &uacute;ltima actualizaci&oacute;n en milisegundos y su tama&ntilde;o
+	 *  en bytes.
+	 * @return Array de bytes de un JSON con el listado de ficheros o con un mensaje de error.
 	 */
-	public  byte[] getLogFiles(final File pathLogs)  {
+	public static byte[] getLogFiles(final File logsDir) {
+
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-		final JsonArrayBuilder data = Json.createArrayBuilder();
+
+		if (logsDir == null || !logsDir.isDirectory()) {
+			LOGGER.log(Level.SEVERE, "No se ha configurado un directorio de logs valido: " + logsDir); //$NON-NLS-1$
+			final JsonArrayBuilder error = Json.createArrayBuilder();
+			error.add(Json.createObjectBuilder()
+					.add("Code",HttpServletResponse.SC_BAD_REQUEST) //$NON-NLS-1$
+					.add("Message", "No se ha podido obtener la lista de ficheros log.")); //$NON-NLS-1$//$NON-NLS-2$
+			jsonObj.add("Error", error); //$NON-NLS-1$
+
+			final StringWriter writer = new StringWriter();
+			try (final JsonWriter jw = Json.createWriter(writer)) {
+				jw.writeObject(jsonObj.build());
+			}
+			return writer.toString().getBytes(Charset.defaultCharset());
+		}
+
+
 		byte[] result = null;
-		//final File f = new File(DIR_LOGS);
-		if(pathLogs == null || pathLogs.exists()) {
-			final File[] files = pathLogs.listFiles(new FilenameFilter() {
-				@Override
-				public boolean accept(final File dir, final String name) {
-					if(name.lastIndexOf(".") > 0) { //$NON-NLS-1$
-						final int dot = name.lastIndexOf('.');
-		                final String ext = name.substring(dot);
-		                if(!ext.equalsIgnoreCase(FILE_EXT_LOGINFO) && !ext.equalsIgnoreCase(FILE_EXT_LCK)) {
-		                	return true;
-		                }
-		                return false;
-					}
+		final File[] files = logsDir.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(final File dir, final String name) {
+				if (name.lastIndexOf(".") == -1) { //$NON-NLS-1$
 					return false;
 				}
-			});
-			if( files.length > 0) {
-				for (int i = 0; i < files.length; i++){
-					data.add(Json.createObjectBuilder()
-							.add("Name",files[i].getName()) //$NON-NLS-1$
-							.add("Date",files[i].lastModified()) //$NON-NLS-1$
-							.add("Size",files[i].length()) //$NON-NLS-1$
+
+				final int dot = name.lastIndexOf('.');
+				final String ext = name.substring(dot);
+				return !ext.equalsIgnoreCase(FILE_EXT_LOGINFO) &&
+						!ext.equalsIgnoreCase(FILE_EXT_LCK);
+			}
+		});
+
+		// Devolvemos el listado de ficheros encontrados
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+		for (final File logFile : files) {
+			data.add(Json.createObjectBuilder()
+					.add("Name", logFile.getName()) //$NON-NLS-1$
+					.add("Date", logFile.lastModified()) //$NON-NLS-1$
+					.add("Size", logFile.length()) //$NON-NLS-1$
 					);
-				}
-				jsonObj.add("FileList", data); //$NON-NLS-1$
-				final StringWriter writer = new StringWriter();
-				try(final JsonWriter jw = Json.createWriter(writer)) {
-			        jw.writeObject(jsonObj.build());
-			        jw.close();
-			    }
-				result = writer.toString().getBytes(Charset.defaultCharset());
-			}
-			else {
-				data.add(Json.createObjectBuilder()
-						.add("Code",HttpServletResponse.SC_BAD_REQUEST) //$NON-NLS-1$
-						.add("Message", "No se ha podido obtener la lista de ficheros log.")); //$NON-NLS-1$//$NON-NLS-2$
-				jsonObj.add("Error", data); //$NON-NLS-1$
-				final StringWriter writer = new StringWriter();
-				try(final JsonWriter jw = Json.createWriter(writer)) {
-			        jw.writeObject(jsonObj.build());
-			        jw.close();
-			    }
-				result = writer.toString().getBytes(Charset.defaultCharset());
-
-			}
-
 		}
+		jsonObj.add("FileList", data); //$NON-NLS-1$
+		final StringWriter writer = new StringWriter();
+		try (final JsonWriter jw = Json.createWriter(writer)) {
+			jw.writeObject(jsonObj.build());
+		}
+		result = writer.toString().getBytes(Charset.defaultCharset());
 
 		return result;
 	}

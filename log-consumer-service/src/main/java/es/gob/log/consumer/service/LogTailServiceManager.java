@@ -30,13 +30,11 @@ public class LogTailServiceManager {
 	 */
 	public final static byte[] process(final HttpServletRequest req) throws IOException  {
 
-		byte[] result = null;
-
 		// Obtenemos la sesion
 		final HttpSession session = req.getSession(false);
 
 		// Obtenemos la informacion del fichero de configuracion de logs
-		final LogInfo info = (LogInfo)session.getAttribute("LogInfo"); //$NON-NLS-1$
+		final LogInfo info = (LogInfo) session.getAttribute("LogInfo"); //$NON-NLS-1$
 		if (info == null) {
 			LOGGER.log(Level.WARNING, "Es necesario abrir el fichero log anteriormente"); //$NON-NLS-1$z
 			throw new IllegalArgumentException("Es necesario abrir el fichero log anteriormente"); //$NON-NLS-1$
@@ -56,18 +54,19 @@ public class LogTailServiceManager {
 			iNumLines = Integer.parseInt(sNumLines.trim());
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "No se ha proporcionado un número de líneas válido", e);  //$NON-NLS-1$
-			throw new IllegalArgumentException("No se ha proporcionado un número de líneas válido", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "No se ha proporcionado un numero de lineas valido", e);  //$NON-NLS-1$
+			throw new IllegalArgumentException("No se ha proporcionado un numero de lineas valido", e); //$NON-NLS-1$
 		}
 
+		byte[] result = null;
 		try {
 			// Obtenemos la ruta completa al fichero log
 			final String path = ConfigManager.getInstance().getLogsDir().getCanonicalPath().toString().concat(File.separator).concat(logFileName);
 
 			final LogTail lTail = new LogTail(info, path);
-			final String resTail = lTail.getLogTail(iNumLines);
-			result = resTail.getBytes(info.getCharset());
-			session.setAttribute("FilePosition",Long.valueOf(lTail.getFilePosition()));//$NON-NLS-1$
+			final StringBuilder resTail = lTail.getLogTail(iNumLines);
+			result = resTail.toString().getBytes(info.getCharset());
+			session.setAttribute("FilePosition", Long.valueOf(lTail.getFilePosition()));//$NON-NLS-1$
 
 			final AsynchronousFileChannel channelSession = (AsynchronousFileChannel) session.getAttribute("Channel"); //$NON-NLS-1$
 			session.setAttribute("FileSize", new Long (channelSession.size())); //$NON-NLS-1$

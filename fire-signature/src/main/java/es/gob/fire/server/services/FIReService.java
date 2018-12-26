@@ -154,7 +154,7 @@ public class FIReService extends HttpServlet {
         	op = FIReServiceOperation.parse(operation);
         }
         catch (final Exception e) {
-            LOGGER.warning("Se ha indicado un id de operacion incorrecto: + e"); //$NON-NLS-1$
+            LOGGER.warning("Se ha indicado un id de operacion incorrecto: " + e); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "Se ha indicado un id de operacion incorrecto" //$NON-NLS-1$
             );
