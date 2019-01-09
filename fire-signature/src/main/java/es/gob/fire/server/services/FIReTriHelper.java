@@ -53,8 +53,9 @@ public final class FIReTriHelper {
     /** ExtraParam de Afirma con el que indicar el identificador de un documento. */
     private static final String AFIRMA_EXTRAPARAM_DOC_ID = "SignatureId"; //$NON-NLS-1$
 
-
 	private static final boolean INSTALL_XMLDSIG_PROVIDER = ConfigManager.isAlternativeXmlDSigActive();
+
+	private static final Logger LOGGER = Logger.getLogger(FIReTriHelper.class.getName());
 
     private FIReTriHelper() {
         // No instanciable
@@ -74,7 +75,7 @@ public final class FIReTriHelper {
      * @throws IOException Cuando ocurre un error al componer la estructura con la
      * informaci&oacute;n de la prefirma.
      */
-    public final static TriphaseData getPreSign(final String criptoOperation,
+    public static TriphaseData getPreSign(final String criptoOperation,
                                          final String format,
                                          final String algorithm,
                                          final Properties extraParams,
@@ -93,7 +94,7 @@ public final class FIReTriHelper {
         	try {
         		expandedParams = ExtraParamsProcessor.expandProperties(expandedParams, docBytes, format);
         	} catch (final Exception e) {
-        		Logger.getLogger("es.gob.afirma").warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+        		LOGGER.warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$
         	}
         }
 
@@ -187,7 +188,7 @@ public final class FIReTriHelper {
      * @throws IOException Cuando ocurre un error al componer la estructura con la
      * informaci&oacute;n de la prefirma.
      */
-    public final static TriphaseData getPreSign(final String criptoOperation,
+    public static TriphaseData getPreSign(final String criptoOperation,
                                          final String format,
                                          final String algorithm,
                                          final Properties extraParams,
@@ -237,7 +238,7 @@ public final class FIReTriHelper {
         		try {
         			expandedParams = ExtraParamsProcessor.expandProperties((Properties) params.clone(), doc.getData(), frmt);
         		} catch (final Exception e) {
-        			Logger.getLogger("es.gob.afirma").warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+        			LOGGER.warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$
         			expandedParams = new Properties();
         		}
         	}
@@ -387,7 +388,7 @@ public final class FIReTriHelper {
      * @return Firma electr&oacute;nica resultante.
      * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
      */
-    public final static byte[] getPostSign(final String criptoOperation,
+    public static byte[] getPostSign(final String criptoOperation,
                                     final String format,
                                     final String algorithm,
                                     final Properties extraParams,
@@ -403,7 +404,7 @@ public final class FIReTriHelper {
         	try {
         		expandedParams = ExtraParamsProcessor.expandProperties(expandedParams, docBytes, format);
         	} catch (final Exception e) {
-        		Logger.getLogger("es.gob.afirma").warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+        		LOGGER.warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$
         	}
         }
 
@@ -557,7 +558,7 @@ public final class FIReTriHelper {
 	 * @param source Objeto del Cliente Afirma a convertir origen.
 	 * @return Objeto de FIRe con los mismos datos que el del Cliente Afirma.
 	 */
-	public static final es.gob.fire.server.connector.TriphaseData fromTriPhaseDataAfirmaToFire(final TriphaseData source) {
+	public static es.gob.fire.server.connector.TriphaseData fromTriPhaseDataAfirmaToFire(final TriphaseData source) {
 		final es.gob.fire.server.connector.TriphaseData target = new es.gob.fire.server.connector.TriphaseData();
 		target.setFormat(source.getFormat());
 		for (final TriSign triSign : source.getTriSigns()) {

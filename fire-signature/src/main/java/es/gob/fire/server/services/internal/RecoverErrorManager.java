@@ -41,19 +41,21 @@ public class RecoverErrorManager {
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
         // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
         if (session == null) {
-    		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
+    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		sendResult(response, buildErrorResult(session, OperationError.INVALID_SESSION));
     		return;
         }
@@ -64,21 +66,21 @@ public class RecoverErrorManager {
         	// Si no se declaro un error, pero sabemos que lo ultimo que se hizo es
         	// redirigir a la pasarela de autorizacion, se notifica como tal
         	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED)) {
-            	LOGGER.warning("Ocurrio un error desconocido despues de llamar a la pasarela de autorizacion de firma en la nube o a la de emision de certificados"); //$NON-NLS-1$
+            	LOGGER.warning(logF.format("Ocurrio un error desconocido despues de llamar a la pasarela de autorizacion de firma en la nube o a la de emision de certificados")); //$NON-NLS-1$
             	final TransactionResult result = buildErrorResult(session, OperationError.EXTERNAL_SERVICE_ERROR);
             	SessionCollector.removeSession(session);
             	sendResult(response, result);
         		return;
         	}
 
-        	LOGGER.warning("No se ha notificado el tipo de error de la transaccion"); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("No se ha notificado el tipo de error de la transaccion")); //$NON-NLS-1$
             final TransactionResult result = buildErrorResult(session, OperationError.UNDEFINED_ERROR);
         	SessionCollector.removeSession(session);
         	sendResult(response, result);
         	return;
         }
 
-        LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve el error identificado", appId, transactionId)); //$NON-NLS-1$
+        LOGGER.info(logF.format("Se devuelve el error identificado")); //$NON-NLS-1$
 
         // Recuperamos la informacion de error y eliminamos la sesion
         final TransactionResult result = buildErrorResult(session);

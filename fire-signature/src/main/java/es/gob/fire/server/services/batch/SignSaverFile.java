@@ -31,7 +31,7 @@ public final class SignSaverFile {
 	 * qu&eacute; ficheros pueden sobrescribirse. */
 	private static final boolean DISABLED = true;
 
-	private static final Logger LOGGER = Logger.getLogger("es.gob.afirma"); //$NON-NLS-1$
+	private static final Logger LOGGER = Logger.getLogger(SignSaverFile.class.getName());
 
 	private String filename;
 

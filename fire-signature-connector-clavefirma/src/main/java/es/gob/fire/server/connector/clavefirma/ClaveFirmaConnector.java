@@ -300,7 +300,7 @@ public final class ClaveFirmaConnector extends FIReConnector {
         catch (final Exception e) {
         	// Mostramos el codigo de error interno
         	if (e instanceof SafeCertGateWayException) {
-        		LOGGER.warning("Codigo de error emitido por la GISS: " + ((SafeCertGateWayException) e).getCode()); //$NON-NLS-1$
+        		LOGGER.warning("Error en la firma. Codigo emitido por la GISS: " + ((SafeCertGateWayException) e).getCode()); //$NON-NLS-1$
         	}
             throw new FIReSignatureException(
                 "No se ha podido recuperar la transaccion de firma: " + e, e //$NON-NLS-1$
@@ -320,7 +320,7 @@ public final class ClaveFirmaConnector extends FIReConnector {
     public void endSign(final String transactionId) {
     	try {
             final EndTransactionResult ets = new GateWayAPI().endTransaction(transactionId);
-            LOGGER.info(
+            LOGGER.fine(
                 "Transaccion de firma cerrada: " + ets.getDescription() //$NON-NLS-1$
             );
         }

@@ -58,7 +58,7 @@ public class AplicationsDAO {
 
 		if (!st.execute()) {
 			st.close();
-			LOGGER.warning("No existe ninguna aplicaci&oacute;n dada de alta con el ID: " + appId); //$NON-NLS-1$
+			LOGGER.fine("No existe ninguna aplicacion dada de alta con el ID: " + appId); //$NON-NLS-1$
 			return false;
 		}
 
@@ -66,11 +66,11 @@ public class AplicationsDAO {
 
 		boolean result;
 		if (rs.next()) {
-			LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + rs.getString(1)); //$NON-NLS-1$
+			LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + appId); //$NON-NLS-1$
 			result = true;
 		}
 		else {
-			LOGGER.warning("No se ha podido leer la aplicacion dada de alta en el sistema con el ID: " + appId); //$NON-NLS-1$
+			LOGGER.fine("No se ha podido leer la aplicacion dada de alta en el sistema con el ID: " + appId); //$NON-NLS-1$
 			result = false;
 		}
 
@@ -117,7 +117,7 @@ public class AplicationsDAO {
 
 		if (!st.execute()) {
 			st.close();
-			LOGGER.warning("No existe ningun certificado con la huella: " + thumb); //$NON-NLS-1$
+			LOGGER.fine("No existe ningun certificado con la huella: " + thumb); //$NON-NLS-1$
 			return false;
 		}
 
@@ -125,7 +125,7 @@ public class AplicationsDAO {
 
 		boolean result;
 		if (!rs.next()) {
-			LOGGER.warning("No se ha podido leer la huella del certificado: " + thumb); //$NON-NLS-1$
+			LOGGER.fine("No se ha podido leer la huella del certificado: " + thumb); //$NON-NLS-1$
 			result = false;
 		}
 		else {

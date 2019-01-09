@@ -78,6 +78,18 @@ public class ConfigManager {
 
 	private static final String PROP_SESSIONS_DAO = "sessions.dao"; //$NON-NLS-1$
 
+	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
+
+	private static final String PROP_LOGS_ROLLING_POLICY = "logs.rollingPolicy"; //$NON-NLS-1$
+
+	private static final String PROP_LOGS_LEVEL_FIRE = "logs.level.fire"; //$NON-NLS-1$
+
+	private static final String PROP_LOGS_LEVEL_AFIRMA = "logs.level.afirma"; //$NON-NLS-1$
+
+	private static final String PROP_LOGS_LEVEL_GENERAL = "logs.level"; //$NON-NLS-1$
+
+	private static final String DEFAULT_LOGS_LEVEL = "WARNING"; //$NON-NLS-1$
+
 	private static final String PROP_HTTP_CERT_ATTR = "http.cert.attr"; //$NON-NLS-1$
 
 	private static final String DEFAULT_HTTP_CERT_ATTR = "x-clientcert"; //$NON-NLS-1$
@@ -179,7 +191,7 @@ public class ConfigManager {
 		for (final String provider : providersTempList) {
 			if (provider != null && !provider.trim().isEmpty()) {
 				final ProviderElement prov = new ProviderElement(provider);
-				if (!providersList.contains(provider)) {
+				if (!providersList.contains(provider)) { // ProviderElement tiene el equals() sobreescrito
 					providersList.add(prov);
 				}
 			}
@@ -577,6 +589,57 @@ public class ConfigManager {
 	 	}
 
 	 	return getProperty(PROP_FIRE_PUBLIC_URL);
+	 }
+
+	 /**
+	  * Recupera el directorio en el que almacenar los ficheros de log.
+	  * @return Directorio de los ficheros de log o {@code null} si no se configur&oacute;.
+	  */
+	 public static String getLogsDir() {
+
+		 if (config == null) {
+			 try {
+				 loadConfig();
+			 } catch (final ConfigFilesException e) {
+				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				 return null;
+			 }
+		 }
+
+		 return getProperty(PROP_LOGS_DIR);
+	 }
+
+	 /**
+	  * Recupera la pol&iacute;tica de rotado del fichero de log.
+	  * @return Politica de rotado o {@code null} si no se configur&oacute;.
+	  */
+	 public static String getLogsRollingPolicy() {
+		 return getProperty(PROP_LOGS_ROLLING_POLICY);
+	 }
+
+	 /**
+	  * Recupera el nivel general de log m&iacute;nimo que se debe mostrar.
+	  * @return Nivel de log configurado o el nivel por defecto si no se configur&oacute; o
+	  * se configur&oacute; un valor no valido.
+	  */
+	 public static String getLogsLevel() {
+		 return getProperty(PROP_LOGS_LEVEL_GENERAL, DEFAULT_LOGS_LEVEL);
+	 }
+
+	 /**
+	  * Recupera el nivel m&iacute;nimo de los logs de FIRe que se deben mostrar.
+	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;.
+	  */
+	 public static String getLogsLevelFire() {
+		 return getProperty(PROP_LOGS_LEVEL_FIRE, getLogsLevel());
+	 }
+
+	 /**
+	  * Recupera el nivel m&iacute;nimo de los logs del n&uacute;cleo de firma que se deben mostrar.
+	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;.
+	  */
+	 public static String getLogsLevelAfirma() {
+		 return getProperty(PROP_LOGS_LEVEL_AFIRMA, getLogsLevel());
 	 }
 
 	 /**

@@ -18,7 +18,7 @@ import es.gob.fire.server.services.internal.TempFilesHelper;
 
 final class TempStoreFileSystem {
 
-	private static final Logger LOGGER = Logger.getLogger("es.gob.afirma"); //$NON-NLS-1$
+	private static final Logger LOGGER = Logger.getLogger(TempStoreFileSystem.class.getName());
 	private static final MessageDigest MD;
 	static {
 		try {

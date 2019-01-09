@@ -68,155 +68,6 @@ public final class SessionCollector {
     	}
     }
 
-    /**
-     * Busca una sesion en el pool de sesiones para eliminarla junto con sus datos temporales.
-     * Si se establecio tambien un DAO de sesiones compatidas, se elimina tambien del mismo.
-     * @param id Identificador de la sesi&oacute;n.
-     */
-    public static void removeSession(final String id) {
-    	if (id == null) {
-    		return;
-    	}
-
-    	// Buscamos la sesion en la memoria del servidor
-    	final FireSession fireSession = sessions.get(id);
-
-    	// Eliminamos los datos de la session (si los encontramos) y la propia session
-    	if (fireSession != null) {
-    		removeAssociattedTempFiles(fireSession);
-    		fireSession.invalidate();
-    		sessions.remove(id);
-    	}
-    	TempFilesHelper.deleteTempData(id);
-
-    	// Eliminamos la sesion del espacio compartido con el resto de nodos
-		if (dao != null) {
-			dao.removeSession(id);
-		}
-    }
-
-    /**
-     * Elimina por completo una sesi&oacute;n y sus ficheros temporales.
-     * @param fireSession Sesi&oacute;n que hay que eliminar.
-     */
-    public static void removeSession(final FireSession fireSession) {
-    	if (fireSession == null) {
-    		return;
-    	}
-
-    	// Eliminamos los temporales
-   		removeAssociattedTempFiles(fireSession);
-   		TempFilesHelper.deleteTempData(fireSession.getTransactionId());
-
-   		// Eliminamos la sesion de la memoria
-   		sessions.remove(fireSession.getTransactionId());
-
-    	// Eliminamos la sesion del espacio compartido con el resto de nodos
-		if (dao != null) {
-			dao.removeSession(fireSession.getTransactionId());
-		}
-
-		fireSession.invalidate();
-    }
-
-    /**
-     * Elimina los ficheros temporales asociados a la sesi&oacute;n.
-     * @param session Sesi&oacute;n de la que eliminar los ficheros temporales.
-     */
-    private static void removeAssociattedTempFiles(final FireSession session) {
-
-    	if (session.containsAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT)) {
-    		final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
-    		if (batchResult != null) {
-    			final Iterator<String> it = batchResult.iterator();
-    			while (it.hasNext()) {
-    				TempFilesHelper.deleteTempData(batchResult.getDocumentReference(it.next()));
-    			}
-    		}
-    	}
-    }
-
-    /**
-     * Elimina los ficheros temporales asociados a la sesi&oacute;n.
-     * @param session Sesi&oacute;n de la que eliminar los ficheros temporales.
-     */
-    public static void cleanTempFiles(final FireSession session) {
-
-    	if (session.containsAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT)) {
-    		final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
-    		if (batchResult != null) {
-    			final Iterator<String> it = batchResult.iterator();
-    			while (it.hasNext()) {
-    				TempFilesHelper.deleteTempData(batchResult.getDocumentReference(it.next()));
-    			}
-    		}
-    	}
-    }
-
-    /**
-     * Elimina los datos de sesi&oacute;n (salvo mensajes de error, el indicador sobre si
-     * en alg&uacute;n momento se cedi&oacute; el control de la transacci&oacute;n en
-     * cuesti&oacute;n y el identificador del usuario) y los ficheros temporales
-     * asociados, pero no la propia sesion para permitir recuperar el mensaje de error.
-     * @param fireSession Sesion que se desea limpiar.
-     */
-    static void cleanSession(final FireSession fireSession) {
-    	if (fireSession == null) {
-    		return;
-    	}
-
-    	// Eliminamos los temporales
-   		removeAssociattedTempFiles(fireSession);
-    	TempFilesHelper.deleteTempData(fireSession.getTransactionId());
-
-    	// Eliminamos todos los datos de sesion menos los que indican errores
-    	for (final String attr : fireSession.getAttributteNames()) {
-    		if (!attr.equals(ServiceParams.SESSION_PARAM_ERROR_TYPE) &&
-    				!attr.equals(ServiceParams.SESSION_PARAM_ERROR_MESSAGE) &&
-    				!attr.equals(ServiceParams.SESSION_PARAM_CERT_ORIGIN) &&
-    				!attr.equals(ServiceParams.SESSION_PARAM_REDIRECTED) &&
-    				!attr.equals(ServiceParams.SESSION_PARAM_SUBJECT_ID)) {
-    			fireSession.removeAttribute(attr);
-    		}
-    	}
-    }
-
-    /**
-     * Recorre el listado de sesiones registradas y elimina las que han sobrepasado
-     * el periodo de validez.
-     */
-    private static void cleanExpiredSessions() {
-        final ExpiredSessionCleanerThread t = new ExpiredSessionCleanerThread(
-        		sessions.keySet().toArray(new String[sessions.size()]),
-        		sessions,
-        		ConfigManager.getTempsTimeout());
-        t.start();
-    }
-
-	/**
-	 * Crea un ID de transaccion que no se encuentra registrado en la sesi&oacute;n.
-	 * @return ID de transacci&oacute;n.
-	 */
-	private static String generateTransactionId() {
-
-		// Definimos un identificador de sesion externo para usar como ID de transaccion
-    	String transactionId;
-    	do {
-    		transactionId = UUID.randomUUID().toString();
-    	} while (existTransaction(transactionId));
-
-		return transactionId;
-	}
-
-	/**
-	 * Indica si existe una transacci&oacute;n con un identificador concreto.
-	 * @param trId Identificador del que se quiere comprobar la existencia.
-	 * @return {@code true} si ya existe una transacci&oacute;n con ese identificador,
-	 * {@code false} en caso contrario.
-	 */
-	private static boolean existTransaction(final String trId) {
-		return sessions.containsKey(trId) || dao != null && dao.existsSession(trId);
-	}
 
     /**
      * Crea un nuevo objeto de sesi&oacute;n en el que almacenar los datos de
@@ -236,6 +87,8 @@ public final class SessionCollector {
     	if (dao != null) {
 			dao.saveSession(fireSession);
 		}
+
+    	LOGGER.fine("Se crea la transaccion " + transactionId); //$NON-NLS-1$
 
     	return fireSession;
     }
@@ -416,6 +269,143 @@ public final class SessionCollector {
 			}
 		}
 		return fireSession;
+	}
+
+    /**
+     * Busca una sesion en el pool de sesiones para eliminarla junto con sus datos temporales.
+     * Si se establecio tambien un DAO de sesiones compatidas, se elimina tambien del mismo.
+     * @param id Identificador de la sesi&oacute;n.
+     */
+    public static void removeSession(final String id) {
+    	if (id == null) {
+    		return;
+    	}
+
+    	// Buscamos la sesion en la memoria del servidor
+    	final FireSession fireSession = sessions.get(id);
+
+    	// Eliminamos los datos de la session (si los encontramos) y la propia session
+    	if (fireSession != null) {
+    		removeAssociattedTempFiles(fireSession);
+    		fireSession.invalidate();
+    		sessions.remove(id);
+    	}
+    	TempFilesHelper.deleteTempData(id);
+
+    	// Eliminamos la sesion del espacio compartido con el resto de nodos
+		if (dao != null) {
+			dao.removeSession(id);
+		}
+
+		LOGGER.fine("Se elimina la transaccion " + id); //$NON-NLS-1$
+    }
+
+    /**
+     * Elimina por completo una sesi&oacute;n y sus ficheros temporales.
+     * @param fireSession Sesi&oacute;n que hay que eliminar.
+     */
+    public static void removeSession(final FireSession fireSession) {
+    	if (fireSession == null) {
+    		return;
+    	}
+
+    	// Eliminamos los temporales
+   		removeAssociattedTempFiles(fireSession);
+   		TempFilesHelper.deleteTempData(fireSession.getTransactionId());
+
+   		// Eliminamos la sesion de la memoria
+   		sessions.remove(fireSession.getTransactionId());
+
+    	// Eliminamos la sesion del espacio compartido con el resto de nodos
+		if (dao != null) {
+			dao.removeSession(fireSession.getTransactionId());
+		}
+
+		fireSession.invalidate();
+
+		LOGGER.fine("Se elimina la transaccion " + fireSession.getTransactionId()); //$NON-NLS-1$
+    }
+
+    /**
+     * Elimina los ficheros temporales asociados a la sesi&oacute;n.
+     * @param session Sesi&oacute;n de la que eliminar los ficheros temporales.
+     */
+    private static void removeAssociattedTempFiles(final FireSession session) {
+
+    	if (session.containsAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT)) {
+    		final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
+    		if (batchResult != null) {
+    			final Iterator<String> it = batchResult.iterator();
+    			while (it.hasNext()) {
+    				TempFilesHelper.deleteTempData(batchResult.getDocumentReference(it.next()));
+    			}
+    		}
+    	}
+    }
+
+    /**
+     * Elimina los datos de sesi&oacute;n (salvo mensajes de error, el indicador sobre si
+     * en alg&uacute;n momento se cedi&oacute; el control de la transacci&oacute;n en
+     * cuesti&oacute;n y el identificador del usuario) y los ficheros temporales
+     * asociados, pero no la propia sesion para permitir recuperar el mensaje de error.
+     * @param fireSession Sesion que se desea limpiar.
+     */
+    static void cleanSession(final FireSession fireSession) {
+    	if (fireSession == null) {
+    		return;
+    	}
+
+    	// Eliminamos los temporales
+   		removeAssociattedTempFiles(fireSession);
+    	TempFilesHelper.deleteTempData(fireSession.getTransactionId());
+
+    	// Eliminamos todos los datos de sesion menos los que indican errores
+    	for (final String attr : fireSession.getAttributteNames()) {
+    		if (!attr.equals(ServiceParams.SESSION_PARAM_ERROR_TYPE) &&
+    				!attr.equals(ServiceParams.SESSION_PARAM_ERROR_MESSAGE) &&
+    				!attr.equals(ServiceParams.SESSION_PARAM_CERT_ORIGIN) &&
+    				!attr.equals(ServiceParams.SESSION_PARAM_REDIRECTED) &&
+    				!attr.equals(ServiceParams.SESSION_PARAM_SUBJECT_ID)) {
+    			fireSession.removeAttribute(attr);
+    		}
+    	}
+    }
+
+    /**
+     * Recorre el listado de sesiones registradas y elimina las que han sobrepasado
+     * el periodo de validez.
+     */
+    private static void cleanExpiredSessions() {
+        final ExpiredSessionCleanerThread t = new ExpiredSessionCleanerThread(
+        		sessions.keySet().toArray(new String[sessions.size()]),
+        		sessions,
+        		ConfigManager.getTempsTimeout());
+        t.start();
+    }
+
+	/**
+	 * Crea un ID de transaccion que no se encuentra registrado en la sesi&oacute;n.
+	 * @return ID de transacci&oacute;n.
+	 */
+	private static String generateTransactionId() {
+
+		// Definimos un identificador de sesion externo para usar como ID de transaccion
+    	String transactionId;
+    	do {
+    		transactionId = UUID.randomUUID().toString();
+    	} while (existTransaction(transactionId));
+
+		return transactionId;
+	}
+
+	/**
+	 * Indica si existe una transacci&oacute;n con un identificador concreto.
+	 * @param trId Identificador del que se quiere comprobar la existencia.
+	 * @return {@code true} si ya existe una transacci&oacute;n con ese identificador,
+	 * {@code false} en caso contrario.
+	 */
+	private static boolean existTransaction(final String trId) {
+		return sessions.containsKey(trId) || dao != null && dao.existsSession(trId);
 	}
 
 	/**

@@ -84,7 +84,7 @@ public class TestConnector extends FIReConnector {
     @Override
 	public void init(final Properties config) {
 
-		LOGGER.info("Inicializamos " + TestConnector.class.getName()); //$NON-NLS-1$
+		LOGGER.fine("Inicializamos " + TestConnector.class.getName()); //$NON-NLS-1$
 
         // Configuramos la URL base de los servicios de prueba
         this.testUrlBase = config.getProperty(PROP_TEST_ENDPOINT);
@@ -141,7 +141,7 @@ public class TestConnector extends FIReConnector {
 	@Override
 	public void initOperation(final Properties config) {
 
-		LOGGER.info("Nueva transaccion con el conector " + TestConnector.class.getName()); //$NON-NLS-1$
+		LOGGER.fine("Nueva transaccion con el conector " + TestConnector.class.getName()); //$NON-NLS-1$
 
 		if (config != null) {
         	try {

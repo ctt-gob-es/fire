@@ -42,14 +42,16 @@ public class RecoverBatchStateManager {
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
@@ -57,7 +59,7 @@ public class RecoverBatchStateManager {
         // Si no se ha encontrado la session en el pool de sesiones vigentes, se
         // interpreta que estaba caducada
         if (session == null) {
-    		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
+    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
         	return;
         }
@@ -78,7 +80,7 @@ public class RecoverBatchStateManager {
         	}
     	}
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve el estado del lote", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.info(logF.format("Se devuelve el estado del lote")); //$NON-NLS-1$
 
     	final String progress = Float.toString(1 - (float) pending / numOperations);
     	sendResult(response, progress.getBytes());

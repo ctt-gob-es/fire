@@ -57,7 +57,7 @@ public class ConfigFileLoader {
 						config.load(is);
 					}
 					loaded = true;
-					LOGGER.info("Se cargo el fichero de configuracion " + configFile.getAbsolutePath()); //$NON-NLS-1$
+					LOGGER.fine("Se cargo el fichero de configuracion " + configFile.getAbsolutePath()); //$NON-NLS-1$
 				}
 				else {
 					LOGGER.warning(
@@ -68,13 +68,13 @@ public class ConfigFileLoader {
 
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio
 			if (!loaded) {
-				LOGGER.info("Se busca en el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
+				LOGGER.fine("Se busca en el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
 				try (InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilename);) {
 					if (is == null) {
 						LOGGER.severe("No se ha encontrado el fichero de configuracion en el classpath"); //$NON-NLS-1$
 						throw new FileNotFoundException();
 					}
-					LOGGER.info("Se ha cargado desde el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
+					LOGGER.fine("Se ha cargado desde el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
 					config.load(is);
 				}
 			}

@@ -44,23 +44,13 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
+		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String origin = request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 		final boolean originForced = Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
-		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
-		if (subjectId == null || subjectId.isEmpty()) {
-			LOGGER.warning("No se ha proporcionado el identificador de usuario"); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
-
-		if (origin == null || origin.isEmpty()) {
-			LOGGER.warning("No se ha proporcionado el origen del certificado"); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
+		final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
 
 		if (transactionId == null || transactionId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
@@ -68,8 +58,20 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			return;
 		}
 
+		if (subjectId == null || subjectId.isEmpty()) {
+			LOGGER.warning(logF.format("No se ha proporcionado el identificador de usuario")); //$NON-NLS-1$
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+
+		if (origin == null || origin.isEmpty()) {
+			LOGGER.warning(logF.format("No se ha proporcionado el origen del certificado")); //$NON-NLS-1$
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
-			LOGGER.warning("No se ha proporcionado la URL de error"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se ha proporcionado la URL de error")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
@@ -77,7 +79,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(), false, false);
 		if (session == null) {
-			LOGGER.severe("No existe sesion vigente asociada a la transaccion " + transactionId); //$NON-NLS-1$
+			LOGGER.severe(logF.format("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
 			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
@@ -97,18 +99,26 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		// Se selecciono firmar con un certificado local
 		if (ServiceParams.CERTIFICATE_ORIGIN_LOCAL.equalsIgnoreCase(origin)) {
-			signWithClienteAfirma(session, request, response);
+			signWithClienteAfirma(session, request, response, logF);
 		}
 		// Si no se selecciono firma local, se firmara con un proveedor de firma en la nube
 		else {
-			signWithProvider(origin, session, request, response, redirectErrorUrl, originForced);
+			signWithProvider(origin, session, request, response, redirectErrorUrl, originForced, logF);
 		}
-
-
-
 	}
 
-	private static void signWithClienteAfirma(final FireSession session, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+	/**
+	 * Ejecuta y gestiona el flujo de firma con el Cliente @firma.
+	 * @param session Datos de la transacci&oacute;n.
+	 * @param request Petici&oacute;n HTTP realizada al servicio.
+	 * @param response Objeto HTTP de respuesta del servicio.
+	 * @param logF Objeto para el formateo de los logs.
+	 * @throws IOException Cuando ocurre un error al redirigir al usuario.
+	 */
+	private static void signWithClienteAfirma(final FireSession session, final HttpServletRequest request,
+			final HttpServletResponse response, final LogTransactionFormatter logF) throws IOException {
+
+		LOGGER.info(logF.format("Se ha seleccionado el proveedor local")); //$NON-NLS-1$
 
 		SessionCollector.commit(session);
 
@@ -116,7 +126,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			request.getRequestDispatcher(FirePages.PG_MINI_APPLET).forward(request, response);
 			return;
 		} catch (final ServletException e) {
-			LOGGER.warning("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina."); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
 			response.sendRedirect(FirePages.PG_MINI_APPLET+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
@@ -127,16 +137,18 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	 * en la nube del proveedor indicado.
 	 * @param providerName Nombre del proveedor de firma en la nube que se debe utilizar.
 	 * @param session Datos de la transacci&oacute;n.
-	 * @param request Petici&oacute;n realizada al servicio.
-	 * @param response Objeto de respuesta del servicio.
+	 * @param request Petici&oacute;n HTTP realizada al servicio.
+	 * @param response Objeto HTTP de respuesta del servicio.
 	 * @param errorUrl URL a la que redirigir en caso de error hasta que se obtenga la de sesi&oacute;n.
 	 * @param originForced Indica si se forz&oacute; el uso de un proveedor concreto.
+	 * @param logF Objeto para el formateo de los logs.
 	 * @throws IOException Cuando ocurre un error al redirigir al usuario.
 	 * @throws ServletException Cuando ocurre un error al redirigir al usuario.
 	 */
 	private static void signWithProvider(final String providerName, final FireSession session,
 			final HttpServletRequest request, final HttpServletResponse response,
-			final String errorUrl, final boolean originForced) throws IOException, ServletException {
+			final String errorUrl, final boolean originForced, final LogTransactionFormatter logF)
+					throws IOException, ServletException {
 
 		final String trId = session.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
 		final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
@@ -144,7 +156,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning("No se encontro en la sesion la URL de redireccion de error para la operacion"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se encontro en la sesion la URL de redireccion de error para la operacion")); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(errorUrl);
 
@@ -155,18 +167,20 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		// Listamos los certificados del usuario
 		X509Certificate[] certificates = null;
 		try {
+			LOGGER.info(logF.format("Se ha seleccionado el proveedor " + providerName)); //$NON-NLS-1$
 			final FIReConnector connector = ProviderManager.initTransacction(
 					providerName,
 					connConfig.getProperties()
 			);
+	        LOGGER.info(logF.format("Se ha cargado el conector " + connector.getClass().getName())); //$NON-NLS-1$
 			certificates = connector.getCertificates(subjectId);
 			if (certificates == null || certificates.length == 0) {
 				if (connector.allowRequestNewCerts()) {
-					LOGGER.log(Level.WARNING, "El usuario no dispone de certificados y el conector si le permite generarlos"); //$NON-NLS-1$
+					LOGGER.info(logF.format("El usuario no dispone de certificados, pero el conector le permite generarlos")); //$NON-NLS-1$
 					request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE_NOCERT).forward(request, response);
 				}
 				else {
-					LOGGER.log(Level.WARNING, "El usuario no dispone de certificados y el conector no le permite generarlos"); //$NON-NLS-1$
+					LOGGER.log(Level.WARNING, logF.format("El usuario no dispone de certificados y el conector no le permite generarlos")); //$NON-NLS-1$
 					ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_NO_CERTS, originForced);
 					if (originForced) {
 						response.sendRedirect(redirectErrorUrl);
@@ -178,14 +192,14 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				return;
 			}
 		}
-		catch(final FIReConnectorFactoryException e) {
-			LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
+		catch (final FIReConnectorFactoryException e) {
+			LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del servicio de custodia"), e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
 			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
-		catch(final FIReCertificateException e) {
-			LOGGER.log(Level.SEVERE, "No se ha podido recuperar los certificados del usuario " + subjectId + ": " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
+		catch (final FIReCertificateException e) {
+			LOGGER.log(Level.SEVERE, logF.format("No se ha podido recuperar los certificados del usuario " + subjectId), e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -195,8 +209,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			}
 			return;
 		}
-		catch(final FIReConnectorNetworkException e) {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
+		catch (final FIReConnectorNetworkException e) {
+			LOGGER.log(Level.SEVERE, logF.format("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE_NETWORK, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -206,8 +220,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			}
 			return;
 		}
-		catch(final CertificateBlockedException e) {
-			LOGGER.log(Level.WARNING, "Los certificados del usuario " + subjectId + " estan bloqueados: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+		catch (final CertificateBlockedException e) {
+			LOGGER.log(Level.WARNING, logF.format("Los certificados del usuario " + subjectId + " estan bloqueados: " + e)); //$NON-NLS-1$ //$NON-NLS-2$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_BLOCKED, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -217,8 +231,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			}
 			return;
 		}
-		catch(final WeakRegistryException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " realizo un registro debil: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+		catch (final WeakRegistryException e) {
+			LOGGER.log(Level.WARNING, logF.format("El usuario " + subjectId + " realizo un registro debil: " + e)); //$NON-NLS-1$ //$NON-NLS-2$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_WEAK_REGISTRY, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -228,8 +242,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			}
 			return;
 		}
-		catch(final FIReConnectorUnknownUserException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no esta registrado en el sistema: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+		catch (final FIReConnectorUnknownUserException e) {
+			LOGGER.log(Level.WARNING, logF.format("El usuario " + subjectId + " no esta registrado en el sistema: " + e)); //$NON-NLS-1$ //$NON-NLS-2$
 			ErrorManager.setErrorToSession(session, OperationError.UNKNOWN_USER, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -239,8 +253,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			}
 			return;
 		}
-		catch(final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error indeterminado al recuperar los certificados del usuario " + subjectId + ": " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
+		catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, logF.format("Error indeterminado al recuperar los certificados del usuario " + subjectId), e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
@@ -260,7 +274,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			return;
 		}
 		catch (final ServletException e) {
-			LOGGER.warning("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a la misma pagina."); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
 			response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE+"?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}

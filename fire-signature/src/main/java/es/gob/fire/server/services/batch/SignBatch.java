@@ -58,7 +58,7 @@ import es.gob.afirma.core.signers.TriphaseData;
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public abstract class SignBatch {
 
-	protected static final Logger LOGGER = Logger.getLogger("es.gob.afirma"); //$NON-NLS-1$
+	protected static final Logger LOGGER = Logger.getLogger(SignBatch.class.getName());
 
 	protected final List<SingleSign> signs;
 	protected final SingleSignConstants.SignAlgorithm algorithm;
@@ -119,7 +119,7 @@ public abstract class SignBatch {
 			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
 		}
 		catch (final Exception e) {
-			Logger.getLogger("es.gob.afirma").severe( //$NON-NLS-1$
+			LOGGER.severe(
 				"Error al cargar el fichero XML de definicion de lote: " + e + "\n" + new String(xml) //$NON-NLS-1$ //$NON-NLS-2$
 			);
 			throw new IOException("Error al cargar el fichero XML de definicion de lote: " + e, e); //$NON-NLS-1$

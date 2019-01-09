@@ -115,7 +115,7 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
 						this.appId, signature, this.batchResult.getSigningCertificate(),
 						format, extraParams);
 			} catch (final IOException e) {
-	        	LOGGER.log(Level.WARNING, "Error al postprocesar con el FIReDocumentManager la firma del documento: " + this.docId, e); //$NON-NLS-1$
+	        	LOGGER.log(Level.WARNING, "Error al postprocesar con el DocumentManager la firma del documento: " + this.docId, e); //$NON-NLS-1$
 	        	this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
 	        	setFailed(true);
 	        	interrupt();

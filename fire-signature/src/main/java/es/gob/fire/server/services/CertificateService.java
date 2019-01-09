@@ -39,11 +39,12 @@ import es.gob.fire.signature.GoogleAnalitycs;
 /** Servlet para la obtenci&oacute;n de certificados de un usuario. */
 public final class CertificateService extends HttpServlet {
 
+    private static final long serialVersionUID = 9165731108863824136L;
+    
 	private static final String PARAM_APPLICATION_ID = "appId"; //$NON-NLS-1$
     private static final String PARAM_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
     private static final String PARAM_CONFIG = "config"; //$NON-NLS-1$
 
-    private static final long serialVersionUID = 9165731108863824136L;
     private static final Logger LOGGER = Logger.getLogger(CertificateService.class.getName());
 
     private static GoogleAnalitycs analytics = null;

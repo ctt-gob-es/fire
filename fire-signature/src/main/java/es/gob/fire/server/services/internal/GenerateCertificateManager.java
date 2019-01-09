@@ -49,9 +49,22 @@ public class GenerateCertificateManager {
 			final RequestParameters params,
             final HttpServletResponse response) throws IOException {
 
-		final String subjectId      = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
+        final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+        final String subjectId      = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String providerName	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 		final String configB64      = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
+
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
+		// Comprobamos del usuario
+    	if (subjectId == null || subjectId.isEmpty()) {
+        	LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
+        	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+        			"No se ha proporcionado el identificador del usuario que solicita el certificado" //$NON-NLS-1$
+        			);
+        	return;
+        }
 
 		Properties config = null;
     	if (configB64 != null && configB64.length() > 0) {
@@ -60,38 +73,33 @@ public class GenerateCertificateManager {
 
         final GenerateCertificateResult gcr;
 
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+
         try {
         	gcr = generateCertificate(providerName, subjectId, config);
         }
-        catch (final IllegalArgumentException e) {
-        	LOGGER.warning("No se ha proporcionado el identificador del usuario que solicita el certificado"); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-        			"No se ha proporcionado el identificador del usuario que solicita el certificado" //$NON-NLS-1$
-        			);
-        	return;
-        }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del servicio de custodia"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
         			);
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
         			"No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
         	return;
         }
         catch (final WeakRegistryException e) {
-        	LOGGER.log(Level.WARNING, "El usuario realizo un registro debil y no puede tener certificados de firma: " + e, e); //$NON-NLS-1$
+        	LOGGER.log(Level.WARNING, logF.format("El usuario realizo un registro debil y no puede tener certificados de firma"), e); //$NON-NLS-1$
         	response.sendError(HttpCustomErrors.WEAK_REGISTRY.getErrorCode(),
         			"El usuario realizo un registro debil y no puede tener certificados de firma: " + e //$NON-NLS-1$
     				);
     		return;
         }
         catch (final FIReCertificateException e) {
-        	LOGGER.log(Level.SEVERE, "Error en la generacion del certificado: " + e, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("Error en la generacion del certificado"), e); //$NON-NLS-1$
         	if (e instanceof FIReCertificateAvailableException) {
         		response.sendError(HttpCustomErrors.CERTIFICATE_AVAILABLE.getErrorCode(),
         				"El usuario ya tiene un certificado del tipo indicado: " + e //$NON-NLS-1$
@@ -104,7 +112,7 @@ public class GenerateCertificateManager {
         	return;
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, "Error desconocido en la generacion del certificado: " + e, e);//$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("Error desconocido en la generacion del certificado"), e);//$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error desconocido en la generacion del certificado: " + e //$NON-NLS-1$
         			);
@@ -137,14 +145,6 @@ public class GenerateCertificateManager {
 	 * y no se pueda crear otro.
 	 */
 	public static GenerateCertificateResult generateCertificate(final String providerName, final String subjectId, final Properties config) throws IOException, FIReConnectorFactoryException, FIReCertificateAvailableException, FIReCertificateException, FIReConnectorNetworkException, FIReConnectorUnknownUserException, WeakRegistryException {
-
-		// Comprobacion del usuario
-    	if (subjectId == null || subjectId.length() == 0) {
-            LOGGER.severe(
-        		"No se ha proporcionado el identificador del ciudadano que solicita el certificado" //$NON-NLS-1$
-            );
-            throw new IllegalArgumentException("No se ha indicado el identificador del usuario"); //$NON-NLS-1$
-        }
 
     	// Obtenemos el conector con el backend ya configurado
     	final FIReConnector connector = ProviderManager.initTransacction(providerName, config);

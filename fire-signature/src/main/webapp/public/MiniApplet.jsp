@@ -1,10 +1,8 @@
 
-<%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.DocInfo"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
-<%@page import="java.net.URLEncoder"%>
 <%@page import="java.util.Iterator"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.List"%>
@@ -16,7 +14,6 @@
 <%@page import="es.gob.fire.server.services.FIReTriHelper"%>
 <%@page import="es.gob.fire.server.services.ServiceUtil"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
-<%@page import="java.util.Map"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page import="java.util.Properties"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>

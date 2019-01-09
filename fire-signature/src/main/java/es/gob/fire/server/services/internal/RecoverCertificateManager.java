@@ -53,39 +53,41 @@ public class RecoverCertificateManager {
         final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
         final String configB64  = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
 		// Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
 
     	Properties config = null;
     	if (configB64 != null && configB64.length() > 0) {
     		config = ServiceUtil.base642Properties(configB64);
     	}
 
-    	LOGGER.info(String.format("App %1s: TrId %2s: Recuperamos el certificado de usuario", appId, transactionId)); //$NON-NLS-1$
+    	LOGGER.info(logF.format("Recuperamos el certificado de usuario")); //$NON-NLS-1$
 
     	byte[] newCertEncoded;
         try {
         	newCertEncoded = recoverCertificate(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, transactionId, config);
         }
         catch (final FIReConnectorFactoryException e) {
-            LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
+            LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del servicio de custodia"), e); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
                     "No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
             return;
         }
         catch (final Exception e) {
-            LOGGER.log(Level.WARNING, "Error en la generacion del certificado", e); //$NON-NLS-1$
+            LOGGER.log(Level.WARNING, logF.format("Error en la generacion del certificado"), e); //$NON-NLS-1$
             response.sendError(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "No se ha podido obtener el certificado generado" //$NON-NLS-1$
@@ -93,7 +95,7 @@ public class RecoverCertificateManager {
             return;
         }
 
-        LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos el Certificado generado")); //$NON-NLS-1$
+        LOGGER.info(logF.format("Devolvemos el certificado generado")); //$NON-NLS-1$
 
         // El servicio devuelve el resultado de la operacion de firma.
         final OutputStream output = ((ServletResponse) response).getOutputStream();
