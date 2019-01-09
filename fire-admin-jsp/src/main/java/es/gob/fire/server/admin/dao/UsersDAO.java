@@ -2,7 +2,6 @@ package es.gob.fire.server.admin.dao;
 
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
@@ -10,8 +9,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,11 +52,11 @@ public class UsersDAO {
 
 	private static final String ST_INSERT_USER = "INSERT INTO tb_usuarios(nombre_usuario, clave, nombre, apellidos, correo_elec, fec_alta, telf_contacto) VALUES (?,?,?,?,?,?,?)"; //$NON-NLS-1$
 	/**
-	 * Comprueba contra base de datos que la contrase&ntilde;a indicada se corresponda
-	 * con la del usuario administrador del sistema indicado.
+	 * Comprueba que una contrase&ntilde;a se corresponda pertenezca a un usuario.
 	 * @param psswd Contrase&ntilde;a.
-	 * @return {@code true} si la contrase&ntilde;a es del administrador, {@code false} en caso contrario.
-	 * @throws SQLException Cuando ocurre un error al comprobar los datos contra la base de datos.
+	 * @param user Usuario del que comprobar la contrase&ntilde;a
+	 * @return {@code true} si la contrase&ntilde;a es del usuario, {@code false} en caso contrario.
+	 * @throws SQLException Cuando ocurre un error al comprobar la contrase&tilde;a.
 	 */
 	public static boolean checkAdminPassword(final String psswd, final String user) throws SQLException {
 
@@ -110,21 +107,22 @@ public class UsersDAO {
 	}
 
 	/**
-	 * Obtiene un usuario por su nombre
-	 * @param usrName (String)
-	 * @return
-	 * @throws SQLException
+	 * Obtiene la informaci&oacute;n de un usuario a partir de su nombre.
+	 * @param usrName Nombre del usuario.
+	 * @return Datos del usuario.
+	 * @throws SQLException Cuando no se pueden recuperar los datos del usuario.
 	 * SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta FROM tb_usuarios  WHERE nombre_usuario = ?"
 	 */
 	public static User getUserByName(final String usrName) throws SQLException {
-		final User usr = new User();
+		User usr = null;
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_USER_BY_NAME);
 			st.setString(1, usrName);
 			final ResultSet rs = st.executeQuery();
 			if (rs.next()) {
-				usr.setId_usuario(rs.getString(1));
-				usr.setNombre_usuario(rs.getString(2));
+				usr = new User();
+				usr.setId(rs.getString(1));
+				usr.setNombreUsuario(rs.getString(2));
 				usr.setClave(rs.getString(3));
 				usr.setNombre(rs.getString(4));
 				usr.setApellidos(rs.getString(5));
@@ -133,36 +131,35 @@ public class UsersDAO {
 				}
 
 				if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
-					usr.setTelf_contacto(rs.getString(7));
+					usr.setTelfefono(rs.getString(7));
 				}
 				usr.setRol(rs.getString(8));
-				usr.setFec_alta(rs.getDate(9));
+				usr.setFechaAlta(rs.getDate(9));
 			}
 
 			st.close();
 			rs.close();
 		} catch (final Exception e) {
-			LOGGER.info("Error al acceder a la base datos: " + e //$NON-NLS-1$
-			);
+			LOGGER.log(Level.SEVERE, "Error al recuperar la informacion de un usuario", e); //$NON-NLS-1$
 			throw new SQLException(e);
 		}
 		return usr;
 	}
 	/**
-	 * Obtiene un usuario por su ID
-	 * @param idUser (String)
-	 * @return
-	 * @throws SQLException
+	 * Obtiene un usuario a partir de su identificador.
+	 * @param idUser Identificador del usuario.
+	 * @return Datos del usuario.
 	 */
-	public static User getUser(final String idUser) throws SQLException {
-		final User usr = new User();
+	public static User getUser(final String idUser) {
+		User usr = null;
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_USER_BY_ID);
 			st.setString(1, idUser);
 			final ResultSet rs = st.executeQuery();
 			if (rs.next()) {
-				usr.setId_usuario(rs.getString(1));
-				usr.setNombre_usuario(rs.getString(2));
+				usr = new User();
+				usr.setId(rs.getString(1));
+				usr.setNombreUsuario(rs.getString(2));
 				usr.setClave(rs.getString(3));
 				usr.setNombre(rs.getString(4));
 				usr.setApellidos(rs.getString(5));
@@ -170,60 +167,28 @@ public class UsersDAO {
 					usr.setCorreo_elec(rs.getString(6));
 				}
 				if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
-					usr.setTelf_contacto(rs.getString(7));
+					usr.setTelfefono(rs.getString(7));
 				}
 				usr.setRol(rs.getString(8));
-				usr.setFec_alta(rs.getDate(9));
-				usr.setUsu_defecto(String.valueOf(rs.getInt(10)));
+				usr.setFechaAlta(rs.getDate(9));
+				usr.setPorDefecto(String.valueOf(rs.getInt(10)));
 			}
 
 			st.close();
 			rs.close();
 		} catch (final Exception e) {
-			LOGGER.info("Error al acceder a la base datos: " + e //$NON-NLS-1$
-			);
-			throw new SQLException(e);
+			LOGGER.log(Level.SEVERE, "No se pudo obtener la informacion del usuario de la base de datos", e); //$NON-NLS-1$
+			usr = null;
 		}
 		return usr;
 	}
 
 	/**
-	 * Obtiene listado de todos los usuarios dados de alta en la aplicaci�n.
-	 * @return Listado de usuarios.
-	 * @throws SQLException
+	 * Obtiene una estructura JSON con el numero de usuarios.
+	 * @return Estructura JSON.
 	 */
-	public static List<User> getUsersList()  throws SQLException {
-		final List<User> usrList = new ArrayList<User>();
-		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_ALL_USERS);
-		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
-			final User usr = new User();
-			usr.setId_usuario(rs.getString(1));
-			usr.setNombre_usuario(rs.getString(2));
-			usr.setClave(rs.getString(3));
-			usr.setNombre(rs.getString(4));
-			usr.setApellidos(rs.getString(5));
-			if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
-				usr.setCorreo_elec(rs.getString(6));
-			}
-			if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
-				usr.setTelf_contacto(rs.getString(7));
-			}
-			usr.setRol(rs.getString(8));
-			usr.setFec_alta( rs.getDate(9));
-			usr.setUsu_defecto(String.valueOf(rs.getInt(10)));
-			usrList.add(usr);
-		}
-		rs.close();
-		st.close();
-
-		return usrList;
-	}
-
-
 	public static String getUsersCount() {
-		int count=0;
-
+		int count = 0;
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_ALL_USERS_COUNT);
@@ -236,7 +201,7 @@ public class UsersDAO {
 			st.close();
 		}
 		catch(final Exception e){
-			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de usuarios", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al leer los registros en la tabla de usuarios", e); //$NON-NLS-1$
 		}
 
 		final StringWriter writer = new StringWriter();
@@ -246,7 +211,7 @@ public class UsersDAO {
 	        jw.close();
 	    }
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de usuarios", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al componer la estructura JSON con el numero de usuarios", e); //$NON-NLS-1$
 		}
 
 	    return writer.toString();
@@ -267,62 +232,12 @@ public class UsersDAO {
 		final ResultSet rs = st.executeQuery();
 		while (rs.next()) {
 
-			Date date= null;
-			final Timestamp timestamp = rs.getTimestamp(9);
-			if (timestamp != null) {
-				date = new Date(timestamp.getTime());
-			}
-
-			data.add(Json.createObjectBuilder()
-					.add("id_usuario", rs.getString(1)) //$NON-NLS-1$
-					.add("nombre_usuario", rs.getString(2)) //$NON-NLS-1$
-					.add("clave", rs.getString(3)) //$NON-NLS-1$
-					.add("nombre", rs.getString(4)) //$NON-NLS-1$
-					.add("apellidos", rs.getString(5)) //$NON-NLS-1$
-					.add("correo_elec", rs.getString(6) != null && !"".equals(rs.getString(6)) ? rs.getString(6) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					.add("telf_contacto", rs.getString(7) != null && !"".equals(rs.getString(7)) ? rs.getString(7) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					.add("rol", rs.getString(8)) //$NON-NLS-1$
-					.add("fec_alta", Utils.getStringDateFormat(date != null ? date : rs.getDate(9))) //$NON-NLS-1$
-					.add("usu_defecto", rs.getString(10) !=null ? rs.getString(10) : "0") //$NON-NLS-1$ //$NON-NLS-2$
-					);
-
-		}
-		rs.close();
-		st.close();
-		jsonObj.add("UsrList", data); //$NON-NLS-1$
-		final StringWriter writer = new StringWriter();
-		try  {
-			final JsonWriter jw = Json.createWriter(writer);
-	        jw.writeObject(jsonObj.build());
-			jw.close();
-	    }
-		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de usuarios", e); //$NON-NLS-1$
-		}
-	    return writer.toString();
-	}
-
-	/**
-	 * Consulta que obtiene todos los registros de la tabla tb_usuarios paginado
-	 * @return Devuelve un String en formato JSON
-	 * @throws SQLException
-	 */
-	public static String getUsersPag(final String start, final String total) throws SQLException {
-
-		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
-		final JsonArrayBuilder data = Json.createArrayBuilder();
-
-		final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_ALL_USERS_PAG);
-		st.setInt(1,Integer.parseInt(start));
-		st.setInt(2, Integer.parseInt(total));
-		final ResultSet rs = st.executeQuery();
-		while (rs.next()) {
-
 			Date date = null;
 			final Timestamp timestamp = rs.getTimestamp(9);
 			if (timestamp != null) {
 				date = new Date(timestamp.getTime());
 			}
+
 			data.add(Json.createObjectBuilder()
 					.add("id_usuario", rs.getString(1)) //$NON-NLS-1$
 					.add("nombre_usuario", rs.getString(2)) //$NON-NLS-1$
@@ -332,7 +247,7 @@ public class UsersDAO {
 					.add("correo_elec", rs.getString(6) != null && !"".equals(rs.getString(6)) ? rs.getString(6) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					.add("telf_contacto", rs.getString(7) != null && !"".equals(rs.getString(7)) ? rs.getString(7) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					.add("rol", rs.getString(8)) //$NON-NLS-1$
-					.add("fec_alta", Utils.getStringDateFormat(date != null ? date : rs.getDate(9))) //$NON-NLS-1$
+					.add("fec_alta", date != null ? Utils.getStringDateFormat(date) : "") //$NON-NLS-1$ //$NON-NLS-2$
 					.add("usu_defecto", rs.getString(10) !=null ? rs.getString(10) : "0") //$NON-NLS-1$ //$NON-NLS-2$
 					);
 
@@ -347,7 +262,65 @@ public class UsersDAO {
 			jw.close();
 	    }
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error al leer los registros en la tabla de usuarios", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al componer la estructura JSON con el listado de usuarios", e); //$NON-NLS-1$
+		}
+	    return writer.toString();
+	}
+
+	/**
+	 * Consulta que obtiene todos los usuarios de forma paginada.
+	 * @param start Elemento por el cual empezar a la p&aacute;gina.
+	 * @param total N&uacute;mero de elementos de la p&aacute;gina.
+	 * @return Estructura JSON.
+	 */
+	public static String getUsersPag(final String start, final String total) {
+
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+
+		try {
+			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_ALL_USERS_PAG);
+			st.setInt(1,Integer.parseInt(start));
+			st.setInt(2, Integer.parseInt(total));
+			final ResultSet rs = st.executeQuery();
+			while (rs.next()) {
+
+				Date date = null;
+				final Timestamp timestamp = rs.getTimestamp(9);
+				if (timestamp != null) {
+					date = new Date(timestamp.getTime());
+				}
+				data.add(Json.createObjectBuilder()
+						.add("id_usuario", rs.getString(1)) //$NON-NLS-1$
+						.add("nombre_usuario", rs.getString(2)) //$NON-NLS-1$
+						.add("clave", rs.getString(3)) //$NON-NLS-1$
+						.add("nombre", rs.getString(4)) //$NON-NLS-1$
+						.add("apellidos", rs.getString(5)) //$NON-NLS-1$
+						.add("correo_elec", rs.getString(6) != null && !"".equals(rs.getString(6)) ? rs.getString(6) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						.add("telf_contacto", rs.getString(7) != null && !"".equals(rs.getString(7)) ? rs.getString(7) : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						.add("rol", rs.getString(8)) //$NON-NLS-1$
+						.add("fec_alta", date != null ? Utils.getStringDateFormat(date) : "") //$NON-NLS-1$ //$NON-NLS-2$
+						.add("usu_defecto", rs.getString(10) !=null ? rs.getString(10) : "0") //$NON-NLS-1$ //$NON-NLS-2$
+						);
+
+			}
+			rs.close();
+			st.close();
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "No se pudo obtener el listado paginado de usuarios de la base de datos", e); //$NON-NLS-1$
+		}
+
+		jsonObj.add("UsrList", data); //$NON-NLS-1$
+
+		final StringWriter writer = new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+			jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "Error al componer la estructura JSON con el listado paginado de usuarios", e); //$NON-NLS-1$
 		}
 	    return writer.toString();
 	}
@@ -355,10 +328,10 @@ public class UsersDAO {
 
 
 	/**
-	 * Actualiza un usuario existente
-	 * @param idUser
-	 * @param userName
-	 * @param passwd
+	 * Cambia la contrase&ntilde;a de un usuario existente.
+	 * @param idUser Identificador del usuario.
+	 * @param userName Nombre de usuario.
+	 * @param passwd Nueva contrase&ntilde;a.
 	 * @throws SQLException
 	 */
 	public static void updateUserPasswd (final String idUser, final String userName, final String passwd) throws SQLException {
@@ -371,21 +344,18 @@ public class UsersDAO {
 		LOGGER.info("Actualizamos el usuario '" + userName + "' con el ID: " + idUser); //$NON-NLS-1$ //$NON-NLS-2$
 
 		st.execute();
-
 		st.close();
 	}
 	/**
 	 * Actualiza los datos de un usuario existente
-	 * @param idUser
-	 * @param userName
-	 * @param name
-	 * @param surname
-	 * @param email
-	 * @param telf
-	 * @param role
+	 * @param idUser Identificador del usuario.
+	 * @param name Nombre de pila del usuario.
+	 * @param surname Apellidos.
+	 * @param email Correo electr&oacute;nico.
+	 * @param telf Tel&eacute;fono.
 	 * @throws SQLException
 	 */
-	public static void updateUser (final String idUser, final String name, final String surname, final String email, final String telf ) throws SQLException {
+	public static void updateUser (final String idUser, final String name, final String surname, final String email, final String telf) throws SQLException {
 		final PreparedStatement st = DbManager.prepareStatement(ST_UDATE_USER_BY_ID);
 
 		st.setString(1, name);
@@ -394,23 +364,23 @@ public class UsersDAO {
 		st.setString(4, telf);
 		st.setString(5, idUser);
 
-		LOGGER.info("Actualizamos el usuario '" + name + " "+ surname+"' con el ID: " + idUser); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		LOGGER.info("Actualizamos el usuario '" + name + " " + surname + "' con el ID: " + idUser); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		st.execute();
-
 		st.close();
 	}
 
 	/**
-	 * A�ade un nuevo usuario al sistema, no siendo necesarios insertar el id_usuario por ser calculado (autonum�rico), ni  fec_alta
-	 * ya que se calcula la fecha y tiempo actual al introducir en bbdd
-	 * @param userName
-	 * @param passwd
-	 * @throws SQLException
-	 * @throws GeneralSecurityException
-	 * INSERT INTO tb_usuarios(nombre_usuario, clave, nombre, apellidos, correo_elec, telf_contacto, rol) VALUES (?,?,?,?,?,?,?)
+	 * A&ntilde;ade un nuevo usuario al sistema.
+	 * @param userName Nombre de usuario.
+	 * @param passwd Contrase&ntilde;a.
+	 * @param name Nombre de pila del usuario.
+	 * @param surname Apellidos del usuario.
+	 * @param email Correo eletr&oacute;nico.
+	 * @param telf Tel&eacute;fono de contacto.
+	 * @throws SQLException Cuando no se puede agregar el usuario.
 	 */
-	public static void createUser(final String userName, final String passwd, final String name, final String surname,final String email, final String telf) throws SQLException, GeneralSecurityException {
+	public static void createUser(final String userName, final String passwd, final String name, final String surname, final String email, final String telf) throws SQLException {
 
 		final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_USER);
 
@@ -430,19 +400,19 @@ public class UsersDAO {
 
 	/**
 	 * Borra un usuario del sistema
-	 * @param idUser
+	 * @param idUser Identificador del usuario.
+	 * @param username Nombre del usuario.
 	 * @throws SQLException
 	 */
-	public static void removeUser(final String idUser, final String user_name) throws SQLException {
+	public static void removeUser(final String idUser, final String username) throws SQLException {
 
 
 		final PreparedStatement st = DbManager.prepareStatement(ST_REMOVE_USER);
 		st.setString(1, idUser);
 
-		LOGGER.info("Damos de baja al usuario con el ID: " + idUser+" Nombre: " + user_name); //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.info("Damos de baja al usuario con el ID: " + idUser + " Nombre: " + username); //$NON-NLS-1$ //$NON-NLS-2$
 
 		st.execute();
-
 		st.close();
 	}
 }

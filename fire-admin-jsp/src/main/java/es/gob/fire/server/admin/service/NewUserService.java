@@ -63,15 +63,10 @@ public class NewUserService extends HttpServlet {
 
 		try {
 			final MessageDigest md = MessageDigest.getInstance(SHA_2);
-			byte[] digest;
-			String clave = null;
-			//Comprobar que se ha cargado el Certificado nuevo.
-			//Obtenemos la clave codificada
-			if (params.getPassword() != null) {
-				md.update(params.getPassword().getBytes());
-				digest = md.digest();
-				clave = Base64.encode(digest);
-			}
+			// Codificamos la clave
+			md.update(params.getPassword().getBytes());
+			final byte[] digest = md.digest();
+			final String clave = Base64.encode(digest);
 
 			boolean isOk = true;
 
@@ -87,9 +82,9 @@ public class NewUserService extends HttpServlet {
 				else {
 					//Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
 					final User usr = UsersDAO.getUserByName(params.getLoginUser());
-					if(usr != null && usr.getNombre_usuario() != null && !"".equals(usr.getNombre_usuario()))//$NON-NLS-1$
+					if (usr != null && usr.getNombreUsuario() != null && !"".equals(usr.getNombreUsuario()))//$NON-NLS-1$
 					{
-						LOGGER.log(Level.SEVERE,"Se ha proporcionado un nombre de login repetido, no se puede dar de alta el usuario"); //$NON-NLS-1$
+						LOGGER.log(Level.SEVERE, "Se ha proporcionado un nombre de login repetido, no se puede dar de alta el usuario"); //$NON-NLS-1$
 						isOk = false;
 					}
 					else {
@@ -103,7 +98,6 @@ public class NewUserService extends HttpServlet {
 							isOk = false;
 						}
 					}
-
 				}
 			}
 			else if(op == 2) {	//Edicion de usuario
@@ -120,19 +114,18 @@ public class NewUserService extends HttpServlet {
 								 params.getUserSurname(), params.getUserEMail(),
 								 params.getUserTelf());
 					} catch (final Exception e) {
-						LOGGER.log(Level.SEVERE, "Error en la edici�n del usuario", e); //$NON-NLS-1$
+						LOGGER.log(Level.SEVERE, "Error en la edicion del usuario", e); //$NON-NLS-1$
 						isOk = false;
 					}
 				}
-
 			}
 			else if(op == 3 && params.getLoginUser() != null ){
 				// Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
 				final User usr = UsersDAO.getUserByName(params.getLoginUser());
 				resp.setContentType("text/html");//$NON-NLS-1$
-				if (usr != null && usr.getId_usuario() != null && !"".equals(usr.getId_usuario())) { //$NON-NLS-1$
-					final String usrLogin = "El usuario con login, " + params.getLoginUser() + //$NON-NLS-1$
-							", ya existe en el sistema."; //$NON-NLS-1$
+				if (usr != null && usr.getId() != null && !"".equals(usr.getId())) { //$NON-NLS-1$
+					final String usrLogin = "El usuario con login '" + params.getLoginUser() + //$NON-NLS-1$
+							"' ya existe en el sistema."; //$NON-NLS-1$
 					resp.getWriter().write(usrLogin);
 				}
 				else {
@@ -158,15 +151,10 @@ public class NewUserService extends HttpServlet {
 
 	}
 
-
-
-
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doPost(req, resp);
 	}
-
-
 
 	/**
 	 * Procedimiento que obtiene los par&aacute;metros enviados al servicio.
@@ -203,9 +191,6 @@ public class NewUserService extends HttpServlet {
 		return params;
 	}
 
-
-	/*GETTER Y SETTER*/
-
 	static class Parameters {
 
 		private String idUser = null;
@@ -233,7 +218,7 @@ public class NewUserService extends HttpServlet {
 		}
 		/**
 		 * Obtiene la clave (Password)
-		 * @return
+		 * @return Clave.
 		 */
 		final String getPassword() {
 			return this.password;
@@ -260,21 +245,21 @@ public class NewUserService extends HttpServlet {
 			this.userRole = userRole;
 		}
 		/**
-		 * Obtiene el nombre del usuario
-		 * @return
+		 * Obtiene el nombre de pila del usuario.
+		 * @return Nombre de pila.
 		 */
 		final String getUserName() {
 			return this.userName;
 		}
 		/**
-		 * Establece el nombre del usuario
+		 * Establece el nombre de pila del usuario.
 		 */
 		final void setUserName(final String userName) {
 			this.userName = userName;
 		}
 		/**
 		 * Obtiene los apellidos del usuario
-		 * @return
+		 * @return Apellidos.
 		 */
 		final String getUserSurname() {
 			return this.userSurname;
@@ -286,40 +271,40 @@ public class NewUserService extends HttpServlet {
 			this.userSurname = userSurname;
 		}
 		/**
-		 * Obtiene los email del usuario
-		 * @return
+		 * Obtiene la direcci&oacute;n de correo electr&oacute;nico del usuario.
+		 * @return Direcci&oacute;n de correo electr&oacute;nico.
 		 */
 		final String getUserEMail() {
 			return this.userEMail;
 		}
 		/**
-		 * Establece los email del usuario
+		 * Establece la direcci&oacute;n de correo electr&oacute;nico del usuario.
 		 */
 		final void setUserEMail(final String userEMail) {
 			this.userEMail = userEMail;
 		}
 		/**
-		 * Obtiene el tel&eacute;fono del usuario
-		 * @return
+		 * Obtiene el tel&eacute;fono del usuario.
+		 * @return Tel&eacute;fono.
 		 */
 		final String getUserTelf() {
 			return this.userTelf;
 		}
 		/**
-		 * Establece el tel&eacute;fono del usuario
+		 * Establece el tel&eacute;fono del usuario.
 		 */
 		final void setUserTelf(final String userTelf) {
 			this.userTelf = userTelf;
 		}
 		/**
 		 * Obtiene el ID  del usuario
-		 * @return
+		 * @return Identificado del usuario.
 		 */
 		final String getIdUser() {
 			return this.idUser;
 		}
 		/**
-		 * Establece el ID  del usuario
+		 * Establece el ID  del usuario.
 		 */
 		final void setIdUser(final String idUser) {
 			this.idUser = idUser;

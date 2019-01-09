@@ -61,7 +61,7 @@ public class LogTailServiceManager {
 		byte[] result = null;
 		try {
 			// Obtenemos la ruta completa al fichero log
-			final String path = ConfigManager.getInstance().getLogsDir().getCanonicalPath().toString().concat(File.separator).concat(logFileName);
+			final String path = new File(ConfigManager.getInstance().getLogsDir(), logFileName).getCanonicalPath();
 
 			final LogTail lTail = new LogTail(info, path);
 			final StringBuilder resTail = lTail.getLogTail(iNumLines);

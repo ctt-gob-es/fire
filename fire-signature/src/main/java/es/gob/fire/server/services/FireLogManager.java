@@ -27,15 +27,17 @@ public class FireLogManager {
 	 */
 	static void configureLogs() throws IOException {
 
-		// Nos aseguramos de que si ya se encuentra instalado el manejador de log en fichero, se desintale antes
-		// de volverlo a instalar
-		cleanLogHandlers();
-
 		final File logsDir = ConfigManager.getLogsDir() != null ?
 				new File (ConfigManager.getLogsDir()) :
 				null;
 
+		// Si se ha configurado un directorio de log, sacamos los logs a un fichero del mismo
 		if (logsDir != null && logsDir.isDirectory() && logsDir.canWrite()) {
+
+			// Nos aseguramos de que si ya se encontraba instalado el manejador de log en fichero, se desintale antes
+			// de volverlo a instalar
+			cleanLogHandlers();
+
 			final PeriodicRotatingFileHandler handler = new PeriodicRotatingFileHandler(
 					new File(logsDir, LOG_FILENAME).getAbsolutePath(), true);
 			handler.setAutoFlush(true);

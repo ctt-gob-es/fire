@@ -27,7 +27,7 @@
 
 	String id = request.getParameter("id-app");//$NON-NLS-1$
 	final int op = Integer.parseInt(request.getParameter("op"));//$NON-NLS-1$
-	final List<CertificateFire> lCert = CertificatesDAO.selectCertificateALL();
+	final List<CertificateFire> lCert = CertificatesDAO.selectCertificateAll();
 	CertificateFire cert=null;
 	// op = 0 -> Solo lectura, no se puede modificar nada
 	// op = 1 -> nueva aplicacion
@@ -36,7 +36,6 @@
 	String subTitle = ""; //$NON-NLS-1$
 	String certDataPrincipal = "";//$NON-NLS-1$
 	String certDataBkup = "";//$NON-NLS-1$
-	Application app;
 	switch (op) {
 		case 0:
 			title = "Ver la aplicaci&oacute;n " + id;//$NON-NLS-1$
@@ -54,29 +53,34 @@
 			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 			return;
 	}
-	app = id != null ? AplicationsDAO.selectApplication(id): new Application();
-		
-	if(app.getFk_certificado() != null && !"".equals(app.getFk_certificado())){//$NON-NLS-1$
+	
+	Application app = null;
+	if (id != null) {
+		app = AplicationsDAO.selectApplication(id);	
+	}
+	if (app == null) {
+		app = new Application();	
+	}
+
+	if (app.getFk_certificado() != null && !"".equals(app.getFk_certificado())) { //$NON-NLS-1$
 		cert=CertificatesDAO.selectCertificateByID(app.getFk_certificado());
-		if(cert.getCertX509_principal() != null){
-			final String[] datCertificate=cert.getCertX509_principal().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
+		if (cert.getX509Principal() != null){
+			final String[] datCertificate=cert.getX509Principal().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 			for (int i = 0; i < datCertificate.length; i++){
-				certDataPrincipal = certDataPrincipal.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
+				certDataPrincipal += datCertificate[i] + "</br>";//$NON-NLS-1$
 			}
-			//fecha caducidad
-			Date fecha= new Date();
-			fecha=cert.getCertX509_principal().getNotAfter();		
-			certDataPrincipal = certDataPrincipal.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));//$NON-NLS-1$
+			// Fecha caducidad
+			Date fecha = cert.getX509Principal().getNotAfter();		
+			certDataPrincipal += "Fecha de Caducidad = " + Utils.getStringDateFormat(fecha);//$NON-NLS-1$
 		}
-		if(cert.getCertX509_backup() != null){
-			final String[] datCertificate = cert.getCertX509_backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
+		if (cert.getX509Backup() != null) {
+			final String[] datCertificate = cert.getX509Backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 			for (int i = 0; i < datCertificate.length; i++){
-				certDataBkup = certDataBkup.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
+				certDataBkup += datCertificate[i] + "</br>"; //$NON-NLS-1$
 			}
-			//fecha caducidad
-			Date fecha = new Date();
-			fecha = cert.getCertX509_backup().getNotAfter();		
-			certDataBkup = certDataBkup.concat("Fecha de Caducidad = ").concat(Utils.getStringDateFormat(fecha));//$NON-NLS-1$
+			// Fecha caducidad
+			Date fecha = cert.getX509Backup().getNotAfter();		
+			certDataBkup += "Fecha de Caducidad = " + Utils.getStringDateFormat(fecha);//$NON-NLS-1$
 		}
 	}	
 		
@@ -184,16 +188,16 @@
 							<option value="0"></option> 			
 						<% for (CertificateFire cer:lCert){ 
 							if(op == 1){%>													
-							<option value="<%= cer.getId_certificado()%>"><%= cer.getNombre_cert() %></option>  
+							<option value="<%= cer.getId()%>"><%= cer.getNombre() %></option>  
 							<%}
 							else{%>
-							<option value="<%= cer.getId_certificado()%>" <%= cert.getId_certificado().equals(cer.getId_certificado()) ? "selected='selected'" : "" %>><%= cer.getNombre_cert() %></option>  
+							<option value="<%= cer.getId()%>" <%= cert.getId().equals(cer.getId()) ? "selected='selected'" : "" %>><%= cer.getNombre() %></option>  
 							<% }
 						} %>			    		  			   
 				  		</select>				  					
 					<%}else{%>						
 						<input id="id-certificate" class="edit-txt" type="text" name="id-certificate" style="width: 80%;margin-top:3px;" 
-						value="<%= cert.getNombre_cert()%>"/>																								
+						value="<%= cert.getNombre()%>"/>																								
 					<%} %>			
 					</div>
 			

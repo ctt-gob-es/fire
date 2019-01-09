@@ -21,7 +21,7 @@
 	try {
 		DbManager.initialize();
 	}
-	catch (AdminFilesNotFoundException e){
+	catch (AdminFilesNotFoundException e) {
 		response.sendRedirect("../Error/FileNotFound.jsp?file=" + e.getFileName()); //$NON-NLS-1$
 		return;
 	}
@@ -55,7 +55,7 @@
 	String result = request.getParameter("r"); //$NON-NLS-1$
 	String entity = request.getParameter("ent"); //$NON-NLS-1$
 	String msg = request.getParameter("msg");//$NON-NLS-1$
-	MessageResult mr = MessageResultManager.analizeResponse(op, result,entity);
+	MessageResult mr = MessageResultManager.analizeResponse(op, result, entity);
 		
 	
 %>
@@ -80,7 +80,7 @@
 	<div id="menu-bar"  style="display: text-align:right;">
 	<input class="menu-btn" name="add-usr-btn" type="button" value="Alta certificado" title="Crear una nueva aplicaci&oacute;n" onclick="location.href='NewCertificate.jsp?op=1'"/>
 	</div>
-	<% if(errorText != null) { %>
+	<% if (errorText != null) { %>
 		<p id="error-txt"><%= errorText %></p> 
 	<%
 		errorText = null;
@@ -92,11 +92,11 @@
 			</p>
 		</div>
 		
-			<% if(mr != null) { %>
+			<% if (mr != null) { %>
 				<p id="<%=
 						mr.isOk() ? "success-txt" : "error-txt"  //$NON-NLS-1$ //$NON-NLS-2$
 						%>">
-					<%= msg != null && !msg.isEmpty() ? mr.getMessage().concat(msg) : mr.getMessage() %>
+					<%= msg != null && !msg.isEmpty() ? mr.getMessage() + msg : mr.getMessage() %>
 				</p>
 			<% } %>
 		<div id="data" style="display: block-inline; text-align:center;">
