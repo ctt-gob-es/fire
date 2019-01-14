@@ -22,9 +22,8 @@ import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.server.services.statistics.TransactionLogger;
-import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
+import es.gob.fire.server.services.statistics.TransactionRecorder;
 
 /**
  * Manejador que gestiona las peticiones de creaci&oacute;n de un lote de firma, al que posteriormente
@@ -33,8 +32,9 @@ import es.gob.fire.signature.ConfigManager;
 public class CreateBatchManager {
 
 	private static final Logger LOGGER = Logger.getLogger(CreateBatchManager.class.getName());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
+
 	/**
 	 * Create un lote de firma.
 	 * @param request Petici&oacute;n para la creaci&oacute;n del lote.
@@ -42,7 +42,8 @@ public class CreateBatchManager {
 	 * @param response Respuesta de la creaci&oacute;n del lote.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
-	public static void createBatch(final HttpServletRequest request, final RequestParameters params, final HttpServletResponse response)
+	public static void createBatch(final HttpServletRequest request, final String appName,
+			final RequestParameters params, final HttpServletResponse response)
 		throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
@@ -56,37 +57,38 @@ public class CreateBatchManager {
 		final String upgrade	= params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
 		String extraParamsB64	= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId);
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
 		if (subjectId == null || subjectId.isEmpty()) {
-			LOGGER.warning("No se ha proporcionado el identificador del usuario que crea el lote"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que crea el lote")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha proporcionado el identificador del usuario que crea el lote"); //$NON-NLS-1$
 			return;
 		}
 
 		if (algorithm == null || algorithm.isEmpty()) {
-			LOGGER.warning("No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se ha proporcionado el algoritmo de firma")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
 			return;
 		}
 
 		if (cop == null || cop.isEmpty()) {
-			LOGGER.warning("No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se ha indicado la operacion de firma a realizar")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
 			return;
 		}
 
 		if (format == null || format.isEmpty()) {
-			LOGGER.warning("No se ha indicado el formato de firma"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se ha indicado el formato de firma")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha indicado el formato de firma"); //$NON-NLS-1$
 			return;
 		}
 
-		LOGGER.info(String.format("App %1s: TrId null: Peticion bien formada", appId)); //$NON-NLS-1$
+		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
 
 		// Si se especificaron filtros de certificados para su uso con el
 		// Cliente @firma, se habran indicado junto a las propiedades por defecto
@@ -105,15 +107,15 @@ public class CreateBatchManager {
 				connConfig = new TransactionConfig(configB64);
 			}
 			catch(final Exception e) {
-				LOGGER.warning("Se proporcionaron datos malformados para la conexion con el backend"); //$NON-NLS-1$
+				LOGGER.warning(logF.format("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-						"Se proporcionaron datos malformados para la conexion con el backend"); //$NON-NLS-1$
+						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma"); //$NON-NLS-1$
 				return;
 			}
 		}
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning("No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
@@ -130,19 +132,21 @@ public class CreateBatchManager {
         	provs = ProviderManager.getProviderNames();
         }
 
-		final String appName = connConfig.getAppName();
+		final String appTitle = connConfig.getAppTitle();
 		final String docManagerName = connConfig.getDocumentManager();
 
         // Creamos la transaccion
         final FireSession session = SessionCollector.createFireSession(request.getSession());
         final String transactionId = session.getTransactionId();
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Iniciada transaccion de tipo LOTE", appId, transactionId)); //$NON-NLS-1$
+        logF.setTransactionId(transactionId);
+		LOGGER.info(logF.format("Iniciada transaccion de tipo LOTE")); //$NON-NLS-1$
 
         // Guardamos los datos recibidos en la sesion
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ID, appId);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appName);
+        session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_TITLE, appTitle);
         session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig.cleanConfig());
         session.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
@@ -162,25 +166,27 @@ public class CreateBatchManager {
         	docManager = FIReDocumentManagerFactory.newDocumentManager(docManagerName);
         }
         catch (final IllegalArgumentException e) {
-        	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
-        	TRANSLOGGER.log(session, false);
+        	LOGGER.log(Level.SEVERE, logF.format("No existe el gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
+        	SIGNLOGGER.register(session, false, null);
+        	TRANSLOGGER.register(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No existe el gestor de documentos"); //$NON-NLS-1$
         	return;
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
-        	TRANSLOGGER.log(session, false);
+        	LOGGER.log(Level.SEVERE, logF.format("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
+        	SIGNLOGGER.register(session, false, null);
+        	TRANSLOGGER.register(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cargar el gestor de documentos"); //$NON-NLS-1$
         	return;
         }
+
+        LOGGER.info(logF.format("La transaccion usara el DocumentManager " + docManager.getClass().getName())); //$NON-NLS-1$
 
         session.setAttribute(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER, docManager);
 
         SessionCollector.commit(session);
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve el identificador de sesion a la aplicacion", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.info(logF.format("Se devuelve el identificador de sesion a la aplicacion")); //$NON-NLS-1$
 
         sendResult(response, new CreateBatchResult(transactionId));
 	}

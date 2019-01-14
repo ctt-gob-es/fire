@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-statistics-common</artifactId>
-	<version>2.3-SNAPSHOT</version>
+	<version>2.4-SNAPSHOT</version>
 	<name>fire-statistics-common</name>
 		
 	<properties>
@@ -14,12 +14,19 @@
 	</properties>
 
 	<dependencies>
+
 		<dependency>
-			<groupId>es.gob.afirma</groupId>
-			<artifactId>afirma-core</artifactId>
-			<version>1.6</version>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-signature-decipher</artifactId>
+			<version>2.4-SNAPSHOT</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-logs-common</artifactId>
+			<version>2.4-SNAPSHOT</version>
+		</dependency>
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -28,24 +35,10 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-signature-common-libraries</artifactId>
-			<version>2.3-SNAPSHOT</version>
-		</dependency>
-	
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-logs-common</artifactId>
-			<version>2.3-SNAPSHOT</version>
-		</dependency>
-		
-	
-		
-		<dependency>
     		<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.36</version>
-<!-- 			<scope>provided</scope> -->
+			<scope>provided</scope>
 		</dependency>
 		
 		<dependency>

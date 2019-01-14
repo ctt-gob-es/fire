@@ -33,7 +33,6 @@ import es.gob.fire.services.statistics.entity.TransactionCube;
 
 public class FireStatistics {
 
-//	static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	static Logger LOGGER = Logger.getLogger(FireStatistics.class.getName());
 	private String startTime = null;
 	private static final long SEG_DIA = 24L * 60L *60L;
@@ -261,7 +260,7 @@ public class FireStatistics {
 			  for (int i = 0; i < listFiles.length; i++) {
 				  final int totalReg = countFileReg(listFiles[i]);
 				  result[i] = prepareStatisticDB(listFiles[i],totalReg);
-				  //TODO ojo revisar esta funcion ya que ahora sólo cargaria un fichero de transaction en caso de haber varios ficheros de transactions y signature.
+				  //TODO ojo revisar esta funcion ya que ahora solo cargaria un fichero de transaction en caso de haber varios ficheros de transactions y signature.
 				  if(!hashSign.isEmpty() && !hashTrans.isEmpty() && !hashAppSize.isEmpty()) {
 					  insertStatisticDB();
 					  hashSign.clear();
@@ -490,8 +489,8 @@ public class FireStatistics {
 										hashTrans.put(trans.getId_transaccion(), trans);
 									}
 								}
-								//Se actualiza el nombre de la aplicación en el mapa hash que tiene los tamannos de las transacciones
-								// ya que antes de esto el valor del nombre de la aplicación en el objeto ApplicationSize es nulo.
+								//Se actualiza el nombre de la aplicacion en el mapa hash que tiene los tamannos de las transacciones
+								// ya que antes de esto el valor del nombre de la aplicacion en el objeto ApplicationSize es nulo.
 								if(hashAppSize.get(trans.getId_transaccion()) != null) {
 									final ApplicationSize appSize = hashAppSize.get(trans.getId_transaccion());
 									appSize.setApplication(trans.getAplicacion());
@@ -527,7 +526,7 @@ public class FireStatistics {
 		 for (final Map.Entry<Integer, SignatureCube> objSign : hashSign.entrySet()) {
 			 final SignatureCube sign = objSign.getValue();
 			 if(sign != null) {
-				 //Se asigna el nombre de la aplicación a la firma antes de insertar el dato en la tabla t_firmas
+				 //Se asigna el nombre de la aplicacion a la firma antes de insertar el dato en la tabla t_firmas
 				 final ApplicationSize appSize = hashAppSize.get(sign.getId_transaccion());
 				 sign.setAplicacion(appSize.getApplication());
 				 regInserted = regInserted +  SignaturesDAO.insertSignature(sign);

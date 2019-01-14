@@ -49,9 +49,7 @@ public class Utils {
      * @return Cadena de texto con la fecha.
      */
     public static String getStringDateFormat(final Date date) {
-
     	return DateFormat.getInstance().format(date);
-
     }
 
 }

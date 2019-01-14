@@ -28,6 +28,8 @@ import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 
 final class SingleSignPostProcessor {
 
+	private static final Logger LOGGER = Logger.getLogger(SingleSignPostProcessor.class.getName());
+
 	private SingleSignPostProcessor() {
 		// No instanciable
 	}
@@ -76,7 +78,7 @@ final class SingleSignPostProcessor {
 			extraParams = ExtraParamsProcessor.expandProperties(sSign.getExtraParams(), null, sSign.getSignFormat().name());
 		}
 		catch (final IncompatiblePolicyException e) {
-			Logger.getLogger("es.gob.afirma").log( //$NON-NLS-1$
+			LOGGER.log(
 					Level.WARNING, "No se ha podido expandir la politica de firma. Se realizara una firma basica: " + e, e); //$NON-NLS-1$
 			extraParams = sSign.getExtraParams();
 		}

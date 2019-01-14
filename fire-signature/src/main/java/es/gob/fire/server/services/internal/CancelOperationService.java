@@ -53,7 +53,7 @@ public class CancelOperationService extends HttpServlet {
 		final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			SessionCollector.removeSession(session);
-			LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
+			LOGGER.warning("No se proporcionaron datos para la conexion con el proveedor de firma"); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
 			return;
 		}

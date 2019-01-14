@@ -15,7 +15,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.decipher.PropertyDecipher;
 
 /**
@@ -31,11 +30,6 @@ public class ConfigManager {
 
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 
-	private static final String PROP_ANALYTICS_ID = "google.trackingId"; //$NON-NLS-1$
-
-	private static final String PROP_TEMP_DIR = "temp.dir"; //$NON-NLS-1$
-
-//	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
 	private static final String PROP_CHECK_APPLICATION = "security.checkApplication"; //$NON-NLS-1$
 

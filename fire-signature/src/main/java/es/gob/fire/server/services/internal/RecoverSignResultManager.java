@@ -18,8 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
+import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
 
 
@@ -29,10 +29,9 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class RecoverSignResultManager {
 
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private static final Logger LOGGER = Logger.getLogger(RecoverSignResultManager.class.getName());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 
 	/**
 	 * Finaliza un proceso de firma y devuelve el resultado del mismo.
@@ -48,19 +47,21 @@ public class RecoverSignResultManager {
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
         if (session == null) {
-    		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
+    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
     		return;
         }
@@ -75,10 +76,10 @@ public class RecoverSignResultManager {
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
         	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
-        	SIGNLOGGER.log(session, false, null);
-        	TRANSLOGGER.log(session, false);
+        	SIGNLOGGER.register(session, false, null);
+        	TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
-        	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + errMessage); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
         	sendResult(
         			response,
         			new TransactionResult(
@@ -89,27 +90,29 @@ public class RecoverSignResultManager {
         }
 
         // Recuperamos el resultado de la firma
-		LOGGER.info(String.format("App %1s: TrId %2s: Se carga la firma resultante", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.info(logF.format("Se carga el resultado de la operacion del almacen temporal")); //$NON-NLS-1$
         byte[] signResult;
         try {
         	signResult = TempFilesHelper.retrieveAndDeleteTempData(transactionId);
 
         }
         catch (final Exception e) {
-        	LOGGER.warning("No se encuentra la firma generada: " + e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
-        	TRANSLOGGER.log(session, false);
+        	LOGGER.warning(logF.format("No se encuentra el resultado de la operacion: " + e)); //$NON-NLS-1$
+        	SIGNLOGGER.register(session, false, null);
+        	TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "Ha caducado la sesion"); //$NON-NLS-1$
         	return;
         }
+
         // Se registra resultado de operacion firma
-        SIGNLOGGER.log(session, true, null);
-        TRANSLOGGER.log(session, true);
+        SIGNLOGGER.register(session, true, null);
+        TRANSLOGGER.register(session, true);
+
         // Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
         SessionCollector.removeSession(session);
 
-        LOGGER.info(String.format("App %1s: TrId %2s: Se devuelve la firma", appId, transactionId)); //$NON-NLS-1$
+        LOGGER.info(logF.format("Se devuelve el resultado de la operacion")); //$NON-NLS-1$
 
         // Enviamos la firma electronica como resultado
         sendResult(response, signResult);

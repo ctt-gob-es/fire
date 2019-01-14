@@ -607,7 +607,8 @@
   */
  function download(){
 	  
-	 var url = "../LogAdminService?op=10&fname=" + file + "&reset=yes";
+	 var url = "../LogAdminService?op=10&fname=" + file;
+
 	 displayProgressBar(1);	
 	 var xhr = new XMLHttpRequest();
 	 xhr.open("POST", url, true);

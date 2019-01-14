@@ -20,8 +20,6 @@ public final class Upgrade {
 
 	private static PlatformWsHelper defaultConn = null;
 
-	private static String upgradeResult = null;
-
     /**
      * Constructor privado para no permir la instanciaci&oacute;n
      */
@@ -38,7 +36,7 @@ public final class Upgrade {
      *            Formato de actualizaci&oacute;n.
      * @param afirmaAppName
      *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
-     * @return Firma actualizada.
+     * @return Resultado de la actualizaci&oacute;n de la firma.
      * @throws IOException
      *             Si hay problemas en los tratamientos de datos o lectura de
      *             opciones de configuraci&oacute;n.
@@ -50,7 +48,7 @@ public final class Upgrade {
      * @throws ConfigFileNotFoundException
      * 			   Cuando no se puede cargar el fichero de configuraci&oacute;n.
      */
-    public static byte[] signUpgradeCreate(final byte[] data,
+    public static UpgradeResult signUpgradeCreate(final byte[] data,
             final UpgradeTarget format, final String afirmaAppName)
             throws IOException, PlatformWsException, UpgradeResponseException, ConfigFileNotFoundException {
 
@@ -72,7 +70,7 @@ public final class Upgrade {
      *            Formato de actualizaci&oacute;n.
      * @param afirmaAppName
      *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
-     * @return Firma actualizada.
+     * @return Resultado de la actualizaci&oacute;n de la firma.
      * @throws IOException
      *             Si hay problemas en los tratamientos de datos o lectura de
      *             opciones de configuraci&oacute;n.
@@ -84,7 +82,7 @@ public final class Upgrade {
      * @throws ConfigFileNotFoundException
      * 			   Cuando no se puede cargar el fichero de configuraci&oacute;n.
      */
-    public static byte[] signUpgradeCreate(final PlatformWsHelper conn, final byte[] data,
+    public static UpgradeResult signUpgradeCreate(final PlatformWsHelper conn, final byte[] data,
             final UpgradeTarget format, final String afirmaAppName)
             throws IOException, PlatformWsException, UpgradeResponseException, ConfigFileNotFoundException {
 
@@ -105,9 +103,9 @@ public final class Upgrade {
                 PlatformWsHelper.SERVICE_SIGNUPGRADE);
 
         // Analisis de la respuesta
-        final UpgradeResponse vr;
+        final UpgradeAfirmaResponse vr;
         try {
-            vr = new UpgradeResponse(response);
+            vr = new UpgradeAfirmaResponse(response);
         } catch (final Exception e) {
             throw new PlatformWsException(
                     "Error analizando la respuesta de la Plataforma @firma: " + e, e); //$NON-NLS-1$
@@ -121,22 +119,13 @@ public final class Upgrade {
 
         // Comprobamos que la actualizacion haya finalizado correctamente y que el formato
         // actualizado sea el que se habia pedido
-        if (!format.equivalent(vr.getSignatureForm())){
+        if (!format.equivalent(vr.getSignatureForm())) {
         	throw new UpgradeResponseException(vr.getMajorCode(),
         			vr.getMinorCode(), "No se ha actualizado al formato solicitado. Formato recibido: " + vr.getSignatureForm()); //$NON-NLS-1$
         }
-        setUpgradeResult(vr.getSignatureForm());
-        return vr.getUpgradedSignature();
+
+        return new UpgradeResult(
+        		vr.getUpgradedSignature(),
+        		vr.getSignatureForm().substring(vr.getSignatureForm().lastIndexOf(':')));
     }
-
-	public final static String getUpgradeResult() {
-		return Upgrade.upgradeResult;
-	}
-
-	private static final void setUpgradeResult(final String upgradeResult) {
-		Upgrade.upgradeResult = upgradeResult;
-	}
-
-
-
 }

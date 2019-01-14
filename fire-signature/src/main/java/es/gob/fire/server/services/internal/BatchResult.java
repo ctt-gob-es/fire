@@ -244,35 +244,16 @@ public class BatchResult implements Serializable {
 
 		// Construimos la respuesta
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final JsonWriter json = Json.createWriter(baos);
+		try (final JsonWriter json = Json.createWriter(baos);) {
 
-		final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-		jsonBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
-		jsonBuilder.add(JSON_ATTR_BATCH_RESULT, resultBuilder);
+			final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+			jsonBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
+			jsonBuilder.add(JSON_ATTR_BATCH_RESULT, resultBuilder);
 
-		json.writeObject(jsonBuilder.build());
-		json.close();
+			json.writeObject(jsonBuilder.build());
+		}
 
 		return baos.toByteArray();
-
-
-//		final StringBuilder buffer = new StringBuilder();
-//		buffer.append("{\"batch\":["); //$NON-NLS-1$
-//		final Iterator<String> keys = this.results.keySet().iterator();
-//		while (keys.hasNext()) {
-//			final String id = keys.next();
-//			final BatchDocumentReference result = this.results.get(id);
-//			buffer.append("{\"id\": \"").append(id).append("\"") //$NON-NLS-1$ //$NON-NLS-2$
-//			.append(", \"ok\": \"").append(result.isSigned()).append("\"") //$NON-NLS-1$ //$NON-NLS-2$
-//			.append(", \"dt\": \"").append(result.getDetails() != null ? result.getDetails() : "").append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//			buffer.append("}"); //$NON-NLS-1$
-//			if (keys.hasNext()) {
-//				buffer.append(","); //$NON-NLS-1$
-//			}
-//		}
-//		buffer.append("]}"); //$NON-NLS-1$
-//
-//		return buffer.toString();
 	}
 
 	@Override

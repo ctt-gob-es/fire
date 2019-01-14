@@ -228,10 +228,20 @@ public class FireSession implements Serializable {
 	 */
 	public void invalidate() {
 		if (this.ssData != null) {
-			this.ssData.clear();
+			try {
+				this.ssData.clear();
+			}
+			catch (final Exception e) {
+				// No hacemos nada
+			}
 		}
 		if (this.httpSession != null) {
-			this.httpSession.removeAttribute(this.transactionId);
+			try {
+				this.httpSession.removeAttribute(this.transactionId);
+			}
+			catch (final Exception e) {
+				// La sesion fue previamente invalidada. No hacemos nada
+			}
 		}
 	}
 }

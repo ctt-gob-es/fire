@@ -39,16 +39,16 @@ public class AplicationsDAO {
 
 	/** Comprueba si una aplicaci&oacute;n est&aacute; habilitada en el sistema.
 	 * @param appId Identificador de la aplicaci&oacute;n.
-	 * @return {@code true} si la applicaci&oacute;n est&aacute; dada de alta,
-	 * {@code false} en caso contrario.
+	 * @return Resultado de la comprobaci&oacute;n.
 	 * @throws SQLException Cuando no se puede realizar la comprobaci&oacute;n.
 	 * @throws DBConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
 	 */
-	public static boolean checkApplicationId(final String appId) throws SQLException, DBConnectionException {
+	public static ApplicationChecking checkApplicationId(final String appId) throws SQLException, DBConnectionException {
 
 		// si no hay cadena de conexion comprobamos del fichero de configuracion.
 		if (!DbManager.isConfigured()) {
-			return ConfigManager.getAppId().equals(appId);
+			final boolean valid = ConfigManager.getAppId().equals(appId);
+			return new ApplicationChecking(appId, appId, valid);
 		}
 
 		// Comprobamos en BD
@@ -58,20 +58,23 @@ public class AplicationsDAO {
 
 		if (!st.execute()) {
 			st.close();
-			LOGGER.warning("No existe ninguna aplicaci&oacute;n dada de alta con el ID: " + appId); //$NON-NLS-1$
-			return false;
+			LOGGER.fine("No existe ninguna aplicacion dada de alta con el ID: " + appId); //$NON-NLS-1$
+			return new ApplicationChecking(appId, null, false);
 		}
 
 		final ResultSet rs = st.getResultSet();
 
-		boolean result;
+		ApplicationChecking result;
 		if (rs.next()) {
-			LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + rs.getString(1)); //$NON-NLS-1$
-			result = true;
+			LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + appId); //$NON-NLS-1$
+			result = new ApplicationChecking(appId, rs.getString(1), true);
+
+
+			System.out.println(" ================== RECIBIDO NOMBRE DE LA APLICACION");
 		}
 		else {
-			LOGGER.warning("No se ha podido leer la aplicacion dada de alta en el sistema con el ID: " + appId); //$NON-NLS-1$
-			result = false;
+			LOGGER.fine("No se ha podido leer la aplicacion dada de alta en el sistema con el ID: " + appId); //$NON-NLS-1$
+			result =  new ApplicationChecking(appId, null, false);
 		}
 
 		rs.close();
@@ -117,7 +120,7 @@ public class AplicationsDAO {
 
 		if (!st.execute()) {
 			st.close();
-			LOGGER.warning("No existe ningun certificado con la huella: " + thumb); //$NON-NLS-1$
+			LOGGER.fine("No existe ningun certificado con la huella: " + thumb); //$NON-NLS-1$
 			return false;
 		}
 
@@ -125,7 +128,7 @@ public class AplicationsDAO {
 
 		boolean result;
 		if (!rs.next()) {
-			LOGGER.warning("No se ha podido leer la huella del certificado: " + thumb); //$NON-NLS-1$
+			LOGGER.fine("No se ha podido leer la huella del certificado: " + thumb); //$NON-NLS-1$
 			result = false;
 		}
 		else {

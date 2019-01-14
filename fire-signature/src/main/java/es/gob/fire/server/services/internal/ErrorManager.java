@@ -7,9 +7,9 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import es.gob.fire.server.services.FIReServiceOperation;
-import es.gob.fire.server.services.statistics.Operations;
-import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.server.services.statistics.TransactionType;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
+import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.services.statistics.config.ConfigFileLoader;
 import es.gob.fire.services.statistics.config.ConfigManager;
 /**
@@ -19,10 +19,10 @@ import es.gob.fire.services.statistics.config.ConfigManager;
  */
 public class ErrorManager {
 
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private static final Logger LOGGER = Logger.getLogger(ErrorManager.class.getName());
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+
 	private static final String ERR_FILE = "errors_es_ES.messages"; //$NON-NLS-1$
 
 	private static final String PARAM_USER = "PARAM_USER"; //$NON-NLS-1$
@@ -87,22 +87,21 @@ public class ErrorManager {
 
 		// Si se va a volver a la aplicacion, eliminamos los datos de sesion innecesarios
 		if (returnToApp) {
-			//Se registra en log de estadisticas que la transaccion ha terminado erroneamente.
-			TRANSLOGGER.log(session, false);
-			//Comprobar el tipo de operacion si es simple o lote.
-			 // Obtenemos la operacion (SIGN o BATCH)
-	        final FIReServiceOperation fsop = FIReServiceOperation.parse(session.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
-			final Operations op = Operations.parse(fsop);
-			if(op.getId() != 1) { // Operacion por Lote
+			// Se registra en log de estadisticas que la transaccion ha terminado erroneamente.
+			TRANSLOGGER.register(session, false);
+			// Comprobar el tipo de operacion si es simple o lote  (SIGN o BATCH)
+			final FIReServiceOperation fsop = FIReServiceOperation.parse(session.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
+			final TransactionType op = TransactionType.valueOf(fsop);
+			if (op.getId() != 1) { // Operacion por Lote
 				final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
- 				final Iterator<String> it = batchResult.iterator();
- 				while (it.hasNext()) {
- 					final String docId = it.next();
- 					SIGNLOGGER.log(session, false, docId);
- 				}
+				final Iterator<String> it = batchResult.iterator();
+				while (it.hasNext()) {
+					final String docId = it.next();
+					SIGNLOGGER.register(session, false, docId);
+				}
 			}
-			else {//Operacion Simple
-				SIGNLOGGER.log(session, false, null);
+			else { // Operacion Simple
+				SIGNLOGGER.register(session, false, null);
 			}
 			SessionCollector.cleanSession(session);
 		}

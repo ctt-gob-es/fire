@@ -12,10 +12,14 @@ package es.gob.fire.server.services.internal;
 import java.util.Date;
 import java.util.Map;
 
+import es.gob.fire.server.services.statistics.TransactionRecorder;
+
 /**
  * Hilo para la eliminaci&oacute;n de sesiones y datos caducados.
  */
 public class ExpiredSessionCleanerThread extends Thread {
+
+	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 
 	private final String[] ids;
 	private final Map<String, FireSession> sessions;
@@ -45,11 +49,16 @@ public class ExpiredSessionCleanerThread extends Thread {
     	for (final String id : this.ids) {
     		session = this.sessions.get(id);
     		if (session != null && currentTime > session.getExpirationTime()) {
+    			// Registramos la transaccion como erronea
+    			TRANSLOGGER.register(session, false);
+    			// Borramos la sesion
     			SessionCollector.removeSession(session);
     		}
     	}
 
     	// Eliminamos los datos caducados
     	TempFilesHelper.cleanExpiredFiles(this.timeout);
+
+
 	}
 }

@@ -40,11 +40,11 @@ public class DeleteUserService extends HttpServlet {
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
 		final String idUser = request.getParameter(PARAM_ID);
-		final String user_name = request.getParameter(PARAM_USRNAME);
+		final String username = request.getParameter(PARAM_USRNAME);
 		final HttpSession session = request.getSession();
 		final String loggedUsr = (String) session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 
-		LOGGER.info("Baja del usuario con ID: " + idUser + " Nombre:" + user_name); //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.info("Baja del usuario con ID: " + idUser + " Nombre:" + username); //$NON-NLS-1$ //$NON-NLS-2$
 
 		boolean isOk = true;
 		if (idUser == null || "".equals(idUser)) { //$NON-NLS-1$
@@ -53,22 +53,22 @@ public class DeleteUserService extends HttpServlet {
 		else {
 			try {
 				final User usr= UsersDAO.getUser(idUser);
-				if(usr!=null && usr.getUsu_defecto()!=null && Integer.parseInt(usr.getUsu_defecto())!=1) {
-					UsersDAO.removeUser(idUser,user_name);
+				if(usr != null && usr.getPorDefecto() != null && Integer.parseInt(usr.getPorDefecto()) != 1) {
+					UsersDAO.removeUser(idUser,username);
 				}
 				else {
-					LOGGER.info("Se ha intentado dar de baja al usuario por defecto con ID: " + idUser + " Nombre:" + user_name); //$NON-NLS-1$ //$NON-NLS-2$
+					LOGGER.info("Se ha intentado dar de baja al usuario por defecto con ID: " + idUser + " Nombre:" + username); //$NON-NLS-1$ //$NON-NLS-2$
 					isOk = false;
 				}
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error al dar de baja el usuario con ID:" + idUser + " Nombre:" + user_name , e); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.log(Level.SEVERE, "Error al dar de baja el usuario con ID:" + idUser + " Nombre:" + username , e); //$NON-NLS-1$ //$NON-NLS-2$
 				isOk = false;
 			}
 		}
 		// Comprobar que el usuario que se borra es el mismo que esta autenticado,
 		// en ese caso se cierra la sesion redirigiendo a la pagina de Login.jsp
-		if(isOk && loggedUsr != null && !"".equals(loggedUsr) && loggedUsr.equals(user_name)){ //$NON-NLS-1$
+		if(isOk && loggedUsr != null && !"".equals(loggedUsr) && loggedUsr.equals(username)){ //$NON-NLS-1$
 			response.sendRedirect("Login.jsp?"); //$NON-NLS-1$
 		}
 		else {
@@ -82,7 +82,6 @@ public class DeleteUserService extends HttpServlet {
 	 */
 	@Override
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		doGet(request, response);
 	}
 

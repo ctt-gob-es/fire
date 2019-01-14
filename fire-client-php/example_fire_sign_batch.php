@@ -14,7 +14,7 @@
 	$confB64 = base64_encode($conf);
 	
 	//$appId = "7BA5453995EC";	// Entorno preproduccion
-	$appId = "B5DD7690A7FA";	// Entorno local
+	$appId = "B244E473466F";	// Entorno local
 	// Identificador de la transaccion
 	$transactionId = "962db6f1-46a4-47ce-93ad-5007816aa497";
 	// Funcion del API de Clave Firma para listar certificados

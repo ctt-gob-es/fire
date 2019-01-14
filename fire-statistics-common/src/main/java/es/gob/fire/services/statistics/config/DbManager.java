@@ -33,10 +33,6 @@ public class DbManager {
 		conn = initialize();
 	}
 
-
-
-
-
 	/**
 	 * Inicializa al completo el manejador de base de datos, leyendo el fichero
 	 * de configuraci&oacute;n y recuperando la conexi&oacute;n.

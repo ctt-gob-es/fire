@@ -21,9 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.internal.RecoverCertificateManager;
 import es.gob.fire.signature.AplicationsDAO;
+import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.GoogleAnalitycs;
 
 /** Servlet que recupera un certificado recien creado. */
 public final class RecoverCertificateService extends HttpServlet {
@@ -41,8 +41,6 @@ public final class RecoverCertificateService extends HttpServlet {
     private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
     private static final String OLD_PARAMETER_NAME_TRANSACTION_ID = "transactionId"; //$NON-NLS-1$
 
-    private static GoogleAnalitycs analytics = null;
-
     @Override
     public void init() throws ServletException {
     	super.init();
@@ -53,19 +51,6 @@ public final class RecoverCertificateService extends HttpServlet {
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
     		return;
-    	}
-
-    	if (analytics == null && ConfigManager.getGoogleAnalyticsTrackingId() != null) {
-    		try{
-	        	analytics = new GoogleAnalitycs(
-	        			ConfigManager.getGoogleAnalyticsTrackingId(),
-	        			RecoverCertificateService.class.getSimpleName());
-    		}
-    		catch(final Throwable e) {
-    			LOGGER.warning(
-					"No ha podido inicializarse Google Analytics: " + e //$NON-NLS-1$
-				);
-    		}
     	}
     }
 
@@ -104,7 +89,8 @@ public final class RecoverCertificateService extends HttpServlet {
             }
 
     		try {
-    			if (!AplicationsDAO.checkApplicationId(appId)) {
+    			final ApplicationChecking appCheck = AplicationsDAO.checkApplicationId(appId);
+	        	if (!appCheck.isValid()) {
     				LOGGER.warning("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion"); //$NON-NLS-1$
     				response.sendError(HttpServletResponse.SC_FORBIDDEN);
     				return;
@@ -133,10 +119,6 @@ public final class RecoverCertificateService extends HttpServlet {
     	}
     	else {
     		LOGGER.fine("No se validara el certificado");//$NON-NLS-1$
-    	}
-
-    	if (analytics != null) {
-    		analytics.trackRequest(request.getRemoteHost());
     	}
 
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,

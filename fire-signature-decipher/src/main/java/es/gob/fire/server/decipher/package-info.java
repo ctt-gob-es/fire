@@ -7,6 +7,6 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-/** Interfaz para la definici&oacute;n de clases para el uso de propiedades cifradas en los
- * ficheros de configuraci&oacute;n. */
+/** Paquete con la interfaz para la definici&oacute;n de clases para el uso de propiedades
+ * cifradas en los ficheros de configuraci&oacute;n. */
 package es.gob.fire.server.decipher;

@@ -30,7 +30,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.services.statistics.config.ConfigManager;
 
 /**
@@ -38,10 +38,12 @@ import es.gob.fire.services.statistics.config.ConfigManager;
  */
 public class MiniAppletSuccessService extends HttpServlet {
 
-	private static final long serialVersionUID = 1L;
+
+	/** Serial Id. */
+	private static final long serialVersionUID = 2487217258327717181L;
+
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletSuccessService.class.getName());
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
@@ -152,7 +154,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 				}
 				else {
 					batchResult.setErrorResult(docId, translateAfirmaError(asr.getError()));
-					SIGNLOGGER.log(session, false,docId );
+					SIGNLOGGER.register(session, false,docId );
 				}
 			}
 		}

@@ -32,21 +32,20 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.signature.AplicationsDAO;
+import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.GoogleAnalitycs;
 
 /** Servlet para la obtenci&oacute;n de certificados de un usuario. */
 public final class CertificateService extends HttpServlet {
+
+    private static final long serialVersionUID = 9165731108863824136L;
 
 	private static final String PARAM_APPLICATION_ID = "appId"; //$NON-NLS-1$
     private static final String PARAM_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
     private static final String PARAM_CONFIG = "config"; //$NON-NLS-1$
 
-    private static final long serialVersionUID = 9165731108863824136L;
     private static final Logger LOGGER = Logger.getLogger(CertificateService.class.getName());
-
-    private static GoogleAnalitycs analytics = null;
 
     @Override
     public void init() throws ServletException {
@@ -58,20 +57,6 @@ public final class CertificateService extends HttpServlet {
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
     		return;
-    	}
-
-    	if (analytics == null && ConfigManager.getGoogleAnalyticsTrackingId() != null) {
-    		try {
-	        	analytics = new GoogleAnalitycs(
-	    			ConfigManager.getGoogleAnalyticsTrackingId(),
-	    			CertificateService.class.getSimpleName()
-				);
-    		}
-    		catch(final Throwable e) {
-    			LOGGER.warning(
-					"No ha podido inicializarse Google Analytics: " + e //$NON-NLS-1$
-				);
-    		}
     	}
     }
 
@@ -108,7 +93,8 @@ public final class CertificateService extends HttpServlet {
             }
 
         	try {
-	        	if (!AplicationsDAO.checkApplicationId(appId)) {
+        		final ApplicationChecking appCheck = AplicationsDAO.checkApplicationId(appId);
+	        	if (!appCheck.isValid()) {
 	        		LOGGER.warning(
 	    				"Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion" //$NON-NLS-1$
 					);
@@ -143,10 +129,6 @@ public final class CertificateService extends HttpServlet {
     	}
     	else {
     		LOGGER.fine("No se validara el certificado cliente");//$NON-NLS-1$
-    	}
-
-    	if (analytics != null) {
-    		analytics.trackRequest(request.getRemoteHost());
     	}
 
         final String subjectId = params.getParameter(PARAM_SUBJECT_ID);

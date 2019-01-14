@@ -31,15 +31,8 @@ public class ModifyPasswdUserService extends HttpServlet {
 	private static final String PARAM_NEW_PASSWD = "passwd-usr_1"; //$NON-NLS-1$
 	private static final String PARAM_NEW_PASSWD_COPY = "passwd-usr_2"; //$NON-NLS-1$
 	private static final String PARAM_OP = "op"; //$NON-NLS-1$
-	private static final String PARAM_IDUSER = "id-usr"; //$NON-NLS-1$
+	private static final String PARAM_USERID = "id-usr"; //$NON-NLS-1$
 	private static final String SHA_2 = "SHA-256"; //$NON-NLS-1$
-
-	private String idUser = null;
-	private String user_name = null;
-	private String old_password = null;
-	private String new_password = null;
-	private String new_passwdCopy = null;
-
 
     /**
      * @see HttpServlet#HttpServlet()
@@ -53,34 +46,38 @@ public class ModifyPasswdUserService extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		//Obtener el tipo de operacion 2-Edicion, 3 Cambio de contrasena
+		// Obtener el tipo de operacion 2-Edicion, 3 Cambio de contrasena
 		final int op = Integer.parseInt(req.getParameter(PARAM_OP));
 		final String stringOp = op == 3 ? "clave" : "" ;  //$NON-NLS-1$ //$NON-NLS-2$
-		/*Obtenemos los parametros enviados del formulario */
-		this.getParameters(req);
+		// Obtenemos los parametros enviados del formulario
+		final Parameters params = getParameters(req);
 		boolean isOk = true;
-		User usr;
-		try
-		{
-			usr= this.getIdUser() != null ? UsersDAO.getUser(this.getIdUser()) : new User();
+		try {
+			User usr = null;
+			if (params.getUserId() != null) {
+				usr = UsersDAO.getUser(params.getUserId());
+			}
 
-
-			if(this.getUser_name() == null || this.getOld_password() == null ||
-					this.getNew_password() == null && this.getNew_passwdCopy() == null) {
-				LOGGER.log(Level.SEVERE, "No se han proporcionado todos los datos requeridos para cambiar la clave (Nombre de usuario , clave antigua, Clave nueva y repetir clave nueva)"); //$NON-NLS-1$
+			if (usr == null) {
+				LOGGER.log(Level.WARNING, "No se han proporcionado el identificador del usuario o no se han podido recuperar sus datos"); //$NON-NLS-1$
 				isOk = false;
 			}
-			else if(this.getNew_password() != null && this.getNew_passwdCopy() != null
-						&& !this.getNew_password().equals(this.getNew_passwdCopy())) {
-				LOGGER.log(Level.SEVERE, "Clave nueva y repetir clave nueva, deben ser iguales"); //$NON-NLS-1$
+			else if(params.getUsername() == null || params.getOldPassword() == null ||
+					params.getNewPassword() == null && params.getNewPasswordCopy() == null) {
+				LOGGER.log(Level.WARNING, "No se han proporcionado todos los datos requeridos para cambiar la clave (Nombre de usuario , clave antigua, Clave nueva y repetir clave nueva)"); //$NON-NLS-1$
+				isOk = false;
+			}
+			else if(params.getNewPassword() != null && params.getNewPasswordCopy() != null
+						&& !params.getNewPassword().equals(params.getNewPasswordCopy())) {
+				LOGGER.log(Level.WARNING, "Clave nueva y repetir clave nueva, deben ser iguales"); //$NON-NLS-1$
 				isOk = false;
 			}
 			//Comprobamos que la clave introducida como antigua es la que tiene guardada en la base de datos
-			else if(usr.getClave() != null && this.getOld_password() != null && !"".equals(this.getOld_password())) { //$NON-NLS-1$
+			else if(usr.getClave() != null && params.getOldPassword() != null && !"".equals(params.getOldPassword())) { //$NON-NLS-1$
 				final MessageDigest md_oldPass = MessageDigest.getInstance(SHA_2);
 				byte[] digest_oldPass;
 				String oldPasswd = null;
-				md_oldPass.update(this.getOld_password().getBytes());
+				md_oldPass.update(params.getOldPassword().getBytes());
 				digest_oldPass = md_oldPass.digest();
 				oldPasswd = Base64.encode(digest_oldPass);
 				if(!oldPasswd.equals(usr.getClave())) {
@@ -97,26 +94,26 @@ public class ModifyPasswdUserService extends HttpServlet {
 							String clave = null;
 
 							//Obtenemos la clave codificada
-							if(this.getNew_password()!=null && !"".equals(this.getNew_password())) { //$NON-NLS-1$
-								md.update(this.getNew_password().getBytes());
+							if(params.getNewPassword()!=null && !"".equals(params.getNewPassword())) { //$NON-NLS-1$
+								md.update(params.getNewPassword().getBytes());
 								digest = md.digest();
 								clave = Base64.encode(digest);
 							}
 
-							LOGGER.info("Cambio de clave del usuario con nombre: " + this.getUser_name()); //$NON-NLS-1$
+							LOGGER.info("Cambio de clave del usuario con nombre: " + params.getUsername()); //$NON-NLS-1$
 							try {
-								UsersDAO.updateUserPasswd(this.getIdUser() , this.getUser_name(), clave);
+								UsersDAO.updateUserPasswd(params.getUserId() , params.getUsername(), clave);
 							}
 							catch (final SQLException e) {
-								LOGGER.log(Level.SEVERE, "Error en la modificaci�n de la contrase�a del usuario con nombre:" + usr.getNombre_usuario(), e); //$NON-NLS-1$
+								LOGGER.log(Level.SEVERE, "Error en la modificacion de la contrasena del usuario con nombre:" + usr.getNombreUsuario(), e); //$NON-NLS-1$
 								isOk = false;
 							}
 
 						}
 					}
 					catch (final NoSuchAlgorithmException e) {
-
-						e.printStackTrace();
+						LOGGER.log(Level.SEVERE, "El algoritmo de codificacion de las contrasenas no esta soportado", e); //$NON-NLS-1$
+						isOk = false;
 					}
 				}
 			}
@@ -127,7 +124,7 @@ public class ModifyPasswdUserService extends HttpServlet {
 		}
 		catch (final IllegalArgumentException e){
 			LOGGER.log(Level.SEVERE,"Ha ocurrido un error con el base64 : " + e, e); //$NON-NLS-1$
-			resp.sendRedirect("./User/UserPage.jsp?error=true&name=" + this.getUser_name() ); //$NON-NLS-1$
+			resp.sendRedirect("./User/UserPage.jsp?error=true&name=" + params.getUsername() ); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE,"Ha ocurrido un error cambiar la clave : " + e, e); //$NON-NLS-1$
@@ -145,114 +142,71 @@ public class ModifyPasswdUserService extends HttpServlet {
 	}
 
 	/**
-	 * Obtiene los par�metros pasados
-	 * @param req
-	 * @throws IOException
-	 * @throws ServletException
+	 * Obtiene los par&aacute;metros aceptados por el servicio.
+	 * @param req Petici&oacute;n HTTP.
 	 */
-	private void getParameters(final HttpServletRequest req) throws IOException, ServletException {
+	private Parameters getParameters(final HttpServletRequest req) {
 
-		this.setIdUser(null);
-		this.setUser_name(null);
-		this.setNew_password(null);
-		this.setOld_password(null);
-		this.setNew_passwdCopy(null);
+		final Parameters params = new Parameters();
 
-		if(req.getParameter(PARAM_IDUSER) != null && !"".equals(req.getParameter(PARAM_IDUSER))) { //$NON-NLS-1$
-			this.setIdUser(req.getParameter(PARAM_IDUSER));
+		if(req.getParameter(PARAM_USERID) != null && !"".equals(req.getParameter(PARAM_USERID))) { //$NON-NLS-1$
+			params.setUserId(req.getParameter(PARAM_USERID));
 		}
 		if(req.getParameter(PARAM_NAME) != null && !"".equals(req.getParameter(PARAM_NAME))) { //$NON-NLS-1$
-			this.setUser_name(req.getParameter(PARAM_NAME));
+			params.setUsername(req.getParameter(PARAM_NAME));
 		}
 		if(req.getParameter(PARAM_NEW_PASSWD) != null && !"".equals(req.getParameter(PARAM_NEW_PASSWD))) { //$NON-NLS-1$
-			this.setNew_password(req.getParameter(PARAM_NEW_PASSWD));
+			params.setNewPassword(req.getParameter(PARAM_NEW_PASSWD));
 		}
 		if(req.getParameter(PARAM_OLD_PASSWD) != null && !"".equals(req.getParameter(PARAM_OLD_PASSWD))) { //$NON-NLS-1$
-			this.setOld_password(req.getParameter(PARAM_OLD_PASSWD));
+			params.setOldPassword(req.getParameter(PARAM_OLD_PASSWD));
 		}
 		if(req.getParameter(PARAM_NEW_PASSWD_COPY) != null && !"".equals(req.getParameter(PARAM_NEW_PASSWD_COPY))) { //$NON-NLS-1$
-			this.setNew_passwdCopy(req.getParameter(PARAM_NEW_PASSWD_COPY));
+			params.setNewPasswordCopy(req.getParameter(PARAM_NEW_PASSWD_COPY));
 		}
-
-	}
-
-
-	/**
-	 * Obtiene el nombre del usuario
-	 * @return
-	 */
-	private final String getUser_name() {
-		return this.user_name;
-	}
-	/**
-	 * Establece el nombre del usuario
-	 * @param user_name
-	 */
-	private final void setUser_name(final String user_name) {
-		this.user_name = user_name;
-	}
-	/**
-	 * Obtiene la clave antigua
-	 * @return
-	 */
-	private final String getOld_password() {
-		return this.old_password;
-	}
-	/**
-	 *
-	 * @param old_password
-	 */
-	private final void setOld_password(final String old_password) {
-		this.old_password = old_password;
+		return params;
 	}
 
 	/**
-	 * Obtiene la nueva password
-	 * @return
+	 * Conjunto de parametros admitidos por el servicio.
 	 */
-	private final String getNew_password() {
-		return this.new_password;
+	class Parameters {
+
+		private String userId = null;
+		private String username = null;
+		private String oldPassword = null;
+		private String newPassword = null;
+		private String newPasswordCopy = null;
+
+		public String getUserId() {
+			return this.userId;
+		}
+		public String getUsername() {
+			return this.username;
+		}
+		public String getOldPassword() {
+			return this.oldPassword;
+		}
+		public String getNewPassword() {
+			return this.newPassword;
+		}
+		public String getNewPasswordCopy() {
+			return this.newPasswordCopy;
+		}
+		public void setUserId(final String userId) {
+			this.userId = userId;
+		}
+		public void setUsername(final String username) {
+			this.username = username;
+		}
+		public void setOldPassword(final String oldPassword) {
+			this.oldPassword = oldPassword;
+		}
+		public void setNewPassword(final String newPassword) {
+			this.newPassword = newPassword;
+		}
+		public void setNewPasswordCopy(final String newPasswordCopy) {
+			this.newPasswordCopy = newPasswordCopy;
+		}
 	}
-
-	/**
-	 * Establece al nueva password
-	 * @param new_password
-	 */
-	private final void setNew_password(final String new_password) {
-		this.new_password = new_password;
-	}
-
-	/**
-	 * Obtiene la copia-verificaci&oacute;n de la nueva password
-	 * @return
-	 */
-	private final String getNew_passwdCopy() {
-		return this.new_passwdCopy;
-	}
-
-	/**
-	 *  Establece la copia-verificaci&oacute;n de la nueva password
-	 * @param new_passwdCopy
-	 */
-	private final void setNew_passwdCopy(final String new_passwdCopy) {
-		this.new_passwdCopy = new_passwdCopy;
-	}
-
-	/**
-	 * Obtiene el Id del Usuario
-	 * @return
-	 */
-	private final String getIdUser() {
-		return this.idUser;
-	}
-	/**
-	 *  Establece el Id del Usuario
-	 * @param idUser
-	 */
-	private final void setIdUser(final String idUser) {
-		this.idUser = idUser;
-	}
-
-
-
 }

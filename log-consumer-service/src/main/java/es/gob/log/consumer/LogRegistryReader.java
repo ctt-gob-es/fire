@@ -15,8 +15,6 @@ class LogRegistryReader {
 
 	private LogReader logReader = null;
 
-
-
 	/**
 	 * Construye el parse de entradas de registro.
 	 * @param logInfo Informaci&oacute;n del fichero de log.
@@ -77,9 +75,5 @@ class LogRegistryReader {
 
 		return registry;
 	}
-
-
-
-
 }
 

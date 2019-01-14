@@ -18,8 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
+import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -27,11 +27,11 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class SignBatchManager {
 
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private static final Logger LOGGER = Logger.getLogger(SignBatchManager.class.getName());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
-    /**
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
+
+	/**
      * Inicia el proceso de firma de un lote.
 	 * @param request Petici&oacute;n de firma del lote.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
@@ -47,28 +47,30 @@ public class SignBatchManager {
     	final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String stopOnError = params.getParameter(ServiceParams.HTTP_PARAM_BATCH_STOP_ON_ERROR);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
 		// Comprobamos que se hayan prorcionado los parametros indispensables
     	if (transactionId == null || transactionId.isEmpty()) {
-    		LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
+    		LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"No se ha proporcionado el identificador de la transaccion"); //$NON-NLS-1$
     		return;
     	}
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
 
     	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
     	if (session == null) {
-    		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
+    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(), "La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		return;
     	}
 
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
-    		LOGGER.warning("Se ha pedido firmar un lote sin documentos. Se aborta la operacion."); //$NON-NLS-1$
-    		SIGNLOGGER.log(session, false, null);
-    		TRANSLOGGER.log(session, false);
+    		LOGGER.warning(logF.format("Se ha pedido firmar un lote sin documentos. Se aborta la operacion.")); //$NON-NLS-1$
+    		SIGNLOGGER.register(session, false, null);
+    		TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
     		response.sendError(HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorCode(), HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorDescription());
     		return;
@@ -88,9 +90,9 @@ public class SignBatchManager {
 
 		// Listamos los certificados del usuario
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning("No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
-			SIGNLOGGER.log(session, false, null);
-			TRANSLOGGER.log(session, false);
+			LOGGER.warning(logF.format("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
+			SIGNLOGGER.register(session, false, null);
+			TRANSLOGGER.register(session, false);
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
@@ -103,7 +105,7 @@ public class SignBatchManager {
         SessionCollector.commit(session);
 
 
-        LOGGER.info(String.format("App %1s: TrId %2s: Generamos la URL de redireccion", appId, transactionId)); //$NON-NLS-1$
+        LOGGER.info(logF.format("Generamos la URL de redireccion")); //$NON-NLS-1$
 
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
@@ -130,7 +132,7 @@ public class SignBatchManager {
         			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + currentUserId + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
-        LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos la URL de redireccion con el ID de transaccion", appId, transactionId)); //$NON-NLS-1$
+        LOGGER.info(logF.format("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$
 
         sendResult(response, result);
 	}

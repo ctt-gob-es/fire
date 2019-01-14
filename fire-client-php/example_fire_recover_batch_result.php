@@ -9,7 +9,7 @@
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
 	//$appId = "7BA5453995EC";	// Entorno preproduccion
-	$appId = "B5DD7690A7FA";	// Entorno local
+	$appId = "B244E473466F";	// Entorno local
 	$transactionId = "962db6f1-46a4-47ce-93ad-5007816aa497";
 	
 	// Funcion del API de Clave Firma para cargar los datos a firmar

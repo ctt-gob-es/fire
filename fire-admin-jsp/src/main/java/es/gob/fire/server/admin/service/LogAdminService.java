@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.admin.conf.ConfigManager;
-import es.gob.fire.server.admin.message.AdminFilesNotFoundException;
 import es.gob.log.consumer.client.LogConsumerClient;
 import es.gob.log.consumer.client.ServiceOperations;
 
@@ -75,9 +75,15 @@ public class LogAdminService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Se recibido parametros no validos", e); //$NON-NLS-1$
-			final String jsonError = buildJsonError("No se han podido recuperar correctamente los parametros.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-			session.setAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON, jsonError);
-			response.sendRedirect(getSelectionResultUrl(request, false));
+			String errorMessage;
+			if (e instanceof IllegalArgumentException) {
+				errorMessage = e.getMessage();
+			}
+			else {
+				errorMessage = "No se han podido recuperar correctamente los parametros."; //$NON-NLS-1$
+			}
+			final String jsonError = buildJsonError(errorMessage, HttpServletResponse.SC_BAD_REQUEST);
+			response.getOutputStream().write(jsonError.getBytes(StandardCharsets.UTF_8));
 			return;
 		}
 
@@ -126,7 +132,7 @@ public class LogAdminService extends HttpServlet {
 		switch (op) {
 		case ECHO:
 			LOGGER.info("Solicitud entrante de comprobacion de servidor"); //$NON-NLS-1$
-			result = echo(logClient, params.getUrl());
+			result = logClient.echo(params.getUrl());
 			response.getWriter().write(result);
 			break;
 
@@ -305,21 +311,10 @@ public class LogAdminService extends HttpServlet {
 		case DOWNLOAD:
 			LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
 
-			String tempLogsDir = null;
-			try {
-				ConfigManager.initialize();
-				tempLogsDir = ConfigManager.getLogsTempDir();
-				if (tempLogsDir == null || tempLogsDir.equals("")) { //$NON-NLS-1$
-					LOGGER.warning("No se encuentra configurada la variable logs.tempdir del fichero de configuración .properties"); //$NON-NLS-1$
-					final String jsonError = buildJsonError("No se encuentra configurada la variable logs.tempdir del fichero de configuración .properties", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
-					session.setAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON, jsonError);
-					response.sendRedirect(getSelectionResultUrl(request, false));
-					return;
-				}
-
-			} catch (final AdminFilesNotFoundException e) {
-				LOGGER.severe("Error no se encuentra el fichero de configuracion " + e.getFileName()); //$NON-NLS-1$
-				final String jsonError = buildJsonError("No se han podido recuperar correctamente el fichero de configuración .properties.", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
+			final String tempDir = ConfigManager.getTempDir();
+			if (tempDir == null || tempDir.equals("")) { //$NON-NLS-1$
+				LOGGER.warning("No se encuentra configurado el directorio temporal en el fichero de configuracion .properties"); //$NON-NLS-1$
+				final String jsonError = buildJsonError("No se encuentra configurado el directorio temporal en el fichero de configuracion .properties", HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
 				session.setAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON, jsonError);
 				response.sendRedirect(getSelectionResultUrl(request, false));
 				return;
@@ -328,7 +323,7 @@ public class LogAdminService extends HttpServlet {
 			result = ""; //$NON-NLS-1$
 			String path = ""; //$NON-NLS-1$
 
-			final byte datDownload[] = logClient.download(params.getLogFileName(), params.isReset(), tempLogsDir);
+			final byte datDownload[] = logClient.download(params.getLogFileName(), tempDir);
 			if (datDownload != null && datDownload.length > 0 ) {
 
 				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datDownload));
@@ -392,6 +387,9 @@ public class LogAdminService extends HttpServlet {
 					}
 				}
 				else {
+					final String errorText = datDownload.length <= 200 ?
+							new String(datDownload) : new String(datDownload, 0, 200);
+					LOGGER.warning("Error durante la descarga. Mensaje enviado " + errorText); //$NON-NLS-1$
 					result = buildJsonError("El resultado de la operacion no es correcto", 500); //$NON-NLS-1$
 				}
 			}
@@ -422,28 +420,6 @@ public class LogAdminService extends HttpServlet {
 				"/Logs/LogsMainPage.jsp?op=" + OPERATION_SELECTION + //$NON-NLS-1$
 				"&r=" + (isOk ? "1" : "0") + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"&ent=srv"; //$NON-NLS-1$
-	}
-
-	/**
-	 * Funci&oacute;n que obtiene la respuesta del servidor si hay comunicaci&oacute;n a trav&eacute;s
-	 * del api devolviendo un String con formato JSON, tanto si la comunicaci&oacute;n ha sido correcta
-	 * como si ha habido un error.
-	 * @param lclient Cliente para el acceso al servidor de logs.
-	 * @param url
-	 * @return
-	 */
-	protected final static String echo(final LogConsumerClient lclient, final String url) {
-
-		String result;
-		try {
-			result = lclient.echo(url);
-		}
-		catch (final IOException e) {
-			LOGGER.severe("No se pudo conectar con la ruta indicada: " + e.toString()); //$NON-NLS-1$
-	        result = buildJsonError("No se ha podido conectar a la ruta indicada.", 404); //$NON-NLS-1$
-		}
-		return result;
-
 	}
 
 	/**
@@ -483,41 +459,61 @@ public class LogAdminService extends HttpServlet {
 
 		final Parameters params = new Parameters();
 		try {
-			if(request.getParameter(ServiceParams.PARAM_URL) != null &&
+			if (request.getParameter(ServiceParams.PARAM_URL) != null &&
 					!request.getParameter(ServiceParams.PARAM_URL).isEmpty()) {
 				params.setUrl(request.getParameter(ServiceParams.PARAM_URL));
 			}
 			params.setVerifySsl(Boolean.parseBoolean(request.getParameter(ServiceParams.PARAM_VERIFY_SSL)));
 
-			if(request.getParameter(ServiceParams.PARAM_NAMESRV) != null &&
+			if (request.getParameter(ServiceParams.PARAM_NAMESRV) != null &&
 					!request.getParameter(ServiceParams.PARAM_NAMESRV).isEmpty()) {
 				params.setNameSrv(request.getParameter(ServiceParams.PARAM_NAMESRV));
 			}
-			if(request.getParameter(ServiceParams.PARAM_FILENAME) != null &&
+			if (request.getParameter(ServiceParams.PARAM_FILENAME) != null &&
 					!request.getParameter(ServiceParams.PARAM_FILENAME).isEmpty()) {
 				params.setLogFileName(request.getParameter(ServiceParams.PARAM_FILENAME));
 			}
-			if(request.getParameter(ServiceParams.PARAM_NLINES) != null &&
+			if (request.getParameter(ServiceParams.PARAM_NLINES) != null &&
 					!request.getParameter(ServiceParams.PARAM_NLINES).isEmpty()) {
-				params.setNumlines(Integer.parseInt(request.getParameter(ServiceParams.PARAM_NLINES)));
+				try {
+					params.setNumlines(Integer.parseInt(request.getParameter(ServiceParams.PARAM_NLINES)));
+				}
+				catch (final Exception e) {
+					throw new IllegalArgumentException("El n\u00FAmero de l\u00EDneas indicado no es v\u00E1lido", e); //$NON-NLS-1$
+				}
 			}
-			if(request.getParameter(ServiceParams.PARAM_TXT2SEARCH) != null &&
+			if (request.getParameter(ServiceParams.PARAM_TXT2SEARCH) != null &&
 					!request.getParameter(ServiceParams.PARAM_TXT2SEARCH).isEmpty()) {
 				params.setTxt2search(request.getParameter(ServiceParams.PARAM_TXT2SEARCH));
 			}
-			if(request.getParameter(ServiceParams.PARAM_SEARCHDATE) != null &&
+			if (request.getParameter(ServiceParams.PARAM_SEARCHDATE) != null &&
 					!request.getParameter(ServiceParams.PARAM_SEARCHDATE).isEmpty()) {
-				params.setDatetime(request.getParameter(ServiceParams.PARAM_SEARCHDATE));
+				try {
+					params.setDatetime(Long.parseLong(request.getParameter(ServiceParams.PARAM_SEARCHDATE)));
+				}
+				catch (final Exception e) {
+					throw new IllegalArgumentException("La fecha para la b\u00FAsqueda del texto no es v\u00E1lida", e); //$NON-NLS-1$
+				}
 			}
-			if(request.getParameter(ServiceParams.PARAM_START_DATETIME) != null &&
+			if (request.getParameter(ServiceParams.PARAM_START_DATETIME) != null &&
 					!request.getParameter(ServiceParams.PARAM_START_DATETIME).isEmpty()) {
-				params.setStartDateTime(Long.parseLong(request.getParameter(ServiceParams.PARAM_START_DATETIME)));
+				try {
+					params.setStartDateTime(Long.parseLong(request.getParameter(ServiceParams.PARAM_START_DATETIME)));
+				}
+				catch (final Exception e) {
+					throw new IllegalArgumentException("La fecha de inicio del filtro no es v\u00E1lida", e); //$NON-NLS-1$
+				}
 			}
-			if(request.getParameter(ServiceParams.PARAM_END_DATETIME) != null &&
+			if (request.getParameter(ServiceParams.PARAM_END_DATETIME) != null &&
 					!request.getParameter(ServiceParams.PARAM_END_DATETIME).isEmpty()) {
-				params.setEndDateTime(Long.parseLong(request.getParameter(ServiceParams.PARAM_END_DATETIME)));
+				try {
+					params.setEndDateTime(Long.parseLong(request.getParameter(ServiceParams.PARAM_END_DATETIME)));
+				}
+				catch (final Exception e) {
+					throw new IllegalArgumentException("La fecha de fin del filtro no es v\u00E1lida", e); //$NON-NLS-1$
+				}
 			}
-			if(request.getParameter(ServiceParams.PARAM_LEVEL) != null &&
+			if (request.getParameter(ServiceParams.PARAM_LEVEL) != null &&
 					!request.getParameter(ServiceParams.PARAM_LEVEL).isEmpty()) {
 				params.setLevel(request.getParameter(ServiceParams.PARAM_LEVEL));
 			}
@@ -529,11 +525,14 @@ public class LogAdminService extends HttpServlet {
 					!request.getParameter(ServiceParams.PARAM_MSG).isEmpty() ?
 							request.getParameter(ServiceParams.PARAM_MSG) : null);
 		}
-		catch (final Exception e) {
-			throw new IllegalArgumentException("Parametros no validos", e); //$NON-NLS-1$
+		catch (final IllegalArgumentException e) {
+			throw e;
 		}
-		return params;
-	}
+		catch (final Exception e) {
+				throw new IllegalArgumentException("Par\u00E1metro no v\u00E1lido", e); //$NON-NLS-1$
+			}
+			return params;
+		}
 
 	static class Parameters {
 		private String url = "";//$NON-NLS-1$
@@ -542,7 +541,7 @@ public class LogAdminService extends HttpServlet {
 		private String logFileName = "";//$NON-NLS-1$
 		private int numlines = 0;
 		private String txt2search = "";//$NON-NLS-1$
-		private String datetime = "";//$NON-NLS-1$
+		private long datetime = 0L;
 		private String level = "";//$NON-NLS-1$
 		private long startDateTime = 0L;
 		private long endDateTime = 0L;
@@ -585,10 +584,10 @@ public class LogAdminService extends HttpServlet {
 		public void setTxt2search(final String txt2search) {
 			this.txt2search = txt2search;
 		}
-		public String getDatetime() {
+		public long getDatetime() {
 			return this.datetime;
 		}
-		public void setDatetime(final String datetime) {
+		public void setDatetime(final long datetime) {
 			this.datetime = datetime;
 		}
 		public String getLevel() {

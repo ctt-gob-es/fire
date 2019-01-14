@@ -18,15 +18,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReServiceOperation;
-import es.gob.fire.server.services.statistics.Operations;
+import es.gob.fire.server.services.statistics.TransactionType;
 
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
  */
 public class MiniAppletErrorService extends HttpServlet {
 
-	private static final long serialVersionUID = 1L;
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
+
+	/** Serial Id. */
+	private static final long serialVersionUID = 6742462095455032887L;
+
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletErrorService.class.getName());
 
 
@@ -62,7 +64,7 @@ public class MiniAppletErrorService extends HttpServlet {
 
         // Obtenemos la operacion (SIGN o BATCH)
         final FIReServiceOperation fsop = FIReServiceOperation.parse(session.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
-		final Operations op = Operations.parse(fsop);
+		final TransactionType op = TransactionType.valueOf(fsop);
 
     	if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
     		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);

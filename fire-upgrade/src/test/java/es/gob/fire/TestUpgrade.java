@@ -16,6 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.fire.upgrade.Upgrade;
+import es.gob.fire.upgrade.UpgradeResult;
 import es.gob.fire.upgrade.UpgradeTarget;
 
 /** Prueba de mejora de firma.
@@ -49,11 +50,13 @@ public final class TestUpgrade {
 
 		final UpgradeTarget format = UpgradeTarget.T_FORMAT;
 
-		final byte[] result = Upgrade.signUpgradeCreate(testFile, format, "minhap.seap.dtic.clavefirma"); //$NON-NLS-1$
+		final UpgradeResult result = Upgrade.signUpgradeCreate(testFile, format, "minhap.seap.dtic.clavefirma"); //$NON-NLS-1$
+
+		System.out.println("La firma se actualizo a " + result.getFormat()); //$NON-NLS-1$
 
 		final File saveFile = File.createTempFile("TEST-", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		final java.io.OutputStream os = new java.io.FileOutputStream(saveFile);
-		os.write(result);
+		os.write(result.getResult());
 		os.flush();
 		os.close();
 		System.out.println("Temporal para comprobacion manual: " + saveFile.getAbsolutePath()); //$NON-NLS-1$

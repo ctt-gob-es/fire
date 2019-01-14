@@ -78,9 +78,30 @@ public class ConfigManager {
 
 	private static final String PROP_SESSIONS_DAO = "sessions.dao"; //$NON-NLS-1$
 
+	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
+
+	private static final String PROP_LOGS_ROLLING_POLICY = "logs.rollingPolicy"; //$NON-NLS-1$
+
+	private static final String PROP_LOGS_LEVEL_FIRE = "logs.level.fire"; //$NON-NLS-1$
+
+	private static final String PROP_LOGS_LEVEL_AFIRMA = "logs.level.afirma"; //$NON-NLS-1$
+
+	private static final String PROP_LOGS_LEVEL_GENERAL = "logs.level"; //$NON-NLS-1$
+
+	private static final String DEFAULT_LOGS_LEVEL = "WARNING"; //$NON-NLS-1$
+
 	private static final String PROP_HTTP_CERT_ATTR = "http.cert.attr"; //$NON-NLS-1$
 
 	private static final String DEFAULT_HTTP_CERT_ATTR = "x-clientcert"; //$NON-NLS-1$
+
+	/** Configuraci&oacute;n de la pol&iacute;tica de volcado de datos estad&iacute;sticos*/
+	private static final String PROP_STATISTICS_POLICY ="statistics.policy"; //$NON-NLS-1$
+
+	/** Configuraci&oacute;n de la hora del volcado a base de datos si la pol&iacute;tica lo permite). */
+	private static final String PROP_STATISTICS_DUMPTIME = "statistics.dumptime"; //$NON-NLS-1$
+
+	/** Configuraci&oacute;n del directorio de volcado de datosestad&iacute;sticos. */
+	private static final String PROP_STATISTICS_DIR = "statistics.dir"; //$NON-NLS-1$
 
 	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
@@ -103,12 +124,6 @@ public class ConfigManager {
 
 	/** Nombre del fichero de configuraci&oacute;n. */
 	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
-
-	/**Configuraci&oacute;n de las estad&iacute;sticas*/
-	private static final String CONFIG_STATISTICS ="statistics"; //$NON-NLS-1$
-
-	/**Configuraci&oacute;n de la hora de comienzo de carga de estad&iacute;sticas*/
-	private static final String CONFIG_STATISTICS_STARTTIME ="statistics.start_time"; //$NON-NLS-1$
 
 	private static final String PATTERN_TIME = "^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$"; //$NON-NLS-1$
 
@@ -187,7 +202,7 @@ public class ConfigManager {
 		for (final String provider : providersTempList) {
 			if (provider != null && !provider.trim().isEmpty()) {
 				final ProviderElement prov = new ProviderElement(provider);
-				if (!providersList.contains(provider)) {
+				if (!providersList.contains(provider)) { // ProviderElement tiene el equals() sobreescrito
 					providersList.add(prov);
 				}
 			}
@@ -356,32 +371,29 @@ public class ConfigManager {
 
 
 	/**
-	 * Devuelve la configuraci&oacute;n de las estad&iacute;sticas
-	 * @return Dato num&eacute;rico de 0, 1 y 2
-	 *  En caso de error, devolver&aacute; {@code null}.
+	 * Devuelve el identificador num&eacute;rico de la pol&iacute;tica de firma configurada.
+	 * En caso de error, devuelve -1.
+	 * @return Dato num&eacute;rico.
 	 */
-	public static String getConfigStatistics() {
-		int conf;
+	public static int getStatisticsPolicy() {
+		int policy;
 		try {
-			conf = Integer.parseInt(getProperty(CONFIG_STATISTICS));
-			if(conf > 2 || conf < 0) {
-				conf = 0;
-			}
+			policy = Integer.parseInt(getProperty(PROP_STATISTICS_POLICY));
 		}
 		catch (final NumberFormatException e) {
-			conf = 0;
+			policy = -1;
 		}
-		return String.valueOf(conf);
+		return policy;
 	}
 
-
 	/**
-	 * Devuelve la configuraci&oacute;n de la hora de la carga a  la base de datos
-	 * @return Dato hora con formato 00:00:00
-	 *  En caso de no obtener un dato con formato correcto o nulo devolver&aacute; la cadena 00:00:00
+	 * Devuelve la hora a la que deber&iacute;n volcarse los datos estad&iacute;sticos a base de datos. En caso de no
+	 * encontrarse configurada una hora con el formato hh:mm:ss se devolver&aacute; 00:00:00.
+	 * @return Hora con formato hh:mm:ss
+	 *
 	 */
-	public static String getStatisticsStartTime() {
-		 String time =  getProperty(CONFIG_STATISTICS_STARTTIME);
+	public static String getStatisticsDumpTime() {
+		 String time =  getProperty(PROP_STATISTICS_DUMPTIME);
 		 if (time == null || "".equals(time)) { //$NON-NLS-1$
 			 time = "00:00:00";	 //$NON-NLS-1$
 		 }
@@ -389,6 +401,14 @@ public class ConfigManager {
 			 time = "00:00:00";	 //$NON-NLS-1$
 		}
 		return time;
+	}
+
+	/**
+	 * Devuelve la ruta configurada del directorio en el que almacenar los datos para la generaci&oacute;n de estad&iacute;sticas.
+	 * @return Ruta del directorio o {@code null} si no est&aacute; definida.
+	 */
+	public static String getStatisticsDir() {
+		 return getProperty(PROP_STATISTICS_DIR);
 	}
 
 
@@ -452,14 +472,6 @@ public class ConfigManager {
 			}
 			throw new NullPointerException("No se ha definido la clase conectora de los proveedores: " + errorMsg.toString()); //$NON-NLS-1$
 		}
-	}
-
-	/**
-	 * Devuelve el fichero de configuraci&oacute;n.
-	 * @return El fichero de configuraci&oacute;n.
-	 */
-	public static Properties getPropertyFile(){
-		return config;
 	}
 
 	/**
@@ -623,6 +635,57 @@ public class ConfigManager {
 	 	}
 
 	 	return getProperty(PROP_FIRE_PUBLIC_URL);
+	 }
+
+	 /**
+	  * Recupera el directorio en el que almacenar los ficheros de log.
+	  * @return Directorio de los ficheros de log o {@code null} si no se configur&oacute;.
+	  */
+	 public static String getLogsDir() {
+
+		 if (config == null) {
+			 try {
+				 loadConfig();
+			 } catch (final ConfigFilesException e) {
+				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				 return null;
+			 }
+		 }
+
+		 return getProperty(PROP_LOGS_DIR);
+	 }
+
+	 /**
+	  * Recupera la pol&iacute;tica de rotado del fichero de log.
+	  * @return Politica de rotado o {@code null} si no se configur&oacute;.
+	  */
+	 public static String getLogsRollingPolicy() {
+		 return getProperty(PROP_LOGS_ROLLING_POLICY);
+	 }
+
+	 /**
+	  * Recupera el nivel general de log m&iacute;nimo que se debe mostrar.
+	  * @return Nivel de log configurado o el nivel por defecto si no se configur&oacute; o
+	  * se configur&oacute; un valor no valido.
+	  */
+	 public static String getLogsLevel() {
+		 return getProperty(PROP_LOGS_LEVEL_GENERAL, DEFAULT_LOGS_LEVEL);
+	 }
+
+	 /**
+	  * Recupera el nivel m&iacute;nimo de los logs de FIRe que se deben mostrar.
+	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;.
+	  */
+	 public static String getLogsLevelFire() {
+		 return getProperty(PROP_LOGS_LEVEL_FIRE, getLogsLevel());
+	 }
+
+	 /**
+	  * Recupera el nivel m&iacute;nimo de los logs del n&uacute;cleo de firma que se deben mostrar.
+	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;.
+	  */
+	 public static String getLogsLevelAfirma() {
+		 return getProperty(PROP_LOGS_LEVEL_AFIRMA, getLogsLevel());
 	 }
 
 	 /**

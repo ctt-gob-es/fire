@@ -1,70 +1,91 @@
 package es.gob.fire.server.services.statistics;
 
-import es.gob.fire.server.services.internal.SignConstants;
-
 /** Formatos mejorados de firma soportados. */
 public enum ImprovedSignatureFormats {
 
-	ES_A(1,SignConstants.SIGN_LONGFORMATS_ES_A),
-	/** 	Para la actualización del formato CAdES a CAdES-T.<br>
-			Para la actualización del formato XAdES a XAdES-T.<br>
-			A partir de la versión 6.2 de la Plataforma @firma, debe usarse “T-LEVEL”.
-	*/
-	ES_T(2,SignConstants.SIGN_LONGFORMATS_ES_T),
-	/** 	Para la actualización del formato CAdES a CAdES-C.<br>
-			Para la actualización del formato XAdES a XAdES-C.
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a CAdES-A.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a XAdES-A.<br>
 	 */
-	ES_C(3, SignConstants.SIGN_LONGFORMATS_ES_C),
-	/** 	Para la actualización del formato CAdES a CAdES-X.<br>
-			Para la actualización del formato XAdES a XAdES-X.<br>
+	ES_A(1, "ES-A"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a CAdES-T.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a XAdES-T.<br>
+	 * A partir de la versi&oacute;n 6.2 de la Plataforma @firma, debe usarse "T-LEVEL".
 	 */
-	ES_X(4, SignConstants.SIGN_LONGFORMATS_ES_X),
-	/** 	Para la actualización del formato CAdES a CAdES-X1.<br>
-			Para la actualización del formato XAdES a XAdES-X1.
+	ES_T(2, "ES-T"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a CAdES-C.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a XAdES-C.
 	 */
-	ES_X_1(5, SignConstants.SIGN_LONGFORMATS_ES_X_1),
-	/** 	Para la actualización del formato CAdES a CAdES-X2.<br>
-			Para la actualización del formato XAdES a XAdES-X2.
+	ES_C(3, "ES-C"), //$NON-NLS-1$
+	/** Para la actualizaci&oacute;n del formato CAdES a CAdES-X.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a XAdES-X.<br>
 	 */
-	ES_X_2(6, SignConstants.SIGN_LONGFORMATS_ES_X_2),
-	/** 	Para la actualización del formato CAdES a CAdES-XL1.<br>
-			Para la actualización del formato XAdES a XAdES-XL1.
+	ES_X(4, "ES-X"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a CAdES-X1.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a XAdES-X1.
 	 */
-	ES_X_L1(7, SignConstants.SIGN_LONGFORMATS_ES_X_L1),
-	/** 	Para la actualización del formato CAdES a CAdES-XL2.<br>
-			Para la actualización del formato XAdES a XAdES-XL2.
+	ES_X_1(5, "ES-X-1"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a CAdES-X2.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a XAdES-X2.
 	 */
-	ES_X_L2 (8, SignConstants.SIGN_LONGFORMATS_ES_X_L2 ),
-	/** 	Para la actualización del formato PAdES a PAdES-LTV. */
-	ES_LTV (9, SignConstants.SIGN_LONGFORMATS_ES_LTV ),
-	/** 	Para la actualización del formato CAdES a T-LEVEL.<br>
-			Para la actualización del formato XAdES a T-LEVEL.<br>
-			Para la actualización del formato PAdES a T-LEVEL.<br>
-			Sólo disponible a partir de la versión 6.2 de la Plataforma @firma.
+	ES_X_2(6, "ES-X-2"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a CAdES-XL1.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a XAdES-XL1.
 	 */
-	T_LEVEL(10, SignConstants.SIGN_LONGFORMATS_T_LEVEL),
-	/**		Para la actualización del formato CAdES a LT-LEVEL.<br>
-			Para la actualización del formato XAdES a LT-LEVEL.<br>
-			Para la actualización del formato PAdES a LT-LEVEL.<br>
-			Sólo disponible a partir de la versión 6.2 de la Plataforma @firma.
+	ES_X_L1(7, "ES-X-L-1"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a CAdES-XL2.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a XAdES-XL2.
 	 */
-	LT_LEVEL(11, SignConstants.SIGN_LONGFORMATS_LT_LEVEL),
-	/**		Para la actualización del formato CAdES a LTA-LEVEL.<br>
-			Para la actualización del formato XAdES a LTA-LEVEL.<br>
-			Para la actualización del formato PAdES a LTA-LEVEL.<br>
-			Sólo disponible a partir de la versión 6.2 de la Plataforma @firma.
-	*/
-	LTA_LEVEL(12, SignConstants.SIGN_LONGFORMATS_LTA_LEVEL),
+	ES_X_L2 (8, "ES-X-L-2"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato PAdES a PAdES-LTV.
+	 */
+	ES_LTV (9, "ES-LTV"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a T-LEVEL.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a T-LEVEL.<br>
+	 * Para la actualizaci&oacute;n del formato PAdES a T-LEVEL.<br>
+	 * S&oacute;lo disponible a partir de la versi&oacute;n 6.2 de la Plataforma @firma.
+	 */
+	T_LEVEL(10, "T-LEVEL"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a LT-LEVEL.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a LT-LEVEL.<br>
+	 * Para la actualizaci&oacute;n del formato PAdES a LT-LEVEL.<br>
+	 * S&oacute;lo disponible a partir de la versi&oacute;n 6.2 de la Plataforma @firma.
+	 */
+	LT_LEVEL(11, "LT-LEVEL"), //$NON-NLS-1$
+	/**
+	 * Para la actualizaci&oacute;n del formato CAdES a LTA-LEVEL.<br>
+	 * Para la actualizaci&oacute;n del formato XAdES a LTA-LEVEL.<br>
+	 * Para la actualizaci&oacute;n del formato PAdES a LTA-LEVEL.<br>
+	 * S&oacute;lo disponible a partir de la versi&oacute;n 6.2 de la Plataforma @firma.
+	 */
+	LTA_LEVEL(12, "LTA-LEVEL"), //$NON-NLS-1$
 
 	/** Cualquier otro formato. */
-	OTHER(99, SignConstants.SIGN_LONGFORMATS_OTROS);
+	OTHER(99, "OTROS", true); //$NON-NLS-1$
 
 	private int id;
 	private String format;
+	private boolean undefined;
 
 	private ImprovedSignatureFormats(final int id, final String format) {
 		this.id = id;
 		this.format = format;
+		this.undefined = false;
+	}
+
+	private ImprovedSignatureFormats(final int id, final String format, final boolean undefined) {
+		this.id = id;
+		this.format = format;
+		this.undefined = undefined;
 	}
 
 	/**
@@ -80,6 +101,14 @@ public enum ImprovedSignatureFormats {
 			}
 		}
 		return OTHER.toString();
+	}
+
+	public String getFormat() {
+		return this.format;
+	}
+
+	public boolean isUndefined() {
+		return this.undefined;
 	}
 
 	@Override

@@ -59,7 +59,7 @@ public class ConnectionManager {
 
     private static final String ACCEPT_ALL_CERTS = "all"; //$NON-NLS-1$
 
-	private static SSLContext ctx;
+	private static SSLContext ctx = null;
 
 	/**
 	 * M&eacute;todo HTTP soportados.
@@ -104,7 +104,7 @@ public class ConnectionManager {
 		}
 
         final String keyStore = config.getProperty(KEYSTORE_PROPERTY);
-        if (keyStore != null) {
+        if (keyStore != null && !keyStore.isEmpty()) {
         	final File ksFile = new File(keyStore);
         	if (!ksFile.exists() || !ksFile.isFile() || !ksFile.canRead()) {
         		throw new IllegalArgumentException(
@@ -209,14 +209,19 @@ public class ConnectionManager {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		if (con instanceof HttpsURLConnection) {
 
-			HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
+			if (ctx != null) {
+				HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
+			}
 			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
 				@Override
 				public boolean verify(final String hostname, final SSLSession session) {
 					return true;
 				}
 			});
-			((HttpsURLConnection) con).setSSLSocketFactory(ctx.getSocketFactory());
+			if (ctx != null) {
+				((HttpsURLConnection) con).setSSLSocketFactory(ctx.getSocketFactory());
+			}
+
 			((HttpsURLConnection) con).setHostnameVerifier(new HostnameVerifier() {
 				@Override
 				public boolean verify(final String hostname, final SSLSession session) {

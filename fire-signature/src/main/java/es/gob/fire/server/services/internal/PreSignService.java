@@ -38,19 +38,18 @@ import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.signature.AplicationsDAO;
-import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
 
 /** Servicio de carga de datos para su posterior firma en servidor.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class PreSignService extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
+    /** Serial Id. */
+	private static final long serialVersionUID = 7165850857019380976L;
 
-//    private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-    private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
-    private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(es.gob.fire.services.statistics.config.ConfigManager.getConfigStatistics());
+	private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
+    private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
     /** Carga los datos para su posterior firma en servidor.
@@ -109,7 +108,6 @@ public final class PreSignService extends HttpServlet {
 
     	// Leemos los valores necesarios de la configuracion
         final String op          	= session.getString(ServiceParams.SESSION_PARAM_OPERATION);
-    	final String appId          = session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
         final String subjectId      = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
         final String algorithm      = session.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
         final String extraParamsB64 = session.getString(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
@@ -119,34 +117,6 @@ public final class PreSignService extends HttpServlet {
         final boolean stopOnError   = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
         final TransactionConfig connConfig =
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-
-        // Comprobaciones de seguridad
-    	if (ConfigManager.isCheckApplicationNeeded()) {
-        	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
-        	if (appId == null || appId.isEmpty()) {
-                LOGGER.warning("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
-                SessionCollector.removeSession(session);
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-	        try {
-	        	if (!AplicationsDAO.checkApplicationId(appId)) {
-	        		LOGGER.warning("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion"); //$NON-NLS-1$
-	        		SessionCollector.removeSession(session);
-	        		response.sendError(HttpServletResponse.SC_FORBIDDEN);
-	        		return;
-	        	}
-	        }
-	        catch (final Exception e) {
-	        	LOGGER.severe("Ocurrio un error grave al validar el identificador de la aplicacion:" + e); //$NON-NLS-1$
-	        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
-	        	response.sendRedirect(redirectErrorUrl);
-	        	return;
-	        }
-        }
-        else {
-        	LOGGER.info("No se realiza la validacion de aplicacion"); //$NON-NLS-1$
-        }
 
     	// Comprobaciones
         if (subjectId == null || subjectId.isEmpty()) {
@@ -161,7 +131,7 @@ public final class PreSignService extends HttpServlet {
         // El identificador de usuario proporcionado debe ser el que estaba registrado en la sesion
         if (!userId.equals(subjectId)) {
         	LOGGER.warning("El identificador de usuario proporcionado no coincide con el de la sesion"); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
+        	SIGNLOGGER.register(session, false, null);
             SessionCollector.removeSession(session);
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -305,7 +275,7 @@ public final class PreSignService extends HttpServlet {
 
             if (documents.size() == 0) {
             	LOGGER.warning("No se han podido recuperar los datos a firmar"); //$NON-NLS-1$
-            	SIGNLOGGER.log(session, false, null);
+            	SIGNLOGGER.register(session, false, null);
             	SessionCollector.removeSession(session);
                 response.sendError(
             		HttpServletResponse.SC_BAD_REQUEST,

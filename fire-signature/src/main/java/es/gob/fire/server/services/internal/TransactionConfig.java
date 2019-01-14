@@ -21,8 +21,8 @@ public class TransactionConfig implements Serializable {
 	private static final String PARAM_SUCCESS_URL = "redirectOkUrl"; //$NON-NLS-1$
 	/** Par&aacute;metro usado para configurar el origen del certificado que debe usarse. */
 	private static final String PARAM_CERT_ORIGIN = "certOrigin"; //$NON-NLS-1$
-	/** Par&aacute;metro usado para configurar el nombre de la aplicaci&oacute;n que solicita firmar. */
-	private static final String PARAM_APPLICATION_NAME = "appName"; //$NON-NLS-1$
+	/** Par&aacute;metro usado para configurar el t&iacute;tulo de la aplicaci&oacute;n que solicita firmar. */
+	private static final String PARAM_APPLICATION_TITLE = "appName"; //$NON-NLS-1$
 	/** Par&aacute;metro usado para configurar el gestor de documentos con el que obtener los datos
 	 * a firmar y guardar las firmas. */
 	private static final String PARAM_DOCUMENT_MANAGER = "docManager"; //$NON-NLS-1$
@@ -102,11 +102,11 @@ public class TransactionConfig implements Serializable {
 	}
 
 	/**
-	 * Recupera el nombre de la aplicaci&oacute;n cliente en formato legible.
-	 * @return Nombre de la aplicaci&oacute;n o {@code null} si no se especific&oacute;.
+	 * Recupera el t&iacute;tulo de la aplicaci&oacute;n cliente en formato legible.
+	 * @return T&iacute;tulo de la aplicaci&oacute;n o {@code null} si no se especific&oacute;.
 	 */
-	public String getAppName() {
-		return this.config.getProperty(PARAM_APPLICATION_NAME);
+	public String getAppTitle() {
+		return this.config.getProperty(PARAM_APPLICATION_TITLE);
 	}
 
 	/**
@@ -143,7 +143,7 @@ public class TransactionConfig implements Serializable {
 		// Copiamos las propiedades y eliminamos aquellas necesarias
 		final Properties newConfig = (Properties) this.config.clone();
 		newConfig.remove(PARAM_DOCUMENT_MANAGER);
-		newConfig.remove(PARAM_APPLICATION_NAME);
+		newConfig.remove(PARAM_APPLICATION_TITLE);
 
 		return new TransactionConfig(newConfig) ;
 	}

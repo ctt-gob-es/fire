@@ -24,7 +24,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /** Respuesta de una consulta de mejora contra la plataforma Afirma. */
-class UpgradeResponse {
+class UpgradeAfirmaResponse {
 
     private static final String SUCCESS = "Success"; //$NON-NLS-1$
 
@@ -39,7 +39,7 @@ class UpgradeResponse {
     private static final String SIGNATURE_OBJECT_START = "<dss:SignatureObject>"; //$NON-NLS-1$
     private static final String SIGNATURE_OBJECT_END = "</dss:SignatureObject>"; //$NON-NLS-1$
 
-    UpgradeResponse(final byte[] xml) throws ParserConfigurationException,
+    UpgradeAfirmaResponse(final byte[] xml) throws ParserConfigurationException,
             SAXException, IOException {
 
         if (xml == null) {
@@ -157,7 +157,7 @@ class UpgradeResponse {
         private static final String TAG_BASE64_XML = "Base64XML"; //$NON-NLS-1$
         private static final String TAG_SIGNATURE_FORM = "SignatureForm"; //$NON-NLS-1$
 
-        private final UpgradeResponse verifyResponse;
+        private final UpgradeAfirmaResponse verifyResponse;
 
         private boolean overResultMajor = false;
         private boolean overResultMinor = false;
@@ -166,7 +166,7 @@ class UpgradeResponse {
         private boolean overBase64Xml = false;
         private boolean overSignatureForm = false;
 
-        CustomHandler(final UpgradeResponse vr) {
+        CustomHandler(final UpgradeAfirmaResponse vr) {
             this.verifyResponse = vr;
         }
 

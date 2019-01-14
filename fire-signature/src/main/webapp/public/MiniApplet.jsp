@@ -1,10 +1,8 @@
 
-<%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.DocInfo"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
-<%@page import="java.net.URLEncoder"%>
 <%@page import="java.util.Iterator"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.List"%>
@@ -16,7 +14,6 @@
 <%@page import="es.gob.fire.server.services.FIReTriHelper"%>
 <%@page import="es.gob.fire.server.services.ServiceUtil"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
-<%@page import="java.util.Map"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page import="java.util.Properties"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -40,7 +37,7 @@
 	final String refB64 = Base64.encode(trId.getBytes());
 	
 	// Nombre de la aplicacion
-	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 	
 	// Identificamos si estamos ante una firma de lote o una firma normal
 	final String operation = fireSession.getString(ServiceParams.SESSION_PARAM_OPERATION);
@@ -63,12 +60,23 @@
 	String certFilters = null;
 	String batchXmlB64 = null;
 	
-	// Obtenemos la URL de la pagina para obtener la URL base a partir de la cual
-	// acceder a varios servicios y recursos
-	String baseUrl = request.getRequestURL().toString();
-	if (baseUrl != null) {
-		baseUrl = baseUrl.substring(0, baseUrl.toString().lastIndexOf('/') + 1);
+	// Para la carga de recursos y acceso a los servicios, obtenemos la URL publica
+	// configurada o, si no se establecio, se toma la URL base de la pagina actual
+	String baseUrl = ConfigManager.getPublicContextUrl();
+	if ((baseUrl == null || baseUrl.isEmpty()) && request.getRequestURL() != null) {
+		String requestUrl = request.getRequestURL().toString();
+		baseUrl = requestUrl.substring(0, requestUrl.lastIndexOf('/') + 1);
 	}
+
+	if (baseUrl != null && !baseUrl.endsWith("/public/")) { //$NON-NLS-1$
+		if (baseUrl.endsWith("/public")) { //$NON-NLS-1$
+	baseUrl += "/"; //$NON-NLS-1$
+		}
+		else {
+	baseUrl += "/public/"; //$NON-NLS-1$
+		}
+	}
+
 	BatchResult batchResult = null;
 	if (isBatchOperation) {
 		final SignBatchConfig defaultConfig = new SignBatchConfig();
@@ -95,8 +103,8 @@
 		extraParamsProperties.setProperty("serverUrl", baseUrl + "afirma/triphaseSignService"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (String k : extraParamsProperties.keySet().toArray(new String[extraParamsProperties.size()])) {
-			extraParams.append(k).append("="). //$NON-NLS-1$
-				append(extraParamsProperties.getProperty(k)).append("\\n"); //$NON-NLS-1$
+	extraParams.append(k).append("="). //$NON-NLS-1$
+		append(extraParamsProperties.getProperty(k)).append("\\n"); //$NON-NLS-1$
 		}
 	}
 
@@ -114,27 +122,27 @@
 	// mostrara un boton cancelar y, en caso contrario, un boton volver. Configuramos tambien
 	// los parametros que necesitaran estos dos botones
 	boolean originForced = Boolean.parseBoolean(
-			fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
+	fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 
 	// Parametros para el enlace del boton Volver (solo si se selecciono la operacion desde la pagina anterior)
 	String buttonBackUrlParams = null;
 	if (!originForced) {
 		buttonBackUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-				ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
+		ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 		if (unregistered != null) {
-			buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
+	buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (op != null) {
-			buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
+	buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (errorUrl != null) {
-			buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+	buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
 	// Parametros para el enlace del boton Cancelar
 	String buttonCancelUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
+	ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 	if (errorUrl != null) {
 		buttonCancelUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -143,22 +151,22 @@
 	DocInfo[] docInfos = null;
 	if (isBatchOperation) {
 		if (batchResult != null) {
-			final List<DocInfo> docInfosList = new ArrayList<DocInfo>();
-			Iterator<String> it = batchResult.iterator();
-			while (it.hasNext()) {
-				String docId = it.next();
-				DocInfo docInfo = batchResult.getDocInfo(docId);
-				if (docInfo != null) {
-					docInfosList.add(docInfo);
-				}
-			}
-			docInfos = docInfosList.toArray(new DocInfo[docInfosList.size()]);
+	final List<DocInfo> docInfosList = new ArrayList<DocInfo>();
+	Iterator<String> it = batchResult.iterator();
+	while (it.hasNext()) {
+		String docId = it.next();
+		DocInfo docInfo = batchResult.getDocInfo(docId);
+		if (docInfo != null) {
+			docInfosList.add(docInfo);
+		}
+	}
+	docInfos = docInfosList.toArray(new DocInfo[docInfosList.size()]);
 		}
 	} else {
 		final Properties extraParamsProperties = ServiceUtil.base642Properties(extraParamsB64);
 		DocInfo docInfo = DocInfo.extractDocInfo(extraParamsProperties);
 		if (docInfo.getName() != null || docInfo.getTitle() != null) {
-			docInfos = new DocInfo[] { docInfo };
+	docInfos = new DocInfo[] { docInfo };
 		}
 	}
 
@@ -212,8 +220,7 @@
 						sendErrorCallback);
 	
 				} catch (e) {
-					sendErrorCallback(MiniApplet.getErrorType(), MiniApplet
-							.getErrorMessage());
+					sendErrorCallback(MiniApplet.getErrorType(), MiniApplet.getErrorMessage());
 				}
 			}
 		

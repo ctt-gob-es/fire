@@ -54,7 +54,7 @@
 						<label for="usuario" style="color: #404040">USUARIO</label>
 					</div>
 					<div  style="display: inline-block; width: 60%;margin: 5px;">
-						<input id="usuario" class="edit-txt" type="text" name="user" style="width: 100%;margin-top:10px;" />
+						<input id="usuario" class="edit-txt" type="text" name="user" autocomplete="off" style="width: 100%;margin-top:10px;" />
 					</div>	
 				</div>
 				<div style="margin: auto;width: 60%;padding: 5px;">
@@ -63,7 +63,7 @@
 						<label for="contrasenia" style="color: #404040">CONTRASE&Ntilde;A</label>
 					</div>
 					<div  style="display: inline-block; width: 60%;margin: 5px;">
-							<input id="contrasenia" class="edit-txt" type="password" name="password" style="width: 100%;margin-top:10px;"/>
+							<input id="contrasenia" class="edit-txt" type="password" name="password" autocomplete="off" style="width: 100%;margin-top:10px;"/>
 					</div>	
 				</div>
 			

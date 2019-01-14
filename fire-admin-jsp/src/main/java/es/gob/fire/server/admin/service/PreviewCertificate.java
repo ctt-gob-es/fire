@@ -57,30 +57,28 @@ public class PreviewCertificate extends HttpServlet {
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
 		/*Obtenemos el parametro enviado del formulario junto con el Certificado*/
-		this.getParameters(request);
+		getParameters(request);
 		//Obtener el tipo de operacion 1-Alta 2-Edicion
 		final int op = Integer.parseInt(request.getParameter(PARAM_OP));
 
 		String txtCert = null;
-		if(this.getCert() != null) {
-			Date expDate = new Date();
-			expDate = this.getCert().getNotAfter();
-			txtCert = this.getCert().getSubjectX500Principal().getName().concat(", Fecha de Caducidad=").concat(Utils.getStringDateFormat(expDate));		 //$NON-NLS-1$
+		if (getCert() != null) {
+			final Date expDate = getCert().getNotAfter();
+			txtCert = getCert().getSubjectX500Principal().getName() + ", Fecha de Caducidad=" + Utils.getStringDateFormat(expDate);		 //$NON-NLS-1$
 		}
 
-		if(txtCert != null) {
+		if (txtCert != null) {
 			response.setContentType("text/html"); //$NON-NLS-1$
 			final String[] datCertificate=txtCert.split(","); //$NON-NLS-1$
 			String certData = ""; //$NON-NLS-1$
 			for (int i = 0; i <= datCertificate.length-1; i++){
-				certData=certData.concat(datCertificate[i]).concat("</br>");//$NON-NLS-1$
+				certData += datCertificate[i] + "</br>";//$NON-NLS-1$
 			}
 			response.getWriter().write(certData);
 		}
 		else {
 			response.sendRedirect("Certificate/NewCertificate.jsp?error=true&op="+op); //$NON-NLS-1$
 		}
-
 	}
 
 	/**
@@ -96,7 +94,7 @@ public class PreviewCertificate extends HttpServlet {
 
 	        	if (!item.isFormField() && (PARAM_CER_PRINCIPAL.equals(item.getFieldName()) || PARAM_CER_BKUP.equals(item.getFieldName()) )&& item.getInputStream() != null && item.getSize() > 0L) {
 	        		final InputStream isFileContent = item.getInputStream();
-	        		this.setCert((X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(isFileContent));
+	        		setCert((X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(isFileContent));
 	        		isFileContent.close();
 	        		}
 

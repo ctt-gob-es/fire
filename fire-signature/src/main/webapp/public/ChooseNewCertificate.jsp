@@ -32,7 +32,7 @@
 	}
 	
 	final String generateTrId = fireSession.getString(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID);
-	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 	final String providerName = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
     final TransactionConfig connConfig =
     		(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
@@ -41,7 +41,7 @@
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 		errorUrl = connConfig.getRedirectErrorUrl();
 		if (errorUrl != null) {
-			errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
+	errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 		}
 	}
     
@@ -70,7 +70,7 @@
 	final String date = new SimpleDateFormat("dd-MM-yyyy").format(cert.getNotAfter()); //$NON-NLS-1$
 	final String op = fireSession.getString(ServiceParams.SESSION_PARAM_OPERATION);
 	final boolean originForced = Boolean.parseBoolean(
-			fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
+	fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 
 	// Eliminamos el parametro que indica que fuimos redirigidos a una plataforma externa para que
 	// que no se interprete que un posible error derivaba de ello 
@@ -82,18 +82,18 @@
 	// Se define el comportamiento del boton en base a si se forzo el origen
 	// (se muestra el boton Cancelar) o no (boton Volver) 
 	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
+	ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 	if (originForced) {
 		if (errorUrl != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	else {
 		if (op != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
+	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (errorUrl != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	

@@ -34,9 +34,10 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.signature.AplicationsDAO;
+import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.GoogleAnalitycs;
+import es.gob.fire.upgrade.UpgradeResult;
 
 /** Servlet que realiza el proceso de firma. */
 public final class SignService extends HttpServlet {
@@ -58,8 +59,6 @@ public final class SignService extends HttpServlet {
     private static final String PARAMETER_NAME_TRIPHASE_DATA = "tri"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_CONFIG = "config"; //$NON-NLS-1$
 
-    private static GoogleAnalitycs analytics = null;
-
     @Override
     public void init() throws ServletException {
     	super.init();
@@ -70,19 +69,6 @@ public final class SignService extends HttpServlet {
     	catch (final Exception e) {
     		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
     		return;
-    	}
-
-    	if (analytics == null && ConfigManager.getGoogleAnalyticsTrackingId() != null) {
-    		try {
-	        	analytics = new GoogleAnalitycs(
-	        			ConfigManager.getGoogleAnalyticsTrackingId(),
-	        			SignService.class.getSimpleName());
-    		}
-    		catch(final Throwable e) {
-    			LOGGER.warning(
-					"No ha podido inicializarse Google Analytics: " + e //$NON-NLS-1$
-				);
-    		}
     	}
     }
 
@@ -129,7 +115,8 @@ public final class SignService extends HttpServlet {
         	}
 
         	try {
-        		if (!AplicationsDAO.checkApplicationId(appId)) {
+        		final ApplicationChecking appCheck = AplicationsDAO.checkApplicationId(appId);
+	        	if (!appCheck.isValid()) {
         			LOGGER.warning("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion"); //$NON-NLS-1$
         			response.sendError(HttpServletResponse.SC_FORBIDDEN);
         			return;
@@ -166,10 +153,6 @@ public final class SignService extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"No se han proporcionado los datos a firmar"); //$NON-NLS-1$
     		return;
-    	}
-
-    	if (analytics != null) {
-    		analytics.trackRequest(request.getRemoteHost());
     	}
 
     	// Obtenemos el conector con el backend ya configurado
@@ -246,10 +229,9 @@ public final class SignService extends HttpServlet {
 
         // Si se ha definido un formato de actualizacion de la firma, se actualizara
         try {
-        	signResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
-
-
-        } catch (final UpgradeException e) {
+        	final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
+        	signResult = upgradeResult.getResult();
+       } catch (final UpgradeException e) {
         	LOGGER.log(Level.SEVERE, "Error al actualizar la firma de la transaccion: " + transactId, e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Error al actualizar la firma: " + e); //$NON-NLS-1$

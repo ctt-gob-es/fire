@@ -68,16 +68,18 @@ public class ServiceParams {
 
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de operaci&oacute;n. */
     public static final String SESSION_PARAM_OPERATION = "op"; //$NON-NLS-1$
-    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID del tipo de operaci&oacute;n. 1- firma simple 2-firma por lotes */
-    public static final String SESSION_PARAM_TYPE_OPERATION = "typeop"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de aplicaci&oacute;n. */
     public static final String SESSION_PARAM_APPLICATION_ID = "appid"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el nombre de aplicaci&oacute;n. */
-    public static final String SESSION_PARAM_APPLICATION_NAME = "appname"; //$NON-NLS-1$
+    public static final String SESSION_PARAM_APPLICATION_NAME = "appidname"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el t&iacute;tulo asignado a la aplicaci&oacute;n. */
+    public static final String SESSION_PARAM_APPLICATION_TITLE = "appname"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de usuario. */
     public static final String SESSION_PARAM_SUBJECT_ID = "subjectid"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de transacci&oacute;n. */
     public static final String SESSION_PARAM_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID del tipo de operaci&oacute;n. */
+    public static final String SESSION_PARAM_TRANSACTION_TYPE = "transactiontype"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el certificado de firma en Base64. */
     public static final String SESSION_PARAM_CERT = "cert"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el listado de proveedores disponibles para el usuario. */
@@ -144,5 +146,8 @@ public class ServiceParams {
 
     /** Identificador de operaci&oacute;n de firma de lotes. */
     public static final String OPERATION_BATCH = "batch"; //$NON-NLS-1$
+
+    public static final String TRANSACTION_TYPE_SIGN = "1"; //$NON-NLS-1$
+    public static final String TRANSACTION_TYPE_BATCH = "2"; //$NON-NLS-1$
 
 }

@@ -14,7 +14,7 @@
 	$confB64 = base64_encode($conf);
 	
 	//$appId = "7BA5453995EC";	// Entorno preproduccion
-	$appId = "B5DD7690A7FA";	// Entorno local
+	$appId = "B244E473466F";	// Entorno local
 	$subjectId = "00001";		// DNI de la persona
 	$dataB64 = base64_encode("Hola Mundo!!");
 	
@@ -25,7 +25,7 @@
 			$appId,			// Identificador de la aplicacion (dada de alta previamente en el sistema)
 			$subjectId,		// DNI de la persona
 			"sign",			// Operacion criptografica (sign, cosign o countersign)
-			"PAdES",		// Formato de firma (CAdES, XAdES, PAdES...)
+			"CAdES",		// Formato de firma (CAdES, XAdES, PAdES...)
 			"SHA1withRSA",	// Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
 			null,			// Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
 			$dataB64,		// Datos a firmar

@@ -23,7 +23,6 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
  */
 class FIReHelper {
 
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private static final Logger LOGGER = Logger.getLogger(FIReHelper.class.getName());
 
 	/**

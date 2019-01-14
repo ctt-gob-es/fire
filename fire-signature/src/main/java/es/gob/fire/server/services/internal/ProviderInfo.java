@@ -44,7 +44,6 @@ public class ProviderInfo {
 
 	private static final String DATA_URI_IMAGE_HEADER = "image/png;base64,"; //$NON-NLS-1$
 
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private static final Logger LOGGER = Logger.getLogger(ProviderInfo.class.getName());
 
 	private final String name;
@@ -132,7 +131,7 @@ public class ProviderInfo {
 			logo = readInputStream(logoIs);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(String.format("No se ha podido cargar la imagen %s: " + e, uri)); //$NON-NLS-1$
+			LOGGER.warning(String.format("No se ha podido cargar la imagen %1s: %2s", uri, e)); //$NON-NLS-1$
 			return DEFAULT_LOGO_URI;
 		}
 		// Componentemos la URI

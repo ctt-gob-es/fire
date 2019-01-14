@@ -23,8 +23,10 @@ import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
+import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.server.services.statistics.TransactionType;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -33,9 +35,9 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class SignOperationManager {
 
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
 	private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+
 	/**
 	 * Inicia la operaci&oacute;n de firma asociada al componente central.
 	 * @param request Solicitud HTTP.
@@ -44,7 +46,7 @@ public class SignOperationManager {
 	 * @throws IOException Cuando se produce un error en la comunicaci&oacute;n con el cliente
 	 * o en el guardado de temporales.
 	 */
-	public static void sign(final HttpServletRequest request, final RequestParameters params, final HttpServletResponse response) throws IOException {
+	public static void sign(final HttpServletRequest request, final String appName, final RequestParameters params, final HttpServletResponse response) throws IOException {
 
 		final String op				= params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 		final String appId			= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
@@ -56,36 +58,38 @@ public class SignOperationManager {
         final String dataB64        = params.getParameter(ServiceParams.HTTP_PARAM_DATA);
         String extraParamsB64 		= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId);
+
         if (subjectId == null || subjectId.isEmpty()) {
-        	LOGGER.warning("No se ha proporcionado el identificador del usuario que solicita la firma"); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que solicita la firma")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha proporcionado el identificador del usuario que solicita la firma"); //$NON-NLS-1$
             return;
         }
 
         if (algorithm == null || algorithm.isEmpty()) {
-            LOGGER.warning("No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
+            LOGGER.warning(logF.format("No se ha proporcionado el algoritmo de firma")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
             return;
         }
 
         if (cop == null || cop.isEmpty()) {
-            LOGGER.warning("No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
+            LOGGER.warning(logF.format("No se ha indicado la operacion de firma a realizar")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
             return;
         }
 
         if (format == null || format.isEmpty()) {
-            LOGGER.warning("No se ha indicado el formato de firma"); //$NON-NLS-1$
+            LOGGER.warning(logF.format("No se ha indicado el formato de firma")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha indicado el formato de firma"); //$NON-NLS-1$
             return;
         }
 
         if (dataB64 == null || dataB64.isEmpty()) {
-			LOGGER.warning("No se han proporcionado los datos a firmar"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se han proporcionado los datos a firmar")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se han proporcionado los datos a firmar"); //$NON-NLS-1$
             return;
@@ -97,21 +101,21 @@ public class SignOperationManager {
 				connConfig = new TransactionConfig(configB64);
 			}
 			catch(final Exception e) {
-				LOGGER.warning("Se proporcionaron datos malformados para la conexion y configuracion del backend"); //$NON-NLS-1$
+				LOGGER.warning(logF.format("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-						"Se proporcionaron datos malformados para la conexion y configuracion del backend"); //$NON-NLS-1$
+						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma"); //$NON-NLS-1$
 				return;
 			}
 		}
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning("No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
 		}
 
-		LOGGER.info(String.format("App %1s: TrId null: Peticion bien formada", appId)); //$NON-NLS-1$
+		LOGGER.fine(logF.format("Peticion de inicio de transaccion de FIRMA bien formada")); //$NON-NLS-1$
 
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
@@ -126,7 +130,7 @@ public class SignOperationManager {
         	provs = ProviderManager.getProviderNames();
         }
 
-		final String appName = connConfig.getAppName();
+		final String appTitle = connConfig.getAppTitle();
 		final String docManagerName = connConfig.getDocumentManager();
 
 		// Copiamos al extraParams la informacion del documento firmado y el formato de firma
@@ -138,12 +142,15 @@ public class SignOperationManager {
 		final FireSession session = SessionCollector.createFireSession(request.getSession());
 		final String transactionId = session.getTransactionId();
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Iniciada transaccion de tipo FIRMA", appId, transactionId)); //$NON-NLS-1$
+		logF.setTransactionId(transactionId);
+
+		LOGGER.info(logF.format("Iniciada transaccion de FIRMA")); //$NON-NLS-1$
 
         // Guardamos en la sesion la configuracion de la operacion
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ID, appId);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appName);
+        session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_TITLE, appTitle);
         session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig.cleanConfig());
         session.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
@@ -151,7 +158,7 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
-
+    	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.valueOf(FIReServiceOperation.parse(op)));
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
@@ -160,17 +167,19 @@ public class SignOperationManager {
         	docManager = FIReDocumentManagerFactory.newDocumentManager(docManagerName);
         }
         catch (final IllegalArgumentException e) {
-        	LOGGER.log(Level.SEVERE, "No existe el gestor de documentos: " + docManagerName, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("No existe el gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
+
+        LOGGER.info(logF.format("La transaccion usara el DocumentManager " + docManager.getClass().getName())); //$NON-NLS-1$
 
         // Obtenemos el identificador del documento (que puede ser el propio documento)
         byte[] docId;
@@ -178,8 +187,8 @@ public class SignOperationManager {
         	docId = Base64.decode(dataB64, true);
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, "El documento enviado a firmar no esta bien codificado", e); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
+        	LOGGER.log(Level.SEVERE, logF.format("El documento enviado a firmar no esta bien codificado"), e); //$NON-NLS-1$
+			SIGNLOGGER.register(session, false, null);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         			"El documento enviado a firmar no esta bien codificado"); //$NON-NLS-1$
         	return;
@@ -200,7 +209,7 @@ public class SignOperationManager {
 
         SessionCollector.commit(session);
 
-        LOGGER.info(String.format("App %1s: TrId %2s: Se inicia la carga de los datos", appId, transactionId)); //$NON-NLS-1$
+        LOGGER.info(logF.format("Se inicia la carga de los datos")); //$NON-NLS-1$
 
         // Obtenemos los datos a firmar a partir de los datos proporcionados
         // mediante del DocumentManager que corresponda
@@ -209,16 +218,16 @@ public class SignOperationManager {
         	data = docManager.getDocument(docId, appId, format, extraParams);
         }
         catch (final Exception e) {
-    		LOGGER.log(Level.SEVERE, "Error al obtener los datos a firmar", e); //$NON-NLS-1$
-    		SIGNLOGGER.log(session, false, null);
+    		LOGGER.log(Level.SEVERE, logF.format("Error al obtener los datos a firmar"), e); //$NON-NLS-1$
+    		SIGNLOGGER.register(session, false, null);
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"Error al obtener los datos a firmar"); //$NON-NLS-1$
     		return;
         }
 
     	if (data == null) {
-    		LOGGER.severe("No se han podido obtener los datos a firmar"); //$NON-NLS-1$
-    		SIGNLOGGER.log(session, false, null);
+    		LOGGER.severe(logF.format("No se han podido obtener los datos a firmar")); //$NON-NLS-1$
+    		SIGNLOGGER.register(session, false, null);
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"No se han podido obtener los datos a firmar"); //$NON-NLS-1$
     		return;
@@ -232,13 +241,13 @@ public class SignOperationManager {
        	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, TempFilesHelper.getFileSize());
         }
         catch (final Exception e) {
-        	LOGGER.severe("Error en el guardado temporal de los datos a firmar: " + e); //$NON-NLS-1$
+        	LOGGER.severe(logF.format("Error en el guardado temporal de los datos a firmar: " + e)); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
 		}
 
-        LOGGER.info(String.format("App %1s: TrId %2s: Generamos la URL de redireccion", appId, transactionId)); //$NON-NLS-1$
+        LOGGER.info(logF.format("Generamos la URL de redireccion")); //$NON-NLS-1$
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
@@ -264,7 +273,7 @@ public class SignOperationManager {
         			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
-        LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos la URL de redireccion con el ID de transaccion", appId, transactionId)); //$NON-NLS-1$
+        LOGGER.info(logF.format("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$
 
         sendResult(response, result);
 	}
@@ -285,12 +294,6 @@ public class SignOperationManager {
 		}
 		return redirectUrlBase;
 	}
-
-//	private static void setErrorToSession(final FireSession session, final OperationError error) {
-//		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-//		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
-//		SessionCollector.commit(session);
-//	}
 
 	private static void sendResult(final HttpServletResponse response, final SignOperationResult result) throws IOException {
         response.setContentType("application/json"); //$NON-NLS-1$

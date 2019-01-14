@@ -8,16 +8,16 @@ import java.sql.Date;
  *
  */
 public class User {
-	private String id_usuario;
-	private String nombre_usuario;
+	private String id;
+	private String nombreUsuario;
 	private String clave;
 	private String nombre;
 	private String apellidos;
-	private String correo_elec;
-	private String telf_contacto;
+	private String correo;
+	private String telefono;
 	private String rol;
-	private Date fec_alta;
-	private String usu_defecto;
+	private Date fechaAlta;
+	private String porDefecto;
 
 	/**
 	 * Construcctor de Usuario
@@ -35,7 +35,7 @@ public class User {
 	 */
 	public User(final String nombre_usuario, final String clave, final String nombre, final String apellidos, final String rol) {
 		super();
-		this.nombre_usuario = nombre_usuario;
+		this.nombreUsuario = nombre_usuario;
 		this.clave = clave;
 		this.nombre = nombre;
 		this.apellidos = apellidos;
@@ -58,154 +58,162 @@ public class User {
 	public User(final String id_usuario, final String nombre_usuario, final String clave, final String nombre, final String apellidos,
 			final String correo_elec, final String telf_contacto, final String rol, final Date fec_alta) {
 		super();
-		this.id_usuario = id_usuario;
-		this.nombre_usuario = nombre_usuario;
+		this.id = id_usuario;
+		this.nombreUsuario = nombre_usuario;
 		this.clave = clave;
 		this.nombre = nombre;
 		this.apellidos = apellidos;
-		this.correo_elec = correo_elec;
-		this.telf_contacto = telf_contacto;
+		this.correo = correo_elec;
+		this.telefono = telf_contacto;
 		this.rol = rol;
-		this.fec_alta = fec_alta;
+		this.fechaAlta = fec_alta;
 	}
 
 
 
 	/**
-	 * Obtiene el id de usuario
-	 * @return
+	 * Obtiene el id de usuario.
+	 * @return Id del usuario.
 	 */
-	public final String getId_usuario() {
-		return this.id_usuario;
+	public final String getId() {
+		return this.id;
 	}
 	/**
-	 * establece el id de usuario
-	 * @param id_usuario
+	 * establece el id de usuario.
+	 * @param id Id de usuario.
 	 */
-	public final void setId_usuario(final String id_usuario) {
-		this.id_usuario = id_usuario;
+	public final void setId(final String id) {
+		this.id = id;
 	}
 	/**
-	 * Obtiene el nombre del usuario
-	 * @return
+	 * Obtiene el nombre del usuario.
+	 * @return Nombre del usuario.
 	 */
-	public final String getNombre_usuario() {
-		return this.nombre_usuario;
+	public final String getNombreUsuario() {
+		return this.nombreUsuario;
 	}
 /**
- * Estableceel nombre del usuario
- * @param nombre_usuario
+ * Estableceel Nombre del usuario.
+ * @param nombre Nombre del usuario.
  */
-	public final void setNombre_usuario(final String nombre_usuario) {
-		this.nombre_usuario = nombre_usuario;
+	public final void setNombreUsuario(final String nombre) {
+		this.nombreUsuario = nombre;
 	}
 	/**
-	 * Obtiene la clave del usuario
-	 * @return
+	 * Obtiene la clave del usuario.
+	 * @return Clave del usuario.
 	 */
 	public final String getClave() {
 		return this.clave;
 	}
 	/**
-	 * Establece la clave del usuario
-	 * @param clave
+	 * Establece la clave del usuario.
+	 * @param clave Clave del usuario.
 	 */
 	public final void setClave(final String clave) {
 		this.clave = clave;
 	}
 	/**
-	 * Obtiene la fecha de alta del usuario
-	 * @return
+	 * Obtiene la fecha de alta del usuario.
+	 * @return Fecha de alta del usuario.
 	 */
-	public final Date getFec_alta() {
-		return this.fec_alta;
+	public final Date getFechaAlta() {
+		return this.fechaAlta;
 	}
 	/**
-	 * Establece la fecha de alta del usuario
-	 * @param fec_alta
+	 * Establece la fecha de alta del usuario.
+	 * @param fecha Fecha de alta del usuario.
 	 */
-	public final void setFec_alta(final Date fec_alta) {
-		this.fec_alta = fec_alta;
+	public final void setFechaAlta(final Date fecha) {
+		this.fechaAlta = fecha;
 	}
 	/**
-	 * Obtiene el nombre completo del usuario
-	 * @return
+	 * Obtiene el nombre de pila del usuario.
+	 * @return Nombre de pila del usuario.
 	 */
 	public final String getNombre() {
 		return this.nombre;
 	}
 	/**
-	 * Establece el nombre completo del usuario
-	 * @param nombre
+	 * Establece el nombre de pila del usuario.
+	 * @param nombre Nombre de pila del usuario.
 	 */
 	public final void setNombre(final String nombre) {
 		this.nombre = nombre;
 	}
 	/**
-	 * Obtiene los apellidos del usuario
-	 * @return
+	 * Obtiene los apellidos del usuario.
+	 * @return Apellidos del usuario.
 	 */
 	public final String getApellidos() {
 		return this.apellidos;
 	}
 	/**
-	 * Establece los apellidos del usuario
-	 * @param apellidos
+	 * Establece los apellidos del usuario.
+	 * @param apellidos Apellidos del usuario.
 	 */
 	public final void setApellidos(final String apellidos) {
 		this.apellidos = apellidos;
 	}
 	/**
-	 * Obtiene el correo electr�nico del usuario
-	 * @return
+	 * Obtiene el correo electr&oacute;nico del usuario.
+	 * @return Correo electr&oacute;nico.
 	 */
-	public final String getCorreo_elec() {
-		return this.correo_elec;
+	public final String getCorreo() {
+		return this.correo;
 	}
 	/**
-	 * Establece el correo electr�nico del usuario
-	 * @param correo_elec
+	 * Establece el correo electr&oacute;nico del usuario.
+	 * @param correo Correo electr&oacute;nico.
 	 */
-	public final void setCorreo_elec(final String correo_elec) {
-		this.correo_elec = correo_elec;
+	public final void setCorreo_elec(final String correo) {
+		this.correo = correo;
 	}
 	/**
-	 * Obtiene el tel&eacute;fono de contacto del usuario
-	 * @return
+	 * Obtiene el tel&eacute;fono de contacto del usuario.
+	 * @return Tel&eacute;fono de contacto.
 	 */
-	public final String getTelf_contacto() {
-		return this.telf_contacto;
+	public final String getTelefono() {
+		return this.telefono;
 	}
 	/**
-	 * Establece el tel&eacute;fono de contacto del usuario
-	 * @param telf_contacto
+	 * Establece el tel&eacute;fono de contacto del usuario.
+	 * @param telefono Tel&eacute;fono de contacto
 	 */
-	public final void setTelf_contacto(final String telf_contacto) {
-		this.telf_contacto = telf_contacto;
+	public final void setTelfefono(final String telefono) {
+		this.telefono = telefono;
 	}
 	/**
 	 * Obtiene el rol (tipo de usuario en el sistema)
-	 * @return
+	 * @return Rol del usuario.
 	 */
 	public final String getRol() {
 		return this.rol;
 	}
 	/**
 	 * Establece el rol (tipo de usuario en el sistema)
-	 * @param rol
+	 * @param rol Rol del usuario.
 	 */
 	public final void setRol(final String rol) {
 		this.rol = rol;
 	}
 
 
-	public final String getUsu_defecto() {
-		return this.usu_defecto;
+	/**
+	 * Indica si el usuario es el por defecto ("1") o no ("0").
+	 * @return Devuelve "1" si el usuario es el por defecto (el usuario original)
+	 * y "0" si no lo es.
+	 */
+	public final String getPorDefecto() {
+		return this.porDefecto;
 	}
 
-
-	public final void setUsu_defecto(final String usu_defecto) {
-		this.usu_defecto = usu_defecto;
+	/**
+	 * Establece si un usuario es el por defecto ("1") o no ("0").
+	 * @param porDefecto Valor que determina si el usuario es el por defecto o no.
+	 */
+	public final void setPorDefecto(final String porDefecto) {
+		this.porDefecto = porDefecto;
 	}
 
 

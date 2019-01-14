@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -15,8 +14,6 @@ import java.util.zip.ZipOutputStream;
  * un canal de datos.
  */
 public class LogDownload {
-
-	private static final Logger LOGGER = Logger.getLogger(LogDownload.class.getName());
 
 	private static final Charset ENTRY_NAMES_CHARSET = StandardCharsets.UTF_8;
 
@@ -40,8 +37,6 @@ public class LogDownload {
 
 		this.zipOutputStream = null;
 		this.closed = false;
-
-
 	}
 
 	/**
@@ -125,9 +120,6 @@ public class LogDownload {
 	public boolean hasMore() throws IOException {
 		return !this.closed && this.channel.position() != this.channel.size();
 	}
-
-
-
 
 	public final long getPosition() {
 		return this.position;

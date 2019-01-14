@@ -15,8 +15,6 @@ import java.util.logging.Logger;
  * proveedores de firma en la nube. */
 public final class FIReConnectorFactory {
 
-	private static final Logger LOGGER = Logger.getLogger(FIReConnectorFactory.class.getName());
-
     /** Constructor privado para no permir la instanciaci&oacute;n. */
     private FIReConnectorFactory() {
         // no instanciable
@@ -35,7 +33,6 @@ public final class FIReConnectorFactory {
         catch (final Exception e) {
             throw new FIReConnectorFactoryException("No se ha podido cargar el conector definido", e); //$NON-NLS-1$
         }
-        LOGGER.info("Se usara el servicio " + connectorClass); //$NON-NLS-1$
         return ret;
     }
 

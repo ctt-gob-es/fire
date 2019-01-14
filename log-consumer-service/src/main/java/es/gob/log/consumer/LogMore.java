@@ -2,49 +2,38 @@ package es.gob.log.consumer;
 
 import java.io.IOException;
 import java.nio.CharBuffer;
-import java.util.logging.Logger;
-
 
 /**
- *
- * @author Adolfo.Navarro
- *
+ * Clase para la obtenci&oacute;n de m&aacute;s registros de log partiendo de una
+ * petici&oacute;n anterior.
  */
 public class LogMore {
 
-
-	private static final Logger LOGGER = Logger.getLogger(LogMore.class.getName());
-
-
-
 	/**
-	 *
-	 * @param numLines
-	 * @param reader
-	 * @return
-	 * @throws IOException
+	 * Obtiene m&aacute;s registros de log partiendo de una
+	 * petici&oacute;n anterior.
+	 * @param numLines N&uacute;mero de l&iacute;neas a obtener.
+	 * @param reader Lector del log.
+	 * @return Bytes de las nuevas l&iacute;neas de log.
+	 * @throws IOException Cuando ocurra un error durante la lectura.
 	 */
-	public   byte[]  getLogMore( final int numLines, final LogReader reader) throws IOException {
-		String result = ""; //$NON-NLS-1$
-		 if (reader == null) {
-				throw new IOException("No se ha cargado un fichero de log"); //$NON-NLS-1$
-			}
+	public static byte[] getLogMore( final int numLines, final LogReader reader) throws IOException {
 
-			// Leemos el numero de lineas solicitadas,
-			int lines = 1;
-			 CharBuffer lineReaded;
+		if (reader == null) {
+			throw new IOException("No se ha cargado un fichero de log"); //$NON-NLS-1$
+		}
 
-			while ( lines <= numLines && (lineReaded = reader.readLine()) != null) {
-				lineReaded.rewind();
-				result = result.concat(lineReaded.toString()).concat("\n"); //$NON-NLS-1$
-				lines ++;
+		// Leemos el numero de lineas solicitadas,
+		int lines = 1;
+		CharBuffer lineReaded;
 
-			}
+		final StringBuilder result = new StringBuilder();
+		while (lines <= numLines && (lineReaded = reader.readLine()) != null) {
+			lineReaded.rewind();
+			result.append(lineReaded.toString()).append("\n"); //$NON-NLS-1$
+			lines++;
+		}
 
-			return result.getBytes(reader.getCharset());
-
+		return result.toString().getBytes(reader.getCharset());
 	}
-
-
-
 }

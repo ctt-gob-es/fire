@@ -7,6 +7,6 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-/** Clases para el acceso a los servicios proporcionados para
- * gesti&oacute;n de certificado y firma en la nube. */
+/** Clases para el acceso y uso de servicios de gesti&oacute;n de certificados y firma en
+ * la nube. */
 package es.gob.fire.server.connector;

@@ -18,10 +18,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.internal.AddDocumentBatchManager;
 import es.gob.fire.server.services.internal.CreateBatchManager;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.RecoverBatchResultManager;
 import es.gob.fire.server.services.internal.RecoverBatchSignatureManager;
 import es.gob.fire.server.services.internal.RecoverBatchStateManager;
@@ -31,12 +31,11 @@ import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
-import es.gob.fire.server.services.statistics.Operations;
 import es.gob.fire.services.statistics.FireStatistics;
 import es.gob.fire.signature.AplicationsDAO;
+import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.GoogleAnalitycs;
 
 /**
  * Servicio central de FIRe que integra las funciones de firma a traves del Cliente @firma
@@ -49,17 +48,15 @@ public class FIReService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(FIReService.class.getName());
 
 	private static FireStatistics firest;
-    // Parametros que necesitamos de la URL.
-    private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
-    private static final String PARAMETER_NAME_OPERATION = "op"; //$NON-NLS-1$
+
 	/** Nombre del fichero de configuraci&oacute;n. */
 	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
-    private static GoogleAnalitycs analytics = null;
 
     @Override
     public void init() throws ServletException {
     	super.init();
 
+    	// Comprobamos la configuracion
     	try {
 	    	ConfigManager.checkConfiguration();
 	    	es.gob.fire.services.statistics.config.ConfigManager.checkConfiguration(CONFIG_FILE);
@@ -70,32 +67,29 @@ public class FIReService extends HttpServlet {
     		return;
     	}
 
-    	// Codigo para inicializar las estadisticas
+    	// Configuramos los logs
+    	try {
+    		FireLogManager.configureLogs();
+    	}
+		catch(final Throwable e) {
+			LOGGER.warning(
+				"No se pudo configurar la salida de los logs de FIRe a un fichero externo: " + e //$NON-NLS-1$
+			);
+		}
+
+    	// Codigo para programar el volcado de estadisticas a BD si procede
 		try {
 			final int configStatistic = Integer.valueOf(es.gob.fire.services.statistics.config.ConfigManager.getConfigStatistics()).intValue() ;
-			final String st_path = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsDir();
-			if(configStatistic == 2 && st_path != null && !"".equals(st_path)) { //$NON-NLS-1$
-				firest = new FireStatistics(st_path);
+			final String statisticsDirPath = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsDir();
+			if (configStatistic == 2 && statisticsDirPath != null && !statisticsDirPath.isEmpty()) {
+				firest = new FireStatistics(statisticsDirPath);
 				final String startTime = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsStartTime();
 				firest.init(startTime);
 			}
 		}
 		catch (final Exception e) {
-			LOGGER.warning("Error al cargar la configuracion de estadisticas: " + e); //$NON-NLS-1$
+			LOGGER.warning("Error al cargar la configuracion de estadisticas. No se generaran: " + e); //$NON-NLS-1$
 		}
-
-    	if (analytics == null && ConfigManager.getGoogleAnalyticsTrackingId() != null) {
-    		try {
-	        	analytics = new GoogleAnalitycs(
-	        			ConfigManager.getGoogleAnalyticsTrackingId(),
-	        			FIReService.class.getSimpleName());
-    		}
-    		catch(final Throwable e) {
-    			LOGGER.warning(
-					"No ha podido inicializarse Google Analytics: " + e //$NON-NLS-1$
-				);
-    		}
-    	}
 
     	LOGGER.info("Componente central de FIRe cargado correctamente"); //$NON-NLS-1$
     }
@@ -122,12 +116,14 @@ public class FIReService extends HttpServlet {
         final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
         final String trId      = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, trId);
 
+		String appName = null;
 
     	if (ConfigManager.isCheckApplicationNeeded()) {
-        	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
+        	LOGGER.fine(logF.format("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
         	if (appId == null || appId.isEmpty()) {
-            		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en la peticion"); //$NON-NLS-1$
+        		LOGGER.warning(logF.format("No se ha proporcionado el identificador de la aplicacion en una peticion entrante")); //$NON-NLS-1$
                 response.sendError(
             		HttpServletResponse.SC_BAD_REQUEST,
                     "No se ha proporcionado el identificador de la aplicacion" //$NON-NLS-1$
@@ -136,40 +132,44 @@ public class FIReService extends HttpServlet {
             }
 
 	        try {
-	        	if (!AplicationsDAO.checkApplicationId(appId)) {
-	        		LOGGER.warning("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion"); //$NON-NLS-1$
+	        	final ApplicationChecking appCheck = AplicationsDAO.checkApplicationId(appId);
+	        	if (!appCheck.isValid()) {
+	        		LOGGER.warning(logF.format("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion")); //$NON-NLS-1$
 	        		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 	        		return;
 	        	}
+	        	appName = appCheck.getName();
 	        }
 	        catch (final Exception e) {
-	        	LOGGER.severe("Ocurrio un error grave al validar el identificador de la aplicacion :" + e); //$NON-NLS-1$
+	        	LOGGER.log(Level.SEVERE, logF.format("Ocurrio un error grave al validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        	return;
 	        }
         }
         else {
-        	LOGGER.fine("No se realiza la validacion de aplicacion"); //$NON-NLS-1$
+        	LOGGER.fine(logF.format("No se realiza la validacion del identificador de aplicacion")); //$NON-NLS-1$
         }
 
 
     	if (ConfigManager.isCheckCertificateNeeded()){
-    		LOGGER.fine("Se realizara la validacion del certificado"); //$NON-NLS-1$
+    		LOGGER.fine(logF.format("Se realizara la validacion del certificado")); //$NON-NLS-1$
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
 			} catch (final CertificateValidationException e) {
-				LOGGER.severe("Error en la validacion del certificado: " + e); //$NON-NLS-1$
+				LOGGER.severe(logF.format("Error en la validacion del certificado: " + e)); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;
 			}
     	}
     	else {
-    		LOGGER.fine("No se valida el certificado");//$NON-NLS-1$
+    		LOGGER.fine(logF.format("No se valida el certificado"));//$NON-NLS-1$
     	}
 
+    	LOGGER.fine(logF.format("Peticion autorizada")); //$NON-NLS-1$
+
         if (operation == null || operation.isEmpty()) {
-            LOGGER.warning("No se ha indicado la operacion a realizar en servidor"); //$NON-NLS-1$
+            LOGGER.warning(logF.format("No se ha indicado la operacion a realizar en servidor")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha indicado la operacion a realizar" //$NON-NLS-1$
             );
@@ -179,29 +179,21 @@ public class FIReService extends HttpServlet {
         FIReServiceOperation op;
         try {
         	op = FIReServiceOperation.parse(operation);
-        	final Operations typeOp =  Operations.parse(op);
-        	final HttpSession sesion = request.getSession();
-        	sesion.setAttribute(ServiceParams.SESSION_PARAM_TYPE_OPERATION, typeOp.toString());
-
         }
         catch (final Exception e) {
-            LOGGER.warning("Se ha indicado un id de operacion incorrecto: + e"); //$NON-NLS-1$
+            LOGGER.warning(logF.format("Se ha indicado un id de operacion incorrecto: " + e)); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "Se ha indicado un id de operacion incorrecto" //$NON-NLS-1$
             );
             return;
 		}
 
-    	if (analytics != null) {
-    		analytics.trackRequest(request.getRemoteHost(), op.name());
-    	}
-
-    	LOGGER.info(String.format("App %1s: TrId %2s: Peticion de tipo %3s", appId, trId, op.toString())); //$NON-NLS-1$
+    	LOGGER.info(logF.format("Peticion de tipo " + op.toString())); //$NON-NLS-1$
 
     	try {
     		switch (op) {
     		case SIGN:
-    			SignOperationManager.sign(request, params, response);
+    			SignOperationManager.sign(request, appName, params, response);
     			break;
     		case RECOVER_SIGN:
     			RecoverSignManager.recoverSignature(params, response);
@@ -210,7 +202,7 @@ public class FIReService extends HttpServlet {
     			RecoverSignResultManager.recoverSignature(params, response);
     			break;
     		case CREATE_BATCH:
-    			CreateBatchManager.createBatch(request, params, response);
+    			CreateBatchManager.createBatch(request, appName, params, response);
     			break;
     		case ADD_DOCUMENT_TO_BATCH:
     			AddDocumentBatchManager.addDocument(params, response);
@@ -231,7 +223,7 @@ public class FIReService extends HttpServlet {
     			RecoverErrorManager.recoverError(params, response);
     			break;
     		default:
-    			LOGGER.warning("Operacion no soportada: " + op.name()); //$NON-NLS-1$
+    			LOGGER.warning(logF.format("Se ha enviado una peticion con una operacion no soportada: " + op.name())); //$NON-NLS-1$
     			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     			break;
     		}
@@ -239,7 +231,7 @@ public class FIReService extends HttpServlet {
     	catch (final Exception e) {
     		// Las operaciones solo lanzan una excepcion al exterior si no queda mas remedio.
     		// De norma, deberian responder directamente con su propio mensaje de error.
-    		LOGGER.log(Level.WARNING, "Ocurrio un error no recuperable durante la ejecucion de la operacion: " + e, e); //$NON-NLS-1$
+    		LOGGER.log(Level.WARNING, logF.format("Ocurrio un error no recuperable durante la ejecucion de la operacion"), e); //$NON-NLS-1$
     		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     		return;
     	}

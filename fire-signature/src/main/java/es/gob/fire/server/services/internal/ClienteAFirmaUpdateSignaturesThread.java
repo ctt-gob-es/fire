@@ -18,8 +18,9 @@ import java.util.logging.Logger;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.SignatureLogger;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.upgrade.UpgradeResult;
 
 /**
  * Hilo que ejecuta la carga, actualizaci&oacute;n y guardado de una firma de lote
@@ -29,7 +30,7 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
 
 	private static final Logger LOGGER = Logger.getLogger(ClienteAFirmaUpdateSignaturesThread.class.getName());
 
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 
 	private final String appId;
 
@@ -91,17 +92,17 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
         final SignBatchConfig config = this.batchResult.getSignConfig(this.docId);
         final String upgradeFormat = config != null ?
         		config.getUpgrade() :
-        			(String) this.defaultConfig.getString(ServiceParams.SESSION_PARAM_UPGRADE);
-        try {
-        	signature = AfirmaUpgrader.upgradeSignature(signature, upgradeFormat);
-
-        	if(AfirmaUpgrader.getUpgradedFormat() != null && this.batchResult.getSignConfig(this.docId) != null) {
-    			this.batchResult.getSignConfig(this.docId).setUpgrade(AfirmaUpgrader.getUpgradedFormat());
-        }
-        }
+        		(String) this.defaultConfig.getString(ServiceParams.SESSION_PARAM_UPGRADE);
+		try {
+			final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signature, upgradeFormat);
+			signature = upgradeResult.getResult();
+			if (this.batchResult.getSignConfig(this.docId) != null) {
+				this.batchResult.getSignConfig(this.docId).setUpgrade(upgradeResult.getFormat());
+			}
+		}
         catch (final Exception e) {
         	LOGGER.log(Level.WARNING, "Error en la actualizacion de la firma", e); //$NON-NLS-1$
-        	SIGNLOGGER.log(this.defaultConfig, false, this.docId);
+        	SIGNLOGGER.register(this.defaultConfig, false, this.docId);
         	this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
         	setFailed(true);
         	interrupt();
@@ -124,7 +125,7 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
 						this.appId, signature, this.batchResult.getSigningCertificate(),
 						format, extraParams);
 			} catch (final IOException e) {
-	        	LOGGER.log(Level.WARNING, "Error al postprocesar con el FIReDocumentManager la firma del documento: " + this.docId, e); //$NON-NLS-1$
+	        	LOGGER.log(Level.WARNING, "Error al postprocesar con el DocumentManager la firma del documento: " + this.docId, e); //$NON-NLS-1$
 	        	this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
 	        	setFailed(true);
 	        	interrupt();

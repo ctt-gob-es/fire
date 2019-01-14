@@ -53,7 +53,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private static Logger LOGGER = Logger.getLogger("es.gob.afirma"); //$NON-NLS-1$
+	private static Logger LOGGER = Logger.getLogger(ClienteAfirmaSignatureService.class.getName());
 
 	private static DocumentManager DOC_MANAGER;
 

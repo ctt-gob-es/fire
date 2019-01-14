@@ -14,14 +14,14 @@ public enum SignatureAlgorithms {
 	/** Algoritmo de firma SHA512withRSA. */
 	SHA512RSA(4, AOSignConstants.SIGN_ALGORITHM_SHA512WITHRSA),
 	/** Cualquier otro algoritmo. */
-	OTHER(99, ""); //$NON-NLS-1$
+	OTHER(99, "Otro"); //$NON-NLS-1$
 
 	private int id;
-	private String algorithm;
+	private String name;
 
-	private SignatureAlgorithms(final int id, final String algorithm) {
+	private SignatureAlgorithms(final int id, final String name) {
 		this.id = id;
-		this.algorithm = algorithm;
+		this.name = name;
 	}
 
 	/**
@@ -32,11 +32,15 @@ public enum SignatureAlgorithms {
 	 */
 	public static String getId(final String algorithm) {
 		for (final SignatureAlgorithms value : values()) {
-			if (value.algorithm.equalsIgnoreCase(algorithm)) {
+			if (value.name.equalsIgnoreCase(algorithm)) {
 				return value.toString();
 			}
 		}
 		return OTHER.toString();
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	@Override

@@ -25,17 +25,17 @@
 	final FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, false);
 	if (fireSession == null) {
 		if (errorUrl != null) {
-			response.sendRedirect(errorUrl);	
+	response.sendRedirect(errorUrl);	
 		}
 		else {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+	response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		}
 		return;
 	}
 	
-	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 	TransactionConfig connConfig =
-			(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 		errorUrl = connConfig.getRedirectErrorUrl();
 	} else {
@@ -49,9 +49,9 @@
 	if (userAgent != null) {
 		userAgent = userAgent.toUpperCase();
 		isMobile = userAgent.contains("ANDROID") || userAgent.contains("WEBOS") || //$NON-NLS-1$ //$NON-NLS-2$
-				userAgent.contains("IPHONE") || userAgent.contains("IPAD") || //$NON-NLS-1$ //$NON-NLS-2$
-				userAgent.contains("IPOD") || userAgent.contains("BLACKBERRY") || //$NON-NLS-1$ //$NON-NLS-2$
-				userAgent.contains("IEMOBILE") || userAgent.contains("OPERA MINI"); //$NON-NLS-1$ //$NON-NLS-2$
+		userAgent.contains("IPHONE") || userAgent.contains("IPAD") || //$NON-NLS-1$ //$NON-NLS-2$
+		userAgent.contains("IPOD") || userAgent.contains("BLACKBERRY") || //$NON-NLS-1$ //$NON-NLS-2$
+		userAgent.contains("IEMOBILE") || userAgent.contains("OPERA MINI"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	boolean localAllowed = true;
@@ -67,8 +67,8 @@
 	}
 
 	final String cancelUrlParams = ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId + "&" + //$NON-NLS-1$ //$NON-NLS-2$ 
-			ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-			(errorUrl != null ? ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$
+	ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
+	(errorUrl != null ? ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$
 %>
 
 <!DOCTYPE html>

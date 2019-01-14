@@ -34,8 +34,8 @@ import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.SignatureLogger;
-import es.gob.fire.server.services.statistics.TransactionLogger;
+import es.gob.fire.server.services.statistics.SignatureRecorder;
+import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
 
 
@@ -45,9 +45,8 @@ import es.gob.fire.signature.ConfigManager;
  */
 public class RecoverBatchResultManager {
 
-//	private static Logger LOGGER =  FireSignLogger.getFireSignLogger().getFireLogger().getLogger();
-	private static final SignatureLogger SIGNLOGGER = SignatureLogger.getSignatureLogger(ConfigManager.getConfigStatistics());
-	private static final TransactionLogger TRANSLOGGER = TransactionLogger.getTransactLogger(ConfigManager.getConfigStatistics());
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 	private static final Logger LOGGER = Logger.getLogger(RecoverBatchResultManager.class.getName());
 
 	/**
@@ -64,19 +63,21 @@ public class RecoverBatchResultManager {
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.info(String.format("App %1s: TrId %2s: Peticion bien formada", appId, transactionId)); //$NON-NLS-1$
+		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
         if (session == null) {
-    		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
+    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
         	return;
         }
@@ -89,9 +90,9 @@ public class RecoverBatchResultManager {
         // Comprobamos que no se haya declarado ya un error
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
-        	LOGGER.warning("Ocurrio un error durante la operacion de firma de lote: " + errMessage); //$NON-NLS-1$
-        	SIGNLOGGER.log(session, false, null);
-        	TRANSLOGGER.log(session, false);
+        	LOGGER.warning(logF.format("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
+        	SIGNLOGGER.register(session, false, null);
+        	TRANSLOGGER.register(session, false);
         	SessionCollector.cleanSession(session);
         	response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(), HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription());
         	return;
@@ -120,9 +121,7 @@ public class RecoverBatchResultManager {
         				);
         	}
         	catch (final Exception e) {
-        		LOGGER.severe("No se ha podido decodificar el certificado del firmante: " + e); //$NON-NLS-1$
-        		//SIGNLOGGER.log(session, false);
-        		//TRANSLOGGER.log(session, false);
+        		LOGGER.severe(logF.format("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"No se ha podido decodificar el certificado proporcionado: " + e); //$NON-NLS-1$
@@ -144,14 +143,13 @@ public class RecoverBatchResultManager {
         final String origin	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
         if (ServiceParams.CERTIFICATE_ORIGIN_LOCAL.equals(origin)) {
 
-        	LOGGER.info(String.format("App %1s: TrId %2s: Se firmo con certificado local y ya se dispone de las firmas del lote", appId, transactionId)); //$NON-NLS-1$
+        	LOGGER.info(logF.format("Se firmo con certificado local y ya se dispone de las firmas del lote")); //$NON-NLS-1$
 
             // Recuperamos el objeto con el estado actual de cada firma (aun no procesadas)
         	batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         	if (batchResult == null || batchResult.documentsCount() == 0) {
-        		LOGGER.severe("No encontraron firmas en el lote"); //$NON-NLS-1$
-//        		SIGNLOGGER.log(session, false);
-        		TRANSLOGGER.log(session, false);
+        		LOGGER.severe(logF.format("No encontraron firmas en el lote")); //$NON-NLS-1$
+        		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No encontraron firmas en el lote"); //$NON-NLS-1$
         		return;
@@ -176,7 +174,7 @@ public class RecoverBatchResultManager {
         	}
 
         	if (needPostProcess) {
-        		LOGGER.info(String.format("App %1s: TrId %2s: Se actualizan las firmas que lo necesitan", appId, transactionId)); //$NON-NLS-1$
+        		LOGGER.info(logF.format("Se actualizan las firmas que lo necesitan")); //$NON-NLS-1$
         		upgradeLocalSignatures(appId, batchResult, docManager, session, stopOnError);
         	}
 
@@ -186,15 +184,14 @@ public class RecoverBatchResultManager {
         // Firma en la nube
         else {
 
-        	LOGGER.info(String.format("App %1s: TrId %2s: Se firmo con el proveedor %3s y es necesario recuperar el PKCS#1 de las firmas para completar el trabajo", appId, transactionId, origin)); //$NON-NLS-1$
-
+        	LOGGER.info(logF.format(String.format("Se firmo con el proveedor %3s y es necesario recuperar el PKCS#1 de las firmas para completar el trabajo", origin))); //$NON-NLS-1$
 
         	final TransactionConfig connConfig	=
         			(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         	if (connConfig == null) {
-        		LOGGER.warning("No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
-        		SIGNLOGGER.log(session, false, null);
-        		TRANSLOGGER.log(session, false);
+        		LOGGER.warning(logF.format("No se proporcionaron datos para la conexion con el backend")); //$NON-NLS-1$
+        		SIGNLOGGER.register(session, false, null);
+        		TRANSLOGGER.register(session, false);
         		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         				"No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
         		return;
@@ -206,9 +203,9 @@ public class RecoverBatchResultManager {
         		connector = ProviderManager.initTransacction(origin, connConfig.getProperties());
         	}
         	catch (final FIReConnectorFactoryException e) {
-        		LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del servicio de custodia", e); //$NON-NLS-1$
-        		SIGNLOGGER.log(session, false, null);
-        		TRANSLOGGER.log(session, false);
+        		LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del servicio de custodia"), e); //$NON-NLS-1$
+        		SIGNLOGGER.register(session, false, null);
+        		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         		return;
@@ -220,24 +217,24 @@ public class RecoverBatchResultManager {
         	// errores futuros con esta misma transaccion.
         	session.removeAttribute(ServiceParams.SESSION_PARAM_REDIRECTED);
 
-        	LOGGER.info(String.format("App %1s: TrId %2s: Se solicita el PKCS#1 al proveedor %3s", appId, transactionId, origin)); //$NON-NLS-1$
+        	LOGGER.info(logF.format("Se solicita el PKCS#1 al proveedor " + origin)); //$NON-NLS-1$
 
         	final Map<String, byte[]> ret;
         	try {
         		ret = connector.sign(remoteTrId);
         	}
         	catch(final FIReConnectorUnknownUserException e) {
-    			LOGGER.log(Level.SEVERE, "El usuario no esta dado de alta en el sistema", e); //$NON-NLS-1$
-    			SIGNLOGGER.log(session, false, null);
-    			TRANSLOGGER.log(session, false);
+    			LOGGER.log(Level.SEVERE, logF.format("El usuario no esta dado de alta en el sistema"), e); //$NON-NLS-1$
+    			SIGNLOGGER.register(session, false, null);
+    			TRANSLOGGER.register(session, false);
                 SessionCollector.removeSession(session);
     			response.sendError(HttpCustomErrors.NO_USER.getErrorCode());
         		return;
         	}
         	catch(final Exception e) {
-        		LOGGER.log(Level.SEVERE, "Ocurrio un error durante la operacion de firma", e); //$NON-NLS-1$
-        		SIGNLOGGER.log(session, false, null);
-        		TRANSLOGGER.log(session, false);
+        		LOGGER.log(Level.SEVERE, logF.format("Ocurrio un error durante la operacion de firma"), e); //$NON-NLS-1$
+        		SIGNLOGGER.register(session, false, null);
+        		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpCustomErrors.SIGN_ERROR.getErrorCode());
         		return;
@@ -251,9 +248,9 @@ public class RecoverBatchResultManager {
         				);
         	}
         	catch (final Exception e) {
-        		LOGGER.severe("No se ha podido decodificar el certificado del firmante: " + e); //$NON-NLS-1$
-        		SIGNLOGGER.log(session, false, null);
-        		TRANSLOGGER.log(session, false);
+        		LOGGER.severe(logF.format("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
+        		SIGNLOGGER.register(session, false, null);
+        		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"No se ha podido decodificar el certificado proporcionado: " + e); //$NON-NLS-1$
@@ -265,9 +262,9 @@ public class RecoverBatchResultManager {
         		extraParams = ServiceUtil.base642Properties(extraParamsB64);
         	}
         	catch (final Exception e) {
-        		LOGGER.severe("Parametros extra de configuracion de la firma mal formatos: " + e); //$NON-NLS-1$
-        		SIGNLOGGER.log(session, false, null);
-        		TRANSLOGGER.log(session, false);
+        		LOGGER.severe(logF.format("Parametros extra de configuracion de la firma mal formatos: " + e)); //$NON-NLS-1$
+        		SIGNLOGGER.register(session, false, null);
+        		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         				"Parametros extra de configuracion de la firma mal formatos: " + e); //$NON-NLS-1$
@@ -279,9 +276,9 @@ public class RecoverBatchResultManager {
         		td = TriphaseData.parser(Base64.decode(tdB64, true));
         	}
         	catch (final Exception e) {
-        		LOGGER.log(Level.SEVERE, "Error de codificacion en los datos de firma trifasica proporcionados", e); //$NON-NLS-1$
-        		SIGNLOGGER.log(session, false, null);
-        		TRANSLOGGER.log(session, false);
+        		LOGGER.log(Level.SEVERE, logF.format("Error de codificacion en los datos de firma trifasica proporcionados"), e); //$NON-NLS-1$
+        		SIGNLOGGER.register(session, false, null);
+        		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"Error de codificacion en los datos de firma trifasica proporcionados: " + e //$NON-NLS-1$
@@ -292,9 +289,8 @@ public class RecoverBatchResultManager {
         	// Recuperamos el objeto con el estado actual de cada firma
         	batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         	if (batchResult == null || batchResult.documentsCount() == 0) {
-        		LOGGER.severe("No encontraron firmas en el lote"); //$NON-NLS-1$
-        		//SIGNLOGGER.log(session, false);
-        		TRANSLOGGER.log(session, false);
+        		LOGGER.severe(logF.format("No encontraron firmas en el lote")); //$NON-NLS-1$
+        		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No encontraron firmas en el lote"); //$NON-NLS-1$
         		return;
@@ -360,12 +356,12 @@ public class RecoverBatchResultManager {
         	connector.endSign(remoteTrId);
         }
 
-    	LOGGER.info(String.format("App %1s: TrId %2s: Devolvemos el resultado de la operacion", appId, transactionId)); //$NON-NLS-1$
+    	LOGGER.info(logF.format("Devolvemos el resultado del lote")); //$NON-NLS-1$
 
         // Si todas las firmas fallaron, damos por terminada la transaccion y eliminamos la sesion.
         if (isAllFailed(batchResult)) {
         	//SIGNLOGGER.log(session, false);
-    		TRANSLOGGER.log(session, false);
+    		TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
         }
         // Si no, indicamos que ya se ha firmado el lote para permitir que se puedan recuperar los
@@ -375,7 +371,7 @@ public class RecoverBatchResultManager {
             session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
             session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_RECOVER);
             // Se registra que la transac&oacute;n a sido correcta
-            TRANSLOGGER.log(session, true);
+            TRANSLOGGER.register(session, true);
             SessionCollector.commit(session);
         }
 

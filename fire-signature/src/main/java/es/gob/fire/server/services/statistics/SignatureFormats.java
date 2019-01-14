@@ -18,14 +18,14 @@ public enum SignatureFormats {
 	/** Formato de firma XAdES-ASiC. */
 	XADES_ASIC(6, AOSignConstants.SIGN_FORMAT_XADES_ASIC_S),
 	/** Cualquier otro formato. */
-	OTHER(99, ""); //$NON-NLS-1$
+	OTHER(99, "Otro"); //$NON-NLS-1$
 
 	private int id;
-	private String format;
+	private String name;
 
-	private SignatureFormats(final int id, final String format) {
+	private SignatureFormats(final int id, final String name) {
 		this.id = id;
-		this.format = format;
+		this.name = name;
 	}
 
 	/**
@@ -36,11 +36,19 @@ public enum SignatureFormats {
 	 */
 	public static String getId(final String format) {
 		for (final SignatureFormats value : values()) {
-			if (value.format.equalsIgnoreCase(format)) {
+			if (value.name.equalsIgnoreCase(format)) {
 				return value.toString();
 			}
 		}
 		return OTHER.toString();
+	}
+
+	/**
+	 * Recupera el nombre del formato.
+	 * @return Nombre del formato.
+	 */
+	public String getName() {
+		return this.name;
 	}
 
 	@Override

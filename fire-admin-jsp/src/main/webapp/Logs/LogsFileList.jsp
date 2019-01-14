@@ -71,11 +71,11 @@
 				long size = longSizeJSON.longValue();
 				String sSize = "";//$NON-NLS-1$
 				if (size > 1024 && size < 1024000) {
-					sSize = String.valueOf(size / 1024).concat(" Kbytes");//$NON-NLS-1$
+					sSize = String.valueOf(size / 1024) + " Kbytes";//$NON-NLS-1$
 				} else if (size > 1024000) {
-					sSize = String.valueOf(size / 1024000).concat(" Mbytes");//$NON-NLS-1$
+					sSize = String.valueOf(size / 1024000) + " Mbytes";//$NON-NLS-1$
 				} else {
-					sSize = String.valueOf(size).concat(" bytes");//$NON-NLS-1$
+					sSize = String.valueOf(size) + " bytes";//$NON-NLS-1$
 				}
 
 				if (i != FileList.size() - 1) {

@@ -2,7 +2,6 @@ package es.gob.log.consumer.service;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousFileChannel;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,8 +38,12 @@ public class LogSearchServiceManager {
 			throw new IllegalArgumentException("Numero de lineas con formato no valido", e); //$NON-NLS-1$
 		}
 
+		if (text == null || text.trim().isEmpty()) {
+			throw new IllegalArgumentException("No se ha indicado el texto a buscar"); //$NON-NLS-1$
+		}
+
 		long sdateTime = 0L;
-		if (startDateTimeString != null && !startDateTimeString.isEmpty()) {
+		if (startDateTimeString != null && !startDateTimeString.trim().isEmpty()) {
 			try {
 				sdateTime = Long.parseLong(startDateTimeString);
 			} catch (final Exception e) {
@@ -61,24 +64,24 @@ public class LogSearchServiceManager {
 			if (reset) {
 				reader.close();
 				reader.load();
-				//Reset de la posicion de sesion de tail
-				if(filePosition != null && filePosition.longValue() > 0L) {
+				// Reset de la posicion de sesion de tail
+				if (filePosition != null && filePosition.longValue() > 0L) {
 					filePosition = new Long(0L);
 					session.setAttribute("FilePosition", filePosition); //$NON-NLS-1$
 				}
 			}
 
-			if( channel.size() > fileSize.longValue() && reader.isEndFile()) {
+			if (channel.size() > fileSize.longValue() && reader.isEndFile()) {
 				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
-				if(reader.getFilePosition() > 0L) {
+				if (reader.getFilePosition() > 0L) {
 					reader.reload(reader.getFilePosition());
 				}
 			}
 
 			final LogSearchText logSearch = new LogSearchText(info);
 
-			if(sdateTime < 0L) {
-				result = logSearch.searchText(numLines, text, reader);//Integer.parseInt(sNumLines) - nlines.intValue()
+			if (sdateTime < 0L) {
+				result = logSearch.searchText(numLines, text, reader);
 			}
 			else {
 				result = logSearch.searchText(numLines, text, sdateTime, reader);
@@ -87,27 +90,21 @@ public class LogSearchServiceManager {
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 			if (result == null) {
-				throw new NoResultException("No se han encontrado más ocurrencias en la búsqueda");
+				throw new NoResultException("No se han encontrado mas ocurrencias en la busqueda");
 			}
 
 		} catch (final NoResultException e) {
 			LOGGER.log(Level.INFO, "No se han obtenido resultados: " + e.getMessage()); //$NON-NLS-1$
 			throw e;
 		} catch (final InvalidPatternException e) {
-			LOGGER.log(Level.SEVERE, "El patrón indicado con la forma de los registros del log, no es válido" , e); //$NON-NLS-1$
-			throw new NoResultException("El patrón indicado con la forma de los registros del log, no es válido", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "El patron indicado con la forma de los registros del log, no es valido" , e); //$NON-NLS-1$
+			throw new NoResultException("El patron indicado con la forma de los registros del log, no es valido", e); //$NON-NLS-1$
 		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "No se ha podido leer el fichero", e); //$NON-NLS-1$
 			throw new NoResultException("No se ha podido leer el fichero", e); //$NON-NLS-1$
-		} catch (final InterruptedException e) {
-			LOGGER.log(Level.SEVERE, "Error al procesar la petición búsqueda", e); //$NON-NLS-1$
-			throw new NoResultException("Error al procesar la petición de búsqueda", e); //$NON-NLS-1$
-		} catch (final ExecutionException e) {
-			LOGGER.log(Level.SEVERE, "Error al procesar la petición búsqueda", e); //$NON-NLS-1$
-			throw new NoResultException("Error al procesar la petición de búsqueda", e); //$NON-NLS-1$
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error desconocido al procesar la petición búsqueda", e); //$NON-NLS-1$
-			throw new NoResultException("Error desconocido al procesar la petición búsqueda", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error desconocido al procesar la peticion busqueda", e); //$NON-NLS-1$
+			throw new NoResultException("Error desconocido al procesar la peticion busqueda", e); //$NON-NLS-1$
 		}
 
 		return result;

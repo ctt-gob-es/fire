@@ -123,7 +123,8 @@ public class LogInfo implements Serializable {
 	}
 
 	/**
-	 * Obtiene el juego de caracteres del log.
+	 * Obtiene el juego de caracteres del log o el juego de caracteres por defecto
+	 * si no se especific&oacute;.
 	 * @return Juego de caracteres.
 	 */
 	public Charset getCharset() {
