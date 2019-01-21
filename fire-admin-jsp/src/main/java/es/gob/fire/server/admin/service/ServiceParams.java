@@ -8,7 +8,7 @@ public class ServiceParams {
 
 	public static final String PARAM_URL = "url"; //$NON-NLS-1$
 
-	public static final String PARAM_VERIFY_SSL = "verifyssl";
+	public static final String PARAM_VERIFY_SSL = "verifyssl"; //$NON-NLS-1$
 
 	public static final String PARAM_FILENAME = "fname";//$NON-NLS-1$
 

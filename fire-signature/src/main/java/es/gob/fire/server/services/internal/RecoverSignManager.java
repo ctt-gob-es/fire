@@ -37,7 +37,6 @@ import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
-import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.UpgradeResult;
 
 
@@ -187,9 +186,6 @@ public class RecoverSignManager {
         		try {
         			final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
         			signResult = upgradeResult.getResult();
-        			if (upgradeResult.getFormat() != null) {
-        				session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, upgradeResult.getFormat());
-        			}
         		}
         		catch (final Exception e) {
         			LOGGER.log(Level.SEVERE, logF.format("Error al actualizar la firma"), e); //$NON-NLS-1$
@@ -365,9 +361,6 @@ public class RecoverSignManager {
         	try {
         		final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
         		signResult = upgradeResult.getResult();
-        		if (upgradeResult.getFormat() != null) {
-        			session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, upgradeResult.getFormat());
-        		}
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.WARNING, logF.format("Error al actualizar la firma"), e); //$NON-NLS-1$

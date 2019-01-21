@@ -22,17 +22,17 @@ import javax.servlet.http.HttpSessionListener;
 @WebListener
 public final class SessionDataCleaner implements HttpSessionListener {
 
-	Logger LOGGER = Logger.getLogger(SessionDataCleaner.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SessionDataCleaner.class.getName());
 
 	@Override
 	public void sessionCreated(final HttpSessionEvent hse) {
-		this.LOGGER.info("Iniciada sesion " + hse.getSession().getId()); //$NON-NLS-1$
+		LOGGER.info("Iniciada sesion " + hse.getSession().getId()); //$NON-NLS-1$
 	}
 
 	@Override
 	public void sessionDestroyed(final HttpSessionEvent hse) {
 		if (hse != null) {
-			this.LOGGER.info("Eliminamos los datos de sesion"); //$NON-NLS-1$
+			LOGGER.info("Eliminamos los datos de sesion"); //$NON-NLS-1$
 
 			final HttpSession ses = hse.getSession();
 			final Enumeration<String> attrs = ses.getAttributeNames();

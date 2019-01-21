@@ -6,12 +6,11 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import es.gob.fire.server.services.FIReServiceOperation;
-import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
-import es.gob.fire.services.statistics.config.ConfigFileLoader;
-import es.gob.fire.services.statistics.config.ConfigManager;
+import es.gob.fire.server.services.statistics.TransactionType;
+import es.gob.fire.signature.ConfigFileLoader;
+
 /**
  * Clase que gestiona los mensajes de erroes. Carga el fichero de configuraci&oacute;n del fichero errors_es_ES.messages.
  * @author Adolfo.Navarro
@@ -83,24 +82,23 @@ public class ErrorManager {
 	public static void setErrorToSession(final FireSession session, final OperationError error,
 			final boolean returnToApp, final String messageError) {
 
-
-
 		// Si se va a volver a la aplicacion, eliminamos los datos de sesion innecesarios
 		if (returnToApp) {
 			// Se registra en log de estadisticas que la transaccion ha terminado erroneamente.
 			TRANSLOGGER.register(session, false);
 			// Comprobar el tipo de operacion si es simple o lote  (SIGN o BATCH)
-			final FIReServiceOperation fsop = FIReServiceOperation.parse(session.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
-			final TransactionType op = TransactionType.valueOf(fsop);
-			if (op.getId() != 1) { // Operacion por Lote
+			final TransactionType op = TransactionType.getOperation(session.getString(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE));
+			if (op == TransactionType.BATCH) { // Operacion por Lote
 				final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
-				final Iterator<String> it = batchResult.iterator();
-				while (it.hasNext()) {
-					final String docId = it.next();
-					SIGNLOGGER.register(session, false, docId);
+				if (batchResult != null) {
+					final Iterator<String> it = batchResult.iterator();
+					while (it.hasNext()) {
+						final String docId = it.next();
+						SIGNLOGGER.register(session, false, docId);
+					}
 				}
 			}
-			else { // Operacion Simple
+			else if (op == TransactionType.SIGN) { // Operacion Simple
 				SIGNLOGGER.register(session, false, null);
 			}
 			SessionCollector.cleanSession(session);

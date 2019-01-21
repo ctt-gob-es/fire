@@ -126,6 +126,6 @@ public final class Upgrade {
 
         return new UpgradeResult(
         		vr.getUpgradedSignature(),
-        		vr.getSignatureForm().substring(vr.getSignatureForm().lastIndexOf(':')));
+        		vr.getSignatureForm().substring(vr.getSignatureForm().lastIndexOf(':') + 1));
     }
 }

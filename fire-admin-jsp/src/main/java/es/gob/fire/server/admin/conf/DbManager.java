@@ -32,21 +32,19 @@ public class DbManager {
 	 * Crea la conexi&oacute;n a trav&eacute;s del fichero de configuraci&oacute;n.
 	 * @throws AdminFilesNotFoundException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n.
 	 */
-	public static void initialize() throws AdminFilesNotFoundException {
+	private static void initialize() throws AdminFilesNotFoundException {
 
 		conn = null;
 
-		ConfigManager.initialize();
-
 		final String dbConnDriver = ConfigManager.getDbDriverString();
 		if (dbConnDriver == null) {
-			LOGGER.log(Level.SEVERE, "No se ha podido obtener el driver JDBC. Se aborta la creacion de la conexion."); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "No se ha configurado el driver JDBC. Se aborta la creacion de la conexion."); //$NON-NLS-1$
 			return;
 		}
 
 		final String dbConnString = ConfigManager.getDbConnectionString();
 		if (dbConnString == null) {
-			LOGGER.log(Level.SEVERE, "No se ha podido obtener la cadena de conexion a base de datos. Se aborta la creacion de la conexion."); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "No se ha configurado la cadena de conexion a base de datos. Se aborta la creacion de la conexion."); //$NON-NLS-1$
 			return;
 		}
 
@@ -97,7 +95,6 @@ public class DbManager {
 	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo conectar.
 	 */
 	private static Connection getConnection() {
-
 		try {
 			if (!conn.isValid(2)) {
 				LOGGER.warning("La conexion con base de datos ha dejado de ser valida"); //$NON-NLS-1$

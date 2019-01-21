@@ -1,14 +1,8 @@
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
-<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO"%>
-<%@page import="es.gob.fire.server.admin.conf.DbManager"%>
-<%@page import="es.gob.fire.server.admin.dao.AplicationsDAO" %>
-<%@page import="es.gob.fire.server.admin.entity.Application" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResult" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResultManager" %>
-<%@page import="es.gob.fire.server.admin.message.AdminFilesNotFoundException" %>
-<%@page import="java.util.List" %>
-<%@page import="es.gob.fire.server.admin.tool.Utils" %>
+
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
@@ -19,20 +13,8 @@
 	
 	String user = "";//$NON-NLS-1$
 	String errorText = null;
-	try {
-		DbManager.initialize();
-		
-	}
-	catch (AdminFilesNotFoundException e){
-		response.sendRedirect("../Error/FileNotFound.jsp?file=" + e.getFileName()); //$NON-NLS-1$
-		return;
-	}
-	catch (Exception e){
-		response.sendRedirect("../Error/SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
-		return;
-	}
 
-	Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED); //$NON-NLS-1$
+	Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
 	if (state == null) {
 		// Leemos la contrasena de entrada
 		String psswd = request.getParameter("password"); //$NON-NLS-1$

@@ -31,11 +31,11 @@ import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
-import es.gob.fire.services.statistics.FireStatistics;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.statistics.FireStatistics;
 
 /**
  * Servicio central de FIRe que integra las funciones de firma a traves del Cliente @firma
@@ -47,11 +47,6 @@ public class FIReService extends HttpServlet {
 	private static final long serialVersionUID = -2304782878707695769L;
 	private static final Logger LOGGER = Logger.getLogger(FIReService.class.getName());
 
-	private static FireStatistics firest;
-
-	/** Nombre del fichero de configuraci&oacute;n. */
-	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
-
     @Override
     public void init() throws ServletException {
     	super.init();
@@ -59,7 +54,6 @@ public class FIReService extends HttpServlet {
     	// Comprobamos la configuracion
     	try {
 	    	ConfigManager.checkConfiguration();
-	    	es.gob.fire.services.statistics.config.ConfigManager.checkConfiguration(CONFIG_FILE);
 		}
     	catch (final Exception e) {
 
@@ -79,12 +73,16 @@ public class FIReService extends HttpServlet {
 
     	// Codigo para programar el volcado de estadisticas a BD si procede
 		try {
-			final int configStatistic = Integer.valueOf(es.gob.fire.services.statistics.config.ConfigManager.getConfigStatistics()).intValue() ;
-			final String statisticsDirPath = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsDir();
-			if (configStatistic == 2 && statisticsDirPath != null && !statisticsDirPath.isEmpty()) {
-				firest = new FireStatistics(statisticsDirPath);
-				final String startTime = es.gob.fire.services.statistics.config.ConfigManager.getStatisticsStartTime();
-				firest.init(startTime);
+			final int configStatistic = Integer.valueOf(ConfigManager.getStatisticsPolicy()).intValue() ;
+			final String statisticsDirPath = ConfigManager.getStatisticsDir();
+			final String jdbcDriver = ConfigManager.getJdbcDriverString();
+			final String dbConnectionString = ConfigManager.getDataBaseConnectionString();
+			if (configStatistic == 2 &&
+					statisticsDirPath != null && !statisticsDirPath.isEmpty() &&
+					jdbcDriver != null && !jdbcDriver.isEmpty() &&
+					dbConnectionString != null && !dbConnectionString.isEmpty()) {
+				final String startTime = ConfigManager.getStatisticsDumpTime();
+				FireStatistics.init(statisticsDirPath, startTime, jdbcDriver, dbConnectionString, false);
 			}
 		}
 		catch (final Exception e) {

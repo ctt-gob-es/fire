@@ -1,7 +1,5 @@
 package es.gob.fire.server.services.statistics;
 
-import java.util.logging.Logger;
-
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -9,8 +7,6 @@ import es.gob.fire.signature.ConfigManager;
  * los datos estad&iacute;sticos.
  */
 public class StatisticsConfig {
-
-	private static final Logger LOGGER = Logger.getLogger(StatisticsConfig.class.getName());
 
 	private Policy policy = Policy.DISABLE;
 	private String dataDirPath = null;

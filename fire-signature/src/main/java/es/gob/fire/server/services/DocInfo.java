@@ -30,7 +30,7 @@ public class DocInfo implements Serializable {
 
 	private String title = null;
 	private String name = null;
-	private Long size = null;
+	private long size = 0;
 
 
 	/**
@@ -59,11 +59,11 @@ public class DocInfo implements Serializable {
 
 
 
-	public final Long getSize() {
+	public final long getSize() {
 		return this.size;
 	}
 
-	public final void setSize(final Long size) {
+	public final void setSize(final long size) {
 		this.size = size;
 	}
 

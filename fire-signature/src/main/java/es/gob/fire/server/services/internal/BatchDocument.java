@@ -111,7 +111,7 @@ public class BatchDocument {
 
 	/**
 	 * Recupera la informaci&oacute;n disponible del documento.
-	 * @return Informaci&oacute;n del documenot o {@code null} si no la tiene.
+	 * @return Informaci&oacute;n del documento o {@code null} si no la tiene.
 	 */
 	public DocInfo getDocInfo() {
 		return this.docInfo;

@@ -3,3 +3,5 @@
 target
 .classpath
 .properties
+dependency-reduced-pom.xml
+

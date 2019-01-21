@@ -37,7 +37,7 @@ public final class TempFilesHelper {
 
     private static File TMPDIR;
 
-    private static  Long fileSize = 0L;
+    private static long fileSize = 0L;
 
     static {
 
@@ -154,15 +154,15 @@ public final class TempFilesHelper {
         bos.close();
         fos.close();
         LOGGER.fine("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
-        setFileSize(new Long(f.length()));
+        setFileSize(f.length());
         return f.getName();
     }
 
-	public final static  Long getFileSize() {
+	public static long getFileSize() {
 		return fileSize;
 	}
 
-	private final static  void setFileSize(final Long fileSize) {
+	private static  void setFileSize(final long fileSize) {
 		TempFilesHelper.fileSize = fileSize;
 	}
   /**

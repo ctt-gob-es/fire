@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: ./jdbc.jar
+Main-Class: es.gob.fire.statistics.cmd.StatisticsDBLoader
+

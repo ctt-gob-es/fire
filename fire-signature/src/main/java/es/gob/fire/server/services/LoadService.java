@@ -224,7 +224,7 @@ public final class LoadService extends HttpServlet {
             connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
         }
         catch (final FIReConnectorFactoryException e) {
-            LOGGER.log(Level.SEVERE, "Error en la configuracion del conector con el servicio de custodia", e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error en la configuracion del conector con el servicio de custodia: " + e); //$NON-NLS-1$
             return;

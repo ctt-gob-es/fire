@@ -20,10 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
+import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
+import es.gob.fire.server.services.statistics.TransactionType;
 
 /**
  * Manejador que gestiona las peticiones de creaci&oacute;n de un lote de firma, al que posteriormente
@@ -157,6 +159,8 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_ID, transactionId);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
+        session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.valueOf(FIReServiceOperation.parse(op)).toString());
+
 
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,

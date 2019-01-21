@@ -19,7 +19,6 @@ import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
-import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.UpgradeResult;
 
 /**
@@ -93,6 +92,7 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
         final String upgradeFormat = config != null ?
         		config.getUpgrade() :
         		(String) this.defaultConfig.getString(ServiceParams.SESSION_PARAM_UPGRADE);
+
 		try {
 			final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signature, upgradeFormat);
 			signature = upgradeResult.getResult();

@@ -68,9 +68,6 @@ public class AplicationsDAO {
 		if (rs.next()) {
 			LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + appId); //$NON-NLS-1$
 			result = new ApplicationChecking(appId, rs.getString(1), true);
-
-
-			System.out.println(" ================== RECIBIDO NOMBRE DE LA APLICACION");
 		}
 		else {
 			LOGGER.fine("No se ha podido leer la aplicacion dada de alta en el sistema con el ID: " + appId); //$NON-NLS-1$

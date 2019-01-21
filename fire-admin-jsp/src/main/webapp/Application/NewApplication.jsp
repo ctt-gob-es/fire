@@ -4,7 +4,6 @@
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
 <%@page import="java.util.List" %>
-<%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
 <%@page import="es.gob.fire.server.admin.dao.AplicationsDAO" %>
 <%@page import="es.gob.fire.server.admin.entity.Application" %>
 <%@page import="es.gob.fire.server.admin.entity.CertificateFire"%>
@@ -14,13 +13,7 @@
 
 <%
 
-	if (session == null) {
-		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-		return;
-	}
-
-	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
-	if (state == null || !Boolean.parseBoolean((String) state)) {
+	if (session == null || !Boolean.parseBoolean((String) session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED))) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
 	}

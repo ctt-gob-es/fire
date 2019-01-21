@@ -394,12 +394,9 @@ public class ConfigManager {
 	 */
 	public static String getStatisticsDumpTime() {
 		 String time =  getProperty(PROP_STATISTICS_DUMPTIME);
-		 if (time == null || "".equals(time)) { //$NON-NLS-1$
+		 if (time == null || !time.matches(PATTERN_TIME)) {
 			 time = "00:00:00";	 //$NON-NLS-1$
 		 }
-		 else if(!time.matches(PATTERN_TIME)) { //
-			 time = "00:00:00";	 //$NON-NLS-1$
-		}
 		return time;
 	}
 

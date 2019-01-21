@@ -125,7 +125,7 @@
 								<label for="asic-cades-ft" >CAdES-ASIC</label><br>
 							<input id="asic-xades-ft" type="radio" name="format" value="XAdES-ASiC-S" disabled='disabled'/>
 								<label for="asic-xades-ft" >XAdES-ASIC</label><br>
-							<input id="pkcs1-ft" type="radio" name="format" value="NONE"/>
+							<input id="pkcs1-ft" type="radio" name="format" value="NONE" disabled='disabled'/>
 								<label for="pkcs1-ft" >Ninguno</label><br>
 				   	</fieldset>
 	

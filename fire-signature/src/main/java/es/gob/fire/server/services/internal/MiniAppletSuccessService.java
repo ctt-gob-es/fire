@@ -31,7 +31,6 @@ import org.w3c.dom.NodeList;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
-import es.gob.fire.services.statistics.config.ConfigManager;
 
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.

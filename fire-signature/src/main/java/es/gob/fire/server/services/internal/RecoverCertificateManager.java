@@ -76,7 +76,7 @@ public class RecoverCertificateManager {
         	newCertEncoded = recoverCertificate(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, transactionId, config);
         }
         catch (final FIReConnectorFactoryException e) {
-            LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del servicio de custodia"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }

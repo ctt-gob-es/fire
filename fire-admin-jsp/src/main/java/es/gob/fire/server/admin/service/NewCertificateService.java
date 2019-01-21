@@ -168,17 +168,19 @@ public class NewCertificateService extends HttpServlet {
 	        		params.setName(item.getString());
 	        	}
 	        	else if (!item.isFormField() && PARAM_CER_PRIN.equals(item.getFieldName()) && item.getInputStream() != null && item.getSize() > 0L) {
-	        		final InputStream isFileContent = item.getInputStream();
-	        		final X509Certificate cert = (X509Certificate) certFactory.generateCertificate(isFileContent);
-	        		isFileContent.close();
+	        		X509Certificate cert;
+	        		try (final InputStream certIs = item.getInputStream();) {
+	        			cert = (X509Certificate) certFactory.generateCertificate(certIs);
+	        		}
 	        		final byte[] certEncoded = cert.getEncoded();
 	        		params.setCert_prin(certEncoded);
 	        		params.setB64Cert_prin(Base64.encode(certEncoded));
 	        	}
 	        	else if (!item.isFormField() && PARAM_CER_RESP.equals(item.getFieldName()) && item.getInputStream() != null && item.getSize() > 0L) {
-	        		final InputStream isFileContent = item.getInputStream();
-	        		final X509Certificate cert = (X509Certificate) certFactory.generateCertificate(isFileContent);
-	        		isFileContent.close();
+	        		X509Certificate cert;
+	        		try (final InputStream certIs = item.getInputStream();) {
+	        			cert = (X509Certificate) certFactory.generateCertificate(certIs);
+	        		}
 	        		final byte[] certEncoded = cert.getEncoded();
 	        		params.setCert_resp(certEncoded);
 	        		params.setB64Cert_resp(Base64.encode(certEncoded));

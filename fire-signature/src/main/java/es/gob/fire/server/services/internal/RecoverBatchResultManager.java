@@ -36,7 +36,6 @@ import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
-import es.gob.fire.signature.ConfigManager;
 
 
 /**
@@ -203,7 +202,7 @@ public class RecoverBatchResultManager {
         		connector = ProviderManager.initTransacction(origin, connConfig.getProperties());
         	}
         	catch (final FIReConnectorFactoryException e) {
-        		LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del servicio de custodia"), e); //$NON-NLS-1$
+        		LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
         		SIGNLOGGER.register(session, false, null);
         		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);

@@ -34,14 +34,6 @@ public class DeleteCertificateService extends HttpServlet {
 	private static final String PARAM_ID = "id-cert"; //$NON-NLS-1$
 
 	/**
-     * @see HttpServlet#HttpServlet()
-     */
-    public DeleteCertificateService() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
-	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	@Override
@@ -58,11 +50,13 @@ public class DeleteCertificateService extends HttpServlet {
 			try {
 				/*Comprobamos si tiene asociadas aplicaciones al certificado que se quiere eliminar*/
 				final String totalApp=AplicationsDAO.getApplicationsCountByCertificate(id);
-				final JsonReader jsonReader = Json.createReader(new StringReader(totalApp));
-				final JsonObject jsonObj = jsonReader.readObject();
-				jsonReader.close();
-				final int total= jsonObj.getInt("count"); //$NON-NLS-1$
 
+				JsonObject jsonObj;
+				try (final JsonReader jsonReader = Json.createReader(new StringReader(totalApp));) {
+					jsonObj = jsonReader.readObject();
+				}
+
+				final int total= jsonObj.getInt("count"); //$NON-NLS-1$
 				if(total <= 0) {
 					CertificatesDAO.removeCertificate(id);
 

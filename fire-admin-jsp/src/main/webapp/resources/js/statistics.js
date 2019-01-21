@@ -235,8 +235,8 @@ $(document).ready(function(){
 												
 						for (i = 0; i < obJson.TransByApp.length; i++) {
 												
-							totBad += Number(obJson.TransByApp[i].INCORRECTAS);
 							totGood += Number(obJson.TransByApp[i].CORRECTAS);
+							totBad += Number(obJson.TransByApp[i].INCORRECTAS);
 													
 							if (i != obJson.TransByApp.length -1){							
 								dataJSON += JSON.stringify(obJson.TransByApp[i]).trim() + ",";
@@ -245,15 +245,15 @@ $(document).ready(function(){
 						    	dataJSON += JSON.stringify(obJson.TransByApp[i]).trim() + "]" ;
 						    }							
 						}
-						sumTotal = totBad + totGood;
-						userData =',"userdata":{"NOMBRE":"Totales", "INCORRECTAS":"'+totBad+'","CORRECTAS":"'+totGood+ '","TOTAL":"'+sumTotal+'"}}';
+						sumTotal = totGood + totBad;
+						userData =',"userdata":{"NOMBRE":"Totales", "CORRECTAS":"'+totGood+'","INCORRECTAS":"'+totBad+ '","TOTAL":"'+sumTotal+'"}}';
 						dataJSON = dataJSON + userData;
 								
-						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
+						columnNames = ['Nombre', 'CORRECTAS', 'INCORRECTAS', 'TOTAL'];
 						columnModel =[				    	 	
 					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
-					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
+					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
 					        ];
 						
@@ -346,8 +346,8 @@ $(document).ready(function(){
 												
 						for (i = 0; i < obJson.TransByProv.length; i++) {
 												
-							totBad += Number(obJson.TransByProv[i].INCORRECTAS);
 							totGood += Number(obJson.TransByProv[i].CORRECTAS);
+							totBad += Number(obJson.TransByProv[i].INCORRECTAS);
 													
 							if (i != obJson.TransByProv.length -1){							
 								dataJSON += JSON.stringify(obJson.TransByProv[i]).trim() + ",";
@@ -357,15 +357,15 @@ $(document).ready(function(){
 						    	dataJSON += JSON.stringify(obJson.TransByProv[i]).trim() + "]" ;
 						    }							
 						}
-						sumTotal = totBad + totGood;
-						userData =',"userdata":{"NOMBRE":"Totales", "INCORRECTAS":"'+totBad+'","CORRECTAS":"'+totGood+ '","TOTAL":"'+sumTotal+'"}}';
+						sumTotal = totGood + totBad;
+						userData =',"userdata":{"NOMBRE":"Totales", "CORRECTAS":"'+totGood+'", "INCORRECTAS":"'+totBad+ '", "TOTAL":"'+sumTotal+'"}}';
 						dataJSON = dataJSON + userData;
 								
-						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
+						columnNames = ['Nombre', 'CORRECTAS', 'INCORRECTAS', 'TOTAL'];
 						columnModel =[
 					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
-					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
+					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
 					        ];
 						
@@ -426,7 +426,7 @@ $(document).ready(function(){
 						var idCanvasGood = "chartGood";
 							
 						arrCharts = [
-							{idCanvas : idCanvasGood, chartLabels : chartLabelsGood, chartData : chartDataGood,backGround : backGroundGood, text: textGood}						
+							{idCanvas : idCanvasGood, chartLabels : chartLabelsGood, chartData : chartDataGood, backGround : backGroundGood, text: textGood}						
 						];
 						printPieCharts(sLabel,arrCharts);
 						
@@ -438,8 +438,9 @@ $(document).ready(function(){
 						rootSt = "TransByDocSizeRows";
 						captionSt = "Transacciones seg&uacute;n el tama&ntilde;o de los datos de cada aplicaci&oacute;n para el Mes "+ $("#start_date").val()+ ".";
 						dataJSON = dataJSON + total +',"ActualPage":1,"TotalRecords":'+numReg+',"'+rootSt+'":[';
-												
-						for (i = 0; i < obJson.TransByDocSize.length; i++) {												
+
+						var size;
+						for (i = 0; i < obJson.TransByDocSize.length; i++) {
 							totGood += Number(obJson.TransByDocSize[i].MB);													
 							if (i != obJson.TransByDocSize.length -1){							
 								dataJSON += JSON.stringify(obJson.TransByDocSize[i]).trim() + ",";
@@ -448,10 +449,11 @@ $(document).ready(function(){
 						    	dataJSON += JSON.stringify(obJson.TransByDocSize[i]).trim() + "]" ;
 						    }							
 						}
+
 						sumTotal = totGood;
 						userData =',"userdata":{"NOMBRE":"Total", "MB":"'+(sumTotal).toFixed(2)+'"}}';
 						dataJSON = dataJSON + userData;
-								
+
 						columnNames = ['Nombre', 'Megabyte'];
 						columnModel =[
 					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
@@ -714,10 +716,10 @@ $(document).ready(function(){
 							chartLabelsGood.splice(9,0,"OTRAS");
 							chartLabelsBad.splice(9,0,"OTRAS");
 						}
-												
+
 						var backGroundGood = [""];
 						var backGroundBad = [""];
-					
+
 						//Obtenemos los colores a mostrar por aplicación 
 						// hasta um maximo de 10 colores correspondiendo el último al grupo de "OTRAS" ( Aplicaciones )
 						for(i = 0; i < oJSONGood.SignByApp.length; i++){
@@ -767,14 +769,14 @@ $(document).ready(function(){
 						    }							
 						}
 						sumTotal = totBad + totGood;
-						userData =',"userdata":{"NOMBRE":"Totales", "INCORRECTAS":"'+totBad+'","CORRECTAS":"'+totGood+ '","TOTAL":"'+sumTotal+'"}}';
+						userData =',"userdata":{"NOMBRE":"Totales", "CORRECTAS":"'+totGood+'","INCORRECTAS":"'+totBad+ '","TOTAL":"'+sumTotal+'"}}';
 						dataJSON = dataJSON + userData;
 								
-						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
+						columnNames = ['Nombre', 'CORRECTAS', 'INCORRECTAS', 'TOTAL'];
 						columnModel =[				    	 	
 					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
-					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
+					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
 					        ];
 						
@@ -871,8 +873,8 @@ $(document).ready(function(){
 												
 						for (i = 0; i < obJson.SignByProv.length; i++) {
 												
-							totBad += Number(obJson.SignByProv[i].INCORRECTAS);
 							totGood += Number(obJson.SignByProv[i].CORRECTAS);
+							totBad += Number(obJson.SignByProv[i].INCORRECTAS);
 													
 							if (i != obJson.SignByProv.length -1){							
 								dataJSON += JSON.stringify(obJson.SignByProv[i]).trim() + ",";
@@ -882,14 +884,14 @@ $(document).ready(function(){
 						    }							
 						}
 						sumTotal = totBad + totGood;
-						userData =',"userdata":{"NOMBRE":"Totales", "INCORRECTAS":"'+totBad+'","CORRECTAS":"'+totGood+ '","TOTAL":"'+sumTotal+'"}}';
+						userData =',"userdata":{"NOMBRE":"Totales", "CORRECTAS":"'+totGood+'","INCORRECTAS":"'+totBad + '","TOTAL":"'+sumTotal+'"}}';
 						dataJSON = dataJSON + userData;
-								
-						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
-						columnModel =[				    	 	
+
+						columnNames = ['Nombre', 'CORRECTAS', 'INCORRECTAS', 'TOTAL'];
+						columnModel =[
 					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
-					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
+					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
 					        ];
 						
@@ -993,14 +995,14 @@ $(document).ready(function(){
 						    }							
 						}
 						sumTotal = totBad + totGood;
-						userData =',"userdata":{"NOMBRE":"Totales", "INCORRECTAS":"'+totBad+'","CORRECTAS":"'+totGood+ '","TOTAL":"'+sumTotal+'"}}';
+						userData =',"userdata":{"NOMBRE":"Totales", "CORRECTAS":"'+totGood+'","INCORRECTAS":"'+totBad+ '","TOTAL":"'+sumTotal+'"}}';
 						dataJSON = dataJSON + userData;
 								
-						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
+						columnNames = ['Nombre', 'CORRECTAS', 'INCORRECTAS', 'TOTAL'];
 						columnModel =[				    	 	
 					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'left',sortable: true , search:false}, 
-					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
+					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
 					        ];
 						
@@ -1023,8 +1025,6 @@ $(document).ready(function(){
 						
 						ordenarDesc(oJSONGood.SignByLongLiveFormat, 'CORRECTAS');											
 						ordenarDesc(oJSONBad.SignByLongLiveFormat, 'INCORRECTAS');					
-						
-
 						
 						if(oJSONGood.SignByLongLiveFormat.length <= 9){
 							chartLabelsGood = oJSONGood.SignByLongLiveFormat.map(function(e){return e.NOMBRE});
@@ -1107,14 +1107,14 @@ $(document).ready(function(){
 						    }							
 						}
 						sumTotal = totBad + totGood;
-						userData =',"userdata":{"NOMBRE":"Totales", "INCORRECTAS":"'+totBad+'","CORRECTAS":"'+totGood+ '","TOTAL":"'+sumTotal+'"}}';
+						userData =',"userdata":{"NOMBRE":"Totales", "CORRECTAS":"'+totGood+'","INCORRECTAS":"'+totBad+ '","TOTAL":"'+sumTotal+'"}}';
 						dataJSON = dataJSON + userData;
 								
-						columnNames = ['Nombre', 'INCORRECTAS','CORRECTAS','TOTAL'];
+						columnNames = ['Nombre', 'CORRECTAS', 'INCORRECTAS', 'TOTAL'];
 						columnModel =[				    	 	
 					        { name: 'NOMBRE',index:'NOMBRE', width: '250', align: 'center',sortable: true , search:false}, 
-					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'CORRECTAS',index:'CORRECTAS', width: '100', align: 'right',sortable: true, search:false } ,
+					        { name: 'INCORRECTAS',index:'INCORRECTAS', width: '100', align: 'right',sortable: true, search:false }, 
 					        { name: 'TOTAL',index:'TOTAL', width: '100', align: 'right',sortable: true, search:false } 
 					        ];
 						

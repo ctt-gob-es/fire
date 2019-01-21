@@ -1,20 +1,12 @@
 <%@page import="java.io.StringReader"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
-<%@page import="es.gob.fire.server.admin.dao.UsersDAO"%>
-<%@page import="es.gob.fire.server.admin.conf.DbManager"%>
-<%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResult" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResultManager" %>
-<%@page import="es.gob.fire.server.admin.entity.User" %>
-<%@page import="es.gob.fire.server.admin.tool.Utils" %>
-<%@page import="javax.json.JsonString"%>
 <%@page import="javax.json.JsonArray"%>
 <%@page import="javax.json.JsonReader"%>
 <%@page import="javax.json.Json"%>
 <%@page import="javax.json.JsonObject"%>
-<%@page import="java.io.ByteArrayInputStream"%>
 
-<%@page import="java.util.List" %>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
 

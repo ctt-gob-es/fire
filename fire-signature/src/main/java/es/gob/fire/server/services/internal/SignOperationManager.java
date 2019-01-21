@@ -25,8 +25,8 @@ import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
+import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -55,6 +55,7 @@ public class SignOperationManager {
         final String algorithm      = params.getParameter(ServiceParams.HTTP_PARAM_ALGORITHM);
         final String cop			= params.getParameter(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION);
         final String format         = params.getParameter(ServiceParams.HTTP_PARAM_FORMAT);
+        final String improvedFormat = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
         final String dataB64        = params.getParameter(ServiceParams.HTTP_PARAM_DATA);
         String extraParamsB64 		= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
@@ -157,8 +158,9 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParamsB64);
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
+        session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, improvedFormat);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
-    	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.valueOf(FIReServiceOperation.parse(op)));
+    	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.valueOf(FIReServiceOperation.parse(op)).toString());
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto

@@ -63,6 +63,4 @@ public class CancelOperationService extends HttpServlet {
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 		response.sendRedirect(redirectErrorUrl);
 	}
-
-
 }

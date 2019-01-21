@@ -48,7 +48,8 @@ public final class PreSignService extends HttpServlet {
 	private static final long serialVersionUID = 7165850857019380976L;
 
 	private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
-    private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+
+	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
@@ -131,7 +132,6 @@ public final class PreSignService extends HttpServlet {
         // El identificador de usuario proporcionado debe ser el que estaba registrado en la sesion
         if (!userId.equals(subjectId)) {
         	LOGGER.warning("El identificador de usuario proporcionado no coincide con el de la sesion"); //$NON-NLS-1$
-        	SIGNLOGGER.register(session, false, null);
             SessionCollector.removeSession(session);
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -275,12 +275,8 @@ public final class PreSignService extends HttpServlet {
 
             if (documents.size() == 0) {
             	LOGGER.warning("No se han podido recuperar los datos a firmar"); //$NON-NLS-1$
-            	SIGNLOGGER.register(session, false, null);
-            	SessionCollector.removeSession(session);
-                response.sendError(
-            		HttpServletResponse.SC_BAD_REQUEST,
-                    "No se han podido recuperar los datos a firmar" //$NON-NLS-1$
-        		);
+            	ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
+            	response.sendRedirect(redirectErrorUrl);
                 return;
             }
 
@@ -304,11 +300,21 @@ public final class PreSignService extends HttpServlet {
 
             // Actualizamos el resultado de las firmas en caso de haber detectado algun error
             // al procesar su documento asociado
+            boolean failed = false;
             for (final BatchDocument doc : documents) {
         		if (doc.getResult() != null) {
+        			SIGNLOGGER.register(session, false, doc.getId());
         			batchResult.setErrorResult(doc.getId(), doc.getResult());
+        			failed = true;
         		}
         	}
+
+            if (failed && stopOnError) {
+                LOGGER.log(Level.SEVERE, "Se encontraron errores en las prefirmas del lote y se aborta la operacion"); //$NON-NLS-1$
+                ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
+                response.sendRedirect(redirectErrorUrl);
+                return;
+            }
         }
         else {
         	LOGGER.warning("Operacion no soportada: " + op); //$NON-NLS-1$
@@ -326,7 +332,7 @@ public final class PreSignService extends HttpServlet {
             connector = ProviderManager.initTransacction(providerName, connConfig.getProperties());
         }
         catch (final FIReConnectorFactoryException e) {
-            LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor " + providerName, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
             response.sendRedirect(redirectErrorUrl);
             return;

@@ -36,9 +36,9 @@
   <servlet>
   	<description>
   	</description>
-  	<display-name>PreviewCertificate</display-name>
-  	<servlet-name>PreviewCertificate</servlet-name>
-  	<servlet-class>es.gob.fire.server.admin.service.PreviewCertificate</servlet-class>
+  	<display-name>PreviewCertificateService</display-name>
+  	<servlet-name>PreviewCertificateService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.PreviewCertificateService</servlet-class>
   </servlet>
   <servlet>
   	<description>
@@ -94,8 +94,8 @@
   	<url-pattern>/AppService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-  	<servlet-name>PreviewCertificate</servlet-name>
-  	<url-pattern>/PreviewCertificate</url-pattern>
+  	<servlet-name>PreviewCertificateService</servlet-name>
+  	<url-pattern>/PreviewCertificateService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>NewCertificateService</servlet-name>

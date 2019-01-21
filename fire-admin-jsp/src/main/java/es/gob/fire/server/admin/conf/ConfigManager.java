@@ -38,12 +38,20 @@ public class ConfigManager {
 
 	private static PropertyDecipher decipherImpl = null;
 
+	static {
+		try {
+			initialize();
+		} catch (final AdminFilesNotFoundException e) {
+			LOGGER.log(Level.SEVERE, "No se encuentra el fichero de configuracion del modulo de administracion", e); //$NON-NLS-1$
+		}
+	}
+
 
 	/**
 	 * Carga la configuraci&oacute;n del m&oacute;dulo.
 	 * @throws AdminFilesNotFoundException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n.
 	 */
-	public static void initialize() throws AdminFilesNotFoundException {
+	private static void initialize() throws AdminFilesNotFoundException {
 
 		// Si ya esta cargada, se evita repetir el proceso
 		if (config != null) {
@@ -136,7 +144,7 @@ public class ConfigManager {
 	 * @return Cadena del controlador JDBC o {@code null}
 	 * si no se ha encontrado o si no se ha podido obetener.
 	 */
-	static String getDbDriverString() {
+	public static String getDbDriverString() {
 
 		String driverString;
 		try {
@@ -162,7 +170,7 @@ public class ConfigManager {
 	 * @return Cadena de conexi&oacute;n a base de datos configurada o {@code null}
 	 * si no se ha encontrado o si no se ha podido obetener.
 	 */
-	static String getDbConnectionString() {
+	public static String getDbConnectionString() {
 
 		String connectionString;
 		try {

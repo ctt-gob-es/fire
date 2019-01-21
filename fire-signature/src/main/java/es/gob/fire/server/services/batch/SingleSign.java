@@ -227,7 +227,7 @@ public final class SingleSign {
 		);
 
 		this.id = el.getAttribute(XML_ATTRIBUTE_ID);
-		if (this.id == null || "".equals(this.id)) { //$NON-NLS-1$
+		if (this.id == null || this.id.isEmpty()) {
 			throw new IllegalArgumentException(
 				"Es obligatorio establecer identificadores unicos de firma" //$NON-NLS-1$
 			);

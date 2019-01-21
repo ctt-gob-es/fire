@@ -1,11 +1,6 @@
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO"%>
-<%@page import="es.gob.fire.server.admin.conf.DbManager"%>
-<%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
-<%@page import="es.gob.fire.server.admin.message.MessageResult" %>
-<%@page import="es.gob.fire.server.admin.message.MessageResultManager" %>
 <%@page import="es.gob.fire.server.admin.entity.User" %>
-<%@page import="es.gob.fire.server.admin.tool.Utils" %>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%

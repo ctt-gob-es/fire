@@ -85,7 +85,7 @@ public final class CertificateService extends HttpServlet {
         if (ConfigManager.isCheckApplicationNeeded()){
         	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
 
-            if (appId == null || "".equals(appId)) { //$NON-NLS-1$
+            if (appId == null || appId.isEmpty()) {
             	LOGGER.severe("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
         		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
@@ -132,7 +132,7 @@ public final class CertificateService extends HttpServlet {
     	}
 
         final String subjectId = params.getParameter(PARAM_SUBJECT_ID);
-        if (subjectId == null || "".equals(subjectId)) { //$NON-NLS-1$
+        if (subjectId == null || subjectId.isEmpty()) {
         	LOGGER.warning("No se ha proporcionado el identificador del titular");//$NON-NLS-1$
             response.sendError(
         		HttpServletResponse.SC_BAD_REQUEST,
@@ -152,7 +152,7 @@ public final class CertificateService extends HttpServlet {
             connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector con el servicio de custodia", e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
             );

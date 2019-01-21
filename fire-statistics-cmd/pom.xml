@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-statistics-cmd</artifactId>
-	<version>2.3-SNAPSHOT</version>
+	<version>2.4-SNAPSHOT</version>
 	
 	
 	<name>fire-statistics-cmd</name>
@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-statistics-common</artifactId>
-			<version>2.3-SNAPSHOT</version>
+			<version>2.4-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -42,22 +42,11 @@
 	</dependencies>
 	
 	<build>
-		<plugins>
-		
-			<!-- Eclipse project -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<!-- Always download and attach dependencies source code -->
-					<downloadSources>false</downloadSources>
-					<downloadJavadocs>false</downloadJavadocs>
-					<!-- Avoid type mvn eclipse:eclipse -Dwtpversion=2.0 -->
-					<wtpversion>2.0</wtpversion>
-				</configuration>
-			</plugin>
-		
+   		<finalName>FireStatisticsDbLoader</finalName>
+   		
+   		<plugins>
+   		
+   			<!-- Compilamos con la JDK definida. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -67,16 +56,36 @@
 					<target>${jdk.version}</target>
 				</configuration>
 			</plugin>
+		
+			<!-- Empaquetamos junto a todas las dependencias en un unico JAR. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+ 
+ 			<!-- Configuramos la clase principal del JAR. -->
+  
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<archive>
+						<manifestFile>src/main/resources/MANIFEST.MF</manifestFile>
+						<addMavenDescriptor>false</addMavenDescriptor>
+					</archive>
+				</configuration>
+			</plugin>
+ 
 		</plugins>
-		<resources>
-			<resource>
-				<directory>src/main/resources/</directory>
-				<excludes>
-					<exclude>*.properties</exclude>
-					<exclude>SafeCert_GateWay_@Firma_Desarrollo.p12</exclude>
-				</excludes>
-				<filtering>false</filtering>
-			</resource>
-		</resources>
 	</build>
 </project>

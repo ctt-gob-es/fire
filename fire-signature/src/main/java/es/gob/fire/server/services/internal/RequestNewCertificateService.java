@@ -111,7 +111,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         	return;
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector con el servicio de custodia"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
         			);

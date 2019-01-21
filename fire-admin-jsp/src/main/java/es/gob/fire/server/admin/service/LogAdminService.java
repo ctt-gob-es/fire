@@ -154,9 +154,11 @@ public class LogAdminService extends HttpServlet {
 
 				// En caso de recibir un error, redirige a LogsMainPage para mostrar el mensaje
 				// en caso contrario, redigige a .
-				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datLogFiles));
-				final JsonObject jsonObj = reader.readObject();
-				reader.close();
+				JsonObject jsonObj;
+				try (final JsonReader reader = Json.createReader(new ByteArrayInputStream(datLogFiles));) {
+					jsonObj = reader.readObject();
+				}
+
 				if (jsonObj.getJsonArray("Error") != null) {  //$NON-NLS-1$
 					session.setAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON, new String (datLogFiles));
 					response.sendRedirect(getSelectionResultUrl(request, false));
@@ -185,9 +187,10 @@ public class LogAdminService extends HttpServlet {
 
 			if (datOpenFiles != null && datOpenFiles.length > 0) {
 
-				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datOpenFiles));
-				final JsonObject jsonObj = reader.readObject();
-				reader.close();
+				JsonObject jsonObj;
+				try (final JsonReader reader = Json.createReader(new ByteArrayInputStream(datOpenFiles));) {
+					jsonObj = reader.readObject();
+				}
 
 				if (jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
 					final JsonArray jsonError = jsonObj.getJsonArray("Error"); //$NON-NLS-1$
@@ -326,9 +329,10 @@ public class LogAdminService extends HttpServlet {
 			final byte datDownload[] = logClient.download(params.getLogFileName(), tempDir);
 			if (datDownload != null && datDownload.length > 0 ) {
 
-				final JsonReader reader = Json.createReader(new ByteArrayInputStream(datDownload));
-				final JsonObject jsonObj = reader.readObject();
-				reader.close();
+				JsonObject jsonObj;
+				try (final JsonReader reader = Json.createReader(new ByteArrayInputStream(datDownload));) {
+					jsonObj = reader.readObject();
+				}
 
 				if (jsonObj.getJsonArray("Ok") != null) {	//$NON-NLS-1$
 					final JsonArray download = jsonObj.getJsonArray("Ok"); //$NON-NLS-1$
@@ -359,7 +363,6 @@ public class LogAdminService extends HttpServlet {
 				        	final FileInputStream input = new FileInputStream(f);
 				        	response.setContentLength(tam);
 							try {
-							 // final OutputStream output = new FileOutputStream(zipfileName);//guarda a fichero
 								final OutputStream output = response.getOutputStream();//gestiona la descarga el navegador
 							  try {
 							    int bytesRead;
@@ -431,14 +434,16 @@ public class LogAdminService extends HttpServlet {
 	private final static String buildJsonError(final String msgError, final int errorCode) {
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 		final JsonArrayBuilder data = Json.createArrayBuilder();
-		final StringWriter error = new StringWriter();
 		data.add(Json.createObjectBuilder()
 				.add("Code",errorCode) //$NON-NLS-1$
 				.add("Message", msgError)); //$NON-NLS-1$
 		jsonObj.add("Error", data); //$NON-NLS-1$
-		final JsonWriter jw = Json.createWriter(error);
-	    jw.writeObject(jsonObj.build());
-	    jw.close();
+
+		final StringWriter error = new StringWriter();
+		try (final JsonWriter jw = Json.createWriter(error);) {
+			jw.writeObject(jsonObj.build());
+		}
+
         return error.toString();
 	}
 

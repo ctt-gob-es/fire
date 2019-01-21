@@ -49,8 +49,8 @@ public class GenerateCertificateManager {
 			final RequestParameters params,
             final HttpServletResponse response) throws IOException {
 
-		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
-        final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String appId 			= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
+        final String transactionId	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
         final String subjectId      = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String providerName	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 		final String configB64      = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
@@ -72,14 +72,11 @@ public class GenerateCertificateManager {
     	}
 
         final GenerateCertificateResult gcr;
-
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-
         try {
         	gcr = generateCertificate(providerName, subjectId, config);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del servicio de custodia"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
         			);

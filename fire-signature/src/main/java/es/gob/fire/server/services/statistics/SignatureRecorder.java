@@ -13,8 +13,7 @@ import es.gob.fire.server.services.internal.BatchResult;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchConfig;
-import es.gob.fire.services.statistics.Browser;
-import es.gob.fire.services.statistics.entity.SignatureCube;
+import es.gob.fire.statistics.entity.SignatureCube;
 
 /**
  * Permite registrar la informaci&oacute;n relevante de las firmas realizadas para el
@@ -130,12 +129,12 @@ public class SignatureRecorder {
 
 	/**
 	 * Registra los datos de firma.
-	 * @param fireSesion Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
+	 * @param fireSession Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
 	 * @param result Resultado de la operaci&oacute;n ({@code true}, firma correcta;
 	 * {@code false}, no se pudo generar la firma).
 	 * @param docId Identificador del documento firmado en caso de encontrarse dentro de un lote.
 	 */
-	public final void register(final FireSession fireSesion, final boolean result, final String docId) {
+	public final void register(final FireSession fireSession, final boolean result, final String docId) {
 
 		// Si no hay que registrar estadisticas, no se hace
 		if (!this.enable) {
@@ -148,54 +147,49 @@ public class SignatureRecorder {
 		}
 
 		// Id transaccion
-		final String trId = fireSesion.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-		this.getSignCube().setId_transaccion(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
+		this.getSignCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+
+		// Aplicacion
+		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+		this.getSignCube().setApplication(appName);
 
 		// Resultado
 		this.getSignCube().setResultSign(result);
 
 		// Navegador
-		final Browser browser = (Browser) fireSesion.getObject(ServiceParams.SESSION_PARAM_BROWSER);
-		this.getSignCube().setNavegador(browser);
+		final String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
+		this.getSignCube().setBrowser(browser);
 
 		// Proveedor que gestiona el certificado de firma
-		final String provider = fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		this.getSignCube().setProveedor(provider);
+		final String provider = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+		this.getSignCube().setProvider(provider);
 
 		// Algoritmo
-		String algorithm = fireSesion.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-		if (algorithm == null || algorithm.isEmpty()) {
-			algorithm = SignatureAlgorithms.OTHER.getName();
-		}
+		final String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
 		this.getSignCube().setAlgorithm(algorithm);
 
 		// Obtenemos el tamano del documento
 		Long docSize = new Long(0);
-		final Object docSizeObject = fireSesion.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
+		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
 		if (docSize != null) {
 			docSize = (Long) docSizeObject;
 		}
 
 		// Obtenemos el formato de firma configurado
-		String format = fireSesion.getString(ServiceParams.SESSION_PARAM_FORMAT);
-		if (format == null || format.isEmpty()) {
-			format = SignatureFormats.OTHER.getName();
-		}
+		String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
 
 		// Obtenemos el formato de actualizacion configurado
-		String upgrade = fireSesion.getString(ServiceParams.SESSION_PARAM_UPGRADE);
-		if (upgrade != null && upgrade.isEmpty()) {
-			upgrade = null;
-		}
+		String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
 
 		// En caso de firma de lotes, actualizamos la informacion de los documentos y la configuracion empleada
 		if (docId != null) {
-			final BatchResult batchResult = (BatchResult) fireSesion.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
+			final BatchResult batchResult = (BatchResult) fireSession.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
 			if (batchResult != null && batchResult.documentsCount() > 0) {
 				// Actualizamos el tamano del documento
 				final DocInfo docinf = batchResult.getDocInfo(docId);
 			    if (docinf != null) {
-			    	docSize = docinf.getSize();
+			    	docSize = new Long(docinf.getSize());
 			    }
 			    // Si se establecio una configuracion especifica para el documento, registramos esta
 			    final SignBatchConfig signConfig = batchResult.getSignConfig(docId);
@@ -207,7 +201,7 @@ public class SignatureRecorder {
 		}
 
 		// Registramos el tamano del documento, el formato y el formato de actualizacion
-		this.getSignCube().setSize(docSize);
+		this.getSignCube().setDataSize(docSize.longValue());
 		this.getSignCube().setFormat(format);
 		this.getSignCube().setImprovedFormat(upgrade);
 

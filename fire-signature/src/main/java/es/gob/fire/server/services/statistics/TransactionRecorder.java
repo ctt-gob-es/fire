@@ -11,7 +11,7 @@ import es.gob.fire.logs.handlers.DailyFileHandler;
 import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
-import es.gob.fire.services.statistics.entity.TransactionCube;
+import es.gob.fire.statistics.entity.TransactionCube;
 
 public class TransactionRecorder {
 
@@ -111,12 +111,12 @@ public class TransactionRecorder {
 
 	/**
 	 * Registra los datos de la transacci&oacute;n.
-	 * @param fireSesion Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
+	 * @param fireSession Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
 	 * @param result Resultado de la operaci&oacute;n ({@code true}, la firma termino
 	 * correctamente o lo hizo alguna de las firmas del lote; {@code false}, no se pudo
 	 * generar la firma o fallaron todas las firmas del lote).
 	 */
-	public final void register(final FireSession fireSesion, final boolean result) {
+	public final void register(final FireSession fireSession, final boolean result) {
 
 		// Si no hay que registrar estadisticas, no se hace
 		if (!this.enable) {
@@ -129,44 +129,44 @@ public class TransactionRecorder {
 		}
 
 		// Id transaccion
-		final String trId = fireSesion.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-		this.getTransactCube().setId_transaccion(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
+		this.getTransactCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
 
 		// Resultado
 		this.getTransactCube().setResultTransaction(result);
 
 		// Nombre de la aplicacion
-		final String appName = fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
 		if (appName != null && !appName.isEmpty()) {
-			this.getTransactCube().setAplicacion(appName);
+			this.getTransactCube().setApplication(appName);
 		}
 		else {
-			final String appId = fireSesion.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
-			this.getTransactCube().setAplicacion(appId);
+			final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+			this.getTransactCube().setApplication(appId);
 		}
 
 		// Operacion
-		final String op = fireSesion.getString(ServiceParams.SESSION_PARAM_OPERATION);
+		final String op = fireSession.getString(ServiceParams.SESSION_PARAM_OPERATION);
 		if (op != null && !op.isEmpty()) {
 			final FIReServiceOperation fsop = FIReServiceOperation.parse(op) ;
-			this.getTransactCube().setOperacion(TransactionType.valueOf(fsop).name());
+			this.getTransactCube().setOperation(TransactionType.valueOf(fsop).name());
 		}
 
 		// Almacenamos la informacion del proveedor
-		 final String[] provsSession = (String []) fireSesion.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
-		 final String prov = fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		 final String provForced = fireSesion.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
+		 final String[] provsSession = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
+		 final String prov = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+		 final String provForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
 
 		if (provForced != null && !provForced.isEmpty()) {
-			this.getTransactCube().setProveedor(provForced);
-			this.getTransactCube().setProveedorForzado(true);
+			this.getTransactCube().setProvider(provForced);
+			this.getTransactCube().setMandatoryProvider(true);
 		}
 		else if (prov != null && !prov.isEmpty()) {
-			this.getTransactCube().setProveedor(prov);
+			this.getTransactCube().setProvider(prov);
 		}
 		else if(provsSession != null && provsSession.length == 1) {
-			this.getTransactCube().setProveedor(provsSession[0]);
-			this.getTransactCube().setProveedorForzado(true);
+			this.getTransactCube().setProvider(provsSession[0]);
+			this.getTransactCube().setMandatoryProvider(true);
 		}
 
 		this.dataLogger.finest(this.getTransactCube().toString());

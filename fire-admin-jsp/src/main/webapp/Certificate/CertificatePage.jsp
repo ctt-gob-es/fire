@@ -1,53 +1,12 @@
-<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
-<%@page import="es.gob.fire.server.admin.conf.DbManager"%>
-<%@page import="es.gob.fire.server.admin.dao.CertificatesDAO" %>
-<%@page import="es.gob.fire.server.admin.entity.CertificateFire" %>
-<%@page import="java.util.List" %>
-<%@page import="es.gob.fire.server.admin.tool.Utils" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResult" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResultManager" %>
-<%@page import="es.gob.fire.server.admin.message.AdminFilesNotFoundException" %>
+
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-
 	if (session == null) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
-	}
-
-	String user = "";//$NON-NLS-1$
-	String errorText = null;
-	try {
-		DbManager.initialize();
-	}
-	catch (AdminFilesNotFoundException e) {
-		response.sendRedirect("../Error/FileNotFound.jsp?file=" + e.getFileName()); //$NON-NLS-1$
-		return;
-	}
-	catch (Exception e){
-		response.sendRedirect("../Error/SevereError.jsp?msg=" + e.toString()); //$NON-NLS-1$
-		return;
-	}
-
-	Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
-	if (state == null) {
-		// Leemos la contrasena de entrada
-		String psswd = request.getParameter("password"); //$NON-NLS-1$
-		user = request.getParameter("user");//$NON-NLS-1$
-		// Comprobamos la contrasena
-		if (psswd == null || user == null) {
-			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-			return;
-		}
-
-
-		// Marcamos la sesion como iniciada 
-		session.setAttribute("initializedSession", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-		session.setAttribute(ServiceParams.SESSION_ATTR_USER, user);
-	}
-	else if (!"true".equals(state)) { //$NON-NLS-1$
-		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 	}
 
 	// Logica para determinar si mostrar un resultado de operacion
@@ -80,12 +39,7 @@
 	<div id="menu-bar"  style="display: text-align:right;">
 	<input class="menu-btn" name="add-usr-btn" type="button" value="Alta certificado" title="Crear una nueva aplicaci&oacute;n" onclick="location.href='NewCertificate.jsp?op=1'"/>
 	</div>
-	<% if (errorText != null) { %>
-		<p id="error-txt"><%= errorText %></p> 
-	<%
-		errorText = null;
-	  }
-	%>
+
 		<div style="display: block-inline; text-align:center;">
 			<p id="descrp">
 			  Certificados dados de alta en el sistema.
