@@ -1,3 +1,6 @@
+
+-- Script de migracion desde FIRe 2.2 o 2.3 a 2.4
+
 -- 1 Crear la tablas nuevas 
 
 -- Tabla para el guardado de las referencias a los servidores de log
@@ -31,7 +34,7 @@ CREATE TABLE "TB_FIRMAS" (
 
 -- Tabla para el guardado de las estadisticas de las transacciones
 
-CREATE TABLE `TB_TRANSACCIONES` (
+CREATE TABLE "TB_TRANSACCIONES" (
   "id" NUMBER NOT NULL ENABLE,
   "fecha" TIMESTAMP (6) NOT NULL ENABLE,
   "aplicacion" VARCHAR2(45) NOT NULL ENABLE,

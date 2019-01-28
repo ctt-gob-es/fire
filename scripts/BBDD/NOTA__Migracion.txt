@@ -1,0 +1,12 @@
+
+Migración a FIRe 2.4
+--------------------
+
+Las secuencias de scripts de base de datos para migrar a la última versión de FIRe es:
+
+- Desde FIRe 2.0 o 2.1:
+	1. - Migracion_fire_2_-_2_2.sql
+	2. - Migracion_fire_2_2_-_2_4.sql
+
+ - Desde FIRe 2.2 o 2.3:
+	1. - Migracion_fire_2_2_-_2_4.sql
