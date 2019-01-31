@@ -136,7 +136,7 @@ public class FileHandler extends OutputStreamHandler {
      * @param file the file
      * @throws FileNotFoundException if an error occurs opening the file
      */
-    public void setFile(File file) throws FileNotFoundException {
+    public void setFile(final File file) throws FileNotFoundException {
         synchronized (this.outputLock) {
             if (file == null) {
                 this.file = null;
@@ -185,7 +185,7 @@ public class FileHandler extends OutputStreamHandler {
      * @param fileName the file name
      * @throws FileNotFoundException if an error occurs opening the file
      */
-    public void setFileName(String fileName) throws FileNotFoundException {
+    public void setFileName(final String fileName) throws FileNotFoundException {
         setFile(fileName == null ? null : new File(fileName));
     }
 }

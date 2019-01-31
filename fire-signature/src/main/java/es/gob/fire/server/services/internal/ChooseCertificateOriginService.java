@@ -27,7 +27,6 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.WeakRegistryException;
-import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.statistics.entity.Browser;
 
 
@@ -40,8 +39,6 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	private static final long serialVersionUID = -1367908808211903695L;
 
 	private static final Logger LOGGER = Logger.getLogger(ChooseCertificateOriginService.class.getName());
-	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
-
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
 	@Override
@@ -134,7 +131,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			request.getRequestDispatcher(FirePages.PG_MINI_APPLET).forward(request, response);
 			return;
 		} catch (final ServletException e) {
-			LOGGER.warning(logF.format("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina: " + e)); //$NON-NLS-1$
 			response.sendRedirect(FirePages.PG_MINI_APPLET+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
@@ -282,7 +279,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			return;
 		}
 		catch (final ServletException e) {
-			LOGGER.warning(logF.format("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
+			LOGGER.warning(logF.format("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a la misma pagina: " + e)); //$NON-NLS-1$
 			response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE+"?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}

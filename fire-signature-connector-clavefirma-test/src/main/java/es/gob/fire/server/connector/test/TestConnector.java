@@ -192,9 +192,13 @@ public class TestConnector extends FIReConnector {
 		}
 
 		// Leemos el JSON con el listado de certificados
-		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(response));
-        final JsonArray certObjects = jsonReader.readArray();
-        jsonReader.close();
+		final JsonArray certObjects;
+		try (
+			final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(response));
+		) {
+			certObjects = jsonReader.readArray();
+	        jsonReader.close();
+		}
 
         final CertificateFactory certFactory;
         try {
@@ -209,10 +213,10 @@ public class TestConnector extends FIReConnector {
         for (int i = 0; i < certObjects.size(); i++) {
         	try {
         		certs[i] = (X509Certificate) certFactory.generateCertificate(
-        				new ByteArrayInputStream(
-        						Base64.decode(certObjects.get(i).toString())
-        						)
-        				);
+    				new ByteArrayInputStream(
+						Base64.decode(certObjects.get(i).toString())
+					)
+				);
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.WARNING, "Error al componer un certificado del usuario", e); //$NON-NLS-1$
@@ -270,18 +274,19 @@ public class TestConnector extends FIReConnector {
 
 		final String urlBase = this.testUrlBase + "TestLoadDataService"; //$NON-NLS-1$
 		final StringBuilder urlParameters = new StringBuilder()
-		.append("subjectid=").append(subjectId) //$NON-NLS-1$
-		.append("&algorithm=").append(algorithm) //$NON-NLS-1$
-		.append("&certificate=").append(Base64.encode(certEncoded, true)) //$NON-NLS-1$
-		.append("&triphasedata=").append(Base64.encode(td.toString().getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
-		.append("&urlok=").append(Base64.encode(this.redirectOkUrl.getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
-		.append("&urlerror=").append(Base64.encode(this.redirectErrorUrl.getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
-		.append("&infoDocumentos=").append(Base64.encode(infoDocumentos.getBytes(DEFAULT_ENCODING), true)); //$NON-NLS-1$
+			.append("subjectid=").append(subjectId) //$NON-NLS-1$
+			.append("&algorithm=").append(algorithm) //$NON-NLS-1$
+			.append("&certificate=").append(Base64.encode(certEncoded, true)) //$NON-NLS-1$
+			.append("&triphasedata=").append(Base64.encode(td.toString().getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
+			.append("&urlok=").append(Base64.encode(this.redirectOkUrl.getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
+			.append("&urlerror=").append(Base64.encode(this.redirectErrorUrl.getBytes(DEFAULT_ENCODING), true)) //$NON-NLS-1$
+			.append("&infoDocumentos=").append(Base64.encode(infoDocumentos.getBytes(DEFAULT_ENCODING), true)); //$NON-NLS-1$
 
-		byte[] response;
+		final byte[] response;
 		try {
 			response = ConnectionManager.readUrlByPost(urlBase, urlParameters.toString());
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de prueba de carga de datos", e); //$NON-NLS-1$
 			if (e instanceof HttpError) {
 				if (((HttpError) e).getResponseCode() == HTTP_ERROR_UNKNOWN_USER) {
@@ -298,31 +303,34 @@ public class TestConnector extends FIReConnector {
 	public Map<String, byte[]> sign(final String transactionId) throws FIReSignatureException {
 
 		final StringBuilder testUrl = new StringBuilder()
-		.append(this.testUrlBase).append("TestSignService") //$NON-NLS-1$
-		.append("?transactionid=").append(transactionId); //$NON-NLS-1$
+			.append(this.testUrlBase).append("TestSignService") //$NON-NLS-1$
+			.append("?transactionid=").append(transactionId); //$NON-NLS-1$
 
-		byte[] response;
+		final byte[] response;
 		try {
 			response = ConnectionManager.readUrlByGet(testUrl.toString());
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de prueba de firma", e); //$NON-NLS-1$
 			throw new FIReSignatureException("Error en la llamada al servicio de prueba de firma", e); //$NON-NLS-1$
 		}
 
 		final Map<String, byte[]> result = new HashMap<>();
-		final JsonReader reader = Json.createReader(new ByteArrayInputStream(response));
-		try {
+
+		try (
+			final JsonReader reader = Json.createReader(new ByteArrayInputStream(response));
+		) {
 			final JsonArray signatures = reader.readArray();
 			for (int i = 0; i < signatures.size(); i++) {
 				final JsonObject signature = (JsonObject) signatures.get(i);
 				result.put(signature.getString("id"), Base64.decode(signature.getString("pk1"))); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-		} catch (final IOException e) {
-			reader.close();
+	        reader.close();
+		}
+		catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error al decodificar una de las firmas resultantes", e); //$NON-NLS-1$
 			throw new FIReSignatureException("Error al decodificar una de las firmas resultantes", e); //$NON-NLS-1$
 		}
-		reader.close();
 
 		return result;
 	}
@@ -336,15 +344,16 @@ public class TestConnector extends FIReConnector {
 																WeakRegistryException {
 
 		final StringBuilder urlParams = new StringBuilder()
-		.append(this.testUrlBase).append("TestGenerateCertificateService") //$NON-NLS-1$
-		.append("?subjectid=").append(subjectId) //$NON-NLS-1$
-		.append("&urlok=").append(Base64.encode(this.redirectOkUrl.getBytes(StandardCharsets.UTF_8), true)) //$NON-NLS-1$
-		.append("&urlerror=").append(Base64.encode(this.redirectErrorUrl.getBytes(DEFAULT_ENCODING), true)); //$NON-NLS-1$
+			.append(this.testUrlBase).append("TestGenerateCertificateService") //$NON-NLS-1$
+			.append("?subjectid=").append(subjectId) //$NON-NLS-1$
+			.append("&urlok=").append(Base64.encode(this.redirectOkUrl.getBytes(StandardCharsets.UTF_8), true)) //$NON-NLS-1$
+			.append("&urlerror=").append(Base64.encode(this.redirectErrorUrl.getBytes(DEFAULT_ENCODING), true)); //$NON-NLS-1$
 
-		byte[] response;
+		final byte[] response;
 		try {
 			response = ConnectionManager.readUrlByGet(urlParams.toString());
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 
 			if (e instanceof HttpError) {
 				if (((HttpError) e).getResponseCode() == HTTP_ERROR_UNKNOWN_USER) {
@@ -364,7 +373,8 @@ public class TestConnector extends FIReConnector {
 
 		try {
 			return new GenerateCertificateResult(new String(response, StandardCharsets.UTF_8));
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "La respuesta del servicio de generacion de certificados no es valida:\n" + response, e); //$NON-NLS-1$
 			throw new FIReCertificateException("La respuesta del servicio de generacion de certificados no es valida", e); //$NON-NLS-1$
 		}
@@ -374,33 +384,37 @@ public class TestConnector extends FIReConnector {
 	public byte[] recoverCertificate(final String transactionId) throws FIReCertificateException, FIReConnectorNetworkException {
 
 		final StringBuilder url = new StringBuilder()
-		.append(this.testUrlBase).append("TestRecoverCertificateService") //$NON-NLS-1$
-		.append("?transactionid=").append(transactionId); //$NON-NLS-1$
+			.append(this.testUrlBase).append("TestRecoverCertificateService") //$NON-NLS-1$
+			.append("?transactionid=").append(transactionId); //$NON-NLS-1$
 
-		byte[] response;
+		final byte[] response;
 		try {
 			response = ConnectionManager.readUrlByGet(url.toString());
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de recuperacion de certificado generado", e); //$NON-NLS-1$
 			throw new FIReConnectorNetworkException("Error en la llamada al servicio de recuperacion de certificado generado", e); //$NON-NLS-1$
 		}
 
-		final JsonReader reader = Json.createReader(new ByteArrayInputStream(response));
-
-		final JsonObject jsonResult = reader.readObject();
-		final String result = jsonResult.getString("result"); //$NON-NLS-1$
-		if (!"OK".equalsIgnoreCase(result)) { //$NON-NLS-1$
-			LOGGER.log(Level.SEVERE, "El certificado de firma no se genero correctamente: " + result); //$NON-NLS-1$
+		final String certEncoded;
+		try (
+			final JsonReader reader = Json.createReader(new ByteArrayInputStream(response));
+		) {
+			final JsonObject jsonResult = reader.readObject();
+			final String result = jsonResult.getString("result"); //$NON-NLS-1$
+			if (!"OK".equalsIgnoreCase(result)) { //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "El certificado de firma no se genero correctamente: " + result); //$NON-NLS-1$
+				reader.close();
+				throw new FIReCertificateException("El certificado de firma no se genero correctamente"); //$NON-NLS-1$
+			}
+			certEncoded = jsonResult.getString("cert"); //$NON-NLS-1$
 			reader.close();
-			throw new FIReCertificateException("El certificado de firma no se genero correctamente"); //$NON-NLS-1$
 		}
-		final String certEncoded = jsonResult.getString("cert"); //$NON-NLS-1$
-
-		reader.close();
 
 		try {
 			return Base64.decode(certEncoded);
-		} catch (final Exception e) {
+		}
+		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error al decodificar el certificado de firma", e); //$NON-NLS-1$
 			throw new FIReCertificateException("Error al decodificar el certificado de firma", e); //$NON-NLS-1$
 		}

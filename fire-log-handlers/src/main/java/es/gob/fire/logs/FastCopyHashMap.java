@@ -44,890 +44,793 @@ import java.util.Set;
  *
  * @author Jason T. Greene
  */
-class FastCopyHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable
-{
-   /**
-    * Marks null keys.
-    */
-   private static final Object NULL = new Object();
+class FastCopyHashMap<K, V> extends AbstractMap<K, V> implements Cloneable, Serializable {
 
-   /**
-    * Serialization ID
-    */
-   private static final long serialVersionUID = 10929568968762L;
+	/** Marks null keys. */
+	private static final Object NULL = new Object();
 
-   /**
-    * Same default as HashMap, must be a power of 2
-    */
-   private static final int DEFAULT_CAPACITY = 8;
+	/** Serialization ID. */
+	private static final long serialVersionUID = 10929568968762L;
 
-   /**
-    * MAX_INT - 1
-    */
-   private static final int MAXIMUM_CAPACITY = 1 << 30;
+	/** Same default as HashMap, must be a power of 2. */
+	private static final int DEFAULT_CAPACITY = 8;
 
-   /**
-    * 67%, just like IdentityHashMap
-    */
-   private static final float DEFAULT_LOAD_FACTOR = 0.67f;
+	/** MAX_INT - 1 */
+	private static final int MAXIMUM_CAPACITY = 1 << 30;
 
-   /**
-    * The open-addressed table
-    */
-   private transient Entry<K, V>[] table;
+	/** 67%, just like IdentityHashMap. */
+	private static final float DEFAULT_LOAD_FACTOR = 0.67f;
 
-   /**
-    * The current number of key-value pairs
-    */
-   private transient int size;
+	/** The open-addressed table. */
+	transient Entry<K, V>[] table;
 
-   /**
-    * The next resize
-    */
-   private transient int threshold;
+	/**
+	 * The current number of key-value pairs
+	 */
+	transient int size;
 
-   /**
-    * The user defined load factor which defines when to resize
-    */
-   private final float loadFactor;
+	/**
+	 * The next resize
+	 */
+	private transient int threshold;
 
-   /**
-    * Counter used to detect changes made outside of an iterator
-    */
-   private transient int modCount;
+	/**
+	 * The user defined load factor which defines when to resize
+	 */
+	private final float loadFactor;
 
-   // Cached views
-   private transient KeySet keySet;
-   private transient Values values;
-   private transient EntrySet entrySet;
+	/**
+	 * Counter used to detect changes made outside of an iterator
+	 */
+	transient int modCount;
 
-   public FastCopyHashMap(int initialCapacity, final float loadFactor)
-   {
-      if (initialCapacity < 0) {
-		throw new IllegalArgumentException("Can not have a negative size table!");
+	// Cached views
+	private transient KeySet keySet;
+	private transient Values values;
+	private transient EntrySet entrySet;
+
+	public FastCopyHashMap(final int initCapacity, final float loadFactor) {
+
+		int initialCapacity = initCapacity;
+		if (initialCapacity < 0) {
+			throw new IllegalArgumentException("Can not have a negative size table!"); //$NON-NLS-1$
+		}
+
+		if (initialCapacity > MAXIMUM_CAPACITY) {
+			initialCapacity = MAXIMUM_CAPACITY;
+		}
+
+		if (!(loadFactor > 0F && loadFactor <= 1F)) {
+			throw new IllegalArgumentException("Load factor must be greater than 0 and less than or equal to 1"); //$NON-NLS-1$
+		}
+
+		this.loadFactor = loadFactor;
+		init(initialCapacity, loadFactor);
 	}
 
-      if (initialCapacity > MAXIMUM_CAPACITY) {
-		initialCapacity = MAXIMUM_CAPACITY;
-	}
-
-      if (!(loadFactor > 0F && loadFactor <= 1F)) {
-		throw new IllegalArgumentException("Load factor must be greater than 0 and less than or equal to 1");
-	}
-
-      this.loadFactor = loadFactor;
-      init(initialCapacity, loadFactor);
-   }
-
-   @SuppressWarnings("unchecked")
-   public FastCopyHashMap(final Map<? extends K, ? extends V> map)
-   {
-      if (map instanceof FastCopyHashMap)
-      {
-         final FastCopyHashMap<? extends K, ? extends V> fast = (FastCopyHashMap<? extends K, ? extends V>) map;
-         this.table = (Entry<K, V>[]) fast.table.clone();
-         this.loadFactor = fast.loadFactor;
-         this.size = fast.size;
-         this.threshold = fast.threshold;
-      }
-      else
-      {
-         this.loadFactor = DEFAULT_LOAD_FACTOR;
-         init(map.size(), this.loadFactor);
-         putAll(map);
-      }
-   }
-
-   @SuppressWarnings("unchecked")
-   private void init(final int initialCapacity, final float loadFactor)
-   {
-      int c = 1;
-      for (; c < initialCapacity; c <<= 1) {
-		;
-	}
-      this.threshold = (int) (c * loadFactor);
-
-      // Include the load factor when sizing the table for the first time
-      if (initialCapacity > this.threshold && c < MAXIMUM_CAPACITY)
-      {
-         c <<= 1;
-         this.threshold = (int) (c * loadFactor);
-      }
-
-      this.table = new Entry[c];
-   }
-
-   public FastCopyHashMap(final int initialCapacity)
-   {
-      this(initialCapacity, DEFAULT_LOAD_FACTOR);
-   }
-
-   public FastCopyHashMap()
-   {
-      this(DEFAULT_CAPACITY);
-   }
-
-   // The normal bit spreader...
-   private static final int hash(final Object key)
-   {
-      int h = key.hashCode();
-      h ^= h >>> 20 ^ h >>> 12;
-      return h ^ h >>> 7 ^ h >>> 4;
-   }
-
-   @SuppressWarnings("unchecked")
-   private static final <K> K maskNull(final K key)
-   {
-      return key == null ? (K) NULL : key;
-   }
-
-   private static final <K> K unmaskNull(final K key)
-   {
-      return key == NULL ? null : key;
-   }
-
-   private int nextIndex(int index, final int length)
-   {
-      index = index >= length - 1 ? 0 : index + 1;
-      return index;
-   }
-
-   private static final boolean eq(final Object o1, final Object o2)
-   {
-      return o1 == o2 || o1 != null && o1.equals(o2);
-   }
-
-   private static final int index(final int hashCode, final int length)
-   {
-      return hashCode & length - 1;
-   }
-
-   @Override
-public int size()
-   {
-      return this.size;
-   }
-
-   @Override
-public boolean isEmpty()
-   {
-      return this.size == 0;
-   }
-
-   @Override
-public V get(Object key)
-   {
-      key = maskNull(key);
-
-      final int hash = hash(key);
-      final int length = this.table.length;
-      int index = index(hash, length);
-
-      for (final int start = index; ;)
-      {
-         final Entry<K, V> e = this.table[index];
-         if (e == null) {
-			return null;
-		}
-
-         if (e.hash == hash && eq(key, e.key)) {
-			return e.value;
-		}
-
-         index = nextIndex(index, length);
-         if (index == start) {
-			return null;
-		}
-      }
-   }
-
-   @Override
-public boolean containsKey(Object key)
-   {
-      key = maskNull(key);
-
-      final int hash = hash(key);
-      final int length = this.table.length;
-      int index = index(hash, length);
-
-      for (final int start = index; ;)
-      {
-         final Entry<K, V> e = this.table[index];
-         if (e == null) {
-			return false;
-		}
-
-         if (e.hash == hash && eq(key, e.key)) {
-			return true;
-		}
-
-         index = nextIndex(index, length);
-         if (index == start) {
-			return false;
-		}
-      }
-   }
-
-   @Override
-public boolean containsValue(final Object value)
-   {
-      for (final Entry<K, V> e : this.table) {
-		if (e != null && eq(value, e.value)) {
-			return true;
+	@SuppressWarnings("unchecked")
+	public FastCopyHashMap(final Map<? extends K, ? extends V> map) {
+		if (map instanceof FastCopyHashMap) {
+			final FastCopyHashMap<? extends K, ? extends V> fast = (FastCopyHashMap<? extends K, ? extends V>) map;
+			this.table = (Entry<K, V>[]) fast.table.clone();
+			this.loadFactor = fast.loadFactor;
+			this.size = fast.size;
+			this.threshold = fast.threshold;
+		} else {
+			this.loadFactor = DEFAULT_LOAD_FACTOR;
+			init(map.size(), this.loadFactor);
+			putAll(map);
 		}
 	}
 
-      return false;
-   }
-
-   @Override
-public V put(K key, final V value)
-   {
-      key = maskNull(key);
-
-      final Entry<K, V>[] table = this.table;
-      final int hash = hash(key);
-      final int length = table.length;
-      int index = index(hash, length);
-
-      for (final int start = index; ;)
-      {
-         final Entry<K, V> e = table[index];
-         if (e == null) {
-			break;
-		}
-
-         if (e.hash == hash && eq(key, e.key))
-         {
-            table[index] = new Entry<K, V>(e.key, e.hash, value);
-            return e.value;
-         }
-
-         index = nextIndex(index, length);
-         if (index == start) {
-			throw new IllegalStateException("Table is full!");
-		}
-      }
-
-      this.modCount++;
-      table[index] = new Entry<K, V>(key, hash, value);
-      if (++this.size >= this.threshold) {
-		resize(length);
-	}
-
-      return null;
-   }
-
-
-   @SuppressWarnings("unchecked")
-   private void resize(final int from)
-   {
-      final int newLength = from << 1;
-
-      // Can't get any bigger
-      if (newLength > MAXIMUM_CAPACITY || newLength <= from) {
-		return;
-	}
-
-      final Entry<K, V>[] newTable = new Entry[newLength];
-      final Entry<K, V>[] old = this.table;
-
-      for (final Entry<K, V> e : old)
-      {
-         if (e == null) {
-			continue;
-		}
-
-         int index = index(e.hash, newLength);
-         while (newTable[index] != null) {
-			index = nextIndex(index, newLength);
-		}
-
-         newTable[index] = e;
-      }
-
-      this.threshold = (int) (this.loadFactor * newLength);
-      this.table = newTable;
-   }
-
-   @Override
-public void putAll(final Map<? extends K, ? extends V> map)
-   {
-      int size = map.size();
-      if (size == 0) {
-		return;
-	}
-
-      if (size > this.threshold)
-      {
-         if (size > MAXIMUM_CAPACITY) {
-			size = MAXIMUM_CAPACITY;
-		}
-
-         int length = this.table.length;
-         for (; length < size; length <<= 1) {
+	@SuppressWarnings("unchecked")
+	private void init(final int initialCapacity, final float loadFactor1) {
+		int c = 1;
+		for (; c < initialCapacity; c <<= 1) {
 			;
 		}
+		this.threshold = (int) (c * loadFactor1);
 
-         resize(length);
-      }
-
-      for (final Map.Entry<? extends K, ? extends V> e : map.entrySet()) {
-		put(e.getKey(), e.getValue());
-	}
-   }
-
-   @Override
-public V remove(Object key)
-   {
-      key = maskNull(key);
-
-      final Entry<K, V>[] table = this.table;
-      final int length = table.length;
-      final int hash = hash(key);
-      final int start = index(hash, length);
-
-      for (int index = start; ;)
-      {
-         final Entry<K, V> e = table[index];
-         if (e == null) {
-			return null;
+		// Include the load factor when sizing the table for the first time
+		if (initialCapacity > this.threshold && c < MAXIMUM_CAPACITY) {
+			c <<= 1;
+			this.threshold = (int) (c * loadFactor1);
 		}
 
-         if (e.hash == hash && eq(key, e.key))
-         {
-            table[index] = null;
-            relocate(index);
-            this.modCount++;
-            this.size--;
-            return e.value;
-         }
-
-         index = nextIndex(index, length);
-         if (index == start) {
-			return null;
-		}
-      }
-
-
-   }
-
-   private void relocate(int start)
-   {
-      final Entry<K, V>[] table = this.table;
-      final int length = table.length;
-      int current = nextIndex(start, length);
-
-      for (; ;)
-      {
-         final Entry<K, V> e = table[current];
-         if (e == null) {
-			return;
-		}
-
-         // A Doug Lea variant of Knuth's Section 6.4 Algorithm R.
-         // This provides a non-recursive method of relocating
-         // entries to their optimal positions once a gap is created.
-         final int prefer = index(e.hash, length);
-         if (current < prefer && (prefer <= start || start <= current)
-               || prefer <= start && start <= current)
-         {
-            table[start] = e;
-            table[current] = null;
-            start = current;
-         }
-
-         current = nextIndex(current, length);
-      }
-   }
-
-   @Override
-public void clear()
-   {
-      this.modCount++;
-      final Entry<K, V>[] table = this.table;
-      for (int i = 0; i < table.length; i++) {
-		table[i] = null;
+		this.table = new Entry[c];
 	}
 
-      this.size = 0;
-   }
-
-   @Override
-@SuppressWarnings("unchecked")
-   public FastCopyHashMap<K, V> clone()
-   {
-      try
-      {
-         final FastCopyHashMap<K, V> clone = (FastCopyHashMap<K, V>) super.clone();
-         clone.table = this.table.clone();
-         clone.entrySet = null;
-         clone.values = null;
-         clone.keySet = null;
-         return clone;
-      }
-      catch (final CloneNotSupportedException e)
-      {
-         // should never happen
-         throw new IllegalStateException(e);
-      }
-   }
-
-   public void printDebugStats()
-   {
-      int optimal = 0;
-      int total = 0;
-      int totalSkew = 0;
-      int maxSkew = 0;
-      for (int i = 0; i < this.table.length; i++)
-      {
-         final Entry<K, V> e = this.table[i];
-         if (e != null)
-         {
-
-            total++;
-            final int target = index(e.hash, this.table.length);
-            if (i == target) {
-				optimal++;
-			} else
-            {
-               final int skew = Math.abs(i - target);
-               if (skew > maxSkew) {
-				maxSkew = skew;
-			}
-               totalSkew += skew;
-            }
-
-         }
-      }
-
-      System.out.println(" Size:            " + this.size);
-      System.out.println(" Real Size:       " + total);
-      System.out.println(" Optimal:         " + optimal + " (" + (float) optimal * 100 / total + "%)");
-      System.out.println(" Average Distance:" + (float) totalSkew / (total - optimal));
-      System.out.println(" Max Distance:    " + maxSkew);
-   }
-
-   @Override
-public Set<Map.Entry<K, V>> entrySet()
-   {
-      if (this.entrySet == null) {
-		this.entrySet = new EntrySet();
+	public FastCopyHashMap(final int initialCapacity) {
+		this(initialCapacity, DEFAULT_LOAD_FACTOR);
 	}
 
-      return this.entrySet;
-   }
-
-   @Override
-public Set<K> keySet()
-   {
-      if (this.keySet == null) {
-		this.keySet = new KeySet();
+	public FastCopyHashMap() {
+		this(DEFAULT_CAPACITY);
 	}
 
-      return this.keySet;
-   }
-
-   @Override
-public Collection<V> values()
-   {
-      if (this.values == null) {
-		this.values = new Values();
+	// The normal bit spreader...
+	static final int hash(final Object key) {
+		int h = key.hashCode();
+		h ^= h >>> 20 ^ h >>> 12;
+		return h ^ h >>> 7 ^ h >>> 4;
 	}
 
-      return this.values;
-   }
-
-   @SuppressWarnings("unchecked")
-   private void readObject(final java.io.ObjectInputStream s) throws IOException, ClassNotFoundException
-   {
-      s.defaultReadObject();
-
-      final int size = s.readInt();
-
-      init(size, this.loadFactor);
-
-      for (int i = 0; i < size; i++)
-      {
-         final K key = (K) s.readObject();
-         final V value = (V) s.readObject();
-         putForCreate(key, value);
-      }
-
-      this.size = size;
-   }
-
-   @SuppressWarnings("unchecked")
-   private void putForCreate(K key, final V value)
-   {
-      key = maskNull(key);
-
-      final Entry<K, V>[] table = this.table;
-      final int hash = hash(key);
-      final int length = table.length;
-      int index = index(hash, length);
-
-      Entry<K, V> e = table[index];
-      while (e != null)
-      {
-         index = nextIndex(index, length);
-         e = table[index];
-      }
-
-      table[index] = new Entry<K, V>(key, hash, value);
-   }
-
-   private void writeObject(final java.io.ObjectOutputStream s) throws IOException
-   {
-      s.defaultWriteObject();
-      s.writeInt(this.size);
-
-      for (final Entry<K, V> e : this.table)
-      {
-         if (e != null)
-         {
-            s.writeObject(unmaskNull(e.key));
-            s.writeObject(e.value);
-         }
-      }
-   }
-
-   private static final class Entry<K, V>
-   {
-      final K key;
-      final int hash;
-      final V value;
-
-      Entry(final K key, final int hash, final V value)
-      {
-         this.key = key;
-         this.hash = hash;
-         this.value = value;
-      }
-   }
-
-   private abstract class FastCopyHashMapIterator<E> implements Iterator<E>
-   {
-      private int next = 0;
-      private int expectedCount = FastCopyHashMap.this.modCount;
-      private int current = -1;
-      private boolean hasNext;
-      Entry<K, V> table[] = FastCopyHashMap.this.table;
-
-      @Override
-	public boolean hasNext()
-      {
-         if (this.hasNext == true) {
-			return true;
-		}
-
-         final Entry<K, V> table[] = this.table;
-         for (int i = this.next; i < table.length; i++)
-         {
-            if (table[i] != null)
-            {
-               this.next = i;
-               return this.hasNext = true;
-            }
-         }
-
-         this.next = table.length;
-         return false;
-      }
-
-      protected Entry<K, V> nextEntry()
-      {
-         if (FastCopyHashMap.this.modCount != this.expectedCount) {
-			throw new ConcurrentModificationException();
-		}
-
-         if (!this.hasNext && !hasNext()) {
-			throw new NoSuchElementException();
-		}
-
-         this.current = this.next++;
-         this.hasNext = false;
-
-         return this.table[this.current];
-      }
-
-      @Override
 	@SuppressWarnings("unchecked")
-      public void remove()
-      {
-         if (FastCopyHashMap.this.modCount != this.expectedCount) {
-			throw new ConcurrentModificationException();
+	private static final <K> K maskNull(final K key) {
+		return key == null ? (K) NULL : key;
+	}
+
+	static final <K> K unmaskNull(final K key) {
+		return key == NULL ? null : key;
+	}
+
+	static int nextIndex(final int index, final int length) {
+		return index >= length - 1 ? 0 : index + 1;
+	}
+
+	static final boolean eq(final Object o1, final Object o2) {
+		return o1 == o2 || o1 != null && o1.equals(o2);
+	}
+
+	static final int index(final int hashCode, final int length) {
+		return hashCode & length - 1;
+	}
+
+	@Override
+	public int size() {
+		return this.size;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return this.size == 0;
+	}
+
+	@Override
+	public V get(Object key) {
+		key = maskNull(key);
+
+		final int hash = hash(key);
+		final int length = this.table.length;
+		int index = index(hash, length);
+
+		for (final int start = index;;) {
+			final Entry<K, V> e = this.table[index];
+			if (e == null) {
+				return null;
+			}
+
+			if (e.hash == hash && eq(key, e.key)) {
+				return e.value;
+			}
+
+			index = nextIndex(index, length);
+			if (index == start) {
+				return null;
+			}
+		}
+	}
+
+	@Override
+	public boolean containsKey(Object key) {
+		key = maskNull(key);
+
+		final int hash = hash(key);
+		final int length = this.table.length;
+		int index = index(hash, length);
+
+		for (final int start = index;;) {
+			final Entry<K, V> e = this.table[index];
+			if (e == null) {
+				return false;
+			}
+
+			if (e.hash == hash && eq(key, e.key)) {
+				return true;
+			}
+
+			index = nextIndex(index, length);
+			if (index == start) {
+				return false;
+			}
+		}
+	}
+
+	@Override
+	public boolean containsValue(final Object value) {
+		for (final Entry<K, V> e : this.table) {
+			if (e != null && eq(value, e.value)) {
+				return true;
+			}
 		}
 
-         final int current = this.current;
-         int delete = current;
+		return false;
+	}
 
-         if (current == -1) {
-			throw new IllegalStateException();
-		}
+	@Override
+	public V put(K key, final V value) {
+		key = maskNull(key);
 
-         // Invalidate current (prevents multiple remove)
-         this.current = -1;
+		final Entry<K, V>[] table1 = this.table;
+		final int hash = hash(key);
+		final int length = table1.length;
+		int index = index(hash, length);
 
-         // Start were we relocate
-         this.next = delete;
-
-         final Entry<K, V>[] table = this.table;
-         if (table != FastCopyHashMap.this.table)
-         {
-            FastCopyHashMap.this.remove(table[delete].key);
-            table[delete] = null;
-            this.expectedCount = FastCopyHashMap.this.modCount;
-            return;
-         }
-
-
-         final int length = table.length;
-         int i = delete;
-
-         table[delete] = null;
-         FastCopyHashMap.this.size--;
-
-         for (; ;)
-         {
-            i = nextIndex(i, length);
-            final Entry<K, V> e = table[i];
-            if (e == null) {
+		for (final int start = index;;) {
+			final Entry<K, V> e = table1[index];
+			if (e == null) {
 				break;
 			}
 
-            final int prefer = index(e.hash, length);
-            if (i < prefer && (prefer <= delete || delete <= i)
-                  || prefer <= delete && delete <= i)
-            {
-               // Snapshot the unseen portion of the table if we have
-               // to relocate an entry that was already seen by this iterator
-               if (i < current && current <= delete && table == FastCopyHashMap.this.table)
-               {
-                  final int remaining = length - current;
-                  final Entry<K, V>[] newTable = new Entry[remaining];
-                  System.arraycopy(table, current, newTable, 0, remaining);
-
-                  // Replace iterator's table.
-                  // Leave table local var pointing to the real table
-                  this.table = newTable;
-                  this.next = 0;
-               }
-
-               // Do the swap on the real table
-               table[delete] = e;
-               table[i] = null;
-               delete = i;
-            }
-         }
-      }
-   }
-
-
-   private class KeyIterator extends FastCopyHashMapIterator<K>
-   {
-      @Override
-	public K next()
-      {
-         return unmaskNull(nextEntry().key);
-      }
-   }
-
-   private class ValueIterator extends FastCopyHashMapIterator<V>
-   {
-      @Override
-	public V next()
-      {
-         return nextEntry().value;
-      }
-   }
-
-   private class EntryIterator extends FastCopyHashMapIterator<Map.Entry<K, V>>
-   {
-      private class WriteThroughEntry extends SimpleEntry<K, V>
-      {
-         WriteThroughEntry(final K key, final V value)
-         {
-            super(key, value);
-         }
-
-         @Override
-		public V setValue(final V value)
-         {
-            if (EntryIterator.this.table != FastCopyHashMap.this.table) {
-				FastCopyHashMap.this.put(getKey(), value);
+			if (e.hash == hash && eq(key, e.key)) {
+				table1[index] = new Entry<>(e.key, e.hash, value);
+				return e.value;
 			}
 
-            return super.setValue(value);
-         }
-      }
+			index = nextIndex(index, length);
+			if (index == start) {
+				throw new IllegalStateException("Table is full!"); //$NON-NLS-1$
+			}
+		}
 
-      @Override
-	public Map.Entry<K, V> next()
-      {
-         final Entry<K, V> e = nextEntry();
-         return new WriteThroughEntry(unmaskNull(e.key), e.value);
-      }
+		this.modCount++;
+		table1[index] = new Entry<>(key, hash, value);
+		if (++this.size >= this.threshold) {
+			resize(length);
+		}
 
-   }
+		return null;
+	}
 
-   private class KeySet extends AbstractSet<K>
-   {
-      @Override
-	public Iterator<K> iterator()
-      {
-         return new KeyIterator();
-      }
+	@SuppressWarnings("unchecked")
+	private void resize(final int from) {
+		final int newLength = from << 1;
 
-      @Override
-	public void clear()
-      {
-         FastCopyHashMap.this.clear();
-      }
+		// Can't get any bigger
+		if (newLength > MAXIMUM_CAPACITY || newLength <= from) {
+			return;
+		}
 
-      @Override
-	public boolean contains(final Object o)
-      {
-         return containsKey(o);
-      }
+		final Entry<K, V>[] newTable = new Entry[newLength];
+		final Entry<K, V>[] old = this.table;
 
-      @Override
-	public boolean remove(final Object o)
-      {
-         final int size = size();
-         FastCopyHashMap.this.remove(o);
-         return size() < size;
-      }
+		for (final Entry<K, V> e : old) {
+			if (e == null) {
+				continue;
+			}
 
-      @Override
-	public int size()
-      {
-         return FastCopyHashMap.this.size();
-      }
-   }
+			int index = index(e.hash, newLength);
+			while (newTable[index] != null) {
+				index = nextIndex(index, newLength);
+			}
 
-   private class Values extends AbstractCollection<V>
-   {
-      @Override
-	public Iterator<V> iterator()
-      {
-         return new ValueIterator();
-      }
+			newTable[index] = e;
+		}
 
-      @Override
-	public void clear()
-      {
-         FastCopyHashMap.this.clear();
-      }
+		this.threshold = (int) (this.loadFactor * newLength);
+		this.table = newTable;
+	}
 
-      @Override
-	public int size()
-      {
-         return FastCopyHashMap.this.size();
-      }
-   }
+	@Override
+	public void putAll(final Map<? extends K, ? extends V> map) {
+		int size1 = map.size();
+		if (size1 == 0) {
+			return;
+		}
 
-   private class EntrySet extends AbstractSet<Map.Entry<K, V>>
-   {
-      @Override
-	public Iterator<Map.Entry<K, V>> iterator()
-      {
-         return new EntryIterator();
-      }
+		if (size1 > this.threshold) {
+			if (size1 > MAXIMUM_CAPACITY) {
+				size1 = MAXIMUM_CAPACITY;
+			}
 
-      @Override
-	public boolean contains(final Object o)
-      {
-         if (!(o instanceof Map.Entry)) {
+			int length = this.table.length;
+			for (; length < size1; length <<= 1) {
+				;
+			}
+
+			resize(length);
+		}
+
+		for (final Map.Entry<? extends K, ? extends V> e : map.entrySet()) {
+			put(e.getKey(), e.getValue());
+		}
+	}
+
+	@Override
+	public V remove(Object key) {
+		key = maskNull(key);
+
+		final Entry<K, V>[] table1 = this.table;
+		final int length = table1.length;
+		final int hash = hash(key);
+		final int start = index(hash, length);
+
+		for (int index = start;;) {
+			final Entry<K, V> e = table1[index];
+			if (e == null) {
+				return null;
+			}
+
+			if (e.hash == hash && eq(key, e.key)) {
+				table1[index] = null;
+				relocate(index);
+				this.modCount++;
+				this.size--;
+				return e.value;
+			}
+
+			index = nextIndex(index, length);
+			if (index == start) {
+				return null;
+			}
+		}
+
+	}
+
+	private void relocate(int start) {
+		final Entry<K, V>[] table1 = this.table;
+		final int length = table1.length;
+		int current = nextIndex(start, length);
+
+		for (;;) {
+			final Entry<K, V> e = table1[current];
+			if (e == null) {
+				return;
+			}
+
+			// A Doug Lea variant of Knuth's Section 6.4 Algorithm R.
+			// This provides a non-recursive method of relocating
+			// entries to their optimal positions once a gap is created.
+			final int prefer = index(e.hash, length);
+			if (current < prefer && (prefer <= start || start <= current) || prefer <= start && start <= current) {
+				table1[start] = e;
+				table1[current] = null;
+				start = current;
+			}
+
+			current = nextIndex(current, length);
+		}
+	}
+
+	@Override
+	public void clear() {
+		this.modCount++;
+		final Entry<K, V>[] table1 = this.table;
+		for (int i = 0; i < table1.length; i++) {
+			table1[i] = null;
+		}
+
+		this.size = 0;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public FastCopyHashMap<K, V> clone() {
+		try {
+			final FastCopyHashMap<K, V> clone = (FastCopyHashMap<K, V>) super.clone();
+			clone.table = this.table.clone();
+			clone.entrySet = null;
+			clone.values = null;
+			clone.keySet = null;
+			return clone;
+		}
+		catch (final CloneNotSupportedException e) {
+			// should never happen
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public void printDebugStats() {
+		int optimal = 0;
+		int total = 0;
+		int totalSkew = 0;
+		int maxSkew = 0;
+		for (int i = 0; i < this.table.length; i++) {
+			final Entry<K, V> e = this.table[i];
+			if (e != null) {
+
+				total++;
+				final int target = index(e.hash, this.table.length);
+				if (i == target) {
+					optimal++;
+				} else {
+					final int skew = Math.abs(i - target);
+					if (skew > maxSkew) {
+						maxSkew = skew;
+					}
+					totalSkew += skew;
+				}
+
+			}
+		}
+
+		System.out.println(" Size:            " + this.size); //$NON-NLS-1$
+		System.out.println(" Real Size:       " + total); //$NON-NLS-1$
+		System.out.println(" Optimal:         " + optimal + " (" + (float) optimal * 100 / total + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		System.out.println(" Average Distance:" + (float) totalSkew / (total - optimal)); //$NON-NLS-1$
+		System.out.println(" Max Distance:    " + maxSkew); //$NON-NLS-1$
+	}
+
+	@Override
+	public Set<Map.Entry<K, V>> entrySet() {
+		if (this.entrySet == null) {
+			this.entrySet = new EntrySet();
+		}
+
+		return this.entrySet;
+	}
+
+	@Override
+	public Set<K> keySet() {
+		if (this.keySet == null) {
+			this.keySet = new KeySet();
+		}
+
+		return this.keySet;
+	}
+
+	@Override
+	public Collection<V> values() {
+		if (this.values == null) {
+			this.values = new Values();
+		}
+
+		return this.values;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void readObject(final java.io.ObjectInputStream s) throws IOException, ClassNotFoundException {
+		s.defaultReadObject();
+
+		final int size1 = s.readInt();
+
+		init(size1, this.loadFactor);
+
+		for (int i = 0; i < size1; i++) {
+			final K key = (K) s.readObject();
+			final V value = (V) s.readObject();
+			putForCreate(key, value);
+		}
+
+		this.size = size1;
+	}
+
+	private void putForCreate(K key, final V value) {
+		key = maskNull(key);
+
+		final Entry<K, V>[] table1 = this.table;
+		final int hash = hash(key);
+		final int length = table1.length;
+		int index = index(hash, length);
+
+		Entry<K, V> e = table1[index];
+		while (e != null) {
+			index = nextIndex(index, length);
+			e = table1[index];
+		}
+
+		table1[index] = new Entry<>(key, hash, value);
+	}
+
+	private void writeObject(final java.io.ObjectOutputStream s) throws IOException {
+		s.defaultWriteObject();
+		s.writeInt(this.size);
+
+		for (final Entry<K, V> e : this.table) {
+			if (e != null) {
+				s.writeObject(unmaskNull(e.key));
+				s.writeObject(e.value);
+			}
+		}
+	}
+
+	private static final class Entry<K, V> {
+		final K key;
+		final int hash;
+		final V value;
+
+		Entry(final K key, final int hash, final V value) {
+			this.key = key;
+			this.hash = hash;
+			this.value = value;
+		}
+	}
+
+	private abstract class FastCopyHashMapIterator<E> implements Iterator<E> {
+
+		private int next = 0;
+		private int expectedCount = FastCopyHashMap.this.modCount;
+		private int current = -1;
+		private boolean hasNext;
+		Entry<K, V> table0[] = FastCopyHashMap.this.table;
+
+		@Override
+		public boolean hasNext() {
+			if (this.hasNext == true) {
+				return true;
+			}
+
+			final Entry<K, V> table1[] = this.table0;
+			for (int i = this.next; i < table1.length; i++) {
+				if (table1[i] != null) {
+					this.next = i;
+					return this.hasNext = true;
+				}
+			}
+
+			this.next = table1.length;
 			return false;
 		}
 
-         final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
-         final Object value = get(entry.getKey());
-         return eq(entry.getValue(), value);
-      }
+		protected Entry<K, V> nextEntry() {
+			if (FastCopyHashMap.this.modCount != this.expectedCount) {
+				throw new ConcurrentModificationException();
+			}
 
-      @Override
-	public void clear()
-      {
-         FastCopyHashMap.this.clear();
-      }
+			if (!this.hasNext && !hasNext()) {
+				throw new NoSuchElementException();
+			}
 
-      @Override
-	public boolean isEmpty()
-      {
-         return FastCopyHashMap.this.isEmpty();
-      }
+			this.current = this.next++;
+			this.hasNext = false;
 
-      @Override
-	public int size()
-      {
-         return FastCopyHashMap.this.size();
-      }
-   }
-
-   protected static class SimpleEntry<K, V> implements Map.Entry<K, V>
-   {
-      private final K key;
-      private V value;
-
-      SimpleEntry(final K key, final V value)
-      {
-         this.key = key;
-         this.value = value;
-      }
-
-      SimpleEntry(final Map.Entry<K, V> entry)
-      {
-         this.key = entry.getKey();
-         this.value = entry.getValue();
-      }
-
-      @Override
-	public K getKey()
-      {
-         return this.key;
-      }
-
-      @Override
-	public V getValue()
-      {
-         return this.value;
-      }
-
-      @Override
-	public V setValue(final V value)
-      {
-         final V old = this.value;
-         this.value = value;
-         return old;
-      }
-
-      @Override
-	public boolean equals(final Object o)
-      {
-         if (this == o) {
-			return true;
+			return this.table0[this.current];
 		}
 
-         if (!(o instanceof Map.Entry)) {
-			return false;
+		@Override
+		@SuppressWarnings("unchecked")
+		public void remove() {
+			if (FastCopyHashMap.this.modCount != this.expectedCount) {
+				throw new ConcurrentModificationException();
+			}
+
+			final int current1 = this.current;
+			int delete = current1;
+
+			if (current1 == -1) {
+				throw new IllegalStateException();
+			}
+
+			// Invalidate current (prevents multiple remove)
+			this.current = -1;
+
+			// Start were we relocate
+			this.next = delete;
+
+			final Entry<K, V>[] table1 = this.table0;
+			if (table1 != FastCopyHashMap.this.table) {
+				FastCopyHashMap.this.remove(table1[delete].key);
+				table1[delete] = null;
+				this.expectedCount = FastCopyHashMap.this.modCount;
+				return;
+			}
+
+			final int length = table1.length;
+			int i = delete;
+
+			table1[delete] = null;
+			FastCopyHashMap.this.size--;
+
+			for (;;) {
+				i = nextIndex(i, length);
+				final Entry<K, V> e = table1[i];
+				if (e == null) {
+					break;
+				}
+
+				final int prefer = index(e.hash, length);
+				if (i < prefer && (prefer <= delete || delete <= i) || prefer <= delete && delete <= i) {
+					// Snapshot the unseen portion of the table if we have
+					// to relocate an entry that was already seen by this iterator
+					if (i < current1 && current1 <= delete && table1 == FastCopyHashMap.this.table) {
+						final int remaining = length - current1;
+						final Entry<K, V>[] newTable = new Entry[remaining];
+						System.arraycopy(table1, current1, newTable, 0, remaining);
+
+						// Replace iterator's table.
+						// Leave table local var pointing to the real table
+						this.table0 = newTable;
+						this.next = 0;
+					}
+
+					// Do the swap on the real table
+					table1[delete] = e;
+					table1[i] = null;
+					delete = i;
+				}
+			}
 		}
-         final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
-         return eq(this.key, e.getKey()) && eq(this.value, e.getValue());
-      }
+	}
 
-      @Override
-	public int hashCode()
-      {
-         return (this.key == null ? 0 : hash(this.key)) ^
-                (this.value == null ? 0 : hash(this.value));
-      }
+	private class KeyIterator extends FastCopyHashMapIterator<K> {
 
-      @Override
-	public String toString()
-      {
-         return getKey() + "=" + getValue();
-      }
-   }
+		KeyIterator() {
+			// Vacio
+		}
+
+		@Override
+		public K next() {
+			return unmaskNull(nextEntry().key);
+		}
+	}
+
+	class ValueIterator extends FastCopyHashMapIterator<V> {
+		@Override
+		public V next() {
+			return nextEntry().value;
+		}
+	}
+
+	class EntryIterator extends FastCopyHashMapIterator<Map.Entry<K, V>> {
+		private class WriteThroughEntry extends SimpleEntry<K, V> {
+			WriteThroughEntry(final K key, final V value) {
+				super(key, value);
+			}
+
+			@Override
+			public V setValue(final V value) {
+				if (EntryIterator.this.table0 != FastCopyHashMap.this.table) {
+					FastCopyHashMap.this.put(getKey(), value);
+				}
+
+				return super.setValue(value);
+			}
+		}
+
+		@Override
+		public Map.Entry<K, V> next() {
+			final Entry<K, V> e = nextEntry();
+			return new WriteThroughEntry(unmaskNull(e.key), e.value);
+		}
+
+	}
+
+	private class KeySet extends AbstractSet<K> {
+
+		KeySet() {
+			// Vacio
+		}
+
+		@Override
+		public Iterator<K> iterator() {
+			return new KeyIterator();
+		}
+
+		@Override
+		public void clear() {
+			FastCopyHashMap.this.clear();
+		}
+
+		@Override
+		public boolean contains(final Object o) {
+			return containsKey(o);
+		}
+
+		@Override
+		public boolean remove(final Object o) {
+			final int size1 = size();
+			FastCopyHashMap.this.remove(o);
+			return size() < size1;
+		}
+
+		@Override
+		public int size() {
+			return FastCopyHashMap.this.size();
+		}
+	}
+
+	private class Values extends AbstractCollection<V> {
+
+		Values() {
+			// Vacio
+		}
+
+		@Override
+		public Iterator<V> iterator() {
+			return new ValueIterator();
+		}
+
+		@Override
+		public void clear() {
+			FastCopyHashMap.this.clear();
+		}
+
+		@Override
+		public int size() {
+			return FastCopyHashMap.this.size();
+		}
+	}
+
+	private class EntrySet extends AbstractSet<Map.Entry<K, V>> {
+
+		EntrySet() {
+			// Vacio
+		}
+
+		@Override
+		public Iterator<Map.Entry<K, V>> iterator() {
+			return new EntryIterator();
+		}
+
+		@Override
+		public boolean contains(final Object o) {
+			if (!(o instanceof Map.Entry)) {
+				return false;
+			}
+
+			final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
+			final Object value = get(entry.getKey());
+			return eq(entry.getValue(), value);
+		}
+
+		@Override
+		public void clear() {
+			FastCopyHashMap.this.clear();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return FastCopyHashMap.this.isEmpty();
+		}
+
+		@Override
+		public int size() {
+			return FastCopyHashMap.this.size();
+		}
+	}
+
+	protected static class SimpleEntry<K, V> implements Map.Entry<K, V> {
+		private final K key;
+		private V value;
+
+		SimpleEntry(final K key, final V value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		SimpleEntry(final Map.Entry<K, V> entry) {
+			this.key = entry.getKey();
+			this.value = entry.getValue();
+		}
+
+		@Override
+		public K getKey() {
+			return this.key;
+		}
+
+		@Override
+		public V getValue() {
+			return this.value;
+		}
+
+		@Override
+		public V setValue(final V value) {
+			final V old = this.value;
+			this.value = value;
+			return old;
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+
+			if (!(o instanceof Map.Entry)) {
+				return false;
+			}
+			final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+			return eq(this.key, e.getKey()) && eq(this.value, e.getValue());
+		}
+
+		@Override
+		public int hashCode() {
+			return (this.key == null ? 0 : hash(this.key)) ^ (this.value == null ? 0 : hash(this.value));
+		}
+
+		@Override
+		public String toString() {
+			return getKey() + "=" + getValue(); //$NON-NLS-1$
+		}
+	}
 }

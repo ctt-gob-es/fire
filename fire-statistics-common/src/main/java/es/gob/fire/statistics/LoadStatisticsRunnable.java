@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,7 +23,7 @@ import es.gob.fire.statistics.entity.SignatureCube;
 import es.gob.fire.statistics.entity.TransactionCube;
 import es.gob.fire.statistics.entity.TransactionTotal;
 
-public class LoadStatisticsRunnable implements Runnable {
+public final class LoadStatisticsRunnable implements Runnable {
 
 	private static final Logger LOGGER = Logger.getLogger(LoadStatisticsRunnable.class.getName());
 
@@ -197,12 +196,7 @@ public class LoadStatisticsRunnable implements Runnable {
 
 		final File[] dataFiles = new File(this.dataPath).listFiles(new DataStatisticsFileFilter(suffix, date, formatter, this.processCurrentDay));
 
-		Arrays.sort(dataFiles, new Comparator<File>() {
-			@Override
-			public int compare(final File f1, final File f2) {
-				return f1.getName().compareTo(f2.getName());
-			}
-		});
+		Arrays.sort(dataFiles, (f1, f2) -> f1.getName().compareTo(f2.getName()));
 
 		return dataFiles;
 	}

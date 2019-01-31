@@ -86,8 +86,10 @@ public class RequestParameters extends HashMap<String, String> {
 
 		int n = 0;
 		request.setCharacterEncoding("utf-8"); //$NON-NLS-1$
-		final BufferedReader reader = request.getReader();
-		try {
+
+		try (
+			final BufferedReader reader = request.getReader();
+		) {
 			while ((n = reader.read(block, 0, block.length)) > 0) {
 				int startParams = 0;
 				for (int i = 0; i < n; i++) {
@@ -102,9 +104,6 @@ public class RequestParameters extends HashMap<String, String> {
 				buffer.append(Arrays.copyOfRange(block, startParams, n));
 			}
 			saveParam(params, buffer);
-		}
-		finally {
-			reader.close();
 		}
 	}
 

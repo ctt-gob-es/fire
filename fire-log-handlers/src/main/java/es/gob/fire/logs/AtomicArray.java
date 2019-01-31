@@ -64,7 +64,7 @@ final class AtomicArray<T, V> {
      * @return the new instance
      */
     public static <T, V> AtomicArray<T, V> create(final AtomicReferenceFieldUpdater<T, V[]> updater, final Class<V> componentType) {
-        return new AtomicArray<T,V>(updater, componentType);
+        return new AtomicArray<>(updater, componentType);
     }
 
     /**
@@ -96,7 +96,6 @@ final class AtomicArray<T, V> {
         return this.updater.getAndSet(instance, value);
     }
 
-    @SuppressWarnings({ "unchecked" })
     private static <V> V[] copyOf(final Class<V> componentType, final V[] old, final int newLen) {
         final V[] target = newInstance(componentType, newLen);
         System.arraycopy(old, 0, target, 0, Math.min(old.length, newLen));
@@ -110,13 +109,13 @@ final class AtomicArray<T, V> {
      * @param value the updated value
      */
     public void add(final T instance, final V value) {
-        final AtomicReferenceFieldUpdater<T, V[]> updater = this.updater;
+        final AtomicReferenceFieldUpdater<T, V[]> updater1 = this.updater;
         for (;;) {
-            final V[] oldVal = updater.get(instance);
+            final V[] oldVal = updater1.get(instance);
             final int oldLen = oldVal.length;
             final V[] newVal = copyOf(this.componentType, oldVal, oldLen + 1);
             newVal[oldLen] = value;
-            if (updater.compareAndSet(instance, oldVal, newVal)) {
+            if (updater1.compareAndSet(instance, oldVal, newVal)) {
                 return;
             }
         }
@@ -167,39 +166,39 @@ final class AtomicArray<T, V> {
      * @return {@code true} if the value was removed, or {@code false} if it was not present
      */
     public boolean remove(final T instance, final V value, final boolean identity) {
-        final AtomicReferenceFieldUpdater<T, V[]> updater = this.updater;
+        final AtomicReferenceFieldUpdater<T, V[]> updater1 = this.updater;
         for (;;) {
-            final V[] oldVal = updater.get(instance);
+            final V[] oldVal = updater1.get(instance);
             final int oldLen = oldVal.length;
             if (oldLen == 0) {
                 return false;
-            } else {
-                int index = -1;
-                if (identity || value == null) {
-                    for (int i = 0; i < oldLen; i++) {
-                        if (oldVal[i] == value) {
-                            index = i;
-                            break;
-                        }
-                    }
-                } else {
-                    for (int i = 0; i < oldLen; i++) {
-                        if (value.equals(oldVal[i])) {
-                            index = i;
-                            break;
-                        }
-                    }
-                }
-                if (index == -1) {
-                    return false;
-                }
-                final V[] newVal = newInstance(this.componentType, oldLen - 1);
-                System.arraycopy(oldVal, 0, newVal, 0, index);
-                System.arraycopy(oldVal, index + 1, newVal, index, oldLen - index - 1);
-                if (updater.compareAndSet(instance, oldVal, newVal)) {
-                    return true;
-                }
             }
+			int index = -1;
+			if (identity || value == null) {
+			    for (int i = 0; i < oldLen; i++) {
+			        if (oldVal[i] == value) {
+			            index = i;
+			            break;
+			        }
+			    }
+			}
+			else {
+			    for (int i = 0; i < oldLen; i++) {
+			        if (value.equals(oldVal[i])) {
+			            index = i;
+			            break;
+			        }
+			    }
+			}
+			if (index == -1) {
+			    return false;
+			}
+			final V[] newVal = newInstance(this.componentType, oldLen - 1);
+			System.arraycopy(oldVal, 0, newVal, 0, index);
+			System.arraycopy(oldVal, index + 1, newVal, index, oldLen - index - 1);
+			if (updater1.compareAndSet(instance, oldVal, newVal)) {
+			    return true;
+			}
         }
     }
 
@@ -213,49 +212,49 @@ final class AtomicArray<T, V> {
      * @return the number of values removed
      */
     public int removeAll(final T instance, final V value, final boolean identity) {
-        final AtomicReferenceFieldUpdater<T, V[]> updater = this.updater;
+        final AtomicReferenceFieldUpdater<T, V[]> updater1 = this.updater;
         for (;;) {
-            final V[] oldVal = updater.get(instance);
+            final V[] oldVal = updater1.get(instance);
             final int oldLen = oldVal.length;
             if (oldLen == 0) {
                 return 0;
-            } else {
-                final boolean[] removeSlots = new boolean[oldLen];
-                int removeCount = 0;
-                if (identity || value == null) {
-                    for (int i = 0; i < oldLen; i++) {
-                        if (oldVal[i] == value) {
-                            removeSlots[i] = true;
-                            removeCount++;
-                        }
-                    }
-                } else {
-                    for (int i = 0; i < oldLen; i++) {
-                        if (value.equals(oldVal[i])) {
-                            removeSlots[i] = true;
-                            removeCount++;
-                        }
-                    }
-                }
-                if (removeCount == 0) {
-                    return 0;
-                }
-                final int newLen = oldLen - removeCount;
-                final V[] newVal;
-                if (newLen == 0) {
-                    newVal = this.emptyArray;
-                } else {
-                    newVal = newInstance(this.componentType, newLen);
-                    for (int i = 0, j = 0; i < oldLen; i ++) {
-                        if (! removeSlots[i]) {
-                            newVal[j++] = oldVal[i];
-                        }
-                    }
-                }
-                if (updater.compareAndSet(instance, oldVal, newVal)) {
-                    return removeCount;
-                }
             }
+			final boolean[] removeSlots = new boolean[oldLen];
+			int removeCount = 0;
+			if (identity || value == null) {
+			    for (int i = 0; i < oldLen; i++) {
+			        if (oldVal[i] == value) {
+			            removeSlots[i] = true;
+			            removeCount++;
+			        }
+			    }
+			}
+			else {
+			    for (int i = 0; i < oldLen; i++) {
+			        if (value.equals(oldVal[i])) {
+			            removeSlots[i] = true;
+			            removeCount++;
+			        }
+			    }
+			}
+			if (removeCount == 0) {
+			    return 0;
+			}
+			final int newLen = oldLen - removeCount;
+			final V[] newVal;
+			if (newLen == 0) {
+			    newVal = this.emptyArray;
+			} else {
+			    newVal = newInstance(this.componentType, newLen);
+			    for (int i = 0, j = 0; i < oldLen; i ++) {
+			        if (! removeSlots[i]) {
+			            newVal[j++] = oldVal[i];
+			        }
+			    }
+			}
+			if (updater1.compareAndSet(instance, oldVal, newVal)) {
+			    return removeCount;
+			}
         }
     }
 
@@ -267,16 +266,16 @@ final class AtomicArray<T, V> {
      * @param comparator a comparator, or {@code null} to use natural ordering
      */
     public void add(final T instance, final V value, final Comparator<? super V> comparator) {
-        final AtomicReferenceFieldUpdater<T, V[]> updater = this.updater;
+        final AtomicReferenceFieldUpdater<T, V[]> updater1 = this.updater;
         for (;;) {
-            final V[] oldVal = updater.get(instance);
+            final V[] oldVal = updater1.get(instance);
             final int oldLen = oldVal.length;
             final int pos = insertionPoint(Arrays.binarySearch(oldVal, value, comparator));
             final V[] newVal = newInstance(this.componentType, oldLen + 1);
             System.arraycopy(oldVal, 0, newVal, 0, pos);
             newVal[pos] = value;
             System.arraycopy(oldVal, pos, newVal, pos + 1, oldLen - pos);
-            if (updater.compareAndSet(instance, oldVal, newVal)) {
+            if (updater1.compareAndSet(instance, oldVal, newVal)) {
                 return;
             }
         }
@@ -290,9 +289,9 @@ final class AtomicArray<T, V> {
      * @param comparator a comparator, or {@code null} to use natural ordering
      */
     public boolean addIfAbsent(final T instance, final V value, final Comparator<? super V> comparator) {
-        final AtomicReferenceFieldUpdater<T, V[]> updater = this.updater;
+        final AtomicReferenceFieldUpdater<T, V[]> updater1 = this.updater;
         for (;;) {
-            final V[] oldVal = updater.get(instance);
+            final V[] oldVal = updater1.get(instance);
             final int oldLen = oldVal.length;
             final int pos = Arrays.binarySearch(oldVal, value, comparator);
             if (pos < 0) {
@@ -302,7 +301,7 @@ final class AtomicArray<T, V> {
             System.arraycopy(oldVal, 0, newVal, 0, pos);
             newVal[pos] = value;
             System.arraycopy(oldVal, pos, newVal, pos + 1, oldLen - pos);
-            if (updater.compareAndSet(instance, oldVal, newVal)) {
+            if (updater1.compareAndSet(instance, oldVal, newVal)) {
                 return true;
             }
         }
@@ -317,24 +316,23 @@ final class AtomicArray<T, V> {
      * @param comparator a comparator, or {@code null} to use natural ordering
      */
     public boolean remove(final T instance, final V value, final Comparator<? super V> comparator) {
-        final AtomicReferenceFieldUpdater<T, V[]> updater = this.updater;
+        final AtomicReferenceFieldUpdater<T, V[]> updater1 = this.updater;
         for (;;) {
-            final V[] oldVal = updater.get(instance);
+            final V[] oldVal = updater1.get(instance);
             final int oldLen = oldVal.length;
             if (oldLen == 0) {
                 return false;
-            } else {
-                final int pos = Arrays.binarySearch(oldVal, value, comparator);
-                if (pos < 0) {
-                    return false;
-                }
-                final V[] newVal = newInstance(this.componentType, oldLen - 1);
-                System.arraycopy(oldVal, 0, newVal, 0, pos);
-                System.arraycopy(oldVal, pos + 1, newVal, pos, oldLen - pos - 1);
-                if (updater.compareAndSet(instance, oldVal, newVal)) {
-                    return true;
-                }
             }
+			final int pos = Arrays.binarySearch(oldVal, value, comparator);
+			if (pos < 0) {
+			    return false;
+			}
+			final V[] newVal = newInstance(this.componentType, oldLen - 1);
+			System.arraycopy(oldVal, 0, newVal, 0, pos);
+			System.arraycopy(oldVal, pos + 1, newVal, pos, oldLen - pos - 1);
+			if (updater1.compareAndSet(instance, oldVal, newVal)) {
+			    return true;
+			}
         }
     }
 
@@ -345,15 +343,15 @@ final class AtomicArray<T, V> {
      * @param comparator a comparator, or {@code null} to use natural ordering
      */
     public void sort(final T instance, final Comparator<? super V> comparator) {
-        final AtomicReferenceFieldUpdater<T, V[]> updater = this.updater;
+        final AtomicReferenceFieldUpdater<T, V[]> updater1 = this.updater;
         for (;;) {
-            final V[] oldVal = updater.get(instance);
+            final V[] oldVal = updater1.get(instance);
             if (oldVal.length == 0) {
                 return;
             }
             final V[] newVal = oldVal.clone();
             Arrays.sort(newVal, comparator);
-            if (updater.compareAndSet(instance, oldVal, newVal)) {
+            if (updater1.compareAndSet(instance, oldVal, newVal)) {
                 return;
             }
         }

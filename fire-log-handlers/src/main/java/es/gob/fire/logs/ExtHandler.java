@@ -39,7 +39,7 @@ import es.gob.fire.logs.handlers.FlushableCloseable;
  */
 public abstract class ExtHandler extends Handler implements FlushableCloseable, Protectable {
 
-    private static final Permission CONTROL_PERMISSION = new LoggingPermission("control", null);
+    private static final Permission CONTROL_PERMISSION = new LoggingPermission("control", null); //$NON-NLS-1$
     private volatile boolean autoFlush = true;
     private volatile boolean enabled = true;
     private volatile boolean closeChildren;
@@ -48,19 +48,18 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
     private volatile Object protectKey;
     private final ThreadLocal<Boolean> granted = new InheritableThreadLocal<>();
 
-    private static final AtomicReferenceFieldUpdater<ExtHandler, Object> protectKeyUpdater = AtomicReferenceFieldUpdater.newUpdater(ExtHandler.class, Object.class, "protectKey");
+    private static final AtomicReferenceFieldUpdater<ExtHandler, Object> protectKeyUpdater = AtomicReferenceFieldUpdater.newUpdater(ExtHandler.class, Object.class, "protectKey"); //$NON-NLS-1$
 
     /**
      * The sub-handlers for this handler.  May only be updated using the {@link #handlersUpdater} atomic updater.  The array
      * instance should not be modified (treat as immutable).
      */
-    @SuppressWarnings({ "UnusedDeclaration" })
     protected volatile Handler[] handlers;
 
     /**
      * The atomic updater for the {@link #handlers} field.
      */
-    protected static final AtomicArray<ExtHandler, Handler> handlersUpdater = AtomicArray.create(AtomicReferenceFieldUpdater.newUpdater(ExtHandler.class, Handler[].class, "handlers"), Handler.class);
+    protected static final AtomicArray<ExtHandler, Handler> handlersUpdater = AtomicArray.create(AtomicReferenceFieldUpdater.newUpdater(ExtHandler.class, Handler[].class, "handlers"), Handler.class); //$NON-NLS-1$
 
     /**
      * Construct a new instance.
@@ -112,7 +111,7 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
     public void addHandler(final Handler handler) throws SecurityException {
         checkAccess(this);
         if (handler == null) {
-            throw new NullPointerException("handler is null");
+            throw new NullPointerException("handler is null"); //$NON-NLS-1$
         }
         handlersUpdater.add(this, handler);
     }
@@ -139,8 +138,8 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
      * @return a copy of the sub-handlers array
      */
     public Handler[] getHandlers() {
-        final Handler[] handlers = this.handlers;
-        return handlers.length > 0 ? handlers.clone() : handlers;
+        final Handler[] handlers1 = this.handlers;
+        return handlers1.length > 0 ? handlers1.clone() : handlers1;
     }
 
     /**
@@ -153,9 +152,9 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
      */
     public Handler[] clearHandlers() throws SecurityException {
         checkAccess(this);
-        final Handler[] handlers = this.handlers;
+        final Handler[] handlers1 = this.handlers;
         handlersUpdater.clear(this);
-        return handlers.length > 0 ? handlers.clone() : handlers;
+        return handlers1.length > 0 ? handlers1.clone() : handlers1;
     }
 
     /**
@@ -169,15 +168,14 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
      */
     public Handler[] setHandlers(final Handler[] newHandlers) throws SecurityException {
         if (newHandlers == null) {
-            throw new IllegalArgumentException("newHandlers is null");
+            throw new IllegalArgumentException("newHandlers is null"); //$NON-NLS-1$
         }
         if (newHandlers.length == 0) {
             return clearHandlers();
-        } else {
-            checkAccess(this);
-            final Handler[] handlers = handlersUpdater.getAndSet(this, newHandlers);
-            return handlers.length > 0 ? handlers.clone() : handlers;
         }
+		checkAccess(this);
+		final Handler[] handlers1 = handlersUpdater.getAndSet(this, newHandlers);
+		return handlers1.length > 0 ? handlers1.clone() : handlers1;
     }
 
     /**
@@ -254,7 +252,7 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
         if (protectKeyUpdater.compareAndSet(this, null, protectionKey)) {
             return;
         }
-        throw new SecurityException("Log handler already protected");
+        throw new SecurityException("Log handler already protected"); //$NON-NLS-1$
     }
 
     @Override
@@ -266,8 +264,8 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
     }
 
     @Override
-    public final void enableAccess(final Object protectKey) {
-        if (protectKey == this.protectKey) {
+    public final void enableAccess(final Object protectKey1) {
+        if (protectKey1 == this.protectKey) {
             this.granted.set(Boolean.TRUE);
         }
     }
@@ -278,7 +276,7 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
     }
 
     private static SecurityException accessDenied() {
-        return new SecurityException("Log handler modification access denied");
+        return new SecurityException("Log handler modification access denied"); //$NON-NLS-1$
     }
 
     /**
@@ -322,9 +320,13 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
         for (final Handler handler : this.handlers) {
 			try {
 			    handler.flush();
-			} catch (final Exception ex) {
-			    reportError("Failed to flush child handler", ex, ErrorManager.FLUSH_FAILURE);
-			} catch (final Throwable ignored) {}
+			}
+			catch (final Exception ex) {
+			    reportError("Failed to flush child handler", ex, ErrorManager.FLUSH_FAILURE); //$NON-NLS-1$
+			}
+			catch (final Throwable ignored) {
+				// Vacio
+			}
 		}
     }
 
@@ -338,40 +340,43 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
             for (final Handler handler : this.handlers) {
 				try {
                     handler.close();
-                } catch (final Exception ex) {
-                    reportError("Failed to close child handler", ex, ErrorManager.CLOSE_FAILURE);
-                } catch (final Throwable ignored) {
+                }
+				catch (final Exception ex) {
+                    reportError("Failed to close child handler", ex, ErrorManager.CLOSE_FAILURE); //$NON-NLS-1$
+                }
+				catch (final Throwable ignored) {
+                	// Vacio
                 }
 			}
         }
     }
 
     @Override
-    public void setFormatter(final Formatter newFormatter) throws SecurityException {
+    public synchronized void setFormatter(final Formatter newFormatter) throws SecurityException {
         checkAccess(this);
         super.setFormatter(newFormatter);
     }
 
     @Override
-    public void setFilter(final Filter newFilter) throws SecurityException {
+    public synchronized void setFilter(final Filter newFilter) throws SecurityException {
         checkAccess(this);
         super.setFilter(newFilter);
     }
 
     @Override
-    public void setEncoding(final String encoding) throws SecurityException, UnsupportedEncodingException {
+    public synchronized void setEncoding(final String encoding) throws SecurityException, UnsupportedEncodingException {
         checkAccess(this);
         super.setEncoding(encoding);
     }
 
     @Override
-    public void setErrorManager(final ErrorManager em) {
+    public synchronized void setErrorManager(final ErrorManager em) {
         checkAccess(this);
         super.setErrorManager(em);
     }
 
     @Override
-    public void setLevel(final Level newLevel) throws SecurityException {
+    public synchronized void setLevel(final Level newLevel) throws SecurityException {
         checkAccess(this);
         super.setLevel(newLevel);
     }
@@ -390,24 +395,20 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
      * @return {@code true} if the caller should be calculated, otherwise {@code false} if it can be skipped
      *
      * @see LogRecord#getSourceClassName()
-     * @see LogRecord#getSourceFileName()
-     * @see LogRecord#getSourceLineNumber()
      * @see LogRecord#getSourceMethodName()
      */
-    @SuppressWarnings("WeakerAccess")
     public boolean isCallerCalculationRequired() {
         Formatter formatter = getFormatter();
         if (formatterRequiresCallerCalculation(formatter)) {
             return true;
-        } else {
-            final Handler[] handlers = getHandlers();
-            for (final Handler handler : handlers) {
-                formatter = handler.getFormatter();
-                if (formatterRequiresCallerCalculation(formatter)) {
-                    return true;
-                }
-            }
         }
+		final Handler[] handlers1 = getHandlers();
+		for (final Handler handler : handlers1) {
+		    formatter = handler.getFormatter();
+		    if (formatterRequiresCallerCalculation(formatter)) {
+		        return true;
+		    }
+		}
         return false;
     }
 

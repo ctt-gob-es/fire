@@ -190,8 +190,9 @@ public class ProviderManager {
 		catch (final Exception e) {
 			LOGGER.warning(
 				String.format(
-					"No se ha encontrado o no ha podido cargarse el fichero interno '%s' con la informacion del proveedor", //$NON-NLS-1$
-					path)
+					"No se ha encontrado o no ha podido cargarse el fichero interno '%s' con la informacion del proveedor: " + e, //$NON-NLS-1$
+					path
+				)
 			);
 		}
 		return providerInfoProperties;

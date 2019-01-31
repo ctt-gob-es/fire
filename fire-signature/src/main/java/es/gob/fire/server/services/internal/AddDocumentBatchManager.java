@@ -67,7 +67,7 @@ public class AddDocumentBatchManager {
     		config = getParticularConfig(params);
     	}
     	catch (final IOException e) {
-    		LOGGER.warning(logF.format("Se han proporcionado parametros de configuracion de firma mal formados")); //$NON-NLS-1$
+    		LOGGER.warning(logF.format("Se han proporcionado parametros de configuracion de firma mal formados: " + e)); //$NON-NLS-1$
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"Se han proporcionado parametros de configuracion de firma mal formados"); //$NON-NLS-1$
     		return;

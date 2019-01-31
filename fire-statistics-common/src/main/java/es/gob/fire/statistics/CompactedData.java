@@ -11,7 +11,7 @@ import es.gob.fire.statistics.entity.TransactionTotal;
  * Conjunto consistente de datos con la informaci&oacute;n de las firmas y transacciones realizadas
  * por FIRe para la obtenci&oacute;n de estad&iacute;sticas.
  */
-public class CompactedData {
+public final class CompactedData {
 
 	private final Map<SignatureCube, Long> signatureData;
 

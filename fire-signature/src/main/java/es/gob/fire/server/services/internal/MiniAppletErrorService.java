@@ -17,9 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.server.services.FIReServiceOperation;
-import es.gob.fire.server.services.statistics.TransactionType;
-
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
  */
@@ -61,10 +58,6 @@ public class MiniAppletErrorService extends HttpServlet {
         // Obtenenmos la configuracion del conector
         final TransactionConfig connConfig	=
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-
-        // Obtenemos la operacion (SIGN o BATCH)
-        final FIReServiceOperation fsop = FIReServiceOperation.parse(session.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
-		final TransactionType op = TransactionType.valueOf(fsop);
 
     	if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
     		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);

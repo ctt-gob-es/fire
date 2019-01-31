@@ -241,9 +241,12 @@ public final class SignService extends HttpServlet {
         connector.endSign(transactId);
 
         // El servicio devuelve el resultado de la operacion de firma.
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(signResult);
-        output.flush();
-        output.close();
+        try (
+    		final OutputStream output = ((ServletResponse) response).getOutputStream();
+		) {
+	        output.write(signResult);
+	        output.flush();
+	        output.close();
+        }
     }
 }

@@ -423,10 +423,13 @@ public class RecoverBatchResultManager {
 	 * @throws IOException Cuando falla el env&iacute;o.
 	 */
 	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result);
-        output.flush();
-        output.close();
+		try (
+			final OutputStream output = ((ServletResponse) response).getOutputStream();
+		) {
+	        output.write(result);
+	        output.flush();
+	        output.close();
+		}
 	}
 
 	/**

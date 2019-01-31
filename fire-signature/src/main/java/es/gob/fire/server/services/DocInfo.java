@@ -57,8 +57,6 @@ public class DocInfo implements Serializable {
 		this.title = title;
 	}
 
-
-
 	public final long getSize() {
 		return this.size;
 	}

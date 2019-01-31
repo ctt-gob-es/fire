@@ -168,26 +168,23 @@ public class SignatureCube {
 		this.provider = provider;
 	}
 
-	/**
-	 * Obtiene el Navegador  del cubo de la firma
-	 * @return
-	 */
+	/** Obtiene el Navegador del cubo de la firma.
+	 * @return Navegador del cubo de la firma. */
 	public final String getBrowser() {
 		return this.browser;
 	}
 
 	/**
-	 *  Establece el Navegador  del cubo de la firma
+	 *  Establece el Navegador del cubo de la firma
 	 * @param browser
 	 */
 	public final void setBrowser(final String browser) {
 		this.browser = browser;
 	}
 
-	/**
-	 * Indica si la firma termin&oacute; correctamente.
-	 * @return
-	 */
+	/** Indica si la firma termin&oacute; correctamente.
+	 * @return <code>true</code> si la firma termin&oacute; correctamente,
+	 *         <code>false</code> en caso contrario. */
 	public final boolean isResultSign() {
 		return this.resultSign;
 	}
@@ -199,10 +196,14 @@ public class SignatureCube {
 		this.resultSign = resultSign;
 	}
 
+	/** Obtiene el identificador de transacci&oacute;n.
+	 * @return Identificador de transacci&oacute;n. */
 	public String getIdTransaction() {
 		return this.idTransaction;
 	}
 
+	/** Establece el identificador de transacci&oacute;n.
+	 * @param idTransaction Identificador de transacci&oacute;n. */
 	public void setIdTransaction(final String idTransaction) {
 		this.idTransaction = idTransaction;
 	}
@@ -254,43 +255,43 @@ public class SignatureCube {
 		final StringBuilder result = new StringBuilder();
 
 		// Aplicacion
-		if (this.getApplication() != null) {
-			result.append(clean(this.getApplication(), 45));
+		if (getApplication() != null) {
+			result.append(clean(getApplication(), 45));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Formato
-		if (this.getFormat() != null) {
-			result.append(clean(this.getFormat(), 20));
+		if (getFormat() != null) {
+			result.append(clean(getFormat(), 20));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Formato forzado
-		if (this.getImprovedFormat() != null) {
-			result.append(clean(this.getImprovedFormat(), 20));
+		if (getImprovedFormat() != null) {
+			result.append(clean(getImprovedFormat(), 20));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Algoritm
-		if (this.getAlgorithm() != null) {
-			result.append(clean(this.getAlgorithm(), 20));
+		if (getAlgorithm() != null) {
+			result.append(clean(getAlgorithm(), 20));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Nombre del proveedor
-		if (this.getProvider() != null) {
-			result.append(clean(this.getProvider(), 45));
+		if (getProvider() != null) {
+			result.append(clean(getProvider(), 45));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Navegador
-		if (this.getBrowser() != null) {
-			result.append(this.getBrowser());
+		if (getBrowser() != null) {
+			result.append(getBrowser());
 		}
 		result.append(";") //$NON-NLS-1$
-			.append(this.isResultSign() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.append(this.getIdTransaction()).append(";") //$NON-NLS-1$
-			.append(this.getDataSize());
+			.append(isResultSign() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.append(getIdTransaction()).append(";") //$NON-NLS-1$
+			.append(getDataSize());
 
 		return result.toString();
 	}

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 
-public class FireStatistics {
+public final class FireStatistics {
 
 	static final Logger LOGGER = Logger.getLogger(FireStatistics.class.getName());
 

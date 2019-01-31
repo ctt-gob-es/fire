@@ -261,10 +261,13 @@ public final class LoadService extends HttpServlet {
         }
 
         response.setContentType("application/json"); //$NON-NLS-1$
-        final PrintWriter out = response.getWriter();
-        out.print(lr.toString());
-        out.flush();
-        out.close();
+        try (
+    		final PrintWriter out = response.getWriter();
+		) {
+	        out.print(lr.toString());
+	        out.flush();
+	        out.close();
+        }
 
     }
 

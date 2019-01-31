@@ -83,7 +83,8 @@ public final class PlatformWsHelper {
                             config
                                     .getProperty("webservices.authorization.ks.cert.password") //$NON-NLS-1$
                     ));
-        } catch (final AxisFault e) {
+        }
+        catch (final AxisFault e) {
             throw new IllegalStateException(
                     "Error estableciendo la configuracion del cliente del Servicio Web: " + e, e //$NON-NLS-1$
             );
@@ -128,7 +129,8 @@ public final class PlatformWsHelper {
         final String ret;
         try {
             ret = (String) call.invoke(new Object[] { inputDss });
-        } catch (final RemoteException e) {
+        }
+        catch (final RemoteException e) {
             throw new PlatformWsException(
                     "Error en la invocacion al servicio de actualizacion de firma de la Plataforma @firma: " + e, e //$NON-NLS-1$
             );
@@ -177,16 +179,15 @@ public final class PlatformWsHelper {
         return config;
     }
 
-    /**
-	 * Carga el fichero de configuraci&oacute;n del m&oacute;dulo o lo devuelve directamente si ya
+    /** Carga el fichero de configuraci&oacute;n del m&oacute;dulo o lo devuelve directamente si ya
 	 * tuviese cargado.
 	 * @return Propiedades de fichero de configuraci&oacute:n.
-	 * @throws ConfigFileNotFoundException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n.
-	 */
+	 * @throws ConfigFileNotFoundException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n. */
 	public static Properties loadConfig() throws  ConfigFileNotFoundException{
 
-		InputStream is = null;
+		//InputStream is = null;
 		final Properties config = new Properties();
+
 		try {
 			String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
 			if (configDir == null) {
@@ -196,41 +197,37 @@ public final class PlatformWsHelper {
 				final File configFile = new File(configDir, CONFIG_FILE).getCanonicalFile();
 				if (!configFile.isFile() || !configFile.canRead()) {
 					LOGGER.warning(
-							"No se encontro el fichero " + CONFIG_FILE + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configFile.getAbsolutePath() + //$NON-NLS-1$
-									"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+						"No se encontro el fichero " + CONFIG_FILE + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
+							ENVIRONMENT_VAR_CONFIG_DIR + ": " + configFile.getAbsolutePath() + //$NON-NLS-1$
+							"\nSe buscara en el CLASSPATH." //$NON-NLS-1$
+					);
 				}
 				else {
-					is = new FileInputStream(configFile);
+					try (
+						final InputStream is = new FileInputStream(configFile);
+					) {
+						config.load(is);
+					}
+					return config;
 				}
 			}
 
-			if (is == null) {
-				is = PlatformWsHelper.class.getResourceAsStream('/' + CONFIG_FILE);
+			try (
+				final InputStream is = PlatformWsHelper.class.getResourceAsStream('/' + CONFIG_FILE);
+			) {
+				config.load(is);
 			}
+			return config;
 
-			config.load(is);
-			is.close();
 		}
 		catch(final NullPointerException e){
 			LOGGER.severe("No se ha encontrado el fichero de configuracion: " + e); //$NON-NLS-1$
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
 			throw new ConfigFileNotFoundException("No se ha encontrado el fichero de propiedades " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			LOGGER.severe("No se pudo cargar el fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
 			throw new ConfigFileNotFoundException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
 		}
-		finally {
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
-		}
-		return config;
+
 	}
 }

@@ -105,7 +105,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         	gcr = GenerateCertificateManager.generateCertificate(origin, subjectId, requestCertConfig.getProperties());
         }
         catch (final IllegalArgumentException e) {
-        	LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
+        	LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que solicita el certificado: " + e)); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         			"No se ha proporcionado el identificador del usuario que solicita el certificado"); //$NON-NLS-1$
         	return;

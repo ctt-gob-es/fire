@@ -117,7 +117,8 @@ public final class UninterruptibleOutputStream extends OutputStream {
 				try {
 				    this.out.flush();
 				    return;
-				} catch (final InterruptedIOException e) {
+				}
+				catch (final InterruptedIOException e) {
 				    intr |= interrupted();
 				}
 			}

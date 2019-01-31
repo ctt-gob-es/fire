@@ -26,12 +26,10 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -43,7 +41,7 @@ import es.gob.afirma.core.misc.http.HttpError;
 /**
  * Clase para la configuracion de la conexi&oacute;n con el componente central.
  */
-public class ConnectionManager {
+public final class ConnectionManager {
 
     private static final String KEYSTORE_PROPERTY = "javax.net.ssl.keyStore"; //$NON-NLS-1$
 
@@ -127,10 +125,11 @@ public class ConnectionManager {
         KeyStore ks = null;
         if (keyStore != null && ksPassword != null) {
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
-
-        	final FileInputStream ksFis = new FileInputStream(new File(keyStore));
-        	ks.load(ksFis, ksPassword);
-        	ksFis.close();
+        	try (
+    			final FileInputStream ksFis = new FileInputStream(new File(keyStore));
+			) {
+        		ks.load(ksFis, ksPassword);
+        	}
         }
 
         KeyStore ts = null;
@@ -156,9 +155,11 @@ public class ConnectionManager {
                 }
 
                 ts = KeyStore.getInstance(tsType);
-                final FileInputStream tsFis = new FileInputStream(new File(trustStore));
-                ts.load(tsFis, tsPassword.toCharArray());
-                tsFis.close();
+                try (
+            		final FileInputStream tsFis = new FileInputStream(new File(trustStore));
+        		) {
+                	ts.load(tsFis, tsPassword.toCharArray());
+                }
         	}
         }
 
@@ -212,22 +213,12 @@ public class ConnectionManager {
 			if (ctx != null) {
 				HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
 			}
-			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			});
+			HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
 			if (ctx != null) {
 				((HttpsURLConnection) con).setSSLSocketFactory(ctx.getSocketFactory());
 			}
 
-			((HttpsURLConnection) con).setHostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			});
+			((HttpsURLConnection) con).setHostnameVerifier((hostname, session) -> true);
 		}
 
 		return con;
@@ -310,12 +301,14 @@ public class ConnectionManager {
 
 		if (urlParameters != null) {
 			conn.setDoOutput(true);
-			final OutputStreamWriter writer = new OutputStreamWriter(
+			try (
+				final OutputStreamWriter writer = new OutputStreamWriter(
 					conn.getOutputStream()
-					);
-			writer.write(urlParameters);
-			writer.flush();
-			writer.close();
+				);
+			) {
+				writer.write(urlParameters);
+				writer.flush();
+			}
 		}
 
 		conn.connect();
@@ -324,11 +317,11 @@ public class ConnectionManager {
 		if (statusCode.startsWith("4") || statusCode.startsWith("5")) { //$NON-NLS-1$ //$NON-NLS-2$
 			throw new HttpError(resCode, "Error " + statusCode + " en la conexion a: " + url, url); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		try (
+			final InputStream is = conn.getInputStream();
+		) {
+			return AOUtil.getDataFromInputStream(is);
+		}
 
-		final InputStream is = conn.getInputStream();
-		final byte[] data = AOUtil.getDataFromInputStream(is);
-		is.close();
-
-		return data;
 	}
 }

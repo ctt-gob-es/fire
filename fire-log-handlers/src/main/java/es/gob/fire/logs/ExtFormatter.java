@@ -23,7 +23,7 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 /**
- * A formatter which handles {@link org.jboss.logmanager.LogRecord LogRecord} instances.
+ * A formatter which handles instances.
  */
 public abstract class ExtFormatter extends Formatter {
 
@@ -40,11 +40,9 @@ public abstract class ExtFormatter extends Formatter {
      * @return {@code true} if the formatter will need caller information, otherwise {@code false}
      *
      * @see LogRecord#getSourceClassName()
-     * @see LogRecord#getSourceFileName()
-     * @see LogRecord#getSourceLineNumber()
      * @see LogRecord#getSourceMethodName()
      */
-    public boolean isCallerCalculationRequired() {
+    public static boolean isCallerCalculationRequired() {
         return true;
     }
 }

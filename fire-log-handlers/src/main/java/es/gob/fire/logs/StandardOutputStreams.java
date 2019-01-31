@@ -22,60 +22,61 @@ package es.gob.fire.logs;
 import java.io.PrintStream;
 
 /**
- * Caches {@link System#out stdout} and {@link System#err stderr} early.
+ * Caches {@link System#out STDOUT} and {@link System#err STDERR} early.
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
-public class StandardOutputStreams {
-    public static final PrintStream stdout = System.out;
-    public static final PrintStream stderr = System.err;
 
-    /**
-     * Prints an error messages to {@link #stderr stderr}.
-     *
-     * @param msg the message to print
-     */
+public class StandardOutputStreams {
+
+	/** Salida est&aacute;ndar. */
+    public static final PrintStream STDOUT = System.out;
+
+    /** Entrada est&aacute;ndar. */
+    public static final PrintStream STDERR = System.err;
+
+    /** Prints an error messages to {@link #STDERR STDERR}.
+     * @param msg the message to print */
     public static void printError(final String msg) {
-        stderr.println(msg);
+        STDERR.println(msg);
     }
 
     /**
-     * Prints an error messages to {@link #stderr stderr}.
+     * Prints an error messages to {@link #STDERR STDERR}.
      *
      * @param format the {@link java.util.Formatter format}
      * @param args   the arguments for the format
      */
     public static void printError(final String format, final Object... args) {
-        stderr.printf(format, args);
+        STDERR.printf(format, args);
     }
 
     /**
-     * Prints an error messages to {@link #stderr stderr}.
+     * Prints an error messages to {@link #STDERR STDERR}.
      *
      * @param cause the cause of the error, if not {@code null} the {@link Throwable#printStackTrace(PrintStream)}
-     *              writes to {@link #stderr stderr}
+     *              writes to {@link #STDERR STDERR}
      * @param msg   the message to print
      */
     public static void printError(final Throwable cause, final String msg) {
-        stderr.println(msg);
+        STDERR.println(msg);
         if (cause != null) {
-            cause.printStackTrace(stderr);
+            cause.printStackTrace(STDERR);
         }
     }
 
     /**
-     * Prints an error messages to {@link #stderr stderr}.
+     * Prints an error messages to {@link #STDERR STDERR}.
      *
      * @param cause  the cause of the error, if not {@code null} the {@link Throwable#printStackTrace(PrintStream)}
-     *               writes to {@link #stderr stderr}
+     *               writes to {@link #STDERR STDERR}
      * @param format the {@link java.util.Formatter format}
      * @param args   the arguments for the format
      */
     public static void printError(final Throwable cause, final String format, final Object... args) {
-        stderr.printf(format, args);
+        STDERR.printf(format, args);
         if (cause != null) {
-            cause.printStackTrace(stderr);
+            cause.printStackTrace(STDERR);
         }
     }
 }

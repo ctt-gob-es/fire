@@ -33,20 +33,20 @@ public final class OnlyOnceErrorManager extends ErrorManager {
 
     /** {@inheritDoc} */
     @Override
-	public void error(final String msg, final Exception ex, final int code) {
+	public synchronized void error(final String msg, final Exception ex, final int code) {
         if (this.called.getAndSet(true)) {
             return;
         }
         final String codeStr;
         switch (code) {
-            case CLOSE_FAILURE: codeStr = "CLOSE_FAILURE"; break;
-            case FLUSH_FAILURE: codeStr = "FLUSH_FAILURE"; break;
-            case FORMAT_FAILURE: codeStr = "FORMAT_FAILURE"; break;
-            case GENERIC_FAILURE: codeStr = "GENERIC_FAILURE"; break;
-            case OPEN_FAILURE: codeStr = "OPEN_FAILURE"; break;
-            case WRITE_FAILURE: codeStr = "WRITE_FAILURE"; break;
-            default: codeStr = "INVALID (" + code + ")"; break;
+            case CLOSE_FAILURE: codeStr = "CLOSE_FAILURE"; break; //$NON-NLS-1$
+            case FLUSH_FAILURE: codeStr = "FLUSH_FAILURE"; break; //$NON-NLS-1$
+            case FORMAT_FAILURE: codeStr = "FORMAT_FAILURE"; break; //$NON-NLS-1$
+            case GENERIC_FAILURE: codeStr = "GENERIC_FAILURE"; break; //$NON-NLS-1$
+            case OPEN_FAILURE: codeStr = "OPEN_FAILURE"; break; //$NON-NLS-1$
+            case WRITE_FAILURE: codeStr = "WRITE_FAILURE"; break; //$NON-NLS-1$
+            default: codeStr = "INVALID (" + code + ")"; break; //$NON-NLS-1$ //$NON-NLS-2$
         }
-        StandardOutputStreams.printError(ex, "LogManager error of type %s: %s%n", codeStr, msg);
+        StandardOutputStreams.printError(ex, "LogManager error of type %s: %s%n", codeStr, msg); //$NON-NLS-1$
     }
 }

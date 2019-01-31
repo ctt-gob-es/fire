@@ -39,7 +39,9 @@ public class FireLogManager {
 			cleanLogHandlers();
 
 			final PeriodicRotatingFileHandler handler = new PeriodicRotatingFileHandler(
-					new File(logsDir, LOG_FILENAME).getAbsolutePath(), true);
+				new File(logsDir, LOG_FILENAME).getAbsolutePath(),
+				true
+			);
 			handler.setAutoFlush(true);
 			handler.setFormatter(new SimpleFormatter());
 			handler.setEnabled(true);

@@ -3,7 +3,7 @@ package es.gob.fire.statistics.entity;
 /**
  * Informaci&oacute;n de un Navegador web
  */
-public class Browser {
+public final class Browser {
 
 	private  int id;
 	private String version;
@@ -56,9 +56,9 @@ public class Browser {
 		else if(userAgent.contains(BRNAME_IE)) {
 			String version = ""; //$NON-NLS-1$
 			final String[] ua_part= userAgent.split(";"); //$NON-NLS-1$
-			for(int i = 0; i < ua_part.length; i++) {
-				if(ua_part[i].contains(BRNAME_IE)) {
-					version = ua_part[i].substring(BRNAME_IE.length() + 1).trim();
+			for (final String element : ua_part) {
+				if(element.contains(BRNAME_IE)) {
+					version = element.substring(BRNAME_IE.length() + 1).trim();
 				}
 			}
 			browser =  new Browser(Browsers.INTERNET_EXPLORER.getId(), version, IE);

@@ -60,7 +60,7 @@ public class SignatureRecorder {
 			config = StatisticsConfig.load();
 		}
 		catch (final Exception e) {
-			LOGGER.warning("No se configuro una politica valida para el guardado de estadisticas. No se almacenaran"); //$NON-NLS-1$
+			LOGGER.warning("No se configuro una politica valida para el guardado de estadisticas. No se almacenaran: " + e); //$NON-NLS-1$
 			return;
 		}
 
@@ -143,31 +143,31 @@ public class SignatureRecorder {
 
 		 // Inicializamos el cubo de datos si no lo estaba
 		if (getSignCube() == null) {
-			this.setSingCube(new SignatureCube());
+			setSingCube(new SignatureCube());
 		}
 
 		// Id transaccion
 		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-		this.getSignCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+		getSignCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
 
 		// Aplicacion
 		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
-		this.getSignCube().setApplication(appName);
+		getSignCube().setApplication(appName);
 
 		// Resultado
-		this.getSignCube().setResultSign(result);
+		getSignCube().setResultSign(result);
 
 		// Navegador
 		final String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
-		this.getSignCube().setBrowser(browser);
+		getSignCube().setBrowser(browser);
 
 		// Proveedor que gestiona el certificado de firma
 		final String provider = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		this.getSignCube().setProvider(provider);
+		getSignCube().setProvider(provider);
 
 		// Algoritmo
 		final String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-		this.getSignCube().setAlgorithm(algorithm);
+		getSignCube().setAlgorithm(algorithm);
 
 		// Obtenemos el tamano del documento
 		Long docSize = new Long(0);
@@ -201,12 +201,12 @@ public class SignatureRecorder {
 		}
 
 		// Registramos el tamano del documento, el formato y el formato de actualizacion
-		this.getSignCube().setDataSize(docSize.longValue());
-		this.getSignCube().setFormat(format);
-		this.getSignCube().setImprovedFormat(upgrade);
+		getSignCube().setDataSize(docSize.longValue());
+		getSignCube().setFormat(format);
+		getSignCube().setImprovedFormat(upgrade);
 
 		// Imprimimos los datos del cubo en la salida de datos de firma
-		this.dataLogger.finest(this.getSignCube().toString());
+		this.dataLogger.finest(getSignCube().toString());
 	}
 
 	protected final SignatureCube getSignCube() {

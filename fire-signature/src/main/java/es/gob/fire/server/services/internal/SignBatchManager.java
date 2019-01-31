@@ -156,9 +156,12 @@ public class SignBatchManager {
 
 	private static void sendResult(final HttpServletResponse response, final SignOperationResult result) throws IOException {
         response.setContentType("application/json"); //$NON-NLS-1$
-        final PrintWriter out = response.getWriter();
-        out.print(result.toString());
-        out.flush();
-        out.close();
+        try (
+    		final PrintWriter out = response.getWriter();
+		) {
+	        out.print(result.toString());
+	        out.flush();
+	        out.close();
+        }
 	}
 }
