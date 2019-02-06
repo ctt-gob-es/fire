@@ -5,118 +5,124 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-signature</artifactId>
-	<version>2.4-SNAPSHOT</version>
 	<packaging>war</packaging>
 	
 	<name>fire-signature</name>
 	<description>Modulo componente central de FIRe</description>
 	
-	<properties>
-		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-		<jdk.version>1.7</jdk.version>
-	</properties>
+	<parent>
+		<groupId>es.gob.fire</groupId>
+		<artifactId>fire-artifacts</artifactId>
+		<version>2.4-SNAPSHOT</version>
+	</parent>
 
-	<dependencies>
-
-		<dependency>
-			<groupId>es.gob.afirma</groupId>
-			<artifactId>afirma-core</artifactId>
-			<version>1.6.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.afirma</groupId>
-			<artifactId>afirma-server-triphase-signer-core</artifactId>
-			<version>1.6.2</version>
-		</dependency>
+	<!-- Perfiles con los distintos grupos de dependencias -->
+	<!--  - Para agregar el conector de Cl@ve Firma, indicar perfil "clavefirma" -->
+	<!--  - Para agregar el conector de la FNMT, indicar perfil "fnmt" -->
 	
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-upgrade</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-signature-common-libraries</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-log-handlers</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-signature-document</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-signature-connector</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
+	<profiles>
+		<profile>
+			<id>main</id>	 <!-- Este perfil contiene todas las dependencias obligatorias -->
+			<activation>
+				<property>
+					<name>!false</name> <!-- Se activa siempre que no se indique esta propiedad -->
+				</property>
+			</activation>
+	
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.afirma</groupId>
+					<artifactId>afirma-core</artifactId>
+				</dependency>
 		
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-signature-connector-clavefirma</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-signature-connector-clavefirma-test</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-logs-common</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-statistics-common</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.fnmt.fire</groupId>
-			<artifactId>fnmt-fire-connector</artifactId>
-			<version>0.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<version>1.0</version>
-		</dependency>
-
-		<dependency>
-    		<groupId>org.glassfish</groupId>
-    		<artifactId>javax.json</artifactId>
-    		<version>1.0.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
-		</dependency>		
-
-	</dependencies>
+				<dependency>
+					<groupId>es.gob.afirma</groupId>
+					<artifactId>afirma-server-triphase-signer-core</artifactId>
+				</dependency>
+			
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-upgrade</artifactId>
+				</dependency>
+		
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-signature-common-libraries</artifactId>
+				</dependency>
+		
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-log-handlers</artifactId>
+				</dependency>
+		
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-signature-document</artifactId>
+				</dependency>
+		
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-signature-connector</artifactId>
+				</dependency>
+		
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-signature-connector-clavefirma-test</artifactId>
+				</dependency>
+		
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-statistics-common</artifactId>
+				</dependency>
+		
+				<dependency>
+					<groupId>javax.json</groupId>
+					<artifactId>javax.json-api</artifactId>
+				</dependency>
+		
+				<dependency>
+		    		<groupId>org.glassfish</groupId>
+		    		<artifactId>javax.json</artifactId>
+				</dependency>
+		
+				<dependency>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+					<version>3.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+		
+				<dependency>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</dependency>		
+		
+			</dependencies>
+		</profile>
+		
+		<profile>
+			<id>clavefirma</id>	<!-- Perfil que agrega el conector de Cl@ve Firma -->
+			
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-signature-connector-clavefirma</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+		
+		<profile>
+			<id>fnmt</id>	<!-- Perfil que agrega el conector de la FNMT -->
+			
+			<dependencies>
+				<dependency>
+					<groupId>es.fnmt.fire</groupId>
+					<artifactId>fnmt-fire-connector</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+	
 	
 	<build>
 		<plugins>
@@ -138,7 +144,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
