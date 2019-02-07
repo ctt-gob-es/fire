@@ -113,7 +113,6 @@ public final class ClaveFirmaConnector extends FIReConnector {
                                                                             FIReConnectorNetworkException,
                                                                             CertificateBlockedException,
     																		WeakRegistryException {
-
     	final GateWayAPI gatewayApi = getGateWayApi();
 
         final QueryCertificatesResult certs;

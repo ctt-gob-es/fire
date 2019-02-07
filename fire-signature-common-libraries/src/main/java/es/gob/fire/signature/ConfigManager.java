@@ -21,12 +21,12 @@ import java.util.logging.Logger;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.decipher.PropertyDecipher;
 
-/**
- * Manejador que gestiona la configuraci&oacute;n de la aplicaci&oacute;n.
- */
+/** Manejador que gestiona la configuraci&oacute;n de la aplicaci&oacute;n. */
 public class ConfigManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
+
+	private static final String PROP_DEBUG = "debug"; //$NON-NLS-1$
 
 	private static final String PROP_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
 
@@ -139,6 +139,9 @@ public class ConfigManager {
 			DEFAULT_TMP_DIR = System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
+			LOGGER.warning(
+				"No se ha podido determinar el directorio temporal a partir de la variable java 'java.io.tmpdir': "  + e //$NON-NLS-1$
+			);
 			try {
 				DEFAULT_TMP_DIR = File.createTempFile("tmp", null).getParentFile().getAbsolutePath(); //$NON-NLS-1$
 			}
@@ -149,13 +152,25 @@ public class ConfigManager {
 				);
 			}
 		}
+		try {
+			loadConfig();
+		}
+		catch (final ConfigFilesException e) {
+			LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+			config = new Properties();
+		}
 	}
 
-	/**
-	 * Carga el fichero de configuraci&oacute;n del m&oacute;dulo.
-	 * @throws ConfigFilesException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n.
-	 */
-	private static void loadConfig() throws  ConfigFilesException {
+	/** Indica si el programa est&aacute; configurado en modo depuraci&oacute;n.
+	 * @return <code>true</code> si el programa est&aacute; configurado en modo depuraci&oacute;n,
+	 *         <code>false</code> en caso contrario. */
+	public static boolean isDebug() {
+		return Boolean.parseBoolean(config.getProperty(PROP_DEBUG));
+	}
+
+	/** Carga el fichero de configuraci&oacute;n del m&oacute;dulo.
+	 * @throws ConfigFilesException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n. */
+	private static void loadConfig() throws ConfigFilesException {
 
 		if (config == null) {
 			try {
@@ -184,13 +199,10 @@ public class ConfigManager {
 		}
 	}
 
-
-	/**
-	 * Devuelve el listado de nombres de los proveedores configurados.
+	/** Devuelve el listado de nombres de los proveedores configurados.
 	 * En caso de que no se haya definido ninguno, este listado
 	 * estar&aacute; vac&iacute;o.
-	 * @return Listado de proveedores configurados.
-	 */
+	 * @return Listado de proveedores configurados. */
 	public static ProviderElement[] getProviders() {
 		final String providers = getProperty(PROP_PROVIDERS_LIST);
 		if (providers == null) {
@@ -210,11 +222,9 @@ public class ConfigManager {
 		return providersList.toArray(new ProviderElement[providersList.size()]);
 	}
 
-	/**
-	 * Recupera el nombre de la clase de conexi&oacute;n de un proveedor.
+	/** Recupera el nombre de la clase de conexi&oacute;n de un proveedor.
 	 * @param name Nombre del proveedor.
-	 * @return Clase de conexi&oacute;n del proveedor.
-	 */
+	 * @return Clase de conexi&oacute;n del proveedor. */
 	public static String getProviderClass(final String name) {
 		return getProperty(PREFIX_PROP_PROVIDER + name);
 	}
@@ -271,22 +281,19 @@ public class ConfigManager {
 			return Integer.parseInt(getProperty(PROP_BATCH_MAX_DOCUMENTS));
 		}
 		catch (final Exception e) {
-			LOGGER.warning("Se encontro un valor invalido para la propiedad '" + //$NON-NLS-1$
+			LOGGER.warning(
+				"Se encontro un valor invalido para la propiedad '" + //$NON-NLS-1$
 					PROP_BATCH_MAX_DOCUMENTS +
-					"' del fichero de configuracion. No se establecera limite al numero de ficheros."); //$NON-NLS-1$
+						"' del fichero de configuracion. No se establecera limite al numero de ficheros: " + e); //$NON-NLS-1$
 			return UNLIMITED_NUM_DOCUMENTS;
 		}
 	}
 
-	/**
-	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
-	 * @throws ConfigFilesException Si no encuentra el fichero config.properties.
-	 */
+	/** Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
+	 * @throws ConfigFilesException Si no encuentra el fichero config.properties. */
 	public static void checkConfiguration() throws ConfigFilesException {
 
 		initialized = false;
-
-		loadConfig();
 
 		if (config == null) {
 			LOGGER.severe("No se ha encontrado el fichero de configuracion de la conexion"); //$NON-NLS-1$
@@ -295,8 +302,12 @@ public class ConfigManager {
 
 		final ProviderElement[] providers = getProviders();
 		if (providers == null) {
-			LOGGER.severe("Debe declararse al menos un proveedor mediante la propiedad " + PROP_PROVIDERS_LIST); //$NON-NLS-1$
-			throw new ConfigFilesException("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST, CONFIG_FILE); //$NON-NLS-1$
+			LOGGER.severe(
+				"Debe declararse al menos un proveedor mediante la propiedad " + PROP_PROVIDERS_LIST //$NON-NLS-1$
+			);
+			throw new ConfigFilesException(
+				"Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST, CONFIG_FILE //$NON-NLS-1$
+			);
 		}
 
 		try {
@@ -323,11 +334,9 @@ public class ConfigManager {
 		initialized = true;
 	}
 
-	/**
-	 * Indica que la configuracion ya se comprob&oacute; y est&aacute; operativa.
+	/** Indica que la configuracion ya se comprob&oacute; y est&aacute; operativa.
 	 * @return {@code true} cuando ya se ha cargado la configuraci&oacute;n y comprobado
-	 * que es correcta.
-	 */
+	 * que es correcta. */
 	public static boolean isInitialized() {
 		return initialized;
 	}
@@ -350,48 +359,32 @@ public class ConfigManager {
 		return getProperty(PROP_APP_ID);
 	}
 
-	/**
-	 * Devuelve el directorio configurado para el guardado de temporales.
+	/** Devuelve el directorio configurado para el guardado de temporales.
 	 * @return Ruta del directorio temporal o, si no se configuro, el directorio
-	 * temporal del sistema. En caso de error, devolver&aacute; {@code null}.
-	 */
+	 * temporal del sistema. En caso de error, devolver&aacute; {@code null}. */
 	public static String getTempDir() {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return null;
-			}
-		}
-
 		return getProperty(PROP_TEMP_DIR, DEFAULT_TMP_DIR);
 	}
 
 
-	/**
-	 * Devuelve el identificador num&eacute;rico de la pol&iacute;tica de firma configurada.
+	/** Devuelve el identificador num&eacute;rico de la pol&iacute;tica de firma configurada.
 	 * En caso de error, devuelve -1.
-	 * @return Dato num&eacute;rico.
-	 */
+	 * @return Dato num&eacute;rico. */
 	public static int getStatisticsPolicy() {
 		int policy;
 		try {
 			policy = Integer.parseInt(getProperty(PROP_STATISTICS_POLICY));
 		}
 		catch (final NumberFormatException e) {
+			LOGGER.warning("No se ha podido leer el identificador de politica (" + getProperty(PROP_STATISTICS_POLICY) + "):" + e); //$NON-NLS-1$ //$NON-NLS-2$
 			policy = -1;
 		}
 		return policy;
 	}
 
-	/**
-	 * Devuelve la hora a la que deber&iacute;n volcarse los datos estad&iacute;sticos a base de datos. En caso de no
+	/** Devuelve la hora a la que deber&iacute;n volcarse los datos estad&iacute;sticos a base de datos. En caso de no
 	 * encontrarse configurada una hora con el formato hh:mm:ss se devolver&aacute; 00:00:00.
-	 * @return Hora con formato hh:mm:ss
-	 *
-	 */
+	 * @return Hora con formato <i>hh:mm:ss</i>. */
 	public static String getStatisticsDumpTime() {
 		 String time =  getProperty(PROP_STATISTICS_DUMPTIME);
 		 if (time == null || !time.matches(PATTERN_TIME)) {
@@ -479,41 +472,41 @@ public class ConfigManager {
 		return 	Boolean.parseBoolean(getProperty(USE_TSP, Boolean.FALSE.toString()));
 	}
 
-	/**
-	 * Recupera el tiempo en milisegundos que debe transcurrir antes de considerar caducados los
+	/** Recupera el tiempo en milisegundos que debe transcurrir antes de considerar caducados los
 	 * ficheros temporales almacenados durante un proceso de firma de lote. Si no se encuentra
 	 * configurado un valor, se usara el valor por defecto.
 	 * @return N&uacute;mero de milisegundos que como m&iacute;nimo se almacenar&aacute;n los
-	 * ficheros temporales.
-	 */
+	 * ficheros temporales. */
 	public static long getTempsTimeout() {
 		try {
 			return Long.parseLong(getProperty(PROP_FIRE_TEMP_TIMEOUT, Integer.toString(DEFAULT_FIRE_TEMP_TIMEOUT)))
 					* 1000;
 		}
 		catch (final Exception e) {
-			LOGGER.warning("Tiempo de expiracion invalido en la propiedad '" + PROP_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
+			LOGGER.warning(
+				"Tiempo de expiracion invalido en la propiedad '" + PROP_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
 					"' del fichero de configuracion. Se usaran " + DEFAULT_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
-					"segundos"); //$NON-NLS-1$
+						"segundos: " + e); //$NON-NLS-1$
 			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 		}
 	}
 
-	/**
-	 * Recupera el tiempo en milisegundos que puede almacenarse un fichero de intercambio del Cliente Afirma
+	/** Recupera el tiempo en milisegundos que puede almacenarse un fichero de intercambio del Cliente Afirma
 	 * antes de considerarse caducado. El tipo se carga de la configuraci&oacute;n en donde se indica
 	 * en segundo.
 	 * @return Tiempo m&aacute;ximo en milisegundos que puede tardarse en recoger un fichero antes de que
-	 * caduque.
-	 */
+	 * caduque. */
 	public static long getAfirmaTempsTimeout() {
 		try {
 			return Long.parseLong(getProperty(PROP_CLIENTEAFIRMA_TEMP_TIMEOUT, Integer.toString(DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT)))
 					* 1000;
-		} catch (final Exception e) {
-			LOGGER.warning("Tiempo de expiracion invalido en la propiedad '" + PROP_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
+		}
+		catch (final Exception e) {
+			LOGGER.warning(
+				"Tiempo de expiracion invalido en la propiedad '" + PROP_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
 					"' del fichero de configuracion. Se usaran " + DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
-					"segundos"); //$NON-NLS-1$
+						"segundos: " + e //$NON-NLS-1$
+			);
 			return DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT * 1000;
 		}
 	}
@@ -538,21 +531,10 @@ public class ConfigManager {
 		return !Boolean.FALSE.toString().equalsIgnoreCase(getProperty(PROP_CLIENTEAFIRMA_FORCE_NATIVE));
 	}
 
-	/**
-	 * Recupera el t&iacute;tulo a asignar a las p&aacute;ginas web del componente central.
+	/** Recupera el t&iacute;tulo a asignar a las p&aacute;ginas web del componente central.
 	 * @return T&iacute;tulo configurado para las paginas o cadena vac&iacute;a si no se
-	 * especific&oacute; uno.
-	 */
+	 * especific&oacute; uno. */
 	public static String getPagesTitle() {
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return ""; //$NON-NLS-1$
-			}
-		}
-
 		return getProperty(PROP_FIRE_PAGES_TITLE, ""); //$NON-NLS-1$
 	}
 
@@ -562,164 +544,83 @@ public class ConfigManager {
 	 * @return URL completa de la imagen de logo o cadena vac&iacute;a si no se ha configurado.
 	 */
 	public static String getPagesLogoUrl() {
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return ""; //$NON-NLS-1$
-			}
-		}
-
-		return getProperty(PROP_FIRE_PAGES_LOGO_URL);
+		return getProperty(PROP_FIRE_PAGES_LOGO_URL, ""); //$NON-NLS-1$
 	}
 
-	/**
-	 * Recupera la clase DocumentManager con la que obtener los datos a firmar y
+	/** Recupera la clase DocumentManager con la que obtener los datos a firmar y
 	 * guardar la firma.
 	 * @param docManager Identificador del DocumentManager.
-	 * @return Nombre cualificado de la clase.
-	 */
+	 * @return Nombre cualificado de la clase. */
 	public static String getDocumentManagerClassName(final String docManager) {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return ""; //$NON-NLS-1$
-			}
-		}
-
-		return getProperty(PROP_DOCUMENT_MANAGER_PREFIX + docManager);
+		return getProperty(PROP_DOCUMENT_MANAGER_PREFIX + docManager, ""); //$NON-NLS-1$
 	}
 
-	/**
-	 * Recupera el identificador del gestor para la compartici&oacute;n de sesiones, necesario
+	/** Recupera el identificador del gestor para la compartici&oacute;n de sesiones, necesario
 	 * para permitir el uso de varios nodos balanceados con el componente central.
 	 * @return Instancia del gestor para la compartici&oacute;n de sesiones o {@code null}
-	 * si no se ha podido recuperar o no se ha configurado.
-	 */
+	 * si no se ha podido recuperar o no se ha configurado. */
 	public static String getSessionsDao() {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return null;
-			}
-		}
-
 		return getProperty(PROP_SESSIONS_DAO);
 	}
 
-
-	/**
-	  * Recupera la URL de la parte p&uacute;blica del componente central.
+	/** Recupera la URL de la parte p&uacute;blica del componente central.
 	  * @return URL de la parte p&uacute;blica del componente central o {@code null}
-	  * si no se ha podido recuperar o no se ha configurado.
-	  */
+	  * si no se ha podido recuperar o no se ha configurado. */
 	 public static String getPublicContextUrl() {
-
-	 	if (config == null) {
-	 		try {
-	 			loadConfig();
-	 		} catch (final ConfigFilesException e) {
-	 			LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-	 			return null;
-	 		}
-	 	}
-
 	 	return getProperty(PROP_FIRE_PUBLIC_URL);
 	 }
 
-	 /**
-	  * Recupera el directorio en el que almacenar los ficheros de log.
-	  * @return Directorio de los ficheros de log o {@code null} si no se configur&oacute;.
-	  */
+	 /** Recupera el directorio en el que almacenar los ficheros de log.
+	  * @return Directorio de los ficheros de log o {@code null} si no se configur&oacute;. */
 	 public static String getLogsDir() {
-
-		 if (config == null) {
-			 try {
-				 loadConfig();
-			 } catch (final ConfigFilesException e) {
-				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				 return null;
-			 }
-		 }
-
 		 return getProperty(PROP_LOGS_DIR);
 	 }
 
-	 /**
-	  * Recupera la pol&iacute;tica de rotado del fichero de log.
-	  * @return Politica de rotado o {@code null} si no se configur&oacute;.
-	  */
+	 /** Recupera la pol&iacute;tica de rotado del fichero de log.
+	  * @return Politica de rotado o {@code null} si no se configur&oacute;. */
 	 public static String getLogsRollingPolicy() {
 		 return getProperty(PROP_LOGS_ROLLING_POLICY);
 	 }
 
-	 /**
-	  * Recupera el nivel general de log m&iacute;nimo que se debe mostrar.
+	 /** Recupera el nivel general de log m&iacute;nimo que se debe mostrar.
 	  * @return Nivel de log configurado o el nivel por defecto si no se configur&oacute; o
-	  * se configur&oacute; un valor no valido.
-	  */
+	  * se configur&oacute; un valor no valido. */
 	 public static String getLogsLevel() {
 		 return getProperty(PROP_LOGS_LEVEL_GENERAL, DEFAULT_LOGS_LEVEL);
 	 }
 
-	 /**
-	  * Recupera el nivel m&iacute;nimo de los logs de FIRe que se deben mostrar.
-	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;.
-	  */
+	 /** Recupera el nivel m&iacute;nimo de los logs de FIRe que se deben mostrar.
+	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;. */
 	 public static String getLogsLevelFire() {
 		 return getProperty(PROP_LOGS_LEVEL_FIRE, getLogsLevel());
 	 }
 
-	 /**
-	  * Recupera el nivel m&iacute;nimo de los logs del n&uacute;cleo de firma que se deben mostrar.
-	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;.
-	  */
+	 /** Recupera el nivel m&iacute;nimo de los logs del n&uacute;cleo de firma que se deben mostrar.
+	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;. */
 	 public static String getLogsLevelAfirma() {
 		 return getProperty(PROP_LOGS_LEVEL_AFIRMA, getLogsLevel());
 	 }
 
-	 /**
-	  * Recupera el nombre del atributo de la cabecera de las peticiones HTTP
+	 /** Recupera el nombre del atributo de la cabecera de las peticiones HTTP
 	  * en el que se transmite el certificado para la autenticaci&oacute;n
 	  * cliente SSL.
-	 * @return Nombre del atributo configurado.
-	 */
+	 * @return Nombre del atributo configurado. */
 	public static String getHttpsCertAttributeHeader() {
-
-		 if (config == null) {
-			 try {
-				 loadConfig();
-			 } catch (final ConfigFilesException e) {
-				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				 return null;
-			 }
-		 }
 		 return getProperty(PROP_HTTP_CERT_ATTR, DEFAULT_HTTP_CERT_ATTR);
 	 }
 
-	/**
-	 * Indica si se ha configurado un objeto para el descifrado de propiedades
+	/** Indica si se ha configurado un objeto para el descifrado de propiedades
 	 * en los ficheros de configuraci&oacute;n.
 	 * @return {@code true} si se ha definido el objeto de descifrado. {@code false}
-	 * en caso contrario.
-	 */
+	 * en caso contrario. */
 	public static boolean hasDecipher() {
 		return decipherImpl != null;
 	}
 
-	/**
-	 * Recupera una propiedad del fichero de configuraci&oacute;n y devuelve su
+	/** Recupera una propiedad del fichero de configuraci&oacute;n y devuelve su
 	 * valor habi&eacute;ndolo descifrado si era necesario.
 	 * @param key Clave de la propiedad.
-	 * @return Valor descifrado de la propiedad o {@code null} si la propiedad no estaba definida.
-	 */
+	 * @return Valor descifrado de la propiedad o {@code null} si la propiedad no estaba definida. */
 	private static String getProperty(final String key) {
 		return getProperty(key, null);
 	}
