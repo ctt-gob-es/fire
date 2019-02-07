@@ -28,8 +28,7 @@ public final class SignOperationResult {
     /**
      * Crea el resultado de una operaci&oacute;n de carga de datos a firmar.
      *
-     * @param id
-     *            Identificador de la transacci&oacute;n de firma.
+     * @param id Identificador de la transacci&oacute;n de firma.
      * @param redirect
      *            URL a redireccionar al usuario para que se autentique.
      */
@@ -81,11 +80,17 @@ public final class SignOperationResult {
                     "El JSON de definicion no puede ser nulo" //$NON-NLS-1$
             );
         }
-        final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
-        final JsonObject jsonObject = jsonReader.readObject();
-        final String id = jsonObject.getString("transactionid"); //$NON-NLS-1$
-        final String redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
-        jsonReader.close();
+
+        final String id;
+        final String redirect;
+        try (
+    		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
+		) {
+	        final JsonObject jsonObject = jsonReader.readObject();
+	        id = jsonObject.getString("transactionid"); //$NON-NLS-1$
+	        redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
+	        jsonReader.close();
+        }
 
         if (id == null || "".equals(id)) { //$NON-NLS-1$
             throw new IllegalArgumentException(

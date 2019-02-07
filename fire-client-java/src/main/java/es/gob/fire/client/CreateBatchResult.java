@@ -15,54 +15,47 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-/**
- * Resultado de una iniciar un proceso de lote contra Cl@ve Firma.
- */
+/** Resultado de una iniciar un proceso de lote contra Cl@ve Firma. */
 public final class CreateBatchResult {
 
     private final String transactionId;
 
-    /**
-     * Crea el resultado de una operaci&oacute;n de creaci&oacute;n de lote para
+    /** Crea el resultado de una operaci&oacute;n de creaci&oacute;n de lote para
      * la firma con Clave Firma.
-     *
-     * @param id
-     *            Identificador de la transacci&oacute;n de creaci&oacute;n de lote.
-     */
+     * @param id Identificador de la transacci&oacute;n de creaci&oacute;n de lote. */
     public CreateBatchResult(final String id) {
         if (id == null || "".equals(id)) { //$NON-NLS-1$
             throw new IllegalArgumentException(
-                    "El identificador de la transacci&oacute;n de creacion de lote no puede ser nulo" //$NON-NLS-1$
+                "El identificador de la transacci&oacute;n de creacion de lote no puede ser nulo" //$NON-NLS-1$
             );
         }
         this.transactionId = id;
     }
 
-
-    /**
-     * Crea el resultado de una operaci&oacute;n de creaci&oacute;n de lote para
+    /** Crea el resultado de una operaci&oacute;n de creaci&oacute;n de lote para
      * la firma con Clave Firma.
-     *
-     * @param json
-     *            Definici&oacute;n JSON del resultado de una operaci&oacute;n
-     *            de creaci&oacute;n de lote a firmar.
-     * @return Resultado de la creacion del lote.
-     */
+     * @param json Definici&oacute;n JSON del resultado de una operaci&oacute;n
+     *             de creaci&oacute;n de lote a firmar.
+     * @return Resultado de la creacion del lote. */
     public static CreateBatchResult parse(final byte[] json) {
         if (json == null) {
             throw new IllegalArgumentException(
                     "El JSON de definicion no puede ser nulo" //$NON-NLS-1$
             );
         }
-        final JsonReader jsonReader = Json
-                .createReader(new ByteArrayInputStream(json));
-        final JsonObject jsonObject = jsonReader.readObject();
-        final String id = jsonObject.getString("transactionid"); //$NON-NLS-1$
-        jsonReader.close();
 
-        if (id == null || "".equals(id)) { //$NON-NLS-1$
+        final String id;
+        try (
+    		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
+		) {
+	        final JsonObject jsonObject = jsonReader.readObject();
+	        id = jsonObject.getString("transactionid"); //$NON-NLS-1$
+	        jsonReader.close();
+        }
+
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Es obligatorio que el JSON contenga el identificador de la transacci&oacute;n" //$NON-NLS-1$
+                "Es obligatorio que el JSON contenga el identificador de la transacci&oacute;n" //$NON-NLS-1$
             );
         }
 

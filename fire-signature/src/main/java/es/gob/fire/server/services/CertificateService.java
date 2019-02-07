@@ -96,7 +96,7 @@ public final class CertificateService extends HttpServlet {
         		final ApplicationChecking appCheck = AplicationsDAO.checkApplicationId(appId);
 	        	if (!appCheck.isValid()) {
 	        		LOGGER.warning(
-	    				"Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion" //$NON-NLS-1$
+	    				"Se proporciono un identificador de aplicacion no valido (" + appId + "), se rechaza la peticion" //$NON-NLS-1$ //$NON-NLS-2$
 					);
 	        		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 	        		return;
@@ -105,13 +105,13 @@ public final class CertificateService extends HttpServlet {
 	        catch (final Exception e) {
 	        	LOGGER.log(
 	    			Level.SEVERE,
-	    			"Ocurrio un error grave al validar el identificador de la aplicacion", e //$NON-NLS-1$
+	    			"Ocurrio un error grave al validar el identificador de la aplicacion: " + e, e //$NON-NLS-1$
 				);
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        	return;
 	        }
         }
-        else{
+        else {
         	LOGGER.fine("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
         }
 
@@ -220,10 +220,13 @@ public final class CertificateService extends HttpServlet {
         response.setContentType("application/json"); //$NON-NLS-1$
 
         // El servicio devuelve el JSON con la lista de certificados
-        final PrintWriter out = response.getWriter();
-        out.print(certJSON);
-        out.flush();
-        out.close();
+        try (
+    		final PrintWriter out = response.getWriter();
+		) {
+	        out.print(certJSON);
+	        out.flush();
+	        out.close();
+        }
     }
 
     /** Crea un JSON para el conjunto de certificados.

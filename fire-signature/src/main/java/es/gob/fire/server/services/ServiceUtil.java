@@ -202,6 +202,13 @@ public final class ServiceUtil {
 	 *                                        no tiene acceso. */
 	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates) throws CertificateValidationException {
 
+		if (ConfigManager.isDebug()) {
+			LOGGER.warning(
+				"Se ha omitido la comprobacion cliente por estar en modo depuracion" //$NON-NLS-1$
+			);
+			return;
+		}
+
 		if (certificates == null || certificates.length == 0 || certificates[0] == null) {
 			LOGGER.severe("No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$
 			throw new CertificateValidationException (HttpServletResponse.SC_UNAUTHORIZED, "No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$

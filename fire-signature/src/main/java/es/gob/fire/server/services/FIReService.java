@@ -37,10 +37,8 @@ import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.statistics.FireStatistics;
 
-/**
- * Servicio central de FIRe que integra las funciones de firma a traves del Cliente @firma
- * y proveedores de firma en la nube.
- */
+/** Servicio central de FIRe que integra las funciones de firma a traves del Cliente @firma
+ * y proveedores de firma en la nube. */
 public class FIReService extends HttpServlet {
 
 	/** Serial Id. */

@@ -46,13 +46,18 @@ public final class LoadResult {
                     "El JSON de definicion no puede ser nulo" //$NON-NLS-1$
             );
         }
-        final JsonReader jsonReader = Json
-                .createReader(new ByteArrayInputStream(json.getBytes()));
-        final JsonObject jsonObject = jsonReader.readObject();
-        final String id = jsonObject.getString("transacionid"); //$NON-NLS-1$
-        final String redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
-        final String tDataXmlB64 = jsonObject.getString("triphasedata"); //$NON-NLS-1$
-        jsonReader.close();
+        final String id;
+        final String redirect;
+        final String tDataXmlB64;
+        try (
+    		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json.getBytes()));
+		) {
+	        final JsonObject jsonObject = jsonReader.readObject();
+	        id = jsonObject.getString("transacionid"); //$NON-NLS-1$
+	        redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
+	        tDataXmlB64 = jsonObject.getString("triphasedata"); //$NON-NLS-1$
+	        jsonReader.close();
+        }
 
         if (id == null || "".equals(id)) { //$NON-NLS-1$
             throw new IllegalArgumentException(

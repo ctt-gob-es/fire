@@ -19,9 +19,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 
-/**
- * Resultado de una operaci&oacute;n de firma de lote.
- */
+/** Resultado de una operaci&oacute;n de firma de lote. */
 public class BatchResult extends HashMap<String, SignBatchResult> {
 
 	/** Serial Id. */
@@ -93,38 +91,38 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 		return buffer.toString();
 	}
 
-	/**
-	 * Parsea un JSON con el resultado de la firma de un lote.
+	/** Analiza un JSON con el resultado de la firma de un lote.
 	 * @param json JSON con el resultado de la firma del lote.
 	 * @return Objeto con el listado de identificadores de los
-	 * documentos y el resultado de firmarlos.
-	 */
+	 * documentos y el resultado de firmarlos. */
 	public static BatchResult parse(final byte[] json) {
 
 		final BatchResult result = new BatchResult();
 
-		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
-		final JsonObject mainObject = jsonReader.readObject();
-		final JsonString providerName = mainObject.getJsonString(JSON_FIELD_PROVIDER_NAME);
-		result.setProviderName(providerName.getChars().toString());
+		try (
+			final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
+		) {
+			final JsonObject mainObject = jsonReader.readObject();
+			final JsonString providerName = mainObject.getJsonString(JSON_FIELD_PROVIDER_NAME);
+			result.setProviderName(providerName.getChars().toString());
 
-		final JsonArray jsonArray = mainObject.getJsonArray(JSON_OBJECT);
-		for (int i = 0; i < jsonArray.size(); i++) {
-			final JsonObject jsonObject = jsonArray.getJsonObject(i);
-			final String id = jsonObject.getString(JSON_FIELD_ID);
-			final boolean ok = jsonObject.getBoolean(JSON_FIELD_OK);
-			String dt = null;
-			if (jsonObject.containsKey(JSON_FIELD_DETAIL)) {
-				dt = jsonObject.getString(JSON_FIELD_DETAIL);
-			}
+			final JsonArray jsonArray = mainObject.getJsonArray(JSON_OBJECT);
+			for (int i = 0; i < jsonArray.size(); i++) {
+				final JsonObject jsonObject = jsonArray.getJsonObject(i);
+				final String id = jsonObject.getString(JSON_FIELD_ID);
+				final boolean ok = jsonObject.getBoolean(JSON_FIELD_OK);
+				String dt = null;
+				if (jsonObject.containsKey(JSON_FIELD_DETAIL)) {
+					dt = jsonObject.getString(JSON_FIELD_DETAIL);
+				}
 
-			result.put(id, ok ? new SignBatchResult() : new SignBatchResult(dt));
-			if (!ok) {
-				result.error = true;
+				result.put(id, ok ? new SignBatchResult() : new SignBatchResult(dt));
+				if (!ok) {
+					result.error = true;
+				}
 			}
+			jsonReader.close();
 		}
-		jsonReader.close();
-
 		return result;
 	}
 }

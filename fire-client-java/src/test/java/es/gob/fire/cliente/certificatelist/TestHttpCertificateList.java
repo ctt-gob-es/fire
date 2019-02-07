@@ -24,9 +24,9 @@ public class TestHttpCertificateList {
      * @throws Exception En cualquier error. */
     @SuppressWarnings("static-method")
     @Test
-    @Ignore
+    //@Ignore
     public void testCertificateRetrieval() throws Exception {
-        final List<X509Certificate> list = HttpCertificateList.getList("1", "52020201C"); //$NON-NLS-1$ //$NON-NLS-2$
+        final List<X509Certificate> list = HttpCertificateList.getList("spt", "00001"); //$NON-NLS-1$ //$NON-NLS-2$
         System.out.println("Numero de certificados obtenidos: " + list.size()); //$NON-NLS-1$
         for (final X509Certificate cert : list) {
             System.out.println(" -- Certificado : " + cert.getSubjectDN()); //$NON-NLS-1$

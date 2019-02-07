@@ -77,59 +77,48 @@ public final class HttpCertificateList {
 
     private static void initializeProperties() throws ClientConfigFilesNotFoundException {
 
-    	Properties p;
+    	final Properties p;
 		try {
 			p = ConfigManager.loadConfig();
-		} catch (final es.gob.fire.client.ClientConfigFilesNotFoundException e) {
+		}
+		catch (final es.gob.fire.client.ClientConfigFilesNotFoundException e) {
 			throw new ClientConfigFilesNotFoundException(e.getMessage(), e.getCause());
 		}
 
         URL = p.getProperty("certificateUrl"); //$NON-NLS-1$
         if (URL == null) {
             throw new IllegalStateException(
-                    "No esta declarada la configuracion de URL en la configuracion" //$NON-NLS-1$
+                "No esta declarada la configuracion de URL en la configuracion (propiedad 'certificateUrl')" //$NON-NLS-1$
             );
         }
 
         try {
 			ConnectionManager.configureConnection(p);
-		} catch (final Exception e) {
+		}
+        catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 		}
 
         LOGGER.info(
-        		"Se usara el siguiente servicio de listado de certificados: " + URL //$NON-NLS-1$
+    		"Se usara el siguiente servicio de listado de certificados: " + URL //$NON-NLS-1$
         );
     }
 
-    /**
-     * Lista los certificados del sistema.
-     *
-     * @param appId
-     * 			  Identificador de la aplicaci&oacute;n.
-     * @param subjectId
-     *            Identificador del titular de los certificados.
+    /** Lista los certificados del sistema.
+     * @param appId Identificador de la aplicaci&oacute;n.
+     * @param subjectId Identificador del titular de los certificados.
      * @return Lista de certificados almacenados en el sistema.
-     * @throws CertificateException
-     * 				Si ocurren errores en la extracci&oacute;n del certificado
-     * 				recibido o si no se puede leer el certificado.
-     * @throws HttpNetworkException
-     * 				Si hay errores en la llamada al servicio o la obtenci&oacute;n del resultado.
-     * @throws HttpForbiddenException
-     * 				Si la aplicaci&oacute;n no tiene permisos de acceso al servicio.
-     * @throws HttpNoUserException
-     * 				Si el usuario no est&aacute; dado de alta en el sistema.
-     * @throws HttpCertificateBlockedException
-     * 				Si el certificado de firma del usuario est&aacute; bloqueado.
-     * @throws HttpOperationException
-     * 				Si hay cualquier otro error en el extremo servidor del servicio.
-     * @throws ClientConfigFilesNotFoundException
-     * 				Si no se ha encontrado en el sistema el fichero de configuraci&oacute;n.
-     * @throws HttpWeakRegistryException
-     * 				Si el usuario no puede tener certificados de firma por haber hecho un
-     * 				registro no fehaciente.
-     */
+     * @throws CertificateException Si ocurren errores en la extracci&oacute;n del certificado
+     * 				                recibido o si no se puede leer el certificado.
+     * @throws HttpNetworkException Si hay errores en la llamada al servicio o la obtenci&oacute;n del resultado.
+     * @throws HttpForbiddenException Si la aplicaci&oacute;n no tiene permisos de acceso al servicio.
+     * @throws HttpNoUserException Si el usuario no est&aacute; dado de alta en el sistema.
+     * @throws HttpCertificateBlockedException Si el certificado de firma del usuario est&aacute; bloqueado.
+     * @throws HttpOperationException Si hay cualquier otro error en el extremo servidor del servicio.
+     * @throws ClientConfigFilesNotFoundException Si no se ha encontrado en el sistema el fichero de configuraci&oacute;n.
+     * @throws HttpWeakRegistryException Si el usuario no puede tener certificados de firma por haber hecho un
+     * 				                     registro no fehaciente. */
     public static List<X509Certificate> getList(final String appId, final String subjectId)
             throws CertificateException, HttpNetworkException, HttpForbiddenException,
             HttpNoUserException, HttpCertificateBlockedException,
@@ -137,7 +126,7 @@ public final class HttpCertificateList {
 
     	initialize();
 
-        final List<X509Certificate> certificates = new ArrayList<X509Certificate>();
+        final List<X509Certificate> certificates = new ArrayList<>();
 
         byte[] responseJSON;
         try {
@@ -183,8 +172,10 @@ public final class HttpCertificateList {
             throw new HttpNetworkException("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
 		}
 
-        try {
-        	final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(responseJSON));
+        try (
+    		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(responseJSON));
+		) {
+
         	final JsonArray certList = jsonReader.readObject().getJsonArray(CERT_JSON_PARAM);
             for (final JsonValue cert : certList) {
                 certificates.add((X509Certificate) CertificateFactory
@@ -193,10 +184,12 @@ public final class HttpCertificateList {
                                         .toString()))));
             }
             jsonReader.close();
-        } catch (final CertificateException e) {
+        }
+        catch (final CertificateException e) {
         	LOGGER.severe("Error en la composicion de uno de los certificados del usuario: " + e); //$NON-NLS-1$
         	throw e;
-        } catch (final Exception e) {
+        }
+        catch (final Exception e) {
             LOGGER.severe("Error en la lectura del JSON de certificados: " + e); //$NON-NLS-1$
             throw new HttpOperationException("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
         }

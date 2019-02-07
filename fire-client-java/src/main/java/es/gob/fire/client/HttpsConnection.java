@@ -25,19 +25,15 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-/**
- * Clase de conexi&oacute;n mediante SSL.
- */
+/** Clase de conexi&oacute;n mediante SSL. */
 public class HttpsConnection {
 
 	private static final String KEYSTORE_PROPERTY = "javax.net.ssl.keyStore"; //$NON-NLS-1$
@@ -139,9 +135,12 @@ public class HttpsConnection {
 
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
 
-        	final FileInputStream ksFis = new FileInputStream(new File(keyStore));
-        	ks.load(ksFis, ksPassword.getPassword());
-        	ksFis.close();
+        	try (
+    			final FileInputStream ksFis = new FileInputStream(new File(keyStore));
+			) {
+	        	ks.load(ksFis, ksPassword.getPassword());
+	        	ksFis.close();
+        	}
         }
 
         // Inicializamos el TrustStore
@@ -168,9 +167,12 @@ public class HttpsConnection {
                 }
 
                 ts = KeyStore.getInstance(tsType);
-                final FileInputStream tsFis = new FileInputStream(new File(trustStore));
-                ts.load(tsFis, new KeyStorePassword(tsPasswordText, decipher).getPassword());
-                tsFis.close();
+                try (
+            		final FileInputStream tsFis = new FileInputStream(new File(trustStore));
+        		) {
+	                ts.load(tsFis, new KeyStorePassword(tsPasswordText, decipher).getPassword());
+	                tsFis.close();
+                }
         	}
         }
 
@@ -256,12 +258,15 @@ public class HttpsConnection {
 
 		if (urlParameters != null) {
 			conn.setDoOutput(true);
-			final OutputStreamWriter writer = new OutputStreamWriter(
+			try (
+				final OutputStreamWriter writer = new OutputStreamWriter(
 					conn.getOutputStream()
-					);
-			writer.write(urlParameters);
-			writer.flush();
-			writer.close();
+				);
+			) {
+				writer.write(urlParameters);
+				writer.flush();
+				writer.close();
+			}
 		}
 
 		conn.connect();
@@ -272,10 +277,13 @@ public class HttpsConnection {
 			throw new HttpError(resCode, conn.getResponseMessage(), uri.getHost());
 		}
 
-		final InputStream is = conn.getInputStream();
-		final byte[] data = Utils.getDataFromInputStream(is);
-		is.close();
-
+		final byte[] data;
+		try (
+			final InputStream is = conn.getInputStream();
+		) {
+			data = Utils.getDataFromInputStream(is);
+			is.close();
+		}
 		return data;
 	}
 
@@ -285,19 +293,9 @@ public class HttpsConnection {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		if (con instanceof HttpsURLConnection && this.ctx != null) {
 			HttpsURLConnection.setDefaultSSLSocketFactory(this.ctx.getSocketFactory());
-			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			});
+			HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
 			((HttpsURLConnection) con).setSSLSocketFactory(this.ctx.getSocketFactory());
-			((HttpsURLConnection) con).setHostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			});
+			((HttpsURLConnection) con).setHostnameVerifier((hostname, session) -> true);
 		}
 
 		return con;

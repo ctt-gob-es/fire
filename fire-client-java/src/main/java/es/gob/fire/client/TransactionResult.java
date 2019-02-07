@@ -208,13 +208,16 @@ public class TransactionResult {
 
 		// Construimos la respuesta
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final JsonWriter json = Json.createWriter(baos);
 
-		final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-		jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
+		try (
+			final JsonWriter json = Json.createWriter(baos);
+		) {
+			final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+			jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
 
-		json.writeObject(jsonBuilder.build());
-		json.close();
+			json.writeObject(jsonBuilder.build());
+			json.close();
+		}
 
 		return baos.toByteArray();
 	}
