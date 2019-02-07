@@ -16,11 +16,9 @@ import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.ProviderElement;
 
-/**
- * Gestor para la obtenci&oacute;n de conectores ya configurados para iniciar
- * transacciones con un proveedor.
- */
-public class ProviderManager {
+/** Gestor para la obtenci&oacute;n de conectores ya configurados para iniciar
+ * transacciones con un proveedor. */
+public final class ProviderManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ProviderManager.class.getName());
 
@@ -33,16 +31,13 @@ public class ProviderManager {
 	/** Nombre del proveedor local. */
 	public static final String PROVIDER_NAME_LOCAL = "local"; //$NON-NLS-1$
 
-	/**
-	 * Inicializamos una transacci&oacute;n a trav&eacute;s de un proveedor.
+	/** Inicializamos una transacci&oacute;n a trav&eacute;s de un proveedor.
 	 * @param providerName Nombre del proveedor.
 	 * @param transactionConfig Configuraci&oacute;n de la transacci&oacute;n.
 	 * @return Conector con el proveedor ya configurado para realizar cualquier transacci&oacute;n.
-	 * @throws FIReConnectorFactoryException Cuando falle la inicializaci&oacute;n del conector.
-	 */
-	public static FIReConnector initTransacction(final String providerName, final Properties transactionConfig)
-			throws FIReConnectorFactoryException{
-
+	 * @throws FIReConnectorFactoryException Cuando falle la inicializaci&oacute;n del conector. */
+	public static FIReConnector initTransacction(final String providerName,
+			                                     final Properties transactionConfig) throws FIReConnectorFactoryException{
 		// Obtenemos la clase del connector
 		final String providerClass = ConfigManager.getProviderClass(providerName);
 		if (providerClass == null) {
@@ -93,8 +88,7 @@ public class ProviderManager {
 	 * @param providerName Nombre del proveedor.
 	 * @return Informaci&oacute;n del proveedor. */
 	public static ProviderInfo getProviderInfo(final String providerName) {
-
-		Properties infoProperties;
+		final Properties infoProperties;
 		if (PROVIDER_NAME_LOCAL.equalsIgnoreCase(providerName)) {
 			infoProperties = loadLocalProviderInfoProperties();
 		}
@@ -108,45 +102,50 @@ public class ProviderManager {
 	/** Carga el fichero de configuraci&oacute;n de un proveedor.
 	 * @param providerName Nombre el proveedor.
 	 * @return Configuraci&oacute;n cargada. */
-	private static Properties loadProviderConfig(final String providerName) {
+	public static Properties loadProviderConfig(final String providerName) {
 
 		final String providerConfigFilename = String.format(PROVIDER_CONFIG_FILE_TEMPLATE, providerName);
 		Properties providerConfig;
 		try {
 			providerConfig = ConfigFileLoader.loadConfigFile(providerConfigFilename);
-		} catch (final FileNotFoundException e) {
-			LOGGER.warning(String.format(
+		}
+		catch (final FileNotFoundException e) {
+			LOGGER.warning(
+				String.format(
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
 					providerConfigFilename, providerName
-			));
+				)
+			);
 			providerConfig = new Properties();
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			LOGGER.log(
-					Level.SEVERE,
-					String.format(
-							"No se ha podido cargar el fichero de configuracion del proveedor %s", //$NON-NLS-1$
-							providerName),
-					e);
+				Level.SEVERE,
+				String.format(
+					"No se ha podido cargar el fichero de configuracion del proveedor %s", //$NON-NLS-1$
+					providerName
+				),
+				e
+			);
 			providerConfig = new Properties();
 		}
 
 		return providerConfig;
 	}
 
-	/**
-	 * Carga el fichero interno de propiedades del proveedor en el que se encuentra
+	/** Carga el fichero interno de propiedades del proveedor en el que se encuentra
 	 * la informaci&oacute;n generica que debe proporcionar. El fichero debe tener
 	 * el nombre determinado por {@link #PROVIDER_INFO_FILE} y encontrarse en el
 	 * mismo paquete que la clase conectora.
 	 * @param classname Clase conectora del proveedor.
-	 * @return Properties cargado.
-	 */
+	 * @return Properties cargado. */
 	private static Properties loadProviderInfoProperties(final String classname) {
 
 		String classPath;
 		if (classname.lastIndexOf('.') == -1) {
 			classPath = classname;
-		} else {
+		}
+		else {
 			classPath = classname.substring(0, classname.lastIndexOf('.')).replace('.', '/');
 		}
 		if (!classPath.startsWith("/")) { //$NON-NLS-1$
@@ -159,20 +158,16 @@ public class ProviderManager {
 		return loadInternalProperties(providerInfoPath);
 	}
 
-	/**
-	 * Carga el fichero interno de propiedades del proveedor de firma con certificados
+	/** Carga el fichero interno de propiedades del proveedor de firma con certificados
 	 * locales.
-	 * @return Properties cargado.
-	 */
+	 * @return Properties cargado. */
 	private static Properties loadLocalProviderInfoProperties() {
 		return loadInternalProperties(LOCAL_PROVIDER_INFO_PATH);
 	}
 
-	/**
-	 * Carga un fichero interno de propiedades.
+	/** Carga un fichero interno de propiedades.
 	 * @param path Ruta interna del fichero.
-	 * @return Properties cargado.
-	 */
+	 * @return Properties cargado. */
 	private static Properties loadInternalProperties(final String path) {
 
 		final Properties providerInfoProperties = new Properties();
@@ -190,14 +185,12 @@ public class ProviderManager {
 		return providerInfoProperties;
 	}
 
-	/**
-	 * Filtra los proveedores configurados para s&oacute;lo mostrar aquellos solicitados
+	/** Filtra los proveedores configurados para s&oacute;lo mostrar aquellos solicitados
 	 * por la aplicaci&oacute;n y aquellos configurados como imprescindibles. Los
 	 * proveedores indicados por la aplicaci&oacute;n y no configurados en el componente
 	 * central se ignoran.
 	 * @param requestedProviders Proveedores solicitados.
-	 * @return Listado de proveedores ya filtrados.
-	 */
+	 * @return Listado de proveedores ya filtrados. */
 	public static String[] getFilteredProviders(final String[] requestedProviders) {
 
 		final List<String> filteredProviders = new ArrayList<>();

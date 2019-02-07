@@ -142,14 +142,24 @@ public final class CertificateService extends HttpServlet {
         }
 
         // Obtenemos el conector con el backend ya configurado
+    	LOGGER.warning(
+			"El servicio directo no soporta multiples conectores, se usara el primero de la lista: " + ProviderManager.getProviderNames()[0] //$NON-NLS-1$
+		);
         final FIReConnector connector;
         try {
-        	Properties config = null;
+        	final Properties config;
         	final String configB64 = params.getParameter(PARAM_CONFIG);
         	if (configB64 != null && configB64.length() > 0) {
         		config = ServiceUtil.base642Properties(configB64);
         	}
-            connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
+        	else {
+        		// Cargamos configuracion por defecto del conector
+        		config = ProviderManager.loadProviderConfig(ProviderManager.getProviderNames()[0]);
+        	}
+            connector = ProviderManager.initTransacction(
+        		ProviderManager.getProviderNames()[0],
+        		config
+    		);
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
