@@ -138,8 +138,12 @@ public class RecoverSignManager {
         	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "No se ha podido decodificar el certificado proporcionado: " + e); //$NON-NLS-1$
+        	sendResult(
+        			response,
+        			new TransactionResult(
+        					TransactionResult.RESULT_TYPE_SIGN,
+        					OperationError.SIGN_SERVICE_POSTSIGN.getCode(),
+        					"El proveedor o cliente de firma no proporciono el certificado utilizado para firmar o este estaba mal formado")); //$NON-NLS-1$
         	return;
         }
 
