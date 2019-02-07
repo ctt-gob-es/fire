@@ -47,7 +47,7 @@ public class ProviderManager {
 		final String providerClass = ConfigManager.getProviderClass(providerName);
 		if (providerClass == null) {
 			throw new FIReConnectorFactoryException(
-					"No se ha encontrado el nombre de la clase conectora del proveedor " + providerName); //$NON-NLS-1$
+				"No se ha encontrado el nombre de la clase conectora del proveedor " + providerName); //$NON-NLS-1$
 		}
 
 		// Obtenemos el fichero de configuracion del proveedor
@@ -71,18 +71,14 @@ public class ProviderManager {
 		return connector;
 	}
 
-	/**
-	 * Obtiene el listado de proveedores configurados.
-	 * @return Listado con los proveedores.
-	 */
+	/** Obtiene el listado de proveedores configurados.
+	 * @return Listado con los proveedores. */
 	public static ProviderElement[] getProviders() {
 		return ConfigManager.getProviders();
 	}
 
-	/**
-	 * Obtiene el listado con el nombre de los proveedores configurados.
-	 * @return Listado con los nombres de los proveedores.
-	 */
+	/** Obtiene el listado con el nombre de los proveedores configurados.
+	 * @return Listado con los nombres de los proveedores. */
 	public static String[] getProviderNames() {
 		final ProviderElement[] provs = ConfigManager.getProviders();
 		final String[] provNames = new String[provs.length];
@@ -92,12 +88,10 @@ public class ProviderManager {
 		return provNames;
 	}
 
-	/**
-	 * Obtiene la informaci&oacute;n necesaria de un proveedor para pod&eacute;rsela
+	/** Obtiene la informaci&oacute;n necesaria de un proveedor para pod&eacute;rsela
 	 * mostrar a un usuario y que as&iacute; identifique su uso.
 	 * @param providerName Nombre del proveedor.
-	 * @return Informaci&oacute;n del proveedor.
-	 */
+	 * @return Informaci&oacute;n del proveedor. */
 	public static ProviderInfo getProviderInfo(final String providerName) {
 
 		Properties infoProperties;
@@ -111,11 +105,9 @@ public class ProviderManager {
 		return new ProviderInfo(providerName, infoProperties);
 	}
 
-	/**
-	 * Carga el fichero de configuraci&oacute;n de un proveedor.
+	/** Carga el fichero de configuraci&oacute;n de un proveedor.
 	 * @param providerName Nombre el proveedor.
-	 * @return Configuraci&oacute;n cargada.
-	 */
+	 * @return Configuraci&oacute;n cargada. */
 	private static Properties loadProviderConfig(final String providerName) {
 
 		final String providerConfigFilename = String.format(PROVIDER_CONFIG_FILE_TEMPLATE, providerName);

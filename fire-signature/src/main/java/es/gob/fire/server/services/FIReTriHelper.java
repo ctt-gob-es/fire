@@ -35,9 +35,7 @@ import es.gob.fire.server.services.internal.Pkcs1TriPhasePreProcessor;
 import es.gob.fire.server.services.internal.SignBatchConfig;
 import es.gob.fire.signature.ConfigManager;
 
-/**
- * Clase auxiliar que proporciona individualmente las operaciones de prefirma y postfirma.
- */
+/** Clase auxiliar que proporciona individualmente las operaciones de prefirma y postfirma. */
 public final class FIReTriHelper {
 
     private static final String PARAM_VALUE_SUB_OPERATION_SIGN = "sign"; //$NON-NLS-1$
@@ -61,8 +59,7 @@ public final class FIReTriHelper {
         // No instanciable
     }
 
-    /**
-     * Ejecuta una operaci&oacute;n de prefirma dentro de un proceso de firma
+    /** Ejecuta una operaci&oacute;n de prefirma dentro de un proceso de firma
      * trif&aacute;sica.
      * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign").
      * @param format Formato de firma.
@@ -73,14 +70,13 @@ public final class FIReTriHelper {
      * @return Informaci&oacute;n de prefirma generada.
      * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
      * @throws IOException Cuando ocurre un error al componer la estructura con la
-     * informaci&oacute;n de la prefirma.
-     */
+     *                     informaci&oacute;n de la prefirma. */
     public static TriphaseData getPreSign(final String criptoOperation,
-                                         final String format,
-                                         final String algorithm,
-                                         final Properties extraParams,
-                                         final X509Certificate signerCert,
-                                         final byte[] docBytes) throws FIReSignatureException, IOException {
+                                          final String format,
+                                          final String algorithm,
+                                          final Properties extraParams,
+                                          final X509Certificate signerCert,
+                                          final byte[] docBytes) throws FIReSignatureException, IOException {
 
         // Instanciamos el preprocesador adecuado
         final TriPhasePreProcessor prep = getTriPhasePreProcessor(format);
@@ -93,7 +89,8 @@ public final class FIReTriHelper {
         if (expandedParams != null) {
         	try {
         		expandedParams = ExtraParamsProcessor.expandProperties(expandedParams, docBytes, format);
-        	} catch (final Exception e) {
+        	}
+        	catch (final Exception e) {
         		LOGGER.warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$
         	}
         }

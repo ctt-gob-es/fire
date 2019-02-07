@@ -86,8 +86,9 @@ public class TestSignService extends HttpServlet {
 		}
 
 		final Properties p;
-		try {
+		try (
 			final InputStream fis = new FileInputStream(transactionFile);
+		) {
 			p = new Properties();
 			p.load(fis);
 			fis.close();
@@ -188,8 +189,8 @@ public class TestSignService extends HttpServlet {
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error accediendo al nuevo almacen de usuario: " + e, e); //$NON-NLS-1$
 				final Exception ex = new FIReSignatureException(
-						"Error accediendo al nuevoalmacen de usuario '"  + subjectid + "': " + e, e //$NON-NLS-1$ //$NON-NLS-2$
-						);
+					"Error accediendo al nuevoalmacen de usuario '"  + subjectid + "': " + e, e //$NON-NLS-1$ //$NON-NLS-2$
+				);
 				throw new ServletException(ex);
 			}
 		}

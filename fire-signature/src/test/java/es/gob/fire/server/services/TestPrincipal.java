@@ -42,7 +42,7 @@ public final class TestPrincipal {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
-	@Ignore
+	//@Ignore
 	public void testGetCertificate() throws Exception {
 		final X509Certificate[] certs;
 		try {
@@ -50,9 +50,6 @@ public final class TestPrincipal {
 		}
 		catch(final Exception e) {
 			e.printStackTrace();
-//			System.out.println(e.getCause().getMessage());
-//			System.out.println(e.getCause().getCause().getCause().getClass().getName());
-//			System.out.println(e.getCause().getCause().getCause().getMessage());
 			throw e;
 		}
 		System.out.println("Encontrados " + certs.length + " certificados para el usuario " + USER + ":");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$

@@ -11,6 +11,7 @@ package es.gob.fire.server.services;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -63,9 +64,19 @@ public final class TestTestService {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
-	@Ignore
+	//@Ignore
 	public void testGetCertificates() throws Exception {
+
+		// Cargamos la configuracion
+		final Properties config = new Properties();
+		try (
+			final InputStream is = TestTestService.class.getResourceAsStream("/test-backend.properties"); //$NON-NLS-1$
+		) {
+			config.load(is);
+		}
+
 		final FIReConnector testService = new TestConnector();
+		testService.init(config);
 		final X509Certificate[] certs = testService.getCertificates("00001"); //$NON-NLS-1$
 		for (final X509Certificate cert : certs) {
 			System.out.println(AOUtil.getCN(cert));
@@ -76,12 +87,19 @@ public final class TestTestService {
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
-	@Ignore
+	//@Ignore
 	public void testSignData() throws Exception {
 
 		final FIReConnector nbh = new TestConnector();
 
+		// Cargamos la configuracion
 		final Properties config = new Properties();
+		try (
+			final InputStream is = TestTestService.class.getResourceAsStream("/test-backend.properties"); //$NON-NLS-1$
+		) {
+			config.load(is);
+		}
+
 		config.setProperty("redirectOkUrl", "http://www.google.com"); //$NON-NLS-1$ //$NON-NLS-2$
 		config.setProperty("redirectErrorUrl", "http://www.ibm.com"); //$NON-NLS-1$ //$NON-NLS-2$
 		nbh.init(config);
@@ -151,10 +169,12 @@ public final class TestTestService {
 			);
 
 		// El resultado obtenido es la firma completa
-		final FileOutputStream fos = new FileOutputStream(File.createTempFile("ClaveFirma-XSIG_", ".xml")); //$NON-NLS-1$ //$NON-NLS-2$
-		fos.write(signature);
-		fos.close();
-
+		try (
+			final FileOutputStream fos = new FileOutputStream(File.createTempFile("ClaveFirma-XSIG_", ".xml")); //$NON-NLS-1$ //$NON-NLS-2$
+		) {
+			fos.write(signature);
+			fos.close();
+		}
 		System.out.println("OK"); //$NON-NLS-1$
 	}
 
