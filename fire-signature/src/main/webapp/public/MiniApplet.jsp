@@ -103,8 +103,8 @@
 		extraParamsProperties.setProperty("serverUrl", baseUrl + "afirma/triphaseSignService"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (String k : extraParamsProperties.keySet().toArray(new String[extraParamsProperties.size()])) {
-	extraParams.append(k).append("="). //$NON-NLS-1$
-		append(extraParamsProperties.getProperty(k)).append("\\n"); //$NON-NLS-1$
+			extraParams.append(k).append("="). //$NON-NLS-1$
+				append(extraParamsProperties.getProperty(k)).append("\\n"); //$NON-NLS-1$
 		}
 	}
 
