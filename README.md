@@ -7,10 +7,29 @@ FIRe es software libre y se publica con licencia [GPL 2+](https://www.gnu.org/li
 
 ## Notas de construcción
 
-* La versión aquí publicada de FIRe se distribuye con versiones del MiniApplet @firma 1.6 y AutoFirma WebStart 1.6 firmadas con certificados de prueba. Un despliegue en producción de FIRe debería publicarse con versiones de estos JAR firmadas con certificados de confianza.
+* El proyecto FIRe está preparado para ser construído mediante la herramienta Apache Maven.
 
-* Las bibliotecas de conexión con el sistema de custodia de Cl@ve Firma no se encuentran en repositorios públicos ni se atienen a la licencia de este producto. Para poder realizar un despliegue de FIRe que tenga acceso a Cl@ve Firma será necesario ponerse en contacto con los responsables del proyecto para dar autorización a su aplicación y obtener las bibliotecas necesarias. La dependencia Maven necesaria es:
- * `com.openlandsw.rss:gateway-api:2.4.05`
+* Aunque FIRe es un proyecto de fuentes abiertas, algunos de los conectores para la conexión con los servicios de firma en la nube pueden requerir bibliotecas propietarias que no se encuentran en los repositorios públicos de Maven. Los conectores conocidos que requieren bibliotecas privadas son:
+
+	* Cl@ve Firma: Las bibliotecas de conexión con el sistema de custodia de Cl@ve Firma no se encuentran en repositorios públicos ni se atienen a la licencia de este producto. Para poder realizar un despliegue de FIRe que tenga acceso a Cl@ve Firma será necesario ponerse en contacto con los responsables del proyecto para dar autorización a su aplicación y obtener las bibliotecas necesarias. La dependencia Maven necesaria para poder compilar y empaquetar el conector con Cl@ve Firma es:
+		* `com.openlandsw.rss:gateway-api`
+		
+	* FNMT: El conector para el acceso al servicio de firma de la FNMT ha sido desarrollado por la propia entidad y se requiere autorización de esta para su uso. La dependencia Maven del conector al servicio de la FNMT es:
+		* `es.gob.fnmt:fnmt-fire-connector`
+
+* Para construir los artefactos de FIRe mediante Maven deberá usarse el comando:
+
+	* `mvn clean install`
+
+* Para construir los artefactos de FIRe, incluyendo el conector de Cl@ve Firma, deberá agregarse el perfil "claveFirma":
+
+	* `mvn clean install -Pclavefirma`
+
+* Para construir los artefactos de FIRe, incluyendo el conector con los servicios de la FNMT, deberá agregarse el perfil "fnmt":
+
+	* `mvn clean install -Pfnmt`
+
+* La versión aquí publicada de FIRe se distribuye con versiones del MiniApplet @firma y AutoFirma WebStart firmadas con certificados de prueba. Un despliegue en producción de FIRe debería publicarse con versiones de estos JAR firmadas con certificados de confianza.
 
 ## Arquitectura
 
@@ -28,12 +47,112 @@ El sistema FIRe está compuesto principalmente por dos elementos:
 
    Está formado por las librerías de integración **(fire-client)** que utilizan las aplicaciones para conectarse al componente central. Las librerías se proporcionan en los lenguajes Java, .Net y PHP.
    
-3. Aplicación de prueba
+Junto a estos elementos se distribuye una aplicación de prueba en lenguaje java **(fire-test-jsp)** que permite demostrar las funcionalidades del sistema y que puede servir de ejemplo para desarrollos propios.
+   
 
-   Aplicación de prueba en lenguaje java **(fire-test-jsp)** que permite demostrar las funcionalidades del sistema y que puede servir de base para desarrollos propios.
-   
-   
 ## Release notes
+
+Principales cambios en la historia de versiones:
+
+### v2.4-SNAPSHOT
+
+#### Componente central
+
+ - [RFE] Se integra un nuevo sistema de gestión de logs que permite la salida de los logs a un fichero independiente.
+ - [RFE] Cambios en los logs del sistema para un mejor seguimiento de las transacciones.
+ - [RFE] Se sustituye el envío de estadísticas a Google Analytics por el guardado de datos para su explotación desde el módulo de administración.
+ - [RFE] Se permite configurar si no se quieren generar los datos de estadísticas, si sólo se desean almacenar los datos en disco o si se desean guardar en disco y realizar un volcado diario a base de datos.
+ - [BUG] Se corrige el conector con el servicio de pruebas, para que no sea necesario que se le configure un almacén para la autenticación SSL cliente, aun cuando puede ser no necesaria esta autenticación.
+ - [BUG] Se permite el uso del parámetro "headless" para la selección automática de un certificado local durante la operación de firma de lotes.
+
+#### Módulo de administración.
+
+ - [RFE] Se integra un nuevo apartado para la consulta de logs del componente central.
+ - [RFE] Se integra un nuevo apartado para la visualización de informes predefinidos sobre los datos estadísticos almacenados.
+
+#### Aplicación de carga de estadísticas
+
+ - [RFE] Se agrega una aplicación independiente para la carga en base de datos de las estadísticas generadas por el componente central.
+
+----------
+
+### v2.3
+
+#### Componente central
+
+ - [RFE] Se permite que los valores de las propiedades de los ficheros de configuración aparezcan cifrados.
+ - [RFE] Se permite la configuración de una clase encargada de descifrar los valores cifrados de los ficheros de configuración.
+ - [RFE] Se busca por defecto el certificado cliente de las peticiones en el atributo de cabecera "x-clientcert" cuando no se recibe directamente o a través de AJP. El valor establecido en la propiedad "http.cert.attr" sustituye a este valor por defecto.
+ - [RFE] Nuevos mensajes de log para la identificación de errores.
+ - [BUG] Se corrige el uso de filtros de certificados con el proveedor de AutoFirma en los procesos de firma de lotes.
+ - [BUG] Se corrige la redirección errónea cuando se genera/renueva un certificado en la nube y se tiene diferenciados por URL los contextos público y privado de FIRe con la propiedad "pages.public.url".
+ - [BUG] Se corrige la redirección a un error 403 cuando está activado el sistema de despliegue en múltiples nodos y no se pueden recuperar los certificados del usuario (el usuario no está dado de alta, certificados bloqueados,...)
+ - [BUG] Se eliminan las conexiones contra el dominio "soapinterop.org".
+ - [BUG] Se eliminan periódicamente los ficheros temporales que se quedaban huérfanos tras interrumpirse inesperadamente la sesión a la que pertenecían.
+ - [BUG] Se corrige la visualización del botón "Cancelar" de la pantalla de selección de proveedor cuando se utiliza Internet Explorer.
+
+#### Cliente distribuido Java
+
+ - [RFE] Se permite que las contraseñas de las propiedades de configuración aparezcan cifradas.
+ - [RFE] Se permite la configuración de una clase encargada de descifrar los valores de las propiedades de configuración.
+ - [RFE] Se sustituye el uso de la Java Logging API por SLF4J para que el integrador seleccione el sistema de logs a utilizar.
+
+#### Módulo de administración.
+
+ - [RFE] Se permite que los valores de las propiedades de los ficheros de configuración aparezcan cifrados.
+ - [RFE] Se permite la configuración de una clase encargada de descifrar los valores cifrados de los ficheros de configuración.
+
+#### Aplicación de pruebas
+
+ - [RFE] El fichero de configuración app_config.properties se busca primeramente en el directorio designado por la variable de entorno "fire.config.path".
+ - [RFE] Se sustituye el uso de la Java Logging API por SLF4J. Se sigue utilizando Java Logging API como implementación.
+
+----------
+
+### v2.2
+
+#### Componente central
+
+ - [RFE] Se agrega la compatibilidad con múltiples proveedores de firma.
+ - [RFE] Se incorpora el proveedor de firma de la Fábrica Nacional de Moneda y Timbre para firma de funcionarios públicos.
+ - [RFE] Se permite configurar la URL pública que se devolverá a los componentes distribuidos para dar acceso al usuario a las páginas de FIRe.
+ - [RFE] Se permite configurar si el proveedor de Cl@ve Firma permite a los usuarios emitir nuevos certificados de firma.
+ - [RFE] Se permite configurar si el simulador de Cl@ve Firma permite a los usuarios emitir nuevos certificados de firma.
+ - [RFE] Se permite configurar desde las aplicaciones cliente el listado de proveedores que que se desea mostrar a los usuarios.
+ - [RFE] Se permite configurar desde las aplicaciones cliente si debe utilizarse AutoFirma WebStart o AutoFirma nativo para la firma con certificado local.
+ - [RFE] Se permite configurar un atributo de las cabeceras de las peticiones HTTP del que recoger el certificado de autenticación de los componentes distribuidos. Esto permite el despliegue de FIRe en algunos entornos complejos.
+ - [RFE] Se muestra un diálogo de espera después de pulsar el botón firmar con certificado local.
+ - [RFE] Cuando ocurre un error al conectar con un proveedor de firmas o al recuperar sus certificados, se muestra el error y se permite seleccionar otro proveedor.
+
+#### Componentes ditribuidos
+
+ - [RFE] Se obtiene como parte del resultado de las operaciones de firma simple y firma de lotes, el nombre del proveedor utilizado.
+
+#### Servicio simulador de Cl@ve Firma
+
+ - [RFE] Se muestran los nombres y títulos de fichero en la página que emula a la pasarela de Cl@ve Firma.
+
+#### Módulo de administración.
+
+ - [RFE] Se crean pantallas de gestión de usuarios, altas, bajas, modificación y consulta 
+ - [RFE] Se permite cambio de contraseña del usuario logado.
+ - [RFE] Se crea menú principal de navegación.
+ - [RFE] Se crea icono de cierre de sesión de usuario.
+ - [RFE] Se crean pantallas de gestión de certificados, altas, bajas,modificaciones y consulta. Con previsualización del certificado, carga del certificado mediante fichero y descarga del certificado en archivo .cer
+ - [RFE] Se modifica la gestión de aplicaciones adaptado a la nueva gestion de certificados.
+ - [RFE] Se mejora la validación de campos obligatorios y formato en los formularios.
+ - [RFE] Se mejora la visualización de los listados mediate tablas paginadas.
+
+----------
+
+### v2.1.1
+
+#### Componente central
+
+ - [RFE] Se refirman el MiniApplet 1.6 y AutoFirma WebStart 1.6 para evitar problemas de ejecución.
+ - [BUG] Se corrije un error por el que las sesiones en displiegues del componente central sobre múltiples nodos cuando las transacciones se iniciaban en un nodo, se continuaban en otro y despúes volvían al primero.
+
+----------
 
 ### v2.1
 

@@ -304,7 +304,7 @@ namespace FIRe
 
             string url = this.config.getFireService();
             string urlParameters = URL_PARAMETERS_RECOVER_ERROR
-                .Replace(OP, "99") // El tipo de operacion solicitada es RECOVER_ERROR (99)
+                .Replace(OP, OP_CODE_RECOVER_ERROR) // El tipo de operacion solicitada es RECOVER_ERROR (99)
                 .Replace(APP_ID, this.appId)
                 .Replace(SUBJECTID, subjectId)
                 .Replace(TRANSACTION, transactionId);

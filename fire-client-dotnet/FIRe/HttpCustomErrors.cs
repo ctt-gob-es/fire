@@ -33,9 +33,9 @@ namespace FIRe
         public const string POSTSIGN_ERROR = "530";
         /// Error devuelto por el servicio de custodia al realizar la operación de firma. 
         public const string WEAK_REGISTRY = "531";
-        /// Error devuelto por el servicio de custodia al realizar la actualizaci&oacute;n de la firma.
+        /// Error devuelto por el servicio de custodia al realizar la actualización de la firma.
         public const string UPGRADING_ERROR = "532";
-        /// Error devuelto al no poder guardar la firma en servidor a trav&eacute;s del gestor de documentos.
+        /// Error devuelto al no poder guardar la firma en servidor a través del gestor de documentos.
         public const string SAVING_ERROR = "533";
         /// Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes.
         public const string BATCH_NO_SIGNED = "534";

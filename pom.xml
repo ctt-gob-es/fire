@@ -12,6 +12,19 @@
 	
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		
+		<jdk.version>1.7</jdk.version>
+		
+		<fire.version>2.4-SNAPSHOT</fire.version>
+		<clienteafirma.version>1.6.2</clienteafirma.version>
+		<fnmt.version>0.2</fnmt.version>
+		<log-consumer.version>1.0-SNAPSHOT</log-consumer.version>
+		
+		<javax.json-api.version>1.0</javax.json-api.version>
+		<org.glassfish-javax.json.version>1.0.4</org.glassfish-javax.json.version>
+		<junit.version>4.8.2</junit.version>
+		
+		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
 	</properties>
 
 	<url>https://administracionelectronica.gob.es/ctt/fire</url>
@@ -43,44 +56,168 @@
 	</scm>
 	
 	
-	<modules>
-		<module>clavefirma-test-services</module>
-		<module>fire-admin-jsp</module>
-		<module>fire-client-java</module>
-		<module>fire-signature</module>
-		<module>fire-signature-common-libraries</module>
-		<module>fire-signature-connector</module>
-		<module>fire-signature-connector-clavefirma</module>
-		<module>fire-signature-connector-clavefirma-test</module>
-		<module>fire-signature-document</module>
-		<module>fire-signature-decipher</module>
-		<module>fire-test-jsp</module>
-		<module>fire-upgrade</module>
-		<module>fire-statistics-common</module>
-		<module>fire-statistics-cmd</module>
-		<module>fire-log-handlers</module>
-		<module>log-consumer-api</module>
-		<module>log-consumer-service</module>
-	</modules>
+	<profiles>
+		<profile>
+			<id>main</id>	 <!-- Este perfil contiene los modulos basicos que usa FIRe -->
+			<activation>
+				<property>
+					<name>!false</name> <!-- Se activa siempre que no se indique esta propiedad -->
+				</property>
+			</activation>
+	
+			<modules>
+				<module>clavefirma-test-services</module>
+				<module>fire-admin-jsp</module>
+				<module>fire-client-java</module>
+				<module>fire-signature</module>
+				<module>fire-signature-common-libraries</module>
+				<module>fire-signature-connector</module>
+				<module>fire-signature-connector-clavefirma-test</module>
+				<module>fire-signature-document</module>
+				<module>fire-signature-decipher</module>
+				<module>fire-test-jsp</module>
+				<module>fire-upgrade</module>
+				<module>fire-statistics-common</module>
+				<module>fire-statistics-cmd</module>
+				<module>fire-log-handlers</module>
+				<module>log-consumer-api</module>
+				<module>log-consumer-service</module>
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>clavefirma</id>	<!-- Perfil que agrega el conector de Cl@ve Firma -->
 
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
+			<modules>
+				<module>fire-signature-connector-clavefirma</module>
+			</modules>
+		</profile>
+	</profiles>
+
+	<dependencyManagement>
+	  <dependencies>
+	  
+	  	<dependency>
+		  <groupId>es.gob.afirma</groupId>
+		  <artifactId>afirma-core</artifactId>
+		  <version>${clienteafirma.version}</version>
 		</dependency>
-	</dependencies>
+		
+		<dependency>
+		  <groupId>es.gob.afirma</groupId>
+		  <artifactId>afirma-server-triphase-signer-core</artifactId>
+		  <version>${clienteafirma.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-client</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-signature-common-libraries</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-signature-connector</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-signature-connector-clavefirma</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-signature-connector-clavefirma-test</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-signature-document</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-signature-decipher</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-upgrade</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-statistics-common</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-log-handlers</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+	  
+		<dependency>
+			<groupId>es.fnmt.fire</groupId>
+			<artifactId>fnmt-fire-connector</artifactId>
+			<version>${fnmt.version}</version>
+		</dependency>
+	  
+	  	<dependency>
+			<groupId>es.gob.logconsumer</groupId>
+  			<artifactId>log-consumer-api</artifactId>
+  			<version>${log-consumer.version}</version>
+  		</dependency>
+	  
+		<dependency>
+			<groupId>es.gob.logconsumer</groupId>
+  			<artifactId>log-consumer-service</artifactId>
+  			<version>${log-consumer.version}</version>
+  		</dependency>
+	  
+		<dependency>
+			<groupId>javax.json</groupId>
+			<artifactId>javax.json-api</artifactId>
+			<version>${javax.json-api.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>${org.glassfish-javax.json.version}</version>
+		</dependency>
+
+		<dependency>
+		  <groupId>junit</groupId>
+		  <artifactId>junit</artifactId>
+		  <version>${junit.version}</version>
+		  <scope>test</scope>
+		</dependency>
+	  </dependencies>
+	</dependencyManagement>
 	
 	<build>
 		<plugins>
+		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
 					<fork>true</fork>
 					<compilerArgs>
 						<arg>-Xbootclasspath:${java.home}/lib/jsse.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</arg>

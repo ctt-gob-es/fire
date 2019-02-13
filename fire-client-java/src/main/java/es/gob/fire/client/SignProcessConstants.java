@@ -30,7 +30,7 @@ public final class SignProcessConstants {
         SHA512WITHRSA("SHA512withRSA"), //$NON-NLS-1$
 
         /** SHA384withRSA. */
-        SHA384WITHRSA("SHA284withRSA"), //$NON-NLS-1$
+        SHA384WITHRSA("SHA384withRSA"), //$NON-NLS-1$
 
         /** SHA256withRSA. */
         SHA256WITHRSA("SHA256withRSA"); //$NON-NLS-1$
@@ -135,7 +135,16 @@ public final class SignProcessConstants {
         A_FORMAT("ES-A"), //$NON-NLS-1$
 
         /** PAdES-LTV. */
-        PADES_LTV_FORMAT("ES-LTV"); //$NON-NLS-1$
+        PADES_LTV_FORMAT("ES-LTV"), //$NON-NLS-1$
+
+        /** T-LEVEL. */
+        T_LEVEL("T-LEVEL"), //$NON-NLS-1$
+
+        /** LT-LEVEL. */
+        LT_LEVEL("LT-LEVEL"), //$NON-NLS-1$
+
+        /** LTA-LEVEL. */
+        LTA_LEVEL("LTA-LEVEL"); //$NON-NLS-1$
 
         private final String str;
 

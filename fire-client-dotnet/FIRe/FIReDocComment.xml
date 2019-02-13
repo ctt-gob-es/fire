@@ -477,8 +477,12 @@
         <member name="F:FIRe.HttpCustomErrors.WEAK_REGISTRY">
             Error devuelto por el servicio de custodia al realizar la operación de firma. 
         </member>
-        <!-- Badly formed XML comment ignored for member "F:FIRe.HttpCustomErrors.UPGRADING_ERROR" -->
-        <!-- Badly formed XML comment ignored for member "F:FIRe.HttpCustomErrors.SAVING_ERROR" -->
+        <member name="F:FIRe.HttpCustomErrors.UPGRADING_ERROR">
+            Error devuelto por el servicio de custodia al realizar la actualización de la firma.
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.SAVING_ERROR">
+            Error devuelto al no poder guardar la firma en servidor a través del gestor de documentos.
+        </member>
         <member name="F:FIRe.HttpCustomErrors.BATCH_NO_SIGNED">
             Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes.
         </member>

@@ -49,7 +49,7 @@ public interface FIReDocumentManager {
 	 * @param appId Identificador de la aplicaci&oacute;n que solicita la firma.
 	 * @param data Datos firmados.
 	 * @param cert Certificado de firma. <b>IMPORTANTE:</b> El Cliente @firma 1.5 y anteriores no permiten
-	 * obtener el certificado de firma en la firma de lotes, así que en los casos de firma de lotes
+	 * obtener el certificado de firma en la firma de lotes, as&iacute; que en los casos de firma de lotes
 	 * con certificado local este par&aacute;metro ser&aacute; nulo.
 	 * @param format Formato de firma.
 	 * @param extraParams Par&aacute;metros para la configuraci&oacute;n de la firma.

@@ -9,10 +9,6 @@
 	<name>clavefirma-test-services</name>
 	<packaging>war</packaging>
 
-	<properties>
-		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-	</properties>
-
 	<dependencies>
 	
 		<dependency>

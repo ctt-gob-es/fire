@@ -93,7 +93,8 @@ public class MiniAppletSuccessService extends HttpServlet {
 		final String redirectUrl = connConfig.getRedirectSuccessUrl();
 		errorUrl = connConfig.getRedirectErrorUrl();
 
-		// Agregamos el certificado en caso de haberlo recibido (que se deberia, pero no sera imprescindible)
+		// Agregamos el certificado en caso de haberlo recibido. Para el proceso de firma simple,
+		// sera obligatorio ya que se requerira para completar la firma
 		final String certB64 = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
         if (certB64 != null && !certB64.isEmpty()) {
         	session.setAttribute(ServiceParams.SESSION_PARAM_CERT, certB64);

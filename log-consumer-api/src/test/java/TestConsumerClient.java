@@ -1,5 +1,6 @@
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.log.consumer.client.LogConsumerClient;
@@ -10,6 +11,7 @@ public class TestConsumerClient {
 	private static final String SERVICE_URL = "https://appprueba:8443/log-consumer-service/logservice";
 
 	@Test
+	@Ignore
 	public void testEcho() {
 
 		final LogConsumerClient client = new LogConsumerClient();
@@ -22,6 +24,7 @@ public class TestConsumerClient {
 	}
 
 	@Test
+	@Ignore
 	public void testInitSession() {
 
 		final LogConsumerClient client = new LogConsumerClient();

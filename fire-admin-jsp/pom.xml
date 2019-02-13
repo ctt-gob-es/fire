@@ -5,51 +5,41 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-admin-jsp</artifactId>
-	<version>2.4-SNAPSHOT</version>
-	<name>fire-admin-jsp</name>
 	<packaging>war</packaging>
 
-	<properties>
-		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-		<jdk.version>1.7</jdk.version>
-	</properties>
+	<name>fire-admin-jsp</name>
+	
+	<parent>
+		<groupId>es.gob.fire</groupId>
+		<artifactId>fire-artifacts</artifactId>
+		<version>2.4-SNAPSHOT</version>
+	</parent>
 
 	<dependencies>
 
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-decipher</artifactId>
-			<version>2.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-logs-common</artifactId>
-			<version>2.4-SNAPSHOT</version>
 		</dependency>
 	
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
-			<version>1.0</version>
 		</dependency>
 		
 		<dependency>
     		<groupId>org.glassfish</groupId>
     		<artifactId>javax.json</artifactId>
-    		<version>1.0.4</version>
 		</dependency>
 
 		<dependency>
-			<groupId>log-consumer-api</groupId>
+			<groupId>es.gob.logconsumer</groupId>
   			<artifactId>log-consumer-api</artifactId>
-  			<version>2.4-SNAPSHOT</version>
   		</dependency>
 		
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-statistics-common</artifactId>
-			<version>2.4-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -75,8 +65,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	
@@ -101,7 +89,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>

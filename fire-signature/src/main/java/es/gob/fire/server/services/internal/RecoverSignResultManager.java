@@ -20,12 +20,11 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
-import es.gob.fire.signature.ConfigManager;
 
 
 /**
- * Manejador encargado de la composici&oacute;n de las firmas, su actualizaci&oacute;n
- * de ser preciso, y la devoluci&oacute;n al cliente.
+ * Manejador encargado de recuperar el resultado de la operaci&oacute;n de firma (tipo de operacion, si termino bien o mal,
+ * etc.). La propia firma no va incluiso en el resultado.
  */
 public class RecoverSignResultManager {
 
@@ -34,7 +33,7 @@ public class RecoverSignResultManager {
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 
 	/**
-	 * Finaliza un proceso de firma y devuelve el resultado del mismo.
+	 * Obtiene el resultado del proceso de firma.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.

@@ -5,9 +5,15 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-test-jsp</artifactId>
-	<version>2.4-SNAPSHOT</version>
-	<name>fire-test-jsp</name>
 	<packaging>war</packaging>
+
+	<name>fire-test-jsp</name>
+
+	<parent>
+		<groupId>es.gob.fire</groupId>
+		<artifactId>fire-artifacts</artifactId>
+		<version>2.4-SNAPSHOT</version>
+	</parent>
 
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
@@ -15,17 +21,6 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<version>1.0</version>
-		</dependency>
-
-		<dependency>
-    		<groupId>org.glassfish</groupId>
-    		<artifactId>javax.json</artifactId>
-    		<version>1.0.4</version>
-		</dependency>
 
 		<dependency>
 		    <groupId>commons-fileupload</groupId>
@@ -43,7 +38,6 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-client</artifactId>
-			<version>2.4-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -61,8 +55,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
@@ -88,7 +80,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>

@@ -50,7 +50,7 @@ CREATE TABLE `tb_servidores_log` (
   `nombre` varchar(45) NOT NULL,
   `url_servicio_log` varchar(500) NOT NULL,
   `clave` varchar(45) NOT NULL,
-  `verificar_ssl` tinyint(4) DEFAULT '1',
+  `verificar_ssl` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id_servidor`),
   UNIQUE KEY `nombre_UNIQUE` (`nombre`),
   UNIQUE KEY `url_servicio_log_UNIQUE` (`url_servicio_log`)
@@ -66,7 +66,7 @@ CREATE TABLE `tb_firmas` (
   `algoritmo` varchar(20) DEFAULT NULL COMMENT 'Algoritmo de firma',
   `proveedor` varchar(45) DEFAULT NULL COMMENT 'Nombre del proveedor de certificados utilizado',
   `navegador` varchar(20) NOT NULL COMMENT 'Navegador web',
-  `correcta` tinyint(4) DEFAULT NULL COMMENT 'Si la firma es correcta o no',
+  `correcta` tinyint(1) DEFAULT NULL COMMENT 'Si la firma es correcta o no',
   `total` int(11) DEFAULT NULL COMMENT 'Numero de operaciones con la esta configuracion',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
@@ -78,8 +78,8 @@ CREATE TABLE `tb_transacciones` (
   `aplicacion` varchar(45) DEFAULT NULL COMMENT 'Aplicacion que solicito la operacion',
   `operacion` varchar(10) NOT NULL COMMENT 'Tipo de operacion',
   `proveedor` varchar(45) DEFAULT NULL COMMENT 'Nombre del proveedor de firma',
-  `proveedor_forzado` tinyint(4) DEFAULT '0' COMMENT 'Si solo habia un proveedor o si la aplicacion forzo que se usase ese',
-  `correcta` tinyint(4) DEFAULT '0' COMMENT 'Si termino correctamente o no',
+  `proveedor_forzado` tinyint(1) DEFAULT '0' COMMENT 'Si solo habia un proveedor o si la aplicacion forzo que se usase ese',
+  `correcta` tinyint(1) DEFAULT '0' COMMENT 'Si termino correctamente o no',
   `tamanno` int(11) DEFAULT '0' COMMENT 'Tamano total de los datos procesados',
   `total` int(11) DEFAULT '1' COMMENT 'Numero de transacciones con esta configuracion',
   PRIMARY KEY (`id`)

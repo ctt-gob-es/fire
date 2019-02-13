@@ -1,3 +1,6 @@
+
+-- Script de migracion desde FIRe 2.0 o 2.1 a 2.2 o 2.3
+
 -- 1 Crear la tablas nuevas 
 CREATE TABLE `tb_aplicaciones_new` (
   `id` varchar(48) NOT NULL,

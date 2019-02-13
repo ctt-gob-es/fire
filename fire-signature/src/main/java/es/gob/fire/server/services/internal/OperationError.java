@@ -36,7 +36,7 @@ enum OperationError {
 	// Errores propios de la operacion de firma
 	SIGN_SERVICE(201, "Error en la obtencion de la firma de los datos"), //$NON-NLS-1$
 	SIGN_SERVICE_PRESIGN(202, "Error al ejecutar la prefirma de los datos"), //$NON-NLS-1$
-	//SIGN_SERVICE_POSTSIGN(203, "Error al ejecutar la postfirma de los datos"), //$NON-NLS-1$
+	SIGN_SERVICE_POSTSIGN(203, "Error al ejecutar la postfirma de los datos"), //$NON-NLS-1$
 	SIGN_SERVICE_NETWORK(205, "Error al conectar con el servicio para la generacion de la firma con la clave remota"), //$NON-NLS-1$
 
 	SIGN_MINIAPPLET(250, "Error al generar la firma con el cliente nativo"), //$NON-NLS-1$

@@ -1,3 +1,6 @@
+
+-- Script de migracion desde FIRe 2.2 o 2.3 a 2.4
+
 -- 1 Crear la tablas nuevas 
 
 -- Tabla para el guardado de las referencias a los servidores de log

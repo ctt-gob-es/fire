@@ -1,32 +1,30 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>es.gob.fire</groupId>
-  <artifactId>fire-signature-connector-clavefirma</artifactId>
-  <version>2.4-SNAPSHOT</version>
-  <packaging>jar</packaging>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>es.gob.fire</groupId>
+	<artifactId>fire-signature-connector-clavefirma</artifactId>
+	<packaging>jar</packaging>
 
-  <name>fire-signature-connector-clavefirma</name>
-  <description>Modulo con el conector para la firma con certificados de Cl@veFirma</description>
+	<name>fire-signature-connector-clavefirma</name>
+	<description>Modulo con el conector para la firma con certificados de Cl@veFirma</description>
 
-  <properties>
-  		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  		<jdk.version>1.7</jdk.version>
-  </properties>
+	<parent>
+		<groupId>es.gob.fire</groupId>
+		<artifactId>fire-artifacts</artifactId>
+		<version>2.4-SNAPSHOT</version>
+	</parent>
 
   	<dependencies>
 	
 		<dependency>
 			<groupId>es.gob.afirma</groupId>
 			<artifactId>afirma-core</artifactId>
-			<version>1.6.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-connector</artifactId>
-			<version>2.4-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -44,8 +42,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
 		</dependency>		
 
 	</dependencies>
@@ -55,7 +51,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>

@@ -126,21 +126,27 @@ public class RecoverSignManager {
         // En caso de haberse indicado un DocumentManager, lo recogemos
         final FIReDocumentManager docManager	= (FIReDocumentManager) session.getObject(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER);
 
-        // Decodificamos el certificado
-        final X509Certificate signerCert;
-        try {
-            signerCert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
-                new ByteArrayInputStream(Base64.decode(certB64, true))
-            );
+        // Decodificamos el certificado si se indico.
+        // Si no se indico, es posible que el proceso falle mas adelante si resulta que este era obligatorio
+        X509Certificate signerCert = null;
+        if (certB64 != null) {
+        	try {
+        		signerCert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
+        				new ByteArrayInputStream(Base64.decode(certB64, true))
+        				);
+        	}
+        	catch (final Exception e) {
+        		LOGGER.severe(logF.format("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
+        		SIGNLOGGER.register(session, false, null);
+        		TRANSLOGGER.register(session, false);
+        		SessionCollector.removeSession(session);
+        		response.sendError(HttpCustomErrors.POSTSIGN_ERROR.getErrorCode(),
+        				"El proveedor o cliente de firma proporciono un certificado mal formado"); //$NON-NLS-1$
+        		return;
+        	}
         }
-        catch (final Exception e) {
-        	LOGGER.severe(logF.format("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
-        	SIGNLOGGER.register(session, false, null);
-        	TRANSLOGGER.register(session, false);
-        	SessionCollector.removeSession(session);
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "No se ha podido decodificar el certificado proporcionado: " + e); //$NON-NLS-1$
-        	return;
+        else {
+        	LOGGER.warning(logF.format("El proveedor o la aplicacion cliente no devolvio el certificado de firma. Segun el tipo de operacion, puede provocar errores futuros.")); //$NON-NLS-1$
         }
 
         // Decodificamos la configuracion de firma
@@ -243,6 +249,18 @@ public class RecoverSignManager {
 
         // En el caso de firma con un certificado en la nube, todavia tendremos que
         // componer la propia firma
+
+
+        // Comprobamos que tengamos el certificado de firma necesario para componerla
+        if (signerCert == null) {
+    		LOGGER.severe(logF.format("El certificado firmante es obligatorio para componer la firma y no se devolvio")); //$NON-NLS-1$
+    		SIGNLOGGER.register(session, false, null);
+    		TRANSLOGGER.register(session, false);
+    		SessionCollector.removeSession(session);
+    		response.sendError(HttpCustomErrors.POSTSIGN_ERROR.getErrorCode(),
+    				"El proveedor o cliente de firma no proporciono el certificado utilizado para firmar"); //$NON-NLS-1$
+    		return;
+        }
 
         // Se cargan los datos a firmar o firma parcial generada para evitar que caduque en caso de retraso
         final byte[] data;
