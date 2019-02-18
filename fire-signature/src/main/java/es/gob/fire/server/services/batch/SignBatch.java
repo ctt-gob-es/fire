@@ -113,10 +113,12 @@ public abstract class SignBatch {
 
 		// ****************************************************
 		// *********** Carga del XML **************************
-		final InputStream is = new ByteArrayInputStream(xml);
 		final Document doc;
-		try {
+		try (
+			final InputStream is = new ByteArrayInputStream(xml);
+		) {
 			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+			is.close();
 		}
 		catch (final Exception e) {
 			LOGGER.severe(
@@ -124,7 +126,7 @@ public abstract class SignBatch {
 			);
 			throw new IOException("Error al cargar el fichero XML de definicion de lote: " + e, e); //$NON-NLS-1$
 		}
-		is.close();
+
 		// *********** Fin carga del XML **********************
 		// ****************************************************
 

@@ -19,9 +19,7 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
-/**
- * Resultado de una transacci&oacute;n.
- */
+/** Resultado de una transacci&oacute;n. */
 public class TransactionResult {
 
 	/** Codificaci&oacute;n de caracters por defecto. */
@@ -208,13 +206,16 @@ public class TransactionResult {
 
 		// Construimos la respuesta
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final JsonWriter json = Json.createWriter(baos);
 
-		final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-		jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
+		try (
+			final JsonWriter json = Json.createWriter(baos);
+		) {
+			final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+			jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
 
-		json.writeObject(jsonBuilder.build());
-		json.close();
+			json.writeObject(jsonBuilder.build());
+			json.close();
+		}
 
 		return baos.toByteArray();
 	}
@@ -242,19 +243,22 @@ public class TransactionResult {
 
 		// Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
 		if (prefix != null && Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes())) {
-			final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
-			final JsonObject json = jsonReader.readObject();
-			final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
-			if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {
-				opResult.errorCode = resultObject.getInt(JSON_ATTR_ERROR_CODE);
+			try (
+				final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
+			) {
+				final JsonObject json = jsonReader.readObject();
+				final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
+				if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {
+					opResult.errorCode = resultObject.getInt(JSON_ATTR_ERROR_CODE);
+				}
+				if (resultObject.containsKey(JSON_ATTR_ERROR_MSG)) {
+					opResult.errorMessage = resultObject.getString(JSON_ATTR_ERROR_MSG);
+				}
+				if (resultObject.containsKey(JSON_ATTR_PROVIDER_NAME)) {
+					opResult.providerName = resultObject.getString(JSON_ATTR_PROVIDER_NAME);
+				}
+	            jsonReader.close();
 			}
-			if (resultObject.containsKey(JSON_ATTR_ERROR_MSG)) {
-				opResult.errorMessage = resultObject.getString(JSON_ATTR_ERROR_MSG);
-			}
-			if (resultObject.containsKey(JSON_ATTR_PROVIDER_NAME)) {
-				opResult.providerName = resultObject.getString(JSON_ATTR_PROVIDER_NAME);
-			}
-            jsonReader.close();
 		}
 		// En caso de exito habremos recibido directamente el resultado.
 		else {

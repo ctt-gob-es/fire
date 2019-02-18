@@ -16,23 +16,18 @@ import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 
-
-/**
- * Clase con m&eacute;todos de utilidad para la gesti&oacute;n de las peticiones al
- * servicio de custodia de certificados.
- */
+/** Utilidad para la gesti&oacute;n de las peticiones al
+ * servicio de custodia de certificados. */
 class FIReHelper {
 
 	private static final Logger LOGGER = Logger.getLogger(FIReHelper.class.getName());
 
-	/**
-	 * Conecta con el servicio de custodia de certificados en la nube para comprobar si
+	/** Conecta con el servicio de custodia de certificados en la nube para comprobar si
 	 * el usuario est&aacute; dado de alta en &eacute;l.
 	 * @param providerName Nombre del proveedor de firma en la nube.
 	 * @param subjectId Identificador del usuario del que se desee comprobar el alta.
 	 * @return {@code true} si el usuario est&aacute; dado de alta en el servicio
-	 * de custodia de certificados en la nube, {@code false} en caso contrario.
-	 */
+	 * de custodia de certificados en la nube, {@code false} en caso contrario. */
 	public static boolean isUserRegistered(final String providerName, final String subjectId) {
 
         final FIReConnector connector;

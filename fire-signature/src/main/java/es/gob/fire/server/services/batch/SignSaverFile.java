@@ -70,14 +70,17 @@ public final class SignSaverFile {
 	 */
 	public void saveSign(final SingleSign sign, final byte[] dataToSave) throws IOException {
 		if (!DISABLED) {
-			final OutputStream fos = new FileOutputStream(this.filename);
-			final BufferedOutputStream bos = new BufferedOutputStream(
-				fos,
-				dataToSave.length
-			);
-			bos.write(dataToSave);
-			bos.flush();
-			fos.close();
+			try (
+				final OutputStream fos = new FileOutputStream(this.filename);
+				final OutputStream bos = new BufferedOutputStream(
+					fos,
+					dataToSave.length
+				);
+			) {
+				bos.write(dataToSave);
+				bos.flush();
+				fos.close();
+			}
 			LOGGER.info("Guardada finalmente la firma '" + sign.getId() + "' en: " + this.filename); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		else {

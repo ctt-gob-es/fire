@@ -25,7 +25,6 @@ import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
 import es.gob.fire.server.services.UpgradeException;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
-import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.UpgradeResult;
 
 class FIRePostSignaturesThread extends ConcurrentProcessThread {
@@ -66,12 +65,18 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 	 * @param pkcs1s Conjunto de PKCS#1 de la firma.
 	 * @param partialTd Datos parciales de la firma.
 	 * @param docManager Gestor de documentos que realizar&aacute; el tratamiento de la firma.
-	 * del hilo en caso de detectar un error en alguna de las firmas del lote.
-	 */
-	public FIRePostSignaturesThread(final String appId, final String docId, final BatchResult batchResult,
-			final String algorithm, final SignBatchConfig signConfig, final X509Certificate signingCert,
-			final Map<String, byte[]> pkcs1s, final TriphaseData partialTd, final FIReDocumentManager docManager, final FireSession session) {
-
+	 *                   del hilo en caso de detectar un error en alguna de las firmas del lote.
+	 * @param session Sesi&oacute;n con los datos de la transacci&oacute;n. */
+	public FIRePostSignaturesThread(final String appId,
+			                        final String docId,
+			                        final BatchResult batchResult,
+			                        final String algorithm,
+			                        final SignBatchConfig signConfig,
+			                        final X509Certificate signingCert,
+			                        final Map<String, byte[]> pkcs1s,
+			                        final TriphaseData partialTd,
+			                        final FIReDocumentManager docManager,
+			                        final FireSession session) {
 		this.appId = appId;
 		this.docId = docId;
 		this.batchResult = batchResult;
@@ -91,7 +96,10 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     		setFailed(true);
     		final DocInfo docInf = this.batchResult.getDocInfo(this.docId);
         	if(docInf != null) {
-        		this.sesion.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, docInf.getSize());
+        		this.sesion.setAttribute(
+    				ServiceParams.SESSION_PARAM_DOCSIZE,
+    				Long.valueOf(docInf.getSize())
+				);
         	}
     		SIGNLOGGER.register(this.sesion, false,this.docId);
     		interrupt();
@@ -119,7 +127,10 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
         	final DocInfo docInf = this.batchResult.getDocInfo(this.docId);
         	if(docInf != null) {
-        		this.sesion.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, docInf.getSize());
+        		this.sesion.setAttribute(
+    				ServiceParams.SESSION_PARAM_DOCSIZE,
+    				Long.valueOf(docInf.getSize())
+				);
         	}
 
         	SIGNLOGGER.register(this.sesion, false, this.docId);

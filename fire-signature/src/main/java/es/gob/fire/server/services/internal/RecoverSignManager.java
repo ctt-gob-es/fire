@@ -39,11 +39,8 @@ import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.upgrade.UpgradeResult;
 
-
-/**
- * Manejador encargado de la composici&oacute;n de las firmas, su actualizaci&oacute;n
- * de ser preciso, y la devoluci&oacute;n al cliente.
- */
+/** Manejador encargado de la composici&oacute;n de las firmas, su actualizaci&oacute;n
+ * de ser preciso, y la devoluci&oacute;n al cliente. */
 public class RecoverSignManager {
 
 	private static final Logger LOGGER = Logger.getLogger(RecoverSignManager.class.getName());
@@ -435,9 +432,12 @@ public class RecoverSignManager {
 
 	private static void sendResult(final HttpServletResponse response, final TransactionResult result) throws IOException {
 		// El servicio devuelve el resultado de la operacion de firma.
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result.encodeResult());
-        output.flush();
-        output.close();
+		try (
+			final OutputStream output = ((ServletResponse) response).getOutputStream();
+		) {
+	        output.write(result.encodeResult());
+	        output.flush();
+	        output.close();
+		}
 	}
 }

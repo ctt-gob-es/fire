@@ -176,10 +176,10 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		// Expandimos los atributos de los extraParams
 		try {
 			extraParams = ExtraParamsProcessor.expandProperties(
-					extraParams,
-					null,
-					format
-					);
+				extraParams,
+				null,
+				format
+			);
 		}
 		catch (final Exception e) {
 			LOGGER.severe("Se han indicado una politica de firma y un formato incompatibles: "  + e); //$NON-NLS-1$
@@ -215,13 +215,11 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		final X509Certificate[] signerCertChain = new X509Certificate[receivedCerts.length];
 		for (int i = 0; i<receivedCerts.length; i++) {
 			try {
-				signerCertChain[i] =
-					(X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
-						new ByteArrayInputStream(
-							Base64.decode(receivedCerts[i], true)
-						)
+				signerCertChain[i] =(X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
+					new ByteArrayInputStream(
+						Base64.decode(receivedCerts[i], true)
 					)
-				;
+				);
 			}
 			catch(final Exception e) {
 
@@ -442,16 +440,16 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 	}
 
-	/**
-	 * Env&iacute;a una cadena como respuesta del servicio.
+	/** Env&iacute;a una cadena como respuesta del servicio.
 	 * @param response Respuesta.
-	 * @param result Cadena a devolver.
-	 */
+	 * @param result Cadena a devolver. */
 	private static void sendResponse(final HttpServletResponse response, final String result) {
 
-		PrintWriter out = null;
-		try {
-			out = response.getWriter();
+		try (
+			final PrintWriter out = response.getWriter();
+		) {
+			out.print(result);
+			out.flush();
 		}
         catch (final Exception e) {
         	LOGGER.severe("No se pudo contestar a la peticion: " + e); //$NON-NLS-1$
@@ -464,7 +462,5 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
         	return;
         }
 
-		out.print(result);
-		out.flush();
 	}
 }

@@ -25,10 +25,7 @@ import java.util.logging.Logger;
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.fire.signature.ConfigManager;
 
-/**
- * Clase con m&eacute;todos de ayuda para la gesti&oacute;n de ficheros temporales.
- *
- */
+/** Ayuda para la gesti&oacute;n de ficheros temporales. */
 public final class TempFilesHelper {
 
 	private static final Logger LOGGER = Logger.getLogger(TempFilesHelper.class.getName());
@@ -107,21 +104,23 @@ public final class TempFilesHelper {
                     "El nombre del fichero a recuperar no es valido: " + filename //$NON-NLS-1$
             );
         }
+        final byte[] ret;
         final File f = new File(TMPDIR, filename);
-        final InputStream fis = new FileInputStream(f);
-        final InputStream bis = new BufferedInputStream(fis);
-        final byte[] ret = AOUtil.getDataFromInputStream(bis);
-        bis.close();
-        fis.close();
+        try (
+	        final InputStream fis = new FileInputStream(f);
+	        final InputStream bis = new BufferedInputStream(fis);
+		) {
+	        ret = AOUtil.getDataFromInputStream(bis);
+	        bis.close();
+	        fis.close();
+        }
 
         return ret;
     }
 
-    /**
-     * Elimina un fichero situado en un directorio
+    /** Elimina un fichero situado en un directorio
      * concreto.
-     * @param filename Nombre del fichero.
-     */
+     * @param filename Nombre del fichero. */
     public static void deleteTempData(final String filename) {
         new File(TMPDIR, filename).delete();
     }
@@ -148,16 +147,21 @@ public final class TempFilesHelper {
         	f = File.createTempFile(DEFAULT_PREFIX, null, TMPDIR);
         }
 
-        final OutputStream fos = new FileOutputStream(f);
-        final OutputStream bos = new BufferedOutputStream(fos);
-        bos.write(data);
-        bos.close();
-        fos.close();
+        try (
+	        final OutputStream fos = new FileOutputStream(f);
+	        final OutputStream bos = new BufferedOutputStream(fos);
+		) {
+	        bos.write(data);
+	        bos.close();
+	        fos.close();
+        }
         LOGGER.fine("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
         setFileSize(f.length());
         return f.getName();
     }
 
+	/** Obtiene el tama&ntilde;o del fichero.
+	 * @return Tama&ntilde;o del fichero. */
 	public static long getFileSize() {
 		return fileSize;
 	}
@@ -165,37 +169,32 @@ public final class TempFilesHelper {
 	private static  void setFileSize(final long fileSize) {
 		TempFilesHelper.fileSize = fileSize;
 	}
-  /**
-     * Recorre el directorio temporal eliminando los ficheros que hayan sobrepasado el tiempo
+
+    /** Recorre el directorio temporal eliminando los ficheros que hayan sobrepasado el tiempo
      * indicado sin haber sido modificados.
      * @param timeout Tiempo en milisegundos que debe haber transcurrido desde la &uacute;ltima
-     * modificaci&oacute;n de un fichero para considerarse caducado.
-     */
+     *                modificaci&oacute;n de un fichero para considerarse caducado. */
     public static void cleanExpiredFiles(final long timeout) {
-
     	for (final File tempFile : TMPDIR.listFiles(new ExpiredFileFilter(timeout))) {
     		try {
     			Files.delete(tempFile.toPath());
     		}
     		catch (final Exception e) {
-    			LOGGER.warning("No se pudo eliminar el fichero caducado " + tempFile.getAbsolutePath() + //$NON-NLS-1$
-    					": " + e); //$NON-NLS-1$
+    			LOGGER.warning(
+					"No se pudo eliminar el fichero caducado " + tempFile.getAbsolutePath() + ": " + e //$NON-NLS-1$ //$NON-NLS-2$
+				);
     		}
     	}
     }
 
-    /**
-     * Filtro de ficheros para la obtenci&oacute;n de ficheros de datos
-     * que se hayan modificado hace m&aacute;s del tiempo indicado.
-     */
-    private static class ExpiredFileFilter implements FileFilter {
+    /** Filtro de ficheros para la obtenci&oacute;n de ficheros de datos
+     * que se hayan modificado hace m&aacute;s del tiempo indicado. */
+    private static final class ExpiredFileFilter implements FileFilter {
 
     	private final long timeoutMillis;
 
-    	/**
-    	 * Tiempo m&aacute;ximo de vigencia de un fichero.
-    	 * @param timeout Tiempo de vigencia en milisegundos.
-    	 */
+    	/** Tiempo m&aacute;ximo de vigencia de un fichero.
+    	 * @param timeout Tiempo de vigencia en milisegundos. */
     	public ExpiredFileFilter(final long timeout) {
     		this.timeoutMillis = timeout;
 		}
@@ -205,4 +204,5 @@ public final class TempFilesHelper {
 			return pathname.isFile() && System.currentTimeMillis() > pathname.lastModified() + this.timeoutMillis;
 		}
 
-    }}
+    }
+}

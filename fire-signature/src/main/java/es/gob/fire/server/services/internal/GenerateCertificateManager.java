@@ -29,12 +29,10 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 
-/**
- * Manejador de la operaci&oacute;n de generaci&oacute;n de certificados. Esta clase
+/** Manejador de la operaci&oacute;n de generaci&oacute;n de certificados. Esta clase
  * atiende una peticion de generaci&oacute;n de certificados recibida en servidor.
- * Las comprobaciones de acceso deber&aacute;n haberse realizado previamente.
- */
-public class GenerateCertificateManager {
+ * Las comprobaciones de acceso deber&aacute;n haberse realizado previamente. */
+public final class GenerateCertificateManager {
 
 	private static final Logger LOGGER = Logger.getLogger(GenerateCertificateManager.class.getName());
 
@@ -117,10 +115,13 @@ public class GenerateCertificateManager {
         }
 
         response.setContentType("application/json"); //$NON-NLS-1$
-        final PrintWriter out = response.getWriter();
-        out.print(gcr.toString());
-        out.flush();
-        out.close();
+        try (
+    		final PrintWriter out = response.getWriter();
+		) {
+	        out.print(gcr.toString());
+	        out.flush();
+	        out.close();
+        }
 	}
 
 	/**

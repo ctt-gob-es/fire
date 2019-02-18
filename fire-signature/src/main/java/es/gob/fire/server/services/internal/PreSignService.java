@@ -172,8 +172,8 @@ public final class PreSignService extends HttpServlet {
         	extraParams = ServiceUtil.base642Properties(extraParamsB64);
         }
         catch (final Exception e) {
-        	LOGGER.warning("Se ha proporcionado extraParams mal formados"); //$NON-NLS-1$
-        	 ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
+        	LOGGER.warning("Se ha proporcionado extraParams mal formados: " + e); //$NON-NLS-1$
+        	ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(redirectErrorUrl);
             return;
 		}

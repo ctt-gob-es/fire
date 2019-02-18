@@ -94,7 +94,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 			sessionData = loadSessionData(sessionFile);
 		}
 		catch (final FileNotFoundException e) {
-			LOGGER.warning("No se encontro en disco la sesion: " + id); //$NON-NLS-1$
+			LOGGER.warning("No se encontro en disco la sesion '" + id + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 		catch (final Exception e) {
@@ -142,10 +142,12 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	public void removeSession(final String id) {
 		try {
 			Files.delete(new File(this.dir, id).toPath());
-		} catch (final NoSuchFileException e) {
+		}
+		catch (final NoSuchFileException e) {
 			// No hacemos nada
-		} catch (final IOException e) {
-			LOGGER.warning("No se pudo eliminar de disco la sesion " + id); //$NON-NLS-1$
+		}
+		catch (final IOException e) {
+			LOGGER.warning("No se pudo eliminar de disco la sesion '" + id + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -179,7 +181,8 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 				if (currentTime > file.lastModified() + DEFAULT_MAX_SESSION_PERIOD) {
 					try {
 						Files.deleteIfExists(file.toPath());
-					} catch (final IOException e) {
+					}
+					catch (final IOException e) {
 						// No hacemos nada
 					}
 				}

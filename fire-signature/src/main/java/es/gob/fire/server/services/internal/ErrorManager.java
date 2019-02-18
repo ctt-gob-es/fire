@@ -1,7 +1,5 @@
 package es.gob.fire.server.services.internal;
 
-
-
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -11,11 +9,8 @@ import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.signature.ConfigFileLoader;
 
-/**
- * Clase que gestiona los mensajes de erroes. Carga el fichero de configuraci&oacute;n del fichero errors_es_ES.messages.
- * @author Adolfo.Navarro
- *
- */
+/** Clase que gestiona los mensajes de erroes. Carga el fichero de configuraci&oacute;n del fichero errors_es_ES.messages.
+ * @author Adolfo.Navarro. */
 public class ErrorManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ErrorManager.class.getName());
@@ -37,7 +32,7 @@ public class ErrorManager {
 				error = ConfigFileLoader.loadConfigFile(ERR_FILE);
 			}
 			catch (final Exception e) {
-				LOGGER.severe("No se pudo cargar el fichero de configuracion " + ERR_FILE); //$NON-NLS-1$
+				LOGGER.severe("No se pudo cargar el fichero de configuracion '" + ERR_FILE + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}

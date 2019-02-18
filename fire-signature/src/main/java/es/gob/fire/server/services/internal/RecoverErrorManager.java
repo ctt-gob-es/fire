@@ -18,21 +18,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.RequestParameters;
 
-
-/**
- * Manejador encargado de la recuperaci&oacute;n del error obtenido durante el
- * proceso de una transacci&oacute;n.
- */
+/** Manejador encargado de la recuperaci&oacute;n del error obtenido durante el
+ * proceso de una transacci&oacute;n. */
 public class RecoverErrorManager {
 
 	private static final Logger LOGGER = Logger.getLogger(RecoverErrorManager.class.getName());
 
-	/**
-	 * Obtiene el error detectado durante la transacci&oacute;n.
+	/** Obtiene el error detectado durante la transacci&oacute;n.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
-	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
-	 */
+	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos. */
 	public static void recoverError(final RequestParameters params, final HttpServletResponse response)
 			throws IOException {
 
@@ -118,9 +113,12 @@ public class RecoverErrorManager {
 
 	private static void sendResult(final HttpServletResponse response, final TransactionResult result) throws IOException {
 		// El servicio devuelve el resultado de la operacion de firma.
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result.encodeResult());
-        output.flush();
-        output.close();
+		try (
+			final OutputStream output = ((ServletResponse) response).getOutputStream();
+		) {
+	        output.write(result.encodeResult());
+	        output.flush();
+	        output.close();
+		}
 	}
 }

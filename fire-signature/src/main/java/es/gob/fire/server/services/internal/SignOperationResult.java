@@ -16,11 +16,8 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-/**
- * Resultado de una operaci&oacute;n de carga de datos a firmar.
- *
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
- */
+/** Resultado de una operaci&oacute;n de carga de datos a firmar.
+ * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class SignOperationResult {
 
     private final String transactionId;
@@ -43,22 +40,27 @@ public final class SignOperationResult {
                     "El JSON de definicion no puede ser nulo" //$NON-NLS-1$
             );
         }
-        final JsonReader jsonReader = Json
-                .createReader(new ByteArrayInputStream(json));
-        final JsonObject jsonObject = jsonReader.readObject();
-        final String id = jsonObject.getString("transactionid"); //$NON-NLS-1$
-        final String redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
-        jsonReader.close();
+
+        final String id;
+        final String redirect;
+        try (
+    		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
+		) {
+	        final JsonObject jsonObject = jsonReader.readObject();
+	        id = jsonObject.getString("transactionid"); //$NON-NLS-1$
+	        redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
+	        jsonReader.close();
+        }
 
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Es obligatorio que el JSON contenga el identificador de la transacci&oacute;n" //$NON-NLS-1$
+                "Es obligatorio que el JSON contenga el identificador de la transacci&oacute;n" //$NON-NLS-1$
             );
         }
 
         if (redirect == null || redirect.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Es obligatorio que el JSON contenga la URL a redireccionar al usuario para que se autentique" //$NON-NLS-1$
+                "Es obligatorio que el JSON contenga la URL a redireccionar al usuario para que se autentique" //$NON-NLS-1$
             );
         }
 

@@ -21,14 +21,10 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
-import es.gob.fire.signature.ConfigManager;
 
-
-/**
- * Manejador que gestiona las peticiones para la recuperaci&oacute;n de la firma de un documento
- * concreto dentro de un lote de firma.
- */
-public class RecoverBatchSignatureManager {
+/** Manejador que gestiona las peticiones para la recuperaci&oacute;n de la firma de un documento
+ * concreto dentro de un lote de firma. */
+public final class RecoverBatchSignatureManager {
 
 	private static final Logger LOGGER = Logger.getLogger(RecoverBatchSignatureManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
@@ -179,11 +175,15 @@ public class RecoverBatchSignatureManager {
 		return "ERR-" + code + ":" + message; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result);
-        output.flush();
-        output.close();
+	private static void sendResult(final HttpServletResponse response,
+			                       final byte[] result) throws IOException {
+		try (
+			final OutputStream output = ((ServletResponse) response).getOutputStream();
+		) {
+	        output.write(result);
+	        output.flush();
+	        output.close();
+		}
 	}
 
 	/**

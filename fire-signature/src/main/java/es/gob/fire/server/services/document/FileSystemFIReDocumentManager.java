@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
@@ -92,22 +93,14 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 		}
 
 		final byte[] data;
-		InputStream fis = null;
-		try {
-			fis = new FileInputStream(file);
+		try (
+			final InputStream fis = new FileInputStream(file);
+		) {
 			data = AOUtil.getDataFromInputStream(fis);
 			fis.close();
 		}
 		catch (final IOException e) {
 			LOGGER.warning("Error en la lectura del fichero '" + printShortPath(file) + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
-			if (fis != null) {
-				try {
-					fis.close();
-				}
-				catch (final IOException e2) {
-					LOGGER.warning("El fichero queda sin cerrar: " + printShortPath(file)); //$NON-NLS-1$
-				}
-			}
 			throw e;
 		}
 
@@ -152,22 +145,14 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 			throw new IOException("Se ha obtenido un nombre de documento existente en el sistema de ficheros."); //$NON-NLS-1$
 		}
 
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(file);
+		try (
+			OutputStream fos = new FileOutputStream(file);
+		) {
 			fos.write(data);
 			fos.close();
 		}
 		catch (final IOException e) {
 			LOGGER.severe("Error al almacenar los datos en el fichero '" + file.getAbsolutePath() + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
-			if (fos != null) {
-				try {
-					fos.close();
-				}
-				catch (final IOException e2) {
-					LOGGER.warning("El fichero queda sin cerrar: " + file.getAbsolutePath()); //$NON-NLS-1$
-				}
-			}
 			throw e;
 		}
 
@@ -175,14 +160,12 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 		return newId.getBytes(StandardCharsets.UTF_8);
 	}
 
-	/**
-	 * Comprueba si un directorio es el ra&iacute;z de un fichero (es padre suyo o de
+	/** Comprueba si un directorio es el ra&iacute;z de un fichero (es padre suyo o de
 	 * cualquiera de los directorios de los que cuelga).
 	 * @param p Directorio padre.
 	 * @param file Fichero que se va a comprobar.
 	 * @return {@code true} si el fichero est&aacute; dentro del directorio o si est&aacute;
-	 * cualquiera de sus directorios superiores.
-	 */
+	 *         cualquiera de sus directorios superiores. */
 	private static boolean isRootParent(final File p, final File file) {
 	    File f;
 	    final File parent;

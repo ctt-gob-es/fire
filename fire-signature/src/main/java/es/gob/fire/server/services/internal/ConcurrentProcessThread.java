@@ -11,11 +11,9 @@ package es.gob.fire.server.services.internal;
 
 import java.util.List;
 
-/**
- * Hilo preparado para la ejecuci&oacute;n de m&uacute;ltiples
+/** Hilo preparado para la ejecuci&oacute;n de m&uacute;ltiples
  * instancias concurrentes y permitir deternerlos todos si alguno
- * falla en su ejecuci&oacute;n.
- */
+ * falla en su ejecuci&oacute;n. */
 public class ConcurrentProcessThread extends Thread {
 
 	private boolean failed;
@@ -63,7 +61,8 @@ public class ConcurrentProcessThread extends Thread {
         	if (lives > 0) {
         		try {
 					Thread.sleep(2000);
-        		} catch (final InterruptedException e) {
+        		}
+        		catch (final InterruptedException e) {
         			// No hacemos nada
         		}
         	}
@@ -110,7 +109,8 @@ public class ConcurrentProcessThread extends Thread {
         	if (lives > 0) {
         		try {
 					Thread.sleep(2000);
-        		} catch (final InterruptedException e) {
+        		}
+        		catch (final InterruptedException e) {
         			// No hacemos nada
         		}
         	}

@@ -147,7 +147,10 @@ public class ServiceParams {
     /** Identificador de operaci&oacute;n de firma de lotes. */
     public static final String OPERATION_BATCH = "batch"; //$NON-NLS-1$
 
+    /** Transacci&oacute;n de tipo firma &uacute;nica. */
     public static final String TRANSACTION_TYPE_SIGN = "1"; //$NON-NLS-1$
+
+    /** Transacci&oacute;n de tipo firma por lotes. */
     public static final String TRANSACTION_TYPE_BATCH = "2"; //$NON-NLS-1$
 
 }

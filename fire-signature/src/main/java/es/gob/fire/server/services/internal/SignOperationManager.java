@@ -38,15 +38,17 @@ public class SignOperationManager {
 	private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 
-	/**
-	 * Inicia la operaci&oacute;n de firma asociada al componente central.
+	/** Inicia la operaci&oacute;n de firma asociada al componente central.
 	 * @param request Solicitud HTTP.
+	 * @param appName Nombre de la aplicaci&oacute;n que solicita la firma.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta HTTP.
 	 * @throws IOException Cuando se produce un error en la comunicaci&oacute;n con el cliente
-	 * o en el guardado de temporales.
-	 */
-	public static void sign(final HttpServletRequest request, final String appName, final RequestParameters params, final HttpServletResponse response) throws IOException {
+	 *                     o en el guardado de temporales. */
+	public static void sign(final HttpServletRequest request,
+			                final String appName,
+			                final RequestParameters params,
+			                final HttpServletResponse response) throws IOException {
 
 		final String op				= params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 		final String appId			= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
@@ -62,9 +64,15 @@ public class SignOperationManager {
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId);
 
         if (subjectId == null || subjectId.isEmpty()) {
-        	LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que solicita la firma")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se ha proporcionado el identificador del usuario que solicita la firma"); //$NON-NLS-1$
+        	LOGGER.warning(
+    			logF.format(
+					"No se ha proporcionado el identificador del usuario que solicita la firma" //$NON-NLS-1$
+				)
+			);
+			response.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"No se ha proporcionado el identificador del usuario que solicita la firma" //$NON-NLS-1$
+			);
             return;
         }
 
@@ -102,9 +110,15 @@ public class SignOperationManager {
 				connConfig = new TransactionConfig(configB64);
 			}
 			catch(final Exception e) {
-				LOGGER.warning(logF.format("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma"); //$NON-NLS-1$
+				LOGGER.warning(
+					logF.format(
+						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma: " + e //$NON-NLS-1$
+					)
+				);
+				response.sendError(
+					HttpServletResponse.SC_BAD_REQUEST,
+					"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma" //$NON-NLS-1$
+				);
 				return;
 			}
 		}
@@ -239,8 +253,11 @@ public class SignOperationManager {
         // Creamos un temporal con los datos a procesar asociado a la sesion
         try {
         	TempFilesHelper.storeTempData(transactionId, data);
-        	//obtenemos el tamaño del documento
-       	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, TempFilesHelper.getFileSize());
+        	//obtenemos el tamano del documento
+       	 	session.setAttribute(
+   	 			ServiceParams.SESSION_PARAM_DOCSIZE,
+   	 			Long.valueOf(TempFilesHelper.getFileSize())
+ 			);
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.format("Error en el guardado temporal de los datos a firmar: " + e)); //$NON-NLS-1$
@@ -299,9 +316,12 @@ public class SignOperationManager {
 
 	private static void sendResult(final HttpServletResponse response, final SignOperationResult result) throws IOException {
         response.setContentType("application/json"); //$NON-NLS-1$
-        final PrintWriter out = response.getWriter();
-        out.print(result.toString());
-        out.flush();
-        out.close();
+        try (
+    		final PrintWriter out = response.getWriter();
+		) {
+	        out.print(result.toString());
+	        out.flush();
+	        out.close();
+        }
 	}
 }
