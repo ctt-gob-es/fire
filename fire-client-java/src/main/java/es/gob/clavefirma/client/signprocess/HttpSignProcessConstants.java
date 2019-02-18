@@ -31,7 +31,7 @@ public final class HttpSignProcessConstants {
 
         /** SHA256withRSA. */
         SHA256WITHRSA("SHA256withRSA"), //$NON-NLS-1$
-    	
+
     	/** SHA512withECDSA. */
         SHA512withECDSA("SHA512withECDSA"), //$NON-NLS-1$
 
@@ -108,7 +108,10 @@ public final class HttpSignProcessConstants {
         public String toString() {
             return this.fmtName;
         }
-        
+
+        /** Obtiene un formato de firma a partir de su nombre.
+         * @param name Nombre del formato de firma.
+         * @return Formato de firma. */
         public static SignatureFormat getSignatureFormat(final String name) {
         	if (name == null) {
         		throw new IllegalArgumentException(

@@ -11,6 +11,8 @@ package es.gob.fire.client;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * <p>Encodes and decodes to and from Base64 notation.</p>
@@ -301,8 +303,7 @@ public final class Base64 {
         return encodeBytes( source, 0, source.length, urlSafe ? URL_SAFE : NO_OPTIONS);
     }
 
-    /**
-     * Encodes a byte array into Base64 notation.
+    /** Encodes a byte array into Base64 notation.
      * <p>
      * Example: <code>encode( myData )</code> or
      * <p>
@@ -314,20 +315,19 @@ public final class Base64 {
      * @param options Specified options
      * @return The Base64-encoded data as a String
      * @throws IllegalArgumentException if source array, offset, or length are invalid
-     * @since 2.0
-     */
+     * @since 2.0 */
     private static String encodeBytes( final byte[] source, final int off, final int len, final int options ) {
         final byte[] encoded = encodeBytesToBytes( source, off, len, options );
-
-        // Return value according to relevant encoding.
         try {
             return new String( encoded, PREFERRED_ENCODING );
-        }   // end try
+        }
         catch (final java.io.UnsupportedEncodingException uue) {
+        	Logger.getLogger(Base64.class).warn(
+    			"No se soporta la codificacion por defecto (" + PREFERRED_ENCODING + "): " + uue, uue //$NON-NLS-1$ //$NON-NLS-2$
+			);
             return new String( encoded );
-        }   // end catch
-
-    }   // end encodeBytes
+        }
+    }
 
     /**
      * Similar to {@link #encodeBytes(byte[], int, int, int)} but returns
@@ -631,9 +631,12 @@ public final class Base64 {
             bytes = str.getBytes(PREFERRED_ENCODING);
         }
         catch(final java.io.UnsupportedEncodingException uee ) {
+        	Logger.getLogger(Base64.class).warn(
+    			"No se soporta la codificacion por defecto (" + PREFERRED_ENCODING + "): " + uee, uee //$NON-NLS-1$ //$NON-NLS-2$
+			);
             bytes = str.getBytes();
         }
-        return decode( bytes, 0, bytes.length, urlSafe);
+        return decode(bytes, 0, bytes.length, urlSafe);
     }
 
     /** Caracteres aceptados en una codificaci&oacute;n Base64 seg&uacute;n la
