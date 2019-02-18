@@ -70,18 +70,14 @@ public enum HttpCustomErrors {
 		this.errorDescription = description;
 	}
 
-	/**
-	 * Recupera el c&oacute;digo del error.
-	 * @return C&oacute;digo de error.
-	 */
+	/** Recupera el c&oacute;digo del error.
+	 * @return C&oacute;digo de error. */
 	public int getErrorCode() {
 		return this.errorCode;
 	}
 
-	/**
-	 * Recupera el mensaje asociado al error.
-	 * @return Mensaje de error.
-	 */
+	/** Recupera el mensaje asociado al error.
+	 * @return Mensaje de error. */
 	public String getErrorDescription() {
 		return this.errorDescription;
 	}

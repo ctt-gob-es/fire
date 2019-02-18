@@ -19,35 +19,32 @@ import java.util.logging.Logger;
 
 import es.gob.clavefirma.client.ClientConfigFilesNotFoundException;
 import es.gob.clavefirma.client.ConnectionManager;
+import es.gob.clavefirma.client.ConnectionManager.Method;
 import es.gob.clavefirma.client.HttpForbiddenException;
 import es.gob.clavefirma.client.HttpNetworkException;
 import es.gob.clavefirma.client.HttpNoUserException;
 import es.gob.clavefirma.client.HttpOperationException;
-import es.gob.clavefirma.client.ConnectionManager.Method;
 import es.gob.fire.client.Base64;
 import es.gob.fire.client.ConfigManager;
 import es.gob.fire.client.HttpCustomErrors;
 import es.gob.fire.client.HttpError;
 import es.gob.fire.client.Utils;
 
-/**
- * Cliente del servicio de carga de datos para firma de Clave Firma. Debe
+/** Cliente del servicio de carga de datos para firma de Clave Firma. Debe
  * recibir los siguientes datos:
  * <ol>
- * <li>subjectId</li>
- * <li>operation</li>
- * <li>format</li>
- * <li>algoritmo</li>
- * <li>extraparams</li>
- * <li>certificate</li>
- * <li>datos a firmar</li>
- * <li>firma a firmar</li>
- * <li>configuracion</li>
- * <li>upgrade</li>
+ *  <li>subjectId</li>
+ *  <li>operation</li>
+ *  <li>format</li>
+ *  <li>algoritmo</li>
+ *  <li>extraparams</li>
+ *  <li>certificate</li>
+ *  <li>datos a firmar</li>
+ *  <li>firma a firmar</li>
+ *  <li>configuracion</li>
+ *  <li>upgrade</li>
  * </ol>
- *
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
- */
+ * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class HttpLoadProcess {
 
 	private static final String PARAMETER_NAME_APPID = "appId"; //$NON-NLS-1$
@@ -92,17 +89,13 @@ public final class HttpLoadProcess {
 
     private static boolean initialized = false;
 
-    /**
-     * Constructor privado para no permir la instanciaci&oacute;n
-     */
+    /** Constructor privado para no permir la instanciaci&oacute;n. */
     private HttpLoadProcess() {
         // no instanciable
     }
 
-    /**
-     * Inicializa las propiedades de sistema a trav&eacute;s del fichero de propiedades.
-     * @throws ClientConfigFilesNotFoundException Si no encuentra el fichero de configuraci&oacute;n.
-     */
+    /** Inicializa las propiedades de sistema a trav&eacute;s del fichero de propiedades.
+     * @throws ClientConfigFilesNotFoundException Si no encuentra el fichero de configuraci&oacute;n. */
     public static void initialize() throws ClientConfigFilesNotFoundException{
     	if (!initialized) {
     		initializeProperties();
@@ -112,111 +105,98 @@ public final class HttpLoadProcess {
 
     private static void initializeProperties() throws ClientConfigFilesNotFoundException {
 
-    	Properties p;
+    	final Properties p;
 		try {
 			p = ConfigManager.loadConfig();
-		} catch (final es.gob.fire.client.ClientConfigFilesNotFoundException e) {
+		}
+		catch (final es.gob.fire.client.ClientConfigFilesNotFoundException e) {
 			throw new ClientConfigFilesNotFoundException(e.getMessage(), e.getCause());
 		}
 
         URL = p.getProperty(LOAD_URL);
         if (URL == null) {
             throw new IllegalStateException(
-                    "No esta declarada la configuracion de URL en la configuracion" //$NON-NLS-1$
+                "No esta declarada la URL en la configuracion (propiedad '" + LOAD_URL + "')" //$NON-NLS-1$ //$NON-NLS-2$
             );
         }
 
         try {
 			ConnectionManager.configureConnection(p);
-		} catch (final Exception e) {
+		}
+        catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 		}
 
         LOGGER.info(
-        		"Se usara el siguiente servicio de carga de datos: " + URL //$NON-NLS-1$
+    		"Se usara el siguiente servicio de carga de datos: " + URL //$NON-NLS-1$
         );
     }
 
-    /**
-     * Carga datos para ser posteriormente firmados.
-     * @param appId
-     *            Identificador de la aplicaci&oacute;n que realiza la
-     *            petici&oacute;n.
-     * @param subjectId
-     *            Identificador del titular de la clave de firma.
-     * @param op
-     *            Tipo de operaci&oacute;n a realizar.
-     * @param ft
-     *            Formato de la operaci&oacute;n.
-     * @param algth
-     *            Algoritmo de firma.
-     * @param prop
-     *            Propiedades extra a a&ntilde;adir a la firma (puede ser
-     *            <code>null</code>).
-     * @param cert
-     *            Certificado de usuario para realizar la firma.
-     * @param d
-     *            Datos a firmar.
-     * @param conf
-     *            Configuraci&oacute;n a indicar al servicio remoto (dependiente
-     *            de la implementaci&oacute;n).
+    /** Carga datos para ser posteriormente firmados.
+     * @param appId Identificador de la aplicaci&oacute;n que realiza la
+     *              petici&oacute;n.
+     * @param subjectId Identificador del titular de la clave de firma.
+     * @param op Tipo de operaci&oacute;n a realizar.
+     * @param ft Formato de la operaci&oacute;n.
+     * @param algth Algoritmo de firma.
+     * @param prop Propiedades extra a a&ntilde;adir a la firma (puede ser
+     *             <code>null</code>).
+     * @param cert Certificado de usuario para realizar la firma.
+     * @param d Datos a firmar.
+     * @param conf Configuraci&oacute;n a indicar al servicio remoto (dependiente
+     *             de la implementaci&oacute;n).
      * @return Resultado de la carga.
-     * @throws IOException
-     *             Cuando no se pueden codificar en base 64 los objetos de propiedades.
-     * @throws CertificateEncodingException
-     * 				Si el certificado proporcionado no es v&aacute;lido.
-     * @throws HttpForbiddenException
-     * 				Cuando no se tiene acceso al servicio remoto.
-     * @throws HttpNetworkException
-     * 				Si hay problemas en la llamada al servicio de red.
-     * @throws HttpOperationException
-     * 				Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
-     * @throws ClientConfigFilesNotFoundException
-     * 				Cuando no se encuentra el fichero de configuraci&oacute;n.
-     * @throws HttpNoUserException
-     * 				Cuando el usuario no est&eacute; dado de alta en el sistema.
-     */
+     * @throws IOException Cuando no se pueden codificar en base 64 los objetos de propiedades.
+     * @throws CertificateEncodingException Si el certificado proporcionado no es v&aacute;lido.
+     * @throws HttpForbiddenException Cuando no se tiene acceso al servicio remoto.
+     * @throws HttpNetworkException Si hay problemas en la llamada al servicio de red.
+     * @throws HttpOperationException Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
+     * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero de configuraci&oacute;n.
+     * @throws HttpNoUserException Cuando el usuario no est&eacute; dado de alta en el sistema. */
     public static LoadResult loadData(final String appId,
-    		final String subjectId,
-            final HttpSignProcessConstants.SignatureOperation op,
-            final HttpSignProcessConstants.SignatureFormat ft,
-            final HttpSignProcessConstants.SignatureAlgorithm algth,
-            final Properties prop, final X509Certificate cert, final byte[] d,
-            final Properties conf)
-            throws IOException, CertificateEncodingException,
-            HttpForbiddenException, HttpNetworkException,
-            HttpOperationException, ClientConfigFilesNotFoundException,
-            HttpNoUserException {
-
+    		                          final String subjectId,
+    		                          final HttpSignProcessConstants.SignatureOperation op,
+    		                          final HttpSignProcessConstants.SignatureFormat ft,
+    		                          final HttpSignProcessConstants.SignatureAlgorithm algth,
+    		                          final Properties prop,
+    		                          final X509Certificate cert,
+    		                          final byte[] d,
+    		                          final Properties conf) throws IOException,
+                                                                    CertificateEncodingException,
+                                                                    HttpForbiddenException,
+                                                                    HttpNetworkException,
+                                                                    HttpOperationException,
+                                                                    ClientConfigFilesNotFoundException,
+                                                                    HttpNoUserException {
         if (op == null) {
             throw new IllegalArgumentException(
-                    "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
+                "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (ft == null) {
             throw new IllegalArgumentException(
-                    "El formato de firma no puede ser nulo" //$NON-NLS-1$
+                "El formato de firma no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (algth == null) {
             throw new IllegalArgumentException(
-                    "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
+                "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (d == null) {
             throw new IllegalArgumentException(
-                    "Los datos a firmar no pueden ser nulos" //$NON-NLS-1$
+                "Los datos a firmar no pueden ser nulos" //$NON-NLS-1$
             );
         }
         if (subjectId == null || "".equals(subjectId)) { //$NON-NLS-1$
             throw new IllegalArgumentException(
-                    "El identificador del titular no puede ser nulo" //$NON-NLS-1$
+                "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (cert == null) {
             throw new IllegalArgumentException(
-                    "El certificado del firmante no puede ser nulo" //$NON-NLS-1$
+                "El certificado del firmante no puede ser nulo" //$NON-NLS-1$
             );
         }
 
@@ -225,84 +205,82 @@ public final class HttpLoadProcess {
         final String extraParamsB64 = Utils.properties2Base64(prop, true);
         final String configB64 = Utils.properties2Base64(conf, true);
 
-        return loadData(appId, subjectId, op.toString(), ft.toString(),
-                algth.toString(), extraParamsB64, certB64, dataB64, configB64);
+        return loadData(
+    		appId,
+    		subjectId,
+    		op.toString(),
+    		ft.toString(),
+            algth.toString(),
+            extraParamsB64,
+            certB64,
+            dataB64,
+            configB64
+        );
     }
 
-    /**
-     * Carga datos para ser posteriormente firmados.
-     * @param appId
-     *            Identificador de la aplicaci&oacute;n que realiza la
-     *            petici&oacute;n.
-     * @param subjectId
-     *            Identificador del titular de la clave de firma.
-     * @param op
-     *            Tipo de operaci&oacute;n a realizar: sign, cosign o
-     *            countersign.
-     * @param ft
-     *            Formato de la operaci&oacute;n.
-     * @param algth
-     *            Algoritmo de firma.
-     * @param propB64
-     *            Propiedades extra a a&ntilde;adir a la firma  en Base64 (puede ser
-     *            <code>null</code>).
-     * @param certB64
-     *            Certificado de usuario para realizar la firma en Base64.
-     * @param dataB64
-     *            Datos a firmar en Base64.
-     * @param confB64
-     *            Configuraci&oacute;n a indicar al servicio remoto (dependiente
-     *            de la implementaci&oacute;n).
+    /** Carga datos para ser posteriormente firmados.
+     * @param appId Identificador de la aplicaci&oacute;n que realiza la
+     *              petici&oacute;n.
+     * @param subjectId Identificador del titular de la clave de firma.
+     * @param op Tipo de operaci&oacute;n a realizar: sign, cosign o
+     *           countersign.
+     * @param ft Formato de la operaci&oacute;n.
+     * @param algth Algoritmo de firma.
+     * @param propB64 Propiedades extra a a&ntilde;adir a la firma  en Base64 (puede ser
+     *                <code>null</code>).
+     * @param certB64 Certificado de usuario para realizar la firma en Base64.
+     * @param dataB64 Datos a firmar en Base64.
+     * @param confB64 Configuraci&oacute;n a indicar al servicio remoto (dependiente
+     *                de la implementaci&oacute;n).
      * @return Resultado de la carga.
-     * @throws HttpForbiddenException
-     * 				Cuando no se tiene acceso al servicio remoto.
-     * @throws HttpNetworkException
-     * 				Si hay problemas en la llamada al servicio de red.
-     * @throws HttpOperationException
-     * 				Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
-     * @throws ClientConfigFilesNotFoundException
-     * 				Cuando no se encuentra el fichero de configuraci&oacute;n.
-     * @throws HttpNoUserException
-     * 				Cuando el usuario no est&eacute; dado de alta en el sistema.
-     */
+     * @throws HttpForbiddenException Cuando no se tiene acceso al servicio remoto.
+     * @throws HttpNetworkException Si hay problemas en la llamada al servicio de red.
+     * @throws HttpOperationException Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
+     * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero de configuraci&oacute;n.
+     * @throws HttpNoUserException Cuando el usuario no est&eacute; dado de alta en el sistema. */
     public static LoadResult loadData(final String appId,
-    		final String subjectId, final String op, final String ft,
-    		final String algth, final String propB64, final String certB64,
-    		final String dataB64, final String confB64)
-    				throws HttpForbiddenException, HttpNetworkException,
-    				HttpOperationException, ClientConfigFilesNotFoundException,
-    				HttpNoUserException {
-
+    		                          final String subjectId,
+    		                          final String op,
+    		                          final String ft,
+    		                          final String algth,
+    		                          final String propB64,
+    		                          final String certB64,
+    		                          final String dataB64,
+    		                          final String confB64) throws HttpForbiddenException,
+                                                                   HttpNetworkException,
+                                                                   HttpOperationException,
+                                                                   ClientConfigFilesNotFoundException,
+                                                                   HttpNoUserException {
     	initialize();
 
     	if (op == null) {
             throw new IllegalArgumentException(
-                    "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
+                "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (ft == null) {
             throw new IllegalArgumentException(
-                    "El formato de firma no puede ser nulo" //$NON-NLS-1$
+                "El formato de firma no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (algth == null) {
             throw new IllegalArgumentException(
-                    "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
+                "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (dataB64 == null) {
             throw new IllegalArgumentException(
-                    "Los datos a firmar no pueden ser nulos" //$NON-NLS-1$
+                "Los datos a firmar no pueden ser nulos" //$NON-NLS-1$
             );
         }
         if (subjectId == null || "".equals(subjectId)) { //$NON-NLS-1$
             throw new IllegalArgumentException(
-                    "El identificador del titular no puede ser nulo" //$NON-NLS-1$
+                "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (certB64 == null) {
             throw new IllegalArgumentException(
-                    "El certificado del firmante no puede ser nulo" //$NON-NLS-1$
+                "El certificado del firmante no puede ser nulo" //$NON-NLS-1$
             );
         }
 
@@ -331,15 +309,18 @@ public final class HttpLoadProcess {
         	if (e instanceof HttpError) {
         		final HttpError he = (HttpError) e;
         		LOGGER.severe(
-        				"Error en la llamada al servicio de carga de datos: " + he.getResponseDescription() //$NON-NLS-1$
-        				);
+    				"Error en la llamada al servicio de carga de datos: " + he.getResponseDescription() //$NON-NLS-1$
+				);
         		if (he.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
         			throw new HttpForbiddenException(he.getResponseDescription(), he);
-        		} else if (he.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+        		}
+        		else if (he.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
         			throw new HttpNetworkException(he.getResponseDescription(), he);
-        		} else if (he.getResponseCode() == HttpCustomErrors.NO_USER.getErrorCode()) {
+        		}
+        		else if (he.getResponseCode() == HttpCustomErrors.NO_USER.getErrorCode()) {
         			throw new HttpNoUserException(he.getResponseDescription(), he);
-        		} else {
+        		}
+        		else {
         			throw new HttpOperationException(he.getResponseDescription(), he);
         		}
         	}
@@ -348,9 +329,9 @@ public final class HttpLoadProcess {
         }
         catch (final Exception e) {
         	LOGGER.log(
-        			Level.SEVERE,
-        			"Error en la invocacion al servicio de recuperacion de carga de datos", e //$NON-NLS-1$
-        			);
+    			Level.SEVERE,
+    			"Error en la invocacion al servicio de recuperacion de carga de datos", e //$NON-NLS-1$
+			);
         	throw new HttpOperationException("Error en la invocacion al servicio de recuperacion de carga de datos", e); //$NON-NLS-1$
         }
 

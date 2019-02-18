@@ -9,12 +9,9 @@
  */
 package es.gob.fire.client;
 
-/**
- * @author mario
- * Excepci&oacute;n que salta cuando falta un fichero de configuraci&oacute;n del
- * componente distribuido.
- */
-public class ClientConfigFilesNotFoundException extends Exception {
+/** Excepci&oacute;n que salta cuando falta un fichero de configuraci&oacute;n del
+ * componente distribuido. */
+public final class ClientConfigFilesNotFoundException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 	private static String fileName;
@@ -22,47 +19,38 @@ public class ClientConfigFilesNotFoundException extends Exception {
         super();
     }
 
-	/**
-	 * Constructor p&uacute;blico de la excepci&oacute;n.
+	/** Constructor p&uacute;blico de la excepci&oacute;n.
 	 * @param msg Mensaje de la excepci&oacute;n.
-	 * @param filename Nombre del fichero que falta en el sistema.
-	 */
+	 * @param filename Nombre del fichero que falta en el sistema. */
 	public ClientConfigFilesNotFoundException(final String msg, final String filename) {
 		super(msg);
 		fileName = filename;
     }
 
-	/**
-	 * Constructor p&uacute;blico de la excepci&oacute;n.
+	/** Constructor p&uacute;blico de la excepci&oacute;n.
 	 * @param msg Mensaje de la excepci&oacute;n.
 	 * @param filename Nombre del fichero que falta en el sistema.
-	 * @param cause Error que caus&oacute; la excepci&oacute;n.
-	 */
+	 * @param cause Error que caus&oacute; la excepci&oacute;n. */
 	public ClientConfigFilesNotFoundException(final String msg, final String filename, final Throwable cause) {
 		super(msg, cause);
 		fileName = filename;
     }
 
-	/**
-	 * Constructor p&uacute;blico de la excepci&oacute;n.
-	 * @param msg Mensaje de la excepci&oacute;n.
-	 */
+	/** Constructor p&uacute;blico de la excepci&oacute;n.
+	 * @param msg Mensaje de la excepci&oacute;n. */
 	public ClientConfigFilesNotFoundException(final String msg) {
 		super(msg);
 	}
 
-	/**
-	 * Constructor p&uacute;blico de la excepci&oacute;n.
+	/** Constructor p&uacute;blico de la excepci&oacute;n.
 	 * @param msg Mensaje de la excepci&oacute;n.
-	 * @param cause Error que caus&oacute; la excepci&oacute;n.
-	 */
+	 * @param cause Error que caus&oacute; la excepci&oacute;n. */
 	public ClientConfigFilesNotFoundException(final String msg, final Throwable cause) {
 		super(msg, cause);
 	}
 
-	/**
-	 * @return El nombre del fichero que no se ha encontrado en el sistema.
-	 */
+	/** Obtiene el nombre del fichero que no se ha encontrado en el sistema.
+	 * @return Nombre del fichero que no se ha encontrado en el sistema. */
 	public static String getFileName(){
 		return ClientConfigFilesNotFoundException.fileName;
 	}

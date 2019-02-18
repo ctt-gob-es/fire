@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Manejador para la obtenci&oacute;n de los valores del fichero de configuraci&oacute;n. */
-public class ConfigManager {
+public final class ConfigManager {
 
 	private static final String PROPERTY_FILE = "client_config.properties";//$NON-NLS-1$
 

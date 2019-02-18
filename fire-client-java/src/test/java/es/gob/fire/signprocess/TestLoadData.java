@@ -12,7 +12,6 @@ package es.gob.fire.signprocess;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.clavefirma.client.certificatelist.HttpCertificateList;
@@ -26,14 +25,14 @@ import es.gob.clavefirma.client.signprocess.LoadResult;
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class TestLoadData {
 
-	private static final String APP_ID = "1"; //$NON-NLS-1$
-	private static final String SUBJECT = "52020201C"; //$NON-NLS-1$
+	private static final String APP_ID = "spt"; //$NON-NLS-1$
+	private static final String SUBJECT = "00001"; //$NON-NLS-1$
 
 	/** prueba de carga de datos.
 	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
-	@Ignore
+	//@Ignore
 	public void testClientLoadData() throws Exception {
 
 		final X509Certificate cert = HttpCertificateList.getList(APP_ID, SUBJECT).get(0);

@@ -40,6 +40,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import es.gob.fire.client.Base64;
+
 /** Mensaje con la informaci&oacute;n requerida para la ejecuci&oacute;n de una
  * operaci&oacute;n trif&aacute;sica. */
 public final class TriphaseData {
@@ -221,6 +223,28 @@ public final class TriphaseData {
 	 * @return N&uacute;mero de firmas. */
 	public int getSignsCount() {
 		return this.signs.size();
+	}
+
+	/** Obtiene una sesi&oacute;n de firma trif&aacute;sica a partir de un XML pasado a Base64 que lo describe.
+	 * Un ejemplo de XML podr&iacute;a ser el siguiente:
+	 * <pre>
+	 * &lt;xml&gt;
+	 *  &lt;firmas format="XAdES"&gt;
+	 *   &lt;firma Id="001"&gt;
+	 *    &lt;param n="NEED_PRE"&gt;true&lt;/param&gt;
+	 *    &lt;param n="PRE"&gt;MYICXDAYBgkqhkiG9[...]w0BA=&lt;/param&gt;
+	 *    &lt;param n="NEED_DATA"&gt;true&lt;/param&gt;
+	 *    &lt;param n="PK1"&gt;EMijB9pJ0lj27Xqov[...]RnCM=&lt;/param&gt;
+	 *   &lt;/firma&gt;
+	 *  &lt;/firmas&gt;
+	 * &lt;/xml&gt;
+	 * </pre>
+	 * @param xmlB64 XML codificado en Base64 (a partir de su representaci&oacute;n binaria directa) con la
+	 *               informaci&oacute;n del mensaje.
+	 * @return Mensaje de datos.
+	 * @throws IOException Cuando hay problemas en el tratamiento de datos. */
+	public static TriphaseData parser(final String xmlB64) throws IOException {
+		return parser(Base64.decode(xmlB64));
 	}
 
 	/** Obtiene una sesi&oacute;n de firma trif&aacute;sica a partir de un XML que lo describe.

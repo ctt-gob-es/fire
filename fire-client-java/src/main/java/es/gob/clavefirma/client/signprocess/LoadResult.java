@@ -18,28 +18,20 @@ import javax.json.JsonReader;
 
 import es.gob.fire.client.Base64;
 
-/**
- * Resultado de una operaci&oacute;n de carga de datos a firmar.
- *
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
- */
+/** Resultado de una operaci&oacute;n de carga de datos a firmar.
+ * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class LoadResult {
 
     private final String transactionId;
     private final String redirectUrl;
     private final TriphaseData triphaseData;
 
-    /**
-     * Crea el resultado de una operaci&oacute;n de carga de datos a firmar a
+    /** Crea el resultado de una operaci&oacute;n de carga de datos a firmar a
      * partir de su defici&oacute;n JSON.
-     *
-     * @param json
-     *            Definici&oacute;n JSON del resultado de una operaci&oacute;n
-     *            de carga de datos a firmar.
-     * @throws IOException
-     *             Si hay problemas analizando los datos de sesi&oacute;n
-     *             trif&aacute;sica.
-     */
+     * @param json Definici&oacute;n JSON del resultado de una operaci&oacute;n
+     *             de carga de datos a firmar.
+     * @throws IOException Si hay problemas analizando los datos de sesi&oacute;n
+     *                     trif&aacute;sica. */
     public LoadResult(final String json) throws IOException {
         if (json == null) {
             throw new IllegalArgumentException(
@@ -79,19 +71,12 @@ public final class LoadResult {
         this.transactionId = id;
         this.redirectUrl = redirect;
         this.triphaseData = TriphaseData.parser(Base64.decode(tDataXmlB64));
-
     }
 
-    /**
-     * Crea el resultado de una operaci&oacute;n de carga de datos a firmar.
-     *
-     * @param id
-     *            Identificador de la transacci&oacute;n de firma.
-     * @param redirect
-     *            URL a redireccionar al usuario para que se autentique.
-     * @param td
-     *            Datos de la sesi&oacute;n trif&aacute;sica.
-     */
+    /** Crea el resultado de una operaci&oacute;n de carga de datos a firmar.
+     * @param id Identificador de la transacci&oacute;n de firma.
+     * @param redirect URL a redireccionar al usuario para que se autentique.
+     * @param td Datos de la sesi&oacute;n trif&aacute;sica. */
     public LoadResult(final String id, final String redirect, final TriphaseData td) {
         if (id == null || "".equals(id)) { //$NON-NLS-1$
             throw new IllegalArgumentException(
@@ -113,29 +98,20 @@ public final class LoadResult {
         this.triphaseData = td;
     }
 
-    /**
-     * Obtiene el identificador de la transacci&oacute;n de firma.
-     *
-     * @return Identificador de la transacci&oacute;n de firma.
-     */
+    /** Obtiene el identificador de la transacci&oacute;n de firma.
+     * @return Identificador de la transacci&oacute;n de firma. */
     public String getTransactionId() {
         return this.transactionId;
     }
 
-    /**
-     * Obtiene la URL a redireccionar al usuario para que se autentique.
-     *
-     * @return URL a redireccionar al usuario para que se autentique.
-     */
+    /** Obtiene la URL a redireccionar al usuario para que se autentique.
+     * @return URL a redireccionar al usuario para que se autentique. */
     public String getRedirectUrl() {
         return this.redirectUrl;
     }
 
-    /**
-     * Obtiene los datos de la sesi&oacute;n trif&aacute;sica.
-     *
-     * @return Datos de la sesi&oacute;n trif&aacute;sica.
-     */
+    /** Obtiene los datos de la sesi&oacute;n trif&aacute;sica.
+     * @return Datos de la sesi&oacute;n trif&aacute;sica. */
     public TriphaseData getTriphaseData() {
         return this.triphaseData;
     }

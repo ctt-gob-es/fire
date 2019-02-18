@@ -9,11 +9,8 @@
  */
 package es.gob.fire.client;
 
-/**
- * No se ha podido conectar con el componente central.
- *
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
- */
+/** No se ha podido conectar con el componente central.
+ * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class HttpNetworkException extends HttpOperationException {
 
     /** Serial Id. */
@@ -23,26 +20,21 @@ public final class HttpNetworkException extends HttpOperationException {
         super();
     }
 
-    /**
-     * Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
-     * @param e Causa del error.
-     */
+    /** Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
+     * @param e Causa del error. */
     public HttpNetworkException(final Throwable e) {
         super("Error de conexion", e); //$NON-NLS-1$
     }
 
-    /**
-     * Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
-     * @param msg Mensaje de error.
-     */
+    /** Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
+     * @param msg Mensaje de error. */
     HttpNetworkException(final String msg) {
     	super(msg);
     }
 
-    /**
-     * @param msg
-     * @param e
-     */
+    /** Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
+     * @param msg Mensaje de error.
+     * @param e Causa del error. */
     public HttpNetworkException(final String msg, final Throwable e) {
     	super(msg, e);
     }

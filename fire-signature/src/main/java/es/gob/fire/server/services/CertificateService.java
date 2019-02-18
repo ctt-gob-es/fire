@@ -87,8 +87,10 @@ public final class CertificateService extends HttpServlet {
 
             if (appId == null || appId.isEmpty()) {
             	LOGGER.severe("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
-        		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                        "No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
+        		response.sendError(
+    				HttpServletResponse.SC_BAD_REQUEST,
+                    "No se ha proporcionado el identificador de la aplicacion" //$NON-NLS-1$
+				);
                 return;
             }
 
@@ -143,27 +145,31 @@ public final class CertificateService extends HttpServlet {
 
         // Obtenemos el conector con el backend ya configurado
     	LOGGER.warning(
-			"El servicio directo no soporta multiples conectores, se usara el primero de la lista: " + ProviderManager.getProviderNames()[0] //$NON-NLS-1$
+			"El servicio directo de lista de certificados no soporta multiples conectores, se usara el primero de la lista: " + ProviderManager.getProviderNames()[0] //$NON-NLS-1$
 		);
         final FIReConnector connector;
         try {
-        	final Properties config;
+        	final Properties config = new Properties();
+
+        	// Cargamos configuracion por defecto del conector
+    		config.putAll(ProviderManager.loadProviderConfig(ProviderManager.getProviderNames()[0]));
+
         	final String configB64 = params.getParameter(PARAM_CONFIG);
         	if (configB64 != null && configB64.length() > 0) {
-        		config = ServiceUtil.base642Properties(configB64);
+        		config.putAll(ServiceUtil.base642Properties(configB64));
         	}
-        	else {
-        		// Cargamos configuracion por defecto del conector
-        		config = ProviderManager.loadProviderConfig(ProviderManager.getProviderNames()[0]);
-        	}
+
             connector = ProviderManager.initTransacction(
         		ProviderManager.getProviderNames()[0],
         		config
     		);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        	LOGGER.log(
+    			Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e //$NON-NLS-1$
+			);
+            response.sendError(
+        		HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
             );
             return;

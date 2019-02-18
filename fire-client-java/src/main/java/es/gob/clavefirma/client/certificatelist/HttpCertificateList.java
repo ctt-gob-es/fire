@@ -57,17 +57,13 @@ public final class HttpCertificateList {
 
     private static boolean initialized = false;
 
-    /**
-     * Constructor vac&iacute;o no instanciable
-     */
+    /** Constructor vac&iacute;o no instanciable. */
     private HttpCertificateList() {
         // No instanciable
     }
 
-    /**
-     * Inicializa las propiedades de sistema a trav&eacute;s del fichero de propiedades.
-     * @throws ClientConfigFilesNotFoundException Si no encuentra el fichero de configuraci&oacute;n.
-     */
+    /** Inicializa las propiedades de sistema a trav&eacute;s del fichero de propiedades.
+     * @throws ClientConfigFilesNotFoundException Si no encuentra el fichero de configuraci&oacute;n. */
     public static void initialize() throws ClientConfigFilesNotFoundException{
     	if (!initialized) {
     		initializeProperties();
@@ -88,7 +84,7 @@ public final class HttpCertificateList {
         URL = p.getProperty("certificateUrl"); //$NON-NLS-1$
         if (URL == null) {
             throw new IllegalStateException(
-                "No esta declarada la configuracion de URL en la configuracion (propiedad 'certificateUrl')" //$NON-NLS-1$
+                "No esta declarada la URL en la configuracion (propiedad 'certificateUrl')" //$NON-NLS-1$
             );
         }
 
@@ -119,55 +115,64 @@ public final class HttpCertificateList {
      * @throws ClientConfigFilesNotFoundException Si no se ha encontrado en el sistema el fichero de configuraci&oacute;n.
      * @throws HttpWeakRegistryException Si el usuario no puede tener certificados de firma por haber hecho un
      * 				                     registro no fehaciente. */
-    public static List<X509Certificate> getList(final String appId, final String subjectId)
-            throws CertificateException, HttpNetworkException, HttpForbiddenException,
-            HttpNoUserException, HttpCertificateBlockedException,
-            HttpOperationException, ClientConfigFilesNotFoundException, HttpWeakRegistryException {
-
+    public static List<X509Certificate> getList(final String appId, final String subjectId) throws CertificateException,
+    	                                                                                           HttpNetworkException,
+    	                                                                                           HttpForbiddenException,
+    	                                                                                           HttpNoUserException,
+    	                                                                                           HttpCertificateBlockedException,
+    	                                                                                           HttpOperationException,
+    	                                                                                           ClientConfigFilesNotFoundException,
+    	                                                                                           HttpWeakRegistryException {
     	initialize();
 
         final List<X509Certificate> certificates = new ArrayList<>();
 
-        byte[] responseJSON;
+        final byte[] responseJSON;
         try {
         	responseJSON = ConnectionManager.readUrlByGet(
-        			URL + URL_SUFIX
+    			URL + URL_SUFIX
         			.replace(APP_ID_TAG, appId)
         			.replace(SUBJECT_ID_TAG, subjectId));
         }
         catch (final HttpError e) {
         	LOGGER.log(Level.SEVERE,
-            		"Error en la llamada al servicio de listado de certificados: " + e.getMessage(), //$NON-NLS-1$
-            		e
-            	);
+        		"Error en la llamada al servicio de listado de certificados: " + e.getMessage(), //$NON-NLS-1$
+        		e
+        	);
 
         	// Aplicacion no permitida
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
 			    throw new HttpForbiddenException("Aplicacion no permitida", e); //$NON-NLS-1$
+        	}
 			// Usuario no valido
-        	} else if (e.getResponseCode() == HttpCustomErrors.NO_USER.getErrorCode()) {
+        	else if (e.getResponseCode() == HttpCustomErrors.NO_USER.getErrorCode()) {
 			    throw new HttpNoUserException("Usuario no valido", e); //$NON-NLS-1$
+        	}
 			// El certificado de firma esta bloqueado
-        	} else if (e.getResponseCode() == HttpCustomErrors.CERTIFICATE_BLOCKED.getErrorCode()) {
+        	else if (e.getResponseCode() == HttpCustomErrors.CERTIFICATE_BLOCKED.getErrorCode()) {
 			    throw new HttpCertificateBlockedException("Usuario con certificados bloqueados", e); //$NON-NLS-1$
+        	}
 			// El usuario realizo un registro debil y no tiene permisos para generar certificados
-        	}  else if (e.getResponseCode() == HttpCustomErrors.WEAK_REGISTRY.getErrorCode()) {
+        	else if (e.getResponseCode() == HttpCustomErrors.WEAK_REGISTRY.getErrorCode()) {
 			    throw new HttpWeakRegistryException("El usuario realizo un registro debil y no puede tener certificados de firma", e); //$NON-NLS-1$
+        	}
 			// El usuario no tiene certificados
-        	}  else if (e.getResponseCode() == HttpCustomErrors.NO_CERTS.getErrorCode()) {
+        	else if (e.getResponseCode() == HttpCustomErrors.NO_CERTS.getErrorCode()) {
 			    return certificates;
+        	}
 			// Problema de red
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+        	else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
 			    throw new HttpNetworkException("Error en la conexion", e); //$NON-NLS-1$
+        	}
 			// Cualquier otro error
-        	} else {
+        	else {
 			    throw new HttpOperationException(e.getResponseDescription(), e);
 			}
         }
         catch (final Exception e) {
             LOGGER.log(
-            		Level.SEVERE,
-            		"Error en la llamada al servicio de obtencion de certificados", e //$NON-NLS-1$
+        		Level.SEVERE,
+        		"Error en la llamada al servicio de obtencion de certificados", e //$NON-NLS-1$
             );
             throw new HttpNetworkException("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
 		}
@@ -178,10 +183,13 @@ public final class HttpCertificateList {
 
         	final JsonArray certList = jsonReader.readObject().getJsonArray(CERT_JSON_PARAM);
             for (final JsonValue cert : certList) {
-                certificates.add((X509Certificate) CertificateFactory
-                        .getInstance(X509).generateCertificate(
-                                new ByteArrayInputStream(Base64.decode(cert
-                                        .toString()))));
+                certificates.add(
+            		(X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(
+        				new ByteArrayInputStream(
+    						Base64.decode(cert.toString())
+						)
+            		)
+        		);
             }
             jsonReader.close();
         }

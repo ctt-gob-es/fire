@@ -9,46 +9,36 @@
  */
 package es.gob.fire.client;
 
-/**
- * Resultado de cada firma particular dentro de un lote de firma.
- */
-public class SignBatchResult {
+/** Resultado de cada firma particular dentro de un lote de firma. */
+public final class SignBatchResult {
 
 	private final boolean signed;
 	private final String errotType;
 
-	/**
-	 * Crea el resultado de una firma de un lote indicando
-	 * que esta finaliz&oacute; correctamente.
-	 */
+	/** Crea el resultado de una firma de un lote indicando
+	 * que esta finaliz&oacute; correctamente. */
 	public SignBatchResult() {
 		this.signed = true;
 		this.errotType = null;
 	}
 
-	/**
-	 * Crea el resultado de una firma de un lote indicando
+	/** Crea el resultado de una firma de un lote indicando
 	 * que esta no finaliz&oacute; correctamente.
-	 * @param errorType Tipo de error de la firma.
-	 */
+	 * @param errorType Tipo de error de la firma. */
 	public SignBatchResult(final String errorType) {
 		this.signed = false;
 		this.errotType = errorType;
 	}
 
-	/**
-	 * Indica si se gener&oacute; la firma del documento.
+	/** Indica si se gener&oacute; la firma del documento.
 	 * @return {@code true} si la firma se gener&oacute; correctamente,
-	 * {@code false} en caso contrario.
-	 */
+	 * {@code false} en caso contrario. */
 	public boolean isSigned() {
 		return this.signed;
 	}
 
-	/**
-	 * Motivo por el que la firma no finaliz&oacute; correctamente.
-	 * @return Tipo de error registrado durante la firma.
-	 */
+	/** Motivo por el que la firma no finaliz&oacute; correctamente.
+	 * @return Tipo de error registrado durante la firma. */
 	public String getErrotType() {
 		return this.errotType;
 	}

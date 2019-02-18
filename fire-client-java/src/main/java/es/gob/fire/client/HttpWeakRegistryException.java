@@ -9,11 +9,8 @@
  */
 package es.gob.fire.client;
 
-
-/**
- * El usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados
- * de firma.
- */
+/** El usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados
+ * de firma. */
 public final class HttpWeakRegistryException extends HttpOperationException {
 
 	/** Serial ID. */
@@ -23,19 +20,15 @@ public final class HttpWeakRegistryException extends HttpOperationException {
         super();
     }
 
-	/**
-	 * Indica que un usuario no puede tener certificados de firma.
-	 * @param e Excepci&oacute;n que caus&oacute; el error.
-	 */
+	/** Indica que un usuario no puede tener certificados de firma.
+	 * @param e Excepci&oacute;n que caus&oacute; el error. */
     public HttpWeakRegistryException(final Throwable e) {
         super("El usuario realizo un registro debil y no puede tener certificados de firma", e); //$NON-NLS-1$
     }
 
-    /**
-	 * Indica que un usuario no puede tener certificados de firma.
+    /** Indica que un usuario no puede tener certificados de firma.
 	 * @param msg Mensaje de error.
-	 * @param e Excepci&oacute;n que caus&oacute; el error.
-	 */
+	 * @param e Excepci&oacute;n que caus&oacute; el error. */
     public HttpWeakRegistryException(final String msg, final Throwable e) {
         super(msg, e);
     }

@@ -57,7 +57,6 @@ public final class LoadService extends HttpServlet {
     @Override
     public void init() throws ServletException {
     	super.init();
-
     	try {
 	    	ConfigManager.checkConfiguration();
 		}
@@ -132,7 +131,8 @@ public final class LoadService extends HttpServlet {
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
-			} catch (final CertificateValidationException e) {
+			}
+	    	catch (final CertificateValidationException e) {
 				LOGGER.severe("Error en la validacion del certificado: " + e); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;
@@ -172,15 +172,18 @@ public final class LoadService extends HttpServlet {
 
         if (format == null || format.isEmpty()) {
             LOGGER.warning("No se ha indicado el formato de firma"); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                "No se ha indicado el formato de firma"); //$NON-NLS-1$
+            response.sendError(
+        		HttpServletResponse.SC_BAD_REQUEST,
+                "No se ha indicado el formato de firma" //$NON-NLS-1$
+    		);
             return;
         }
 
         if (dataB64 == null || dataB64.isEmpty()) {
             response.sendError(
         		HttpServletResponse.SC_BAD_REQUEST,
-                "No se han proporcionado los datos a firmar"); //$NON-NLS-1$
+                "No se han proporcionado los datos a firmar" //$NON-NLS-1$
+    		);
             return;
         }
 
@@ -209,24 +212,41 @@ public final class LoadService extends HttpServlet {
         }
         catch (final Exception e) {
             LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "No se ha podido obtener la prefirma: " + e); //$NON-NLS-1$
+            response.sendError(
+    			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "No se ha podido obtener la prefirma: " + e //$NON-NLS-1$
+            );
             return;
         }
 
         // Obtenemos el conector con el backend ya configurado
+    	LOGGER.warning(
+			"El servicio directo de carga de datos no soporta multiples conectores, se usara el primero de la lista: " + ProviderManager.getProviderNames()[0] //$NON-NLS-1$
+		);
         final FIReConnector connector;
         try {
-        	Properties config = null;
+        	final Properties config = new Properties();
+
+        	// Cargamos configuracion por defecto del conector
+    		config.putAll(ProviderManager.loadProviderConfig(ProviderManager.getProviderNames()[0]));
+
         	if (configB64 != null && configB64.length() > 0) {
-        		config = ServiceUtil.base642Properties(configB64);
+        		config.putAll(ServiceUtil.base642Properties(configB64));
         	}
-            connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
+
+            connector = ProviderManager.initTransacction(
+        		ProviderManager.getProviderNames()[0],
+        		config
+    		);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error en la configuracion del conector con el servicio de custodia: " + e); //$NON-NLS-1$
+        	LOGGER.log(
+    			Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e //$NON-NLS-1$
+			);
+            response.sendError(
+        		HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
+            );
             return;
         }
 
@@ -243,20 +263,26 @@ public final class LoadService extends HttpServlet {
         }
         catch (final FIReConnectorUnknownUserException e) {
             LOGGER.severe("El usuario " + subjectId + " no tiene certificados en el sistema: " + e); //$NON-NLS-1$ //$NON-NLS-2$
-            response.sendError(HttpCustomErrors.NO_USER.getErrorCode(),
-                "El usuario " + subjectId + " no tiene certificados en el sistema: " + e); //$NON-NLS-1$//$NON-NLS-2$
+            response.sendError(
+        		HttpCustomErrors.NO_USER.getErrorCode(),
+                "El usuario " + subjectId + " no tiene certificados en el sistema: " + e //$NON-NLS-1$//$NON-NLS-2$
+    		);
             return;
         }
         catch (final FIReConnectorNetworkException e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
-                    "No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
+            response.sendError(
+        		HttpServletResponse.SC_REQUEST_TIMEOUT,
+                "No se ha podido conectar con el sistema: " + e //$NON-NLS-1$
+    		);
             return;
         }
         catch (final Exception e) {
             LOGGER.log(Level.SEVERE, "Error en la carga de datos: " + e, e); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error en la carga de datos: " + e); //$NON-NLS-1$
+            response.sendError(
+        		HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Error en la carga de datos: " + e //$NON-NLS-1$
+    		);
             return;
         }
 

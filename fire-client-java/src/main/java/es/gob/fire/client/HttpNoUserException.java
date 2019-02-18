@@ -9,11 +9,8 @@
  */
 package es.gob.fire.client;
 
-
-/**
- * El usuario no est&aacute; dado de alta en el sistema.
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
- */
+/** El usuario no est&aacute; dado de alta en el sistema.
+ * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class HttpNoUserException extends HttpOperationException {
 
     /** Serial Id. */
@@ -23,19 +20,15 @@ public final class HttpNoUserException extends HttpOperationException {
         super();
     }
 
-    /**
-     * El usuario no est&aacute; dado de alta en el sistema.
-     * @param e Motivo del error.
-     */
+    /** El usuario no est&aacute; dado de alta en el sistema.
+     * @param e Motivo del error. */
     public HttpNoUserException(final Throwable e) {
         super("Usuario no valido", e); //$NON-NLS-1$
     }
 
-    /**
-     * El usuario no est&aacute; dado de alta en el sistema.
+    /** El usuario no est&aacute; dado de alta en el sistema.
      * @param msg Mensaje de error.
-     * @param e Motivo del error.
-     */
+     * @param e Motivo del error. */
     public HttpNoUserException(final String msg, final Throwable e) {
         super(msg, e);
     }

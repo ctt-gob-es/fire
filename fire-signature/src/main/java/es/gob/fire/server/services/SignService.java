@@ -132,12 +132,13 @@ public final class SignService extends HttpServlet {
         	LOGGER.fine("No se realiza la validacion de aplicacion"); //$NON-NLS-1$
         }
 
-    	if(ConfigManager.isCheckCertificateNeeded()){
+    	if (ConfigManager.isCheckCertificateNeeded()){
     		LOGGER.fine("Se realizara la validacion del certificado"); //$NON-NLS-1$
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
-			} catch (final CertificateValidationException e) {
+			}
+	    	catch (final CertificateValidationException e) {
 				LOGGER.severe("Error en la validacion del certificado: " + e); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;
@@ -156,13 +157,16 @@ public final class SignService extends HttpServlet {
     	}
 
     	// Obtenemos el conector con el backend ya configurado
+        LOGGER.warning(
+    		"El servicio directo de lista de certificados no soporta multiples conectores, se usara el primero de la lista: " + ProviderManager.getProviderNames()[0] //$NON-NLS-1$
+    	);
         final FIReConnector connector;
         try {
         	Properties config = null;
         	if (configB64 != null && configB64.length() > 0) {
         		config = ServiceUtil.base642Properties(configB64);
         	}
-    		connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
+    		connector = ProviderManager.initTransacction(ProviderManager.getProviderNames()[0], config); //Cambiado ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
@@ -231,10 +235,13 @@ public final class SignService extends HttpServlet {
         try {
         	final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
         	signResult = upgradeResult.getResult();
-       } catch (final UpgradeException e) {
+        }
+        catch (final UpgradeException e) {
         	LOGGER.log(Level.SEVERE, "Error al actualizar la firma de la transaccion: " + transactId, e); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Error al actualizar la firma: " + e); //$NON-NLS-1$
+        	response.sendError(
+    			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Error al actualizar la firma: " + e //$NON-NLS-1$
+            );
         	return;
         }
 

@@ -31,28 +31,22 @@ import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.DBConnectionException;
 
-/**
- *  Conjunto de funciones est&aacute;ticas de car&aacute;cter general.
- */
+/** Conjunto de funciones est&aacute;ticas de car&aacute;cter general. */
 public final class ServiceUtil {
 
     private static final Logger LOGGER = Logger.getLogger(ServiceUtil.class.getName());
-
 
     private ServiceUtil() {
         // No instanciable
     }
 
-
-    /**
-     * Transforma un Base64 URL Safe en un Base64 corriente.
+    /** Transforma un Base64 URL Safe en un Base64 corriente.
      * @param b64 Cadena Base64 URl Safe.
-     * @return Cadena Base64 corriente.
-     */
+     * @return Cadena Base64 corriente. */
     public static String undoUrlSafe(final String b64) {
         if (b64 == null) {
             throw new IllegalArgumentException(
-                    "Los datos a deshacer del URL SAFE no pueden ser nulos" //$NON-NLS-1$
+                "Los datos a deshacer del URL SAFE no pueden ser nulos" //$NON-NLS-1$
             );
         }
         return b64.replace("-", "+").replace("_", "/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -68,11 +62,14 @@ public final class ServiceUtil {
     		return p;
     	}
 
-    	p.load(new InputStreamReader(
+    	p.load(
+			new InputStreamReader(
     			new ByteArrayInputStream(
-    					Base64.decode(base64, base64.indexOf('-') > -1 || base64.indexOf('_') > -1)
-    					),
-    			StandardCharsets.UTF_8));
+					Base64.decode(base64, base64.indexOf('-') > -1 || base64.indexOf('_') > -1)
+				),
+    			StandardCharsets.UTF_8
+			)
+		);
 
     	return p;
     }
@@ -92,12 +89,10 @@ public final class ServiceUtil {
     	return Base64.encode(buffer.toString().getBytes());
     }
 
-    /**
-     * Devuelve una lista de certificados X509 de la cabecera de una peticion HTTP
+    /** Devuelve una lista de certificados X509 de la cabecera de una peticion HTTP
      * @param request Cabecera HTTP recibida.
      * @return Lista de los certificados X509 contenidos en la cabecera HTTP o
-     * {@code null} si no hay ninguno.
-     */
+     * {@code null} si no hay ninguno. */
     static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request){
 
     	X509Certificate[] certificates = getCertificatesFromAttribute(request);
@@ -110,14 +105,12 @@ public final class ServiceUtil {
     	return certificates;
     }
 
-    /**
-     * Recupera los certificados de autenticacion SSL como atributo de las peticiones.
+    /** Recupera los certificados de autenticacion SSL como atributo de las peticiones.
      * Esto ser&aacute; cuando se transmitan al servidor de aplicaciones los certificados mediante
      * AJP.
      * @param request Petici&oacute;n con los certificados.
      * @return Lista de los certificados X509 enviados o {@code null} se enviaron como
-     * atributos de la petici&oacute;n.
-     */
+     * atributos de la petici&oacute;n. */
     private static X509Certificate[] getCertificatesFromAttribute(final HttpServletRequest request) {
     	final Object[] cer = (Object[]) request.getAttribute("javax.servlet.request.X509Certificate"); //$NON-NLS-1$
     	if (cer == null){
@@ -130,16 +123,13 @@ public final class ServiceUtil {
     	return certificates;
     }
 
-    /**
-     * Recupera los certificados de autenticacion SSL como una propiedad de la cabecera de las
+    /** Recupera los certificados de autenticacion SSL como una propiedad de la cabecera de las
      * peticiones. Se deber&aacute; indicar el nombre de la propiedad de la cabecera en la que
      * se transmiten los certificados.
      * @param request Petici&oacute;n con los certificados.
      * @return Lista de los certificados X509 enviados o {@code null} se enviaron en la propiedad
-     * de la cabecera.
-     */
-    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName)
-    {
+     *         de la cabecera. */
+    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName) {
         X509Certificate certificates[] = null;
         final String headerName = propName;
         String headerCert = request.getHeader(headerName);
@@ -153,7 +143,8 @@ public final class ServiceUtil {
                 final X509Certificate cer = (X509Certificate)fact.generateCertificate(bis);
                 certificates = new X509Certificate[1];
                 certificates[0] = cer;
-            } else {
+            }
+            else {
                 LOGGER.warning("No existe certficado en la request en el header " + headerName); //$NON-NLS-1$
             }
         }

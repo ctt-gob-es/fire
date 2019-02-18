@@ -10,11 +10,8 @@
 package es.gob.fire.client;
 
 
-/**
- * El lote no est&aacute; firmado.
- */
+/** El lote no est&aacute; firmado. */
 public final class BatchNoSignedException extends HttpOperationException {
-
 
     /** Serial Id. */
 	private static final long serialVersionUID = 459647017984206993L;
@@ -23,19 +20,15 @@ public final class BatchNoSignedException extends HttpOperationException {
         super();
     }
 
-    /**
-     * El lote no est&aacute; firmado.
-     * @param e Motivo del error.
-     */
+    /** El lote no est&aacute; firmado.
+     * @param e Motivo del error. */
     public BatchNoSignedException(final Throwable e) {
         super("El lote no esta firmado", e); //$NON-NLS-1$
     }
 
-    /**
-     * El lote no est&aacute; firmado.
+    /** El lote no est&aacute; firmado.
      * @param msg Mensaje de error.
-     * @param e Motivo del error.
-     */
+     * @param e Motivo del error. */
     public BatchNoSignedException(final String msg, final Throwable e) {
         super(msg, e);
     }

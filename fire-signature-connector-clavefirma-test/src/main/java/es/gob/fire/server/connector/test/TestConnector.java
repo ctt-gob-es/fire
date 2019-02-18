@@ -48,7 +48,7 @@ import es.gob.fire.server.connector.WeakRegistryException;
 
 /** Servicio de pruebas con certificados en disco.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
-public class TestConnector extends FIReConnector {
+public final class TestConnector extends FIReConnector {
 
 	private static final Logger LOGGER = Logger.getLogger(TestConnector.class.getName());
 
@@ -79,7 +79,7 @@ public class TestConnector extends FIReConnector {
 
     private String testUrlBase = null;
 
-   private boolean allowedNewCerts = true;
+    private boolean allowedNewCerts = true;
 
     @Override
 	public void init(final Properties config) {
@@ -90,11 +90,12 @@ public class TestConnector extends FIReConnector {
         this.testUrlBase = config.getProperty(PROP_TEST_ENDPOINT);
         if (this.testUrlBase == null || this.testUrlBase.length() == 0) {
         	LOGGER.warning(
-        			String.format(
-        					"No se ha establecido la propiedad %1s se establece la ruta por defecto: %2s", //$NON-NLS-1$
-        					PROP_TEST_ENDPOINT,
-        					DEFAULT_TEST_URL_BASE)
-        			);
+    			String.format(
+					"No se ha establecido la propiedad %1s se establece la ruta por defecto: %2s", //$NON-NLS-1$
+					PROP_TEST_ENDPOINT,
+					DEFAULT_TEST_URL_BASE
+				)
+			);
         	this.testUrlBase = DEFAULT_TEST_URL_BASE;
         }
         else if (!this.testUrlBase.endsWith("/")) { //$NON-NLS-1$
@@ -128,12 +129,12 @@ public class TestConnector extends FIReConnector {
 		// Se permitira la emision de nuevos certificados salvo que se configure
 		// expresamente el valor "false"
 		final String allowedValue = config.getProperty(PROP_ALLOW_REQUEST_NEW_CERT);
-		this.allowedNewCerts = allowedValue == null ||
-				!Boolean.FALSE.toString().equalsIgnoreCase(allowedValue);
+		this.allowedNewCerts = allowedValue == null || !Boolean.FALSE.toString().equalsIgnoreCase(allowedValue);
 
 		try {
 			ConnectionManager.configureConnection(c);
-		} catch (final Exception e) {
+		}
+		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error configurando la conexion con el servicio de pruebas", e); //$NON-NLS-1$
 		}
     }
@@ -145,8 +146,14 @@ public class TestConnector extends FIReConnector {
 
 		if (config != null) {
         	try {
-        		this.redirectOkUrl = URLEncoder.encode(config.getProperty("redirectOkUrl"), DEFAULT_ENCODING.name()); //$NON-NLS-1$
-        		this.redirectErrorUrl = URLEncoder.encode(config.getProperty("redirectErrorUrl"), DEFAULT_ENCODING.name()); //$NON-NLS-1$
+        		this.redirectOkUrl = URLEncoder.encode(
+    				config.getProperty("redirectOkUrl"), //$NON-NLS-1$
+    				DEFAULT_ENCODING.name()
+				);
+        		this.redirectErrorUrl = URLEncoder.encode(
+    				config.getProperty("redirectErrorUrl"), //$NON-NLS-1$
+    				DEFAULT_ENCODING.name()
+				);
         	}
         	catch (final Exception e) {
         		LOGGER.severe("No se han podido configurar las URL de redireccion de exito y error: " + e); //$NON-NLS-1$
@@ -162,15 +169,22 @@ public class TestConnector extends FIReConnector {
 	                                                                        FIReConnectorNetworkException,
 	                                                                        CertificateBlockedException,
 	                                                                        WeakRegistryException {
-
+		if (this.testUrlBase == null) {
+			throw new FIReCertificateException(
+				"La URL de base del contector de prueba es nula, probablemente no se haya configurado adecuadamente" //$NON-NLS-1$
+			);
+		}
 		final StringBuilder testUrl = new StringBuilder()
-		.append(this.testUrlBase).append("TestGetCertificateService") //$NON-NLS-1$
-		.append("?subjectid=").append(subjectId); //$NON-NLS-1$
+			.append(this.testUrlBase).append("TestGetCertificateService") //$NON-NLS-1$
+			.append("?subjectid=").append(subjectId); //$NON-NLS-1$
 
-		byte[] response;
+		LOGGER.info("Se llama al servicio de proveedor con la URL: " + testUrl.toString()); //$NON-NLS-1$
+
+		final byte[] response;
 		try {
 			response = ConnectionManager.readUrlByGet(testUrl.toString());
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 
 			if (e instanceof HttpError) {
 				if (((HttpError) e).getResponseCode() == HTTP_ERROR_NO_CERT) {

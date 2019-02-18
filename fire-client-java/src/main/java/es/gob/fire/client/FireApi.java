@@ -18,9 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.HttpsConnection.Method;
 
-/**
- * Cliente de FIRe v2.0.
- */
+/** Cliente de FIRe v2.0. */
 public final class FireApi {
 
     private static final String PROPERTY_KEY_SERVICE_URL = "fireUrl"; //$NON-NLS-1$
@@ -112,17 +110,13 @@ public final class FireApi {
 
     private static PasswordDecipher passwordDecipher = null;
 
-    /**
-     * Constructor privado para no permir la instanciaci&oacute;n
-     */
+    /** Constructor privado para no permir la instanciaci&oacute;n. */
     private FireApi() {
         // No instanciable
     }
 
-    /**
-     * Inicializa las propiedades de sistema a trav&eacute;s del fichero de propiedades.
-     * @throws ClientConfigFilesNotFoundException Si no encuentra el fichero de configuraci&oacute;n.
-     */
+    /** Inicializa las propiedades de sistema a trav&eacute;s del fichero de propiedades.
+     * @throws ClientConfigFilesNotFoundException Si no encuentra el fichero de configuraci&oacute;n. */
     private static void initialize() throws ClientConfigFilesNotFoundException{
     	if (!initialized) {
     		initializeProperties();
@@ -151,59 +145,46 @@ public final class FireApi {
 		}
     }
 
-	/**
-	 * Configura el objeto encargado de descifrar las contrase&ntilde;as encontradas
+	/** Configura el objeto encargado de descifrar las contrase&ntilde;as encontradas
 	 * en el fichero de configuraci&oacute;n para el uso de los almacenes de claves.
 	 * Si no se establece, se utilizar&aacute;a la misma cadena encontrada en el
 	 * fichero de coinfiguraci&oacute;n.
-	 * @param decipher Objeto para el descifrado.
-	 */
+	 * @param decipher Objeto para el descifrado. */
     public static void setPasswordDecipher(final PasswordDecipher decipher) {
     	passwordDecipher = decipher;
     }
 
-    /**
-     * Carga datos para ser posteriormente firmados.
-     * @param appId
-     *            Identificador de aplicaci&oacute;n que realiza la
-     *            petici&oacute;n.
-     * @param subjectId
-     *            Identificador del titular de la clave de firma.
-     * @param op
-     *            Tipo de operaci&oacute;n a realizar.
-     * @param ft
-     *            Formato de la operaci&oacute;n.
-     * @param algth
-     *            Algoritmo de firma.
-     * @param prop
-     *            Propiedades extra a a&ntilde;adir a la firma (puede ser
-     *            <code>null</code>).
-     * @param d
-     *            Datos a firmar, cofirmar o contrafirmar.
-     * @param config
-     *            Configuraci&oacute;n a indicar al servicio remoto (dependiente
-     *            de la implementaci&oacute;n).
+    /** Carga datos para ser posteriormente firmados.
+     * @param appId Identificador de aplicaci&oacute;n que realiza la
+     *              petici&oacute;n.
+     * @param subjectId Identificador del titular de la clave de firma.
+     * @param op Tipo de operaci&oacute;n a realizar.
+     * @param ft Formato de la operaci&oacute;n.
+     * @param algth Algoritmo de firma.
+     * @param prop Propiedades extra a a&ntilde;adir a la firma (puede ser
+     *             <code>null</code>).
+     * @param d Datos a firmar, cofirmar o contrafirmar.
+     * @param config Configuraci&oacute;n a indicar al servicio remoto (dependiente
+     *               de la implementaci&oacute;n).
      * @return Resultado de la carga de los datos para la firma.
-     * @throws IOException
-     *             Si hay problemas en la llamada al servicio de red.
-     * @throws HttpNetworkException
-     * 				Cuando se produce un error de red.
-     * @throws HttpForbiddenException
-     * 				Cuando se deniega el acceso al componente central.
+     * @throws IOException Si hay problemas en la llamada al servicio de red.
+     * @throws HttpNetworkException Cuando se produce un error de red.
+     * @throws HttpForbiddenException Cuando se deniega el acceso al componente central.
      * @throws HttpOperationException Error gen&eacute;rico en la operaci&oacute;n de firma.
      * @throws ClientConfigFilesNotFoundException Si no se ha encontrado en el sistema
-     * el fichero de configuraci&oacute;n.
-     */
+     *                                            el fichero de configuraci&oacute;n. */
     public static SignOperationResult sign(final String appId,
-    		final String subjectId,
-            final SignProcessConstants.SignatureOperation op,
-            final SignProcessConstants.SignatureFormat ft,
-            final SignProcessConstants.SignatureAlgorithm algth,
-            final Properties prop, final byte[] d,
-            final Properties config)
-            throws IOException, HttpNetworkException, HttpForbiddenException,
-            HttpOperationException, ClientConfigFilesNotFoundException {
-
+    		                               final String subjectId,
+    		                               final SignProcessConstants.SignatureOperation op,
+    		                               final SignProcessConstants.SignatureFormat ft,
+    		                               final SignProcessConstants.SignatureAlgorithm algth,
+    		                               final Properties prop,
+    		                               final byte[] d,
+    		                               final Properties config) throws IOException,
+                                                                           HttpNetworkException,
+                                                                           HttpForbiddenException,
+                                                                           HttpOperationException,
+                                                                           ClientConfigFilesNotFoundException {
         if (op == null) {
             throw new IllegalArgumentException(
                     "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
@@ -237,44 +218,28 @@ public final class FireApi {
                 algth.toString(), extraParamsB64, dataB64, config);
     }
 
-    /**
-     * Inicia una operaci&oacute;n de firma.
-     * @param appId
-     *            Identificador de aplicaci&oacute;n que realiza la
-     *            petici&oacute;n.
-     * @param subjectId
-     *            Identificador del titular del certificado de firma.
-     * @param op
-     *            Tipo de operaci&oacute;n a realizar: sign, cosign o
-     *            countersign.
-     * @param ft
-     *            Formato de la operaci&oacute;n.
-     * @param algth
-     *            Algoritmo de firma.
-     * @param propB64
-     *            Propiedades extra a a&ntilde;adir a la firma. Se establece
-     *            en Base64 y puede ser <code>null</code>.
-     * @param dataB64
-     *            Datos a firmar en Base64.
-     * @param config
-     *            Configuraci&oacute;n a indicar al servicio remoto (dependiente
-     *            de la implementaci&oacute;n).
+    /** Inicia una operaci&oacute;n de firma.
+     * @param appId Identificador de aplicaci&oacute;n que realiza la
+     *              petici&oacute;n.
+     * @param subjectId Identificador del titular del certificado de firma.
+     * @param op Tipo de operaci&oacute;n a realizar: sign, cosign o
+     *           countersign.
+     * @param ft Formato de la operaci&oacute;n.
+     * @param algth Algoritmo de firma.
+     * @param propB64 Propiedades extra a a&ntilde;adir a la firma. Se establece
+     *                en Base64 y puede ser <code>null</code>.
+     * @param dataB64 Datos a firmar en Base64.
+     * @param config Configuraci&oacute;n a indicar al servicio remoto (dependiente
+     *               de la implementaci&oacute;n).
      * @return Resultado de la carga de los datos para la firma.
-     * @throws IllegalArgumentException
-     * 				Si se proporciona nulo o vac&iacute;o alg&uacute;n
-     * 				par&aacute;metro obligatorio.
-     * @throws IOException
-     * 				Si hay problemas en la llamada al servicio de red.
-     * @throws HttpNetworkException
-     * 				Cuando se produce un error de red.
-     * @throws HttpForbiddenException
-     * 				Cuando se deniega el acceso al componente central.
-     * @throws HttpOperationException
-     * 				Error gen&eacute;rico en la operaci&oacute;n de firma.
-     * @throws ClientConfigFilesNotFoundException
-     * 				Cuando no se encuentra el fichero de
-     * 				configuraci&oacute;n del componente distribuido.
-     */
+     * @throws IllegalArgumentException Si se proporciona nulo o vac&iacute;o alg&uacute;n
+     * 				                    par&aacute;metro obligatorio.
+     * @throws IOException Si hay problemas en la llamada al servicio de red.
+     * @throws HttpNetworkException Cuando se produce un error de red.
+     * @throws HttpForbiddenException Cuando se deniega el acceso al componente central.
+     * @throws HttpOperationException Error gen&eacute;rico en la operaci&oacute;n de firma.
+     * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero de
+     * 				                              configuraci&oacute;n del componente distribuido. */
     public static SignOperationResult sign(final String appId,
     		final String subjectId, final String op, final String ft,
     		final String algth, final String propB64,
@@ -326,7 +291,8 @@ public final class FireApi {
         final byte[] responseJSON;
         try {
         	responseJSON = conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
-        } catch (final HttpError e) {
+        }
+        catch (final HttpError e) {
             LOGGER.error("Error en la llamada al servicio de firma: {}", //$NON-NLS-1$
             			e.getResponseDescription());
             switch (e.getResponseCode()) {

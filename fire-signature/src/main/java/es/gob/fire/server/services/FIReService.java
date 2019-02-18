@@ -39,10 +39,11 @@ import es.gob.fire.statistics.FireStatistics;
 
 /** Servicio central de FIRe que integra las funciones de firma a traves del Cliente @firma
  * y proveedores de firma en la nube. */
-public class FIReService extends HttpServlet {
+public final class FIReService extends HttpServlet {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = -2304782878707695769L;
+
 	private static final Logger LOGGER = Logger.getLogger(FIReService.class.getName());
 
     @Override
@@ -54,7 +55,6 @@ public class FIReService extends HttpServlet {
 	    	ConfigManager.checkConfiguration();
 		}
     	catch (final Exception e) {
-
     		LOGGER.severe("No se pudo cargar la configuracion del componente central de FIRe: " + e); //$NON-NLS-1$
     		return;
     	}
@@ -152,7 +152,8 @@ public class FIReService extends HttpServlet {
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
-			} catch (final CertificateValidationException e) {
+			}
+	    	catch (final CertificateValidationException e) {
 				LOGGER.severe(logF.format("Error en la validacion del certificado: " + e)); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;
@@ -172,7 +173,7 @@ public class FIReService extends HttpServlet {
             return;
         }
 
-        FIReServiceOperation op;
+        final FIReServiceOperation op;
         try {
         	op = FIReServiceOperation.parse(operation);
         }
@@ -188,40 +189,40 @@ public class FIReService extends HttpServlet {
 
     	try {
     		switch (op) {
-    		case SIGN:
-    			SignOperationManager.sign(request, appName, params, response);
-    			break;
-    		case RECOVER_SIGN:
-    			RecoverSignManager.recoverSignature(params, response);
-    			break;
-    		case RECOVER_SIGN_RESULT:
-    			RecoverSignResultManager.recoverSignature(params, response);
-    			break;
-    		case CREATE_BATCH:
-    			CreateBatchManager.createBatch(request, appName, params, response);
-    			break;
-    		case ADD_DOCUMENT_TO_BATCH:
-    			AddDocumentBatchManager.addDocument(params, response);
-    			break;
-    		case SIGN_BATCH:
-    			SignBatchManager.signBatch(request, params, response);
-    			break;
-    		case RECOVER_BATCH:
-    			RecoverBatchResultManager.recoverResult(params, response);
-    			break;
-    		case RECOVER_BATCH_STATE:
-    			RecoverBatchStateManager.recoverState(params, response);
-    			break;
-    		case RECOVER_SIGN_BATCH:
-    			RecoverBatchSignatureManager.recoverSignature(params, response);
-    			break;
-    		case RECOVER_ERROR:
-    			RecoverErrorManager.recoverError(params, response);
-    			break;
-    		default:
-    			LOGGER.warning(logF.format("Se ha enviado una peticion con una operacion no soportada: " + op.name())); //$NON-NLS-1$
-    			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-    			break;
+	    		case SIGN:
+	    			SignOperationManager.sign(request, appName, params, response);
+	    			break;
+	    		case RECOVER_SIGN:
+	    			RecoverSignManager.recoverSignature(params, response);
+	    			break;
+	    		case RECOVER_SIGN_RESULT:
+	    			RecoverSignResultManager.recoverSignature(params, response);
+	    			break;
+	    		case CREATE_BATCH:
+	    			CreateBatchManager.createBatch(request, appName, params, response);
+	    			break;
+	    		case ADD_DOCUMENT_TO_BATCH:
+	    			AddDocumentBatchManager.addDocument(params, response);
+	    			break;
+	    		case SIGN_BATCH:
+	    			SignBatchManager.signBatch(request, params, response);
+	    			break;
+	    		case RECOVER_BATCH:
+	    			RecoverBatchResultManager.recoverResult(params, response);
+	    			break;
+	    		case RECOVER_BATCH_STATE:
+	    			RecoverBatchStateManager.recoverState(params, response);
+	    			break;
+	    		case RECOVER_SIGN_BATCH:
+	    			RecoverBatchSignatureManager.recoverSignature(params, response);
+	    			break;
+	    		case RECOVER_ERROR:
+	    			RecoverErrorManager.recoverError(params, response);
+	    			break;
+	    		default:
+	    			LOGGER.warning(logF.format("Se ha enviado una peticion con una operacion no soportada: " + op.name())); //$NON-NLS-1$
+	    			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	    			break;
     		}
     	}
     	catch (final Exception e) {

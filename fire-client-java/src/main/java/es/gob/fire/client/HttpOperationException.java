@@ -9,12 +9,8 @@
  */
 package es.gob.fire.client;
 
-
-/**
- * Error en el cliente al ejecutar la operaci&oacute;n del servidor central.
- *
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
- */
+/** Error en el cliente al ejecutar la operaci&oacute;n del servidor central.
+ * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public class HttpOperationException extends Exception {
 
     private static final long serialVersionUID = -5667976435415689416L;
@@ -24,27 +20,21 @@ public class HttpOperationException extends Exception {
         super();
     }
 
-    /**
-     * /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
-     * @param msg Mensaje de error.
-     */
+    /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
+     * @param msg Mensaje de error. */
     public HttpOperationException(final String msg) {
         super(msg);
     }
 
-    /**
-     * /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
-     * @param e Causa del error.
-     */
+    /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
+     * @param e Causa del error. */
     protected HttpOperationException(final Throwable e) {
         super(e);
     }
 
-    /**
-     * /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
+    /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
      * @param msg Mensaje del error.
-     * @param e Causa del error.
-     */
+     * @param e Causa del error. */
     public HttpOperationException(final String msg, final Throwable e) {
         super(msg, e);
     }

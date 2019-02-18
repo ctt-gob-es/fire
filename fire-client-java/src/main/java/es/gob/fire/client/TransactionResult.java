@@ -19,9 +19,7 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
-/**
- * Resultado de una transacci&oacute;n.
- */
+/** Resultado de una transacci&oacute;n. */
 public class TransactionResult {
 
 	/** Codificaci&oacute;n de caracters por defecto. */
@@ -79,13 +77,11 @@ public class TransactionResult {
 		this.resultType = resultType;
 	}
 
-	/**
-	 * Crea el objeto que debe devolverse como resultado de una transacci&oacute;n cuando esta
+	/** Crea el objeto que debe devolverse como resultado de una transacci&oacute;n cuando esta
 	 * ha finalizado con errores.
 	 * @param resultType Tipo de resultado.
 	 * @param errorCode C&oacute;digo de error.
-	 * @param errorMessage Mensaje de error.
-	 */
+	 * @param errorMessage Mensaje de error. */
 	public TransactionResult(final int resultType, final int errorCode, final String errorMessage) {
 		this.resultType = resultType;
 		this.state = STATE_ERROR;
@@ -93,50 +89,40 @@ public class TransactionResult {
 		this.errorMessage = errorMessage;
 	}
 
-	/**
-	 * Crea el objeto que debe devolverse como resultado de una transacci&oacute;n cuando esta
+	/** Crea el objeto que debe devolverse como resultado de una transacci&oacute;n cuando esta
 	 * ha finalizado correctamente. Este objeto no tiene definido el resultado final.
 	 * @param resultType Tipo de resultado.
-	 * @param providerName Nombre del proveedor utilizado.
-	 */
+	 * @param providerName Nombre del proveedor utilizado. */
 	public TransactionResult(final int resultType, final String providerName) {
 		this.resultType = resultType;
 		this.state = STATE_OK;
 		this.providerName = providerName;
 	}
 
-	/**
-	 * Crea el objeto que debe devolverse como resultado de una transacci&oacute;n cuando esta
+	/** Crea el objeto que debe devolverse como resultado de una transacci&oacute;n cuando esta
 	 * ha finalizado correctamente.
 	 * @param resultType Tipo de resultado.
-	 * @param result Datos resultantes de la operaci&oacute;n.
-	 */
+	 * @param result Datos resultantes de la operaci&oacute;n. */
 	public TransactionResult(final int resultType, final byte[] result) {
 		this.resultType = resultType;
 		this.state = STATE_OK;
 		this.result = result;
 	}
 
-	/**
-	 * Recupera el tipo de resultado almacenado en el objeto.
-	 * @return Tipo de resultado.
-	 */
+	/** Recupera el tipo de resultado almacenado en el objeto.
+	 * @return Tipo de resultado. */
 	public int getResultType() {
 		return this.resultType;
 	}
 
-	/**
-	 * Devuelve el estado de la transacci&oacute; (si termin&oacute; correctamente o no).
-	 * @return Estado de la transacci&oacute;n: {@link #STATE_OK} o {@link #STATE_ERROR}.
-	 */
+	/** Devuelve el estado de la transacci&oacute; (si termin&oacute; correctamente o no).
+	 * @return Estado de la transacci&oacute;n: {@link #STATE_OK} o {@link #STATE_ERROR}. */
 	public int getState() {
 		return this.state;
 	}
 
-	/**
-	 * Devuelve el c&oacute;digo asociado al error sufrido durante la transacci&oacute;n.
-	 * @return C&oacute;digo de error.
-	 */
+	/** Devuelve el c&oacute;digo asociado al error sufrido durante la transacci&oacute;n.
+	 * @return C&oacute;digo de error. */
 	public int getErrorCode() {
 		return this.errorCode;
 	}
@@ -246,8 +232,9 @@ public class TransactionResult {
 
 		// Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
 		if (prefix != null && Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes())) {
-			try {
+			try (
 				final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
+			) {
 				final JsonObject json = jsonReader.readObject();
 				final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
 				if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {

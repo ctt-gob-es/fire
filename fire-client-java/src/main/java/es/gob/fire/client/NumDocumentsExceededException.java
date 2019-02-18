@@ -9,13 +9,11 @@
  */
 package es.gob.fire.client;
 
-/**
- * Excepci&oacute;n que denota que se ha sobrepasado el n&uacute;mero m&aacute;ximo
+/** Excepci&oacute;n que denota que se ha sobrepasado el n&uacute;mero m&aacute;ximo
  * de documentos. Normalmente, se referir&aacute; al n&uacute;mero de documentos
  * permitidos en un lote.
- * @author Carlos Gamuci
- */
-public class NumDocumentsExceededException extends Exception {
+ * @author Carlos Gamuci. */
+public final class NumDocumentsExceededException extends Exception {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 3410961465765079806L;

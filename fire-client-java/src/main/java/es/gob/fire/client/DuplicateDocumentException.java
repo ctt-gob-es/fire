@@ -9,12 +9,10 @@
  */
 package es.gob.fire.client;
 
-/**
- * Excepci&oacute;n que denota que se ha intentado agregar un documento a un lote con un identificador
+/** Excepci&oacute;n que denota que se ha intentado agregar un documento a un lote con un identificador
  * que ya se agreg&oacute; anteriormente.
- * @author Carlos Gamuci
- */
-public class DuplicateDocumentException extends Exception {
+ * @author Carlos Gamuci. */
+public final class DuplicateDocumentException extends Exception {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 3123749200845358933L;

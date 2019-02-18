@@ -105,9 +105,8 @@ public final class ProviderManager {
 	public static Properties loadProviderConfig(final String providerName) {
 
 		final String providerConfigFilename = String.format(PROVIDER_CONFIG_FILE_TEMPLATE, providerName);
-		Properties providerConfig;
 		try {
-			providerConfig = ConfigFileLoader.loadConfigFile(providerConfigFilename);
+			return ConfigFileLoader.loadConfigFile(providerConfigFilename);
 		}
 		catch (final FileNotFoundException e) {
 			LOGGER.warning(
@@ -116,7 +115,7 @@ public final class ProviderManager {
 					providerConfigFilename, providerName
 				)
 			);
-			providerConfig = new Properties();
+			return new Properties();
 		}
 		catch (final IOException e) {
 			LOGGER.log(
@@ -127,10 +126,8 @@ public final class ProviderManager {
 				),
 				e
 			);
-			providerConfig = new Properties();
+			return new Properties();
 		}
-
-		return providerConfig;
 	}
 
 	/** Carga el fichero interno de propiedades del proveedor en el que se encuentra

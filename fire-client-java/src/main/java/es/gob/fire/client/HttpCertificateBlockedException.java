@@ -10,11 +10,8 @@
 package es.gob.fire.client;
 
 
-/**
- * El certificado del usuario est&aacute; bloqueado.
- */
+/** El certificado del usuario est&aacute; bloqueado. */
 public final class HttpCertificateBlockedException extends HttpOperationException {
-
 
     /** Serial Id. */
 	private static final long serialVersionUID = 4353657884161773302L;
@@ -23,19 +20,15 @@ public final class HttpCertificateBlockedException extends HttpOperationExceptio
         super();
     }
 
-    /**
-	 * Indica que los certificados de un usuario est&aacute;n bloqueados.
-	 * @param e Excepci&oacute;n que caus&oacute; el error.
-	 */
+    /** Indica que los certificados de un usuario est&aacute;n bloqueados.
+	 * @param e Excepci&oacute;n que caus&oacute; el error. */
     public HttpCertificateBlockedException(final Throwable e) {
         super("Certitificado bloqueado", e); //$NON-NLS-1$
     }
 
-    /**
-	 * Indica que los certificados de un usuario est&aacute;n bloqueados.
+    /** Indica que los certificados de un usuario est&aacute;n bloqueados.
 	 * @param msg Mensaje de error.
-	 * @param e Excepci&oacute;n que caus&oacute; el error.
-	 */
+	 * @param e Excepci&oacute;n que caus&oacute; el error. */
     public HttpCertificateBlockedException(final String msg, final Throwable e) {
         super(msg, e);
     }

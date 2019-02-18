@@ -9,11 +9,8 @@
  */
 package es.gob.clavefirma.client.signprocess;
 
-/**
- * Constantes para el proceso de firma en la nube-
- *
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
- */
+/** Constantes para el proceso de firma en la nube.
+ * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class HttpSignProcessConstants {
 
     private HttpSignProcessConstants() {
@@ -30,10 +27,19 @@ public final class HttpSignProcessConstants {
         SHA512WITHRSA("SHA512withRSA"), //$NON-NLS-1$
 
         /** SHA384withRSA. */
-        SHA384WITHRSA("SHA284withRSA"), //$NON-NLS-1$
+        SHA384WITHRSA("SHA384withRSA"), //$NON-NLS-1$
 
         /** SHA256withRSA. */
-        SHA256WITHRSA("SHA256withRSA"); //$NON-NLS-1$
+        SHA256WITHRSA("SHA256withRSA"), //$NON-NLS-1$
+    	
+    	/** SHA512withECDSA. */
+        SHA512withECDSA("SHA512withECDSA"), //$NON-NLS-1$
+
+    	/** SHA384withECDSA. */
+        SHA384withECDSA("SHA384withECDSA"), //$NON-NLS-1$
+
+    	/** SHA256withECDSA. */
+        SHA256withECDSA("SHA256withECDSA"); //$NON-NLS-1$
 
         private final String algName;
 
@@ -101,6 +107,32 @@ public final class HttpSignProcessConstants {
         @Override
         public String toString() {
             return this.fmtName;
+        }
+        
+        public static SignatureFormat getSignatureFormat(final String name) {
+        	if (name == null) {
+        		throw new IllegalArgumentException(
+    				"El nombre del formato de firma no puede ser nulo" //$NON-NLS-1$
+				);
+        	}
+        	switch(name.toLowerCase().trim()) {
+	        	case "cades": //$NON-NLS-1$
+	        		return CADES;
+	        	case "cades-asic-s-tri": //$NON-NLS-1$
+	        		return CADES_ASIC_S;
+	        	case "xades": //$NON-NLS-1$
+	        		return XADES;
+	        	case "xades-asic-s-tri": //$NON-NLS-1$
+	        		return XADES_ASIC_S;
+	        	case "facturae": //$NON-NLS-1$
+	        		return FACTURAE;
+	        	case "pades": //$NON-NLS-1$
+	        		return PADES;
+	        	default:
+	        		throw new IllegalArgumentException(
+        				"El nombre del formato de firma no es adecuado: " + name //$NON-NLS-1$
+    				);
+        	}
         }
     }
 

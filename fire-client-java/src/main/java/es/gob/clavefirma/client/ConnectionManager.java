@@ -16,10 +16,8 @@ import java.util.StringTokenizer;
 
 import es.gob.fire.client.HttpsConnection;
 
-/**
- * Clase para la configuracion de la conexi&oacute;n con el componente central.
- */
-public class ConnectionManager {
+/** Configuracion de la conexi&oacute;n con el componente central. */
+public final class ConnectionManager {
 
 	private static HttpsConnection conn = null;
 
@@ -27,15 +25,14 @@ public class ConnectionManager {
 		// No se permite instanciar la clase
 	}
 
-	/**
-	 * Configura la conexi&oacute;n con el componente central.
+	/** Configura la conexi&oacute;n con el componente central.
 	 * @param config Opciones de configuraci&oacute;n.
 	 * @throws IllegalArgumentException Cuando se configura un fichero de almac&eacute;n que no existe.
 	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.
-	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto.
-	 */
-	public static void configureConnection(final Properties config) throws IllegalArgumentException, GeneralSecurityException, IOException {
-
+	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto. */
+	public static void configureConnection(final Properties config) throws IllegalArgumentException,
+	                                                                       GeneralSecurityException,
+	                                                                       IOException {
 		// Si ya esta inicializada la conexion, ignoramos la operacion
 		if (conn != null) {
 			return;
@@ -43,12 +40,10 @@ public class ConnectionManager {
 		conn = HttpsConnection.getConnection(config, null);
 	}
 
-	/**
-	 * Realiza una peticion HTTP a una URL usando el m&eacute;todo POST.
+	/** Realiza una petici&oacute;n HTTP a una URL usando el m&eacute;todo POST.
 	 * @param url URL a la que se realiza la petici&oacute;n.
 	 * @return Datos recuperados como resultado de la llamada.
-	 * @throws IOException Cuando no es posible conectar con el servidor o leer su respuesta.
-	 */
+	 * @throws IOException Cuando no es posible conectar con el servidor o leer su respuesta. */
 	public static byte[] readUrlByPost(final String url) throws IOException {
 		if (url == null) {
 			throw new IllegalArgumentException("La URL a leer no puede ser nula"); //$NON-NLS-1$
@@ -68,42 +63,42 @@ public class ConnectionManager {
 		return readUrl(urlBase, urlParameters, Method.POST);
 	}
 
-	/**
-	 * Realiza una peticion HTTP a una URL usando el m&eacute;todo GET.
+	/** Realiza una peticion HTTP a una URL usando el m&eacute;todo GET.
 	 * @param url URL a la que se realiza la petici&oacute;n.
 	 * @return Datos recuperados como resultado de la llamada.
-	 * @throws IOException Cuando no es posible conectar con el servidor o leer su respuesta.
-	 */
+	 * @throws IOException Cuando no es posible conectar con el servidor o leer su respuesta. */
 	public static byte[] readUrlByGet(final String url) throws IOException {
+		if (url == null) {
+			throw new IllegalArgumentException("La URL a leer no puede nula"); //$NON-NLS-1$
+		}
 		return readUrl(url, null, Method.GET);
 	}
 
-	/**
-	 * Realiza una peticion HTTP a una URL.
+	/** Realiza una peticion HTTP a una URL.
 	 * @param url URL a la que se realiza la petici&oacute;n.
 	 * @param urlParameters Par&aacute;metros transmitidos en la llamada.
 	 * @param method M&eacute;todo HTTP utilizado.
 	 * @return Datos recuperados como resultado de la llamada.
 	 * @throws IOException Cuando ocurre un error durante la conexi&oacute;n/lectura o el
-	 * servidor devuelve un error en la operaci&oacute;n.
-	 */
+	 * servidor devuelve un error en la operaci&oacute;n. */
 	public static byte[] readUrl(final String url, final String urlParameters, final Method method) throws IOException {
 
 		if (url == null) {
 			throw new IllegalArgumentException("La URL a leer no puede ser nula"); //$NON-NLS-1$
 		}
 
-		return conn.readUrl(url, urlParameters, method == Method.POST ?
-				HttpsConnection.Method.POST : HttpsConnection.Method.GET);
+		return conn.readUrl(
+			url,
+			urlParameters,
+			method == Method.POST ? HttpsConnection.Method.POST : HttpsConnection.Method.GET
+		);
 	}
 
-	/**
-	 * M&eacute;todo HTTP soportados.
-	 */
+	/** M&eacute;todo HTTP soportados. */
 	public enum Method {
-		/** M&eacute;todo HTTP para la recuperaci&oacute;n de datos remotos. */
+		/** HTTP GET. */
 		GET,
-		/** M&eacute;todo HTTP para el env&iacute;o de datos remotos. */
+		/** HTTP POST. */
 		POST
 	}
 }

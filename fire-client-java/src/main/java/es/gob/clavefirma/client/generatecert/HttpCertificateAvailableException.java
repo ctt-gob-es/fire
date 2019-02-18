@@ -11,47 +11,33 @@ package es.gob.clavefirma.client.generatecert;
 
 import es.gob.fire.client.HttpOperationException;
 
-/**
- * Error producido al solicitar un certificado cuando ya hay otro disponible.
- */
+/** Error producido al solicitar un certificado cuando ya hay otro disponible. */
 public final class HttpCertificateAvailableException extends HttpOperationException {
 
     /** Serial Id. */
 	private static final long serialVersionUID = -3384174742441075646L;
 
-	/**
-     * Construye una excepci&oacute;n de error en la obtenci&oacute;n o uso de
+	/** Construye una excepci&oacute;n de error en la obtenci&oacute;n o uso de
      * los certificados del usuario debido a que ya existia otro certificado de
      * ese tipo.
-     *
-     * @param msg
-     *            Mensaje de la excepci&oacute;n.
-     * @param e
-     *            Causa inicial de la excepci&oacute;n.
-     */
+     * @param msg Mensaje de la excepci&oacute;n.
+     * @param e Causa inicial de la excepci&oacute;n. */
     public HttpCertificateAvailableException(final String msg, final Throwable e) {
         super(msg, e);
     }
 
-    /**
-     * Construye una excepci&oacute;n de error en la obtenci&oacute;n o uso de
+    /** Construye una excepci&oacute;n de error en la obtenci&oacute;n o uso de
      * los certificados del usuario debido a que ya existia otro certificado de
      * ese tipo.
-     *
-     * @param msg
-     *            Mensaje de la excepci&oacute;n.
-     */
+     * @param msg Mensaje de la excepci&oacute;n. */
     public HttpCertificateAvailableException(final String msg) {
         super(msg);
     }
 
-    /**
-     * Construye una excepci&oacute;n de error en la obtenci&oacute;n o uso de
+    /** Construye una excepci&oacute;n de error en la obtenci&oacute;n o uso de
      * los certificados del usuario debido a que ya existia otro certificado de
      * ese tipo.
-     * @param e
-     *            Causa inicial de la excepci&oacute;n.
-     */
+     * @param e Causa inicial de la excepci&oacute;n. */
     public HttpCertificateAvailableException(final Throwable e) {
         super(e);
     }

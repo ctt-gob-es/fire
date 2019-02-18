@@ -22,11 +22,11 @@ public final class FIReConnectorFactory {
      * @param connectorClass Nombre de la clase conectora.
      * @return Implementaci&oacute;n de FIReConnector.
      * @throws FIReConnectorFactoryException Si se ha producido alg&uacute;n problema en la creaci&oacute;
-     *                                     del conector. */
+     *                                       del conector. */
     public static FIReConnector getConnector(final String connectorClass) throws FIReConnectorFactoryException {
         final FIReConnector ret;
         try {
-        	ret = (FIReConnector) Class.forName(connectorClass).newInstance();
+        	ret = (FIReConnector) Class.forName(connectorClass).getConstructor().newInstance();
         }
         catch (final Exception e) {
             throw new FIReConnectorFactoryException("No se ha podido cargar el conector definido", e); //$NON-NLS-1$

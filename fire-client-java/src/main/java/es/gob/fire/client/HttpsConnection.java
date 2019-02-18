@@ -34,7 +34,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 /** Clase de conexi&oacute;n mediante SSL. */
-public class HttpsConnection {
+public final class HttpsConnection {
 
 	private static final String KEYSTORE_PROPERTY = "javax.net.ssl.keyStore"; //$NON-NLS-1$
 
@@ -50,9 +50,7 @@ public class HttpsConnection {
 
     private static final String ACCEPT_ALL_CERTS_VALUE = "all"; //$NON-NLS-1$
 
-	/**
-	 * M&eacute;todo HTTP soportados.
-	 */
+	/** M&eacute;todo HTTP soportados. */
 	public enum Method {
 		/** M&eacute;todo HTTP para la recuperaci&oacute;n de datos remotos. */
 		GET,
@@ -76,41 +74,34 @@ public class HttpsConnection {
 
 	private SSLContext ctx;
 
-
 	private HttpsConnection() {
 		// No hacemos nada
 	}
 
-
-	/**
-	 * Obtiene una conexi&oacute;n Http/Https.
+	/** Obtiene una conexi&oacute;n HTTP/HTTPS.
 	 * @param config Opciones de configuraci&oacute;n.
 	 * @param decipher Descifrador encargado de descifrar las contrase&ntilde;as de
 	 * los almacenes de claves y certificados de confianza.
 	 * @return Devuelve la conexi&oacute;n configurada.
 	 * @throws IllegalArgumentException Cuando se configura un fichero de almac&eacute;n que no existe.
 	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.
-	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto.
-	 */
-	public static HttpsConnection getConnection(final Properties config, final PasswordDecipher decipher) throws IllegalArgumentException,
-																		GeneralSecurityException,
-																		IOException {
-
+	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto. */
+	public static HttpsConnection getConnection(final Properties config,
+			                                    final PasswordDecipher decipher) throws IllegalArgumentException,
+																		                GeneralSecurityException,
+																		                IOException {
 		final HttpsConnection conn = new HttpsConnection();
 		conn.configureConnection(config, decipher);
-
 		return conn;
 	}
 
-	/**
-	 * Configura la conexi&oacute;n con el componente central.
+	/** Configura la conexi&oacute;n con el componente central.
 	 * @param config Opciones de configuraci&oacute;n.
 	 * @param decipher Descifrador encargado de descifrar las contrase&ntilde;as de
-	 * los almacenes de claves y certificados de confianza.
+	 *                 los almacenes de claves y certificados de confianza.
 	 * @throws IllegalArgumentException Cuando se configura un fichero de almac&eacute;n que no existe.
 	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.
-	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto.
-	 */
+	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto. */
 	private void configureConnection(final Properties config, final PasswordDecipher decipher) throws IllegalArgumentException, GeneralSecurityException, IOException {
 
 		// Inicializamos el KeyStore
@@ -121,7 +112,7 @@ public class HttpsConnection {
         	final File ksFile = new File(keyStore);
         	if (!ksFile.isFile() || !ksFile.canRead()) {
         		throw new IllegalArgumentException(
-        				"El almacen de certificados de autenticacion SSL no existe o no puede leerse: " + ksFile.getAbsolutePath() //$NON-NLS-1$
+    				"El almacen de certificados de autenticacion SSL no existe o no puede leerse: " + ksFile.getAbsolutePath() //$NON-NLS-1$
         		);
         	}
 
@@ -181,8 +172,7 @@ public class HttpsConnection {
         }
 	}
 
-	/**
-	 * Inicializa el contexto para las conexiones HTTPS.
+	/** Inicializa el contexto para las conexiones HTTPS.
 	 * @param ks Almac&eqacute;n de claves de autenticaci&oacute;n cliente.
 	 * @param ksPassword Contrase&ntilde:a del almac&eacute;n de claves.
 	 * @param ts TrustStore de certificados de confianza o {@code null} para la
@@ -190,25 +180,22 @@ public class HttpsConnection {
 	 * @param acceptAllCerts Indica si se debe desactivar la validaci&oacute;n de
 	 * los certificados SSL servidor.
 	 * @throws NoSuchAlgorithmException Tipo de almac&eacute;n no soportado.
-	 * @throws UnrecoverableKeyException  Cuando no se puede acceder al almac&eacute;n
-	 * de claves.
+	 * @throws UnrecoverableKeyException Cuando no se puede acceder al almac&eacute;n
+	 *                                   de claves.
 	 * @throws KeyStoreException Cuando no se pueden inicializar el KeyStore o TrustStore.
-	 * @throws KeyManagementException Cuando no se puede inicializar el contexto SSL.
-	 */
-	private void initContext(
-			final KeyStore ks,
-			final char[] ksPassword,
-			final KeyStore ts,
-			final boolean acceptAllCerts) throws
-												NoSuchAlgorithmException,
-												UnrecoverableKeyException,
-												KeyStoreException,
-												KeyManagementException {
-
+	 * @throws KeyManagementException Cuando no se puede inicializar el contexto SSL. */
+	private void initContext(final KeyStore ks,
+			                 final char[] ksPassword,
+			                 final KeyStore ts,
+			                 final boolean acceptAllCerts) throws NoSuchAlgorithmException,
+												                  UnrecoverableKeyException,
+												                  KeyStoreException,
+												                  KeyManagementException {
 		KeyManager[] keyManagers = null;
 		if (ks != null) {
-			final KeyManagerFactory kmf =
-					KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			final KeyManagerFactory kmf = KeyManagerFactory.getInstance(
+				KeyManagerFactory.getDefaultAlgorithm()
+			);
 
 			kmf.init(ks, ksPassword);
 
@@ -230,15 +217,13 @@ public class HttpsConnection {
 		this.ctx.init(keyManagers, tsManager, null);
 	}
 
-	/**
-	 * Realiza una peticion HTTP a una URL.
+	/** Realiza una peticion HTTP a una URL.
 	 * @param url URL a la que se realiza la petici&oacute;n.
 	 * @param urlParameters Par&aacute;metros transmitidos en la llamada.
 	 * @param method M&eacute;todo HTTP utilizado.
 	 * @return Datos recuperados como resultado de la llamada.
 	 * @throws IOException Cuando ocurre un error durante la conexi&oacute;n/lectura o el
-	 * servidor devuelve un error en la operaci&oacute;n.
-	 */
+	 *                     servidor devuelve un error en la operaci&oacute;n. */
 	public byte[] readUrl(final String url, final String urlParameters, final Method method) throws IOException {
 
 		if (url == null) {
