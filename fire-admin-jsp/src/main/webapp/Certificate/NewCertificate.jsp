@@ -119,7 +119,7 @@
 	      $.ajax({
 	            type: "POST",
 	            enctype: 'multipart/form-data',
-	            url: "../PreviewCertificateService?op="+<%= op%>+"&id="+id,
+	            url: "../previewCert?op="+<%= op%>+"&id="+id,
 	            data: data,
 	            processData: false,
 	            contentType: false,

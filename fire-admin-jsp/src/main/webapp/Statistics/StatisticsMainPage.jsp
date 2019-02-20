@@ -47,7 +47,7 @@
 		<!-- contenido -->
 	<div id="containerQueryManager">
 		<div id="subtitle" style="padding: 5px; height: 55px;background-color: #eeeeee;">
-			<form id ="formStatictics" name="formStatictics" method="post" action="../StatisticsService" >
+			<form id ="formStatictics" name="formStatictics" method="post" action="../statistics" >
 				<div id="selectedQuery" style="display:inline-block;">
 				 	<label for = "select_query" >* Consulta:</label>
 					<select id = "select_query" name = "select_query">

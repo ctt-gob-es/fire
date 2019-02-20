@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,13 +23,12 @@ import es.gob.fire.server.admin.dao.AplicationsDAO;
 /**
  * Servicio para el alta de una nueva aplicaci&oacute;n en el sistema.
  */
-@WebServlet("/deleteApp")
-public class DeleteNewAppService extends HttpServlet {
+public class DeleteAppService extends HttpServlet {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = -4783299472733570868L;
 
-	private static final Logger LOGGER = Logger.getLogger(DeleteNewAppService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DeleteAppService.class.getName());
 
 	private static final String PARAM_ID = "id-app"; //$NON-NLS-1$
 

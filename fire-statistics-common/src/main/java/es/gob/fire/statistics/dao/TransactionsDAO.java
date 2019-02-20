@@ -147,13 +147,7 @@ public class TransactionsDAO {
 		    jw.writeObject(jsonObj.build());
 		}
 
-		final String result = writer.toString();
-
-		System.out.println("JSON Resultado de la operacion:");
-		System.out.println(result);
-
-		return result;
-
+		return writer.toString();
 	}
 
 	/**

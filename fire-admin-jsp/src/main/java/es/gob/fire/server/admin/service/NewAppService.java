@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,7 +23,6 @@ import es.gob.fire.server.admin.dao.AplicationsDAO;
 /**
  * Servicio para el alta de una nueva aplicaci&oacute;n en el sistema.
  */
-@WebServlet("/newApp")
 public class NewAppService extends HttpServlet {
 
 	/** Serial Id. */
