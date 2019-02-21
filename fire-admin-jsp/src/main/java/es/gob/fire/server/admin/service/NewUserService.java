@@ -60,12 +60,6 @@ public class NewUserService extends HttpServlet {
 		final Parameters params = getParameters(req);
 
 		try {
-			final MessageDigest md = MessageDigest.getInstance(SHA_2);
-			// Codificamos la clave
-			md.update(params.getPassword().getBytes());
-			final byte[] digest = md.digest();
-			final String clave = Base64.encode(digest);
-
 			boolean isOk = true;
 
 			// nuevo usuario
@@ -78,6 +72,13 @@ public class NewUserService extends HttpServlet {
 					isOk = false;
 				}
 				else {
+
+					// Codificamos la clave
+					final MessageDigest md = MessageDigest.getInstance(SHA_2);
+					md.update(params.getPassword().getBytes());
+					final byte[] digest = md.digest();
+					final String clave = Base64.encode(digest);
+
 					//Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
 					final User usr = UsersDAO.getUserByName(params.getLoginUser());
 					if (usr != null && usr.getNombreUsuario() != null && !"".equals(usr.getNombreUsuario()))//$NON-NLS-1$
