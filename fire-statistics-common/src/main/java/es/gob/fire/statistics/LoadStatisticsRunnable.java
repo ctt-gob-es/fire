@@ -234,8 +234,9 @@ public final class LoadStatisticsRunnable implements Runnable {
 			Date date;
 			try {
 				date = formatter.parse(dateText);
-			} catch (final Exception e) {
-				LOGGER.severe("Se encontro un fichero con una fecha no valida: " + signatureFiles[i]); //$NON-NLS-1$
+			}
+			catch (final Exception e) {
+				LOGGER.severe("Se encontro un fichero con una fecha no valida ('" + signatureFiles[i] + "'): " + e); //$NON-NLS-1$ //$NON-NLS-2$
 				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText);
 			}
 
@@ -443,10 +444,11 @@ public final class LoadStatisticsRunnable implements Runnable {
 
 			final String dateText = name.substring(this.fileSuffix.length(), name.length() - FILE_EXT_LOG.length());
 
-			Date dataDate;
+			final Date dataDate;
 			try {
 				dataDate = this.dateFormatter.parse(dateText);
-			} catch (final Exception e) {
+			}
+			catch (final Exception e) {
 				return false;
 			}
 

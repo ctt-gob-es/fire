@@ -7,10 +7,8 @@ import es.gob.fire.statistics.entity.SignatureCube;
 import es.gob.fire.statistics.entity.TransactionCube;
 import es.gob.fire.statistics.entity.TransactionTotal;
 
-/**
- * Conjunto consistente de datos con la informaci&oacute;n de las firmas y transacciones realizadas
- * por FIRe para la obtenci&oacute;n de estad&iacute;sticas.
- */
+/** Conjunto consistente de datos con la informaci&oacute;n de las firmas y transacciones realizadas
+ * por FIRe para la obtenci&oacute;n de estad&iacute;sticas. */
 public final class CompactedData {
 
 	private final Map<SignatureCube, Long> signatureData;
@@ -56,10 +54,8 @@ public final class CompactedData {
 		this.transactionSizeData.put(signatureCube.getIdTransaction(), currentTrSize);
 	}
 
-	/**
-	 * Agrega un nuevo registro del cubo de transacciones al conjunto de datos.
-	 * @param signatureCube Registro del cubo de transacciones.
-	 */
+	/** Agrega un nuevo registro del cubo de transacciones al conjunto de datos.
+	 * @param transactionCube Registro del cubo de transacciones. */
 	public void addTransactionData(final TransactionCube transactionCube) {
 
 		if (this.signatureData.isEmpty()) {

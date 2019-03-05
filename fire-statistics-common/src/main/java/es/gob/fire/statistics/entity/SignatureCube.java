@@ -4,9 +4,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Objects;
 
-/**
- * Conjunto de datos de las firmas que se registran con objeto de obtener estad&iacute;sticas.
- */
+/** Conjunto de datos de las firmas que se registran con objeto de obtener estad&iacute;sticas. */
 public class SignatureCube {
 
 	private Date date;
@@ -35,8 +33,7 @@ public class SignatureCube {
 	 * </ul>
 	 * @param registry Cadena de texto con las propiedades de la transacci&oacute;n.
 	 * @return Informaci&oacute;n de la transacci&oacute;n.
-	 * @throws ParseException Cuando se encuentra una fecha mal formada.
-	 */
+	 * @throws NumberFormatException Cuando se encuentra una fecha mal formada. */
 	public final static SignatureCube parse(final String registry) throws ParseException, NumberFormatException {
 
 		if (registry == null || registry.isEmpty()) {

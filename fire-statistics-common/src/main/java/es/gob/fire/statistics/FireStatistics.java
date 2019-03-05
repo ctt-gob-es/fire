@@ -6,7 +6,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-
 public final class FireStatistics {
 
 	static final Logger LOGGER = Logger.getLogger(FireStatistics.class.getName());

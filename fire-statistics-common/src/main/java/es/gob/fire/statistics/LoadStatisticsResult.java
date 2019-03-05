@@ -2,10 +2,9 @@ package es.gob.fire.statistics;
 
 import java.util.Date;
 
-/**
- * Resultado obtenido tras una operaci&oacute;n de carga de datos estad&iacute;sticos en base de datos.
- */
-public class LoadStatisticsResult {
+/** Resultado obtenido tras una operaci&oacute;n de carga de datos estad&iacute;sticos
+ * en base de datos. */
+public final class LoadStatisticsResult {
 
 	private final boolean correct;
 

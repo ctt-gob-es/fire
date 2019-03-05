@@ -1,13 +1,11 @@
 package es.gob.fire.statistics.entity;
 
-/**
- * Informaci&oacute;n de un Navegador web
- */
+/** Informaci&oacute;n de un Navegador web. */
 public final class Browser {
 
-	private  int id;
-	private String version;
-	private String name;
+	private final int id;
+	private final String version;
+	private final String name;
 	private static Browser browser;
 
 	private static String BRNAME_FIREFOX = "Firefox/"; //$NON-NLS-1$
@@ -29,10 +27,10 @@ public final class Browser {
 	private static String OPERA = "Opera"; //$NON-NLS-1$
 	private static String OTRO = "OTRO"; //$NON-NLS-1$
 
-	public Browser() {
-	}
-
-
+	/** Construye el idnetificador de un navegador web.
+	 * @param id <i>UserAgent</i>.
+	 * @param version Versi&oacute;n.
+	 * @param name Nombre. */
 	public Browser(final int id, final String version, final String name) {
 		this.id = id;
 		this.version = version;
@@ -41,12 +39,11 @@ public final class Browser {
 
 	/** Identifica un navegador web a trav&eacute;s de las cabeceras de las
 	 * peticiones que realiza.
-	 * @param userAgent UserAgent del navegador.
-	 * @return Navegador web.
-	 */
+	 * @param userAgent <i>UserAgent</i> del navegador.
+	 * @return Navegador web. */
 	public static Browser identify( final String userAgent) {
 
-//Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393
+		//Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393
 		//FIREFOX
 		if (userAgent.contains(BRNAME_FIREFOX) && !userAgent.contains(BRNAME_SEAMONKEY)){
 			final String version = userAgent.substring(userAgent.indexOf(BRNAME_FIREFOX) + BRNAME_FIREFOX.length(), userAgent.length());
@@ -97,45 +94,22 @@ public final class Browser {
 
 	}
 
-	/**
-	 * Recupera el identificador del navegador web.
-	 * @return Identificador del navegador web.
-	 */
+	/** Recupera el identificador del navegador web.
+	 * @return Identificador del navegador web. */
 	public String getId() {
 		return Integer.toString(this.id);
 	}
 
-	public final void setId(final int id) {
-		this.id = id;
-	}
-
-
-	public final void setVersion(final String version) {
-		this.version = version;
-	}
-
-
-	/**
-	 * Recupera la versi&oacute;n del navegador.
-	 * @return Versi&oacute;n del navegador.
-	 */
+	/** Recupera la versi&oacute;n del navegador.
+	 * @return Versi&oacute;n del navegador. */
 	public String getVersion() {
 		return this.version;
 	}
-	/**
-	 * Recupera el nombre del navegador
-	 * @return
-	 */
+
+	/** Recupera el nombre del navegador
+	 * @return Nombre del navegador. */
 	public final String getName() {
 		return this.name;
 	}
-	/**
-	 * Establece el nombre del navegador
-	 * @param name
-	 */
-	public final void setName(final String name) {
-		this.name = name;
-	}
-
 
 }

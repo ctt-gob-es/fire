@@ -1,6 +1,6 @@
 package es.gob.fire.statistics.entity;
 
-public class TransactionTotal {
+public final class TransactionTotal {
 
 	private long dataSize;
 

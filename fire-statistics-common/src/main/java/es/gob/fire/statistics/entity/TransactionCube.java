@@ -3,11 +3,9 @@ package es.gob.fire.statistics.entity;
 import java.text.ParseException;
 import java.util.Objects;
 
-/**
- * Conjunto de datos de las transacciones que se registran con objeto de obtener
- * estad&iacute;sticas.
- */
-public class TransactionCube {
+/** Conjunto de datos de las transacciones que se registran con objeto de obtener
+ * estad&iacute;sticas. */
+public final class TransactionCube {
 
 	private String application;
 	private String operation;
@@ -175,23 +173,23 @@ public class TransactionCube {
 
 		final StringBuilder result = new StringBuilder();
 
-		if (this.getApplication() != null) {
-			result.append(clean(this.getApplication(), 45));
+		if (getApplication() != null) {
+			result.append(clean(getApplication(), 45));
 		}
 		result.append(";");//$NON-NLS-1$
 
-		if (this.getOperation() != null) {
-			result.append(clean(this.getOperation(), 10));
+		if (getOperation() != null) {
+			result.append(clean(getOperation(), 10));
 		}
 		result.append(";");//$NON-NLS-1$
 
-		if (this.getProvider() != null  && !this.getProvider().isEmpty()) {
-			result.append(clean(this.getProvider(), 45));
+		if (getProvider() != null  && !getProvider().isEmpty()) {
+			result.append(clean(getProvider(), 45));
 		}
 		result.append(";") //$NON-NLS-1$
-			.append(this.isMandatoryProvider() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.append(this.isResultTransaction() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.append(this.getIdTransaction() != null ? this.getIdTransaction() : "0"); //$NON-NLS-1$
+			.append(isMandatoryProvider() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.append(isResultTransaction() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.append(getIdTransaction() != null ? getIdTransaction() : "0"); //$NON-NLS-1$
 
 		return result.toString();
 	}
