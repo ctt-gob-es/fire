@@ -29,25 +29,24 @@ public final class TestVerify {
 	@Test
 	@Ignore
 	public void testVerifyCert() throws Exception {
+		try (
+			final java.io.InputStream input = TestVerify.class.getResourceAsStream("/redsara.es.der"); //$NON-NLS-1$
+		) {
+	        int nBytes = 0;
+	        final byte[] buffer = new byte[4096];
+	        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        while ((nBytes = input.read(buffer)) != -1) {
+	            baos.write(buffer, 0, nBytes);
+	        }
+	        final byte[] testFile =  baos.toByteArray();
 
-		final java.io.InputStream input = TestVerify.class.getResourceAsStream("/redsara.es.der"); //$NON-NLS-1$
+	        input.close();
 
-        int nBytes = 0;
-        final byte[] buffer = new byte[4096];
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while ((nBytes = input.read(buffer)) != -1) {
-            baos.write(buffer, 0, nBytes);
-        }
-        final byte[] testFile =  baos.toByteArray();
+	        final VerifyResponse vr = Verify.vertifyCertificate(testFile, AFIRMA_APPNAME);
 
-        input.close();
-
-        final VerifyResponse vr = Verify.vertifyCertificate(testFile, AFIRMA_APPNAME);
-
-        System.out.println(vr.isOk());
-        System.out.println(vr.getDescription());
-
-
+	        System.out.println(vr.isOk());
+	        System.out.println(vr.getDescription());
+		}
 	}
 
 }

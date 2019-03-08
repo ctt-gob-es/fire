@@ -30,36 +30,41 @@ public final class TestUpgrade {
 	@Ignore
 	public void testSignUpgrade() throws Exception {
 
-		final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_detached_bin.xml"); //$NON-NLS-1$
-		//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_enveloping_bin.xml"); //$NON-NLS-1$
-		//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_enveloped_xml.xml"); //$NON-NLS-1$
-		//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_detached_xml.xml"); //$NON-NLS-1$
-		//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_enveloping_xml.xml"); //$NON-NLS-1$
-		//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/pades.pdf"); //$NON-NLS-1$
-		//final java.io.InputStream input = new FileInputStream("C:/Users/carlos/Desktop/02 - firma CADES.csig"); //$NON-NLS-1$
+		try (
+			final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_detached_bin.xml"); //$NON-NLS-1$
+			//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_enveloping_bin.xml"); //$NON-NLS-1$
+			//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_enveloped_xml.xml"); //$NON-NLS-1$
+			//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_detached_xml.xml"); //$NON-NLS-1$
+			//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/xades_enveloping_xml.xml"); //$NON-NLS-1$
+			//final java.io.InputStream input = TestUpgrade.class.getResourceAsStream("/pades.pdf"); //$NON-NLS-1$
+			//final java.io.InputStream input = new FileInputStream("C:/Users/carlos/Desktop/02 - firma CADES.csig"); //$NON-NLS-1$
+		) {
+	        int nBytes = 0;
+	        final byte[] buffer = new byte[4096];
+	        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        while ((nBytes = input.read(buffer)) != -1) {
+	            baos.write(buffer, 0, nBytes);
+	        }
+	        final byte[] testFile =  baos.toByteArray();
 
-        int nBytes = 0;
-        final byte[] buffer = new byte[4096];
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while ((nBytes = input.read(buffer)) != -1) {
-            baos.write(buffer, 0, nBytes);
-        }
-        final byte[] testFile =  baos.toByteArray();
+	        input.close();
 
-        input.close();
+			final UpgradeTarget format = UpgradeTarget.T_FORMAT;
 
-		final UpgradeTarget format = UpgradeTarget.T_FORMAT;
+			final UpgradeResult result = Upgrade.signUpgradeCreate(testFile, format, "minhap.seap.dtic.clavefirma"); //$NON-NLS-1$
 
-		final UpgradeResult result = Upgrade.signUpgradeCreate(testFile, format, "minhap.seap.dtic.clavefirma"); //$NON-NLS-1$
+			System.out.println("La firma se actualizo a " + result.getFormat()); //$NON-NLS-1$
 
-		System.out.println("La firma se actualizo a " + result.getFormat()); //$NON-NLS-1$
-
-		final File saveFile = File.createTempFile("TEST-", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
-		final java.io.OutputStream os = new java.io.FileOutputStream(saveFile);
-		os.write(result.getResult());
-		os.flush();
-		os.close();
-		System.out.println("Temporal para comprobacion manual: " + saveFile.getAbsolutePath()); //$NON-NLS-1$
+			final File saveFile = File.createTempFile("TEST-", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
+			try (
+				final java.io.OutputStream os = new java.io.FileOutputStream(saveFile);
+			) {
+				os.write(result.getResult());
+				os.flush();
+				os.close();
+			}
+			System.out.println("Temporal para comprobacion manual: " + saveFile.getAbsolutePath()); //$NON-NLS-1$
+		}
 
 	}
 
