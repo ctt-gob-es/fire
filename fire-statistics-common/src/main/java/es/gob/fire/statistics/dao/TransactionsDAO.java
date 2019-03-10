@@ -16,7 +16,9 @@ import es.gob.fire.statistics.config.DbManager;
 import es.gob.fire.statistics.entity.TransactionCube;
 import es.gob.fire.statistics.entity.TransactionTotal;
 
-/** Gestor para la manipulaci&oacute;n de la informaci&oacute;n de las transacciones en base de datos. */
+/**
+ * Gestor para la manipulaci&oacute;n de la informaci&oacute;n de las transacciones en base de datos.
+ */
 public class TransactionsDAO {
 
 	/** SQL para insertar una transacci&oacute;n. */
@@ -61,14 +63,18 @@ public class TransactionsDAO {
 			 " AND month(t.fecha) = ? "+		 //$NON-NLS-1$
 			 " GROUP BY t.aplicacion" ; //$NON-NLS-1$
 
-	/** Inserta una configuraci&oacute;n de transacci&oacute;n en base de datos indicando cuantas veces
+	/**
+	 * Inserta una configuraci&oacute;n de transacci&oacute;n en base de datos indicando cuantas veces
 	 * se dio esta configuraci&oacute;n un d&iacute;a concreto.
 	 * @param date Fecha del d&iacute;a en la que se realiz&oacute; la transacci&oacute;n.
-	 * @param transaction Conjunto de datos de la transacci&oacute;n.
+	 * @param signature Configuraci&oacute;n de la transacci&oacute;n.
+	 * @param total N&uacute;mero total de transacciones que se generaron ese d&iacute;a con la
+	 * configuraci&oacute;n indicada.
 	 * @return {@code true} si la configuraci&oacute;n se inserto correctamente. {@code false}
-	 *         en caso contrario.
+	 * en caso contrario.
 	 * @throws SQLException Cuando se produce un error al insertar los datos.
-	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos. */
+	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
+	 */
 	public static boolean insertTransaction(final Date date, final TransactionCube transaction, final TransactionTotal total)
 			throws SQLException, DBConnectionException {
 
@@ -141,19 +147,19 @@ public class TransactionsDAO {
 		    jw.writeObject(jsonObj.build());
 		}
 
-		final String result = writer.toString();
-		return result;
-
+		return writer.toString();
 	}
 
-	/** Obtiene las Transacciones finalizadas correctamente e incorrectamente por cada origen de
+	/**
+	 * Obtiene las Transacciones finalizadas correctamente e incorrectamente por cada origen de
 	 * certificados/proveedor (Filtrado por a&ntilde;o y mes)
 	 * @param year A&ntilde;o de la transacci&oacute;n.
 	 * @param month Mes de la transacci&oacute;n.
 	 * @return JSON con el nombre aplicaci&oacute;n, total transaciones correctas, total
-	 *         transaciones incorrectas y total.
+	 * transaciones incorrectas y total.
 	 * @throws SQLException Cuando se produce un error al acceder a los datos.
-	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos. */
+	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
+	 */
 	public static String getTransactionsByProviderJSON(final int year, final int month) throws SQLException, DBConnectionException {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
