@@ -56,7 +56,7 @@
 			return;
 	}
 	
-	CertificateFire cer;
+	CertificateFire cer = null;
 	if (id != null) {
 		cer = CertificatesDAO.selectCertificateByID (id);
 	}
@@ -64,8 +64,8 @@
 		cer = new CertificateFire();
 	}
 
-	if (cer.getX509Principal() != null && !"".equals(cer.getX509Principal()) && //$NON-NLS-1$
-			cer.getCertPrincipal() != null && !"".equals(cer.getCertPrincipal())){ //$NON-NLS-1$
+	if (cer.getX509Principal() != null &&
+			cer.getCertPrincipal() != null && !cer.getCertPrincipal().isEmpty()){
 		b64CertPrin = cer.getCertPrincipal();
 		final String[] datCertificate = (cer.getX509Principal().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
 		for (int i = 0 ; i <= datCertificate.length-1; i++){
@@ -119,7 +119,7 @@
 	      $.ajax({
 	            type: "POST",
 	            enctype: 'multipart/form-data',
-	            url: "../PreviewCertificateService?op="+<%= op%>+"&id="+id,
+	            url: "../previewCert?op="+<%= op%>+"&id="+id,
 	            data: data,
 	            processData: false,
 	            contentType: false,

@@ -26,9 +26,9 @@
 		}
 
 		try {
-			if (!UsersDAO.checkAdminPassword(psswd,user)) {
+			if (!UsersDAO.checkAdminPassword(psswd, user)) {
 				response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-				return;	
+				return;
 			}
 		}
 		catch (Exception e) {

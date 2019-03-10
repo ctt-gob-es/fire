@@ -6,72 +6,68 @@
   	<listener-class>es.gob.fire.server.admin.session.SessionDataCleaner</listener-class>
   </listener>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Da de alta un usuario</description>
   	<display-name>NewUserService</display-name>
   	<servlet-name>NewUserService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.NewUserService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Da de baja un usuario</description>
   	<display-name>DeleteUserService</display-name>
   	<servlet-name>DeleteUserService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.DeleteUserService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Modifica la contrasena del usuario</description>
   	<display-name>ModifyPasswdUserService</display-name>
   	<servlet-name>ModifyPasswdUserService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.ModifyPasswdUserService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
-  	<display-name>AppService</display-name>
-  	<servlet-name>AppService</servlet-name>
-  	<servlet-class>es.gob.fire.server.admin.service.AppService</servlet-class>
+  	<description>Da de alta una aplicacion</description>
+  	<display-name>NewAppService</display-name>
+  	<servlet-name>NewAppService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.NewAppService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Da de baja una aplicacion</description>
+  	<display-name>DeleteAppService</display-name>
+  	<servlet-name>DeleteAppService</servlet-name>
+  	<servlet-class>es.gob.fire.server.admin.service.DeleteAppService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Obtiene la informacion de un certificado</description>
   	<display-name>PreviewCertificateService</display-name>
   	<servlet-name>PreviewCertificateService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.PreviewCertificateService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Da de alta un certificado</description>
   	<display-name>NewCertificateService</display-name>
   	<servlet-name>NewCertificateService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.NewCertificateService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Da de baja un certificado</description>
   	<display-name>DeleteCertificateService</display-name>
   	<servlet-name>DeleteCertificateService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.DeleteCertificateService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Da acceso a un usuario</description>
   	<display-name>LogAdminService</display-name>
   	<servlet-name>LogAdminService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.LogAdminService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Permite la gestion de logs remotos</description>
   	<display-name>LogServerService</display-name>
   	<servlet-name>LogServerService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.LogServerService</servlet-class>
   </servlet>
   
    <servlet>
-  	<description>
-  	</description>
+  	<description>Permite la consulta de estadisticas</description>
   	<display-name>StatisticsService</display-name>
   	<servlet-name>StatisticsService</servlet-name>
   	<servlet-class>es.gob.fire.server.admin.service.StatisticsService</servlet-class>
@@ -79,43 +75,47 @@
    
   <servlet-mapping>
   	<servlet-name>NewUserService</servlet-name>
-  	<url-pattern>/NewUserService</url-pattern>
+  	<url-pattern>/newUser</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>DeleteUserService</servlet-name>
-  	<url-pattern>/DeleteUserService</url-pattern>
+  	<url-pattern>/deleteUsr</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>ModifyPasswdUserService</servlet-name>
-  	<url-pattern>/ModifyPasswdUserService</url-pattern>
+  	<url-pattern>/modifyPasswdUser</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-  	<servlet-name>AppService</servlet-name>
-  	<url-pattern>/AppService</url-pattern>
+  	<servlet-name>NewAppService</servlet-name>
+  	<url-pattern>/newApp</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>DeleteAppService</servlet-name>
+  	<url-pattern>/deleteApp</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>PreviewCertificateService</servlet-name>
-  	<url-pattern>/PreviewCertificateService</url-pattern>
+  	<url-pattern>/previewCert</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>NewCertificateService</servlet-name>
-  	<url-pattern>/NewCertificateService</url-pattern>
+  	<url-pattern>/newCert</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>DeleteCertificateService</servlet-name>
-  	<url-pattern>/DeleteCertificateService</url-pattern>
+  	<url-pattern>/deleteCert</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>LogAdminService</servlet-name>
-  	<url-pattern>/LogAdminService</url-pattern>
+  	<url-pattern>/log</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>LogServerService</servlet-name>
-  	<url-pattern>/LogServerService</url-pattern>
+  	<url-pattern>/logServer</url-pattern>
   </servlet-mapping>
    <servlet-mapping>
   	<servlet-name>StatisticsService</servlet-name>
-  	<url-pattern>/StatisticsService</url-pattern>
+  	<url-pattern>/statistics</url-pattern>
   </servlet-mapping>
   
   

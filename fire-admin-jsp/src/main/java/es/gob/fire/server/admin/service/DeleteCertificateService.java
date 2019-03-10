@@ -9,7 +9,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,7 +19,6 @@ import es.gob.fire.server.admin.dao.CertificatesDAO;
 /**
  * Servlet implementation class DeleteCertificateService
  */
-@WebServlet("/deleteCert")
 public class DeleteCertificateService extends HttpServlet {
 
 
@@ -29,7 +27,7 @@ public class DeleteCertificateService extends HttpServlet {
 	 */
 	private static final long serialVersionUID = -4929894052421807407L;
 
-	private static final Logger LOGGER = Logger.getLogger(DeleteNewAppService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DeleteAppService.class.getName());
 
 	private static final String PARAM_ID = "id-cert"; //$NON-NLS-1$
 

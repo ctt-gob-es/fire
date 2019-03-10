@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +16,6 @@ import es.gob.fire.server.admin.entity.User;
 /**
  * Servlet implementation class DeleteUserService
  */
-@WebServlet("/deleteUsr")
 public class DeleteUserService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 

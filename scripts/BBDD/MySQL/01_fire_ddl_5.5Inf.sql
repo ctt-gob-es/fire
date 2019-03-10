@@ -21,7 +21,7 @@ CREATE TABLE `tb_aplicaciones` (
   `resp_correo` varchar(45) DEFAULT NULL,
   `resp_telefono` varchar(30) DEFAULT NULL,
   `fecha_alta` TIMESTAMP NOT NULL,
-  `fk_certificado` int(11) NOT NULL
+  `fk_certificado` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_certificado_idx` (`fk_certificado`),
   CONSTRAINT `fk_certificado` FOREIGN KEY (`fk_certificado`) REFERENCES `tb_certificados` (`id_certificado`) ON UPDATE CASCADE

@@ -37,7 +37,7 @@
 	
 	final byte[] jsonLogInfo = (byte[]) session.getAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO); 
 	if (jsonLogInfo == null){
-		response.sendRedirect("../LogAdminService?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+		response.sendRedirect("../log?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
 				"&name-srv=" + nameSrv); //$NON-NLS-1$
 		return;
 	}

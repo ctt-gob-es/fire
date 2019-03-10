@@ -195,7 +195,7 @@ public class LogAdminService extends HttpServlet {
 				if (jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
 					final JsonArray jsonError = jsonObj.getJsonArray("Error"); //$NON-NLS-1$
 					response.sendRedirect(request.getContextPath() +
-							"/LogAdminService?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+							"/log?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
 							"&" + ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv() + //$NON-NLS-1$ //$NON-NLS-2$
 							"&" + ServiceParams.PARAM_MSG + "=" + jsonError.getJsonObject(0).getString("Message")//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							);

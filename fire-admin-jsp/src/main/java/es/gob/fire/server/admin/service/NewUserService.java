@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +27,6 @@ import es.gob.fire.server.admin.tool.Base64;
 /**
  * Servlet implementation class NewUserService
  */
-@WebServlet("/newUser")
 public class NewUserService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -62,12 +60,6 @@ public class NewUserService extends HttpServlet {
 		final Parameters params = getParameters(req);
 
 		try {
-			final MessageDigest md = MessageDigest.getInstance(SHA_2);
-			// Codificamos la clave
-			md.update(params.getPassword().getBytes());
-			final byte[] digest = md.digest();
-			final String clave = Base64.encode(digest);
-
 			boolean isOk = true;
 
 			// nuevo usuario
@@ -80,6 +72,13 @@ public class NewUserService extends HttpServlet {
 					isOk = false;
 				}
 				else {
+
+					// Codificamos la clave
+					final MessageDigest md = MessageDigest.getInstance(SHA_2);
+					md.update(params.getPassword().getBytes());
+					final byte[] digest = md.digest();
+					final String clave = Base64.encode(digest);
+
 					//Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
 					final User usr = UsersDAO.getUserByName(params.getLoginUser());
 					if (usr != null && usr.getNombreUsuario() != null && !"".equals(usr.getNombreUsuario()))//$NON-NLS-1$

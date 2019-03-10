@@ -263,7 +263,7 @@
 	 	var ok = validateFields(arrFields);						
 		if(ok){
 			 activeElement("more-button", true);
-			 var url = "../LogAdminService?op=6&nlines="+nlines+"&fname="+$("#fileName").text();
+			 var url = "../log?op=6&nlines="+nlines+"&fname="+$("#fileName").text();
 			 $.post(url, function(data){		
 				 var JSONData = JSON.parse(data);
 				  if(JSONData.hasOwnProperty('Tail')){
@@ -288,7 +288,7 @@
 	var arrFields = ["Nlines"];
 	var ok = validateFields(arrFields);						
 	if(ok){
-		 var url = "../LogAdminService?op=7&nlines="+nlines+"&fname="+$("#fileName").text();
+		 var url = "../log?op=7&nlines="+nlines+"&fname="+$("#fileName").text();
 		 $.post(url, function(data){		
 			 var JSONData = JSON.parse(data);
 			  if(JSONData.hasOwnProperty('More')){
@@ -330,7 +330,7 @@
 		 if (text2Search !== text || date2Search != DateTime){
 			 resetSearch(text, DateTime)
 		 }	
-		 var url = "../LogAdminService?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime + param_reset;
+		 var url = "../log?op=8&nlines=" + nlines + "&search_txt=" + text + "&search_date=" + DateTime + param_reset;
 
 		 if(isFinal || searchOp == 0){ 
 			 $.post(url, function(data,status){
@@ -397,7 +397,7 @@
 		 }	
 			
 		filterOp = filterOp + 1;		
-		var url = "../LogAdminService?op=9&nlines=" + nlines + "&start_date=" + startDateTime + "&end_date=" + endDateTime + "&level=" + level + param_reset;		 
+		var url = "../log?op=9&nlines=" + nlines + "&start_date=" + startDateTime + "&end_date=" + endDateTime + "&level=" + level + param_reset;		 
 		 $.post(url, function(data){		
 			 var JSONData = JSON.parse(data);
 			  if(JSONData.hasOwnProperty('Filtered')){
@@ -607,7 +607,7 @@
   */
  function download(){
 	  
-	 var url = "../LogAdminService?op=10&fname=" + file;
+	 var url = "../log?op=10&fname=" + file;
 
 	 displayProgressBar(1);	
 	 var xhr = new XMLHttpRequest();
@@ -712,7 +712,7 @@
 	 $("#" + idOkTxtLog).hide();
 	 activeElement("more-button", true);
 
-	 var url = "../LogAdminService?op=5";
+	 var url = "../log?op=5";
 	 $.post(url,function(data){	
 	 if(data != null && typeof(data) != "undefined"){
 		 var JSONData = JSON.parse(data);
@@ -722,7 +722,7 @@
 		   }
 		   else{			   	  
 			   $("#" + idContainer).html("");
-			   var urlOpen = "../LogAdminService?op=4&fname=" + file + "&name-srv=" + server + "&reset=yes";			   		 
+			   var urlOpen = "../log?op=4&fname=" + file + "&name-srv=" + server + "&reset=yes";			   		 
 			   $.post(urlOpen,function(dat){	
 				   if(dat != null && typeof(dat) != "undefined"){
 					   isReset = true;
@@ -763,7 +763,7 @@
   */
  function closeFile(){
 	 
-	 var url = "../LogAdminService?op=5";
+	 var url = "../log?op=5";
 	 $.post(url,function(data){	
 		 if(data != null && typeof(data) != "undefined"){
 			 var JSONData = JSON.parse(data);

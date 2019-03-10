@@ -25,7 +25,7 @@
 
 	final byte[] sJSON = (byte[]) session.getAttribute(ServiceParams.SESSION_ATTR_JSON); 
 	if (sJSON == null){
-		response.sendRedirect("../LogAdminService" + //$NON-NLS-1$
+		response.sendRedirect("../log" + //$NON-NLS-1$
 				"?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
 				"&name-srv=" + nameSrv); //$NON-NLS-1$
 		return;
@@ -186,7 +186,7 @@
 	        ondblClickRow: function(id){        	
 	        	var rowData = $(this).getRowData(id);
 	        	var fileName = rowData['Name'];
-	        	document.location.href = "../LogAdminService?op=4&fname=" + fileName + "&name-srv=" + nameServer;
+	        	document.location.href = "../log?op=4&fname=" + fileName + "&name-srv=" + nameServer;
 	        },
 	    });
 	    grid.jqGrid('navGrid', '#page',
