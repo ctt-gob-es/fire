@@ -186,13 +186,13 @@ public final class FIReTriHelper {
      * informaci&oacute;n de la prefirma.
      */
     public static TriphaseData getPreSign(final String criptoOperation,
-                                         final String format,
-                                         final String algorithm,
-                                         final Properties extraParams,
-                                         final X509Certificate signerCert,
-                                         final List<BatchDocument> documents,
-                                         final boolean stopOnError) throws FIReSignatureException, IOException {
-
+                                          final String format,
+                                          final String algorithm,
+                                          final Properties extraParams,
+                                          final X509Certificate signerCert,
+                                          final List<BatchDocument> documents,
+                                          final boolean stopOnError) throws FIReSignatureException,
+                                                                            IOException {
         final TriphaseData batchTriPhaseData = new TriphaseData();
 
         boolean stopOperation = false;
@@ -221,6 +221,7 @@ public final class FIReTriHelper {
             	prep = getTriPhasePreProcessor(frmt);
             }
             catch (final FIReSignatureException e) {
+            	LOGGER.severe("Error obteniendo el preprocesador para el formato '" + frmt + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
     			if (stopOnError) {
     				stopOperation = true;
 				}
@@ -234,7 +235,8 @@ public final class FIReTriHelper {
         	if (params != null) {
         		try {
         			expandedParams = ExtraParamsProcessor.expandProperties((Properties) params.clone(), doc.getData(), frmt);
-        		} catch (final Exception e) {
+        		}
+        		catch (final Exception e) {
         			LOGGER.warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$
         			expandedParams = new Properties();
         		}
@@ -253,13 +255,14 @@ public final class FIReTriHelper {
         	if (PARAM_VALUE_SUB_OPERATION_SIGN.equalsIgnoreCase(cop)) {
         		try {
         			preRes = prep.preProcessPreSign(
-        					doc.getData(),
-        					algorithm,
-        					new X509Certificate[] { signerCert },
-        					expandedParams
-        					);
+    					doc.getData(),
+    					algorithm,
+    					new X509Certificate[] { signerCert },
+    					expandedParams
+					);
         		}
         		catch (final Exception e) {
+        			LOGGER.severe("Error en la prefirma del documento (" + doc + "): " + e); //$NON-NLS-1$ //$NON-NLS-2$
             		if (stopOnError) {
             			stopOperation = true;
 					}
@@ -270,13 +273,14 @@ public final class FIReTriHelper {
         	else if (PARAM_VALUE_SUB_OPERATION_COSIGN.equalsIgnoreCase(cop)) {
         		try {
         			preRes = prep.preProcessPreCoSign(
-        					doc.getData(),
-        					algorithm,
-        					new X509Certificate[] { signerCert },
-        					expandedParams
-        					);
+    					doc.getData(),
+    					algorithm,
+    					new X509Certificate[] { signerCert },
+    					expandedParams
+					);
         		}
         		catch (final Exception e) {
+        			LOGGER.severe("Error en la precofirma del documento (" + doc + "): " + e); //$NON-NLS-1$ //$NON-NLS-2$
         			if (stopOnError) {
         				stopOperation = true;
 					}
@@ -304,6 +308,7 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Exception e) {
+        			LOGGER.severe("Error en la precontrafirma del documento (" + doc + "): " + e); //$NON-NLS-1$ //$NON-NLS-2$
         			if (stopOnError) {
         				stopOperation = true;
 					}
@@ -341,13 +346,11 @@ public final class FIReTriHelper {
         return batchTriPhaseData;
     }
 
-    /**
-     * Agrega un PKCS#1 a la informaci&oacute;n ya disponible de una operaci&oacute;n
+    /** Agrega un PKCS#1 a la informaci&oacute;n ya disponible de una operaci&oacute;n
      * trif&aacute;sica.
      * @param pkcs1 PKCS#1 a agregar.
      * @param signId Identificador de la firma concreta a la que pertenece el PKCS#1.
-     * @param td Conjunto de informaci&oacute;n de firma trif&aacute;sica a la que se agrega el PKCS#1.
-     */
+     * @param td Conjunto de informaci&oacute;n de firma trif&aacute;sica a la que se agrega el PKCS#1. */
     public static void addPkcs1ToTriSign(final byte[] pkcs1, final String signId,
             final TriphaseData td) {
         if (pkcs1 == null || pkcs1.length < 1) {
@@ -371,8 +374,7 @@ public final class FIReTriHelper {
         }
     }
 
-    /**
-     * Ejecuta una operaci&oacute;n de postfirma dentro de un proceso de firma
+    /** Ejecuta una operaci&oacute;n de postfirma dentro de un proceso de firma
      * trif&aacute;sica para una firma trif&aacute;sica concreta.
      * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign").
      * @param format Formato de firma.
@@ -383,8 +385,7 @@ public final class FIReTriHelper {
      * @param triphaseData Conjunto de datos de la firma trif&aacute;sico obtenido de la
      * ejecuci&oacute;n de la prefirma y a&ntilde;adido de la firma.
      * @return Firma electr&oacute;nica resultante.
-     * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
-     */
+     * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n. */
     public static byte[] getPostSign(final String criptoOperation,
                                     final String format,
                                     final String algorithm,
@@ -472,14 +473,12 @@ public final class FIReTriHelper {
         }
     }
 
-    /**
-     * Obtiene el procesador encargado de gestionar firmas trifasicas asociado
+    /** Obtiene el procesador encargado de gestionar firmas trif&aacute;sicas asociado
      * a un formato de firma concreto.
      * @param format Formato de firma.
      * @return Procesador.
      * @throws FIReSignatureException Cuando el formato indicado no est&aacute;
-     * soportado.
-     */
+     *                                soportado. */
     private static TriPhasePreProcessor getTriPhasePreProcessor(final String format) throws FIReSignatureException {
     	final TriPhasePreProcessor prep;
     	if (AOSignConstants.SIGN_FORMAT_PADES.equalsIgnoreCase(format)
@@ -506,24 +505,24 @@ public final class FIReTriHelper {
     			|| AOSignConstants.SIGN_FORMAT_XADES_ASIC_S_TRI.equalsIgnoreCase(format)) {
     		prep = new XAdESASiCSTriPhasePreProcessor(INSTALL_XMLDSIG_PROVIDER);
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format) ||
-    			AOSignConstants.SIGN_FORMAT_PKCS1_TRI.equalsIgnoreCase(format)) {
+    	else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format)
+    			|| AOSignConstants.SIGN_FORMAT_PKCS1_TRI.equalsIgnoreCase(format)
+    			|| AOSignConstants.SIGN_FORMAT_PKCS1_ALT1.equalsIgnoreCase(format)
+    			|| AOSignConstants.SIGN_FORMAT_PKCS1_ALT2.equalsIgnoreCase(format)) {
     		prep = new Pkcs1TriPhasePreProcessor();
     	}
     	else {
     		throw new FIReSignatureException(
-    				"No se soporta el formato " + format //$NON-NLS-1$
-    				);
+				"No se soporta el formato " + format //$NON-NLS-1$
+			);
     	}
     	return prep;
     }
 
-    /**
-     * Permite obtener el nombre del formato trif&aacute;sico asociado a un formato monof&aacute;sico.
+    /** Permite obtener el nombre del formato trif&aacute;sico asociado a un formato monof&aacute;sico.
      * Si el formato no se soporta o es nulo, se devolvera el mismo valor de entrada.
      * @param format Nombre de formato de firma.
-     * @return Nombre del formato trif&aacute;sico o la propia entrada si no se soporta.
-     */
+     * @return Nombre del formato trif&aacute;sico o la propia entrada si no se soporta. */
     public static String getTriPhaseFormat(final String format) {
 
     	if (AOSignConstants.SIGN_FORMAT_PADES.equalsIgnoreCase(format)) {
@@ -544,17 +543,17 @@ public final class FIReTriHelper {
     	else if (AOSignConstants.SIGN_FORMAT_XADES_ASIC_S.equalsIgnoreCase(format)) {
         	return AOSignConstants.SIGN_FORMAT_XADES_ASIC_S_TRI;
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format)) {
+    	else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format)      ||
+    			 AOSignConstants.SIGN_FORMAT_PKCS1_ALT1.equalsIgnoreCase(format) ||
+    			 AOSignConstants.SIGN_FORMAT_PKCS1_ALT2.equalsIgnoreCase(format)) {
         	return AOSignConstants.SIGN_FORMAT_PKCS1_TRI;
     	}
     	return format;
     }
 
-	/**
-	 * Convierte un objeto TriPhaseData del Cliente Afirma a una de FIRe.
+	/** Convierte un objeto <code>TriPhaseData</code> del Cliente Afirma a una de FIRe.
 	 * @param source Objeto del Cliente Afirma a convertir origen.
-	 * @return Objeto de FIRe con los mismos datos que el del Cliente Afirma.
-	 */
+	 * @return Objeto de FIRe con los mismos datos que el del Cliente Afirma. */
 	public static es.gob.fire.server.connector.TriphaseData fromTriPhaseDataAfirmaToFire(final TriphaseData source) {
 		final es.gob.fire.server.connector.TriphaseData target = new es.gob.fire.server.connector.TriphaseData();
 		target.setFormat(source.getFormat());

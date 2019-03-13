@@ -11,10 +11,8 @@ package es.gob.fire.server.services.internal;
 
 import es.gob.fire.server.services.DocInfo;
 
-/**
- * Documento a firmar dentro de un proceso de lote.
- */
-public class BatchDocument {
+/** Documento a firmar dentro de un proceso de lote. */
+public final class BatchDocument {
 
 	private final String id;
 
@@ -26,11 +24,9 @@ public class BatchDocument {
 
 	private final DocInfo docInfo;
 
-	/**
-	 * Construye el documento.
+	/** Construye el documento.
 	 * @param id Identificador del documento.
-	 * @param data Contenido del documento.
-	 */
+	 * @param data Contenido del documento. */
 	public BatchDocument(final String id, final byte[] data) {
 		this.id = id;
 		this.data = data;
@@ -39,12 +35,10 @@ public class BatchDocument {
 		this.docInfo = null;
 	}
 
-	/**
-	 * Construye el documento.
+	/** Construye el documento.
 	 * @param id Identificador del documento.
 	 * @param data Contenido del documento.
-	 * @param config Configuraci&oacute;n de firma particular para este documento.
-	 */
+	 * @param config Configuraci&oacute;n de firma particular para este documento. */
 	public BatchDocument(final String id, final byte[] data, final SignBatchConfig config) {
 		this.id = id;
 		this.data = data;
@@ -53,13 +47,11 @@ public class BatchDocument {
 		this.docInfo = null;
 	}
 
-	/**
-	 * Construye el documento.
+	/** Construye el documento.
 	 * @param id Identificador del documento.
 	 * @param data Contenido del documento.
 	 * @param config Configuraci&oacute;n de firma particular para este documento.
-	 * @param docInfo Informaci&oacute;n del documento.
-	 */
+	 * @param docInfo Informaci&oacute;n del documento. */
 	public BatchDocument(final String id, final byte[] data, final SignBatchConfig config, final DocInfo docInfo) {
 		this.id = id;
 		this.data = data;
@@ -68,51 +60,44 @@ public class BatchDocument {
 		this.docInfo = docInfo;
 	}
 
-	/**
-	 * Establece el resultado parcial de la firma de este documento.
-	 * @param result Resultado parcial de la firma.
-	 */
+	@Override
+	public String toString() {
+		return "Documento para firma dentro de lote (ID='" + this.id + "'" + (this.docInfo != null ? " " + this.docInfo : "") + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+	}
+
+	/** Establece el resultado parcial de la firma de este documento.
+	 * @param result Resultado parcial de la firma. */
 	public void setBatchResult(final String result) {
 		this.result = result;
 	}
 
-	/**
-	 * Recupera el identificador del documento.
-	 * @return Identificador del documento.
-	 */
+	/** Recupera el identificador del documento.
+	 * @return Identificador del documento. */
 	public String getId() {
 		return this.id;
 	}
 
-	/**
-	 * Recupera el contenido del documento.
-	 * @return Contenido del documento.
-	 */
+	/** Recupera el contenido del documento.
+	 * @return Contenido del documento. */
 	public byte[] getData() {
 		return this.data;
 	}
 
-	/**
-	 * Resultado parcial de la operaci&oacute;n de firma.
+	/** Resultado parcial de la operaci&oacute;n de firma.
 	 * @return Indicador de un error producido durante la firma de los datos,
-	 * o {@code null} si no se ha producido ning&uacute;n error.
-	 */
+	 * o {@code null} si no se ha producido ning&uacute;n error. */
 	public String getResult() {
 		return this.result;
 	}
 
-	/**
-	 * Recupera la configuraci&oacute;n de firma particular para este documento.
-	 * @return Configuraci&oacute;n de firma particular o {@code null} si no la tiene.
-	 */
+	/** Recupera la configuraci&oacute;n de firma particular para este documento.
+	 * @return Configuraci&oacute;n de firma particular o {@code null} si no la tiene. */
 	public SignBatchConfig getConfig() {
 		return this.config;
 	}
 
-	/**
-	 * Recupera la informaci&oacute;n disponible del documento.
-	 * @return Informaci&oacute;n del documento o {@code null} si no la tiene.
-	 */
+	/** Recupera la informaci&oacute;n disponible del documento.
+	 * @return Informaci&oacute;n del documento o {@code null} si no la tiene. */
 	public DocInfo getDocInfo() {
 		return this.docInfo;
 	}

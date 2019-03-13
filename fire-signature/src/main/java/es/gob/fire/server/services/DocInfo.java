@@ -24,17 +24,38 @@ public final class DocInfo implements Serializable {
 
 	private static final String PROPERTY_DOC_NAME = "docName"; //$NON-NLS-1$
 
-	//private static final String PROPERTY_DOC_SIZE ="docSize"; //$NON-NLS-1$
-
 	private String title = null;
 	private String name = null;
 	private long size = 0;
 
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Informacion de documento firmado: "); //$NON-NLS-1$
+		if (this.title == null && this.name == null && this.size == 0) {
+			sb.append("sin informacion"); //$NON-NLS-1$
+		}
+		else {
+			if (this.title != null) {
+				sb.append("titulo='"); //$NON-NLS-1$
+				sb.append(this.title);
+				sb.append("' "); //$NON-NLS-1$
+			}
+			if (this.name != null) {
+				sb.append("nombre='"); //$NON-NLS-1$
+				sb.append(this.name);
+				sb.append("' "); //$NON-NLS-1$
+			}
+			if (this.size != 0) {
+				sb.append("tamano='"); //$NON-NLS-1$
+				sb.append(this.size);
+				sb.append("' "); //$NON-NLS-1$
+			}
+		}
+		return sb.toString().trim();
+	}
 
-	/**
-	 * Recupera el t&iacute;tulo del documento.
-	 * @return T&iacute;tulo del documento.
-	 */
+	/** Recupera el t&iacute;tulo del documento.
+	 * @return T&iacute;tulo del documento. */
 	public String getTitle() {
 		return this.title;
 	}
@@ -53,20 +74,22 @@ public final class DocInfo implements Serializable {
 		this.title = title;
 	}
 
+	/** Obtiene el tama&ntilde;o del documento firmado.
+	 * @return Tama&ntilde;o del documento firmado. */
 	public final long getSize() {
 		return this.size;
 	}
 
+	/** Establece el tama&ntilde;o del documento firmado.
+	 * @param size Tama&ntilde;o del documento firmado. */
 	public final void setSize(final long size) {
 		this.size = size;
 	}
 
-	/**
-	 * Extrae la informaci&oacute;n declarada del documento que se firma de
+	/** Extrae la informaci&oacute;n declarada del documento que se firma de
 	 * la configuraci&oacute;n y la elimina de la misma.
 	 * @param config Configuraci&oacute;n de firma.
-	 * @return Informaci&oacute;n del documento.
-	 */
+	 * @return Informaci&oacute;n del documento. */
 	public static DocInfo extractDocInfo(final Properties config) {
 
 		final DocInfo docInfo = new DocInfo();
