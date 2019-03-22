@@ -11,39 +11,37 @@ package es.gob.fire.server.services.internal.sessions;
 
 import java.util.logging.Logger;
 
-/**
- * Factor&iacute;a para la obtenci&oacute;n de gestores de sesiones que
+/** Factor&iacute;a para la obtenci&oacute;n de gestores de sesiones que
  * posibiliten disponer de varios servidores sin memoria compartida entre los
- * que se compartan las sesiones con las transacciones de firma.
- */
-public class SessionsDAOFactory {
+ * que se compartan las sesiones con las transacciones de firma. */
+public final class SessionsDAOFactory {
 
 	private static final Logger LOGGER = Logger.getLogger(SessionsDAOFactory.class.getName());
 
 	private static final String DAO_FILESYSTEM = "filesystem"; //$NON-NLS-1$
 
 	private static final String[][] DAOS = new String[][] {
-			{DAO_FILESYSTEM, "es.gob.fire.server.services.internal.sessions.FileSystemSessionsDAO"}, //$NON-NLS-1$
+		{
+			DAO_FILESYSTEM,
+			"es.gob.fire.server.services.internal.sessions.FileSystemSessionsDAO" //$NON-NLS-1$
+		},
 	};
 
-	/**
-	 * Recupera una instancia de un gestor de sesiones para que se compartan entre
+	/** Recupera una instancia de un gestor de sesiones para que se compartan entre
 	 * los distintos nodos en los que se despliegue el componente central de FIRe.
 	 * @param type Nombre del gestor.
-	 * @return Gestor de sesiones.
-	 */
+	 * @return Gestor de sesiones, o <code>null</code> si no se puede instanciar el gestor indicado. */
 	public static SessionsDAO getInstance(final String type) {
-
-		SessionsDAO daoInstance = null;
 		for (final String[] dao : DAOS){
 			if (dao[0].equalsIgnoreCase(type)) {
 				try {
-					daoInstance = (SessionsDAO) Class.forName(dao[1]).getConstructor().newInstance();
-				} catch (final Exception e) {
+					return (SessionsDAO) Class.forName(dao[1]).getConstructor().newInstance();
+				}
+				catch (final Exception e) {
 					LOGGER.severe("Error al cargar del gestor para la comparticion de sesiones entre nodos: " + e); //$NON-NLS-1$
 				}
 			}
 		}
-		return daoInstance;
+		return null;
 	}
 }

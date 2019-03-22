@@ -10,10 +10,8 @@ import java.util.logging.SimpleFormatter;
 import es.gob.fire.logs.handlers.PeriodicRotatingFileHandler;
 import es.gob.fire.signature.ConfigManager;
 
-/**
- * Gestor para la configuraci&oacute;n de los logs de FIRe.
- */
-public class FireLogManager {
+/** Gestor para la configuraci&oacute;n de los <i>logs</i> de FIRe. */
+public final class FireLogManager {
 
 	private static final String LOG_FILENAME = "fire_signature.log"; //$NON-NLS-1$
 
@@ -21,14 +19,14 @@ public class FireLogManager {
 
 	private static final String LOG_AFIRMA_NAME = "es.gob.afirma"; //$NON-NLS-1$
 
-	/**
-	 * Configura los logs del servicio.
-	 * @throws IOException Cuando no es posible configurar la salida de los logs a un fichero externo.
-	 */
+	private static final Logger LOGGER = Logger.getLogger(FireLogManager.class.getName());
+
+	/** Configura los logs del servicio.
+	 * @throws IOException Cuando no es posible configurar la salida de los logs a un fichero externo. */
 	static void configureLogs() throws IOException {
 
 		final File logsDir = ConfigManager.getLogsDir() != null ?
-				new File (ConfigManager.getLogsDir()) :
+			new File (ConfigManager.getLogsDir()) :
 				null;
 
 		// Si se ha configurado un directorio de log, sacamos los logs a un fichero del mismo
@@ -52,6 +50,7 @@ public class FireLogManager {
 				policy = RollingPolicy.valueOf(ConfigManager.getLogsRollingPolicy());
 			}
 			catch (final Exception e) {
+				LOGGER.warning("Politica de ciclado de logs incorrecta (" + ConfigManager.getLogsRollingPolicy() + "), se usara la diaria: " + e); //$NON-NLS-1$ //$NON-NLS-2$
 				policy = RollingPolicy.DAY;
 			}
 			handler.setSuffix(policy.getSuffix());
@@ -66,9 +65,7 @@ public class FireLogManager {
 		Logger.getLogger(LOG_AFIRMA_NAME).setLevel(parseLevel(ConfigManager.getLogsLevelAfirma()));
 	}
 
-	/**
-	 * Desinstala los manejadores de log en fichero que hubiese ya instalados.
-	 */
+	/** Desinstala los manejadores de log en fichero que hubiese ya instalados. */
 	private static void cleanLogHandlers() {
 
 		// Retiramos los logs a fichero si ya estaban instalados
@@ -79,21 +76,17 @@ public class FireLogManager {
 		}
 	}
 
-
 	private static Level parseLevel(final String levelName) {
-		Level level;
 		try {
-			level = Level.parse(levelName);
+			return Level.parse(levelName);
 		}
 		catch (final Exception e) {
-			level = Level.INFO;
+			LOGGER.warning("Nivel de log incorrecto (" + levelName + "), se usara INFO: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			return Level.INFO;
 		}
-		return level;
 	}
 
-	/**
-	 * Politica de rotado del fichero de logs.
-	 */
+	/** Pol&iacute;tica de rotado del fichero de logs. */
 	enum RollingPolicy {
 		DAY(".yyyy-MM-dd"), //$NON-NLS-1$
 		HOUR(".yyyy-MM-dd_hh"), //$NON-NLS-1$

@@ -27,8 +27,7 @@ import javax.servlet.http.HttpSession;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.signature.ConfigManager;
 
-/**
- * Gestor para el guardado de sesiones que utiliza un directorio en disco como
+/** Gestor para el guardado de sesiones que utiliza un directorio en disco como
  * lugar para el guardado y lectura de datos de sesi&oacute;n. Este mecanismo
  * puede conllevar un uso intensivo de la unidad de disco y problemas de
  * inconsistencia si un retardo de escritura en disco permitiese que se buscase
@@ -36,9 +35,8 @@ import es.gob.fire.signature.ConfigManager;
  * El borrado de sesiones de disco caducadas debe llevarse a cabo a trav&eacute;s
  * del proceso de gesti&oacute;n de sesiones pero esta clase incluye su propia
  * l&oacute;gica para el borrado de sesiones hu&eacute;rfanas que no se borraron en
- * su momento. Al instanciar el DAO se inicia el proceso de borrado de sesiones caducadas.
- */
-public class FileSystemSessionsDAO implements SessionsDAO {
+ * su momento. Al instanciar el DAO se inicia el proceso de borrado de sesiones caducadas. */
+public final class FileSystemSessionsDAO implements SessionsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(FileSystemSessionsDAO.class.getName());
 
@@ -56,13 +54,9 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	/** Numero de recuperaciones de sesion realizados. */
 	private int uses = 0;
 
-	/**
-	 * Construye el gestor y crea el directorio para el guardado.
-	 */
+	/** Construye el gestor y crea el directorio para el guardado. */
 	public FileSystemSessionsDAO() {
-
 		this.dir = new File(ConfigManager.getTempDir(), SESSIONS_TEMP_DIR);
-
 		if (!this.dir.exists()) {
 			this.dir.mkdirs();
 		}
@@ -109,13 +103,11 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 				sessionFile.lastModified() + ConfigManager.getTempsTimeout());
 	}
 
-	/**
-	 * Carga de un fichero de sesi&oacute;n los datos que contiene.
+	/** Carga de un fichero de sesi&oacute;n los datos que contiene.
 	 * @param sessionFile Fichero de sesi&oacute;n.
 	 * @return Datos contenidos en la sesi&oacute;n del fichero.
 	 * @throws FileNotFoundException Cuando no se encuentra el fichero.
-	 * @throws Exception Cuando ocurre un error durante la carga de la sesi&oacute;n.
-	 */
+	 * @throws Exception Cuando ocurre un error durante la carga de la sesi&oacute;n. */
 	private static Map<String, Object> loadSessionData(final File sessionFile) throws FileNotFoundException, Exception {
 
 		final Map<String, Object> sessionData;
@@ -129,7 +121,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	@Override
 	public void saveSession(final FireSession session) {
 		try (final FileOutputStream fos = new FileOutputStream(new File(this.dir, session.getTransactionId()));) {
-			try (ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+			try (final ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 				oos.writeObject(session.getAttributtes());
 			}
 		}
@@ -151,9 +143,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 		}
 	}
 
-	/**
-	 * Hilo para la limpieza de sesiones en disco.
-	 */
+	/** Hilo para la limpieza de sesiones en disco. */
 	class CleanerThread extends Thread {
 
 		private final Logger LOGGER_THREAD = Logger.getLogger(CleanerThread.class.getName());
@@ -167,7 +157,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 		@Override
 		public void run() {
 
-			File[] files;
+			final File[] files;
 			try {
 				files = this.cleaningDir.listFiles();
 			}

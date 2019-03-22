@@ -1,9 +1,7 @@
 package es.gob.fire.server.services.internal;
 
-/**
- * Clase para la simplificacion de la impresion de logs referentes a una transacci&oacute;n.
- */
-public class LogTransactionFormatter {
+/** Clase para la simplificaci&oacute;n de la impresi&oacute;n de <i>logs</i> referentes a una transacci&oacute;n. */
+public final class LogTransactionFormatter {
 
 	private final String appId;
 

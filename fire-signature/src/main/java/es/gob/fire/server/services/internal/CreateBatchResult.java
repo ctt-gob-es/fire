@@ -12,7 +12,7 @@ package es.gob.fire.server.services.internal;
 /**
  * Resultado de la operaci&oacute;n de creaci&oacute;n de un lote.
  */
-public class CreateBatchResult {
+public final class CreateBatchResult {
 
 	private final String transactionId;
 

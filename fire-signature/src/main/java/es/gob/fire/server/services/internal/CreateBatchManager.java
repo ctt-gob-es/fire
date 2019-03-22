@@ -31,22 +31,22 @@ import es.gob.fire.server.services.statistics.TransactionType;
  * Manejador que gestiona las peticiones de creaci&oacute;n de un lote de firma, al que posteriormente
  * se le podr&aacute;an agregar documentos a firmar.
  */
-public class CreateBatchManager {
+public final class CreateBatchManager {
 
 	private static final Logger LOGGER = Logger.getLogger(CreateBatchManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 
-	/**
-	 * Create un lote de firma.
+	/** Create un lote de firma.
 	 * @param request Petici&oacute;n para la creaci&oacute;n del lote.
+	 * @param appName Nombre de la aplicaci&oacute;n que gestiona el lote.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta de la creaci&oacute;n del lote.
-	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
-	 */
-	public static void createBatch(final HttpServletRequest request, final String appName,
-			final RequestParameters params, final HttpServletResponse response)
-		throws IOException {
+	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos. */
+	public static void createBatch(final HttpServletRequest request,
+			                       final String appName,
+			                       final RequestParameters params,
+			                       final HttpServletResponse response) throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
 		final String op			= params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
@@ -71,22 +71,28 @@ public class CreateBatchManager {
 
 		if (algorithm == null || algorithm.isEmpty()) {
 			LOGGER.warning(logF.format("No se ha proporcionado el algoritmo de firma")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
+			response.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"No se ha proporcionado el algoritmo de firma" //$NON-NLS-1$
+			);
 			return;
 		}
 
 		if (cop == null || cop.isEmpty()) {
 			LOGGER.warning(logF.format("No se ha indicado la operacion de firma a realizar")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
+			response.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"No se ha indicado la operacion de firma a realizar" //$NON-NLS-1$
+			);
 			return;
 		}
 
 		if (format == null || format.isEmpty()) {
 			LOGGER.warning(logF.format("No se ha indicado el formato de firma")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se ha indicado el formato de firma"); //$NON-NLS-1$
+			response.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"No se ha indicado el formato de firma" //$NON-NLS-1$
+			);
 			return;
 		}
 
@@ -109,23 +115,31 @@ public class CreateBatchManager {
 				connConfig = new TransactionConfig(configB64);
 			}
 			catch(final Exception e) {
-				LOGGER.warning(logF.format("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma"); //$NON-NLS-1$
+				LOGGER.warning(
+					logF.format(
+						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma: " + e //$NON-NLS-1$
+					)
+				);
+				response.sendError(
+					HttpServletResponse.SC_BAD_REQUEST,
+					"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma" //$NON-NLS-1$
+				);
 				return;
 			}
 		}
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning(logF.format("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
+			response.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"No se proporcionaron las URL de redireccion para la operacion" //$NON-NLS-1$
+			);
 			return;
 		}
 
         // Se obtiene el listado final de proveedores para la operacion, filtrando la
         // lista de proveedores dados de alta con los solicitados
-		String[] provs;
+		final String[] provs;
 		final String[] requestedProvs = connConfig.getProviders();
 		if (requestedProvs != null) {
 			provs = ProviderManager.getFilteredProviders(requestedProvs);
@@ -160,8 +174,6 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_ID, transactionId);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.valueOf(FIReServiceOperation.parse(op)).toString());
-
-
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
@@ -198,9 +210,12 @@ public class CreateBatchManager {
 	/** Env&iacute;a el resultado al componente cliente. */
 	private static void sendResult(final HttpServletResponse response, final CreateBatchResult result) throws IOException {
         response.setContentType("application/json"); //$NON-NLS-1$
-        final PrintWriter out = response.getWriter();
-        out.print(result.toString());
-        out.flush();
-        out.close();
+        try (
+    		final PrintWriter out = response.getWriter();
+		) {
+	        out.print(result.toString());
+	        out.flush();
+	        out.close();
+        }
 	}
 }

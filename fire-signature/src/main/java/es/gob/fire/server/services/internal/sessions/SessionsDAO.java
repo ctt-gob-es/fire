@@ -13,38 +13,28 @@ import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.internal.FireSession;
 
-/**
- * Interfaz que implementan los gestores para el guardado de sesiones y
- * su proceso compartido por varios nodos que no comparten objetos en memoria.
- */
+/** Interfaz que implementan los gestores para el guardado de sesiones y
+ * su proceso compartido por varios nodos que no comparten objetos en memoria. */
 public interface SessionsDAO {
 
-	/**
-	 * Guarda una sesi&oacute;n.
-	 * @param session Sesi&oacute;n a guardar.
-	 */
+	/** Guarda una sesi&oacute;n.
+	 * @param session Sesi&oacute;n a guardar. */
 	void saveSession(FireSession session);
 
-	/**
-	 * Comprueba la existencia de una sesi&oacute;n.
+	/** Comprueba la existencia de una sesi&oacute;n.
 	 * @param id Identificador de la sesi&oacute;n.
-	 * @return {@code true} si la sesi&oacute;n existe, {@code false} en caso contrario.
-	 */
+	 * @return {@code true} si la sesi&oacute;n existe, {@code false} en caso contrario. */
 	boolean existsSession(String id);
 
-	/**
-	 * Recupera una sesi&oacute;n. Esto implica construir el propio objeto de sesi&oacute;n y
+	/** Recupera una sesi&oacute;n. Esto implica construir el propio objeto de sesi&oacute;n y
 	 * renovar su periodo de validez.
 	 * @param id Identificador de la sesi&oacute;n.
 	 * @param session Sesi&oacute;n web en la que se debe sustentar la sesi&oacute;n.
 	 * @return Sesi&oacute;n recuperada o {@code null} si no existe la sesi&oacute;n
-	 * o no pudo cargarse.
-	 */
+	 * o no pudo cargarse. */
 	FireSession recoverSession(String id, HttpSession session);
 
-	/**
-	 * Elimina una sesi&oacute;n.
-	 * @param id Identificador de la sesi&oacute;n.
-	 */
+	/** Elimina una sesi&oacute;n.
+	 * @param id Identificador de la sesi&oacute;n. */
 	void removeSession(String id);
 }

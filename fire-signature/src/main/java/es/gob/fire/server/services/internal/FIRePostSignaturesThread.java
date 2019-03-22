@@ -27,7 +27,7 @@ import es.gob.fire.server.services.UpgradeException;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.upgrade.UpgradeResult;
 
-class FIRePostSignaturesThread extends ConcurrentProcessThread {
+final class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 	private static final Logger LOGGER = Logger.getLogger(FIRePostSignaturesThread.class.getName());
@@ -52,8 +52,7 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
 	private final FireSession sesion;
 
-	/**
-	 * Construye un hilo que se encargar&aacute; de componer la firma electr&oacute;nica
+	/** Construye un hilo que se encargar&aacute; de componer la firma electr&oacute;nica
 	 * realizada con el certificado en la nube y la actualizar&aacute; al formato avanzado
 	 * que corresponda (si se configura).
 	 * @param appId Identificador de la aplicaci&oacute;n.
@@ -173,14 +172,14 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     	byte[] signature;
     	try {
     		signature = FIReTriHelper.getPostSign(
-    				this.signConfig.getCryptoOperation(),
-    				this.signConfig.getFormat(),
-    				this.algorithm,
-    				this.signConfig.getExtraParams(),
-    				this.signingCert,
-    				data,
-    				currentTd
-    				);
+				this.signConfig.getCryptoOperation(),
+				this.signConfig.getFormat(),
+				this.algorithm,
+				this.signConfig.getExtraParams(),
+				this.signingCert,
+				data,
+				currentTd
+			);
     	}
     	catch (final FIReSignatureException e) {
     		LOGGER.log(
@@ -223,7 +222,7 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 		}
 
     	// Si se definio un gestor de documentos, procesamos la firma tal como este indique
-    	byte[] result;
+    	final byte[] result;
     	if (this.docManager != null) {
     		try {
     			result = this.docManager.storeDocument(this.docId.getBytes(StandardCharsets.UTF_8),
@@ -264,7 +263,6 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     		//TRANSLOGGER.log(this.sesion, false);
     		return;
     	}
-
 
     	// Registrar en el listado de resultados el de la operacion
     	this.batchResult.setSuccessResult(this.docId);

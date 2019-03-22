@@ -26,7 +26,7 @@ import es.gob.fire.signature.ConfigManager;
  * Servicio para la obtenci&oaucte;n de un fichero de despliegue JNLP
  * al que se le proporciona un argumento proporcionado en la llamada.
  */
-public class AutoFirmaJnlpService extends HttpServlet {
+public final class AutoFirmaJnlpService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -91,11 +91,13 @@ public class AutoFirmaJnlpService extends HttpServlet {
 	 * @throws IOException Cuando ocurre un error en la lectura.
 	 */
 	private static String loadJnlpTemplate() throws IOException {
-
-		final InputStream templateIs = AutoFirmaJnlpService.class.getClassLoader().getResourceAsStream(TEMPLATE_FILE);
-		final byte[] content = readInputStream(templateIs);
-		templateIs.close();
-
+		final byte[] content;
+		try (
+			final InputStream templateIs = AutoFirmaJnlpService.class.getClassLoader().getResourceAsStream(TEMPLATE_FILE);
+		) {
+			content = readInputStream(templateIs);
+			templateIs.close();
+		}
 		return new String(content, StandardCharsets.UTF_8);
 	}
 

@@ -6,18 +6,15 @@ import es.gob.fire.signature.ConfigManager;
  * Configuraci&oacute;n necesaria para al generaci&oacute;n y gesti&oacute;n de
  * los datos estad&iacute;sticos.
  */
-public class StatisticsConfig {
+public final class StatisticsConfig {
 
 	private Policy policy = Policy.DISABLE;
 	private String dataDirPath = null;
 	private String dumpTime = null;
 
-	/**
-	 * Carga la configuraci&oacute;n para la generaci&oacute;n de los datos estad&iacute;sticos.
-	 * @param config Configuraci&oacute;n de la aplicaci&oacute;n.
+	/** Carga la configuraci&oacute;n para la generaci&oacute;n de los datos estad&iacute;sticos.
 	 * @return Configuraci&oacute;n para la generaci&oacute;n de los datos estad&iacute;sticos.
-	 * @throws Cuando se indica una politica de firma no valida.
-	 */
+	 * @throws IllegalArgumentException Cuando se indica una politica de firma no valida. */
 	public static StatisticsConfig load() throws IllegalArgumentException {
 
 		final int policyId = ConfigManager.getStatisticsPolicy();
@@ -68,18 +65,19 @@ public class StatisticsConfig {
 		return this.dumpTime;
 	}
 
-	/**
-	 * Pol&iacute;ticas de generaci&oacute;n de datos estad&iacute;sticos.
-	 */
+	/** Pol&iacute;ticas de generaci&oacute;n de datos estad&iacute;sticos. */
 	enum Policy {
+
 		/** No se generan datos estad&iacute;sticos, */
 		DISABLE (0),
+
 		/** S&iacute; se generan datos estad&iacute;sticos. */
 		GENERATE (1),
+
 		/** Se generan datos estad&iacute;sticos y se vuelcan autom&aacute;ticamente a base de datos. */
 		AUTOMATIC (2);
 
-		int id;
+		final int id;
 
 		private Policy(final int id) {
 			this.id = id;

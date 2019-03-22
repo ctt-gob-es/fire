@@ -15,10 +15,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-/**
- * Sesi&oacute;n de FIRe en la que se almacenan los datos de una transacci&oacute;n.
- */
-public class FireSession implements Serializable {
+/** Sesi&oacute;n de FIRe en la que se almacenan los datos de una transacci&oacute;n. */
+public final class FireSession implements Serializable {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 2379947907716059060L;
@@ -35,13 +33,11 @@ public class FireSession implements Serializable {
 		this.expirationTime = 0;
 	}
 
-	/**
-	 * Carga una sesi&oacute;n de FIRe de la sesi&oacute;n web proporcionada.
+	/** Carga una sesi&oacute;n de FIRe de la sesi&oacute;n web proporcionada.
 	 * @param trId Identificador de la transacci&oacute;n que se debe cargar.
 	 * @param httpSession Sesi&oacute;n web.
 	 * @return Datos de la sesi&oacute;n o {@code null} si no se encuentran
-	 * los datos de la transacci&oacute;n indicada.
-	 */
+	 *         los datos de la transacci&oacute;n indicada. */
 	static FireSession loadFireSession(final String trId, final HttpSession httpSession) {
 
 		if (httpSession == null) {
@@ -165,7 +161,10 @@ public class FireSession implements Serializable {
 	 */
 	public void copySessionAttributes(final HttpSession targetSession) {
 		targetSession.setAttribute(this.transactionId, this.ssData);
-		targetSession.setAttribute(ServiceParams.SESSION_PARAM_TIMEOUT, new Long(this.expirationTime));
+		targetSession.setAttribute(
+			ServiceParams.SESSION_PARAM_TIMEOUT,
+			Long.valueOf(this.expirationTime)
+		);
 	}
 
 	/**
@@ -204,7 +203,10 @@ public class FireSession implements Serializable {
 	public void updateExpirationTime(final long newExpirationPeriod) {
 		this.expirationTime = System.currentTimeMillis() + newExpirationPeriod;
 		if (this.httpSession != null) {
-			this.httpSession.setAttribute(ServiceParams.SESSION_PARAM_TIMEOUT, new Long(this.expirationTime));
+			this.httpSession.setAttribute(
+				ServiceParams.SESSION_PARAM_TIMEOUT,
+				Long.valueOf(this.expirationTime)
+			);
 		}
 	}
 

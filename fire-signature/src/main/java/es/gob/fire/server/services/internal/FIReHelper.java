@@ -18,7 +18,7 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 
 /** Utilidad para la gesti&oacute;n de las peticiones al
  * servicio de custodia de certificados. */
-class FIReHelper {
+final class FIReHelper {
 
 	private static final Logger LOGGER = Logger.getLogger(FIReHelper.class.getName());
 
@@ -46,7 +46,7 @@ class FIReHelper {
         	return false;
         }
         catch (final Exception e) {
-        	// No tratamos errores
+        	LOGGER.severe("Error comprobando el registro del usuario: " + e); //$NON-NLS-1$
         }
 
 		return true;

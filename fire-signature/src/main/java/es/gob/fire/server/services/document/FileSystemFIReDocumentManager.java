@@ -29,7 +29,7 @@ import es.gob.fire.server.document.FIReDocumentManager;
  * Gestor de documentos para la carga de datos desde sistema de ficheros para su
  * uso en FIRe y guardado de las firmas generadas por el propio FIRe.
  */
-public class FileSystemFIReDocumentManager implements FIReDocumentManager, Serializable {
+public final class FileSystemFIReDocumentManager implements FIReDocumentManager, Serializable {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = -5810048749537708465L;
@@ -174,6 +174,9 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	        f = file.getCanonicalFile();
 	    }
 	    catch( final IOException e ) {
+	    	LOGGER.warning(
+    			"Error comprobando si el directorio '" + p.getAbsolutePath() + "' es padre en algun nivel del fichero '" + file.getAbsolutePath() + "': " + e //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			);
 	        return false;
 	    }
 

@@ -14,7 +14,7 @@ import java.util.List;
 /** Hilo preparado para la ejecuci&oacute;n de m&uacute;ltiples
  * instancias concurrentes y permitir deternerlos todos si alguno
  * falla en su ejecuci&oacute;n. */
-public class ConcurrentProcessThread extends Thread {
+public abstract class ConcurrentProcessThread extends Thread {
 
 	private boolean failed;
 
@@ -79,7 +79,10 @@ public class ConcurrentProcessThread extends Thread {
 	 * a&uacute;n no han terminado.
 	 * @param attrName Nombre del atributo de sesi&oacute;n con el que se guardar&aacute;.
 	 */
-	public static void waitThreads(final List<ConcurrentProcessThread> threads, final boolean stopOnError, final FireSession session, final String attrName) {
+	public static void waitThreads(final List<ConcurrentProcessThread> threads,
+			                       final boolean stopOnError,
+			                       final FireSession session,
+			                       final String attrName) {
 
         boolean stopThreads = false;
         int lives;

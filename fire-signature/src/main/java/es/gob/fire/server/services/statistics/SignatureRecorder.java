@@ -19,7 +19,7 @@ import es.gob.fire.statistics.entity.SignatureCube;
  * Permite registrar la informaci&oacute;n relevante de las firmas realizadas para el
  * c&aacute;lculo de estad&iacute;sticas.
  */
-public class SignatureRecorder {
+public final class SignatureRecorder {
 
 	private static final Logger LOGGER = Logger.getLogger(SignatureRecorder.class.getName());
 
@@ -170,7 +170,7 @@ public class SignatureRecorder {
 		getSignCube().setAlgorithm(algorithm);
 
 		// Obtenemos el tamano del documento
-		Long docSize = new Long(0);
+		Long docSize = Long.valueOf(0);
 		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
 		if (docSize != null) {
 			docSize = (Long) docSizeObject;
@@ -189,7 +189,7 @@ public class SignatureRecorder {
 				// Actualizamos el tamano del documento
 				final DocInfo docinf = batchResult.getDocInfo(docId);
 			    if (docinf != null) {
-			    	docSize = new Long(docinf.getSize());
+			    	docSize = Long.valueOf(docinf.getSize());
 			    }
 			    // Si se establecio una configuracion especifica para el documento, registramos esta
 			    final SignBatchConfig signConfig = batchResult.getSignConfig(docId);
@@ -201,7 +201,11 @@ public class SignatureRecorder {
 		}
 
 		// Registramos el tamano del documento, el formato y el formato de actualizacion
-		getSignCube().setDataSize(docSize.longValue());
+		getSignCube().setDataSize(
+			docSize != null ?
+				docSize.longValue() :
+					0L
+		);
 		getSignCube().setFormat(format);
 		getSignCube().setImprovedFormat(upgrade);
 
