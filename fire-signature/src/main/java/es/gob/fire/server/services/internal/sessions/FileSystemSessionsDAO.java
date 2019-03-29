@@ -139,7 +139,7 @@ public final class FileSystemSessionsDAO implements SessionsDAO {
 			// No hacemos nada
 		}
 		catch (final IOException e) {
-			LOGGER.warning("No se pudo eliminar de disco la sesion '" + id + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.warning("No se pudo eliminar la sesion '" + id + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

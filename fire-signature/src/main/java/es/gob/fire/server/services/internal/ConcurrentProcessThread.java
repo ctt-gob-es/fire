@@ -12,7 +12,7 @@ package es.gob.fire.server.services.internal;
 import java.util.List;
 
 /** Hilo preparado para la ejecuci&oacute;n de m&uacute;ltiples
- * instancias concurrentes y permitir deternerlos todos si alguno
+ * instancias concurrentes y permitir detenerlos todos si alguno
  * falla en su ejecuci&oacute;n. */
 public abstract class ConcurrentProcessThread extends Thread {
 
@@ -104,7 +104,7 @@ public abstract class ConcurrentProcessThread extends Thread {
 
         	// Actualizamos en la sesion el numero de hilos que faltan por terminar
         	synchronized (session) {
-        		session.setAttribute(attrName, new Integer(lives));
+        		session.setAttribute(attrName, Integer.valueOf(lives));
         	}
 
         	// Si aun quedan hilos vivos, esperamos un poco antes
