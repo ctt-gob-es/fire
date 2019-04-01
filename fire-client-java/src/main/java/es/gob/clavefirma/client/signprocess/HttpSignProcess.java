@@ -219,37 +219,37 @@ public final class HttpSignProcess {
 
         if (transactionId == null) {
             throw new IllegalArgumentException(
-                    "El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+                "El id de la transaccion no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (op == null) {
             throw new IllegalArgumentException(
-                    "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
+                "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (ft == null) {
             throw new IllegalArgumentException(
-                    "El formato de firma no puede ser nulo" //$NON-NLS-1$
+                "El formato de firma no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (algth == null) {
             throw new IllegalArgumentException(
-                    "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
+                "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (dataB64 == null) {
             throw new IllegalArgumentException(
-                    "Los datos a firmar no pueden ser nulos" //$NON-NLS-1$
+                "Los datos a firmar no pueden ser nulos" //$NON-NLS-1$
             );
         }
         if (tdB64 == null) {
             throw new IllegalArgumentException(
-                    "Los datos de la operacion trifasica no pueden ser nulos" //$NON-NLS-1$
+                "Los datos de la operacion trifasica no pueden ser nulos" //$NON-NLS-1$
             );
         }
         if (cert == null) {
             throw new IllegalArgumentException(
-                    "El certificado del firmante no puede ser nulo" //$NON-NLS-1$
+                "El certificado del firmante no puede ser nulo" //$NON-NLS-1$
             );
         }
 
@@ -277,7 +277,7 @@ public final class HttpSignProcess {
         	if (e instanceof HttpError) {
         		final HttpError he = (HttpError) e;
         		LOGGER.severe(
-    				"Error en la consulta al servicio de recuperacion de firma (" + URL_BASE + ") con respuesta '" + he.getResponseDescription() + "': " + e //$NON-NLS-1$ //$NON-NLS-2$
+    				"Error en la consulta al servicio de recuperacion de firma (" + URL_BASE + ") con respuesta '" + he.getResponseDescription() + "': " + e //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				);
         		switch (he.getResponseCode()) {
 	        		case HttpURLConnection.HTTP_FORBIDDEN:
