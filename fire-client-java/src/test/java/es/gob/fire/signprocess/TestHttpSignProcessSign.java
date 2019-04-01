@@ -37,7 +37,7 @@ public final class TestHttpSignProcessSign {
 	private static final String PADES = "PAdES"; //$NON-NLS-1$
 
 	/** Prueba completa de firma.
-	 * @throws Exception EN cualquier error. */
+	 * @throws Exception En cualquier error. */
 	@SuppressWarnings("static-method")
 	@Test
 	public void testCompleteSign() throws Exception {

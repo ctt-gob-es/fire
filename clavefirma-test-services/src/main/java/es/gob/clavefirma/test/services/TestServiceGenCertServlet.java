@@ -76,7 +76,7 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 		}
 
 		// Extraemos el certificado
-		byte[] certEncoded;
+		final byte[] certEncoded;
 		try {
 			final KeyStore ks = TestHelper.getNewKeyStore();
 			certEncoded = ((X509Certificate) ks.getCertificate(ks.aliases().nextElement())).getEncoded();
@@ -90,9 +90,12 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 		transactionProps.setProperty(KEY_CERTIFICATE, Base64.encode(certEncoded));
 		transactionProps.setProperty(KEY_AUTH, Boolean.TRUE.toString());
 
-		final OutputStream fos = new FileOutputStream(transactionFile);
-		transactionProps.store(fos, null);
-		fos.close();
+		try (
+			final OutputStream fos = new FileOutputStream(transactionFile);
+		) {
+			transactionProps.store(fos, null);
+			fos.close();
+		}
 
 		response.sendRedirect(request.getParameter("redirectok")); //$NON-NLS-1$
 	}

@@ -27,10 +27,8 @@ import es.gob.fire.server.connector.FIReCertificateAvailableException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.WeakRegistryException;
 
-/**
- * Servicio para la solicitud de un nuevo certificado de pruebas.
- */
-public class TestGenerateCertificateService extends HttpServlet {
+/** Servicio para la solicitud de un nuevo certificado de pruebas. */
+public final class TestGenerateCertificateService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,9 +43,6 @@ public class TestGenerateCertificateService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(TestGenerateCertificateService.class.getName());
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
@@ -82,11 +77,14 @@ public class TestGenerateCertificateService extends HttpServlet {
 
 		final String transactionId = UUID.randomUUID().toString();
 
-		final OutputStream fos = new FileOutputStream(
+		try (
+			final OutputStream fos = new FileOutputStream(
 				new File(TestHelper.getDataFolder(), transactionId)
-				);
-		p.store(fos, ""); //$NON-NLS-1$
-		fos.close();
+			);
+		) {
+			p.store(fos, ""); //$NON-NLS-1$
+			fos.close();
+		}
 
 		final String redirect = TestHelper.getCertificateRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe);
 

@@ -30,7 +30,7 @@ import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.WeakRegistryException;
 
 
-class TestHelper {
+final class TestHelper {
 
 	private static final Logger LOGGER = Logger.getLogger(TestHelper.class.getName());
 
@@ -117,7 +117,6 @@ class TestHelper {
 			);
 		}
 
-
 		String urlBase = p.getProperty(PROPERTY_URL_SERVICE);
 		if (urlBase == null || urlBase.length() == 0) {
 			urlBase = URL_BASE_SERVICE;
@@ -145,7 +144,6 @@ class TestHelper {
 	 */
 	public static Properties loadConfig() throws  IOException {
 
-		InputStream is = null;
 		final Properties config = new Properties();
 		try {
 			String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
@@ -156,42 +154,36 @@ class TestHelper {
 				final File configFile = new File(configDir, CONFIG_FILE).getCanonicalFile();
 				if (!configFile.isFile() || !configFile.canRead()) {
 					LOGGER.warning(
-							"No se encontro el fichero " + CONFIG_FILE + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configFile.getAbsolutePath() + //$NON-NLS-1$
-									"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+						"No se encontro el fichero " + CONFIG_FILE + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
+							ENVIRONMENT_VAR_CONFIG_DIR + ": " + configFile.getAbsolutePath() + //$NON-NLS-1$
+								"\nSe buscara en el CLASSPATH"); //$NON-NLS-1$
 				}
 				else {
-					is = new FileInputStream(configFile);
+					try (
+						final InputStream is = new FileInputStream(configFile);
+					) {
+						config.load(is);
+						is.close();
+					}
+					return config;
 				}
 			}
 
-			if (is == null) {
-				is = TestHelper.class.getResourceAsStream('/' + CONFIG_FILE);
+			try (
+				final InputStream is = TestHelper.class.getResourceAsStream('/' + CONFIG_FILE);
+			) {
+				config.load(is);
+				is.close();
 			}
+			return config;
 
-			config.load(is);
-			is.close();
 		}
 		catch(final NullPointerException e){
-			LOGGER.severe("No se ha encontrado el fichero de configuracion: " + e); //$NON-NLS-1$
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
-			throw new IOException("No se ha encontrado el fichero de propiedades " + CONFIG_FILE, e); //$NON-NLS-1$
+			throw new IOException("No se ha encontrado el fichero de propiedades '" + CONFIG_FILE + "': " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		catch (final Exception e) {
-			LOGGER.severe("No se pudo cargar el fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
-			throw new IOException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, e); //$NON-NLS-1$
+			throw new IOException("No se pudo cargar el fichero de configuracion '" + CONFIG_FILE + "': " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		finally {
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
-		}
-		return config;
 	}
 
 	static File getDataFolder() {
@@ -201,8 +193,7 @@ class TestHelper {
 		return tempDir;
 	}
 
-	/**
-	 * Recupera el almacen de claves del usuario.
+	/** Recupera el almac&eacute;n de claves del usuario.
 	 * @param subjectId Identificador del usuario.
 	 * @return Almac&eacute;n del usuario.
 	 * @throws FIReCertificateException Cuando el usuario no tiene certificados.
@@ -210,20 +201,19 @@ class TestHelper {
 	 * @throws NoSuchAlgorithmException
 	 * @throws CertificateException
 	 * @throws IOException
-	 * @throws InvalidUserException Cuando el usuario no exista.
-	 * @throws BlockedCertificateException Cuando el usuario no tenga certificados activos y s&iacute; bloqueados.
-	 * @throws WeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma.
-	 */
-	static KeyStore getKeyStore(final String subjectId) throws  FIReCertificateException,
-																		KeyStoreException,
-																		NoSuchAlgorithmException,
-																		CertificateException,
-																		IOException,
-																		InvalidUserException,
-																		BlockedCertificateException,
-																		WeakRegistryException {
-
-
+	 * @throws InvalidUserException Cuando el usuario no existe.
+	 * @throws BlockedCertificateException Cuando el usuario no tiene certificados activos y
+	 *                                     s&iacute; bloqueados.
+	 * @throws WeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil
+	 *                               y no puede tener certificados de firma. */
+	static KeyStore getKeyStore(final String subjectId) throws FIReCertificateException,
+															   KeyStoreException,
+															   NoSuchAlgorithmException,
+															   CertificateException,
+															   IOException,
+															   InvalidUserException,
+															   BlockedCertificateException,
+															   WeakRegistryException {
 		checkSubject(subjectId);
 
 		// Eliminamos el proveedor de BouncyCastle en caso de estar instaladas
@@ -231,31 +221,30 @@ class TestHelper {
 
 		final KeyStore ks = KeyStore.getInstance("PKCS12"); //$NON-NLS-1$
 		ks.load(
-				TestGetCertificateService.class.getResourceAsStream("/testservice/"+ subjectId + ".p12"), //$NON-NLS-1$ //$NON-NLS-2$
-				getSubjectPassword(subjectId).toCharArray()
-				);
+			TestGetCertificateService.class.getResourceAsStream("/testservice/"+ subjectId + ".p12"), //$NON-NLS-1$ //$NON-NLS-2$
+			getSubjectPassword(subjectId).toCharArray()
+		);
 		return ks;
 	}
 
-	/**
-	 * Recupera la contrase&ntilde;a declarada para el almacen de claves en cuesti&oacute;n.
-	 * @param subjectId Identificador del usuario, nombre de su almacen de claves y el de su
-	 * fichero de propiedades.
+	/** Recupera la contrase&ntilde;a declarada para el almac&eacute;n de claves en cuesti&oacute;n.
+	 * @param subjectId Identificador del usuario, nombre de su almac&eacute;n de claves y el de su
+	 *                  fichero de propiedades.
 	 * @return Contrase&ntilde;a declarada en el fichero de propiedades del usuario.
 	 * @throws IOException Cuando ocurre un error al leer el fichero del usuario.
-	 * @throws InvalidUserException Cuando no se encuentra este fichero.
-	 */
+	 * @throws InvalidUserException Cuando no se encuentra este fichero. */
 	static String getSubjectPassword(final String subjectId) throws IOException, InvalidUserException {
-
-		final InputStream fis = new FileInputStream(doSubjectExist(subjectId));
 		final Properties tempProperties = new Properties();
-		tempProperties.load(fis);
-		fis.close();
+		try (
+			final InputStream fis = new FileInputStream(doSubjectExist(subjectId));
+		) {
+			tempProperties.load(fis);
+			fis.close();
+		}
 		return tempProperties.getProperty(TEST_USER_PROPERTY_PASSWORD);
 	}
 
-	/**
-	 * Recupera el almacen de claves del usuario.
+	/** Recupera el almac&eacute;n de claves del usuario.
 	 * @param subjectId Identificador del usuario.
 	 * @return Almac&eacute;n del usuario.
 	 * @throws FIReCertificateException Cuando el usuario no tiene certificados.
@@ -263,39 +252,41 @@ class TestHelper {
 	 * @throws NoSuchAlgorithmException
 	 * @throws CertificateException
 	 * @throws IOException
-	 * @throws InvalidUserException Cuando el usuario no exista.
-	 */
-	static KeyStore getNewKeyStore() throws  FIReCertificateException,
-																		KeyStoreException,
-																		NoSuchAlgorithmException,
-																		CertificateException,
-																		IOException, InvalidUserException {
+	 * @throws InvalidUserException Cuando el usuario no exista. */
+	static KeyStore getNewKeyStore() throws FIReCertificateException,
+											KeyStoreException,
+											NoSuchAlgorithmException,
+											CertificateException,
+											IOException,
+											InvalidUserException {
 
 		// Eliminamos el proveedor de BouncyCastle en caso de estar instaladas
 		Security.removeProvider("BC"); //$NON-NLS-1$
 
 		final KeyStore ks = KeyStore.getInstance("PKCS12"); //$NON-NLS-1$
 		ks.load(
-				TestGetCertificateService.class.getResourceAsStream("/testservice/new/new.p12"), //$NON-NLS-1$
-				getNewSubjectPassword().toCharArray()
-				);
+			TestGetCertificateService.class.getResourceAsStream("/testservice/new/new.p12"), //$NON-NLS-1$
+			getNewSubjectPassword().toCharArray()
+		);
 		return ks;
 	}
 
 	static String getNewSubjectPassword() throws IOException {
-
-		final InputStream fis = TestGetCertificateService.class.getResourceAsStream("/testservice/new/new.properties"); //$NON-NLS-1$
 		final Properties tempProperties = new Properties();
-		tempProperties.load(fis);
-		fis.close();
+		try (
+			final InputStream fis = TestGetCertificateService.class.getResourceAsStream("/testservice/new/new.properties"); //$NON-NLS-1$
+		) {
+			tempProperties.load(fis);
+			fis.close();
+		}
 		return tempProperties.getProperty(TEST_USER_PROPERTY_PASSWORD, ""); //$NON-NLS-1$
 	}
 
 	static File doSubjectExist(final String subjectId) throws IOException, InvalidUserException {
 		if (subjectId == null) {
 			throw new IllegalArgumentException(
-					"El identificador del titular no puede ser nulo" //$NON-NLS-1$
-					);
+				"El identificador del titular no puede ser nulo" //$NON-NLS-1$
+			);
 		}
 		final File f;
 		final URL subUrl = TestGetCertificateService.class.getResource("/testservice/"+ subjectId + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -304,11 +295,11 @@ class TestHelper {
 		}
 		try {
 			f = new File(
-					subUrl.toURI()
-					);
+				subUrl.toURI()
+			);
 		}
 		catch (final Exception e) {
-			throw new IOException("Error comprobando el ID del titular: " + e, e); //$NON-NLS-1$
+			throw new IOException("Error comprobando el ID del titular ('" + subjectId + "'): " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (!f.isFile() || !f.canRead()) {
 			throw new InvalidUserException("El titular no existe: " + subjectId); //$NON-NLS-1$
@@ -316,29 +307,30 @@ class TestHelper {
 		return f;
 	}
 
-	/**
-	 * Comprueba que el usuario en cuestion este dado de alta en el sistema y disponga
+	/** Comprueba que el usuario est&eacute; dado de alta en el sistema y disponga
 	 * de certificados. Si se ejecuta normalmente, sin lanzar excepciones, el usuario
 	 * ser&aacute; vg&aacute;lido y tendr&aacute;a certificados para usar.
 	 * @param subjectId Identificador del usuario
 	 * @throws IOException
 	 * @throws FileNotFoundException
-	 * @throws InvalidUserException Cuando el usuario no exista.
+	 * @throws InvalidUserException Cuando el usuario no existe.
 	 * @throws BlockedCertificate Cuando el usuario tenga un certificado bloqueado.
 	 * @throws FIReCertificateException Cuando el usuario no tenga certificados.
 	 * @throws BlockedCertificateException Cuando el usuario no tenga certificados activos y s&iacute; bloqueados.
-	 * @throws WeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma.
-	 */
-	private static void checkSubject(final String subjectId) throws InvalidUserException, FIReCertificateException, BlockedCertificateException, WeakRegistryException {
-
+	 * @throws WeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma. */
+	private static void checkSubject(final String subjectId) throws InvalidUserException,
+	                                                                FIReCertificateException,
+	                                                                BlockedCertificateException,
+	                                                                WeakRegistryException {
 		final Properties tempProperties = new Properties();
-		try {
+		try (
 			final InputStream fis = new FileInputStream(doSubjectExist(subjectId));
+		) {
 			tempProperties.load(fis);
 			fis.close();
 		}
 		catch(final IOException e) {
-			throw new InvalidUserException("No se ha podido cargar el fichero descriptor del usuario", e); //$NON-NLS-1$
+			throw new InvalidUserException("No se ha podido cargar el fichero descriptor del usuario: " + e, e); //$NON-NLS-1$
 		}
 
 		if (STATE_NOCERT.equalsIgnoreCase(tempProperties.getProperty(TEST_USER_PROPERTY_STATE))) {
@@ -365,6 +357,7 @@ class TestHelper {
 			f = new File(subUrl.toURI());
 		}
 		catch (final Exception e) {
+			LOGGER.warning("Error intentando abrir el almacen del usuario '" + subjectId + "' ('" + subUrl + "'): " + e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return false;
 		}
 
@@ -372,66 +365,74 @@ class TestHelper {
 	}
 
 	@SuppressWarnings("deprecation")
-	static String getSignRedirectionUrl(final String subjectId, final String transactionId, final String okUrlB64, final String errorUrlB64, final String infoDocumentosB64) {
+	static String getSignRedirectionUrl(final String subjectId,
+			                            final String transactionId,
+			                            final String okUrlB64,
+			                            final String errorUrlB64,
+			                            final String infoDocumentosB64) {
 
-		String infoDocsB64 = infoDocumentosB64;
-		if (infoDocsB64 == null) {
-			infoDocsB64 = ""; //$NON-NLS-1$
-		}
+		final String infoDocsB64 = infoDocumentosB64 != null ? infoDocumentosB64 : ""; //$NON-NLS-1$
 
 		try {
 			return urlTemplateSign
-					.replace(REDIRECT_URL_ID_TAG, transactionId)
-					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
-					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
-					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING))
-					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocsB64);
-		} catch (final UnsupportedEncodingException e) {
+				.replace(REDIRECT_URL_ID_TAG, transactionId)
+				.replace(REDIRECT_URL_OK_TAG, okUrlB64)
+				.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
+				.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING))
+				.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocsB64);
+		}
+		catch (final UnsupportedEncodingException e) {
 			LOGGER.warning("No se soporta el encoding proporcionado para codificar la URL, se usara el por defecto: " + e); //$NON-NLS-1$
 			return urlTemplateSign
-					.replace(REDIRECT_URL_ID_TAG, transactionId)
-					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
-					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
-					.replace(REDIRECT_ID, URLEncoder.encode(subjectId))
-					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocsB64);
+				.replace(REDIRECT_URL_ID_TAG, transactionId)
+				.replace(REDIRECT_URL_OK_TAG, okUrlB64)
+				.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
+				.replace(REDIRECT_ID, URLEncoder.encode(subjectId))
+				.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocsB64);
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-	static String getCertificateRedirectionUrl(final String subjectId, final String transactionId, final String okUrlB64, final String errorUrlB64) {
+	static String getCertificateRedirectionUrl(final String subjectId,
+			                                   final String transactionId,
+			                                   final String okUrlB64,
+			                                   final String errorUrlB64) {
 		try {
 			return urlTemplateCert
-					.replace(REDIRECT_URL_ID_TAG, transactionId)
-					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
-					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
-					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING));
-		} catch (final UnsupportedEncodingException e) {
+				.replace(REDIRECT_URL_ID_TAG, transactionId)
+				.replace(REDIRECT_URL_OK_TAG, okUrlB64)
+				.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
+				.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING));
+		}
+		catch (final UnsupportedEncodingException e) {
 			LOGGER.warning("No se soporta el encoding proporcionado para codificar la URL, se usara el por defecto: " + e); //$NON-NLS-1$
 			return urlTemplateCert
-					.replace(REDIRECT_URL_ID_TAG, transactionId)
-					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
-					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
-					.replace(REDIRECT_ID, URLEncoder.encode(subjectId));
+				.replace(REDIRECT_URL_ID_TAG, transactionId)
+				.replace(REDIRECT_URL_OK_TAG, okUrlB64)
+				.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
+				.replace(REDIRECT_ID, URLEncoder.encode(subjectId));
 		}
 	}
 
-	/**
-	 * Comprueba que el usuario en cuestion pueda crear nuevos certificados.
+	/** Comprueba que el usuario pueda crear nuevos certificados.
 	 * @param subjectId Identificador del usuario
-	 * @throws InvalidUserException Cuando el usuario no exista.
-	 * @throws FIReCertificateAvailableException Cuando ya existen certificados y no se pueden generar m&aacute;s.
-	 * @throws WeakRegistryException Cuando el usuario no puede generar certificados por haber hecho un registro d&eacute;bil.
-	 */
-	static void checkCanGenerateCert(final String subjectId) throws InvalidUserException, FIReCertificateAvailableException, WeakRegistryException {
+	 * @throws InvalidUserException Cuando el usuario no existe.
+	 * @throws FIReCertificateAvailableException Cuando ya existen certificados y no se pueden
+	 *                                           generar m&aacute;s.
+	 * @throws WeakRegistryException Cuando el usuario no puede generar certificados por haber
+	 *                               hecho un registro d&eacute;bil. */
+	static void checkCanGenerateCert(final String subjectId) throws InvalidUserException,
+	                                                                FIReCertificateAvailableException,
+	                                                                WeakRegistryException {
 
 		final Properties tempProperties = new Properties();
-		try {
+		try  (
 			final InputStream fis = new FileInputStream(doSubjectExist(subjectId));
+		) {
 			tempProperties.load(fis);
 			fis.close();
 		}
 		catch(final IOException e) {
-			throw new InvalidUserException("No se ha podido cargar el fichero descriptor del usuario", e); //$NON-NLS-1$
+			throw new InvalidUserException("No se ha podido cargar el fichero descriptor del usuario '" + subjectId + "': " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		if (STATE_WEAK_REGISTRY.equalsIgnoreCase(tempProperties.getProperty(TEST_USER_PROPERTY_STATE))) {

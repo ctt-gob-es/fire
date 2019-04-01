@@ -94,7 +94,7 @@ public final class SignService extends HttpServlet {
     	final RequestParameters params = RequestParameters.extractParameters(request);
 
     	final String appId      = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
-        final String op         = params.getParameter(PARAMETER_NAME_OPERATION).toLowerCase();
+        final String op         = params.getParameter(PARAMETER_NAME_OPERATION);
         final String format     = params.getParameter(PARAMETER_NAME_FORMAT);
         final String algorithm  = params.getParameter(PARAMETER_NAME_ALGORITHM);
         final String extraParamsB64 = params.getParameter(PARAMETER_NAME_EXTRA_PARAM);
@@ -213,21 +213,23 @@ public final class SignService extends HttpServlet {
         byte[] signResult;
         try {
             signResult = FIReTriHelper.getPostSign(
-                    op,
-                    format,
-                    algorithm,
-                    extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null,
-                    signerCert,
-                    Base64.decode(dataB64, true),
-                    td
+                op.toLowerCase(),
+                format,
+                algorithm,
+                extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null,
+                signerCert,
+                Base64.decode(dataB64, true),
+                td
             );
         }
         catch (final FIReSignatureException e) {
             LOGGER.log(Level.WARNING,
-            		"Error durante la operacion. Verifique el codigo de operacion (" + op + //$NON-NLS-1$
-                    ") y el formato (" + format + ")", e); //$NON-NLS-1$ //$NON-NLS-2$
+        		"Error durante la operacion. Verifique el codigo de operacion (" + op + //$NON-NLS-1$
+                    ") y el formato (" + format + ")", e //$NON-NLS-1$ //$NON-NLS-2$
+            );
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error durante la operacion. Verifique el codigo de operacion y el formato: " + e); //$NON-NLS-1$
+                "Error durante la operacion. Verifique el codigo de operacion y el formato: " + e //$NON-NLS-1$
+            );
             return;
         }
 
@@ -237,7 +239,11 @@ public final class SignService extends HttpServlet {
         	signResult = upgradeResult.getResult();
         }
         catch (final UpgradeException e) {
-        	LOGGER.log(Level.SEVERE, "Error al actualizar la firma de la transaccion: " + transactId, e); //$NON-NLS-1$
+        	LOGGER.log(
+    			Level.SEVERE,
+    			"Error al actualizar la firma de la transaccion '" + transactId + "': " + e, //$NON-NLS-1$ //$NON-NLS-2$
+    			e
+			);
         	response.sendError(
     			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error al actualizar la firma: " + e //$NON-NLS-1$

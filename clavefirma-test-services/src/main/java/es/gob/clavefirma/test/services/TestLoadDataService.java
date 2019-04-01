@@ -28,10 +28,8 @@ import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.connector.TriphaseData;
 
-/**
- * Servlet implementation class TestLoadData
- */
-public class TestLoadDataService extends HttpServlet {
+/** Servicio de carga de datos. */
+public final class TestLoadDataService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -61,13 +59,10 @@ public class TestLoadDataService extends HttpServlet {
 	/** Clave para indicar la informaci&oacute;n de los documentos */
 	public static final String KEY_INFODOCUMENTOS = "infoDocumentos"; //$NON-NLS-1$
 
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
 	@Override
-	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
-
+	protected void doPost(final HttpServletRequest request,
+			              final HttpServletResponse response) throws ServletException,
+	                                                                 IOException {
         final String subjectId = request.getParameter(KEY_SUBJECTID);
 		final String algorithm = request.getParameter(KEY_ALGORITHM);
 		final String certB64UrlSafe = request.getParameter(KEY_CERTIFICATE);
@@ -97,11 +92,14 @@ public class TestLoadDataService extends HttpServlet {
 		}
 
 		final String transactionId = UUID.randomUUID().toString();
-		final OutputStream fos = new FileOutputStream(
-			new File(TestHelper.getDataFolder(), transactionId)
-		);
-		p.store(fos, ""); //$NON-NLS-1$
-		fos.close();
+		try (
+			final OutputStream fos = new FileOutputStream(
+				new File(TestHelper.getDataFolder(), transactionId)
+			);
+		) {
+			p.store(fos, ""); //$NON-NLS-1$
+			fos.close();
+		}
 
 		final String redirectUrl = TestHelper.getSignRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe, infoDocumentosB64);
 

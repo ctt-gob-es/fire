@@ -259,7 +259,7 @@ public final class HttpsConnection {
 		final int resCode = conn.getResponseCode();
 		final String statusCode = Integer.toString(resCode);
 		if (statusCode.startsWith("4") || statusCode.startsWith("5")) { //$NON-NLS-1$ //$NON-NLS-2$
-			throw new HttpError(resCode, conn.getResponseMessage(), uri.getHost());
+			throw new HttpError(resCode, conn.getResponseMessage(), uri.toString());
 		}
 
 		final byte[] data;

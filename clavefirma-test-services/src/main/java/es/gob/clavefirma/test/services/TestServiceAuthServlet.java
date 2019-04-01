@@ -54,10 +54,14 @@ public final class TestServiceAuthServlet extends HttpServlet {
 			response.sendRedirect(ERROR_PAGE);
 			return;
 		}
+
 		final Properties transactionProps = new Properties();
-		final InputStream fis = new FileInputStream(transactionFile);
-		transactionProps.load(fis);
-		fis.close();
+		try (
+			final InputStream fis = new FileInputStream(transactionFile);
+		) {
+			transactionProps.load(fis);
+			fis.close();
+		}
 
 		final String subjectId = transactionProps.getProperty("subjectid"); //$NON-NLS-1$
 		if (subjectId == null || "".equals(subjectId.trim())) { //$NON-NLS-1$
@@ -109,9 +113,12 @@ public final class TestServiceAuthServlet extends HttpServlet {
 		}
 
 		transactionProps.put("auth", Boolean.TRUE.toString()); //$NON-NLS-1$
-		final OutputStream fos = new FileOutputStream(transactionFile);
-		transactionProps.store(fos, null);
-		fos.close();
+		try (
+			final OutputStream fos = new FileOutputStream(transactionFile);
+		) {
+			transactionProps.store(fos, null);
+			fos.close();
+		}
 
 		response.sendRedirect(redirectOk);
 	}

@@ -303,13 +303,18 @@ public final class HttpLoadProcess {
         final byte[] responseJSON;
         try {
         	responseJSON = ConnectionManager.readUrl(
-                            URL, urlParameters, Method.POST);
+                URL,
+                urlParameters,
+                Method.POST
+            );
         }
         catch (final IOException e) {
         	if (e instanceof HttpError) {
         		final HttpError he = (HttpError) e;
-        		LOGGER.severe(
-    				"Error en la llamada al servicio de carga de datos: " + he.getResponseDescription() //$NON-NLS-1$
+        		LOGGER.log(
+    				Level.SEVERE,
+    				"Error en la llamada al servicio de carga de datos (" + he.getResponseDescription() + "): " + e, //$NON-NLS-1$ //$NON-NLS-2$
+    				e
 				);
         		if (he.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
         			throw new HttpForbiddenException(he.getResponseDescription(), he);

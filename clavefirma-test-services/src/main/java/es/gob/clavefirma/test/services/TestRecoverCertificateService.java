@@ -27,10 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.connector.FIReSignatureException;
 
-/**
- * Servicio para la recuperacion de un certificado recien creado.
- */
-public class TestRecoverCertificateService extends HttpServlet {
+/** Servicio para la recuperacion de un certificado recien creado. */
+public final class TestRecoverCertificateService extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,9 +40,6 @@ public class TestRecoverCertificateService extends HttpServlet {
 	/** Clave para la propiedad de identificador de la transaccion. */
 	private static final String KEY_TRANSACTIONID = "transactionid"; //$NON-NLS-1$
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
@@ -58,8 +53,9 @@ public class TestRecoverCertificateService extends HttpServlet {
 		}
 
 		final Properties p;
-		try {
+		try (
 			final InputStream fis = new FileInputStream(transactionFile);
+		) {
 			p = new Properties();
 			p.load(fis);
 			fis.close();
