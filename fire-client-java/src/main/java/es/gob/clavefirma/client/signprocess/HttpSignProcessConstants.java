@@ -39,7 +39,10 @@ public final class HttpSignProcessConstants {
         SHA384withECDSA("SHA384withECDSA"), //$NON-NLS-1$
 
     	/** SHA256withECDSA. */
-        SHA256withECDSA("SHA256withECDSA"); //$NON-NLS-1$
+        SHA256withECDSA("SHA256withECDSA"), //$NON-NLS-1$
+
+    	/** NONEwithECDSA. */
+    	NONEwithECDSA("NONEwithECDSA"); //$NON-NLS-1$
 
         private final String algName;
 
@@ -50,6 +53,39 @@ public final class HttpSignProcessConstants {
         @Override
         public String toString() {
             return this.algName;
+        }
+
+        /** Obtiene una algoritmo de firma a partir de su nombre.
+         * @param name Nombre del algoritmo de firma.
+         * @return Algoritmo de firma. */
+        public static SignatureAlgorithm getSignatureAlgorithm(final String name) {
+        	if (name == null) {
+        		throw new IllegalArgumentException(
+    				"El nombre del algoritmo de firma no puede ser nulo" //$NON-NLS-1$
+				);
+        	}
+        	switch(name.toLowerCase().trim()) {
+	        	case "sha1withrsa": //$NON-NLS-1$
+	        		return SHA1WITHRSA;
+	        	case "sha512withrsa": //$NON-NLS-1$
+	        		return SHA512WITHRSA;
+	        	case "sha384withrsa": //$NON-NLS-1$
+	        		return SHA384WITHRSA;
+	        	case "sha256withrsa": //$NON-NLS-1$
+	        		return SHA256WITHRSA;
+	        	case "sha512withecdsa": //$NON-NLS-1$
+	        		return SHA384withECDSA;
+	        	case "sha384withecdsa": //$NON-NLS-1$
+	        		return SHA512withECDSA;
+	        	case "sha256withecdsa": //$NON-NLS-1$
+	        		return SHA256withECDSA;
+	        	case "nonewithecdsa": //$NON-NLS-1$
+	        		return NONEwithECDSA;
+	        	default:
+	        		throw new IllegalArgumentException(
+        				"El nombre del algoritmo de firma no es adecuado: " + name //$NON-NLS-1$
+    				);
+        	}
         }
     }
 
@@ -75,6 +111,29 @@ public final class HttpSignProcessConstants {
         public String toString() {
             return this.opName;
         }
+
+        /** Obtiene una operaci&oacute;n de firma a partir de su nombre.
+         * @param name Nombre del operaci&oacute;n de firma.
+         * @return Operaci&oacute;n de firma. */
+        public static SignatureOperation getSignatureOperation(final String name) {
+        	if (name == null) {
+        		throw new IllegalArgumentException(
+    				"El nombre de la operacion de firma no puede ser nulo" //$NON-NLS-1$
+				);
+        	}
+        	switch(name.toLowerCase().trim()) {
+	        	case "sign": //$NON-NLS-1$
+	        		return SIGN;
+	        	case "cosign": //$NON-NLS-1$
+	        		return COSIGN;
+	        	case "countersign": //$NON-NLS-1$
+	        		return COUNTERSIGN;
+	        	default:
+	        		throw new IllegalArgumentException(
+        				"El nombre de la operacion de firma no es adecuado: " + name //$NON-NLS-1$
+    				);
+        	}
+        }
     }
 
     /** Formato de firma. */
@@ -96,7 +155,10 @@ public final class HttpSignProcessConstants {
         FACTURAE("FacturaE"), //$NON-NLS-1$
 
         /** PAdES. */
-        PADES("PAdES"); //$NON-NLS-1$
+        PADES("PAdES"), //$NON-NLS-1$
+
+    	/** PKCS1. */
+    	NONE("NONE"); //$NON-NLS-1$
 
         private final String fmtName;
 
@@ -131,6 +193,8 @@ public final class HttpSignProcessConstants {
 	        		return FACTURAE;
 	        	case "pades": //$NON-NLS-1$
 	        		return PADES;
+	        	case "none": //$NON-NLS-1$
+	        		return NONE;
 	        	default:
 	        		throw new IllegalArgumentException(
         				"El nombre del formato de firma no es adecuado: " + name //$NON-NLS-1$
