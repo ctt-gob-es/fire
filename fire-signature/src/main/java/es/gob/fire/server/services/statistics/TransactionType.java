@@ -18,10 +18,15 @@ public enum TransactionType {
 		this.id = id;
 	}
 
+	/** Obtiene el identificador de transacci&oacute;n.
+	 * @return Identificador de transacci&oacute;n. */
 	public int getId() {
 		return this.id;
 	}
 
+	/** Obtiene el tipo (operaci&oacute;n) de transacci&oacute;n.
+	 * @param idString Identificador de la transacci&oacute;n.
+	 * @return Tipo (operaci&oacute;n) de transacci&oacute;n. */
 	public static TransactionType getOperation(final String idString) {
 		final int result = Integer.parseInt(idString);
 		for (final TransactionType value : values()) {
@@ -32,6 +37,10 @@ public enum TransactionType {
 		return OTHER;
 	}
 
+	/** Obtiene el tipo (operaci&oacute;n) de transacci&oacute;n de una
+	 * operaci&oacute;n de FIRe.
+	 * @param op Operaci&oacute;n de FIRe.
+	 * @return Tipo (operaci&oacute;n) de transacci&oacute;n. */
 	public static TransactionType valueOf(final FIReServiceOperation op) {
 		switch (op) {
 			case SIGN:

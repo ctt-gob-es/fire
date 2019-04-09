@@ -15,10 +15,8 @@ import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchConfig;
 import es.gob.fire.statistics.entity.SignatureCube;
 
-/**
- * Permite registrar la informaci&oacute;n relevante de las firmas realizadas para el
- * c&aacute;lculo de estad&iacute;sticas.
- */
+/** Permite registrar la informaci&oacute;n relevante de las firmas realizadas para el
+ * c&aacute;lculo de estad&iacute;sticas. */
 public final class SignatureRecorder {
 
 	private static final Logger LOGGER = Logger.getLogger(SignatureRecorder.class.getName());
@@ -37,11 +35,9 @@ public final class SignatureRecorder {
 
 	private static SignatureRecorder instance;
 
-	/**
-	 * Obtenemos el logger para el guardado de los datos estad&iacute;sticos de las
+	/** Obtiene el <i>logger</i> para el guardado de los datos estad&iacute;sticos de las
 	 * firmas realizadas.
-	 * @return Objeto para el registro de los datos de las firmas.
-	 */
+	 * @return Objeto para el registro de los datos de las firmas. */
 	public final static SignatureRecorder getInstance() {
 		if (instance == null) {
 			instance =  new SignatureRecorder();
@@ -49,10 +45,8 @@ public final class SignatureRecorder {
 		return instance;
 	}
 
-	/**
-	 * Construye un objeto para el registro de los datos de firma en base a los cuales generar
-	 * estad&iacute;sticas sobre las firmas generadas por FIRe.
-	 */
+	/** Construye un objeto para el registro de los datos de firma en base a los cuales generar
+	 * estad&iacute;sticas sobre las firmas generadas por FIRe. */
 	private SignatureRecorder() {
 
 		final StatisticsConfig config;
@@ -97,14 +91,18 @@ public final class SignatureRecorder {
 
 		// Instalamos el manejador para la impresion en el fichero de estadisticas
 		try {
-			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			final Handler logHandler = new DailyFileHandler(
+				new File(logsPath, LOG_FILENAME).getAbsolutePath()
+			);
 			logHandler.setEncoding(LOG_CHARSET);
-			logHandler.setFormatter(new Formatter() {
-				@Override
-				public String format(final LogRecord record) {
-					return record.getMessage() + "\r\n"; //$NON-NLS-1$
+			logHandler.setFormatter(
+				new Formatter() {
+					@Override
+					public String format(final LogRecord record) {
+						return record.getMessage() + "\r\n"; //$NON-NLS-1$
+					}
 				}
-			});
+			);
 
 			fileLogger.addHandler(logHandler);
 		}
@@ -117,23 +115,19 @@ public final class SignatureRecorder {
 		this.dataLogger = fileLogger;
 	}
 
-	/**
-	 * Registra los datos de firma.
+	/** Registra los datos de firma.
 	 * @param fireSesion Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
 	 * @param result Resultado de la operaci&oacute;n ({@code true}, firma correcta;
-	 * {@code false}, no se pudo generar la firma).
-	 */
+	 * {@code false}, no se pudo generar la firma). */
 	public final void register(final FireSession fireSesion, final boolean result) {
 		register(fireSesion, result, null);
 	}
 
-	/**
-	 * Registra los datos de firma.
+	/** Registra los datos de firma.
 	 * @param fireSession Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
 	 * @param result Resultado de la operaci&oacute;n ({@code true}, firma correcta;
 	 * {@code false}, no se pudo generar la firma).
-	 * @param docId Identificador del documento firmado en caso de encontrarse dentro de un lote.
-	 */
+	 * @param docId Identificador del documento firmado en caso de encontrarse dentro de un lote. */
 	public final void register(final FireSession fireSession, final boolean result, final String docId) {
 
 		// Si no hay que registrar estadisticas, no se hace

@@ -2,10 +2,8 @@ package es.gob.fire.server.services.statistics;
 
 import es.gob.fire.signature.ConfigManager;
 
-/**
- * Configuraci&oacute;n necesaria para al generaci&oacute;n y gesti&oacute;n de
- * los datos estad&iacute;sticos.
- */
+/** Configuraci&oacute;n necesaria para al generaci&oacute;n y gesti&oacute;n de
+ * los datos estad&iacute;sticos. */
 public final class StatisticsConfig {
 
 	private Policy policy = Policy.DISABLE;
@@ -14,13 +12,15 @@ public final class StatisticsConfig {
 
 	/** Carga la configuraci&oacute;n para la generaci&oacute;n de los datos estad&iacute;sticos.
 	 * @return Configuraci&oacute;n para la generaci&oacute;n de los datos estad&iacute;sticos.
-	 * @throws IllegalArgumentException Cuando se indica una politica de firma no valida. */
+	 * @throws IllegalArgumentException Cuando se indica una pol&iacute;tica de firma no v&aacute;lida. */
 	public static StatisticsConfig load() throws IllegalArgumentException {
 
 		final int policyId = ConfigManager.getStatisticsPolicy();
 		final Policy policy = Policy.valueOf(policyId);
 		if (policy == null) {
-			throw new IllegalArgumentException("No se ha proporcionado una politica valida para la generacion de estadisticas"); //$NON-NLS-1$
+			throw new IllegalArgumentException(
+				"No se ha proporcionado una politica valida para la generacion de estadisticas" //$NON-NLS-1$
+			);
 		}
 
 		final StatisticsConfig config = new StatisticsConfig();
@@ -43,16 +43,16 @@ public final class StatisticsConfig {
 		this.dumpTime = dumpTime;
 	}
 
+	/** Obtiene la pol&iacute;tica para la generaci&oacute;n de estad&iacute;sticas establecida.
+	 * @return Pol&iacute;tica para la generaci&oacute;n de estad&iacute;sticas establecida. */
 	public Policy getPolicy() {
 		return this.policy;
 	}
 
-	/**
-	 * Comprueba que la pol&iacute;tica establecida permita la generaci&oacute;n de datos
+	/** Comprueba que la pol&iacute;tica establecida permita la generaci&oacute;n de datos
 	 * estad&iacute;sticos.
 	 * @return {@code true} si la generaci&oacute;n no est&aacute; desactivada.
-	 * {@code false} si s&iacute; se deben generar los datos.
-	 */
+	 * {@code false} si s&iacute; se deben generar los datos. */
 	public boolean isEnabled() {
 		return this.policy != Policy.DISABLE;
 	}

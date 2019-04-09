@@ -35,7 +35,11 @@ final class FIReHelper {
         	connector = ProviderManager.initTransacction(providerName, null);
         }
 		catch(final FIReConnectorFactoryException e) {
-			LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
+			LOGGER.log(
+				Level.SEVERE,
+				"Error en la configuracion del conector del proveedor de firma: " + e, //$NON-NLS-1$
+				e
+			);
             return false;
 		}
 

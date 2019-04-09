@@ -13,7 +13,8 @@ import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.statistics.entity.TransactionCube;
 
-public class TransactionRecorder {
+/** Registro estad&iacute;stico de las transacciones. */
+public final class TransactionRecorder {
 
 	private static final Logger LOGGER = Logger.getLogger(TransactionRecorder.class.getName());
 
@@ -31,11 +32,9 @@ public class TransactionRecorder {
 
 	private static TransactionRecorder instance;
 
-	/**
-	 * Obtenemos el logger para el guardado de los datos estad&iacute;sticos de las
+	/** Obtenemos el <code>logger</code> para el guardado de los datos estad&iacute;sticos de las
 	 * transacciones realizadas.
-	 * @return Objeto para el registro de los datos de las transacciones.
-	 */
+	 * @return Objeto para el registro de los datos de las transacciones. */
 	public final static TransactionRecorder getInstance() {
 		if (instance == null) {
 			instance =  new TransactionRecorder();
@@ -51,7 +50,9 @@ public class TransactionRecorder {
 			config = StatisticsConfig.load();
 		}
 		catch (final Exception e) {
-			LOGGER.warning("No se configuro una politica valida para el guardado de estadisticas. No se almacenaran"); //$NON-NLS-1$
+			LOGGER.warning(
+				"No se configuro una politica valida para el guardado de estadisticas, estas no se almacenaran: " + e //$NON-NLS-1$
+			);
 			return;
 		}
 
@@ -88,19 +89,27 @@ public class TransactionRecorder {
 
 		// Instalamos el manejador para la impresion en el fichero de estadisticas
 		try {
-			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			final Handler logHandler = new DailyFileHandler(
+				new File(logsPath, LOG_FILENAME).getAbsolutePath()
+			);
 			logHandler.setEncoding(LOG_CHARSET);
-			logHandler.setFormatter(new Formatter() {
-				@Override
-				public String format(final LogRecord record) {
-					return record.getMessage() + "\r\n"; //$NON-NLS-1$
+			logHandler.setFormatter(
+				new Formatter() {
+					@Override
+					public String format(final LogRecord record) {
+						return record.getMessage() + "\r\n"; //$NON-NLS-1$
+					}
 				}
-			});
+			);
 
 			fileLogger.addHandler(logHandler);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para las estadisticas de transaccion", e); //$NON-NLS-1$
+			LOGGER.log(
+				Level.WARNING,
+				"No se ha podido crear el fichero de datos para las estadisticas de transaccion: " + e, //$NON-NLS-1$
+				e
+			);
 			this.enable = false;
 			return;
 		}
@@ -109,13 +118,11 @@ public class TransactionRecorder {
 	}
 
 
-	/**
-	 * Registra los datos de la transacci&oacute;n.
+	/** Registra los datos de la transacci&oacute;n.
 	 * @param fireSession Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
 	 * @param result Resultado de la operaci&oacute;n ({@code true}, la firma termino
 	 * correctamente o lo hizo alguna de las firmas del lote; {@code false}, no se pudo
-	 * generar la firma o fallaron todas las firmas del lote).
-	 */
+	 * generar la firma o fallaron todas las firmas del lote). */
 	public final void register(final FireSession fireSession, final boolean result) {
 
 		// Si no hay que registrar estadisticas, no se hace
@@ -125,31 +132,31 @@ public class TransactionRecorder {
 
 		// Inicializamos el cubo de datos si no lo estaba
 		if(getTransactCube() == null) {
-			this.setTransactCube(new TransactionCube());
+			setTransactCube(new TransactionCube());
 		}
 
 		// Id transaccion
 		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-		this.getTransactCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+		getTransactCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
 
 		// Resultado
-		this.getTransactCube().setResultTransaction(result);
+		getTransactCube().setResultTransaction(result);
 
 		// Nombre de la aplicacion
 		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
 		if (appName != null && !appName.isEmpty()) {
-			this.getTransactCube().setApplication(appName);
+			getTransactCube().setApplication(appName);
 		}
 		else {
 			final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
-			this.getTransactCube().setApplication(appId);
+			getTransactCube().setApplication(appId);
 		}
 
 		// Operacion
 		final String op = fireSession.getString(ServiceParams.SESSION_PARAM_OPERATION);
 		if (op != null && !op.isEmpty()) {
 			final FIReServiceOperation fsop = FIReServiceOperation.parse(op) ;
-			this.getTransactCube().setOperation(TransactionType.valueOf(fsop).name());
+			getTransactCube().setOperation(TransactionType.valueOf(fsop).name());
 		}
 
 		// Almacenamos la informacion del proveedor
@@ -158,18 +165,18 @@ public class TransactionRecorder {
 		 final String provForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
 
 		if (provForced != null && !provForced.isEmpty()) {
-			this.getTransactCube().setProvider(provForced);
-			this.getTransactCube().setMandatoryProvider(true);
+			getTransactCube().setProvider(provForced);
+			getTransactCube().setMandatoryProvider(true);
 		}
 		else if (prov != null && !prov.isEmpty()) {
-			this.getTransactCube().setProvider(prov);
+			getTransactCube().setProvider(prov);
 		}
 		else if(provsSession != null && provsSession.length == 1) {
-			this.getTransactCube().setProvider(provsSession[0]);
-			this.getTransactCube().setMandatoryProvider(true);
+			getTransactCube().setProvider(provsSession[0]);
+			getTransactCube().setMandatoryProvider(true);
 		}
 
-		this.dataLogger.finest(this.getTransactCube().toString());
+		this.dataLogger.finest(getTransactCube().toString());
 	}
 
 	private final TransactionCube getTransactCube() {
@@ -180,7 +187,5 @@ public class TransactionRecorder {
 	private final void setTransactCube(final TransactionCube transactCube) {
 		this.transactCube = transactCube;
 	}
-
-
 
 }
