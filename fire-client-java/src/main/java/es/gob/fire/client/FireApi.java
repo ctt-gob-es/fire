@@ -278,7 +278,7 @@ public final class FireApi {
         final String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.SIGN.getId()) +
         		URL_PARAMETERS_SIGN
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
                 .replace(TAG_VALUE_CRYPTO_OPERATION, op)
@@ -348,7 +348,7 @@ public final class FireApi {
         String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_SIGN.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_SIGN.getId()) +
         		URL_PARAMETERS_RECOVER_SIGNATURE
                 .replace(TAG_VALUE_TRANSACTION, transactionId);
 
@@ -402,7 +402,7 @@ public final class FireApi {
         urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, appId)
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_SIGN_RESULT.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_SIGN_RESULT.getId()) +
         		URL_PARAMETERS_RECOVER_SIGNATURE_RESULT
                 .replace(TAG_VALUE_TRANSACTION, transactionId);
 
@@ -501,7 +501,7 @@ public final class FireApi {
         String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.CREATE_BATCH.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.CREATE_BATCH.getId()) +
         		URL_PARAMETERS_CREATE_BATCH
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
                 .replace(TAG_VALUE_CRYPTO_OPERATION, op)
@@ -583,7 +583,7 @@ public final class FireApi {
         final String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.ADD_DOCUMENT_TO_BATCH.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.ADD_DOCUMENT_TO_BATCH.getId()) +
         		URL_PARAMETERS_ADD_BATCH_DOCUMENT
                 .replace(TAG_VALUE_TRANSACTION, transactionId)
         		.replace(TAG_VALUE_DOCUMENT_ID, documentId)
@@ -679,7 +679,7 @@ public final class FireApi {
         String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.ADD_DOCUMENT_TO_BATCH.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.ADD_DOCUMENT_TO_BATCH.getId()) +
         		URL_PARAMETERS_ADD_BATCH_DOCUMENT_WITH_CONFIG
                 .replace(TAG_VALUE_TRANSACTION, transactionId)
         		.replace(TAG_VALUE_DOCUMENT_ID, documentId)
@@ -762,7 +762,7 @@ public final class FireApi {
         final String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN_BATCH.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.SIGN_BATCH.getId()) +
         		URL_PARAMETERS_SIGN_BATCH
                 .replace(TAG_VALUE_TRANSACTION, transactionId)
         		.replace(TAG_VALUE_STOP_ON_ERROR, Boolean.toString(stopOnError));
@@ -823,7 +823,7 @@ public final class FireApi {
     	final String urlParameters =
     			URL_PARAMETERS_BASE
     			.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-    			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_BATCH.getId()) +
+    			.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_BATCH.getId()) +
     			URL_PARAMETERS_RECOVER_BATCH
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
@@ -893,7 +893,7 @@ public final class FireApi {
     	final String urlParameters =
     			URL_PARAMETERS_BASE
     			.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-    			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_BATCH_STATE.getId()) +
+    			.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_BATCH_STATE.getId()) +
     			URL_PARAMETERS_RECOVER_BATCH_STATE
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
@@ -949,7 +949,7 @@ public final class FireApi {
     	final String urlParameters =
     			URL_PARAMETERS_BASE
     			.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-    			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_BATCH_SIGN.getId()) +
+    			.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_BATCH_SIGN.getId()) +
     			URL_PARAMETERS_RECOVER_SIGN_BATCH
     			.replace(TAG_VALUE_TRANSACTION, transactionId)
     			.replace(TAG_VALUE_DOCUMENT_ID, docId);
@@ -1005,7 +1005,7 @@ public final class FireApi {
     	final String urlParameters =
     			URL_PARAMETERS_BASE
     			.replace(TAG_VALUE_APP_ID, appId != null ? appId : "") //$NON-NLS-1$
-    			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_ERROR.getId()) +
+    			.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_ERROR.getId()) +
     			URL_PARAMETERS_RECOVER_ERROR
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 

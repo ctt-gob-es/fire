@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import es.gob.fire.client.HttpsConnection.Method;
 
 /** Cliente para el acceso al componente central de FIRe. Mediante esta clase se pueden
- * ejecutar todas las operaciones soportadas por FIRe.<br/>
+ * ejecutar todas las operaciones soportadas por FIRe.<br>
  * Para la configuraci&oacute;n de la conexi&oacute;n con FIRe es necesario que se
  * proporcionen ciertos par&aacute;metros a trav&eacute;s de un objeto de propiedades
  * o que estas est&eacute;n establecidas en el fichero de configuraci&oacute;n
@@ -142,7 +142,7 @@ public final class FireClient {
 	/** Construye el cliente de FIRe cargando la configuraci&oacute;n para la
 	 * conexi&oacute;n con el componente central del fichero
 	 * <i>client_config.properties</i> del directorio configurado a trav&eacute;s
-	 * de propiedades del sistema o del <i>classpath</i>.<br/>
+	 * de propiedades del sistema o del <i>classpath</i>.<br>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 * JavaDoc de la clase ({@link FireClient}).
 	 * @param appId Identificador de aplicaci&oacute;n.
@@ -152,11 +152,11 @@ public final class FireClient {
 		this(appId, ConfigManager.loadConfig(), null);
 	}
 
-	/** Construye el cliente de FIRe a partir de la configuraci&oacute;n proporcionada.<br/>
+	/** Construye el cliente de FIRe a partir de la configuraci&oacute;n proporcionada.<br>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 * Javadoc de la clase ({@link FireClient}).
 	 * @param appId Identificador de aplicaci&oacute;n.
-	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br/>
+	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br>
 	 *               Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 *               JavaDoc de la clase ({@link FireClient}). */
 	public FireClient(final String appId, final Properties config) {
@@ -166,14 +166,14 @@ public final class FireClient {
 	/** Construye el cliente de FIRe cargando la configuraci&oacute;n para la
 	 * conexi&oacute;n con el componente central del fichero
 	 * <i>client_config.properties</i> del directorio configurado a trav&eacute;s
-	 * de propiedades del sistema o del <i>classpath</i>.<br/>
+	 * de propiedades del sistema o del <i>classpath</i>.<br>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 * Javadoc de la clase ({@link FireClient}).
 	 * @param appId Identificador de aplicaci&oacute;n.
 	 * @param decipher Objeto para el descifrado de las contrase&ntilde;as definidas en el
 	 *                 objeto de propiedades. Si se pasa {@code null}, se entender&aacute;a que las
-	 *                 contrase&ntildes;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
-	 *                 tener la forma {@ciphered: PASSWORD_CIFRADA_EN_BASE64 }.
+	 *                 contrase&ntilde;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
+	 *                 tener la forma <i>PASSWORD_CIFRADA_EN_BASE64</i>.
 	 * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero
 	 *                                            de configuraci&oacute;n.
 	 */
@@ -183,13 +183,13 @@ public final class FireClient {
 
 	/** Construye el cliente de FIRe a partir de la configuraci&oacute;n proporcionada.
 	 * @param appId Identificador de aplicaci&oacute;n.
-	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br/>
+	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br>
 	 *               Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 *               JavaDoc de la clase ({@link FireClient}).
 	 * @param decipher Objeto para el descifrado de las contrase&ntilde;as definidas en el
 	 *                 objeto de propiedades. Si se pasa {@code null}, se entender&aacute;a que las
-	 *                 contrase&ntildes;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
-	 *                 tener la forma {@ciphered: PASSWORD_CIFRADA_EN_BASE64 }. */
+	 *                 contrase&ntilde;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
+	 *                 tener la forma <i>PASSWORD_CIFRADA_EN_BASE64</i>. */
 	public FireClient(final String appId, final Properties config, final PasswordDecipher decipher) {
 
     	this.appId = appId;
@@ -356,7 +356,7 @@ public final class FireClient {
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.SIGN.getId()) +
         		URL_PARAMETERS_SIGN
         		.replace(TAG_VALUE_CRYPTO_OPERATION, op)
                 .replace(TAG_VALUE_FORMAT, ft)
@@ -429,7 +429,7 @@ public final class FireClient {
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_SIGN.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_SIGN.getId()) +
         		URL_PARAMETERS_RECOVER_SIGNATURE
                 .replace(TAG_VALUE_TRANSACTION, transactionId);
 
@@ -479,7 +479,7 @@ public final class FireClient {
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_SIGN_RESULT.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_SIGN_RESULT.getId()) +
         		URL_PARAMETERS_RECOVER_SIGNATURE_RESULT
                 .replace(TAG_VALUE_TRANSACTION, transactionId);
 
@@ -558,7 +558,7 @@ public final class FireClient {
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.CREATE_BATCH.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.CREATE_BATCH.getId()) +
         		URL_PARAMETERS_CREATE_BATCH
                 .replace(TAG_VALUE_CRYPTO_OPERATION, op)
                 .replace(TAG_VALUE_FORMAT, ft)
@@ -642,7 +642,7 @@ public final class FireClient {
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.ADD_DOCUMENT_TO_BATCH.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.ADD_DOCUMENT_TO_BATCH.getId()) +
         		URL_PARAMETERS_ADD_BATCH_DOCUMENT
                 .replace(TAG_VALUE_TRANSACTION, transactionId)
         		.replace(TAG_VALUE_DOCUMENT_ID, documentId)
@@ -737,7 +737,7 @@ public final class FireClient {
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.ADD_DOCUMENT_TO_BATCH.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.ADD_DOCUMENT_TO_BATCH.getId()) +
         		URL_PARAMETERS_ADD_BATCH_DOCUMENT_WITH_CONFIG
                 .replace(TAG_VALUE_TRANSACTION, transactionId)
         		.replace(TAG_VALUE_DOCUMENT_ID, documentId)
@@ -817,7 +817,7 @@ public final class FireClient {
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN_BATCH.getId()) +
+        		.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.SIGN_BATCH.getId()) +
         		URL_PARAMETERS_SIGN_BATCH
                 .replace(TAG_VALUE_TRANSACTION, transactionId)
         		.replace(TAG_VALUE_STOP_ON_ERROR, Boolean.toString(stopOnError));
@@ -879,7 +879,7 @@ public final class FireClient {
     			URL_PARAMETERS_BASE
     			.replace(TAG_VALUE_APP_ID, this.appId)
     			.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-    			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_BATCH.getId()) +
+    			.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_BATCH.getId()) +
     			URL_PARAMETERS_RECOVER_BATCH
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
@@ -949,7 +949,7 @@ public final class FireClient {
     			URL_PARAMETERS_BASE
     			.replace(TAG_VALUE_APP_ID, this.appId)
     			.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-    			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_BATCH_STATE.getId()) +
+    			.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_BATCH_STATE.getId()) +
     			URL_PARAMETERS_RECOVER_BATCH_STATE
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
@@ -1011,7 +1011,7 @@ public final class FireClient {
     			URL_PARAMETERS_BASE
     			.replace(TAG_VALUE_APP_ID, this.appId)
     			.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-    			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_BATCH_SIGN.getId()) +
+    			.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_BATCH_SIGN.getId()) +
     			URL_PARAMETERS_RECOVER_SIGN_BATCH
     			.replace(TAG_VALUE_TRANSACTION, transactionId)
     			.replace(TAG_VALUE_DOCUMENT_ID, docId);
@@ -1044,8 +1044,7 @@ public final class FireClient {
     	}
     }
 
-    /**
-     * Recupera una el resultado de error asociado a una transacci&oacute;n.
+    /** Recupera una el resultado de error asociado a una transacci&oacute;n.
      * @param transactionId Identificador de la transacci&oacute;n del lote.
      * @param subjectId Identificador del usuario que realiza la transacci&oacute;n.
      * @return Resultado de la transacci&oacute;n con el error recibido.
@@ -1054,12 +1053,13 @@ public final class FireClient {
      * @throws HttpNetworkException Cuando ocurre un error de red.
      * @throws HttpOperationException Cuando ocurre un error durante la ejecuci&oacute;n.
      * @throws InvalidTransactionException Cuando la transacci&oacute;n no existe o
-     * est&aacute; caducada.
-     */
-    public TransactionResult recoverErrorResult(final String transactionId, final String subjectId)
-    		throws IOException, HttpForbiddenException, HttpNetworkException, HttpOperationException,
-    		InvalidTransactionException {
-
+     *                                     est&aacute; caducada. */
+    public TransactionResult recoverErrorResult(final String transactionId,
+    		                                    final String subjectId) throws IOException,
+                                                                               HttpForbiddenException,
+                                                                               HttpNetworkException,
+                                                                               HttpOperationException,
+                                                                               InvalidTransactionException {
     	if (transactionId == null) {
     		throw new InvalidTransactionException(
     				"El id de la transaccion no puede ser nulo" //$NON-NLS-1$
@@ -1075,13 +1075,14 @@ public final class FireClient {
     			URL_PARAMETERS_BASE
     			.replace(TAG_VALUE_APP_ID, this.appId)
     			.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-    			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_ERROR.getId()) +
-    			URL_PARAMETERS_RECOVER_ERROR
+    			.replace(TAG_VALUE_OPERATION, FIReService.FIReServiceOperation.RECOVER_ERROR.getId()) +
+    				URL_PARAMETERS_RECOVER_ERROR
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
     	try {
     		return TransactionResult.parse(TransactionResult.RESULT_TYPE_ERROR, this.conn.readUrl(this.serviceUrl, urlParameters, Method.GET));
-    	} catch (final HttpError e) {
+    	}
+    	catch (final HttpError e) {
     		LOGGER.error("Error en la llamada al servicio de recuperacion de error: {}", e.getResponseDescription()); //$NON-NLS-1$
     		if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
         		throw new HttpForbiddenException(e);

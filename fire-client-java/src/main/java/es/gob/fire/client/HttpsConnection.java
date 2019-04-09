@@ -173,8 +173,8 @@ public final class HttpsConnection {
 	}
 
 	/** Inicializa el contexto para las conexiones HTTPS.
-	 * @param ks Almac&eqacute;n de claves de autenticaci&oacute;n cliente.
-	 * @param ksPassword Contrase&ntilde:a del almac&eacute;n de claves.
+	 * @param ks Almac&eacute;n de claves de autenticaci&oacute;n cliente.
+	 * @param ksPassword Contrase&ntilde;a del almac&eacute;n de claves.
 	 * @param ts TrustStore de certificados de confianza o {@code null} para la
 	 * configuraci&oacute;n por defecto.
 	 * @param acceptAllCerts Indica si se debe desactivar la validaci&oacute;n de

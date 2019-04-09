@@ -160,20 +160,16 @@ public class TransactionResult {
 		return this.result;
 	}
 
-	/**
-	 * Establece el resultado de la transacci&oacute;n.
-	 * @param result
-	 */
+	/** Establece el resultado de la transacci&oacute;n.
+	 * @param result Resultado de la transacci&oacute;n. */
 	public void setResult(final byte[] result) {
 		this.result = result;
 	}
 
-	/**
-	 * Obtiene el resultado de la transacci&oacute;n, que puede ser los bytes del resultado
+	/** Obtiene el resultado de la transacci&oacute;n, que puede ser los bytes del resultado
 	 * o un objeto JSON con la informaci&oacute;n del proceso si este no se obtuvo. Este
 	 * resultado es susceptible de parsearse mediante el m&eacute;todo {@link #parse(int, byte[])}.
-	 * @return Resultado de la operaci&oacute;n.
-	 */
+	 * @return Resultado de la operaci&oacute;n. */
 	public byte[] encodeResult() {
 
 		// Si tenemos un resultado, lo devolvemos directamente

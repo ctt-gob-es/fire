@@ -31,18 +31,15 @@ public final class HttpNetworkException extends HttpOperationException {
         super("Error de conexion", e); //$NON-NLS-1$
     }
 
-    /**
-     * Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
-     * @param msg Mensaje de error.
-     */
+    /** Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
+     * @param msg Mensaje de error. */
     HttpNetworkException(final String msg) {
     	super(msg);
     }
 
-    /**
-     * @param msg
-     * @param e
-     */
+    /** Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
+     * @param msg Mensaje de error.
+     * @param e Error de origen. */
     public HttpNetworkException(final String msg, final Throwable e) {
     	super(msg, e);
     }
