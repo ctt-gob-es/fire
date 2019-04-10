@@ -89,9 +89,9 @@ public final class ServiceUtil {
     	return Base64.encode(buffer.toString().getBytes());
     }
 
-    /** Devuelve una lista de certificados X509 de la cabecera de una peticion HTTP
+    /** Devuelve una lista de certificados X&#46;509 de la cabecera de una petici&oacute;n HTTP
      * @param request Cabecera HTTP recibida.
-     * @return Lista de los certificados X509 contenidos en la cabecera HTTP o
+     * @return Lista de los certificados X&#46;509 contenidos en la cabecera HTTP o
      * {@code null} si no hay ninguno. */
     static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request){
 
@@ -105,11 +105,11 @@ public final class ServiceUtil {
     	return certificates;
     }
 
-    /** Recupera los certificados de autenticacion SSL como atributo de las peticiones.
+    /** Recupera los certificados de autenticaci&oacute;n SSL como atributo de las peticiones.
      * Esto ser&aacute; cuando se transmitan al servidor de aplicaciones los certificados mediante
      * AJP.
      * @param request Petici&oacute;n con los certificados.
-     * @return Lista de los certificados X509 enviados o {@code null} se enviaron como
+     * @return Lista de los certificados X&#46;509 enviados o {@code null} se enviaron como
      * atributos de la petici&oacute;n. */
     private static X509Certificate[] getCertificatesFromAttribute(final HttpServletRequest request) {
     	final Object[] cer = (Object[]) request.getAttribute("javax.servlet.request.X509Certificate"); //$NON-NLS-1$
@@ -123,11 +123,11 @@ public final class ServiceUtil {
     	return certificates;
     }
 
-    /** Recupera los certificados de autenticacion SSL como una propiedad de la cabecera de las
+    /** Recupera los certificados de autenticaci&oacute;n SSL como una propiedad de la cabecera de las
      * peticiones. Se deber&aacute; indicar el nombre de la propiedad de la cabecera en la que
      * se transmiten los certificados.
      * @param request Petici&oacute;n con los certificados.
-     * @return Lista de los certificados X509 enviados o {@code null} se enviaron en la propiedad
+     * @return Lista de los certificados X&#46;509 enviados o {@code null} se enviaron en la propiedad
      *         de la cabecera. */
     private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName) {
         X509Certificate certificates[] = null;
