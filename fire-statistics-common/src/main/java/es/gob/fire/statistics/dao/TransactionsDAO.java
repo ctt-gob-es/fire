@@ -69,9 +69,10 @@ public class TransactionsDAO {
 	 *         en caso contrario.
 	 * @throws SQLException Cuando se produce un error al insertar los datos.
 	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos. */
-	public static boolean insertTransaction(final Date date, final TransactionCube transaction, final TransactionTotal total)
-			throws SQLException, DBConnectionException {
-
+	public static boolean insertTransaction(final Date date,
+			                                final TransactionCube transaction,
+			                                final TransactionTotal total) throws SQLException,
+	                                                                             DBConnectionException {
 		int totalInsertReg = 0;
 		try (final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_TRANSACTION,false);) {
 
@@ -100,8 +101,10 @@ public class TransactionsDAO {
 	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
 	 * @throws NumberFormatException Cuando se obtienen totales incorrectos de la base de datos.
 	 */
-	public static String getTransactionsByAppJSON(final int year, final int month) throws SQLException, DBConnectionException, NumberFormatException {
-
+	public static String getTransactionsByAppJSON(final int year,
+			                                      final int month) throws SQLException,
+	                                                                      DBConnectionException,
+	                                                                      NumberFormatException {
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
 		try (final PreparedStatement st = DbManager.prepareStatement(TRANSACTIONS_BYAPP);) {
