@@ -9,22 +9,15 @@
  */
 package es.gob.fire.signature;
 
-
-/**
- * Excepci&oacute;n de petici&oacute;n inv&aacute;lida a un servicio de firma en
- * la nube.
- */
+/** Excepci&oacute;n de petici&oacute;n inv&aacute;lida a un servicio de firma en
+ * la nube. */
 public abstract class FIReInvalidRequestException extends Exception {
 
     private static final long serialVersionUID = 392897533326297380L;
 
-    /**
-     * Construye una excepci&oacute;n de petici&oacute;n inv&aacute;lida a un
+    /** Construye una excepci&oacute;n de petici&oacute;n inv&aacute;lida a un
      * servicio de firma en la nube.
-     *
-     * @param msg
-     *            Mensaje de la excepci&oacute;n.
-     */
+     * @param msg Mensaje de la excepci&oacute;n. */
     protected FIReInvalidRequestException(final String msg) {
         super(msg);
     }

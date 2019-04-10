@@ -186,7 +186,7 @@ public class ConfigManager {
 				if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
 					try {
 						final Class<?> decipherClass = Class.forName(decipherClassname);
-						final Object decipher = decipherClass.newInstance();
+						final Object decipher = decipherClass.getConstructor().newInstance();
 						if (PropertyDecipher.class.isInstance(decipher)) {
 							decipherImpl = (PropertyDecipher) decipher;
 						}

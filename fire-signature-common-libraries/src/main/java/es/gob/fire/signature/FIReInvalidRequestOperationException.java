@@ -9,25 +9,16 @@
  */
 package es.gob.fire.signature;
 
-
-/**
- * Excepci&oacute;n de operaci&oacute;n inv&aacute;lida en una petici&oacute;n a
- * un servicio.
- */
-public final class FIReInvalidRequestOperationException extends
-	FIReInvalidRequestException {
+/** Excepci&oacute;n de operaci&oacute;n inv&aacute;lida en una petici&oacute;n a
+ * un servicio. */
+public final class FIReInvalidRequestOperationException extends	FIReInvalidRequestException {
 
     private static final long serialVersionUID = 392897533326297380L;
 
-    /**
-     * Construye una excepci&oacute;n de operaci&oacute;n inv&aacute;lida en una
+    /** Construye una excepci&oacute;n de operaci&oacute;n inv&aacute;lida en una
      * petici&oacute;n a un servicio.
-     *
-     * @param cause
-     *            Mensaje de la excepci&oacute;n.
-     */
+     * @param cause Mensaje de la excepci&oacute;n. */
     public FIReInvalidRequestOperationException(final String cause) {
         super(cause);
     }
-
 }

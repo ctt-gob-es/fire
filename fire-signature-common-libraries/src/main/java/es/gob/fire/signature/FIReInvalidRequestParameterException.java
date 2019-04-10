@@ -9,25 +9,16 @@
  */
 package es.gob.fire.signature;
 
-
-/**
- * Excepci&oacute;n de par&aacute;metros inv&aacute;lidos en una petici&oacute;n
- * a un servicio.
- */
-public final class FIReInvalidRequestParameterException extends
-	FIReInvalidRequestException {
+/** Excepci&oacute;n de par&aacute;metros inv&aacute;lidos en una petici&oacute;n
+ * a un servicio. */
+public final class FIReInvalidRequestParameterException extends	FIReInvalidRequestException {
 
     private static final long serialVersionUID = 8069176528557786566L;
 
-    /**
-     * Construye una excepci&oacute;n de par&aacute;metros inv&aacute;lido en
+    /** Construye una excepci&oacute;n de par&aacute;metros inv&aacute;lido en
      * una petici&oacute;n a un servicio.
-     *
-     * @param cause
-     *            Mensaje de la excepci&oacute;n.
-     */
+     * @param cause Mensaje de la excepci&oacute;n. */
     public FIReInvalidRequestParameterException(final String cause) {
         super(cause);
     }
-
 }

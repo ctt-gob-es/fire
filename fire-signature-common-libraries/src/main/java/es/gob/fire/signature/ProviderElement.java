@@ -1,9 +1,7 @@
 package es.gob.fire.signature;
 
-/**
- * Elemento del listado de proveedores que puede configurarse para su uso.
- */
-public class ProviderElement {
+/** Elemento del listado de proveedores que puede configurarse para su uso. */
+public final class ProviderElement {
 
 	/** Sufijo usado en los nombres de proveedor para indicar que estos son indispensables. */
 	private static final String SUFIX_IMPORTANT = "@"; //$NON-NLS-1$
@@ -14,10 +12,8 @@ public class ProviderElement {
 	/** Indica si el proveedor es indispensable y debe darse a elegir siempre al usuario. */
 	private final boolean indispensable;
 
-	/**
-	 * Construye el elemento proveedor.
-	 * @param name Nombre del proveedor.
-	 */
+	/** Construye el elemento proveedor.
+	 * @param name Nombre del proveedor. */
 	public ProviderElement(final String name) {
 
 		if (name == null || name.trim().isEmpty()) {
@@ -41,19 +37,15 @@ public class ProviderElement {
 		}
 	}
 
-	/**
-	 * Obtiene el nombre del proveedor.
-	 * @return Nombre del proveedor.
-	 */
+	/** Obtiene el nombre del proveedor.
+	 * @return Nombre del proveedor. */
 	public String getName() {
 		return this.name;
 	}
 
-	/**
-	 * Obtiene si el proveedor debe mostrarse siempre o no.
+	/** Obtiene si el proveedor debe mostrarse siempre o no.
 	 * @return {@code true} si el proveedor debe mostrarse siempre,
-	 * {@code false} en caso contrario.
-	 */
+	 * {@code false} en caso contrario. */
 	public boolean isIndispensable() {
 		return this.indispensable;
 	}
