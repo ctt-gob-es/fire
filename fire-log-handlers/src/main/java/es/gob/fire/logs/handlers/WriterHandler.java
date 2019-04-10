@@ -29,7 +29,6 @@ import java.util.logging.LogRecord;
 
 import es.gob.fire.logs.ExtHandler;
 
-
 /**
  * A handler which writes to any {@code Writer}.
  */
@@ -45,7 +44,8 @@ public class WriterHandler extends ExtHandler {
         final Formatter formatter = getFormatter();
         try {
             formatted = formatter.format(record);
-        } catch (final Exception ex) {
+        }
+        catch (final Exception ex) {
             reportError("Formatting error", ex, ErrorManager.FORMAT_FAILURE);
             return;
         }
@@ -121,7 +121,8 @@ public class WriterHandler extends ExtHandler {
             if (formatter != null) {
 				writer.write(formatter.getHead(this));
 			}
-        } catch (final Exception e) {
+        }
+        catch (final Exception e) {
             reportError("Error writing section header", e, ErrorManager.WRITE_FAILURE);
         }
     }
@@ -132,7 +133,8 @@ public class WriterHandler extends ExtHandler {
             if (formatter != null) {
 				writer.write(formatter.getTail(this));
 			}
-        } catch (final Exception ex) {
+        }
+        catch (final Exception ex) {
             reportError("Error writing section tail", ex, ErrorManager.WRITE_FAILURE);
         }
     }
@@ -171,9 +173,11 @@ public class WriterHandler extends ExtHandler {
             if (c != null) {
 				c.close();
 			}
-        } catch (final Exception e) {
+        }
+        catch (final Exception e) {
             reportError("Error closing resource", e, ErrorManager.CLOSE_FAILURE);
-        } catch (final Throwable ignored) {}
+        }
+        catch (final Throwable ignored) {}
     }
 
     void safeFlush(final Flushable f) {
@@ -181,8 +185,10 @@ public class WriterHandler extends ExtHandler {
             if (f != null) {
 				f.flush();
 			}
-        } catch (final Exception e) {
+        }
+        catch (final Exception e) {
             reportError("Error on flush", e, ErrorManager.FLUSH_FAILURE);
-        } catch (final Throwable ignored) {}
+        }
+        catch (final Throwable ignored) {}
     }
 }

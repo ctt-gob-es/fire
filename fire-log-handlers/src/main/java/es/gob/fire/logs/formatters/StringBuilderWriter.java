@@ -87,10 +87,12 @@ final class StringBuilderWriter extends Writer {
 
     @Override
     public void flush() {
+    	// Vacio
     }
 
     @Override
     public void close() {
+    	// Vacio
     }
 
     @Override

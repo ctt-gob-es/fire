@@ -44,7 +44,7 @@ import java.util.Set;
  *
  * @author Jason T. Greene
  */
-class FastCopyHashMap<K, V> extends AbstractMap<K, V> implements Cloneable, Serializable {
+final class FastCopyHashMap<K, V> extends AbstractMap<K, V> implements Cloneable, Serializable {
 
 	/** Marks null keys. */
 	private static final Object NULL = new Object();
@@ -654,14 +654,14 @@ class FastCopyHashMap<K, V> extends AbstractMap<K, V> implements Cloneable, Seri
 		}
 	}
 
-	class ValueIterator extends FastCopyHashMapIterator<V> {
+	final class ValueIterator extends FastCopyHashMapIterator<V> {
 		@Override
 		public V next() {
 			return nextEntry().value;
 		}
 	}
 
-	class EntryIterator extends FastCopyHashMapIterator<Map.Entry<K, V>> {
+	final class EntryIterator extends FastCopyHashMapIterator<Map.Entry<K, V>> {
 		private class WriteThroughEntry extends SimpleEntry<K, V> {
 			WriteThroughEntry(final K key, final V value) {
 				super(key, value);
@@ -685,7 +685,7 @@ class FastCopyHashMap<K, V> extends AbstractMap<K, V> implements Cloneable, Seri
 
 	}
 
-	private class KeySet extends AbstractSet<K> {
+	private final class KeySet extends AbstractSet<K> {
 
 		KeySet() {
 			// Vacio
