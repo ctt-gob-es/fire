@@ -127,6 +127,7 @@ public final class ServiceUtil {
      * peticiones. Se deber&aacute; indicar el nombre de la propiedad de la cabecera en la que
      * se transmiten los certificados.
      * @param request Petici&oacute;n con los certificados.
+     * @param propName Nombre de la cabecera HTTP donde ha de buscarse el certificado.
      * @return Lista de los certificados X&#46;509 enviados o {@code null} se enviaron en la propiedad
      *         de la cabecera. */
     private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName) {
@@ -176,10 +177,14 @@ public final class ServiceUtil {
 	 * @throws IOException Si hay un error de entrada o salida.
 	 * @throws CertificateException Si hay un problema al decodificar el certificado.
 	 * @throws NoSuchAlgorithmException No se encuentra el algoritmo en el sistema.
-	 * @throws DataBaseConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
-	 */
-	private static void checkValideThumbPrint(final String appId, final String thumbPrint) throws SQLException,
-	                                                                          IllegalAccessException, CertificateException, NoSuchAlgorithmException, IOException, DBConnectionException {
+	 * @throws DBConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos. */
+	private static void checkValideThumbPrint(final String appId,
+			                                  final String thumbPrint) throws SQLException,
+	                                                                          IllegalAccessException,
+	                                                                          CertificateException,
+	                                                                          NoSuchAlgorithmException,
+	                                                                          IOException,
+	                                                                          DBConnectionException {
 		if (!AplicationsDAO.checkThumbPrint(appId, thumbPrint)) {
     		throw new IllegalAccessException("El certificado utilizado no tiene permiso para acceder"); //$NON-NLS-1$
     	}

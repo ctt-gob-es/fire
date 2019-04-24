@@ -207,8 +207,12 @@ public final class CreateBatchManager {
         sendResult(response, new CreateBatchResult(transactionId));
 	}
 
-	/** Env&iacute;a el resultado al componente cliente. */
-	private static void sendResult(final HttpServletResponse response, final CreateBatchResult result) throws IOException {
+	/** Env&iacute;a el resultado al componente cliente.
+	 * @param response Respuesta HTTP donde enviar el resultado.
+	 * @param result Resultado.
+	 * @throws IOException Si no se puede enviar el resultado. */
+	private static void sendResult(final HttpServletResponse response,
+			                       final CreateBatchResult result) throws IOException {
         response.setContentType("application/json"); //$NON-NLS-1$
         try (
     		final PrintWriter out = response.getWriter();

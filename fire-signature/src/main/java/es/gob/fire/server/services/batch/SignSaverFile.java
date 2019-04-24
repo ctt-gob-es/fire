@@ -52,22 +52,18 @@ public final class SignSaverFile {
 		// Vacio
 	}
 
-	/**
-	 * Recupera la configuraci&acote;n establecida para el guardado de ficheros del lote.
-	 * @return Configur&aacute;n de guardado de lote.
-	 */
+	/** Recupera la configuraci&oacute;n establecida para el guardado de ficheros del lote.
+	 * @return Configur&aacute;n de guardado de lote. */
 	public Properties getConfig() {
 		final Properties p = new Properties();
 		p.put(PROP_FILENAME, this.filename);
 		return p;
 	}
 
-	/**
-	 * Guarda una firma.
+	/** Guarda una firma.
 	 * @param sign Datos de identificacion de la firma.
 	 * @param dataToSave Contenido de la firma.
-	 * @throws IOException Cuando se produce un error durante el guardado.
-	 */
+	 * @throws IOException Cuando se produce un error durante el guardado. */
 	public void saveSign(final SingleSign sign, final byte[] dataToSave) throws IOException {
 		if (!DISABLED) {
 			try (

@@ -23,7 +23,7 @@ import es.gob.fire.signature.ConfigManager;
 
 /**
  * Factoria para la obtenci&oacute;n de los distintos gestores de documentos. Al
- * utilizar esta factor&iaucte;a, que almacena y reutiliza las instancias de los
+ * utilizar esta factor&iacute;a, que almacena y reutiliza las instancias de los
  * DocumentManager, conseguimos que no sea necesario inicializar un DocumentManager
  * por cada operaci&oacute;n de firma.
  */
@@ -40,15 +40,13 @@ public class FIReDocumentManagerFactory {
 		docManagers = new HashMap<>();
 	}
 
-	/**
-	 * Obtiene una instancia de la clase de gesti&oacute;n de documentos. Si no se
+	/** Obtiene una instancia de la clase de gesti&oacute;n de documentos. Si no se
 	 * indica ninguno, se devuelve el por defecto.
 	 * @param docManagerName Nombre del gestor que se desea recuperar o {@code null}
-	 * para obtener el por defecto.
+	 *                       para obtener el por defecto.
 	 * @return Gestor de documentos.
 	 * @throws IllegalArgumentException Cuando se indica un gestor de documentos que no existe.
-	 * @throws IOException Cuando no es posible cargar el gestor de documentos.
-	 */
+	 * @throws IOException Cuando no es posible cargar el gestor de documentos. */
 	public static FIReDocumentManager newDocumentManager(final String docManagerName)
 			throws IllegalArgumentException, IOException {
 

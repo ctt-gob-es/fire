@@ -24,7 +24,7 @@ import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.TriPhaseUtil;
 
-/** Procesador para simular la realizaci&oacutre;n de firmas PKCS#1 en 3 fases. Ya que este
+/** Procesador para simular la realizaci&oacute;n de firmas PKCS#1 en 3 fases. Ya que este
  * tipo de firmas se realiza por completo en la segunda fase de un proceso trif&aacute;sico,
  * la primera fase consistir&aacute; en establecer los datos recibidos como el valor de
  * prefirma de la operaci&oacute;n y la tercera fase &uacute;nicamente devolver&aacute; el

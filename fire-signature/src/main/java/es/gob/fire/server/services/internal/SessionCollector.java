@@ -93,17 +93,16 @@ public final class SessionCollector {
     	return fireSession;
     }
 
-    /**
-	 * Recupera una sesi&oacute;n activa con el identificador indicado de un usuario concreto.<br/>
+    /** Recupera una sesi&oacute;n activa con el identificador indicado de un usuario concreto.<br>
 	 * La sesi&oacute;n se carga de las distintas fuentes disponibles, a menos que se indique
 	 * que s&oacute;lo se obtenga si ya est&aacute; cargada en memoria. Este es un mecanismo
 	 * de seguridad con el que poder evitar que un usuario logueado empiece a reclamar transacciones
-	 * de otros usuarios.<br/>
+	 * de otros usuarios.<br>
 	 * Por orden de prioridad, los datos de sesi&oacute;n se recuperan de:
 	 * <ol>
-	 * <li>La propia sesi&oacute;n HTTP.</li>
-	 * <li>La colecci&oacute;n de sesiones en memoria.</li>
-	 * <li>El gestor de sesiones entre m&uacute;ltiples nodos.</li>
+	 *  <li>La propia sesi&oacute;n HTTP.</li>
+	 *  <li>La colecci&oacute;n de sesiones en memoria.</li>
+	 *  <li>El gestor de sesiones entre m&uacute;ltiples nodos.</li>
 	 * </ol>
 	 * Mediante el par&aacute;metro {@code onlyLoaded} se puede indicar que s&oacute;lo se recupere
 	 * la sesi&oacute;n si ya estaba cargada. Esto es &uacute;til cuando sabemos que la sesi&oacute;n
@@ -120,8 +119,7 @@ public final class SessionCollector {
 	 * @param onlyLoaded Indica si solo se debe recuperar la transacci&oacute;n si ya estaba cargado en memoria.
 	 * @param forceLoad Fuerza que, en caso de haberse definido un gestor de sesiones, se recargue la sesi&oacute;n de &eacute;l.
 	 * @return Datos de sesi&oacute;n con la transacci&oacute;n deseada o {@code null} si no se encontr&oacute;
-	 * o establa caducada.
-	 */
+	 *         o establa caducada. */
 	public static FireSession getFireSession(final String trId, final String userId, final HttpSession session, final boolean onlyLoaded, final boolean forceLoad) {
 
 		if (trId == null) {

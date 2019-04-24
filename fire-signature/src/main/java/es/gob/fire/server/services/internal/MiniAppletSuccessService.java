@@ -23,11 +23,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
@@ -126,20 +128,25 @@ public class MiniAppletSuccessService extends HttpServlet {
         response.sendRedirect(redirectUrl);
 	}
 
-	/**
-	 * Actualiza el estado de las firmas del lote con el resultado obtenido al firmarlas
+	/** Actualiza el estado de las firmas del lote con el resultado obtenido al firmarlas
 	 * con el Cliente @firma.
 	 * @param batchResult Resultado parcial de la firma del lote.
 	 * @param afirmaBatchResultB64 Resultado obtenido del Cliente @firma al finalizar la firma
-	 * 		  del lote.
-	 * @throws Exception Cuando ocurre alg&uacute;n error al procesar el resultado devuelto por
-	 * 		   el Cliente @firma.
-	 */
-	private static void updateSingleResult(final BatchResult batchResult, final String afirmaBatchResultB64, final  FireSession session ) throws Exception {
-
+	 * 		                       del lote.
+	 * @param session Sesi&oacute;n de firma por lotes.
+	 * @throws IOException Si el Base64 est&aacute; mal formado o no se pueden procesar los datos.
+	 * @throws ParserConfigurationException Si no se puede inicializar en analizador XML.
+	 * @throws SAXException Cuando ocurre alg&uacute;n error al procesar el resultado devuelto por
+	 * 		                el Cliente afirma. */
+	private static void updateSingleResult(final BatchResult batchResult,
+			                               final String afirmaBatchResultB64,
+			                               final FireSession session) throws IOException,
+	                                                                         SAXException,
+	                                                                         ParserConfigurationException {
 		final byte[] afirmaResultXml = Base64.decode(afirmaBatchResultB64);
 		final Document afirmaResultDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
-				new ByteArrayInputStream(afirmaResultXml));
+			new ByteArrayInputStream(afirmaResultXml)
+		);
 
 		final Map<String, AfirmaSingleResult> afirmaResults = new HashMap<>();
 		parseAfirmaResult(afirmaResultDoc, afirmaResults);
@@ -160,12 +167,10 @@ public class MiniAppletSuccessService extends HttpServlet {
 		}
 	}
 
-	/**
-	 * Extrae de un XML resultado de la firma de un lote con el Cliente @firma el estado
+	/** Extrae de un XML resultado de la firma de un lote con el Cliente @firma el estado
 	 * de cada una de las firmas del lote.
 	 * @param afirmaResultDoc &Aacute;rbol DOM con el resultado de las firmas.
-	 * @param afirmaResults Mapa con los resultados de las firmas registrados por su ID de documento.
-	 */
+	 * @param afirmaResults Mapa con los resultados de las firmas registrados por su ID de documento. */
 	private static void parseAfirmaResult(final Document afirmaResultDoc, final Map<String, AfirmaSingleResult> afirmaResults) {
 		final Element rootElement = afirmaResultDoc.getDocumentElement();
 		final NodeList signNodes = rootElement.getChildNodes();

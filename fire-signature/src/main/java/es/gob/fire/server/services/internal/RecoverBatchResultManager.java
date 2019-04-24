@@ -378,21 +378,21 @@ public class RecoverBatchResultManager {
         sendResult(response, batchResult.encode());
 	}
 
-	/**
-	 * Actualiza las firmas del resultado que finalizaron correctamente y para
-	 * las que haya configurado un formato de actualizaci&oacute;n, ya se a nivel
+	/** Actualiza las firmas del resultado que finalizaron correctamente y para
+	 * las que haya configurado un formato de actualizaci&oacute;n, ya sea a nivel
 	 * de lote o de la propia firma.
 	 * @param appId Identificador de la aplicaci&oacute;n.
 	 * @param batchResult Listado con los resultados parciales de cada firma.
-	 * @param defaultConfig Configuraci&oacute;n por defecto en caso de no tener una espec&iacute;fica.
-	 * @param stopOnError Ser&aacute; {@code true} si debe pararse el proceso tras encontrar un error,
-	 * {@code false} en caso contrario.
+	 * @param docManager Gestor a usar para el origen y el destino de los documentos.
 	 * @param session Sesi&oacute;n en la que se ir&aacute; almacenando el numero de peticiones pendientes
-	 * en cada momento para su consulta en paralelo.
-	 */
-	private static void upgradeLocalSignatures(final String appId, final BatchResult batchResult,
-			final FIReDocumentManager docManager, final FireSession session,
-			final boolean stopOnError) {
+	 *                en cada momento para su consulta en paralelo.
+	 * @param stopOnError Ser&aacute; {@code true} si debe pararse el proceso tras encontrar un error,
+	 *                    {@code false} en caso contrario. */
+	private static void upgradeLocalSignatures(final String appId,
+			                                   final BatchResult batchResult,
+			                                   final FIReDocumentManager docManager,
+			                                   final FireSession session,
+			                                   final boolean stopOnError) {
 
 		final List<ConcurrentProcessThread> threads = new ArrayList<>();
     	final Iterator<String> it = batchResult.iterator();

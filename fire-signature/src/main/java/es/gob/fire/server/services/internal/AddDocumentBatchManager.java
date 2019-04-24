@@ -208,14 +208,12 @@ public class AddDocumentBatchManager {
         response.getWriter().print(Boolean.TRUE.toString());
     }
 
-	/**
-     * Extrae de la peticion la configuraci&oacute;n de firma que se debe
+	/** Extrae de la petici&oacute;n la configuraci&oacute;n de firma que se debe
      * aplicar a este documento particular.
-     * @param request Solicitud de agregar documento al lote.
+     * @param params Solicitud de agregar documento al lote.
      * @return Configuraci&oacute;n de firma particular o {@code null} si no
-     * se defini&oacute;.
-     * @throws IOException Si se configuran extraParams y no son un Base 64 bien formado.
-     */
+     *         se defini&oacute;.
+     * @throws IOException Si se configuran extraParams y no son un Base64 bien formado. */
 	private static SignBatchConfig getParticularConfig(final RequestParameters params) throws IOException {
 
 		// Comprobamos si se ha establecido configuracion particular
@@ -235,14 +233,12 @@ public class AddDocumentBatchManager {
 		return config;
 	}
 
-	/**
-     * Extrae de la petici&oacute;n informaci&oacute;n del documento.
-     * @param request Solicitud de agregar documento al lote.
-     * @return Informaci&oaucte;n del documento enviada en la petici&oacute;n
-     * o {@code null} si no se env&iacute;a.
+	/** Extrae de la petici&oacute;n informaci&oacute;n del documento.
+     * @param params Solicitud de agregar documento al lote.
+     * @return Informaci&oacute;n del documento enviada en la petici&oacute;n
+     *         o {@code null} si no se env&iacute;a.
 	 * @throws IOException Si la configuraci&oacute;n con la informaci&oacute;n
-	 * del documento no est&aacute; bien codificada.
-     */
+	 *         del documento no est&aacute; bien codificada. */
 	private static DocInfo getDocInfo(final RequestParameters params) throws IOException {
 
 		// Comprobamos si se ha establecido configuracion particular
