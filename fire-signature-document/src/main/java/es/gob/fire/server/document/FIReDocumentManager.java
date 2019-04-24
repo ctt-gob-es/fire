@@ -16,19 +16,17 @@ import java.util.Properties;
 /** Interfaz para la recuperaci&oacute;n de documentos desde un servidor o repositorio documental.
  * <u>ES OBLIGATORIO</u>, que las clases que implementen esta interfaz no definan un constructor
  * o que este sea el contructor p&uacute;blico por defecto.<br>
- * Si se encuentra en el directorio de configuraci&oacuute;n o en el <i>classpath</i> un fichero
+ * Si se encuentra en el directorio de configuraci&oacute;n o en el <i>classpath</i> un fichero
  * con el nombre "docmanager.NOMBRE_DOCUMENT_MANAGER.properties", se cargar&aacute; como fichero
  * de propiedades y se ejecutar&aacute; el m&eacute;rodo init() de la case antes de realizar cualquier
  * llamada a los m&eacute;todos getDocument y storeDocument. Si no se encuentra este fichero, no se
- * realizara ninguna llamada al metodo init. */
+ * realizar&aacute; ninguna llamada al metodo init. */
 public interface FIReDocumentManager {
 
-	/**
-	 * Inicializa el objeto con las propiedades de un fichero de configuraci&oacute;n.
+	/** Inicializa el objeto con las propiedades de un fichero de configuraci&oacute;n.
 	 * @param config Configuraci&oacute;n que aplicar a todas las operaciones del
-	 * DocumentManager o {@code null} si no se pudo cargar la configuraci&oacute;n.
-	 * @throws IOException Si ocurre un error durante la inicializaci&oacute;n.
-	 */
+	 *               <code>DocumentManager</code> o {@code null} si no se pudo cargar la configuraci&oacute;n.
+	 * @throws IOException Si ocurre un error durante la inicializaci&oacute;n. */
 	void init(Properties config) throws IOException;
 
 	/** Obtiene un documento para firmarlo.
