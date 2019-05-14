@@ -151,22 +151,22 @@
 	DocInfo[] docInfos = null;
 	if (isBatchOperation) {
 		if (batchResult != null) {
-	final List<DocInfo> docInfosList = new ArrayList<DocInfo>();
-	Iterator<String> it = batchResult.iterator();
-	while (it.hasNext()) {
-		String docId = it.next();
-		DocInfo docInfo = batchResult.getDocInfo(docId);
-		if (docInfo != null) {
-			docInfosList.add(docInfo);
-		}
-	}
-	docInfos = docInfosList.toArray(new DocInfo[docInfosList.size()]);
+			final List<DocInfo> docInfosList = new ArrayList<DocInfo>();
+			Iterator<String> it = batchResult.iterator();
+			while (it.hasNext()) {
+				String docId = it.next();
+				DocInfo docInfo = batchResult.getDocInfo(docId);
+				if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null)) {
+					docInfosList.add(docInfo);
+				}
+			}
+			docInfos = docInfosList.toArray(new DocInfo[docInfosList.size()]);
 		}
 	} else {
 		final Properties extraParamsProperties = ServiceUtil.base642Properties(extraParamsB64);
 		DocInfo docInfo = DocInfo.extractDocInfo(extraParamsProperties);
-		if (docInfo.getName() != null || docInfo.getTitle() != null) {
-	docInfos = new DocInfo[] { docInfo };
+		if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null)) {
+			docInfos = new DocInfo[] { docInfo };
 		}
 	}
 
@@ -459,8 +459,7 @@
 				for (DocInfo docInfo : docInfos)  { %>
 					<div class="celda-listaDocs"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>	
 					<div class="celda-listaDocs"><%= docInfo.getTitle() != null ? docInfo.getTitle() : "" %></div>	
-													
-				<%i++; 
+					<%i++; 
 				}%>				
 
 			</div>

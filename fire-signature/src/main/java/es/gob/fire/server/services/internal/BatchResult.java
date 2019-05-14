@@ -99,7 +99,7 @@ public class BatchResult implements Serializable {
 	 */
 	public void addDocument(final String docId, final String dataReference, final SignBatchConfig config, final DocInfo docInfo) {
 		BatchDocumentReference docRef;
-		if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null)) {
+		if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null || docInfo.getSize() > 0)) {
 			docRef = new BatchDocumentReference(dataReference, config, docInfo);
 		}
 		else {

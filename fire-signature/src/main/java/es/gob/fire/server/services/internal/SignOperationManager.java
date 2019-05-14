@@ -239,7 +239,7 @@ public class SignOperationManager {
         // Creamos un temporal con los datos a procesar asociado a la sesion
         try {
         	TempFilesHelper.storeTempData(transactionId, data);
-        	//obtenemos el tamaño del documento
+        	//obtenemos el tamano del documento
        	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, TempFilesHelper.getFileSize());
         }
         catch (final Exception e) {

@@ -174,6 +174,9 @@ public class SignatureRecorder {
 		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
 		if (docSize != null) {
 			docSize = (Long) docSizeObject;
+			if (docSize == null) {
+				docSize = new Long(0);
+			}
 		}
 
 		// Obtenemos el formato de firma configurado
