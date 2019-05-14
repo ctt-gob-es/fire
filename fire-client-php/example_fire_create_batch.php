@@ -5,22 +5,21 @@
  <body>
  <?php 
 	// Cargamos el componente distribuido de Clave Firma
-	include 'fire_api.php';
+	include 'fire_client.php';
 		
+
+	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
+	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
+	$subjectId = "00001";		// DNI de la persona
 	$conf = "redirectOkUrl=http://www.google.es"."\n".	// URL a la que llegara si el usuario se autentica correctamente
 			"redirectErrorUrl=http://www.ibm.com";		// URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
 	$confB64 = base64_encode($conf);
+
 	
-	// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	//$appId = "7BA5453995EC";	// Entorno preproduccion
-	$appId = "B244E473466F";	// Entorno local
-	$subjectId = "00001";		// DNI de la persona
-	
-	// Funcion del API de Clave Firma para generar un nuevo certificado
+	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
 	$batch;
 	try {
-		$batch = createBatchProcess(
-			$appId,			// Identificador de la aplicacion (dada de alta previamente en el sistema)
+		$batch = $fireClient->createBatchProcess(
 			$subjectId,		// DNI de la persona
 			"sign",			// Operacion criptografica (sign, cosign o countersign)
 			"CAdES",		// Formato de firma (CAdES, XAdES, PAdES...)
