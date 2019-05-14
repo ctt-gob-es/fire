@@ -5,7 +5,7 @@
  <body>
  <?php 
 	// Cargamos el componente distribuido de Clave Firma
-	include 'fire_api.php';
+	include 'fire_client.php';
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
 	
@@ -18,11 +18,12 @@
 	$subjectId = "00001";		// DNI de la persona
 	$dataB64 = base64_encode("Hola Mundo!!");
 	
+	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+	
 	// Funcion del API de Clave Firma para listar certificados
 	$signatureB64;
 	try {
-		$signatureB64 = sign(
-			$appId,			// Identificador de la aplicacion (dada de alta previamente en el sistema)
+		$signatureB64 = $fireClient->sign(
 			$subjectId,		// DNI de la persona
 			"sign",			// Operacion criptografica (sign, cosign o countersign)
 			"CAdES",		// Formato de firma (CAdES, XAdES, PAdES...)

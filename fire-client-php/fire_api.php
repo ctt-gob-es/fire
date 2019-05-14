@@ -672,15 +672,18 @@
 	class TransactionIdResult {
 		var $transactionId;
 		
-		function TransactionIdResult ($response){
+		function __construct ($response) {
 			$json = json_decode($response, true);
 			$this->transactionId = $json["transactionid"];
 			if (empty($this->transactionId)){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el identificador de la transacción");
 			}
 		}
-	}
 		
+		function TransactionIdResult ($response){
+			__construct ($response);
+		}
+	}
 		
 	/**
 	 * Clase que almacena la respuesta en formato json en la firma de un batch
@@ -691,7 +694,7 @@
 		var $dt;
 		var $providerName;
 		
-		function BatchResult ($response, $provName){
+		function __construct ($response, $provName){
 			if(isset($response->id)) {
 				$this->id = $response->id;
 			}
@@ -716,7 +719,11 @@
 			}
 			else if (empty($this->dt) && !$this->ok){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el codigo de error si la firma no se llevo a cabo correctamente");
-			}
+			}			
+		}
+		
+		function BatchResult ($response, $provName){
+			__construct ($response, $provName);
 		}
 	};
 	
@@ -727,7 +734,7 @@
 		var $transactionId;
 		var $redirectUrl;
 		
-		function SignOperationResult ($response){
+		function __construct ($response){
 			$json = json_decode($response, true);
 			$this->transactionId = $json["transactionid"];
 			$this->redirectUrl = $json["redirecturl"];
@@ -737,6 +744,10 @@
 			if (empty($this->redirectUrl)){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga la URL a redireccionar al usuario para que se autentique");
 			}
+		}
+		
+		function SignOperationResult ($response){
+			__construct($response);
 		}
 	};
 	  
@@ -751,7 +762,7 @@
 		var $errorMessage;
 		var $result;
 		
-		function TransactionResult ($result) {
+		function __construct($result){
 			// Especifica que la transacci&oacute;n finaliz&oacute; correctamente.
 			$STATE_OK = 0;
 			// Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
@@ -780,6 +791,10 @@
 			else {
 				$this->result = $result;
 			}
+		}
+		
+		function TransactionResult ($result) {
+			__construct($result);
 		}
 	};
 ?>

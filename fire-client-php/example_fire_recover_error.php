@@ -5,20 +5,21 @@
  <body>
  <?php 
 	// Cargamos el componente distribuido de Clave Firma
-	include 'fire_api.php';
+	include 'fire_client.php';
+
+
+	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
+	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
+	$subjectId = "00001";		// DNI de la persona
+	$transactionId = "9de3fa16-726a-40a9-aba9-97656c5588ea";	// Identificador de la transaccion
 	
-	$dataB64 = base64_encode("Hola Mundo!!");
-	
-	// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	//$appId = "7BA5453995EC";	// Entorno preproduccion
-	$appId = "B244E473466F";	// Entorno local
-	
-	// Funcion del API de Clave Firma para cargar los datos a firmar
+
+	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
 	$error;
 	try {
-		$error = recoverError(
-			$appId,			// Identificador de la aplicacion (dada de alta previamente en el sistema)
-			"30ee59ef-cf4f-418e-83db-0a9e71fcc0c8"		// Identificador de transaccion recuperado en la operacion sign()
+		$error = $fireClient->recoverError(
+			$subjectId,			// DNI de la persona
+			$transactionId		// Identificador de transaccion recuperado en la operacion sign()
 		);
 	}
 	catch(Exception $e) {
