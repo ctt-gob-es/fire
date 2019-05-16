@@ -43,6 +43,12 @@ public class ClientConfigFilesNotFoundException extends Exception {
 		fileName = filename;
     }
 
+	/** Constructor p&uacute;blico de la excepci&oacute;n.
+	 * @param cause Error que caus&oacute; la excepci&oacute;n. */
+	public ClientConfigFilesNotFoundException(final Throwable cause) {
+		super(cause);
+    }
+
 	/**
 	 * Constructor p&uacute;blico de la excepci&oacute;n.
 	 * @param msg Mensaje de la excepci&oacute;n.

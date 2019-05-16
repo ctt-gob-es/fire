@@ -70,9 +70,6 @@ public class TestSignService extends HttpServlet {
      * sesi&oacute;n trif&aacute;sica. */
     private static final String PROPERTY_NAME_PRESIGN = "PRE"; //$NON-NLS-1$
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
@@ -102,12 +99,6 @@ public class TestSignService extends HttpServlet {
 		}
 
 		transactionFile.delete();
-
-		if (!Boolean.parseBoolean(p.getProperty("auth"))) { //$NON-NLS-1$
-			LOGGER.warning(" La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception ex = new FIReSignatureException("La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new ServletException(ex);
-		}
 
 		final X509Certificate signingCert;
 		try {

@@ -94,7 +94,13 @@ public final class PreSignService extends HttpServlet {
         }
         redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
 
-        FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), false, false);
+        FireSession session = SessionCollector.getFireSession(
+    		transactionId,
+    		userId,
+    		request.getSession(false),
+    		false,
+    		false
+		);
         if (session == null) {
         	LOGGER.warning("La sesion no contiene los datos de la operacion"); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);

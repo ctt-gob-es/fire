@@ -29,24 +29,24 @@ import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.signature.ConfigManager;
 
-/**
- * Manejador encargado de la gesti&oacute;n de las operaciones de firma ordenadas al
- * componente central.
- */
-public class SignOperationManager {
+/** Manejador encargado de la gesti&oacute;n de las operaciones de firma ordenadas al
+ * componente central. */
+public final class SignOperationManager {
 
 	private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 
-	/**
-	 * Inicia la operaci&oacute;n de firma asociada al componente central.
+	/** Inicia la operaci&oacute;n de firma asociada al componente central.
 	 * @param request Solicitud HTTP.
+	 * @param appName Nombre de la aplicaci&oacute;n que solicita la operaci&oacute;n.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta HTTP.
 	 * @throws IOException Cuando se produce un error en la comunicaci&oacute;n con el cliente
-	 * o en el guardado de temporales.
-	 */
-	public static void sign(final HttpServletRequest request, final String appName, final RequestParameters params, final HttpServletResponse response) throws IOException {
+	 *                     o en el guardado de temporales. */
+	public static void sign(final HttpServletRequest request,
+			                final String appName,
+			                final RequestParameters params,
+			                final HttpServletResponse response) throws IOException {
 
 		final String op				= params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 		final String appId			= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
@@ -70,8 +70,10 @@ public class SignOperationManager {
 
         if (algorithm == null || algorithm.isEmpty()) {
             LOGGER.warning(logF.format("No se ha proporcionado el algoritmo de firma")); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                "No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
+            response.sendError(
+        		HttpServletResponse.SC_BAD_REQUEST,
+                "No se ha proporcionado el algoritmo de firma" //$NON-NLS-1$
+    		);
             return;
         }
 

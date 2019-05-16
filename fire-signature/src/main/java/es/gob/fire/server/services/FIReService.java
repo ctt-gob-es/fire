@@ -33,7 +33,6 @@ import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
-import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.statistics.FireStatistics;
 
@@ -49,15 +48,6 @@ public final class FIReService extends HttpServlet {
     @Override
     public void init() throws ServletException {
     	super.init();
-
-    	// Comprobamos la configuracion
-    	try {
-	    	ConfigManager.checkConfiguration();
-		}
-    	catch (final Exception e) {
-    		LOGGER.severe("No se pudo cargar la configuracion del componente central de FIRe: " + e); //$NON-NLS-1$
-    		return;
-    	}
 
     	// Configuramos los logs
     	try {
@@ -94,17 +84,6 @@ public final class FIReService extends HttpServlet {
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
 		LOGGER.fine("Nueva peticion entrante"); //$NON-NLS-1$
-
-		if (!ConfigManager.isInitialized()) {
-			try {
-				ConfigManager.checkConfiguration();
-			}
-			catch (final ConfigFilesException e) {
-				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
-				return;
-			}
-		}
 
 		final RequestParameters params = RequestParameters.extractParameters(request);
 

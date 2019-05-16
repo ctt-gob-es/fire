@@ -17,10 +17,8 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-/**
- * Clase para la carga de ficheros de configuraci&oacute;n.
- */
-public class ConfigFileLoader {
+/** Utilidad para la carga de ficheros de configuraci&oacute;n. */
+public final class ConfigFileLoader {
 
 	/** Variable de entorno que determina el directorio en el que buscar el fichero de configuraci&oacute;n. */
 	private static final String ENVIRONMENT_VAR_CONFIG_DIR = "fire.config.path"; //$NON-NLS-1$
@@ -31,14 +29,12 @@ public class ConfigFileLoader {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigFileLoader.class.getName());
 
-	/**
-	 * Carga un fichero de configuraci&oacute;n del directorio configurado
+	/** Carga un fichero de configuraci&oacute;n del directorio configurado
 	 * o del classpath si no se configur&oacute;.
 	 * @param configFilename Nombre del fichero de configuraci&oacute;n.
 	 * @return Propiedades de fichero de configuraci&oacute:n.
 	 * @throws IOException Cuando no se puede cargar el fichero de configuraci&oacute;n.
-	 * @throws FileNotFoundException Cuando no se encuentra el fichero de configuraci&oacute;n.
-	 */
+	 * @throws FileNotFoundException Cuando no se encuentra el fichero de configuraci&oacute;n. */
 	public static Properties loadConfigFile(final String configFilename) throws  IOException, FileNotFoundException {
 
 		boolean loaded = false;
@@ -61,8 +57,9 @@ public class ConfigFileLoader {
 				}
 				else {
 					LOGGER.warning(
-							"El fichero " + configFilename + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ". El fichero debia encontrase en el directorio " + configDir); //$NON-NLS-1$
+						"El fichero " + configFilename + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
+							ENVIRONMENT_VAR_CONFIG_DIR + ". El fichero debia encontrase en el directorio " + configDir //$NON-NLS-1$
+					);
 				}
 			}
 

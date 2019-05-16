@@ -39,21 +39,22 @@ public final class DbManager {
 			dbConnDriver = ConfigManager.getJdbcDriverString();
 			if (dbConnDriver == null) {
 				LOGGER.log(
-					Level.SEVERE,
+					Level.WARNING,
 					"No se ha declarado la clase del driver JDBC a la BD en el fichero de configuracion" //$NON-NLS-1$
 				);
 				return null;
 			}
 
-			dbConnString = ConfigManager.getDataBaseConnectionString();
-			if (dbConnString == null) {
-				LOGGER.log(
-					Level.SEVERE,
-					"No se ha declarado la cadena de conexion a la BD en el fichero de configuracion" //$NON-NLS-1$
-				);
-				return null;
+			if (dbConnDriver != null) {
+				dbConnString = ConfigManager.getDataBaseConnectionString();
+				if (dbConnString == null) {
+					LOGGER.log(
+						Level.SEVERE,
+						"No se ha declarado la cadena de conexion a la BD en el fichero de configuracion" //$NON-NLS-1$
+					);
+					return null;
+				}
 			}
-
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error al crear la conexion con la base de datos", e); //$NON-NLS-1$
@@ -69,12 +70,11 @@ public final class DbManager {
 	private static Connection initConnection() {
 
 		try {
-			Class.forName(dbConnDriver).newInstance();
-
+			Class.forName(dbConnDriver).getConstructor().newInstance();
 			return DriverManager.getConnection(dbConnString);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error al crear la conexion con la base de datos", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al crear la conexion con la base de datos: " + e, e); //$NON-NLS-1$
 			return null;
 		}
 	}

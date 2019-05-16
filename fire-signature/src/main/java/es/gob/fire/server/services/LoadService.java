@@ -33,7 +33,6 @@ import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
-import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 
 /** Servicio de carga de datos para su posterior firma en servidor.
@@ -54,18 +53,6 @@ public final class LoadService extends HttpServlet {
     private static final String PARAMETER_NAME_FORMAT = "format"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_DATA = "dat"; //$NON-NLS-1$
 
-    @Override
-    public void init() throws ServletException {
-    	super.init();
-    	try {
-	    	ConfigManager.checkConfiguration();
-		}
-    	catch (final Exception e) {
-    		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
-    		return;
-    	}
-    }
-
     /** Carga los datos para su posterior firma en servidor.
      * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
     @Override
@@ -73,17 +60,6 @@ public final class LoadService extends HttpServlet {
     		               final HttpServletResponse response) throws ServletException, IOException {
 
 		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
-
-		if (!ConfigManager.isInitialized()) {
-			try {
-				ConfigManager.checkConfiguration();
-			}
-			catch (final ConfigFilesException e) {
-				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
-				return;
-			}
-		}
 
     	final RequestParameters params = RequestParameters.extractParameters(request);
 
@@ -165,8 +141,10 @@ public final class LoadService extends HttpServlet {
 
         if (subOperation == null || subOperation.isEmpty()) {
             LOGGER.warning("No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                "No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
+            response.sendError(
+        		HttpServletResponse.SC_BAD_REQUEST,
+                "No se ha indicado la operacion de firma a realizar" //$NON-NLS-1$
+    		);
             return;
         }
 

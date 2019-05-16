@@ -73,7 +73,7 @@ public final class HttpLoadProcess {
     private static final String AM = "&"; //$NON-NLS-1$
 
     private static final String URL_SUFIX =
-            PARAMETER_NAME_CONFIG + EQ + TAG_NAME_CONFIG + AM
+        PARAMETER_NAME_CONFIG + EQ + TAG_NAME_CONFIG + AM
             + PARAMETER_NAME_APPID + EQ + TAG_NAME_APP_ID + AM
             + PARAMETER_NAME_ALGORITHM + EQ + TAG_NAME_ALGORITHM + AM
             + PARAMETER_NAME_SUBJECT_ID + EQ + TAG_NAME_SUBJECT_ID + AM
@@ -83,40 +83,25 @@ public final class HttpLoadProcess {
             + PARAMETER_NAME_FORMAT + EQ + TAG_NAME_FORMAT + AM
             + PARAMETER_NAME_DATA + EQ + TAG_NAME_DATA;
 
-    private static String URL;
+    private static final String URL;
 
     private static final Logger LOGGER = Logger.getLogger(HttpLoadProcess.class.getName());
 
-    private static boolean initialized = false;
-
-    /** Constructor privado para no permir la instanciaci&oacute;n. */
-    private HttpLoadProcess() {
-        // no instanciable
-    }
-
-    /** Inicializa las propiedades de sistema a trav&eacute;s del fichero de propiedades.
-     * @throws ClientConfigFilesNotFoundException Si no encuentra el fichero de configuraci&oacute;n. */
-    public static void initialize() throws ClientConfigFilesNotFoundException{
-    	if (!initialized) {
-    		initializeProperties();
-            initialized = true;
-    	}
-    }
-
-    private static void initializeProperties() throws ClientConfigFilesNotFoundException {
-
+    static {
     	final Properties p;
 		try {
 			p = ConfigManager.loadConfig();
 		}
 		catch (final es.gob.fire.client.ClientConfigFilesNotFoundException e) {
-			throw new ClientConfigFilesNotFoundException(e.getMessage(), e.getCause());
+			throw new IllegalStateException(
+				new ClientConfigFilesNotFoundException(e)
+			);
 		}
 
         URL = p.getProperty(LOAD_URL);
         if (URL == null) {
             throw new IllegalStateException(
-                "No esta declarada la URL en la configuracion (propiedad '" + LOAD_URL + "')" //$NON-NLS-1$ //$NON-NLS-2$
+                "No esta declarada la URL de carga de datos a firmar en la configuracion (propiedad '" + LOAD_URL + "')" //$NON-NLS-1$ //$NON-NLS-2$
             );
         }
 
@@ -131,6 +116,11 @@ public final class HttpLoadProcess {
         LOGGER.info(
     		"Se usara el siguiente servicio de carga de datos: " + URL //$NON-NLS-1$
         );
+    }
+
+    /** Constructor privado para no permir la instanciaci&oacute;n. */
+    private HttpLoadProcess() {
+        // no instanciable
     }
 
     /** Carga datos para ser posteriormente firmados.
@@ -251,8 +241,6 @@ public final class HttpLoadProcess {
                                                                    HttpOperationException,
                                                                    ClientConfigFilesNotFoundException,
                                                                    HttpNoUserException {
-    	initialize();
-
     	if (op == null) {
             throw new IllegalArgumentException(
                 "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
@@ -285,20 +273,16 @@ public final class HttpLoadProcess {
         }
 
         final String urlParameters =
-        		URL_SUFIX
+    		URL_SUFIX
         		.replace(TAG_NAME_APP_ID, appId)
                 .replace(TAG_NAME_SUBJECT_ID, subjectId)
                 .replace(TAG_NAME_OPERATION, op)
                 .replace(TAG_NAME_FORMAT, ft)
                 .replace(TAG_NAME_ALGORITHM, algth)
-                .replace(
-                        TAG_NAME_EXTRA_PARAM,
-                        propB64 != null ? Utils.doBase64UrlSafe(propB64) : "") //$NON-NLS-1$
+                .replace(TAG_NAME_EXTRA_PARAM, propB64 != null ? Utils.doBase64UrlSafe(propB64) : "") //$NON-NLS-1$
                 .replace(TAG_NAME_CERT, Utils.doBase64UrlSafe(certB64))
                 .replace(TAG_NAME_DATA, Utils.doBase64UrlSafe(dataB64))
-                .replace(
-                        TAG_NAME_CONFIG,
-                        confB64 != null ? Utils.doBase64UrlSafe(confB64) : ""); //$NON-NLS-1$
+                .replace(TAG_NAME_CONFIG, confB64 != null ? Utils.doBase64UrlSafe(confB64) : ""); //$NON-NLS-1$
 
         final byte[] responseJSON;
         try {

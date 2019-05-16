@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +34,6 @@ import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
-import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.UpgradeResult;
 
@@ -59,36 +57,12 @@ public final class SignService extends HttpServlet {
     private static final String PARAMETER_NAME_TRIPHASE_DATA = "tri"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_CONFIG = "config"; //$NON-NLS-1$
 
-    @Override
-    public void init() throws ServletException {
-    	super.init();
-
-    	try {
-	    	ConfigManager.checkConfiguration();
-		}
-    	catch (final Exception e) {
-    		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
-    		return;
-    	}
-    }
-
     /** Recepci&oacute;n de la petici&oacute;n POST y realizaci&oacute;n de la
      * firma. */
     @Override
     protected void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
 		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
-
-		if (!ConfigManager.isInitialized()) {
-			try {
-				ConfigManager.checkConfiguration();
-			}
-			catch (final ConfigFilesException e) {
-				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
-				return;
-			}
-		}
 
         // Recepcion de los parametros.
     	final RequestParameters params = RequestParameters.extractParameters(request);

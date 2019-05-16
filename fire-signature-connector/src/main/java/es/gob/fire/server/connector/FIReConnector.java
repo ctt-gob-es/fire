@@ -38,12 +38,11 @@ public abstract class FIReConnector {
      * @throws FIReConnectorNetworkException Si hay problemas de conectividad de red.
      * @throws CertificateBlockedException Si se detecta que los certificados de firma est&aacute;n bloqueados.
      * @throws WeakRegistryException Si el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma. */
-	public abstract X509Certificate[] getCertificates(String subjectId) throws FIReCertificateException,
-                                                                     FIReConnectorUnknownUserException,
-                                                                     FIReConnectorNetworkException,
-                                                                     CertificateBlockedException,
-                                                                     WeakRegistryException;
-
+	public abstract X509Certificate[] getCertificates(final String subjectId) throws FIReCertificateException,
+                                                                                     FIReConnectorUnknownUserException,
+                                                                                     FIReConnectorNetworkException,
+                                                                                     CertificateBlockedException,
+                                                                                     WeakRegistryException;
 
     /** Carga los datos a firmar.
      * @param subjectId Identificador del titular de la clave de firma.
@@ -70,8 +69,8 @@ public abstract class FIReConnector {
      * @return Resultados de las firmas, indexados por su identificador.
      * @throws FIReSignatureException Si hay problemas en el proceso.
      * @throws FIReConnectorUnknownUserException Si el usuario no est&aacute; dado de alta en el sistema. */
-	public abstract Map<String, byte[]> sign(String transactionId) throws FIReSignatureException,
-	                                                                      FIReConnectorUnknownUserException;
+	public abstract Map<String, byte[]> sign(final String transactionId) throws FIReSignatureException,
+	                                                                            FIReConnectorUnknownUserException;
 
     /** Informa del fin de la operaci&oacute;n de firma.
      * @param transactionId Identificador de la transacci&oacute;n a la que corresponde la firma. */
@@ -94,8 +93,14 @@ public abstract class FIReConnector {
      * @throws FIReConnectorNetworkException Si ocurre un error en la comunicaci&oacute;n con el backend.
      * @throws FIReConnectorUnknownUserException Si el usuario no est&aacute; dado de alta en el sistema.
      * @throws WeakRegistryException Si el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma. */
-	public GenerateCertificateResult generateCertificate(final String subjectId) throws FIReCertificateAvailableException, FIReCertificateException, FIReConnectorNetworkException, FIReConnectorUnknownUserException, WeakRegistryException {
-		throw new UnsupportedOperationException("El proveedor no soporta la generacion de nuevos certificados al vuelo"); //$NON-NLS-1$
+	public GenerateCertificateResult generateCertificate(final String subjectId) throws FIReCertificateAvailableException,
+	                                                                                    FIReCertificateException,
+	                                                                                    FIReConnectorNetworkException,
+	                                                                                    FIReConnectorUnknownUserException,
+	                                                                                    WeakRegistryException {
+		throw new UnsupportedOperationException(
+			"El proveedor no soporta la generacion de nuevos certificados al vuelo" //$NON-NLS-1$
+		);
 	}
 
     /** Recupera un certificado de firma reci&eacute;n generado.

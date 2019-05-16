@@ -17,7 +17,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,7 +32,6 @@ import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
-import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 
 /** Servlet para la obtenci&oacute;n de certificados de un usuario. */
@@ -48,35 +46,11 @@ public final class CertificateService extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(CertificateService.class.getName());
 
     @Override
-    public void init() throws ServletException {
-    	super.init();
-
-    	try {
-	    	ConfigManager.checkConfiguration();
-		}
-    	catch (final Exception e) {
-    		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
-    		return;
-    	}
-    }
-
-    @Override
     protected void service(final HttpServletRequest request,
     		               final HttpServletResponse response) throws IOException {
 
 
 		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
-
-		if (!ConfigManager.isInitialized()) {
-			try {
-				ConfigManager.checkConfiguration();
-			}
-			catch (final ConfigFilesException e) {
-				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
-				return;
-			}
-		}
 
     	final RequestParameters params = RequestParameters.extractParameters(request);
 

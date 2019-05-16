@@ -14,7 +14,6 @@ import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.services.internal.RecoverCertificateManager;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
-import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 
 /** Servlet que recupera un certificado recien creado. */
@@ -41,19 +39,6 @@ public final class RecoverCertificateService extends HttpServlet {
     private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
     private static final String OLD_PARAMETER_NAME_TRANSACTION_ID = "transactionId"; //$NON-NLS-1$
 
-    @Override
-    public void init() throws ServletException {
-    	super.init();
-
-    	try {
-	    	ConfigManager.checkConfiguration();
-		}
-    	catch (final Exception e) {
-    		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
-    		return;
-    	}
-    }
-
     /** Recepci&oacute;n de la petici&oacute;n GET y realizaci&oacute;n de la
      * firma. */
     @Override
@@ -61,17 +46,6 @@ public final class RecoverCertificateService extends HttpServlet {
     					   final HttpServletResponse response) throws IOException {
 
 		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
-
-		if (!ConfigManager.isInitialized()) {
-			try {
-				ConfigManager.checkConfiguration();
-			}
-			catch (final ConfigFilesException e) {
-				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
-				return;
-			}
-		}
 
     	final RequestParameters params = RequestParameters.extractParameters(request);
 

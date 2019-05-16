@@ -59,12 +59,10 @@ public final class FireSession implements Serializable {
 		return session;
 	}
 
-	/**
-	 * Crea una nueva sesi&oacute;n de FIRe en la que se va a procesar una transacci&oacute;n.
+	/** Crea una nueva sesi&oacute;n de FIRe en la que se va a procesar una transacci&oacute;n.
 	 * @param trId Identificador de transacci&oacute;n.
 	 * @param httpSession Sesi&oacute;n web en la que se genera la nueva sesi&oacute;n.
-	 * @return Sesi&oacute;n de FIRe.
-	 */
+	 * @return Sesi&oacute;n de FIRe. */
 	public static FireSession newSession(final String trId, final HttpSession httpSession) {
 
 		final Map<String, Object> sessionData = new HashMap<>();
@@ -73,14 +71,12 @@ public final class FireSession implements Serializable {
 		return new FireSession(trId, sessionData, httpSession);
 	}
 
-	/**
-	 * Crea una nueva sesi&oacute;n de FIRe en la que se va a procesar una transacci&oacute;n.
+	/** Crea una nueva sesi&oacute;n de FIRe en la que se va a procesar una transacci&oacute;n.
 	 * @param id Identificador de transacci&oacute;n.
 	 * @param sessionData Datos de la sesi&oacute;n.
 	 * @param httpSession Sesi&oacute;n web en la que se genera la nueva sesi&oacute;n.
 	 * @param expirationTime Momento del tiempo en el que expirara la sesi&oacute;n.
-	 * @return Sesi&oacute;n de FIRe.
-	 */
+	 * @return Sesi&oacute;n de FIRe. */
 	public static FireSession newSession(final String id, final Map<String, Object> sessionData, final HttpSession httpSession, final long expirationTime) {
 
 		final FireSession session = new FireSession(id, sessionData, httpSession);
@@ -210,11 +206,9 @@ public final class FireSession implements Serializable {
 		}
 	}
 
-	/**
-	 * Identifica si la sesi&oacute;n ha expirado.
+	/** Identifica si la sesi&oacute;n ha expirado.
 	 * @return {@code true} en caso de que la sesi&oacute;n haya expirado, {@code false}
-	 * en caso contrario.
-	 */
+	 * en caso contrario. */
 	public boolean isExpired() {
 		if (this.expirationTime == 0 && this.httpSession != null) {
 			final Long time = (Long) this.httpSession.getAttribute(ServiceParams.SESSION_PARAM_TIMEOUT);
@@ -225,9 +219,7 @@ public final class FireSession implements Serializable {
 		return System.currentTimeMillis() > this.expirationTime;
 	}
 
-	/**
-	 * Elimina los datos de la sesi&oacute;n.
-	 */
+	/** Elimina los datos de la sesi&oacute;n. */
 	public void invalidate() {
 		if (this.ssData != null) {
 			try {
