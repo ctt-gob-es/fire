@@ -114,11 +114,13 @@ public final class ClaveFirmaConnector extends FIReConnector {
                                                                             CertificateBlockedException,
     																		WeakRegistryException {
 
+    	final String ownerId = prepareSubjectId(subjectId);
+
     	final GateWayAPI gatewayApi = getGateWayApi();
 
         final QueryCertificatesResult certs;
         try {
-            certs = gatewayApi.queryCertificatesFiltered(subjectId,
+            certs = gatewayApi.queryCertificatesFiltered(ownerId,
                     ConstantsGateWay.OPERATION_SIGN);
         }
         catch (final SafeCertGateWayException e) {
@@ -135,10 +137,10 @@ public final class ClaveFirmaConnector extends FIReConnector {
             );
         }
         if (certs == null || certs.getCertificates().size() == 0) {
-            if (isSignCertificateBlocked(gatewayApi, subjectId)) {
+            if (isSignCertificateBlocked(gatewayApi, ownerId)) {
             	throw new CertificateBlockedException("El certificado de firma esta bloqueado"); //$NON-NLS-1$
             }
-            else if (isUserWeakRegistry(gatewayApi, subjectId)) {
+            else if (isUserWeakRegistry(gatewayApi, ownerId)) {
             	throw new WeakRegistryException("El usuario realizo un registro debil y no puede tener certificados de firma"); //$NON-NLS-1$
             }
             return new X509Certificate[0];
@@ -260,9 +262,11 @@ public final class ClaveFirmaConnector extends FIReConnector {
         	params.add(paramAux);
         }
 
+    	final String ownerId = prepareSubjectId(subjectId);
+
         final StartTransactionResult str;
         try {
-            str = getGateWayApi().startTransaction(subjectId, dts, params != null ? params.toArray(new ParameterAux[params.size()]): null);
+            str = getGateWayApi().startTransaction(ownerId, dts, params != null ? params.toArray(new ParameterAux[params.size()]): null);
         }
         catch (final SafeCertGateWayException e) {
             if (ClaveFirmaErrorManager.ERROR_CODE_UNKNOWN_USER.equals(e.getCode())) {
@@ -345,9 +349,12 @@ public final class ClaveFirmaConnector extends FIReConnector {
 
 		final ParameterAux[] paramsList = new ParameterAux[1];
 		paramsList[0] = param;
+
+    	final String ownerId = prepareSubjectId(subjectId);
+
 		StartOpTransactionResult intermediateResult;
 		try {
-			intermediateResult = getGateWayApi().startOpTransaction(subjectId, opInfo, paramsList);
+			intermediateResult = getGateWayApi().startOpTransaction(ownerId, opInfo, paramsList);
 		} catch (final SafeCertGateWayException e) {
 
 			if (ClaveFirmaErrorManager.ERROR_CODE_WEAK_REGISTRY.equals(e.getCode())) {
@@ -400,18 +407,18 @@ public final class ClaveFirmaConnector extends FIReConnector {
 	/**
 	 * Comprueba si el usuario tiene alg&uacute;n certificado de firma bloqueado.
 	 * @param gatewayApi API de conexi&oacute;n con el servicio de custodia.
-	 * @param subjectId Identificador del usuario.
+	 * @param ownerId Identificador del usuario.
 	 * @return {@code true} si el certificado de firma del usuario est&aacute; bloqueado, {@code false}
 	 * en caso contrario.
 	 * @throws FIReCertificateException Cuando no se pueden recuperar los certificados del usuario
 	 * o se produce un error durante su an&aacute;lisis.
 	 */
-	private static boolean isSignCertificateBlocked(final GateWayAPI gatewayApi, final String subjectId)
+	private static boolean isSignCertificateBlocked(final GateWayAPI gatewayApi, final String ownerId)
 			throws FIReCertificateException {
 
 		final ListOwnerCertificateInfo[] certsInfo;
 		try {
-			certsInfo = gatewayApi.listOwnerCertificates(subjectId).getCertificates();
+			certsInfo = gatewayApi.listOwnerCertificates(ownerId).getCertificates();
 		} catch (final SafeCertGateWayException e) {
             throw new FIReCertificateException(
                     "Error al recuperar todos los certificados del usuario del servicio de custodia: " + e, e //$NON-NLS-1$
@@ -429,7 +436,7 @@ public final class ClaveFirmaConnector extends FIReConnector {
 					);
 		}
 
-		// Si el certificado esta bloqueado, comprobamos que si es de firma y, si lo es, indicamos que
+		// Si el certificado esta bloqueado, comprobamos si es de firma y, si lo es, indicamos que
 		// el certificado de firma esta bloqueado
 		for (final ListOwnerCertificateInfo certInfo : certsInfo) {
 			if (certInfo.getState() != null && certInfo.getState().getStateCode() == CERT_STATE_CODE_BLOCKED) {
@@ -454,13 +461,13 @@ public final class ClaveFirmaConnector extends FIReConnector {
 	/**
 	 * Comprueba si el usuario realiz&oacute; un registro d&eacute;bil.
 	 * @param gatewayApi API de conexi&oacute;n con el servicio de custodia.
-	 * @param subjectId Identificador del usuario.
+	 * @param ownerId Identificador del usuario.
 	 * @return {@code true} si el usuario realiz&oacute; un registro d&eacute;bil, {@code false}
 	 * en caso contrario.
-	 * @throws FIReCertificateException Cuando no se pueden recuperar los certificados del usuario
-	 * o se produce un error durante su an&aacute;lisis.
+	 * @throws FIReCertificateException Cuando no se puede comprobar el motivo por el que el usuario
+	 * no puede recuperar sus certificados.
 	 */
-	private static boolean isUserWeakRegistry(final GateWayAPI gatewayApi, final String subjectId)
+	private static boolean isUserWeakRegistry(final GateWayAPI gatewayApi, final String ownerId)
 			throws FIReCertificateException {
 
 		final StartOperationInfo opInfo = new StartOperationInfo();
@@ -476,11 +483,12 @@ public final class ClaveFirmaConnector extends FIReConnector {
 		paramsList[0] = param;
 		StartOpTransactionResult intermediateResult;
 		try {
-			intermediateResult = gatewayApi.startOpTransaction(subjectId, opInfo, paramsList);
+			intermediateResult = gatewayApi.startOpTransaction(ownerId, opInfo, paramsList);
 		} catch (final SafeCertGateWayException e) {
 			if (ClaveFirmaErrorManager.ERROR_CODE_WEAK_REGISTRY.equals(e.getCode())) {
 				return true;
 			}
+			LOGGER.warning("Error al comprobar si el usuario realizo un registro debil. Codigo de error: " + e.getCode()); //$NON-NLS-1$
             throw new FIReCertificateException(
                     "Error al comprobar si el usuario realizo un registro debil: " + e, e //$NON-NLS-1$
             );
@@ -512,5 +520,17 @@ public final class ClaveFirmaConnector extends FIReConnector {
 			}
 		}
 		return allowed;
+	}
+
+	/**
+	 * Prepara el identificador de usuario proporcionado para el correcto procesamiento por parte
+	 * de la GISS.
+	 * @param subjectId Identificador del usuario.
+	 * @return Identificador del usuario preparado para su env&iacute;o a la GISS.
+	 */
+	private static String prepareSubjectId(final String subjectId) {
+		// Convertimos el identificador a mayusculas, porque la GISS parece guardar en
+		// mayusculas la letra del DNI de los ciudadanos
+		return subjectId != null ? subjectId.toUpperCase() : null;
 	}
 }
