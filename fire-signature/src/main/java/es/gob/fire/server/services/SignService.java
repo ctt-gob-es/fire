@@ -209,7 +209,7 @@ public final class SignService extends HttpServlet {
 
         // Si se ha definido un formato de actualizacion de la firma, se actualizara
         try {
-        	final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
+        	final UpgradeResult upgradeResult = UpgraderFactory.getUpgrader().upgradeSignature(signResult, upgrade);
         	signResult = upgradeResult.getResult();
         }
         catch (final UpgradeException e) {

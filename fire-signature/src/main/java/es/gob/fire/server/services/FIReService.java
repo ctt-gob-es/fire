@@ -47,6 +47,7 @@ public final class FIReService extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+
     	super.init();
 
     	// Configuramos los logs

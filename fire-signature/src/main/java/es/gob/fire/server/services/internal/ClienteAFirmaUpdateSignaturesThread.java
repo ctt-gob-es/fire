@@ -16,16 +16,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.fire.server.document.FIReDocumentManager;
-import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.server.services.UpgraderFactory;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.upgrade.UpgradeResult;
 
-/**
- * Hilo que ejecuta la carga, actualizaci&oacute;n y guardado de una firma de lote
- * generada con el Cliente @firma.
- */
-public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread {
+/** Hilo que ejecuta la carga, actualizaci&oacute;n y guardado de una firma de lote
+ * generada con el Cliente @firma. */
+public final class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread {
 
 	private static final Logger LOGGER = Logger.getLogger(ClienteAFirmaUpdateSignaturesThread.class.getName());
 
@@ -41,17 +39,18 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
 
 	private final FIReDocumentManager docManager;
 
-	/**
-	 * Crea un hilo para la actualizaci&oacute;n de una firma de un lote.
+	/** Crea un hilo para la actualizaci&oacute;n de una firma de un lote.
 	 * @param appId Identificador de la aplicaci&oacute;n.
 	 * @param docId Identificador a partir del cual obtener el resultado parcial y la firma.
 	 * @param batchResult Objeto con todos los resultados parciales del lote.
 	 * @param defaultConfig Configuraci&oacute;n por defecto en caso de no tener una espec&iacute;fica.
-	 * espec&iacute;fico para el documento {@code docId} (Puede ser {@code null}).
-	 * @param docManager Gestor de documentos con el que postprocesar la firma (Puede ser {@code null}).
-	 */
-	public ClienteAFirmaUpdateSignaturesThread(final String appId, final String docId, final BatchResult batchResult,
-			final FireSession defaultConfig, final FIReDocumentManager docManager) {
+	 *                      espec&iacute;fico para el documento {@code docId} (Puede ser {@code null}).
+	 * @param docManager Gestor de documentos con el que postprocesar la firma (Puede ser {@code null}). */
+	public ClienteAFirmaUpdateSignaturesThread(final String appId,
+			                                   final String docId,
+			                                   final BatchResult batchResult,
+			                                   final FireSession defaultConfig,
+			                                   final FIReDocumentManager docManager) {
 		this.appId = appId;
 		this.docId = docId;
 		this.batchResult = batchResult;
@@ -94,7 +93,10 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
         		(String) this.defaultConfig.getString(ServiceParams.SESSION_PARAM_UPGRADE);
 
 		try {
-			final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signature, upgradeFormat);
+			final UpgradeResult upgradeResult = UpgraderFactory.getUpgrader().upgradeSignature(
+				signature,
+				upgradeFormat
+			);
 			signature = upgradeResult.getResult();
 			if (this.batchResult.getSignConfig(this.docId) != null) {
 				this.batchResult.getSignConfig(this.docId).setUpgrade(upgradeResult.getFormat());
@@ -124,7 +126,8 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
 				signature = this.docManager.storeDocument(this.docId.getBytes(StandardCharsets.UTF_8),
 						this.appId, signature, this.batchResult.getSigningCertificate(),
 						format, extraParams);
-			} catch (final IOException e) {
+			}
+    		catch (final IOException e) {
 	        	LOGGER.log(Level.WARNING, "Error al postprocesar con el DocumentManager la firma del documento: " + this.docId, e); //$NON-NLS-1$
 	        	this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
 	        	setFailed(true);

@@ -30,11 +30,11 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.document.FIReDocumentManager;
-import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.server.services.UpgraderFactory;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.upgrade.UpgradeResult;
@@ -187,7 +187,7 @@ public class RecoverSignManager {
         	if (upgrade != null && !upgrade.isEmpty()) {
         		LOGGER.info(logF.format("Se actualiza la firma al formato " + upgrade)); //$NON-NLS-1$
         		try {
-        			final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
+        			final UpgradeResult upgradeResult = UpgraderFactory.getUpgrader().upgradeSignature(signResult, upgrade);
         			signResult = upgradeResult.getResult();
         		}
         		catch (final Exception e) {
@@ -374,7 +374,7 @@ public class RecoverSignManager {
         if (upgrade != null && !upgrade.isEmpty()) {
         	LOGGER.info(logF.format("Se actualiza la firma al formato " + upgrade)); //$NON-NLS-1$
         	try {
-        		final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
+        		final UpgradeResult upgradeResult = UpgraderFactory.getUpgrader().upgradeSignature(signResult, upgrade);
         		signResult = upgradeResult.getResult();
         	}
         	catch (final Exception e) {

@@ -21,31 +21,32 @@ import es.gob.fire.upgrade.UpgradeResponseException;
 import es.gob.fire.upgrade.UpgradeResult;
 import es.gob.fire.upgrade.UpgradeTarget;
 
-/**
- * Clase para la actualizaci&oacute;n de firmas mediante una conexi&oacute;n
- * con la Plataforma @firma.
- */
-public class AfirmaUpgrader {
+/** Clase para la actualizaci&oacute;n de firmas mediante una conexi&oacute;n
+ * con la Plataforma @firma. */
+public final class UpgraderAfirma implements Upgrader {
 
 	private static PlatformWsHelper conn = null;
 
-	/**
-	 * Actualiza una firma utilizando la Plataforma @firma. Si no se indica formato de
+	UpgraderAfirma() {
+		// Vacio
+	}
+
+	/** Actualiza una firma utilizando la Plataforma @firma. Si no se indica formato de
 	 * actualizaci&oacute;n, se devuelve la propia firma.
 	 * @param signature Firma que se desea actualizar.
 	 * @param upgradeFormat Formato avanzado al que actualizar.
 	 * @return Firma actualizada o, si no se indica un formato de actualizacion, la propia firma.
 	 * @throws UpgradeException Cuando ocurre cualquier problema que impida la
-	 * actualizaci&oacute;n de la firma.
-	 */
-	public static UpgradeResult upgradeSignature(final byte[] signature, final String upgradeFormat) throws UpgradeException {
+	 *                          actualizaci&oacute;n de la firma. */
+	@Override
+	public UpgradeResult upgradeSignature(final byte[] signature, final String upgradeFormat) throws UpgradeException {
 
 		if (upgradeFormat == null || upgradeFormat.isEmpty()) {
 			return new UpgradeResult(signature, null);
 		}
 
 		if (conn == null) {
-			Properties config;
+			final Properties config;
 			try {
 				config = PlatformWsHelper.loadConfig();
 			}
@@ -62,24 +63,31 @@ public class AfirmaUpgrader {
 			conn.init(config);
 		}
 
-		UpgradeResult upgradeResult;
+		final UpgradeResult upgradeResult;
 		final String afirmaId = ConfigManager.getAfirmaAplicationId();
 		try {
 			upgradeResult = Upgrade.signUpgradeCreate(
-					conn,
-					signature,
-					UpgradeTarget.getUpgradeTarget(upgradeFormat),
-					afirmaId);
-		} catch (final PlatformWsException e) {
+				conn,
+				signature,
+				UpgradeTarget.getUpgradeTarget(upgradeFormat),
+				afirmaId
+			);
+		}
+		catch (final PlatformWsException e) {
 			throw new UpgradeException("Error de conexion con la Plataforma @firma para la actualizacion de la firma", e); //$NON-NLS-1$
-		} catch (final UpgradeResponseException e) {
-			throw new UpgradeException("Error durante la actualizacion de la firma. MajorCode: " + e.getMajorCode() + //$NON-NLS-1$
-					". MinorCode: " + e.getMinorCode(), e); //$NON-NLS-1$
-		} catch (final IOException e) {
+		}
+		catch (final UpgradeResponseException e) {
+			throw new UpgradeException(
+				"Error durante la actualizacion de la firma. MajorCode: " + e.getMajorCode() + ". MinorCode: " + e.getMinorCode(), e //$NON-NLS-1$ //$NON-NLS-2$
+			);
+		}
+		catch (final IOException e) {
 			throw new UpgradeException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
-		} catch (final ConfigFileNotFoundException e) {
+		}
+		catch (final ConfigFileNotFoundException e) {
 			throw new UpgradeException("No se encuentra el fichero de configuracion de acceso a la Plataforma @firma", e); //$NON-NLS-1$
-		} catch (final Exception e) {
+		}
+		catch (final Exception e) {
 			throw new UpgradeException("Error no identificado durante el proceso de actualizacion de la firma", e); //$NON-NLS-1$
 		}
 

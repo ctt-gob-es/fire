@@ -37,25 +37,19 @@ import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 
-
-/**
- * Manejador que gestiona las peticiones para la recuperaci&oacute;n del resultado de la firma
- * de un lote de firma.
- */
-public class RecoverBatchResultManager {
+/** Manejador que gestiona las peticiones para la recuperaci&oacute;n del resultado de la firma
+ * de un lote de firma. */
+public final class RecoverBatchResultManager {
 
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 	private static final Logger LOGGER = Logger.getLogger(RecoverBatchResultManager.class.getName());
 
-	/**
-	 * Finaliza un proceso de firma y devuelve el resultado del mismo.
+	/** Finaliza un proceso de firma y devuelve el resultado del mismo.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
-	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
-	 */
-	public static void recoverResult(final RequestParameters params, final HttpServletResponse response)
-			throws IOException {
+	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos. */
+	public static void recoverResult(final RequestParameters params, final HttpServletResponse response) throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
 		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
@@ -64,7 +58,7 @@ public class RecoverBatchResultManager {
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
 
-        // Comprobamos que se hayan prorcionado los parametros indispensables
+        // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
         	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -97,7 +91,6 @@ public class RecoverBatchResultManager {
         	return;
         }
 
-
         // En el caso de firma con un certificado en la nube, todavia tendremos que
         // componer la propia firma
         final String tdB64			= session.getString(ServiceParams.SESSION_PARAM_TRIPHASE_DATA);
@@ -112,20 +105,25 @@ public class RecoverBatchResultManager {
 
         // Decodificamos el certificado en caso de que se nos indique (en las firmas de
         // lote con certificado local podria no indicarse).
-        X509Certificate signingCert = null;
+        final X509Certificate signingCert;
         if (certB64 != null) {
         	try {
         		signingCert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
-        				new ByteArrayInputStream(Base64.decode(certB64, true))
-        				);
+    				new ByteArrayInputStream(Base64.decode(certB64, true))
+				);
         	}
         	catch (final Exception e) {
         		LOGGER.severe(logF.format("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
         		SessionCollector.removeSession(session);
-        		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-        				"No se ha podido decodificar el certificado proporcionado: " + e); //$NON-NLS-1$
+        		response.sendError(
+    				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+    				"No se ha podido decodificar el certificado proporcionado: " + e //$NON-NLS-1$
+				);
         		return;
         	}
+        }
+        else {
+        	signingCert = null;
         }
 
         // Obtenemos si se debe detener el proceso en caso de error
@@ -177,7 +175,6 @@ public class RecoverBatchResultManager {
         		upgradeLocalSignatures(appId, batchResult, docManager, session, stopOnError);
         	}
 
-
         }
 
         // Firma en la nube
@@ -185,14 +182,15 @@ public class RecoverBatchResultManager {
 
         	LOGGER.info(logF.format(String.format("Se firmo con el proveedor %3s y es necesario recuperar el PKCS#1 de las firmas para completar el trabajo", origin))); //$NON-NLS-1$
 
-        	final TransactionConfig connConfig	=
-        			(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+        	final TransactionConfig connConfig	= (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         	if (connConfig == null) {
         		LOGGER.warning(logF.format("No se proporcionaron datos para la conexion con el backend")); //$NON-NLS-1$
         		SIGNLOGGER.register(session, false, null);
         		TRANSLOGGER.register(session, false);
-        		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-        				"No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
+        		response.sendError(
+    				HttpServletResponse.SC_BAD_REQUEST,
+    				"No se proporcionaron datos para la conexion con el backend" //$NON-NLS-1$
+				);
         		return;
         	}
 
@@ -363,6 +361,7 @@ public class RecoverBatchResultManager {
     		TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
         }
+
         // Si no, indicamos que ya se ha firmado el lote para permitir que se puedan recuperar los
         // resultados particulares de cada una de las firmas
         else {
@@ -403,7 +402,12 @@ public class RecoverBatchResultManager {
     				batchResult.getSignConfig(docId) != null &&
     				batchResult.getSignConfig(docId).getUpgrade() != null) {
     			final ConcurrentProcessThread t = new ClienteAFirmaUpdateSignaturesThread(
-    					appId, docId, batchResult, session, docManager);
+					appId,
+					docId,
+					batchResult,
+					session,
+					docManager
+				);
     			threads.add(t);
     			t.start();
     		}
@@ -412,16 +416,18 @@ public class RecoverBatchResultManager {
         // Esperamos a que terminen todos los hilos y los
         // interrumpimos todos si detectamos que alguno de
         // ellos fue interrumpido y no se admiten errores parciales
-        ConcurrentProcessThread.waitThreads(threads, stopOnError,
-        		session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS);
+        ConcurrentProcessThread.waitThreads(
+    		threads,
+    		stopOnError,
+    		session,
+    		ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS
+		);
 	}
 
-	/**
-	 * Envia el XML resultado de la operaci&oacute;n como respuesta del servicio.
+	/** Env&iacute;a el XML resultado de la operaci&oacute;n como respuesta del servicio.
 	 * @param response Respuesta del servicio.
 	 * @param result Resultado de la operaci&oacute;n.
-	 * @throws IOException Cuando falla el env&iacute;o.
-	 */
+	 * @throws IOException Cuando falla el env&iacute;o. */
 	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
 		try (
 			final OutputStream output = ((ServletResponse) response).getOutputStream();
@@ -432,12 +438,10 @@ public class RecoverBatchResultManager {
 		}
 	}
 
-	/**
-	 * Comprueba si todas las firmas de un lote son err&oacute;neas.
+	/** Comprueba si todas las firmas de un lote son err&oacute;neas.
 	 * @param batchResult Informaci&oacute;n del lote.
 	 * @return {@code true} si todas las firmas notifican alg&uacute;n error,
-	 * {@code false} en caso contrario.
-	 */
+	 *         {@code false} en caso contrario. */
 	private static boolean isAllFailed(final BatchResult batchResult) {
         boolean recovered = true;
         final Iterator<String> it = batchResult.iterator();

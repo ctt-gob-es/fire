@@ -30,13 +30,11 @@ public abstract class ConcurrentProcessThread extends Thread {
 		return this.failed;
 	}
 
-	/**
-	 * Espera indefinidamente a que finalicen todos los hilos de un listado. Si se indica
+	/** Espera indefinidamente a que finalicen todos los hilos de un listado. Si se indica
 	 * que se deben detener el proceso en caso de error, interrumpe todos los hilos.
 	 * @param threads Listado de hilos en ejecuci&oacute;n a los que hay que esperar.
 	 * @param stopOnError Si es {@code true} se detendr&aacute;n todos los hilos si uno
-	 * de ellos se interrumpe. {@code false} en caso contrario.
-	 */
+	 *                    de ellos se interrumpe. {@code false} en caso contrario. */
 	public static void waitThreads(final List<ConcurrentProcessThread> threads, final boolean stopOnError) {
 
         boolean stopThreads = false;

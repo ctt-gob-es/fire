@@ -19,11 +19,11 @@ import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.document.FIReDocumentManager;
-import es.gob.fire.server.services.AfirmaUpgrader;
 import es.gob.fire.server.services.DocInfo;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
 import es.gob.fire.server.services.UpgradeException;
+import es.gob.fire.server.services.UpgraderFactory;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.upgrade.UpgradeResult;
 
@@ -204,7 +204,10 @@ final class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
     	// Actualizamos la firma si se definio un formato de actualizacion
     	try {
-			final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signature, this.signConfig.getUpgrade());
+			final UpgradeResult upgradeResult = UpgraderFactory.getUpgrader().upgradeSignature(
+				signature,
+				this.signConfig.getUpgrade()
+			);
 			signature = upgradeResult.getResult();
 			if (this.batchResult.getSignConfig(this.docId) != null) {
 				this.batchResult.getSignConfig(this.docId).setUpgrade(upgradeResult.getFormat());

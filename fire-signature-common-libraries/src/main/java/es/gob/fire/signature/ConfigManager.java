@@ -32,6 +32,10 @@ public final class ConfigManager implements ServletContextListener {
 
 	private static final String PROP_DEBUG = "debug"; //$NON-NLS-1$
 
+	private static final String PROP_UPGRADER_CLASSNAME = "signature.upgrader"; //$NON-NLS-1$
+
+	private static final String DEFAULT_UPGRADER_CLASSNAME = "es.gob.fire.server.services.UpgraderAfirma"; //$NON-NLS-1$
+
 	private static final String PROP_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
 
 	private static final String PROP_DB_CONNECTION = "bbdd.conn"; //$NON-NLS-1$
@@ -191,6 +195,13 @@ public final class ConfigManager implements ServletContextListener {
 	 *         <code>false</code> en caso contrario. */
 	public static boolean isDebug() {
 		return Boolean.parseBoolean(CONFIG.getProperty(PROP_DEBUG));
+	}
+
+	/** Obtiene el nombre de la clase encargada de la mejora de firmas.
+	 * @return Nombre de la clase encargada de la mejora de firmas.
+	 *         Si no hay ninguna definida en la configuraci&oacute;n, devuelve la clase por defecto. */
+	public static String getUpgraderClassName() {
+		return CONFIG.getProperty(PROP_UPGRADER_CLASSNAME, DEFAULT_UPGRADER_CLASSNAME);
 	}
 
 	/** Devuelve el listado de nombres de los proveedores configurados.
