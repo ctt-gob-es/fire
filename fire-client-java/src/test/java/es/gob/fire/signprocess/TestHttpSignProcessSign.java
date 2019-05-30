@@ -79,7 +79,7 @@ public final class TestHttpSignProcessSign {
 			cert, // Certificado de firma en Base64
 			dataToSign, // Datos a firmar en Base 64
 			td, // Sesion trifasica
-			null  // Formato de mejora
+			null // HttpSignProcessConstants.SignatureUpgrade.T_FORMAT  // Formato de mejora
 		);
 
 		System.out.println("Resultado de la firma:\n" + new String(signResult)); //$NON-NLS-1$
