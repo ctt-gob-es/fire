@@ -27,8 +27,8 @@
 	String nombre = ""; //$NON-NLS-1$
 	String apellidos = ""; //$NON-NLS-1$
 	if (usr != null) {
-		nombre = usr.getNombre();
-		apellidos = usr.getApellidos();
+		nombre = usr.getName();
+		apellidos = usr.getSurname();
 	}
 	final String title = "Modificar contrase&ntilde;a"; //$NON-NLS-1$
 	final String subTitle = "Modificar contrase&ntilde;a del usuario " + nombre + " " + apellidos; //$NON-NLS-1$ //$NON-NLS-2$

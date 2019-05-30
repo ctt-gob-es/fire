@@ -54,37 +54,44 @@
 			}
 
 			final JsonArray FileList = jsonObj.getJsonArray("FileList");//$NON-NLS-1$
-			jsonData += "{\"FileList\":[";//$NON-NLS-1$
-
-			numRec = String.valueOf(FileList.size());
-			for (int i = 0; i < FileList.size(); i++) {
-				final JsonObject json = FileList.getJsonObject(i);
-
-				// Tratamiento de la fecha de ultima actualizacion
-				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");//$NON-NLS-1$
-				final JsonNumber longDateJSON = json.getJsonNumber("Date");//$NON-NLS-1$
-				Date date = new Date(longDateJSON.longValue());
-				final String dateModif = sdf.format(date);
-
-				// Tratramiento del tamano
-				final JsonNumber longSizeJSON = json.getJsonNumber("Size");//$NON-NLS-1$
-				long size = longSizeJSON.longValue();
-				String sSize = "";//$NON-NLS-1$
-				if (size > 1024 && size < 1024000) {
-					sSize = String.valueOf(size / 1024) + " Kbytes";//$NON-NLS-1$
-				} else if (size > 1024000) {
-					sSize = String.valueOf(size / 1024000) + " Mbytes";//$NON-NLS-1$
-				} else {
-					sSize = String.valueOf(size) + " bytes";//$NON-NLS-1$
+			
+			if (FileList.size() > 0) {
+				jsonData += "{\"FileList\":[";//$NON-NLS-1$
+	
+				numRec = String.valueOf(FileList.size());
+				for (int i = 0; i < FileList.size(); i++) {
+					final JsonObject json = FileList.getJsonObject(i);
+	
+					// Tratamiento de la fecha de ultima actualizacion
+					SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");//$NON-NLS-1$
+					final JsonNumber longDateJSON = json.getJsonNumber("Date");//$NON-NLS-1$
+					Date date = new Date(longDateJSON.longValue());
+					final String dateModif = sdf.format(date);
+	
+					// Tratramiento del tamano
+					final JsonNumber longSizeJSON = json.getJsonNumber("Size");//$NON-NLS-1$
+					long size = longSizeJSON.longValue();
+					String sSize = "";//$NON-NLS-1$
+					if (size > 1024 && size < 1024000) {
+						sSize = String.valueOf(size / 1024) + " Kbytes";//$NON-NLS-1$
+					} else if (size > 1024000) {
+						sSize = String.valueOf(size / 1024000) + " Mbytes";//$NON-NLS-1$
+					} else {
+						sSize = String.valueOf(size) + " bytes";//$NON-NLS-1$
+					}
+	
+					if (i != FileList.size() - 1) {
+						jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+								+ "\",\"Size\":\"" + sSize + "\"},"; //$NON-NLS-1$ //$NON-NLS-2$
+					} else {
+						jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+								+ "\",\"Size\":\"" + sSize + "\"}"; //$NON-NLS-1$ //$NON-NLS-2$
+					}
 				}
-
-				if (i != FileList.size() - 1) {
-					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-							+ "\",\"Size\":\"" + sSize + "\"},";//$NON-NLS-1$//$NON-NLS-2$
-				} else {
-					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-							+ "\",\"Size\":\"" + sSize + "\"}]}";//$NON-NLS-1$//$NON-NLS-2$
-				}
+				jsonData += "]}"; //$NON-NLS-1$
+			}
+			else {
+				htmlError = "<p id='error-txt'>No se han encontrado ficheros en el directorio</p>"; //$NON-NLS-1$
 			}
 		}
 	} catch (Exception e) {
@@ -146,7 +153,7 @@
 	var total =  Math.ceil(txtNumRec / 10);
 	var dataJSON = '{"TotalPages":'+ total +',"ActualPage":1,"TotalRecords":'+txtNumRec+',"FileListRows":[';
 	
-	if (obJson) {
+	if (obJson && obJson.FileList.length > 0) {
 		for (i = 0; i < obJson.FileList.length; i++) {
 			if (i != obJson.FileList.length -1){
 				dataJSON += JSON.stringify(obJson.FileList[i]) + ",";

@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.admin.message.UserMessages"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -23,12 +24,16 @@
 			}
 			// Este parametro comprueba si el usuario ha introducido su nombre de usuario y contrasena
 			// En caso de que haya introducido datos erroneos, se recibe un "fail"
-			String login = request.getParameter("login"); //$NON-NLS-1$
-			boolean loginFail = false;
-			if (login != null) {
-				if (login.equals("fail")) { //$NON-NLS-1$
-					loginFail = true;
-				}
+			String err = request.getParameter(ServiceParams.PARAM_ERR); //$NON-NLS-1$
+			String errMsg = null;
+			if (err != null) {
+				errMsg = UserMessages.parse(err).getText();
+			}
+			
+			String succ = request.getParameter(ServiceParams.PARAM_SUCCESS); //$NON-NLS-1$
+			String succMsg = null;
+			if (succ != null) {
+				succMsg = UserMessages.parse(succ).getText();
 			}
 		%>
 		<!-- Barra de navegacion -->
@@ -43,10 +48,12 @@
 				 Introduzca la contrase&ntilde;a para acceder a la interfaz de administraci&oacute;n.
 				</p>
 			</div>
-			<%if(loginFail) {%>
-				<p id="error-txt">La contrase&ntilde;a introducida es incorrecta.</p> 
-			<%}%>
-			<form method="POST" action="./Application/AdminMainPage.jsp">
+			<% if (errMsg != null) { %>
+				<p id="error-txt"><%= errMsg %></p> 
+			<% } else if (succMsg != null) { %>
+				<p id="success-txt"><%= succMsg %></p>
+			<% } %>
+			<form method="POST" action="./login">
 			
 				<div style="margin: auto;width: 60%;padding: 5px;">
 					<div style="display: inline-block; width: 20%;margin: 5px;">
@@ -54,7 +61,7 @@
 						<label for="usuario" style="color: #404040">USUARIO</label>
 					</div>
 					<div  style="display: inline-block; width: 60%;margin: 5px;">
-						<input id="usuario" class="edit-txt" type="text" name="user" autocomplete="off" style="width: 100%;margin-top:10px;" />
+						<input id="usuario" class="edit-txt" type="text" name="<%= ServiceParams.PARAM_USERNAME %>" autocomplete="off" style="width: 100%;margin-top:10px;" />
 					</div>	
 				</div>
 				<div style="margin: auto;width: 60%;padding: 5px;">
@@ -63,15 +70,27 @@
 						<label for="contrasenia" style="color: #404040">CONTRASE&Ntilde;A</label>
 					</div>
 					<div  style="display: inline-block; width: 60%;margin: 5px;">
-							<input id="contrasenia" class="edit-txt" type="password" name="password" autocomplete="off" style="width: 100%;margin-top:10px;"/>
+							<input id="contrasenia" class="edit-txt" type="<%= ServiceParams.PARAM_PASSWORD %>" name="password" autocomplete="off" style="width: 100%;margin-top:10px;"/>
 					</div>	
 				</div>
 			
 				<div id="loginButton">
-				<p style="color: #808080;">Pulse el bot&oacute;n para acceder</p>
+				<p style="color: #808080;right:inherit;">Pulse el bot&oacute;n para acceder</p>
 				<input id="submit-btn" type="submit" value="ACCEDER" style="margin-top: 10px;">
 				</div>
+				
+				
+				
+				
+			<!-- enlace para acceder a la pagina MailChangePassword -->
 			</form>
+			<form action="User/MailPasswordRestoration.jsp" >
+			<div id="PasswordButton">
+				<p style="color: #808080; left:inherit;"></p>
+				<input type="submit" name="¿Has olvidado tu contrase&ntilde;a?" id="¿Has olvidado tu contrase&ntilde;a?" value="¿Has olvidado tu contrase&ntilde;a?" class="enlace" />
+
+				</div>
+				</form>
 		</div>
 	</body>
 </html>

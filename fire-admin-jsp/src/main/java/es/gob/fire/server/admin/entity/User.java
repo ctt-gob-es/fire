@@ -2,6 +2,8 @@ package es.gob.fire.server.admin.entity;
 
 import java.sql.Date;
 
+import es.gob.fire.server.admin.service.RolePermissions;
+
 /**
  * Usuarios
  * @author Adolfo.Navarro
@@ -9,64 +11,94 @@ import java.sql.Date;
  */
 public class User {
 	private String id;
-	private String nombreUsuario;
-	private String clave;
-	private String nombre;
-	private String apellidos;
-	private String correo;
-	private String telefono;
-	private String rol;
-	private Date fechaAlta;
-	private String porDefecto;
+	private String userName;
+	private String password;
+	private String name;
+	private String surname;
+	private String mail;
+	private String telephone;
+	private int role;
+	private Date startdate;
+	private boolean root;
+	private CertificateFire certificate;
+	private Application responsibleName;
+
+
+
+
+	private RolePermissions permissions;
 
 	/**
-	 * Construcctor de Usuario
+	 * Constructor de Usuario
 	 */
-	public User() {}
+	public User() {
+		this.id = null;
+		this.userName = null;
+		this.password = null;
+		this.name = null;
+		this.surname = null;
+		this.mail = null;
+		this.telephone = null;
+		this.role = 0;
+		this.startdate = null;
+		this.root = false;
+		this.responsibleName = null;
+		this.certificate = null;
+
+
+
+	}
 
 
 	/**
 	 * Constructor con los campos necesarios para la insertci&oacute;n de la entidad en bbdd
-	 * @param nombre_usuario
-	 * @param clave
-	 * @param nombre
-	 * @param apellidos
-	 * @param rol
+	 * @param user_name
+	 * @param password
+	 * @param name
+	 * @param surname
+	 * @param role
 	 */
-	public User(final String nombre_usuario, final String clave, final String nombre, final String apellidos, final String rol) {
+	public User(final String user_name, final String password, final String name, final String surname, final int role) {
 		super();
-		this.nombreUsuario = nombre_usuario;
-		this.clave = clave;
-		this.nombre = nombre;
-		this.apellidos = apellidos;
-		this.rol = rol;
+		this.userName = user_name;
+		this.password = password;
+		this.name = name;
+		this.surname = surname;
+		this.role = role;
+		this.root = false;
 	}
 
 
 	/**
 	 * Constructor con todos los campos
-	 * @param id_usuario
-	 * @param nombre_usuario
-	 * @param clave
-	 * @param nombre
-	 * @param apellidos
-	 * @param correo_elec
-	 * @param telf_contacto
-	 * @param rol
-	 * @param fec_alta
+	 * @param id_user
+	 * @param user_name
+	 * @param password
+	 * @param name
+	 * @param surname
+	 * @param mail
+	 * @param contac_phone
+	 * @param role
+	 * @param datahigh
+	 * @param codeRenovation
+	 * @param renovationDate
 	 */
-	public User(final String id_usuario, final String nombre_usuario, final String clave, final String nombre, final String apellidos,
-			final String correo_elec, final String telf_contacto, final String rol, final Date fec_alta) {
+	public User(final String id_user, final String user_name, final String password, final String name, final String surname,
+			final String mail, final String contac_phone, final int role, final Date datahigh
+			) {
 		super();
-		this.id = id_usuario;
-		this.nombreUsuario = nombre_usuario;
-		this.clave = clave;
-		this.nombre = nombre;
-		this.apellidos = apellidos;
-		this.correo = correo_elec;
-		this.telefono = telf_contacto;
-		this.rol = rol;
-		this.fechaAlta = fec_alta;
+		this.id = id_user;
+		this.userName = user_name;
+		this.password = password;
+		this.name = name;
+		this.surname = surname;
+		this.mail = mail;
+		this.telephone = contac_phone;
+		this.role = role;
+		this.startdate = datahigh;
+
+		this.root = false;
+
 	}
 
 
@@ -89,132 +121,177 @@ public class User {
 	 * Obtiene el nombre del usuario.
 	 * @return Nombre del usuario.
 	 */
-	public final String getNombreUsuario() {
-		return this.nombreUsuario;
+	public final String getUserName() {
+		return this.userName;
 	}
-/**
- * Estableceel Nombre del usuario.
- * @param nombre Nombre del usuario.
- */
-	public final void setNombreUsuario(final String nombre) {
-		this.nombreUsuario = nombre;
+	/**
+	 * Establece el Nombre del usuario.
+	 * @param name Nombre del usuario.
+	 */
+	public final void setUserName(final String name) {
+		this.userName = name;
 	}
 	/**
 	 * Obtiene la clave del usuario.
 	 * @return Clave del usuario.
 	 */
-	public final String getClave() {
-		return this.clave;
+	public final String getPassword() {
+		return this.password;
 	}
 	/**
 	 * Establece la clave del usuario.
-	 * @param clave Clave del usuario.
+	 * @param password Clave del usuario.
 	 */
-	public final void setClave(final String clave) {
-		this.clave = clave;
+	public final void setpassword(final String password) {
+		this.password = password;
 	}
 	/**
 	 * Obtiene la fecha de alta del usuario.
 	 * @return Fecha de alta del usuario.
 	 */
-	public final Date getFechaAlta() {
-		return this.fechaAlta;
+	public final Date getStartDate() {
+		return this.startdate;
 	}
 	/**
 	 * Establece la fecha de alta del usuario.
-	 * @param fecha Fecha de alta del usuario.
+	 * @param date Fecha de alta del usuario.
 	 */
-	public final void setFechaAlta(final Date fecha) {
-		this.fechaAlta = fecha;
+	public final void setStartDate(final Date date) {
+		this.startdate = date;
 	}
 	/**
 	 * Obtiene el nombre de pila del usuario.
 	 * @return Nombre de pila del usuario.
 	 */
-	public final String getNombre() {
-		return this.nombre;
+	public final String getName() {
+		return this.name;
 	}
 	/**
 	 * Establece el nombre de pila del usuario.
-	 * @param nombre Nombre de pila del usuario.
+	 * @param name Nombre de pila del usuario.
 	 */
-	public final void setNombre(final String nombre) {
-		this.nombre = nombre;
+	public final void setName(final String name) {
+		this.name = name;
 	}
 	/**
 	 * Obtiene los apellidos del usuario.
 	 * @return Apellidos del usuario.
 	 */
-	public final String getApellidos() {
-		return this.apellidos;
+	public final String getSurname() {
+		return this.surname;
 	}
 	/**
 	 * Establece los apellidos del usuario.
-	 * @param apellidos Apellidos del usuario.
+	 * @param surname Apellidos del usuario.
 	 */
-	public final void setApellidos(final String apellidos) {
-		this.apellidos = apellidos;
+	public final void setSurname(final String surname) {
+		this.surname = surname;
 	}
 	/**
 	 * Obtiene el correo electr&oacute;nico del usuario.
 	 * @return Correo electr&oacute;nico.
 	 */
-	public final String getCorreo() {
-		return this.correo;
+	public final String getMail() {
+		return this.mail;
 	}
 	/**
 	 * Establece el correo electr&oacute;nico del usuario.
-	 * @param correo Correo electr&oacute;nico.
+	 * @param mail Correo electr&oacute;nico.
 	 */
-	public final void setCorreo_elec(final String correo) {
-		this.correo = correo;
+	public final void setMail(final String mail) {
+		this.mail = mail;
 	}
 	/**
 	 * Obtiene el tel&eacute;fono de contacto del usuario.
 	 * @return Tel&eacute;fono de contacto.
 	 */
-	public final String getTelefono() {
-		return this.telefono;
+	public final String getTelephone() {
+		return this.telephone;
 	}
 	/**
 	 * Establece el tel&eacute;fono de contacto del usuario.
-	 * @param telefono Tel&eacute;fono de contacto
+	 * @param telephone Tel&eacute;fono de contacto
 	 */
-	public final void setTelfefono(final String telefono) {
-		this.telefono = telefono;
+	public final void setTelephone(final String telephone) {
+		this.telephone = telephone;
 	}
 	/**
 	 * Obtiene el rol (tipo de usuario en el sistema)
 	 * @return Rol del usuario.
 	 */
-	public final String getRol() {
-		return this.rol;
+	public final int getRole() {
+		return this.role;
 	}
 	/**
 	 * Establece el rol (tipo de usuario en el sistema)
-	 * @param rol Rol del usuario.
+	 * @param role Rol del usuario.
 	 */
-	public final void setRol(final String rol) {
-		this.rol = rol;
+	public final void setRole(final int role) {
+		this.role = role;
 	}
 
 
 	/**
-	 * Indica si el usuario es el por defecto ("1") o no ("0").
-	 * @return Devuelve "1" si el usuario es el por defecto (el usuario original)
-	 * y "0" si no lo es.
+	 * Indica si el usuario es el superadministrador o no.
+	 * @return Devuelve {@code true} si el usuario es el superaministrador, {@code false}
+	 * si no lo es.
 	 */
-	public final String getPorDefecto() {
-		return this.porDefecto;
+	 public final boolean isRoot() {
+		return this.root;
 	}
 
 	/**
 	 * Establece si un usuario es el por defecto ("1") o no ("0").
-	 * @param porDefecto Valor que determina si el usuario es el por defecto o no.
+	 * @param root Valor que determina si el usuario es el por defecto o no.
 	 */
-	public final void setPorDefecto(final String porDefecto) {
-		this.porDefecto = porDefecto;
+	public final void setRoot(final boolean root) {
+		this.root = root;
 	}
+
+
+	public  RolePermissions getPermissions() {
+		return this.permissions;
+	}
+
+
+	 public void setPermissions(final RolePermissions permissions) {
+		this.permissions = permissions;
+	}
+
+	 /**
+	  * Obtiene el usuario responsable de la aplicaci&oacute;n
+	  * @return responsibleName nombre del responsable
+	  */
+	   public Application getResponsibleName() {
+		return this.responsibleName;
+	}
+	   /**
+	    * Establece el usuario responsable (tipo de usuario responsable en el sistema)
+	    * @param responsibleName
+	    */
+	   public void setResponsibleName(final Application responsibleName) {
+		this.responsibleName = responsibleName;
+	}
+	  /**
+	   *  Obtiene el certificado de la aplicaci&oacute;n
+	   * @return certificate certificado de la aplicaci&oacute;n
+	   */
+	   public CertificateFire getCertificate() {
+		return this.certificate;
+	}
+	   /**
+	    * Establece el certificado de la aplicaci&oacute;n
+	    * @param certificate certificado de la aplicaci&oacute;n
+	    */
+	   public void setCertificate(final CertificateFire certificate) {
+		this.certificate = certificate;
+	}
+
+	@Override
+	public String toString() {
+		return this.name + " " + this.surname; //$NON-NLS-1$
+	}
+
 
 
 }
