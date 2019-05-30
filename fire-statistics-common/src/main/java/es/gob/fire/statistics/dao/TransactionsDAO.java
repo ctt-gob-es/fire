@@ -73,9 +73,10 @@ public class TransactionsDAO {
 			                                final TransactionCube transaction,
 			                                final TransactionTotal total) throws SQLException,
 	                                                                             DBConnectionException {
-		int totalInsertReg = 0;
-		try (final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_TRANSACTION,false);) {
-
+		final int totalInsertReg;
+		try (
+			final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_TRANSACTION,false)
+		) {
 			st.setTimestamp(1, new java.sql.Timestamp(date.getTime()));
 			st.setString(2, transaction.getApplication());
 			st.setString(3, transaction.getOperation());
@@ -86,21 +87,18 @@ public class TransactionsDAO {
 			st.setLong(8, total.getTotal());
 			totalInsertReg = st.executeUpdate();
 		}
-
 		return totalInsertReg == 1;
 	}
 
-	/**
-	 * Obtiene las transacciones finalizadas correctamente e incorrectamente por cada
+	/** Obtiene las transacciones finalizadas correctamente e incorrectamente por cada
 	 * aplicaci&oacute;n (Filtrado por a&ntilde;o y mes).
 	 * @param year A&ntilde;o de la transacci&oacute;n.
 	 * @param month Mes de la transacci&oacute;n.
 	 * @return JSON con el nombre de la aplicaci&oacute;n, total de transaciones correctas, total
-	 * de transaciones incorrectas y total global.
+	 *         de transaciones incorrectas y total global.
 	 * @throws SQLException Cuando se produce un error al acceder a los datos.
 	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
-	 * @throws NumberFormatException Cuando se obtienen totales incorrectos de la base de datos.
-	 */
+	 * @throws NumberFormatException Cuando se obtienen totales incorrectos de la base de datos. */
 	public static String getTransactionsByAppJSON(final int year,
 			                                      final int month) throws SQLException,
 	                                                                      DBConnectionException,

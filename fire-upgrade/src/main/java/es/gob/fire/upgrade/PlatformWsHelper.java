@@ -122,7 +122,7 @@ public final class PlatformWsHelper {
         final String servicioDSS = "verify"; //$NON-NLS-1$
         //call.setOperationName(new QName("http://soapinterop.org/", servicioDSS)); //$NON-NLS-1$
         call.setOperationName(servicioDSS);
-        call.setTimeout(new Integer(WEB_SERVICES_TIMEOUT));
+        call.setTimeout(Integer.getInteger(WEB_SERVICES_TIMEOUT));
         call.setClientHandlers(REQUEST_HANDLER, null);
 
         // Se envia el DSS
