@@ -45,16 +45,20 @@ public final class TempFilesHelper {
             final File f = tmpDir != null && tmpDir.trim().length() > 0 ? new File(tmpDir.trim()) : null;
             if (f == null || !f.isDirectory()) {
                 LOGGER.severe(
-                		"El directorio temporal configurado (" + //$NON-NLS-1$
-                		(f != null ? f.getAbsolutePath() : null) +
-                		") no es valido, se usara el por defecto: " + defaultDir); //$NON-NLS-1$
+            		"El directorio temporal configurado (" + //$NON-NLS-1$
+            		(f != null ? f.getAbsolutePath() : null) +
+            		") no es valido, se usara el por defecto: " + defaultDir //$NON-NLS-1$
+        		);
                 TMPDIR = new File(defaultDir);
-            } else if (!f.canRead() || !f.canWrite()) {
+            }
+            else if (!f.canRead() || !f.canWrite()) {
             	LOGGER.severe(
-                		"El directorio temporal configurado (" + f.getAbsolutePath() + //$NON-NLS-1$
-                		") no tiene permiso de lectura/escritura, se usara el por defecto: " + defaultDir); //$NON-NLS-1$
+            		"El directorio temporal configurado (" + f.getAbsolutePath() + //$NON-NLS-1$
+            		") no tiene permiso de lectura/escritura, se usara el por defecto: " + defaultDir //$NON-NLS-1$
+    			);
             	TMPDIR = new File(defaultDir);
-            } else {
+            }
+            else {
                 LOGGER.info("Se usara el directorio temporal configurado: " + f.getAbsolutePath()); //$NON-NLS-1$
                 TMPDIR = f;
             }
@@ -136,10 +140,10 @@ public final class TempFilesHelper {
     public static String storeTempData(final String tempFileName, final byte[] data) throws IOException {
         if (data == null || data.length < 1) {
             throw new IllegalArgumentException(
-                    "Los datos a guardar no pueden ser nulos ni vacios" //$NON-NLS-1$
+                "Los datos a guardar no pueden ser nulos ni vacios" //$NON-NLS-1$
             );
         }
-        File f;
+        final File f;
         if (tempFileName != null) {
         	f = new File(TMPDIR, tempFileName);
         }

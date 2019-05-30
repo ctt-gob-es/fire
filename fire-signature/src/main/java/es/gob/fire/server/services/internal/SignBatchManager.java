@@ -22,10 +22,8 @@ import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
 
-/**
- * Manejador que gestiona las peticiones para iniciar el proceso de firma de un lote.
- */
-public class SignBatchManager {
+/** Manejador que gestiona las peticiones para iniciar el proceso de firma de un lote. */
+public final class SignBatchManager {
 
 	private static final Logger LOGGER = Logger.getLogger(SignBatchManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();

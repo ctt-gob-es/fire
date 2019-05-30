@@ -39,7 +39,8 @@ public final class UpgraderAfirma implements Upgrader {
 	 * @throws UpgradeException Cuando ocurre cualquier problema que impida la
 	 *                          actualizaci&oacute;n de la firma. */
 	@Override
-	public UpgradeResult upgradeSignature(final byte[] signature, final String upgradeFormat) throws UpgradeException {
+	public UpgradeResult upgradeSignature(final byte[] signature,
+			                              final String upgradeFormat) throws UpgradeException {
 
 		if (upgradeFormat == null || upgradeFormat.isEmpty()) {
 			return new UpgradeResult(signature, null);

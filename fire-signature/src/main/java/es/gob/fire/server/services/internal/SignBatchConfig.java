@@ -15,11 +15,9 @@ import java.util.Properties;
 
 import es.gob.fire.server.services.ServiceUtil;
 
-/**
- * Configuraci&oacute;n de firma particular para un documento de un lote.
- * @author Carlos Gamuci
- */
-public class SignBatchConfig implements Serializable {
+/** Configuraci&oacute;n de firma particular para un documento de un lote.
+ * @author Carlos Gamuci. */
+public final class SignBatchConfig implements Serializable {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 8594180356291997801L;
@@ -32,82 +30,63 @@ public class SignBatchConfig implements Serializable {
 
 	private String upgrade;
 
-	/**
-	 * Recupera el identificador de la operaci&oacute;n criptogr&aacute;fica
-	 * configurada (firma, cofirma,...).
-	 * @return Identificador de operacion criptogr&aacute;fica (sign, cosign o countersign).
-	 */
+	/** Recupera el identificador de la operaci&oacute;n criptogr&aacute;fica
+	 * configurada (firma, cofirma...).
+	 * @return Identificador de operacion criptogr&aacute;fica (sign, cosign o countersign). */
 	public String getCryptoOperation() {
 		return this.cryptoOperation;
 	}
 
-	/**
-	 * Establece la operaci&oacute;n criptogr&aacute;fica a realizar (firma, cofirma,...).
+	/** Establece la operaci&oacute;n criptogr&aacute;fica a realizar (firma, cofirma,...).
 	 * @param cryptoOperation Identificador de operacion criptogr&aacute;fica (sign,
-	 * cosign o countersign).
-	 */
+	 *                        cosign o countersign). */
 	public void setCryptoOperation(final String cryptoOperation) {
 		this.cryptoOperation = cryptoOperation;
 	}
 
-	/**
-	 * Recupera el formato de firma.
-	 * @return Formato de firma.
-	 */
+	/** Recupera el formato de firma.
+	 * @return Formato de firma. */
 	public String getFormat() {
 		return this.format;
 	}
 
-	/**
-	 * Establece el formato de firma.
-	 * @param format Formato de firma.
-	 */
+	/** Establece el formato de firma.
+	 * @param format Formato de firma. */
 	public void setFormat(final String format) {
 		this.format = format;
 	}
 
-	/**
-	 * Recupera la configuraci&oacute;n del formato de firma.
-	 * @return Configuraci&oacute;n del formato de firma en base 64.
-	 */
+	/** Recupera la configuraci&oacute;n del formato de firma.
+	 * @return Configuraci&oacute;n del formato de firma en Base64. */
 	public Properties getExtraParams() {
 		return this.extraParams;
 	}
 
-	/**
-	 * Establece la configuraci&oacute;n del formato de firma.
-	 * @param extraParamsB64 Configuraci&oacute;n del formato de firma en base 64.
-	 * @throws IOException Los datos proporcionados no son un base 64 v&aacute;lido.
-	 */
+	/** Establece la configuraci&oacute;n del formato de firma.
+	 * @param extraParamsB64 Configuraci&oacute;n del formato de firma en Base64.
+	 * @throws IOException Los datos proporcionados no son un Base64 v&aacute;lido. */
 	public void setExtraParamsB64(final String extraParamsB64) throws IOException {
 		if (extraParamsB64 != null) {
 			this.extraParams = ServiceUtil.base642Properties(extraParamsB64);
 		}
 	}
 
-	/**
-	 * Establece la configuraci&oacute;n del formato de firma.
-	 * @param extraParams Configuraci&oacute;n del formato de firma.
-	 */
+	/** Establece la configuraci&oacute;n del formato de firma.
+	 * @param extraParams Configuraci&oacute;n del formato de firma. */
 	public void setExtraParams(final Properties extraParams) {
 		this.extraParams = extraParams;
 	}
 
-	/**
-	 * Recupera el formato de actualizaci&oacute;n de la firma particular.
-	 * @return Formato de actualizaci&oacute;n o {@code null} si no se estableci&oacute;.
-	 */
+	/** Recupera el formato de actualizaci&oacute;n de la firma particular.
+	 * @return Formato de actualizaci&oacute;n o {@code null} si no se estableci&oacute;. */
 	public String getUpgrade() {
 		return this.upgrade;
 	}
 
-	/**
-	 * Establece el formato de actualizaci&oacute;n de la firma particular.
-	 * @param upgrade Nombre del formato avanzado al que hay que actualizar la firma.
-	 */
+	/** Establece el formato de actualizaci&oacute;n de la firma particular.
+	 * @param upgrade Nombre del formato avanzado al que hay que actualizar la firma. */
 	public void setUpgrade(final String upgrade) {
 		this.upgrade = upgrade;
 	}
-
 
 }

@@ -23,21 +23,16 @@ public final class SignOperationResult {
     private final String transactionId;
     private final String redirectUrl;
 
-    /**
-     * Crea el resultado de una operaci&oacute;n de carga de datos a firmar a
+    /** Crea el resultado de una operaci&oacute;n de carga de datos a firmar a
      * partir de su defici&oacute;n JSON.
-     *
-     * @param json
-     *            Definici&oacute;n JSON del resultado de una operaci&oacute;n
-     *            de carga de datos a firmar.
-     * @throws IOException
-     *             Si hay problemas analizando los datos de sesi&oacute;n
-     *             trif&aacute;sica.
-     */
+     * @param json Definici&oacute;n JSON del resultado de una operaci&oacute;n
+     *             de carga de datos a firmar.
+     * @throws IOException Si hay problemas analizando los datos de sesi&oacute;n
+     *                     trif&aacute;sica. */
     public SignOperationResult(final byte[] json) throws IOException {
         if (json == null) {
             throw new IllegalArgumentException(
-                    "El JSON de definicion no puede ser nulo" //$NON-NLS-1$
+                "El JSON de definicion no puede ser nulo" //$NON-NLS-1$
             );
         }
 
@@ -69,47 +64,35 @@ public final class SignOperationResult {
 
     }
 
-    /**
-     * Crea el resultado de una operaci&oacute;n de carga de datos a firmar.
-     *
-     * @param id
-     *            Identificador de la transacci&oacute;n de firma.
-     * @param redirect
-     *            URL a redireccionar al usuario para que se autentique.
-     */
+    /** Crea el resultado de una operaci&oacute;n de carga de datos a firmar.
+     * @param id Identificador de la transacci&oacute;n de firma.
+     * @param redirect URL a redireccionar al usuario para que se autentique. */
     public SignOperationResult(final String id, final String redirect) {
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException(
-                    "El identificador de la transacci&oacute;n de firma no puede ser nulo" //$NON-NLS-1$
+                "El identificador de la transacci&oacute;n de firma no puede ser nulo" //$NON-NLS-1$
             );
         }
         if (redirect == null || redirect.isEmpty()) {
             throw new IllegalArgumentException(
-                    "La URL a redireccionar al usuario para que se autentique no puede ser nula" //$NON-NLS-1$
+                "La URL a redireccionar al usuario para que se autentique no puede ser nula" //$NON-NLS-1$
             );
         }
         this.transactionId = id;
         this.redirectUrl = redirect;
     }
 
-    /**
-     * Obtiene el identificador de la transacci&oacute;n de firma.
-     *
-     * @return Identificador de la transacci&oacute;n de firma.
-     */
+    /** Obtiene el identificador de la transacci&oacute;n de firma.
+     * @return Identificador de la transacci&oacute;n de firma. */
     public String getTransactionId() {
         return this.transactionId;
     }
 
-    /**
-     * Obtiene la URL a redireccionar al usuario para que se autentique.
-     *
-     * @return URL a redireccionar al usuario para que se autentique.
-     */
+    /** Obtiene la URL a redireccionar al usuario para que se autentique.
+     * @return URL a redireccionar al usuario para que se autentique. */
     public String getRedirectUrl() {
         return this.redirectUrl;
     }
-
 
     @Override
     public String toString() {

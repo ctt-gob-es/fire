@@ -104,9 +104,15 @@ public final class SignOperationManager {
 				connConfig = new TransactionConfig(configB64);
 			}
 			catch(final Exception e) {
-				LOGGER.warning(logF.format("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma"); //$NON-NLS-1$
+				LOGGER.warning(
+					logF.format(
+						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma: " + e //$NON-NLS-1$
+					)
+				);
+				response.sendError(
+					HttpServletResponse.SC_BAD_REQUEST,
+					"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma" //$NON-NLS-1$
+				);
 				return;
 			}
 		}
@@ -166,7 +172,7 @@ public final class SignOperationManager {
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
-        FIReDocumentManager docManager;
+        final FIReDocumentManager docManager;
         try {
         	docManager = FIReDocumentManagerFactory.newDocumentManager(docManagerName);
         }
@@ -186,15 +192,21 @@ public final class SignOperationManager {
         LOGGER.info(logF.format("La transaccion usara el DocumentManager " + docManager.getClass().getName())); //$NON-NLS-1$
 
         // Obtenemos el identificador del documento (que puede ser el propio documento)
-        byte[] docId;
+        final byte[] docId;
         try {
         	docId = Base64.decode(dataB64, true);
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, logF.format("El documento enviado a firmar no esta bien codificado"), e); //$NON-NLS-1$
+        	LOGGER.log(
+    			Level.SEVERE,
+    			logF.format("El documento enviado a firmar no esta bien codificado"), //$NON-NLS-1$
+    			e
+			);
 			SIGNLOGGER.register(session, false, null);
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-        			"El documento enviado a firmar no esta bien codificado"); //$NON-NLS-1$
+        	response.sendError(
+    			HttpServletResponse.SC_BAD_REQUEST,
+    			"El documento enviado a firmar no esta bien codificado" //$NON-NLS-1$
+			);
         	return;
         }
 
@@ -217,23 +229,27 @@ public final class SignOperationManager {
 
         // Obtenemos los datos a firmar a partir de los datos proporcionados
         // mediante del DocumentManager que corresponda
-        byte[] data;
+        final byte[] data;
         try {
         	data = docManager.getDocument(docId, appId, format, extraParams);
         }
         catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.format("Error al obtener los datos a firmar"), e); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"Error al obtener los datos a firmar"); //$NON-NLS-1$
+    		response.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"Error al obtener los datos a firmar" //$NON-NLS-1$
+			);
     		return;
         }
 
     	if (data == null) {
     		LOGGER.severe(logF.format("No se han podido obtener los datos a firmar")); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"No se han podido obtener los datos a firmar"); //$NON-NLS-1$
+    		response.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"No se han podido obtener los datos a firmar" //$NON-NLS-1$
+			);
     		return;
     	}
 
@@ -242,7 +258,10 @@ public final class SignOperationManager {
         try {
         	TempFilesHelper.storeTempData(transactionId, data);
         	//obtenemos el tamano del documento
-       	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, TempFilesHelper.getFileSize());
+       	 	session.setAttribute(
+   	 			ServiceParams.SESSION_PARAM_DOCSIZE,
+   	 			Long.valueOf(TempFilesHelper.getFileSize())
+ 			);
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.format("Error en el guardado temporal de los datos a firmar: " + e)); //$NON-NLS-1$
@@ -259,23 +278,24 @@ public final class SignOperationManager {
 
         // Si hay proveedor disponible, se selecciona automaticamente;
         // si no, se envia a la pagina de seleccion de proveedor
-		String redirectUrl;
+		final String redirectUrl;
         if (provs.length == 1) {
         	redirectUrl = "chooseCertificateOriginService?" + //$NON-NLS-1$
         			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] + "&" + //$NON-NLS-1$ //$NON-NLS-2$
  					ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$
-        } else {
+        }
+        else {
         	redirectUrl = "ChooseCertificateOrigin.jsp"; //$NON-NLS-1$
         }
 
         // Devolvemos al usuario el ID de la transaccion y la pagina a la que debe dirigir al usuario
-        final SignOperationResult result = new SignOperationResult(
-        		transactionId,
-        		redirectUrlBase + redirectUrl +
-        			(redirectUrl.indexOf('?') == -1 ? "?" : "&") + //$NON-NLS-1$ //$NON-NLS-2$
-        			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$
-        			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$ //$NON-NLS-2$
-        			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
+	    final SignOperationResult result = new SignOperationResult(
+    		transactionId,
+    		redirectUrlBase + redirectUrl +
+    			(redirectUrl.indexOf('?') == -1 ? "?" : "&") + //$NON-NLS-1$ //$NON-NLS-2$
+    				ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$
+    					"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$ //$NON-NLS-2$
+    						"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
         LOGGER.info(logF.format("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$
 
@@ -301,9 +321,12 @@ public final class SignOperationManager {
 
 	private static void sendResult(final HttpServletResponse response, final SignOperationResult result) throws IOException {
         response.setContentType("application/json"); //$NON-NLS-1$
-        final PrintWriter out = response.getWriter();
-        out.print(result.toString());
-        out.flush();
-        out.close();
+        try (
+    		final PrintWriter out = response.getWriter()
+		) {
+	        out.print(result.toString());
+	        out.flush();
+	        out.close();
+        }
 	}
 }

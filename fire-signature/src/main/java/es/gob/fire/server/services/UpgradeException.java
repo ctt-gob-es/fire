@@ -11,31 +11,31 @@ package es.gob.fire.server.services;
 
 import java.io.IOException;
 
-/**
- * Excepci&oacute;n para indicar que ocurri&oacute; un error durante la
- * actualizaci&oacute;n de una firma electr&oacute;nica.
- */
-public class UpgradeException extends IOException {
+/** Excepci&oacute;n para indicar que ocurri&oacute; un error durante la
+ * actualizaci&oacute;n de una firma electr&oacute;nica. */
+public final class UpgradeException extends IOException {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = -3470452142461150016L;
 
-	/**
-	 * Construye la excepci&oacute;n describiendo el motivo del error.
-	 * @param msg Mensaje de error.
-	 */
+	/** Construye la excepci&oacute;n describiendo el motivo del error.
+	 * @param msg Mensaje de error. */
 	UpgradeException(final String msg) {
 		super(msg);
     }
 
-	/**
-	 * Construye la excepci&oacute;n describiendo el motivo del error.
+	/** Construye la excepci&oacute;n describiendo el motivo del error.
 	 * @param msg Mensaje de error.
-	 * @param cause Causa del error.
-	 */
+	 * @param cause Causa del error. */
 	UpgradeException(final String msg, final Throwable cause) {
 		super(msg, cause);
     }
+
+	/** Construye la excepci&oacute;n describiendo el motivo del error.
+	 * @param cause Causa del error. */
+	public UpgradeException(final Exception cause) {
+		super(cause);
+	}
 
 
 }
