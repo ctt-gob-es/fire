@@ -34,7 +34,7 @@
 	
 	String jsonData = "";//$NON-NLS-1$
 	String htmlError = null;
-	String numRec = "1";//$NON-NLS-1$
+	int numRec = 1;
 	JsonObject jsonObj;
 	try {
 		final JsonReader reader = Json.createReader(new ByteArrayInputStream(sJSON));
@@ -53,21 +53,21 @@
 				htmlError += "<p id='error-txt'>" + request.getParameter("msg") + "</p>";//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 			}
 
-			final JsonArray FileList = jsonObj.getJsonArray("FileList");//$NON-NLS-1$
+			final JsonArray fileList = jsonObj.getJsonArray("fileList");//$NON-NLS-1$
 			jsonData += "{\"FileList\":[";//$NON-NLS-1$
 
-			numRec = String.valueOf(FileList.size());
-			for (int i = 0; i < FileList.size(); i++) {
-				final JsonObject json = FileList.getJsonObject(i);
+			numRec = fileList.size();
+			for (int i = 0; i < fileList.size(); i++) {
+				final JsonObject json = fileList.getJsonObject(i);
 
 				// Tratamiento de la fecha de ultima actualizacion
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");//$NON-NLS-1$
-				final JsonNumber longDateJSON = json.getJsonNumber("Date");//$NON-NLS-1$
+				final JsonNumber longDateJSON = json.getJsonNumber("date");//$NON-NLS-1$
 				Date date = new Date(longDateJSON.longValue());
 				final String dateModif = sdf.format(date);
 
 				// Tratramiento del tamano
-				final JsonNumber longSizeJSON = json.getJsonNumber("Size");//$NON-NLS-1$
+				final JsonNumber longSizeJSON = json.getJsonNumber("size");//$NON-NLS-1$
 				long size = longSizeJSON.longValue();
 				String sSize = "";//$NON-NLS-1$
 				if (size > 1024 && size < 1024000) {
@@ -78,12 +78,12 @@
 					sSize = String.valueOf(size) + " bytes";//$NON-NLS-1$
 				}
 
-				if (i != FileList.size() - 1) {
-					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				if (i != fileList.size() - 1) {
+					jsonData += "{\"Name\":\"" + json.getString("name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 							+ "\",\"Size\":\"" + sSize + "\"},";//$NON-NLS-1$//$NON-NLS-2$
 				} else {
-					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-							+ "\",\"Size\":\"" + sSize + "\"}]}";//$NON-NLS-1$//$NON-NLS-2$
+					jsonData += "{\"Name\":\"" + json.getString("name") + "\",\"date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+							+ "\",\"size\":\"" + sSize + "\"}]}";//$NON-NLS-1$//$NON-NLS-2$
 				}
 			}
 		}

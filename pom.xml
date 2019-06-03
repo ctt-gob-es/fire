@@ -18,7 +18,7 @@
 		<fire.version>2.4-SNAPSHOT</fire.version>
 		<clienteafirma.version>1.6.2</clienteafirma.version>
 		<fnmt.version>0.2</fnmt.version>
-		<log-consumer.version>1.0-SNAPSHOT</log-consumer.version>
+		<log-consumer.version>1.1-SNAPSHOT</log-consumer.version>
 		
 		<javax.json-api.version>1.0</javax.json-api.version>
 		<org.glassfish-javax.json.version>1.0.4</org.glassfish-javax.json.version>

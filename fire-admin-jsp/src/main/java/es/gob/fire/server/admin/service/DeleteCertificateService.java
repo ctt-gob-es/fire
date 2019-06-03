@@ -27,7 +27,7 @@ public class DeleteCertificateService extends HttpServlet {
 	 */
 	private static final long serialVersionUID = -4929894052421807407L;
 
-	private static final Logger LOGGER = Logger.getLogger(DeleteAppService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DeleteCertificateService.class.getName());
 
 	private static final String PARAM_ID = "id-cert"; //$NON-NLS-1$
 

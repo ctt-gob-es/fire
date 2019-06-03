@@ -206,13 +206,13 @@
 				      	<div id="dateTimes" style="display:block; width:100%;">
 				      		<div>
 					      		<div style="display: inline-block;width:48%;">
-					      		<% if(date){%>
+					      		<% if (date) {%>
 					      			<label for="startDate">Fecha inicio</label>
 					      			<input type="text" id="startDate" name="startDate" class="log_filter" maxlength="10" size="10">
 					      		<%}%>
 					      		</div>
 					      		<div style="display: inline-block;width:48%;">
-					      		<% if(time){%>
+					      		<% if (time) {%>
 					      			<label for="startTime">Hora inicio</label>
 					      			<input type="text" id="startTime" name="startTime" class="log_filter"  maxlength="8" size="8">	
 					      		<%}%>
@@ -220,7 +220,7 @@
 				      		</div>				      	
 				      		<div>
 					      		<div style="display: inline-block;width:48%;">
-					    		<% if(date){%>
+					    		<% if (date) {%>
 					    			<label for="endDate">Fecha fin</label>
 					      			<input type="text" id="endDate" name="endDate" class="log_filter" maxlength="10" size="10">
 					      		<%}%>

@@ -90,7 +90,7 @@ public class LogSearchServiceManager {
 			session.setAttribute("Reader", reader); //$NON-NLS-1$
 
 			if (result == null) {
-				throw new NoResultException("No se han encontrado mas ocurrencias en la busqueda");
+				throw new NoResultException("No se han encontrado mas ocurrencias en la busqueda"); //$NON-NLS-1$
 			}
 
 		} catch (final NoResultException e) {

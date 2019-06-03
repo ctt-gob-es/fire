@@ -34,9 +34,9 @@ public class LogFiles {
 			LOGGER.log(Level.SEVERE, "No se ha configurado un directorio de logs valido: " + logsDir); //$NON-NLS-1$
 			final JsonArrayBuilder error = Json.createArrayBuilder();
 			error.add(Json.createObjectBuilder()
-					.add("Code",HttpServletResponse.SC_BAD_REQUEST) //$NON-NLS-1$
-					.add("Message", "No se ha podido obtener la lista de ficheros log.")); //$NON-NLS-1$//$NON-NLS-2$
-			jsonObj.add("Error", error); //$NON-NLS-1$
+					.add("code",HttpServletResponse.SC_BAD_REQUEST) //$NON-NLS-1$
+					.add("message", "No se ha podido obtener la lista de ficheros log.")); //$NON-NLS-1$//$NON-NLS-2$
+			jsonObj.add("error", error); //$NON-NLS-1$
 
 			final StringWriter writer = new StringWriter();
 			try (final JsonWriter jw = Json.createWriter(writer)) {
@@ -65,12 +65,12 @@ public class LogFiles {
 		final JsonArrayBuilder data = Json.createArrayBuilder();
 		for (final File logFile : files) {
 			data.add(Json.createObjectBuilder()
-					.add("Name", logFile.getName()) //$NON-NLS-1$
-					.add("Date", logFile.lastModified()) //$NON-NLS-1$
-					.add("Size", logFile.length()) //$NON-NLS-1$
+					.add("name", logFile.getName()) //$NON-NLS-1$
+					.add("date", logFile.lastModified()) //$NON-NLS-1$
+					.add("size", logFile.length()) //$NON-NLS-1$
 					);
 		}
-		jsonObj.add("FileList", data); //$NON-NLS-1$
+		jsonObj.add("fileList", data); //$NON-NLS-1$
 		final StringWriter writer = new StringWriter();
 		try (final JsonWriter jw = Json.createWriter(writer)) {
 			jw.writeObject(jsonObj.build());

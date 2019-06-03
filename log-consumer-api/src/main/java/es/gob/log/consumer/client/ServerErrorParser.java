@@ -7,7 +7,9 @@ public class ServerErrorParser {
 
 	private static final int SEPARATOR = '|';
 
-	private int status;
+	private static final String DEFAULT_STATUS = "0"; //$NON-NLS-1$
+
+	private String status;
 
 	private final String message;
 
@@ -34,20 +36,20 @@ public class ServerErrorParser {
 		final int sepPos = content.indexOf(SEPARATOR);
 		if (sepPos > -1) {
 			try {
-				this.status = Integer.parseInt(content.substring(0, sepPos));
+				this.status = content.substring(0, sepPos);
 			}
 			catch (final Exception e) {
-				this.status = 0;
+				this.status = DEFAULT_STATUS;
 			}
 			this.message = content.substring(sepPos + 1);
 		}
 		else {
-			this.status = 0;
+			this.status = DEFAULT_STATUS;
 			this.message = content;
 		}
 	}
 
-	public int getStatus() {
+	public String getStatus() {
 		return this.status;
 	}
 

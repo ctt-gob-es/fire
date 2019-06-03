@@ -175,9 +175,6 @@
 	 $("#" + idOkTxtLog).hide();
 	 $("#" + idAdvice).hide();
 	 
-	 
-	 
-	 
 	 if(JSONData.hasOwnProperty('Tail')){
 		 
 		 if ($("#" + idMsgTxtLog).is(":hidden")) {
