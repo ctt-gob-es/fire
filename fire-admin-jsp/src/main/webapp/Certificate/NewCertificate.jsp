@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.admin.dao.AplicationsDAO"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
@@ -7,7 +8,13 @@
 <%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
 <%@page import="es.gob.fire.server.admin.dao.CertificatesDAO" %>
 <%@page import="es.gob.fire.server.admin.entity.CertificateFire" %>
+<%@page import="es.gob.fire.server.admin.entity.Application" %>
 <%@page import="es.gob.fire.server.admin.tool.Utils" %>
+<%@page import="es.gob.fire.server.admin.dao.RolesDAO"%>
+<%@page import="es.gob.fire.server.admin.entity.Role"%>
+<%@page import="es.gob.fire.server.admin.dao.UsersDAO" %>
+<%@page import="es.gob.fire.server.admin.entity.User" %>
+
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
@@ -41,7 +48,7 @@
 	switch (op) {
 		case 0:
 			title = "Ver el certificado " + nameCert;//$NON-NLS-1$
-			subTitle = ""; //$NON-NLS-1$
+			subTitle = "Visualizaci&oacute;n de los certificados"; //$NON-NLS-1$
 			break;
 		case 1:
 			title = "Alta de nuevo certificado"; //$NON-NLS-1$
@@ -55,6 +62,23 @@
 			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 			return;
 	}
+	// prueba Carlos
+	User[] users = UsersDAO.getUserAppResponsables();
+
+	 
+	Application app = null;
+	if (id != null) {
+		try {
+			app = AplicationsDAO.getApplicationWithCompleteInfo(id);
+		} catch (Exception e) {
+			response.sendRedirect("AdminMainPage.jsp");
+		}
+	}
+	if (app == null) {
+		app = new Application();
+	}
+	// fin prueba Carlos
+	
 	
 	CertificateFire cer = null;
 	if (id != null) {
@@ -201,7 +225,7 @@
 			Los campos con [*] al menos uno es obligatorio
 		<%} %>
 		</p>
-			<form id="frmCertificate" method="POST" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId() != null ? cer.getId() : empty%>" enctype="multipart/form-data" onsubmit="isCert()">
+			<form id="frmCertificate" method="POST" autocomplete="off" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId() != null ? cer.getId() : empty%>" enctype="multipart/form-data" onsubmit="isCert()">
 							
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				<div style="display: inline-block; width: 20%;margin: 3px;">
@@ -328,13 +352,15 @@
 		
 		<% if(op == 0){ %>
 		<br>
+		
 		<fieldset>
 			<legend>Aplicaciones</legend>
-			<div id="data" style="display: block-inline; text-align:center;">
+			<div id="data" style="display: block-inline; text-align:center; overflow-y: auto;margin-top:3px;resize:none">
 				<h4>No hay Aplicaciones asociadas al certificado <%=nameCert%> </h4>		
 			</div>
 
 		</fieldset>
+		
 		<fieldset class="fieldset-clavefirma">			
 			<div style="margin: auto;width: 60%;padding: 3px; margin-top: 5px;">
 				<div style="display: inline-block; width: 45%;margin: 3px;">
@@ -346,7 +372,18 @@
 	
 		<script>
 			//bloqueamos los campos en caso de que sea una operacion de solo lectura
-			document.getElementById("nombre-cer").disabled = <%= op == 0 %>			
+			document.getElementById("nombre-cer").disabled = <%= op == 0 %>
+			
+			if(op == 0){
+				document.getElementById("nombre-cer").style.background = '#F5F5F5';
+				document.getElementById("cert-prin").style.background = '#F5F5F5';
+				document.getElementById("cert-resp").style.background = '#F5F5F5';
+			}else if(op == 1 || op == 2){
+				
+				document.getElementById("cert-prin").style.background = '#F5F5F5';
+				document.getElementById("cert-resp").style.background = '#F5F5F5';
+				
+			}
 					
 			// quitamos los espacios en blanco que se han agregado en el certificado
 			//document.getElementById("cert-prin").value = document.getElementById("cert-prin").value.trim();

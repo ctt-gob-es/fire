@@ -54,6 +54,7 @@
 			}
 
 			final JsonArray fileList = jsonObj.getJsonArray("fileList");//$NON-NLS-1$
+			
 			jsonData += "{\"FileList\":[";//$NON-NLS-1$
 
 			numRec = fileList.size();
@@ -146,7 +147,7 @@
 	var total =  Math.ceil(txtNumRec / 10);
 	var dataJSON = '{"TotalPages":'+ total +',"ActualPage":1,"TotalRecords":'+txtNumRec+',"FileListRows":[';
 	
-	if (obJson) {
+	if (obJson && obJson.FileList.length > 0) {
 		for (i = 0; i < obJson.FileList.length; i++) {
 			if (i != obJson.FileList.length -1){
 				dataJSON += JSON.stringify(obJson.FileList[i]) + ",";

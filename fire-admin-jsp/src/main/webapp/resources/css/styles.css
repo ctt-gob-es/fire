@@ -60,6 +60,15 @@ ul li.field-text {
 	background-color: #FFAAAA;
 }
 
+input[type=checkbox]
+{
+  /* Doble-tamaño Checkboxes */
+  -ms-transform: scale(2); /* IE */
+  -moz-transform: scale(2); /* FF */
+  -webkit-transform: scale(2); /* Safari y Chrome */
+  -o-transform: scale(2); /* Opera */
+  padding: 10px;
+}
 .success-log{
 	color:green; 
 	font-size: 14px;
@@ -337,6 +346,22 @@ ul li.field-text {
 				0px 3px 5px black;
 	text-shadow:0,5px 0,5px 0,5px white;	
 }
+
+img.nombre_rol{
+  width: 35px; height: 35px;
+}
+
+img.deshabilitado{
+  width: 20px; height: 20px;
+}
+
+img.habilitado{
+  width: 25px; height: 25px;
+}
+
+img.details_icon{
+  width: 5px; height: 5px;
+}
 .btn-log {
 	padding:5px; 
 	background:#820606; 
@@ -361,6 +386,8 @@ ul li.field-text {
 	text-shadow:0,5px 0,5px 0,5px white;	
 }
 
+.enlace{border:0; background-color:#fff; text-decoration:underline; color:#000; cursor:pointer;}
+
 .btn-log_inactive {
 	padding:5px; 
 	background:#808080; 
@@ -383,6 +410,7 @@ ul li.field-text {
 	 width:30%;
 	 color: #808080
 }
+
 
 span.highlight
 {
@@ -447,7 +475,9 @@ span.nextHighLight{
 				right:-140px;
 				top:0px;
 			}
-			
+			#img {
+			  float: right;
+			}
 
 /********************/
 .ui-datepicker{ z-index: 9999 !important;}

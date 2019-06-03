@@ -71,14 +71,14 @@ public class ModifyPasswdUserService extends HttpServlet {
 				isOk = false;
 			}
 			//Comprobamos que la clave introducida como antigua es la que tiene guardada en la base de datos
-			else if(usr.getClave() != null && params.getOldPassword() != null && !"".equals(params.getOldPassword())) { //$NON-NLS-1$
+			else if(usr.getPassword() != null && params.getOldPassword() != null && !"".equals(params.getOldPassword())) { //$NON-NLS-1$
 				final MessageDigest md_oldPass = MessageDigest.getInstance(SHA_2);
 				byte[] digest_oldPass;
 				String oldPasswd = null;
 				md_oldPass.update(params.getOldPassword().getBytes());
 				digest_oldPass = md_oldPass.digest();
 				oldPasswd = Base64.encode(digest_oldPass);
-				if(!oldPasswd.equals(usr.getClave())) {
+				if(!oldPasswd.equals(usr.getPassword())) {
 					LOGGER.log(Level.SEVERE, "La clave antigua introducida es erronea."); //$NON-NLS-1$
 					isOk = false;
 				}
@@ -103,7 +103,7 @@ public class ModifyPasswdUserService extends HttpServlet {
 								UsersDAO.updateUserPasswd(params.getUserId() , params.getUsername(), clave);
 							}
 							catch (final SQLException e) {
-								LOGGER.log(Level.SEVERE, "Error en la modificacion de la contrasena del usuario con nombre:" + usr.getNombreUsuario(), e); //$NON-NLS-1$
+								LOGGER.log(Level.SEVERE, "Error en la modificacion de la contrasena del usuario con nombre:" + usr.getUserName(), e); //$NON-NLS-1$
 								isOk = false;
 							}
 

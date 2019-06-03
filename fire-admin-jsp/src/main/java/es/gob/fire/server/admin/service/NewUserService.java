@@ -18,7 +18,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import es.gob.fire.server.admin.dao.RolesDAO;
 import es.gob.fire.server.admin.dao.UsersDAO;
 import es.gob.fire.server.admin.entity.User;
 import es.gob.fire.server.admin.tool.Base64;
@@ -42,7 +44,13 @@ public class NewUserService extends HttpServlet {
 	private static final String PARAM_USEREMAIL = "email";//$NON-NLS-1$
 	private static final String PARAM_USERTELF = "telf-contact";//$NON-NLS-1$
 
+
 	private static final String SHA_2 = "SHA-256"; //$NON-NLS-1$
+
+
+
+
+
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
@@ -50,11 +58,22 @@ public class NewUserService extends HttpServlet {
 	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 
+		final HttpSession session = req.getSession(false);
+		if (session == null) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
+
 		req.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
 		// Obtener el tipo de operacion 1-Alta 2-Edicion
+		final String idUser = req.getParameter(PARAM_IDUSER);
+		final String username = req.getParameter(PARAM_USERNAME);
 		final int op = Integer.parseInt(req.getParameter(PARAM_OP));
 		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
+		final String stringOp4 = op == 4 ? "baja" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
+		 final String msg = ""; //$NON-NLS-1$
+
 
 		// Obtenemos los parametros enviados del formulario
 		final Parameters params = getParameters(req);
@@ -64,24 +83,35 @@ public class NewUserService extends HttpServlet {
 
 			// nuevo usuario
 			if (op == 1) {
+				final RolePermissions permissions = RolesDAO.getPermissions(Integer.parseInt(params.getUserRole()));
 
-				if (params.getLoginUser() == null || params.getPassword() == null ||
+
+				if (params.getLoginUser() == null || params.getUserRole() == null ||
 						params.getUserName() == null || params.getUserSurname() == null) {
 					LOGGER.log(Level.SEVERE,
-							"No se han proporcionado todos los datos requeridos para el alta del usuario (login, clave, rol, nombre y apellidos)"); //$NON-NLS-1$
+							"No se han proporcionado todos los datos requeridos para el alta del usuario (login, rol, nombre y apellidos)"); //$NON-NLS-1$
+					isOk = false;
+				}
+				else if (permissions.hasLoginPermission() && params.getPassword() == null) {
+					LOGGER.log(Level.SEVERE,
+							"Un usuario con permisos de acceso tiene que establecer una contrasena"); //$NON-NLS-1$
 					isOk = false;
 				}
 				else {
 
 					// Codificamos la clave
-					final MessageDigest md = MessageDigest.getInstance(SHA_2);
-					md.update(params.getPassword().getBytes());
-					final byte[] digest = md.digest();
-					final String clave = Base64.encode(digest);
+					String clave = null;
+					if (params.getPassword() != null) {
+						final MessageDigest md = MessageDigest.getInstance(SHA_2);
+						md.update(params.getPassword().getBytes());
+						final byte[] digest = md.digest();
+						clave = Base64.encode(digest);
+					}
 
-					//Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
+
+					// Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
 					final User usr = UsersDAO.getUserByName(params.getLoginUser());
-					if (usr != null && usr.getNombreUsuario() != null && !"".equals(usr.getNombreUsuario()))//$NON-NLS-1$
+					if (usr != null && usr.getUserName() != null && !"".equals(usr.getUserName()))//$NON-NLS-1$
 					{
 						LOGGER.log(Level.SEVERE, "Se ha proporcionado un nombre de login repetido, no se puede dar de alta el usuario"); //$NON-NLS-1$
 						isOk = false;
@@ -89,19 +119,26 @@ public class NewUserService extends HttpServlet {
 					else {
 						LOGGER.info("Alta del usuario con nombre de login: " + params.getLoginUser()); //$NON-NLS-1$
 						try {
-							 UsersDAO.createUser(params.getLoginUser(), clave,
-									 params.getUserName(), params.getUserSurname(),
-									 params.getUserEMail(), params.getUserTelf());
+							UsersDAO.createUser(params.getLoginUser(), clave,
+									params.getUserName(), params.getUserSurname(),
+									params.getUserEMail(), params.getUserTelf(), params.getUserRole());
 						} catch (final Exception e) {
 							LOGGER.log(Level.SEVERE, "Error en el alta del usuario", e); //$NON-NLS-1$
 							isOk = false;
 						}
 					}
+
 				}
 			}
+
 			else if(op == 2) {	//Edicion de usuario
-				if (params.getIdUser()==null
-						|| params.getUserName() == null || params.getUserSurname() == null) {
+
+				final User usr = UsersDAO.getUser(idUser);
+
+				final RolePermissions permissions = RolesDAO.getPermissions(usr.getRole());
+
+				if (params.getIdUser()==null || params.getUserName() == null || params.getUserSurname() == null ||
+						params.getUserRole() == null) {
 					LOGGER.log(Level.SEVERE,
 							"No se han proporcionado todos los datos requeridos para la edicion del usuario (login, rol, nombre y apellidos)"); //$NON-NLS-1$
 					isOk = false;
@@ -109,15 +146,25 @@ public class NewUserService extends HttpServlet {
 				else {
 					LOGGER.info("Edicion del usuario con nombre de login: " + params.getLoginUser()); //$NON-NLS-1$
 					try {
-						 UsersDAO.updateUser(params.getIdUser(), params.getUserName(),
-								 params.getUserSurname(), params.getUserEMail(),
-								 params.getUserTelf());
-					} catch (final Exception e) {
+						if (permissions == null || !permissions.hasAppResponsable()) {
+							UsersDAO.updateUser(params.getIdUser(), params.getUserName(),
+									params.getUserSurname(), params.getUserEMail(),
+									params.getUserTelf(), params.getUserRole());
+						} else {
+
+							UsersDAO.updateUser(params.getIdUser(), params.getUserName(),
+									params.getUserSurname(), params.getUserEMail(),
+									params.getUserTelf(), params.getUserRole());
+						}
+					}
+					catch (final Exception e) {
 						LOGGER.log(Level.SEVERE, "Error en la edicion del usuario", e); //$NON-NLS-1$
 						isOk = false;
 					}
 				}
 			}
+
+
 			else if(op == 3 && params.getLoginUser() != null ){
 				// Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
 				final User usr = UsersDAO.getUserByName(params.getLoginUser());
@@ -148,166 +195,173 @@ public class NewUserService extends HttpServlet {
 			resp.sendRedirect("./User/NewUser.jsp?op=1&r=0&ent=user"); //$NON-NLS-1$
 		}
 
+
+
 	}
 
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doPost(req, resp);
+
+@Override
+protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+	doPost(req, resp);
+}
+
+/**
+ * Procedimiento que obtiene los par&aacute;metros enviados al servicio.
+ * @param req Petici&ioacute;n HTTP realizada al servicio.
+ */
+private static Parameters getParameters(final HttpServletRequest req)  {
+
+	final Parameters params = new Parameters();
+
+	if(req.getParameter(PARAM_IDUSER) != null && !req.getParameter(PARAM_IDUSER).isEmpty()) {
+		params.setIdUser(req.getParameter(PARAM_IDUSER));
 	}
+	if(req.getParameter(PARAM_LOGNAME) != null && !req.getParameter(PARAM_LOGNAME).isEmpty()) {
+		params.setLoginUser(req.getParameter(PARAM_LOGNAME));
+	}
+	if(req.getParameter(PARAM_PASSWD) != null && !req.getParameter(PARAM_PASSWD).isEmpty()) {
+		params.setPassword(req.getParameter(PARAM_PASSWD));
+	}
+	if(req.getParameter(PARAM_USER_ROLE) != null && !"".equals(req.getParameter(PARAM_USER_ROLE))) {//$NON-NLS-1$
+		params.setUserRole(req.getParameter(PARAM_USER_ROLE));
+	}
+	if(req.getParameter(PARAM_USERNAME) != null && !req.getParameter(PARAM_USERNAME).isEmpty()) {
+		params.setUserName(req.getParameter(PARAM_USERNAME));
+	}
+	if(req.getParameter(PARAM_USERSURNAME) != null && !req.getParameter(PARAM_USERSURNAME).isEmpty()) {
+		params.setUserSurname(req.getParameter(PARAM_USERSURNAME));
+	}
+	if(req.getParameter(PARAM_USEREMAIL) != null && !req.getParameter(PARAM_USEREMAIL).isEmpty()) {
+		params.setUserEMail(req.getParameter(PARAM_USEREMAIL));
+	}
+	if(req.getParameter(PARAM_USERTELF) != null && !"".equals(req.getParameter(PARAM_USERTELF))) {//$NON-NLS-1$
+		params.setUserTelf(req.getParameter(PARAM_USERTELF));
+
+	}
+	return params;
+}
+
+static class Parameters {
+
+	private String idUser = null;
+	private String loginUser = null;
+	private String password = null;
+	private String userRole = null;
+	private String userName = null;
+	private String userSurname = null;
+	private String userEMail = null;
+	private String userTelf = null;
+	private final RolePermissions rolePermision = null;
 
 	/**
-	 * Procedimiento que obtiene los par&aacute;metros enviados al servicio.
-	 * @param req Petici&ioacute;n HTTP realizada al servicio.
+	 * Obtiene el login (nombre con el que se accede a la aplicaci&oacute;n) del usuario
+	 * @return
 	 */
-	private static Parameters getParameters(final HttpServletRequest req)  {
-
-		final Parameters params = new Parameters();
-
-		if(req.getParameter(PARAM_IDUSER) != null && !"".equals(req.getParameter(PARAM_IDUSER))) {//$NON-NLS-1$
-			params.setIdUser(req.getParameter(PARAM_IDUSER));
-		}
-		if(req.getParameter(PARAM_LOGNAME) != null && !"".equals(req.getParameter(PARAM_LOGNAME))) {//$NON-NLS-1$
-			params.setLoginUser(req.getParameter(PARAM_LOGNAME));
-		}
-		if(req.getParameter(PARAM_PASSWD) != null && !"".equals(req.getParameter(PARAM_PASSWD))) {//$NON-NLS-1$
-			params.setPassword(req.getParameter(PARAM_PASSWD));
-		}
-		if(req.getParameter(PARAM_USER_ROLE) != null && !"".equals(req.getParameter(PARAM_USER_ROLE))) {//$NON-NLS-1$
-			params.setUserRole(req.getParameter(PARAM_USER_ROLE));
-		}
-		if(req.getParameter(PARAM_USERNAME) != null && !"".equals(req.getParameter(PARAM_USERNAME))) {//$NON-NLS-1$
-			params.setUserName(req.getParameter(PARAM_USERNAME));
-		}
-		if(req.getParameter(PARAM_USERSURNAME) != null && !"".equals(req.getParameter(PARAM_USERSURNAME))) {//$NON-NLS-1$
-			params.setUserSurname(req.getParameter(PARAM_USERSURNAME));
-		}
-		if(req.getParameter(PARAM_USEREMAIL) != null && !"".equals(req.getParameter(PARAM_USEREMAIL))) {//$NON-NLS-1$
-			params.setUserEMail(req.getParameter(PARAM_USEREMAIL));
-		}
-		if(req.getParameter(PARAM_USERTELF) != null && !"".equals(req.getParameter(PARAM_USERTELF))) {//$NON-NLS-1$
-			params.setUserTelf(req.getParameter(PARAM_USERTELF));
-		}
-		return params;
+	final String getLoginUser() {
+		return this.loginUser;
+	}
+	/**
+	 * Establece el login (nombre con el que se accede a la aplicaci&oacute;n) del usuario.
+	 * @param loginUser Nombre de usuario;
+	 */
+	final void setLoginUser(final String loginUser) {
+		this.loginUser = loginUser;
+	}
+	/**
+	 * Obtiene la clave (Password)
+	 * @return Clave.
+	 */
+	final String getPassword() {
+		return this.password;
+	}
+	/**
+	 * Establece la clave (Password)
+	 * @param password Clave de usuario.
+	 */
+	final void setPassword(final String password) {
+		this.password = password;
+	}
+	/**
+	 * Obtiene el rol del usuario.
+	 * @return Rol del usuario.
+	 */
+	final String getUserRole() {
+		return this.userRole;
+	}
+	/**
+	 * Establece el rol del usuario.
+	 * @param userRole Rol del usuario.
+	 */
+	final void setUserRole(final String userRole) {
+		this.userRole = userRole;
+	}
+	/**
+	 * Obtiene el nombre de pila del usuario.
+	 * @return Nombre de pila.
+	 */
+	final String getUserName() {
+		return this.userName;
+	}
+	/**
+	 * Establece el nombre de pila del usuario.
+	 */
+	final void setUserName(final String userName) {
+		this.userName = userName;
+	}
+	/**
+	 * Obtiene los apellidos del usuario
+	 * @return Apellidos.
+	 */
+	final String getUserSurname() {
+		return this.userSurname;
+	}
+	/**
+	 * Establece los apellidos del usuario
+	 */
+	final void setUserSurname(final String userSurname) {
+		this.userSurname = userSurname;
+	}
+	/**
+	 * Obtiene la direcci&oacute;n de correo electr&oacute;nico del usuario.
+	 * @return Direcci&oacute;n de correo electr&oacute;nico.
+	 */
+	final String getUserEMail() {
+		return this.userEMail;
+	}
+	/**
+	 * Establece la direcci&oacute;n de correo electr&oacute;nico del usuario.
+	 */
+	final void setUserEMail(final String userEMail) {
+		this.userEMail = userEMail;
+	}
+	/**
+	 * Obtiene el tel&eacute;fono del usuario.
+	 * @return Tel&eacute;fono.
+	 */
+	final String getUserTelf() {
+		return this.userTelf;
+	}
+	/**
+	 * Establece el tel&eacute;fono del usuario.
+	 */
+	final void setUserTelf(final String userTelf) {
+		this.userTelf = userTelf;
+	}
+	/**
+	 * Obtiene el ID  del usuario
+	 * @return Identificado del usuario.
+	 */
+	final String getIdUser() {
+		return this.idUser;
+	}
+	/**
+	 * Establece el ID  del usuario.
+	 */
+	final void setIdUser(final String idUser) {
+		this.idUser = idUser;
 	}
 
-	static class Parameters {
 
-		private String idUser = null;
-		private String loginUser = null;
-		private String password = null;
-		private String userRole = null;
-		private String userName = null;
-		private String userSurname = null;
-		private String userEMail = null;
-		private String userTelf = null;
-
-		/**
-		 * Obtiene el login (nombre con el que se accede a la aplicaci&oacute;n) del usuario
-		 * @return
-		 */
-		final String getLoginUser() {
-			return this.loginUser;
-		}
-		/**
-		 * Establece el login (nombre con el que se accede a la aplicaci&oacute;n) del usuario.
-		 * @param loginUser Nombre de usuario;
-		 */
-		final void setLoginUser(final String loginUser) {
-			this.loginUser = loginUser;
-		}
-		/**
-		 * Obtiene la clave (Password)
-		 * @return Clave.
-		 */
-		final String getPassword() {
-			return this.password;
-		}
-		/**
-		 * Establece la clave (Password)
-		 * @param password Clave de usuario.
-		 */
-		final void setPassword(final String password) {
-			this.password = password;
-		}
-		/**
-		 * Obtiene el rol del usuario.
-		 * @return Rol del usuario.
-		 */
-		final String getUserRole() {
-			return this.userRole;
-		}
-		/**
-		 * Establece el rol del usuario.
-		 * @param userRole Rol del usuario.
-		 */
-		final void setUserRole(final String userRole) {
-			this.userRole = userRole;
-		}
-		/**
-		 * Obtiene el nombre de pila del usuario.
-		 * @return Nombre de pila.
-		 */
-		final String getUserName() {
-			return this.userName;
-		}
-		/**
-		 * Establece el nombre de pila del usuario.
-		 */
-		final void setUserName(final String userName) {
-			this.userName = userName;
-		}
-		/**
-		 * Obtiene los apellidos del usuario
-		 * @return Apellidos.
-		 */
-		final String getUserSurname() {
-			return this.userSurname;
-		}
-		/**
-		 * Establece los apellidos del usuario
-		 */
-		final void setUserSurname(final String userSurname) {
-			this.userSurname = userSurname;
-		}
-		/**
-		 * Obtiene la direcci&oacute;n de correo electr&oacute;nico del usuario.
-		 * @return Direcci&oacute;n de correo electr&oacute;nico.
-		 */
-		final String getUserEMail() {
-			return this.userEMail;
-		}
-		/**
-		 * Establece la direcci&oacute;n de correo electr&oacute;nico del usuario.
-		 */
-		final void setUserEMail(final String userEMail) {
-			this.userEMail = userEMail;
-		}
-		/**
-		 * Obtiene el tel&eacute;fono del usuario.
-		 * @return Tel&eacute;fono.
-		 */
-		final String getUserTelf() {
-			return this.userTelf;
-		}
-		/**
-		 * Establece el tel&eacute;fono del usuario.
-		 */
-		final void setUserTelf(final String userTelf) {
-			this.userTelf = userTelf;
-		}
-		/**
-		 * Obtiene el ID  del usuario
-		 * @return Identificado del usuario.
-		 */
-		final String getIdUser() {
-			return this.idUser;
-		}
-		/**
-		 * Establece el ID  del usuario.
-		 */
-		final void setIdUser(final String idUser) {
-			this.idUser = idUser;
-		}
-	}
+}
 
 }

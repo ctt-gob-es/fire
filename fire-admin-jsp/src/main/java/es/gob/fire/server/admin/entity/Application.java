@@ -8,7 +8,6 @@
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 package es.gob.fire.server.admin.entity;
-
 import java.util.Date;
 
 
@@ -21,17 +20,13 @@ public class Application {
 
 	private String nombre;
 
-	private String responsable;
-
-	private String correo;
-
-	private String telefono;
+	private User responsable;
 
 	private Date alta;
 
-	private String fk_certificado;
+	private CertificateFire certificate;
 
-
+	private boolean habilitado;
 
 	/**
 	 * Constructor vac&iacute;o que iniciliza los String a cadena vac&iacute;a.
@@ -39,9 +34,9 @@ public class Application {
 	public Application(){
 		this.id = ""; //$NON-NLS-1$
 		this.nombre = ""; //$NON-NLS-1$
-		this.responsable = ""; //$NON-NLS-1$
-		this.correo = ""; //$NON-NLS-1$
-		this.telefono = "";  //$NON-NLS-1$
+		this.responsable = new User() ;
+		this.certificate = new CertificateFire();
+		this.habilitado = true;
 	}
 
 	/**
@@ -83,7 +78,7 @@ public class Application {
 	 * Recupera el nombre del responsable de la aplicaci&oacute;n.
 	 * @return Nombre del responsable de la aplicaci&oacute;n.
 	 */
-	public String getResponsable() {
+	public User getResponsable() {
 		return this.responsable;
 	}
 
@@ -92,45 +87,10 @@ public class Application {
 	 * Establece el nombre del responsable de la aplicaci&oacute;n.
 	 * @param responsable Nombre del responsable de la aplicaci&oacute;n.
 	 */
-	public void setResponsable(final String responsable) {
+	public void setResponsable(final User responsable) {
 		this.responsable = responsable;
 	}
 
-
-	/**
-	 * Recupera el correo del responsable de la aplicaci&oacute;n.
-	 * @return correo del responsable de la aplicaci&oacute;n.
-	 */
-	public String getCorreo() {
-		return this.correo;
-	}
-
-
-	/**
-	 * Establece el correo del responsable de la aplicaci&oacute;n.
-	 * @param correo Correo del responsable de la aplicaci&oacute;n.
-	 */
-	public void setCorreo(final String correo) {
-		this.correo = correo;
-	}
-
-
-	/**
-	 * Recupera el tel&eacute;fono del responsable de la aplicaci&oacute;n.
-	 * @return Tel&eacute;fono del responsable de la aplicaci&oacute;n.
-	 */
-	public String getTelefono() {
-		return this.telefono;
-	}
-
-
-	/**
-	 * Establece el tel&eacute;fono del responsable de la aplicaci&oacute;n.
-	 * @param telefono Tel&eacute;fono del responsable de la aplicaci&oacute;n.
-	 */
-	public void setTelefono(final String telefono) {
-		this.telefono = telefono;
-	}
 
 	/**
 	 * Recupera la fecha de alta de la aplicaci&oacute;n.
@@ -151,18 +111,25 @@ public class Application {
 
 
 	/**
-	 * Obtiene la clave foranea del certificado asociado
-	 * @return
+	 * Obtiene el certificado de autenticaci&oacute;n de la aplicaci&oacute;n.
+	 * @return Informaci&oacute;n del certificado.
 	 */
-	public final String getFk_certificado() {
-		return this.fk_certificado;
+	public final CertificateFire getCertificate() {
+		return this.certificate;
 	}
 	/**
-	 * Establece la clave foranea del certificado
-	 * @param fk_certificado
+	 * Establece el certificado de autenticaci&oacute;n de la aplcaci&oacute;n.
+	 * @param certificate Certificado de autenticaci&oacute;n.
 	 */
-	public final void setFk_certificado(final String fk_certificado) {
-		this.fk_certificado = fk_certificado;
+	public final void setCertificate(final CertificateFire certificate) {
+		this.certificate = certificate;
 	}
 
+	public boolean isHabilitado() {
+		return this.habilitado;
+	}
+
+	public void setHabilitado(final boolean habilitado) {
+		this.habilitado = habilitado;
+	}
 }

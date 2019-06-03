@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.admin.dao.AplicationsDAO;
 import es.gob.fire.server.admin.dao.CertificatesDAO;
@@ -36,6 +37,13 @@ public class DeleteCertificateService extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+
+
+		final HttpSession session = request.getSession(false);
+		if (session == null) {
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
 		final String id = request.getParameter(PARAM_ID);
 		String msg = ""; //$NON-NLS-1$
 		LOGGER.info("Baja del certificado con ID: " + id); //$NON-NLS-1$
