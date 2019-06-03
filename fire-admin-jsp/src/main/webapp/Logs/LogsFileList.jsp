@@ -79,13 +79,10 @@
 					sSize = String.valueOf(size) + " bytes";//$NON-NLS-1$
 				}
 
-				if (i != fileList.size() - 1) {
-					jsonData += "{\"Name\":\"" + json.getString("name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-							+ "\",\"Size\":\"" + sSize + "\"},";//$NON-NLS-1$//$NON-NLS-2$
-				} else {
-					jsonData += "{\"Name\":\"" + json.getString("name") + "\",\"date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-							+ "\",\"size\":\"" + sSize + "\"}]}";//$NON-NLS-1$//$NON-NLS-2$
-				}
+				jsonData += "{\"name\":\"" + json.getString("name") + "\",\"date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+						+ "\",\"size\":\"" + sSize + "\"}"; //$NON-NLS-1$ //$NON-NLS-2$
+						
+				jsonData +=  (i != fileList.size() - 1) ? "," : "]}"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	} catch (Exception e) {
