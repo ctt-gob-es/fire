@@ -91,7 +91,7 @@ public class LogServerService extends HttpServlet {
 					logclient.setDisableSslChecks(!logServer.isVerificarSsl());
 					if (connectServer(logclient, logServer, request)) {
 						response.sendRedirect(request.getContextPath() +
-								"/log?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+								"/log?op=" + ServiceOperations.GET_LOG_FILES.getId() + //$NON-NLS-1$
 								"&name-srv=" + logServer.getNombre()); //$NON-NLS-1$
 						return;
 					}
