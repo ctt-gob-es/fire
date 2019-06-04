@@ -678,7 +678,16 @@ public class LogConsumerClient {
 			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al recuperar los registros adicionales del fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
-			logData.setError(new LogError(LogError.EC_CONTROLLED, errorParser.getMessage()));
+
+			// No se encuentran mas resultados
+			if (Integer.parseInt(errorParser.getStatus()) == STATUSCODE_NO_CONTENT) {
+				LOGGER.log(Level.WARNING, "No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
+				logData.setError(new LogError(LogError.EC_NO_MORE_LINES, errorParser.getMessage()));
+			}
+			// Cualquier otro error
+			else {
+				logData.setError(new LogError(LogError.EC_CONTROLLED, errorParser.getMessage()));
+			}
 		}
 
 		// Error no controlado devuelto por el servidor
