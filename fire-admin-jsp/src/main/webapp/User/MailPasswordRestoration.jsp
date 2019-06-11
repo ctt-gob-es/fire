@@ -73,7 +73,7 @@
 				
 				
 				<div id="loginButton">
-				<p style="color: #808080;right:inherit;">Pulse el bot&oacute;n para restaurar la contrase&ntilde;a o volver a la p&aacute;gina principal</p>
+				<p style="color: #808080;right:inherit;">Pulse el bot&oacute;n (Restaurar) para restaurar la contrase&ntilde;a o el bot&oacute;n (Volver) para ir a la p&aacute;gina principal</p>
 				<input class="menu-btn" type="submit" value="Restaurar" style="margin-top: 10px;">
 				<input class="menu-btn" name="add-usr-btn" type="button" value="Volver" title="Volver a la p&aacute;gina de administraci&oacute;n" onclick="location.href='../Login.jsp'" style="margin-top: 10px;"/>
 				</div>

@@ -24,17 +24,27 @@
 			}
 			// Este parametro comprueba si el usuario ha introducido su nombre de usuario y contrasena
 			// En caso de que haya introducido datos erroneos, se recibe un "fail"
-			String err = request.getParameter(ServiceParams.PARAM_ERR); //$NON-NLS-1$
+			String err = request.getParameter(ServiceParams.PARAM_ERR);
 			String errMsg = null;
-			if (err != null) {
+			try {
+			if (err != null) 
 				errMsg = UserMessages.parse(err).getText();
 			}
+			catch (Exception e) {
+				err = null;
+			}
+			
 			
 			String succ = request.getParameter(ServiceParams.PARAM_SUCCESS); //$NON-NLS-1$
 			String succMsg = null;
-			if (succ != null) {
+			try {
+			if (succ != null) 
 				succMsg = UserMessages.parse(succ).getText();
 			}
+			catch (Exception e) {
+				succ = null;
+			}
+			
 		%>
 		<!-- Barra de navegacion -->
 		<ul id="menubar">
@@ -84,13 +94,7 @@
 				
 			<!-- enlace para acceder a la pagina MailChangePassword -->
 			</form>
-			<form action="User/MailPasswordRestoration.jsp" >
-			<div id="PasswordButton">
-				<p style="color: #808080; left:inherit;"></p>
-				<input type="submit" name="¿Has olvidado tu contrase&ntilde;a?" id="¿Has olvidado tu contrase&ntilde;a?" value="¿Has olvidado tu contrase&ntilde;a?" class="enlace" />
-
-				</div>
-				</form>
+			<a href="User/MailPasswordRestoration.jsp"  class="enlace">&iquest;Ha olvidado su contrase&ntilde;a?</a>
 		</div>
 	</body>
 </html>

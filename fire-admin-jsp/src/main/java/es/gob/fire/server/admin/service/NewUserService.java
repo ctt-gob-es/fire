@@ -11,6 +11,7 @@ package es.gob.fire.server.admin.service;
 
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -122,13 +123,33 @@ public class NewUserService extends HttpServlet {
 							UsersDAO.createUser(params.getLoginUser(), clave,
 									params.getUserName(), params.getUserSurname(),
 									params.getUserEMail(), params.getUserTelf(), params.getUserRole());
-						} catch (final Exception e) {
+						} catch (final SQLIntegrityConstraintViolationException e) {
+							LOGGER.log(Level.SEVERE, "Se ha detectado un error de duplicidad en base de datos: " + e); //$NON-NLS-1$
+							isOk = false;
+
+							final User mail = UsersDAO.getUserByMail(params.getUserEMail());
+							if (mail != null && mail.getMail() != null && !"".equals(mail.getMail()))//$NON-NLS-1$
+							{
+								LOGGER.log(Level.SEVERE, "Se ha proporcionado un dirección de correo repetida, no se puede dar de alta el usuario"); //$NON-NLS-1$
+								isOk = false;
+
+							}
+
+
+						}
+						catch (final Exception e) {
 							LOGGER.log(Level.SEVERE, "Error en el alta del usuario", e); //$NON-NLS-1$
 							isOk = false;
 						}
 					}
 
+
+					if (isOk) {
+						LOGGER.info("Alta del usuario con mail de login: " + params.getUserEMail()); //$NON-NLS-1$
+					}
+
 				}
+
 			}
 
 			else if(op == 2) {	//Edicion de usuario
@@ -178,13 +199,33 @@ public class NewUserService extends HttpServlet {
 					resp.getWriter().write("new");//$NON-NLS-1$
 				}
 			}
+			else if(op == 3 && params.getUserEMail() != null ){
+				// Comprobar que el correo de usuario no existe anteriormente en la tabla de usuarios dado de alta
+				final User mail = UsersDAO.getUserByMail(params.getUserEMail());
+				resp.setContentType("text/html");//$NON-NLS-1$
+				if (mail != null && mail.getId() != null && !"".equals(mail.getId())) { //$NON-NLS-1$
+					final String usrMail = "El usuario con direccion de correo '" + params.getUserEMail() + //$NON-NLS-1$
+							"' ya existe en el sistema."; //$NON-NLS-1$
+					resp.getWriter().write(usrMail);
+					return;
+				}
+				else {
+					resp.getWriter().write("new");//$NON-NLS-1$
+					return;
+				}
+			}
+
 			else {
 				throw new IllegalStateException("Estado no permitido");//$NON-NLS-1$
 			}
 
+
 			if (op != 3) {
 				resp.sendRedirect("User/UserPage.jsp?op=" + stringOp + "&r=" + (isOk ? "1" : "0")+"&ent=user"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				return;
 			}
+
+
 		}
 		catch (final IllegalArgumentException e){
 			LOGGER.log(Level.SEVERE,"Ha ocurrido un error con el base64 : " + e, e); //$NON-NLS-1$

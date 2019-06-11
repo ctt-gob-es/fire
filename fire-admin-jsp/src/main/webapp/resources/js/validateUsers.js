@@ -79,6 +79,27 @@ $(document).ready(function(){
 				msg = msg + "Debe introducir mail correcto para el usuario\n";
 				ok = false;
 			}
+			if(op == 1 && $("#email").val() != ""){			
+				var data="&email="+$("#email").val();
+				$.ajax({
+				 	async:false,
+				 	cache:false,
+		            type: "POST",
+		            url: "../newUser?op=3",
+		            data: data,		         
+		            success: function (responseText) {
+		            	if(responseText!="new"){
+				e.preventDefault();
+				$('label[for=email]').css({color:'red'});
+				$('#email').css({backgroundColor:'#fcc'});
+				msg =  msg + responseText+"\n";	
+				ok = false;
+		              	}	            		    					    				            	                     
+		            }		           
+		        });
+			  }
+			
+			
 		}if (!ok){
 			alert(msg);
 			return false;

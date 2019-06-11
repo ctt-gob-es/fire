@@ -47,6 +47,8 @@ public class UsersDAO {
 
 	private static final String ST_SELECT_USER_BY_NAME = "SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, fk_rol, fec_alta, usu_defecto  FROM tb_usuarios  WHERE nombre_usuario = ?";//$NON-NLS-1$
 
+	private static final String ST_SELECT_USER_BY_MAIL = "SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, fk_rol, fec_alta, usu_defecto  FROM tb_usuarios  WHERE correo_elec = ?";//$NON-NLS-1$
+
 	private static final String ST_SELECT_ALL_USERS = "SELECT tb_usu.id_usuario, tb_usu.nombre_usuario, tb_usu.clave,tb_usu.nombre, tb_usu.apellidos, tb_usu.correo_elec, tb_usu.telf_contacto,tb_rol.nombre_rol, tb_usu.fec_alta, tb_usu.usu_defecto  FROM tb_usuarios AS tb_usu, tb_roles AS tb_rol "
 			+ "WHERE tb_usu.fk_rol = tb_rol.id  ORDER BY tb_usu.nombre_usuario"; //$NON-NLS-1$
 
@@ -59,7 +61,7 @@ public class UsersDAO {
 
 	private static final String ST_UDATE_USER_BY_ID = "UPDATE tb_usuarios SET  nombre=?, apellidos=?, correo_elec=?, fk_rol=?, telf_contacto=? WHERE id_usuario = ?";//$NON-NLS-1$
 
-	private static final String ST_UDATE_PASSWD_BY_ID = "UPDATE tb_usuarios SET nombre_usuario=?, clave=? WHERE id_usuario = ?";//$NON-NLS-1$
+	private static final String ST_UDATE_PASSWD_BY_ID = "UPDATE tb_usuarios SET clave=? WHERE id_usuario = ?";//$NON-NLS-1$
 
 	private static final String ST_REMOVE_USER = "DELETE FROM tb_usuarios WHERE id_usuario = ?"; //$NON-NLS-1$
 
@@ -383,9 +385,8 @@ public class UsersDAO {
 	public static void updateUserPasswd (final String idUser, final String userName, final String passwd) throws SQLException {
 		final PreparedStatement st = DbManager.prepareStatement(ST_UDATE_PASSWD_BY_ID);
 
-		st.setString(1, userName);
-		st.setString(2, passwd);
-		st.setString(3, idUser);
+		st.setString(1, passwd);
+		st.setString(2, idUser);
 
 		LOGGER.info("Actualizamos el usuario '" + userName + "' con el ID: " + idUser); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -435,7 +436,6 @@ public class UsersDAO {
 	public static void createUser(final String userName, final String passwd, final String name, final String surname, final String email, final String telf, final String role) throws SQLException {
 
 		final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_USER);
-		st.setInt(8, Integer.parseInt(role));
 
 		st.setString(1, userName);
 		st.setString(2, passwd);
@@ -444,7 +444,7 @@ public class UsersDAO {
 		st.setString(5, email);
 		st.setDate(6, new Date(new java.util.Date().getTime()));
 		st.setString(7, telf);
-		st.setString(8, role);
+		st.setInt(8, Integer.parseInt(role));
 		st.execute();
 		LOGGER.info("Damos de alta el usuario '" + userName ); //$NON-NLS-1$
 
@@ -721,6 +721,50 @@ public class UsersDAO {
 		st.execute();
 		st.close();
 	}
+	/**
+	 * Obtiene la informaci&oacute;n de un usuario a partir de su nombre.
+	 * @param usrName Nombre del usuario.
+	 * @return Datos del usuario o {@code null} si no se encontr&oacute; el usuario.
+	 * @throws SQLException Cuando no se pueden recuperar los datos del usuario.
+	 * SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, rol, fec_alta FROM tb_usuarios  WHERE nombre_usuario = ?"
+	 */
+	public static User getUserByMail(final String mail) throws SQLException {
+		User usr = null;
+		try {
+			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_USER_BY_MAIL);
+			st.setString(1, mail);
+			final ResultSet rs = st.executeQuery();
+			if (rs.next()) {
+				usr = new User();
+				usr.setId(rs.getString(1));
+				usr.setUserName(rs.getString(2));
+				usr.setpassword(rs.getString(3));
+				usr.setName(rs.getString(4));
+				usr.setSurname(rs.getString(5));
+				if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
+					usr.setMail(rs.getString(6));
+				}
 
+				if(rs.getString(7) != null && !"".equals(rs.getString(7))) { //$NON-NLS-1$
+					usr.setTelephone(rs.getString(7));
+				}
+				usr.setRole(rs.getInt(8));
+				usr.setStartDate(rs.getDate(9));
+			}
+
+			st.close();
+			rs.close();
+		} catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "Error al recuperar la informacion de un usuario", e); //$NON-NLS-1$
+			throw new SQLException(e);
+		}
+
+		// Si se recupero el usuario, le configuramos los permisos
+		if (usr != null) {
+			usr.setPermissions(RolesDAO.getPermissions(usr.getRole()));
+		}
+
+		return usr;
+	}
 
 }

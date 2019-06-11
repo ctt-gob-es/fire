@@ -51,11 +51,11 @@ public class NewAppService extends HttpServlet {
 
 		try {
 			final String id = params.getId();
-			if (id != null && !id.isEmpty()) {
-				throw new IllegalArgumentException("El id del usuario no existe: " + id); //$NON-NLS-1$
+			if (id == null && id.isEmpty()) {
+				throw new IllegalArgumentException("El id del usuario es: " + id); //$NON-NLS-1$
 			}
 		} catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de operacion no soportado: " + ServiceParams.PARAM_APPID); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de usuario no soportado: " + ServiceParams.PARAM_APPID); //$NON-NLS-1$
 			resp.sendRedirect("Application/AdminMainPage.jsp"); //$NON-NLS-1$
 			return;
 		}
@@ -88,7 +88,7 @@ public class NewAppService extends HttpServlet {
 		if (op == 1) {
 			LOGGER.info("Alta de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
 			try {
-				AplicationsDAO.createApplication(params.getName(), params.getRes(), params.getIdcertificate());
+				AplicationsDAO.createApplication(params.getName(), params.getRes(), params.getIdcertificate(),params.isHabilitado());
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
 				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -101,7 +101,12 @@ public class NewAppService extends HttpServlet {
 			try {
 
 			 final boolean enable = params.isHabilitado();
-				AplicationsDAO.updateApplication(params.getId(),params.getName(), params.getRes(), params.getIdcertificate(), params.isHabilitado());
+				AplicationsDAO.updateApplication(
+						params.getId(),
+						params.getName(),
+						params.getRes(),
+						params.getIdcertificate(),
+						params.isHabilitado());
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la actualizacion de la aplicacion", e); //$NON-NLS-1$
 				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$

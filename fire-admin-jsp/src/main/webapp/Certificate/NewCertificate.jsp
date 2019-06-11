@@ -31,12 +31,11 @@
 		return;
 	}
 
-	final String empty = "";//$NON-NLS-1$
+	final String EMPTY = "";//$NON-NLS-1$
 	String id = request.getParameter("id-cert");//$NON-NLS-1$
 	String nameCert = request.getParameter("nombre-cert");//$NON-NLS-1$
 	final int op = Integer.parseInt(request.getParameter("op"));//$NON-NLS-1$
-	String b64CertPrin = "";//$NON-NLS-1$
-	String b64CertBkup = "";//$NON-NLS-1$
+	
 	
 	// op = 0 -> Solo lectura, no se puede modificar nada
 	// op = 1 -> nueva aplicacion
@@ -45,6 +44,10 @@
 	String subTitle = ""; //$NON-NLS-1$
 	String certDataPrincipal = "";//$NON-NLS-1$
 	String certDataBkup = "";//$NON-NLS-1$
+	String b64CertPrin = "";//$NON-NLS-1$
+	String b64CertBkup = "";//$NON-NLS-1$
+	
+	
 	switch (op) {
 		case 0:
 			title = "Ver el certificado " + nameCert;//$NON-NLS-1$
@@ -93,7 +96,7 @@
 		b64CertPrin = cer.getCertPrincipal();
 		final String[] datCertificate = (cer.getX509Principal().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
 		for (int i = 0 ; i <= datCertificate.length-1; i++){
-			certDataPrincipal = certDataPrincipal + datCertificate[i] + "</br>";//$NON-NLS-1$
+			certDataPrincipal += datCertificate[i] + "</br>";//$NON-NLS-1$
 		}
 		//fecha caducidad
 		Date fecha = cer.getX509Principal().getNotAfter();		
@@ -104,7 +107,7 @@
 		b64CertBkup = cer.getCertBackup();
 		final String[] datCertificate = (cer.getX509Backup().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
 		for (int i = 0; i<= datCertificate.length-1; i++){
-			certDataBkup = certDataBkup + datCertificate[i] + "</br>"; //$NON-NLS-1$
+			certDataBkup += datCertificate[i] + "</br>"; //$NON-NLS-1$
 		}
 		//fecha caducidad
 		Date fecha = new Date();
@@ -183,6 +186,7 @@
 			save.dispatchEvent(clicEvent);
 			(window.URL || window.webkitURL)
 					.revokeObjectURL(save.href);
+			console.log('carlos spring')
 		};
 		reader.readAsDataURL(contentBlob);
 	}
@@ -200,7 +204,7 @@
 
 	function downLoadCert(idDataCert,numCert){
 		var datCert = $("#"+idDataCert).html();
-		downloadCertificate(generateText(datCert), $("#nombre-cer").val()+'_'+numCert+ '.cer');
+		downloadCertificate(generateText(datCert), $("#nombre-cer").val() + '_' + numCert+ '.cer');
 	}
 	
 	</script>
@@ -225,7 +229,7 @@
 			Los campos con [*] al menos uno es obligatorio
 		<%} %>
 		</p>
-			<form id="frmCertificate" method="POST" autocomplete="off" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId() != null ? cer.getId() : empty%>" enctype="multipart/form-data" onsubmit="isCert()">
+			<form id="frmCertificate" method="POST" autocomplete="off" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId() != null ? cer.getId() : EMPTY %>" enctype="multipart/form-data" onsubmit="isCert()">
 							
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				<div style="display: inline-block; width: 20%;margin: 3px;">
@@ -234,7 +238,7 @@
 				</div>
 				<div  style="display: inline-block; width: 78%;margin: 3px;">
 						<input id="nombre-cer" class="edit-txt" type="text" name="nombre-cer" style="width: 80%;margin-top:3px;" 
-						value="<%= request.getParameter("nombre-cert") != null ? request.getParameter("nombre-cert") : empty %>"> 
+						value="<%= request.getParameter("nombre-cert") != null ? request.getParameter("nombre-cert") : EMPTY %>"> 
 				</div>
 										
 			</div>				
