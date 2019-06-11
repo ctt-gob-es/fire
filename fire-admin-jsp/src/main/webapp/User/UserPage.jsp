@@ -42,14 +42,17 @@ if (succ != null) {
 	MessageResult mr = MessageResultManager.analizeResponse(op, result,entity);
 	
 	if ("baja".equals(op) && "0".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2$
-		errorText = "No se ha podido borrar el usuario. Compruebe que no es responsable de ninguna aplicación.";
+		errorText = "No se ha podido borrar el usuario, tiene aplicaciones asociadas.";
 	
 	}else if  ("baja".equals(op) && "1".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2$
 		valueText = "El usuario ha sido borrado correctamente"; //$NON-NLS-1$
+		
+	}else if ("alta".equals(op) && "1".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2${
+		valueText = "El usuario ha sido creado correctamente"; //$NON-NLS-1$
 	}
 	
 	if ("edicion".equals(op) && "0".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2$
-		errorText = "No se ha podido realizar el cambio de rol. Compruebe que no es responsable de ninguna aplicación.";
+		errorText = "Los usuarios no pueden tener el mismo correo.";
 	
 	}else if  ("edicion".equals(op) && "1".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2$
 		valueText = "El usuario ha sido modificado correctamente";

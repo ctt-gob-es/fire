@@ -48,7 +48,7 @@
             		htmlTableBody = htmlTableBody + '<td headers="email">' + dataUndefined(JSONData.UsrList[i].correo_elec) + '</td>';            		
             		htmlTableBody = htmlTableBody + '<td headers="telf">' + dataUndefined(JSONData.UsrList[i].telf_contacto) + '</td>';
             		
-            		htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(JSONData.UsrList[i].nombre_rol) + '" headers="nombre_rol"><img  class = "nombre_rol" src="../resources/img/' + dataUndefined(JSONData.UsrList[i].nombre_rol) + '_icon.png"/></td>';
+            		htmlTableBody = htmlTableBody + '<td title="' + traductor(JSONData.UsrList[i].nombre_rol) + '" headers="nombre_rol"><img  class = "nombre_rol" src="../resources/img/' + dataUndefined(JSONData.UsrList[i].nombre_rol) + '_icon.png")/></td>';
 
             		htmlTableBody = htmlTableBody + '<td headers="actions">';            		
             		htmlTableBody = htmlTableBody + '<a href="NewUser.jsp?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario + '&op=0" title="Visualizar"><img src="../resources/img/details_icon.png"/></a>';    				
@@ -102,6 +102,23 @@
 	} else {
 		return confirm('¿Está seguro de eliminar el usuario ' + nombreApp + '?');
 	}
+  }
+  
+  function traductor(nombre_rol){
+	 // var nombre_rol = $("input[name=nombre_rol]").val();
+	  
+	  switch (nombre_rol) {
+	  case "admin":
+		  return "Administrador";
+		break
+	  case "responsible":
+		  return "Responsable";
+		 break
+	  case "contact":
+			return "Contacto";
+		break
+	  
+	  }
   }
   
 

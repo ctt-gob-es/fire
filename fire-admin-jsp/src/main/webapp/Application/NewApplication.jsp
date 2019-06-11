@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.admin.tool.Base64"%>
 <%@page import="jdk.management.resource.internal.ApproverGroup"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.CertificatesDAO"%>
@@ -51,6 +52,10 @@
 	String subTitle = ""; //$NON-NLS-1$
 	String certDataPrincipal = "";//$NON-NLS-1$
 	String certDataBkup = "";//$NON-NLS-1$
+	String b64CertPrin = "";//$NON-NLS-1$
+	String b64CertBkup = "";//$NON-NLS-1$
+	
+	
 	switch (op) {
 		case 0:
 	title = "Ver la aplicaci&oacute;n " + id;//$NON-NLS-1$
@@ -85,12 +90,18 @@
 	if (app == null) {
 		app = new Application();
 	}
-
+	
+	CertificateFire cert = null;
+	if (id != null) {
+		cert = CertificatesDAO.selectCertificateByID (id);
+	}
+	if (cert == null) {
+		cert = app.getCertificate();
+	}
 	if (app.getCertificate() != null) {
-		CertificateFire cert = app.getCertificate();
 		if (cert != null && cert.getX509Principal() != null) {
-			final String[] datCertificate = cert.getX509Principal().getSubjectX500Principal().getName()
-					.split(",");//$NON-NLS-1$
+			b64CertPrin = Base64.encode(cert.getX509Principal().getEncoded());
+			final String[] datCertificate = cert.getX509Principal().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 			for (int i = 0; i < datCertificate.length; i++) {
 				certDataPrincipal += datCertificate[i] + "</br>";//$NON-NLS-1$
 			}
@@ -98,7 +109,8 @@
 			Date fecha = cert.getX509Principal().getNotAfter();
 			certDataPrincipal += "Fecha de Caducidad = " + Utils.getStringDateFormat(fecha);//$NON-NLS-1$
 		}
-		if (cert != null && cert.getX509Backup() != null) {
+		if (cert != null && cert.getX509Backup() != null ) {
+			b64CertBkup = Base64.encode(cert.getX509Backup().getEncoded());
 			final String[] datCertificate = cert.getX509Backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 			for (int i = 0; i < datCertificate.length; i++) {
 				certDataBkup += datCertificate[i] + "</br>"; //$NON-NLS-1$
@@ -173,11 +185,50 @@
 					
 				});
 			
-			//ESTA PARTE ES DE NEW APPLICATION
 			
+			//ESTA PARTE ES DE NEW APPLICATION
+		});
 		
+		
+		
+		function downLoadCert(idDataCert, numCert) {
+			var datCert = $("#" + idDataCert).html();
+			var filename = $("#id-certificate").val() + "_" + numCert + ".cer";
+			downloadCertificate(
+					generateText(datCert), filename);
+		}
+		
+		/* Descargar Certificado */
+		function downloadCertificate(contentBlob, fileName) {
+			var reader = new FileReader();
+			reader.onload = function(event) {
+				var save = document.createElement('a');
+				save.href = event.target.result;
+				save.target = '_blank';
+				save.download = fileName || 'certificado.cer';
+				var clicEvent = new MouseEvent('click', {
+					'view' : window,
+					'bubbles' : true,
+					'cancelable' : true
+				});
+				save.dispatchEvent(clicEvent);
+				(window.URL || window.webkitURL)
+						.revokeObjectURL(save.href);
+				console.log('carlos spring')
+				
+			};
+			reader.readAsDataURL(contentBlob);
+		};
+		// Genera un objeto Blob con los datos del certificado en
+		// base64
+		function generateText(certB64) {
+			var text = [];
+			text.push(certB64);
+			return new Blob(text, {
+				type : 'text/plain'
 			});
-		
+		};
+
 		
 			
 		
@@ -316,6 +367,8 @@
 				
 				
 				<div style="margin: auto;width: 100%;padding: 3px;">
+					<% if (op == 2 || op == 1) { %>
+				
 					<div style="display: inline-block; width: 48%;margin: 3px;">
 						<div>
 							<div style="display: inline-block;width: 75%;">
@@ -340,7 +393,55 @@
 							<% } %>
 						</div>					
 					</div>
-				</div>									
+				<
+			<% } else{%>
+			
+					<div style="display: inline-block; width: 48%;margin: 3px;">
+						<div>
+							<div style="display: inline-block;width: 75%;">
+								<label for="cert-prin" style="color: #404040">Certificado 1</label>
+							</div>
+							<div  style="display: inline-block; width: 20%;margin:3px;">
+								<textarea style="display:none;" id="b64CertPrin" name="b64CertPrin"><%= b64CertPrin %></textarea>
+								<%if(certDataPrincipal != null && !certDataPrincipal.isEmpty()){ %>	
+								<input id="CertPrincipal-button" class="btn-borrar-cert" name="add-usr-btn" type="button" value="Descargar .cer" 
+								title="Descargar certificado en fichero con formato .cer" onclick="downLoadCert('b64CertPrin','1')" />
+								<%}%>
+							</div>															
+						</div>	
+						
+						
+																
+						<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8.5em;overflow-y: auto;margin-top:3px;resize:none">
+							<% if (certDataPrincipal != null && !certDataPrincipal.isEmpty()) { %>
+								<p><%= certDataPrincipal %></p>							
+							<% } %>						
+						</div>
+					</div>
+					<div style="display: inline-block; width: 48%;margin: 3px;">
+						<div>
+							<div style="display: inline-block;width: 75%;">
+								<label for="cert-resp"  style="color: #404040">Certificado 2</label>
+							</div>	
+						
+							<div  style="display: inline-block; width: 20%;margin: 3px;">
+												
+								<textarea style="display:none;" id="b64CertBkup" name="b64CertBkup"><%= b64CertBkup%></textarea>
+								<%if(certDataBkup != null && !certDataBkup.isEmpty()){ %>	
+								<input id="CertBkup-button" class="btn-borrar-cert" name="add-usr-btn" type="button" value="Descargar .cer" title="Descargar certificado en fichero con formato .cer" onclick="downLoadCert('b64CertBkup','2')" />
+								<%}%>
+							</div>	
+																								
+						</div>				
+						<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 90%;height:8.5em;overflow-y: auto;margin-top:3px;resize:none">
+							<% if (certDataBkup != null && !certDataBkup.isEmpty()) { %>
+								<p><%= certDataBkup %></p>						
+							<% } %>
+						</div>					
+					</div>
+								
+			<% } %>	
+			</div>										
 			<fieldset class="fieldset-clavefirma" >			
 		   	<div style="margin: auto;width: 60%;padding: 3px; margin-top: 5px;">
 				<div style="display: inline-block; width: 45%;margin: 3px;">
@@ -463,6 +564,8 @@
 				</div>
 			
 				<div style="margin: auto;width: 100%;padding: 3px;">
+			<% if (op == 2 || op == 1) { %>
+				
 					<div style="display: inline-block; width: 48%;margin: 3px;">
 						<div>
 							<div style="display: inline-block;width: 75%;">
@@ -487,7 +590,56 @@
 							<% } %>
 						</div>					
 					</div>
-				</div>	
+				<
+			<% } else{%>
+			
+					<div style="display: inline-block; width: 48%;margin: 3px;">
+						<div>
+							<div style="display: inline-block;width: 75%;">
+								<label for="cert-prin" style="color: #404040">Certificado 1</label>
+							</div>
+							<div  style="display: inline-block; width: 20%;margin:3px;">
+								<textarea style="display:none;" id="b64CertPrin" name="b64CertPrin"><%= b64CertPrin%></textarea>
+								<%if(certDataPrincipal != null && !certDataPrincipal.isEmpty()){ %>	
+								<input id="CertPrincipal-button" class="btn-borrar-cert" name="add-usr-btn" type="button" value="Descargar .cer" 
+								title="Descargar certificado en fichero con formato .cer" onclick="downLoadCert('b64CertPrin','1')" />
+								<%}%>
+							</div>															
+						</div>	
+						
+						
+																
+						<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8.5em;overflow-y: auto;margin-top:3px;resize:none">
+							<% if (certDataPrincipal != null && !certDataPrincipal.isEmpty()) { %>
+								<p><%= certDataPrincipal %></p>							
+							<% } %>						
+						</div>
+					</div>
+					<div style="display: inline-block; width: 48%;margin: 3px;">
+						<div>
+							<div style="display: inline-block;width: 75%;">
+								<label for="cert-resp"  style="color: #404040">Certificado 2</label>
+							</div>	
+						
+							<div  style="display: inline-block; width: 20%;margin: 3px;">
+												
+								<textarea style="display:none;" id="b64CertBkup" name="b64CertBkup"><%= b64CertBkup%></textarea>
+								<%if(certDataBkup != null && !certDataBkup.isEmpty()){ %>	
+								<input id="CertBkup-button" class="btn-borrar-cert" name="add-usr-btn" type="button" value="Descargar .cer" title="Descargar certificado en fichero con formato .cer" onclick="downLoadCert('b64CertBkup','2')" />
+								<%}%>
+							</div>	
+																								
+						</div>				
+						<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 90%;height:8.5em;overflow-y: auto;margin-top:3px;resize:none">
+							<% if (certDataBkup != null && !certDataBkup.isEmpty()) { %>
+								<p><%= certDataBkup %></p>						
+							<% } %>
+						</div>					
+					</div>
+								
+			<% } %>	
+			</div>	
+			</div>					
 				
 										
 			<fieldset class="fieldset-clavefirma" >			
@@ -569,21 +721,11 @@
 				  
 				  if (checkBox.checked == false && op == 1 || op == 2){
 				    text.style.display = "none";
-				  //  document.getElementById("nombre-app").disabled = 'disabled';
-					document.getElementById("nombre-app").style.background = '#F5F5F5';
-				//	document.getElementById("nombre-resp").disabled = 'disabled';
-					document.getElementById("nombre-resp").style.background  = '#F5F5F5';
-				//	document.getElementById("id-certificate").disabled = 'disabled';
-					document.getElementById("id-certificate").style.background = '#F5F5F5';
+				 
 				    
 				  } else {
 				     text.style.display = "block";
-				     document.getElementById("nombre-app").disabled = 'enable';
-				     document.getElementById("nombre-resp").disabled = 'enable';
-				     document.getElementById("id-certificate").style.background = 'enable';
-				    
-							
-				     
+				   
 				  }
 				}
 				

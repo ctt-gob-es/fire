@@ -122,7 +122,12 @@ public class NewCertificateService extends HttpServlet {
 		if (op == 1){
 			LOGGER.info("Alta del certificado con nombre: " + params.getName()); //$NON-NLS-1$
 			try {
-				CertificatesDAO.createCertificate(params.getName(), params.getB64Cert_prin(), params.getHuella_prin(), params.getB64Cert_resp(), params.getHuella_resp());
+				CertificatesDAO.createCertificate(
+						params.getName(),
+						params.getB64Cert_prin(),
+						params.getHuella_prin(),
+						params.getB64Cert_resp(),
+						params.getHuella_resp());
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en el alta del certificado", e); //$NON-NLS-1$
 				response.sendRedirect("Certificate/NewCertificate.jsp?op=" + op + "&r=0&ent=cer"); //$NON-NLS-1$ //$NON-NLS-2$

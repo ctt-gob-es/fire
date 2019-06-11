@@ -25,7 +25,10 @@
 		valueText = "La aplicacion ha sido modificada correctamente";
 	 
 	}else if  ("baja".equals(op) && "1".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2$
-		valueText = "El usuario ha sido borrado correctamente"; //$NON-NLS-1$
+		valueText = "La aplicacion ha sido borrada correctamente"; //$NON-NLS-1$
+		
+	}else if ("alta".equals(op) && "1".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2${
+		valueText = "La aplicacion ha sido creada correctamente"; //$NON-NLS-1$
 	}
 
 %>

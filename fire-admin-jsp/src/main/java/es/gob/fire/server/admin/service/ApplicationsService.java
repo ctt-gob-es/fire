@@ -65,10 +65,10 @@ public class ApplicationsService extends HttpServlet{
 					}
 					// Fecha caducidad
 					final Date fecha = cert.getX509Principal().getNotAfter();
-					data += "Fecha de Caducidad = " + Utils.getStringDateFormat(fecha) + "§"; //$NON-NLS-1$ //$NON-NLS-2$
+					data += "Fecha de Caducidad = " + Utils.getStringDateFormat(fecha); //$NON-NLS-1$
 				}
 				else {
-					data += "--§"; //$NON-NLS-1$
+					data += "--"; //$NON-NLS-1$
 				}
 				if (cert.getX509Backup() != null) {
 					final String[] datCertificate = cert.getX509Backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$

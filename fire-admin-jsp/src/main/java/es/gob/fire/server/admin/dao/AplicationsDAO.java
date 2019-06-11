@@ -9,14 +9,11 @@
  */
 package es.gob.fire.server.admin.dao;
 
-import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,6 +36,7 @@ import es.gob.fire.server.admin.entity.CertificateFire;
 import es.gob.fire.server.admin.entity.User;
 import es.gob.fire.server.admin.tool.Base64;
 import es.gob.fire.server.admin.tool.Hexify;
+import es.gob.fire.server.admin.tool.Utils;
 
 
 
@@ -71,7 +69,7 @@ public class AplicationsDAO {
 
 	private static final String ST_SELECT_APPLICATIONS_COUNT_BYCERT = "SELECT count(*) FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=?"; //$NON-NLS-1$
 
-	private static final String STATEMENT_INSERT_APPLICATION = "INSERT INTO tb_aplicaciones(id, nombre, fk_responsable,  fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?)"; //$NON-NLS-1$
+	private static final String STATEMENT_INSERT_APPLICATION = "INSERT INTO tb_aplicaciones(id, nombre, fk_responsable,  fecha_alta,fk_certificado,habilitado ) VALUES (?, ?, ?, ?, ?,?)"; //$NON-NLS-1$
 
 	private static final String STATEMENT_REMOVE_APPLICATION = "DELETE FROM tb_aplicaciones WHERE id = ?"; //$NON-NLS-1$
 
@@ -395,7 +393,7 @@ public class AplicationsDAO {
 	 * @throws GeneralSecurityException  Cuando no se puede generar el identificador aleatorio de la aplicaci&oacute;n.
 	 * @SQL INSERT INTO tb_aplicaciones(id, nombre, fk_responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?)
 	 */
-	public static void createApplication(final String nombre, final String fk_responsable, final String fkCer)  throws SQLException, GeneralSecurityException {
+	public static void createApplication(final String nombre, final String fk_responsable, final String fkCer, final boolean habilitado)  throws SQLException, GeneralSecurityException {
 
 		final String id = generateId();
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INSERT_APPLICATION);
@@ -407,6 +405,7 @@ public class AplicationsDAO {
 //		st.setString(5, telefono);
 		st.setDate(4, new Date(new java.util.Date().getTime()));
 	    st.setString(5, fkCer);
+	    st.setBoolean(6, habilitado);
 
 		LOGGER.info("Damos de alta la aplicacion '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
 		st.execute();
@@ -471,24 +470,21 @@ public class AplicationsDAO {
 				certificate.setId(rs.getString(11));
 				certificate.setNombre(rs.getString(12));
 
-				X509Certificate certPrincipal = null;
-				final String cerPrincipalString = rs.getString(13);
-				if (cerPrincipalString != null) {
-					final byte[] certPrincipalDecoded = Base64.decode(cerPrincipalString);
-					certPrincipal = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
-							new ByteArrayInputStream(certPrincipalDecoded));
+				if (rs.getString(13) != null && !"".equals(rs.getString(13))) { //$NON-NLS-1$
+					certificate.setCertPrincipalb64ToX509(rs.getString(13));
+					final String certPrincipal[] = certificate.getX509Principal().getSubjectX500Principal().getName().split(","); //$NON-NLS-1$
+					java.util.Date expDatePrincipal = new java.util.Date();
+					expDatePrincipal=certificate.getX509Principal().getNotAfter();
+					certificate.setCertPrincipal(certPrincipal[0] + "<br>Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
+				}
+				if (rs.getString(14)!=null && !"".equals(rs.getString(14))) { //$NON-NLS-1$
+					certificate.setCertBkupb64ToX509(rs.getString(14));
+					final String certBkup[] = certificate.getX509Backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
+					java.util.Date expDateBkup= new java.util.Date();
+					expDateBkup = certificate.getX509Backup().getNotAfter();
+					certificate.setCertBackup(certBkup[0] + "<br>Fecha de Caducidad=" + Utils.getStringDateFormat(expDateBkup)); //$NON-NLS-1$
 				}
 
-				X509Certificate certBackup = null;
-				final String certBackupB64 = rs.getString(14);
-				if (certBackupB64 != null) {
-					final byte[] certBackupDecoded = Base64.decode(certBackupB64);
-					certBackup = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
-							new ByteArrayInputStream(certBackupDecoded));
-				}
-
-				certificate.setX509Principal(certPrincipal);
-				certificate.setX509Backup(certBackup);
 
 				result = new Application();
 				result.setId(rs.getString(1));

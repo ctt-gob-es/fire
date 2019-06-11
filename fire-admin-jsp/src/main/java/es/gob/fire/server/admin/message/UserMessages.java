@@ -10,7 +10,9 @@ public enum UserMessages {
 	PASS_RESTORE_CORRECT(103, "La nueva contrase&ntilde;a se ha establecido"), //$NON-NLS-1$
 	EXCEP_TIME(104, "Se ha excedido el tiempo maximo de espera para la renovacion de la contrase&ntilde;a"), //$NON-NLS-1$
 	ERR_INCORRET_USER(105,"No existe usuario registrado en el sistema"), //$NON-NLS-1$
-	ERR_INCORRET_MAIL(106,"No existe usuario registrado en el sistema") //$NON-NLS-1$
+	ERR_INCORRET_MAIL(106,"No existe usuario registrado en el sistema"), //$NON-NLS-1$
+	CERT_CREATED_CORRECT(107, "El certificado ha sido creado correctamente"),
+	CERT_REMOVE_CORRECT(108, "El certificado ha sido eliminado correctamente")
 			;
 
 
@@ -32,7 +34,7 @@ public enum UserMessages {
 		return this.text;
 	}
 
-	public static UserMessages parse(final String code) {
+	public static UserMessages parse(final String code) throws IllegalArgumentException {
 
 		int numCode;
 		try {

@@ -25,7 +25,7 @@ import es.gob.fire.server.admin.tool.SendMail;
 
 
 /**
- * Servicio para el envio del enlace y mensaje al correo del usuario que quiere restablecer la contraseña
+ * Servicio para el envio del enlace y mensaje al correo del usuario que quiere restablecer la contrase&ntilde;a
  * @author Carlos.J.Raboso
  *
  */

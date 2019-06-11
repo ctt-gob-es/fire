@@ -46,6 +46,8 @@ public class LoginService extends HttpServlet {
 			return;
 		}
 
+
+
         if (user == null) {
         	LOGGER.warning("El usuario tiene que tener un login"); //$NON-NLS-1$
         	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$

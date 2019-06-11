@@ -69,7 +69,6 @@ $(document).ready(function(){
         		}
 
         		htmlTableBody = htmlTableBody + "</td><td>" + JSONData.AppList[i].alta + "</td>";
-        	//	htmlTableBody = htmlTableBody + "<td>" + dataUndefined(JSONData.AppList[i].deshablitado) + "</td>";
         		if (JSONData.AppList[i].habilitado){  
         			htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(JSONData.AppList[i].habilitado) + '"><img  class = "habilitado" src="../resources/img/comprobado_icon.png"/></td>'
         		} else {
@@ -77,6 +76,7 @@ $(document).ready(function(){
         		}
 
         		htmlTableBody = htmlTableBody + "<td>";
+        		
         		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?id-app=" + JSONData.AppList[i].id + "&op=0' title='Visualizar'><img  src='../resources/img/details_icon.png'/></a>";
         		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?id-app=" + JSONData.AppList[i].id + "&op=2' title='Editar'><img src='../resources/img/editar_icon.png'/></a>";        		
         		htmlTableBody = htmlTableBody + "<a href='../deleteApp?id-app=" + JSONData.AppList[i].id + "' title='Eliminar'><img src='../resources/img/delete_icon.png' onclick='return confirmar(\"" + JSONData.AppList[i].nombre + "\")'/></a>";     

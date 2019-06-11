@@ -68,7 +68,7 @@ public class SendMail {
         msg.setContent(body,"text/html"); //$NON-NLS-1$
 
         // Agregar un encabezado de conjunto de configuracion. Comenta o borra el
-        // siguiente linea si no está utilizando un conjunto de configuracion
+        // siguiente linea si no esta utilizando un conjunto de configuracion
       //  msg.setHeader("X-SES-CONFIGURATION-SET", CONFIGSET); //$NON-NLS-1$
 
         // Crear un transporte

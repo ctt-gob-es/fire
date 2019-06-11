@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.message.MessageResult" %>
 <%@page import="es.gob.fire.server.admin.message.MessageResultManager" %>
 
@@ -8,6 +9,8 @@
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
 	}
+	String errorText = null;
+	String valueText = null;
 
 	// Logica para determinar si mostrar un resultado de operacion
 	String op = request.getParameter("op"); //$NON-NLS-1$
@@ -15,6 +18,18 @@
 	String entity = request.getParameter("ent"); //$NON-NLS-1$
 	String msg = request.getParameter("msg");//$NON-NLS-1$
 	MessageResult mr = MessageResultManager.analizeResponse(op, result, entity);
+	
+	
+	
+	 if  ("edicion".equals(op) && "1".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2$
+			valueText = "El certificado ha sido modificado correctamente";
+		 
+		}else if  ("baja".equals(op) && "1".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2$
+			valueText = "El certificado ha sido borrado correctamente"; //$NON-NLS-1$
+			
+		}else if ("alta".equals(op) && "1".equals(result)) { //$NON-NLS-1$ //$NON-NLS-2${
+			valueText = "El certificado ha sido creado correctamente"; //$NON-NLS-1$
+		}
 		
 	
 %>
@@ -39,7 +54,19 @@
 	<div id="menu-bar"  style="display: text-align:right;">
 	<input class="menu-btn" name="add-usr-btn" type="button" value="Alta certificado" title="Crear una nueva aplicaci&oacute;n" onclick="location.href='NewCertificate.jsp?op=1'"/>
 	</div>
-
+<% if (errorText != null) { %>
+		<p id="error-txt"><%= errorText %></p> 
+	<%
+		errorText = null;
+	  }
+	%>
+	
+	<% if (valueText != null) { %>
+		<p id="success-txt"><%= valueText %></p> 
+	<%
+	valueText = null;
+	  }
+	%>
 		<div style="display: block-inline; text-align:center;">
 			<p id="descrp">
 			  Certificados dados de alta en el sistema.
