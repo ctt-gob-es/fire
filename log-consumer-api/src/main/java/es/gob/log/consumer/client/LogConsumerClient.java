@@ -1141,12 +1141,24 @@ public class LogConsumerClient {
 	 */
 	public byte[] downloadJson(final String fileName, final String downloadDir) {
 
+		final File dir = new File(downloadDir);
+
+		// Si no existe el directorio, lo intentamos crear
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+
+		if (!dir.isDirectory() || !dir.canWrite()) {
+			LOGGER.log(Level.SEVERE, String.format("El directorio '%1s' no existe o no tiene permisos de escritura", downloadDir)); //$NON-NLS-1$
+			return createErrorMessage("Problema en servidor al descargar el fichero", 500).getBytes(getCharsetContent()); //$NON-NLS-1$
+		}
+
 		final String serviceUrlPattern = new StringBuilder(this.serviceUrl)
 				.append("?").append(ServiceParams.OPERATION).append("=").append(ServiceOperations.DOWNLOAD.getId()) //$NON-NLS-1$ //$NON-NLS-2$
 				.append("&").append(ServiceParams.LOG_FILE_NAME).append("=").append(fileName)//$NON-NLS-1$ //$NON-NLS-2$
 				.append("&").append(ServiceParams.PARAM_RESET).append("=").toString(); //$NON-NLS-1$ //$NON-NLS-2$;
 
-		final File outputFile = new File(downloadDir, fileName + ".zip"); //$NON-NLS-1$
+		final File outputFile = new File(dir, fileName + ".zip"); //$NON-NLS-1$
 
 		final String result;
 		HttpResponse response = null;
