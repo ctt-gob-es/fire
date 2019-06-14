@@ -26,7 +26,7 @@
 	final byte[] sJSON = (byte[]) session.getAttribute(ServiceParams.SESSION_ATTR_JSON); 
 	if (sJSON == null){
 		response.sendRedirect("../log" + //$NON-NLS-1$
-				"?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+				"?op=" + ServiceOperations.GET_LOG_FILES.getId() + //$NON-NLS-1$
 				"&name-srv=" + nameSrv); //$NON-NLS-1$
 		return;
 	}
@@ -139,12 +139,14 @@
 <script type="text/javascript">
 
 	var obJson = <%=jsonData%>; 
-	var txtNumRec = '<%=numRec%>';
-	var nameServer = '<%=nameSrv%>';
-	var total =  Math.ceil(txtNumRec / 10);
-	var dataJSON = '{"TotalPages":'+ total +',"ActualPage":1,"TotalRecords":'+txtNumRec+',"FileListRows":[';
 	
 	if (obJson && obJson.FileList.length > 0) {
+		
+		var txtNumRec = '<%=numRec%>';
+		var nameServer = '<%=nameSrv%>';
+		var total =  Math.ceil(txtNumRec / 10);
+		var dataJSON = '{"TotalPages":'+ total +',"ActualPage":1,"TotalRecords":'+txtNumRec+',"FileListRows":[';
+				
 		for (i = 0; i < obJson.FileList.length; i++) {
 			if (i != obJson.FileList.length -1){
 				dataJSON += JSON.stringify(obJson.FileList[i]) + ",";
@@ -153,15 +155,17 @@
 		    	dataJSON += JSON.stringify(obJson.FileList[i]) + "]}" ;
 		    }
 		}
+		
+		console.log(dataJSON);
 
 		grid = $("#list");
 	    grid.jqGrid({
 	      colNames: ['Nombre fichero', 'Fecha de modificaci&oacute;n','Tama&ntilde;o'],
 	      colModel: [
 	    	
-	        { name: 'Name', width: "400",index:"id", align: 'left',sortable: true, search:false },
-	        { name: 'Date', width: "200", align: 'center',sortable: true , search:false},
-	        { name: 'Size', width: "200", align: 'right',sortable: true, search:false }
+	        { name: 'name', width: "400",index:"id", align: 'left',sortable: true, search:false },
+	        { name: 'date', width: "200", align: 'center',sortable: true , search:false},
+	        { name: 'size', width: "200", align: 'right',sortable: true, search:false }
 	      ],
 	       
 	        pager: '#page',
@@ -183,7 +187,7 @@
 	        ignoreCase: true,
 	        ondblClickRow: function(id){        	
 	        	var rowData = $(this).getRowData(id);
-	        	var fileName = rowData['Name'];
+	        	var fileName = rowData['name'];
 	        	document.location.href = "../log?op=4&fname=" + fileName + "&name-srv=" + nameServer;
 	        },
 	    });
