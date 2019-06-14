@@ -34,8 +34,6 @@ public class ConfigManager {
 
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 
-	private static final String PROP_ANALYTICS_ID = "google.trackingId"; //$NON-NLS-1$
-
 	private static final String PROP_AFIRMA_ID = "afirma.appId"; //$NON-NLS-1$
 
 	private static final String PROP_TEMP_DIR = "temp.dir"; //$NON-NLS-1$
@@ -202,7 +200,7 @@ public class ConfigManager {
 		for (final String provider : providersTempList) {
 			if (provider != null && !provider.trim().isEmpty()) {
 				final ProviderElement prov = new ProviderElement(provider);
-				if (!providersList.contains(provider)) { // ProviderElement tiene el equals() sobreescrito
+				if (!providersList.contains(prov)) {
 					providersList.add(prov);
 				}
 			}
@@ -217,14 +215,6 @@ public class ConfigManager {
 	 */
 	public static String getProviderClass(final String name) {
 		return getProperty(PREFIX_PROP_PROVIDER + name);
-	}
-
-	/**
-	 * Recupera el tracking Id de Google Analytics.
-	 * @return Tracking Id de Google Analytics.
-	 */
-	public static String getGoogleAnalyticsTrackingId() {
-		return getProperty(PROP_ANALYTICS_ID);
 	}
 
 	/**
