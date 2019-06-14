@@ -32,7 +32,7 @@ public class AplicationsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(AplicationsDAO.class.getName());
 
-	private static final String STATEMENT_SELECT_APP_NAME = "SELECT nombre FROM tb_aplicaciones WHERE id = ?"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_APP_NAME = "SELECT nombre, habilitado FROM tb_aplicaciones WHERE id = ?"; //$NON-NLS-1$
 
 	private static final String STATEMENT_SELECT_CERT ="SELECT COUNT(*) FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado AND (tb_certificados.huella_principal = ? OR tb_certificados.huella_backup=?)"; //$NON-NLS-1$
 
@@ -48,7 +48,7 @@ public class AplicationsDAO {
 		// si no hay cadena de conexion comprobamos del fichero de configuracion.
 		if (!DbManager.isConfigured()) {
 			final boolean valid = ConfigManager.getAppId().equals(appId);
-			return new ApplicationChecking(appId, appId, valid);
+			return new ApplicationChecking(appId, appId, valid, true);
 		}
 
 		// Comprobamos en BD
@@ -59,7 +59,7 @@ public class AplicationsDAO {
 		if (!st.execute()) {
 			st.close();
 			LOGGER.fine("No existe ninguna aplicacion dada de alta con el ID: " + appId); //$NON-NLS-1$
-			return new ApplicationChecking(appId, null, false);
+			return new ApplicationChecking(appId, null, false, false);
 		}
 
 		final ResultSet rs = st.getResultSet();
@@ -67,11 +67,11 @@ public class AplicationsDAO {
 		ApplicationChecking result;
 		if (rs.next()) {
 			LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + appId); //$NON-NLS-1$
-			result = new ApplicationChecking(appId, rs.getString(1), true);
+			result = new ApplicationChecking(appId, rs.getString(1), true, rs.getBoolean(2));
 		}
 		else {
 			LOGGER.fine("No se ha podido leer la aplicacion dada de alta en el sistema con el ID: " + appId); //$NON-NLS-1$
-			result =  new ApplicationChecking(appId, null, false);
+			result =  new ApplicationChecking(appId, null, false, false);
 		}
 
 		rs.close();
