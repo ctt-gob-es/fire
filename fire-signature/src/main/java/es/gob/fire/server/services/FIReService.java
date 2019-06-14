@@ -136,6 +136,11 @@ public class FIReService extends HttpServlet {
 	        		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 	        		return;
 	        	}
+	        	if (!appCheck.isEnabled()) {
+	        		LOGGER.warning(logF.format(String.format("La aplicacion %1s se encuentra desactivada. Se rechaza la peticion", appCheck.getName()))); //$NON-NLS-1$
+	        		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+	        		return;
+	        	}
 	        	appName = appCheck.getName();
 	        }
 	        catch (final Exception e) {

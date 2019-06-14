@@ -188,7 +188,8 @@ public final class ServiceUtil {
 	 * @throws DataBaseConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
 	 */
 	private static void checkValideThumbPrint(final String appId, final String thumbPrint) throws SQLException,
-	                                                                          IllegalAccessException, CertificateException, NoSuchAlgorithmException, IOException, DBConnectionException {
+	                                                                          IllegalAccessException, CertificateException,
+	                                                                          NoSuchAlgorithmException, IOException, DBConnectionException {
 		if (!AplicationsDAO.checkThumbPrint(appId, thumbPrint)) {
     		throw new IllegalAccessException("El certificado utilizado no tiene permiso para acceder"); //$NON-NLS-1$
     	}
