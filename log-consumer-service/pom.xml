@@ -11,28 +11,59 @@
 		<version>2.4-SNAPSHOT</version>
 	</parent>
 
-	<dependencies>
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-		</dependency>
-		<dependency>
-    		<groupId>org.glassfish</groupId>
-    		<artifactId>javax.json</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
-			<scope>provided</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-	</dependencies>
+	<profiles>
+  
+		<profile>
+			<id>basic-dependencies</id>
+			<activation>
+				<property>
+					<name>!withoutdependencies</name>	<!-- Se activara siempre que no se indique esta propiedad -->
+				</property>
+			</activation>
+
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.logconsumer</groupId>
+					<artifactId>log-consumer-register</artifactId>
+					<version>${log-consumer.version}</version>
+				</dependency>
+			
+				<dependency>
+					<groupId>javax.json</groupId>
+					<artifactId>javax.json-api</artifactId>
+				</dependency>
+				<dependency>
+		    		<groupId>org.glassfish</groupId>
+		    		<artifactId>javax.json</artifactId>
+				</dependency>
+				
+				<dependency>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+					<version>3.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				
+				<dependency>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</dependency>
+			</dependencies>
+	  	  			
+	  	</profile>
+	  	
+	  	<profile>
+			<id>monitoriza-register</id>
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.monitoriza</groupId>
+					<artifactId>monitoriza-log-register</artifactId>
+					<version>1.0</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+  
   
   <build>
     <plugins>

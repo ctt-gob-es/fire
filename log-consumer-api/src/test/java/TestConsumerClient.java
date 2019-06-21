@@ -1,4 +1,10 @@
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -65,5 +71,17 @@ public class TestConsumerClient {
 
 		data = client.searchText(5, "ser", 0, false);
 		System.out.println(new String(data.getLog()));
+	}
+
+	public static void main(final String[ ] args) throws NoSuchAlgorithmException {
+
+		// Generamos clave de usuario
+		final KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		final SecureRandom random = new SecureRandom(); // cryptograph. secure random
+		keyGen.init(random);
+		final SecretKey secretKey = keyGen.generateKey();
+		System.out.println(Base64.getEncoder().encodeToString(secretKey.getEncoded()));
+
+
 	}
 }

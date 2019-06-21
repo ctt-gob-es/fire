@@ -44,6 +44,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 /** Clase para la lectura y env&iacute;o de datos a URL remotas.
@@ -66,6 +67,19 @@ class HttpManager {
 
 	private static final int BUFFER_SIZE = 4096;
 
+	private static final TrustManager[] DUMMY_TRUST_MANAGER = new TrustManager[] {
+		new X509TrustManager() {
+			@Override
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+			@Override
+			public void checkClientTrusted(final X509Certificate[] certs, final String authType) { /* No hacemos nada */ }
+			@Override
+			public void checkServerTrusted(final X509Certificate[] certs, final String authType) {  /* No hacemos nada */  }
+
+		}
+	};
 	/** M&eacute;todo HTTP.
 	 * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 	public static enum UrlHttpMethod {
@@ -82,6 +96,8 @@ class HttpManager {
 
 	private boolean disabledSslChecks = false;
 
+	private TrustManager[] trustStoreManagers = null;
+
 	static {
 		final CookieManager cookieManager = new CookieManager();
 		cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
@@ -91,20 +107,6 @@ class HttpManager {
 	protected HttpManager() {
 		// Vacio y "protected"
 	}
-
-	private static final TrustManager[] DUMMY_TRUST_MANAGER = new TrustManager[] {
-		new X509TrustManager() {
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
-			@Override
-			public void checkClientTrusted(final X509Certificate[] certs, final String authType) { /* No hacemos nada */ }
-			@Override
-			public void checkServerTrusted(final X509Certificate[] certs, final String authType) {  /* No hacemos nada */  }
-
-		}
-	};
 
 	/**
 	 * Permite desactivar la comprobaci&oacute;n del servidor SSL servidor.
@@ -184,14 +186,17 @@ class HttpManager {
 
 		final URL uri = new URL(request != null ? request : url);
 
-		if (this.disabledSslChecks && uri.getProtocol().equals(HTTPS)) {
+		if (uri.getProtocol().equals(HTTPS)) {
 			try {
-				disableSslChecks();
+				if (this.trustStoreManagers != null) {
+					configureCustomTrustManager();
+				}
+				else if (this.disabledSslChecks) {
+					disableSslChecks();
+				}
 			}
 			catch(final Exception e) {
-				Logger.getLogger("es.gob.afirma").warning( //$NON-NLS-1$
-					"No se ha podido ajustar la confianza SSL, es posible que no se pueda completar la conexion: " + e //$NON-NLS-1$
-				);
+				LOGGER.warning("No se ha podido ajustar la confianza SSL, es posible que no se pueda completar la conexion: " + e); //$NON-NLS-1$
 			}
 		}
 
@@ -269,8 +274,18 @@ class HttpManager {
 			}
 		}
 
-		if (this.disabledSslChecks && uri.getProtocol().equals(HTTPS)) {
-			enableSslChecks();
+		if (uri.getProtocol().equals(HTTPS)) {
+			try {
+				if (this.trustStoreManagers != null) {
+					unconfigureCustomTrustManager();
+				}
+				else if (this.disabledSslChecks) {
+					enableSslChecks();
+				}
+			}
+			catch(final Exception e) {
+				LOGGER.warning("No se ha podido reestablecer la confianza SSL despues de realizar la conexion: " + e); //$NON-NLS-1$
+			}
 		}
 
 		response.setContent(content);
@@ -291,6 +306,63 @@ class HttpManager {
 			LOGGER.warning("Error comprobando si una URL es el bucle local: " + e); //$NON-NLS-1$
 			return false;
 		}
+	}
+
+	/** Reconfigura el gestor de confianza por defecto para las conexi&oacute;nes. */
+	private static void unconfigureCustomTrustManager() {
+		HttpsURLConnection.setDefaultSSLSocketFactory(DEFAULT_SSL_SOCKET_FACTORY);
+		LOGGER.fine(
+			"Reabilitado el gestior de confianza SSL por defecto" //$NON-NLS-1$
+		);
+	}
+
+	/** Deshabilita las comprobaciones de certificados en conexiones SSL, acept&aacute;dose entonces
+	 * cualquier certificado.
+	 * @throws KeyManagementException Si hay problemas en la gesti&oacute;n de claves SSL.
+	 * @throws NoSuchAlgorithmException Si el JRE no soporta alg&uacute;n algoritmo necesario.
+	 * @throws KeyStoreException Si no se puede cargar el KeyStore SSL.
+	 * @throws IOException Si hay errores en la carga del fichero KeyStore SSL.
+	 * @throws CertificateException Si los certificados del KeyStore SSL son inv&aacute;lidos.
+	 * @throws UnrecoverableKeyException Si una clave del KeyStore SSL es inv&aacute;lida. */
+	private void configureCustomTrustManager() throws KeyManagementException,
+	                                             NoSuchAlgorithmException,
+	                                             KeyStoreException,
+	                                             UnrecoverableKeyException,
+	                                             CertificateException,
+	                                             IOException {
+		final SSLContext sc = SSLContext.getInstance(SSL_CONTEXT);
+		KeyManager[] km;
+		try {
+			km = getKeyManager();
+		}
+		catch(final Exception e) {
+			// En ocasiones, los servidores de aplicaciones establecen configuraciones de KeyStore
+			// que no se pueden cargar aqui, y no es algo controlable por las aplicaciones
+			LOGGER.log(
+				Level.SEVERE,
+				"No ha sido posible obtener el KeyManager con el KeyStore '" + System.getProperty(KEYSTORE) + //$NON-NLS-1$
+					"', se usara null: " + e, //$NON-NLS-1$
+				e
+			);
+			km = null;
+		}
+		sc.init(
+			km,
+			this.trustStoreManagers,
+			new java.security.SecureRandom()
+		);
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		HttpsURLConnection.setDefaultHostnameVerifier(
+			new HostnameVerifier() {
+				@Override
+				public boolean verify(final String hostname, final SSLSession session) {
+					return true;
+				}
+			}
+		);
+		LOGGER.fine(
+			"Configurado el TrustManager a medida para las conexiones SSL" //$NON-NLS-1$
+		);
 	}
 
 	/** Habilita las comprobaciones de certificados en conexiones SSL dej&aacute;ndolas con su
@@ -392,7 +464,26 @@ class HttpManager {
 			keystore,
 			keyStorePassword != null ? keyStorePassword.toCharArray() : new char[0]
 		);
+
 		return keyFac.getKeyManagers();
+	}
+
+	/**
+	 * Establece cu&aacute;l es el almac&eacute;n de confianza para las conexiones SSL.
+	 * @param trustStore Almac&eacute;n de confianza ya inicializado.
+	 */
+	public void setTrustStore(final KeyStore trustStore) {
+
+		TrustManagerFactory trustManagerFactory;
+		try {
+			trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			trustManagerFactory.init(trustStore);
+		} catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "No se pudo cargar el gestoy para los certificados SSL", e);
+			return;
+		}
+		this.trustStoreManagers = trustManagerFactory.getTrustManagers();
+
 	}
 
     /** Lee un flujo de datos de entrada y los recupera en forma de array de

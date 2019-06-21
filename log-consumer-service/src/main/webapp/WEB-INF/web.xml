@@ -4,17 +4,24 @@ xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/
 id="WebApp_ID" version="3.1">
   <display-name>log-consumer-service</display-name>
 
-  <servlet>
-  	<description>Servicio de consulta de logs</description>
-  	<display-name>LogService</display-name>
-  	<servlet-name>LogService</servlet-name>
-  	<servlet-class>es.gob.log.consumer.service.LogService</servlet-class>
-  </servlet>
+    <servlet>
+        <description>Servicio de inicializacion ejecutado al levantarse el servidor</description>
+        <servlet-name>SystemInitializer</servlet-name>
+        <servlet-class>es.gob.log.consumer.service.SystemInitializer</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+  	    <description>Servicio de consulta de logs</description>
+  	    <display-name>LogService</display-name>
+  	    <servlet-name>LogService</servlet-name>
+  	    <servlet-class>es.gob.log.consumer.service.LogService</servlet-class>
+    </servlet>
   
   <!-- Mapeo -->  
-  <servlet-mapping>
-  	<servlet-name>LogService</servlet-name>
-  	<url-pattern>/logservice</url-pattern>
-  </servlet-mapping>
+    <servlet-mapping>
+  	    <servlet-name>LogService</servlet-name>
+  	    <url-pattern>/logservice</url-pattern>
+    </servlet-mapping>
 
 </web-app>

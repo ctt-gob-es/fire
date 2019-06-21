@@ -24,7 +24,7 @@
 		<org.glassfish-javax.json.version>1.0.4</org.glassfish-javax.json.version>
 		<junit.version>4.8.2</junit.version>
 		
-		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
 	</properties>
 
 	<url>https://administracionelectronica.gob.es/ctt/fire</url>
@@ -181,6 +181,12 @@
   			<version>${log-consumer.version}</version>
   		</dependency>
 	  
+		<dependency>
+			<groupId>es.gob.logconsumer</groupId>
+  			<artifactId>log-consumer-service</artifactId>
+  			<version>${log-consumer.version}</version>
+  		</dependency>
+		
 		<dependency>
 			<groupId>es.gob.logconsumer</groupId>
   			<artifactId>log-consumer-service</artifactId>

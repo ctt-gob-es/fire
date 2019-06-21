@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,6 +58,15 @@ public class LogConsumerClient {
 	 */
 	public LogConsumerClient() {
 		this.conn = new HttpManager();
+
+	}
+
+	/**
+	 * Configura el almace&acute;n de confianza para las conexiones SSL.
+	 * @param trustStore Almac&eacute;n de confianza ya inicializado.
+	 */
+	public void setTrustStore(final KeyStore trustStore) {
+		this.conn.setTrustStore(trustStore);
 	}
 
 	/**

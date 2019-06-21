@@ -34,6 +34,7 @@ public class LogService extends HttpServlet {
 
 	private static File pathLogs = null;
 
+
 	@Override
 	public void init() throws ServletException {
 		super.init();
@@ -198,7 +199,7 @@ public class LogService extends HttpServlet {
 	 * @throws NumberFormatException
 	 * @throws UnsupportedOperationException
 	 */
-	private static ServiceOperations checkOperation(final String opString)
+	private static final ServiceOperations checkOperation(final String opString)
 			throws NumberFormatException, UnsupportedOperationException {
 
 		final int op = Integer.parseInt(opString);
@@ -211,7 +212,7 @@ public class LogService extends HttpServlet {
 	 * @param op
 	 * @return true en caso de necesitar login, false en caso contrario
 	 */
-	private static boolean needLogin(final ServiceOperations op) {
+	private static final boolean needLogin(final ServiceOperations op) {
 		// Las operaciones echo, peticion de login y validacion de login, son
 		// las unicas que pueden realizarse sin haber establecido logging.
 		return 	op != ServiceOperations.ECHO &&
@@ -225,7 +226,7 @@ public class LogService extends HttpServlet {
 	 * @return {@code true} si el cliente est&aacute; autenticado y {@code false}
 	 * en caso contrario.
 	 */
-	private static boolean checkLogin(final HttpServletRequest req) {
+	private static final boolean checkLogin(final HttpServletRequest req) {
 
 		boolean logged = false;
 
@@ -242,7 +243,7 @@ public class LogService extends HttpServlet {
 	 * Funci&oacute;n que devuelve una cadena con formato en byte[]
 	 * @return
 	 */
-	private static byte[] echo() {
+	private static final byte[] echo() {
 		return EchoServiceManager.process();
 	}
 
@@ -252,7 +253,7 @@ public class LogService extends HttpServlet {
 	 * @return Token que deber&aacute; cifrarse para el acceso al servicio.
 	 * @throws SessionException Cuando no es posible crear la sesi&oacute;n.
 	 */
-	private static byte[] requestLogin(final HttpServletRequest req) throws SessionException {
+	private static final byte[] requestLogin(final HttpServletRequest req) throws SessionException {
 		final HttpSession session = req.getSession();
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
