@@ -26,7 +26,6 @@ public class SendMail {
 	 */
 	private static final Logger LOGGER = Logger.getLogger(SendMail.class.getName());
 
-    @SuppressWarnings("boxing")
 	public static void sendMail(final List<String> receivers, final String subject, final String body)
    		 {
 
