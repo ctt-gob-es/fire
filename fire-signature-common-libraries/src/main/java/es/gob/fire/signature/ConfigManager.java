@@ -222,7 +222,13 @@ public class ConfigManager {
 	 * @return Clase de conexi&oacute;n.
 	 */
 	public static String getJdbcDriverString() {
-		return getProperty(PROP_DB_DRIVER);
+		final String driver = getProperty(PROP_DB_DRIVER);
+		if (driver == null) {
+			LOGGER.warning(
+					String.format("No se ha declarado la clase del driver JDBC de la BD en el fichero de configuracion. " //$NON-NLS-1$
+							+ "Asegurese de habilitar las propiedades %1s y %2s como alternativa", PROP_APP_ID, PROP_CERTIFICATE)); //$NON-NLS-1$
+		}
+		return driver;
 	}
 
 	/**
@@ -230,7 +236,13 @@ public class ConfigManager {
 	 * @return Cadena de conexi&oacute;n con la base de datos.
 	 */
 	public static String getDataBaseConnectionString() {
-		return getProperty(PROP_DB_CONNECTION);
+		final String dbConnection = getProperty(PROP_DB_CONNECTION);
+		if (dbConnection == null) {
+			LOGGER.warning(
+					String.format("No se ha declarado la cadena de conexion a la BD en el fichero de configuracion. " //$NON-NLS-1$
+							+ "Asegurese de habilitar las propiedades %1s y %2s como alternativa", PROP_APP_ID, PROP_CERTIFICATE)); //$NON-NLS-1$
+		}
+		return dbConnection;
 	}
 
 	/**

@@ -44,16 +44,16 @@ public class DbManager {
 			dbConnDriver = ConfigManager.getJdbcDriverString();
 			if (dbConnDriver == null) {
 				LOGGER.log(
-						Level.SEVERE,
-						"No se ha declarado la clase del driver JDBC a la BD en el fichero de configuracion"); //$NON-NLS-1$
+						Level.WARNING,
+						"No se ha podido recuperar la clase del driver JDBC a la BD. No se realizara la conexion"); //$NON-NLS-1$
 				return null;
 			}
 
 			dbConnString = ConfigManager.getDataBaseConnectionString();
 			if (dbConnString == null) {
 				LOGGER.log(
-						Level.SEVERE,
-						"No se ha declarado la cadena de conexion a la BD en el fichero de configuracion"); //$NON-NLS-1$
+						Level.WARNING,
+						"No se ha podido recuperar la cadena de conexion a la BD. No se realizara la conexion"); //$NON-NLS-1$
 				return null;
 			}
 

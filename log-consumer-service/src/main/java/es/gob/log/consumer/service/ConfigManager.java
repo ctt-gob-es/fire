@@ -24,6 +24,10 @@ public class ConfigManager {
 
 	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
 
+	private static final String PROP_LOG_REGISTER_CLASS = "logs.register.class";
+
+	private static final String PROP_LOG_REGISTER_URL = "logs.register.url";
+
 	private static ConfigManager instance = null;
 
 	private Properties config;
@@ -131,5 +135,29 @@ public class ConfigManager {
 	public File getLogsDir() {
 		final String directory = this.config.getProperty(PROP_LOGS_DIR);
 		return directory != null ? new File(directory) : null;
+	}
+
+	/**
+	 * Recupera la clase para la notificaci&oacute;n del estado del servicio.
+	 * @return Clase encargada de notificar el estado del servicio
+	 */
+	public String getLogServiceRegisterClass() {
+		return this.config.getProperty(PROP_LOG_REGISTER_CLASS);
+	}
+
+	/**
+	 * URL a la que notificar el estado del servicio.
+	 * @return URL del servicio al que notificar.
+	 */
+	public String getLogServiceRegisterUrl() {
+		return this.config.getProperty(PROP_LOG_REGISTER_URL);
+	}
+
+	/**
+	 * Recupera una copia de todas las propiedades configuradas.
+	 * @return Propiedades configuradas en la aplicaci&oacute;n.
+	 */
+	public Properties getProperties() {
+		return (Properties) this.config.clone();
 	}
 }
