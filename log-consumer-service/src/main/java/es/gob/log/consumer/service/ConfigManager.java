@@ -24,9 +24,9 @@ public class ConfigManager {
 
 	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
 
-	private static final String PROP_LOG_REGISTER_CLASS = "logs.register.class";
+	private static final String PROP_LOG_REGISTER_CLASS = "logs.register.class"; //$NON-NLS-1$
 
-	private static final String PROP_LOG_REGISTER_URL = "logs.register.url";
+	private static final String PROP_LOG_REGISTER_URL = "logs.register.url"; //$NON-NLS-1$
 
 	private static ConfigManager instance = null;
 
@@ -79,7 +79,8 @@ public class ConfigManager {
 				final File configFile = new File(configDir, configFilename).getCanonicalFile();
 				// Comprobamos que se trate de un fichero sobre el que tengamos permisos y que no
 				// nos hayamos salido del directorio de configuracion indicado
-				if (configFile.isFile() && configFile.canRead() && configDir.startsWith(configFile.getParent())) {
+				if (configFile.isFile() && configFile.canRead() &&
+						configFile.getCanonicalPath().startsWith(new File(configDir).getCanonicalPath())) {
 					try (InputStream is = new FileInputStream(configFile);) {
 						config.load(is);
 						loaded = true;
