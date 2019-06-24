@@ -14,7 +14,7 @@ class ServiceParams {
 	static final String CIPHERED_TOKEN = "sc"; //$NON-NLS-1$
 
 	/**Par&aacute;metro que indica el nombre del fichero log */
-	static final String LOG_FILE_NAME = "fname"; //$NON-NLS-1$
+	public static final String LOG_FILE_NAME = "fname"; //$NON-NLS-1$
 
 	/**Par&aacute;metro que indica el n&uacute;mero de l&iacute;neas a obtener del fichero log */
 	static final String NUM_LINES = "nlines"; //$NON-NLS-1$

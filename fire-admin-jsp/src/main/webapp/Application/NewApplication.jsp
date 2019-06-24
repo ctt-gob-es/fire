@@ -140,8 +140,9 @@
 		      		opSel=$(this).val();
 		      	});
 		      	if(opSel!="0"){
-		      		$.get("application?requestType=getCertificateId&id-cert=" + opSel, function(data){	      		
-			      		var certificados=data.split("§");		      		
+		      		$.get("application?requestType=getCertificateId&id-cert=" + opSel, function(data){
+		      			console.log("Certificado: " + data);
+			      		var certificados=data.split("$*$");		      		
 			      		if(certificados[0] != null && typeof certificados[0] != "undefined" && certificados[0].trim() != "--"){		      			
 			      			$("#cert-prin").html(certificados[0]);
 			      		}
@@ -251,7 +252,7 @@
 		
 		<% if (op == 2 || op == 1) { %>	
 		<p>Los campos con * son obligatorios</p>
-			<form id="frmApplication" method="POST" autocomplete="off" action="../newApp"  onsubmit="isCert()">
+			<form id="frmApplication" method="POST" autocomplete="off" action="../newApp" onsubmit="isCert()" >
 			
 			<input type="hidden" name="<%= ServiceParams.PARAM_APPID %>" value="<%=  id %>" />
 			<input type="hidden" name="<%= ServiceParams.PARAM_OP %>" value="<%=  op %>" />  
@@ -466,7 +467,7 @@
 		
 		<% }else { %>	
 		<p>Los campos con * son obligatorios</p>
-			<form id="frmApplication" method="POST" autocomplete="off" action="../newApp"  onsubmit="isCert()">
+			<form id="frmApplication" method="POST" autocomplete="off" action="../newApp" onsubmit="isCert()" >
 			
 			<input type="hidden" name="<%= ServiceParams.PARAM_APPID %>" value="<%=  id %>" />
 			<input type="hidden" name="<%= ServiceParams.PARAM_OP %>" value="<%=  op %>" />  

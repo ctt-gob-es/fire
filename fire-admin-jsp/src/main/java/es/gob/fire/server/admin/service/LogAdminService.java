@@ -71,6 +71,7 @@ public class LogAdminService extends HttpServlet {
 
 		// Cargamos los parametros de la peticion
 		Parameters params;
+
 		try {
 			params = loadParameters(request);
 		}
@@ -103,7 +104,7 @@ public class LogAdminService extends HttpServlet {
 			op = checkOperation(opString);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString)); //$NON-NLS-1$
+			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", LogUtils.cleanText(opString))); //$NON-NLS-1$
 			final String jsonError = buildJsonError(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString), HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
 			session.setAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON, jsonError);
 			response.sendRedirect(getSelectionResultUrl(request, false));
@@ -147,7 +148,7 @@ public class LogAdminService extends HttpServlet {
 
 				// En caso de exito, redirigimos a LogsFileList para mostrar los ficheros encontrados
 				if (params.getMessage() != null && !params.getMessage().isEmpty()) {
-					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
+					response.sendRedirect("Logs/LogsFileList.jsp?"//$NON-NLS-1$
 						.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(params.getNameSrv()) //$NON-NLS-1$
 						.concat("&").concat(ServiceParams.PARAM_MSG).concat("=").concat(params.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
 					return;
@@ -188,8 +189,7 @@ public class LogAdminService extends HttpServlet {
 
 
 				if (datOpenFiles.getError() != null) {
-					response.sendRedirect(request.getContextPath() +
-							"/log?op=" + ServiceOperations.GET_LOG_FILES.getId() + //$NON-NLS-1$
+					response.sendRedirect("log?op=" + ServiceOperations.GET_LOG_FILES.getId() + //$NON-NLS-1$
 							"&" + ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv() + //$NON-NLS-1$ //$NON-NLS-2$
 							"&" + ServiceParams.PARAM_MSG + "=" + datOpenFiles.getError().getMessage() //$NON-NLS-1$ //$NON-NLS-2$
 							);
@@ -199,7 +199,7 @@ public class LogAdminService extends HttpServlet {
 				session.setAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO, datOpenFiles);
 
 				if (!params.isReset()) {
-					response.sendRedirect(request.getContextPath() + "/Logs/LogsManager.jsp?" + //$NON-NLS-1$
+					response.sendRedirect("Logs/LogsManager.jsp?" + //$NON-NLS-1$
 						ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv() + //$NON-NLS-1$
 						 "&" + ServiceParams.PARAM_FILENAME + "=" + params.getLogFileName());  //$NON-NLS-1$//$NON-NLS-2$
 					return;
@@ -346,35 +346,42 @@ public class LogAdminService extends HttpServlet {
 
 				        // Obtenemos los datos de la respuesta
 
-				        final byte[] buffer = new byte[8 * 1024];
-				        final File f =  new File(path.replaceAll("\"", "")); //$NON-NLS-1$ //$NON-NLS-2$
-				        int tam = 0;
-				        if (f.exists()) {
-				        	tam = (int) f.length();
-				        	final FileInputStream input = new FileInputStream(f);
-				        	response.setContentLength(tam);
-							try {
-								final OutputStream output = response.getOutputStream();//gestiona la descarga el navegador
-							  try {
-							    int bytesRead;
-							    while ((bytesRead = input.read(buffer)) != -1) {
-							      output.write(buffer, 0, bytesRead);
-							    }
-							  } finally {
-								output.flush();
-							    output.close();
-							  }
-							} finally {
-							  input.close();
-							}
+				        final File f =  new File(path.replaceAll("\"", "")).getCanonicalFile(); //$NON-NLS-1$ //$NON-NLS-2$
+				        final String normalizedTempDir = new File(tempDir).getCanonicalPath();
 
-							if (response.isCommitted()) {
-								Files.deleteIfExists(f.toPath());
-							}
+				        if (f.getAbsolutePath().startsWith(normalizedTempDir)) {
+
+				        	final byte[] buffer = new byte[8 * 1024];
+				        	int tam = 0;
+				        	if (f.exists()) {
+				        		tam = (int) f.length();
+				        		final FileInputStream input = new FileInputStream(f);
+				        		response.setContentLength(tam);
+				        		try {
+				        			final OutputStream output = response.getOutputStream();//gestiona la descarga el navegador
+				        			try {
+				        				int bytesRead;
+				        				while ((bytesRead = input.read(buffer)) != -1) {
+				        					output.write(buffer, 0, bytesRead);
+				        				}
+				        			} finally {
+				        				output.flush();
+				        				output.close();
+				        			}
+				        		} finally {
+				        			input.close();
+				        		}
+
+				        		if (response.isCommitted()) {
+				        			Files.deleteIfExists(f.toPath());
+				        		}
+				        		return;
+				        	}
+				        	result = buildJsonError("No se encontro el fichero para la descarga", 500); //$NON-NLS-1$
 				        }
-						else {
-							result = buildJsonError("No se encontro el fichero para la descarga", 500); //$NON-NLS-1$
-						}
+				        else {
+				        	result = buildJsonError("Se especifico una ruta de fichero no valida", 400); //$NON-NLS-1$
+				        }
 					}
 					else {
 						result = buildJsonError("La respuesta del servicio no esta bien formada", 500); //$NON-NLS-1$
@@ -391,6 +398,7 @@ public class LogAdminService extends HttpServlet {
 				// No se obtuvo resultado
 				result = buildJsonError("No se obtuvo respuesta del servidor", 500); //$NON-NLS-1$
 			}
+
 
 			response.getWriter().write(result);
 			break;

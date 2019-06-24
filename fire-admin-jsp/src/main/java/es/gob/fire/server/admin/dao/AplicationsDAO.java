@@ -34,6 +34,7 @@ import es.gob.fire.server.admin.conf.DbManager;
 import es.gob.fire.server.admin.entity.Application;
 import es.gob.fire.server.admin.entity.CertificateFire;
 import es.gob.fire.server.admin.entity.User;
+import es.gob.fire.server.admin.service.LogUtils;
 import es.gob.fire.server.admin.tool.Base64;
 import es.gob.fire.server.admin.tool.Hexify;
 import es.gob.fire.server.admin.tool.Utils;
@@ -439,7 +440,7 @@ public class AplicationsDAO {
 
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_REMOVE_APPLICATION);
 		st.setString(1, id);
-		LOGGER.info("Damos de baja la aplicacion con el ID: " + id); //$NON-NLS-1$
+		LOGGER.info("Damos de baja la aplicacion con el ID: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 		st.execute();
 		st.close();
 	}

@@ -70,6 +70,7 @@ public class ApplicationsService extends HttpServlet{
 				else {
 					data += "--"; //$NON-NLS-1$
 				}
+				data += "$*$"; //$NON-NLS-1$
 				if (cert.getX509Backup() != null) {
 					final String[] datCertificate = cert.getX509Backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 					for (int i = 0; i < datCertificate.length; i++){

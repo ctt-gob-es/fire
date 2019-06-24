@@ -140,7 +140,7 @@ public final class PreSignService extends HttpServlet {
         if (algorithm == null || algorithm.isEmpty()) {
             LOGGER.warning("No se encontro en la sesion el algoritmo de firma"); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
-        	response.sendRedirect(redirectErrorUrl);
+        	response.sendRedirect(redirectErrorUrl.replaceAll("[\r\n]",""));
             return;
         }
 

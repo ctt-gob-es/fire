@@ -60,7 +60,7 @@ public class DeleteUserService extends HttpServlet {
 		 String msg = ""; //$NON-NLS-1$
 
 
-		LOGGER.info("Baja del usuario con ID: " + idUser + " Nombre:" + username); //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.info("Baja del usuario con ID: " + LogUtils.cleanText(idUser) + " Nombre: " 	+ LogUtils.cleanText(username)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		boolean isOk = true;
 
@@ -108,7 +108,7 @@ public class DeleteUserService extends HttpServlet {
 			}
 			catch (final Exception e) {
 				isOk = false;
-				LOGGER.log(Level.SEVERE, "Error al dar de baja el usuario con ID:" + idUser + " Nombre:" + username , e); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.log(Level.SEVERE, "Error al dar de baja el usuario con ID:" + LogUtils.cleanText(idUser) + " Nombre:" + LogUtils.cleanText(username) , e); //$NON-NLS-1$ //$NON-NLS-2$
 
 			}
 		}

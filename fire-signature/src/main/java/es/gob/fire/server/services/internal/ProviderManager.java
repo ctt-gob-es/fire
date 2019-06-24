@@ -125,7 +125,7 @@ public class ProviderManager {
 		} catch (final FileNotFoundException e) {
 			LOGGER.warning(String.format(
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
-					providerConfigFilename, providerName
+					providerConfigFilename.replaceAll("[\r\n]",""), providerName.replaceAll("[\r\n]","")
 			));
 			providerConfig = new Properties();
 		} catch (final IOException e) {
@@ -133,7 +133,7 @@ public class ProviderManager {
 					Level.SEVERE,
 					String.format(
 							"No se ha podido cargar el fichero de configuracion del proveedor %s", //$NON-NLS-1$
-							providerName),
+							providerName.replaceAll("[\r\n]","")),
 					e);
 			providerConfig = new Properties();
 		}

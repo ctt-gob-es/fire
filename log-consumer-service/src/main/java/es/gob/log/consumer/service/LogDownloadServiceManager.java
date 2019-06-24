@@ -40,7 +40,12 @@ public class LogDownloadServiceManager {
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		final File dataFile = new File(pathLogs, logFileName);
 
+		if (!dataFile.getCanonicalPath().startsWith(pathLogs)){
+			throw new SecurityException("Se ha intentado acceder a una ruta fuera del directorio de logs: " + dataFile.getAbsolutePath()); //$NON-NLS-1$
+        }
+
 		Long fileDownloadPosition = new Long(0L);
+
 		if ((Long) session.getAttribute("FileDownloadPos") != null) { //$NON-NLS-1$
 			fileDownloadPosition = (Long)session.getAttribute("FileDownloadPos"); //$NON-NLS-1$
 		}
@@ -80,7 +85,7 @@ public class LogDownloadServiceManager {
 		}
 		catch (final Exception e) {
 			removeDownloadSessions(req);
-			throw new IOException("Ocurrio un error durante la lectura del fichero de log", e);
+			throw new IOException("Ocurrio un error durante la lectura del fichero de log", e); //$NON-NLS-1$
 		}
 
 		if (download.getPosition() > 0L) {

@@ -46,7 +46,7 @@ public class DeleteCertificateService extends HttpServlet {
 		}
 		final String id = request.getParameter(PARAM_ID);
 		final String msg = ""; //$NON-NLS-1$
-		LOGGER.info("Baja del certificado con ID: " + id); //$NON-NLS-1$
+		LOGGER.info("Baja del certificado con ID: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
 		boolean isOk = true;
 		if (id == null) {

@@ -26,6 +26,7 @@ import es.gob.fire.server.admin.conf.DbManager;
 import es.gob.fire.server.admin.entity.Application;
 import es.gob.fire.server.admin.entity.CertificateFire;
 import es.gob.fire.server.admin.entity.User;
+import es.gob.fire.server.admin.service.LogUtils;
 import es.gob.fire.server.admin.service.RolePermissions;
 import es.gob.fire.server.admin.service.UserRestorationInfo;
 import es.gob.fire.server.admin.tool.Base64;
@@ -463,7 +464,7 @@ public class UsersDAO {
 		final PreparedStatement st = DbManager.prepareStatement(ST_REMOVE_USER);
 		st.setString(1, idUser);
 
-		LOGGER.info("Damos de baja al usuario con el ID: " + idUser + " Nombre: " + username); //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.info("Damos de baja al usuario con el ID: " + LogUtils.cleanText(idUser) + " Nombre: " + LogUtils.cleanText(username)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		st.execute();
 		st.close();

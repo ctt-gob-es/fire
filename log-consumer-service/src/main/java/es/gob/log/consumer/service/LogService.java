@@ -67,7 +67,7 @@ public class LogService extends HttpServlet {
 			op = checkOperation(opString);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString)); //$NON-NLS-1$
+			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString.replaceAll("[\r\n]", ""))); //$NON-NLS-1$
 			sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "Codigo de operacion no soportado"); //$NON-NLS-1$
 			return;
 		}

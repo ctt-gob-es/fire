@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -18,7 +18,7 @@ import javax.servlet.http.HttpSession;
  */
 public class ValidationLoginManager {
 
-	private static final String CIPHER_CONFIG = "AES/CBC/PKCS5PADDING"; //$NON-NLS-1$
+	private static final String CIPHER_CONFIG = "AES/GCM/NoPadding"; //$NON-NLS-1$
 
 	private static final String CIPHER_ALGORITHM = "AES"; //$NON-NLS-1$
 
@@ -85,8 +85,12 @@ public class ValidationLoginManager {
 
 		final SecretKeySpec secretKey = new SecretKeySpec(key, CIPHER_ALGORITHM);
 		final Cipher cipher = Cipher.getInstance(CIPHER_CONFIG);
-		cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+
+		final GCMParameterSpec ivSpec = new GCMParameterSpec(16 * Byte.SIZE, iv);
+
+		cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
 		final byte[] decipheredToken = cipher.doFinal(cipheredData);
+
 
 		return decipheredToken;
 	}

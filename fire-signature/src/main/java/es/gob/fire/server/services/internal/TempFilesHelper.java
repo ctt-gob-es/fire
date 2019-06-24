@@ -46,6 +46,9 @@ public final class TempFilesHelper {
         try {
             final String tmpDir = ConfigManager.getTempDir();
             final File f = tmpDir != null && tmpDir.trim().length() > 0 ? new File(tmpDir.trim()) : null;
+            if (!f.getCanonicalPath().startsWith(tmpDir)){
+    			throw new SecurityException("Se ha intentado acceder a una ruta fuera del directorio de logs: " + f.getAbsolutePath()); //$NON-NLS-1$
+            }
             if (f == null || !f.isDirectory()) {
                 LOGGER.severe(
                 		"El directorio temporal configurado (" + //$NON-NLS-1$
@@ -108,6 +111,9 @@ public final class TempFilesHelper {
             );
         }
         final File f = new File(TMPDIR, filename);
+        if (!f.getCanonicalPath().startsWith(filename)){
+			throw new SecurityException("Se ha intentado acceder a una ruta fuera del directorio de logs: " + f.getAbsolutePath()); //$NON-NLS-1$
+        }
         final InputStream fis = new FileInputStream(f);
         final InputStream bis = new BufferedInputStream(fis);
         final byte[] ret = AOUtil.getDataFromInputStream(bis);
@@ -124,6 +130,7 @@ public final class TempFilesHelper {
      */
     public static void deleteTempData(final String filename) {
         new File(TMPDIR, filename).delete();
+
     }
 
     /**

@@ -170,7 +170,7 @@ public final class ServiceUtil {
      * @throws CertificateEncodingException Si hay alg&uacute;n problema codificando el certificado. */
 	private static String getThumbPrint(final X509Certificate cert) throws NoSuchAlgorithmException,
 	                                                                       CertificateEncodingException {
-		final MessageDigest md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
+		final MessageDigest md = MessageDigest.getInstance("SHA-256"); //$NON-NLS-1$
 		final byte[] der = cert.getEncoded();
 		md.update(der);
 		final byte[] digest = md.digest();

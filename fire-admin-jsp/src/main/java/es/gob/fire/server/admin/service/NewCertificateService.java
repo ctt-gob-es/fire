@@ -36,16 +36,7 @@ public class NewCertificateService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(NewCertificateService.class.getName());
 
-	private static final String PARAM_ID = "id-cert"; //$NON-NLS-1$
-	private static final String PARAM_NAME = "nombre-cer";//$NON-NLS-1$
-	private static final String PARAM_CER_PRIN = "fichero-firma-prin";//$NON-NLS-1$
-	private static final String PARAM_CER_RESP = "fichero-firma-resp";//$NON-NLS-1$
 
-	private static final String PARAM_CERB64PRIM = "b64CertPrin";//$NON-NLS-1$
-	private static final String PARAM_CERB64RESP = "b64CertBkup";//$NON-NLS-1$
-
-	private static final String PARAM_OP = "op"; //$NON-NLS-1$
-	private static final String X509 = "X.509"; //$NON-NLS-1$
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -70,12 +61,12 @@ public class NewCertificateService extends HttpServlet {
 		// Obtenemos el tipo de operacion 1-Alta 2-Edicion
 		int op;
 		try {
-			op = Integer.parseInt(request.getParameter(PARAM_OP));
+			op = Integer.parseInt(request.getParameter(ServiceParams.PARAM_OP_CERT));
 			if (op != 1 && op != 2) {
 				throw new IllegalArgumentException();
 			}
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Operacion no soportada: " + request.getParameter(PARAM_OP)); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Operacion no soportada: " + LogUtils.cleanText(ServiceParams.PARAM_OP_CERT)); //$NON-NLS-1$
 			response.sendRedirect("Certificate/CertificatePage.jsp?op=alta&r=0&ent=cer"); //$NON-NLS-1$
 			return;
 		}
@@ -103,7 +94,7 @@ public class NewCertificateService extends HttpServlet {
 		// Calculamos la huella de los certificados
 		MessageDigest md;
 		try {
-			md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
+			md = MessageDigest.getInstance("SHA-256"); //$NON-NLS-1$
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e); //$NON-NLS-1$
 			response.sendRedirect("Certificate/NewCertificate.jsp?op=" + op + "&r=0&ent=cer"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -163,21 +154,22 @@ public class NewCertificateService extends HttpServlet {
 	 */
 	private Parameters getParameters(final HttpServletRequest req) throws IOException, ServletException {
 
+
 		final Parameters params = new Parameters();
 
 		try {
-			if(req.getParameter(PARAM_ID) != null && !"".equals(req.getParameter(PARAM_ID))) {//$NON-NLS-1$
-				params.setIdCert(req.getParameter(PARAM_ID));
+			if(req.getParameter(ServiceParams.PARAM_ID_CERT) != null && !"".equals(req.getParameter(ServiceParams.PARAM_ID_CERT))) {//$NON-NLS-1$
+				params.setIdCert(req.getParameter(ServiceParams.PARAM_ID_CERT));
 			}
 
-			final CertificateFactory certFactory = CertificateFactory.getInstance(X509);
+			final CertificateFactory certFactory = CertificateFactory.getInstance(ServiceParams.X509);
 
 	        final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
 	        for (final FileItem item : items) {
-	        	if (item.isFormField() && PARAM_NAME.equals(item.getFieldName())) {
+	        	if (item.isFormField() && ServiceParams.PARAM_NAME_CERT.equals(item.getFieldName())) {
 	        		params.setName(item.getString());
 	        	}
-	        	else if (!item.isFormField() && PARAM_CER_PRIN.equals(item.getFieldName()) && item.getInputStream() != null && item.getSize() > 0L) {
+	        	else if (!item.isFormField() && ServiceParams.PARAM_CER_PRIN.equals(item.getFieldName()) && item.getInputStream() != null && item.getSize() > 0L) {
 	        		X509Certificate cert;
 	        		try (final InputStream certIs = item.getInputStream();) {
 	        			cert = (X509Certificate) certFactory.generateCertificate(certIs);
@@ -186,7 +178,7 @@ public class NewCertificateService extends HttpServlet {
 	        		params.setCert_prin(certEncoded);
 	        		params.setB64Cert_prin(Base64.encode(certEncoded));
 	        	}
-	        	else if (!item.isFormField() && PARAM_CER_RESP.equals(item.getFieldName()) && item.getInputStream() != null && item.getSize() > 0L) {
+	        	else if (!item.isFormField() && ServiceParams.PARAM_CER_RESP.equals(item.getFieldName()) && item.getInputStream() != null && item.getSize() > 0L) {
 	        		X509Certificate cert;
 	        		try (final InputStream certIs = item.getInputStream();) {
 	        			cert = (X509Certificate) certFactory.generateCertificate(certIs);
@@ -195,15 +187,17 @@ public class NewCertificateService extends HttpServlet {
 	        		params.setCert_resp(certEncoded);
 	        		params.setB64Cert_resp(Base64.encode(certEncoded));
 	        	}
-	        	else if (item.isFormField() && PARAM_CERB64PRIM.equals(item.getFieldName()) && item.getSize() > 0L) {
+
+	        	else if (item.isFormField() && ServiceParams.PARAM_CERB64PRIM.equals(item.getFieldName()) && item.getSize() > 0L) {
 	        		final X509Certificate cert = (X509Certificate)certFactory.generateCertificate(new ByteArrayInputStream(Base64.decode(item.getString())));
-	        		params.setCert_prin(cert.getEncoded());
 	        		params.setB64Cert_prin(item.getString());
+	        		params.setCert_prin(cert.getEncoded());
 	        	}
-	        	else if (item.isFormField() && PARAM_CERB64RESP.equals(item.getFieldName()) && item.getSize() > 0L) {
+	        	else if (item.isFormField() && ServiceParams.PARAM_CERB64RESP.equals(item.getFieldName()) && item.getSize() > 0L) {
 	        		final X509Certificate cert = (X509Certificate)certFactory.generateCertificate(new ByteArrayInputStream(Base64.decode(item.getString())));
-	        		params.setCert_resp(cert.getEncoded());
 	        		params.setB64Cert_resp(item.getString());
+	        		params.setCert_resp(cert.getEncoded());
+
 	        	}
 	        }
 		}

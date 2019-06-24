@@ -82,7 +82,7 @@ public class MailRestorePasswordUserService  extends HttpServlet{
 
 		if (currentTime > renovationTime + expirationTime) {
 			LOGGER.log(Level.WARNING, "Se ha excedido el tiempo maximo de espera hasta la renovacion de la contrasena"); //$NON-NLS-1$
-			resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.EXCEP_TIME.getCode()); //$NON-NLS-1$
+			resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.EXCEP_TIME.getCode()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		// Actualizar verdadero el tiempo  de la nueva url
@@ -100,8 +100,8 @@ public class MailRestorePasswordUserService  extends HttpServlet{
 		session.setAttribute(ServiceParams.SESSION_ATTR_RESTORATION, restorationInfo);
 
 		// Redirigir al usuario a la web de restablecimiento indicando el codigo recibido
-		resp.sendRedirect("User/RestorePasswordUser.jsp?" + ServiceParams.PARAM_USERID + "=" + restorationInfo.getId() +
-				"&" + ServiceParams.PARAM_USERNAME + "=" + restorationInfo.getName() + "&" + ServiceParams.PARAM_CODE + "=" + restorationInfo.getCodeInfo()); //$NON-NLS-1$ //$NON-NLS-2$
+		resp.sendRedirect("User/RestorePasswordUser.jsp?" + ServiceParams.PARAM_USERID + "=" + restorationInfo.getId() + //$NON-NLS-1$ //$NON-NLS-2$
+				"&" + ServiceParams.PARAM_USERNAME + "=" + restorationInfo.getName() + "&" + ServiceParams.PARAM_CODE + "=" + restorationInfo.getCodeInfo()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	/**

@@ -129,7 +129,6 @@ public class ConfigManager {
 	 * @return Clave de cifrado.
 	 */
 	public File getLogsDir() {
-
 		final String directory = this.config.getProperty(PROP_LOGS_DIR);
 		return directory != null ? new File(directory) : null;
 	}

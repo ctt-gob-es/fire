@@ -35,18 +35,6 @@ public class NewUserService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(NewUserService.class.getName());
 
-	private static final String PARAM_IDUSER = "idUser";//$NON-NLS-1$
-	private static final String PARAM_LOGNAME = "login-usr"; //$NON-NLS-1$
-	private static final String PARAM_PASSWD = "passwd-usr"; //$NON-NLS-1$
-	private static final String PARAM_USER_ROLE = "role-usr";//$NON-NLS-1$
-	private static final String PARAM_OP = "op"; //$NON-NLS-1$
-	private static final String PARAM_USERNAME = "usr-name";//$NON-NLS-1$
-	private static final String PARAM_USERSURNAME = "usr-surname";//$NON-NLS-1$
-	private static final String PARAM_USEREMAIL = "email";//$NON-NLS-1$
-	private static final String PARAM_USERTELF = "telf-contact";//$NON-NLS-1$
-
-
-	private static final String SHA_2 = "SHA-256"; //$NON-NLS-1$
 
 
 
@@ -68,9 +56,10 @@ public class NewUserService extends HttpServlet {
 		req.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
 		// Obtener el tipo de operacion 1-Alta 2-Edicion
-		final String idUser = req.getParameter(PARAM_IDUSER);
-		final String username = req.getParameter(PARAM_USERNAME);
-		final int op = Integer.parseInt(req.getParameter(PARAM_OP));
+		int op;
+		final String idUser = req.getParameter(ServiceParams.PARAM_IDUSER);
+		final String username = req.getParameter(ServiceParams.PARAM_USERNAME);
+		op = Integer.parseInt(req.getParameter(ServiceParams.PARAM_OP_USER));
 		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
 		final String stringOp4 = op == 4 ? "baja" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
 		 final String msg = ""; //$NON-NLS-1$
@@ -103,7 +92,7 @@ public class NewUserService extends HttpServlet {
 					// Codificamos la clave
 					String clave = null;
 					if (params.getPassword() != null) {
-						final MessageDigest md = MessageDigest.getInstance(SHA_2);
+						final MessageDigest md = MessageDigest.getInstance(ServiceParams.SHA_2);
 						md.update(params.getPassword().getBytes());
 						final byte[] digest = md.digest();
 						clave = Base64.encode(digest);
@@ -254,29 +243,29 @@ private static Parameters getParameters(final HttpServletRequest req)  {
 
 	final Parameters params = new Parameters();
 
-	if(req.getParameter(PARAM_IDUSER) != null && !req.getParameter(PARAM_IDUSER).isEmpty()) {
-		params.setIdUser(req.getParameter(PARAM_IDUSER));
+	if(req.getParameter(ServiceParams.PARAM_IDUSER) != null && !req.getParameter(ServiceParams.PARAM_IDUSER).isEmpty()) {
+		params.setIdUser(req.getParameter(ServiceParams.PARAM_IDUSER));
 	}
-	if(req.getParameter(PARAM_LOGNAME) != null && !req.getParameter(PARAM_LOGNAME).isEmpty()) {
-		params.setLoginUser(req.getParameter(PARAM_LOGNAME));
+	if(req.getParameter(ServiceParams.PARAM_LOGNAME) != null && !req.getParameter(ServiceParams.PARAM_LOGNAME).isEmpty()) {
+		params.setLoginUser(req.getParameter(ServiceParams.PARAM_LOGNAME));
 	}
-	if(req.getParameter(PARAM_PASSWD) != null && !req.getParameter(PARAM_PASSWD).isEmpty()) {
-		params.setPassword(req.getParameter(PARAM_PASSWD));
+	if(req.getParameter(ServiceParams.PARAM_PASSWD) != null && !req.getParameter(ServiceParams.PARAM_PASSWD).isEmpty()) {
+		params.setPassword(req.getParameter(ServiceParams.PARAM_PASSWD));
 	}
-	if(req.getParameter(PARAM_USER_ROLE) != null && !"".equals(req.getParameter(PARAM_USER_ROLE))) {//$NON-NLS-1$
-		params.setUserRole(req.getParameter(PARAM_USER_ROLE));
+	if(req.getParameter(ServiceParams.PARAM_USER_ROLE) != null && !"".equals(req.getParameter(ServiceParams.PARAM_USER_ROLE))) {//$NON-NLS-1$
+		params.setUserRole(req.getParameter(ServiceParams.PARAM_USER_ROLE));
 	}
-	if(req.getParameter(PARAM_USERNAME) != null && !req.getParameter(PARAM_USERNAME).isEmpty()) {
-		params.setUserName(req.getParameter(PARAM_USERNAME));
+	if(req.getParameter(ServiceParams.PARAM_USERNAME) != null && !req.getParameter(ServiceParams.PARAM_USERNAME).isEmpty()) {
+		params.setUserName(req.getParameter(ServiceParams.PARAM_USERNAME));
 	}
-	if(req.getParameter(PARAM_USERSURNAME) != null && !req.getParameter(PARAM_USERSURNAME).isEmpty()) {
-		params.setUserSurname(req.getParameter(PARAM_USERSURNAME));
+	if(req.getParameter(ServiceParams.PARAM_USERSURNAME) != null && !req.getParameter(ServiceParams.PARAM_USERSURNAME).isEmpty()) {
+		params.setUserSurname(req.getParameter(ServiceParams.PARAM_USERSURNAME));
 	}
-	if(req.getParameter(PARAM_USEREMAIL) != null && !req.getParameter(PARAM_USEREMAIL).isEmpty()) {
-		params.setUserEMail(req.getParameter(PARAM_USEREMAIL));
+	if(req.getParameter(ServiceParams.PARAM_USEREMAIL) != null && !req.getParameter(ServiceParams.PARAM_USEREMAIL).isEmpty()) {
+		params.setUserEMail(req.getParameter(ServiceParams.PARAM_USEREMAIL));
 	}
-	if(req.getParameter(PARAM_USERTELF) != null && !"".equals(req.getParameter(PARAM_USERTELF))) {//$NON-NLS-1$
-		params.setUserTelf(req.getParameter(PARAM_USERTELF));
+	if(req.getParameter(ServiceParams.PARAM_USERTELF) != null && !"".equals(req.getParameter(ServiceParams.PARAM_USERTELF))) {//$NON-NLS-1$
+		params.setUserTelf(req.getParameter(ServiceParams.PARAM_USERTELF));
 
 	}
 	return params;

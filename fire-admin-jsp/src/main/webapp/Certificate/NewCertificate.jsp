@@ -137,10 +137,12 @@
 	      var data = new FormData($("#frmCertificate")[0]);
 	      var idResult;
 	      if(id == "fichero-firma-prin"){
-	    	  idResult="cert-prin"; 		
+	    	  idResult="cert-prin";
+	    	  $('#b64CertPrin').val(null);
       		}
       	  else if(id == "fichero-firma-resp"){
-      		idResult = "cert-resp"; 
+      			idResult = "cert-resp";
+      			$('#b64CertBkup').val(null);
       	  }
 	    	      
 	      $.ajax({
@@ -255,7 +257,7 @@
 							<input id="fichero-firma-prin" type="file" name="fichero-firma-prin" accept=".cer"/>										
 						</div>
 						<%if(op == 2){ %>
-						<textarea style="display:none;" id="b64CertPrin" name="b64CertPrin"><%= b64CertPrin%></textarea>
+						<input type="hidden" id="b64CertPrin" name="b64CertPrin" value="<%= b64CertPrin%>">
 						
 						<div  style="display: inline-block; width: 20%;margin:3px;">
 							<input id="cleanCertPrin-button" class="btn-borrar-cert" name="cleanCertPrin-button" 
@@ -265,7 +267,7 @@
 					</div>											
 					<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
 						<%if (certDataPrincipal != null && !certDataPrincipal.isEmpty()) { %>
-							<p><%= certDataPrincipal %></p>							
+							<p><%= certDataPrincipal%></p>							
 						<%}%>						
 					</div>
 				</div>
@@ -278,7 +280,7 @@
 							<input id="fichero-firma-resp" type="file" name="fichero-firma-resp" accept=".cer"/>										
 						</div>
 						<%if(op == 2){ %>
-						<textarea style="display:none;" id="b64CertBkup" name="b64CertBkup"><%= b64CertBkup%></textarea>
+						<input type="hidden" id="b64CertBkup" name="b64CertBkup" value="<%= b64CertBkup%>">
 							
 						<div  style="display: inline-block; width: 20%;margin: 3px;">						
 							<input id="cleanCertResp-button" class="btn-borrar-cert" name="cleanCertResp-button"
@@ -289,6 +291,7 @@
 								
 					<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
 						<%if(certDataBkup != null && !certDataBkup.isEmpty()) { %>
+						
 							<p><%= certDataBkup %></p>						
 						<%}%>
 					</div>					
@@ -340,14 +343,15 @@
 		   	if (op > 0) {
 		   			final String msg = (op == 1 ) ? "Crear certificado" : "Guardar cambios";   //$NON-NLS-1$ //$NON-NLS-2$
 					final String tit= (op == 1 ) ? "Crea nuevo certificado" : "Guarda las modificaciones realizadas";//$NON-NLS-1$ //$NON-NLS-2$
+					
 		   	%>	
 			<fieldset class="fieldset-clavefirma" >			
 			   	<div style="margin: auto;width: 60%;padding: 3px; margin-top: 5px;">
 					<div style="display: inline-block; width: 45%;margin: 3px;">
-						<input class="menu-btn" name="add-usr-btn" type="button" value="Volver" title="Volver a la p&aacute;gina de administraci&oacute;n" onclick="location.href='CertificatePage.jsp'"/>
+						<input class="menu-btn" name="return-btn" type="button" value="Volver" title="Volver a la p&aacute;gina de administraci&oacute;n" onclick="location.href='CertificatePage.jsp'"/>
 					</div>
 				   	<div  style="display: inline-block; width: 35%;margin: 3px">
-				   		<input class="menu-btn" name="add-cert-btn" type="submit" value="<%= msg %>" title="<%= tit %>">
+				   		<input class="menu-btn" name="save-btn" type="submit" value="<%= msg %>" title="<%= tit %>">
 				   	</div>			   						   		
 			   	</div>	
 			</fieldset>

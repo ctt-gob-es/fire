@@ -45,7 +45,7 @@ public class DeleteAppService extends HttpServlet {
 
 		final String id = req.getParameter(PARAM_ID);
 
-		LOGGER.info("Baja de la app con ID: " + id); //$NON-NLS-1$
+		LOGGER.info("Baja de la app con ID: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
 		boolean isOk = true;
 		if (id == null) {

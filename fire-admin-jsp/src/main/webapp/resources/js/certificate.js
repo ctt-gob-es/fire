@@ -62,9 +62,9 @@ $(document)
 								+ "<td>Certificado 1</td>"
 								+ "<td>Certificado 2</td>"
 								+ "<td>Fecha Alta</td>" + "<td id='acciones'>Acciones</td>"
-								+ "</tr>" + "</thead><tbody>";
+								+ "</tr>" + "</thead>";
 						var htmlTableBody = "";
-						var htmlTableFoot = "</tbody></table>";
+						var htmlTableFoot = "</table>";
 
 						for (i = 0; i < recordsToFetch; ++i) {
 							htmlTableBody = htmlTableBody + "<tr><td>" + dataUndefined(JSONData.CertList[i].nombre_cert) + "</td>";

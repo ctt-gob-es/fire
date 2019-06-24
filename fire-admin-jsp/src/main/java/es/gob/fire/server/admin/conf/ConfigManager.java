@@ -46,6 +46,8 @@ public class ConfigManager {
 
 	private static final long DEFAULT_EXPIRED_TIME = 1800000;
 
+	private static final int DEFAULT_MAIL_PORT = 0;
+
 	/** Ruta del directorio por defecto para el guardado de temporales (directorio temporal del sistema). */
 	private static String DEFAULT_TMP_DIR;
 
@@ -326,26 +328,23 @@ public class ConfigManager {
 	 * @return Puerto de conexi&oacute;n
 	 *
 	 */
-	public static String getMailPort() {
+	public static int getMailPort() {
 
-		String portConecction;
-		try {
-			portConecction = getProperty(PARAM_MAIL_PORT);
-		}
-		catch (final Exception e) {
-			LOGGER.severe(String.format("Error al encontrar el puerto", PARAM_MAIL_PORT)); //$NON-NLS-1$
-			return null;
-		}
+		int portConecction;
 
-		if (portConecction == null) {
-			LOGGER.log(
-					Level.SEVERE,
-					String.format(
-							"No se ha encontrado el puerto de conexi&oacute;n.", //$NON-NLS-1$
-							PARAM_MAIL_PORT));
+			try {
+				final String portText = getProperty(PARAM_MAIL_PORT);
+				portConecction = Integer.parseInt(portText);
+			}
+			catch (final Exception e) {
+				LOGGER.severe(
+						String.format(
+								"No se ha configurado un puerto correcto en la propiedad '%1s' del fichero de configuracion", //$NON-NLS-1$
+								PARAM_MAIL_PORT));
+				return DEFAULT_MAIL_PORT;
+			}
+			return portConecction;
 		}
-		return portConecction;
-	}
 	/**
 	 * Recupera el nombre del usuario de la base de datos.
 	 * @return Nombre del usuario logeado

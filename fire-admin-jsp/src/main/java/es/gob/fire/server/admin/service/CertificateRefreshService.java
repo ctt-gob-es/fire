@@ -42,7 +42,7 @@ public class CertificateRefreshService extends HttpServlet{
 		JsonObject result;
 		final String id = req.getParameter(PARAM_IDCERT);
 		if (id == null) {
-			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de operacion no soportado: " + req.getParameter(PARAM_IDCERT)); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de operacion no soportado: " + LogUtils.cleanText(PARAM_IDCERT)); //$NON-NLS-1$
 			final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
 					.add("error"," Id no valido"); //$NON-NLS-1$ //$NON-NLS-2$
 

@@ -15,7 +15,7 @@ public class RolePermissions {
 	private boolean appResponsable;
 
 /**
- * Se obtiene los permisos que estan asovciados a cada rol
+ * Se obtiene los permisos que estan asociados a cada rol
  * @param permissions
  * @return
  */

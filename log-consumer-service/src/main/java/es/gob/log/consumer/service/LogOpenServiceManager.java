@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.channels.AsynchronousFileChannel;
-										 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,12 +20,12 @@ public class LogOpenServiceManager implements Serializable {
 	private static final long serialVersionUID = 3381831208944096820L;
 
 	private static final Logger LOGGER = Logger.getLogger(LogOpenServiceManager.class.getName());
-	
+
 	/**
 	 * Lanza el proceso de obtener los datos loginfo asociado al fichero log indicado por
 	 * par&aacute;metro "fname" de HttpServletRequest (req)
 	 * @param req Petici&oacute;n HTTP.
-			   
+
 	 * @return  {@code null} Si el par&aacute;metro "fname" de HttpServletRequest (req) es nulo o vacio
 	 * @throws IOException Cuando ocurre un error en la apertura.
 	 * @throws IllegalArgumentException Cuando no se proporcionan los par&aacute;metros necesarios.
@@ -37,16 +36,19 @@ public class LogOpenServiceManager implements Serializable {
 
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		if (logFileName == null || logFileName.isEmpty()) {
-												 
-																														  
-													  
+
+
+
 			LOGGER.log(Level.WARNING, "No se ha proporcionado el parametro con el nombre de fichero: " + ServiceParams.LOG_FILE_NAME); //$NON-NLS-1$
 			throw new IllegalArgumentException("No se ha proporcionado el parametro con el nombre de fichero: " + ServiceParams.LOG_FILE_NAME); //$NON-NLS-1$
-																									
-				  
+
+
 		}
 
 		final File logFile = new File(ConfigManager.getInstance().getLogsDir(), logFileName);
+		if (!logFile.getCanonicalPath().startsWith(logFileName)){
+			throw new SecurityException("Se ha intentado acceder a una ruta fuera del directorio de logs: " + logFile.getAbsolutePath()); //$NON-NLS-1$
+        }
 
 		// Comprobacion de seguridad de que no se pida un fichero fuera del directorio configurado
 		try {
@@ -72,7 +74,7 @@ public class LogOpenServiceManager implements Serializable {
 
 			final LogInfo logInfo = logOpen.getLogInfo();
 			session.setAttribute("LogInfo", logInfo); //$NON-NLS-1$
-  
+
 			final AsynchronousFileChannel logChannel = logOpen.getChannel();
 			session.setAttribute("Channel", logChannel); //$NON-NLS-1$
 			session.setAttribute("FileSize", new Long (logChannel.size())); //$NON-NLS-1$
@@ -82,7 +84,7 @@ public class LogOpenServiceManager implements Serializable {
 			session.setAttribute("FilePosition", new Long(0L)); //$NON-NLS-1$
 
 		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Error al abrir el fichero de log " + logFileName, e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al abrir el fichero de log ", e); //$NON-NLS-1$
 			throw e;
 		}
 

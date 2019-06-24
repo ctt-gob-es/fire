@@ -57,7 +57,7 @@ public class LoginService extends HttpServlet {
         final boolean logginPermission = user.getPermissions().hasLoginPermission();
 
         if (!logginPermission) {
-        	LOGGER.log(Level.WARNING, "El usuario " + username + " no tiene permisos de acceso"); //$NON-NLS-1$
+        	LOGGER.log(Level.WARNING, "El usuario " + LogUtils.cleanText(username) + " no tiene permisos de acceso"); //$NON-NLS-1$
         	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
 			return;
         }
@@ -68,11 +68,14 @@ public class LoginService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No es posible autenticar al usuario", e); //$NON-NLS-1$
+        	//resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
+
 			logged = false;
 		}
 
 		if (!logged) {
-			resp.sendRedirect("Login.jsp?login=fail"); //$NON-NLS-1$
+        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
+
 			return;
 		}
 
