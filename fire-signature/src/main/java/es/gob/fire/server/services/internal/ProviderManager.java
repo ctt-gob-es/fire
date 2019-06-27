@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactory;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.ProviderElement;
@@ -125,7 +126,7 @@ public class ProviderManager {
 		} catch (final FileNotFoundException e) {
 			LOGGER.warning(String.format(
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
-					providerConfigFilename.replaceAll("[\r\n]",""), providerName.replaceAll("[\r\n]","")
+					LogUtils.cleanText(providerConfigFilename), LogUtils.cleanText(providerName)
 			));
 			providerConfig = new Properties();
 		} catch (final IOException e) {
@@ -133,7 +134,7 @@ public class ProviderManager {
 					Level.SEVERE,
 					String.format(
 							"No se ha podido cargar el fichero de configuracion del proveedor %s", //$NON-NLS-1$
-							providerName.replaceAll("[\r\n]","")),
+							LogUtils.cleanText(providerName)),
 					e);
 			providerConfig = new Properties();
 		}

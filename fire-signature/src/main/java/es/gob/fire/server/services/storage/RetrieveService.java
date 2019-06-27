@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.signature.ConfigManager;
 
 /** Servicio de almacenamiento temporal de firmas. &Uacute;til para servir de intermediario en comunicaci&oacute;n
@@ -98,10 +99,10 @@ public final class RetrieveService extends HttpServlet {
 			return;
 		}
 
-		LOGGER.fine("Se solicita el fichero con el identificador: " + id.replaceAll("[\r\n]","")); //$NON-NLS-1$
+		LOGGER.fine("Se solicita el fichero con el identificador: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
 		final File inFile = new File(ConfigManager.getAfirmaTempDir(), id);
-		if (!inFile.getCanonicalPath().startsWith(id)){
+		if (!inFile.getCanonicalPath().startsWith(ConfigManager.getAfirmaTempDir().getCanonicalPath())){
 			throw new SecurityException("Se ha intentado acceder a una ruta fuera del directorio de logs: " + inFile.getAbsolutePath().replaceAll("[\r\n]","")); //$NON-NLS-1$
         }
 
@@ -110,20 +111,20 @@ public final class RetrieveService extends HttpServlet {
 		if (!inFile.exists() || !inFile.isFile() || !inFile.canRead() || isExpired(inFile, ConfigManager.getAfirmaTempsTimeout())) {
 
 			if (!inFile.exists()) {
-				LOGGER.warning("El fichero con el identificador '" + id.replaceAll("[\r\n]","") + "' no existe: " + inFile.getAbsolutePath().replaceAll("[\r\n]","")); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.warning("El fichero con el identificador '" + LogUtils.cleanText(id) + "' no existe: " + inFile.getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			else if (!inFile.isFile()) {
-				LOGGER.warning("El archivo con el identificador '" + id.replaceAll("[\r\n]","") + "' no es un fichero: " + inFile.getAbsolutePath().replaceAll("[\r\n]","")); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.warning("El archivo con el identificador '" + LogUtils.cleanText(id) + "' no es un fichero: " + inFile.getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			else if (!inFile.canRead()) {
-				LOGGER.warning("El fichero con el identificador '" + id.replaceAll("[\r\n]","") + "' no tiene permisos de lectura: " + inFile.getAbsolutePath().replaceAll("[\r\n]","")); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.warning("El fichero con el identificador '" + LogUtils.cleanText(id) + "' no tiene permisos de lectura: " + inFile.getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			else {
-				LOGGER.warning("El fichero con el identificador '" + id.replaceAll("[\r\n]","") + "' esta caducado: " + inFile.getAbsolutePath().replaceAll("[\r\n]","")); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.warning("El fichero con el identificador '" + LogUtils.cleanText(id) + "' esta caducado: " + inFile.getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
 			out.println(
-				ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + id.replaceAll("[\r\n]","") + "')" //$NON-NLS-1$ //$NON-NLS-2$
+				ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + id + "')" //$NON-NLS-1$ //$NON-NLS-2$
 			);
 			// Que el fichero sea de tipo fichero, implica que existe
 			if (inFile.isFile()) {
@@ -135,7 +136,7 @@ public final class RetrieveService extends HttpServlet {
 				final InputStream fis = new FileInputStream(inFile);
 				out.println(new String(getDataFromInputStream(fis)));
 				fis.close();
-				LOGGER.fine("Se recupera el fichero: " + inFile.getName().replaceAll("[\r\n]","")); //$NON-NLS-1$
+				LOGGER.fine("Se recupera el fichero: " + inFile.getName()); //$NON-NLS-1$
 			}
 			catch (final IOException e) {
 				LOGGER.severe(ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));

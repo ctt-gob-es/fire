@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.internal.sessions.SessionsDAO;
 import es.gob.fire.server.services.internal.sessions.SessionsDAOFactory;
 import es.gob.fire.signature.ConfigManager;
@@ -184,7 +185,7 @@ public final class SessionCollector {
 					LOGGER.warning(
 							String.format(
 									"El usuario %s esta solicitando una transaccion que no le pertenece. Quizas alguien este intentando suplantar su identidad", //$NON-NLS-1$
-									userId.replaceAll("[\r\n]","")));
+									LogUtils.cleanText(userId)));
 					return null;
 				}
 			}
@@ -297,7 +298,7 @@ public final class SessionCollector {
 			dao.removeSession(id);
 		}
 
-		LOGGER.fine("Se elimina la transaccion " + id.replaceAll("[\r\n]","")); //$NON-NLS-1$
+		LOGGER.fine("Se elimina la transaccion " + LogUtils.cleanText(id)); //$NON-NLS-1$
     }
 
     /**

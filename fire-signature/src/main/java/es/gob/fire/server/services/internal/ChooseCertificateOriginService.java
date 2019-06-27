@@ -177,7 +177,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		try {
 			LOGGER.info(logF.format("Se ha seleccionado el proveedor " + providerName.replaceAll("[\r\n]",""))); //$NON-NLS-1$
 			final FIReConnector connector = ProviderManager.initTransacction(
-					providerName.replaceAll("[\r\n]",""),
+					providerName,
 					connConfig.getProperties()
 			);
 	        LOGGER.info(logF.format("Se ha cargado el conector " + connector.getClass().getName())); //$NON-NLS-1$

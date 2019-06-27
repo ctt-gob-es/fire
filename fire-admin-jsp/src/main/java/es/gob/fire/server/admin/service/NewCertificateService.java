@@ -36,8 +36,6 @@ public class NewCertificateService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(NewCertificateService.class.getName());
 
-
-
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -66,7 +64,7 @@ public class NewCertificateService extends HttpServlet {
 				throw new IllegalArgumentException();
 			}
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Operacion no soportada: " + LogUtils.cleanText(ServiceParams.PARAM_OP_CERT)); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Operacion no soportada: " + LogUtils.cleanText(request.getParameter(ServiceParams.PARAM_OP_CERT))); //$NON-NLS-1$
 			response.sendRedirect("Certificate/CertificatePage.jsp?op=alta&r=0&ent=cer"); //$NON-NLS-1$
 			return;
 		}
@@ -162,7 +160,7 @@ public class NewCertificateService extends HttpServlet {
 				params.setIdCert(req.getParameter(ServiceParams.PARAM_ID_CERT));
 			}
 
-			final CertificateFactory certFactory = CertificateFactory.getInstance(ServiceParams.X509);
+			final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
 	        final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
 	        for (final FileItem item : items) {

@@ -46,7 +46,7 @@ public class ConfigManager {
 
 	private static final long DEFAULT_EXPIRED_TIME = 1800000;
 
-	private static final int DEFAULT_MAIL_PORT = 0;
+	private static final int DEFAULT_MAIL_PORT = 587;
 
 	/** Ruta del directorio por defecto para el guardado de temporales (directorio temporal del sistema). */
 	private static String DEFAULT_TMP_DIR;
@@ -253,6 +253,10 @@ public class ConfigManager {
 				text.substring(idx2 + SUFIX_CIPHERED_TEXT.length());
 	}
 
+	/**
+	 * Recupera el directorio temporal configurado.
+	 * @return Ruta del directorio temporal o nulo si no se ha .
+	 */
 	public static String getTempDir() {
 
 		String pathTempLogs;
@@ -260,8 +264,8 @@ public class ConfigManager {
 			pathTempLogs = getProperty(PARAM_TEMP_DIR);
 		}
 		catch (final Exception e) {
-			LOGGER.severe(String.format("Error al descifrar la propiedad %1s", PARAM_TEMP_DIR)); //$NON-NLS-1$
-			return null;
+			LOGGER.severe(String.format("Error al descifrar la propiedad %1s. Se usara el directorio temporal por defecto.", PARAM_TEMP_DIR)); //$NON-NLS-1$
+			pathTempLogs = DEFAULT_TMP_DIR;
 		}
 
 		if (pathTempLogs == null) {
@@ -323,6 +327,7 @@ public class ConfigManager {
 		}
 		return hostConecction;
 	}
+
 	/**
 	 * Recupera el puerto de conexi&oacute;n.
 	 * @return Puerto de conexi&oacute;n
@@ -331,20 +336,20 @@ public class ConfigManager {
 	public static int getMailPort() {
 
 		int portConecction;
-
-			try {
-				final String portText = getProperty(PARAM_MAIL_PORT);
-				portConecction = Integer.parseInt(portText);
-			}
-			catch (final Exception e) {
-				LOGGER.severe(
-						String.format(
-								"No se ha configurado un puerto correcto en la propiedad '%1s' del fichero de configuracion", //$NON-NLS-1$
-								PARAM_MAIL_PORT));
-				return DEFAULT_MAIL_PORT;
-			}
-			return portConecction;
+		try {
+			final String portText = getProperty(PARAM_MAIL_PORT);
+			portConecction = Integer.parseInt(portText);
 		}
+		catch (final Exception e) {
+			LOGGER.severe(
+					String.format(
+							"No se ha configurado un puerto correcto en la propiedad '%1s' del fichero de configuracion", //$NON-NLS-1$
+							PARAM_MAIL_PORT));
+			return DEFAULT_MAIL_PORT;
+		}
+		return portConecction;
+	}
+
 	/**
 	 * Recupera el nombre del usuario de la base de datos.
 	 * @return Nombre del usuario logeado

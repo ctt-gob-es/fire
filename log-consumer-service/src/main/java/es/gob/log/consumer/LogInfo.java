@@ -108,8 +108,8 @@ public class LogInfo implements Serializable {
 		catch (final Exception e) {
 			LOGGER.warning(String.format(
 					"Se configuro un juego de caracteres no valido (%s), se usara el por defecto: %s", //$NON-NLS-1$
-					config.getProperty(PROPERTY_CHARSET).replaceAll("[\r\n]", ""), //$NON-NLS-1$ //$NON-NLS-2$
-					DEFAULT_CHARSET.name().replaceAll("[\r\n]", ""))); //$NON-NLS-1$
+					config.getProperty(PROPERTY_CHARSET),
+					DEFAULT_CHARSET.name()));
 			this.charset = DEFAULT_CHARSET;
 		}
 
