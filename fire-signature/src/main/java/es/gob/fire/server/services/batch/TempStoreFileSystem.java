@@ -22,7 +22,7 @@ final class TempStoreFileSystem {
 	private static final MessageDigest MD;
 	static {
 		try {
-			MD = MessageDigest.getInstance("SHA-256"); //$NON-NLS-1$
+			MD = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			throw new IllegalStateException(

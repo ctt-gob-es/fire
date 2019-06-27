@@ -50,7 +50,7 @@ public class AplicationsDAO {
 
 	private static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
 
-	private static final String MD_ALGORITHM = "SHA-256"; //$NON-NLS-1$
+	private static final String MD_ALGORITHM = "SHA-1"; //$NON-NLS-1$
 
 	private static final String HMAC_ALGORITHM = "HmacMD5"; //$NON-NLS-1$
 
@@ -413,6 +413,11 @@ public class AplicationsDAO {
 		st.close();
 	}
 
+	/**
+	 * Genera un nuevo identificador de aplicaci&oacute;n.
+	 * @return Identificador de aplicaci&oacute;n.
+	 * @throws GeneralSecurityException Cuando no se puede generar un identificador.
+	 */
 	private static String generateId() throws GeneralSecurityException {
 
 		Mac mac;

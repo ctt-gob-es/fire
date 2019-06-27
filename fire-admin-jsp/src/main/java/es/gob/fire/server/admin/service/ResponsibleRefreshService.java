@@ -55,7 +55,7 @@ public class ResponsibleRefreshService extends HttpServlet {
 		JsonObject result;
 		final String id = req.getParameter(PARAM_ID);
 		if (id == null) {
-			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de operacion no soportado: " + LogUtils.cleanText(PARAM_ID)); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "No se ha proporcionado un identificador de operacion"); //$NON-NLS-1$
 			final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
 					.add("error"," Id no valido"); //$NON-NLS-1$ //$NON-NLS-2$
 

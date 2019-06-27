@@ -105,8 +105,10 @@ public class AplicationsDAO {
 			// Sacamos la huella del certificado que tenemos en el fichero de propiedades
 			final MessageDigest md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
 			final String propertyThumb = Base64.encode(md.digest(cer.getEncoded()));
+
 			return id != null && id.equals(appId) && propertyThumb.equals(thumb);
 		}
+
 		/*SELECT COUNT(*) FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?
 		 * AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado
 		 * AND (tb_certificados.huella_principal = ? OR tb_certificados.huella_backup=?)*/

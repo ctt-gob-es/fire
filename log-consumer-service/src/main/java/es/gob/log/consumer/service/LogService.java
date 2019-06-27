@@ -68,7 +68,7 @@ public class LogService extends HttpServlet {
 			op = checkOperation(opString);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString.replaceAll("[\r\n]", ""))); //$NON-NLS-1$
+			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString.replaceAll("[\r\n]", ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "Codigo de operacion no soportado"); //$NON-NLS-1$
 			return;
 		}
@@ -114,7 +114,7 @@ public class LogService extends HttpServlet {
 						sendControlledError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No se ha podido cerrar el fichero log"); //$NON-NLS-1$
 						return;
 					}
-					result = "Fichero cerrado".getBytes();
+					result = "Fichero cerrado".getBytes(); //$NON-NLS-1$
 					break;
 				case TAIL:
 					LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
@@ -143,7 +143,7 @@ public class LogService extends HttpServlet {
 				case CLOSE_CONNECTION:
 					LOGGER.info("Solicitud entrante para el cierre de la conexion con el servidor"); //$NON-NLS-1$
 					closeConection(req);
-					result = "Conexion cerrada".getBytes();
+					result = "Conexion cerrada".getBytes(); //$NON-NLS-1$
 					break;
 				default:
 					LOGGER.warning(String.format("Operacion no soportada: %s", op)); //$NON-NLS-1$

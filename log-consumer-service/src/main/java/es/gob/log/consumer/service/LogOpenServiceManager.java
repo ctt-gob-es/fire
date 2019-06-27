@@ -45,8 +45,9 @@ public class LogOpenServiceManager implements Serializable {
 
 		}
 
-		final File logFile = new File(ConfigManager.getInstance().getLogsDir(), logFileName);
-		if (!logFile.getCanonicalPath().startsWith(logFileName)){
+		final File logsDir = ConfigManager.getInstance().getLogsDir();
+		final File logFile = new File(logsDir, logFileName);
+		if (!logFile.getCanonicalPath().startsWith(logsDir.getCanonicalPath())){
 			throw new SecurityException("Se ha intentado acceder a una ruta fuera del directorio de logs: " + logFile.getAbsolutePath()); //$NON-NLS-1$
         }
 
@@ -84,7 +85,7 @@ public class LogOpenServiceManager implements Serializable {
 			session.setAttribute("FilePosition", new Long(0L)); //$NON-NLS-1$
 
 		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Error al abrir el fichero de log ", e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al abrir el fichero de log " + logFile.getAbsolutePath(), e); //$NON-NLS-1$
 			throw e;
 		}
 

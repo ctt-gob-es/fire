@@ -141,7 +141,6 @@
 		      	});
 		      	if(opSel!="0"){
 		      		$.get("application?requestType=getCertificateId&id-cert=" + opSel, function(data){
-		      			console.log("Certificado: " + data);
 			      		var certificados=data.split("$*$");		      		
 			      		if(certificados[0] != null && typeof certificados[0] != "undefined" && certificados[0].trim() != "--"){		      			
 			      			$("#cert-prin").html(certificados[0]);

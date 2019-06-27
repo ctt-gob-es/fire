@@ -80,9 +80,6 @@ public class ServiceParams {
 	/***Par&aacute;metro que indica la operaci&oacute;n del certificado */
 	public static final String PARAM_OP_CERT = "op"; //$NON-NLS-1$
 
-	/***Par&aacute;metro que indica la via estandar del atributo X509 del certificado */
-	public static final String X509 = "X.509"; //$NON-NLS-1$
-
 	/***Par&aacute;metro que indica el id del usuario */
 	public static final String PARAM_IDUSER = "idUser";//$NON-NLS-1$
 

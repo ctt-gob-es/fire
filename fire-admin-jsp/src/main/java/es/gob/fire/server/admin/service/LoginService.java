@@ -32,7 +32,7 @@ public class LoginService extends HttpServlet {
 		final String password = req.getParameter(ServiceParams.PARAM_PASSWORD);
 
         if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
-        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
+        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$ //$NON-NLS-2$
         	return;
         }
 
@@ -42,7 +42,7 @@ public class LoginService extends HttpServlet {
 
 		} catch (final SQLException e) {
         	LOGGER.log(Level.WARNING, "No se pudo encontrar el usuario", e); //$NON-NLS-1$
-        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
+        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 
@@ -50,15 +50,15 @@ public class LoginService extends HttpServlet {
 
         if (user == null) {
         	LOGGER.warning("El usuario tiene que tener un login"); //$NON-NLS-1$
-        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
+        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
         }
 
         final boolean logginPermission = user.getPermissions().hasLoginPermission();
 
         if (!logginPermission) {
-        	LOGGER.log(Level.WARNING, "El usuario " + LogUtils.cleanText(username) + " no tiene permisos de acceso"); //$NON-NLS-1$
-        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
+        	LOGGER.log(Level.WARNING, "El usuario " + LogUtils.cleanText(username) + " no tiene permisos de acceso"); //$NON-NLS-1$ //$NON-NLS-2$
+        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
         }
 
@@ -68,14 +68,11 @@ public class LoginService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No es posible autenticar al usuario", e); //$NON-NLS-1$
-        	//resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
-
 			logged = false;
 		}
 
 		if (!logged) {
-        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$
-
+        	resp.sendRedirect("Login.jsp?" + ServiceParams.PARAM_ERR + "=" + UserMessages.ERR_LOGIN_ACCESS.getCode()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 

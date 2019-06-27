@@ -36,8 +36,6 @@ public class NewCertificateService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(NewCertificateService.class.getName());
 
-
-
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -66,7 +64,7 @@ public class NewCertificateService extends HttpServlet {
 				throw new IllegalArgumentException();
 			}
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Operacion no soportada: " + LogUtils.cleanText(ServiceParams.PARAM_OP_CERT)); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Operacion no soportada: " + LogUtils.cleanText(request.getParameter(ServiceParams.PARAM_OP_CERT))); //$NON-NLS-1$
 			response.sendRedirect("Certificate/CertificatePage.jsp?op=alta&r=0&ent=cer"); //$NON-NLS-1$
 			return;
 		}
@@ -94,7 +92,7 @@ public class NewCertificateService extends HttpServlet {
 		// Calculamos la huella de los certificados
 		MessageDigest md;
 		try {
-			md = MessageDigest.getInstance("SHA-256"); //$NON-NLS-1$
+			md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e); //$NON-NLS-1$
 			response.sendRedirect("Certificate/NewCertificate.jsp?op=" + op + "&r=0&ent=cer"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -126,7 +124,7 @@ public class NewCertificateService extends HttpServlet {
 			}
 		}
 		// Editar certificado
-		else if (op == 2){
+		else if (op == 2) {
 			LOGGER.info("Edicion del certificado con nombre: " + params.getName()); //$NON-NLS-1$
 			try {
 				CertificatesDAO.updateCertificate(
@@ -162,7 +160,7 @@ public class NewCertificateService extends HttpServlet {
 				params.setIdCert(req.getParameter(ServiceParams.PARAM_ID_CERT));
 			}
 
-			final CertificateFactory certFactory = CertificateFactory.getInstance(ServiceParams.X509);
+			final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
 	        final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req);
 	        for (final FileItem item : items) {
