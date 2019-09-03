@@ -230,7 +230,7 @@ public final class PreSignService extends HttpServlet {
         		);
             }
             catch (final Exception e) {
-                LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
+                LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma: " + e, e); //$NON-NLS-1$
                 ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
                 response.sendRedirect(redirectErrorUrl);
                 return;
