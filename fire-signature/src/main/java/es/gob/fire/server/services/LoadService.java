@@ -189,7 +189,7 @@ public final class LoadService extends HttpServlet {
     		);
         }
         catch (final Exception e) {
-            LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
+            LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma: " + e, e); //$NON-NLS-1$
             response.sendError(
     			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "No se ha podido obtener la prefirma: " + e //$NON-NLS-1$
