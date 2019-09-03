@@ -9,6 +9,8 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.mysql.jdbc.log.LogUtils;
+
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactory;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
@@ -16,9 +18,11 @@ import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.ProviderElement;
 
-/** Gestor para la obtenci&oacute;n de conectores ya configurados para iniciar
- * transacciones con un proveedor. */
-public final class ProviderManager {
+/**
+ * Gestor para la obtenci&oacute;n de conectores ya configurados para iniciar
+ * transacciones con un proveedor.
+ */
+public class ProviderManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ProviderManager.class.getName());
 
@@ -31,18 +35,21 @@ public final class ProviderManager {
 	/** Nombre del proveedor local. */
 	public static final String PROVIDER_NAME_LOCAL = "local"; //$NON-NLS-1$
 
-	/** Inicializamos una transacci&oacute;n a trav&eacute;s de un proveedor.
+	/**
+	 * Inicializamos una transacci&oacute;n a trav&eacute;s de un proveedor.
 	 * @param providerName Nombre del proveedor.
 	 * @param transactionConfig Configuraci&oacute;n de la transacci&oacute;n.
 	 * @return Conector con el proveedor ya configurado para realizar cualquier transacci&oacute;n.
-	 * @throws FIReConnectorFactoryException Cuando falle la inicializaci&oacute;n del conector. */
-	public static FIReConnector initTransacction(final String providerName,
-			                                     final Properties transactionConfig) throws FIReConnectorFactoryException{
+	 * @throws FIReConnectorFactoryException Cuando falle la inicializaci&oacute;n del conector.
+	 */
+	public static FIReConnector initTransacction(final String providerName, final Properties transactionConfig)
+			throws FIReConnectorFactoryException{
+
 		// Obtenemos la clase del connector
 		final String providerClass = ConfigManager.getProviderClass(providerName);
 		if (providerClass == null) {
 			throw new FIReConnectorFactoryException(
-				"No se ha encontrado el nombre de la clase conectora del proveedor " + providerName); //$NON-NLS-1$
+					"No se ha encontrado el nombre de la clase conectora del proveedor " + providerName); //$NON-NLS-1$
 		}
 
 		// Obtenemos el fichero de configuracion del proveedor
@@ -66,14 +73,18 @@ public final class ProviderManager {
 		return connector;
 	}
 
-	/** Obtiene el listado de proveedores configurados.
-	 * @return Listado con los proveedores. */
+	/**
+	 * Obtiene el listado de proveedores configurados.
+	 * @return Listado con los proveedores.
+	 */
 	public static ProviderElement[] getProviders() {
 		return ConfigManager.getProviders();
 	}
 
-	/** Obtiene el listado con el nombre de los proveedores configurados.
-	 * @return Listado con los nombres de los proveedores. */
+	/**
+	 * Obtiene el listado con el nombre de los proveedores configurados.
+	 * @return Listado con los nombres de los proveedores.
+	 */
 	public static String[] getProviderNames() {
 		final ProviderElement[] provs = ConfigManager.getProviders();
 		final String[] provNames = new String[provs.length];
@@ -83,12 +94,15 @@ public final class ProviderManager {
 		return provNames;
 	}
 
-	/** Obtiene la informaci&oacute;n necesaria de un proveedor para pod&eacute;rsela
+	/**
+	 * Obtiene la informaci&oacute;n necesaria de un proveedor para pod&eacute;rsela
 	 * mostrar a un usuario y que as&iacute; identifique su uso.
 	 * @param providerName Nombre del proveedor.
-	 * @return Informaci&oacute;n del proveedor. */
+	 * @return Informaci&oacute;n del proveedor.
+	 */
 	public static ProviderInfo getProviderInfo(final String providerName) {
-		final Properties infoProperties;
+
+		Properties infoProperties;
 		if (PROVIDER_NAME_LOCAL.equalsIgnoreCase(providerName)) {
 			infoProperties = loadLocalProviderInfoProperties();
 		}
@@ -99,50 +113,50 @@ public final class ProviderManager {
 		return new ProviderInfo(providerName, infoProperties);
 	}
 
-	/** Carga el fichero de configuraci&oacute;n de un proveedor.
+	/**
+	 * Carga el fichero de configuraci&oacute;n de un proveedor.
 	 * @param providerName Nombre el proveedor.
-	 * @return Configuraci&oacute;n cargada. */
-	public static Properties loadProviderConfig(final String providerName) {
+	 * @return Configuraci&oacute;n cargada.
+	 */
+	private static Properties loadProviderConfig(final String providerName) {
 
 		final String providerConfigFilename = String.format(PROVIDER_CONFIG_FILE_TEMPLATE, providerName);
+		Properties providerConfig;
 		try {
-			return ConfigFileLoader.loadConfigFile(providerConfigFilename);
-		}
-		catch (final FileNotFoundException e) {
-			LOGGER.warning(
-				String.format(
+			providerConfig = ConfigFileLoader.loadConfigFile(providerConfigFilename);
+		} catch (final FileNotFoundException e) {
+			LOGGER.warning(String.format(
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
-					providerConfigFilename, providerName
-				)
-			);
-			return new Properties();
-		}
-		catch (final IOException e) {
+					LogUtils.cleanText(providerConfigFilename), LogUtils.cleanText(providerName)
+			));
+			providerConfig = new Properties();
+		} catch (final IOException e) {
 			LOGGER.log(
-				Level.SEVERE,
-				String.format(
-					"No se ha podido cargar el fichero de configuracion del proveedor %s", //$NON-NLS-1$
-					providerName
-				),
-				e
-			);
-			return new Properties();
+					Level.SEVERE,
+					String.format(
+							"No se ha podido cargar el fichero de configuracion del proveedor %s", //$NON-NLS-1$
+							LogUtils.cleanText(providerName)),
+					e);
+			providerConfig = new Properties();
 		}
+
+		return providerConfig;
 	}
 
-	/** Carga el fichero interno de propiedades del proveedor en el que se encuentra
+	/**
+	 * Carga el fichero interno de propiedades del proveedor en el que se encuentra
 	 * la informaci&oacute;n generica que debe proporcionar. El fichero debe tener
 	 * el nombre determinado por {@link #PROVIDER_INFO_FILE} y encontrarse en el
 	 * mismo paquete que la clase conectora.
 	 * @param classname Clase conectora del proveedor.
-	 * @return Properties cargado. */
+	 * @return Properties cargado.
+	 */
 	private static Properties loadProviderInfoProperties(final String classname) {
 
 		String classPath;
 		if (classname.lastIndexOf('.') == -1) {
 			classPath = classname;
-		}
-		else {
+		} else {
 			classPath = classname.substring(0, classname.lastIndexOf('.')).replace('.', '/');
 		}
 		if (!classPath.startsWith("/")) { //$NON-NLS-1$
@@ -155,16 +169,20 @@ public final class ProviderManager {
 		return loadInternalProperties(providerInfoPath);
 	}
 
-	/** Carga el fichero interno de propiedades del proveedor de firma con certificados
+	/**
+	 * Carga el fichero interno de propiedades del proveedor de firma con certificados
 	 * locales.
-	 * @return Properties cargado. */
+	 * @return Properties cargado.
+	 */
 	private static Properties loadLocalProviderInfoProperties() {
 		return loadInternalProperties(LOCAL_PROVIDER_INFO_PATH);
 	}
 
-	/** Carga un fichero interno de propiedades.
+	/**
+	 * Carga un fichero interno de propiedades.
 	 * @param path Ruta interna del fichero.
-	 * @return Properties cargado. */
+	 * @return Properties cargado.
+	 */
 	private static Properties loadInternalProperties(final String path) {
 
 		final Properties providerInfoProperties = new Properties();
@@ -174,20 +192,21 @@ public final class ProviderManager {
 		catch (final Exception e) {
 			LOGGER.warning(
 				String.format(
-					"No se ha encontrado o no ha podido cargarse el fichero interno '%s' con la informacion del proveedor: " + e, //$NON-NLS-1$
-					path
-				)
+					"No se ha encontrado o no ha podido cargarse el fichero interno '%s' con la informacion del proveedor", //$NON-NLS-1$
+					path)
 			);
 		}
 		return providerInfoProperties;
 	}
 
-	/** Filtra los proveedores configurados para s&oacute;lo mostrar aquellos solicitados
+	/**
+	 * Filtra los proveedores configurados para s&oacute;lo mostrar aquellos solicitados
 	 * por la aplicaci&oacute;n y aquellos configurados como imprescindibles. Los
 	 * proveedores indicados por la aplicaci&oacute;n y no configurados en el componente
 	 * central se ignoran.
 	 * @param requestedProviders Proveedores solicitados.
-	 * @return Listado de proveedores ya filtrados. */
+	 * @return Listado de proveedores ya filtrados.
+	 */
 	public static String[] getFilteredProviders(final String[] requestedProviders) {
 
 		final List<String> filteredProviders = new ArrayList<>();
