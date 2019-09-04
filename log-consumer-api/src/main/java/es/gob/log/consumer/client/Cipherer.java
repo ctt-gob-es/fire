@@ -15,12 +15,16 @@ class Cipherer {
 
 	private static final String CIPHER_ALGORITHM = "AES"; //$NON-NLS-1$
 
+	private static final String CIPHER_PROVIDER = "SunJCE"; //$NON-NLS-1$
+
 	static byte[] cipher(final byte[] data, final byte[] key, final byte[] iv)
 			throws	GeneralSecurityException {
 
-		final SecretKeySpec secretKey = new SecretKeySpec(key, CIPHER_ALGORITHM);
-		final Cipher cipher = Cipher.getInstance(CIPHER_CONFIG);
+		// Se han encontrado problemas con el proveedor de BouncyCastle cuando se encuentra este
+		// instalado con alta prioridad, asi que especificamos el proveedor concreto a utilizar
+		final Cipher cipher = Cipher.getInstance(CIPHER_CONFIG, CIPHER_PROVIDER);
 
+		final SecretKeySpec secretKey = new SecretKeySpec(key, CIPHER_ALGORITHM);
 		final GCMParameterSpec ivSpec = new GCMParameterSpec(16 * Byte.SIZE, iv);
 
 		cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);

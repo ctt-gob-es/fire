@@ -13,14 +13,15 @@ public class ResponseParser {
 
 		final LogInfo logInfo = new LogInfo();
 
-		try (final JsonReader reader = Json.createReader(new ByteArrayInputStream(json))) {
+		//try (	final Reader streamReader = new InputStreamReader(new ByteArrayInputStream(json), StandardCharsets.UTF_8);
+		try (	final JsonReader reader = Json.createReader(new ByteArrayInputStream(json))) {
 			final JsonObject openFileReponse = reader.readObject();
 			final JsonArray jsonArr = openFileReponse.getJsonArray("LogInfo"); //$NON-NLS-1$
 			if (jsonArr != null && jsonArr.size() >= 1) {
 				final JsonObject logInfoJson = jsonArr.getJsonObject(0);
 
 				// Si se ha definido un error, lo parseamos e ignoramos el resto
-				if (logInfoJson.containsKey("error")) {
+				if (logInfoJson.containsKey("error")) { //$NON-NLS-1$
 					final JsonObject errorObject = logInfoJson.getJsonObject("error"); //$NON-NLS-1$
 					if (errorObject != null) {
 						logInfo.setError(new LogError(
@@ -33,7 +34,7 @@ public class ResponseParser {
 					logInfo.setDate(Boolean.parseBoolean(logInfoJson.getString("Date"))); //$NON-NLS-1$
 					logInfo.setTime(Boolean.parseBoolean(logInfoJson.getString("Time"))); //$NON-NLS-1$
 					logInfo.setDateTimeFormat(logInfoJson.getString("DateTimeFormat")); //$NON-NLS-1$
-					logInfo.setLevels(logInfoJson.getString("Levels").split(",")); //$NON-NLS-1$
+					logInfo.setLevels(logInfoJson.getString("Levels").split(",")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
