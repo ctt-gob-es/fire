@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.channels.AsynchronousFileChannel;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import es.gob.log.consumer.LogConstants;
 import es.gob.log.consumer.LogInfo;
 import es.gob.log.consumer.LogOpen;
 import es.gob.log.consumer.LogReader;
@@ -36,13 +38,13 @@ public class LogOpenServiceManager implements Serializable {
 
 		final String logFileName = req.getParameter(ServiceParams.LOG_FILE_NAME);
 		if (logFileName == null || logFileName.isEmpty()) {
-
-
-
 			LOGGER.log(Level.WARNING, "No se ha proporcionado el parametro con el nombre de fichero: " + ServiceParams.LOG_FILE_NAME); //$NON-NLS-1$
 			throw new IllegalArgumentException("No se ha proporcionado el parametro con el nombre de fichero: " + ServiceParams.LOG_FILE_NAME); //$NON-NLS-1$
+		}
 
-
+		if (logFileName.toLowerCase(Locale.ENGLISH).endsWith(LogConstants.FILE_EXT_LOGINFO)) {
+			LOGGER.log(Level.WARNING, "Se ha solicitado cargar un fichero loginfo. Se bloquea la peticion"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Se ha solicitado cargar un fichero loginfo"); //$NON-NLS-1$
 		}
 
 		final File logsDir = ConfigManager.getInstance().getLogsDir();
