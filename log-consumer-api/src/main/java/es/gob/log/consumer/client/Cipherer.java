@@ -3,7 +3,7 @@ package es.gob.log.consumer.client;
 import java.security.GeneralSecurityException;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -11,7 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 class Cipherer {
 
-	private static final String CIPHER_CONFIG = "AES/CBC/PKCS5PADDING"; //$NON-NLS-1$
+	private static final String CIPHER_CONFIG = "AES/GCM/NoPadding"; //$NON-NLS-1$
 
 	private static final String CIPHER_ALGORITHM = "AES"; //$NON-NLS-1$
 
@@ -20,7 +20,10 @@ class Cipherer {
 
 		final SecretKeySpec secretKey = new SecretKeySpec(key, CIPHER_ALGORITHM);
 		final Cipher cipher = Cipher.getInstance(CIPHER_CONFIG);
-		cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
+
+		final GCMParameterSpec ivSpec = new GCMParameterSpec(16 * Byte.SIZE, iv);
+
+		cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
 
 		return cipher.doFinal(data);
 	}

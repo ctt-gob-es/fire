@@ -14,6 +14,7 @@ import com.mysql.jdbc.log.LogUtils;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactory;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.ProviderElement;

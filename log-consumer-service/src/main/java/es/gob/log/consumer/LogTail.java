@@ -29,6 +29,7 @@ public class LogTail {
 	public LogTail(final LogInfo logInfo, final String path)  {
 		this.logInfor = logInfo;
 		this.path = Paths.get(path);
+
 	}
 
 	/**

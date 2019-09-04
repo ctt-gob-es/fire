@@ -58,6 +58,8 @@ public class LogServerService extends HttpServlet {
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
+
+
 		final Parameters params = getParameters(request);
 
 		LogServer logServer = null;
@@ -75,6 +77,7 @@ public class LogServerService extends HttpServlet {
 
 			if (logServer == null) {
 				LOGGER.severe("No se pudo cargar la configuracion del servidor"); //$NON-NLS-1$
+
 				response.sendRedirect(request.getContextPath() +
 						"/Logs/LogsMainPage.jsp?op=" + params.getAction() + //$NON-NLS-1$
 						"&r=0&ent=srv"); //$NON-NLS-1$
@@ -90,8 +93,7 @@ public class LogServerService extends HttpServlet {
 					final LogConsumerClient logclient = new LogConsumerClient();
 					logclient.setDisableSslChecks(!logServer.isVerificarSsl());
 					if (connectServer(logclient, logServer, request)) {
-						response.sendRedirect(request.getContextPath() +
-								"/log?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+						response.sendRedirect("log?op=" + ServiceOperations.GET_LOG_FILES.getId() + //$NON-NLS-1$
 								"&name-srv=" + logServer.getNombre()); //$NON-NLS-1$
 						return;
 					}
@@ -101,8 +103,7 @@ public class LogServerService extends HttpServlet {
 							logServer.getNombre(), logServer.getUrl(), logServer.getClave(),
 							logServer.isVerificarSsl());
 					if (createResult > 0) { //Resultado correcto
-						response.sendRedirect(request.getContextPath() +
-								"/Logs/LogsMainPage.jsp?op=" + params.getAction() + //$NON-NLS-1$
+						response.sendRedirect("Logs/LogsMainPage.jsp?op=" + params.getAction() + //$NON-NLS-1$
 								"&r=1&ent=srv"); //$NON-NLS-1$
 						return;
 					}
@@ -112,8 +113,7 @@ public class LogServerService extends HttpServlet {
 							Integer.toString(logServer.getId()), logServer.getNombre(),
 							logServer.getUrl(), logServer.getClave(), logServer.isVerificarSsl());
 					if (editResultDML > 0) {//Resultado correcto
-						response.sendRedirect(request.getContextPath() +
-								"/Logs/LogsMainPage.jsp?op=" + params.getAction() + //$NON-NLS-1$
+						response.sendRedirect("Logs/LogsMainPage.jsp?op=" + params.getAction() + //$NON-NLS-1$
 								"&r=1&ent=srv"); //$NON-NLS-1$
 						return;
 					}
@@ -121,15 +121,13 @@ public class LogServerService extends HttpServlet {
 				case ACTION_DELETE: // Eliminar
 					final int deleteResult = LogServersDAO.removeServer(Integer.toString(logServer.getId()));
 					if (deleteResult > 0) {//Resultado correcto
-						response.sendRedirect(request.getContextPath() +
-								"/Logs/LogsMainPage.jsp?op=" + params.getAction() + //$NON-NLS-1$
+						response.sendRedirect("Logs/LogsMainPage.jsp?op=" + params.getAction() + //$NON-NLS-1$
 								"&r=1&ent=srv"); //$NON-NLS-1$
 						return;
 					}
 					break;
 				case ACTION_VIEW: // Visualizar datos
-					response.sendRedirect(request.getContextPath() +
-							"/Logs/LogServer.jsp?act=5&id-srv=" + logServer.getId()); //$NON-NLS-1$
+					response.sendRedirect("Logs/LogServer.jsp?act=5&id-srv=" + logServer.getId()); //$NON-NLS-1$
 					return;
 				default: //Por defecto, se listan todos los servidores
 					  final String data = LogServersDAO.getLogServersJSON();
@@ -147,7 +145,7 @@ public class LogServerService extends HttpServlet {
 			LOGGER.log(Level.SEVERE, "Error de entrada/salida al ejecutar la operacion por seguridad", e); //$NON-NLS-1$
 		}
 
-		response.sendRedirect(request.getContextPath().toString() + "/Logs/LogsMainPage.jsp?op=" + params.getAction() + "&r=0&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$
+		response.sendRedirect("Logs/LogsMainPage.jsp?op=" + params.getAction() + "&r=0&ent=srv"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -174,7 +172,7 @@ public class LogServerService extends HttpServlet {
 				params.setAction(Integer.parseInt(actionParam));
 			}
 			catch (final Exception e) {
-				LOGGER.warning("Se proporciono un ID de accion mal formado: " + actionParam); //$NON-NLS-1$
+				LOGGER.warning("Se proporciono un ID de accion mal formado: " + LogUtils.cleanText(actionParam)); //$NON-NLS-1$
 			}
 		}
 		else {

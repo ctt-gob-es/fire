@@ -6,27 +6,43 @@ package es.gob.log.consumer.service;
 public enum ServiceOperations {
 
 	/** Echo. */
-	ECHO,				// Operacion: 0
+	ECHO(0),
 	/** Solicitud de acceso. */
-	REQUEST_LOGIN,		// Operacion: 1
+	REQUEST_LOGIN(1),
 	/** Validacion de la solicitud de acceso. */
-	VALIDATE_LOGIN,		// Operacion: 2
+	VALIDATE_LOGIN(2),
 	/** Obtener ficheros de log disponibles. */
-	GET_LOG_FILES,		// Operacion: 3
+	GET_LOG_FILES(3),
 	/** Abrir fichero de log. */
-	OPEN_FILE,			// Operacion: 4
+	OPEN_FILE(4),
 	/** Cerrar fichero de log. */
-	CLOSE_FILE,			// Operacion: 5
+	CLOSE_FILE(5),
 	/** Obtener final del fichero de log. */
-	TAIL,				// Operacion: 6
+	TAIL(6),
 	/** Obtener lineas del fichero de log a partir de la posicion actual. */
-	GET_MORE,			// Operacion: 7
+	GET_MORE(7),
 	/** Buscar texto en el log. */
-	SEARCH_TEXT,		// Operacion: 8
+	SEARCH_TEXT(8),
 	/** Obtener fragmento del log. */
-	FILTER,				// Operacion: 9
+	FILTER(9),
 	/** Descargar fichero de log. */
-	DOWNLOAD; 			// Operacion: 10
+	DOWNLOAD(10),
+	/** Cierra la conexi&oacute;n con el servidor de logs. */
+	CLOSE_CONNECTION(11);
+
+	private int id;
+
+	private ServiceOperations(final int id) {
+		this.id = id;
+	}
+
+	/**
+	 * Recupera el identificador de la operaci&oacute;n.
+	 * @return Identificador.
+	 */
+	public int getId() {
+		return this.id;
+	}
 
 	/**
 	 * Obtiene la operaci&oacute;n a partir de su identificador.
@@ -36,7 +52,7 @@ public enum ServiceOperations {
 	 */
 	public static ServiceOperations parseOperation(final int opId) {
 		for (final ServiceOperations op : values()) {
-			if (op.ordinal() == opId) {
+			if (op.getId() == opId) {
 				return op;
 			}
 		}

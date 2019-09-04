@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.admin.dao.AplicationsDAO;
 import es.gob.fire.server.admin.dao.CertificatesDAO;
@@ -27,7 +28,7 @@ public class DeleteCertificateService extends HttpServlet {
 	 */
 	private static final long serialVersionUID = -4929894052421807407L;
 
-	private static final Logger LOGGER = Logger.getLogger(DeleteAppService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DeleteCertificateService.class.getName());
 
 	private static final String PARAM_ID = "id-cert"; //$NON-NLS-1$
 
@@ -36,9 +37,16 @@ public class DeleteCertificateService extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+
+
+		final HttpSession session = request.getSession(false);
+		if (session == null) {
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
 		final String id = request.getParameter(PARAM_ID);
-		String msg = ""; //$NON-NLS-1$
-		LOGGER.info("Baja del certificado con ID: " + id); //$NON-NLS-1$
+		final String msg = ""; //$NON-NLS-1$
+		LOGGER.info("Baja del certificado con ID: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
 		boolean isOk = true;
 		if (id == null) {
@@ -58,11 +66,7 @@ public class DeleteCertificateService extends HttpServlet {
 				if(total <= 0) {
 					CertificatesDAO.removeCertificate(id);
 
-				}
-				else {
-					isOk = false;
-					LOGGER.log(Level.INFO, "Error al dar de baja el certificado, tiene asociadas aplicaciones"); //$NON-NLS-1$
-					msg = ", tiene asociadas aplicaciones"; //$NON-NLS-1$
+
 				}
 
 			}
@@ -72,7 +76,7 @@ public class DeleteCertificateService extends HttpServlet {
 			}
 		}
 
-		response.sendRedirect("Certificate/CertificatePage.jsp?op=baja&r=" + (isOk ? "1" : "0")+"&ent=cer&msg="+msg); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		response.sendRedirect("Certificate/CertificatePage.jsp?op=baja&r=" + (isOk ? "1" : "0")+"&ent=cer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	/**

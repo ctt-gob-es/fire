@@ -11,6 +11,7 @@
 
 	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
 	final String loggedUsr=(String)session.getAttribute(ServiceParams.SESSION_ATTR_USER);
+	final String pass=(String)session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 
 		
 	if (state == null || !Boolean.parseBoolean((String) state) || loggedUsr==null ) {
@@ -27,8 +28,8 @@
 	String nombre = ""; //$NON-NLS-1$
 	String apellidos = ""; //$NON-NLS-1$
 	if (usr != null) {
-		nombre = usr.getNombre();
-		apellidos = usr.getApellidos();
+		nombre = usr.getName();
+		apellidos = usr.getSurname();
 	}
 	final String title = "Modificar contrase&ntilde;a"; //$NON-NLS-1$
 	final String subTitle = "Modificar contrase&ntilde;a del usuario " + nombre + " " + apellidos; //$NON-NLS-1$ //$NON-NLS-2$

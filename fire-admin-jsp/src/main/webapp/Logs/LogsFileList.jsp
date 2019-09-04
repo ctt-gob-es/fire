@@ -26,7 +26,7 @@
 	final byte[] sJSON = (byte[]) session.getAttribute(ServiceParams.SESSION_ATTR_JSON); 
 	if (sJSON == null){
 		response.sendRedirect("../log" + //$NON-NLS-1$
-				"?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+				"?op=" + ServiceOperations.GET_LOG_FILES.getId() + //$NON-NLS-1$
 				"&name-srv=" + nameSrv); //$NON-NLS-1$
 		return;
 	}
@@ -34,7 +34,7 @@
 	
 	String jsonData = "";//$NON-NLS-1$
 	String htmlError = null;
-	String numRec = "1";//$NON-NLS-1$
+	int numRec = 1;
 	JsonObject jsonObj;
 	try {
 		final JsonReader reader = Json.createReader(new ByteArrayInputStream(sJSON));
@@ -53,21 +53,22 @@
 				htmlError += "<p id='error-txt'>" + request.getParameter("msg") + "</p>";//$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 			}
 
-			final JsonArray FileList = jsonObj.getJsonArray("FileList");//$NON-NLS-1$
+			final JsonArray fileList = jsonObj.getJsonArray("fileList");//$NON-NLS-1$
+			
 			jsonData += "{\"FileList\":[";//$NON-NLS-1$
 
-			numRec = String.valueOf(FileList.size());
-			for (int i = 0; i < FileList.size(); i++) {
-				final JsonObject json = FileList.getJsonObject(i);
+			numRec = fileList.size();
+			for (int i = 0; i < fileList.size(); i++) {
+				final JsonObject json = fileList.getJsonObject(i);
 
 				// Tratamiento de la fecha de ultima actualizacion
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");//$NON-NLS-1$
-				final JsonNumber longDateJSON = json.getJsonNumber("Date");//$NON-NLS-1$
+				final JsonNumber longDateJSON = json.getJsonNumber("date");//$NON-NLS-1$
 				Date date = new Date(longDateJSON.longValue());
 				final String dateModif = sdf.format(date);
 
 				// Tratramiento del tamano
-				final JsonNumber longSizeJSON = json.getJsonNumber("Size");//$NON-NLS-1$
+				final JsonNumber longSizeJSON = json.getJsonNumber("size");//$NON-NLS-1$
 				long size = longSizeJSON.longValue();
 				String sSize = "";//$NON-NLS-1$
 				if (size > 1024 && size < 1024000) {
@@ -78,13 +79,10 @@
 					sSize = String.valueOf(size) + " bytes";//$NON-NLS-1$
 				}
 
-				if (i != FileList.size() - 1) {
-					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-							+ "\",\"Size\":\"" + sSize + "\"},";//$NON-NLS-1$//$NON-NLS-2$
-				} else {
-					jsonData += "{\"Name\":\"" + json.getString("Name") + "\",\"Date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-							+ "\",\"Size\":\"" + sSize + "\"}]}";//$NON-NLS-1$//$NON-NLS-2$
-				}
+				jsonData += "{\"name\":\"" + json.getString("name") + "\",\"date\":\"" + dateModif //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+						+ "\",\"size\":\"" + sSize + "\"}"; //$NON-NLS-1$ //$NON-NLS-2$
+						
+				jsonData +=  (i != fileList.size() - 1) ? "," : "]}"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	} catch (Exception e) {
@@ -141,12 +139,14 @@
 <script type="text/javascript">
 
 	var obJson = <%=jsonData%>; 
-	var txtNumRec = '<%=numRec%>';
-	var nameServer = '<%=nameSrv%>';
-	var total =  Math.ceil(txtNumRec / 10);
-	var dataJSON = '{"TotalPages":'+ total +',"ActualPage":1,"TotalRecords":'+txtNumRec+',"FileListRows":[';
 	
-	if (obJson) {
+	if (obJson && obJson.FileList.length > 0) {
+		
+		var txtNumRec = '<%=numRec%>';
+		var nameServer = '<%=nameSrv%>';
+		var total =  Math.ceil(txtNumRec / 10);
+		var dataJSON = '{"TotalPages":'+ total +',"ActualPage":1,"TotalRecords":'+txtNumRec+',"FileListRows":[';
+				
 		for (i = 0; i < obJson.FileList.length; i++) {
 			if (i != obJson.FileList.length -1){
 				dataJSON += JSON.stringify(obJson.FileList[i]) + ",";
@@ -155,15 +155,17 @@
 		    	dataJSON += JSON.stringify(obJson.FileList[i]) + "]}" ;
 		    }
 		}
+		
+		console.log(dataJSON);
 
 		grid = $("#list");
 	    grid.jqGrid({
 	      colNames: ['Nombre fichero', 'Fecha de modificaci&oacute;n','Tama&ntilde;o'],
 	      colModel: [
 	    	
-	        { name: 'Name', width: "400",index:"id", align: 'left',sortable: true, search:false },
-	        { name: 'Date', width: "200", align: 'center',sortable: true , search:false},
-	        { name: 'Size', width: "200", align: 'right',sortable: true, search:false }
+	        { name: 'name', width: "400",index:"id", align: 'left',sortable: true, search:false },
+	        { name: 'date', width: "200", align: 'center',sortable: true , search:false},
+	        { name: 'size', width: "200", align: 'right',sortable: true, search:false }
 	      ],
 	       
 	        pager: '#page',
@@ -185,7 +187,7 @@
 	        ignoreCase: true,
 	        ondblClickRow: function(id){        	
 	        	var rowData = $(this).getRowData(id);
-	        	var fileName = rowData['Name'];
+	        	var fileName = rowData['name'];
 	        	document.location.href = "../log?op=4&fname=" + fileName + "&name-srv=" + nameServer;
 	        },
 	    });

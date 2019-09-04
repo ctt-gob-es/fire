@@ -1,13 +1,7 @@
+<%@page import="es.gob.log.consumer.client.LogError"%>
+<%@page import="es.gob.log.consumer.client.LogInfo"%>
 <%@page import="es.gob.log.consumer.client.ServiceOperations"%>
-<%@page import="javax.json.JsonNumber"%>
-<%@page import="java.util.Date"%>
-<%@page import="javax.json.JsonString"%>
-<%@page import="javax.json.JsonArray"%>
-<%@page import="javax.json.JsonReader"%>
-<%@page import="javax.json.Json"%>
-<%@page import="javax.json.JsonObject"%>
-<%@page import="java.io.ByteArrayInputStream"%>
-<%@page import="java.text.SimpleDateFormat"%>
+
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
@@ -35,58 +29,29 @@
 	
 	// Logica para determinar si mostrar un resultado de operacion
 	
-	final byte[] jsonLogInfo = (byte[]) session.getAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO); 
-	if (jsonLogInfo == null){
-		response.sendRedirect("../log?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+	final LogInfo logInfo = (LogInfo) session.getAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO); 
+	if (logInfo == null) {
+		response.sendRedirect("../log?op=" + ServiceOperations.GET_LOG_FILES.getId() + //$NON-NLS-1$
 				"&name-srv=" + nameSrv); //$NON-NLS-1$
 		return;
 	}
 	session.removeAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO);
 	
 	try {
-		final JsonReader reader = Json.createReader(new ByteArrayInputStream(jsonLogInfo));
-		final JsonObject jsonObj = reader.readObject();
-		reader.close();
-		
-		if (jsonObj.getJsonArray("LogInfo") != null) {	//$NON-NLS-1$
-			final JsonArray LogInfo = jsonObj.getJsonArray("LogInfo");  //$NON-NLS-1$
-			for (int i = 0; i < LogInfo.size(); i++){
-				final JsonObject json = LogInfo.getJsonObject(i);
-	
-				if (json.get(ServiceParams.PARAM_PARAM_LEVELS) != null && !"".equals(json.get(ServiceParams.PARAM_PARAM_LEVELS).toString().trim())) { //$NON-NLS-1$
-					final String levelsList = json.get("Levels").toString().replace("\"", "");//$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					if (levelsList != null && !"".equals(levelsList.trim())){//$NON-NLS-1$
-						levels = levelsList.split(",");//$NON-NLS-1$
-					}
-					else {
-						filter = false;
-					}				
-				}
-	
-				if (levels == null || (levels != null && levels.length == 1 &&  "".equals(levels[0].trim()))){//$NON-NLS-1$
-					filter = false;
-				}
-	
-				if (json.get("Date") != null && !"".equals(json.get("Date").toString()) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-						&& "\"true\"".equals(json.get("Date").toString())) { //$NON-NLS-1$//$NON-NLS-2$ 
-					date = true;
-				}
-				if(json.get("Time")!=null&& !"".equals(json.get("Time").toString()) //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-						&& "\"true\"".equals(json.get("Time").toString())) { //$NON-NLS-1$//$NON-NLS-2$ 
-					time = true;
-				}						
-			}
+		levels = logInfo.getLevels();
+		if (levels == null || levels.length <= 1) {
+			filter = false;
 		}
-		else {
-			if (jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
-				final JsonArray Error = jsonObj.getJsonArray("Error");  //$NON-NLS-1$
-				for (int i = 0; i < Error.size(); i++) {
-					final JsonObject json = Error.getJsonObject(i);
-					errorMsg += "Error: " + json.getInt("Code") + "  " + json.getString("Message") + "<br/>"; //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
-				}
-				errorMsg = errorMsg.replace("\"", "").replace("'", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}
-			else {
+		
+		date = logInfo.isDate();
+		time = logInfo.isTime();
+		
+		LogError error = logInfo.getError();
+
+		if (error != null) {
+			if (error.getMessage() != null) {
+				errorMsg = "Error: " + error.getCode() + "  " + error.getMessage() + "<br/>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			} else {
 				errorMsg = "No se ha recibido la información de formato del fichero";
 			}
 			// Bloqueamos el uso de las funciones para las que son necesarias el
@@ -122,8 +87,8 @@
 	<script type="text/javascript">
 		var file = '<%=fileName%>';
 		var server = '<%=nameSrv%>';
-	</script>	
-	
+	</script>
+
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery-ui.min.js" type="text/javascript"></script>
 	<script src="../resources/js/jquery.ui.datepicker-es.js" type="text/javascript"></script>
@@ -206,13 +171,13 @@
 				      	<div id="dateTimes" style="display:block; width:100%;">
 				      		<div>
 					      		<div style="display: inline-block;width:48%;">
-					      		<% if(date){%>
+					      		<% if (date) {%>
 					      			<label for="startDate">Fecha inicio</label>
 					      			<input type="text" id="startDate" name="startDate" class="log_filter" maxlength="10" size="10">
 					      		<%}%>
 					      		</div>
 					      		<div style="display: inline-block;width:48%;">
-					      		<% if(time){%>
+					      		<% if (time) {%>
 					      			<label for="startTime">Hora inicio</label>
 					      			<input type="text" id="startTime" name="startTime" class="log_filter"  maxlength="8" size="8">	
 					      		<%}%>
@@ -220,7 +185,7 @@
 				      		</div>				      	
 				      		<div>
 					      		<div style="display: inline-block;width:48%;">
-					    		<% if(date){%>
+					    		<% if (date) {%>
 					    			<label for="endDate">Fecha fin</label>
 					      			<input type="text" id="endDate" name="endDate" class="log_filter" maxlength="10" size="10">
 					      		<%}%>

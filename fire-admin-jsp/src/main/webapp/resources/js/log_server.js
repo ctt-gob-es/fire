@@ -27,10 +27,10 @@
             		htmlTableBody = htmlTableBody + '<tr><td headers="name">' + JSONData.LogSrvs[i].nombre + '</td>';        
             		htmlTableBody = htmlTableBody + '<td headers="url">' + JSONData.LogSrvs[i].url_servicio_log + '</td>'  			      	
             		htmlTableBody = htmlTableBody + '<td headers="actions">';  
-            		htmlTableBody = htmlTableBody + '<a href="../logServer?act=1&id-srv=' +  JSONData.LogSrvs[i].id_servidor + '"><img src="../resources/img/servidor_icon.png"/></a>';   //Conectar
-            		htmlTableBody = htmlTableBody + '<a href="./LogServer.jsp?act=5&id-srv=' +  JSONData.LogSrvs[i].id_servidor + '"><img src="../resources/img/details_icon.png"/></a>';
-            		htmlTableBody = htmlTableBody + '<a href="./LogServer.jsp?act=3&id-srv=' +  JSONData.LogSrvs[i].id_servidor + '"><img src="../resources/img/editar_icon.png"/></a>'; //Visualizar   				
-            		htmlTableBody = htmlTableBody + '<a href="../logServer?act=4&id-srv=' +  JSONData.LogSrvs[i].id_servidor + '"><img src="../resources/img/delete_icon.png" onclick="return confirmar(\'' + JSONData.LogSrvs[i].nombre + '\')"/></a>';	  			         			
+            		htmlTableBody = htmlTableBody + '<a href="../logServer?act=1&id-srv=' +  JSONData.LogSrvs[i].id_servidor + '" title="Conectar"><img src="../resources/img/servidor_icon.png"/></a>';   //Conectar
+            		htmlTableBody = htmlTableBody + '<a href="./LogServer.jsp?act=5&id-srv=' +  JSONData.LogSrvs[i].id_servidor + '" title="Visualizar"><img src="../resources/img/details_icon.png"/></a>';
+            		htmlTableBody = htmlTableBody + '<a href="./LogServer.jsp?act=3&id-srv=' +  JSONData.LogSrvs[i].id_servidor + '" title="Editar"><img src="../resources/img/editar_icon.png"/></a>'; //Visualizar   				
+            		htmlTableBody = htmlTableBody + '<a href="../logServer?act=4&id-srv=' +  JSONData.LogSrvs[i].id_servidor + '" title="Eliminar"><img src="../resources/img/delete_icon.png" onclick="return confirmar(\'' + JSONData.LogSrvs[i].nombre + '\')"/></a>';	  			         			
          		
             		htmlTableBody = htmlTableBody + '</td></tr>';          		       	
             	}

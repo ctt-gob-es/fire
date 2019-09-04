@@ -185,7 +185,7 @@ public class RecoverSignManager {
 
         	// Se actualiza si esta definido el formato de actualizacion
         	if (upgrade != null && !upgrade.isEmpty()) {
-        		LOGGER.info(logF.format("Se actualiza la firma al formato " + upgrade)); //$NON-NLS-1$
+        		LOGGER.info(logF.format("Solicitud de actualizacion de firma")); //$NON-NLS-1$
         		try {
         			final UpgradeResult upgradeResult = UpgraderFactory.getUpgrader().upgradeSignature(signResult, upgrade);
         			signResult = upgradeResult.getResult();
@@ -372,7 +372,7 @@ public class RecoverSignManager {
 
 		// Se actualiza si esta definido el formato de actualizacion
         if (upgrade != null && !upgrade.isEmpty()) {
-        	LOGGER.info(logF.format("Se actualiza la firma al formato " + upgrade)); //$NON-NLS-1$
+        	LOGGER.info(logF.format("Solicitud de actualizacion de firma")); //$NON-NLS-1$
         	try {
         		final UpgradeResult upgradeResult = UpgraderFactory.getUpgrader().upgradeSignature(signResult, upgrade);
         		signResult = upgradeResult.getResult();

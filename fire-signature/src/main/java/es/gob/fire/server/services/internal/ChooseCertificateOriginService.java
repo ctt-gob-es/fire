@@ -172,7 +172,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		// Listamos los certificados del usuario
 		X509Certificate[] certificates = null;
 		try {
-			LOGGER.info(logF.format("Se ha seleccionado el proveedor " + providerName)); //$NON-NLS-1$
+			LOGGER.info(logF.format("Se ha seleccionado el proveedor " + providerName.replaceAll("[\r\n]",""))); //$NON-NLS-1$
 			final FIReConnector connector = ProviderManager.initTransacction(
 					providerName,
 					connConfig.getProperties()

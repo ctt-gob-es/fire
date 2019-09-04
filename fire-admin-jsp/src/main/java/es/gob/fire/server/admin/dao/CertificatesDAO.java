@@ -27,6 +27,7 @@ import javax.json.JsonWriter;
 
 import es.gob.fire.server.admin.conf.DbManager;
 import es.gob.fire.server.admin.entity.CertificateFire;
+import es.gob.fire.server.admin.service.LogUtils;
 import es.gob.fire.server.admin.tool.Utils;
 
 /**
@@ -51,6 +52,10 @@ public class CertificatesDAO {
 
 	private static final String STATEMENT_UPDATE_CERTIFICATE = "UPDATE tb_certificados SET nombre_cert=?, cert_principal = ?, cert_backup = ?, huella_principal = ?, huella_backup = ? WHERE id_certificado = ?";//$NON-NLS-1$
 
+	private static final String STATEMENT_INFO_APPLICATION_CERTIFICATE  = "SELECT tb_cert.id_certificado, tb_cert.nombre_cert, tb_cert.fec_alta, tb_cert.cert_principal,tb_cert.cert_backup, " //$NON-NLS-1$
+			+ "tb_cert.huella_principal,tb_cert.huella_backup, tb_usu.nombre, tb_usu.apellidos " //$NON-NLS-1$
+			+ "FROM tb_certificados AS tb_cert, tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu " //$NON-NLS-1$
+			+ "WHERE tb_app.fk_responsable = tb_usu.id_usuario AND tb_app.fk_certificado = tb_cert.id_certificado  ORDER BY id_certificado"; //$NON-NLS-1$
 	/**
 	 * Obtiene un JSON con el numero de certificados dados de alta en el sistema.
 	 * @return Estructura JSON.
@@ -295,7 +300,7 @@ public class CertificatesDAO {
 	 * @return Listado de certificados.
 	 */
 	public static List<CertificateFire> selectCertificateAll() {
-		final List<CertificateFire> lCert = new ArrayList<CertificateFire>();
+		final List<CertificateFire> lCert = new ArrayList<>();
 
 		try {
 			final PreparedStatement st = DbManager.prepareStatement(ST_SELECT_CERTIFICATES_ALL);
@@ -343,7 +348,7 @@ public class CertificatesDAO {
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_REMOVE_CERTIFICATE);
 		st.setString(1, id);
 
-		LOGGER.info("Damos de baja el certificado con el ID: " + id); //$NON-NLS-1$
+		LOGGER.info("Damos de baja el certificado con el ID: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
 		st.execute();
 		st.close();
@@ -404,5 +409,50 @@ public class CertificatesDAO {
 		st.close();
 	}
 
+	public static String getCertificateApplicationJSON() throws SQLException {
 
+		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
+		final JsonArrayBuilder data = Json.createArrayBuilder();
+
+		try {
+			final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INFO_APPLICATION_CERTIFICATE);
+			final ResultSet rs = st.executeQuery();
+			while (rs.next()) {
+				Date date= null;
+				final Timestamp timestamp = rs.getTimestamp(5);
+				if (timestamp != null) {
+					date = new Date(timestamp.getTime());
+
+				}
+
+				data.add(Json.createObjectBuilder()
+
+						.add("id", rs.getString(1)) //$NON-NLS-1$
+						.add("nombre", rs.getString(2)) //$NON-NLS-1$
+						.add("nombre_responsable", rs.getString(3) + " " + rs.getString(4)) //$NON-NLS-1$ //$NON-NLS-2$
+						.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(5))) //$NON-NLS-1$
+						.add("fk_certificado", rs.getString(6)) //$NON-NLS-1$
+						);
+			}
+			rs.close();
+			st.close();
+		}
+		catch(final Exception e){
+			LOGGER.log(Level.SEVERE, "Error al leer los registros en la tabla de aplicaciones", e); //$NON-NLS-1$
+		}
+
+		jsonObj.add("AppList", data); //$NON-NLS-1$
+
+		final StringWriter writer = new StringWriter();
+		try  {
+			final JsonWriter jw = Json.createWriter(writer);
+	        jw.writeObject(jsonObj.build());
+	        jw.close();
+	    }
+		catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "Error al componente la estructura JSON con el listado de aplicaciones", e); //$NON-NLS-1$
+		}
+
+	    return writer.toString();
+	}
 }

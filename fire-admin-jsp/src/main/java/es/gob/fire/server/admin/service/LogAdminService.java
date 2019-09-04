@@ -26,6 +26,7 @@ import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.admin.conf.ConfigManager;
 import es.gob.log.consumer.client.LogConsumerClient;
+import es.gob.log.consumer.client.LogInfo;
 import es.gob.log.consumer.client.ServiceOperations;
 
 /**
@@ -70,6 +71,7 @@ public class LogAdminService extends HttpServlet {
 
 		// Cargamos los parametros de la peticion
 		Parameters params;
+
 		try {
 			params = loadParameters(request);
 		}
@@ -102,7 +104,7 @@ public class LogAdminService extends HttpServlet {
 			op = checkOperation(opString);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString)); //$NON-NLS-1$
+			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", LogUtils.cleanText(opString))); //$NON-NLS-1$
 			final String jsonError = buildJsonError(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString), HttpServletResponse.SC_BAD_REQUEST); //$NON-NLS-1$
 			session.setAttribute(ServiceParams.SESSION_ATTR_ERROR_JSON, jsonError);
 			response.sendRedirect(getSelectionResultUrl(request, false));
@@ -146,7 +148,7 @@ public class LogAdminService extends HttpServlet {
 
 				// En caso de exito, redirigimos a LogsFileList para mostrar los ficheros encontrados
 				if (params.getMessage() != null && !params.getMessage().isEmpty()) {
-					response.sendRedirect(request.getContextPath().toString().concat("/Logs/LogsFileList.jsp?")//$NON-NLS-1$
+					response.sendRedirect("Logs/LogsFileList.jsp?"//$NON-NLS-1$
 						.concat(ServiceParams.PARAM_NAMESRV).concat("=").concat(params.getNameSrv()) //$NON-NLS-1$
 						.concat("&").concat(ServiceParams.PARAM_MSG).concat("=").concat(params.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
 					return;
@@ -183,21 +185,13 @@ public class LogAdminService extends HttpServlet {
 
 		case OPEN_FILE:
 			LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
-			final byte[] datOpenFiles = logClient.openFile(params.getLogFileName());
+			final LogInfo datOpenFiles = logClient.openFile(params.getLogFileName());
 
-			if (datOpenFiles != null && datOpenFiles.length > 0) {
 
-				JsonObject jsonObj;
-				try (final JsonReader reader = Json.createReader(new ByteArrayInputStream(datOpenFiles));) {
-					jsonObj = reader.readObject();
-				}
-
-				if (jsonObj.getJsonArray("Error") != null){ //$NON-NLS-1$
-					final JsonArray jsonError = jsonObj.getJsonArray("Error"); //$NON-NLS-1$
-					response.sendRedirect(request.getContextPath() +
-							"/log?op=" + ServiceOperations.GET_LOG_FILES.ordinal() + //$NON-NLS-1$
+				if (datOpenFiles.getError() != null) {
+					response.sendRedirect("log?op=" + ServiceOperations.GET_LOG_FILES.getId() + //$NON-NLS-1$
 							"&" + ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv() + //$NON-NLS-1$ //$NON-NLS-2$
-							"&" + ServiceParams.PARAM_MSG + "=" + jsonError.getJsonObject(0).getString("Message")//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							"&" + ServiceParams.PARAM_MSG + "=" + datOpenFiles.getError().getMessage() //$NON-NLS-1$ //$NON-NLS-2$
 							);
 					return;
 				}
@@ -205,7 +199,7 @@ public class LogAdminService extends HttpServlet {
 				session.setAttribute(ServiceParams.SESSION_ATTR_JSON_LOGINFO, datOpenFiles);
 
 				if (!params.isReset()) {
-					response.sendRedirect(request.getContextPath() + "/Logs/LogsManager.jsp?" + //$NON-NLS-1$
+					response.sendRedirect("Logs/LogsManager.jsp?" + //$NON-NLS-1$
 						ServiceParams.PARAM_NAMESRV + "=" + params.getNameSrv() + //$NON-NLS-1$
 						 "&" + ServiceParams.PARAM_FILENAME + "=" + params.getLogFileName());  //$NON-NLS-1$//$NON-NLS-2$
 					return;
@@ -215,10 +209,7 @@ public class LogAdminService extends HttpServlet {
 				// y no se imprima nada en la pantalla
 				result = ""; //$NON-NLS-1$
 				params.setReset(false);
-			}
-			else {
-				result = buildJsonError("No se obtuvo respuesta del servidor", 500); //$NON-NLS-1$
-			}
+
 
 			if (logClient.getCharsetContent() != null){
 				response.setCharacterEncoding(logClient.getCharsetContent().toString());
@@ -228,7 +219,7 @@ public class LogAdminService extends HttpServlet {
 
 		case CLOSE_FILE:
 			LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
-			final byte[] datCloseFiles = logClient.closeFile();
+			final byte[] datCloseFiles = logClient.closeFileJson();
 			if (datCloseFiles != null && datCloseFiles.length > 0) {
 				final String res = new String(datCloseFiles, logClient.getCharsetContent());
 				result = res.replace("\\n", "</br>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -244,7 +235,7 @@ public class LogAdminService extends HttpServlet {
 
 		case TAIL:
 			LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
-			final byte[] datTailFile = logClient.getLogTail(params.getNumlines(), params.getLogFileName());
+			final byte[] datTailFile = logClient.getLogTailJson(params.getNumlines(), params.getLogFileName());
 			if(datTailFile != null && datTailFile.length > 0) {
 				final String res = new String(datTailFile,logClient.getCharsetContent());
 				result = res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
@@ -260,7 +251,7 @@ public class LogAdminService extends HttpServlet {
 			break;
 		case GET_MORE:
 			LOGGER.info("Solicitud entrante de mas log"); //$NON-NLS-1$
-			final byte datMoreFile[] = logClient.getMoreLog(params.getNumlines(), params.getLogFileName());
+			final byte datMoreFile[] = logClient.getMoreLogJson(params.getNumlines());
 			if (datMoreFile != null && datMoreFile.length > 0 ) {
 				final String res = new String(datMoreFile,logClient.getCharsetContent());
 				result = res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
@@ -277,7 +268,7 @@ public class LogAdminService extends HttpServlet {
 			break;
 		case SEARCH_TEXT:
 			LOGGER.info("Solicitud entrante de busqueda de texto"); //$NON-NLS-1$
-			final byte[] datSearchTxt = logClient.searchText(params.getNumlines(), params.getTxt2search(), params.getDatetime(), params.isReset());
+			final byte[] datSearchTxt = logClient.searchTextJson(params.getNumlines(), params.getTxt2search(), params.getDatetime(), params.isReset());
 			if (datSearchTxt != null && datSearchTxt.length > 0 ) {
 				final String res = new String(datSearchTxt,logClient.getCharsetContent());
 				result = res.replace("\\n", "</br>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -296,7 +287,7 @@ public class LogAdminService extends HttpServlet {
 			LOGGER.info("Solicitud entrante de filtrado de log"); //$NON-NLS-1$
 			result = ""; //$NON-NLS-1$
 
-			final byte[] datFiltered = logClient.getLogFiltered(params.getNumlines(), params.getStartDateTime(), params.getEndDateTime(), params.getLevel(), params.isReset());
+			final byte[] datFiltered = logClient.getLogFilteredJson(params.getNumlines(), params.getStartDateTime(), params.getEndDateTime(), params.getLevel(), params.isReset());
 			if(datFiltered != null && datFiltered.length > 0 ) {
 				final String res = new String(datFiltered,logClient.getCharsetContent());
 				result = res.replace("\\n", "</br>");//$NON-NLS-1$//$NON-NLS-2$
@@ -326,7 +317,7 @@ public class LogAdminService extends HttpServlet {
 			result = ""; //$NON-NLS-1$
 			String path = ""; //$NON-NLS-1$
 
-			final byte datDownload[] = logClient.download(params.getLogFileName(), tempDir);
+			final byte datDownload[] = logClient.downloadJson(params.getLogFileName(), tempDir);
 			if (datDownload != null && datDownload.length > 0 ) {
 
 				JsonObject jsonObj;
@@ -355,35 +346,42 @@ public class LogAdminService extends HttpServlet {
 
 				        // Obtenemos los datos de la respuesta
 
-				        final byte[] buffer = new byte[8 * 1024];
-				        final File f =  new File(path.replaceAll("\"", "")); //$NON-NLS-1$ //$NON-NLS-2$
-				        int tam = 0;
-				        if (f.exists()) {
-				        	tam = (int) f.length();
-				        	final FileInputStream input = new FileInputStream(f);
-				        	response.setContentLength(tam);
-							try {
-								final OutputStream output = response.getOutputStream();//gestiona la descarga el navegador
-							  try {
-							    int bytesRead;
-							    while ((bytesRead = input.read(buffer)) != -1) {
-							      output.write(buffer, 0, bytesRead);
-							    }
-							  } finally {
-								output.flush();
-							    output.close();
-							  }
-							} finally {
-							  input.close();
-							}
+				        final File f =  new File(path.replaceAll("\"", "")).getCanonicalFile(); //$NON-NLS-1$ //$NON-NLS-2$
+				        final String normalizedTempDir = new File(tempDir).getCanonicalPath();
 
-							if (response.isCommitted()) {
-								Files.deleteIfExists(f.toPath());
-							}
+				        if (f.getAbsolutePath().startsWith(normalizedTempDir)) {
+
+				        	final byte[] buffer = new byte[8 * 1024];
+				        	int tam = 0;
+				        	if (f.exists()) {
+				        		tam = (int) f.length();
+				        		final FileInputStream input = new FileInputStream(f);
+				        		response.setContentLength(tam);
+				        		try {
+				        			final OutputStream output = response.getOutputStream();//gestiona la descarga el navegador
+				        			try {
+				        				int bytesRead;
+				        				while ((bytesRead = input.read(buffer)) != -1) {
+				        					output.write(buffer, 0, bytesRead);
+				        				}
+				        			} finally {
+				        				output.flush();
+				        				output.close();
+				        			}
+				        		} finally {
+				        			input.close();
+				        		}
+
+				        		if (response.isCommitted()) {
+				        			Files.deleteIfExists(f.toPath());
+				        		}
+				        		return;
+				        	}
+				        	result = buildJsonError("No se encontro el fichero para la descarga", 500); //$NON-NLS-1$
 				        }
-						else {
-							result = buildJsonError("No se encontro el fichero para la descarga", 500); //$NON-NLS-1$
-						}
+				        else {
+				        	result = buildJsonError("Se especifico una ruta de fichero no valida", 400); //$NON-NLS-1$
+				        }
 					}
 					else {
 						result = buildJsonError("La respuesta del servicio no esta bien formada", 500); //$NON-NLS-1$
@@ -400,6 +398,7 @@ public class LogAdminService extends HttpServlet {
 				// No se obtuvo resultado
 				result = buildJsonError("No se obtuvo respuesta del servidor", 500); //$NON-NLS-1$
 			}
+
 
 			response.getWriter().write(result);
 			break;

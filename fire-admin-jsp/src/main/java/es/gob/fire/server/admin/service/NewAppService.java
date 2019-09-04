@@ -17,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.admin.dao.AplicationsDAO;
 
@@ -30,36 +31,51 @@ public class NewAppService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(NewAppService.class.getName());
 
-	private static final String PARAM_NAME = "nombre-app"; //$NON-NLS-1$
-	private static final String PARAM_RESP = "nombre-resp"; //$NON-NLS-1$
-	private static final String PARAM_EMAIL = "email-resp"; //$NON-NLS-1$
-	private static final String PARAM_TEL = "telf-resp"; //$NON-NLS-1$
-	private static final String PARAM_CERTID = "id-certificate"; //$NON-NLS-1$
-	private static final String PARAM_OP = "op"; //$NON-NLS-1$
 
 	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
 
+		final HttpSession session = req.getSession(false);
+		if (session == null) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
+
 		req.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
-		// Obtenemos el tipo de operacion 1-Alta 2-Edicion
-		int op;
+
+		// Obtenemos los parametros enviados del formulario junto con el Certificado
+		final Parameters params = getParameters(req);
+
+
 		try {
-			op = Integer.parseInt(req.getParameter(PARAM_OP));
-			if (op != 1 && op != 2) {
-				throw new IllegalArgumentException();
+			final String id = params.getId();
+			if (id == null && id.isEmpty()) {
+				throw new IllegalArgumentException("El id del usuario es: " + id); //$NON-NLS-1$
 			}
 		} catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de operacion no soportado: " + req.getParameter(PARAM_OP)); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de usuario no soportado: " + ServiceParams.PARAM_APPID); //$NON-NLS-1$
+			resp.sendRedirect("Application/AdminMainPage.jsp"); //$NON-NLS-1$
+			return;
+		}
+
+		// Obtenemos el tipo de operacion 1-Alta 2-Edicion
+
+		int op;
+		try {
+			op = params.getOp();
+			if (op != 1 && op != 2) {
+				throw new IllegalArgumentException("Operacion no soportada: " + op); //$NON-NLS-1$
+			}
+		} catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de operacion no soportado: " + ServiceParams.PARAM_OP); //$NON-NLS-1$
 			resp.sendRedirect("Application/AdminMainPage.jsp?op=alta&r=0&ent=app"); //$NON-NLS-1$
 			return;
 		}
 
 		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$;
 
-		// Obtenemos los parametros enviados del formulario junto con el Certificado
-		final Parameters params = getParameters(req);
 
 		if (params.getName() == null || params.getRes() == null) {
 			LOGGER.log(Level.SEVERE,
@@ -72,7 +88,7 @@ public class NewAppService extends HttpServlet {
 		if (op == 1) {
 			LOGGER.info("Alta de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
 			try {
-				AplicationsDAO.createApplication(params.getName(), params.getRes(), params.getEmail(), params.getTel(), params.getIdcertificate());
+				AplicationsDAO.createApplication(params.getName(), params.getRes(), params.getIdcertificate(),params.isHabilitado());
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
 				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -83,7 +99,14 @@ public class NewAppService extends HttpServlet {
 		else if (op == 2) {
 			LOGGER.info("Edicion de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
 			try {
-				AplicationsDAO.updateApplication(req.getParameter("iddApp"), params.getName(), params.getRes(), params.getEmail(), params.getTel(), params.getIdcertificate());//$NON-NLS-1$
+
+			 final boolean enable = params.isHabilitado();
+				AplicationsDAO.updateApplication(
+						params.getId(),
+						params.getName(),
+						params.getRes(),
+						params.getIdcertificate(),
+						params.isHabilitado());
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la actualizacion de la aplicacion", e); //$NON-NLS-1$
 				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -102,34 +125,71 @@ public class NewAppService extends HttpServlet {
 	 */
 	private Parameters getParameters(final HttpServletRequest req) {
 
+		final String id = req.getParameter(ServiceParams.PARAM_APPID);
+		final String op = req.getParameter(ServiceParams.PARAM_OP);
+		final String nombreApp = req.getParameter(ServiceParams.PARAM_NAME);
+
+		final String disabledParam = req.getParameter(ServiceParams.PARAM_ENABLED);
+		final boolean enabled = disabledParam == null;
+
+		final String nombreResp = req.getParameter(ServiceParams.PARAM_RESP);
+		final String idCertificate = req.getParameter(ServiceParams.PARAM_CERTID);
+		final String mail = req.getParameter(ServiceParams.PARAM_MAIL);
+		final String telf = req.getParameter(ServiceParams.PARAM_TEL);
 		final Parameters params = new Parameters();
 
-		if(req.getParameter(PARAM_NAME) != null && !"".equals(req.getParameter(PARAM_NAME))) { //$NON-NLS-1$
-			params.setName(req.getParameter(PARAM_NAME));
+		try {
+			params.setOp(Integer.parseInt(op));
+		}catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "No se han encontrado el parametro correspondido", e); //$NON-NLS-1$
+			return params;
+
 		}
-		if(req.getParameter(PARAM_RESP) != null && !"".equals(req.getParameter(PARAM_RESP))) {//$NON-NLS-1$
-			params.setRes(req.getParameter(PARAM_RESP));
+		if (id != null && !id.isEmpty()) {
+			params.setId(id);
 		}
-		if(req.getParameter(PARAM_EMAIL) != null && !"".equals(req.getParameter(PARAM_EMAIL))) {//$NON-NLS-1$
-			params.setEmail(req.getParameter(PARAM_EMAIL));
+
+		if (nombreApp != null && !nombreApp.isEmpty()) {
+			params.setName(nombreApp);
 		}
-		if(req.getParameter(PARAM_TEL) != null && !"".equals(req.getParameter(PARAM_TEL))) {//$NON-NLS-1$
-			params.setTel(req.getParameter(PARAM_TEL));
+		if (nombreResp != null && !nombreResp.isEmpty()) {
+			params.setRes(nombreResp);
 		}
-		if(req.getParameter(PARAM_CERTID) != null && !"".equals(req.getParameter(PARAM_CERTID))) {//$NON-NLS-1$
-			params.setIdcertificate(req.getParameter(PARAM_CERTID));
+		if (idCertificate != null && !idCertificate.isEmpty()) {
+			params.setIdcertificate(idCertificate);
 		}
+		if (mail != null && !mail.isEmpty()) {
+			params.setEmail(mail);
+		}
+		if (telf != null && !telf.isEmpty()) {
+			params.setTel(telf);
+		}
+		params.setHabilitado(enabled);
+
+
 		return params;
 	}
 
 	class Parameters {
 
-		private String name = null;
-		private String res = null;
-		private String email = null;
-		private String tel = null;
-		private String idcertificate = null;
+		private String id;
+		private String name;
+		private String res;
+		private String email;
+		private String tel;
+		private String idcertificate;
+		private boolean habilitado;
+		private int op;
 
+
+
+
+		public String getId() {
+			return this.id;
+		}
+		public void setId(final String id) {
+			this.id = id;
+		}
 		/**
 		 * Obtiene el nombre de la aplicaci&ácute;n
 		 * @return
@@ -189,7 +249,7 @@ public class NewAppService extends HttpServlet {
 		}
 		/**
 		 * Obtiene el id del certificado
-		 * @return
+		 * @return idcertificate
 		 */
 		final String getIdcertificate() {
 			return this.idcertificate;
@@ -201,5 +261,21 @@ public class NewAppService extends HttpServlet {
 		final void setIdcertificate(final String idcertificate) {
 			this.idcertificate = idcertificate;
 		}
+
+		public boolean isHabilitado() {
+			return this.habilitado ;
+		}
+
+		public void setHabilitado(final boolean habilitado) {
+			this.habilitado = habilitado;
+		}
+
+		public int getOp() {
+			return this.op;
+		}
+		public void setOp(final int op) {
+			this.op = op;
+		}
+
 	}
 }

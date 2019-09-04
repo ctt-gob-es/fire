@@ -70,8 +70,6 @@ final class DssServicesUtils {
             firmaNode = "<dss:Base64XML>" + Base64.encode(firma) + "</dss:Base64XML>"; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        final String normalizedFormat = translateFormat(formato);
-
         // Creamos la peticion segun el tipo de firma que se actualiza
         final StringBuilder dss = new StringBuilder(1000);
         if (isBinary || isEnveloping(firmaXml)) {
@@ -82,7 +80,7 @@ final class DssServicesUtils {
                     .append(afirmaAppName)
                     .append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
                     .append("<dss:ReturnUpdatedSignature Type='") //$NON-NLS-1$
-                    .append(normalizedFormat)
+                    .append(formato.getFormatUrn())
                     .append("'></dss:ReturnUpdatedSignature>") //$NON-NLS-1$
                     .append("</dss:OptionalInputs>") //$NON-NLS-1$
                     .append("<dss:SignatureObject>") //$NON-NLS-1$
@@ -101,7 +99,7 @@ final class DssServicesUtils {
                     .append(afirmaAppName)
                     .append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
                     .append("<dss:ReturnUpdatedSignature Type='") //$NON-NLS-1$
-                    .append(normalizedFormat)
+                    .append(formato.getFormatUrn())
                     .append("'></dss:ReturnUpdatedSignature>") //$NON-NLS-1$
                     .append("</dss:OptionalInputs>") //$NON-NLS-1$
                     .append("<dss:SignatureObject>") //$NON-NLS-1$
@@ -139,13 +137,6 @@ final class DssServicesUtils {
             index = xml.indexOf('<', index + 1);
         }
         return xml.substring(index);
-    }
-
-    private static String translateFormat(final UpgradeTarget formato) {
-        if (UpgradeTarget.PADES_LTV_FORMAT == formato) {
-            return "urn:afirma:dss:1.0:profile:XSS:PAdES:1.1.2:forms:LTV"; //$NON-NLS-1$
-        }
-        return "urn:oasis:names:tc:dss:1.0:profiles:AdES:forms:" + formato.toString(); //$NON-NLS-1$
     }
 
     /**

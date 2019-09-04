@@ -73,7 +73,7 @@
 		</div>
 		
 		<p>Los campos con * son obligatorios</p>
-			<form id="formLogServer" method="post" action="../logServer?act=<%= act%><%= idSrv != null ? ("&id-srv=" + idSrv) : "" %>"> 
+			<form id="formLogServer" method="post" autocomplete="off" action="../logServer?act=<%= act%><%= idSrv != null ? ("&id-srv=" + idSrv) : "" %>"> 
 			
 				<div style="margin: auto;width: 100%;padding: 3px;">		
 					<div style="display: inline-block; width: 20%;margin: 3px;">
@@ -151,6 +151,12 @@
 			document.getElementById("url").disabled = <%= act == 5 %>
 			document.getElementById("verifyssl").disabled = <%= act == 5 %>
 			document.getElementById("clave").disabled = <%= act == 5 %> 
+			
+			if(act == 5){
+				document.getElementById("url").style.background = '#F5F5F5';
+				document.getElementById("clave").style.background = '#F5F5F5';
+				document.getElementById("name-srv").style.background = '#F5F5F5';
+			}
 			
 																
 		</script>

@@ -11,37 +11,45 @@ CREATE TABLE `tb_certificados` (
   `huella_principal` varchar(45) DEFAULT NULL,
   `huella_backup` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id_certificado`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='tabla de certificados';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='tabla de certificados'
 
 
 CREATE TABLE `tb_aplicaciones` (
   `id` varchar(48) NOT NULL,
   `nombre` varchar(45) NOT NULL,
-  `responsable` varchar(45) NOT NULL,
-  `resp_correo` varchar(45) DEFAULT NULL,
-  `resp_telefono` varchar(30) DEFAULT NULL,
+  `fk_responsable` int(11) DEFAULT NULL,
   `fecha_alta` datetime NOT NULL,
   `fk_certificado` int(11) NOT NULL,
+  `habilitado` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `fk_certificado_idx` (`fk_certificado`),
-  CONSTRAINT `fk_certificado` FOREIGN KEY (`fk_certificado`) REFERENCES `tb_certificados` (`id_certificado`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `fk_responsable_idx` (`nombre`),
+  KEY `fk_responsable_idx1` (`fk_responsable`),
+  CONSTRAINT `fk_certificado` FOREIGN KEY (`fk_certificado`) REFERENCES `tb_certificados` (`id_certificado`) ON UPDATE CASCADE,
+  CONSTRAINT `fk_responsable` FOREIGN KEY (`fk_responsable`) REFERENCES `tb_usuarios` (`id_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
 
 CREATE TABLE `tb_usuarios` (
   `id_usuario` int(11) NOT NULL AUTO_INCREMENT COMMENT 'auto-numérico identificativo único',
   `nombre_usuario` varchar(30) NOT NULL COMMENT 'Nombre con el que se identifica en la aplicación',
-  `clave` varchar(45) NOT NULL COMMENT 'clave condificada con SHA256, con la que se registra el usuario',
+  `clave` varchar(45) DEFAULT NULL COMMENT 'clave condificada con SHA256, con la que se registra el usuario',
   `nombre` varchar(45) NOT NULL COMMENT 'Nombre completo del usuario',
   `apellidos` varchar(120) NOT NULL COMMENT 'Apellidos del usuario',
   `correo_elec` varchar(45) DEFAULT NULL COMMENT 'Correo electrónico',
+  `rol` int(11) NOT NULL,
   `fec_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'fecha de alta del usuario.',
   `telf_contacto` varchar(45) DEFAULT NULL COMMENT 'Teléfono de contacto',
-  `rol` varchar(45) NOT NULL DEFAULT 'admin' COMMENT 'Papel (rol) que desempeña dentro de la aplicación',
   `usu_defecto` tinyint(4) NOT NULL DEFAULT '0',
+  `codigo_renovacion` varchar(90) DEFAULT NULL,
+  `fec_renovacion` datetime DEFAULT NULL,
+  `rest_clave` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id_usuario`),
-  UNIQUE KEY `nombre_usuario_UNIQUE` (`nombre_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+  UNIQUE KEY `nombre_usuario_UNIQUE` (`nombre_usuario`),
+  UNIQUE KEY `codigo_renovacion_UNIQUE` (`codigo_renovacion`),
+  KEY `fk_role_idx` (`rol`),
+  CONSTRAINT `fk_role` FOREIGN KEY (`rol`) REFERENCES `tb_roles` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8
 
 
 CREATE TABLE `tb_servidores_log` (
@@ -83,3 +91,12 @@ CREATE TABLE `tb_transacciones` (
   `total` int(11) DEFAULT '1' COMMENT 'Numero de transacciones con esta configuracion',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `tb_roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre_rol` varchar(45) NOT NULL,
+  `permisos` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre_UNIQUE` (`nombre_rol`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

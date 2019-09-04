@@ -42,8 +42,6 @@ public final class ConfigManager implements ServletContextListener {
 
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 
-	private static final String PROP_ANALYTICS_ID = "google.trackingId"; //$NON-NLS-1$
-
 	private static final String PROP_AFIRMA_ID = "afirma.appId"; //$NON-NLS-1$
 
 	private static final String PROP_TEMP_DIR = "temp.dir"; //$NON-NLS-1$
@@ -219,7 +217,7 @@ public final class ConfigManager implements ServletContextListener {
 		for (final String provider : providersTempList) {
 			if (provider != null && !provider.trim().isEmpty()) {
 				final ProviderElement prov = new ProviderElement(provider);
-				if (!providersList.contains(provider)) { // ProviderElement tiene el equals() sobreescrito
+				if (!providersList.contains(prov)) {
 					providersList.add(prov);
 				}
 			}
@@ -235,19 +233,17 @@ public final class ConfigManager implements ServletContextListener {
 	}
 
 	/**
-	 * Recupera el tracking Id de Google Analytics.
-	 * @return Tracking Id de Google Analytics.
-	 */
-	public static String getGoogleAnalyticsTrackingId() {
-		return getProperty(PROP_ANALYTICS_ID);
-	}
-
-	/**
 	 * Recupera la clase del driver JDBC para el acceso a la base de datos.
 	 * @return Clase de conexi&oacute;n.
 	 */
 	public static String getJdbcDriverString() {
-		return getProperty(PROP_DB_DRIVER);
+		final String driver = getProperty(PROP_DB_DRIVER);
+		if (driver == null) {
+			LOGGER.warning(
+					String.format("No se ha declarado la clase del driver JDBC de la BD en el fichero de configuracion. " //$NON-NLS-1$
+							+ "Asegurese de habilitar las propiedades %1s y %2s como alternativa", PROP_APP_ID, PROP_CERTIFICATE)); //$NON-NLS-1$
+		}
+		return driver;
 	}
 
 	/**
@@ -255,7 +251,13 @@ public final class ConfigManager implements ServletContextListener {
 	 * @return Cadena de conexi&oacute;n con la base de datos.
 	 */
 	public static String getDataBaseConnectionString() {
-		return getProperty(PROP_DB_CONNECTION);
+		final String dbConnection = getProperty(PROP_DB_CONNECTION);
+		if (dbConnection == null) {
+			LOGGER.warning(
+					String.format("No se ha declarado la cadena de conexion a la BD en el fichero de configuracion. " //$NON-NLS-1$
+							+ "Asegurese de habilitar las propiedades %1s y %2s como alternativa", PROP_APP_ID, PROP_CERTIFICATE)); //$NON-NLS-1$
+		}
+		return dbConnection;
 	}
 
 	/**

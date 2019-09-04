@@ -99,8 +99,7 @@ public class LogMoreServiceManager {
 		}
 
 		// Si no se han obtenido resultados, se indica con un mensaje
-		if (result != null && result.length <= 0) {
-			LOGGER.log(Level.INFO, "No se han encontrado mas lineas en el fichero"); //$NON-NLS-1$
+		if (result == null || result.length <= 0) {
 			throw new NoResultException("No se han encontrado mas lineas en el fichero"); //$NON-NLS-1$
 		}
 

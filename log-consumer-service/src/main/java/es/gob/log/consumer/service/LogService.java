@@ -34,6 +34,7 @@ public class LogService extends HttpServlet {
 
 	private static File pathLogs = null;
 
+
 	@Override
 	public void init() throws ServletException {
 		super.init();
@@ -67,7 +68,7 @@ public class LogService extends HttpServlet {
 			op = checkOperation(opString);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString)); //$NON-NLS-1$
+			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString.replaceAll("[\r\n]", ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "Codigo de operacion no soportado"); //$NON-NLS-1$
 			return;
 		}
@@ -75,7 +76,6 @@ public class LogService extends HttpServlet {
 		// Procesamos la peticion segun si requieren login o no
 
 		byte[] result = null;
-		boolean fileClosed = false;
 		try {
 			if (!needLogin(op)) {
 				switch (op) {
@@ -107,15 +107,14 @@ public class LogService extends HttpServlet {
 				case OPEN_FILE:
 					LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
 					result = openFile(req);
-					fileClosed = false;
 					break;
 				case CLOSE_FILE:
 					LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
-					fileClosed = closeFile(req);
-					if (!fileClosed) {
+					if (!closeFile(req)) {
 						sendControlledError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No se ha podido cerrar el fichero log"); //$NON-NLS-1$
 						return;
 					}
+					result = "Fichero cerrado".getBytes(); //$NON-NLS-1$
 					break;
 				case TAIL:
 					LOGGER.info("Solicitud entrante de consulta del final del log"); //$NON-NLS-1$
@@ -140,6 +139,11 @@ public class LogService extends HttpServlet {
 						resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 					}
 					result = data.getData();
+					break;
+				case CLOSE_CONNECTION:
+					LOGGER.info("Solicitud entrante para el cierre de la conexion con el servidor"); //$NON-NLS-1$
+					closeConection(req);
+					result = "Conexion cerrada".getBytes(); //$NON-NLS-1$
 					break;
 				default:
 					LOGGER.warning(String.format("Operacion no soportada: %s", op)); //$NON-NLS-1$
@@ -184,12 +188,7 @@ public class LogService extends HttpServlet {
 			return;
 		}
 
-		if (!fileClosed) {
-			resp.getOutputStream().write(result);
-		}
-		else {
-			resp.getOutputStream().write(new String("Fichero cerrado").getBytes()); //$NON-NLS-1$
-		}
+		resp.getOutputStream().write(result);
 		resp.getOutputStream().flush();
 	}
 
@@ -200,7 +199,7 @@ public class LogService extends HttpServlet {
 	 * @throws NumberFormatException
 	 * @throws UnsupportedOperationException
 	 */
-	private static ServiceOperations checkOperation(final String opString)
+	private static final ServiceOperations checkOperation(final String opString)
 			throws NumberFormatException, UnsupportedOperationException {
 
 		final int op = Integer.parseInt(opString);
@@ -213,7 +212,7 @@ public class LogService extends HttpServlet {
 	 * @param op
 	 * @return true en caso de necesitar login, false en caso contrario
 	 */
-	private static boolean needLogin(final ServiceOperations op) {
+	private static final boolean needLogin(final ServiceOperations op) {
 		// Las operaciones echo, peticion de login y validacion de login, son
 		// las unicas que pueden realizarse sin haber establecido logging.
 		return 	op != ServiceOperations.ECHO &&
@@ -227,7 +226,7 @@ public class LogService extends HttpServlet {
 	 * @return {@code true} si el cliente est&aacute; autenticado y {@code false}
 	 * en caso contrario.
 	 */
-	private static boolean checkLogin(final HttpServletRequest req) {
+	private static final boolean checkLogin(final HttpServletRequest req) {
 
 		boolean logged = false;
 
@@ -244,7 +243,7 @@ public class LogService extends HttpServlet {
 	 * Funci&oacute;n que devuelve una cadena con formato en byte[]
 	 * @return
 	 */
-	private static byte[] echo() {
+	private static final byte[] echo() {
 		return EchoServiceManager.process();
 	}
 
@@ -254,7 +253,7 @@ public class LogService extends HttpServlet {
 	 * @return Token que deber&aacute; cifrarse para el acceso al servicio.
 	 * @throws SessionException Cuando no es posible crear la sesi&oacute;n.
 	 */
-	private static byte[] requestLogin(final HttpServletRequest req) throws SessionException {
+	private static final byte[] requestLogin(final HttpServletRequest req) throws SessionException {
 		final HttpSession session = req.getSession();
 		if (session == null) {
 			throw new SessionException("No ha sido posible crear la sesion"); //$NON-NLS-1$
@@ -263,10 +262,10 @@ public class LogService extends HttpServlet {
 	}
 
 	/**
-	 * Funci&oacute;n que retorna una cadena de bytes en formato Json indicando si es correcto el login.
-	 * @param req
-	 * @return
-	 * @throws SessionException
+	 * Completa el proceso de login.
+	 * @param req Petici&oacute;n HTTP para la validaci&oacute;n de la sesi&oacute;n.
+	 * @return Cadena de bytes en formato Json indicando que el login es correcto.
+	 * @throws SessionException Cuando la sesi&oacute;n no es valida.
 	 */
 	private static byte[] validateLogin(final HttpServletRequest req) throws SessionException {
 		final HttpSession session = req.getSession(false);
@@ -276,6 +275,19 @@ public class LogService extends HttpServlet {
 		return ValidationLoginManager.process(req, session);
 	}
 
+	/**
+	 * Funci&oacute;n que cierra la conexi&oacute;n con el servidor.
+	 * @param req Petici&oacute;n HTTP para el cierre de sesi&oacute;n.
+	 */
+	private static void closeConection(final HttpServletRequest req) {
+
+		// Cerramos el fichero actual por si no lo estuviese
+		closeFile(req);
+
+		// Invalidamos la sesion
+		final HttpSession session = req.getSession(false);
+		session.invalidate();
+	}
 	/**
 	 * Funci&oacute;n que retorna una cadena de bytes en formato Json con el resultado de los
 	 * ficheros con extendi&oacute;n log exitentes en el servidor con los datos nombre, fecha y

@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.admin.dao.AplicationsDAO"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
@@ -7,7 +8,13 @@
 <%@page import="es.gob.fire.server.admin.dao.ConfigurationDAO" %>
 <%@page import="es.gob.fire.server.admin.dao.CertificatesDAO" %>
 <%@page import="es.gob.fire.server.admin.entity.CertificateFire" %>
+<%@page import="es.gob.fire.server.admin.entity.Application" %>
 <%@page import="es.gob.fire.server.admin.tool.Utils" %>
+<%@page import="es.gob.fire.server.admin.dao.RolesDAO"%>
+<%@page import="es.gob.fire.server.admin.entity.Role"%>
+<%@page import="es.gob.fire.server.admin.dao.UsersDAO" %>
+<%@page import="es.gob.fire.server.admin.entity.User" %>
+
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
@@ -24,12 +31,11 @@
 		return;
 	}
 
-	final String empty = "";//$NON-NLS-1$
+	final String EMPTY = "";//$NON-NLS-1$
 	String id = request.getParameter("id-cert");//$NON-NLS-1$
 	String nameCert = request.getParameter("nombre-cert");//$NON-NLS-1$
 	final int op = Integer.parseInt(request.getParameter("op"));//$NON-NLS-1$
-	String b64CertPrin = "";//$NON-NLS-1$
-	String b64CertBkup = "";//$NON-NLS-1$
+	
 	
 	// op = 0 -> Solo lectura, no se puede modificar nada
 	// op = 1 -> nueva aplicacion
@@ -38,10 +44,14 @@
 	String subTitle = ""; //$NON-NLS-1$
 	String certDataPrincipal = "";//$NON-NLS-1$
 	String certDataBkup = "";//$NON-NLS-1$
+	String b64CertPrin = "";//$NON-NLS-1$
+	String b64CertBkup = "";//$NON-NLS-1$
+	
+	
 	switch (op) {
 		case 0:
 			title = "Ver el certificado " + nameCert;//$NON-NLS-1$
-			subTitle = ""; //$NON-NLS-1$
+			subTitle = "Visualizaci&oacute;n de los certificados"; //$NON-NLS-1$
 			break;
 		case 1:
 			title = "Alta de nuevo certificado"; //$NON-NLS-1$
@@ -55,6 +65,23 @@
 			response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 			return;
 	}
+	// prueba Carlos
+	User[] users = UsersDAO.getUserAppResponsables();
+
+	 
+	Application app = null;
+	if (id != null) {
+		try {
+			app = AplicationsDAO.getApplicationWithCompleteInfo(id);
+		} catch (Exception e) {
+			response.sendRedirect("AdminMainPage.jsp");
+		}
+	}
+	if (app == null) {
+		app = new Application();
+	}
+	// fin prueba Carlos
+	
 	
 	CertificateFire cer = null;
 	if (id != null) {
@@ -69,7 +96,7 @@
 		b64CertPrin = cer.getCertPrincipal();
 		final String[] datCertificate = (cer.getX509Principal().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
 		for (int i = 0 ; i <= datCertificate.length-1; i++){
-			certDataPrincipal = certDataPrincipal + datCertificate[i] + "</br>";//$NON-NLS-1$
+			certDataPrincipal += datCertificate[i] + "</br>";//$NON-NLS-1$
 		}
 		//fecha caducidad
 		Date fecha = cer.getX509Principal().getNotAfter();		
@@ -80,7 +107,7 @@
 		b64CertBkup = cer.getCertBackup();
 		final String[] datCertificate = (cer.getX509Backup().getSubjectX500Principal().getName()).split(",");	//$NON-NLS-1$
 		for (int i = 0; i<= datCertificate.length-1; i++){
-			certDataBkup = certDataBkup + datCertificate[i] + "</br>"; //$NON-NLS-1$
+			certDataBkup += datCertificate[i] + "</br>"; //$NON-NLS-1$
 		}
 		//fecha caducidad
 		Date fecha = new Date();
@@ -110,10 +137,12 @@
 	      var data = new FormData($("#frmCertificate")[0]);
 	      var idResult;
 	      if(id == "fichero-firma-prin"){
-	    	  idResult="cert-prin"; 		
+	    	  idResult="cert-prin";
+	    	  $('#b64CertPrin').val(null);
       		}
       	  else if(id == "fichero-firma-resp"){
-      		idResult = "cert-resp"; 
+      			idResult = "cert-resp";
+      			$('#b64CertBkup').val(null);
       	  }
 	    	      
 	      $.ajax({
@@ -159,6 +188,7 @@
 			save.dispatchEvent(clicEvent);
 			(window.URL || window.webkitURL)
 					.revokeObjectURL(save.href);
+			console.log('carlos spring')
 		};
 		reader.readAsDataURL(contentBlob);
 	}
@@ -176,7 +206,7 @@
 
 	function downLoadCert(idDataCert,numCert){
 		var datCert = $("#"+idDataCert).html();
-		downloadCertificate(generateText(datCert), $("#nombre-cer").val()+'_'+numCert+ '.cer');
+		downloadCertificate(generateText(datCert), $("#nombre-cer").val() + '_' + numCert+ '.cer');
 	}
 	
 	</script>
@@ -201,7 +231,7 @@
 			Los campos con [*] al menos uno es obligatorio
 		<%} %>
 		</p>
-			<form id="frmCertificate" method="POST" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId() != null ? cer.getId() : empty%>" enctype="multipart/form-data" onsubmit="isCert()">
+			<form id="frmCertificate" method="POST" autocomplete="off" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId() != null ? cer.getId() : EMPTY %>" enctype="multipart/form-data" onsubmit="isCert()">
 							
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				<div style="display: inline-block; width: 20%;margin: 3px;">
@@ -210,7 +240,7 @@
 				</div>
 				<div  style="display: inline-block; width: 78%;margin: 3px;">
 						<input id="nombre-cer" class="edit-txt" type="text" name="nombre-cer" style="width: 80%;margin-top:3px;" 
-						value="<%= request.getParameter("nombre-cert") != null ? request.getParameter("nombre-cert") : empty %>"> 
+						value="<%= request.getParameter("nombre-cert") != null ? request.getParameter("nombre-cert") : EMPTY %>"> 
 				</div>
 										
 			</div>				
@@ -227,7 +257,7 @@
 							<input id="fichero-firma-prin" type="file" name="fichero-firma-prin" accept=".cer"/>										
 						</div>
 						<%if(op == 2){ %>
-						<textarea style="display:none;" id="b64CertPrin" name="b64CertPrin"><%= b64CertPrin%></textarea>
+						<input type="hidden" id="b64CertPrin" name="b64CertPrin" value="<%= b64CertPrin%>">
 						
 						<div  style="display: inline-block; width: 20%;margin:3px;">
 							<input id="cleanCertPrin-button" class="btn-borrar-cert" name="cleanCertPrin-button" 
@@ -237,7 +267,7 @@
 					</div>											
 					<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
 						<%if (certDataPrincipal != null && !certDataPrincipal.isEmpty()) { %>
-							<p><%= certDataPrincipal %></p>							
+							<p><%= certDataPrincipal%></p>							
 						<%}%>						
 					</div>
 				</div>
@@ -250,7 +280,7 @@
 							<input id="fichero-firma-resp" type="file" name="fichero-firma-resp" accept=".cer"/>										
 						</div>
 						<%if(op == 2){ %>
-						<textarea style="display:none;" id="b64CertBkup" name="b64CertBkup"><%= b64CertBkup%></textarea>
+						<input type="hidden" id="b64CertBkup" name="b64CertBkup" value="<%= b64CertBkup%>">
 							
 						<div  style="display: inline-block; width: 20%;margin: 3px;">						
 							<input id="cleanCertResp-button" class="btn-borrar-cert" name="cleanCertResp-button"
@@ -261,6 +291,7 @@
 								
 					<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
 						<%if(certDataBkup != null && !certDataBkup.isEmpty()) { %>
+						
 							<p><%= certDataBkup %></p>						
 						<%}%>
 					</div>					
@@ -312,14 +343,15 @@
 		   	if (op > 0) {
 		   			final String msg = (op == 1 ) ? "Crear certificado" : "Guardar cambios";   //$NON-NLS-1$ //$NON-NLS-2$
 					final String tit= (op == 1 ) ? "Crea nuevo certificado" : "Guarda las modificaciones realizadas";//$NON-NLS-1$ //$NON-NLS-2$
+					
 		   	%>	
 			<fieldset class="fieldset-clavefirma" >			
 			   	<div style="margin: auto;width: 60%;padding: 3px; margin-top: 5px;">
 					<div style="display: inline-block; width: 45%;margin: 3px;">
-						<input class="menu-btn" name="add-usr-btn" type="button" value="Volver" title="Volver a la p&aacute;gina de administraci&oacute;n" onclick="location.href='CertificatePage.jsp'"/>
+						<input class="menu-btn" name="return-btn" type="button" value="Volver" title="Volver a la p&aacute;gina de administraci&oacute;n" onclick="location.href='CertificatePage.jsp'"/>
 					</div>
 				   	<div  style="display: inline-block; width: 35%;margin: 3px">
-				   		<input class="menu-btn" name="add-cert-btn" type="submit" value="<%= msg %>" title="<%= tit %>">
+				   		<input class="menu-btn" name="save-btn" type="submit" value="<%= msg %>" title="<%= tit %>">
 				   	</div>			   						   		
 			   	</div>	
 			</fieldset>
@@ -328,13 +360,15 @@
 		
 		<% if(op == 0){ %>
 		<br>
+		
 		<fieldset>
 			<legend>Aplicaciones</legend>
-			<div id="data" style="display: block-inline; text-align:center;">
+			<div id="data" style="display: block-inline; text-align:center; overflow-y: auto;margin-top:3px;resize:none">
 				<h4>No hay Aplicaciones asociadas al certificado <%=nameCert%> </h4>		
 			</div>
 
 		</fieldset>
+		
 		<fieldset class="fieldset-clavefirma">			
 			<div style="margin: auto;width: 60%;padding: 3px; margin-top: 5px;">
 				<div style="display: inline-block; width: 45%;margin: 3px;">
@@ -346,7 +380,18 @@
 	
 		<script>
 			//bloqueamos los campos en caso de que sea una operacion de solo lectura
-			document.getElementById("nombre-cer").disabled = <%= op == 0 %>			
+			document.getElementById("nombre-cer").disabled = <%= op == 0 %>
+			
+			if(op == 0){
+				document.getElementById("nombre-cer").style.background = '#F5F5F5';
+				document.getElementById("cert-prin").style.background = '#F5F5F5';
+				document.getElementById("cert-resp").style.background = '#F5F5F5';
+			}else if(op == 1 || op == 2){
+				
+				document.getElementById("cert-prin").style.background = '#F5F5F5';
+				document.getElementById("cert-resp").style.background = '#F5F5F5';
+				
+			}
 					
 			// quitamos los espacios en blanco que se han agregado en el certificado
 			//document.getElementById("cert-prin").value = document.getElementById("cert-prin").value.trim();
