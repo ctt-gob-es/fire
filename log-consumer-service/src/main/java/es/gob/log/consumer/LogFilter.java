@@ -54,22 +54,22 @@ public class LogFilter {
 	}
 
 	/**
-	 * Carga lector de logs.Avanzando siempre a la siguiente l&inea
-	 * @param reader
-	 * @throws IOException
+	 * Carga lector de logs y lo prepara para una operaci&oacute;n de b&uaacute;squeda
+	 * sobre una porci&oacute;n filtrada del log.
+	 * @param reader Lector de logs.
+	 * @throws IOException Cuando ocurre al cargar el lector.
 	 */
 	public void loadReaderToSearch(final LogReader reader) throws IOException {
 
 		load(reader);
+
 		this.registryReader.loadReader(this.logReader);
 	}
 
 	/**
-	 * Carga lector de logs.
-	 * Avanzando  a la siguiente l&iacute;nea, en el caso de ser una nueva cargar o recarga del registro.
-	 * No avanza a la siguiente l&iacute;nea si dentro de cada carga se piden m&aacute;s datos para mostrar.
-	 * @param reader
-	 * @throws IOException
+	 * Carga lector de logs y lo prepara para una operaci&oacute;n de filtrado.
+	 * @param reader Lector de logs.
+	 * @throws IOException Cuando ocurre al cargar el lector.
 	 */
 	public void loadReaderToFilter(final LogReader reader) throws IOException {
 
@@ -81,7 +81,6 @@ public class LogFilter {
 		else  {
 			this.registryReader.load(this.logReader);
 		}
-
 	}
 
 	/**

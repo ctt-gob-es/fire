@@ -32,7 +32,7 @@ public interface LogReader {
 	 * @param position
 	 * @throws IOException
 	 */
-	public void load(final long position) throws IOException;
+	void load(final long position) throws IOException;
 
 	/** Inicia el proceso de carga del log.
 	 * @throws IOException Cuando se produce un error durante la carga. */
@@ -69,63 +69,32 @@ public interface LogReader {
 	  * Obtiene la posici&oacute;n actual dentro del log.
 	  * @return Posici&oacute;n en el log.
 	  */
-	 public long getFilePosition() ;
+	 long getFilePosition() ;
 
 
 	 /**
 	  * Obtiene la posici&oacute;n actual dentro del log.
 	  * @return Posici&oacute;n en el log.
 	  */
-	 public long getFileFragmentedPosition() ;
+	 long getFileFragmentedPosition() ;
 
 	 /**
 	  * Indica si hemos llegado al final de la lectura del fichero.
 	  * @return {@code true} si la posicion actual es el fin de fichero, {@code false} en
 	  * caso contrario.
 	  */
-	 public boolean isEndFile();
+	 boolean isEndFile();
 
 	 /**
 	  * Estaqblece el indicador de si hemos llegado al final de la lectura del fichero.
 	  * @return
 	  */
-	 public void setEndFile(final boolean endOfFile);
-
-	 /**
-	  * Obtiene las lineas leidas
-	  * @return
-	  */
-	 public int getCharactersReaded();
-
-	 /**
-	  * Establece el las lineas leidas
-	  */
-	 public void setCharactersReaded(final int linesReaded);
-
-	 /**
-	  * Obtiene las lineas que se van a leer
-	  * @return
-	  */
-	 public int getCharactersToRead();
-
-	 /**
-	  * Establece que se van a leer
-	  */
-	 public void setCharactersToRead(final int linesReaded);
-
-
+	 void setEndFile(final boolean endOfFile);
 
 	 /**
 	  * Indica si hemos llegado al final de la lectura del fichero.
 	  * @return {@code true} si la posicion actual es el fin de fichero, {@code false} en
 	  * caso contrario.
 	  */
-	 public boolean isReloaded();
-
-	 /**
-	  * Estaqblece el indicador de si hemos llegado al final de la lectura del fichero.
-	  * @return
-	  */
-	 public void setReloaded(final boolean reloaded);
-
+	 boolean isReloaded();
 }

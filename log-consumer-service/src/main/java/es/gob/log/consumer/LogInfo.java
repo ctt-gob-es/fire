@@ -2,6 +2,7 @@ package es.gob.log.consumer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -100,7 +101,10 @@ public class LogInfo implements Serializable {
 	public void load(final InputStream is) throws IOException {
 
 		final Properties config = new Properties();
-		config.load(is);
+
+		try (final InputStreamReader reader = new InputStreamReader(is, DEFAULT_CHARSET); ) {
+			config.load(reader);
+		}
 
 		try {
 			this.charset = Charset.forName(config.getProperty(PROPERTY_CHARSET, DEFAULT_CHARSET.name()));
@@ -117,7 +121,7 @@ public class LogInfo implements Serializable {
 		this.dateFormat = config.getProperty(PROPERTY_DATE_FORMAT);
 		final String levelsText = config.getProperty(PROPERTY_LEVELS);
 
-		this.levels = levelsText!= null ? levelsText.split(LEVELS_SEPARATOR) : null;
+		this.levels = levelsText != null ? levelsText.split(LEVELS_SEPARATOR) : null;
 		this.hasDate = this.dateFormat != null ? identifyDateTimeComponent(this.dateFormat, DATE_FORMAT_CHARSET) : false;
 		this.hasTime = this.dateFormat != null ? identifyDateTimeComponent(this.dateFormat, TIME_FORMAT_CHARSET) : false;
 	}

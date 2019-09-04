@@ -2,7 +2,7 @@
 # Fichero de configuración de Logs    		# 
 #############################################
 
-# Juego de caracteres del log (UTF-8, UTF-16, ISO-8859-1, etc..) 
+# Juego de caracteres del log (UTF-8, UTF-16, ISO-8859-1, etc.) 
 charset=UTF-8
 
 # Niveles de log, en orden creciente de criticidad, separados por comas (',')

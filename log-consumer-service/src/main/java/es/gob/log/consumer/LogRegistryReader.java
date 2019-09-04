@@ -65,7 +65,6 @@ class LogRegistryReader {
 			try {
 				// Procesamos la linea y se deja cargada la siguiente
 				registry = this.registryParser.parse(this.logReader);
-
 			}
 			catch (final InvalidRegistryFormatException e) {
 				LOGGER.warning("Error al procesar una entrada del fichero de log: " + e); //$NON-NLS-1$
