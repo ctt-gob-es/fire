@@ -135,6 +135,9 @@ public class FireClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FireClient.class);
 
+	/** Codificaci&oacute;n de caracters por defecto. */
+	public static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
+
     private final String appId;
 
     private final String serviceUrl;
@@ -918,7 +921,7 @@ public class FireClient {
     	}
     	catch (final Exception e) {
     		LOGGER.error("La respuesta de la firma del lote no esta bien formada. Inicio del resultado: {}", //$NON-NLS-1$
-    						new String(batchResult, 0, batchResult.length < 50 ? batchResult.length : 50),
+    						new String(batchResult, 0, batchResult.length < 50 ? batchResult.length : 50, DEFAULT_CHARSET),
     						e);
     		throw new IOException("La respuesta de la firma del lote no esta bien formada", e); //$NON-NLS-1$
     	}

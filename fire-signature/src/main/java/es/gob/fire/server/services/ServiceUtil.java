@@ -12,6 +12,7 @@ package es.gob.fire.server.services;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,6 +38,8 @@ import es.gob.fire.signature.DBConnectionException;
 public final class ServiceUtil {
 
     private static final Logger LOGGER = Logger.getLogger(ServiceUtil.class.getName());
+
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
     private ServiceUtil() {
@@ -72,7 +75,7 @@ public final class ServiceUtil {
     			new ByteArrayInputStream(
     					Base64.decode(base64, base64.indexOf('-') > -1 || base64.indexOf('_') > -1)
     					),
-    			StandardCharsets.UTF_8));
+    			DEFAULT_CHARSET));
 
     	return p;
     }
@@ -89,7 +92,7 @@ public final class ServiceUtil {
     	for (final String k : p.keySet().toArray(new String[p.size()])) {
     		buffer.append(k).append("=").append(p.getProperty(k)).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
     	}
-    	return Base64.encode(buffer.toString().getBytes());
+    	return Base64.encode(buffer.toString().getBytes(DEFAULT_CHARSET));
     }
 
     /**
@@ -171,10 +174,7 @@ public final class ServiceUtil {
 	private static String getThumbPrint(final X509Certificate cert) throws NoSuchAlgorithmException,
 	                                                                       CertificateEncodingException {
 		final MessageDigest md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
-		final byte[] der = cert.getEncoded();
-		md.update(der);
-		final byte[] digest = md.digest();
-		return Base64.encode(digest);
+		return Base64.encode(md.digest(cert.getEncoded()));
 	}
 
 	/** Comprueba si la huella del certificado pasada est&aacute;n registrada en la base de datos.

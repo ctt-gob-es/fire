@@ -9,6 +9,8 @@
  */
 package es.gob.fire.server.services.internal;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -38,6 +40,7 @@ public class MiniAppletHelper {
 	private static final String AFIRMA_EXTRAPARAM_ORDER_FILTERS_PREFIX = "filters."; //$NON-NLS-1$
 	private static final String AFIRMA_EXTRAPARAM_HEADLESS = "headless"; //$NON-NLS-1$
 
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	/**
 	 * Crea el fichero de firma de lote para su uso por parte del Cliente @firma.
@@ -69,7 +72,7 @@ public class MiniAppletHelper {
 			}
 
 			sb.append("</signbatch>\n"); //$NON-NLS-1$
-			return Base64.encode(sb.toString().getBytes());
+			return Base64.encode(sb.toString().getBytes(DEFAULT_CHARSET));
 	}
 
 	private static String getSingleSignXml(final String docId, final String dataReference, final SignBatchConfig signConfig) {

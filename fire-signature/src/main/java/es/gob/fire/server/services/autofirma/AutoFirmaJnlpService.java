@@ -12,6 +12,7 @@ package es.gob.fire.server.services.autofirma;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
@@ -44,7 +45,10 @@ public class AutoFirmaJnlpService extends HttpServlet {
 	private static final String TEMPLATE_REPLACE_CODEBASE = "%CODEBASE%"; //$NON-NLS-1$
 	private static final String TEMPLATE_REPLACE_ARGUMENT = "%ARGUMENT%"; //$NON-NLS-1$
 
-	private static final String TEMPLATE_NODE_REFERENCE = "<jar href=\"%CODEBASE%%OSNAME%.jar\"/>"; //$NON-NLS-1$
+	private static final String TEMPLATE_NODE_REFERENCE = "<jar href=\"" + TEMPLATE_REPLACE_CODEBASE + //$NON-NLS-1$
+			TEMPLATE_REPLACE_OS_NAME + ".jar\"/>"; //$NON-NLS-1$
+
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -80,7 +84,7 @@ public class AutoFirmaJnlpService extends HttpServlet {
 				template
 				.replace(TEMPLATE_REPLACE_CODEBASE, publicCodeBase)
 				.replace(TEMPLATE_REPLACE_ARGUMENT, arg != null && !arg.isEmpty() ?
-						"<argument>" + new String(Base64.decode(arg, true), StandardCharsets.UTF_8) + "</argument>" : "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						"<argument>" + new String(Base64.decode(arg, true), DEFAULT_CHARSET) + "</argument>" : "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		response.flushBuffer();
 	}
 
@@ -92,11 +96,12 @@ public class AutoFirmaJnlpService extends HttpServlet {
 	 */
 	private static String loadJnlpTemplate() throws IOException {
 
-		final InputStream templateIs = AutoFirmaJnlpService.class.getClassLoader().getResourceAsStream(TEMPLATE_FILE);
-		final byte[] content = readInputStream(templateIs);
-		templateIs.close();
+		byte[] content;
+		try (final InputStream templateIs = AutoFirmaJnlpService.class.getClassLoader().getResourceAsStream(TEMPLATE_FILE)) {
+			content = readInputStream(templateIs);
+		}
 
-		return new String(content, StandardCharsets.UTF_8);
+		return new String(content, DEFAULT_CHARSET);
 	}
 
 	/**

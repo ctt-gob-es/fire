@@ -10,6 +10,7 @@
 package es.gob.fire.server.services.triphase.document;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
@@ -27,12 +28,14 @@ public class FIReLocalDocumentManager implements DocumentManager {
 
 	private static final String RESULT_OK = "OK"; //$NON-NLS-1$
 
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
 	@Override
 	public byte[] getDocument(final String id, final X509Certificate[] certChain, final Properties config) throws IOException {
 		return TempFilesHelper.retrieveTempData(
 				new String(
 						Base64.decode(id.replace('-', '+').replace('_', '/')),
-						StandardCharsets.UTF_8));
+						DEFAULT_CHARSET));
 	}
 
 	@Override
@@ -43,7 +46,7 @@ public class FIReLocalDocumentManager implements DocumentManager {
 		TempFilesHelper.storeTempData(
 				new String(
 						Base64.decode(id.replace('-', '+').replace('_', '/')),
-						StandardCharsets.UTF_8),
+						DEFAULT_CHARSET),
 				signature);
 
 		return Base64.encode(RESULT_OK.getBytes());

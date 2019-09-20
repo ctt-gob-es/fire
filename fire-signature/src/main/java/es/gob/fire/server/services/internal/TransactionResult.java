@@ -11,6 +11,8 @@ package es.gob.fire.server.services.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import javax.json.Json;
@@ -25,7 +27,7 @@ import javax.json.JsonWriter;
 public class TransactionResult {
 
 	/** Codificaci&oacute;n de caracters por defecto. */
-	public static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	/** Prefijo de la respuesta JSON que engloba los detalles de la operaci&oacute;n. */
 	private static final String JSON_ATTR_RESULT = "result"; //$NON-NLS-1$
@@ -241,7 +243,7 @@ public class TransactionResult {
 		}
 
 		// Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
-		if (prefix != null && Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes())) {
+		if (prefix != null && Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes(DEFAULT_CHARSET))) {
 			final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
 			final JsonObject json = jsonReader.readObject();
 			final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);

@@ -148,16 +148,17 @@ class TestHelper {
 		InputStream is = null;
 		final Properties config = new Properties();
 		try {
-			String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
-			if (configDir == null) {
-				configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
+			String configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
+			if (configDirPath == null) {
+				configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
 			}
-			if (configDir != null) {
+			if (configDirPath != null) {
+				final File configDir = new File(configDirPath).getCanonicalFile();
 				final File configFile = new File(configDir, CONFIG_FILE).getCanonicalFile();
 				if (!configFile.isFile() || !configFile.canRead()) {
 					LOGGER.warning(
 							"No se encontro el fichero " + CONFIG_FILE + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configFile.getAbsolutePath() + //$NON-NLS-1$
+									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configDir.getAbsolutePath() + //$NON-NLS-1$
 									"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
 				}
 				else {

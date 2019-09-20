@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -92,6 +93,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 	/** Or&iacute;genes permitidos por defecto desde los que se pueden realizar peticiones al servicio. */
 	private static final String ALL_ORIGINS_ALLOWED = "*"; //$NON-NLS-1$
 
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
 	static {
 		DOC_MANAGER = new FIReLocalDocumentManager();
 	}
@@ -104,7 +107,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		final Map<String, String> parameters = new HashMap<>();
 		final String[] params;
 		try {
-			params = new String(AOUtil.getDataFromInputStream(request.getInputStream()), StandardCharsets.UTF_8).split("&"); //$NON-NLS-1$
+			params = new String(AOUtil.getDataFromInputStream(request.getInputStream()), DEFAULT_CHARSET).split("&"); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			LOGGER.severe("No se pudieron leer los parametros de la peticion: " + e); //$NON-NLS-1$
@@ -156,11 +159,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		Properties extraParams = new Properties();
 		try {
 			if (parameters.containsKey(PARAM_NAME_EXTRA_PARAM)) {
-				extraParams.load(
-					new ByteArrayInputStream(
-						Base64.decode(parameters.get(PARAM_NAME_EXTRA_PARAM).trim(), true)
-					)
-				);
+				extraParams = AOUtil.base642Properties(parameters.get(PARAM_NAME_EXTRA_PARAM));
 			}
 		}
 		catch (final Exception e) {
@@ -200,7 +199,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		if (sessionData != null) {
-			LOGGER.fine("Recibidos los siguientes datos de sesion para '" + operation + "':\n" + new String(sessionData)); //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.fine("Recibidos los siguientes datos de sesion para '" + operation + "':\n"
+					+ new String(sessionData, DEFAULT_CHARSET));
 		}
 
 		// Obtenemos el certificado

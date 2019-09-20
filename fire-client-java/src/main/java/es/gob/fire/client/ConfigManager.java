@@ -53,16 +53,17 @@ public class ConfigManager {
 		InputStream is = null;
 		config = new Properties();
 		try {
-			String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
-			if (configDir == null) {
-				configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
+			String configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
+			if (configDirPath == null) {
+				configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
 			}
-			if (configDir != null) {
+			if (configDirPath != null) {
+				final File configDir = new File(configDirPath).getCanonicalFile();
 				final File configFile = new File(configDir, PROPERTY_FILE).getCanonicalFile();
-				if (!configFile.isFile() || !configFile.canRead()) {
+				if (!configFile.isFile() || !configFile.canRead() || !configDir.equals(configFile.getParentFile())) {
 					LOGGER.warn(
 							"No se encontro el fichero {} en el directorio configurado en la variable {}: {}\n" + //$NON-NLS-1$
-							"Se buscara en el CLASSPATH", PROPERTY_FILE, ENVIRONMENT_VAR_CONFIG_DIR, configFile.getAbsolutePath()); //$NON-NLS-1$
+							"Se buscara en el CLASSPATH", PROPERTY_FILE, ENVIRONMENT_VAR_CONFIG_DIR, configDir.getAbsolutePath()); //$NON-NLS-1$
 				}
 				else {
 					is = new FileInputStream(configFile);

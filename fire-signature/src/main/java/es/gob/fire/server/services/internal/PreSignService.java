@@ -358,31 +358,28 @@ public final class PreSignService extends HttpServlet {
         	else {
         		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
         	}
-
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
         	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_NETWORK, originForced);
-        	if(originForced) {
+        	if (originForced) {
         		response.sendRedirect(redirectErrorUrl);
         	}
         	else {
         		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
         	}
-
             return;
         }
         catch (final Exception e) {
             LOGGER.log(Level.SEVERE, "Error en la carga de datos: " + e, e); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE, originForced);
-        	if(originForced) {
+        	if (originForced) {
         		response.sendRedirect(redirectErrorUrl);
         	}
         	else {
         		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
         	}
-
             return;
         }
 

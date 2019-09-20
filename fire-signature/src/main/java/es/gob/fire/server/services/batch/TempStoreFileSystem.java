@@ -10,6 +10,8 @@
 package es.gob.fire.server.services.batch;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.logging.Logger;
 
@@ -17,6 +19,8 @@ import es.gob.afirma.core.misc.AOUtil;
 import es.gob.fire.server.services.internal.TempFilesHelper;
 
 final class TempStoreFileSystem {
+
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final Logger LOGGER = Logger.getLogger(TempStoreFileSystem.class.getName());
 	private static final MessageDigest MD;
@@ -46,6 +50,6 @@ final class TempStoreFileSystem {
 	}
 
 	private static String getFilename(final SingleSign ss, final String batchId) {
-		return AOUtil.hexify(MD.digest(ss.getId().getBytes()), false) + "." + batchId; //$NON-NLS-1$
+		return AOUtil.hexify(MD.digest(ss.getId().getBytes(DEFAULT_CHARSET)), false) + "." + batchId; //$NON-NLS-1$
 	}
 }

@@ -10,11 +10,18 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -60,6 +67,8 @@ public class BatchResult implements Serializable {
 	private static final String JSON_ATTR_DOC_ID = "id"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_OK = "ok"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_DETAILS = "dt"; //$NON-NLS-1$
+
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private final Map<String, BatchDocumentReference> results;
 
@@ -243,22 +252,34 @@ public class BatchResult implements Serializable {
 		}
 
 		// Construimos la respuesta
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (final JsonWriter json = Json.createWriter(baos);) {
+		byte[] result = null;
+		try (	final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				final Writer w = new OutputStreamWriter(baos, DEFAULT_CHARSET);
+				final JsonWriter json = Json.createWriter(w);) {
 
 			final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
 			jsonBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
 			jsonBuilder.add(JSON_ATTR_BATCH_RESULT, resultBuilder);
 
 			json.writeObject(jsonBuilder.build());
-		}
+			w.flush();
 
-		return baos.toByteArray();
+			result = baos.toByteArray();
+		}
+		catch (final IOException e) {
+			// Error en el cierre de los flujos de datos, no deberia afectar al resultado
+			Logger.getLogger(BatchResult.class.getName()).log(
+					Level.WARNING,
+					"Error en el cierre del flujo de datos al devolver el resultado del lote", //$NON-NLS-1$
+					e);
+		}
+		return result;
 	}
 
 	@Override
 	public String toString() {
-		return new String(encode());
+		final byte[] encoded = encode();
+		return encoded != null ? new String(encoded, DEFAULT_CHARSET) : null;
 	}
 
 	private class BatchDocumentReference implements Serializable {

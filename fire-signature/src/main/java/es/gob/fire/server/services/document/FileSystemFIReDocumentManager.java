@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
@@ -36,6 +37,8 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	private static final String IN_DIR_PARAM = "indir"; //$NON-NLS-1$
 	private static final String OUT_DIR_PARAM = "outdir"; //$NON-NLS-1$
 	private static final String OVERWRITE_PARAM = "overwrite"; //$NON-NLS-1$
+
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private String inDir;
 	private String outDir;
@@ -62,7 +65,7 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	@Override
 	public byte[] getDocument(final byte[] docId, final String appId, final String format, final Properties extraParams) throws IOException {
 
-		final String id = new String(docId, StandardCharsets.UTF_8);
+		final String id = new String(docId, DEFAULT_CHARSET);
 		LOGGER.fine("Recuperamos el documento con identificador: " + (id.length() > 20 ? id.substring(0, 20) + "..." : id)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		final File file = new File(this.inDir, id);
@@ -130,7 +133,7 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	public byte[] storeDocument(final byte[] docId, final String appId, final byte[] data, final X509Certificate cert, final String format, final Properties extraParams)
 			throws IOException {
 
-		final String initialId = docId != null ? new String(docId, StandardCharsets.UTF_8) : "signature"; //$NON-NLS-1$
+		final String initialId = docId != null ? new String(docId, DEFAULT_CHARSET) : "signature"; //$NON-NLS-1$
 		String newId = initialId;
 		final int lastDotPos = initialId.lastIndexOf('.');
 		if (lastDotPos != -1) {

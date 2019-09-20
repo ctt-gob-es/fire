@@ -11,6 +11,8 @@ package es.gob.fire.server.services.batch;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -44,9 +46,9 @@ public final class SingleSign {
 	private static final String XML_ELEMENT_SUBOPERATION = "suboperation"; //$NON-NLS-1$
 	private static final String XML_ELEMENT_EXTRAPARAMS = "extraparams"; //$NON-NLS-1$
 
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
 	private final Properties extraParams;
-
-
 
 	private final String dataSource;
 
@@ -218,8 +220,10 @@ public final class SingleSign {
 		if (tmpNl != null && tmpNl.getLength() > 0) {
 			final String extraParamsText = new String(
 						Base64.decode(tmpNl.item(0).getTextContent()),
-					StandardCharsets.UTF_8).replace("\\n", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			this.extraParams.load(new ByteArrayInputStream(extraParamsText.getBytes()));
+						DEFAULT_CHARSET).replace("\\n", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			this.extraParams.load(new InputStreamReader(
+					new ByteArrayInputStream(extraParamsText.getBytes(DEFAULT_CHARSET)),
+					DEFAULT_CHARSET));
 		}
 
 		this.format = SignFormat.getFormat(

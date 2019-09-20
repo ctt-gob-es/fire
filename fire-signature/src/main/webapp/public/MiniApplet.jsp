@@ -1,4 +1,6 @@
 
+<%@page import="es.gob.afirma.core.misc.AOUtil"%>
+<%@page import="java.nio.charset.StandardCharsets"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.DocInfo"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
@@ -34,7 +36,7 @@
 	}
 	
 	// Referencia a los datos cargados (que no el documento a firmar)
-	final String refB64 = Base64.encode(trId.getBytes());
+	final String refB64 = Base64.encode(trId.getBytes(StandardCharsets.UTF_8));
 	
 	// Nombre de la aplicacion
 	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
@@ -52,7 +54,6 @@
 	
 	// Valores de la operacion de firma
 	String triphaseFormat = null;
-	final StringBuilder extraParams = new StringBuilder();
 	
 	// Valores en la operacion de lote
 	String preSignBatchUrl = null;
@@ -77,6 +78,9 @@
 		}
 	}
 
+	// Obtenemos las propiedades extra de configuracion de las firmas
+	final Properties extraParams = ServiceUtil.base642Properties(extraParamsB64);
+	
 	BatchResult batchResult = null;
 	if (isBatchOperation) {
 		final SignBatchConfig defaultConfig = new SignBatchConfig();
@@ -97,15 +101,8 @@
 	else {
 		triphaseFormat = FIReTriHelper.getTriPhaseFormat(format);
 		
-		// Obtenemos las propiedades de configuracion de la firma y le agregamos
-		// los parametros necesarios para la generacion de una firma trifasica.
-		final Properties extraParamsProperties = ServiceUtil.base642Properties(extraParamsB64);
-		extraParamsProperties.setProperty("serverUrl", baseUrl + "afirma/triphaseSignService"); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		for (String k : extraParamsProperties.keySet().toArray(new String[extraParamsProperties.size()])) {
-			extraParams.append(k).append("="). //$NON-NLS-1$
-				append(extraParamsProperties.getProperty(k)).append("\\n"); //$NON-NLS-1$
-		}
+		// Agregamos a los extraParams el parametro necesario para la generacion de una firma trifasica
+		extraParams.setProperty("serverUrl", baseUrl + "afirma/triphaseSignService"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 
@@ -163,8 +160,7 @@
 			docInfos = docInfosList.toArray(new DocInfo[docInfosList.size()]);
 		}
 	} else {
-		final Properties extraParamsProperties = ServiceUtil.base642Properties(extraParamsB64);
-		DocInfo docInfo = DocInfo.extractDocInfo(extraParamsProperties);
+		DocInfo docInfo = DocInfo.extractDocInfo(extraParams);
 		if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null)) {
 			docInfos = new DocInfo[] { docInfo };
 		}
@@ -235,7 +231,7 @@
 				var refB64 = "<%= refB64 %>";
 				var format = "<%= triphaseFormat %>";
 				var algorithm = "<%= algorithm %>";
-				var extraParamsB64 = "<%= extraParams.toString() %>";
+				var extraParams = "<%= AOUtil.propertiesAsString(extraParams).replace("\n", "\\n") %>";
 	
 				try {				
 					showProgress();
@@ -244,7 +240,7 @@
 							refB64,
 							algorithm,
 							format,
-							extraParamsB64,
+							extraParams,
 							sendResultCallback,
 							sendErrorCallback);
 					}
@@ -254,7 +250,7 @@
 							null,
 							algorithm,
 							format,
-							extraParamsB64,
+							extraParams,
 							sendResultCallback,
 							sendErrorCallback);
 					}
@@ -263,7 +259,7 @@
 							refB64,
 							algorithm,
 							format,
-							extraParamsB64,
+							extraParams,
 							sendResultCallback,
 							sendErrorCallback);
 					}

@@ -10,6 +10,8 @@
 package es.gob.fire.client;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -36,6 +38,8 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 	private static final String JSON_FIELD_OK = "ok"; //$NON-NLS-1$
 
 	private static final String JSON_FIELD_DETAIL = "dt"; //$NON-NLS-1$
+
+	private static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
 
 	private boolean error = false;
 
@@ -103,7 +107,16 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 
 		final BatchResult result = new BatchResult();
 
-		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
+		Reader reader;
+		try {
+			reader = new InputStreamReader(new ByteArrayInputStream(json), DEFAULT_CHARSET);
+		}
+		catch (final Exception e) {
+			// Nunca deberia ocurrir
+			throw new RuntimeException("Error al componer el objeto de lectura de los datos", e); //$NON-NLS-1$
+		}
+
+		final JsonReader jsonReader = Json.createReader(reader);
 		final JsonObject mainObject = jsonReader.readObject();
 		final JsonString providerName = mainObject.getJsonString(JSON_FIELD_PROVIDER_NAME);
 		result.setProviderName(providerName.getChars().toString());
