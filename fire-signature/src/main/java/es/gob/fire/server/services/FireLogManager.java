@@ -32,9 +32,10 @@ public class FireLogManager {
 				null;
 
 		// Si se ha configurado un directorio de log, sacamos los logs a un fichero del mismo
+		// y establecemos el resto de configuracion para los logs
 		if (logsDir != null && logsDir.isDirectory() && logsDir.canWrite()) {
 
-			// Nos aseguramos de que si ya se encontraba instalado el manejador de log en fichero, se desintale antes
+			// Nos aseguramos de que si ya se encontraba instalado el manejador de log en fichero, se desinstale antes
 			// de volverlo a instalar
 			cleanLogHandlers();
 
@@ -56,12 +57,12 @@ public class FireLogManager {
 
 			// Asignamos el logger a toda la jerarquia de logs
 			Logger.getLogger("").addHandler(handler); //$NON-NLS-1$
-		}
 
-		// Establecemos el nivel para la jerarquia completa y para cada los paquetes especificos
-		Logger.getLogger("").setLevel(parseLevel(ConfigManager.getLogsLevel())); //$NON-NLS-1$
-		Logger.getLogger(LOG_FIRE_NAME).setLevel(parseLevel(ConfigManager.getLogsLevelFire()));
-		Logger.getLogger(LOG_AFIRMA_NAME).setLevel(parseLevel(ConfigManager.getLogsLevelAfirma()));
+			// Establecemos el nivel para la jerarquia completa y para cada los paquetes especificos
+			Logger.getLogger("").setLevel(parseLevel(ConfigManager.getLogsLevel())); //$NON-NLS-1$
+			Logger.getLogger(LOG_FIRE_NAME).setLevel(parseLevel(ConfigManager.getLogsLevelFire()));
+			Logger.getLogger(LOG_AFIRMA_NAME).setLevel(parseLevel(ConfigManager.getLogsLevelAfirma()));
+		}
 	}
 
 	/**

@@ -69,7 +69,8 @@ public class AfirmaUpgrader {
 					conn,
 					signature,
 					UpgradeTarget.getUpgradeTarget(upgradeFormat),
-					afirmaId);
+					afirmaId,
+					true);
 		} catch (final PlatformWsException e) {
 			throw new UpgradeException("Error de conexion con la Plataforma @firma para la actualizacion de la firma", e); //$NON-NLS-1$
 		} catch (final UpgradeResponseException e) {
