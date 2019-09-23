@@ -188,24 +188,27 @@ public final class PlatformWsHelper {
 		InputStream is = null;
 		final Properties config = new Properties();
 		try {
-			String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
-			if (configDir == null) {
-				configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
+			String configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
+			if (configDirPath == null) {
+				configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
 			}
-			if (configDir != null) {
+			if (configDirPath != null) {
+				final File configDir = new File(configDirPath).getCanonicalFile();
 				final File configFile = new File(configDir, CONFIG_FILE).getCanonicalFile();
-				if (!configFile.isFile() || !configFile.canRead()) {
+				if (!configFile.isFile() || !configFile.canRead() || !configDir.equals(configFile.getParentFile())) {
 					LOGGER.warning(
-							"No se encontro el fichero " + CONFIG_FILE + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configFile.getAbsolutePath() + //$NON-NLS-1$
+							"El fichero " + CONFIG_FILE + " no se encuentra en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
+									ENVIRONMENT_VAR_CONFIG_DIR + ". Deberia encontrarse en el directorio " + configDir + //$NON-NLS-1$
 									"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+					is = PlatformWsHelper.class.getResourceAsStream('/' + CONFIG_FILE);
 				}
 				else {
 					is = new FileInputStream(configFile);
 				}
 			}
-
-			if (is == null) {
+			else {
+				LOGGER.warning(
+						"Se carga el fichero " + CONFIG_FILE + " desde el CLASSPATH."); //$NON-NLS-1$ //$NON-NLS-2$
 				is = PlatformWsHelper.class.getResourceAsStream('/' + CONFIG_FILE);
 			}
 

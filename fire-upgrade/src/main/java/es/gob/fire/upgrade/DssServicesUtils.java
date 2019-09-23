@@ -34,8 +34,9 @@ final class DssServicesUtils {
         // no instanciable
     }
 
-    static String createSignUpgradeDss(final byte[] firma,
-            final UpgradeTarget formato, final String afirmaAppName) {
+    static String createSignUpgradeDss(final byte[] firma, final UpgradeTarget formato,
+    		final String afirmaAppName, final boolean ignoreGracePeriod) {
+
         boolean isBinary = false;
         Document firmaXml = null;
         try {
@@ -73,39 +74,43 @@ final class DssServicesUtils {
         // Creamos la peticion segun el tipo de firma que se actualiza
         final StringBuilder dss = new StringBuilder(1000);
         if (isBinary || isEnveloping(firmaXml)) {
-            dss.append(
-                    "<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd'>") //$NON-NLS-1$
-                    .append("<dss:OptionalInputs>") //$NON-NLS-1$
-                    .append("<dss:ClaimedIdentity><dss:Name>") //$NON-NLS-1$
-                    .append(afirmaAppName)
-                    .append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
-                    .append("<dss:ReturnUpdatedSignature Type='") //$NON-NLS-1$
-                    .append(formato.getFormatUrn())
-                    .append("'></dss:ReturnUpdatedSignature>") //$NON-NLS-1$
-                    .append("</dss:OptionalInputs>") //$NON-NLS-1$
-                    .append("<dss:SignatureObject>") //$NON-NLS-1$
-                    .append(firmaNode).append("</dss:SignatureObject>") //$NON-NLS-1$
-                    .append("</dss:VerifyRequest>"); //$NON-NLS-1$
+        	dss.append( "<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd'>") //$NON-NLS-1$
+        	    .append("<dss:OptionalInputs>") //$NON-NLS-1$
+        	    .append("<dss:ClaimedIdentity><dss:Name>") //$NON-NLS-1$
+        	    .append(afirmaAppName)
+        	    .append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
+        	    .append("<dss:ReturnUpdatedSignature Type='") //$NON-NLS-1$
+        	    .append(formato.getFormatUrn())
+        	    .append("'></dss:ReturnUpdatedSignature>"); //$NON-NLS-1$
+        	if (ignoreGracePeriod) {
+        		dss.append("<afxp:IgnoreGracePeriod xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema'/>"); //$NON-NLS-1$
+        	}
+        	dss.append( "</dss:OptionalInputs>") //$NON-NLS-1$
+        	    .append("<dss:SignatureObject>") //$NON-NLS-1$
+        	    .append(firmaNode).append("</dss:SignatureObject>") //$NON-NLS-1$
+        	    .append("</dss:VerifyRequest>"); //$NON-NLS-1$
         } else {
-            dss.append(
-                    "<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd'>") //$NON-NLS-1$
-                    .append("<dss:InputDocuments>") //$NON-NLS-1$
-                    .append("<dss:Document ID='1'>") //$NON-NLS-1$
-                    .append(firmaNode)
-                    .append("</dss:Document>") //$NON-NLS-1$
-                    .append("</dss:InputDocuments>") //$NON-NLS-1$
-                    .append("<dss:OptionalInputs>") //$NON-NLS-1$
-                    .append("<dss:ClaimedIdentity><dss:Name>") //$NON-NLS-1$
-                    .append(afirmaAppName)
-                    .append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
-                    .append("<dss:ReturnUpdatedSignature Type='") //$NON-NLS-1$
-                    .append(formato.getFormatUrn())
-                    .append("'></dss:ReturnUpdatedSignature>") //$NON-NLS-1$
-                    .append("</dss:OptionalInputs>") //$NON-NLS-1$
-                    .append("<dss:SignatureObject>") //$NON-NLS-1$
-                    .append("<dss:SignaturePtr WhichDocument='1'/>") //$NON-NLS-1$
-                    .append("</dss:SignatureObject>") //$NON-NLS-1$
-                    .append("</dss:VerifyRequest>"); //$NON-NLS-1$
+            dss.append( "<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd'>") //$NON-NLS-1$
+                .append("<dss:InputDocuments>") //$NON-NLS-1$
+                .append("<dss:Document ID='1'>") //$NON-NLS-1$
+                .append(firmaNode)
+                .append("</dss:Document>") //$NON-NLS-1$
+                .append("</dss:InputDocuments>") //$NON-NLS-1$
+                .append("<dss:OptionalInputs>") //$NON-NLS-1$
+                .append("<dss:ClaimedIdentity><dss:Name>") //$NON-NLS-1$
+                .append(afirmaAppName)
+                .append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
+                .append("<dss:ReturnUpdatedSignature Type='") //$NON-NLS-1$
+                .append(formato.getFormatUrn())
+                .append("'></dss:ReturnUpdatedSignature>"); //$NON-NLS-1$
+        	if (ignoreGracePeriod) {
+        		dss.append("<afxp:IgnoreGracePeriod xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema'/>"); //$NON-NLS-1$
+        	}
+        	dss.append( "</dss:OptionalInputs>") //$NON-NLS-1$
+                .append("<dss:SignatureObject>") //$NON-NLS-1$
+                .append("<dss:SignaturePtr WhichDocument='1'/>") //$NON-NLS-1$
+                .append("</dss:SignatureObject>") //$NON-NLS-1$
+                .append("</dss:VerifyRequest>"); //$NON-NLS-1$
         }
 
         return dss.toString();

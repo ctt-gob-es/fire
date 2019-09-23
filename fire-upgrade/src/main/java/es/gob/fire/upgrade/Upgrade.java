@@ -36,6 +36,8 @@ public final class Upgrade {
      *            Formato de actualizaci&oacute;n.
      * @param afirmaAppName
      *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
+     * @param ignoreGracePeriod
+     * 			  Indica que debe ignorase el periodo de gracia de la actualizaci&oacute;n de firma.
      * @return Resultado de la actualizaci&oacute;n de la firma.
      * @throws IOException
      *             Si hay problemas en los tratamientos de datos o lectura de
@@ -49,7 +51,7 @@ public final class Upgrade {
      * 			   Cuando no se puede cargar el fichero de configuraci&oacute;n.
      */
     public static UpgradeResult signUpgradeCreate(final byte[] data,
-            final UpgradeTarget format, final String afirmaAppName)
+            final UpgradeTarget format, final String afirmaAppName, final boolean ignoreGracePeriod)
             throws IOException, PlatformWsException, UpgradeResponseException, ConfigFileNotFoundException {
 
     	if (defaultConn == null) {
@@ -57,7 +59,7 @@ public final class Upgrade {
     		defaultConn.init();
     	}
 
-        return signUpgradeCreate(defaultConn, data, format, afirmaAppName);
+        return signUpgradeCreate(defaultConn, data, format, afirmaAppName, ignoreGracePeriod);
     }
 
     /**
@@ -70,6 +72,8 @@ public final class Upgrade {
      *            Formato de actualizaci&oacute;n.
      * @param afirmaAppName
      *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
+     * @param ignoreGracePeriod
+     * 			  Indica que debe ignorase el periodo de gracia de la actualizaci&oacute;n de firma.
      * @return Resultado de la actualizaci&oacute;n de la firma.
      * @throws IOException
      *             Si hay problemas en los tratamientos de datos o lectura de
@@ -83,7 +87,7 @@ public final class Upgrade {
      * 			   Cuando no se puede cargar el fichero de configuraci&oacute;n.
      */
     public static UpgradeResult signUpgradeCreate(final PlatformWsHelper conn, final byte[] data,
-            final UpgradeTarget format, final String afirmaAppName)
+            final UpgradeTarget format, final String afirmaAppName, final boolean ignoreGracePeriod)
             throws IOException, PlatformWsException, UpgradeResponseException, ConfigFileNotFoundException {
 
     	// Es incompatible la configuracion de dos conexiones contra la Plataforma @firma porque
@@ -96,7 +100,8 @@ public final class Upgrade {
         final String inputDss = DssServicesUtils.createSignUpgradeDss(
         		data,
         		format,
-        		afirmaAppName);
+        		afirmaAppName,
+        		ignoreGracePeriod);
 
         final byte[] response = conn.doPlatformCall(
         		inputDss,

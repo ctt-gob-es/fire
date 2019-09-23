@@ -21,7 +21,8 @@ final class VerifyUtils {
     private static final String TAG_CERT = "$$CERT$$"; //$NON-NLS-1$
     private static final String TAG_APPNAME = "$$APPNAME$$"; //$NON-NLS-1$
 
-    private static final String XML_TEMPLATE = "<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:ds='http://www.w3.org/2000/09/xmldsig#' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd'>\n" + //$NON-NLS-1$
+    private static final String XML_TEMPLATE =
+    		"<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:ds='http://www.w3.org/2000/09/xmldsig#' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd'>\n" + //$NON-NLS-1$
             "  <dss:SignatureObject>\n" + //$NON-NLS-1$
             "    <dss:Other>\n" + //$NON-NLS-1$
             "      <ds:X509Data>\n" + //$NON-NLS-1$
@@ -58,6 +59,7 @@ final class VerifyUtils {
             +
             "      </vr:CheckOptions>\n" + //$NON-NLS-1$
             "    </vr:ReturnVerificationReport>\n" + //$NON-NLS-1$
+            "    <afxp:IgnoreGracePeriod xmlns:afxp=\"urn:afirma:dss:1.0:profile:XSS:schema\"/>\n" + //$NON-NLS-1$
             "  </dss:OptionalInputs>\n" + //$NON-NLS-1$
             "  <dss:SignatureObject></dss:SignatureObject>\n" + //$NON-NLS-1$
             "</dss:VerifyRequest>"; //$NON-NLS-1$

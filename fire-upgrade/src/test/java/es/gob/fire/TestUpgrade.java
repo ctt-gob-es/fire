@@ -50,7 +50,7 @@ public final class TestUpgrade {
 
 		final UpgradeTarget format = UpgradeTarget.T_FORMAT;
 
-		final UpgradeResult result = Upgrade.signUpgradeCreate(testFile, format, "minhap.seap.dtic.clavefirma"); //$NON-NLS-1$
+		final UpgradeResult result = Upgrade.signUpgradeCreate(testFile, format, "minhap.seap.dtic.clavefirma", true); //$NON-NLS-1$
 
 		System.out.println("La firma se actualizo a " + result.getFormat()); //$NON-NLS-1$
 
