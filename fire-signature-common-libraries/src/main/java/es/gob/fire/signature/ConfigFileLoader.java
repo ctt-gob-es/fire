@@ -44,15 +44,16 @@ public class ConfigFileLoader {
 		boolean loaded = false;
 		final Properties config = new Properties();
 		try {
-			String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
-			if (configDir == null) {
-				configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
+			String configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
+			if (configDirPath == null) {
+				configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
 			}
-			if (configDir != null) {
+			if (configDirPath != null) {
+				final File configDir = new File(configDirPath).getCanonicalFile();
 				final File configFile = new File(configDir, configFilename).getCanonicalFile();
 				// Comprobamos que se trate de un fichero sobre el que tengamos permisos y que no
 				// nos hayamos salido del directorio de configuracion indicado
-				if (configFile.isFile() && configFile.canRead() && configDir.startsWith(configFile.getParent())) {
+				if (configFile.isFile() && configFile.canRead() && configDir.equals(configFile.getParentFile())) {
 					try (InputStream is = new FileInputStream(configFile);) {
 						config.load(is);
 					}
@@ -68,7 +69,7 @@ public class ConfigFileLoader {
 
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio
 			if (!loaded) {
-				LOGGER.fine("Se busca en el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
+				LOGGER.warning("Se busca en el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
 				try (InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilename);) {
 					if (is == null) {
 						LOGGER.severe("No se ha encontrado el fichero de configuracion en el classpath"); //$NON-NLS-1$

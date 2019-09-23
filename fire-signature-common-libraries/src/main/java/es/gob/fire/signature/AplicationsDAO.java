@@ -58,7 +58,7 @@ public class AplicationsDAO {
 
 		if (!st.execute()) {
 			st.close();
-			LOGGER.fine("No existe ninguna aplicacion dada de alta con el ID: " + appId); //$NON-NLS-1$
+			LOGGER.fine("Error al buscar la aplicacion con el ID: " + appId); //$NON-NLS-1$
 			return new ApplicationChecking(appId, null, false, false);
 		}
 
@@ -70,7 +70,7 @@ public class AplicationsDAO {
 			result = new ApplicationChecking(appId, rs.getString(1), true, rs.getBoolean(2));
 		}
 		else {
-			LOGGER.fine("No se ha podido leer la aplicacion dada de alta en el sistema con el ID: " + appId); //$NON-NLS-1$
+			LOGGER.fine("No se ha encontrado en el sistema la aplicacion con el ID: " + appId); //$NON-NLS-1$
 			result =  new ApplicationChecking(appId, null, false, false);
 		}
 
@@ -100,13 +100,11 @@ public class AplicationsDAO {
 			final X509Certificate cer = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate //$NON-NLS-1$
 					(new ByteArrayInputStream(Base64.decode(ConfigManager.getCert())));
 
-			final String id = ConfigManager.getAppId();
-
 			// Sacamos la huella del certificado que tenemos en el fichero de propiedades
 			final MessageDigest md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
 			final String propertyThumb = Base64.encode(md.digest(cer.getEncoded()));
 
-			return id != null && id.equals(appId) && propertyThumb.equals(thumb);
+			return propertyThumb.equals(thumb);
 		}
 
 		/*SELECT COUNT(*) FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?
