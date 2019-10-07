@@ -17,9 +17,9 @@
 	
 	// Definimos los parametros de conexion SSL (https://curl.haxx.se/libcurl/c/easy_setopt_options.html)
 	$client_ssl_curl_options = array(
-		CURLOPT_SSLCERT => "C:/Entrada/client_ssl_public_cert.pem",
+		CURLOPT_SSLCERT => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_public_cert.pem",
 		CURLOPT_SSLCERTTYPE => "PEM",
-		CURLOPT_SSLKEY => "C:/Entrada/client_ssl_private_key.pem",
+		CURLOPT_SSLKEY => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_private_key.pem",
 		CURLOPT_SSLKEYTYPE => "PEM",
 		CURLOPT_SSLKEYPASSWD => "12341234",
 		CURLOPT_SSL_VERIFYPEER => 0
@@ -425,13 +425,16 @@
 
 		// Llamamos al servicio remoto
 		$response = connect($URL_SERVICE, $URL_SERVICE_PARAMS);
+		
+		// Parseamos el json recibido
 		$jsonResponse = json_decode($response);
 		$providerName = $jsonResponse->prov;
+		$signingCert = $jsonResponse->cert;
 		$batchDocuments = $jsonResponse->batch;
-		// Parseamos el json recibido
+		
 		$allDocuments = array();
 		foreach ($batchDocuments as $document) {
-			$allDocuments[] = new BatchResult($document, $providerName);
+			$allDocuments[] = new BatchResult($document, $providerName, $signingCert);
 		}		
 		return $allDocuments;
 	}
@@ -693,8 +696,9 @@
 		var $ok;
 		var $dt;
 		var $providerName;
+		var $signingCert;
 		
-		function __construct ($response, $provName){
+		function __construct ($response, $provName, $cert){
 			if(isset($response->id)) {
 				$this->id = $response->id;
 			}
@@ -711,6 +715,10 @@
 				$this->providerName = $provName;
 			}
 			
+			if (isset($cert)) {
+				$this->signingCert = $cert;
+			}
+			
 			if (empty($this->id)){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el identificador de cada documento batch");
 			}
@@ -722,8 +730,8 @@
 			}			
 		}
 		
-		function BatchResult ($response, $provName){
-			__construct ($response, $provName);
+		function BatchResult ($response, $provName, $cert){
+			__construct ($response, $provName, $cert);
 		}
 	};
 	

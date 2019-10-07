@@ -1,17 +1,16 @@
 <html>
  <head>
-  <title>Ejemplo de addDocumentToBatch</title>
+  <title>Agregar documentos al lote de firma</title>
  </head>
  <body>
  <?php 
-	// Cargamos el componente distribuido de Clave Firma
+	// Cargamos el componente distribuido de FIRe
 	include 'fire_client.php';
-	
 	
 	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
 	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
 	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "dd935292-07f2-4d0e-a043-6ce162ed2e73";	// Identificador de la transaccion
+	$transactionId = "b9550827-b8dd-4eed-ae17-f3d5d8a2a597";	// Identificador de la transaccion
 	$documentB64 = base64_encode("Hola Mundo!!");				// Simulacion de documento para agregarlo al batch
 	$conf = "redirectOkUrl=http://www.google.es"."\n".	// URL a la que llegara si el usuario se autentica correctamente
 			"redirectErrorUrl=http://www.ibm.com";		// URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
@@ -41,7 +40,7 @@
 			"0002",			// Identificador del documento
 			$documentB64,	// Documento a incluir 
 			"sign",			// Operacion criptografica (sign, cosign o countersign)
-			"XAdES",		// Formato de firma (CAdES, XAdES, PAdES...)
+			"CAdES",		// Formato de firma (CAdES, XAdES, PAdES...)
 			null,			// Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
 			null,			// Actualizacion
 			$confB64		// Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)

@@ -1,17 +1,17 @@
 <html>
  <head>
-  <title>Ejemplo de recuperacion de firma</title>
+  <title>Recuperar error</title>
  </head>
  <body>
  <?php 
-	// Cargamos el componente distribuido de Clave Firma
+	// Cargamos el componente distribuido de FIRe
 	include 'fire_client.php';
 
 
 	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
 	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
 	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "9de3fa16-726a-40a9-aba9-97656c5588ea";	// Identificador de la transaccion
+	$transactionId = "e0000792-5e22-4bf6-b5de-04b3b5ce66b3";	// Identificador de la transaccion
 	
 
 	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)

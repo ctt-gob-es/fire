@@ -1,10 +1,10 @@
 <html>
  <head>
-  <title>Ejemplo de listado de certificados</title>
+  <title>Firmar documento</title>
  </head>
  <body>
  <?php 
-	// Cargamos el componente distribuido de Clave Firma
+	// Cargamos el componente distribuido de FIRe
 	include 'fire_client.php';
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)

@@ -17,9 +17,9 @@
 	
 	// Definimos los parametros de conexion SSL (https://curl.haxx.se/libcurl/c/easy_setopt_options.html)
 	$client_ssl_curl_options = array(
-		CURLOPT_SSLCERT => "C:/Entrada/client_ssl_public_cert.pem",
+		CURLOPT_SSLCERT => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_public_cert.pem",
 		CURLOPT_SSLCERTTYPE => "PEM",
-		CURLOPT_SSLKEY => "C:/Entrada/client_ssl_private_key.pem",
+		CURLOPT_SSLKEY => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_private_key.pem",
 		CURLOPT_SSLKEYTYPE => "PEM",
 		CURLOPT_SSLKEYPASSWD => "12341234",
 		CURLOPT_SSL_VERIFYPEER => 0
@@ -161,6 +161,8 @@
 			
 			// Llamamos al servicio
 			$response = $this->connect($URL_SERVICE, $URL_SERVICE_PARAMS);
+			
+			// Agregamos el resultado recibido como firma resultante de la operacion
 			$transaction->result = $response;
 			
 			return $transaction;
@@ -463,15 +465,15 @@
 
 			// Llamamos al servicio remoto
 			$response = $this->connect($URL_SERVICE, $URL_SERVICE_PARAMS);
-			$jsonResponse = json_decode($response);
-			$providerName = $jsonResponse->prov;
-			$batchDocuments = $jsonResponse->batch;
+			
 			// Parseamos el json recibido
-			$allDocuments = array();
-			foreach ($batchDocuments as $document) {
-				$allDocuments[] = new BatchResult($document, $providerName);
-			}
-			return $allDocuments;
+			$jsonResponse = json_decode($response);
+			
+			$batchDocuments = $jsonResponse->batch;
+			$providerName = $jsonResponse->prov;
+			$signingCert = $jsonResponse->cert;
+
+			return new BatchResult($batchDocuments, $providerName, $signingCert);
 		}
 		
 		/**
@@ -733,31 +735,59 @@
 	}
 		
 	/**
-	 * Clase que almacena la respuesta en formato json en la firma de un batch
+	 * Clase que almacena el resultado de una firma de lote.
 	 */
 	class BatchResult{
+		var $providerName;
+		var $signingCert;
+		var $batch;
+		
+		function __construct ($batchDocuments, $provName, $cert){
+
+			if (!isset($batchDocuments)) {
+				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el listado de resultados");
+			}
+			
+			if (isset($provName)) {
+				$this->providerName = $provName;
+			}
+
+			if (isset($cert)) {
+				$this->signingCert = $cert;
+			}
+			
+			$this->batch = array();
+			foreach ($batchDocuments as $documentResult) {
+				$this->batch[] = new BatchSignResult($documentResult);
+			}
+		}
+		
+		function BatchResult ($response, $provName, $cert){
+			__construct ($response, $provName, $cert);
+		}
+	};
+	
+	/**
+	 * Clase que almacena el resultado particular de haber firmado un documento de un lote.
+	 */
+	class BatchSignResult{
 		var $id;
 		var $ok;
 		var $dt;
-		var $providerName;
 		
-		function __construct ($response, $provName){
-			if(isset($response->id)) {
+		function __construct ($response){
+			if (isset($response->id)) {
 				$this->id = $response->id;
 			}
 			
-			if(isset($response->ok)) {
+			if (isset($response->ok)) {
 				$this->ok = $response->ok;
 			}
 			
-			if(isset($response->dt)) {
+			if (isset($response->dt)) {
 				$this->dt = $response->dt;
 			}
-
-			if(isset($provName)) {
-				$this->providerName = $provName;
-			}
-			
+		
 			if (empty($this->id)){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el identificador de cada documento batch");
 			}
@@ -769,8 +799,8 @@
 			}			
 		}
 		
-		function BatchResult ($response, $provName){
-			__construct ($response, $provName);
+		function BatchSignResult ($response){
+			__construct ($response);
 		}
 	};
 	
@@ -805,6 +835,7 @@
 		var $resultType;
 		var $state;
 		var $providerName;
+		var $signingCert;
 		var $errorCode;
 		var $errorMessage;
 		var $result;
@@ -825,6 +856,9 @@
 				$jsonResponse = json_decode($result);
 				if (isset($jsonResponse->result->prov)) {
 					$this->providerName = $jsonResponse->result->prov;
+				}
+				if (isset($jsonResponse->result->cert)) {
+					$this->signingCert = $jsonResponse->result->cert;
 				}
 				if (isset($jsonResponse->result->ercod)) {
 					$this->errorCode = $jsonResponse->result->ercod;

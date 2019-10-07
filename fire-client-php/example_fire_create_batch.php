@@ -1,10 +1,10 @@
 <html>
  <head>
-  <title>Ejemplo de generacion de un nuevo certificado de firma</title>
+  <title>Generar lote de firma</title>
  </head>
  <body>
  <?php 
-	// Cargamos el componente distribuido de Clave Firma
+	// Cargamos el componente distribuido de FIRe
 	include 'fire_client.php';
 		
 

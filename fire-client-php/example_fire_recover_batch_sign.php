@@ -1,17 +1,17 @@
 <html>
  <head>
-  <title>Ejemplo recoverBatchSign</title>
+  <title>Recuperar firma del lote de firmas</title>
  </head>
  <body>
  <?php 
-	// Cargamos el componente distribuido de Clave Firma
+	// Cargamos el componente distribuido de FIRe
 	include 'fire_client.php';
 	
 	
 	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
 	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
 	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "dd935292-07f2-4d0e-a043-6ce162ed2e73";	// Identificador de la transaccion
+	$transactionId = "9727febd-ec92-4503-8b5d-d6f4cbc086af";	// Identificador de la transaccion
 	$dataB64 = base64_encode("Hola Mundo!!");
 	
 	
