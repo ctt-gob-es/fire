@@ -48,6 +48,96 @@ namespace FIRe
         private static readonly string OP_CODE_RECOVER_BATCH_SIGN = "10";
         private static readonly string OP_CODE_RECOVER_SIGN_RESULT = "11";
         private static readonly string OP_CODE_RECOVER_ERROR = "99";
+
+        private static readonly string URL_PARAMETERS_SIGN =
+            "&op=" + OP +
+            "&appid=" + APP_ID +
+            "&subjectid=" + SUBJECTID +
+            "&cop=" + COP +
+            "&algorithm=" + ALG +
+            "&format=" + FORMAT +
+            "&properties=" + PROP +
+            "&dat=" + DATA +
+            "&config=" + CONF;
+
+        private static readonly string URL_PARAMETERS_RECOVER_SIGN =
+            "appid=" + APP_ID +
+            "&transactionid=" + TRANSACTION +
+            "&subjectid=" + SUBJECTID +
+            "&upgrade=" + UPGRADE +
+            "&op=" + OP;
+
+        private static readonly string URL_PARAMETERS_RECOVER_SIGN_RESULT =
+            "appid=" + APP_ID +
+            "&transactionid=" + TRANSACTION +
+            "&subjectid=" + SUBJECTID +
+            "&op=" + OP;
+
+        private static readonly string URL_PARAMETERS_RECOVER_ERROR =
+            "op=" + OP +
+            "&appid=" + APP_ID +
+            "&subjectid=" + SUBJECTID +
+            "&transactionid=" + TRANSACTION;
+
+        private static readonly string URL_PARAMETERS_CREATE_BATCH =
+                    "appid=" + APP_ID +
+                    "&subjectid=" + SUBJECTID +
+                    "&cop=" + COP +
+                    "&op=" + OP +
+                    "&algorithm=" + ALG +
+                    "&format=" + FORMAT +
+                    "&properties=" + PROP +
+                    "&upgrade=" + UPGRADE +
+                    "&config=" + CONF;
+
+        private static readonly string URL_PARAMETERS_ADD_DOCUMENT_BATCH =
+            "op=" + OP +
+            "&appid=" + APP_ID +
+            "&subjectid=" + SUBJECTID +
+            "&transactionid=" + TRANSACTION +
+            "&docid=" + DOCID +
+            "&dat=" + DATA +
+            "&config=" + CONF;
+
+        private static readonly string URL_PARAMETERS_ADD_CUSTOM_DOCUMENT_BATCH =
+            "op=" + OP +
+            "&appid=" + APP_ID +
+            "&subjectid=" + SUBJECTID +
+            "&transactionid=" + TRANSACTION +
+            "&docid=" + DOCID +
+            "&cop=" + COP +
+            "&format=" + FORMAT +
+            "&properties=" + PROP +
+            "&upgrade=" + UPGRADE +
+            "&dat=" + DATA +
+            "&config=" + CONF;
+
+        private static readonly string URL_PARAMETERS_SIGN_BATCH =
+            "appid=" + APP_ID +
+            "&subjectid=" + SUBJECTID +
+            "&transactionid=" + TRANSACTION +
+            "&op=" + OP +
+            "&stoponerror=" + STOPONERROR;
+
+        private static readonly string URL_PARAMETERS_RECOVER_BATCH_RESULT =
+                   "appid=" + APP_ID +
+                   "&subjectid=" + SUBJECTID +
+                   "&transactionid=" + TRANSACTION +
+                   "&op=" + OP;
+
+        private static readonly string URL_PARAMETERS_RECOVER_BATCH_STATE =
+            "appid=" + APP_ID +
+            "&subjectid=" + SUBJECTID +
+            "&transactionid=" + TRANSACTION +
+            "&op=" + OP;
+
+        private static readonly string URL_PARAMETERS_RECOVER_BATCH_SIGN =
+            "appid=" + APP_ID +
+            "&subjectid=" + SUBJECTID +
+            "&transactionid=" + TRANSACTION +
+            "&docid=" + DOCID +
+            "&op=" + OP;
+
         private readonly string appId;
         private readonly FireConfig config;
 
@@ -60,7 +150,7 @@ namespace FIRe
         /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
         public FireClient(string appId)
         {
-            this.appId = appId != null ? appId : "";
+            this.appId = appId ?? "";
             this.config = new FireConfig();
         }
 
@@ -74,22 +164,10 @@ namespace FIRe
         /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
         public FireClient(string appId, Dictionary<String, String> config)
         {
-            this.appId = appId != null ? appId : "";
+            this.appId = appId ?? "";
             this.config = new FireConfig(config);
         }
-
-
-        private static readonly string URL_PARAMETERS_SIGN =
-            "&op=" + OP +
-            "&appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&cop=" + COP +
-            "&algorithm=" + ALG +
-            "&format=" + FORMAT +
-            "&properties=" + PROP +
-            "&dat=" + DATA +
-            "&config=" + CONF;
-            
+    
         /// <summary>
         /// Firma unos datos haciendo uso del servicio de red de firma en la nube.
         /// </summary>
@@ -114,37 +192,37 @@ namespace FIRe
 			                  string dataB64,
 			                  string confB64) {
             
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
 			    throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
                 );
 		    }
-            if (String.IsNullOrEmpty(op))
+            if (string.IsNullOrEmpty(op))
             {
                 throw new ArgumentException(
 				    "El tipo de operacion de firma a realizar no puede ser nulo"
 			    );
 		    }
-            if (String.IsNullOrEmpty(ft))
+            if (string.IsNullOrEmpty(ft))
             {
                 throw new ArgumentException(
 				    "El formato de firma no puede ser nulo"
 			    );
 		    }
-            if (String.IsNullOrEmpty(algth))
+            if (string.IsNullOrEmpty(algth))
             {
                 throw new ArgumentException(
 				    "El algoritmo de firma no puede ser nulo"
 			    );
 		    }
-            if (String.IsNullOrEmpty(dataB64))
+            if (string.IsNullOrEmpty(dataB64))
             {
                 throw new ArgumentException(
 				    "Los datos a firmar no pueden ser nulos"
 			    );
 		    }
-            if (String.IsNullOrEmpty(confB64))
+            if (string.IsNullOrEmpty(confB64))
             {
                 throw new ArgumentException(
 				    "Los datos de configuracion no pueden ser nulos"
@@ -171,19 +249,6 @@ namespace FIRe
             return new FireLoadResult(System.Text.Encoding.UTF8.GetString(bytes));
         }
 
-        private static readonly string URL_PARAMETERS_RECOVER_SIGN =
-            "appid=" + APP_ID +
-            "&transactionid=" + TRANSACTION +
-            "&subjectid=" + SUBJECTID +
-            "&upgrade=" + UPGRADE +
-            "&op=" + OP;
-
-        private static readonly string URL_PARAMETERS_RECOVER_SIGN_RESULT =
-            "appid=" + APP_ID +
-            "&transactionid=" + TRANSACTION +
-            "&subjectid=" + SUBJECTID +
-            "&op=" + OP;
-
         /// <summary>
         /// Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
         /// </summary>
@@ -203,13 +268,13 @@ namespace FIRe
                               )
         {
 
-            if (String.IsNullOrEmpty(transactionId))
+            if (string.IsNullOrEmpty(transactionId))
             {
                 throw new ArgumentException(
                     "El id de la transaccion no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
@@ -267,12 +332,6 @@ namespace FIRe
 
         }
 
-        private static readonly string URL_PARAMETERS_RECOVER_ERROR =
-            "op=" + OP +
-            "&appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&transactionid=" + TRANSACTION;
-
         /// <summary>
         /// Recupera el error tras la firma de los datos haciendo uso del servicio de red de firma en la nube.
         /// </summary>
@@ -289,13 +348,13 @@ namespace FIRe
                               string subjectId)
         {
 
-            if (String.IsNullOrEmpty(transactionId))
+            if (string.IsNullOrEmpty(transactionId))
             {
                 throw new ArgumentException(
                     "El id de la transaccion no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
@@ -321,17 +380,7 @@ namespace FIRe
             }
         }
 
-        private static readonly string URL_PARAMETERS_CREATE_BATCH =
-            "appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&cop=" + COP +
-            "&op=" + OP +
-            "&algorithm=" + ALG +
-            "&format=" + FORMAT +
-            "&properties=" + PROP +
-            "&upgrade=" + UPGRADE +
-            "&config=" + CONF;
-
+        
         /// <summary>
         /// Crea un batch de documentos para posteriormente realizar la firma por lotes.
         /// </summary>
@@ -413,16 +462,7 @@ namespace FIRe
             // Mostramos los datos obtenidos
             return new FireTransactionIdResult(System.Text.Encoding.UTF8.GetString(bytes));
         }
-
-        private static readonly string URL_PARAMETERS_ADD_DOCUMENT_BATCH =
-            "op=" + OP +
-            "&appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&transactionid=" + TRANSACTION +
-            "&docid=" + DOCID +
-            "&dat=" + DATA +
-            "&config=" + CONF;
-
+        
         /// <summary>
         /// Incluye un documento en el batch para realizar una firma por lotes.
         /// </summary>
@@ -446,19 +486,19 @@ namespace FIRe
                               string confB64)
         {
 
-            if (String.IsNullOrEmpty(transactionId))
+            if (string.IsNullOrEmpty(transactionId))
             {
                 throw new ArgumentException(
                     "El id de la transaccion no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(documentId))
+            if (string.IsNullOrEmpty(documentId))
             {
                 throw new ArgumentException(
                     "El identificador del documento no puede ser nulo"
@@ -479,20 +519,7 @@ namespace FIRe
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             getResponseToPostPetition(url, urlParameters, this.config.getConfig());
         }
-
-        private static readonly string URL_PARAMETERS_ADD_CUSTOM_DOCUMENT_BATCH =
-            "op=" + OP +
-            "&appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&transactionid=" + TRANSACTION +
-            "&docid=" + DOCID +
-            "&cop=" + COP +
-            "&format=" + FORMAT +
-            "&properties=" + PROP +
-            "&upgrade=" + UPGRADE +
-            "&dat=" + DATA +
-            "&config=" + CONF;
-
+        
         /// <summary>
         /// Incluye en el batch un documento con una configuración de firma propia para realizar una firma por lotes.
         /// </summary>
@@ -524,31 +551,31 @@ namespace FIRe
                               string confB64)
         {
 
-            if (String.IsNullOrEmpty(transactionId))
+            if (string.IsNullOrEmpty(transactionId))
             {
                 throw new ArgumentException(
                     "El id de la transaccion no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(documentId))
+            if (string.IsNullOrEmpty(documentId))
             {
                 throw new ArgumentException(
                     "El identificador del documento no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(op))
+            if (string.IsNullOrEmpty(op))
             {
                 throw new ArgumentException(
                     "El tipo de operacion de firma a realizar no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(ft))
+            if (string.IsNullOrEmpty(ft))
             {
                 throw new ArgumentException(
                     "El formato de firma no puede ser nulo"
@@ -569,7 +596,7 @@ namespace FIRe
                 .Replace(CONF, string.IsNullOrEmpty(confB64) ? "" : confB64.Replace('+', '-').Replace('/', '_'));
             
             // Si se ha indicado un formato de upgrade, lo actualizamos; si no, lo eliminamos de la URL
-            if (String.IsNullOrEmpty(upgrade))
+            if (string.IsNullOrEmpty(upgrade))
             {
                 urlParameters = urlParameters.Replace("&upgrade=" + UPGRADE, "");
             }
@@ -581,13 +608,6 @@ namespace FIRe
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             getResponseToPostPetition(url, urlParameters, this.config.getConfig());
         }
-
-        private static readonly string URL_PARAMETERS_SIGN_BATCH =
-            "appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&transactionid=" + TRANSACTION +
-            "&op=" + OP +
-            "&stoponerror=" + STOPONERROR;
 
         /// <summary>
         /// Realiza una firma por lotes.
@@ -607,13 +627,13 @@ namespace FIRe
                               bool stopOnError)
         {
 
-            if (String.IsNullOrEmpty(transactionId))
+            if (string.IsNullOrEmpty(transactionId))
             {
                 throw new ArgumentException(
                     "El id de la transaccion no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
@@ -635,13 +655,6 @@ namespace FIRe
             return new FireLoadResult(System.Text.Encoding.UTF8.GetString(bytes));
         }
 
-
-        private static readonly string URL_PARAMETERS_RECOVER_BATCH_RESULT =
-            "appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&transactionid=" + TRANSACTION +
-            "&op=" + OP;
-
         /// <summary>
         /// Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
         /// </summary>
@@ -658,13 +671,13 @@ namespace FIRe
                               string subjectId)
         {
 
-            if (String.IsNullOrEmpty(transactionId))
+            if (string.IsNullOrEmpty(transactionId))
             {
                 throw new ArgumentException(
                     "El id de la transaccion no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
@@ -678,18 +691,13 @@ namespace FIRe
                 .Replace(SUBJECTID, subjectId)
                 .Replace(OP, OP_CODE_RECOVER_BATCH); // El tipo de operacion solicitada es RECOVER_BATCH
 
-            //  realizamos la peticion post al servicio y recibimos los datos de la peticion
+            //  Realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
-            FireBatchResult documentList = deserializedBatchResult(System.Text.Encoding.UTF8.GetString(bytes));
-            // Mostramos los datos obtenidos
-            return documentList;
-        }
+            FireBatchResultJson batchResultJson = deserializedBatchResult(System.Text.Encoding.UTF8.GetString(bytes));
 
-        private static readonly string URL_PARAMETERS_RECOVER_BATCH_STATE =
-            "appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&transactionid=" + TRANSACTION +
-            "&op=" + OP;
+            // Componemos el objeto de resultado con la respuesta del servicio
+            return FireBatchResult.Parse(batchResultJson);
+        }
 
         /// <summary>
         /// Recupera el progreso del proceso de firma de los datos del proceso batch.
@@ -707,13 +715,13 @@ namespace FIRe
                               string subjectId)
         {
 
-            if (String.IsNullOrEmpty(transactionId))
+            if (string.IsNullOrEmpty(transactionId))
             {
                 throw new ArgumentException(
                     "El id de la transaccion no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
@@ -733,13 +741,6 @@ namespace FIRe
             // Mostramos los datos obtenidos
             return float.Parse(System.Text.Encoding.UTF8.GetString(bytes), System.Globalization.CultureInfo.InvariantCulture);
         }
-
-        private static readonly string URL_PARAMETERS_RECOVER_BATCH_SIGN =
-            "appid=" + APP_ID +
-            "&subjectid=" + SUBJECTID +
-            "&transactionid=" + TRANSACTION +
-            "&docid=" + DOCID +
-            "&op=" + OP;
 
         /// <summary>
         /// Recupera la firma de un documento del proceso batch haciendo uso del servicio de red de firma en la nube.
@@ -761,19 +762,19 @@ namespace FIRe
                               string docId)
         {
 
-            if (String.IsNullOrEmpty(transactionId))
+            if (string.IsNullOrEmpty(transactionId))
             {
                 throw new ArgumentException(
                     "El id de la transaccion no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(subjectId))
+            if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
                     "El identificador del titular no puede ser nulo"
                 );
             }
-            if (String.IsNullOrEmpty(docId))
+            if (string.IsNullOrEmpty(docId))
             {
                 throw new ArgumentException(
                     "El identificador del documento no puede ser nulo"
@@ -896,10 +897,10 @@ namespace FIRe
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
         /// <returns></returns>
-        private static FireBatchResult deserializedBatchResult(string JSON)
+        private static FireBatchResultJson deserializedBatchResult(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
-            return json_serializer.Deserialize<FireBatchResult>(JSON);
+            return json_serializer.Deserialize<FireBatchResultJson>(JSON);
         }
     }
 

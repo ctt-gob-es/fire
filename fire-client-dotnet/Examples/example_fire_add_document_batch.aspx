@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Incluye documents en un batch</title>
+    <title>Agregar documentos a un lote de firma</title>
 </head>
 <body>
     <form id="form1" runat="server">

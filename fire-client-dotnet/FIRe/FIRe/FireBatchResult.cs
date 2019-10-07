@@ -8,27 +8,47 @@
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web.Script.Serialization;
+using System.Security.Cryptography.X509Certificates;
 
 namespace FIRe
 {
     /// <summary>Clase para el almacén del resultado de una operación de firma por lotes.</summary>
     public class FireBatchResult
     {
-
-        /// <summary>
-        /// Listado de resultados de firma en proceso batch.
-        /// </summary>
-        public String prov { get; set; }
-
         /// <summary>
         /// Listado de resultados de firma en proceso batch.
         /// </summary>
         public List<FireSingleResult> batch { get; set; }
+        
+        /// <summary>
+        /// Nombre del proveedor de firma utilizado.
+        /// </summary>
+        public string prov { get; set; }
+
+        /// <summary>
+        /// Certificado de firma utilizado.
+        /// </summary>
+        public X509Certificate cert { get; set; }
+
+        /// <summary>
+        ///  Obtiene el resultado de la firma del lote a partir del objeto con la respuesta del
+        ///  servicio que devolvió dicho resultado.
+        /// </summary>
+        /// <param name="json">Objeto con el JSON de respuesta serializado.</param>
+        /// <returns>Objeto con el resultado de la firma del lote.</returns>
+        public static FireBatchResult Parse(FireBatchResultJson json)
+        {
+            FireBatchResult result = new FireBatchResult();
+            result.prov = json.prov;
+            result.batch = json.batch;
+            if (json.cert != null)
+            {
+                result.cert = new X509Certificate(System.Convert.FromBase64String(json.cert));
+            }
+
+            return result;
+        }
     }
 
     /// <summary>Clase para el almacén del resultado de una operación de firma de un documento.</summary>

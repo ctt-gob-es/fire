@@ -38,6 +38,26 @@
             <param name="msg">Descripcion del error.</param>
             <param name="e">Causa del error</param>
         </member>
+        <member name="T:FIRe.FireBatchResultJson">
+            <summary>
+            Clase para la serialización/deserialización del resultado de una operación de firma por lotes.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireBatchResultJson.batch">
+            <summary>
+            Listado de resultados de firma en proceso batch.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireBatchResultJson.prov">
+            <summary>
+            Nombre del proveedor de firma utilizado.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireBatchResultJson.cert">
+            <summary>
+            Certificado de firma utilizado.
+            </summary>
+        </member>
         <member name="T:FIRe.InvalidBatchDocumentException">
             <summary>
             La firma del documento no se generó correctamente o se indicó un documento no válido.
@@ -680,15 +700,28 @@
         <member name="T:FIRe.FireBatchResult">
             <summary>Clase para el almacén del resultado de una operación de firma por lotes.</summary>
         </member>
-        <member name="P:FIRe.FireBatchResult.prov">
-            <summary>
-            Listado de resultados de firma en proceso batch.
-            </summary>
-        </member>
         <member name="P:FIRe.FireBatchResult.batch">
             <summary>
             Listado de resultados de firma en proceso batch.
             </summary>
+        </member>
+        <member name="P:FIRe.FireBatchResult.prov">
+            <summary>
+            Nombre del proveedor de firma utilizado.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireBatchResult.cert">
+            <summary>
+            Certificado de firma utilizado.
+            </summary>
+        </member>
+        <member name="M:FIRe.FireBatchResult.Parse(FIRe.FireBatchResultJson)">
+            <summary>
+             Obtiene el resultado de la firma del lote a partir del objeto con la respuesta del
+             servicio que devolvió dicho resultado.
+            </summary>
+            <param name="json">Objeto con el JSON de respuesta serializado.</param>
+            <returns>Objeto con el resultado de la firma del lote.</returns>
         </member>
         <member name="T:FIRe.FireSingleResult">
             <summary>Clase para el almacén del resultado de una operación de firma de un documento.</summary>
@@ -716,7 +749,7 @@
             <param name="json">Definición del resultado de una operación de carga de datos a firmar.</param>
             <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
         </member>
-        <member name="M:FIRe.FireTransactionIdResult.getJson(System.String)">
+        <member name="M:FIRe.FireTransactionIdResult.GetJson(System.String)">
             <summary>
              Devuelve un conjunto de propiedades extraídas de un JSON.
             </summary>
@@ -739,58 +772,68 @@
             <param name="bytes">Definición del resultado de una operación de firma.</param>
             <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
         </member>
-        <member name="M:FIRe.FireTransactionResult.deserializedSignResult(System.String)">
+        <member name="M:FIRe.FireTransactionResult.getState">
+            <summary>Obtiene el tipo de resultado obtenido.</summary>
+            <returns>Tipo de resultado obtenido.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getProviderName">
+            <summary>Obtiene el nombre del proveedor con el que se realizó la operación.</summary>
+            <returns>Nombre del proveedor.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getSigningCert">
+            <summary>Obtiene el certificado con el que se realizó la operación.</summary>
+            <returns>Certificado.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getErrorCode">
+            <summary>Obtiene el código del error obtenido al ejecurar la transacción.</summary>
+            <returns>Código del error obtenido.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getErrorMessage">
+            <summary>Obtiene el mensaje del error obtenido al ejecurar la transacción.</summary>
+            <returns>Mensaje del error obtenido.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.getResult">
+            <summary>Recupera el resultado generado por la transacción.</summary>
+            <returns>Resultado generado por la transacción.</returns>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.setResult(System.Byte[])">
+            <summary>Establece el resultado generado por la transacción.</summary>
+            <param name="result">Resultado generado por la transacción.</param>
+        </member>
+        <member name="M:FIRe.FireTransactionResult.DeserializedSignResult(System.String)">
             <summary>
              Deserializa una estructura JSON para obtener de ella un objeto de tipo FireSignResult.
             </summary>
             <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
             <returns></returns>
         </member>
-        <member name="M:FIRe.FireTransactionResult.getResult">
-            <summary> Obtiene el resultado de la transacción de firma.</summary>
-            <returns>Identificador de la transacción de firma</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.setResult(System.Byte[])">
-            <summary> Establece el resultado de la transacción de firma.</summary>
-            <param name="data">Datos resultantes de la transacción.</param>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.getProviderName">
-            <summary>Obtiene el nombre del proveedor utilizado para la firma.</summary>
-            <returns>Nombre del proveedor.</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.setProviderName(System.String)">
-            <summary>Obtiene el nombre del proveedor utilizado para realizar la firma.</summary>
-            <param name="providerName">Nombre del proveedor.</param>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.getErrorCode">
-            <summary>Obtiene el código de error durante la firma.</summary>
-            <returns>Código de error.</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.getErrorMessage">
-            <summary>Obtiene el mensaje de error durante la firma.</summary>
-            <returns>Mensaje de error.</returns>
-        </member>
         <member name="T:FIRe.FireSignResult">
             <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
         </member>
-        <member name="P:FIRe.FireSignResult.result">
+        <member name="P:FIRe.FireSignResult.Result">
             <summary>
             Resultado de la operacion de firma.
             </summary>
         </member>
-        <member name="M:FIRe.FireSignResult.getProviderName">
+        <member name="M:FIRe.FireSignResult.GetProviderName">
             <summary>
             Recupera el nombre del proveedor utilizado en la operación.
             </summary>
             <returns>Nombre del proveedor.</returns>
         </member>
-        <member name="M:FIRe.FireSignResult.getErrorCode">
+        <member name="M:FIRe.FireSignResult.GetSigningCert">
+            <summary>
+            Recupera el certificado utilizado en la operación.
+            </summary>
+            <returns>Certificado utilizado.</returns>
+        </member>
+        <member name="M:FIRe.FireSignResult.GetErrorCode">
             <summary>
             Recupera el código del error que se produjese durante la operación.
             </summary>
             <returns>Código de error o null si no se produjo ningún error.</returns>
         </member>
-        <member name="M:FIRe.FireSignResult.getErrorMessage">
+        <member name="M:FIRe.FireSignResult.GetErrorMessage">
             <summary>
             Recupera el mensaje del error que se produjese durante la operación.
             </summary>
@@ -799,17 +842,22 @@
         <member name="T:FIRe.FireSignResultData">
             <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
         </member>
-        <member name="P:FIRe.FireSignResultData.prov">
+        <member name="P:FIRe.FireSignResultData.Prov">
             <summary>
             Nombre del proveedor.
             </summary>
         </member>
-        <member name="P:FIRe.FireSignResultData.ercod">
+        <member name="P:FIRe.FireSignResultData.Cert">
+            <summary>
+            Certificado de firma.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireSignResultData.Ercod">
             <summary>
             Código de error.
             </summary>
         </member>
-        <member name="P:FIRe.FireSignResultData.ermsg">
+        <member name="P:FIRe.FireSignResultData.Ermsg">
             <summary>
             Mensaje de error.
             </summary>
@@ -822,7 +870,7 @@
             <param name="json">Definición del resultado de una operación de carga de datos a firmar.</param>
             <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
         </member>
-        <member name="M:FIRe.FireLoadResult.getJson(System.String)">
+        <member name="M:FIRe.FireLoadResult.GetJson(System.String)">
             <summary>
              Devuelve un conjunto de propiedades extraídas de un JSON.
             </summary>
@@ -1225,7 +1273,7 @@
              Devuelve un conjunto de propiedades extraídas de un JSON.
             </summary>
             <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
-            <returns></returns>
+            <returns>Objeto con el resultado de la firma del lote.</returns>
         </member>
     </members>
 </doc>

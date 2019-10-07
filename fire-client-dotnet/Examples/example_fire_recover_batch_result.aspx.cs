@@ -8,7 +8,7 @@ public partial class example_fire_recover_batch_result : System.Web.UI.Page
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireBatchResult batchResult;
         string appId = "B244E473466F";
-        string transactionId = "d9ff68d2-71cb-47ea-87b9-497b66c3b3e7";
+        string transactionId = "1bdbb621-fa77-4dea-8ff8-602400fd033b";
         try
         {
             batchResult = new FireClient(appId).recoverBatchResult( // Identificador de la aplicacion (dada de alta previamente en el sistema)
@@ -30,9 +30,9 @@ public partial class example_fire_recover_batch_result : System.Web.UI.Page
 
         // Mostramos los datos obtenidos
         ProviderName.Text = batchResult.prov;
+        CertB64.Text = System.Convert.ToBase64String(batchResult.cert.GetRawCertData());
         Result1.Text = batchResult.batch[0].id + " - " + batchResult.batch[0].ok + " - " + batchResult.batch[0].dt;
         Result2.Text = batchResult.batch[1].id + " - " + batchResult.batch[1].ok + " - " + batchResult.batch[1].dt;
-
     }
 
     /// <summary>Codifica en base64</summary>

@@ -7,13 +7,14 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Creacion de batch</title>
+    <title>Recuperar resultado de la firma del lote</title>
 </head>
 <body>
     <form id="form1" runat="server">
     <div>
     
         <br /><b>Proveedor:</b><br /> <asp:Label runat="server" id="ProviderName"></asp:Label>
+        <br /><b>Certificado:</b><br /> <asp:Label runat="server" id="CertB64"></asp:Label>
         <br /><b>Resultado de firma:</b><br /> <asp:Label runat="server" id="Result1"></asp:Label>
         <br /><b>Resultado de firma:</b><br /> <asp:Label runat="server" id="Result2"></asp:Label>
 

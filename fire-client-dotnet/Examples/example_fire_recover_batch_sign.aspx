@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Ejemplo de recuperacion de resultado de firma batch</title>
+    <title>Recuperar firma de un lote firmado</title>
 </head>
 <body>
     <form id="form1" runat="server">

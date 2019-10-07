@@ -594,9 +594,9 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters);
-            FireBatchResult documentList = getJson(System.Text.Encoding.UTF8.GetString(bytes));
-            // Mostramos los datos obtenidos
-            return documentList;
+            FireBatchResultJson batchResult = getJson(System.Text.Encoding.UTF8.GetString(bytes));
+            
+            return FireBatchResult.Parse(batchResult);
         }
 
         /// <summary>
@@ -756,11 +756,11 @@ namespace FIRe
         ///  Devuelve un conjunto de propiedades extraídas de un JSON.
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
-        /// <returns></returns>
-        private static FireBatchResult getJson(string JSON)
+        /// <returns>Objeto con el resultado de la firma del lote.</returns>
+        private static FireBatchResultJson getJson(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
-            return json_serializer.Deserialize<FireBatchResult>(JSON);
+            return json_serializer.Deserialize<FireBatchResultJson>(JSON);
         }
     }
 }

@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Ejemplo de recuperacion del estado de firma del lote</title>
+    <title>Recuperar estado de firma del lote</title>
 </head>
 <body>
     <form id="form1" runat="server">

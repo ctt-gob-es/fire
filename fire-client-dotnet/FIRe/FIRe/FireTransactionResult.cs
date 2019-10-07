@@ -9,8 +9,9 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Web.Script.Serialization;
+using System.Security.Cryptography.X509Certificates;
+using System.Windows.Forms;
 
 namespace FIRe
 {
@@ -28,11 +29,12 @@ namespace FIRe
         // Prefijo de la estructura que almacena la informacion sobre la operacion realizada
         private static readonly string JSON_RESULT_PREFIX = "{\"" + JSON_ATTR_RESULT + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
 
-        private readonly int state;
-        private String providerName;
-        private readonly String errorCode;
-        private readonly String errorMessage;
-        private byte[] result { get; set; }
+        private readonly int State;
+        private readonly string ProviderName;
+        private readonly X509Certificate SigningCert;
+        private readonly string ErrorCode;
+        private readonly string ErrorMessage;
+        private byte[] Result;
 
         /// <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
         /// <param name="bytes">Definición del resultado de una operación de firma.</param>
@@ -44,7 +46,7 @@ namespace FIRe
 			    );
 		    }
             
-            this.state = STATE_OK;
+            this.State = STATE_OK;
 
             // Comprobamos el inicio de la respuesta para saber si recibimos la informacion
             // de la operacion o el binario resultante
@@ -60,19 +62,24 @@ namespace FIRe
             {
                 try
                 {
-                    FireSignResult signResult = deserializedSignResult(System.Text.Encoding.UTF8.GetString(bytes));
-                    if (signResult.getErrorCode() != 0)
+                    FireSignResult signResult = DeserializedSignResult(System.Text.Encoding.UTF8.GetString(bytes));
+
+                    if (signResult.GetErrorCode() != 0)
                     {
-                        this.errorCode = signResult.getErrorCode().ToString();
-                        this.state = STATE_ERROR;
+                        this.ErrorCode = signResult.GetErrorCode().ToString();
+                        this.State = STATE_ERROR;
                     }
-                    if (signResult.getErrorMessage() != null)
+                    if (signResult.GetErrorMessage() != null)
                     {
-                        this.errorMessage = signResult.getErrorMessage();
+                        this.ErrorMessage = signResult.GetErrorMessage();
                     }
-                    if (signResult.getProviderName() != null)
+                    if (signResult.GetProviderName() != null)
                     {
-                        this.providerName = signResult.getProviderName();
+                        this.ProviderName = signResult.GetProviderName();
+                    }
+                    if (signResult.GetSigningCert() != null)
+                    {
+                        this.SigningCert = signResult.GetSigningCert();
                     }
                 }
                 catch(Exception e)
@@ -82,61 +89,68 @@ namespace FIRe
             }
             else
             {
-                this.result = bytes;
+                this.Result = bytes;
             }
         }
-        
+
+        /// <summary>Obtiene el tipo de resultado obtenido.</summary>
+        /// <returns>Tipo de resultado obtenido.</returns>
+        public int getState()
+        {
+            return this.State;
+        }
+
+        /// <summary>Obtiene el nombre del proveedor con el que se realizó la operación.</summary>
+        /// <returns>Nombre del proveedor.</returns>
+        public string getProviderName()
+        {
+            return this.ProviderName;
+        }
+
+        /// <summary>Obtiene el certificado con el que se realizó la operación.</summary>
+        /// <returns>Certificado.</returns>
+        public X509Certificate getSigningCert()
+        {
+            return this.SigningCert;
+        }
+
+        /// <summary>Obtiene el código del error obtenido al ejecurar la transacción.</summary>
+        /// <returns>Código del error obtenido.</returns>
+        public string getErrorCode()
+        {
+            return this.ErrorCode;
+        }
+
+        /// <summary>Obtiene el mensaje del error obtenido al ejecurar la transacción.</summary>
+        /// <returns>Mensaje del error obtenido.</returns>
+        public string getErrorMessage()
+        {
+            return this.ErrorMessage;
+        }
+
+        /// <summary>Recupera el resultado generado por la transacción.</summary>
+        /// <returns>Resultado generado por la transacción.</returns>
+        public byte[] getResult()
+        {
+            return this.Result;
+        }
+
+        /// <summary>Establece el resultado generado por la transacción.</summary>
+        /// <param name="result">Resultado generado por la transacción.</param>
+        public void setResult(byte[] result)
+        {
+            this.Result = result;
+        }
+
         /// <summary>
         ///  Deserializa una estructura JSON para obtener de ella un objeto de tipo FireSignResult.
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
         /// <returns></returns>
-        private static FireSignResult deserializedSignResult(string JSON)
+        private static FireSignResult DeserializedSignResult(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
             return json_serializer.Deserialize<FireSignResult>(JSON);
-        }
-
-        /// <summary> Obtiene el resultado de la transacción de firma.</summary>
-        /// <returns>Identificador de la transacción de firma</returns>
-        public byte[] getResult()
-        {
-		    return this.result;
-	    }
-
-        /// <summary> Establece el resultado de la transacción de firma.</summary>
-        /// <param name="data">Datos resultantes de la transacción.</param>
-        public void setResult(byte[] data)
-        {
-            this.result = data;
-        }
-
-        /// <summary>Obtiene el nombre del proveedor utilizado para la firma.</summary>
-        /// <returns>Nombre del proveedor.</returns>
-        public String getProviderName()
-        {
-            return this.providerName;
-        }
-
-        /// <summary>Obtiene el nombre del proveedor utilizado para realizar la firma.</summary>
-        /// <param name="providerName">Nombre del proveedor.</param>
-        public void setProviderName(String providerName)
-        {
-            this.providerName = providerName;
-        }
-
-        /// <summary>Obtiene el código de error durante la firma.</summary>
-        /// <returns>Código de error.</returns>
-	    public String getErrorCode()
-        {
-		    return this.errorCode;
-	    }
-
-        /// <summary>Obtiene el mensaje de error durante la firma.</summary>
-        /// <returns>Mensaje de error.</returns>
-        public String getErrorMessage()
-        {
-            return this.errorMessage;
         }
     }
 
@@ -146,33 +160,46 @@ namespace FIRe
         /// <summary>
         /// Resultado de la operacion de firma.
         /// </summary>
-        public FireSignResultData result { get; set; }
+        public FireSignResultData Result { get; set; }
 
         /// <summary>
         /// Recupera el nombre del proveedor utilizado en la operación.
         /// </summary>
         /// <returns>Nombre del proveedor.</returns>
-        public String getProviderName()
+        public string GetProviderName()
         {
-            return this.result.prov;
+            return this.Result.Prov;
+        }
+
+        /// <summary>
+        /// Recupera el certificado utilizado en la operación.
+        /// </summary>
+        /// <returns>Certificado utilizado.</returns>
+        public X509Certificate GetSigningCert()
+        {
+            if (this.Result.Cert == null)
+            {
+                return null;
+            }
+            return new X509Certificate(System.Convert.FromBase64String(this.Result.Cert));
         }
 
         /// <summary>
         /// Recupera el código del error que se produjese durante la operación.
         /// </summary>
         /// <returns>Código de error o null si no se produjo ningún error.</returns>
-        public int getErrorCode()
+        public int GetErrorCode()
         {
-            return this.result.ercod;
+            return this.Result.Ercod;
         }
 
         /// <summary>
         /// Recupera el mensaje del error que se produjese durante la operación.
         /// </summary>
         /// <returns>Mensaje de error o null si no se produjo ningún error.</returns>
-        public String getErrorMessage()
+        public string GetErrorMessage()
         {
-            return this.result.ermsg;
+            return this.Result.Ermsg;
         }
     }
 
@@ -182,15 +209,19 @@ namespace FIRe
         /// <summary>
         /// Nombre del proveedor.
         /// </summary>
-        public string prov { get; set; }
+        public string Prov { get; set; }
+        /// <summary>
+        /// Certificado de firma.
+        /// </summary>
+        public string Cert { get; set; }
         /// <summary>
         /// Código de error.
         /// </summary>
-        public int ercod { get; set; }
+        public int Ercod { get; set; }
         /// <summary>
         /// Mensaje de error.
         /// </summary>
-        public string ermsg { get; set; }
+        public string Ermsg { get; set; }
     }
 
 }

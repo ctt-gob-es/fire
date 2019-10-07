@@ -9,13 +9,13 @@ public partial class example_fire_sign : System.Web.UI.Page
 
         string appId = "B244E473466F";
 
-        Dictionary<String, String> serviceConfig = new Dictionary<string, string>();
-        serviceConfig.Add("fire_service", "https://servidorcentral:8443/fire-signature/fireService");
-        serviceConfig.Add("admit_all_certs", "true");
-        serviceConfig.Add("ssl_client_pkcs12", "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new.p12");
-        serviceConfig.Add("ssl_client_pass", "12341234");
+        //Dictionary<String, String> serviceConfig = new Dictionary<string, string>();
+        //serviceConfig.Add("fire_service", "https://servidorcentral:8443/fire-signature/fireService");
+        //serviceConfig.Add("admit_all_certs", "true");
+        //serviceConfig.Add("ssl_client_pkcs12", "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new.p12");
+        //serviceConfig.Add("ssl_client_pass", "12341234");
 
-        string extraParams = "filters=keyusage.nonrepudiation:true\nformat = XAdES Detached\napplySystemDate = false";
+        string extraParams = "filters=keyusage.nonrepudiation:true\nmode=implicit";
         string extraParamsB64 = Base64Encode(extraParams);
 
         string dataB64 = Base64Encode("Hola Mundo!!");
@@ -29,12 +29,12 @@ public partial class example_fire_sign : System.Web.UI.Page
         FireLoadResult loadResult;
         try
         {
-            loadResult = new FireClient(appId, serviceConfig).sign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
-            //loadResult = new FireClient(appId).sign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            //loadResult = new FireClient(appId, serviceConfig).sign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            loadResult = new FireClient(appId).sign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
             //loadResult = FireApi.sign(appId,          // Identificador de la aplicacion (dada de alta previamente en el sistema)
                 "00001",        // Identificador del usuario
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
-                "XAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
+                "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
                 "SHA1withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
                 extraParamsB64, // Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
                 dataB64,        // Datos a firmar

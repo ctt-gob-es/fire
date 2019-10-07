@@ -11,7 +11,7 @@ public partial class example_fire_add_document_batch : System.Web.UI.Page
         string confB64 = Base64Encode(conf);
         string dataB64 = Base64Encode("Hola Mundo!!");
         string appId = "B244E473466F";
-        string transactionId = "d9ff68d2-71cb-47ea-87b9-497b66c3b3e7";
+        string transactionId = "1bdbb621-fa77-4dea-8ff8-602400fd033b";
 
         FireClient client;
 
