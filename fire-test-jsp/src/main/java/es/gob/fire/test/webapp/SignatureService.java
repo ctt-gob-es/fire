@@ -24,8 +24,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.SignOperationResult;
 
@@ -113,6 +113,9 @@ public class SignatureService extends HttpServlet {
         if (configManager.getAppName() != null) {
         	confProperties.setProperty("appName", configManager.getAppName()); //$NON-NLS-1$
         }
+
+        // Desactivacion del periodo de gracia (puede ser necesario si se configura politica de firma)
+       	//confProperties.setProperty("updater.ignoreGracePeriod", Boolean.TRUE.toString()); //$NON-NLS-1$
 
         // Configuracion del nombre y titulo del documento
 //        confProperties.setProperty("docTitle", "Mi titulo"); //$NON-NLS-1$ //$NON-NLS-2$

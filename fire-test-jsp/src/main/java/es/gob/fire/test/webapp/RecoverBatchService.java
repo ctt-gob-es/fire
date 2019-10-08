@@ -12,6 +12,7 @@ package es.gob.fire.test.webapp;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateEncodingException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -56,10 +57,19 @@ public class RecoverBatchService extends HttpServlet {
 	    }
 	    catch (final Exception e) {
 			LOGGER.error("Error durante la operacion de recuperacion del lote", e); //$NON-NLS-1$
-	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
+			final String msg = e.getMessage() != null ? e.getMessage() : e.toString();
+	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(msg, "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 	    	return;
 	    }
 
+	    LOGGER.info("Proveedor usado: " + result.getProviderName()); //$NON-NLS-1$
+
+	    try {
+			LOGGER.info("Certificado de firma: " + (result.getSigningCert() != null ? //$NON-NLS-1$
+					Base64.encode(result.getSigningCert().getEncoded()) : null));
+		} catch (final CertificateEncodingException e) {
+			LOGGER.error("No se pudo decodificar el certificado de firma: " + e); //$NON-NLS-1$
+		}
 
 	    response.getOutputStream().write(result.toString().getBytes(StandardCharsets.UTF_8));
 	    response.flushBuffer();

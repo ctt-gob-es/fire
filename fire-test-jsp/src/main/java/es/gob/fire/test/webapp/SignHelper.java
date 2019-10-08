@@ -51,7 +51,7 @@ public class SignHelper {
      * 				de la firma.
      * @throws InvalidTransactionException Cuando la transacci&oacute;n indicada no exista o este caducada.
      */
-    public static byte[] recoverSignResult(final HttpServletRequest request)
+    public static TransactionResult recoverSignResult(final HttpServletRequest request)
             throws IllegalArgumentException, IOException, HttpOperationException, InvalidTransactionException {
 
     	// El identificador de aplicacion es propio de cada aplicacion. En esta de ejemplo,
@@ -90,6 +90,6 @@ public class SignHelper {
         			": " + result.getErrorMessage()); //$NON-NLS-1$
         }
 
-        return  result.getResult();
+        return  result;
     }
 }

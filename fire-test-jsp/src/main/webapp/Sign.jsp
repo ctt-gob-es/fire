@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.test.webapp.Base64"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -80,17 +81,19 @@
 			   	</fieldset>
 				
 				<fieldset  class="fieldset-fire">
-					<legend>Seleccione el formato al que actualizar la firma: </legend>
+					<legend>Post-proceso de la firma: </legend>
 						<input id="none-ft" type="radio" name="upgrade" value="" checked="checked"/>
 							<label for="none-ft" >Ninguno</label><br>
 						<input id="es-a-ft" type="radio" name="upgrade" value="ES-A"/>
-							<label for="es-a-ft" >ES-A</label><br>
+							<label for="es-a-ft" >Actualizar a ES-A</label><br>
 						<input id="es-t-ft" type="radio" name="upgrade" value="ES-T"/>
-							<label for="es-t-ft">ES-T</label><br>
+							<label for="es-t-ft">Actualizar a ES-T</label><br>
 						<input id="t-level-ft" type="radio" name="upgrade" value="T-Level"/>
-							<label for="t-level-ft">T-Level</label><br>
+							<label for="t-level-ft">Actualizar a T-Level</label><br>
 						<input id="es-ltv-ft" type="radio" name="upgrade" value="ES-LTV"/>
-							<label for="es-ltv-ft">ES-LTV</label><br>
+							<label for="es-ltv-ft">Actualizar a ES-LTV</label><br>
+						<input id="upgrade-verify" type="radio" name="upgrade" value="verify"/>
+							<label for="upgrade-verify">Validar</label><br>
 			   	</fieldset>
 				
 				 <!-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
@@ -99,7 +102,7 @@
 				  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
 				  de certificados de firma. -->
 				<input id="extraparams-conf" type="hidden" name="extraParams"
-				value="bW9kZT1pbXBsaWNpdA0KZmlsdGVycz1rZXl1c2FnZS5ub25yZXB1ZGlhdGlvbjp0cnVl" />
+				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true".getBytes()) %>" />
 
 				<div style="margin-top: 10px; text-align: left; ">
 					<label for="fichero-firma">Seleccionar documento:</label><br>

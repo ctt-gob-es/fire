@@ -7,7 +7,10 @@ import es.gob.fire.client.PasswordDecipher;
 
 /**
  * Descifrador de contrase&ntilde;as de ejemplo. Esta implementaci&oacute;n
- * realmente no descifra. Utiliza como contrase&ntilde;a la propia entrada.
+ * realmente no descifra. Utiliza como cadena descifrada la propia entrada.
+ * Esto permitir&iacute;a que en el fichero de configuraci&oacute;n se indicase
+ * como cadena "cifrada" el base64 del texto y como resultado se obtenga el
+ * propio texto.
  */
 public class FakePasswordDecipher implements PasswordDecipher {
 

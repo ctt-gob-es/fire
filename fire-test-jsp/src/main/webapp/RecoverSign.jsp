@@ -1,3 +1,5 @@
+<%@page import="java.security.cert.CertificateEncodingException"%>
+<%@page import="es.gob.fire.client.TransactionResult"%>
 <%@page import="org.slf4j.LoggerFactory"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="es.gob.fire.test.webapp.Base64"%>
@@ -20,15 +22,29 @@
 				return;
 			}
 
-		    byte[] signature = null;
+		    TransactionResult result;
 		    try {
-		    	signature = SignHelper.recoverSignResult(request);
+		    	result = SignHelper.recoverSignResult(request);
 		    }
 		    catch (Exception e) {
 				LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
 						"Error durante la operacion de recuperacion de firma: {}", e.toString()); //$NON-NLS-1$
 		    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
+		    	return;
 		    }
+
+		    final byte[] signature = result.getResult();
+
+		    LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
+		    		"Nombre de proveedor: " + result.getProviderName()); //$NON-NLS-1$
+		    try {
+		    	 LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
+		    			 "Certificado de firma: " + (result.getSigningCert() != null ? //$NON-NLS-1$
+							Base64.encode(result.getSigningCert().getEncoded()) : null));
+			} catch (final CertificateEncodingException e) {
+				LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
+						"No se pudo decodificar el certificado de firma: " + e); //$NON-NLS-1$
+			}
 		%>
 
 		<!-- Barra de navegacion -->
