@@ -10,8 +10,12 @@
 package es.gob.fire.client;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -33,6 +37,8 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 
 	private static final String JSON_FIELD_PROVIDER_NAME = "prov"; //$NON-NLS-1$
 
+	private static final String JSON_FIELD_SIGNING_CERT = "cert"; //$NON-NLS-1$
+
 	private static final String JSON_FIELD_ID = "id"; //$NON-NLS-1$
 
 	private static final String JSON_FIELD_OK = "ok"; //$NON-NLS-1$
@@ -44,6 +50,8 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 	private boolean error = false;
 
 	private String providerName = null;
+
+	private X509Certificate signingCert = null;
 
 	private BatchResult() {
 		// Impedimos la creacion directa de objetos
@@ -63,6 +71,22 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 	 */
 	public void setProviderName(final String provName) {
 		this.providerName = provName;
+	}
+
+	/**
+	 * Recupera el certificado utilizado para la firma.
+	 * @return Certificado de firma.
+	 */
+	public X509Certificate getSigningCert() {
+		return this.signingCert;
+	}
+
+	/**
+	 * Establece el certificado utilizado para la firma.
+	 * @param Certificado de firma.
+	 */
+	public void setSigningCert(final X509Certificate signingCert) {
+		this.signingCert = signingCert;
 	}
 
 	/**
@@ -121,6 +145,19 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 		final JsonString providerName = mainObject.getJsonString(JSON_FIELD_PROVIDER_NAME);
 		result.setProviderName(providerName.getChars().toString());
 
+		if (mainObject.containsKey(JSON_FIELD_SIGNING_CERT)) {
+			final JsonString signingCertB64 = mainObject.getJsonString(JSON_FIELD_SIGNING_CERT);
+			if (signingCertB64 != null) {
+				try {
+					result.setSigningCert(decodeCertificate(signingCertB64.getChars().toString()));
+				}
+				catch (final Exception e) {
+					jsonReader.close();
+					throw new RuntimeException("El certificado de firma proporcionado no esta bien codificado", e); //$NON-NLS-1$
+				}
+			}
+		}
+
 		final JsonArray jsonArray = mainObject.getJsonArray(JSON_OBJECT);
 		for (int i = 0; i < jsonArray.size(); i++) {
 			final JsonObject jsonObject = jsonArray.getJsonObject(i);
@@ -139,5 +176,18 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 		jsonReader.close();
 
 		return result;
+	}
+
+	/**
+	 * Compone un certificado.
+	 * @param certB64 Certificao en base 64.
+	 * @return Certificado X509.
+	 * @throws CertificateException Cuando la cadena indicada no se corresponde con un certificado.
+	 * @throws IOException Cuando ocurre un error al leer el certificado.
+	 */
+	private static X509Certificate decodeCertificate(final String certB64) throws CertificateException, IOException {
+		return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
+				new ByteArrayInputStream(Base64.decode(certB64))
+				);
 	}
 }

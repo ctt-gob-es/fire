@@ -11,7 +11,14 @@ package es.gob.fire.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -38,6 +45,9 @@ public class TransactionResult {
 
 	/** Par&aacute;metro JSON con el c&oacute;digo del error. */
 	private static final String JSON_ATTR_PROVIDER_NAME = "prov"; //$NON-NLS-1$
+
+	/** Par&aacute;metro JSON con el certificado utilizado para firmar. */
+	private static final String JSON_ATTR_SIGNING_CERT = "cert"; //$NON-NLS-1$
 
 	/** Cadena de inicio de una estructura JSON compatible. */
 	private static final String JSON_RESULT_PREFIX = "{\"" + JSON_ATTR_RESULT + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -72,6 +82,8 @@ public class TransactionResult {
 	private String errorMessage = null;
 
 	private String providerName = null;
+
+	private X509Certificate signingCert = null;
 
 	private byte[] result = null;
 
@@ -166,6 +178,22 @@ public class TransactionResult {
 	}
 
 	/**
+	 * Recupera el certificado utilizado para la firma.
+	 * @return Certificado de firma.
+	 */
+	public X509Certificate getSigningCert() {
+		return this.signingCert;
+	}
+
+	/**
+	 * Establece el certificado utilizado para la firma.
+	 * @param Certificado de firma.
+	 */
+	public void setSigningCert(final X509Certificate signingCert) {
+		this.signingCert = signingCert;
+	}
+
+	/**
 	 * Devuelve los datos obtenidos como resultado cuando la transacci&oacute;n ha
 	 * finalizado correctamente.
 	 * @return Resultado de la operaci&oacute;n.
@@ -205,6 +233,17 @@ public class TransactionResult {
 		if (this.providerName != null) {
 			resultBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
 		}
+		if (this.signingCert != null) {
+			try {
+				resultBuilder.add(JSON_ATTR_SIGNING_CERT, encodeCertificate(this.signingCert));
+			} catch (final CertificateEncodingException e) {
+				// Error al codificar el certificado, no se devolvera certificado en ese caso
+				Logger.getLogger(BatchResult.class.getName()).log(
+						Level.WARNING,
+						"Error al codificar el certificado de firma", //$NON-NLS-1$
+						e);
+			}
+		}
 
 		// Construimos la respuesta
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -219,10 +258,9 @@ public class TransactionResult {
 		return baos.toByteArray();
 	}
 
-
 	/**
 	 * Obtiene un objeto con el resultado de la transacci&oacute;n a partir de los
-	 * datos obtenidos en los servicios para recuperaci&oacute;n de datos de Clave Firma.
+	 * datos obtenidos en los servicios para recuperaci&oacute;n de datos de FIRe.
 	 * @param resultType Tipo de resultado.
 	 * @param result Datos devueltos por la operacion de recuperacion de datos.
 	 * @return Resultado de la operaci&oacute;n.
@@ -257,6 +295,20 @@ public class TransactionResult {
 				if (resultObject.containsKey(JSON_ATTR_PROVIDER_NAME)) {
 					opResult.providerName = resultObject.getString(JSON_ATTR_PROVIDER_NAME);
 				}
+				if (resultObject.containsKey(JSON_ATTR_SIGNING_CERT)) {
+					try {
+						opResult.signingCert = decodeCertificate(resultObject.getString(JSON_ATTR_SIGNING_CERT));
+					}
+					catch (final Exception e) {
+						// Error al codificar el certificado, no se devolvera certificado en ese caso
+						Logger.getLogger(TransactionResult.class.getName()).log(
+								Level.WARNING,
+								"Error al decodificar el certificado de firma", //$NON-NLS-1$
+								e);
+					}
+
+
+				}
 				jsonReader.close();
 			}
 			catch (final Exception e) {
@@ -269,5 +321,27 @@ public class TransactionResult {
 		}
 
 		return opResult;
+	}
+
+	/**
+	 * Codifica un certificado en forma de una cadena en base 64.
+	 * @param cert Certificado a codificar.
+	 * @return Certificado codificado.
+	 * @throws CertificateEncodingException Cuando ocurre un error al codificar el certificado.
+	 */
+	private static String encodeCertificate(final X509Certificate cert) throws CertificateEncodingException {
+		return Base64.encode(cert.getEncoded());
+	}
+
+	/**
+	 * Construye el objeto certificado.
+	 * @param certB64 Texto en base64 con el certificado codificado.
+	 * @return Certificado.
+	 * @throws CertificateException Cuando el base 64 no se correspond&iacute;a con un certificado.
+	 * @throws IOException Cuando ocurre un error al leer el base 64.
+	 */
+	private static X509Certificate decodeCertificate(final String certB64) throws CertificateException, IOException {
+        return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
+                new ByteArrayInputStream(Base64.decode(certB64)));
 	}
 }

@@ -469,6 +469,8 @@ public class FireClient {
         		throw new HttpOperationException(HttpCustomErrors.POSTSIGN_ERROR.getErrorDescription(), e);
         	} else if (e.getResponseCode() == HttpCustomErrors.UPGRADING_ERROR.getErrorCode()) {
         		throw new HttpOperationException(HttpCustomErrors.UPGRADING_ERROR.getErrorDescription(), e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorDescription(), e);
         	} else if (e.getResponseCode() == HttpCustomErrors.SAVING_ERROR.getErrorCode()) {
         		throw new HttpOperationException(HttpCustomErrors.SAVING_ERROR.getErrorDescription(), e);
         	} else {
@@ -612,7 +614,8 @@ public class FireClient {
      * @param documentId Identificador &uacute;nico del documento que se adjunta al lote.
      * @param document Datos a firmar como parte del lote.
      * @param config Conjunto de propiedades adicionales que se podr&aacute;n establecer
-     * para configurar la gesti&oacute;n del documento.
+     * para configurar la gesti&oacute;n del documento y la mejora/validaci&oacute;n de
+     * la firma.
      * @throws IOException Cuando no se puede conectar con el servicio.
      * @throws HttpForbiddenException Cuando no se tiene acceso al servicio remoto.
      * @throws HttpNetworkException Cuando ocurre un error de red.
@@ -702,7 +705,8 @@ public class FireClient {
      * @param documentId Identificador &uacute;nico del documento que se adjunta al lote.
      * @param document Datos a firmar como parte del lote.
      * @param config Conjunto de propiedades adicionales que se podr&aacute;n establecer
-     * para configurar la gesti&oacute;n del documento.
+     * para configurar la gesti&oacute;n del documento y la mejora/validaci&oacute;n de
+     * la firma.
      * @param op Operaci&oacute;n criptogr&aacute;fica a realizar (firma, cofirma...).
      * @param ft Formato de firma.
      * @param propB64 Configuraci&oacute;n adicional del formato de firma.

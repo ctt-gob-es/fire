@@ -411,6 +411,8 @@ public final class FireApi {
         		throw new HttpOperationException(HttpCustomErrors.POSTSIGN_ERROR.getErrorDescription(), e);
         	} else if (e.getResponseCode() == HttpCustomErrors.UPGRADING_ERROR.getErrorCode()) {
         		throw new HttpOperationException(HttpCustomErrors.UPGRADING_ERROR.getErrorDescription(), e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorDescription(), e);
         	} else {
         		throw new HttpOperationException(e.getMessage(), e);
         	}
