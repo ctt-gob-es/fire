@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +29,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
+import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.DocInfo;
 
 /**
@@ -51,6 +53,8 @@ public class BatchResult implements Serializable {
 	public static final String POSTSIGN_ERROR = "POSTSIGN_ERROR"; //$NON-NLS-1$
 	/** Error que denota que no se pudo actualizar la firma al formato avanzado solicitado. */
 	public static final String UPGRADE_ERROR = "UPGRADE_ERROR"; //$NON-NLS-1$
+	/** Error que denota que la firma generada es inv&aacute;lida. */
+	public static final String INVALID_SIGNATURE = "INVALID_SIGNATURE"; //$NON-NLS-1$
 	/** Error que denota un problema durante el guardado de la firma. */
 	public static final String ERROR_SAVING_DATA = "ERROR_SAVING_DATA"; //$NON-NLS-1$
 	/** Error que denota que se configur&oacute; una operaci&oacute;n de firma no v&aacute;lida. */
@@ -63,6 +67,7 @@ public class BatchResult implements Serializable {
 	public static final String RECOVERED = "RECOVERED"; //$NON-NLS-1$
 
 	private static final String JSON_ATTR_PROVIDER_NAME = "prov"; //$NON-NLS-1$
+	private static final String JSON_ATTR_SIGNING_CERT = "cert"; //$NON-NLS-1$
 	private static final String JSON_ATTR_BATCH_RESULT = "batch"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_ID = "id"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_OK = "ok"; //$NON-NLS-1$
@@ -72,14 +77,13 @@ public class BatchResult implements Serializable {
 
 	private final Map<String, BatchDocumentReference> results;
 
-	private X509Certificate signingCertificate;
-
 	private String providerName = null;
+
+	private X509Certificate signingCertificate = null;
 
 	/** Construye el objeto con el resultado del lote. */
 	public BatchResult() {
 		this.results = new HashMap<>();
-		this.signingCertificate = null;
 	}
 
 
@@ -97,6 +101,23 @@ public class BatchResult implements Serializable {
 	 */
 	public void setProviderName(final String provName) {
 		this.providerName = provName;
+	}
+
+	/**
+	 * Obtiene el certificado utilizado para firmar.
+	 * @return Certificado utilizado para firmar o {@code null} si no
+	 * se ha firmado todav&iacute;a.
+	 */
+	public X509Certificate getSigningCertificate() {
+		return this.signingCertificate;
+	}
+
+	/**
+	 * Establece el certificado utilizado para firmar.
+	 * @param cert Certificado utilizado para firmar.
+	 */
+	public void setSigningCertificate(final X509Certificate cert) {
+		this.signingCertificate = cert;
 	}
 
 	/**
@@ -124,23 +145,6 @@ public class BatchResult implements Serializable {
 	 */
 	public Iterator<String> iterator() {
 		return this.results.keySet().iterator();
-	}
-
-	/**
-	 * Obtiene el certificado utilizado para firmar.
-	 * @return Certificado utilizado para firmar o {@code null} si no
-	 * se ha firmado todav&iacute;a.
-	 */
-	public X509Certificate getSigningCertificate() {
-		return this.signingCertificate;
-	}
-
-	/**
-	 * Establece el certificado utilizado para firmar.
-	 * @param cert Certificado utilizado para firmar.
-	 */
-	public void setSigningCertificate(final X509Certificate cert) {
-		this.signingCertificate = cert;
 	}
 
 	/**
@@ -259,6 +263,17 @@ public class BatchResult implements Serializable {
 
 			final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
 			jsonBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
+			if (this.signingCertificate != null) {
+				try {
+					jsonBuilder.add(JSON_ATTR_SIGNING_CERT, Base64.encode(this.signingCertificate.getEncoded()));
+				} catch (final CertificateEncodingException e) {
+					// Error al codificar el certificado, no se devolvera certificado en ese caso
+					Logger.getLogger(BatchResult.class.getName()).log(
+							Level.WARNING,
+							"Error al codificar el certificado de firma", //$NON-NLS-1$
+							e);
+				}
+			}
 			jsonBuilder.add(JSON_ATTR_BATCH_RESULT, resultBuilder);
 
 			json.writeObject(jsonBuilder.build());

@@ -53,23 +53,23 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		// Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
 		// Comprobamos del usuario
     	if (subjectId == null || subjectId.isEmpty()) {
-            LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
 		FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), true, false);
         if (session == null) {
-    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
     		return;
         }
@@ -98,55 +98,55 @@ public final class RequestNewCertificateService extends HttpServlet {
         				ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
         				ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId); //$NON-NLS-1$
 
-        LOGGER.info(logF.format("Solicitamos generar un nuevo certificado de usuario")); //$NON-NLS-1$
+        LOGGER.info(logF.f("Solicitamos generar un nuevo certificado de usuario")); //$NON-NLS-1$
 
         final GenerateCertificateResult gcr;
         try {
         	gcr = GenerateCertificateManager.generateCertificate(origin, subjectId, requestCertConfig.getProperties());
         }
         catch (final IllegalArgumentException e) {
-        	LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         			"No se ha proporcionado el identificador del usuario que solicita el certificado"); //$NON-NLS-1$
         	return;
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
         			);
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
         	response.sendError(
         			HttpServletResponse.SC_REQUEST_TIMEOUT,
         			"No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
         	return;
         }
         catch (final FIReCertificateAvailableException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("El usuario ya tiene un certificado del tipo indicado"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("El usuario ya tiene un certificado del tipo indicado"), e); //$NON-NLS-1$
         	response.sendError(
     				HttpCustomErrors.CERTIFICATE_AVAILABLE.getErrorCode(),
     				"El usuario ya tiene un certificado del tipo indicado: " + e); //$NON-NLS-1$
     		return;
         }
         catch (final FIReCertificateException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("Error en la generacion del certificado"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error en la generacion del certificado"), e); //$NON-NLS-1$
         	response.sendError(
         			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error en la generacion del certificado: " + e); //$NON-NLS-1$
         	return;
         }
         catch (final FIReConnectorUnknownUserException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("El usuario no esta dado de alta en el sistema"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("El usuario no esta dado de alta en el sistema"), e); //$NON-NLS-1$
         	response.sendError(
         			HttpCustomErrors.NO_USER.getErrorCode(),
         			"El usuario no esta dado de alta en el sistema: " + e); //$NON-NLS-1$
         	return;
         }
         catch (final WeakRegistryException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("El usuario realizo un registro debil y no puede tener certificados de firma"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("El usuario realizo un registro debil y no puede tener certificados de firma"), e); //$NON-NLS-1$
         	if (originForced) {
         		response.sendRedirect(errorUrlRedirection);
         	}
@@ -156,7 +156,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         	return;
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, logF.format("Error desconocido en la generacion del certificado"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error desconocido en la generacion del certificado"), e); //$NON-NLS-1$
         	SessionCollector.removeSession(session);
         	response.sendError(
         			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -172,7 +172,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_GEN);
         SessionCollector.commit(session);
 
-        LOGGER.info(logF.format("Redirigimos a la URL de emision del certificado")); //$NON-NLS-1$
+        LOGGER.info(logF.f("Redirigimos a la URL de emision del certificado")); //$NON-NLS-1$
 
         response.sendRedirect(redirectUrl);
 	}

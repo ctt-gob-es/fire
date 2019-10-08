@@ -100,6 +100,8 @@ public class ServiceParams {
     public static final String SESSION_PARAM_FILTERS = "filters"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el formato avanzado de actualizaci&oacute;n de la firma. */
     public static final String SESSION_PARAM_UPGRADE = "upgrade"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con la configuracion adicional para la mejora de la firma. */
+    public static final String SESSION_PARAM_UPGRADE_CONFIG = "upgradeconfig"; //$NON-NLS-1$
 
 
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el formato de firma configurado */
@@ -141,8 +143,8 @@ public class ServiceParams {
 	 /** Par&aacute;metro usado para el guardado del tama&ntilde;o de los datos a firmar en sesi&oacute;n */
 	public static final String SESSION_PARAM_DOCSIZE = "docsize"; //$NON-NLS-1$
 
-	/** Par&aacute;metro usado para configurar que se debe utilizar un certificado local. */
-    public static final String CERTIFICATE_ORIGIN_LOCAL = "local"; //$NON-NLS-1$
+    /** Valor del parametro de actualizacion que determina que la firma debe validarse. */
+    public static final String UPGRADE_VERIFY = "verify"; //$NON-NLS-1$
 
     /** Identificador de operaci&oacute;n de firma de lotes. */
     public static final String OPERATION_BATCH = "batch"; //$NON-NLS-1$

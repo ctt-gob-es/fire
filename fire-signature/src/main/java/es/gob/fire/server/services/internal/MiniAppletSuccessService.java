@@ -106,9 +106,9 @@ public class MiniAppletSuccessService extends HttpServlet {
         	final String afirmaBatchResultB64 = request.getParameter(ServiceParams.HTTP_PARAM_AFIRMA_BATCH_RESULT);
         	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
 
-        	// Actualizamos el resultado del lote con el resultado reportado el Cliente @firma
+        	// Actualizamos el resultado del lote con el resultado reportado por el Cliente @firma
         	try {
-        		updateSingleResult(batchResult, afirmaBatchResultB64,session);
+        		updateBatchResult(batchResult, afirmaBatchResultB64, session);
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, "Error al procesar el resultado de la firma de lote del Cliente @firma: " + e, e); //$NON-NLS-1$
         		ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET_BATCH, true, null);
@@ -127,15 +127,16 @@ public class MiniAppletSuccessService extends HttpServlet {
 	}
 
 	/**
-	 * Actualiza el estado de las firmas del lote con el resultado obtenido al firmarlas
-	 * con el Cliente @firma.
+	 * Actualiza el estado del lote con el resultado obtenido al firmarlo con el Cliente @firma.
 	 * @param batchResult Resultado parcial de la firma del lote.
 	 * @param afirmaBatchResultB64 Resultado obtenido del Cliente @firma al finalizar la firma
 	 * 		  del lote.
+	 * @param session Sesi&oacute;n de la transacci&oacute;n de firma para el registro de
+	 * 		  estad&iacute;sticas.
 	 * @throws Exception Cuando ocurre alg&uacute;n error al procesar el resultado devuelto por
 	 * 		   el Cliente @firma.
 	 */
-	private static void updateSingleResult(final BatchResult batchResult, final String afirmaBatchResultB64, final  FireSession session ) throws Exception {
+	private static void updateBatchResult(final BatchResult batchResult, final String afirmaBatchResultB64, final  FireSession session) throws Exception {
 
 		final byte[] afirmaResultXml = Base64.decode(afirmaBatchResultB64);
 		final Document afirmaResultDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
@@ -154,7 +155,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 				}
 				else {
 					batchResult.setErrorResult(docId, translateAfirmaError(asr.getError()));
-					SIGNLOGGER.register(session, false,docId );
+					SIGNLOGGER.register(session, false, docId);
 				}
 			}
 		}

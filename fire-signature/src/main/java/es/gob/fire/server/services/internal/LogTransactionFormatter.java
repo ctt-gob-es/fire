@@ -36,7 +36,7 @@ public class LogTransactionFormatter {
 	 * @param message Mensaje al que agregar los prefijos.
 	 * @return Cadena con los pregfijos.
 	 */
-	public String format(final String message) {
+	public String f(final String message) {
 		if (this.appId != null && this.transactionId != null) {
 			return String.format("App %1s, TrId %2s: %3s", this.appId, this.transactionId, message); //$NON-NLS-1$
 		}

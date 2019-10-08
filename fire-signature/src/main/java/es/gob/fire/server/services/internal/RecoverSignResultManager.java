@@ -50,17 +50,17 @@ public class RecoverSignResultManager {
 
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
         if (session == null) {
-    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
     		return;
         }
@@ -78,25 +78,25 @@ public class RecoverSignResultManager {
         	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
-        	LOGGER.warning(logF.format("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
         	sendResult(
         			response,
         			new TransactionResult(
-        					TransactionResult.RESULT_TYPE_BATCH,
+        					TransactionResult.RESULT_TYPE_SIGN,
         					Integer.parseInt(errType),
         					errMessage).encodeResult());
         	return;
         }
 
         // Recuperamos el resultado de la firma
-		LOGGER.info(logF.format("Se carga el resultado de la operacion del almacen temporal")); //$NON-NLS-1$
+		LOGGER.info(logF.f("Se carga el resultado de la operacion del almacen temporal")); //$NON-NLS-1$
         byte[] signResult;
         try {
         	signResult = TempFilesHelper.retrieveAndDeleteTempData(transactionId);
 
         }
         catch (final Exception e) {
-        	LOGGER.warning(logF.format("No se encuentra el resultado de la operacion: " + e)); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se encuentra el resultado de la operacion: " + e)); //$NON-NLS-1$
         	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
@@ -111,7 +111,7 @@ public class RecoverSignResultManager {
         // Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
         SessionCollector.removeSession(session);
 
-        LOGGER.info(logF.format("Se devuelve el resultado de la operacion")); //$NON-NLS-1$
+        LOGGER.info(logF.f("Se devuelve el resultado de la operacion")); //$NON-NLS-1$
 
         // Enviamos la firma electronica como resultado
         sendResult(response, signResult);

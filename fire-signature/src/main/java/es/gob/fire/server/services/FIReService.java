@@ -119,9 +119,9 @@ public class FIReService extends HttpServlet {
 		String appName = null;
 
     	if (ConfigManager.isCheckApplicationNeeded()) {
-        	LOGGER.fine(logF.format("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
+        	LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
         	if (appId == null || appId.isEmpty()) {
-        		LOGGER.warning(logF.format("No se ha proporcionado el identificador de la aplicacion en una peticion entrante")); //$NON-NLS-1$
+        		LOGGER.warning(logF.f("No se ha proporcionado el identificador de la aplicacion en una peticion entrante")); //$NON-NLS-1$
                 response.sendError(
             		HttpServletResponse.SC_BAD_REQUEST,
                     "No se ha proporcionado el identificador de la aplicacion" //$NON-NLS-1$
@@ -132,47 +132,47 @@ public class FIReService extends HttpServlet {
 	        try {
 	        	final ApplicationChecking appCheck = AplicationsDAO.checkApplicationId(appId);
 	        	if (!appCheck.isValid()) {
-	        		LOGGER.warning(logF.format("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion")); //$NON-NLS-1$
+	        		LOGGER.warning(logF.f("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion")); //$NON-NLS-1$
 	        		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 	        		return;
 	        	}
 	        	if (!appCheck.isEnabled()) {
-	        		LOGGER.warning(logF.format(String.format("La aplicacion %1s se encuentra desactivada. Se rechaza la peticion", appCheck.getName()))); //$NON-NLS-1$
+	        		LOGGER.warning(logF.f(String.format("La aplicacion %1s se encuentra desactivada. Se rechaza la peticion", appCheck.getName()))); //$NON-NLS-1$
 	        		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 	        		return;
 	        	}
 	        	appName = appCheck.getName();
 	        }
 	        catch (final Exception e) {
-	        	LOGGER.log(Level.SEVERE, logF.format("Ocurrio un error grave al validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
+	        	LOGGER.log(Level.SEVERE, logF.f("Ocurrio un error grave al validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        	return;
 	        }
         }
         else {
-        	LOGGER.fine(logF.format("No se realiza la validacion del identificador de aplicacion")); //$NON-NLS-1$
+        	LOGGER.fine(logF.f("No se realiza la validacion del identificador de aplicacion")); //$NON-NLS-1$
         }
 
 
     	if (ConfigManager.isCheckCertificateNeeded()){
-    		LOGGER.fine(logF.format("Se realizara la validacion del certificado")); //$NON-NLS-1$
+    		LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
 			} catch (final CertificateValidationException e) {
-				LOGGER.severe(logF.format("Error en la validacion del certificado: " + e)); //$NON-NLS-1$
+				LOGGER.severe(logF.f("Error en la validacion del certificado: " + e)); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;
 			}
     	}
     	else {
-    		LOGGER.fine(logF.format("No se valida el certificado"));//$NON-NLS-1$
+    		LOGGER.fine(logF.f("No se valida el certificado"));//$NON-NLS-1$
     	}
 
-    	LOGGER.fine(logF.format("Peticion autorizada")); //$NON-NLS-1$
+    	LOGGER.fine(logF.f("Peticion autorizada")); //$NON-NLS-1$
 
         if (operation == null || operation.isEmpty()) {
-            LOGGER.warning(logF.format("No se ha indicado la operacion a realizar en servidor")); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se ha indicado la operacion a realizar en servidor")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha indicado la operacion a realizar" //$NON-NLS-1$
             );
@@ -184,14 +184,14 @@ public class FIReService extends HttpServlet {
         	op = FIReServiceOperation.parse(operation);
         }
         catch (final Exception e) {
-            LOGGER.warning(logF.format("Se ha indicado un id de operacion incorrecto: " + e)); //$NON-NLS-1$
+            LOGGER.warning(logF.f("Se ha indicado un id de operacion incorrecto: " + e)); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "Se ha indicado un id de operacion incorrecto" //$NON-NLS-1$
             );
             return;
 		}
 
-    	LOGGER.info(logF.format("Peticion de tipo " + op.toString())); //$NON-NLS-1$
+    	LOGGER.info(logF.f("Peticion de tipo " + op.toString())); //$NON-NLS-1$
 
     	try {
     		switch (op) {
@@ -226,7 +226,7 @@ public class FIReService extends HttpServlet {
     			RecoverErrorManager.recoverError(params, response);
     			break;
     		default:
-    			LOGGER.warning(logF.format("Se ha enviado una peticion con una operacion no soportada: " + op.name())); //$NON-NLS-1$
+    			LOGGER.warning(logF.f("Se ha enviado una peticion con una operacion no soportada: " + op.name())); //$NON-NLS-1$
     			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     			break;
     		}
@@ -234,7 +234,7 @@ public class FIReService extends HttpServlet {
     	catch (final Exception e) {
     		// Las operaciones solo lanzan una excepcion al exterior si no queda mas remedio.
     		// De norma, deberian responder directamente con su propio mensaje de error.
-    		LOGGER.log(Level.WARNING, logF.format("Ocurrio un error no recuperable durante la ejecucion de la operacion"), e); //$NON-NLS-1$
+    		LOGGER.log(Level.WARNING, logF.f("Ocurrio un error no recuperable durante la ejecucion de la operacion"), e); //$NON-NLS-1$
     		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     		return;
     	}

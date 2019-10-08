@@ -51,24 +51,24 @@ public class SignBatchManager {
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
     	if (transactionId == null || transactionId.isEmpty()) {
-    		LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+    		LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
     				"No se ha proporcionado el identificador de la transaccion"); //$NON-NLS-1$
     		return;
     	}
 
-		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
     	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
     	if (session == null) {
-    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(), "La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		return;
     	}
 
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
-    		LOGGER.warning(logF.format("Se ha pedido firmar un lote sin documentos. Se aborta la operacion.")); //$NON-NLS-1$
+    		LOGGER.warning(logF.f("Se ha pedido firmar un lote sin documentos. Se aborta la operacion.")); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
@@ -90,7 +90,7 @@ public class SignBatchManager {
 
 		// Listamos los certificados del usuario
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning(logF.format("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
 			SIGNLOGGER.register(session, false, null);
 			TRANSLOGGER.register(session, false);
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
@@ -105,7 +105,7 @@ public class SignBatchManager {
         SessionCollector.commit(session);
 
 
-        LOGGER.info(logF.format("Generamos la URL de redireccion")); //$NON-NLS-1$
+        LOGGER.info(logF.f("Generamos la URL de redireccion")); //$NON-NLS-1$
 
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
@@ -132,7 +132,7 @@ public class SignBatchManager {
         			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + currentUserId + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
-        LOGGER.info(logF.format("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$
+        LOGGER.info(logF.f("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$
 
         sendResult(response, result);
 	}

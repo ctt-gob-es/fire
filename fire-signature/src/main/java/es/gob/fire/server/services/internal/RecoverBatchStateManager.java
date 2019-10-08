@@ -46,12 +46,12 @@ public class RecoverBatchStateManager {
 
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
@@ -59,7 +59,7 @@ public class RecoverBatchStateManager {
         // Si no se ha encontrado la session en el pool de sesiones vigentes, se
         // interpreta que estaba caducada
         if (session == null) {
-    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
         	return;
         }
@@ -80,7 +80,7 @@ public class RecoverBatchStateManager {
         	}
     	}
 
-		LOGGER.info(logF.format("Se devuelve el estado del lote")); //$NON-NLS-1$
+		LOGGER.info(logF.f("Se devuelve el estado del lote")); //$NON-NLS-1$
 
     	final String progress = Float.toString(1 - (float) pending / numOperations);
     	sendResult(response, progress.getBytes());

@@ -61,7 +61,10 @@ public enum HttpCustomErrors {
 	BATCH_DOCUMENT_FAILED(536, "Fallo la firma del documento que se intenta recuperar"), //$NON-NLS-1$
 
 	/** Error devuelto cuando se solicita firmar un lote sin documentos. */
-	BATCH_NO_DOCUMENT(537, "Se intenta firmar un lote sin documentos"); //$NON-NLS-1$
+	BATCH_NO_DOCUMENT(537, "Se intenta firmar un lote sin documentos"), //$NON-NLS-1$
+
+	/** Error devuelto cuando se detecta que la firma generada no es v&aacute;lida. */
+	INVALID_SIGNATURE_ERROR(538, "La firma generada no es valida"); //$NON-NLS-1$
 
 	private final int errorCode;
 	private final String errorDescription;

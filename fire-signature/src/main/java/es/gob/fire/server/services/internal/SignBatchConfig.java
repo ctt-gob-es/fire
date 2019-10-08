@@ -32,6 +32,8 @@ public class SignBatchConfig implements Serializable {
 
 	private String upgrade;
 
+	private Properties upgradeConfig;
+
 	/**
 	 * Recupera el identificador de la operaci&oacute;n criptogr&aacute;fica
 	 * configurada (firma, cofirma,...).
@@ -109,5 +111,19 @@ public class SignBatchConfig implements Serializable {
 		this.upgrade = upgrade;
 	}
 
+	/**
+	 * Recupera la configuraci&oacute;n adicional para la actualizaci&oacute;n de la firma.
+	 * @return Configuraci&oacute;n para la actualizaci&oacute;n de la firma.
+	 */
+	public Properties getUpgradeConfig() {
+		return this.upgradeConfig;
+	}
 
+	/**
+	 * Establece la configuraci&oacute;n particular para la actualizaci&oacute;n de la firma.
+	 * @param upgradeConfig Configuraci&oacute;n para la actualizaci&oacute;n de la firma.
+	 */
+	public void setUpgradeConfig(final Properties upgradeConfig) {
+		this.upgradeConfig = upgradeConfig;
+	}
 }

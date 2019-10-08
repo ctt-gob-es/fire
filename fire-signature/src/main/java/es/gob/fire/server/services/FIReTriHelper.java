@@ -40,10 +40,6 @@ import es.gob.fire.signature.ConfigManager;
  */
 public final class FIReTriHelper {
 
-    private static final String PARAM_VALUE_SUB_OPERATION_SIGN = "sign"; //$NON-NLS-1$
-    private static final String PARAM_VALUE_SUB_OPERATION_COSIGN = "cosign"; //$NON-NLS-1$
-    private static final String PARAM_VALUE_SUB_OPERATION_COUNTERSIGN = "countersign"; //$NON-NLS-1$
-
     /** Nombre del par&aacute;metro que identifica los nodos que deben contrafirmarse. */
     private static final String PARAM_NAME_TARGET_TYPE = "target"; //$NON-NLS-1$
 
@@ -99,7 +95,7 @@ public final class FIReTriHelper {
         }
 
         TriphaseData preRes;
-        if (PARAM_VALUE_SUB_OPERATION_SIGN.equalsIgnoreCase(criptoOperation)) {
+        if (SignOperation.SIGN.toString().equalsIgnoreCase(criptoOperation)) {
             try {
                 preRes = prep.preProcessPreSign(
             		docBytes,
@@ -108,13 +104,13 @@ public final class FIReTriHelper {
                     expandedParams
                 );
             }
-            catch (final Exception e) {
+            catch (final Throwable e) {
                 throw new FIReSignatureException(
             		"Error en la prefirma: " + e, e //$NON-NLS-1$
                 );
             }
         }
-        else if (PARAM_VALUE_SUB_OPERATION_COSIGN.equalsIgnoreCase(criptoOperation)) {
+        else if (SignOperation.COSIGN.toString().equalsIgnoreCase(criptoOperation)) {
             try {
                 preRes = prep.preProcessPreCoSign(
             		docBytes,
@@ -123,13 +119,13 @@ public final class FIReTriHelper {
                     expandedParams
                 );
             }
-            catch (final Exception e) {
+            catch (final Throwable e) {
                 throw new FIReSignatureException(
                     "Error en la precofirma: " + e,  e //$NON-NLS-1$
                 );
             }
         }
-        else if (PARAM_VALUE_SUB_OPERATION_COUNTERSIGN.equalsIgnoreCase(criptoOperation)) {
+        else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(criptoOperation)) {
 
             CounterSignTarget target = CounterSignTarget.LEAFS;
             if (expandedParams != null && expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
@@ -148,7 +144,7 @@ public final class FIReTriHelper {
                     target
                 );
             }
-            catch (final Exception e) {
+            catch (final Throwable e) {
                 throw new FIReSignatureException(
                     "Error en la precontrafirma: " + e, e //$NON-NLS-1$
                 );
@@ -253,7 +249,7 @@ public final class FIReTriHelper {
         	}
 
         	TriphaseData preRes;
-        	if (PARAM_VALUE_SUB_OPERATION_SIGN.equalsIgnoreCase(cop)) {
+        	if (SignOperation.SIGN.toString().equalsIgnoreCase(cop)) {
         		try {
         			preRes = prep.preProcessPreSign(
         					doc.getData(),
@@ -270,7 +266,7 @@ public final class FIReTriHelper {
         			continue;
         		}
         	}
-        	else if (PARAM_VALUE_SUB_OPERATION_COSIGN.equalsIgnoreCase(cop)) {
+        	else if (SignOperation.COSIGN.toString().equalsIgnoreCase(cop)) {
         		try {
         			preRes = prep.preProcessPreCoSign(
         					doc.getData(),
@@ -287,7 +283,7 @@ public final class FIReTriHelper {
         			continue;
         		}
         	}
-        	else if (PARAM_VALUE_SUB_OPERATION_COUNTERSIGN.equalsIgnoreCase(cop)) {
+        	else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(cop)) {
 
         		CounterSignTarget target = CounterSignTarget.LEAFS;
         		if (expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
@@ -408,7 +404,7 @@ public final class FIReTriHelper {
         	}
         }
 
-        if (PARAM_VALUE_SUB_OPERATION_SIGN.equalsIgnoreCase(criptoOperation)) {
+        if (SignOperation.SIGN.toString().equalsIgnoreCase(criptoOperation)) {
             try {
                 return prep.preProcessPostSign(
             		docBytes,
@@ -424,7 +420,7 @@ public final class FIReTriHelper {
                 );
             }
         }
-        else if (PARAM_VALUE_SUB_OPERATION_COSIGN.equalsIgnoreCase(criptoOperation)) {
+        else if (SignOperation.COSIGN.toString().equalsIgnoreCase(criptoOperation)) {
             try {
                 return prep.preProcessPostCoSign(
             		docBytes,
@@ -440,7 +436,7 @@ public final class FIReTriHelper {
                 );
             }
         }
-        else if (PARAM_VALUE_SUB_OPERATION_COUNTERSIGN.equalsIgnoreCase(criptoOperation)) {
+        else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(criptoOperation)) {
 
             CounterSignTarget target = CounterSignTarget.LEAFS;
             if (expandedParams != null && expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {

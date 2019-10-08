@@ -121,6 +121,17 @@
 				</dependency>
 			</dependencies>
 		</profile>
+		
+		<profile>
+			<id>afirma</id>	<!-- Perfil que agrega la actualizacion/validacion con @firma -->
+			
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-upgrade-afirma</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
 	</profiles>
 	
 	

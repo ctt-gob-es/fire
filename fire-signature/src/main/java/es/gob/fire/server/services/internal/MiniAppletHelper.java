@@ -33,7 +33,7 @@ public class MiniAppletHelper {
 
 	/** Nombre del par&aacute;metro para la configuraci&oacute;n del formato avanzado
 	 * al que actualizar las firmas en el proceso de firma trif&aacute;sico. */
-	public static final String PARAM_CONFIG_UPGRADE = "upgradeFormat"; //$NON-NLS-1$
+	public static final String PARAM_UPGRADE_FORMAT = "upgradeFormat"; //$NON-NLS-1$
 
 	private static final String AFIRMA_EXTRAPARAM_FILTER = "filter"; //$NON-NLS-1$
 	private static final String AFIRMA_EXTRAPARAM_FILTERS = "filters"; //$NON-NLS-1$
@@ -90,7 +90,7 @@ public class MiniAppletHelper {
 		// servidor trifasico, la metemos dentro de los extraParams que se le enviaran
 		final Properties extraParams = signConfig.getExtraParams();
 		if (signConfig.getUpgrade() != null && !signConfig.getUpgrade().isEmpty()) {
-			extraParams.setProperty(PARAM_CONFIG_UPGRADE, signConfig.getUpgrade());
+			extraParams.setProperty(PARAM_UPGRADE_FORMAT, signConfig.getUpgrade());
 		}
 
 		sb.append(XML_ELEMENT_EXTRAPARAMS).append(">").append(ServiceUtil.properties2Base64(extraParams)) //$NON-NLS-1$

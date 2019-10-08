@@ -26,6 +26,7 @@ import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
+import es.gob.fire.upgrade.UpgraderUtils;
 
 /**
  * Manejador que gestiona las peticiones de creaci&oacute;n de un lote de firma, al que posteriormente
@@ -57,51 +58,57 @@ public class CreateBatchManager {
 		final String format 	= params.getParameter(ServiceParams.HTTP_PARAM_FORMAT);
 		final String configB64	= params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
 		final String upgrade	= params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
-		String extraParamsB64	= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
+		final String extraParamsB64	= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId);
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
 		if (subjectId == null || subjectId.isEmpty()) {
-			LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que crea el lote")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que crea el lote")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha proporcionado el identificador del usuario que crea el lote"); //$NON-NLS-1$
 			return;
 		}
 
 		if (algorithm == null || algorithm.isEmpty()) {
-			LOGGER.warning(logF.format("No se ha proporcionado el algoritmo de firma")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se ha proporcionado el algoritmo de firma")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
 			return;
 		}
 
 		if (cop == null || cop.isEmpty()) {
-			LOGGER.warning(logF.format("No se ha indicado la operacion de firma a realizar")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se ha indicado la operacion de firma a realizar")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
 			return;
 		}
 
 		if (format == null || format.isEmpty()) {
-			LOGGER.warning(logF.format("No se ha indicado el formato de firma")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se ha indicado el formato de firma")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se ha indicado el formato de firma"); //$NON-NLS-1$
 			return;
 		}
 
-		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
 		// Si se especificaron filtros de certificados para su uso con el
 		// Cliente @firma, se habran indicado junto a las propiedades por defecto
 		// de configuracion para las firmas del lote. Extraemos los filtros de esas
 		// propiedades (si los hubiese) y los almacenamos por separado
-		String filters = null;
-		if (extraParamsB64 != null) {
-			final Properties extraParams = ServiceUtil.base642Properties(extraParamsB64);
-			filters = MiniAppletHelper.extractCertFiltersParams(extraParams);
-			extraParamsB64 = ServiceUtil.properties2Base64(extraParams);
+		Properties extraParams;
+		try {
+			extraParams = ServiceUtil.base642Properties(extraParamsB64);
 		}
+		catch (final Exception e) {
+			LOGGER.warning("Se ha proporcionado extraParams mal formados: " + e); //$NON-NLS-1$
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
+			return;
+		}
+		final String filters = MiniAppletHelper.extractCertFiltersParams(extraParams);
+
 
 		TransactionConfig connConfig = null;
 		if (configB64 != null && configB64.length() > 0) {
@@ -109,7 +116,7 @@ public class CreateBatchManager {
 				connConfig = new TransactionConfig(configB64);
 			}
 			catch(final Exception e) {
-				LOGGER.warning(logF.format("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
+				LOGGER.warning(logF.f("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma"); //$NON-NLS-1$
 				return;
@@ -117,7 +124,7 @@ public class CreateBatchManager {
 		}
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning(logF.format("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
@@ -137,12 +144,15 @@ public class CreateBatchManager {
 		final String appTitle = connConfig.getAppTitle();
 		final String docManagerName = connConfig.getDocumentManager();
 
+		// Extraemos de la configuracion general posibles opciones de configuracion para el sistema de actualizacion
+		final Properties upgradeConfig = UpgraderUtils.extractUpdaterProperties(connConfig.getProperties());
+
         // Creamos la transaccion
         final FireSession session = SessionCollector.createFireSession(request.getSession());
         final String transactionId = session.getTransactionId();
 
         logF.setTransactionId(transactionId);
-		LOGGER.info(logF.format("Iniciada transaccion de tipo LOTE")); //$NON-NLS-1$
+		LOGGER.info(logF.f("Iniciada transaccion de tipo LOTE")); //$NON-NLS-1$
 
         // Guardamos los datos recibidos en la sesion
         session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
@@ -152,9 +162,10 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig.cleanConfig());
         session.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
-        session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParamsB64);
+        session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParams);
         session.setAttribute(ServiceParams.SESSION_PARAM_FILTERS, filters != null ? filters.toString() : null);
         session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, upgrade);
+        session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE_CONFIG, upgradeConfig);
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_ID, transactionId);
@@ -170,27 +181,27 @@ public class CreateBatchManager {
         	docManager = FIReDocumentManagerFactory.newDocumentManager(docManagerName);
         }
         catch (final IllegalArgumentException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("No existe el gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No existe el gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
         	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No existe el gestor de documentos"); //$NON-NLS-1$
         	return;
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, logF.format("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
         	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cargar el gestor de documentos"); //$NON-NLS-1$
         	return;
         }
 
-        LOGGER.info(logF.format("La transaccion usara el DocumentManager " + docManager.getClass().getName())); //$NON-NLS-1$
+        LOGGER.info(logF.f("La transaccion usara el DocumentManager " + docManager.getClass().getName())); //$NON-NLS-1$
 
         session.setAttribute(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER, docManager);
 
         SessionCollector.commit(session);
 
-		LOGGER.info(logF.format("Se devuelve el identificador de sesion a la aplicacion")); //$NON-NLS-1$
+		LOGGER.info(logF.f("Se devuelve el identificador de sesion a la aplicacion")); //$NON-NLS-1$
 
         sendResult(response, new CreateBatchResult(transactionId));
 	}

@@ -45,17 +45,17 @@ public class RecoverErrorManager {
 
         // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning(logF.format("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-		LOGGER.fine(logF.format("Peticion bien formada")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
         if (session == null) {
-    		LOGGER.warning(logF.format("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		sendResult(response, buildErrorResult(session, OperationError.INVALID_SESSION));
     		return;
         }
@@ -66,21 +66,21 @@ public class RecoverErrorManager {
         	// Si no se declaro un error, pero sabemos que lo ultimo que se hizo es
         	// redirigir a la pasarela de autorizacion, se notifica como tal
         	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED)) {
-            	LOGGER.warning(logF.format("Ocurrio un error desconocido despues de llamar a la pasarela de autorizacion de firma en la nube o a la de emision de certificados")); //$NON-NLS-1$
+            	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela de autorizacion de firma en la nube o a la de emision de certificados")); //$NON-NLS-1$
             	final TransactionResult result = buildErrorResult(session, OperationError.EXTERNAL_SERVICE_ERROR);
             	SessionCollector.removeSession(session);
             	sendResult(response, result);
         		return;
         	}
 
-        	LOGGER.warning(logF.format("No se ha notificado el tipo de error de la transaccion")); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se ha notificado el tipo de error de la transaccion")); //$NON-NLS-1$
             final TransactionResult result = buildErrorResult(session, OperationError.UNDEFINED_ERROR);
         	SessionCollector.removeSession(session);
         	sendResult(response, result);
         	return;
         }
 
-        LOGGER.info(logF.format("Se devuelve el error identificado")); //$NON-NLS-1$
+        LOGGER.info(logF.f("Se devuelve el error identificado")); //$NON-NLS-1$
 
         // Recuperamos la informacion de error y eliminamos la sesion
         final TransactionResult result = buildErrorResult(session);

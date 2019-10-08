@@ -70,7 +70,6 @@ public class MiniAppletErrorService extends HttpServlet {
     		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
     	}
     	else {
-
         	ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, true, errorMessage);
         	errorUrl = connConfig.getRedirectErrorUrl();
     	}

@@ -33,11 +33,17 @@ import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.internal.ProviderManager;
+import es.gob.fire.server.services.internal.SignatureValidatorBuilder;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.upgrade.SignatureValidator;
+import es.gob.fire.upgrade.UpgradeException;
 import es.gob.fire.upgrade.UpgradeResult;
+import es.gob.fire.upgrade.UpgraderUtils;
+import es.gob.fire.upgrade.ValidatorException;
+import es.gob.fire.upgrade.VerifyException;
 
 /** Servlet que realiza el proceso de firma. */
 public final class SignService extends HttpServlet {
@@ -132,7 +138,7 @@ public final class SignService extends HttpServlet {
         	LOGGER.fine("No se realiza la validacion de aplicacion"); //$NON-NLS-1$
         }
 
-    	if(ConfigManager.isCheckCertificateNeeded()){
+    	if (ConfigManager.isCheckCertificateNeeded()){
     		LOGGER.fine("Se realizara la validacion del certificado"); //$NON-NLS-1$
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
@@ -156,12 +162,21 @@ public final class SignService extends HttpServlet {
     	}
 
     	// Obtenemos el conector con el backend ya configurado
+        Properties config = null;
+    	if (configB64 != null && configB64.length() > 0) {
+    		try {
+    			config = ServiceUtil.base642Properties(configB64);
+    		}
+    		catch (final Exception e) {
+            	LOGGER.log(Level.SEVERE, "Error al decodificar las configuracion de los proveedores de firma", e); //$NON-NLS-1$
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Error al decodificar las configuracion de los proveedores de firma: " + e); //$NON-NLS-1$
+                return;
+			}
+    	}
+
         final FIReConnector connector;
         try {
-        	Properties config = null;
-        	if (configB64 != null && configB64.length() > 0) {
-        		config = ServiceUtil.base642Properties(configB64);
-        	}
     		connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
         }
         catch (final FIReConnectorFactoryException e) {
@@ -227,14 +242,28 @@ public final class SignService extends HttpServlet {
             return;
         }
 
+        // Obtenemos la informacion para la configuracion particular de la mejora/validacion de la firma
+        final Properties upgraterConfig = UpgraderUtils.extractUpdaterProperties(config);
+
         // Si se ha definido un formato de actualizacion de la firma, se actualizara
         try {
-        	final UpgradeResult upgradeResult = AfirmaUpgrader.upgradeSignature(signResult, upgrade);
+        	final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator();
+        	final UpgradeResult upgradeResult = validator.upgradeSignature(signResult, upgrade, upgraterConfig);
         	signResult = upgradeResult.getResult();
-       } catch (final UpgradeException e) {
+        } catch (final ValidatorException e) {
+        	LOGGER.log(Level.SEVERE, "Error al cargar el conector con el sistema de validacion de firmas en la transaccion: " + transactId, e); //$NON-NLS-1$
+        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        			"Error al actualizar la firma: " + e); //$NON-NLS-1$
+        	return;
+        } catch (final UpgradeException e) {
         	LOGGER.log(Level.SEVERE, "Error al actualizar la firma de la transaccion: " + transactId, e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Error al actualizar la firma: " + e); //$NON-NLS-1$
+        			"Error al actualizar la firma: " + e); //$NON-NLS-1$
+        	return;
+        } catch (final VerifyException e) {
+        	LOGGER.log(Level.SEVERE, "La firma que se desea actualizar no es valida: " + transactId, e); //$NON-NLS-1$
+        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        			"La firma que se intenta actualizar no es valida: " + e); //$NON-NLS-1$
         	return;
         }
 

@@ -49,8 +49,9 @@
 	String cop = fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
 	String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
 	String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
-	String extraParamsB64 = fireSession.getString(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
+	Properties extraParams = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
 	String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
+	Properties upgradeConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_UPGRADE_CONFIG);
 	
 	// Valores de la operacion de firma
 	String triphaseFormat = null;
@@ -79,15 +80,14 @@
 	}
 
 	// Obtenemos las propiedades extra de configuracion de las firmas
-	final Properties extraParams = ServiceUtil.base642Properties(extraParamsB64);
-	
 	BatchResult batchResult = null;
 	if (isBatchOperation) {
 		final SignBatchConfig defaultConfig = new SignBatchConfig();
 		defaultConfig.setCryptoOperation(cop);
 		defaultConfig.setFormat(format);
-		defaultConfig.setExtraParamsB64(extraParamsB64);
+		defaultConfig.setExtraParams(extraParams);
 		defaultConfig.setUpgrade(upgrade);
+		defaultConfig.setUpgradeConfig(upgradeConfig);
 		
 		certFilters = fireSession.getString(ServiceParams.SESSION_PARAM_FILTERS);
 		batchResult = (BatchResult) fireSession.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
@@ -219,6 +219,14 @@
 					sendErrorCallback(MiniApplet.getErrorType(), MiniApplet.getErrorMessage());
 				}
 			}
+			
+			function sendBatchResultCallback(batchResultB64, certificateB64) {
+				document.getElementById("afirmaBatchResult").value = batchResultB64;
+				if (certificateB64) {
+					document.getElementById("cert").value = certificateB64.replace(/\+/g, "-").replace(/\//g, "_");
+				}
+				document.getElementById("formSign").submit();
+			}
 		
 		<% } else { %>
 
@@ -274,19 +282,14 @@
 				}
 			}
 
-		<% } %>
 			function sendResultCallback(signatureB64, certificateB64) {
-				// Algunos entornos,  
 				if (certificateB64) {
 					document.getElementById("cert").value = certificateB64.replace(/\+/g, "-").replace(/\//g, "_");
 				}
 				document.getElementById("formSign").submit();
 			}
-
-			function sendBatchResultCallback(batchResultB64) {
-				document.getElementById("afirmaBatchResult").value = batchResultB64;
-				document.getElementById("formSign").submit();
-			}
+			
+		<% } %>
 
 			function sendErrorCallback(errorType, errorMessage) {
 				hideProgress();

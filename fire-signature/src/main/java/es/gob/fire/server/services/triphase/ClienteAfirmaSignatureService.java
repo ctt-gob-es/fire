@@ -43,7 +43,7 @@ import es.gob.afirma.triphase.signer.processors.PAdESTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESASiCSTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
-import es.gob.fire.server.services.UpgradeException;
+import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.internal.Pkcs1TriPhasePreProcessor;
 import es.gob.fire.server.services.triphase.document.DocumentManager;
 import es.gob.fire.server.services.triphase.document.FIReLocalDocumentManager;
@@ -66,10 +66,6 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 	private static final String PARAM_VALUE_OPERATION_POSTSIGN = "post"; //$NON-NLS-1$
 
 	private static final String PARAM_NAME_SIGNATURE_OPERATION = "cop"; //$NON-NLS-1$
-
-	private static final String PARAM_VALUE_SIGNATURE_OPERATION_SIGN = "sign"; //$NON-NLS-1$
-	private static final String PARAM_VALUE_SIGNATURE_OPERATION_COSIGN = "cosign"; //$NON-NLS-1$
-	private static final String PARAM_VALUE_SIGNATURE_OPERATION_COUNTERSIGN = "countersign"; //$NON-NLS-1$
 
 	// Parametros que necesitamos para la prefirma
 	private static final String PARAM_NAME_DOCID = "doc"; //$NON-NLS-1$
@@ -138,10 +134,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		// Obtenemos el codigo de operacion
-		final String subOperation = parameters.get(PARAM_NAME_SIGNATURE_OPERATION);
-		if (subOperation == null || !PARAM_VALUE_SIGNATURE_OPERATION_SIGN.equalsIgnoreCase(subOperation)
-				&& !PARAM_VALUE_SIGNATURE_OPERATION_COSIGN.equalsIgnoreCase(subOperation)
-				&& !PARAM_VALUE_SIGNATURE_OPERATION_COUNTERSIGN.equalsIgnoreCase(subOperation)) {
+		final SignOperation subOperation = SignOperation.parse(parameters.get(PARAM_NAME_SIGNATURE_OPERATION));
+		if (subOperation == null) {
 			sendResponse(response, ErrorManager.getErrorMessage(13));
 			return;
 		}
@@ -302,24 +296,24 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			final TriphaseData preRes;
 			try {
-				if (PARAM_VALUE_SIGNATURE_OPERATION_SIGN.equalsIgnoreCase(subOperation)) {
+				switch (subOperation) {
+				case SIGN:
 					preRes = prep.preProcessPreSign(
-						docBytes,
-						algorithm,
-						signerCertChain,
-						extraParams
-					);
-				}
-				else if (PARAM_VALUE_SIGNATURE_OPERATION_COSIGN.equalsIgnoreCase(subOperation)) {
+							docBytes,
+							algorithm,
+							signerCertChain,
+							extraParams
+						);
+					break;
+				case COSIGN:
 					preRes = prep.preProcessPreCoSign(
-						docBytes,
-						algorithm,
-						signerCertChain,
-						extraParams
-					);
-				}
-				else if (PARAM_VALUE_SIGNATURE_OPERATION_COUNTERSIGN.equalsIgnoreCase(subOperation)) {
-
+							docBytes,
+							algorithm,
+							signerCertChain,
+							extraParams
+						);
+					break;
+				case COUNTERSIGN:
 					CounterSignTarget target = CounterSignTarget.LEAFS;
 					if (extraParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
 						final String targetValue = extraParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
@@ -335,11 +329,11 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 						extraParams,
 						target
 					);
-				}
-				else {
+					break;
+
+				default:
 					throw new AOException("No se reconoce el codigo de sub-operacion: " + subOperation); //$NON-NLS-1$
 				}
-
 				LOGGER.fine("Se ha calculado el resultado de la prefirma y se devuelve"); //$NON-NLS-1$
 			}
 			catch (final Exception e) {
@@ -358,26 +352,26 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			final byte[] signedDoc;
 			try {
-				if (PARAM_VALUE_SIGNATURE_OPERATION_SIGN.equals(subOperation)) {
+				switch (subOperation) {
+				case SIGN:
 					signedDoc = prep.preProcessPostSign(
-						docBytes,
-						algorithm,
-						signerCertChain,
-						extraParams,
-						sessionData
-					);
-				}
-				else if (PARAM_VALUE_SIGNATURE_OPERATION_COSIGN.equals(subOperation)) {
+							docBytes,
+							algorithm,
+							signerCertChain,
+							extraParams,
+							sessionData
+							);
+					break;
+				case COSIGN:
 					signedDoc = prep.preProcessPostCoSign(
-						docBytes,
-						algorithm,
-						signerCertChain,
-						extraParams,
-						sessionData
-					);
-				}
-				else if (PARAM_VALUE_SIGNATURE_OPERATION_COUNTERSIGN.equals(subOperation)) {
-
+							docBytes,
+							algorithm,
+							signerCertChain,
+							extraParams,
+							sessionData
+							);
+					break;
+				case COUNTERSIGN:
 					CounterSignTarget target = CounterSignTarget.LEAFS;
 					if (extraParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
 						final String targetValue = extraParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
@@ -385,17 +379,16 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 							target = CounterSignTarget.TREE;
 						}
 					}
-
 					signedDoc = prep.preProcessPostCounterSign(
-						docBytes,
-						algorithm,
-						signerCertChain,
-						extraParams,
-						sessionData,
-						target
-					);
-				}
-				else {
+							docBytes,
+							algorithm,
+							signerCertChain,
+							extraParams,
+							sessionData,
+							target
+							);
+					break;
+				default:
 					throw new AOException("No se reconoce el codigo de sub-operacion: " + subOperation); //$NON-NLS-1$
 				}
 			}
@@ -417,11 +410,6 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			final String newDocId;
 			try {
 				newDocId = DOC_MANAGER.storeDocument(docId, signerCertChain, signedDoc, extraParams);
-			}
-			catch(final UpgradeException e) {
-				LOGGER.severe("Error actualizando la firma: " + e); //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(16) + ": " + e); //$NON-NLS-1$
-				return;
 			}
 			catch(final Throwable e) {
 				LOGGER.severe("Error al almacenar el documento: " + e); //$NON-NLS-1$

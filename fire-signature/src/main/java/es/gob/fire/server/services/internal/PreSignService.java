@@ -92,7 +92,12 @@ public final class PreSignService extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
+        try {
+        	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
+        }
+        catch (final Exception e) {
+        	LOGGER.warning("No se pudo deshacer el URL Encoding de la URL de redireccion: " + e); //$NON-NLS-1$
+		}
 
         FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), false, false);
         if (session == null) {
@@ -111,7 +116,7 @@ public final class PreSignService extends HttpServlet {
         final String op          	= session.getString(ServiceParams.SESSION_PARAM_OPERATION);
         final String subjectId      = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
         final String algorithm      = session.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-        final String extraParamsB64 = session.getString(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
+        final Properties extraParams = (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
         final String subOperation   = session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
         final String format         = session.getString(ServiceParams.SESSION_PARAM_FORMAT);
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
@@ -166,17 +171,6 @@ public final class PreSignService extends HttpServlet {
 			return;
 		}
 		redirectErrorUrl = connConfig.getRedirectErrorUrl();
-
-        Properties extraParams;
-        try {
-        	extraParams = ServiceUtil.base642Properties(extraParamsB64);
-        }
-        catch (final Exception e) {
-        	LOGGER.warning("Se ha proporcionado extraParams mal formados"); //$NON-NLS-1$
-        	 ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
-        	response.sendRedirect(redirectErrorUrl);
-            return;
-		}
 
         // Decodificamos el certificado de firma
         final X509Certificate signerCert;
@@ -291,7 +285,7 @@ public final class PreSignService extends HttpServlet {
                     stopOnError
         		);
             }
-            catch (final Exception e) {
+            catch (final Throwable e) {
                 LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
                 ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
                 response.sendRedirect(redirectErrorUrl);

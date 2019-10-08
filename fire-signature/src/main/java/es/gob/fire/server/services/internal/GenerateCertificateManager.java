@@ -59,7 +59,7 @@ public class GenerateCertificateManager {
 
 		// Comprobamos del usuario
     	if (subjectId == null || subjectId.isEmpty()) {
-        	LOGGER.warning(logF.format("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         			"No se ha proporcionado el identificador del usuario que solicita el certificado" //$NON-NLS-1$
         			);
@@ -76,27 +76,27 @@ public class GenerateCertificateManager {
         	gcr = generateCertificate(providerName, subjectId, config);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
         			);
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
         			"No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
         	return;
         }
         catch (final WeakRegistryException e) {
-        	LOGGER.log(Level.WARNING, logF.format("El usuario realizo un registro debil y no puede tener certificados de firma"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.WARNING, logF.f("El usuario realizo un registro debil y no puede tener certificados de firma"), e); //$NON-NLS-1$
         	response.sendError(HttpCustomErrors.WEAK_REGISTRY.getErrorCode(),
         			"El usuario realizo un registro debil y no puede tener certificados de firma: " + e //$NON-NLS-1$
     				);
     		return;
         }
         catch (final FIReCertificateException e) {
-        	LOGGER.log(Level.SEVERE, logF.format("Error en la generacion del certificado"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error en la generacion del certificado"), e); //$NON-NLS-1$
         	if (e instanceof FIReCertificateAvailableException) {
         		response.sendError(HttpCustomErrors.CERTIFICATE_AVAILABLE.getErrorCode(),
         				"El usuario ya tiene un certificado del tipo indicado: " + e //$NON-NLS-1$
@@ -109,7 +109,7 @@ public class GenerateCertificateManager {
         	return;
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, logF.format("Error desconocido en la generacion del certificado"), e);//$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error desconocido en la generacion del certificado"), e);//$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error desconocido en la generacion del certificado: " + e //$NON-NLS-1$
         			);

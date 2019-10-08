@@ -34,15 +34,26 @@ public class ConfigManager {
 
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 
-	private static final String PROP_AFIRMA_ID = "afirma.appId"; //$NON-NLS-1$
-
 	private static final String PROP_TEMP_DIR = "temp.dir"; //$NON-NLS-1$
 
 	/** Propiedad utilizada para indicar los proveedores activos en el componente central. */
 	private static final String PROP_PROVIDERS_LIST = "providers"; //$NON-NLS-1$
 
-	/** Prefijo utilizado para las propiedades que determinan la clase principal de un proveedor. */
+	/** Prefijo utilizado para las propiedades que determinan la clase principal de un proveedor.
+	 * Ejemplo: provider.NOMBRE_PROVEEDOR=es.gob.fire.MI_CLASE_CONECTORA*/
 	private static final String PREFIX_PROP_PROVIDER = "provider."; //$NON-NLS-1$
+
+	/** Sufijo utilizado junto prefijo y nombre de un proveedor para determinar si este se ha
+	 * configurado como un proveedor seguro o no.
+	 * Ejemplo: provider.NOMBRE_PROVEEDOR.secure=true */
+	private static final String SUFIX_PROP_SECURE_PROVIDER = ".secure"; //$NON-NLS-1$
+
+	/** Propiedad con la clase encargada de la validaci&oacute;n y actualizaci&oacute;n de las firmas. */
+	private static final String PROP_VALIDATOR_CLASS = "validator.class"; //$NON-NLS-1$
+
+	/** Sufijo utilizado para las propiedades que determinan si un proveedor es de confianza.
+	 * Ejemplo: provider.NOMBRE_PROVEEDOR.trusted=true */
+	private static final String SUFIX_PROP_TRUSTED_PROVIDER = ".trusted"; //$NON-NLS-1$
 
 	private static final String PROP_APP_ID = "default.appId"; //$NON-NLS-1$
 
@@ -218,6 +229,41 @@ public class ConfigManager {
 	}
 
 	/**
+	 * Identifica si se ha configurado un proveedor como seguro y, por lo tanto, no es
+	 * posible que las firmas realizadas con &eacute;n no sean v&aacute;lidas.
+	 * @param name Nombre del proveedor.
+	 * @return {@code true} si el proveedor se configur&oacute; como de confianza, {@code false}
+	 * si es el proveedor local, si no se configur&oacute; o si se configur&oacute; expresamente
+	 * que no lo es.
+	 */
+	public static boolean isSecureProvider(final String name) {
+		// El proveedor local nunca sera seguro
+		if (PROVIDER_LOCAL.equalsIgnoreCase(name)) {
+			return false;
+		}
+		return Boolean.parseBoolean(getProperty(PREFIX_PROP_PROVIDER + name + SUFIX_PROP_SECURE_PROVIDER));
+	}
+
+	/**
+	 * Indica si un proveedor esta configurado como proveedor de confianza.
+	 * No debe usarse con el proveedor "local".
+	 * @param name Nombre del proveedor.
+	 * @return {@code true} si el proveedor es de confianza y no es necesario validar sus firmas,
+	 * {@code false} en caso contrario.
+	 */
+	public static boolean isTrusted(final String name) {
+		return Boolean.parseBoolean(getProperty(PREFIX_PROP_PROVIDER + name + SUFIX_PROP_TRUSTED_PROVIDER));
+	}
+
+	/**
+	 * Recupera el nombre de la clase para la validaci&oacute;n y mejora de firmas..
+	 * @return Clase de conexi&oacute;n del proveedor.
+	 */
+	public static String getValidatorClass() {
+		return getProperty(PROP_VALIDATOR_CLASS);
+	}
+
+	/**
 	 * Recupera la clase del driver JDBC para el acceso a la base de datos.
 	 * @return Clase de conexi&oacute;n.
 	 */
@@ -243,14 +289,6 @@ public class ConfigManager {
 							+ "Asegurese de habilitar las propiedades %1s y %2s como alternativa", PROP_APP_ID, PROP_CERTIFICATE)); //$NON-NLS-1$
 		}
 		return dbConnection;
-	}
-
-	/**
-	 * Recupera la cadena de conexi&oacute;n con la base de datos.
-	 * @return Cadena de conexi&oacute;n con la base de datos.
-	 */
-	public static String getAfirmaAplicationId() {
-		return getProperty(PROP_AFIRMA_ID);
 	}
 
 	/**
