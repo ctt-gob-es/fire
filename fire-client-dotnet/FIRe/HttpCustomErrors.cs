@@ -45,5 +45,7 @@ namespace FIRe
         public const string BATCH_DOCUMENT_FAILED = "536";
         /// Error devuelto cuando se solicita firmar un lote sin documentos.
         public const string BATCH_NO_DOCUMENTS = "537";
+        /// Error devuelto cuando se detecta que la firma generada no es válida.
+        public const string INVALID_SIGNATURE_ERROR = "538";
     }
 }

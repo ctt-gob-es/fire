@@ -855,6 +855,10 @@ namespace FIRe
                             throw new DuplicateDocumentException("El identificador de documento ya existe en el lote", e);
                         case (HttpCustomErrors.INVALID_TRANSACTION):
                             throw new InvalidTransactionException("La transaccion no es valida o ha caducado", e);
+                        case (HttpCustomErrors.UPGRADING_ERROR):
+                            throw new HttpOperationException("Error durante la actualización de firma", e);
+                        case (HttpCustomErrors.INVALID_SIGNATURE_ERROR):
+                            throw new HttpOperationException("La firma generada no es válida", e);
                         case (HttpCustomErrors.BATCH_NO_DOCUMENTS):
                             throw new HttpOperationException("Se ha mandado a firmar un lote sin documentos", e);
                         case (HttpCustomErrors.BATCH_NO_SIGNED):
