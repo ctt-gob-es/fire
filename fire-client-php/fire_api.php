@@ -622,6 +622,9 @@
 		else if ($http_code == 537) {
 			throw new HttpOperationException("Se intenta firmar un lote sin documentos");
 		}
+		else if ($http_code == 538) {
+			throw new HttpOperationException("La firma generada no es valida");
+		}
 		else if ($http_code / 100 >= 3) {
 			throw new HttpOperationException("Error indeterminado (".$http_code.")");
 		}
@@ -630,7 +633,7 @@
 	class HttpOperationException extends Exception { }
 	
 	class HttpForbiddenException extends HttpOperationException { }
-		
+	
 	class HttpNetworkException extends HttpOperationException { }
 	
 	class NumDocumentsExceededException extends HttpOperationException { }
@@ -642,7 +645,7 @@
 	class BatchNoSignedException extends HttpOperationException { }
 	
 	class InvalidBatchDocumentException extends HttpOperationException { }
-		
+	
 		
 	/* =================================================================== */
 	/* ====================== Funciones de utilidad ====================== */
