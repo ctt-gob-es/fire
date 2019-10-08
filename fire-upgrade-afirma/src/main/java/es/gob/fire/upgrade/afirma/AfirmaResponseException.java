@@ -7,22 +7,21 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade;
+package es.gob.fire.upgrade.afirma;
 
 /**
  * Error provocado por una respuesta no positiva a una petici&oacute;n de mejora
  * de firma.
- *
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
  */
-public final class UpgradeResponseException extends UpgradeException {
+public final class AfirmaResponseException extends Exception {
 
     private static final long serialVersionUID = -5987647422142289573L;
 
     private final String majorCode;
     private final String minorCode;
 
-    UpgradeResponseException(final String major, final String minor,
+    AfirmaResponseException(final String major, final String minor,
             final String desc) {
         super(desc);
         this.majorCode = major;

@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade;
+package es.gob.fire.upgrade.afirma;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,18 +16,15 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.ws.security.util.Base64;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-/**
- * Respuesta de una consulta de mejora contra la plataforma Afirma.
- *
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
- */
-public class VerifyResponse {
+/** Respuesta de una consulta de mejora contra la plataforma Afirma. */
+class UpgradeAfirmaResponse {
 
     private static final String SUCCESS = "Success"; //$NON-NLS-1$
 
@@ -35,13 +32,34 @@ public class VerifyResponse {
     private String minor = null;
     private String desc = null;
 
-    VerifyResponse(final byte[] xml) throws ParserConfigurationException,
+    private String signatureForm = null;
+
+    private String signature = null;
+
+    private static final String SIGNATURE_OBJECT_START = "<dss:SignatureObject>"; //$NON-NLS-1$
+    private static final String SIGNATURE_OBJECT_END = "</dss:SignatureObject>"; //$NON-NLS-1$
+
+    UpgradeAfirmaResponse(final byte[] xml) throws ParserConfigurationException,
             SAXException, IOException {
 
         if (xml == null) {
             throw new IllegalArgumentException(
                     "El XML de entrada no puede ser nulo" //$NON-NLS-1$
             );
+        }
+
+        final String inXml = new String(xml);
+
+        if (inXml.contains(SIGNATURE_OBJECT_START)) {
+            final String updatedSigNode = inXml.substring(
+                    inXml.indexOf(SIGNATURE_OBJECT_START)
+                            + SIGNATURE_OBJECT_START.length(),
+                    inXml.indexOf(SIGNATURE_OBJECT_END));
+
+            // Condicion especifica para firmas XAdES Enveloping/Detached
+            if (updatedSigNode.endsWith("Signature>")) { //$NON-NLS-1$
+                setSignature(Base64.encode(updatedSigNode.getBytes()));
+            }
         }
 
         final SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -58,8 +76,24 @@ public class VerifyResponse {
      * @return <code>true</code> si la respuesta ha sido correcta,
      *         <code>false</code> si hay alg&uacute;n error,
      */
-    public boolean isOk() {
+    boolean isOk() {
         return SUCCESS.equals(getMajorCode());
+    }
+
+    /**
+     * Obtiene la firma mejorada.
+     *
+     * @return Firma mejorada.
+     * @throws IOException
+     *             Si falla la descodificaci&oacute;n del Base64 enviado por la
+     *             plataforma.
+     */
+    byte[] getUpgradedSignature() throws IOException {
+        return Base64.decode(this.signature);
+    }
+
+    void setSignature(final String s) {
+        this.signature = s;
     }
 
     /**
@@ -67,7 +101,7 @@ public class VerifyResponse {
      *
      * @return C&oacute;digo secundario de resultado.
      */
-    public String getMinorCode() {
+    String getMinorCode() {
         return this.minor;
     }
 
@@ -80,7 +114,7 @@ public class VerifyResponse {
      *
      * @return C&oacute;digo principal de resultado.
      */
-    public String getMajorCode() {
+    String getMajorCode() {
         return this.major;
     }
 
@@ -93,7 +127,7 @@ public class VerifyResponse {
      *
      * @return Descripci&oacute;n de la respuesta.
      */
-    public String getDescription() {
+    String getDescription() {
         return this.desc;
     }
 
@@ -101,19 +135,38 @@ public class VerifyResponse {
         this.desc = d;
     }
 
+    /**
+     * Obtiene el formato al que se ha actualizado la firma.
+     *
+     * @return Formato actualizado de la respuesta.
+     */
+    String getSignatureForm() {
+        return this.signatureForm;
+    }
+
+    void setSignatureForm(final String s) {
+        this.signatureForm = s;
+    }
+
     private static class CustomHandler extends DefaultHandler {
 
         private static final String TAG_RESULT_MAJOR = "ResultMajor"; //$NON-NLS-1$
         private static final String TAG_RESULT_MINOR = "ResultMinor"; //$NON-NLS-1$
         private static final String TAG_RESULT_MESSAGE = "ResultMessage"; //$NON-NLS-1$
+        private static final String TAG_BASE64_SIGNATURE = "Base64Signature"; //$NON-NLS-1$
+        private static final String TAG_BASE64_XML = "Base64XML"; //$NON-NLS-1$
+        private static final String TAG_SIGNATURE_FORM = "SignatureForm"; //$NON-NLS-1$
 
-        private final VerifyResponse verifyResponse;
+        private final UpgradeAfirmaResponse verifyResponse;
 
         private boolean overResultMajor = false;
         private boolean overResultMinor = false;
         private boolean overResultMessage = false;
+        private boolean overBase64Signature = false;
+        private boolean overBase64Xml = false;
+        private boolean overSignatureForm = false;
 
-        CustomHandler(final VerifyResponse vr) {
+        CustomHandler(final UpgradeAfirmaResponse vr) {
             this.verifyResponse = vr;
         }
 
@@ -125,14 +178,44 @@ public class VerifyResponse {
                 this.overResultMajor = true;
                 this.overResultMinor = false;
                 this.overResultMessage = false;
+                this.overBase64Signature = false;
+                this.overBase64Xml = false;
+                this.overSignatureForm = false;
             } else if (TAG_RESULT_MESSAGE.equals(localName)) {
                 this.overResultMajor = false;
                 this.overResultMinor = false;
                 this.overResultMessage = true;
+                this.overBase64Signature = false;
+                this.overBase64Xml = false;
+                this.overSignatureForm = false;
+            } else if (TAG_BASE64_SIGNATURE.equals(localName)) {
+                this.overResultMajor = false;
+                this.overResultMinor = false;
+                this.overResultMessage = false;
+                this.overBase64Signature = true;
+                this.overBase64Xml = false;
+                this.overSignatureForm = false;
             } else if (TAG_RESULT_MINOR.equals(localName)) {
                 this.overResultMajor = false;
                 this.overResultMinor = true;
                 this.overResultMessage = false;
+                this.overBase64Signature = false;
+                this.overBase64Xml = false;
+                this.overSignatureForm = false;
+            } else if (TAG_BASE64_XML.equals(localName)) {
+                this.overResultMajor = false;
+                this.overResultMinor = false;
+                this.overResultMessage = false;
+                this.overBase64Signature = false;
+                this.overBase64Xml = true;
+                this.overSignatureForm = false;
+            } else if (TAG_SIGNATURE_FORM.equals(localName)) {
+                this.overResultMajor = false;
+                this.overResultMinor = false;
+                this.overResultMessage = false;
+                this.overBase64Signature = false;
+                this.overBase64Xml = false;
+                this.overSignatureForm = true;
             }
         }
 
@@ -149,9 +232,18 @@ public class VerifyResponse {
             } else if (this.overResultMessage) {
                 this.verifyResponse.setDescription(value);
                 this.overResultMessage = false;
+            } else if (this.overBase64Signature) {
+                this.verifyResponse.setSignature(value);
+                this.overBase64Signature = false;
             } else if (this.overResultMinor) {
                 this.verifyResponse.setMinorCode(value);
                 this.overResultMinor = false;
+            } else if (this.overBase64Xml) {
+                this.verifyResponse.setSignature(value);
+                this.overBase64Xml = false;
+            } else if (this.overSignatureForm) {
+                this.verifyResponse.setSignatureForm(value);
+                this.overSignatureForm = false;
             }
         }
     }

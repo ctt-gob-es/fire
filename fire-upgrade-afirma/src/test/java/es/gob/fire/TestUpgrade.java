@@ -11,13 +11,16 @@ package es.gob.fire;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.util.Properties;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import es.gob.fire.upgrade.Upgrade;
 import es.gob.fire.upgrade.UpgradeResult;
-import es.gob.fire.upgrade.UpgradeTarget;
+import es.gob.fire.upgrade.afirma.AfirmaConnector;
+import es.gob.fire.upgrade.afirma.Upgrade;
+import es.gob.fire.upgrade.afirma.UpgradeTarget;
 
 /** Prueba de mejora de firma.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -50,7 +53,14 @@ public final class TestUpgrade {
 
 		final UpgradeTarget format = UpgradeTarget.T_FORMAT;
 
-		final UpgradeResult result = Upgrade.signUpgradeCreate(testFile, format, "minhap.seap.dtic.clavefirma", true); //$NON-NLS-1$
+		final AfirmaConnector conn = new AfirmaConnector();
+		final Properties config = new Properties();
+		try (InputStream is = TestUpgrade.class.getResourceAsStream("/platform.properties");) {
+			config.load(is);
+		}
+		conn.init(config);
+
+		final UpgradeResult result = Upgrade.signUpgradeCreate(conn, testFile, format, "minhap.seap.dtic.clavefirma", true); //$NON-NLS-1$
 
 		System.out.println("La firma se actualizo a " + result.getFormat()); //$NON-NLS-1$
 

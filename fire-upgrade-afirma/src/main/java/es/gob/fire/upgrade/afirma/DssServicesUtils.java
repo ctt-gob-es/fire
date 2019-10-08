@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade;
+package es.gob.fire.upgrade.afirma;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
@@ -157,4 +157,73 @@ final class DssServicesUtils {
         return result != null ? result.substring(result.lastIndexOf(":") + 1) : null; //$NON-NLS-1$
     }
 
+    static String createSignVerifyDss(final byte[] firma,
+    		final String afirmaAppName) {
+
+        boolean isBinary = false;
+        Document firmaXml = null;
+        try {
+            firmaXml = DocumentBuilderFactory.newInstance()
+                    .newDocumentBuilder()
+                    .parse(new ByteArrayInputStream(firma));
+            LOGGER.info("La firma es XML"); //$NON-NLS-1$
+        } catch (final Exception e) {
+            isBinary = true;
+            LOGGER.info("La firma no es XML: " + e); //$NON-NLS-1$
+        }
+
+        // Definimos el tipo de nodo en el que se declara la firma
+        String firmaNode;
+        if (isBinary) {
+            LOGGER.info("La firma es binaria"); //$NON-NLS-1$
+            firmaNode = "<dss:Base64Signature>" + Base64.encode(firma) + "</dss:Base64Signature>"; //$NON-NLS-1$ //$NON-NLS-2$
+        } else if (firmaXml != null && isEnveloping(firmaXml)) {
+            LOGGER.info("La firma es XML enveloping"); //$NON-NLS-1$
+            // Quitamos la cabecera XML
+            final String encoding = firmaXml.getInputEncoding();
+            try {
+                firmaNode = encoding != null ? new String(firma, encoding)
+                        : new String(firma);
+            } catch (final UnsupportedEncodingException e) {
+                LOGGER.warning("No se pudo aplicar la codificacion del XML para su conversion a texto, se usara la por defecto: " + e); //$NON-NLS-1$
+                firmaNode = new String(firma);
+            }
+            firmaNode = removeXmlHeader(firmaNode);
+        } else {
+            LOGGER.info("La firma es XML enveloped o detached"); //$NON-NLS-1$
+            firmaNode = "<dss:Base64XML>" + Base64.encode(firma) + "</dss:Base64XML>"; //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        // Creamos la peticion segun el tipo de firma que se actualiza
+        final StringBuilder dss = new StringBuilder(1000);
+        if (isBinary || isEnveloping(firmaXml)) {
+        	dss.append( "<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd'>") //$NON-NLS-1$
+        	    .append("<dss:OptionalInputs>") //$NON-NLS-1$
+        	    .append("<dss:ClaimedIdentity><dss:Name>") //$NON-NLS-1$
+        	    .append(afirmaAppName)
+        	    .append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
+        	    .append( "</dss:OptionalInputs>") //$NON-NLS-1$
+        	    .append("<dss:SignatureObject>") //$NON-NLS-1$
+        	    .append(firmaNode).append("</dss:SignatureObject>") //$NON-NLS-1$
+        	    .append("</dss:VerifyRequest>"); //$NON-NLS-1$
+        } else {
+            dss.append( "<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='urn:oasis:names:tc:dss:1.0:core:schema http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-schema-v1.0-os.xsd'>") //$NON-NLS-1$
+                .append("<dss:InputDocuments>") //$NON-NLS-1$
+                .append("<dss:Document ID='1'>") //$NON-NLS-1$
+                .append(firmaNode)
+                .append("</dss:Document>") //$NON-NLS-1$
+                .append("</dss:InputDocuments>") //$NON-NLS-1$
+                .append("<dss:OptionalInputs>") //$NON-NLS-1$
+                .append("<dss:ClaimedIdentity><dss:Name>") //$NON-NLS-1$
+                .append(afirmaAppName)
+                .append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
+        	    .append( "</dss:OptionalInputs>") //$NON-NLS-1$
+                .append("<dss:SignatureObject>") //$NON-NLS-1$
+                .append("<dss:SignaturePtr WhichDocument='1'/>") //$NON-NLS-1$
+                .append("</dss:SignatureObject>") //$NON-NLS-1$
+                .append("</dss:VerifyRequest>"); //$NON-NLS-1$
+        }
+
+        return dss.toString();
+    }
 }

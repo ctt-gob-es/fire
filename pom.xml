@@ -160,6 +160,12 @@
 		
 		<dependency>
 		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-upgrade-afirma</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
 		  <artifactId>fire-statistics-common</artifactId>
 		  <version>${fire.version}</version>
 		</dependency>
@@ -190,7 +196,7 @@
 		
 		<dependency>
 			<groupId>es.gob.logconsumer</groupId>
-  			<artifactId>log-consumer-service</artifactId>
+  			<artifactId>log-consumer-register</artifactId>
   			<version>${log-consumer.version}</version>
   		</dependency>
 	  

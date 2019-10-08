@@ -7,12 +7,9 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade;
+package es.gob.fire.upgrade.afirma;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -27,34 +24,16 @@ import org.apache.axis.client.Service;
 /**
  * Clase para la conexi&oacute;n con la Plataforma @firma.
  */
-public final class PlatformWsHelper {
+public final class AfirmaConnector {
 
-    static final String CONFIG_FILE = "platform.properties" ;//$NON-NLS-1$
-
-	/** Variable de entorno que determina el directorio en el que buscar el fichero de configuraci&oacute;n. */
-	private static final String ENVIRONMENT_VAR_CONFIG_DIR = "fire.config.path"; //$NON-NLS-1$
-
-	/** Variable de entorno antigua que determinaba el directorio en el que buscar el fichero
-	 * de configuraci&oacute;n. Se utiliza si no se ha establecido la nueva variable. */
-	private static final String ENVIRONMENT_VAR_CONFIG_DIR_OLD = "clavefirma.config.path"; //$NON-NLS-1$
-
-    private static final Logger LOGGER = Logger.getLogger(PlatformWsHelper.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AfirmaConnector.class.getName());
 
     private static Handler REQUEST_HANDLER;
     private static String WEB_SERVICES_TIMEOUT;
 
     static String SERVICE_SIGNUPGRADE;
-    static String SERVICE_CERTVERIFY;
 
     private String AFIRMA_ENDPOINT;
-
-    /**
-     * Inicializa el objeto para que pueda conectar con la Plataforma @firma.
-     * @throws ConfigFileNotFoundException Cuando no encuentra el fichero de configuraci&oacute;n.
-     */
-    void init() throws ConfigFileNotFoundException {
-    	init(loadConfig());
-    }
 
     /**
      * Inicializa el objeto para que pueda conectar con la Plataforma @firma.
@@ -89,13 +68,9 @@ public final class PlatformWsHelper {
             );
         }
 
-        WEB_SERVICES_TIMEOUT = config.getProperty(
-                "webservices.timeout", "25000"); //$NON-NLS-1$ //$NON-NLS-2$
+        WEB_SERVICES_TIMEOUT = config.getProperty("webservices.timeout", "25000"); //$NON-NLS-1$ //$NON-NLS-2$
 
-        SERVICE_SIGNUPGRADE = config
-                .getProperty("webservices.service.signupgrade"); //$NON-NLS-1$
-        SERVICE_CERTVERIFY = config
-                .getProperty("webservices.service.certverify"); //$NON-NLS-1$
+        SERVICE_SIGNUPGRADE = config.getProperty("webservices.service.signupgrade"); //$NON-NLS-1$
 
         this.AFIRMA_ENDPOINT = config.getProperty("webservices.endpoint"); //$NON-NLS-1$
     }
@@ -176,64 +151,4 @@ public final class PlatformWsHelper {
                 "security.keystore.cert.password", authorizationKeyStoreCertPassword); //$NON-NLS-1$
         return config;
     }
-
-    /**
-	 * Carga el fichero de configuraci&oacute;n del m&oacute;dulo o lo devuelve directamente si ya
-	 * tuviese cargado.
-	 * @return Propiedades de fichero de configuraci&oacute:n.
-	 * @throws ConfigFileNotFoundException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n.
-	 */
-	public static Properties loadConfig() throws  ConfigFileNotFoundException{
-
-		InputStream is = null;
-		final Properties config = new Properties();
-		try {
-			String configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
-			if (configDirPath == null) {
-				configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
-			}
-			if (configDirPath != null) {
-				final File configDir = new File(configDirPath).getCanonicalFile();
-				final File configFile = new File(configDir, CONFIG_FILE).getCanonicalFile();
-				if (!configFile.isFile() || !configFile.canRead() || !configDir.equals(configFile.getParentFile())) {
-					LOGGER.warning(
-							"El fichero " + CONFIG_FILE + " no se encuentra en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ". Deberia encontrarse en el directorio " + configDir + //$NON-NLS-1$
-									"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
-					is = PlatformWsHelper.class.getResourceAsStream('/' + CONFIG_FILE);
-				}
-				else {
-					is = new FileInputStream(configFile);
-				}
-			}
-			else {
-				LOGGER.warning(
-						"Se carga el fichero " + CONFIG_FILE + " desde el CLASSPATH."); //$NON-NLS-1$ //$NON-NLS-2$
-				is = PlatformWsHelper.class.getResourceAsStream('/' + CONFIG_FILE);
-			}
-
-			config.load(is);
-			is.close();
-		}
-		catch(final NullPointerException e){
-			LOGGER.severe("No se ha encontrado el fichero de configuracion: " + e); //$NON-NLS-1$
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
-			throw new ConfigFileNotFoundException("No se ha encontrado el fichero de propiedades " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
-		}
-		catch (final Exception e) {
-			LOGGER.severe("No se pudo cargar el fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
-			throw new ConfigFileNotFoundException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
-		}
-		finally {
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
-		}
-		return config;
-	}
 }

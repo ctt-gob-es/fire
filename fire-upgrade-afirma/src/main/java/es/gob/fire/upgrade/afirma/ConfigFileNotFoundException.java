@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade;
+package es.gob.fire.upgrade.afirma;
 
 /**
  * Indica que no se ha encontrado el fichero de configuraci&oacute;n requerido.

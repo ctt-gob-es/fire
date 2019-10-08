@@ -7,19 +7,42 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade;
+package es.gob.fire.upgrade.afirma;
+
+import es.gob.fire.upgrade.ValidatorException;
 
 /**
  * Error relacionado con el acceso a los servicios Web de la Plataforma Afirma.
- *
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
  */
-public final class PlatformWsException extends UpgradeException {
+public final class PlatformWsException extends ValidatorException {
 
     private static final long serialVersionUID = -8027555586203516787L;
 
-    PlatformWsException(final String msg, final Throwable e) {
-        super(msg, e);
+    /**
+     * Construye la excepci&oacute;n.
+     * @param msg Mensaje descriptivo del error.3
+     *
+     * @param cause Causa del error.
+     */
+    PlatformWsException(final String msg, final Throwable cause) {
+        super(msg, cause);
+    }
+
+    /**
+     * Construye la excepci&oacute;n.
+     * @param cause Causa del error.
+     */
+    PlatformWsException(final Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Construye la excepci&oacute;n.
+     * @param msg Mensaje descriptivo del error.
+     */
+    PlatformWsException(final String msg) {
+        super(msg);
     }
 
 }

@@ -8,6 +8,6 @@
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 
-/** Clases para la mejora de firmas.
+/** Clases para la mejora de firmas con la Plataforma Afirma.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
-package es.gob.fire.upgrade;
+package es.gob.fire.upgrade.afirma;

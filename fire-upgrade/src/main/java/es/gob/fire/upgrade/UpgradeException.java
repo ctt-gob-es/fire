@@ -11,18 +11,26 @@ package es.gob.fire.upgrade;
 
 /**
  * Error relacionado con la mejora de firmas.
- *
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
  */
 public class UpgradeException extends Exception {
 
     private static final long serialVersionUID = -3257579473377289361L;
 
-    UpgradeException(final String msg, final Throwable e) {
-        super(msg, e);
+    /**
+     * Construye la excepci&oacute;n con su descripci&oacute;n y la causa del error.
+     * @param msg Mensaje descriptivo del error.
+     * @param cause Causa del error.
+     */
+    public UpgradeException(final String msg, final Throwable cause) {
+        super(msg, cause);
     }
 
-    protected UpgradeException(final String msg) {
+    /**
+     * Construye la excepci&oacute;n con su descripci&oacute;n.
+     * @param msg Mensaje descriptivo del error.
+     */
+    public UpgradeException(final String msg) {
         super(msg);
     }
 

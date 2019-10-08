@@ -7,11 +7,10 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade;
+package es.gob.fire.upgrade.afirma;
 
 /**
  * Formato de firma mejorada.
- *
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
  */
 public enum UpgradeTarget {
@@ -35,7 +34,7 @@ public enum UpgradeTarget {
     /** ES-A. */
     A_FORMAT("ES-A", "urn:oasis:names:tc:dss:1.0:profiles:AdES:forms:ES-A"), //$NON-NLS-1$ //$NON-NLS-2$
     /** ES-LTV. */
-    PADES_LTV_FORMAT("ES-LTV", "urn:afirma:dss:1.0:profile:xss:PAdES:1.1.2:forms:LTV"), //$NON-NLS-1$ //$NON-NLS-2$
+    PADES_LTV_FORMAT("ES-LTV", "urn:afirma:dss:1.0:profile:XSS:PAdES:1.1.2:forms:LTV"), //$NON-NLS-1$ //$NON-NLS-2$
     /** T-Level. */
     T_LEVEL_FORMAT("T-Level", "urn:afirma:dss:1.0:profile:XSS:AdES:forms:T-Level", "ES-T", "urn:oasis:names:tc:dss:1.0:profiles:AdES:forms:ES-T"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     /** LT-Level. */

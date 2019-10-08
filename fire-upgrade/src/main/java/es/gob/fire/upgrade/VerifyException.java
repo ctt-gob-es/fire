@@ -10,20 +10,19 @@
 package es.gob.fire.upgrade;
 
 /**
- * Error relacionado con validaci&oacute;n de certificados.
- *
+ * Error relacionado con validaci&oacute;n de firmas.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
  */
 public class VerifyException extends Exception {
 
-    private static final long serialVersionUID = -3257579473377289361L;
+    /** Serial Id. */
+	private static final long serialVersionUID = 5344165604415563447L;
 
-    VerifyException(final String msg, final Throwable e) {
+	public VerifyException(final String msg, final Throwable e) {
         super(msg, e);
     }
 
-    protected VerifyException(final String desc) {
+    public VerifyException(final String desc) {
         super(desc);
     }
-
 }
