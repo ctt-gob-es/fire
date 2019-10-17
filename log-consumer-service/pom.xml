@@ -2,7 +2,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.logconsumer</groupId>
 	<artifactId>log-consumer-service</artifactId>
-	<version>${log-consumer.version}</version>
 	<packaging>war</packaging>
 
 	<parent>
