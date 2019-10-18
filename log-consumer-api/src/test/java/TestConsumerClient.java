@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -9,6 +8,7 @@ import javax.crypto.SecretKey;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import es.gob.log.consumer.client.Base64;
 import es.gob.log.consumer.client.LogConsumerClient;
 import es.gob.log.consumer.client.LogData;
 import junit.framework.Assert;
@@ -80,8 +80,6 @@ public class TestConsumerClient {
 		final SecureRandom random = new SecureRandom(); // cryptograph. secure random
 		keyGen.init(random);
 		final SecretKey secretKey = keyGen.generateKey();
-		System.out.println(Base64.getEncoder().encodeToString(secretKey.getEncoded()));
-
-
+		System.out.println(Base64.encode(secretKey.getEncoded()));
 	}
 }

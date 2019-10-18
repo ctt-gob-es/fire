@@ -6,7 +6,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.SQLException;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.admin.dao.UsersDAO;
 import es.gob.fire.server.admin.entity.User;
 import es.gob.fire.server.admin.message.UserMessages;
+import es.gob.fire.server.admin.tool.Base64;
 import es.gob.fire.server.admin.tool.SendMail;
 
 
@@ -155,7 +155,7 @@ public class MailPasswordRestorationService extends HttpServlet{
           md.update(id.getBytes());
           md.update(code);
 
-          return Base64.getUrlEncoder().encodeToString(md.digest());
+          return Base64.encode(md.digest());
     }
 
     private static String getRestorationPageUrl(final HttpServletRequest req) {
