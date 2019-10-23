@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -44,6 +45,8 @@ public class HttpsConnection {
 
     private static final String KEYSTORE_PASS_PROPERTY = "javax.net.ssl.keyStorePassword"; //$NON-NLS-1$
 
+    private static final String KEYSTORE_ALIAS_PROPERTY = "javax.net.ssl.certAlias"; //$NON-NLS-1$
+
     private static final String KEYSTORE_TYPE_PROPERTY = "javax.net.ssl.keyStoreType"; //$NON-NLS-1$
 
     private static final String TRUSTSTORE_PROPERTY = "javax.net.ssl.trustStore"; //$NON-NLS-1$
@@ -53,6 +56,8 @@ public class HttpsConnection {
     private static final String TRUSTSTORE_TYPE_PROPERTY = "javax.net.ssl.trustStoreType"; //$NON-NLS-1$
 
     private static final String ACCEPT_ALL_CERTS_VALUE = "all"; //$NON-NLS-1$
+
+    private static final Logger LOGGER = Logger.getLogger(HttpsConnection.class.getName());
 
 	/**
 	 * M&eacute;todo HTTP soportados.
@@ -120,6 +125,7 @@ public class HttpsConnection {
 		// Inicializamos el KeyStore
 		KeyStore ks = null;
 		KeyStorePassword ksPassword = null;
+		String ksAlias = null;
         final String keyStore = config.getProperty(KEYSTORE_PROPERTY);
         if (keyStore != null) {
         	final File ksFile = new File(keyStore);
@@ -136,6 +142,8 @@ public class HttpsConnection {
         		throw new IllegalArgumentException("No se ha indicado la clave del almacen SSL"); //$NON-NLS-1$
         	}
         	ksPassword = new KeyStorePassword(ksPasswordText, decipher);
+
+        	ksAlias = config.getProperty(KEYSTORE_ALIAS_PROPERTY);
 
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
 
@@ -175,7 +183,7 @@ public class HttpsConnection {
         }
 
         if (ks != null || ts != null || acceptAllCert) {
-        	initContext(ks, ksPassword != null ? ksPassword.getPassword() : null, ts, acceptAllCert);
+        	initContext(ks, ksPassword != null ? ksPassword.getPassword() : null, ksAlias, ts, acceptAllCert);
         }
 	}
 
@@ -196,6 +204,7 @@ public class HttpsConnection {
 	private void initContext(
 			final KeyStore ks,
 			final char[] ksPassword,
+			final String ksAlias,
 			final KeyStore ts,
 			final boolean acceptAllCerts) throws
 												NoSuchAlgorithmException,
@@ -205,12 +214,25 @@ public class HttpsConnection {
 
 		KeyManager[] keyManagers = null;
 		if (ks != null) {
-			final KeyManagerFactory kmf =
-					KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 
-			kmf.init(ks, ksPassword);
+			if (ksAlias != null) {
+				try {
+					keyManagers = new KeyManager[]{ new MultiCertKeyManager(ks, ksPassword, ksAlias) };
+				} catch (final Exception e) {
+					LOGGER.warning("No se pudo inicializar el almacen con los datos proporcionados. Se usara el mecanismo por defecto"); //$NON-NLS-1$
+					keyManagers = null;
+				}
+			}
 
-			keyManagers = kmf.getKeyManagers();
+			// Si todavia no se ha inicializado, lo hacemos con el mecanismo por defecto
+			if (keyManagers == null) {
+				final KeyManagerFactory kmf =
+						KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+
+				kmf.init(ks, ksPassword);
+
+				keyManagers = kmf.getKeyManagers();
+			}
 		}
 
 		TrustManager[] tsManager = null;
@@ -269,7 +291,8 @@ public class HttpsConnection {
 		final int resCode = conn.getResponseCode();
 		final String statusCode = Integer.toString(resCode);
 		if (statusCode.startsWith("4") || statusCode.startsWith("5")) { //$NON-NLS-1$ //$NON-NLS-2$
-			throw new HttpError(resCode, conn.getResponseMessage(), uri.getHost());
+			throw new HttpError(resCode, conn.getResponseMessage() != null ?
+					conn.getResponseMessage() : "Error: StatusCode: " + statusCode, uri.getHost()); //$NON-NLS-1$
 		}
 
 		final InputStream is = conn.getInputStream();

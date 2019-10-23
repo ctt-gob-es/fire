@@ -29,7 +29,8 @@ namespace FIRe
         private static readonly string REGISTRY_VALUE_ADMIT_ALL_CERTS = "admit_all_certs";
         private static readonly string REGISTRY_VALUE_SSL_CLIENT_PKCS12 = "ssl_client_pkcs12";
         private static readonly string REGISTRY_VALUE_SSL_CLIENT_PASS = "ssl_client_pass";
-
+        private static readonly string REGISTRY_VALUE_SSL_CLIENT_ALIAS = "ssl_client_alias";
+        
         private static readonly string URL_PARAMENTERS_SEPARATOR = "?";
 
         private static TraceSource log = new TraceSource("es.gob.fire");
@@ -133,21 +134,47 @@ namespace FIRe
         {
             string sslClientPkcs12 = null;
             string sslClientPass = null;
+            string sslClientAlias = null;
             try
             {
                 sslClientPkcs12 = recoverConfigValue(REGISTRY_VALUE_SSL_CLIENT_PKCS12, config);
                 sslClientPass = recoverConfigValue(REGISTRY_VALUE_SSL_CLIENT_PASS, config);
+                sslClientAlias = recoverConfigValue(REGISTRY_VALUE_SSL_CLIENT_ALIAS, config);
             }
             catch (Exception e)
             {
                 log.TraceData(TraceEventType.Warning, 1, "No se ha encontrado un certificado cliente SSL configurado en el registro: " + e.ToString());
+                return;
             }
 
             if (!string.IsNullOrEmpty(sslClientPkcs12) && !string.IsNullOrEmpty(sslClientPass))
             {
                 try
                 {
-                    X509Certificate2 sslClientCert = new X509Certificate2(@sslClientPkcs12, sslClientPass, X509KeyStorageFlags.MachineKeySet);
+                    X509Certificate2Collection certCollection = new X509Certificate2Collection();
+                    certCollection.Import(sslClientPkcs12, sslClientPass, X509KeyStorageFlags.MachineKeySet);
+
+                    X509Certificate2 sslClientCert = null;
+                    if (sslClientAlias != null)
+                    {
+                        foreach (var certx in certCollection)
+                        {
+                            if (sslClientAlias.Equals(certx.FriendlyName))
+                            {
+                                sslClientCert = certx;
+                            }
+                        }
+                    }
+                    
+                    if (sslClientCert == null)
+                    {
+                        if (sslClientAlias != null)
+                        {
+                            log.TraceData(TraceEventType.Warning, 1, "El certificado con el alias indicado no esta en el almacen. Se usara el primer certificado");
+                        }
+                        sslClientCert = certCollection[0];
+                    }
+
                     request.ClientCertificates.Add(sslClientCert);
                 }
                 catch (Exception e)

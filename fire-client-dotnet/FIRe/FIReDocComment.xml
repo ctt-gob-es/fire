@@ -515,6 +515,9 @@
         <member name="F:FIRe.HttpCustomErrors.BATCH_NO_DOCUMENTS">
             Error devuelto cuando se solicita firmar un lote sin documentos.
         </member>
+        <member name="F:FIRe.HttpCustomErrors.INVALID_SIGNATURE_ERROR">
+            Error devuelto cuando se detecta que la firma generada no es válida.
+        </member>
         <member name="T:FIRe.ConnectionManager">
             <summary>Clase para la codificación de datos binarios en cadenas Base64 y viceversa.</summary>
         </member>
