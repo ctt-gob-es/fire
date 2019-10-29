@@ -19,11 +19,6 @@ public class HttpOperationException extends Exception {
 
     private static final long serialVersionUID = -5667976435415689416L;
 
-    /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central. */
-    public HttpOperationException() {
-        super();
-    }
-
     /**
      * /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
      * @param msg Mensaje de error.

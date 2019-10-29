@@ -19,10 +19,6 @@ public final class HttpForbiddenException extends HttpOperationException {
     /** Serial Id. */
 	private static final long serialVersionUID = -3001968868698178809L;
 
-	HttpForbiddenException() {
-        super();
-    }
-
     /**
      * Se rechaza el acceso del usuario al sistema.
      * @param e Motivo del error.

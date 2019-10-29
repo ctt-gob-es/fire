@@ -63,7 +63,10 @@ public enum HttpCustomErrors {
 	BATCH_NO_DOCUMENT(537, "Se intenta firmar un lote sin documentos"), //$NON-NLS-1$
 
 	/** Error devuelto cuando se detecta que la firma generada no es v&aacute;lida. */
-	INVALID_SIGNATURE_ERROR(538, "La firma generada no es valida"); //$NON-NLS-1$
+	INVALID_SIGNATURE_ERROR(538, "La firma generada no es valida"), //$NON-NLS-1$
+
+	/** Error devuelto cuando se detecta que la firma generada no es v&aacute;lida. */
+	INVALID_DOCUMENT_MANAGER(539, "Gestor de documentos no valido"); //$NON-NLS-1$
 
 	private final int errorCode;
 	private final String errorDescription;

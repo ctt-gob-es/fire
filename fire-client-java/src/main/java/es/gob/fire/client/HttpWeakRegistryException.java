@@ -19,10 +19,6 @@ public final class HttpWeakRegistryException extends HttpOperationException {
 	/** Serial ID. */
 	private static final long serialVersionUID = -6238299869930902680L;
 
-	HttpWeakRegistryException() {
-        super();
-    }
-
 	/**
 	 * Indica que un usuario no puede tener certificados de firma.
 	 * @param e Excepci&oacute;n que caus&oacute; el error.

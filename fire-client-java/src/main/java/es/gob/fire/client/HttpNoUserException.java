@@ -19,10 +19,6 @@ public final class HttpNoUserException extends HttpOperationException {
     /** Serial Id. */
 	private static final long serialVersionUID = -759772137388280743L;
 
-	HttpNoUserException() {
-        super();
-    }
-
     /**
      * El usuario no est&aacute; dado de alta en el sistema.
      * @param e Motivo del error.

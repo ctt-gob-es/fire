@@ -329,12 +329,13 @@ public final class FireApi {
         } catch (final HttpError e) {
             LOGGER.error("Error en la llamada al servicio de firma: {}", //$NON-NLS-1$
             			e.getResponseDescription());
-            switch (e.getResponseCode()) {
-            case HttpURLConnection.HTTP_FORBIDDEN:
+            if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                 throw new HttpForbiddenException(e);
-            case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
+            } else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
                 throw new HttpNetworkException(e);
-            default:
+            } else if (e.getResponseCode() == HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorDescription(), e);
+            } else {
                 throw new HttpOperationException(e.getResponseDescription(), e);
             }
         }
@@ -559,12 +560,13 @@ public final class FireApi {
         	responseJSON = conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
         } catch (final HttpError e) {
             LOGGER.error("Error en la llamada al servicio de firma: " + e.getResponseDescription()); //$NON-NLS-1$
-            switch (e.getResponseCode()) {
-            case HttpURLConnection.HTTP_FORBIDDEN:
+            if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                 throw new HttpForbiddenException(e);
-            case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
+            } else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
                 throw new HttpNetworkException(e);
-            default:
+            } else if (e.getResponseCode() == HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorDescription(), e);
+            } else {
                 throw new HttpOperationException(e.getResponseDescription(), e);
             }
         }

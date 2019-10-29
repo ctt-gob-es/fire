@@ -152,7 +152,7 @@ namespace FIRe
                 try
                 {
                     X509Certificate2Collection certCollection = new X509Certificate2Collection();
-                    certCollection.Import(sslClientPkcs12, sslClientPass, X509KeyStorageFlags.MachineKeySet);
+                    certCollection.Import(@sslClientPkcs12, sslClientPass, X509KeyStorageFlags.MachineKeySet);
 
                     X509Certificate2 sslClientCert = null;
                     if (sslClientAlias != null)
@@ -189,7 +189,6 @@ namespace FIRe
             return config != null && config.ContainsKey(key) && !string.IsNullOrEmpty(config[key]) ? config[key] : getRegistryKey(key);
         }
 
-        
         private static string getRegistryKey(string valueName)
         {
             RegistryKey masterKey = Registry.CurrentUser.OpenSubKey(REGISTRY_KEY_FIRE);

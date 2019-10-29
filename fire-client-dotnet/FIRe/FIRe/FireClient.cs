@@ -867,6 +867,8 @@ namespace FIRe
                             throw new InvalidBatchDocumentException("Fallo la firma del documento que se intenta recuperar", e);
                         case (HttpCustomErrors.INVALID_BATCH_DOCUMENT):
                             throw new InvalidBatchDocumentException("El documento no existe en el lote", e);
+                        case (HttpCustomErrors.INVALID_DOCUMENT_MANAGER):
+                            throw new HttpOperationException("Gestor de documentos no valido", e);
                     }
                     throw new HttpForbiddenException("Error durante la operacion de firma", e);
                 }

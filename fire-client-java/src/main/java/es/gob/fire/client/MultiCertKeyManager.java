@@ -14,7 +14,8 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.X509KeyManager;
 
 /**
- * Gestor de claves SSL que permite la selección expresa de una clave por medio de su alias.
+ * Gestor de claves SSL que permite la selecci&oacute;n expresa de una clave
+ * por medio de su alias.
  */
 public class MultiCertKeyManager implements X509KeyManager {
 

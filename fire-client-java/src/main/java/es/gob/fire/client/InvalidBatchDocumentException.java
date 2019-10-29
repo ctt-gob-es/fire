@@ -19,10 +19,6 @@ public final class InvalidBatchDocumentException extends HttpOperationException 
 	/** Serial Id. */
 	private static final long serialVersionUID = -2000803668147485604L;
 
-	InvalidBatchDocumentException() {
-        super();
-    }
-
     /**
      * La firma del documento no se gener&oacute; correctamente o se indic&oacute;
      * un documento no v&aacute;lido.

@@ -19,10 +19,6 @@ public final class HttpNetworkException extends HttpOperationException {
     /** Serial Id. */
 	private static final long serialVersionUID = 5460965331472261684L;
 
-	HttpNetworkException() {
-        super();
-    }
-
     /**
      * Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
      * @param e Causa del error.

@@ -19,10 +19,6 @@ public final class BatchNoSignedException extends HttpOperationException {
     /** Serial Id. */
 	private static final long serialVersionUID = 459647017984206993L;
 
-	BatchNoSignedException() {
-        super();
-    }
-
     /**
      * El lote no est&aacute; firmado.
      * @param e Motivo del error.
