@@ -2879,7 +2879,7 @@ var MiniApplet = ( function ( window, undefined ) {
 					else {
 						if (cipherKey != undefined && cipherKey != null) {
 							result = decipher(html.substring(0, sepPos), cipherKey, true);
-							certificate = decipher(html.substring(sepPos + 1), cipherKey);
+							certificate = decipher(html.substring(sepPos + 1), cipherKey, true);
 						}
 						else {
 							result = fromBase64UrlSaveToBase64(html.substring(0, sepPos));
