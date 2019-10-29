@@ -94,6 +94,7 @@ public class FragmentedFileReader implements LogReader {
 		this.charactersReaded = 0;
 		this.charactersToRead = 0;
 		this.currentLine = null;
+		this.moreData = true;
 
 		setEndFile(false);
 
