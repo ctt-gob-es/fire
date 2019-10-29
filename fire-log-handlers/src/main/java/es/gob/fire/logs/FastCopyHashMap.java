@@ -143,7 +143,7 @@ class FastCopyHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clon
    {
       int c = 1;
       for (; c < initialCapacity; c <<= 1) {
-		;
+
 	}
       this.threshold = (int) (c * loadFactor);
 
@@ -299,7 +299,7 @@ public V put(K key, final V value)
 
          if (e.hash == hash && eq(key, e.key))
          {
-            table[index] = new Entry<K, V>(e.key, e.hash, value);
+            table[index] = new Entry<>(e.key, e.hash, value);
             return e.value;
          }
 
@@ -310,7 +310,7 @@ public V put(K key, final V value)
       }
 
       this.modCount++;
-      table[index] = new Entry<K, V>(key, hash, value);
+      table[index] = new Entry<>(key, hash, value);
       if (++this.size >= this.threshold) {
 		resize(length);
 	}
@@ -366,7 +366,7 @@ public void putAll(final Map<? extends K, ? extends V> map)
 
          int length = this.table.length;
          for (; length < size; length <<= 1) {
-			;
+
 		}
 
          resize(length);
@@ -500,12 +500,6 @@ public void clear()
 
          }
       }
-
-      System.out.println(" Size:            " + this.size);
-      System.out.println(" Real Size:       " + total);
-      System.out.println(" Optimal:         " + optimal + " (" + (float) optimal * 100 / total + "%)");
-      System.out.println(" Average Distance:" + (float) totalSkew / (total - optimal));
-      System.out.println(" Max Distance:    " + maxSkew);
    }
 
    @Override
@@ -574,7 +568,7 @@ public Collection<V> values()
          e = table[index];
       }
 
-      table[index] = new Entry<K, V>(key, hash, value);
+      table[index] = new Entry<>(key, hash, value);
    }
 
    private void writeObject(final java.io.ObjectOutputStream s) throws IOException
