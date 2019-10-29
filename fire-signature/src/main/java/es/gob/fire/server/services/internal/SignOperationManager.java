@@ -165,17 +165,17 @@ public class SignOperationManager {
         // cargamos el por defecto
         FIReDocumentManager docManager;
         try {
-        	docManager = FIReDocumentManagerFactory.newDocumentManager(docManagerName);
+        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, docManagerName);
         }
-        catch (final IllegalArgumentException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No existe el gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
-        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
+        catch (final IllegalAccessException | IllegalArgumentException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$
+        	ErrorManager.setErrorToSession(session, OperationError.INVALID_DOCUMENT_MANAGER);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
-        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
+        	ErrorManager.setErrorToSession(session, OperationError.INVALID_DOCUMENT_MANAGER);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
@@ -237,9 +237,9 @@ public class SignOperationManager {
 
         // Creamos un temporal con los datos a procesar asociado a la sesion
         try {
-        	TempFilesHelper.storeTempData(transactionId, data);
+        	TempDocumentsManager.storeDocument(transactionId, data, true);
         	//obtenemos el tamano del documento
-       	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, TempFilesHelper.getFileSize());
+       	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, data.length);
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.f("Error en el guardado temporal de los datos a firmar: " + e)); //$NON-NLS-1$

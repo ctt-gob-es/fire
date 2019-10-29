@@ -13,6 +13,7 @@ package es.gob.fire.signature;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -85,7 +86,15 @@ public class ConfigManager {
 
 	private static final String PROP_DOCUMENT_MANAGER_PREFIX = "docmanager."; //$NON-NLS-1$
 
+	private static final String PROP_DOCMANAGER_REQUESTOR_PARTICLE = ".requestor"; //$NON-NLS-1$
+
+	private static final String PROP_DOCMANAGER_REQ_VALID_SUFIX = PROP_DOCMANAGER_REQUESTOR_PARTICLE + ".valid"; //$NON-NLS-1$
+
+	private static final String PROP_DOCMANAGER_REQ_INVALID_SUFIX = PROP_DOCMANAGER_REQUESTOR_PARTICLE + ".invalid"; //$NON-NLS-1$
+
 	private static final String PROP_SESSIONS_DAO = "sessions.dao"; //$NON-NLS-1$
+
+	private static final String PROP_TEMP_DOCUMENTS_DAO = "sessions.documents.dao"; //$NON-NLS-1$
 
 	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
 
@@ -329,8 +338,8 @@ public class ConfigManager {
 		loadConfig();
 
 		if (config == null) {
-			LOGGER.severe("No se ha encontrado el fichero de configuracion de la conexion"); //$NON-NLS-1$
-			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion de la conexion", CONFIG_FILE); //$NON-NLS-1$
+			LOGGER.severe("No se ha encontrado el fichero de configuracion del componente central"); //$NON-NLS-1$
+			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion del componente central", CONFIG_FILE); //$NON-NLS-1$
 		}
 
 		final ProviderElement[] providers = getProviders();
@@ -534,7 +543,7 @@ public class ConfigManager {
 		catch (final Exception e) {
 			LOGGER.warning("Tiempo de expiracion invalido en la propiedad '" + PROP_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
 					"' del fichero de configuracion. Se usaran " + DEFAULT_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
-					"segundos"); //$NON-NLS-1$
+					" segundos"); //$NON-NLS-1$
 			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 		}
 	}
@@ -553,7 +562,7 @@ public class ConfigManager {
 		} catch (final Exception e) {
 			LOGGER.warning("Tiempo de expiracion invalido en la propiedad '" + PROP_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
 					"' del fichero de configuracion. Se usaran " + DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
-					"segundos"); //$NON-NLS-1$
+					" segundos"); //$NON-NLS-1$
 			return DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT * 1000;
 		}
 	}
@@ -635,6 +644,30 @@ public class ConfigManager {
 	}
 
 	/**
+	 * Indica si una aplicaci&oacute;n tiene permisos para el uso de un gestor de documentos concreto.
+	 * @param appId Identificador de la aplicaci&oacute;n.
+	 * @param docManager Identificador del gestor de documentos.
+	 * @return {@code true} si tiene permiso, {@code false} en caso contrario.
+	 */
+	public static boolean isDocumentManagerAllowed(final String appId, final String docManager) {
+
+		// Si hay un listado de aplicaciones validas, comprobamos que la indicada este entre ellas
+		final String validsList = getProperty(PROP_DOCUMENT_MANAGER_PREFIX + docManager + PROP_DOCMANAGER_REQ_VALID_SUFIX);
+		if (validsList != null) {
+			return Arrays.asList(validsList.split(VALUES_SEPARATOR)).contains(appId);
+		}
+
+		// Si hay un listado de aplicacion invalidas, comprobamos que la indicada no este entre ellas
+		final String invalidsList = getProperty(PROP_DOCUMENT_MANAGER_PREFIX + docManager + PROP_DOCMANAGER_REQ_INVALID_SUFIX);
+		if (invalidsList != null) {
+			return !Arrays.asList(invalidsList.split(VALUES_SEPARATOR)).contains(appId);
+		}
+
+		// Si no se ha restringido el uso, se permite directamente
+		return true;
+	}
+
+	/**
 	 * Recupera el identificador del gestor para la compartici&oacute;n de sesiones, necesario
 	 * para permitir el uso de varios nodos balanceados con el componente central.
 	 * @return Instancia del gestor para la compartici&oacute;n de sesiones o {@code null}
@@ -654,6 +687,24 @@ public class ConfigManager {
 		return getProperty(PROP_SESSIONS_DAO);
 	}
 
+	/**
+	 * Recupera el identificador del gestor para la compartici&oacute;n de ficheros temporales,
+	 * necesario para permitir el uso de varios nodos balanceados con el componente central.
+	 * @return Instancia del gestor para la compartici&oacute;n de ficheros temporales o
+	 * {@code null} si no se ha podido recuperar o no se ha configurado.
+	 */
+	public static String getTempDocumentsDao() {
+		if (config == null) {
+			try {
+				loadConfig();
+			} catch (final ConfigFilesException e) {
+				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				return null;
+			}
+		}
+
+		return getProperty(PROP_TEMP_DOCUMENTS_DAO);
+	}
 
 	/**
 	  * Recupera la URL de la parte p&uacute;blica del componente central.

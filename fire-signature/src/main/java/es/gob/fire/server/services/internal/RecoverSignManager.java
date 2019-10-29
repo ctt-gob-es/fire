@@ -152,7 +152,7 @@ public class RecoverSignManager {
         // del temporal en el que lo almacenamos
     	byte[] partialResult;
     	try {
-    		partialResult = TempFilesHelper.retrieveAndDeleteTempData(transactionId);
+    		partialResult = TempDocumentsManager.retrieveDocument(transactionId);
     	}
     	catch (final Exception e) {
     		LOGGER.warning(logF.f("No se encuentra la firma parcial generada. Puede haber caducado la sesion: " + e)); //$NON-NLS-1$
@@ -264,7 +264,7 @@ public class RecoverSignManager {
     	// firma generada
         LOGGER.info(logF.f("Se almacena temporalmente el resultado de la operacion")); //$NON-NLS-1$
     	try {
-    		TempFilesHelper.storeTempData(transactionId, partialResult);
+    		TempDocumentsManager.storeDocument(transactionId, partialResult, false);
     	}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al almacenar la firma despues de haberla completado"), e); //$NON-NLS-1$

@@ -18,6 +18,7 @@ import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.server.services.batch.SingleSign.ProcessResult;
 import es.gob.fire.server.services.batch.SingleSign.ProcessResult.Result;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignAlgorithm;
+import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 /** Lote de firmas electr&oacute;nicas que se ejecuta secuencialmente.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -160,7 +161,7 @@ public final class SignBatchSerial extends SignBatch {
 			}
 
 			try {
-				ss.save(TempStoreFileSystem.retrieve(ss, getId()));
+				ss.save(TempDocumentsManager.retrieveDocument(ss.getName(getId())));
 				ss.setProcessResult(ProcessResult.PROCESS_RESULT_DONE_SAVED);
 			}
 			catch (final IOException e) {
@@ -196,7 +197,11 @@ public final class SignBatchSerial extends SignBatch {
 
 	protected void deleteAllTemps() {
 		for (final SingleSign ss : this.signs) {
-			TempStoreFileSystem.delete(ss, getId());
+			try {
+				TempDocumentsManager.deleteDocument(ss.getName(getId()));
+			} catch (final IOException e) {
+				LOGGER.warning("No se pudo eliminar el fichero: " + ss.getName(getId())); //$NON-NLS-1$
+			}
 		}
 	}
 }

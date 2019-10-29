@@ -174,8 +174,8 @@ public class AddDocumentBatchManager {
         final String filename = transactionId + "_" + docId; //$NON-NLS-1$
 
         try {
-        	TempFilesHelper.storeTempData(filename, data);
-        	docInfo.setSize(TempFilesHelper.getFileSize());
+        	TempDocumentsManager.storeDocument(filename, data, true);
+        	docInfo.setSize(data.length);
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.f("Error en el guardado temporal de los datos a firmar: " + e)); //$NON-NLS-1$

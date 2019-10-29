@@ -9,6 +9,8 @@
  */
 package es.gob.fire.server.services.internal;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,8 +20,11 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.internal.sessions.SessionException;
 import es.gob.fire.server.services.internal.sessions.SessionsDAO;
 import es.gob.fire.server.services.internal.sessions.SessionsDAOFactory;
+import es.gob.fire.server.services.internal.sessions.TempDocumentsDAO;
+import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -34,22 +39,19 @@ import es.gob.fire.signature.ConfigManager;
  */
 public final class SessionCollector {
 
-	/** N&uacute;mero de veces que se puden buscar sesiones antes de buscar aquellas que estan caducadas. */
-	private static final int MAX_USE_TO_CLEANING = 250;
-
 	private static final Logger LOGGER = Logger.getLogger(SessionCollector.class.getName());
 
 	private static final Map<String, FireSession> sessions = new HashMap<>();
+
+	/** N&uacute;mero de veces que se puden guardar sesiones antes ejecutar el proceso para
+	 * eliminar aquellas que estan caducadas. */
+	private static final int MAX_USE_TO_CLEANING = 250;
 
 	private static int uses = 0;
 
     private static SessionsDAO dao;
 
     static {
-
-    	// Ejecutamos el proceso de borrado de sesiones caducadas (que no habra ninguna)
-    	// y temporales
-    	cleanExpiredSessions();
 
     	// Cargamos el DAO de sesiones compartidas
     	final String daoType = ConfigManager.getSessionsDao();
@@ -60,13 +62,17 @@ public final class SessionCollector {
     	else {
     		dao = SessionsDAOFactory.getInstance(daoType);
     		if (dao == null) {
-    			LOGGER.warning("Se configuro un tipo de gestor de sesiones no reconocido: " + //$NON-NLS-1$
+    			LOGGER.warning("Se configuro un tipo de gestor de sesiones no reconocido o no disponible: " + //$NON-NLS-1$
     					daoType + ". El funcionamiento del componente central fallara en despliegues sobre multiples nodos."); //$NON-NLS-1$
     		}
     		else {
     			LOGGER.info("Se configuro el gestor de sesiones: " + daoType); //$NON-NLS-1$
     		}
     	}
+
+    	// Ejecutamos el proceso de borrado de sesiones caducadas (que no habra ninguna)
+    	// y temporales
+    	deleteExpiredSessions();
     }
 
 
@@ -86,7 +92,7 @@ public final class SessionCollector {
     	sessions.put(transactionId, fireSession);
 
     	if (dao != null) {
-			dao.saveSession(fireSession);
+			dao.saveSession(fireSession, true);
 		}
 
     	LOGGER.fine("Se crea la transaccion " + transactionId); //$NON-NLS-1$
@@ -165,15 +171,6 @@ public final class SessionCollector {
 				}
 				if (fireSession != null) {
 					LOGGER.fine("Sesion cargada de almacenamiento persistente"); //$NON-NLS-1$
-				}
-			}
-
-			// Si hemos llegado al limite establecido de peticiones entre las cuales limpiar,
-			// ejecutamos la limpieza
-			synchronized (sessions) {
-				if (++uses > MAX_USE_TO_CLEANING) {
-					cleanExpiredSessions();
-					uses = 0;
 				}
 			}
 		}
@@ -264,7 +261,7 @@ public final class SessionCollector {
 			if (fireSession != null) {
 				if (fireSession.isExpired()) {
 					fireSession.invalidate();
-					dao.removeSession(id);
+					dao.deleteSession(id);
 					return null;
 				}
 			}
@@ -291,11 +288,15 @@ public final class SessionCollector {
     		fireSession.invalidate();
     		sessions.remove(id);
     	}
-    	TempFilesHelper.deleteTempData(id);
+    	try {
+			TempDocumentsManager.deleteDocument(id);
+		} catch (final IOException e) {
+			LOGGER.warning(String.format("No se pudo eliminar el documento de la transaccion %1s: ", id) + e); //$NON-NLS-1$
+		}
 
     	// Eliminamos la sesion del espacio compartido con el resto de nodos
 		if (dao != null) {
-			dao.removeSession(id);
+			dao.deleteSession(id);
 		}
 
 		LOGGER.fine("Se elimina la transaccion " + LogUtils.cleanText(id)); //$NON-NLS-1$
@@ -312,14 +313,20 @@ public final class SessionCollector {
 
     	// Eliminamos los temporales
    		removeAssociattedTempFiles(fireSession);
-   		TempFilesHelper.deleteTempData(fireSession.getTransactionId());
+   		try {
+			TempDocumentsManager.deleteDocument(fireSession.getTransactionId());
+		} catch (final IOException e) {
+			LOGGER.warning(String.format(
+					"No se pudo eliminar el documento de la transaccion %1s: ", //$NON-NLS-1$
+					fireSession.getTransactionId()) + e);
+		}
 
    		// Eliminamos la sesion de la memoria
    		sessions.remove(fireSession.getTransactionId());
 
     	// Eliminamos la sesion del espacio compartido con el resto de nodos
 		if (dao != null) {
-			dao.removeSession(fireSession.getTransactionId());
+			dao.deleteSession(fireSession.getTransactionId());
 		}
 
 		fireSession.invalidate();
@@ -338,7 +345,14 @@ public final class SessionCollector {
     		if (batchResult != null) {
     			final Iterator<String> it = batchResult.iterator();
     			while (it.hasNext()) {
-    				TempFilesHelper.deleteTempData(batchResult.getDocumentReference(it.next()));
+    				final String docId = it.next();
+    				try {
+						TempDocumentsManager.deleteDocument(batchResult.getDocumentReference(docId));
+					} catch (final IOException e) {
+						LOGGER.warning(String.format(
+								"No se pudo eliminar el documento %1s de la transaccion %2s: ", //$NON-NLS-1$
+								docId, session.getTransactionId()) + e);
+					}
     			}
     		}
     	}
@@ -358,7 +372,13 @@ public final class SessionCollector {
 
     	// Eliminamos los temporales
    		removeAssociattedTempFiles(fireSession);
-    	TempFilesHelper.deleteTempData(fireSession.getTransactionId());
+    	try {
+			TempDocumentsManager.deleteDocument(fireSession.getTransactionId());
+		} catch (final IOException e) {
+			LOGGER.warning(String.format(
+					"No se pudo eliminar el documento de la transaccion %1s: ", //$NON-NLS-1$
+					fireSession.getTransactionId()) + e);
+		}
 
     	// Eliminamos todos los datos de sesion menos los que indican errores
     	for (final String attr : fireSession.getAttributteNames()) {
@@ -372,18 +392,6 @@ public final class SessionCollector {
     	}
     }
 
-    /**
-     * Recorre el listado de sesiones registradas y elimina las que han sobrepasado
-     * el periodo de validez.
-     */
-    private static void cleanExpiredSessions() {
-        final ExpiredSessionCleanerThread t = new ExpiredSessionCleanerThread(
-        		sessions.keySet().toArray(new String[sessions.size()]),
-        		sessions,
-        		ConfigManager.getTempsTimeout());
-        t.start();
-    }
-
 	/**
 	 * Crea un ID de transaccion que no se encuentra registrado en la sesi&oacute;n.
 	 * @return ID de transacci&oacute;n.
@@ -391,10 +399,17 @@ public final class SessionCollector {
 	private static String generateTransactionId() {
 
 		// Definimos un identificador de sesion externo para usar como ID de transaccion
-    	String transactionId;
-    	do {
-    		transactionId = UUID.randomUUID().toString();
-    	} while (existTransaction(transactionId));
+    	String transactionId = null;
+    	try {
+    		do {
+    			transactionId = UUID.randomUUID().toString();
+    		} while (existTransaction(transactionId));
+    	}
+    	catch (final Exception e) {
+    		LOGGER.warning(
+    				"No se crea una sesion compartida. La sesion solo estara disponible en local con el ID: " + //$NON-NLS-1$
+    						transactionId);
+    	}
 
 		return transactionId;
 	}
@@ -404,8 +419,9 @@ public final class SessionCollector {
 	 * @param trId Identificador del que se quiere comprobar la existencia.
 	 * @return {@code true} si ya existe una transacci&oacute;n con ese identificador,
 	 * {@code false} en caso contrario.
+	 * @throws SessionException
 	 */
-	private static boolean existTransaction(final String trId) {
+	private static boolean existTransaction(final String trId) throws SessionException {
 		return sessions.containsKey(trId) || dao != null && dao.existsSession(trId);
 	}
 
@@ -426,7 +442,98 @@ public final class SessionCollector {
 
 		// Actualizamos, si procede, la informacion de la sesion de la memoria compartida
 		if (dao != null) {
-			dao.saveSession(session);
+			dao.saveSession(session, false);
+		}
+
+		// Si hemos llegado al limite establecido de peticiones entre las cuales limpiar,
+		// ejecutamos la limpieza
+		synchronized (sessions) {
+			if (++uses > MAX_USE_TO_CLEANING) {
+				deleteExpiredSessions();
+				uses = 0;
+			}
 		}
 	}
+
+	/**
+	 * Obtiene el gestor de ficheros temporales asociado al gestor de sesiones compartidas
+	 * establecido.
+	 * @return Gestor de ficheros temporales o {@code null} si no hay gestor de sesiones
+	 * o si este no tiene ninguno asociado.
+	 */
+	public static TempDocumentsDAO getAssociatedDocumentsDAO() {
+		return dao != null ? dao.getAssociatedDocumentsDAO() : null;
+	}
+
+
+    /**
+     * Recorre el listado de sesiones registradas y elimina las que han sobrepasado
+     * el periodo de validez.
+     */
+    private static void deleteExpiredSessions() {
+        new ExpiredSessionCleanerThread(
+        		sessions.keySet().toArray(new String[sessions.size()]),
+        		sessions,
+        		dao,
+        		ConfigManager.getTempsTimeout()).start();
+    }
+
+    /**
+     * Hilo para la eliminaci&oacute;n de sesiones y datos caducados.
+     */
+    private static final class ExpiredSessionCleanerThread extends Thread {
+
+    	private static Logger THREAD_LOGGER = Logger.getLogger(ExpiredSessionCleanerThread.class.getName());
+
+    	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
+
+    	private final String[] ids;
+    	private final Map<String, FireSession> sessionsMap;
+    	private final SessionsDAO sessionsDao;
+    	private final long timeout;
+
+    	/**
+    	 * Construye el objeto para la eliminaci&oacute;n de sesiones caducadas.
+    	 * @param ids Identificadores de las sesiones que se tienen que evaluar.
+    	 * @param sessions Mapa con todas las sesiones.
+    	 * @param tempTimeout Tiempo de caducidad en milisegundos de los ficheros temporales.
+    	 */
+    	public ExpiredSessionCleanerThread(final String[] ids,
+    			final Map<String, FireSession> sessions,
+    			final SessionsDAO dao,
+    			final long tempTimeout) {
+    		this.ids = ids;
+    		this.sessionsMap = sessions;
+    		this.sessionsDao = dao;
+    		this.timeout = tempTimeout;
+    	}
+
+    	@Override
+    	public void run() {
+
+    		FireSession session;
+    		final long currentTime = new Date().getTime();
+
+    		// Eliminamos la sesiones caducadas y sus datos asociados
+        	for (final String id : this.ids) {
+        		session = this.sessionsMap.get(id);
+        		if (session != null && currentTime > session.getExpirationTime()) {
+        			// Registramos la transaccion como erronea
+        			TRANSLOGGER.register(session, false);
+        			// Borramos la sesion
+        			SessionCollector.removeSession(session);
+        		}
+        	}
+
+        	// Eliminamos las sesiones caducadas en almacenamiento persistente
+        	if (this.sessionsDao != null) {
+        		try {
+        			this.sessionsDao.deleteExpiredSessions(this.timeout);
+        		}
+        		catch (final Exception e) {
+        			THREAD_LOGGER.warning("Error al eliminar las sesiones caducadas: " + e); //$NON-NLS-1$
+    			}
+        	}
+    	}
+    }
 }

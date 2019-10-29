@@ -9,15 +9,12 @@
  */
 package es.gob.fire.server.services.storage;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.Hashtable;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -26,7 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 
 /** Servicio de almacenamiento temporal de firmas. &Uacute;til para servir de intermediario en comunicaci&oacute;n
@@ -136,21 +133,13 @@ public final class StorageService extends HttpServlet {
 			dataText = ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA);
 		}
 
-		final File outFile = new File(ConfigManager.getAfirmaTempDir(), id);
 		try {
-			final OutputStream fos = new FileOutputStream(outFile);
-			final BufferedOutputStream bos = new BufferedOutputStream(fos);
-			bos.write(dataText.getBytes());
-			bos.flush();
-			bos.close();
-			fos.close();
+			TempDocumentsManager.storeDocument(id, dataText.getBytes(), true);
 		} catch (final IOException e) {
-			LOGGER.severe("No se ha podido generar el fichero temporal para el envio de datos a la web: " + e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al guardar el temporal para la comunicacion con el Cliente @firma", e); //$NON-NLS-1$
 			out.println(ErrorManager.genError(ErrorManager.ERROR_COMMUNICATING_WITH_WEB));
 			return;
 		}
-
-		LOGGER.fine("Se guardo correctamente el fichero: " + outFile.getAbsolutePath()); //$NON-NLS-1$
 
 		out.print(SUCCESS);
 	}

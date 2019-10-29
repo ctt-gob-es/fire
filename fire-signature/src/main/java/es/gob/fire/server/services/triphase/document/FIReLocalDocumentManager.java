@@ -16,7 +16,7 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.server.services.internal.TempFilesHelper;
+import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 /**
  *  Manejador que determina de donde recoge los documentos FIRe para realizar una firma
@@ -32,7 +32,7 @@ public class FIReLocalDocumentManager implements DocumentManager {
 
 	@Override
 	public byte[] getDocument(final String id, final X509Certificate[] certChain, final Properties config) throws IOException {
-		return TempFilesHelper.retrieveTempData(
+		return TempDocumentsManager.retrieveDocument(
 				new String(
 						Base64.decode(id.replace('-', '+').replace('_', '/')),
 						DEFAULT_CHARSET));
@@ -43,11 +43,12 @@ public class FIReLocalDocumentManager implements DocumentManager {
 			throws IOException {
 
 		// Guardamos la firma en un temporal
-		TempFilesHelper.storeTempData(
+		TempDocumentsManager.storeDocument(
 				new String(
 						Base64.decode(id.replace('-', '+').replace('_', '/')),
 						DEFAULT_CHARSET),
-				signature);
+				signature,
+				false);
 
 		return Base64.encode(RESULT_OK.getBytes());
 	}

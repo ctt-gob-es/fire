@@ -9,6 +9,8 @@
  */
 package es.gob.fire.server.services.internal.sessions;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.internal.FireSession;
@@ -22,15 +24,18 @@ public interface SessionsDAO {
 	/**
 	 * Guarda una sesi&oacute;n.
 	 * @param session Sesi&oacute;n a guardar.
+	 * @param created Indica si la sesi&oacute;n se est&aacute; creando ({@code true})
+	 * o si ya lo estaba ({@code false}).
 	 */
-	void saveSession(FireSession session);
+	void saveSession(FireSession session, boolean created);
 
 	/**
 	 * Comprueba la existencia de una sesi&oacute;n.
 	 * @param id Identificador de la sesi&oacute;n.
 	 * @return {@code true} si la sesi&oacute;n existe, {@code false} en caso contrario.
+	 * @throws SessionException Cuando no se haya podido comprobar la existencia de la sesi&oacute;n.
 	 */
-	boolean existsSession(String id);
+	boolean existsSession(String id) throws SessionException;
 
 	/**
 	 * Recupera una sesi&oacute;n. Esto implica construir el propio objeto de sesi&oacute;n y
@@ -46,5 +51,19 @@ public interface SessionsDAO {
 	 * Elimina una sesi&oacute;n.
 	 * @param id Identificador de la sesi&oacute;n.
 	 */
-	void removeSession(String id);
+	void deleteSession(String id);
+
+	/**
+	 * Elimina las sesiones caducadas.
+	 * @param expirationTime Tiempo que puede haber trasncurrido desde su uso creaci&oacute;n/modificaci&oacute;n antes
+	 * de considerarse caducada.
+	 * @throws IOException Cuando ocurre alg&uacute;n error al borrar los ficheros.
+	 */
+	void deleteExpiredSessions(long expirationTime) throws IOException;
+
+	/**
+	 * Recupera el gestor de documentos temporales asociado a un gestor de sesiones.
+	 * @return Gestor de documentos temporales o {@code null} si no tuviese uno asociado.
+	 */
+	TempDocumentsDAO getAssociatedDocumentsDAO();
 }

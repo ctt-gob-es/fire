@@ -102,7 +102,11 @@
 		
 		<profile>
 			<id>clavefirma</id>	<!-- Perfil que agrega el conector de Cl@ve Firma -->
-			
+			<activation>
+				<property>
+					<name>compile</name> <!-- Se activa siempre que se indique esta propiedad -->
+				</property>
+			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>es.gob.fire</groupId>
@@ -113,7 +117,11 @@
 		
 		<profile>
 			<id>fnmt</id>	<!-- Perfil que agrega el conector de la FNMT -->
-			
+			<activation>
+				<property>
+					<name>compile</name> <!-- Se activa siempre que se indique esta propiedad -->
+				</property>
+			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>es.fnmt.fire</groupId>
@@ -124,7 +132,11 @@
 		
 		<profile>
 			<id>afirma</id>	<!-- Perfil que agrega la actualizacion/validacion con @firma -->
-			
+			<activation>
+				<property>
+					<name>compile</name> <!-- Se activa siempre que se indique esta propiedad -->
+				</property>
+			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>es.gob.fire</groupId>

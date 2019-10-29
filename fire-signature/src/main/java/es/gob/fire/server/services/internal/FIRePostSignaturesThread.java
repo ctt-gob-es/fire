@@ -125,7 +125,7 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
     	final byte[] data;
         try {
-        	data = TempFilesHelper.retrieveAndDeleteTempData(docFilename);
+        	data = TempDocumentsManager.retrieveDocument(docFilename);
         }
         catch (final Exception e) {
         	LOGGER.warning(logF.f("No se encuentran los datos a firmar: ") + e); //$NON-NLS-1$
@@ -225,7 +225,7 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
     				}
     			}
     			else {
-    				LOGGER.info(logF.f("Actualizamos la firma '" + this.docId + "' a: " + upgradeLevel)); //$NON-NLS-1$
+    				LOGGER.info(logF.f("Actualizamos la firma '%1s' a: %2s", this.docId, upgradeLevel)); //$NON-NLS-1$
     				UpgradeResult upgradeResult;
     				try {
     					upgradeResult = validator.upgradeSignature(processedSignature,
@@ -278,10 +278,10 @@ class FIRePostSignaturesThread extends ConcurrentProcessThread {
 
     	// Guardamos el resultado pisando el documento de datos
     	try {
-    		TempFilesHelper.storeTempData(docFilename, result);
+    		TempDocumentsManager.storeDocument(docFilename, result, false);
     	}
     	catch (final Exception e) {
-    		LOGGER.severe("Error al almacenar la firma en el directorio temporal: " + e); //$NON-NLS-1$
+    		LOGGER.log(Level.SEVERE, "Error al almacenar la firma en el directorio temporal", e); //$NON-NLS-1$
     		this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
     		SIGNLOGGER.register(this.session, false, this.docId);
     		setFailed(true);

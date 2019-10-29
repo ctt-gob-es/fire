@@ -113,6 +113,7 @@ public final class PreSignService extends HttpServlet {
 		}
 
     	// Leemos los valores necesarios de la configuracion
+		final String appId         	= session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
         final String op          	= session.getString(ServiceParams.SESSION_PARAM_OPERATION);
         final String subjectId      = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
         final String algorithm      = session.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
@@ -124,11 +125,13 @@ public final class PreSignService extends HttpServlet {
         final TransactionConfig connConfig =
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
+        final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
     	// Comprobaciones
         if (subjectId == null || subjectId.isEmpty()) {
-            LOGGER.warning(
+            LOGGER.warning(logF.f(
         		"No se encontro en la sesion el identificador del titular de la clave de firma" //$NON-NLS-1$
-            );
+            ));
             ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(redirectErrorUrl);
             return;
@@ -136,28 +139,28 @@ public final class PreSignService extends HttpServlet {
 
         // El identificador de usuario proporcionado debe ser el que estaba registrado en la sesion
         if (!userId.equals(subjectId)) {
-        	LOGGER.warning("El identificador de usuario proporcionado no coincide con el de la sesion"); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("El identificador de usuario proporcionado no coincide con el de la sesion")); //$NON-NLS-1$
             SessionCollector.removeSession(session);
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
         if (algorithm == null || algorithm.isEmpty()) {
-            LOGGER.warning("No se encontro en la sesion el algoritmo de firma"); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se encontro en la sesion el algoritmo de firma")); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(redirectErrorUrl);
             return;
         }
 
         if (subOperation == null || subOperation.isEmpty()) {
-            LOGGER.warning("No se encontro en la sesion la operacion de firma a realizar"); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se encontro en la sesion la operacion de firma a realizar")); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(redirectErrorUrl);
             return;
         }
 
         if (format == null || format.isEmpty()) {
-            LOGGER.warning("No se encontro en la sesion el formato de firma"); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se encontro en la sesion el formato de firma")); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(redirectErrorUrl);
             return;
@@ -165,7 +168,7 @@ public final class PreSignService extends HttpServlet {
 
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning("No se encontro en la sesion la URL redireccion de error para la operacion"); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se encontro en la sesion la URL redireccion de error para la operacion")); //$NON-NLS-1$
 			 ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(redirectErrorUrl);
 			return;
@@ -180,7 +183,7 @@ public final class PreSignService extends HttpServlet {
             );
         }
         catch (final Exception e) {
-        	LOGGER.warning("No se ha podido decodificar el certificado del firmante: " + e); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
         	response.sendRedirect(redirectErrorUrl);
         	return;
@@ -192,10 +195,10 @@ public final class PreSignService extends HttpServlet {
         if (FIReServiceOperation.SIGN.getId().equals(op)) {
         	final byte[] data;
         	try {
-        		data = TempFilesHelper.retrieveTempData(transactionId);
+        		data = TempDocumentsManager.retrieveDocument(transactionId);
         	}
         	catch (final Exception e) {
-        		LOGGER.warning("No se han podido recuperar los datos de la operacion: " + e); //$NON-NLS-1$
+        		LOGGER.warning(logF.f("No se han podido recuperar los datos de la operacion: " + e)); //$NON-NLS-1$
             	ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
             	response.sendRedirect(redirectErrorUrl);
         		return;
@@ -218,7 +221,7 @@ public final class PreSignService extends HttpServlet {
         		);
             }
             catch (final Exception e) {
-                LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
+                LOGGER.log(Level.SEVERE, logF.f("No se ha podido obtener la prefirma"), e); //$NON-NLS-1$
                 ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
                 response.sendRedirect(redirectErrorUrl);
                 return;
@@ -229,7 +232,7 @@ public final class PreSignService extends HttpServlet {
 
         	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         	if (batchResult == null || batchResult.documentsCount() == 0) {
-        		LOGGER.log(Level.WARNING, "No se han agregado documentos al lote"); //$NON-NLS-1$
+        		LOGGER.log(Level.WARNING, logF.f("No se han agregado documentos al lote")); //$NON-NLS-1$
             	ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
             	response.sendRedirect(redirectErrorUrl);
         		return;
@@ -241,7 +244,7 @@ public final class PreSignService extends HttpServlet {
 
         		final String docId = it.next();
         		if (batchResult.isSignFailed(docId)) {
-        			LOGGER.warning("La firma estaba marcada como erronea desde el inicio"); //$NON-NLS-1$
+        			LOGGER.warning(logF.f("La firma estaba marcada como erronea desde el inicio")); //$NON-NLS-1$
 
             		if (stopOnError) {
 						ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
@@ -253,10 +256,10 @@ public final class PreSignService extends HttpServlet {
 
         		byte[] data;
         		try {
-        			data = TempFilesHelper.retrieveTempData(batchResult.getDocumentReference(docId));
+        			data = TempDocumentsManager.retrieveDocument(batchResult.getDocumentReference(docId));
             	}
             	catch (final Exception e) {
-            		LOGGER.warning("No se pudo recuperar uno de los datos agregados al lote: " + e); //$NON-NLS-1$
+            		LOGGER.warning(logF.f("No se pudo recuperar uno de los datos agregados al lote: " + e)); //$NON-NLS-1$
             		if (stopOnError) {
             			ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
 						response.sendRedirect(redirectErrorUrl);
@@ -268,7 +271,7 @@ public final class PreSignService extends HttpServlet {
         	}
 
             if (documents.size() == 0) {
-            	LOGGER.warning("No se han podido recuperar los datos a firmar"); //$NON-NLS-1$
+            	LOGGER.warning(logF.f("No se han podido recuperar los datos a firmar")); //$NON-NLS-1$
             	ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
             	response.sendRedirect(redirectErrorUrl);
                 return;
@@ -286,7 +289,7 @@ public final class PreSignService extends HttpServlet {
         		);
             }
             catch (final Throwable e) {
-                LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
+                LOGGER.log(Level.SEVERE, logF.f("No se ha podido obtener la prefirma"), e); //$NON-NLS-1$
                 ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
                 response.sendRedirect(redirectErrorUrl);
                 return;
@@ -304,14 +307,14 @@ public final class PreSignService extends HttpServlet {
         	}
 
             if (failed && stopOnError) {
-                LOGGER.log(Level.SEVERE, "Se encontraron errores en las prefirmas del lote y se aborta la operacion"); //$NON-NLS-1$
+                LOGGER.log(Level.SEVERE, logF.f("Se encontraron errores en las prefirmas del lote y se aborta la operacion")); //$NON-NLS-1$
                 ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
                 response.sendRedirect(redirectErrorUrl);
                 return;
             }
         }
         else {
-        	LOGGER.warning("Operacion no soportada: " + op); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("Operacion no soportada: " + op)); //$NON-NLS-1$
         	SessionCollector.removeSession(session);
     		response.sendError(
     				HttpServletResponse.SC_BAD_REQUEST,
@@ -326,7 +329,7 @@ public final class PreSignService extends HttpServlet {
             connector = ProviderManager.initTransacction(providerName, connConfig.getProperties());
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
             response.sendRedirect(redirectErrorUrl);
             return;
@@ -344,7 +347,7 @@ public final class PreSignService extends HttpServlet {
             );
         }
         catch (final FIReConnectorUnknownUserException e) {
-        	LOGGER.severe("El usuario " + subjectId + " no tiene certificados en el sistema: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+        	LOGGER.severe(logF.f("El usuario ") + subjectId + " no tiene certificados en el sistema: " + e); //$NON-NLS-1$ //$NON-NLS-2$
         	ErrorManager.setErrorToSession(session, OperationError.UNKNOWN_USER, originForced);
         	if (originForced) {
         		response.sendRedirect(redirectErrorUrl);
@@ -355,7 +358,7 @@ public final class PreSignService extends HttpServlet {
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el sistema: ") + e, e); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_NETWORK, originForced);
         	if (originForced) {
         		response.sendRedirect(redirectErrorUrl);
@@ -366,7 +369,7 @@ public final class PreSignService extends HttpServlet {
             return;
         }
         catch (final Exception e) {
-            LOGGER.log(Level.SEVERE, "Error en la carga de datos: " + e, e); //$NON-NLS-1$
+            LOGGER.log(Level.SEVERE, logF.f("Error en la carga de datos: ") + e, e); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE, originForced);
         	if (originForced) {
         		response.sendRedirect(redirectErrorUrl);

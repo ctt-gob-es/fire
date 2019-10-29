@@ -83,7 +83,7 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
 
     	byte[] signature;
         try {
-        	signature = TempFilesHelper.retrieveAndDeleteTempData(docFilename);
+        	signature = TempDocumentsManager.retrieveAndDeleteDocument(docFilename);
         }
         catch (final Exception e) {
         	LOGGER.warning(this.logF.f("No se encuentra la firma: " + e)); //$NON-NLS-1$
@@ -173,7 +173,7 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
 
         // Pisamos la firma por el resultado de la actualizacion y el postproceso
         try {
-        	TempFilesHelper.storeTempData(docFilename, signature);
+        	TempDocumentsManager.storeDocument(docFilename, signature, true);
         }
         catch (final Exception e) {
         	LOGGER.severe(this.logF.f("Error al almacenar la firma en el directorio temporal: " + e)); //$NON-NLS-1$
@@ -184,7 +184,11 @@ public class ClienteAFirmaUpdateSignaturesThread extends ConcurrentProcessThread
         }
 
     	if (isInterrupted()) {
-    		TempFilesHelper.deleteTempData(docFilename);
+    		try {
+				TempDocumentsManager.deleteDocument(docFilename);
+			} catch (final IOException e) {
+				LOGGER.warning("No se pudo borrar el documento: " + docFilename); //$NON-NLS-1$
+			}
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
     		return;
     	}

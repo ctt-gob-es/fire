@@ -44,17 +44,11 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 
 	private static final String SESSIONS_TEMP_DIR = "sessions"; //$NON-NLS-1$
 
-	/** N&uacute;mero de usos maximos antes de realizar una limpieza de sesiones abandonadas en disco. */
-	private static final int MAX_USES = 2000;
-
-	/** Tiempo m&aacute;ximo por defecto que puede estar en disco una sesi&oacute;n. */
-	private static final long DEFAULT_MAX_SESSION_PERIOD = 30*60*1000; // 30 Minutos
-
 	/** Directorio de sesiones. */
 	private final File dir;
 
-	/** Numero de recuperaciones de sesion realizados. */
-	private int uses = 0;
+	/** Gestor asociado para el guardado de ficheros temporales. */
+	private final TempDocumentsDAO documentsDAO;
 
 	/**
 	 * Construye el gestor y crea el directorio para el guardado.
@@ -66,10 +60,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 		if (!this.dir.exists()) {
 			this.dir.mkdirs();
 		}
-		else {
-			// Al iniciar el DAO limpiamos las sesiones caducadas que existiesen previamente
-			new CleanerThread(this.dir).start();
-		}
+		this.documentsDAO = new FileSystemTempDocumentsDAO();
 	}
 
 	@Override
@@ -79,13 +70,6 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 
 	@Override
 	public FireSession recoverSession(final String id, final HttpSession session) {
-
-		// Si hemos alcanzado el numero maximo de accesos, iniciamos
-		// la limpieza del directorio temporal y reiniciamos el contador
-		if (++this.uses > MAX_USES) {
-			new CleanerThread(this.dir).start();
-			this.uses = 0;
-		}
 
 		final File sessionFile = new File(this.dir, id);
 
@@ -127,7 +111,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	}
 
 	@Override
-	public void saveSession(final FireSession session) {
+	public void saveSession(final FireSession session, final boolean created) {
 		try (final FileOutputStream fos = new FileOutputStream(new File(this.dir, session.getTransactionId()));) {
 			try (ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 				oos.writeObject(session.getAttributtes());
@@ -139,7 +123,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	}
 
 	@Override
-	public void removeSession(final String id) {
+	public void deleteSession(final String id) {
 		try {
 			Files.delete(new File(this.dir, id).toPath());
 		} catch (final NoSuchFileException e) {
@@ -149,41 +133,23 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 		}
 	}
 
-	/**
-	 * Hilo para la limpieza de sesiones en disco.
-	 */
-	class CleanerThread extends Thread {
+	@Override
+	public void deleteExpiredSessions(final long expirationTime) throws IOException {
 
-		private final Logger LOGGER_THREAD = Logger.getLogger(CleanerThread.class.getName());
-
-		private final File cleaningDir;
-
-		public CleanerThread(final File dir) {
-			this.cleaningDir = dir;
-		}
-
-		@Override
-		public void run() {
-
-			File[] files;
-			try {
-				files = this.cleaningDir.listFiles();
-			}
-			catch (final Exception e) {
-				this.LOGGER_THREAD.log(Level.WARNING, "No se pudo realizar la limpieza del directorio de sesiones", e); //$NON-NLS-1$
-				return;
-			}
-
-			final long currentTime = System.currentTimeMillis();
-			for (final File file : files) {
-				if (currentTime > file.lastModified() + DEFAULT_MAX_SESSION_PERIOD) {
-					try {
-						Files.deleteIfExists(file.toPath());
-					} catch (final IOException e) {
-						// No hacemos nada
-					}
-				}
-			}
-		}
+    	for (final File tempFile : this.dir.listFiles(new ExpiredFileFilter(expirationTime))) {
+    		try {
+    			Files.delete(tempFile.toPath());
+    		}
+    		catch (final Exception e) {
+    			LOGGER.warning("No se pudo eliminar la sesion caducada " + tempFile.getName() + //$NON-NLS-1$
+    					": " + e); //$NON-NLS-1$
+    		}
+    	}
 	}
+
+	@Override
+	public TempDocumentsDAO getAssociatedDocumentsDAO() {
+		return this.documentsDAO;
+	}
+
 }

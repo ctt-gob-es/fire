@@ -92,8 +92,7 @@ public class RecoverSignResultManager {
 		LOGGER.info(logF.f("Se carga el resultado de la operacion del almacen temporal")); //$NON-NLS-1$
         byte[] signResult;
         try {
-        	signResult = TempFilesHelper.retrieveAndDeleteTempData(transactionId);
-
+        	signResult = TempDocumentsManager.retrieveDocument(transactionId);
         }
         catch (final Exception e) {
         	LOGGER.warning(logF.f("No se encuentra el resultado de la operacion: " + e)); //$NON-NLS-1$

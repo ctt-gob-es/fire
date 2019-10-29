@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReServiceOperation;
+import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
@@ -173,18 +174,19 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.valueOf(FIReServiceOperation.parse(op)).toString());
 
 
-
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
         FIReDocumentManager docManager;
         try {
-        	docManager = FIReDocumentManagerFactory.newDocumentManager(docManagerName);
+        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, docManagerName);
         }
-        catch (final IllegalArgumentException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No existe el gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
+        catch (final IllegalAccessException | IllegalArgumentException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$
         	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No existe el gestor de documentos"); //$NON-NLS-1$
+        	// En el mensaje de error se indica que no existe para no revelar si no existe simplemente es un tema de permisos
+        	response.sendError(HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorCode(),
+        			HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorDescription());
         	return;
         }
         catch (final Exception e) {

@@ -26,6 +26,8 @@ enum OperationError {
 	INTERNAL_ERROR(7, "Error interno del servidor"), //$NON-NLS-1$
 	EXTERNAL_SERVICE_ERROR(8, "Error detectado despues de llamar a la pasarela externa"), //$NON-NLS-1$
 
+	INVALID_DOCUMENT_MANAGER(9, "El gestor de documentos indicado no es valido"), //$NON-NLS-1$
+
 	// Errores especificos del servicios de listado de certificados
 	CERTIFICATES_SERVICE(101, "Error en la obtencion de los certificados"), //$NON-NLS-1$
 	CERTIFICATES_SERVICE_NETWORK(102, "Error al conectar con el servicio para la recuperacion de certificados"), //$NON-NLS-1$

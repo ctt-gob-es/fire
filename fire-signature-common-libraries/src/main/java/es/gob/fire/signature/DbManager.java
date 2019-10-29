@@ -31,6 +31,14 @@ public class DbManager {
 	private static Connection conn = null;
 	static {
 		conn = initialize();
+		if (conn != null) {
+			try {
+				conn.setAutoCommit(true);
+			}
+			catch (final Exception e) {
+				LOGGER.warning("No se pudo activar la funcion de AutoCommit en la conexion de BD"); //$NON-NLS-1$
+			}
+		}
 	}
 
 	/**
@@ -108,15 +116,24 @@ public class DbManager {
 	}
 
 	/**
+	 * Establece si debe realizarse commit despu&eacute;s de cada sentencia de modificaci&oacute;n
+	 * de la base de datos.
+	 * @throws SQLException Cuando no se puede modificar la opci&oacute;n de AutoCommit.
+	 */
+	public static void setAutoCommit(final boolean autoCommit) throws SQLException {
+		getConnection().setAutoCommit(autoCommit);
+	}
+
+	/**
 	 * Realiza a acci&oacute;n de commit desde la &uacute;ltima acci&oacute;n de commit o rollback anterior
-	 * @throws SQLException
+	 * @throws SQLException Cuando fall&oacute; la ejecuci&oacute;n del commit.
 	 */
 	public static void runCommit() throws SQLException {
 		getConnection().commit();
 	}
 	/**
 	 * Deshace todos los cambios de la actual transacci&oacute;n
-	 * @throws SQLException
+	 * @throws SQLException Cuando fall&oacute; la ejecuci&oacute;n del rollback.
 	 */
 	public static void runRollBack() throws SQLException {
 		getConnection().rollback();
@@ -147,24 +164,6 @@ public class DbManager {
 
 		return c.prepareStatement(statement);
 	}
-
-	/**
-	 * Prepara una sentencia SQL para ser ejecutada.
-	 * @param statement Sentencia SQL.
-	 * @param autoCommit true or false
-	 * @return Sentencia SQL.
-	 * @throws SQLException Cuando se produce un error al preparar la sentencia.
-	 * @throws DBConnectionException Cuando no se ha podido inicializar la conexion con base de datos.
-	 */
-	public static PreparedStatement prepareStatement(final String statement, final boolean autoCommit) throws SQLException, DBConnectionException {
-		final Connection c = getConnection();
-		if (c == null)  {
-			throw new DBConnectionException("No se ha encontrado una conexion abierta contra la base de datos"); //$NON-NLS-1$
-		}
-		c.setAutoCommit(autoCommit);
-		return c.prepareStatement(statement);
-	}
-
 
 	/**
 	 * Indica si la conexi&oacute;n a base de datos esta conigurada y puede usarse.

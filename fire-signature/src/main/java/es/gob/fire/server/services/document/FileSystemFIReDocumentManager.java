@@ -65,10 +65,22 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	@Override
 	public byte[] getDocument(final byte[] docId, final String appId, final String format, final Properties extraParams) throws IOException {
 
+		if (docId.length > 255) {
+			throw new IOException(
+					"El nombre de fichero no puede superar los 255 bytes" //$NON-NLS-1$
+				);
+		}
+
 		final String id = new String(docId, DEFAULT_CHARSET);
 		LOGGER.fine("Recuperamos el documento con identificador: " + (id.length() > 20 ? id.substring(0, 20) + "..." : id)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		final File file = new File(this.inDir, id);
+
+		if (id.contains("\n")) { //$NON-NLS-1$
+			throw new IOException(
+				"Se han encontrado caracteres invalidos en el nombre de fichero" //$NON-NLS-1$
+			);
+		}
 
 		if( !isRootParent(new File(this.inDir), file ) ) {
 		    throw new IOException(

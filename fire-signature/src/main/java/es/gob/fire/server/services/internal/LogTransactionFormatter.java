@@ -48,4 +48,17 @@ public class LogTransactionFormatter {
 		}
 		return message;
 	}
+
+	/**
+	 * Devuelve un mensaje con los prefijos que indican el identificador de aplicaci&oacute;n y
+	 * el de la transacci&oacute;n actual si se han configurado.
+	 * @param message Mensaje al que agregar los prefijos.
+	 * @param subtexts Part&iacute;culas de texto que deben introducirse en el mensaje.
+	 * @return Cadena con los pregfijos.
+	 */
+	public String f(final String message, final Object... subtexts) {
+		return f(subtexts != null && subtexts.length > 0 ?
+					String.format(message, subtexts) :
+					message);
+	}
 }

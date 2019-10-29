@@ -14,10 +14,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.w3c.dom.DOMException;
@@ -26,12 +26,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import es.gob.afirma.core.AOException;
+import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.server.services.batch.SingleSign.ProcessResult.Result;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignSubOperation;
-import es.gob.fire.server.services.internal.TempFilesHelper;
+import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 /** Firma electr&oacute;nica &uacute;nica dentro de un lote.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -60,6 +61,18 @@ public final class SingleSign {
 	private final SignSubOperation subOperation;
 
 	private ProcessResult processResult = new ProcessResult(Result.NOT_STARTED, null);
+
+	private static final MessageDigest MD;
+	static {
+		try {
+			MD = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
+		}
+		catch (final Exception e) {
+			throw new IllegalStateException(
+				"No se ha podido cargar el motor de huellas para SHA-1: " + e, e //$NON-NLS-1$
+			);
+		}
+	}
 
 
 	/**
@@ -243,55 +256,13 @@ public final class SingleSign {
 		);
 	}
 
-	/** Crea una definici&oacute;n de tarea de firma electr&oacute;nica &uacute;nica.
-	 * @param id Identificador de la firma.
-	 * @param dataSrc Datos a firmar.
-	 * @param fmt Formato de firma.
-	 * @param subOp Tipo de firma a realizar.
-	 * @param xParams Opciones adicionales de la firma.
-	 * @param ss Objeto para guardar la firma una vez completada. */
-	public SingleSign(final String id,
-			          final String dataSrc,
-			          final SignFormat fmt,
-			          final SignSubOperation subOp,
-			          final Properties xParams,
-			          final SignSaverFile ss) {
-
-		if (dataSrc == null) {
-			throw new IllegalArgumentException(
-				"El origen de los datos a firmar no puede ser nulo" //$NON-NLS-1$
-			);
-		}
-
-		if (fmt == null) {
-			throw new IllegalArgumentException(
-				"El formato de firma no puede ser nulo" //$NON-NLS-1$
-			);
-		}
-
-		if (ss == null) {
-			throw new IllegalArgumentException(
-				"El objeto de guardado de firma no puede ser nulo" //$NON-NLS-1$
-			);
-		}
-
-		this.dataSource = dataSrc;
-		this.extraParams = xParams != null ? xParams : new Properties();
-		this.format = fmt;
-
-		this.id = id != null ? id : UUID.randomUUID().toString();
-		this.extraParams.put(PROP_ID, getId());
-
-		this.subOperation = subOp;
-	}
-
 	/**
 	 * Recupera los datos que se deben procesar.
 	 * @return Datos.
 	 * @throws IOException Cuando no se encuentran los datos o no pueden leerse.
 	 */
 	public byte[] getData() throws IOException {
-		return TempFilesHelper.retrieveTempData(this.dataSource);
+		return TempDocumentsManager.retrieveDocument(this.dataSource);
 	}
 
 	/**
@@ -300,7 +271,7 @@ public final class SingleSign {
 	 * @throws IOException Cuando no pueden guardarse los datos.
 	 */
 	void save(final byte[] dataToSave) throws IOException {
-		TempFilesHelper.storeTempData(this.dataSource, dataToSave);
+		TempDocumentsManager.storeDocument(this.dataSource, dataToSave, false);
 	}
 
 	Callable<CallableResult> getSaveCallable(final String batchId) {
@@ -308,7 +279,7 @@ public final class SingleSign {
 			@Override
 			public CallableResult call() {
 				try {
-					save(TempStoreFileSystem.retrieve(SingleSign.this, batchId));
+					save(TempDocumentsManager.retrieveDocument(SingleSign.this.getName(batchId)));
 				}
 				catch(final Exception e) {
 					return new CallableResult(getId(), e);
@@ -316,6 +287,16 @@ public final class SingleSign {
 				return new CallableResult(getId());
 			}
 		};
+	}
+
+	/**
+	 * Devuelve el nombre con el que referenciar a la firma en base al identificador del
+	 * lote indicado.
+	 * @param batchId Identificador de lote.
+	 * @return Nombre que asignar a la firma.
+	 */
+	String getName(final String batchId) {
+		return AOUtil.hexify(MD.digest(this.id.getBytes(DEFAULT_CHARSET)), false) + "." + batchId; //$NON-NLS-1$
 	}
 
 	/**

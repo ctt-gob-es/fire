@@ -137,7 +137,7 @@ public class RecoverBatchSignatureManager {
         LOGGER.info(logF.f("Se carga el resultado de la firma")); //$NON-NLS-1$
         byte[] signature;
         try {
-        	signature = TempFilesHelper.retrieveAndDeleteTempData(docFilename);
+        	signature = TempDocumentsManager.retrieveAndDeleteDocument(docFilename);
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.f("No se encuentra el resultado de la firma del documento: " + e)); //$NON-NLS-1$

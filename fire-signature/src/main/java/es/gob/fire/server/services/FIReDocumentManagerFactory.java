@@ -43,35 +43,42 @@ public class FIReDocumentManagerFactory {
 	/**
 	 * Obtiene una instancia de la clase de gesti&oacute;n de documentos. Si no se
 	 * indica ninguno, se devuelve el por defecto.
+	 * @param appId Identificador de la aplicaci&oacute;n que solicita el gestor.
 	 * @param docManagerName Nombre del gestor que se desea recuperar o {@code null}
 	 * para obtener el por defecto.
 	 * @return Gestor de documentos.
 	 * @throws IllegalArgumentException Cuando se indica un gestor de documentos que no existe.
 	 * @throws IOException Cuando no es posible cargar el gestor de documentos.
+	 * @throws IllegalAccessException Cuando no se tenga permisos para acceder al gestor de
+	 * documentos indicado.
 	 */
-	public static FIReDocumentManager newDocumentManager(final String docManagerName)
-			throws IllegalArgumentException, IOException {
+	public static FIReDocumentManager newDocumentManager(final String appId, final String docManagerName)
+			throws IllegalArgumentException, IOException, IllegalAccessException {
 
 		String managerName = docManagerName;
 		if (managerName == null) {
 			managerName = DEFAULT_DOCUMENT_MANAGER;
 		}
 
+		// Si se intenta cargar un gestor de documentos distinto al por defecto y no se tiene permiso para ello,
+		// se devuelve un error
+		if (!managerName.equals(DEFAULT_DOCUMENT_MANAGER) && !ConfigManager.isDocumentManagerAllowed(appId, managerName)) {
+			throw new IllegalAccessException("La aplicacion no tiene habilitado el acceso al gestor de documentos: " + managerName); //$NON-NLS-1$
+		}
+
+		// Si no se tiene cargada ya la clase gestora, se carga ahora
 		if (!docManagers.containsKey(managerName)) {
 
 			final String docManagerClassName = ConfigManager.getDocumentManagerClassName(managerName);
 
 			// Comprobamos que la clase este definida en el fichero de configuracion
 			if (docManagerClassName == null) {
-
 				// Si no hay definida en el fichero de configuracion una clase especifica en el fichero
 				// de configuracion, cargamos la clase gestora original
 				if (DEFAULT_DOCUMENT_MANAGER.equals(managerName)) {
 					LOGGER.warning("No se ha encontrado la clase gestora por defecto en el fichero de configuracion. Se establecera la clase original."); //$NON-NLS-1$
 					return registryDefaultDocumentManager();
 				}
-
-				LOGGER.severe("No hay definida una clase gestora de documentos con el nombre " + managerName); //$NON-NLS-1$
 				throw new IllegalArgumentException("No hay definida una clase gestora de documentos con el nombre " + managerName); //$NON-NLS-1$
 			}
 
@@ -81,49 +88,43 @@ public class FIReDocumentManagerFactory {
 						getConstructor().newInstance();
 			}
 			catch (final ClassNotFoundException e) {
-				LOGGER.severe("No se encontro la clase gestora de documentos " + docManagerClassName); //$NON-NLS-1$
 				throw new IOException("No se encontro la clase gestora de documentos " + docManagerClassName, e); //$NON-NLS-1$
 			}
 			catch (final NoSuchMethodException | IllegalAccessException e) {
-				LOGGER.severe("La clase gestora de documento no tiene definido el constructor por defecto o este no es publico: " + e); //$NON-NLS-1$
 				throw new IOException("La clase gestora de documento no tiene definido el constructor por defecto o este no es publico", e); //$NON-NLS-1$
 			}
 			catch (final Exception e) {
-				LOGGER.severe("La clase gestora de documentos genero un error durante la construccion: " + e); //$NON-NLS-1$
 				throw new IOException("La clase gestora de documentos genero un error durante la construccion", e); //$NON-NLS-1$
 			}
 
-			// Salvo que sea el DocumentManager por defecto, se busca un fichero de configuracion
-			// para su inicializacion. El DocumentManager por defecto no lo necesita.
-			if (!DEFAULT_DOCUMENT_MANAGER.equals(managerName)) {
-				Properties config = null;
-				try {
-					config = ConfigFileLoader.loadConfigFile(getDocManagerConfigFilename(managerName));
-				}
-				catch (final FileNotFoundException e) {
-					LOGGER.warning("No se encontro el fichero de configuracion '" + getDocManagerConfigFilename(managerName) + //$NON-NLS-1$
-							"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
-				}
-				catch (final Exception e) {
-					LOGGER.warning("No se pudo cargar el fichero de configuracion '" + getDocManagerConfigFilename(managerName) + //$NON-NLS-1$
-							"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
-				}
+			// Se busca un fichero de configuracion para la inicializacion del gestor
+			Properties config = null;
+			try {
+				config = ConfigFileLoader.loadConfigFile(getDocManagerConfigFilename(managerName));
+			}
+			catch (final FileNotFoundException e) {
+				LOGGER.warning("No se encontro el fichero de configuracion '" + getDocManagerConfigFilename(managerName) + //$NON-NLS-1$
+						"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
+			}
+			catch (final Exception e) {
+				LOGGER.warning("No se pudo cargar el fichero de configuracion '" + getDocManagerConfigFilename(managerName) + //$NON-NLS-1$
+						"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
+			}
 
-				// Desciframos las claves del fichero de configuracion si es necesario
-				if (config != null && ConfigManager.hasDecipher()) {
-					for (final String key : config.keySet().toArray(new String[config.size()])) {
-						config.setProperty(key, ConfigManager.getDecipheredProperty(config, key, null));
-					}
-				}
-
-				try {
-					docManager.init(config);
-				}
-				catch (final Exception e) {
-					LOGGER.severe("La clase gestora de documentos " + docManagerClassName + " genero un error durante la inicializacion: " + e); //$NON-NLS-1$ //$NON-NLS-2$
-					throw new IOException("La clase gestora de documentos genero un error durante la inicializacion", e); //$NON-NLS-1$
+			// Desciframos las claves del fichero de configuracion si es necesario
+			if (config != null && ConfigManager.hasDecipher()) {
+				for (final String key : config.keySet().toArray(new String[config.size()])) {
+					config.setProperty(key, ConfigManager.getDecipheredProperty(config, key, null));
 				}
 			}
+
+			try {
+				docManager.init(config);
+			}
+			catch (final Exception e) {
+				throw new IOException("La clase gestora de documentos '" + docManagerClassName + "' genero un error durante la inicializacion", e); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+
 			docManagers.put(managerName, docManager);
 		}
 

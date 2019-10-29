@@ -25,6 +25,7 @@ import es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyExcepti
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
+import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 final class SingleSignPostProcessor {
 
@@ -130,7 +131,7 @@ final class SingleSignPostProcessor {
 		}
 
 		// Guardamos el resultado en almacenamiento temporal
-		TempStoreFileSystem.store(signedDoc, sSign, batchId);
+		TempDocumentsManager.storeDocument(sSign.getName(batchId), signedDoc, true);
 	}
 
 	/** Elimina los datos de sesi&oacute;n que no est&eacute;n relacionados con la firma actual.
