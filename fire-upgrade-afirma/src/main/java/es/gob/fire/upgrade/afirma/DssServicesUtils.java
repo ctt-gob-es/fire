@@ -43,10 +43,10 @@ final class DssServicesUtils {
             firmaXml = DocumentBuilderFactory.newInstance()
                     .newDocumentBuilder()
                     .parse(new ByteArrayInputStream(firma));
-            LOGGER.info("La firma es XML"); //$NON-NLS-1$
+            LOGGER.fine("La firma es XML"); //$NON-NLS-1$
         } catch (final Exception e) {
             isBinary = true;
-            LOGGER.info("La firma no es XML: " + e); //$NON-NLS-1$
+            LOGGER.fine("La firma no es XML: " + e); //$NON-NLS-1$
         }
 
         // Definimos el tipo de nodo en el que se declara la firma
@@ -166,10 +166,10 @@ final class DssServicesUtils {
             firmaXml = DocumentBuilderFactory.newInstance()
                     .newDocumentBuilder()
                     .parse(new ByteArrayInputStream(firma));
-            LOGGER.info("La firma es XML"); //$NON-NLS-1$
+            LOGGER.fine("La firma es XML"); //$NON-NLS-1$
         } catch (final Exception e) {
             isBinary = true;
-            LOGGER.info("La firma no es XML: " + e); //$NON-NLS-1$
+            LOGGER.fine("La firma no es XML: " + e); //$NON-NLS-1$
         }
 
         // Definimos el tipo de nodo en el que se declara la firma
