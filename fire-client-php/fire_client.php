@@ -145,9 +145,10 @@
 			// Llamamos al servicio remoto
 			$response = $this->connect($URL_SERVICE, $URL_SERVICE_PARAMS);
 			
-			// Si la respuesta notifica un error o incluye los datos procesados, se devuelve
+			// Si la respuesta notifica un error, senala que hay que esperar un periodo de gracia para obtener el
+			// binario firmado o si ya incluye la firma, se devuelve
 			$transaction = new TransactionResult($response);
-			if (isset($transaction->errorCode) || isset($transaction->result)) {
+			if (isset($transaction->errorCode) || isset($transaction->gracePeriod) || isset($transaction->result)) {
 				return $transaction;
 			}
 			
@@ -256,7 +257,7 @@
 			);
 
 			// Si se ha indicado un formato de upgrade, lo actualizamos
-			if (!isset($upgrade) && !empty($upgrade)) {
+			if (isset($upgrade) && !empty($upgrade)) {
 				$URL_SERVICE_PARAMS["upgrade"] = $upgrade;
 			}
 			
@@ -662,7 +663,7 @@
 				throw new InvalidBatchDocumentException("El documento no existe en el lote");
 			}
 			else if ($http_code == 536) {
-				throw new InvalidBatchDocumentException("Fallo la firma del documento que se intenta recuperar");
+				throw new InvalidBatchDocumentException("La firma solicitada no se encuentra disponible");
 			}
 			else if ($http_code == 537) {
 				throw new HttpOperationException("Se intenta firmar un lote sin documentos");
@@ -780,6 +781,7 @@
 		var $id;
 		var $ok;
 		var $dt;
+		var $gp;
 		
 		function __construct ($response){
 			if (isset($response->id)) {
@@ -792,6 +794,10 @@
 			
 			if (isset($response->dt)) {
 				$this->dt = $response->dt;
+			}
+			
+			if (isset($response->gp)) {
+				$this->gp = new GracePeriod($response->gp->id, "@".($response->gp->dt/1000));
 			}
 		
 			if (empty($this->id)){
@@ -842,6 +848,7 @@
 		var $state;
 		var $providerName;
 		var $signingCert;
+		var $gracePeriod;
 		var $errorCode;
 		var $errorMessage;
 		var $result;
@@ -866,6 +873,9 @@
 				if (isset($jsonResponse->result->cert)) {
 					$this->signingCert = $jsonResponse->result->cert;
 				}
+				if (isset($jsonResponse->result->grace)) {
+					$this->gracePeriod = new GracePeriod($jsonResponse->result->grace->id, "@".($jsonResponse->result->grace->date/1000));
+				}
 				if (isset($jsonResponse->result->ercod)) {
 					$this->errorCode = $jsonResponse->result->ercod;
 					$this->state = $STATE_ERROR;
@@ -884,4 +894,26 @@
 			__construct($result);
 		}
 	};
+	
+	/**
+	 * Clase que almacena la informacion del periodo de gracia solicitado antes de la recuperacion de la firma.
+	 */
+	class GracePeriod{
+		var $id;
+		var $date;
+
+		/**
+		 * Construye un objeto con la informacion del periodo de gracia.
+		 * $gracePeriodId Identificador para la recuperacion de los datos firmados.
+		 * $gracePeriodDate Cadena de texto con marca de tiempo UNIX (segundos desde 1 de enero del 1970 a las 00:00:00).
+		 */
+		function __construct($gracePeriodId, $gracePeriodDate){
+			$this->id = $gracePeriodId;
+			$this->date = new DateTime($gracePeriodDate);
+		}
+
+		function GracePeriod ($gracePeriodId, $gracePeriodDate) {
+			__construct($gracePeriodId, $gracePeriodDate);
+		}
+	}
 ?>

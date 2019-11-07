@@ -11,6 +11,8 @@
 	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
 	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
 	$subjectId = "00001";		// DNI de la persona
+	$extraParams = base64_encode("mode=implicit\nexpPolicy=FirmaAGE");
+	$upgradeFormat = null;		//Formato de firma longeva (T-LEVEL, LT-LEVEL...)
 	$conf = "redirectOkUrl=http://www.google.es"."\n".	// URL a la que llegara si el usuario se autentica correctamente
 			"redirectErrorUrl=http://www.ibm.com";		// URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
 	$confB64 = base64_encode($conf);
@@ -24,8 +26,8 @@
 			"sign",			// Operacion criptografica (sign, cosign o countersign)
 			"CAdES",		// Formato de firma (CAdES, XAdES, PAdES...)
 			"SHA1withRSA",	// Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
-			null,			// Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
-			null,			// Actualizacion
+			$extraParams,	// Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
+			$upgradeFormat,	// Actualizacion
 			$confB64		// Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
 		);
 	}

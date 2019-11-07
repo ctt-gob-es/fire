@@ -10,7 +10,7 @@
 	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
 	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
 	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "b9550827-b8dd-4eed-ae17-f3d5d8a2a597";	// Identificador de la transaccion
+	$transactionId = "1bf458ac-6940-4be9-bd26-86d6ba82f898";	// Identificador de la transaccion
 	$documentB64 = base64_encode("Hola Mundo!!");				// Simulacion de documento para agregarlo al batch
 	$conf = "redirectOkUrl=http://www.google.es"."\n".	// URL a la que llegara si el usuario se autentica correctamente
 			"redirectErrorUrl=http://www.ibm.com";		// URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente

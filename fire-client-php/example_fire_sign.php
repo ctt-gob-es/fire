@@ -17,6 +17,7 @@
 	$appId = "B244E473466F";	// Entorno local
 	$subjectId = "00001";		// DNI de la persona
 	$dataB64 = base64_encode("Hola Mundo!!");
+	$extraParams = base64_encode("mode=implicit");
 	
 	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
 	
@@ -28,7 +29,7 @@
 			"sign",			// Operacion criptografica (sign, cosign o countersign)
 			"CAdES",		// Formato de firma (CAdES, XAdES, PAdES...)
 			"SHA1withRSA",	// Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
-			null,			// Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
+			$extraParams,	// Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
 			$dataB64,		// Datos a firmar
 			$confB64		// Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
 		);
