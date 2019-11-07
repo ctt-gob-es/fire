@@ -38,6 +38,7 @@ import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.upgrade.GracePeriodInfo;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;
 import es.gob.fire.upgrade.UpgradeResult;
@@ -234,8 +235,10 @@ public class RecoverSignManager {
     		// Comprobamos si es necesaria la validacion de la firma
         	final boolean signValidationNeeded = needValidation(
         			ConfigManager.isSecureProvider(providerName), cop, format);
+
+        	final PostProcessResult postProcessResult;
     		try {
-    			partialResult = postProcessSignature(partialResult, upgrade, connConfig, signValidationNeeded, logF);
+    			postProcessResult = postProcessSignature(partialResult, upgrade, connConfig, signValidationNeeded, logF);
     		}
     		catch (final InvalidSignatureException e) {
     			LOGGER.log(Level.WARNING, logF.f("La firma generada no es valida")); //$NON-NLS-1$
@@ -247,6 +250,19 @@ public class RecoverSignManager {
     			sendError(response, session, HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
     			return;
     		}
+
+    		// Si hay que esperar un periodo de gracia, damos la operacion por completada correctamente y
+    		// enviamos la informacion de la operacion y del propio periodo
+    		if (postProcessResult.getState() == PostProcessResult.State.PENDING) {
+    	    	LOGGER.info(logF.f("Se requiere la espera de un periodo de gracia para la obtencion de la firma")); //$NON-NLS-1$
+    			SIGNLOGGER.register(session, true);
+    			TRANSLOGGER.register(session, true);
+    			SessionCollector.removeSession(session);
+    	        sendResult(response, buildResult(providerName, signingCert, postProcessResult.getGracePeriodInfo()));
+    	        return;
+    		}
+
+    		partialResult = postProcessResult.getResult();
     	}
 
         // Operamos con la firma tal como lo indique el DocumentManager
@@ -297,7 +313,7 @@ public class RecoverSignManager {
 	 * @throws ValidatorException Cuando no ha sido posible cargar el conector para la
 	 * validaci&oacute;n y actualizaci&oacute;n de firnas,
 	 */
-	private static byte[] postProcessSignature(final byte[] signature, final String upgradeLevel,
+	private static PostProcessResult postProcessSignature(final byte[] signature, final String upgradeLevel,
 			final TransactionConfig connConfig, final boolean needValidation,
 			final LogTransactionFormatter logF)
 					throws InvalidSignatureException, UpgradeException,
@@ -309,12 +325,12 @@ public class RecoverSignManager {
 			upgradeConfig = UpgraderUtils.extractUpdaterProperties(connConfig.getProperties());
 		}
 
-		byte[] processedSignature = signature;
+		PostProcessResult result;
 		final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator();
 		if (ServiceParams.UPGRADE_VERIFY.equalsIgnoreCase(upgradeLevel)) {
 			if (needValidation) {
 				LOGGER.info(logF.f("Validamos la firma")); //$NON-NLS-1$
-				final VerifyResult verifyResult = validator.validateSignature(processedSignature, upgradeConfig);
+				final VerifyResult verifyResult = validator.validateSignature(signature, upgradeConfig);
 				if (!verifyResult.isOk()) {
 					throw new InvalidSignatureException("La firma generada no es valida"); //$NON-NLS-1$
 				}
@@ -322,19 +338,27 @@ public class RecoverSignManager {
 			else {
 				LOGGER.info(logF.f("El proveedor es seguro y no es necesario validar el tipo de firma generada")); //$NON-NLS-1$
 			}
+			result = new PostProcessResult(signature);
 		}
 		else {
 			LOGGER.info(logF.f("Actualizamos la firma a: " + upgradeLevel)); //$NON-NLS-1$
 			UpgradeResult upgradeResult;
 			try {
-				upgradeResult = validator.upgradeSignature(processedSignature, upgradeLevel, upgradeConfig);
+				upgradeResult = validator.upgradeSignature(signature, upgradeLevel, upgradeConfig);
 			}
 			catch (final VerifyException e) {
 				throw new InvalidSignatureException("Se ha intentado actualizar una firma invalida", e); //$NON-NLS-1$
 			}
-			processedSignature = upgradeResult.getResult();
+
+
+			if (upgradeResult.getState() == UpgradeResult.State.PENDING) {
+				result = new PostProcessResult(upgradeResult.getGracePeriodInfo());
+			}
+			else {
+				result = new PostProcessResult(upgradeResult.getResult());
+			}
 		}
-		return processedSignature;
+		return result;
 	}
 
 	/** Construye el resultado de la operaci&oacute;n.
@@ -345,6 +369,18 @@ public class RecoverSignManager {
 	private static TransactionResult buildResult(final String providerName, final X509Certificate signingCert) {
 		final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, providerName);
 		result.setSigningCert(signingCert);
+		return result;
+	}
+
+	/** Construye el resultado de la operaci&oacute;n.
+	 * @param providerName Nombre del proveedor seleccionado.
+	 * @param signingCert Certificado utilizado para firmar.
+	 * @return Resultado de la operaci&oacute;n de firma.
+	 */
+	private static TransactionResult buildResult(final String providerName, final X509Certificate signingCert, final GracePeriodInfo gracePeriod) {
+		final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, providerName);
+		result.setSigningCert(signingCert);
+		result.setGracePeriod(gracePeriod);
 		return result;
 	}
 

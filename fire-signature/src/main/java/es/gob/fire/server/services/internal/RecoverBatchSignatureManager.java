@@ -12,6 +12,7 @@ package es.gob.fire.server.services.internal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletResponse;
@@ -107,7 +108,6 @@ public class RecoverBatchSignatureManager {
         final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         if (batchResult == null || batchResult.documentsCount() == 0) {
             LOGGER.severe(logF.f("No se han encontrado registrados los documentos del lote")); //$NON-NLS-1$
-        	TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			buildErrorMessage(OperationError.INVALID_STATE));
@@ -118,7 +118,14 @@ public class RecoverBatchSignatureManager {
         // que se marca como erroneo el resultado), se notifica un error en la operacion
         if (batchResult.isSignFailed(docId)) {
             LOGGER.severe(logF.f("El documento solicitado ya se recupero o no se firmo correctamente")); //$NON-NLS-1$
-        	SIGNLOGGER.register(session, false, docId);
+        	response.sendError(HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorCode(),
+        			HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorDescription());
+        	return;
+        }
+
+        // Si para recuperar la firma hay que esperar un periodo de gracia, se notifica un error en la operacion
+        if (batchResult.needWaitGracePeriod(docId)) {
+            LOGGER.severe(logF.f("El documento solicitado no estara disponible hasta esperar un periodo de gracia")); //$NON-NLS-1$
         	response.sendError(HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorCode(),
         			HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorDescription());
         	return;
@@ -127,7 +134,6 @@ public class RecoverBatchSignatureManager {
         final String docFilename = batchResult.getDocumentReference(docId);
         if (docFilename == null) {
             LOGGER.severe(logF.f("El documento solicitado no estaba en el lote de firma")); //$NON-NLS-1$
-        	SIGNLOGGER.register(session, false, docId);
         	response.sendError(HttpCustomErrors.INVALID_BATCH_DOCUMENT.getErrorCode(),
         			HttpCustomErrors.INVALID_BATCH_DOCUMENT.getErrorDescription());
         	return;
@@ -140,7 +146,7 @@ public class RecoverBatchSignatureManager {
         	signature = TempDocumentsManager.retrieveAndDeleteDocument(docFilename);
         }
         catch (final Exception e) {
-        	LOGGER.severe(logF.f("No se encuentra el resultado de la firma del documento: " + e)); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se encuentra el resultado de la firma del documento: " + docId), e); //$NON-NLS-1$
         	batchResult.setErrorResult(docId, BatchResult.ERROR_RECOVERING);
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SIGNLOGGER.register(session, false, docId);
@@ -195,7 +201,10 @@ public class RecoverBatchSignatureManager {
         boolean recovered = true;
         final Iterator<String> it = batchResult.iterator();
         while (it.hasNext() && recovered) {
-        	if (!batchResult.isSignFailed(it.next())) {
+        	final String docId = it.next();
+        	// El documento no estara procesado si no es un fallo (los que ya se hayan recuperado se consideran fallados)
+        	// y si no esta pendiente de la espera de un periodo de gracia (que no se considera fallo)
+        	if (!batchResult.isSignFailed(docId) && !batchResult.needWaitGracePeriod(docId)) {
         		recovered = false;
         	}
         }

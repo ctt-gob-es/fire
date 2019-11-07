@@ -1,44 +1,38 @@
-package es.gob.fire.upgrade;
+package es.gob.fire.server.services.internal;
 
-import java.util.Date;
+import es.gob.fire.upgrade.GracePeriodInfo;
 
 /**
- * Resultado de una operaci&oacute;n de actualizaci&oacute;n. Compuesto por la firma resultante y
- * el identificador del formato longevo al que se ha actualizado.
+ * Resultado del postproceso de una firma (validaci&oacute;n o actualizaci&oacute;n).
  */
-public class UpgradeResult {
-
-	private final byte[] result;
-
-	private final String format;
-
-	private final GracePeriodInfo gracePeriodInfo;
+public class PostProcessResult {
 
 	private final State state;
 
+	private final byte[] result;
+
+	private final GracePeriodInfo gracePeriodInfo;
+
 	/**
-	 * Construye el resultado de la actualizaci&oacute;n en donde se proporciona
+	 * Construye el resultado del postproceso de la firma en donde se proporciona
 	 * la firma obtenida.
 	 * @param result Firma resultante.
 	 * @param format Identificador del formato longevo.
 	 */
-	public UpgradeResult(final byte[] result, final String format) {
+	public PostProcessResult(final byte[] result) {
 		this.result = result;
-		this.format = format;
 		this.gracePeriodInfo = null;
-		this.state = State.COMPLETE;
+		this.state = State.OK;
 	}
 
 	/**
-	 * Construye el resultado de la actualizaci&oacute;n, en donde se indica que
+	 * Construye el resultado del postproceso de la firma, en donde se indica que
 	 * debe esperarse un periodo de gracia para obtener la firma.
-	 * @param responseId Identificador de operaci&oacute;n para obtener la respuesta.
-	 * @param resolutionDate Fecha hasta la que se debe esperar.
+	 * @param gracePeriod Periodo de gracia.
 	 */
-	public UpgradeResult(final String responseId, final Date resolutionDate) {
+	public PostProcessResult(final GracePeriodInfo gracePeriod) {
 		this.result = null;
-		this.format = null;
-		this.gracePeriodInfo = new GracePeriodInfo(responseId, resolutionDate);
+		this.gracePeriodInfo = gracePeriod;
 		this.state = State.PENDING;
 	}
 
@@ -48,15 +42,6 @@ public class UpgradeResult {
 	 */
 	public byte[] getResult() {
 		return this.result;
-	}
-
-	/**
-	 * Recupera el identificador del formato al que se ha actualizado
-	 * la firma.
-	 * @return Idenficador del formato longevo.
-	 */
-	public String getFormat() {
-		return this.format;
 	}
 
 	/**
@@ -81,8 +66,8 @@ public class UpgradeResult {
 	/**
 	 * Estado del proceso de actualizaci&oacute;n.
 	 */
-	public static enum State {
-		PENDING,
-		COMPLETE
+	public enum State {
+		OK,
+		PENDING
 	}
 }

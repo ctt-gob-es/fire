@@ -28,6 +28,13 @@ public final class AfirmaResponseException extends Exception {
         this.minorCode = minor;
     }
 
+    AfirmaResponseException(final String major, final String minor,
+            final String desc, final Throwable cause) {
+        super(desc, cause);
+        this.majorCode = major;
+        this.minorCode = minor;
+    }
+
     /**
      * Obtiene el c&oacute;digo principal de resultado.
      *

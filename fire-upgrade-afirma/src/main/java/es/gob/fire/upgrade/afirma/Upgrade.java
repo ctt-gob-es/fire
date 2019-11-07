@@ -10,6 +10,7 @@
 package es.gob.fire.upgrade.afirma;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 import es.gob.fire.upgrade.UpgradeResult;
 
@@ -19,6 +20,12 @@ import es.gob.fire.upgrade.UpgradeResult;
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s
  */
 public final class Upgrade {
+
+	private static final SimpleDateFormat formatter;
+
+	static {
+		formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"); //$NON-NLS-1$
+	}
 
     /**
      * Constructor privado para no permir la instanciaci&oacute;n
@@ -72,8 +79,19 @@ public final class Upgrade {
                     "Error analizando la respuesta de la Plataforma @firma: " + e, e); //$NON-NLS-1$
         }
 
+        // Comprobamos si la operacion termino indicando que requiere periodo de gracia
+        if (vr.isPending()) {
+        	try {
+        		return new UpgradeResult(vr.getResponseId(), formatter.parse(vr.getResponseTime()));
+	        }
+	        catch (final Exception e) {
+	        	throw new AfirmaResponseException(vr.getMajorCode(),
+	        			vr.getMinorCode(), "Error al componer el resultado con el periodo de gracia", e); //$NON-NLS-1$
+	        }
+        }
+
         // Comprobamos que la operacion haya finalizado correctamente
-        if (!vr.isOk() || vr.getUpgradedSignature() == null) {
+        if (!vr.isOk()) {
             throw new AfirmaResponseException(vr.getMajorCode(),
                     vr.getMinorCode(), vr.getDescription());
         }
@@ -85,8 +103,14 @@ public final class Upgrade {
         			vr.getMinorCode(), "No se ha actualizado al formato solicitado. Formato recibido: " + vr.getSignatureForm()); //$NON-NLS-1$
         }
 
-        return new UpgradeResult(
-        		vr.getUpgradedSignature(),
-        		vr.getSignatureForm().substring(vr.getSignatureForm().lastIndexOf(':') + 1));
+        try {
+        	return new UpgradeResult(
+        			vr.getUpgradedSignature(),
+        			vr.getSignatureForm().substring(vr.getSignatureForm().lastIndexOf(':') + 1));
+        }
+        catch (final Exception e) {
+        	throw new AfirmaResponseException(vr.getMajorCode(),
+        			vr.getMinorCode(), "Error al componer el resultado con la firma", e); //$NON-NLS-1$
+        }
     }
 }

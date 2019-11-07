@@ -182,7 +182,6 @@ public class CreateBatchManager {
         }
         catch (final IllegalAccessException | IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$
-        	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
         	// En el mensaje de error se indica que no existe para no revelar si no existe simplemente es un tema de permisos
         	response.sendError(HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorCode(),
@@ -191,7 +190,6 @@ public class CreateBatchManager {
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
-        	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
         	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cargar el gestor de documentos"); //$NON-NLS-1$
         	return;

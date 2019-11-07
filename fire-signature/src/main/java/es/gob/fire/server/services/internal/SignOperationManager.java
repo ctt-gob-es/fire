@@ -57,7 +57,7 @@ public class SignOperationManager {
         final String format         = params.getParameter(ServiceParams.HTTP_PARAM_FORMAT);
         final String improvedFormat = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
         final String dataB64        = params.getParameter(ServiceParams.HTTP_PARAM_DATA);
-        final String extraParamsB64 		= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
+        final String extraParamsB64 = params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId);
 
@@ -238,8 +238,8 @@ public class SignOperationManager {
         // Creamos un temporal con los datos a procesar asociado a la sesion
         try {
         	TempDocumentsManager.storeDocument(transactionId, data, true);
-        	//obtenemos el tamano del documento
-       	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, data.length);
+        	// Registramos el tamano del documento con fines estadisticos
+       	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, new Long(data.length));
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.f("Error en el guardado temporal de los datos a firmar: " + e)); //$NON-NLS-1$

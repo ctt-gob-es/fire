@@ -31,6 +31,7 @@ import javax.json.JsonWriter;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.DocInfo;
+import es.gob.fire.upgrade.GracePeriodInfo;
 
 /**
  * Resultado de un proceso de firma de lote.
@@ -65,6 +66,8 @@ public class BatchResult implements Serializable {
 	public static final String ERROR_RECOVERING = "ERROR_RECOVERING"; //$NON-NLS-1$
 	/** Estado que indica que la firma ya se ha recuperado. */
 	public static final String RECOVERED = "RECOVERED"; //$NON-NLS-1$
+	/** Estado que indica que es necesario esperar un periodo de gracia para recuperar la firma. */
+	public static final String GRACE_PERIOD = "GRACE_PERIOD"; //$NON-NLS-1$
 
 	private static final String JSON_ATTR_PROVIDER_NAME = "prov"; //$NON-NLS-1$
 	private static final String JSON_ATTR_SIGNING_CERT = "cert"; //$NON-NLS-1$
@@ -72,6 +75,10 @@ public class BatchResult implements Serializable {
 	private static final String JSON_ATTR_DOC_ID = "id"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_OK = "ok"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_DETAILS = "dt"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_GRACE_PERIOD = "gp"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_GP_ID = "id"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_GP_DATE = "dt"; //$NON-NLS-1$
+
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
@@ -181,11 +188,32 @@ public class BatchResult implements Serializable {
 	}
 
 	/**
+	 * Recupera el periodo de gracia establecido antes de recuperar la firma.
+	 * @param docId Identificador del documento.
+	 * @return Periodo de gracia solicitado para la recuperaci&oacute;n de la firma o {@code null}
+	 * si no se estableci&oacute; un periodo de gr&aacute;cia.
+	 */
+	public GracePeriodInfo getGracePeriod(final String docId) {
+		final BatchDocumentReference docRef = this.results.get(docId);
+		return docRef == null ? null : docRef.getGracePeriod();
+	}
+
+	/**
 	 * Establece que un documento del resultado se ha firmado correctamente.
 	 * @param docId Identificador del documento del que se desea establecer el resultado.
 	 */
 	public void setSuccessResult(final String docId) {
 		this.results.get(docId).setSuccessResult();
+	}
+
+	/**
+	 * Establece que un documento del resultado se ha firmado correctamente, pero que
+	 * hay que esperar para recuperar el resultado.
+	 * @param docId Identificador del documento del que se desea establecer el resultado.
+	 * @param gracePeriod Periodo de gracia que hay que esperar para recuperar la firma.
+	 */
+	public void setSuccessResult(final String docId, final GracePeriodInfo gracePeriod) {
+		this.results.get(docId).setSuccessResult(gracePeriod);
 	}
 
 	/**
@@ -210,7 +238,21 @@ public class BatchResult implements Serializable {
 			return false;
 		}
 		final String error = docRef.getDetails();
-		return error != null && !PENDING.equals(error);
+		return !docRef.isSigned() && !PENDING.equals(error);
+	}
+
+	/**
+	 * Indica si la firma requiere que se espere un periodo de gracia.
+	 * @param docId Identificador del documento.
+	 * @return {@code true} en caso de que la firma tenga asignado un periodo de gracia,
+	 * {@code false} en caso contrario.
+	 */
+	public boolean needWaitGracePeriod(final String docId) {
+		final BatchDocumentReference docRef = this.results.get(docId);
+		if (docRef == null) {
+			return false;
+		}
+		return docRef.getGracePeriod() != null;
 	}
 
 	/**
@@ -247,12 +289,20 @@ public class BatchResult implements Serializable {
 			final String id = keys.next();
 			final BatchDocumentReference result = this.results.get(id);
 
-			resultBuilder.add(
-					Json.createObjectBuilder()
-					.add(JSON_ATTR_DOC_ID, id)
-					.add(JSON_ATTR_DOC_OK, result.isSigned())
-					.add(JSON_ATTR_DOC_DETAILS, result.getDetails() != null ? result.getDetails() : "") //$NON-NLS-1$
-					);
+			final JsonObjectBuilder docInfo = Json.createObjectBuilder()
+			.add(JSON_ATTR_DOC_ID, id)
+			.add(JSON_ATTR_DOC_OK, result.isSigned())
+			.add(JSON_ATTR_DOC_DETAILS, result.getDetails() != null ? result.getDetails() : ""); //$NON-NLS-1$
+
+			// Si hay informacion del periodo de gracia, la agregamos
+			if (result.getGracePeriod() != null) {
+				final JsonObjectBuilder gracePeriod = Json.createObjectBuilder()
+				.add(JSON_ATTR_DOC_GP_ID, result.getGracePeriod().getResponseId())
+				.add(JSON_ATTR_DOC_GP_DATE, Long.toString(result.getGracePeriod().getResolutionDate().getTime()));
+				docInfo.add(JSON_ATTR_DOC_GRACE_PERIOD, gracePeriod);
+			}
+
+			resultBuilder.add(docInfo);
 		}
 
 		// Construimos la respuesta
@@ -307,6 +357,7 @@ public class BatchResult implements Serializable {
 		private String details;
 		private final SignBatchConfig config;
 		private final DocInfo docInfo;
+		private GracePeriodInfo gracePeriod = null;
 
 		public BatchDocumentReference(final String dataReference, final SignBatchConfig config) {
 			this.dataReference = dataReference;
@@ -327,6 +378,12 @@ public class BatchResult implements Serializable {
 		public void setSuccessResult() {
 			this.signed = true;
 			this.details = null;
+		}
+
+		public void setSuccessResult(final GracePeriodInfo gracePeriod) {
+			this.signed = true;
+			this.details = GRACE_PERIOD;
+			this.gracePeriod = gracePeriod;
 		}
 
 		public void setErrorResult(final String error) {
@@ -352,6 +409,10 @@ public class BatchResult implements Serializable {
 
 		public DocInfo getDocInfo() {
 			return this.docInfo;
+		}
+
+		public GracePeriodInfo getGracePeriod() {
+			return this.gracePeriod;
 		}
 	}
 }

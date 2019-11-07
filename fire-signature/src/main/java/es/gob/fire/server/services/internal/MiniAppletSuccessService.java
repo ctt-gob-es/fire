@@ -30,7 +30,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.server.services.statistics.SignatureRecorder;
 
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
@@ -42,7 +41,6 @@ public class MiniAppletSuccessService extends HttpServlet {
 	private static final long serialVersionUID = 2487217258327717181L;
 
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletSuccessService.class.getName());
-	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
@@ -155,7 +153,6 @@ public class MiniAppletSuccessService extends HttpServlet {
 				}
 				else {
 					batchResult.setErrorResult(docId, translateAfirmaError(asr.getError()));
-					SIGNLOGGER.register(session, false, docId);
 				}
 			}
 		}

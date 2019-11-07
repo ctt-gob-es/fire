@@ -92,7 +92,7 @@ public class AddDocumentBatchManager {
     		return;
     	}
 
-        // Si se definio un DocumentManager, lo usaremos para
+        // Si se definio un DocumentManager, lo usaremos
         final FIReDocumentManager documentManager = (FIReDocumentManager) session.getObject(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER);
     	if (documentManager instanceof DefaultFIReDocumentManager && (dataB64 == null || dataB64.isEmpty())) {
     		LOGGER.warning(logF.f("No se ha proporcionado el documento a firmar ni un gestor de documentos del que recuperarlo")); //$NON-NLS-1$
@@ -145,6 +145,8 @@ public class AddDocumentBatchManager {
     		return;
     	}
 
+    	// Registramos el tamano del documento con fines estadisticos
+    	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, new Long(data.length));
 
     	// Recuperamos el listado de documentos del lote o lo creamos si este es el primero
         BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);

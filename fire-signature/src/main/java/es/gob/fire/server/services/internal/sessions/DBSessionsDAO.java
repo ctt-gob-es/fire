@@ -73,7 +73,7 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 			serializedSession = baos.toByteArray();
 		}
 		catch (final Exception e) {
-			LOGGER.warning("Error al preparar para el guardado la sesion con ID: " + session.getTransactionId()); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "Error al preparar para el guardado la sesion con ID: " + session.getTransactionId(), e); //$NON-NLS-1$
 			return;
 		}
 
@@ -87,8 +87,8 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 				st.setLong(3, new Date().getTime());
 				st.executeUpdate();
 			}
-			catch (final Exception e2) {
-				LOGGER.warning("Error al crear la sesion con ID: " + sessionId); //$NON-NLS-1$
+			catch (final Exception e) {
+				LOGGER.log(Level.WARNING, "Error al crear la sesion con ID: " + sessionId, e); //$NON-NLS-1$
 			}
 		}
 		else {
@@ -99,7 +99,7 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 				st.executeUpdate();
 			}
 			catch (final Exception e) {
-				LOGGER.warning("Error al actualizar la sesion con ID: " + sessionId); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, "Error al actualizar la sesion con ID: " + sessionId, e); //$NON-NLS-1$
 			}
 		}
 	}

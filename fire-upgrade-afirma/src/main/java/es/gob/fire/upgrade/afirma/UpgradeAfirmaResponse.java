@@ -28,6 +28,8 @@ class UpgradeAfirmaResponse {
 
     private static final String SUCCESS = "Success"; //$NON-NLS-1$
 
+    private static final String PENDING = "Pending"; //$NON-NLS-1$
+
     private String major = null;
     private String minor = null;
     private String desc = null;
@@ -35,6 +37,10 @@ class UpgradeAfirmaResponse {
     private String signatureForm = null;
 
     private String signature = null;
+
+    private String responseId = null;
+
+    private String responseTime = null;
 
     private static final String SIGNATURE_OBJECT_START = "<dss:SignatureObject>"; //$NON-NLS-1$
     private static final String SIGNATURE_OBJECT_END = "</dss:SignatureObject>"; //$NON-NLS-1$
@@ -50,11 +56,12 @@ class UpgradeAfirmaResponse {
 
         final String inXml = new String(xml);
 
-        if (inXml.contains(SIGNATURE_OBJECT_START)) {
+        int signaturePos = inXml.indexOf(SIGNATURE_OBJECT_START);
+        if (signaturePos > -1) {
+        	signaturePos += SIGNATURE_OBJECT_START.length();
             final String updatedSigNode = inXml.substring(
-                    inXml.indexOf(SIGNATURE_OBJECT_START)
-                            + SIGNATURE_OBJECT_START.length(),
-                    inXml.indexOf(SIGNATURE_OBJECT_END));
+                    signaturePos,
+                    inXml.indexOf(SIGNATURE_OBJECT_END, signaturePos));
 
             // Condicion especifica para firmas XAdES Enveloping/Detached
             if (updatedSigNode.endsWith("Signature>")) { //$NON-NLS-1$
@@ -71,13 +78,23 @@ class UpgradeAfirmaResponse {
     }
 
     /**
-     * Indica si la respuesta ha sido correcta o hay alg&uacute;n error.
+     * Indica si se ha obtenido la firma actualizada.
      *
-     * @return <code>true</code> si la respuesta ha sido correcta,
-     *         <code>false</code> si hay alg&uacute;n error,
+     * @return <code>true</code> si se ha obtenido la firma,
+     *         <code>false</code> en caso contrario.
      */
     boolean isOk() {
         return SUCCESS.equals(getMajorCode());
+    }
+
+    /**
+     * Indica si la respuesta esta pendiente de que se respete un periodo de gracia.
+     *
+     * @return <code>true</code> si la respuesta esta pendiente,
+     *         <code>false</code> en caso contrario.
+     */
+    boolean isPending() {
+        return PENDING.equals(getMajorCode());
     }
 
     /**
@@ -148,23 +165,61 @@ class UpgradeAfirmaResponse {
         this.signatureForm = s;
     }
 
+    /**
+     * Obtiene el Token para recoger la firma tras el periodo de gracia.
+     * @return Token para recoger la firma.
+     */
+    String getResponseId() {
+		return this.responseId;
+	}
+
+    void setResponseId(final String responseId) {
+		this.responseId = responseId;
+	}
+
+    /**
+     * Obtiene la fecha a partir de la que recoger la firma.
+     * @return Fecha a partir de la que recoger la firma.
+     */
+    String getResponseTime() {
+		return this.responseTime;
+	}
+
+    public void setResponseTime(final String responseTime) {
+		this.responseTime = responseTime;
+	}
+
     private static class CustomHandler extends DefaultHandler {
 
-        private static final String TAG_RESULT_MAJOR = "ResultMajor"; //$NON-NLS-1$
-        private static final String TAG_RESULT_MINOR = "ResultMinor"; //$NON-NLS-1$
-        private static final String TAG_RESULT_MESSAGE = "ResultMessage"; //$NON-NLS-1$
-        private static final String TAG_BASE64_SIGNATURE = "Base64Signature"; //$NON-NLS-1$
-        private static final String TAG_BASE64_XML = "Base64XML"; //$NON-NLS-1$
-        private static final String TAG_SIGNATURE_FORM = "SignatureForm"; //$NON-NLS-1$
+    	enum Tag {
+    		RESULT_MAJOR("ResultMajor"), //$NON-NLS-1$
+    		RESULT_MINOR("ResultMinor"), //$NON-NLS-1$
+    		RESULT_MESSAGE("ResultMessage"), //$NON-NLS-1$
+    		BASE64_SIGNATURE("Base64Signature"), //$NON-NLS-1$
+    		BASE64_XML("Base64XML"), //$NON-NLS-1$
+    		SIGNATURE_FORM("SignatureForm"), //$NON-NLS-1$
+    		RESPONSE_ID("ResponseID"), //$NON-NLS-1$
+    		RESPONSE_TIME("ResponseTime"); //$NON-NLS-1$
+
+    		private String nodeName;
+
+    		Tag(final String nodeName) {
+    			this.nodeName = nodeName;
+    		}
+
+    		public static Tag parseTag(final String tagName) {
+    			for (final Tag tag : values()) {
+    				if (tag.nodeName.equals(tagName)) {
+    					return tag;
+    				}
+    			}
+    			return null;
+    		}
+    	}
 
         private final UpgradeAfirmaResponse verifyResponse;
 
-        private boolean overResultMajor = false;
-        private boolean overResultMinor = false;
-        private boolean overResultMessage = false;
-        private boolean overBase64Signature = false;
-        private boolean overBase64Xml = false;
-        private boolean overSignatureForm = false;
+        private Tag currentTag = null;
 
         CustomHandler(final UpgradeAfirmaResponse vr) {
             this.verifyResponse = vr;
@@ -174,77 +229,45 @@ class UpgradeAfirmaResponse {
         public void startElement(final String namespaceURI,
                 final String localName, final String qName,
                 final Attributes atts) throws SAXException {
-            if (TAG_RESULT_MAJOR.equals(localName)) {
-                this.overResultMajor = true;
-                this.overResultMinor = false;
-                this.overResultMessage = false;
-                this.overBase64Signature = false;
-                this.overBase64Xml = false;
-                this.overSignatureForm = false;
-            } else if (TAG_RESULT_MESSAGE.equals(localName)) {
-                this.overResultMajor = false;
-                this.overResultMinor = false;
-                this.overResultMessage = true;
-                this.overBase64Signature = false;
-                this.overBase64Xml = false;
-                this.overSignatureForm = false;
-            } else if (TAG_BASE64_SIGNATURE.equals(localName)) {
-                this.overResultMajor = false;
-                this.overResultMinor = false;
-                this.overResultMessage = false;
-                this.overBase64Signature = true;
-                this.overBase64Xml = false;
-                this.overSignatureForm = false;
-            } else if (TAG_RESULT_MINOR.equals(localName)) {
-                this.overResultMajor = false;
-                this.overResultMinor = true;
-                this.overResultMessage = false;
-                this.overBase64Signature = false;
-                this.overBase64Xml = false;
-                this.overSignatureForm = false;
-            } else if (TAG_BASE64_XML.equals(localName)) {
-                this.overResultMajor = false;
-                this.overResultMinor = false;
-                this.overResultMessage = false;
-                this.overBase64Signature = false;
-                this.overBase64Xml = true;
-                this.overSignatureForm = false;
-            } else if (TAG_SIGNATURE_FORM.equals(localName)) {
-                this.overResultMajor = false;
-                this.overResultMinor = false;
-                this.overResultMessage = false;
-                this.overBase64Signature = false;
-                this.overBase64Xml = false;
-                this.overSignatureForm = true;
-            }
+        	this.currentTag = Tag.parseTag(localName);
         }
 
         @Override
         public void characters(final char[] ch, final int start,
                 final int length) {
 
+        	if (this.currentTag == null) {
+        		return;
+        	}
+
             final String value = new String(ch, start, length).trim();
 
-            if (this.overResultMajor) {
-                this.verifyResponse.setMajorCode(DssServicesUtils
-                        .cleanDssResult(value));
-                this.overResultMajor = false;
-            } else if (this.overResultMessage) {
-                this.verifyResponse.setDescription(value);
-                this.overResultMessage = false;
-            } else if (this.overBase64Signature) {
-                this.verifyResponse.setSignature(value);
-                this.overBase64Signature = false;
-            } else if (this.overResultMinor) {
-                this.verifyResponse.setMinorCode(value);
-                this.overResultMinor = false;
-            } else if (this.overBase64Xml) {
-                this.verifyResponse.setSignature(value);
-                this.overBase64Xml = false;
-            } else if (this.overSignatureForm) {
-                this.verifyResponse.setSignatureForm(value);
-                this.overSignatureForm = false;
-            }
+            switch (this.currentTag) {
+			case RESULT_MAJOR:
+				this.verifyResponse.setMajorCode(DssServicesUtils.cleanDssResult(value));
+				break;
+			case RESULT_MINOR:
+				this.verifyResponse.setMinorCode(value);
+				break;
+			case RESULT_MESSAGE:
+				this.verifyResponse.setDescription(value);
+				break;
+			case BASE64_SIGNATURE:
+			case BASE64_XML:
+				this.verifyResponse.setSignature(value);
+				break;
+			case SIGNATURE_FORM:
+				this.verifyResponse.setSignatureForm(value);
+				break;
+			case RESPONSE_ID:
+				this.verifyResponse.setResponseId(value);
+				break;
+			case RESPONSE_TIME:
+				this.verifyResponse.setResponseTime(value);
+				break;
+			default:
+				break;
+			}
         }
     }
 

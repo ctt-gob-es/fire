@@ -92,7 +92,6 @@ public class RecoverBatchResultManager {
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
-        	SIGNLOGGER.register(session, false, null);
         	TRANSLOGGER.register(session, false);
         	SessionCollector.cleanSession(session);
         	response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(), HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription());
@@ -125,7 +124,6 @@ public class RecoverBatchResultManager {
         	}
         	catch (final Exception e) {
         		LOGGER.severe(logF.f("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
-        		SIGNLOGGER.register(session, false, null);
         		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -200,7 +198,6 @@ public class RecoverBatchResultManager {
         			(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         	if (connConfig == null) {
         		LOGGER.warning(logF.f("No se proporcionaron datos para la conexion con el backend")); //$NON-NLS-1$
-        		SIGNLOGGER.register(session, false, null);
         		TRANSLOGGER.register(session, false);
         		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         				"No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
@@ -214,7 +211,6 @@ public class RecoverBatchResultManager {
         	}
         	catch (final FIReConnectorFactoryException e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
-        		SIGNLOGGER.register(session, false, null);
         		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -235,7 +231,6 @@ public class RecoverBatchResultManager {
         	}
         	catch(final FIReConnectorUnknownUserException e) {
     			LOGGER.log(Level.SEVERE, logF.f("El usuario no esta dado de alta en el sistema"), e); //$NON-NLS-1$
-    			SIGNLOGGER.register(session, false, null);
     			TRANSLOGGER.register(session, false);
                 SessionCollector.removeSession(session);
     			response.sendError(HttpCustomErrors.NO_USER.getErrorCode());
@@ -243,7 +238,6 @@ public class RecoverBatchResultManager {
         	}
         	catch(final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("Ocurrio un error durante la operacion de firma"), e); //$NON-NLS-1$
-        		SIGNLOGGER.register(session, false, null);
         		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpCustomErrors.SIGN_ERROR.getErrorCode());
@@ -256,12 +250,10 @@ public class RecoverBatchResultManager {
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error de codificacion en los datos de firma trifasica proporcionados"), e); //$NON-NLS-1$
-        		SIGNLOGGER.register(session, false, null);
         		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-        				"Error de codificacion en los datos de firma trifasica proporcionados: " + e //$NON-NLS-1$
-        				);
+        				"Error de codificacion en los datos de firma trifasica proporcionados: " + e); //$NON-NLS-1$
         		return;
         	}
 
@@ -290,8 +282,8 @@ public class RecoverBatchResultManager {
         	// obtenemos la informacion de firma trifasica y realizamos la postfirma.
         	// La firma generada se almacena en lugar del documento y se compone un XML
         	// con la informacion del resultado de cada firma.
-        	final Iterator<String> it = batchResult.iterator();
         	final List<ConcurrentProcessThread> threads = new ArrayList<>();
+        	final Iterator<String> it = batchResult.iterator();
         	while (it.hasNext()) {
 
         		final String docId = it.next();
@@ -312,13 +304,16 @@ public class RecoverBatchResultManager {
 
         		// Verificamos que es necesaria la validacion segun el tipo de firma a realizar (las cofirmas
         		// y contrafirmas deben validarse porque no sabemos de la validez de firmas anteriores).
-
         		final boolean signValidationNeeded = needValidation(
         				secureProvider, signConfig.getCryptoOperation(), signConfig.getFormat());
+        		// Configuramos el objeto para la composicion de las firmas
+    			final PostSignBatchRecover signRecover = new CloudPostSignBatchRecover(
+    					docId, algorithm, signConfig, ret, td, batchResult);
+    			// Ejecutamos un hilo encargado de componer las firmas y actualizarlas
+    			final ConcurrentProcessThread t = new PostSignBatchThread(
+    					appId, transactionId, docId, batchResult, signConfig,
+    					signValidationNeeded, docManager, signRecover);
 
-        		final FIRePostSignaturesThread t = new FIRePostSignaturesThread(appId,
-        				transactionId, docId, batchResult, algorithm, signConfig,
-        				signValidationNeeded, signingCert, ret, td, docManager, session);
         		threads.add(t);
         		t.start();
         	}
@@ -344,13 +339,45 @@ public class RecoverBatchResultManager {
             session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE.toString());
             session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
             session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_RECOVER);
-            // Se registra que la transac&oacute;n a sido correcta
-            TRANSLOGGER.register(session, true);
+
+            // Registramos el resultado de la operacion y los errores de las firmas. Los exitos
+            // en las firmas no se registran hasta que se recuperen con &eacute;xito.
+            registryResults(batchResult, session, logF);
             SessionCollector.commit(session);
         }
 
         // Enviamos el XML resultado de la firma del lote
         sendResult(response, batchResult.encode());
+	}
+
+	/**
+	 * Elimina los temporales que no se necesiten ya, se registra el exito de la transaci&oacute;n
+	 * y los errores en las firmas para las estad&iacute;sticas.
+	 * @param batchResult Resultado de la firma del lote.
+	 * @param session Sesi&oacute;n con la informaci&oacute;n de la transacci&oacute;n.
+	 * @throws IOException
+	 */
+	private static void registryResults(final BatchResult batchResult, final FireSession session,
+			final LogTransactionFormatter logF)
+			throws IOException {
+        final Iterator<String> it = batchResult.iterator();
+    	while (it.hasNext()) {
+    		final String docId = it.next();
+    		final boolean failed = batchResult.isSignFailed(docId);
+    		if (failed || batchResult.getGracePeriod(docId) != null) {
+    			final String docRef = batchResult.getDocumentReference(docId);
+    			try {
+    				TempDocumentsManager.deleteDocument(docRef);
+    			}
+    			catch (final Exception e) {
+    				LOGGER.log(Level.WARNING, logF.f("No se pudo eliminar el temporal del documento: " + docRef), e); //$NON-NLS-1$
+				}
+    		}
+    		if (failed) {
+    			SIGNLOGGER.register(session, false, docId);
+    		}
+    	}
+        TRANSLOGGER.register(session, true);
 	}
 
 	/**
@@ -383,9 +410,11 @@ public class RecoverBatchResultManager {
     		if (docManager != null || session.getString(ServiceParams.SESSION_PARAM_UPGRADE) != null ||
     				signConfig != null && signConfig.getUpgrade() != null) {
 
-    			final ConcurrentProcessThread t = new ClienteAFirmaUpdateSignaturesThread(
-    					appId, trId, docId, batchResult, signConfig, session,
-    					docManager);
+    			final PostSignBatchRecover signRecover = new ClienteAfirmaPostSignBatchRecover(
+    					docId, batchResult);
+    			final ConcurrentProcessThread t = new PostSignBatchThread(
+    					appId, trId, docId, batchResult, signConfig, true,
+    					docManager, signRecover);
     			threads.add(t);
     			t.start();
     		}

@@ -54,11 +54,11 @@ public enum HttpCustomErrors {
 	/** Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes. */
 	BATCH_NO_SIGNED(534, "El lote no se ha firmado"), //$NON-NLS-1$
 
-	/** Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes. */
+	/** Error devuelto cuando se solicita recuperar una firma que no existe en el lote. */
 	INVALID_BATCH_DOCUMENT(535, "El documento no existe en el lote"), //$NON-NLS-1$
 
-	/** Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes. */
-	BATCH_DOCUMENT_FAILED(536, "Fallo la firma del documento que se intenta recuperar"), //$NON-NLS-1$
+	/** Error devuelto cuando falla la recuperaci&oacute;n de una firma del lote o cuando esta firma no existe. */
+	BATCH_DOCUMENT_FAILED(536, "La firma solicitada no se encuentra disponible"), //$NON-NLS-1$
 
 	/** Error devuelto cuando se solicita firmar un lote sin documentos. */
 	BATCH_NO_DOCUMENT(537, "Se intenta firmar un lote sin documentos"), //$NON-NLS-1$

@@ -20,7 +20,6 @@ import es.gob.fire.server.services.ServiceUtil;
 /**
  * Clase de utilidad para la construcci&oacute;n de un XML de definicion de lote
  * de firma para el cliente @firma.
- * @author Carlos Gamuci
  */
 public class MiniAppletHelper {
 
