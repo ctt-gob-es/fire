@@ -10,7 +10,8 @@
 package es.gob.fire.client;
 
 /**
- * Identificadores de errores HTTP definidos por Cl@ve Firma.
+ * Identificadores de errores HTTP que se pueden devolver a los componentes distribuidos
+ * para se&ntilde;alar casos concretos de error.
  */
 public enum HttpCustomErrors {
 
@@ -29,7 +30,7 @@ public enum HttpCustomErrors {
 	/** Se excede el l&iacute;mite de documentos establecido (com&uacute;nmente, el tama&ntilde;o de un lote). */
 	NUM_DOCUMENTS_EXCEEDED(526, "Se excedido el numero maximo de documentos permitidos"), //$NON-NLS-1$
 
-	/** Se indica un identificador de documento que ya es&aacute; dado de alta en el lote de firma. */
+	/** Se indica un identificador de documento que ya est&aacute; dado de alta en el lote de firma. */
 	DUPLICATE_DOCUMENT(527, "El identificador de documento ya existe en el lote"), //$NON-NLS-1$
 
 	/** La transaccion indicada no es valida o ya ha caducado. */
@@ -53,11 +54,11 @@ public enum HttpCustomErrors {
 	/** Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes. */
 	BATCH_NO_SIGNED(534, "El lote no se ha firmado"), //$NON-NLS-1$
 
-	/** Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes. */
+	/** Error devuelto cuando se solicita recuperar una firma que no existe en el lote. */
 	INVALID_BATCH_DOCUMENT(535, "El documento no existe en el lote"), //$NON-NLS-1$
 
-	/** Error devuelto cuando se solicita recuperar una firma de un lote sin haberlo firmado antes. */
-	BATCH_DOCUMENT_FAILED(536, "Fallo la firma del documento que se intenta recuperar"), //$NON-NLS-1$
+	/** Error devuelto cuando falla la recuperaci&oacute;n de una firma del lote o cuando esta firma no existe. */
+	BATCH_DOCUMENT_FAILED(536, "La firma solicitada no se encuentra disponible"), //$NON-NLS-1$
 
 	/** Error devuelto cuando se solicita firmar un lote sin documentos. */
 	BATCH_NO_DOCUMENT(537, "Se intenta firmar un lote sin documentos"), //$NON-NLS-1$

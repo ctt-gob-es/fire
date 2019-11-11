@@ -16,6 +16,7 @@ import java.io.Reader;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -44,6 +45,12 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 	private static final String JSON_FIELD_OK = "ok"; //$NON-NLS-1$
 
 	private static final String JSON_FIELD_DETAIL = "dt"; //$NON-NLS-1$
+
+	private static final String JSON_FIELD_GRACE_PERIOD = "grace"; //$NON-NLS-1$
+
+	private static final String JSON_FIELD_GP_ID = "id"; //$NON-NLS-1$
+
+	private static final String JSON_FIELD_GP_DATE = "date"; //$NON-NLS-1$
 
 	private static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
 
@@ -111,6 +118,11 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 			buffer.append("{\"id\": \"").append(id).append("\"") //$NON-NLS-1$ //$NON-NLS-2$
 			.append(", \"ok\": \"").append(result.isSigned()).append("\"") //$NON-NLS-1$ //$NON-NLS-2$
 			.append(", \"dt\": \"").append(result.getErrotType() != null ? result.getErrotType() : "").append("\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (result.getGracePeriod() != null) {
+				buffer.append(", \"gp\": {\"id\":\"").append(result.getGracePeriod().getResponseId()) //$NON-NLS-1$
+					.append("\", \"dt\":\"").append(result.getGracePeriod().getResolutionDate().getTime()) //$NON-NLS-1$
+					.append("\"}"); //$NON-NLS-1$
+			}
 			buffer.append("}"); //$NON-NLS-1$
 			if (keys.hasNext()) {
 				buffer.append(","); //$NON-NLS-1$
@@ -167,8 +179,17 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 			if (jsonObject.containsKey(JSON_FIELD_DETAIL)) {
 				dt = jsonObject.getString(JSON_FIELD_DETAIL);
 			}
+			GracePeriodInfo gp = null;
+			if (jsonObject.containsKey(JSON_FIELD_GRACE_PERIOD)) {
+				final JsonObject gpObject = jsonObject.getJsonObject(JSON_FIELD_GRACE_PERIOD);
+				final String gpId = gpObject.getString(JSON_FIELD_GP_ID);
+				final long gpMillis = gpObject.getJsonNumber(JSON_FIELD_GP_DATE).longValue();
+				gp = new GracePeriodInfo(gpId, new Date(gpMillis));
+			}
 
-			result.put(id, ok ? new SignBatchResult() : new SignBatchResult(dt));
+			final SignBatchResult batchResult = gp != null ?
+					new SignBatchResult(gp) : new SignBatchResult(ok, dt);
+			result.put(id, batchResult);
 			if (!ok) {
 				result.error = true;
 			}

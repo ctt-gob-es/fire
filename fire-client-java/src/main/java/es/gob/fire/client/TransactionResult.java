@@ -17,6 +17,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +50,15 @@ public class TransactionResult {
 	/** Par&aacute;metro JSON con el certificado utilizado para firmar. */
 	private static final String JSON_ATTR_SIGNING_CERT = "cert"; //$NON-NLS-1$
 
+	/** Par&aacute;metro JSON con la informaci&oacute;n del periodo de gracia. */
+	private static final String JSON_ATTR_GRACE_PERIOD = "grace"; //$NON-NLS-1$
+
+	/** Par&aacute;metro JSON con el identificador con el que recuperar la firma. */
+	private static final String JSON_ATTR_GRACE_PERIOD_ID = "id"; //$NON-NLS-1$
+
+	/** Par&aacute;metro JSON con la fecha a la que se debe recuperar la firma. */
+	private static final String JSON_ATTR_GRACE_PERIOD_DATE = "date"; //$NON-NLS-1$
+
 	/** Cadena de inicio de una estructura JSON compatible. */
 	private static final String JSON_RESULT_PREFIX = "{\"" + JSON_ATTR_RESULT + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -73,6 +83,9 @@ public class TransactionResult {
 	/** Especifica que la transacci&oacute;n no pudo finalizar debido a un error. */
 	public static final int STATE_ERROR = -1;
 
+	/** Especifica que la transacci&oacute;n aun no ha finalizado y se deber&aacute; pedir el resultamos m&aacute;s adelante. */
+	public static final int STATE_PENDING = 1;
+
 	private int state = STATE_ERROR;
 
 	private final int resultType;
@@ -86,6 +99,8 @@ public class TransactionResult {
 	private X509Certificate signingCert = null;
 
 	private byte[] result = null;
+
+	private GracePeriodInfo gracePeriod = null;
 
 	private TransactionResult(final int resultType) {
 		this.resultType = resultType;
@@ -139,7 +154,7 @@ public class TransactionResult {
 
 	/**
 	 * Devuelve el estado de la transacci&oacute; (si termin&oacute; correctamente o no).
-	 * @return Estado de la transacci&oacute;n: {@link #STATE_OK} o {@link #STATE_ERROR}.
+	 * @return Estado de la transacci&oacute;n.
 	 */
 	public int getState() {
 		return this.state;
@@ -194,6 +209,25 @@ public class TransactionResult {
 	}
 
 	/**
+	 * Recupera la informaci&opacute;n del periodo de gracia necesario para recuperar la firma.
+	 * @return Informaci&oacute;n del periodo de gracia o {@code null} si no lo hay.
+	 */
+	public GracePeriodInfo getGracePeriod() {
+		return this.gracePeriod;
+	}
+
+	/**
+	 * Establece la informaci&oacute;n del periodo de gracia necesario para recuperar la firma.
+	 * @param Informaci&oacute;n del periodo de gracia.
+	 */
+	public void setGracePeriod(final GracePeriodInfo gracePeriod) {
+		this.gracePeriod = gracePeriod;
+		if (this.gracePeriod != null) {
+			this.state = STATE_PENDING;
+		}
+	}
+
+	/**
 	 * Devuelve los datos obtenidos como resultado cuando la transacci&oacute;n ha
 	 * finalizado correctamente.
 	 * @return Resultado de la operaci&oacute;n.
@@ -244,11 +278,24 @@ public class TransactionResult {
 						e);
 			}
 		}
+		if (this.gracePeriod != null) {
+			try {
+				final JsonObjectBuilder gracePeriodBuilder = Json.createObjectBuilder();
+				gracePeriodBuilder.add(JSON_ATTR_GRACE_PERIOD_ID, this.gracePeriod.getResponseId());
+				gracePeriodBuilder.add(JSON_ATTR_GRACE_PERIOD_DATE, this.gracePeriod.getResolutionDate().getTime());
+				resultBuilder.add(JSON_ATTR_GRACE_PERIOD, gracePeriodBuilder);
+			} catch (final Exception e) {
+				// Error al codificar el certificado, no se devolvera certificado en ese caso
+				Logger.getLogger(BatchResult.class.getName()).log(
+						Level.WARNING,
+						"Error al codificar el certificado de firma", //$NON-NLS-1$
+						e);
+			}
+		}
 
 		// Construimos la respuesta
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		final JsonWriter json = Json.createWriter(baos);
-
 		final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
 		jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
 
@@ -306,8 +353,17 @@ public class TransactionResult {
 								"Error al decodificar el certificado de firma", //$NON-NLS-1$
 								e);
 					}
+				}
+				if (resultObject.containsKey(JSON_ATTR_GRACE_PERIOD)) {
+					final JsonObject gracePeriodObject = resultObject.getJsonObject(JSON_ATTR_GRACE_PERIOD);
 
-
+					Date gracePeriodDate = null;
+					if (gracePeriodObject.containsKey(JSON_ATTR_GRACE_PERIOD_DATE)) {
+						gracePeriodDate = new Date(gracePeriodObject.getJsonNumber(JSON_ATTR_GRACE_PERIOD_DATE).longValue());
+					}
+					opResult.gracePeriod = new GracePeriodInfo(
+							gracePeriodObject.getString(JSON_ATTR_GRACE_PERIOD_ID),
+							gracePeriodDate);
 				}
 				jsonReader.close();
 			}

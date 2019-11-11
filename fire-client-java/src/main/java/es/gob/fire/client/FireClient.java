@@ -482,8 +482,8 @@ public class FireClient {
         	throw new IOException(e);
         }
 
-        // Si el resultado es un error o si ya contiene la firma, lo devolvemos
-        if (result.getErrorCode() != 0 || result.getResult() != null) {
+        // Si el resultado es un error, si tiene un periodo de gracia o si ya contiene la firma, lo devolvemos
+        if (result.getErrorCode() != 0 || result.getGracePeriod() != null || result.getResult() != null) {
         	return result;
         }
 

@@ -15,25 +15,39 @@ package es.gob.fire.client;
 public class SignBatchResult {
 
 	private final boolean signed;
-	private final String errotType;
+	private final String errorType;
+	private final GracePeriodInfo gracePeriod;
 
 	/**
 	 * Crea el resultado de una firma de un lote indicando
 	 * que esta finaliz&oacute; correctamente.
 	 */
-	public SignBatchResult() {
+	SignBatchResult() {
 		this.signed = true;
-		this.errotType = null;
+		this.errorType = null;
+		this.gracePeriod = null;
+	}
+
+	/**
+	 * Crea el resultado de una firma de un lote indicando
+	 * que esta finaliz&oacute; correctamente, pero que hay
+	 * que esperar un periodo de gracia antes de recogerla.
+	 */
+	SignBatchResult(final GracePeriodInfo gracePeriod) {
+		this.signed = true;
+		this.errorType = null;
+		this.gracePeriod = gracePeriod;
 	}
 
 	/**
 	 * Crea el resultado de una firma de un lote indicando
 	 * que esta no finaliz&oacute; correctamente.
-	 * @param errorType Tipo de error de la firma.
+	 * @param detail Detalle del resultado (tipo de error o estado final).
 	 */
-	public SignBatchResult(final String errorType) {
-		this.signed = false;
-		this.errotType = errorType;
+	SignBatchResult(final boolean signed, final String detail) {
+		this.signed = signed;
+		this.errorType = detail;
+		this.gracePeriod = null;
 	}
 
 	/**
@@ -46,10 +60,19 @@ public class SignBatchResult {
 	}
 
 	/**
-	 * Motivo por el que la firma no finaliz&oacute; correctamente.
-	 * @return Tipo de error registrado durante la firma.
+	 * Detalle del resultado de la operaci&oacute;n.
+	 * @return Detalle del resultado de firma.
 	 */
 	public String getErrotType() {
-		return this.errotType;
+		return this.errorType;
+	}
+
+	/**
+	 * Obtiene el periodo de gracia establecido.
+	 * @return Informaci&oacute;n del periodo de gracia o {@code null}
+	 * si no se estableci&oacute;.
+	 */
+	public GracePeriodInfo getGracePeriod() {
+		return this.gracePeriod;
 	}
 }
