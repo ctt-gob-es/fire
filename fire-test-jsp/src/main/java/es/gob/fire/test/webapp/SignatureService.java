@@ -129,7 +129,7 @@ public class SignatureService extends HttpServlet {
         // Con esto, en lugar de tomar el campo datos que le pasamos a la aplicacion,
         // se le pasara este campo al DocumentManager configurado para que lo use de
         // identificador
-//        confProperties.setProperty("docManager", "filesystem");
+//        confProperties.setProperty("docManager", "filesystem"); //$NON-NLS-1$ //$NON-NLS-2$
 
 
 		// Utilizamos el cliente distribuido para solicitar la operacion de firma

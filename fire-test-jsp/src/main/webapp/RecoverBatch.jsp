@@ -79,9 +79,17 @@
 					htmlResult += "<tr>";
 					htmlResult += "<td>" + results.batch[i].id + "</td>";
 					htmlResult += "<td>" + results.batch[i].ok + "</td>";
-					htmlResult += "<td>" + results.batch[i].dt + "</td>";
 					htmlResult += "<td>";
-					if (results.batch[i].ok == "true") {
+					if (results.batch[i].gp) {
+						htmlResult += "ID periodo de gracia: " + results.batch[i].gp.id +
+									  "<br>Fecha estimada: " + new Date(parseInt(results.batch[i].gp.dt));	
+					}
+					else {
+						htmlResult += results.batch[i].dt;
+					}
+					htmlResult += "</td>";
+					htmlResult += "<td>";
+					if (results.batch[i].ok == "true" && !results.batch[i].gp) {
 						htmlResult += "<a target=\"_blank\" href=\"RecoverBatchSign.jsp?docid=" + results.batch[i].id + "\">Recuperar firma</a>";
 					}
 					htmlResult += "</td>";

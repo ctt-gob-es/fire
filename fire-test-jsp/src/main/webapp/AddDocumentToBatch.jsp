@@ -102,7 +102,7 @@
 					<input id="custom-config" type="checkbox" name="custom-config" onchange="enableCustomConfig()"/>
 					<label for="custom-config">Configuraci&oacute;n particular</label><br>
 				</legend>
-					<fieldset  class="fieldset-fire">
+					<fieldset class="fieldset-fire">
 						<legend>Seleccione la operaci&oacute;n deseada: </legend>
 							<input id="sign-op" type="radio" name="operation" value="sign" checked="checked" disabled='disabled'/>
 								<label for="sign-op">Firma</label><br>
@@ -112,7 +112,7 @@
 								<label for="countersign-op">Contrafirma</label><br>
 				   	</fieldset>
 	
-				   	<fieldset  class="fieldset-fire">
+				   	<fieldset class="fieldset-fire">
 						<legend>Seleccione el formato de firma: </legend>
 							<input id="cades-ft" type="radio" name="format" value="CAdES" checked="checked" disabled='disabled'/>
 								<label for="cades-ft">CAdES</label><br>
@@ -130,7 +130,7 @@
 								<label for="pkcs1-ft" >Ninguno</label><br>
 				   	</fieldset>
 	
-					<fieldset  class="fieldset-fire">
+					<fieldset class="fieldset-fire">
 						<legend>Post-proceso de la firma: </legend>
 							<input id="none-ft" type="radio" name="upgrade" value="" checked="checked" disabled='disabled'/>
 								<label for="none-ft" >Ninguno</label><br>
@@ -145,13 +145,13 @@
 							<input id="upgrade-verify" type="radio" name="upgrade" value="verify" disabled='disabled'/>
 								<label for="upgrade-verify">Validar</label><br>
 				   	</fieldset>
-	
+
 					<input id="extraparams-conf" type="hidden" name="extraParams"
 						value="<%= Base64.encode("mode=implicit".getBytes()) %>"/>
 				</fieldset>
-				
+
 				<div style="margin-top:30px;text-align: left;">
-					<input  id="submit-btn-add"  type="submit" value="AGREGAR DOCUMENTO AL LOTE">
+					<input id="submit-btn-add" type="submit" value="AGREGAR DOCUMENTO AL LOTE">
 				</div>
 			</form>
 			

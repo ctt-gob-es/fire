@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.client.GracePeriodInfo"%>
 <%@page import="java.security.cert.CertificateEncodingException"%>
 <%@page import="es.gob.fire.client.TransactionResult"%>
 <%@page import="org.slf4j.LoggerFactory"%>
@@ -34,7 +35,14 @@
 		    }
 
 		    final byte[] signature = result.getResult();
-
+		    final GracePeriodInfo gracePeriod = result.getGracePeriod();
+		    
+		    final String resultMsg = signature != null ?
+		    		Base64.encode(signature) :
+		    		(gracePeriod != null ?
+		    				("ID Periodo de gracia: " + gracePeriod.getResponseId() + "\nFecha estimada: " + gracePeriod.getResolutionDate()) : //$NON-NLS-1$ //$NON-NLS-2$
+		    				"No se ha obtenido resultado"); //$NON-NLS-1$
+		    
 		    LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
 		    		"Nombre de proveedor: " + result.getProviderName()); //$NON-NLS-1$
 		    try {
@@ -59,12 +67,9 @@
 			<div style="display:inline-block;"></div>
 
 			<div style="margin-top: 10px; text-align: left; ">
-				<label for="datos-firma">Firma generada: </label><br><br>
-				<textarea id="datos-firma" rows="10" cols="150" name="sign-data"><%= 
-						signature != null ? Base64.encode(signature) : "" //$NON-NLS-1$
-				%></textarea>
+				<label for="datos-firma">Resultado: </label><br><br>
+				<textarea id="datos-firma" rows="10" cols="150" name="sign-data"><%= resultMsg %></textarea>
 			</div>
-
 
 			<form method="POST" action="Login.jsp">
 				<div style="margin-top:30px;text-align: center; ">

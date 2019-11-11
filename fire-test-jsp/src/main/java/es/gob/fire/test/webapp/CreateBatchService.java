@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.CreateBatchResult;
+import es.gob.fire.client.HttpOperationException;
 
 /**
  * Servicio para la creacion de un lote de firmas.
@@ -83,8 +84,7 @@ public class CreateBatchService extends HttpServlet {
         // Podemos configurar un DocumentManager configurado en el componente central.
         // Con esto, en lugar de tomar los datos que le pasamos a la aplicacion, se cargaran
         // en base al DocumentManager y el identificador que le pasemos como datos
-
-        //confProperties.setProperty("docManager", "filesystem");
+        //confProperties.setProperty("docManager", "filesystem"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// Recobemos los parametros para la operacion.
 		final String op = request.getParameter("operation"); //$NON-NLS-1$
@@ -97,9 +97,13 @@ public class CreateBatchService extends HttpServlet {
 		try {
 			createBatchResult = ConfigManager.getInstance().getFireClient(appId).createBatchProcess(
 					userId, op, format, algorithm, extraparams, upgrade, confProperties);
-		} catch (final Exception e) {
+		} catch (final HttpOperationException e) {
 			LOGGER.error("Ocurrio un error al crear un lote", e); //$NON-NLS-1$
 			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
+		} catch (final Exception e) {
+			LOGGER.error("Ocurrio un error grave al crear un lote", e); //$NON-NLS-1$
+			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.toString(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 
