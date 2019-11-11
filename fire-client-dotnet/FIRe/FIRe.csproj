@@ -52,7 +52,8 @@
   <ItemGroup>
     <Compile Include="Certificate\HttpCertificateBlockedException.cs" />
     <Compile Include="FIRe\BatchNoSignedException.cs" />
-    <Compile Include="FIRe\FireBatchResultJson.cs" />
+    <Compile Include="FIRe\BatchResultJson.cs" />
+    <Compile Include="FIRe\TransactionResultJson.cs" />
     <Compile Include="FIRe\InvalidBatchDocumentException.cs" />
     <Compile Include="FIRe\InvalidTransactionException.cs" />
     <Compile Include="FIRe\FireConfig.cs" />

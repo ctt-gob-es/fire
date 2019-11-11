@@ -196,7 +196,7 @@ namespace FIRe
             }
 
             // Si el resultado es un error o si ya contiene la firma, lo devolvemos
-            if (result.getErrorCode() != null || result.getResult() != null)
+            if (result.ErrorCode != null || result.Result != null)
             {
                 return result;
             }
@@ -209,7 +209,7 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             bytes = getResponseToPostPetition(url, urlParameters);
-            result.setResult(bytes);
+            result.Result = bytes;
 
             return result;
         }
@@ -594,7 +594,7 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters);
-            FireBatchResultJson batchResult = getJson(System.Text.Encoding.UTF8.GetString(bytes));
+            BatchResultJson batchResult = getJson(System.Text.Encoding.UTF8.GetString(bytes));
             
             return FireBatchResult.Parse(batchResult);
         }
@@ -757,10 +757,10 @@ namespace FIRe
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
         /// <returns>Objeto con el resultado de la firma del lote.</returns>
-        private static FireBatchResultJson getJson(string JSON)
+        private static BatchResultJson getJson(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
-            return json_serializer.Deserialize<FireBatchResultJson>(JSON);
+            return json_serializer.Deserialize<BatchResultJson>(JSON);
         }
     }
 }

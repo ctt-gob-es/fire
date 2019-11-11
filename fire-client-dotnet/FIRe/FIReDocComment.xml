@@ -38,24 +38,97 @@
             <param name="msg">Descripcion del error.</param>
             <param name="e">Causa del error</param>
         </member>
-        <member name="T:FIRe.FireBatchResultJson">
+        <member name="T:FIRe.BatchResultJson">
             <summary>
             Clase para la serialización/deserialización del resultado de una operación de firma por lotes.
             </summary>
         </member>
-        <member name="P:FIRe.FireBatchResultJson.batch">
+        <member name="P:FIRe.BatchResultJson.batch">
             <summary>
             Listado de resultados de firma en proceso batch.
             </summary>
         </member>
-        <member name="P:FIRe.FireBatchResultJson.prov">
+        <member name="P:FIRe.BatchResultJson.prov">
             <summary>
             Nombre del proveedor de firma utilizado.
             </summary>
         </member>
-        <member name="P:FIRe.FireBatchResultJson.cert">
+        <member name="P:FIRe.BatchResultJson.cert">
             <summary>
             Certificado de firma utilizado.
+            </summary>
+        </member>
+        <member name="T:FIRe.BatchSingleResultJson">
+            <summary>Clase para el almacén del resultado de una operación de firma de un documento.</summary>
+        </member>
+        <member name="P:FIRe.BatchSingleResultJson.id">
+            <summary>
+            Identificador del documento.
+            </summary>
+        </member>
+        <member name="P:FIRe.BatchSingleResultJson.ok">
+            <summary>
+            Indicador de éxito de la firma.
+            </summary>
+        </member>
+        <member name="P:FIRe.BatchSingleResultJson.dt">
+            <summary>
+            Resultado de la firma.
+            </summary>
+        </member>
+        <member name="P:FIRe.BatchSingleResultJson.grace">
+            <summary>
+            Periodo de gracia que es necesario conceder a la firma antes de recuperarla.
+            </summary>
+        </member>
+        <member name="T:FIRe.TransactionResultJson">
+            <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
+        </member>
+        <member name="P:FIRe.TransactionResultJson.Result">
+            <summary>
+            Resultado de la operacion de firma.
+            </summary>
+        </member>
+        <member name="T:FIRe.ResultJson">
+            <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
+        </member>
+        <member name="P:FIRe.ResultJson.Prov">
+            <summary>
+            Nombre del proveedor.
+            </summary>
+        </member>
+        <member name="P:FIRe.ResultJson.Cert">
+            <summary>
+            Certificado de firma.
+            </summary>
+        </member>
+        <member name="P:FIRe.ResultJson.Grace">
+            <summary>
+            Periodo de gracia.
+            </summary>
+        </member>
+        <member name="P:FIRe.ResultJson.Ercod">
+            <summary>
+            Código de error.
+            </summary>
+        </member>
+        <member name="P:FIRe.ResultJson.Ermsg">
+            <summary>
+            Mensaje de error.
+            </summary>
+        </member>
+        <member name="T:FIRe.GracePeriodJson">
+            <summary>Clase con el periodo de gracia recogido del JSON.</summary>
+        </member>
+        <member name="P:FIRe.GracePeriodJson.Id">
+            <summary>
+            Identificador con el que recuperar la firma actualizada.
+            </summary>
+        </member>
+        <member name="P:FIRe.GracePeriodJson.Date">
+            <summary>
+            Fecha en la que deberia estar disponible la firma actualizada, expresada en forma del
+            número de milisegundos transcurridos desde el 1 de Enero de 1970.
             </summary>
         </member>
         <member name="T:FIRe.InvalidBatchDocumentException">
@@ -518,6 +591,9 @@
         <member name="F:FIRe.HttpCustomErrors.INVALID_SIGNATURE_ERROR">
             Error devuelto cuando se detecta que la firma generada no es válida.
         </member>
+        <member name="F:FIRe.HttpCustomErrors.INVALID_DOCUMENT_MANAGER">
+            Error devuelto cuando se solicita el uso de un gestor que no existe o que no le está permitido a la aplicación.
+        </member>
         <member name="T:FIRe.ConnectionManager">
             <summary>Clase para la codificación de datos binarios en cadenas Base64 y viceversa.</summary>
         </member>
@@ -718,7 +794,7 @@
             Certificado de firma utilizado.
             </summary>
         </member>
-        <member name="M:FIRe.FireBatchResult.Parse(FIRe.FireBatchResultJson)">
+        <member name="M:FIRe.FireBatchResult.Parse(FIRe.BatchResultJson)">
             <summary>
              Obtiene el resultado de la firma del lote a partir del objeto con la respuesta del
              servicio que devolvió dicho resultado.
@@ -742,6 +818,11 @@
         <member name="P:FIRe.FireSingleResult.dt">
             <summary>
             Resultado de la firma.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireSingleResult.gracePeriod">
+            <summary>
+            Periodo de gracia que es necesario conceder a la firma antes de recuperarla.
             </summary>
         </member>
         <member name="T:FIRe.FireTransactionIdResult">
@@ -770,99 +851,55 @@
         <member name="T:FIRe.FireTransactionResult">
             <summary>Clase para el almacén del resultado de una operación de carga de datos para firmar.</summary>
         </member>
+        <member name="P:FIRe.FireTransactionResult.State">
+            <summary>Tipo de resultado obtenido.</summary>
+        </member>
+        <member name="P:FIRe.FireTransactionResult.ProviderName">
+            <summary>Nombre del proveedor de firma.</summary>
+        </member>
+        <member name="P:FIRe.FireTransactionResult.SigningCert">
+            <summary>Certificado utilizado para firmar.</summary>
+        </member>
+        <member name="P:FIRe.FireTransactionResult.GracePeriod">
+            <summary>Periodo de gracia que esperar antes de obtener un resultado.</summary>
+        </member>
+        <member name="P:FIRe.FireTransactionResult.ErrorCode">
+            <summary>Código del error obtenido.</summary>
+        </member>
+        <member name="P:FIRe.FireTransactionResult.ErrorMessage">
+            <summary>Mensaje del error obtenido.</summary>
+        </member>
+        <member name="P:FIRe.FireTransactionResult.Result">
+            <summary>Resultado generado por la transacción.</summary>
+        </member>
         <member name="M:FIRe.FireTransactionResult.#ctor(System.Byte[])">
             <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
             <param name="bytes">Definición del resultado de una operación de firma.</param>
             <exception cref="T:System.ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
         </member>
-        <member name="M:FIRe.FireTransactionResult.getState">
-            <summary>Obtiene el tipo de resultado obtenido.</summary>
-            <returns>Tipo de resultado obtenido.</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.getProviderName">
-            <summary>Obtiene el nombre del proveedor con el que se realizó la operación.</summary>
-            <returns>Nombre del proveedor.</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.getSigningCert">
-            <summary>Obtiene el certificado con el que se realizó la operación.</summary>
-            <returns>Certificado.</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.getErrorCode">
-            <summary>Obtiene el código del error obtenido al ejecurar la transacción.</summary>
-            <returns>Código del error obtenido.</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.getErrorMessage">
-            <summary>Obtiene el mensaje del error obtenido al ejecurar la transacción.</summary>
-            <returns>Mensaje del error obtenido.</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.getResult">
-            <summary>Recupera el resultado generado por la transacción.</summary>
-            <returns>Resultado generado por la transacción.</returns>
-        </member>
-        <member name="M:FIRe.FireTransactionResult.setResult(System.Byte[])">
-            <summary>Establece el resultado generado por la transacción.</summary>
-            <param name="result">Resultado generado por la transacción.</param>
-        </member>
         <member name="M:FIRe.FireTransactionResult.DeserializedSignResult(System.String)">
             <summary>
-             Deserializa una estructura JSON para obtener de ella un objeto de tipo FireSignResult.
+             Deserializa una estructura JSON para obtener de ella un objeto de tipo TransactionResultJson.
             </summary>
             <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
             <returns></returns>
         </member>
-        <member name="T:FIRe.FireSignResult">
-            <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
+        <member name="T:FIRe.GracePeriod">
+            <summary>Clase con el periodo de gracia asignado para la obtencion de la firma actualizada.</summary>
         </member>
-        <member name="P:FIRe.FireSignResult.Result">
+        <member name="M:FIRe.GracePeriod.#ctor(System.String,System.DateTime)">
             <summary>
-            Resultado de la operacion de firma.
+            Construye el periodo de gracia a partir del identificador.
             </summary>
         </member>
-        <member name="M:FIRe.FireSignResult.GetProviderName">
+        <member name="P:FIRe.GracePeriod.Id">
             <summary>
-            Recupera el nombre del proveedor utilizado en la operación.
-            </summary>
-            <returns>Nombre del proveedor.</returns>
-        </member>
-        <member name="M:FIRe.FireSignResult.GetSigningCert">
-            <summary>
-            Recupera el certificado utilizado en la operación.
-            </summary>
-            <returns>Certificado utilizado.</returns>
-        </member>
-        <member name="M:FIRe.FireSignResult.GetErrorCode">
-            <summary>
-            Recupera el código del error que se produjese durante la operación.
-            </summary>
-            <returns>Código de error o null si no se produjo ningún error.</returns>
-        </member>
-        <member name="M:FIRe.FireSignResult.GetErrorMessage">
-            <summary>
-            Recupera el mensaje del error que se produjese durante la operación.
-            </summary>
-            <returns>Mensaje de error o null si no se produjo ningún error.</returns>
-        </member>
-        <member name="T:FIRe.FireSignResultData">
-            <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
-        </member>
-        <member name="P:FIRe.FireSignResultData.Prov">
-            <summary>
-            Nombre del proveedor.
+            Identificador con el que recuperar la firma actualizada.
             </summary>
         </member>
-        <member name="P:FIRe.FireSignResultData.Cert">
+        <member name="P:FIRe.GracePeriod.Date">
             <summary>
-            Certificado de firma.
-            </summary>
-        </member>
-        <member name="P:FIRe.FireSignResultData.Ercod">
-            <summary>
-            Código de error.
-            </summary>
-        </member>
-        <member name="P:FIRe.FireSignResultData.Ermsg">
-            <summary>
-            Mensaje de error.
+            Fecha en la que deberia estar disponible la firma actualizada.
             </summary>
         </member>
         <member name="T:FIRe.FireLoadResult">

@@ -9,7 +9,7 @@ public partial class example_fire_recover_batch_sign : System.Web.UI.Page
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
         string appId = "B244E473466F";
-        string transactionId = "1bdbb621-fa77-4dea-8ff8-602400fd033b";
+        string transactionId = "dcee82eb-e0cd-46ac-aa53-b7dc65ef1d9f";
         FireClient fireClient = new FireClient(appId);
 
         FireTransactionResult signature1;
@@ -22,7 +22,7 @@ public partial class example_fire_recover_batch_sign : System.Web.UI.Page
             );
 
             // Mostramos los datos obtenidos
-            DocumentSignature1.Text = System.Convert.ToBase64String(signature1.getResult());
+            DocumentSignature1.Text = System.Convert.ToBase64String(signature1.Result);
         }
         catch (Exception ex)
         {
@@ -39,7 +39,7 @@ public partial class example_fire_recover_batch_sign : System.Web.UI.Page
             );
 
             // Mostramos los datos obtenidos
-            DocumentSignature2.Text = System.Convert.ToBase64String(signature2.getResult());
+            DocumentSignature2.Text = System.Convert.ToBase64String(signature2.Result);
         }
         catch (Exception ex)
         {

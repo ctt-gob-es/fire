@@ -67,7 +67,7 @@ namespace Example_Console
                     Console.WriteLine("Error: " + ex.Message);
                     return;
                 }
-                Console.WriteLine(signature.getResult());
+                Console.WriteLine(signature.Result);
 
             }
         }

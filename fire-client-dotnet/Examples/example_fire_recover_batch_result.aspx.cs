@@ -1,5 +1,6 @@
 ﻿using FIRe;
 using System;
+using System.Globalization;
 
 public partial class example_fire_recover_batch_result : System.Web.UI.Page
 {
@@ -8,7 +9,7 @@ public partial class example_fire_recover_batch_result : System.Web.UI.Page
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireBatchResult batchResult;
         string appId = "B244E473466F";
-        string transactionId = "1bdbb621-fa77-4dea-8ff8-602400fd033b";
+        string transactionId = "dcee82eb-e0cd-46ac-aa53-b7dc65ef1d9f";
         try
         {
             batchResult = new FireClient(appId).recoverBatchResult( // Identificador de la aplicacion (dada de alta previamente en el sistema)
@@ -31,8 +32,11 @@ public partial class example_fire_recover_batch_result : System.Web.UI.Page
         // Mostramos los datos obtenidos
         ProviderName.Text = batchResult.prov;
         CertB64.Text = System.Convert.ToBase64String(batchResult.cert.GetRawCertData());
-        Result1.Text = batchResult.batch[0].id + " - " + batchResult.batch[0].ok + " - " + batchResult.batch[0].dt;
-        Result2.Text = batchResult.batch[1].id + " - " + batchResult.batch[1].ok + " - " + batchResult.batch[1].dt;
+
+        Result1.Text =  "Id: " + batchResult.batch[0].id +
+                        "<br>Resultado: " + batchResult.batch[0].ok +
+                        "<br>Detalle: " + GetDetailText(batchResult.batch[0]);
+        Result2.Text = batchResult.batch[1].id + " - " + batchResult.batch[1].ok + " - " + GetDetailText(batchResult.batch[1]);
     }
 
     /// <summary>Codifica en base64</summary>
@@ -42,5 +46,24 @@ public partial class example_fire_recover_batch_result : System.Web.UI.Page
     {
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
         return System.Convert.ToBase64String(plainTextBytes);
+    }
+
+    /// <summary>Devuelve el texto con el detalle de la operación o, si existía, con la información
+    /// del periodo de gracia remitido.</summary>
+    /// <param name="result">Resultado de una firma del lote.</param>
+    /// <returns>Información adicional de la firma.</returns>
+    private string GetDetailText(FireSingleResult result)
+    {
+        string detail;
+        if (result.gracePeriod != null)
+        {
+            detail = "ID periodo de gracia: " + result.gracePeriod.Id +
+                     "  -  Fecha recogida: " + result.gracePeriod.Date.ToString("r", CultureInfo.CreateSpecificCulture("es-ES"));
+        }
+        else
+        {
+            detail = result.dt;
+        }
+        return detail;
     }
 }

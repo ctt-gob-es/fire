@@ -9,9 +9,8 @@
  */
 
 using System;
-using System.Web.Script.Serialization;
 using System.Security.Cryptography.X509Certificates;
-using System.Windows.Forms;
+using System.Web.Script.Serialization;
 
 namespace FIRe
 {
@@ -23,29 +22,37 @@ namespace FIRe
         private static readonly int STATE_OK = 0;
         // Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
         private static readonly int STATE_ERROR = -1;
-        
-        // Nombre del campo principal del JSON con la informacion de la firma
-        private static readonly string JSON_ATTR_RESULT = "result"; //$NON-NLS-1$
-        // Prefijo de la estructura que almacena la informacion sobre la operacion realizada
-        private static readonly string JSON_RESULT_PREFIX = "{\"" + JSON_ATTR_RESULT + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
 
-        private readonly int State;
-        private readonly string ProviderName;
-        private readonly X509Certificate SigningCert;
-        private readonly string ErrorCode;
-        private readonly string ErrorMessage;
-        private byte[] Result;
+        // Prefijo de la estructura que almacena la informacion sobre la operacion realizada
+        private static readonly string JSON_RESULT_PREFIX = "{\"result\":"; //$NON-NLS-1$ //$NON-NLS-2$
+
+        /// <summary>Tipo de resultado obtenido.</summary>
+        public int State { get; }
+        /// <summary>Nombre del proveedor de firma.</summary>
+        public string ProviderName { get; }
+        /// <summary>Certificado utilizado para firmar.</summary>
+        public X509Certificate SigningCert { get; }
+        /// <summary>Periodo de gracia que esperar antes de obtener un resultado.</summary>
+        public GracePeriod GracePeriod { get; }
+        /// <summary>Código del error obtenido.</summary>
+        public string ErrorCode { get; }
+        /// <summary>Mensaje del error obtenido.</summary>
+        public string ErrorMessage { get; }
+        /// <summary>Resultado generado por la transacción.</summary>
+        public byte[] Result { get; set; }
 
         /// <summary>Crea el resultado de una operación de carga de datos a firmar a partir de su defición JSON.</summary>
         /// <param name="bytes">Definición del resultado de una operación de firma.</param>
         /// <exception cref="ArgumentException">Cuando el formato del JSON no es el esperado.</exception>
-        public FireTransactionResult(byte[] bytes) { 
-            if (bytes == null) {
-			    throw new ArgumentException(
-				    "El resultado de la firma no puede ser nulo" 
-			    );
-		    }
-            
+        public FireTransactionResult(byte[] bytes)
+        {
+            if (bytes == null)
+            {
+                throw new ArgumentException(
+                    "El resultado de la firma no puede ser nulo"
+                );
+            }
+
             this.State = STATE_OK;
 
             // Comprobamos el inicio de la respuesta para saber si recibimos la informacion
@@ -56,33 +63,40 @@ namespace FIRe
                 prefix = new byte[JSON_RESULT_PREFIX.Length];
                 Array.Copy(bytes, 0, prefix, 0, prefix.Length);
             }
-            
+
             // Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
             if (prefix != null && System.Text.Encoding.UTF8.GetString(prefix).Equals(JSON_RESULT_PREFIX))
             {
                 try
                 {
-                    FireSignResult signResult = DeserializedSignResult(System.Text.Encoding.UTF8.GetString(bytes));
+                    TransactionResultJson signResult = DeserializedSignResult(System.Text.Encoding.UTF8.GetString(bytes));
 
-                    if (signResult.GetErrorCode() != 0)
+                    if (signResult.Result.Ercod != 0)
                     {
-                        this.ErrorCode = signResult.GetErrorCode().ToString();
+                        this.ErrorCode = signResult.Result.Ercod.ToString();
                         this.State = STATE_ERROR;
                     }
-                    if (signResult.GetErrorMessage() != null)
+                    if (signResult.Result.Ermsg != null)
                     {
-                        this.ErrorMessage = signResult.GetErrorMessage();
+                        this.ErrorMessage = signResult.Result.Ermsg;
                     }
-                    if (signResult.GetProviderName() != null)
+                    if (signResult.Result.Prov != null)
                     {
-                        this.ProviderName = signResult.GetProviderName();
+                        this.ProviderName = signResult.Result.Prov;
                     }
-                    if (signResult.GetSigningCert() != null)
+                    if (signResult.Result.Cert != null)
                     {
-                        this.SigningCert = signResult.GetSigningCert();
+                        this.SigningCert = new X509Certificate(System.Convert.FromBase64String(signResult.Result.Cert));
+                    }
+                    if (signResult.Result.Grace != null)
+                    {
+                        // Transformamos los milisegundos Java a una fecha .Net
+                        GracePeriodJson graceJson = signResult.Result.Grace;
+                        DateTime graceDate = new DateTime(new DateTime(1970, 1, 1).Ticks + graceJson.Date * 10000);
+                        this.GracePeriod = new GracePeriod(graceJson.Id, graceDate);
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     throw new FormatException("El servicio respondio con un JSON no valido: " + System.Text.Encoding.UTF8.GetString(bytes), e);
                 }
@@ -93,135 +107,39 @@ namespace FIRe
             }
         }
 
-        /// <summary>Obtiene el tipo de resultado obtenido.</summary>
-        /// <returns>Tipo de resultado obtenido.</returns>
-        public int getState()
-        {
-            return this.State;
-        }
-
-        /// <summary>Obtiene el nombre del proveedor con el que se realizó la operación.</summary>
-        /// <returns>Nombre del proveedor.</returns>
-        public string getProviderName()
-        {
-            return this.ProviderName;
-        }
-
-        /// <summary>Obtiene el certificado con el que se realizó la operación.</summary>
-        /// <returns>Certificado.</returns>
-        public X509Certificate getSigningCert()
-        {
-            return this.SigningCert;
-        }
-
-        /// <summary>Obtiene el código del error obtenido al ejecurar la transacción.</summary>
-        /// <returns>Código del error obtenido.</returns>
-        public string getErrorCode()
-        {
-            return this.ErrorCode;
-        }
-
-        /// <summary>Obtiene el mensaje del error obtenido al ejecurar la transacción.</summary>
-        /// <returns>Mensaje del error obtenido.</returns>
-        public string getErrorMessage()
-        {
-            return this.ErrorMessage;
-        }
-
-        /// <summary>Recupera el resultado generado por la transacción.</summary>
-        /// <returns>Resultado generado por la transacción.</returns>
-        public byte[] getResult()
-        {
-            return this.Result;
-        }
-
-        /// <summary>Establece el resultado generado por la transacción.</summary>
-        /// <param name="result">Resultado generado por la transacción.</param>
-        public void setResult(byte[] result)
-        {
-            this.Result = result;
-        }
-
         /// <summary>
-        ///  Deserializa una estructura JSON para obtener de ella un objeto de tipo FireSignResult.
+        ///  Deserializa una estructura JSON para obtener de ella un objeto de tipo TransactionResultJson.
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
         /// <returns></returns>
-        private static FireSignResult DeserializedSignResult(string JSON)
+        private static TransactionResultJson DeserializedSignResult(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
-            return json_serializer.Deserialize<FireSignResult>(JSON);
+            return json_serializer.Deserialize<TransactionResultJson>(JSON);
         }
+
+        
     }
 
-    /// <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
-    public class FireSignResult
+    /// <summary>Clase con el periodo de gracia asignado para la obtencion de la firma actualizada.</summary>
+    public class GracePeriod
     {
         /// <summary>
-        /// Resultado de la operacion de firma.
+        /// Construye el periodo de gracia a partir del identificador.
         /// </summary>
-        public FireSignResultData Result { get; set; }
-
-        /// <summary>
-        /// Recupera el nombre del proveedor utilizado en la operación.
-        /// </summary>
-        /// <returns>Nombre del proveedor.</returns>
-        public string GetProviderName()
+        public GracePeriod(string Id, DateTime Date)
         {
-            return this.Result.Prov;
+            this.Id = Id;
+            this.Date = Date;
         }
 
         /// <summary>
-        /// Recupera el certificado utilizado en la operación.
+        /// Identificador con el que recuperar la firma actualizada.
         /// </summary>
-        /// <returns>Certificado utilizado.</returns>
-        public X509Certificate GetSigningCert()
-        {
-            if (this.Result.Cert == null)
-            {
-                return null;
-            }
-            return new X509Certificate(System.Convert.FromBase64String(this.Result.Cert));
-        }
-
+        public string Id { get; set; }
         /// <summary>
-        /// Recupera el código del error que se produjese durante la operación.
+        /// Fecha en la que deberia estar disponible la firma actualizada.
         /// </summary>
-        /// <returns>Código de error o null si no se produjo ningún error.</returns>
-        public int GetErrorCode()
-        {
-            return this.Result.Ercod;
-        }
-
-        /// <summary>
-        /// Recupera el mensaje del error que se produjese durante la operación.
-        /// </summary>
-        /// <returns>Mensaje de error o null si no se produjo ningún error.</returns>
-        public string GetErrorMessage()
-        {
-            return this.Result.Ermsg;
-        }
+        public DateTime Date { get; set; }
     }
-
-    /// <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
-    public class FireSignResultData
-    {
-        /// <summary>
-        /// Nombre del proveedor.
-        /// </summary>
-        public string Prov { get; set; }
-        /// <summary>
-        /// Certificado de firma.
-        /// </summary>
-        public string Cert { get; set; }
-        /// <summary>
-        /// Código de error.
-        /// </summary>
-        public int Ercod { get; set; }
-        /// <summary>
-        /// Mensaje de error.
-        /// </summary>
-        public string Ermsg { get; set; }
-    }
-
 }

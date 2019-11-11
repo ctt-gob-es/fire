@@ -9,6 +9,9 @@ public partial class example_fire_create_batch : System.Web.UI.Page
         string conf = "redirectOkUrl=http://www.google.es\n" +	// URL a la que llegara si el usuario se autentica correctamente
                       "redirectErrorUrl=http://www.ibm.com";        // URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
         string confB64 = Base64Encode(conf);
+        string extraParams = "mode=implicit";
+        string extraParamsB64 = Base64Encode(extraParams);
+        string upgradeFormat = null;
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionIdResult loadResult;
@@ -19,8 +22,8 @@ public partial class example_fire_create_batch : System.Web.UI.Page
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
                 "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
                 "SHA1withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
-                null,           // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
-                null,           // Actualizacion
+                extraParamsB64, // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
+                upgradeFormat,  // Actualizacion
                 confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
             );
         }

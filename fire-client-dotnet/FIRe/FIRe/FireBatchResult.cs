@@ -8,6 +8,7 @@
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
@@ -37,16 +38,29 @@ namespace FIRe
         /// </summary>
         /// <param name="json">Objeto con el JSON de respuesta serializado.</param>
         /// <returns>Objeto con el resultado de la firma del lote.</returns>
-        public static FireBatchResult Parse(FireBatchResultJson json)
+        internal static FireBatchResult Parse(BatchResultJson json)
         {
             FireBatchResult result = new FireBatchResult();
             result.prov = json.prov;
-            result.batch = json.batch;
             if (json.cert != null)
             {
                 result.cert = new X509Certificate(System.Convert.FromBase64String(json.cert));
             }
-
+            result.batch = new List<FireSingleResult>();
+            foreach (var singleBatch in json.batch)
+            {
+                FireSingleResult singleSignature = new FireSingleResult();
+                singleSignature.id = singleBatch.id;
+                singleSignature.ok = singleBatch.ok;
+                singleSignature.dt = singleBatch.dt;
+                if (singleBatch.grace != null)
+                {
+                    // Transformamos los milisegundos Java a una fecha .Net
+                    DateTime graceDate = new DateTime(new DateTime(1970, 1, 1).Ticks + singleBatch.grace.Date * 10000);
+                    singleSignature.gracePeriod = new GracePeriod(singleBatch.grace.Id, graceDate);
+                }
+                result.batch.Add(singleSignature);
+            }
             return result;
         }
     }
@@ -66,5 +80,10 @@ namespace FIRe
         /// Resultado de la firma.
         /// </summary>
         public string dt { get; set; }
+
+        /// <summary>
+        /// Periodo de gracia que es necesario conceder a la firma antes de recuperarla.
+        /// </summary>
+        public GracePeriod gracePeriod { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using FIRe;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 public partial class example_fire_recover_sign : System.Web.UI.Page
 {
@@ -15,15 +16,15 @@ public partial class example_fire_recover_sign : System.Web.UI.Page
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionResult signature;
-        string transactionId = "6db855d1-5985-482a-bdb1-ea03ef8e04f4";
+        string transactionId = "d17ddc97-6a71-491a-8e38-c3455bdf4bff";
         string appId = "B244E473466F";
+        string upgradeFormat = "ES-T";
         try
         {
-            
             signature = new FireClient(appId, serviceConfig).recoverSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
                 transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
                 "00001",        // Identificador del usuario
-                null            // Formato longevo
+                upgradeFormat   // Formato longevo
             );
             
             /*
@@ -40,9 +41,21 @@ public partial class example_fire_recover_sign : System.Web.UI.Page
         }
 
         // Mostramos los datos obtenidos
-        Provider.Text = signature.getProviderName();
-        CertB64.Text = System.Convert.ToBase64String(signature.getSigningCert().GetRawCertData());
-        SignatureB64.Text = System.Convert.ToBase64String(signature.getResult());
+        Provider.Text = signature.ProviderName;
+        CertB64.Text = System.Convert.ToBase64String(signature.SigningCert.GetRawCertData());
+        if (signature.ErrorCode != null)
+        {
+            SignatureB64.Text = "Error " + signature.ErrorCode + ": " + signature.ErrorMessage;
+        }
+        else if (signature.Result != null)
+        {
+            SignatureB64.Text = System.Convert.ToBase64String(signature.Result);
+        }
+        else if (signature.GracePeriod != null)
+        {
+            SignatureB64.Text = "ID periodo de gracia: " + signature.GracePeriod.Id +
+                                "<br>Fecha recogida: " + signature.GracePeriod.Date.ToString("r", CultureInfo.CreateSpecificCulture("es-ES"));
+        }
     }
 
     /// <summary>Codifica en base64</summary>

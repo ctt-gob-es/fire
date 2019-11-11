@@ -303,7 +303,8 @@ namespace FIRe
 
             // Identificamos los datos obtenidos
             FireTransactionResult result;
-            try { 
+            try {
+
                 result = new FireTransactionResult(bytes);
             }
             catch (Exception e)
@@ -311,8 +312,8 @@ namespace FIRe
                 throw new HttpOperationException("La respuesta del servicio no tiene un formato valido", e);
             }
 
-            // Si el resultado es un error o si ya contiene la firma, lo devolvemos
-            if (result.getErrorCode() != null || result.getResult() != null)
+            // Si el resultado es un error, se indica un periodo de gracia o si ya contiene la firma, lo devolvemos
+            if (result.ErrorCode != null || result.GracePeriod != null || result.Result != null)
             {
                 return result;
             }
@@ -326,7 +327,7 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
-            result.setResult(bytes);
+            result.Result = bytes;
 
             return result;
 
@@ -693,10 +694,18 @@ namespace FIRe
 
             //  Realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
-            FireBatchResultJson batchResultJson = deserializedBatchResult(System.Text.Encoding.UTF8.GetString(bytes));
-
-            // Componemos el objeto de resultado con la respuesta del servicio
-            return FireBatchResult.Parse(batchResultJson);
+            FireBatchResult batchResult;
+            try
+            {
+                // Componemos el objeto de resultado con la respuesta del servicio
+                BatchResultJson batchResultJson = deserializedBatchResult(System.Text.Encoding.UTF8.GetString(bytes));
+                batchResult = FireBatchResult.Parse(batchResultJson);
+            }
+            catch (Exception e)
+            {
+                throw new HttpOperationException("El servicio respondio con un JSON no valido: " + System.Text.Encoding.UTF8.GetString(bytes), e);
+            }
+            return batchResult;
         }
 
         /// <summary>
@@ -864,7 +873,7 @@ namespace FIRe
                         case (HttpCustomErrors.BATCH_NO_SIGNED):
                             throw new BatchNoSignedException("El lote no se ha firmado", e);
                         case (HttpCustomErrors.BATCH_DOCUMENT_FAILED):
-                            throw new InvalidBatchDocumentException("Fallo la firma del documento que se intenta recuperar", e);
+                            throw new InvalidBatchDocumentException("La firma solicitada no se encuentra disponible", e);
                         case (HttpCustomErrors.INVALID_BATCH_DOCUMENT):
                             throw new InvalidBatchDocumentException("El documento no existe en el lote", e);
                         case (HttpCustomErrors.INVALID_DOCUMENT_MANAGER):
@@ -903,10 +912,10 @@ namespace FIRe
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
         /// <returns></returns>
-        private static FireBatchResultJson deserializedBatchResult(string JSON)
+        private static BatchResultJson deserializedBatchResult(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
-            return json_serializer.Deserialize<FireBatchResultJson>(JSON);
+            return json_serializer.Deserialize<BatchResultJson>(JSON);
         }
     }
 

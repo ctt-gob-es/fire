@@ -16,6 +16,7 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Windows.Forms;
 
 namespace FIRe
 {
@@ -206,7 +207,7 @@ namespace FIRe
 
             if (string.IsNullOrEmpty(value))
             {
-                throw new ConfigureException("No se ha encontrado el valor de registro " + REGISTRY_KEY_FIRE + "\\" + valueName);
+                value = null;
             }
 
             return value;
