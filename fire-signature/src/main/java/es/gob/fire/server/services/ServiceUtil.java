@@ -147,7 +147,7 @@ public final class ServiceUtil {
         final String headerName = propName;
         String headerCert = request.getHeader(headerName);
         try {
-            if(headerCert != null && !headerCert.isEmpty()) {
+            if (headerCert != null && !headerCert.isEmpty()) {
                 headerCert = headerCert.replace("-----BEGIN CERTIFICATE----- ", ""); //$NON-NLS-1$ //$NON-NLS-2$
                 headerCert = headerCert.replace(" -----END CERTIFICATE-----", ""); //$NON-NLS-1$ //$NON-NLS-2$
                 final byte certBytes[] = Base64.decode(headerCert);
@@ -157,11 +157,11 @@ public final class ServiceUtil {
                 certificates = new X509Certificate[1];
                 certificates[0] = cer;
             } else {
-                LOGGER.warning("No existe certficado en la request en el header " + headerName); //$NON-NLS-1$
+                LOGGER.fine("No existe certficado en la request en el header " + headerName); //$NON-NLS-1$
             }
         }
         catch(final Exception ex) {
-            LOGGER.severe("Ha ocurrido un error al extraer certificado : " + ex); //$NON-NLS-1$
+            LOGGER.warning("Ha ocurrido un error al extraer certificado de la cabecera de la peticion: " + ex); //$NON-NLS-1$
         }
         return certificates;
     }

@@ -75,9 +75,9 @@ public class BatchResult implements Serializable {
 	private static final String JSON_ATTR_DOC_ID = "id"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_OK = "ok"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_DETAILS = "dt"; //$NON-NLS-1$
-	private static final String JSON_ATTR_DOC_GRACE_PERIOD = "gp"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_GRACE_PERIOD = "grace"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_GP_ID = "id"; //$NON-NLS-1$
-	private static final String JSON_ATTR_DOC_GP_DATE = "dt"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_GP_DATE = "date"; //$NON-NLS-1$
 
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
@@ -298,7 +298,7 @@ public class BatchResult implements Serializable {
 			if (result.getGracePeriod() != null) {
 				final JsonObjectBuilder gracePeriod = Json.createObjectBuilder()
 				.add(JSON_ATTR_DOC_GP_ID, result.getGracePeriod().getResponseId())
-				.add(JSON_ATTR_DOC_GP_DATE, Long.toString(result.getGracePeriod().getResolutionDate().getTime()));
+				.add(JSON_ATTR_DOC_GP_DATE, result.getGracePeriod().getResolutionDate().getTime());
 				docInfo.add(JSON_ATTR_DOC_GRACE_PERIOD, gracePeriod);
 			}
 
