@@ -11,7 +11,7 @@
 	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
 	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
 	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "1bf458ac-6940-4be9-bd26-86d6ba82f898";	// Identificador de la transaccion
+	$transactionId = "5051c8b1-a125-48e0-9e3e-1f36d1b71c23";	// Identificador de la transaccion
 	
 	
 	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
@@ -37,8 +37,8 @@
 		if (!$batchDocument->ok) {
 			echo "<br><b>Codigo de error:</b><br>".$batchDocument->dt;
 		}
-		if (isset($batchDocument->gp)) {
-			echo "<br><b>Periodo de gracia:</b><br>ID: ".($batchDocument->gp->id)."<br>Fecha: ".($batchDocument->gp->date->format('Y-m-d H:i:sP'));
+		if (isset($batchDocument->gracePeriod)) {
+			echo "<br><b>Periodo de gracia:</b><br>ID: ".($batchDocument->gracePeriod->id)."<br>Fecha: ".($batchDocument->gracePeriod->date->format('Y-m-d H:i:sP'));
 		}
 	}
 	

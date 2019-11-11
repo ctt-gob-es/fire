@@ -781,7 +781,7 @@
 		var $id;
 		var $ok;
 		var $dt;
-		var $gp;
+		var $gracePeriod;
 		
 		function __construct ($response){
 			if (isset($response->id)) {
@@ -796,8 +796,8 @@
 				$this->dt = $response->dt;
 			}
 			
-			if (isset($response->gp)) {
-				$this->gp = new GracePeriod($response->gp->id, "@".($response->gp->dt/1000));
+			if (isset($response->grace)) {
+				$this->gracePeriod = new GracePeriod($response->grace->id, "@".($response->grace->date/1000));
 			}
 		
 			if (empty($this->id)){
