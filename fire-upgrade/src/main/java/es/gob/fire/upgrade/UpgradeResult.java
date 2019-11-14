@@ -30,6 +30,21 @@ public class UpgradeResult {
 	}
 
 	/**
+	 * Construye el resultado de la actualizaci&oacute;n en donde se proporciona
+	 * la firma obtenida.
+	 * @param result Firma resultante.
+	 * @param format Identificador del formato longevo.
+	 * @param state Estado de la firma (completa o parcial).
+	 * @see UpgradeResult.State
+	 */
+	public UpgradeResult(final byte[] result, final String format, final State state) {
+		this.result = result;
+		this.format = format;
+		this.gracePeriodInfo = null;
+		this.state = state;
+	}
+
+	/**
 	 * Construye el resultado de la actualizaci&oacute;n, en donde se indica que
 	 * debe esperarse un periodo de gracia para obtener la firma.
 	 * @param responseId Identificador de operaci&oacute;n para obtener la respuesta.
@@ -79,10 +94,15 @@ public class UpgradeResult {
 	}
 
 	/**
-	 * Estado del proceso de actualizaci&oacute;n.
+	 * Estado resultante del proceso de actualizaci&oacute;n.
 	 */
 	public static enum State {
+		/** El resultado esta pendiente de actualizar (Periodo de gracia). */
 		PENDING,
+		/** El resultado solo se ha actualizado parcialmente (no se han introducido todos los
+		 * sellos y evidencias correspondientes al formato de actualizaci&oacute;n solicitado. */
+		PARTIAL,
+		/** El resultado contiene la firma actualizada al formato solicitado. */
 		COMPLETE
 	}
 }

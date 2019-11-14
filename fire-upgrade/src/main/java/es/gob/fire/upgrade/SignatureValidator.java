@@ -1,5 +1,6 @@
 package es.gob.fire.upgrade;
 
+import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -24,8 +25,22 @@ public interface SignatureValidator {
 	 * @throws UpgradeException Cuando ocurre un error durante la actualizaci&oacute;n de la firma.
 	 * @throws VerifyException Cuando la firma que se desea actualizar no es v&aacute;lida.
 	 */
-	UpgradeResult upgradeSignature(final byte[] signature, final String upgradeFormat, Properties config)
+	UpgradeResult upgradeSignature(byte[] signature, String upgradeFormat, Properties config)
 			throws UpgradeException, VerifyException;
+
+	/**
+	 * Recupera una firma enviada a actualizar previamente y para la que se solicit&oacute; un
+	 * periodo de gracia antes de su actualizaci&oacute;n.
+	 * @param docId Identificador del documento que se devolvi&oacute; al enviar a actualizar.
+	 * @param upgradeFormat Nombre del formato longevo que se solicit&oacute;.
+	 * @param config Opciones de configuraci&oacute;n adicionales para la operaci&oacute;n.
+	 * @return Resultado de la operaci&oacute;n de actualizaci&oacute;n.
+	 * @throws UpgradeException Cuando ocurre un error al recuperar la firma.
+	 * @throws IOException Cuando ocurre un error al conectar con la plataforma de
+	 * actualizaci&oacute;n.
+	 */
+	UpgradeResult recoverUpgradedSignature(String docId, String upgradeFormat, Properties config)
+			throws UpgradeException, IOException;
 
 	/**
 	 * Valida una firma electr&oacute;nica.
@@ -34,5 +49,5 @@ public interface SignatureValidator {
 	 * @return Resultado de la operaci&oacute;n de actualizaci&oacute;n.
 	 * @throws UpgradeException Cuando ocurre un error durante la actualizaci&oacute;n de la firma.
 	 */
-	VerifyResult validateSignature(final byte[] signature, Properties config) throws VerifyException;
+	VerifyResult validateSignature(byte[] signature, Properties config) throws VerifyException;
 }

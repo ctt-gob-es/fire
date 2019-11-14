@@ -92,6 +92,11 @@
         <member name="T:FIRe.ResultJson">
             <summary>Clase que contiene la información recabada de la firma de un documento.</summary>
         </member>
+        <member name="P:FIRe.ResultJson.State">
+            <summary>
+            Estado del resultado.
+            </summary>
+        </member>
         <member name="P:FIRe.ResultJson.Prov">
             <summary>
             Nombre del proveedor.
@@ -105,6 +110,11 @@
         <member name="P:FIRe.ResultJson.Grace">
             <summary>
             Periodo de gracia.
+            </summary>
+        </member>
+        <member name="P:FIRe.ResultJson.Upgrade">
+            <summary>
+            Formato al que se ha actualizado la firma.
             </summary>
         </member>
         <member name="P:FIRe.ResultJson.Ercod">
@@ -324,15 +334,15 @@
         </member>
         <member name="M:FIRe.FireClient.sign(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
-            Firma unos datos haciendo uso del servicio de red de firma en la nube.
+            Envía datos a firmar al servicio de firma.
             </summary>
             <param name="subjectId">Identificador del firmante.</param>
             <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
             <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
             <param name="algth">Algoritmo de firma.</param>
-            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+            <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>) codificadas en base 64.</param>
             <param name="dataB64"> Datos a firmar en base64.</param>
-            <param name="confB64">Parámetros de la configuración de la firma.</param>
+            <param name="confB64">Parámetros de la configuración de la firma codificados en base 64.</param>
             <returns>Firma realizada en servidor.</returns>
             <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
             <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
@@ -341,11 +351,27 @@
         </member>
         <member name="M:FIRe.FireClient.recoverSign(System.String,System.String,System.String)">
             <summary>
-            Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
+            Recupera la firma de los datos enviados a firmar anteriormente.
             </summary>
             <param name="transactionId">Identificador de la transacción.</param>
             <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
             <param name="upgrade">Formato al que queremos mejorar la firma (puede ser null).</param>
+            <returns>Firma realizada en servidor.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error generico durante la operación.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.recoverSign(System.String,System.String,System.String,System.String)">
+            <summary>
+            Recupera la firma de los datos enviados a firmar anteriormente.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+            <param name="upgrade">Formato al que queremos mejorar la firma (puede ser null).</param>
+            <param name="upgradeConfigB64">Configuración adicional para la plataforma de
+                    actualización y validación en forma de properties codificado en base64.</param>
             <returns>Firma realizada en servidor.</returns>
             <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
             <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
@@ -476,6 +502,23 @@
             <exception cref="T:FIRe.InvalidBatchDocumentException">Cuando se indica el identificador de un documento que no existe en el lote o que no se firmó correctamente.</exception>
             <exception cref="T:FIRe.BatchNoSignedException">Cuando se solicita recuperar una firma del lote antes de firmar el propio lote.</exception>
             <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        </member>
+        <member name="M:FIRe.FireClient.recoverAsyncSign(System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            Recupera una firma enviada a generar anteriormente y para la que se solicitó esperar un periodo de gracia.
+            </summary>
+            <param name="docId">Identificador de documento recibido de la  usuario propietario de los certificados de firma.</param>
+            <param name="upgrade">Formato al que solicitamos actualizar la firma. Si se indica, se comprobará que la
+            firma devuelta esté en el formato indicado.</param>
+            <param name="confB64">Properties codificado en base 64 con configuración adicional para la plataforma de
+            actualización de firma. </param>
+            <param name="allowPartial">Indica si se debe devolver la firma incluso si no se ha actualizado al formato
+            solicitado.</param>
+            <returns>Resultado con la firma recuperada o un nuevo periodo de gracia.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error durante la operación.</exception>
         </member>
         <member name="M:FIRe.FireClient.getResponseToPostPetition(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
             <summary>
@@ -851,6 +894,21 @@
         <member name="T:FIRe.FireTransactionResult">
             <summary>Clase para el almacén del resultado de una operación de carga de datos para firmar.</summary>
         </member>
+        <member name="F:FIRe.FireTransactionResult.STATE_OK">
+            <summary>Especifica que la transacción finalizó correctamente.</summary>
+        </member>
+        <member name="F:FIRe.FireTransactionResult.STATE_ERROR">
+            <summary>Especifica que la transacción no pudo finalizar debido a un error.</summary>
+        </member>
+        <member name="F:FIRe.FireTransactionResult.STATE_PENDING">
+            <summary>Especifica que la transaccion aun no ha finalizado y se debera pedir el resultamos
+            mas adelante.</summary>
+        </member>
+        <member name="F:FIRe.FireTransactionResult.STATE_PARTIAL">
+            <summary>Especifica que la transacción ha finalizado pero que el resultado puede
+            diferir de lo solicitado por la aplicación. Por ejemplo, puede haberse
+            solicitado una firma ES-A y recibirse una ES-T.</summary>
+        </member>
         <member name="P:FIRe.FireTransactionResult.State">
             <summary>Tipo de resultado obtenido.</summary>
         </member>
@@ -862,6 +920,9 @@
         </member>
         <member name="P:FIRe.FireTransactionResult.GracePeriod">
             <summary>Periodo de gracia que esperar antes de obtener un resultado.</summary>
+        </member>
+        <member name="P:FIRe.FireTransactionResult.UpgradeFormat">
+            <summary>Formato al que se ha actualizado la firma.</summary>
         </member>
         <member name="P:FIRe.FireTransactionResult.ErrorCode">
             <summary>Código del error obtenido.</summary>

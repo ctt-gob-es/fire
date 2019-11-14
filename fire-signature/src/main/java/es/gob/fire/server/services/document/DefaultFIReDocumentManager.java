@@ -14,31 +14,28 @@ import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import es.gob.fire.server.document.FIReDocumentManager;
+import es.gob.fire.server.document.FireDocumentManagerBase;
 
 /**
  * Implementaci&oacute;n que por defecto recibe los datos en lugar de un identificador de documento
  * y devuelve los datos firmados como resultado del guardado.
  */
-public class DefaultFIReDocumentManager implements FIReDocumentManager, Serializable {
+public class DefaultFIReDocumentManager extends FireDocumentManagerBase
+	implements Serializable {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 4608510893704491372L;
 
 	@Override
-	public void init(final Properties config) {
-		// Este DocumentManager no necesita inicializacion
-	}
-
-	@Override
-	public byte[] getDocument(final byte[] docId, final String appId, final String format, final Properties extraParams) throws IOException {
+	public byte[] getDocument(final byte[] docId, final String appId, final String format,
+			final Properties extraParams) throws IOException {
 		return docId;
 	}
 
 	@Override
-	public byte[] storeDocument(final byte[] docId, final String appId, final byte[] data, final X509Certificate cert, final String format, final Properties extraParams)
-			throws IOException {
+	public byte[] storeDocument(final byte[] docId, final String appId, final byte[] data,
+			final X509Certificate cert, final String format, final String upgradeFormat,
+			final Properties extraParams) throws IOException {
 		return data;
 	}
-
 }

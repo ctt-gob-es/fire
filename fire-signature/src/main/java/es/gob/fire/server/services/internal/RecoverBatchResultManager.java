@@ -299,8 +299,10 @@ public class RecoverBatchResultManager {
         			signConfig.setFormat(format);
         			signConfig.setExtraParams(extraParams);
         			signConfig.setUpgrade(defaultUpgrade);
-        			signConfig.setUpgradeConfig(upgradeConfig);
         		}
+        		// La configuracion para la plataforma de actualizacion siempre es la por defecto
+        		// para todos los elementos del lote
+        		signConfig.setUpgradeConfig(upgradeConfig);
 
         		// Verificamos que es necesaria la validacion segun el tipo de firma a realizar (las cofirmas
         		// y contrafirmas deben validarse porque no sabemos de la validez de firmas anteriores).
@@ -329,7 +331,6 @@ public class RecoverBatchResultManager {
 
         // Si todas las firmas fallaron, damos por terminada la transaccion y eliminamos la sesion.
         if (isAllFailed(batchResult)) {
-        	//SIGNLOGGER.log(session, false);
     		TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
         }
@@ -409,6 +410,10 @@ public class RecoverBatchResultManager {
 
     		if (docManager != null || session.getString(ServiceParams.SESSION_PARAM_UPGRADE) != null ||
     				signConfig != null && signConfig.getUpgrade() != null) {
+
+        		// La configuracion para la plataforma de actualizacion siempre es la por defecto
+        		// para todos los elementos del lote
+    			signConfig.setUpgradeConfig(defaultSignConfig.getUpgradeConfig());
 
     			final PostSignBatchRecover signRecover = new ClienteAfirmaPostSignBatchRecover(
     					docId, batchResult);

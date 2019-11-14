@@ -60,7 +60,7 @@ public final class TestUpgrade {
 		}
 		conn.init(config);
 
-		final UpgradeResult result = Upgrade.signUpgradeCreate(conn, testFile, format, "minhap.seap.dtic.clavefirma", true); //$NON-NLS-1$
+		final UpgradeResult result = Upgrade.upgradeSignature(conn, testFile, format, "minhap.seap.dtic.clavefirma", true); //$NON-NLS-1$
 
 		System.out.println("La firma se actualizo a " + result.getFormat()); //$NON-NLS-1$
 

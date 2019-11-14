@@ -34,6 +34,7 @@ namespace FIRe
 	    private static readonly string DATA = "%DATA%";
 	    private static readonly string CONF = "%CONF%";
         private static readonly string UPGRADE = "%UPGRADE%";
+        private static readonly string PARTIAL = "%ALLOWPARTIAL%";
         private static readonly string PROP = "%PROP%";
         private static readonly string DOCID = "%DOCID%";
         private static readonly string STOPONERROR = "%STOPONERROR%";
@@ -47,6 +48,8 @@ namespace FIRe
         private static readonly string OP_CODE_RECOVER_BATCH_STATE = "9";
         private static readonly string OP_CODE_RECOVER_BATCH_SIGN = "10";
         private static readonly string OP_CODE_RECOVER_SIGN_RESULT = "11";
+        private static readonly string OP_CODE_RECOVER_ASYNC_SIGN = "70";
+        private static readonly string OP_CODE_RECOVER_ASYNC_SIGN_RESULT = "71";
         private static readonly string OP_CODE_RECOVER_ERROR = "99";
 
         private static readonly string URL_PARAMETERS_SIGN =
@@ -65,6 +68,7 @@ namespace FIRe
             "&transactionid=" + TRANSACTION +
             "&subjectid=" + SUBJECTID +
             "&upgrade=" + UPGRADE +
+            "&config=" + CONF +
             "&op=" + OP;
 
         private static readonly string URL_PARAMETERS_RECOVER_SIGN_RESULT =
@@ -113,30 +117,44 @@ namespace FIRe
             "&config=" + CONF;
 
         private static readonly string URL_PARAMETERS_SIGN_BATCH =
-            "appid=" + APP_ID +
+            "op=" + OP +
+            "&appid=" + APP_ID +
             "&subjectid=" + SUBJECTID +
             "&transactionid=" + TRANSACTION +
-            "&op=" + OP +
             "&stoponerror=" + STOPONERROR;
 
         private static readonly string URL_PARAMETERS_RECOVER_BATCH_RESULT =
-                   "appid=" + APP_ID +
+                   "op=" + OP +
+                   "&appid=" + APP_ID +
                    "&subjectid=" + SUBJECTID +
                    "&transactionid=" + TRANSACTION +
                    "&op=" + OP;
 
         private static readonly string URL_PARAMETERS_RECOVER_BATCH_STATE =
-            "appid=" + APP_ID +
+            "op=" + OP +
+            "&appid=" + APP_ID +
             "&subjectid=" + SUBJECTID +
-            "&transactionid=" + TRANSACTION +
-            "&op=" + OP;
+            "&transactionid=" + TRANSACTION;
 
         private static readonly string URL_PARAMETERS_RECOVER_BATCH_SIGN =
-            "appid=" + APP_ID +
+            "op=" + OP +
+            "&appid=" + APP_ID +
             "&subjectid=" + SUBJECTID +
             "&transactionid=" + TRANSACTION +
+            "&docid=" + DOCID;
+
+        private static readonly string URL_PARAMETERS_RECOVER_ASYNC_SIGN =
+            "op=" + OP +
+            "&appid=" + APP_ID +
             "&docid=" + DOCID +
-            "&op=" + OP;
+            "&upgrade=" + UPGRADE +
+            "&config=" + CONF +
+            "&partial=" + PARTIAL;
+
+        private static readonly string URL_PARAMETERS_RECOVER_ASYNC_SIGN_RESULT =
+            "op=" + OP +
+            "&appid=" + APP_ID +
+            "&docid=" + DOCID;
 
         private readonly string appId;
         private readonly FireConfig config;
@@ -167,17 +185,17 @@ namespace FIRe
             this.appId = appId ?? "";
             this.config = new FireConfig(config);
         }
-    
+
         /// <summary>
-        /// Firma unos datos haciendo uso del servicio de red de firma en la nube.
+        /// Envía datos a firmar al servicio de firma.
         /// </summary>
         /// <param name="subjectId">Identificador del firmante.</param>
         /// <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
         /// <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
         /// <param name="algth">Algoritmo de firma.</param>
-        /// <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+        /// <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>) codificadas en base 64.</param>
         /// <param name="dataB64"> Datos a firmar en base64.</param>
-        /// <param name="confB64">Parámetros de la configuración de la firma.</param>
+        /// <param name="confB64">Parámetros de la configuración de la firma codificados en base 64.</param>
         /// <returns>Firma realizada en servidor.</returns>
         /// <exception cref="ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
         /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
@@ -250,7 +268,7 @@ namespace FIRe
         }
 
         /// <summary>
-        /// Recupera la firma de los datos haciendo uso del servicio de red de firma en la nube.
+        /// Recupera la firma de los datos enviados a firmar anteriormente.
         /// </summary>
         /// <param name="transactionId">Identificador de la transacción.</param>
         /// <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
@@ -261,10 +279,30 @@ namespace FIRe
         /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
         /// <exception cref="InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
         /// <exception cref="HttpOperationException">Cuando se produce un error generico durante la operación.</exception>
+        public FireTransactionResult recoverSign(string transactionId, string subjectId, string upgrade)
+        {
+            return recoverSign(transactionId, subjectId, upgrade, null);
+        }
+
+        /// <summary>
+        /// Recupera la firma de los datos enviados a firmar anteriormente.
+        /// </summary>
+        /// <param name="transactionId">Identificador de la transacción.</param>
+        /// <param name="subjectId">Identificador del usuario propietario de los certificados de firma.</param>
+        /// <param name="upgrade">Formato al que queremos mejorar la firma (puede ser null).</param>
+        /// <param name="upgradeConfigB64">Configuración adicional para la plataforma de
+        ///         actualización y validación en forma de properties codificado en base64.</param>
+        /// <returns>Firma realizada en servidor.</returns>
+        /// <exception cref="ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+        /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+        /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+        /// <exception cref="InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+        /// <exception cref="HttpOperationException">Cuando se produce un error generico durante la operación.</exception>
         public FireTransactionResult recoverSign(
                               string transactionId,
                               string subjectId,
-                              string upgrade
+                              string upgrade,
+                              string upgradeConfigB64
                               )
         {
 
@@ -289,13 +327,21 @@ namespace FIRe
                 .Replace(OP, OP_CODE_RECOVER_SIGN); // El tipo de operacion solicitada es RECOVER_SIGN
 
             // Si se ha indicado un formato de upgrade, lo actualizamos; si no, lo eliminamos de la URL
-            if (upgrade != null && upgrade != "")
+            if (!string.IsNullOrEmpty(upgrade))
             {
                 urlParameters = urlParameters.Replace(UPGRADE, upgrade);
             }
             else
             {
-                urlParameters = urlParameters.Replace("&upgrade=" + UPGRADE, ""); //$NON-NLS-1$ //$NON-NLS-2$
+                urlParameters = urlParameters.Replace("&upgrade=" + UPGRADE, "");
+            }
+            if (!string.IsNullOrEmpty(upgradeConfigB64))
+            {
+                urlParameters = urlParameters.Replace(CONF, upgradeConfigB64.Replace('+', '-').Replace('/', '_'));
+            }
+            else
+            {
+                urlParameters = urlParameters.Replace("&config=" + CONF, "");
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
@@ -303,8 +349,8 @@ namespace FIRe
 
             // Identificamos los datos obtenidos
             FireTransactionResult result;
-            try {
-
+            try
+            {
                 result = new FireTransactionResult(bytes);
             }
             catch (Exception e)
@@ -330,7 +376,6 @@ namespace FIRe
             result.Result = bytes;
 
             return result;
-
         }
 
         /// <summary>
@@ -808,6 +853,95 @@ namespace FIRe
             {
                 throw new HttpOperationException("La respuesta del servicio no tiene un formato valido", e);
             }
+        }
+
+        /// <summary>
+        /// Recupera una firma enviada a generar anteriormente y para la que se solicitó esperar un periodo de gracia.
+        /// </summary>
+        /// <param name="docId">Identificador de documento recibido de la  usuario propietario de los certificados de firma.</param>
+        /// <param name="upgrade">Formato al que solicitamos actualizar la firma. Si se indica, se comprobará que la
+        /// firma devuelta esté en el formato indicado.</param>
+        /// <param name="confB64">Properties codificado en base 64 con configuración adicional para la plataforma de
+        /// actualización de firma. </param>
+        /// <param name="allowPartial">Indica si se debe devolver la firma incluso si no se ha actualizado al formato
+        /// solicitado.</param>
+        /// <returns>Resultado con la firma recuperada o un nuevo periodo de gracia.</returns>
+        /// <exception cref="ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+        /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+        /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+        /// <exception cref="HttpOperationException">Cuando se produce un error durante la operación.</exception>
+        public FireTransactionResult recoverAsyncSign(
+                              string docId,
+                              string upgrade,
+                              string confB64,
+                              bool allowPartial
+                              )
+        {
+
+            if (string.IsNullOrEmpty(docId))
+            {
+                throw new ArgumentException(
+                    "El identificador del documento firmado no puede ser nulo"
+                );
+            }
+
+            string url = this.config.getFireService();
+            string urlParameters = URL_PARAMETERS_RECOVER_ASYNC_SIGN
+                .Replace(APP_ID, this.appId)
+                .Replace(DOCID, docId)
+                .Replace(OP, OP_CODE_RECOVER_ASYNC_SIGN)
+                .Replace(PARTIAL, allowPartial.ToString());
+
+            // Establecemos el formato de update y la configuracion para el validador si se han establecido.
+            // Si no, los eliminamos de la URL
+            if (!string.IsNullOrEmpty(upgrade))
+            {
+                urlParameters = urlParameters.Replace(UPGRADE, upgrade);
+            }
+            else
+            {
+                urlParameters = urlParameters.Replace("&upgrade=" + UPGRADE, "");
+            }
+            if (!string.IsNullOrEmpty(confB64))
+            {
+                urlParameters = urlParameters.Replace(CONF, confB64.Replace('+', '-').Replace('/', '_'));
+            }
+            else
+            {
+                urlParameters = urlParameters.Replace("&config=" + CONF, "");
+            }
+
+            //  realizamos la peticion post al servicio y recibimos los datos de la peticion
+            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+
+            // Identificamos los datos obtenidos
+            FireTransactionResult result;
+            try
+            {
+                result = new FireTransactionResult(bytes);
+            }
+            catch (Exception e)
+            {
+                throw new HttpOperationException("La respuesta del servicio no tiene un formato valido", e);
+            }
+
+            // Si el resultado es un error, se indica un periodo de gracia o si ya contiene la firma, lo devolvemos
+            if (result.ErrorCode != null || result.GracePeriod != null || result.Result != null)
+            {
+                return result;
+            }
+
+            // Si no, hacemos una nueva llamada para recuperarla
+            urlParameters = URL_PARAMETERS_RECOVER_ASYNC_SIGN_RESULT
+                .Replace(APP_ID, this.appId)
+                .Replace(DOCID, docId)
+                .Replace(OP, OP_CODE_RECOVER_ASYNC_SIGN_RESULT); // El tipo de operacion solicitada es RECOVER_ASYNC_SIGN_RESULT
+
+            //  Realizamos la peticion al servicio y recibimos los datos de la peticion
+            bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            result.Result = bytes;
+
+            return result;
         }
 
         /// <summary>

@@ -46,12 +46,15 @@ public final class Verify {
 	 *             Si hay problemas en la propia validaci&oacute;n del
 	 *             certificado.
 	 */
-	public static VerifyResult vertifySignature(final AfirmaConnector conn,
+	public static VerifyResult verifySignature(final AfirmaConnector conn,
 			final byte[] signature, final String afirmaAppName) throws IOException,
 				PlatformWsException {
 
 		final String inputDss = DssServicesUtils.createSignVerifyDss(signature, afirmaAppName);
-		final byte[] responseBytes = conn.doPlatformCall(inputDss, AfirmaConnector.SERVICE_SIGNUPGRADE);
+		final byte[] responseBytes = conn.doPlatformCall(
+				inputDss,
+				AfirmaConnector.SERVICE_SIGNUPGRADE,
+				AfirmaConnector.SIGNUPGRADE_OPERATION_VERIFY);
 
 		VerifyAfirmaResponse response;
 		try {

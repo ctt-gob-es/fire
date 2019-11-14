@@ -10,7 +10,9 @@
 <body>
     <form id="form1" runat="server">
     <div>
+        <br /><b>Estado:</b><br /> <asp:Label runat="server" id="State"></asp:Label>
         <br /><b>Proveedor:</b><br /> <asp:Label runat="server" id="Provider"></asp:Label>
+        <br /><b>Formato de actualizacion:</b> <asp:Label runat="server" id="Format"></asp:Label>
         <br /><b>Certificado:</b><br /> <asp:Label runat="server" id="CertB64"></asp:Label>
         <br /><b>Firma:</b><br /> <asp:Label runat="server" id="SignatureB64"></asp:Label>
     </div>

@@ -111,20 +111,22 @@
 		 * Compone la firma electronica y la devuelve.
 		 * @param $subjectId Identificador del usuario (numero de DNI).
 		 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a sign()).
-		 * @param $upgrade Formato longevo al que actualizar la firma.
+		 * @param $upgrade Formato longevo al que actualizar la firma. Por defecto, nulo.
+		 * @param $upgradeConfigB64 Properties codificado en base 64 con la configuracion para la plataforma de
+		 * 			validacion y actualizacion. Por defecto, nulo.
 		 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 		 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
 		 * @throws HttpNetworkException Cuando ocurre un problema en la comunicacion.
 		 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 		 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 		 */
-		function recoverSign($subjectId, $transactionId, $upgrade){
+		function recoverSign($subjectId, $transactionId, $upgrade=null, $upgradeConfigB64=null){
 			
 			// Comprobamos las variables de entrada
 			if (empty($transactionId)) {
 				throw new InvalidArgumentException("El id de la transaccion no puede ser nulo");
 			}
-			
+
 			if (empty($subjectId)) {
 				throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
 			}
@@ -138,8 +140,13 @@
 				"transactionid" => $transactionId
 			);
 			
-			if ($upgrade != null) {
+			$configB64us = ($upgradeConfigB64 != null) ? str_replace(array("+", "/"), array("-", "_"), $upgradeConfigB64) : "";
+			
+			if (!empty($upgrade)) {
 				$URL_SERVICE_PARAMS["upgrade"] = $upgrade;
+			}
+			if (!empty($configB64us)) {
+				$URL_SERVICE_PARAMS["config"] = $configB64us;
 			}
 			
 			// Llamamos al servicio remoto
@@ -552,6 +559,73 @@
 		}
 		
 		/**
+		 * Recupera una firma generada anteriormente y para la que se solicito la espera de un
+		 * periodo de gracia antes de su recuperacion.
+		 * @param $docId Identificador del documento obtenido del perioro de gracia.
+		 * @param $upgrade Formato longevo al que se solicit&oacute; actualizar la firma. Si se indica, se
+		 * usara para comprobar que la firma se actualizo al formato solicitado.
+		 * @param $confB64 Properties de configuracion adicional para la plataforma de validacion codificada en en base64.
+		 * @param partial Booleano que indica si se acepta o no una actualizacion parcial de la firma.
+		 * @return Resultado con la firma recibida o un nuevo periodo de gracia.
+		 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
+		 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
+		 * @throws HttpNetworkException Cuando ocurre un problema en la comunicacion.
+		 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
+		 */
+		function recoverAsyncSign($docId, $upgrade, $confB64, $partial){
+			
+			// Comprobamos las variables de entrada
+			if (empty($docId)) {
+				throw new InvalidArgumentException("El identificador del documento firmado no puede ser nulo");
+			}
+
+			// Recodificamos los parametros que lo necesiten para asegurar la correcta transmision por URL
+			$b64SpC = array("+", "/"); 
+			$b64UrlSafeSpC = array("-", "_");
+			
+			$confB64us = ($confB64 != null) ? str_replace($b64SpC, $b64UrlSafeSpC, $confB64) : "";
+
+			// Componemos la URL de llamada al servicio remoto
+			$URL_SERVICE = SERVICEURL;
+			$URL_SERVICE_PARAMS = array(
+				"op" => 70, // El tipo de operacion solicitada es RECOVER_UPDATED_SIGN (70)
+				"appid" => $this->appId,
+				"docid" => $docId,
+				"config" => $confB64us,
+				"partial" => $partial
+			);
+			
+			if (!empty($upgrade)) {
+				$URL_SERVICE_PARAMS["upgrade"] = $upgrade;
+			}
+			
+			// Llamamos al servicio remoto
+			$response = $this->connect($URL_SERVICE, $URL_SERVICE_PARAMS);
+			
+			// Si la respuesta notifica un error, senala que hay que esperar un periodo de gracia para obtener el
+			// binario firmado o si ya incluye la firma, se devuelve
+			$transaction = new TransactionResult($response);
+			if (isset($transaction->errorCode) || isset($transaction->gracePeriod) || isset($transaction->result)) {
+				return $transaction;
+			}
+			
+			// Si no tenemos el binario resultante, lo pedimos
+			$URL_SERVICE_PARAMS = array(
+				"op" => 71, // El tipo de operacion solicitada es RECOVER_UPDATED_SIGN_RESULT (71)
+				"appid" => $this->appId,
+				"docid" => $docId
+			);
+			
+			// Llamamos al servicio
+			$response = $this->connect($URL_SERVICE, $URL_SERVICE_PARAMS);
+			
+			// Agregamos el resultado recibido como firma resultante de la operacion
+			$transaction->result = $response;
+			
+			return $transaction;
+		}
+		
+		/**
 		 * Funcion que realiza la conexion a la URL pasada en parametro, enviando los parametros de conexion por POST.
 		 * @param $URL La url a la que intentar conectarse.
 		 * @param $urlParams Array con los parametros necesarios para el intento de conexion.
@@ -844,41 +918,59 @@
 	 * Clase que almacena la respuesta de recuperacion de firma o de error.
 	 */
 	class TransactionResult{
+		
+		// Especifica que la transacci&oacute;n finaliz&oacute; correctamente.
+		public static $STATE_OK = 0;
+		
+		// Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
+		public static $STATE_ERROR = -1;
+			
+		// Especifica que la transaccion aun no ha finalizado y se debera pedir el resultamos
+		// mas adelante.
+		public static $STATE_PENDING = 1;
+			
+		// Especifica que la transaccion ha finalizado pero que el resultado puede
+		// diferir de lo solicitado por la aplicacion. Por ejemplo, puede haberse
+		// solicitado una firma ES-A y recibirse una ES-T.
+		public static $STATE_PARTIAL = 2;
+		
 		var $resultType;
 		var $state;
 		var $providerName;
 		var $signingCert;
+		var $upgradeFormat;
 		var $gracePeriod;
 		var $errorCode;
 		var $errorMessage;
 		var $result;
 		
 		function __construct($result){
-			// Especifica que la transacci&oacute;n finaliz&oacute; correctamente.
-			$STATE_OK = 0;
-			// Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
-			$STATE_ERROR = -1;
 			
 			// Prefijo que antecede a los datos con la informacion de la firma
 			$RESULT_PREFIX = "{\"result\":";
 		
-			$this->state = $STATE_OK;
+			$this->state = TransactionResult::$STATE_OK;
 			
 			// Comprobamos si se ha recibido la informacion de la firma, en cuyo caso, la cargamos.
 			if (strlen($result) > strlen($RESULT_PREFIX) + 2 && $RESULT_PREFIX == substr($result, 0, strlen($RESULT_PREFIX))) {
 				$jsonResponse = json_decode($result);
+				if (isset($jsonResponse->result->state)) {
+					$this->state = $jsonResponse->result->state;
+				}
 				if (isset($jsonResponse->result->prov)) {
 					$this->providerName = $jsonResponse->result->prov;
 				}
 				if (isset($jsonResponse->result->cert)) {
 					$this->signingCert = $jsonResponse->result->cert;
 				}
+				if (isset($jsonResponse->result->upgrade)) {
+					$this->upgradeFormat = $jsonResponse->result->upgrade;
+				}
 				if (isset($jsonResponse->result->grace)) {
 					$this->gracePeriod = new GracePeriod($jsonResponse->result->grace->id, "@".($jsonResponse->result->grace->date/1000));
 				}
 				if (isset($jsonResponse->result->ercod)) {
 					$this->errorCode = $jsonResponse->result->ercod;
-					$this->state = $STATE_ERROR;
 				}
 				if (isset($jsonResponse->result->ermsg)) {
 					$this->errorMessage = $jsonResponse->result->ermsg;

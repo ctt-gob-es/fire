@@ -215,7 +215,7 @@ public class HttpsConnection {
 		KeyManager[] keyManagers = null;
 		if (ks != null) {
 
-			if (ksAlias != null) {
+			if (ksAlias != null && !ksAlias.isEmpty()) {
 				try {
 					keyManagers = new KeyManager[]{ new MultiCertKeyManager(ks, ksPassword, ksAlias) };
 				} catch (final Exception e) {

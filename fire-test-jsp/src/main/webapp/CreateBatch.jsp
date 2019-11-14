@@ -99,7 +99,7 @@
 				  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
 				  de certificados de firma. -->
 				<input id="extraparams-conf" type="hidden" name="extraParams"
-				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true".getBytes()) %>"/>
+				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true\nexpPolicy=FirmaAGE".getBytes()) %>"/>
 
 				<div style="margin-top:30px;text-align: center; ">
 					<input  id="submit-btn"  type="submit" value="AGREGAR DOCUMENTOS AL LOTE">

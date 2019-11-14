@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
-import es.gob.fire.server.services.statistics.TransactionRecorder;
 
 
 /**
@@ -32,7 +31,6 @@ public class RecoverBatchSignatureManager {
 
 	private static final Logger LOGGER = Logger.getLogger(RecoverBatchSignatureManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
-	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 
 	/**
 	 * Devuelve el resultado de una firma concreta de un lote. Si es necesario, actualiza la firma.

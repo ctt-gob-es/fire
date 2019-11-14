@@ -50,6 +50,8 @@ public class ServiceParams {
     public static final String HTTP_PARAM_CONFIG = "config"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el formato al que actualizar la firma. */
     public static final String HTTP_PARAM_UPGRADE = "upgrade"; //$NON-NLS-1$
+    /** Par&aacute;metro usado en el env&iacute;o de datos HTTP para indicar si se pertite una actualizacion parcial de la firma. */
+    public static final String HTTP_PARAM_ALLOW_PARTIAL_UPGRADE = "partialupgrade"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP que indica que se detenga la firma batch en caso de error. */
     public static final String HTTP_PARAM_BATCH_STOP_ON_ERROR = "stoponerror"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el resultado de la firma de lote con el Cliente @firma. */

@@ -28,6 +28,7 @@ import es.gob.fire.server.services.internal.RecoverBatchStateManager;
 import es.gob.fire.server.services.internal.RecoverErrorManager;
 import es.gob.fire.server.services.internal.RecoverSignManager;
 import es.gob.fire.server.services.internal.RecoverSignResultManager;
+import es.gob.fire.server.services.internal.RecoverUpdatedSignManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
@@ -224,6 +225,9 @@ public class FIReService extends HttpServlet {
     			break;
     		case RECOVER_ERROR:
     			RecoverErrorManager.recoverError(params, response);
+    			break;
+    		case RECOVER_UPDATED_SIGN:
+    			RecoverUpdatedSignManager.recoverSignature(params, response);
     			break;
     		default:
     			LOGGER.warning(logF.f("Se ha enviado una peticion con una operacion no soportada: " + op.name())); //$NON-NLS-1$

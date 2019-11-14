@@ -10,14 +10,15 @@
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
 	
 	$conf = "redirectOkUrl=http://www.google.es"."\n".	// URL a la que llegara si el usuario se autentica correctamente
-			"redirectErrorUrl=http://www.ibm.com";		// URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
+			"redirectErrorUrl=http://www.ibm.com"; // URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
+			
 	$confB64 = base64_encode($conf);
 	
 	//$appId = "7BA5453995EC";	// Entorno preproduccion
 	$appId = "B244E473466F";	// Entorno local
 	$subjectId = "00001";		// DNI de la persona
 	$dataB64 = base64_encode("Hola Mundo!!");
-	$extraParams = base64_encode("mode=implicit");
+	$extraParams = base64_encode("mode=implicit\nexpPolicy=FirmaAGE");
 	
 	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
 	

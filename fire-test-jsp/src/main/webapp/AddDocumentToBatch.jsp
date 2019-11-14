@@ -147,7 +147,7 @@
 				   	</fieldset>
 
 					<input id="extraparams-conf" type="hidden" name="extraParams"
-						value="<%= Base64.encode("mode=implicit".getBytes()) %>"/>
+						value="<%= Base64.encode("mode=implicit\nexpPolicy=FirmaAGE".getBytes()) %>"/>
 				</fieldset>
 
 				<div style="margin-top:30px;text-align: left;">

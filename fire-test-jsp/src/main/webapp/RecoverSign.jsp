@@ -40,11 +40,16 @@
 		    final String resultMsg = signature != null ?
 		    		Base64.encode(signature) :
 		    		(gracePeriod != null ?
-		    				("ID Periodo de gracia: " + gracePeriod.getResponseId() + "\nFecha estimada: " + gracePeriod.getResolutionDate()) : //$NON-NLS-1$ //$NON-NLS-2$
+		    				("ID Periodo de gracia: " + gracePeriod.getResponseId() + //$NON-NLS-1$
+		    					"\nFecha estimada: " + gracePeriod.getResolutionDate()) : //$NON-NLS-1$
 		    				"No se ha obtenido resultado"); //$NON-NLS-1$
 		    
 		    LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
+		    		"Estado: " + result.getState()); //$NON-NLS-1$
+		    LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
 		    		"Nombre de proveedor: " + result.getProviderName()); //$NON-NLS-1$
+			LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
+				    "Formato de actualizacion: " + result.getUpgradeFormat()); //$NON-NLS-1$
 		    try {
 		    	 LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
 		    			 "Certificado de firma: " + (result.getSigningCert() != null ? //$NON-NLS-1$

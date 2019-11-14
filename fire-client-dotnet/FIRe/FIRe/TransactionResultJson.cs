@@ -16,6 +16,10 @@ namespace FIRe
     internal class ResultJson
     {
         /// <summary>
+        /// Estado del resultado.
+        /// </summary>
+        public int State { get; set; }
+        /// <summary>
         /// Nombre del proveedor.
         /// </summary>
         public string Prov { get; set; }
@@ -27,6 +31,10 @@ namespace FIRe
         /// Periodo de gracia.
         /// </summary>
         public GracePeriodJson Grace { get; set; }
+        /// <summary>
+        /// Formato al que se ha actualizado la firma.
+        /// </summary>
+        public string Upgrade { get; set; }
         /// <summary>
         /// Código de error.
         /// </summary>

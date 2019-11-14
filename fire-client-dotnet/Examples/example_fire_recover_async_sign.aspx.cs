@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-public partial class example_fire_recover_sign : System.Web.UI.Page
+public partial class example_fire_recover_async_sign : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -16,25 +16,17 @@ public partial class example_fire_recover_sign : System.Web.UI.Page
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionResult signature;
-        string transactionId = "386b4f9a-9e92-46f3-929f-14719d2916b7";
+        string docId = "1573460420268258223";
         string appId = "B244E473466F";
         string upgradeFormat = "ES-T";
-        string upgradeConfigB64 = Base64Encode("updater.ignoreGracePeriod=true");
         try
         {
-            signature = new FireClient(appId, serviceConfig).recoverSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
-                transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
-                "00001",        // Identificador del usuario
+            signature = new FireClient(appId, serviceConfig).recoverAsyncSign(
+                docId,          // Identificador de transaccion recuperado en la operacion createBatch()
                 upgradeFormat,   // Formato longevo
-                upgradeConfigB64
+                null,
+                true
             );
-            
-            /*
-            signature = FireApi.recoverSign(appId, // Identificador de la aplicacion (dada de alta previamente en el sistema)
-                transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
-                null            // Formato longevo
-            );
-            */
         }
         catch (Exception ex)
         {
@@ -42,14 +34,16 @@ public partial class example_fire_recover_sign : System.Web.UI.Page
             return;
         }
 
-        // Mostramos los datos obtenidos
+        // Mostramos el estado
         State.Text = signature.State.ToString();
-        Provider.Text = signature.ProviderName;
+
+        // Mostramos el formato de actualizacion obtenido
         Format.Text = signature.UpgradeFormat;
-        CertB64.Text = System.Convert.ToBase64String(signature.SigningCert.GetRawCertData());
+
+        // Mostramos los datos obtenidos
         if (signature.ErrorCode != null)
         {
-            SignatureB64.Text = "Error " + signature.ErrorCode + ": " + signature.ErrorMessage;
+            SignatureB64.Text = "Error: " + signature.ErrorCode + ": " + signature.ErrorMessage;
         }
         else if (signature.Result != null)
         {

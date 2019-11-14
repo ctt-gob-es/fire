@@ -32,29 +32,32 @@ public interface FIReDocumentManager {
 	void init(Properties config) throws IOException;
 
 	/** Obtiene un documento para firmarlo.
-	 * Si no es posible recuperar el fichero se debe lanzar una excepci&oacute;n. El mensaje se recibir&aacute;
-	 * como parte del mensaje de error en el cliente de firma.
+	 * Si no es posible recuperar el fichero se debe lanzar una excepci&oacute;n. El mensaje se
+	 * recibir&aacute; como parte del mensaje de error en el cliente de firma.
 	 * @param docId Identificador del documento original no firmado.
 	 * @param appId Identificador de la aplicaci&oacute;n que solicita la firma.
 	 * @param format Formato de firma.
-	 * @param extraParams Par&aacute;metros para la configuraci&oacute;n de la firma. Podr&iacute;a ser {@code null}.
+	 * @param extraParams Par&aacute;metros para la configuraci&oacute;n de la firma. Podr&iacute;a
+	 * ser {@code null}.
 	 * @return Documento (en binario)
 	 * @throws IOException Cuando ocurre alg&uacute;n problema con la recuperaci&oacute;n. */
-	byte[] getDocument(byte[] docId, String appId, String format, Properties extraParams) throws IOException;
+	byte[] getDocument(byte[] docId, String appId, String format, Properties extraParams)
+			throws IOException;
 
 	/** Almacena un documento firmado.
-	 * Si no es posible almacenar el fichero se debe lanzar una excepci&oacute;n. El mensaje se recibir&aacute;
-	 * como resultado de la operaci&oacute; de firma.
+	 * Si no es posible almacenar el fichero se lanza una excepci&oacute;n. El valor devuelto se
+	 * recibir&aacute; como resultado de la operaci&oacute; de firma.
 	 * @param docId Identificador del documento original no firmado.
 	 * @param appId Identificador de la aplicaci&oacute;n que solicita la firma.
 	 * @param data Datos firmados.
-	 * @param cert Certificado de firma. <b>IMPORTANTE:</b> El Cliente @firma 1.5 y anteriores no permiten
-	 * obtener el certificado de firma en la firma de lotes, as&iacute; que en los casos de firma de lotes
-	 * con certificado local este par&aacute;metro ser&aacute; nulo.
+	 * @param cert Certificado de firma. <b>IMPORTANTE:</b> El Cliente @firma 1.5 y anteriores no
+	 * permiten obtener el certificado de firma en la firma de lotes, as&iacute; que en los casos
+	 * de firma de lotes con certificado local este par&aacute;metro ser&aacute; nulo.
 	 * @param format Formato de firma.
 	 * @param extraParams Par&aacute;metros para la configuraci&oacute;n de la firma.
-	 * @return Identificador del nuevo documento.  En caso de usarse cadenas de texto,
-	 * se debertratar&acute;n como UTF-8.
+	 * @return Resultado que obtendr&aacute; la aplicaci&oacute;n cliente. En caso de usarse
+	 * cadenas de texto, se deben codificar en UTF-8.
 	 * @throws IOException Cuando ocurre alg&uacute;n problema con el guardado. */
-	byte[] storeDocument(byte[] docId, String appId, byte[] data, X509Certificate cert, String format, Properties extraParams) throws IOException;
+	byte[] storeDocument(byte[] docId, String appId, byte[] data, X509Certificate cert,
+			String format, Properties extraParams) throws IOException;
 }

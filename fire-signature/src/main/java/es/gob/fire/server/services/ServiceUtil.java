@@ -22,6 +22,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -157,11 +158,11 @@ public final class ServiceUtil {
                 certificates = new X509Certificate[1];
                 certificates[0] = cer;
             } else {
-                LOGGER.fine("No existe certficado en la request en el header " + headerName); //$NON-NLS-1$
+                LOGGER.fine("No existe certificado en la request en el header " + headerName); //$NON-NLS-1$
             }
         }
         catch(final Exception ex) {
-            LOGGER.warning("Ha ocurrido un error al extraer certificado de la cabecera de la peticion: " + ex); //$NON-NLS-1$
+            LOGGER.log(Level.WARNING, "Ha ocurrido un error al extraer certificado de la cabecera de la peticion", ex); //$NON-NLS-1$
         }
         return certificates;
     }
@@ -204,7 +205,6 @@ public final class ServiceUtil {
 	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates) throws CertificateValidationException {
 
 		if (certificates == null || certificates.length == 0 || certificates[0] == null) {
-			LOGGER.severe("No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$
 			throw new CertificateValidationException (HttpServletResponse.SC_UNAUTHORIZED, "No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$
 		}
 
@@ -213,28 +213,22 @@ public final class ServiceUtil {
 			ServiceUtil.checkValideThumbPrint(appId, thumbPrint);
 		}
 		catch (final NoSuchAlgorithmException e) {
-			LOGGER.severe("El algorimto SHA-1 no se ha encontrado en el sistema : " + e); //$NON-NLS-1$
-			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "El algorimto SHA-1 no se ha encontrado en el sistema.", e);//$NON-NLS-1$
+			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "El algoritmo SHA-1 no se ha encontrado en el sistema", e);//$NON-NLS-1$
 		}
 		catch (final IllegalArgumentException e){
-			LOGGER.severe("Ha ocurrido un error con los parametros de la llamada : " + e); //$NON-NLS-1$
-			throw new CertificateValidationException (HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado.", e); //$NON-NLS-1$
+			throw new CertificateValidationException (HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado", e); //$NON-NLS-1$
 		}
 		catch (final IllegalAccessException e) {
-			LOGGER.severe("Acceso no permitido : " + e); //$NON-NLS-1$
-			throw new CertificateValidationException (HttpServletResponse.SC_UNAUTHORIZED, "Acceso no permitido. El certificado utilizado no tiene permiso para acceder.", e); //$NON-NLS-1$
+			throw new CertificateValidationException (HttpServletResponse.SC_UNAUTHORIZED, "Acceso no permitido. El certificado utilizado no tiene permiso para acceder", e); //$NON-NLS-1$
 		}
 		catch (final SQLException e) {
-			LOGGER.severe("Ha ocurrido un problema en el acceso a la base de datos : " + e); //$NON-NLS-1$
-			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ha ocurrido un problema en el acceso a la base de datos.", e); //$NON-NLS-1$
+			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
 		}
 		catch (final DBConnectionException e) {
-			LOGGER.severe("Ha ocurrido un error al conectar con la base de datos : " + e); //$NON-NLS-1$
-			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ha ocurrido un error al conectar con la base de datos.", e); //$NON-NLS-1$
+			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ha ocurrido un error al conectar con la base de datos", e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
-			LOGGER.severe("Ha ocurrido un error al decodificar el certificado: " + e); //$NON-NLS-1$
-			throw new CertificateValidationException(HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error al decodificar el certificado.", e); //$NON-NLS-1$
+			throw new CertificateValidationException(HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error al decodificar el certificado", e); //$NON-NLS-1$
 		}
 	}
 }

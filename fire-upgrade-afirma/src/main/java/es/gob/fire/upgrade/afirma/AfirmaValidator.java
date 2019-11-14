@@ -70,7 +70,7 @@ public class AfirmaValidator implements SignatureValidator {
 			return new UpgradeResult(signature, null);
 		}
 
-		if (this.conn == null || this.appId == null) {
+		if (this.conn == null) {
 			throw new UpgradeException("No se ha inicializado el validador. Llame al metodo " //$NON-NLS-1$
 					+ "init() proporcionando la configuracion necesaria"); //$NON-NLS-1$
 		}
@@ -84,7 +84,7 @@ public class AfirmaValidator implements SignatureValidator {
 
 		UpgradeResult upgradeResult;
 		try {
-			upgradeResult = Upgrade.signUpgradeCreate(
+			upgradeResult = Upgrade.upgradeSignature(
 					this.conn,
 					signature,
 					UpgradeTarget.getUpgradeTarget(upgradeFormat),
@@ -103,6 +103,41 @@ public class AfirmaValidator implements SignatureValidator {
 			throw new UpgradeException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
 		} catch (final Exception e) {
 			throw new UpgradeException("Error no identificado durante el proceso de actualizacion de la firma", e); //$NON-NLS-1$
+		}
+
+		return upgradeResult;
+	}
+
+	@Override
+	public UpgradeResult recoverUpgradedSignature(final String docId, final String upgradeFormat,
+			final Properties config) throws UpgradeException, IOException {
+
+		if (this.conn == null) {
+			throw new UpgradeException("No se ha inicializado el validador. Llame al metodo " //$NON-NLS-1$
+					+ "init() proporcionando la configuracion necesaria"); //$NON-NLS-1$
+		}
+		if (this.appId == null) {
+			throw new UpgradeException("No se ha proporcionado el ID de aplicacion de la Plataforma" //$NON-NLS-1$
+					+ " Afirma junto con la configuracion de conexion (propiedad " + PROP_AFIRMA_APPID //$NON-NLS-1$
+					+ "). Llame al metodo init() proporcionando la configuracion necesaria"); //$NON-NLS-1$
+		}
+
+		UpgradeResult upgradeResult;
+		try {
+			upgradeResult = Upgrade.recoverUpgradedSignature(
+					this.conn,
+					docId,
+					UpgradeTarget.getUpgradeTarget(upgradeFormat),
+					this.appId);
+		} catch (final PlatformWsException e) {
+			throw new IOException("Error de conexion con la Plataforma @firma para la recuperacion asincrona de una firma", e); //$NON-NLS-1$
+		} catch (final AfirmaResponseException e) {
+			throw new UpgradeException("Error durante la recuperacion asincrona de la firma. MajorCode: " + e.getMajorCode() + //$NON-NLS-1$
+					". MinorCode: " + e.getMinorCode() + ". Description: " + e.getMessage(), e); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (final IOException e) {
+			throw new IOException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
+		} catch (final Exception e) {
+			throw new IOException("Error no identificado durante el proceso de recuperacion asincrona de la firma", e); //$NON-NLS-1$
 		}
 
 		return upgradeResult;
@@ -131,7 +166,7 @@ public class AfirmaValidator implements SignatureValidator {
 
 		VerifyResult verifyResult;
 		try {
-			verifyResult = Verify.vertifySignature(
+			verifyResult = Verify.verifySignature(
 					this.conn,
 					signature,
 					this.appId);

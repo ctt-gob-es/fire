@@ -69,6 +69,7 @@ public class FireClient {
     private static final String TAG_VALUE_DATA = "$$DATA$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_TRANSACTION = "$$TRANSACTION$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_UPGRADE = "$$UPGRADE$$"; //$NON-NLS-1$
+    private static final String TAG_VALUE_ALLOW_PARTIAL_UPGRADE = "$$PARTIAL$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_DOCUMENT_ID = "$$DOCID$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_STOP_ON_ERROR = "$$STOPERROR$$"; //$NON-NLS-1$
 
@@ -87,7 +88,8 @@ public class FireClient {
 
     private static final String URL_PARAMETERS_RECOVER_SIGNATURE =
     		"&transactionid=" + TAG_VALUE_TRANSACTION + //$NON-NLS-1$
-    		"&upgrade=" + TAG_VALUE_UPGRADE; //$NON-NLS-1$
+    		"&upgrade=" + TAG_VALUE_UPGRADE + //$NON-NLS-1$
+    		"&config=" + TAG_VALUE_CONFIG; //$NON-NLS-1$
 
     private static final String URL_PARAMETERS_RECOVER_SIGNATURE_RESULT =
     		"&transactionid=" + TAG_VALUE_TRANSACTION; //$NON-NLS-1$
@@ -132,6 +134,19 @@ public class FireClient {
 
     private static final String URL_PARAMETERS_RECOVER_ERROR =
     		"&transactionid=" + TAG_VALUE_TRANSACTION; //$NON-NLS-1$
+
+    private static final String URL_ASYNC_PARAMETERS_BASE =
+            "op=" + TAG_VALUE_OPERATION + //$NON-NLS-1$
+            "&appid=" + TAG_VALUE_APP_ID; //$NON-NLS-1$
+
+    private static final String URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE =
+    		"&docid=" + TAG_VALUE_DOCUMENT_ID + //$NON-NLS-1$
+    		"&upgrade=" + TAG_VALUE_UPGRADE + //$NON-NLS-1$
+    		"&partial=" + TAG_VALUE_ALLOW_PARTIAL_UPGRADE + //$NON-NLS-1$
+    		"&config=" + TAG_VALUE_CONFIG; //$NON-NLS-1$
+
+    private static final String URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE_RESULT =
+    		"&docid=" + TAG_VALUE_DOCUMENT_ID; //$NON-NLS-1$
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FireClient.class);
 
@@ -223,13 +238,13 @@ public class FireClient {
         try {
 			this.conn = HttpsConnection.getConnection(config, decipher);
 		} catch (final Exception e) {
-			LOGGER.error("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
-			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
+			LOGGER.error("Error en la configuracion de la comunicacion con el componente central", e); //$NON-NLS-1$
+			throw new SecurityException("Error en la configuracion de la comunicacion con el componente central", e); //$NON-NLS-1$
 		}
 	}
 
     /**
-     * Carga datos para ser posteriormente firmados.
+     * Solicita la firma de datos.
      * @param subjectId
      *            Identificador del titular de la clave de firma.
      * @param op
@@ -246,7 +261,9 @@ public class FireClient {
      * @param config
      *            Configuraci&oacute;n a indicar al servicio remoto (dependiente
      *            de la implementaci&oacute;n).
-     * @return Resultado de la carga de los datos para la firma.
+     * @return Resultado de la carga de los datos para la firma. En caso de
+     * &eacute;xito, contendr&aacute; un ID de transacci&oacute;n y una URL a la que
+     * redirigir al usuario para completar la firma.
      * @throws IOException
      *             Si hay problemas en la llamada al servicio de red.
      * @throws HttpNetworkException
@@ -299,7 +316,7 @@ public class FireClient {
     }
 
     /**
-     * Inicia una operaci&oacute;n de firma.
+     * Solicita la firma de datos.
      * @param subjectId
      *            Identificador del titular del certificado de firma.
      * @param op
@@ -317,7 +334,9 @@ public class FireClient {
      * @param config
      *            Configuraci&oacute;n a indicar al servicio remoto (dependiente
      *            de la implementaci&oacute;n).
-     * @return Resultado de la carga de los datos para la firma.
+     * @return Resultado de la carga de los datos para la firma. En caso de
+     * &eacute;xito, contendr&aacute; un ID de transacci&oacute;n y una URL a la que
+     * redirigir al usuario para completar la firma.
      * @throws IllegalArgumentException
      * 				Si se proporciona nulo o vac&iacute;o alg&uacute;n
      * 				par&aacute;metro obligatorio.
@@ -397,7 +416,9 @@ public class FireClient {
     }
 
     /**
-     * Firma unos datos haciendo uso del servicio de red de firma en la nube.
+     * Completa y recupera el resultado de firma de los datos, que puede contener la firma generada,
+     * un periodo de gracia que habr&aacute; que esperar antes de recuperar la firma con
+     * {@link #recoverAsyncSign(String, String)} o un mensaje de error.
      *
      * @param transactionId
      *            Identificador de la transacci&oacute;n.
@@ -406,7 +427,7 @@ public class FireClient {
      * @param upgrade
      *            Formato al que queremos mejorar la firma (puede ser
      *            <code>null</code>).
-     * @return Firma realizada en servidor.
+     * @return Resultado de la operaci&oacute;n de firma.
      * @throws IllegalArgumentException
      * 			   Si se proporciona a nulo el identificados de transacci&oacute;n
      * 			   o el de usuario.
@@ -422,6 +443,42 @@ public class FireClient {
      * 			   Cuando la transacci&oacute;n no existe o est&aacute; caducada.
      */
     public TransactionResult recoverSignResult(final String transactionId, final String subjectId, final String upgrade)
+    				throws IOException, HttpNetworkException, HttpForbiddenException,
+    				HttpOperationException, InvalidTransactionException {
+        return recoverSignResult(transactionId, subjectId, upgrade, null);
+    }
+
+    /**
+     * Completa y recupera el resultado de firma de los datos, que puede contener la firma generada,
+     * un periodo de gracia que habr&aacute; que esperar antes de recuperar la firma con
+     * {@link #recoverAsyncSign(String, String)} o un mensaje de error.
+     *
+     * @param transactionId
+     *            Identificador de la transacci&oacute;n.
+     * @param subjectId
+     * 			  Identificador del usuario que realiza la transacci&oacute;n.
+     * @param upgrade
+     *            Formato al que queremos mejorar la firma (puede ser
+     *            <code>null</code>).
+     * @param upgradeConfig Configuraci&oacute;n adicional para la plataforma de
+     * 			  actualizaci&oacute;n y validaci&oacute;n.
+     * @return Resultado de la operaci&oacute;n de firma.
+     * @throws IllegalArgumentException
+     * 			  Si se proporciona a nulo el identificados de transacci&oacute;n
+     * 			  o el de usuario.
+     * @throws IOException
+     *            Si hay problemas en la llamada al servicio de red.
+     * @throws HttpNetworkException
+     * 			  Cuando se produce un error de red.
+     * @throws HttpForbiddenException
+     * 			  Cuando se deniega el acceso al componente central.
+     * @throws HttpOperationException
+     * 			  Si se produjo un error durante la operaci&oacute;n de firma.
+     * @throws InvalidTransactionException
+     * 			  Cuando la transacci&oacute;n no existe o est&aacute; caducada.
+     */
+    public TransactionResult recoverSignResult(final String transactionId, final String subjectId,
+    		final String upgrade, final Properties upgradeConfig)
     				throws IOException, HttpNetworkException, HttpForbiddenException,
     				HttpOperationException, InvalidTransactionException {
 
@@ -450,6 +507,12 @@ public class FireClient {
         }
         else {
         	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        if (upgradeConfig != null && !upgradeConfig.isEmpty()) {
+        	urlParameters = urlParameters.replace(TAG_VALUE_CONFIG, Utils.properties2Base64(upgradeConfig, true));
+        }
+        else {
+        	urlParameters = urlParameters.replace("&config=" + TAG_VALUE_CONFIG , ""); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         TransactionResult result;
@@ -495,6 +558,130 @@ public class FireClient {
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_SIGN_RESULT.getId()) +
         		URL_PARAMETERS_RECOVER_SIGNATURE_RESULT
                 .replace(TAG_VALUE_TRANSACTION, transactionId);
+
+        byte[] signature;
+        try {
+        	 signature = this.conn.readUrl(this.serviceUrl, urlParameters, Method.GET);
+        } catch (final HttpError e) {
+        	LOGGER.error("Error en la llamada al servicio de recuperacion de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
+        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+        		throw new HttpForbiddenException(e);
+        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+        		throw new HttpNetworkException(e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
+        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
+        	} else {
+        		throw new HttpOperationException(e.getMessage(), e);
+        	}
+        }
+        catch (final Exception e) {
+        	LOGGER.error("Error en la comunicacion con el servicio de recuperacion de firma", e); //$NON-NLS-1$
+        	throw new IOException(e);
+        }
+
+        result.setResult(signature);
+
+        return result;
+    }
+
+    /**
+     * Recupera una firma solicitada y tratada de recuperar anteriormente, pero para la que se
+     * estableci&oacute; la espera de un periodo de gracia.
+     *
+     * @param docId
+     *            Identificador de documento remitida en la anterior solicitud de recuperaci&oacute;n.
+     * @param upgrade
+     *            Formato al que solicitamos anteriormente mejorar la firma (puede ser
+     *            <code>null</code>).
+     * @param upgradeConfig Configuraci&oacute;n adicional para la plataforma de actualizaci&oacute;n
+     * 			  de firmas.
+     * @param allowPartial Indica si se debe devolver la firma incluso si s&oacute;lo se actualiza
+     * parcialmente hasta el formato indicado. Si no se indica el parametro {@code upgrade}, este
+     * valor se ignorar&aacute;.
+     * @return Resultado de la recuperaci&oacute;n de la firma.
+     * @throws IllegalArgumentException
+     * 			   Si se proporciona a nulo el identificados de transacci&oacute;n
+     * 			   o el de usuario.
+     * @throws IOException
+     *             Si hay problemas en la llamada al servicio de red.
+     * @throws HttpNetworkException
+     * 				Cuando se produce un error de red.
+     * @throws HttpForbiddenException
+     * 				Cuando se deniega el acceso al componente central.
+     * @throws HttpOperationException
+     * 			   Si se produjo un error durante la operaci&oacute;n de firma.
+     * @throws InvalidTransactionException
+     * 			   Cuando la transacci&oacute;n no existe o est&aacute; caducada.
+     */
+    public TransactionResult recoverAsyncSign(final String docId, final String upgrade,
+    		final Properties upgradeConfig, final boolean allowPartial)
+    				throws IOException, HttpNetworkException, HttpForbiddenException,
+    				HttpOperationException, InvalidTransactionException {
+
+        if (docId == null || docId.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "El identificador del documento firmado no puede ser nulo" //$NON-NLS-1$
+            );
+        }
+
+        // Componemos la URL
+        String urlParameters =
+        		URL_ASYNC_PARAMETERS_BASE
+        		.replace(TAG_VALUE_APP_ID, this.appId)
+        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_UPDATED_SIGN.getId()) +
+        		URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE
+                .replace(TAG_VALUE_DOCUMENT_ID, docId)
+        		.replace(TAG_VALUE_ALLOW_PARTIAL_UPGRADE, Boolean.toString(allowPartial));
+
+        // Establecemos el formato de update y la configuracion para el validador si se han
+        // establecido. Si no, los eliminamos de la URL
+        if (upgrade != null && !upgrade.isEmpty()) {
+        	urlParameters = urlParameters.replace(TAG_VALUE_UPGRADE, upgrade);
+        }
+        else {
+        	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        if (upgradeConfig != null && !upgrade.isEmpty()) {
+        	urlParameters = urlParameters.replace(TAG_VALUE_CONFIG, Utils.properties2Base64(upgradeConfig, true));
+        }
+        else {
+        	urlParameters = urlParameters.replace("&config=" + TAG_VALUE_CONFIG , ""); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        TransactionResult result;
+        try {
+        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, this.conn.readUrl(this.serviceUrl, urlParameters, Method.GET));
+        } catch (final HttpError e) {
+        	LOGGER.error("Error en la llamada al servicio de recuperacion asincrona de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
+        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+        		throw new HttpForbiddenException(e);
+        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+        		throw new HttpNetworkException(e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.UPGRADING_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.UPGRADING_ERROR.getErrorDescription(), e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorDescription(), e);
+        	} else {
+        		throw new HttpOperationException(e.getMessage(), e);
+        	}
+        }
+        catch (final Exception e) {
+        	LOGGER.error("Error en la comunicacion con el servicio de recuperacion asincrona de firma", e); //$NON-NLS-1$
+        	throw new IOException(e);
+        }
+
+        // Si el resultado es un error, si tiene un periodo de gracia o si ya contiene la firma, lo devolvemos
+        if (result.getErrorCode() != 0 || result.getGracePeriod() != null || result.getResult() != null) {
+        	return result;
+        }
+
+        // Si no tenemos la firma, hacemos una nueva llamada para descargarla
+        urlParameters =
+        		URL_ASYNC_PARAMETERS_BASE
+        			.replace(TAG_VALUE_APP_ID, this.appId)
+        			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_UPDATED_SIGN_RESULT.getId()) +
+        			URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE_RESULT
+        			.replace(TAG_VALUE_DOCUMENT_ID, docId);
 
         byte[] signature;
         try {

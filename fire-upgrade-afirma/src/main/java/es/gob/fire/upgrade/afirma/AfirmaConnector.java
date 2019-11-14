@@ -32,6 +32,11 @@ public final class AfirmaConnector {
     private static String WEB_SERVICES_TIMEOUT;
 
     static String SERVICE_SIGNUPGRADE;
+    static String SERVICE_RECOVERSIGNATURE;
+
+    static String SIGNUPGRADE_OPERATION_UPGRADE = "verify"; //$NON-NLS-1$
+    static String SIGNUPGRADE_OPERATION_VERIFY = "verify"; //$NON-NLS-1$
+    static String RECOVERSIGN_OPERATION_ASYNC_RECOVER = "getProcessResponse"; //$NON-NLS-1$
 
     private String AFIRMA_ENDPOINT;
 
@@ -72,10 +77,12 @@ public final class AfirmaConnector {
 
         SERVICE_SIGNUPGRADE = config.getProperty("webservices.service.signupgrade"); //$NON-NLS-1$
 
+        SERVICE_RECOVERSIGNATURE = config.getProperty("webservices.service.recoversignature"); //$NON-NLS-1$
+
         this.AFIRMA_ENDPOINT = config.getProperty("webservices.endpoint"); //$NON-NLS-1$
     }
 
-    byte[] doPlatformCall(final String inputDss, final String serviceName)
+    byte[] doPlatformCall(final String inputDss, final String serviceName, final String operation)
             throws IOException, PlatformWsException {
 
         final Service service = new Service();
@@ -90,12 +97,10 @@ public final class AfirmaConnector {
         }
 
         // Se configura del endponit del servicio
-        call.setTargetEndpointAddress(new java.net.URL(this.AFIRMA_ENDPOINT
-                + serviceName));
+        call.setTargetEndpointAddress(new java.net.URL(this.AFIRMA_ENDPOINT + serviceName));
 
-        final String servicioDSS = "verify"; //$NON-NLS-1$
-        //call.setOperationName(new QName("http://soapinterop.org/", servicioDSS)); //$NON-NLS-1$
-        call.setOperationName(servicioDSS);
+        //call.setOperationName(new QName("http://soapinterop.org/", operation)); //$NON-NLS-1$
+        call.setOperationName(operation);
         call.setTimeout(new Integer(WEB_SERVICES_TIMEOUT));
         call.setClientHandlers(REQUEST_HANDLER, null);
 

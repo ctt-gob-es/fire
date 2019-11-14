@@ -18,7 +18,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
@@ -56,6 +55,9 @@ public class TransactionResult {
 	/** Par&aacute;metro JSON con el certificado utilizado para firmar. */
 	private static final String JSON_ATTR_SIGNING_CERT = "cert"; //$NON-NLS-1$
 
+	/** Prefijo de la respuesta JSON con el formato al que se actualiza la firma. */
+	private static final String JSON_ATTR_UPGRADE = "upgrade"; //$NON-NLS-1$
+
 	/** Par&aacute;metro JSON con la informaci&oacute;n del periodo de gracia. */
 	private static final String JSON_ATTR_GRACE_PERIOD = "grace"; //$NON-NLS-1$
 
@@ -65,8 +67,8 @@ public class TransactionResult {
 	/** Par&aacute;metro JSON con la fecha a la que se debe recuperar la firma en milisegundos. */
 	private static final String JSON_ATTR_GRACE_PERIOD_DATE = "date"; //$NON-NLS-1$
 
-	/** Par&aacute;metro JSON con la fecha a la que se debe recuperar la firma. */
-	private static final String GRACE_PERIOD_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX"; //$NON-NLS-1$
+	/** Par&aacute;metro JSON con el estado de la operaci&oacute;n. */
+	private static final String JSON_ATTR_STATE = "state"; //$NON-NLS-1$
 
 	/** Cadena de inicio de una estructura JSON compatible. */
 	private static final String JSON_RESULT_PREFIX = "{\"" + JSON_ATTR_RESULT + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -95,7 +97,10 @@ public class TransactionResult {
 	/** Especifica que la transacci&oacute;n aun no ha finalizado y se deber&aacute; pedir el resultamos m&aacute;s adelante. */
 	public static final int STATE_PENDING = 1;
 
-	private static SimpleDateFormat formatter = null;
+	/** Especifica que la transacci&oacute;n ha finalizado pero que el resultado puede
+	 * diferir de lo solicitado por la aplicaci&oacute;n. Por ejemplo, puede haberse
+	 * solicitado una firma ES-A y recibirse una ES-T. */
+	public static final int STATE_PARTIAL = 2;
 
 	private int state = STATE_ERROR;
 
@@ -109,11 +114,13 @@ public class TransactionResult {
 
 	private X509Certificate signingCert = null;
 
+	private String upgradeFormat = null;
+
 	private byte[] result = null;
 
 	private GracePeriodInfo gracePeriod = null;
 
-	private TransactionResult(final int resultType) {
+	public TransactionResult(final int resultType) {
 		this.resultType = resultType;
 	}
 
@@ -172,6 +179,14 @@ public class TransactionResult {
 	}
 
 	/**
+	 * Devuelve el estado de la transacci&oacute; (si termin&oacute; correctamente o no).
+	 * @param state Estado de la transacci&oacute;n.
+	 */
+	public void setState(final int state) {
+		this.state = state;
+	}
+
+	/**
 	 * Devuelve el c&oacute;digo asociado al error sufrido durante la transacci&oacute;n.
 	 * @return C&oacute;digo de error.
 	 */
@@ -217,6 +232,22 @@ public class TransactionResult {
 	 */
 	public void setSigningCert(final X509Certificate signingCert) {
 		this.signingCert = signingCert;
+	}
+
+	/**
+	 * Devuelve el identificador del formato de firma longevo.
+	 * @return Formato de firma longevo.
+	 */
+	public String getUpgradeFormat() {
+		return this.upgradeFormat;
+	}
+
+	/**
+	 * Establece el identificador del formato de firma longevo.
+	 * @param upgradeFormat Formato de firma longevo.
+	 */
+	public void setUpgradeFormat(final String upgradeFormat) {
+		this.upgradeFormat = upgradeFormat;
 	}
 
 	/**
@@ -271,6 +302,7 @@ public class TransactionResult {
 		// Si no tenemos resultado, devolvemos un JSON con la informacion que se
 		// dispone de la transaccion
 		final JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
+		resultBuilder.add(JSON_ATTR_STATE, this.state);
 		if (this.errorMessage != null) {
 			resultBuilder.add(JSON_ATTR_ERROR_MSG, this.errorMessage);
 			resultBuilder.add(JSON_ATTR_ERROR_CODE, this.errorCode);
@@ -288,6 +320,9 @@ public class TransactionResult {
 						"Error al codificar el certificado de firma", //$NON-NLS-1$
 						e);
 			}
+		}
+		if (this.upgradeFormat != null) {
+			resultBuilder.add(JSON_ATTR_UPGRADE, this.upgradeFormat);
 		}
 		if (this.gracePeriod != null) {
 			try {
@@ -343,7 +378,9 @@ public class TransactionResult {
 				final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
 				if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {
 					opResult.errorCode = resultObject.getInt(JSON_ATTR_ERROR_CODE);
-					opResult.state = STATE_ERROR;
+				}
+				if (resultObject.containsKey(JSON_ATTR_STATE)) {
+					opResult.state = resultObject.getInt(JSON_ATTR_STATE);
 				}
 				if (resultObject.containsKey(JSON_ATTR_ERROR_MSG)) {
 					opResult.errorMessage = resultObject.getString(JSON_ATTR_ERROR_MSG);
@@ -363,22 +400,25 @@ public class TransactionResult {
 								e);
 					}
 				}
+				if (resultObject.containsKey(JSON_ATTR_UPGRADE)) {
+					opResult.upgradeFormat = resultObject.getString(JSON_ATTR_UPGRADE);
+				}
 				if (resultObject.containsKey(JSON_ATTR_GRACE_PERIOD)) {
 					final JsonObject gracePeriodObject = resultObject.getJsonObject(JSON_ATTR_GRACE_PERIOD);
-					try {
-						Date gracePeriodDate = null;
-						if (gracePeriodObject.containsKey(JSON_ATTR_GRACE_PERIOD_DATE)) {
-							gracePeriodDate = getFormatter().parse(gracePeriodObject.getString(JSON_ATTR_GRACE_PERIOD_DATE));
+					Date gracePeriodDate = null;
+					if (gracePeriodObject.containsKey(JSON_ATTR_GRACE_PERIOD_DATE)) {
+						try {
+							gracePeriodDate = new Date(gracePeriodObject.getJsonNumber(JSON_ATTR_GRACE_PERIOD_DATE).longValue());
 						}
-						opResult.gracePeriod = new GracePeriodInfo(
-								gracePeriodObject.getString(JSON_ATTR_GRACE_PERIOD_ID),
-								gracePeriodDate);
+						catch (final Exception e) {
+							opResult.state = STATE_ERROR;
+							opResult.errorCode = 0;
+							opResult.errorMessage = "Se solicito la espera de un periodo de gracia y se proporciono en un formato no valido"; //$NON-NLS-1$
+						}
 					}
-					catch (final Exception e) {
-						opResult.state = STATE_ERROR;
-						opResult.errorCode = 0;
-						opResult.errorMessage = "El formato de fecha del periodo de gracia no es valido"; //$NON-NLS-1$
-					}
+					opResult.gracePeriod = new GracePeriodInfo(
+							gracePeriodObject.getString(JSON_ATTR_GRACE_PERIOD_ID),
+							gracePeriodDate);
 				}
 			}
 		}
@@ -410,16 +450,5 @@ public class TransactionResult {
 	private static X509Certificate decodeCertificate(final String certB64) throws CertificateException, IOException {
         return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
                 new ByteArrayInputStream(Base64.decode(certB64)));
-	}
-
-	/**
-	 * Recupera el formateador de fechas.
-	 * @return Formateador de fechas.
-	 */
-	private static SimpleDateFormat getFormatter() {
-		if (formatter == null) {
-			formatter = new SimpleDateFormat(GRACE_PERIOD_DATE_FORMAT);
-		}
-		return formatter;
 	}
 }

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import es.gob.fire.upgrade.UpgradeResult;
+import es.gob.fire.upgrade.UpgradeResult.State;
 
 /**
  * Actualizador de firmas AdES contra la Plataforma Afirma.
@@ -56,7 +57,7 @@ public final class Upgrade {
      *             Si el servicio Web de mejora de firmas env&iacute;a una
      *             respuesta de error.
      */
-    public static UpgradeResult signUpgradeCreate(final AfirmaConnector conn, final byte[] data,
+    public static UpgradeResult upgradeSignature(final AfirmaConnector conn, final byte[] data,
             final UpgradeTarget format, final String afirmaAppName, final boolean ignoreGracePeriod)
             throws IOException, PlatformWsException, AfirmaResponseException {
 
@@ -68,7 +69,8 @@ public final class Upgrade {
 
         final byte[] response = conn.doPlatformCall(
         		inputDss,
-                AfirmaConnector.SERVICE_SIGNUPGRADE);
+                AfirmaConnector.SERVICE_SIGNUPGRADE,
+                AfirmaConnector.SIGNUPGRADE_OPERATION_UPGRADE);
 
         // Analisis de la respuesta
         final UpgradeAfirmaResponse vr;
@@ -98,19 +100,102 @@ public final class Upgrade {
 
         // Comprobamos que la actualizacion haya finalizado correctamente y que el formato
         // actualizado sea el que se habia pedido
+        State resultState = State.COMPLETE;
         if (!format.equivalent(vr.getSignatureForm())) {
-        	throw new AfirmaResponseException(vr.getMajorCode(),
-        			vr.getMinorCode(), "No se ha actualizado al formato solicitado. Formato recibido: " + vr.getSignatureForm()); //$NON-NLS-1$
+        	resultState = State.PARTIAL;
         }
 
         try {
         	return new UpgradeResult(
         			vr.getUpgradedSignature(),
-        			vr.getSignatureForm().substring(vr.getSignatureForm().lastIndexOf(':') + 1));
+        			vr.getReducedSignatureForm(),
+        			resultState);
         }
         catch (final Exception e) {
         	throw new AfirmaResponseException(vr.getMajorCode(),
         			vr.getMinorCode(), "Error al componer el resultado con la firma", e); //$NON-NLS-1$
         }
+    }
+
+    /**
+     * Recupera una firma que se envi&oacute; previamente a firmar y solicit&oacute; un
+     * periodo de gracia.
+     * @param conn
+     * 			  Conexi&oacute;n a usar para el acceso a la Plataforma @firma.
+     * @param docId
+     *            Identificador de la firma que se debe recuperar.
+     * @param format
+     *            Formato de actualizaci&oacute;n.
+     * @param afirmaAppName
+     *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
+     * @return Resultado de la actualizaci&oacute;n de la firma.
+     * @throws IOException
+     *             Si hay problemas en los tratamientos de datos o lectura de
+     *             opciones de configuraci&oacute;n.
+     * @throws PlatformWsException
+     *             Si hay problemas con los servicios Web de mejora de firmas.
+     * @throws AfirmaResponseException
+     *             Si el servicio Web de mejora de firmas env&iacute;a una
+     *             respuesta de error.
+     */
+    public static UpgradeResult recoverUpgradedSignature(final AfirmaConnector conn,
+    		final String docId, final UpgradeTarget format, final String afirmaAppName)
+            throws IOException, PlatformWsException, AfirmaResponseException {
+
+        final String inputDss = DssServicesUtils.createRecoverSignatureDss(
+        		docId,
+        		afirmaAppName);
+
+        final byte[] response = conn.doPlatformCall(
+        		inputDss,
+                AfirmaConnector.SERVICE_RECOVERSIGNATURE,
+                AfirmaConnector.RECOVERSIGN_OPERATION_ASYNC_RECOVER);
+
+        // Analisis de la respuesta
+        final UpgradeAfirmaResponse vr;
+        try {
+            vr = new UpgradeAfirmaResponse(response);
+        } catch (final Exception e) {
+            throw new PlatformWsException(
+                    "Error analizando la respuesta de la Plataforma @firma", e); //$NON-NLS-1$
+        }
+
+        // Comprobamos si la firma ya se encuentra disponible o si se requiere mas tiempo de espera
+        if (vr.isPending()) {
+        	try {
+        		return new UpgradeResult(vr.getResponseId(), formatter.parse(vr.getResponseTime()));
+	        }
+	        catch (final Exception e) {
+	        	throw new AfirmaResponseException(vr.getMajorCode(), vr.getMinorCode(),
+	        			"Error al componer el resultado con el periodo de gracia", e); //$NON-NLS-1$
+	        }
+        }
+
+        // Comprobamos que la operacion haya finalizado correctamente
+        if (!vr.isOk()) {
+            throw new AfirmaResponseException(vr.getMajorCode(), vr.getMinorCode(), vr.getDescription());
+        }
+
+        // Comprobamos que la actualizacion haya finalizado correctamente y que el formato
+        // actualizado sea el que se habia pedido
+        State state = State.COMPLETE;
+        if (format != null && !format.equivalent(vr.getSignatureForm())) {
+        	state = State.PARTIAL;
+        }
+
+        // Obtenemos la firma
+        byte[] signature;
+        try {
+        	signature = vr.getUpgradedSignature();
+        }
+        catch (final Exception e) {
+        	throw new AfirmaResponseException(vr.getMajorCode(),
+        			vr.getMinorCode(), "Error al componer el resultado con la firma", e); //$NON-NLS-1$
+        }
+
+        return new UpgradeResult(
+        		signature,
+        		vr.getReducedSignatureForm(),
+        		state);
     }
 }

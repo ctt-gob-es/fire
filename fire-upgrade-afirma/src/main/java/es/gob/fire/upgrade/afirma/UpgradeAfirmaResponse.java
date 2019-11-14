@@ -161,6 +161,15 @@ class UpgradeAfirmaResponse {
         return this.signatureForm;
     }
 
+    /**
+     * Obtiene la version reducida del identificador de formato al que se ha actualizado
+     * la firma.
+     * @return Identificador de formato reducido.
+     */
+    String getReducedSignatureForm() {
+    	return this.signatureForm.substring(this.signatureForm.lastIndexOf(':') + 1);
+    }
+
     void setSignatureForm(final String s) {
         this.signatureForm = s;
     }

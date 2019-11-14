@@ -13,6 +13,8 @@ public class PostProcessResult {
 
 	private final GracePeriodInfo gracePeriodInfo;
 
+	private String upgradeFormat = null;
+
 	/**
 	 * Construye el resultado del postproceso de la firma en donde se proporciona
 	 * la firma obtenida.
@@ -61,6 +63,22 @@ public class PostProcessResult {
 	 */
 	public State getState() {
 		return this.state;
+	}
+
+	/**
+	 * Recupera el formato al que se ha actualizado la firma.
+	 * @return Formato actualizado.
+	 */
+	public String getUpgradeFormat() {
+		return this.upgradeFormat;
+	}
+
+	/**
+	 * Establece el formato al que se ha actualizado la firma.
+	 * @param upgradeFormat Formato actualizado.
+	 */
+	public void setUpgradeFormat(final String upgradeFormat) {
+		this.upgradeFormat = upgradeFormat;
 	}
 
 	/**

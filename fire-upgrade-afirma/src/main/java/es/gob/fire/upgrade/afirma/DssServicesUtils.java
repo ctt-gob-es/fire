@@ -34,6 +34,15 @@ final class DssServicesUtils {
         // no instanciable
     }
 
+    /**
+     * Crea el XML de peticion de actualizaci&oacute;n de firma.
+     * @param firma Firma que se desea actualizar.
+     * @param formato Formato al que actualizar.
+     * @param afirmaAppName Nombre de la aplicaci&oacute;n.
+     * @param ignoreGracePeriod {@code true} si se desea ignorar los periodos de gracia,
+     * {@code false} si se desean respetar.
+     * @return Texto con el XML de petici&oacute;n.
+     */
     static String createSignUpgradeDss(final byte[] firma, final UpgradeTarget formato,
     		final String afirmaAppName, final boolean ignoreGracePeriod) {
 
@@ -157,6 +166,36 @@ final class DssServicesUtils {
         return result != null ? result.substring(result.lastIndexOf(":") + 1) : null; //$NON-NLS-1$
     }
 
+    /**
+     * Crea el XML de peticion de recuperaci&oacute;n as&iacute;ncrona de firma.
+     * @param docId Identificador de la firma que se desea recuperar.
+     * @param afirmaAppName Nombre de la aplicaci&oacute;n.
+     * @return Texto con el XML de petici&oacute;n.
+     */
+    static String createRecoverSignatureDss(final String docId, final String afirmaAppName) {
+
+        // Creamos la peticion segun el tipo de firma que se actualiza
+    	final StringBuilder dss = new StringBuilder(1000)
+    			.append("<async:PendingRequest xmlns:async='urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:1.0'>") //$NON-NLS-1$
+    			.append("<dss:OptionalInputs xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema'>") //$NON-NLS-1$
+    			.append("<dss:ClaimedIdentity><dss:Name>") //$NON-NLS-1$
+    			.append(afirmaAppName)
+    			.append("</dss:Name></dss:ClaimedIdentity>") //$NON-NLS-1$
+    			.append("<async:ResponseID>") //$NON-NLS-1$
+    			.append(docId)
+    			.append("</async:ResponseID>") //$NON-NLS-1$
+    			.append("</dss:OptionalInputs>") //$NON-NLS-1$
+    			.append("</async:PendingRequest>"); //$NON-NLS-1$
+
+        return dss.toString();
+    }
+
+    /**
+     * Crea el XML de peticion de validaci&oacute;n de firma.
+     * @param firma Firma que se desea validar.
+     * @param afirmaAppName Nombre de la aplicaci&oacute;n.
+     * @return Texto con el XML de petici&oacute;n.
+     */
     static String createSignVerifyDss(final byte[] firma,
     		final String afirmaAppName) {
 

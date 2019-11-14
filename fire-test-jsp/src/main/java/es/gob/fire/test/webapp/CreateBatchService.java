@@ -81,6 +81,10 @@ public class CreateBatchService extends HttpServlet {
         	confProperties.setProperty("appName", configManager.getAppName()); //$NON-NLS-1$
         }
 
+        if (configManager.getAppName() != null) {
+        	confProperties.setProperty("updater.ignoreGracePeriod", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
         // Podemos configurar un DocumentManager configurado en el componente central.
         // Con esto, en lugar de tomar los datos que le pasamos a la aplicacion, se cargaran
         // en base al DocumentManager y el identificador que le pasemos como datos

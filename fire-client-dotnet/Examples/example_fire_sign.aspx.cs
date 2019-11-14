@@ -15,7 +15,7 @@ public partial class example_fire_sign : System.Web.UI.Page
         //serviceConfig.Add("ssl_client_pkcs12", "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new.p12");
         //serviceConfig.Add("ssl_client_pass", "12341234");
 
-        string extraParams = "filters=keyusage.nonrepudiation:true\nmode=implicit";
+        string extraParams = "filters=keyusage.nonrepudiation:true\nmode=implicit\nexpPolicy=FirmaAGE";
         string extraParamsB64 = Base64Encode(extraParams);
 
         string dataB64 = Base64Encode("Hola Mundo!!");

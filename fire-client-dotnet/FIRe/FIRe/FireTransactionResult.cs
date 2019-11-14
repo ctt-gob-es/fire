@@ -17,11 +17,17 @@ namespace FIRe
     /// <summary>Clase para el almacén del resultado de una operación de carga de datos para firmar.</summary>
     public class FireTransactionResult
     {
-
-        // Especifica que la transacci&oacute;n finaliz&oacute; correctamente.
-        private static readonly int STATE_OK = 0;
-        // Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
-        private static readonly int STATE_ERROR = -1;
+        /// <summary>Especifica que la transacción finalizó correctamente.</summary>
+        public static readonly int STATE_OK = 0;
+        /// <summary>Especifica que la transacción no pudo finalizar debido a un error.</summary>
+        public static readonly int STATE_ERROR = -1;
+        /// <summary>Especifica que la transaccion aun no ha finalizado y se debera pedir el resultamos
+		/// mas adelante.</summary>
+        public static readonly int STATE_PENDING = 1;
+        /// <summary>Especifica que la transacción ha finalizado pero que el resultado puede
+        /// diferir de lo solicitado por la aplicación. Por ejemplo, puede haberse
+        /// solicitado una firma ES-A y recibirse una ES-T.</summary>
+        public static readonly int STATE_PARTIAL = 2;
 
         // Prefijo de la estructura que almacena la informacion sobre la operacion realizada
         private static readonly string JSON_RESULT_PREFIX = "{\"result\":"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -34,6 +40,8 @@ namespace FIRe
         public X509Certificate SigningCert { get; }
         /// <summary>Periodo de gracia que esperar antes de obtener un resultado.</summary>
         public GracePeriod GracePeriod { get; }
+        /// <summary>Formato al que se ha actualizado la firma.</summary>
+        public string UpgradeFormat { get; }
         /// <summary>Código del error obtenido.</summary>
         public string ErrorCode { get; }
         /// <summary>Mensaje del error obtenido.</summary>
@@ -70,11 +78,10 @@ namespace FIRe
                 try
                 {
                     TransactionResultJson signResult = DeserializedSignResult(System.Text.Encoding.UTF8.GetString(bytes));
-
+                    this.State = signResult.Result.State;
                     if (signResult.Result.Ercod != 0)
                     {
                         this.ErrorCode = signResult.Result.Ercod.ToString();
-                        this.State = STATE_ERROR;
                     }
                     if (signResult.Result.Ermsg != null)
                     {
@@ -94,6 +101,10 @@ namespace FIRe
                         GracePeriodJson graceJson = signResult.Result.Grace;
                         DateTime graceDate = new DateTime(new DateTime(1970, 1, 1).Ticks + graceJson.Date * 10000);
                         this.GracePeriod = new GracePeriod(graceJson.Id, graceDate);
+                    }
+                    if (signResult.Result.Upgrade != null)
+                    {
+                        this.UpgradeFormat = signResult.Result.Upgrade;
                     }
                 }
                 catch (Exception e)

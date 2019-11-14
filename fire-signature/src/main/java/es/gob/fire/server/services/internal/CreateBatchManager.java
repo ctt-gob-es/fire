@@ -24,7 +24,6 @@ import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.upgrade.UpgraderUtils;
@@ -36,7 +35,6 @@ import es.gob.fire.upgrade.UpgraderUtils;
 public class CreateBatchManager {
 
 	private static final Logger LOGGER = Logger.getLogger(CreateBatchManager.class.getName());
-	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 
 	/**

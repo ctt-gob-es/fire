@@ -10,6 +10,7 @@
 package es.gob.fire.test.webapp;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -73,10 +74,18 @@ public class SignHelper {
                     "No se definieron todos los atributos de sesion necesarios"); //$NON-NLS-1$
         }
 
+        final Properties config = new Properties();
+        config.setProperty("updater.ignoreGracePeriod", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+
         // Recuperamos la firma generada (actualizanda en caso de haberse solicitado)
         TransactionResult result;
         try {
-        	result = ConfigManager.getInstance().getFireClient(appId).recoverSignResult(transactionId, userId, upgrade);
+        	result = ConfigManager.getInstance().getFireClient(appId).recoverSignResult(
+        			transactionId,
+        			userId,
+        			upgrade,
+        			config
+        			);
 		} catch (final ClientConfigFilesNotFoundException e) {
 			LoggerFactory.getLogger(SignHelper.class).error(
 					"No se encuentra el fichero de configuracion del componente distribuido de FIRe", e); //$NON-NLS-1$
