@@ -100,3 +100,9 @@ CREATE TABLE `tb_roles` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre_UNIQUE` (`nombre_rol`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+CREATE TABLE `tb_responsable_de_aplicaciones` (
+  `id_responsables` int(11) NOT NULL AUTO_INCREMENT,
+  `id_aplicaciones` varchar(48) NOT NULL,
+  
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
