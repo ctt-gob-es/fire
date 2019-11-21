@@ -61,12 +61,12 @@
 			
            <form id="frmMailChangePass" method="POST" action="../mailPasswordRestoration">
 			
-				<div style="margin: auto;width: 60%;padding: 5px;">
-					<div style="display: inline-block; width: 20%;margin: 5px;">
+				<div style="margin: auto;width: 60%;padding: 5px;"align="center">
+					<div style="display: inline-block; width: 40%;margin: 5px;"itemprop="articleBody">
 						<!-- Label para la accesibilidad de la pagina -->
-						<label for="mail" style="color: #404040">CORREO ELECTR&Oacute;NICO</label>
+						<label for="mail" align="justify" style="color: #404040">LOGIN O CORREO ELECTR&Oacute;NICO</label>
 					</div>
-					<div  style="display: inline-block; width: 60%;margin: 5px;">
+					<div  style="display: inline-block; width: 40%;margin: 25px;">
 						<input id="mail" class="edit-txt" type="text" name="<%= ServiceParams.PARAM_MAIL %>" autocomplete="off" style="width: 100%;margin-top:10px;" />
 					</div>	
 				</div>

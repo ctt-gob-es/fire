@@ -78,7 +78,7 @@ public class MailRestorePasswordUserService  extends HttpServlet{
 		// Si se ha excedido el tiempo de espera, no permitimos la renovacion
 		final long currentTime = new Date().getTime();
 		final long renovationTime = restorationInfo.getRenovationDate().getTime();
-		final long expirationTime = ConfigManager.getExpiration();
+		final int expirationTime = ConfigManager.getExpiration();
 
 		if (currentTime > renovationTime + expirationTime) {
 			LOGGER.log(Level.WARNING, "Se ha excedido el tiempo maximo de espera hasta la renovacion de la contrasena"); //$NON-NLS-1$

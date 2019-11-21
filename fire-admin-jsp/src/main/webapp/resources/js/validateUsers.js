@@ -270,14 +270,14 @@ function comprobarDni(dni) {
 	     letraCorrecta='TRWAGMYFPDXBNJZSQVHLCKET';
 	     letraCorrecta=letraCorrecta.substring(numero,numero+1);
 	    if (letraCorrecta!=letra.toUpperCase()) {
-	     //  alert('Dni erroneo, la letra del NIF no se corresponde');
+	       alert('Dni erroneo, la letra del NIF no se corresponde');
 	       return false;
 	     }else{
-	//       alert('Dni correcto');
+	      // alert('Dni correcto');
 	       return true;
 	     }
 	  }else{
-	  //   alert('Dni erroneo, formato no válido');
+	   // alert('Dni erroneo, formato no válido');
 	     return false;
 	   }
 }

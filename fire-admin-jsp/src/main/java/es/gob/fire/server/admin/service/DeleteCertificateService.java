@@ -30,7 +30,7 @@ public class DeleteCertificateService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(DeleteCertificateService.class.getName());
 
-	private static final String PARAM_ID = "id-cert"; //$NON-NLS-1$
+	private static final String PARAM_ID = "id-certificate"; //$NON-NLS-1$
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)

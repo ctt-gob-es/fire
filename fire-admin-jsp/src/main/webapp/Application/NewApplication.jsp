@@ -41,6 +41,10 @@
 	}
 	String id = request.getParameter("id-app");//$NON-NLS-1$
 	final int op = Integer.parseInt(request.getParameter("op"));//$NON-NLS-1$
+	final String name = request.getParameter(ServiceParams.PARAM_NAME);
+	final String email = request.getParameter(ServiceParams.PARAM_USEREMAIL);
+	final String tel = request.getParameter(ServiceParams.PARAM_TEL);
+	
 	
 	
 	final List<CertificateFire> lCert = CertificatesDAO.selectCertificateAll();
@@ -76,7 +80,7 @@
 	}
 	
 	
-	User[] users = UsersDAO.getUserAppResponsables();
+	User[] usersResponsable = UsersDAO.getUserAppResponsables();
 
 	 
 	Application app = null;
@@ -151,42 +155,6 @@
 			      	});
 		      	}		      			      	
 			});
-			
-			$("#nombre-resp").change(function (event) {
-				
-				var id = event.target.selectedOptions[0].value;
-					  
-				var data="&id="+id;
-					$.ajax({
-						async:true,
-						cache:false,
-				        type: "POST",
-				        url: "./responsiblerefresh",
-				        data: data,		         
-				        success: function (data) {
-				        	if (data != null) {
-					            	
-								console.log(data);
-
-								
-								var jsonData = JSON.parse(data);
-								if (jsonData.hasOwnProperty('mail')) {
-									$("#email-resp").val(jsonData['mail']);
-										
-								}
-								if (jsonData.hasOwnProperty('telephone')) {
-									$("#telf-resp").val(jsonData['telephone']);
-									
-								}
-							}
-						}  			 
-					            	
-					}); 
-					
-				});
-			
-			
-			//ESTA PARTE ES DE NEW APPLICATION
 		});
 		
 		
@@ -251,7 +219,7 @@
 		
 		<% if (op == 2 || op == 1) { %>	
 		<p>Los campos con * son obligatorios</p>
-			<form id="frmApplication" method="POST" autocomplete="off" action="../newApp" onsubmit="isCert()" >
+			<form id="frmApplication" name="frmApplication" method="POST" autocomplete="off" action="../newApp" >
 			
 			<input type="hidden" name="<%= ServiceParams.PARAM_APPID %>" value="<%=  id %>" />
 			<input type="hidden" name="<%= ServiceParams.PARAM_OP %>" value="<%=  op %>" />  
@@ -260,7 +228,7 @@
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				<div style="display: inline-block; width: 20%;margin: 3px;">
 			
-             Deshabilitar aplicacion: 
+             Deshabilitar aplicación: 
              <input type="checkbox" id="habilitado" name="<%= ServiceParams.PARAM_ENABLED %>"  onclick="myFunctionEnableDilable()" 
             <%= app.isHabilitado() ? "" : "checked" %>> 
 
@@ -279,62 +247,83 @@
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 					
 						<input id="nombre-app" class="edit-txt" type="text" autocomplete="off" name=<%= ServiceParams.PARAM_NAME %> style="width: 80%;margin-top:3px;" 
-						value="<%= (request.getParameter("name") != null) ? request.getParameter("name") : (app.getNombre()!=null)?app.getNombre() : "" %>"> 
+						value="<%= (name != null) ? name : (app.getNombre()!=null)?app.getNombre() : "" %>"> 
 						
 				</div>
 					
 				<div style="display: inline-block; width: 10%;margin: 3px;">
 					<!-- Label para la accesibilidad de la pagina -->
-						<label for="nombre-resp" style="color: #404040" >* Responsable</label>
+						<label for="listresp" style="color: #404040" ></label>
 				</div>
-				<div  style="display: inline-block; width: 30%;margin: 3px;">
+				<div  style="display:flex; width: 30%;margin: 3px;">
 				
 				
 				<% if (op != 0) { %>
-					<select id="nombre-resp" name=<%= ServiceParams.PARAM_RESP %> class="edit-txt">		
-					<% if (op == 1){%>
-						<option value="">Seleccione un Responsable</option>
-					<% } %>
 					
-					<% for (User appResponsable : users) {
-					     if (op == 1) { %>
-							<option value="<%= appResponsable.getId() %>"> <%= appResponsable %></option>
-					<% } else { %>
-						<option value="<%= appResponsable.getId() %>" <%= appResponsable.getId().equals(app.getResponsable().getId()) ? "selected='selected'" : ""%>> <%= appResponsable %></option>
-						<% }
-					} %>
-					</select>
-
+ 				<div  style='float: left; margin: 30px; padding: 5px; text-align: left;'>
+					<label for="pasarOpciones(this.form)" >Listado de responsables del sistema</label>
+						<select name="listadoCompletoResponsables[]"  style="width:400px" multiple="multiple" id="listadoCompletoResponsables" size="8" >
+						<% for (User responsable : usersResponsable) { %>
+							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getName() %></option>
+						<% } %>
+						</select>
+						
+						
+				</div>
+				
+				<div style='float: center; margin: 30px; padding: 5px;'>
+					<br></br>
+					<br></br>
+					<input type="button" id="moverright"  value="Añadir »" >
+					<br></br>
+					<input type="button" id="moverleft"    value="« Eliminar" >
+				</div>
+				
+				
+				<div  class="" id ="buscar" style='float: left; margin: 30px; padding: 5px; text-align: left;'>
+					<label for="listadoAplicacionResponsables" display: inline;>Listado de responsables de la aplicaci&oacute;n</label>
+						<select  style="width:400px" multiple="multiple"  id="listadoAplicacionResponsables" name="<%= ServiceParams.PARAM_RESPONSABLES %>"  size="8" >
+						<% for (User responsable : app.getResponsables()) { %>
+							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getName() %></option>
+						<% } %>
+						
+						</select>
+					</div>
+				</div>
 		
-				<% } else { %>
-					<input id="nombre-resp" class="edit-txt" type="text" name=<%= ServiceParams.PARAM_RESP %> style="width: 80%;margin-top:3px;"
-					value="<%= app.getResponsable() %>">
+					<% } else { %>
+				<fieldset>
+				<legend>Responsables:</legend>
+					<table>
+				
+						
+						<thead>
+							<tr>
+							 <div>
+							<label><th>Nombre</th></label>
+							 </div>
+							 <br/>
+							  <div>
+							<<label> <th>Correo Electr&oacute;nico</th></label>
+							 </div>
+							 <br/>
+							  <div>
+							<<label><th>Tel&eacute;fono</th></label>
+							 </div>
+							</tr>
+						</thead>
+						<% for (User user : app.getResponsables()) { %>
+							<tr><td><%= user.getSurname() + "," + user.getName() %></td><td><%= user.getMail() %></td><td><%= user.getTelephone() %></td></tr>
+						<% } %>
+					
 				<% } %>
+						
 							
-								
-								
+				</fieldset>				
+			</table>					
 			</div>	
 			
-			<div style="margin: auto;width: 100%;padding: 3px;">
-				<div style="display: inline-block; width: 20%;margin: 3px;">
-					<!-- Label para la accesibilidad de la pagina -->
-						<label for="email-resp" style="color: #404040">Correo electrónico</label>
-				</div>
-				<div  style="display: inline-block; width: 30%;margin: 3px;">
-					<input id="email-resp" class="edit-txt" type="text" name=<%= ServiceParams.PARAM_CERTID %> style="width: 80%;margin-top:3px;"
-						value="<%=  request.getParameter("email") != null ? request.getParameter("email") : (app.getResponsable().getMail()!=null) ? app.getResponsable().getMail() : "" %>">											
-				</div>
-					
-				<div style="display: inline-block; width: 10%;margin: 3px;">
-					<!-- Label para la accesibilidad de la pagina -->
-					<label for="telf-resp" style="color: #404040">Telf. Contacto</label>
-				</div>
-				<div  style="display: inline-block; width: 30%;margin: 3px;">
-				
-				<input id="telf-resp" class="edit-txt" type="text" name=<%= ServiceParams.PARAM_TEL %> style="width: 80%;margin-top:3px;" 
-						value="<%=  request.getParameter("tel")!= null ? request.getParameter("tel") : (app.getResponsable().getTelephone() != null) ? app.getResponsable().getTelephone() : ""%>">									
-				</div>						
-			</div>
+			
 			
 			
 							
@@ -456,7 +445,7 @@
 		   		%>
 			   		
 			   		<div  style="display: inline-block; width: 35%;margin: 3px">
-			   			<input class="menu-btn" name="add-app-btn" type="submit" value="<%= msg %>" title="<%= tit %>" >
+			   			<input class="menu-btn" name="add-app-btn"type="button" onclick="selectResponsables()" value="<%= msg %>" title="<%= tit %>" >
 			   		</div>
 		   		<% } %>
 			   					   		
@@ -483,59 +472,9 @@
 						
 				</div>
 					
-				<div style="display: inline-block; width: 10%;margin: 3px;">
-					<!-- Label para la accesibilidad de la pagina -->
-						<label for="nombre-resp" style="color: #404040" >* Responsable</label>
-				</div>
-				<div  style="display: inline-block; width: 30%;margin: 3px;">
 				
 				
-				<% if (op != 0) { %>
-					<select id="nombre-resp" name=<%= ServiceParams.PARAM_RESP %> class="edit-txt">		
-					<% if (op == 1){%>
-						<option value="">Seleccione un Responsable</option>
-					<% } %>
-					
-					<% for (User appResponsable : users) {
-					     if (op == 1) { %>
-							<option value="<%= appResponsable.getId() %>"> <%= appResponsable %></option>
-					<% } else { %>
-						<option value="<%= appResponsable.getId() %> " <%= appResponsable.getId().equals(app.getResponsable().getId()) ? "selected='selected'" : ""%>> <%= appResponsable %></option>
-						<% }
-					} %>
-					</select>
-
-		
-				<% } else { %>
-					<input id="nombre-resp" class="edit-txt" type="text" name=<%= ServiceParams.PARAM_RESP %> style="width: 80%;margin-top:3px;"
-					value="<%= app.getResponsable() %>">
-				<% } %>
-							
-								
-								
-			</div>	
 			
-			<div style="margin: auto;width: 100%;padding: 3px;">
-				<div style="display: inline-block; width: 20%;margin: 3px;">
-					<!-- Label para la accesibilidad de la pagina -->
-						<label for="email-resp" style="color: #404040">* Correo electrónico</label>
-				</div>
-				<div  style="display: inline-block; width: 30%;margin: 3px;">
-					<input id="email-resp" class="edit-txt" type="text" name=<%= ServiceParams.PARAM_MAIL %> style="width: 80%;margin-top:3px;"
-						value="<%=  request.getParameter("email") != null ? request.getParameter("email") : (app.getResponsable().getMail()!=null) ? app.getResponsable().getMail() : "" %>">											
-				</div>
-					
-				<div style="display: inline-block; width: 10%;margin: 3px;">
-					<!-- Label para la accesibilidad de la pagina -->
-					<label for="telf-resp" style="color: #404040">Telf. Contacto</label>
-				</div>
-				<div  style="display: inline-block; width: 30%;margin: 3px;">
-				
-				<input id="telf-resp" class="edit-txt" type="text" name=<%= ServiceParams.PARAM_TEL %> style="width: 80%;margin-top:3px;" 
-						value="<%=  request.getParameter("tel")!= null ? request.getParameter("tel") : (app.getResponsable().getTelephone() != null) ? app.getResponsable().getTelephone() : ""%>">									
-				</div>						
-			</div>
-							
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				
 					<div style="display: inline-block; width: 20%;margin: 3px;">
@@ -640,7 +579,46 @@
 			<% } %>	
 			</div>	
 			</div>					
+					<div   style="display: inline-block; width: 93%;margin: 10px;">
 				
+				
+				<% if (op != 0) { %>
+					
+				<label for="listadoAplicacionResponsables">Listado de responsables de la aplicaci&oacute;n</label>
+					<select multiple id="listadoAplicacionResponsables" name="listadoAplicacionResponsables">
+					<% for (User responsable : app.getResponsables()) { %>
+						<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getName() %></option>
+					<% } %>
+					</select>
+
+		
+				<% } else { %>
+				<fieldset  style="text-align: left;">
+				<legend>Responsables</legend>
+					<table width="100%"  border="1" style="margin: 0 auto;">
+						<thead>
+							<tr>
+							<label><th >Nombre</th></label>
+							<label><th>Correo Electr&oacute;nico</th></label>
+							<label><th>Tel&eacute;fono</th></label>
+							</tr>
+						</thead>
+						<% for (User user : app.getResponsables()) { %>
+							<tr>
+								<td align="center"><%= user.getSurname() + " " + user.getName() %></td>
+								<td align="center"><%= user.getMail() %></td>
+								<td align="center"><%= user.getTelephone() %></td>
+							</tr>
+						<% } %>
+					</table>	
+			</fieldset>
+				<% } %>
+							
+								
+					
+								
+			</div>	
+			
 										
 			<fieldset class="fieldset-clavefirma" >			
 		   	<div style="margin: auto;width: 60%;padding: 3px; margin-top: 5px;">
@@ -655,7 +633,7 @@
 		   		%>
 			   		
 			   		<div  style="display: inline-block; width: 35%;margin: 3px">
-			   			<input class="menu-btn" name="add-app-btn" type="submit" value="<%= msg %>" title="<%= tit %>" >
+			   			<input class="menu-btn" name="add-app-btn" type="button" onclick="selectResponsables()"  value="<%= msg %>" title="<%= tit %>" >
 			   		</div>
 		   		<% } %>
 			   					   		
@@ -664,53 +642,37 @@
 <% } %>
 		</form>
 		<script>
-		
-			
-		
+
 			// bloqueamos los campos en caso de que sea una operacion de solo lectura
-			document.getElementById("nombre-app").disabled = <%=  op == 0 %>
-			document.getElementById("email-resp").disabled = <%=  op == 0 %>
-			document.getElementById("nombre-resp").disabled = <%=  op == 0 %>
-			document.getElementById("telf-resp").disabled = <%=  op == 0 %>
-			document.getElementById("id-certificate").disabled = <%=  op == 0 %>
+			document.getElementById("nombre-app").disabled = <%=  op == 0 %>;
+			document.getElementById("id-certificate").disabled = <%=  op == 0 %>;
+			document.getElementById("cert-prin").disabled = <%=  op == 0 %>;
+			document.getElementById("cert-resp").disabled = <%=  op == 0 %>;
 			
 			
 			// bloqueamos los campos email, teléfono, y certificados y cambiamos de color
 			 if (op == 2) { 
 			
-			document.getElementById("email-resp").disabled = 'disabled';
-			document.getElementById("email-resp").style.background = '#F5F5F5';
-			document.getElementById("telf-resp").disabled = 'disabled';
-			document.getElementById("telf-resp").style.background  = '#F5F5F5';
-			document.getElementById("cert-prin").style.background = '#F5F5F5';
-			document.getElementById("cert-resp").style.background = '#F5F5F5';
-			
-			
-			
+				
+				document.getElementById("cert-prin").style.background = '#F5F5F5';
+				document.getElementById("cert-resp").style.background = '#F5F5F5';
+
 				// cambiamos el color a los campos bloqueados de edicion
 			 } else if (op == 0){
 				 document.getElementById("nombre-app").style.background = '#F5F5F5';
-					document.getElementById("email-resp").style.background = '#F5F5F5';
-					document.getElementById("nombre-resp").style.background = '#F5F5F5';
-					document.getElementById("telf-resp").style.background = '#F5F5F5';
 					document.getElementById("id-certificate").style.background = '#F5F5F5';
 					document.getElementById("cert-prin").style.background = '#F5F5F5';
 					document.getElementById("cert-resp").style.background = '#F5F5F5';
 					
 			 } else if (op == 1){
-					document.getElementById("email-resp").disabled = 'disabled';
-					document.getElementById("email-resp").style.background = '#F5F5F5';
-					document.getElementById("telf-resp").disabled = 'disabled';
-					document.getElementById("telf-resp").style.background  = '#F5F5F5';
+					
 					document.getElementById("cert-prin").style.background = '#F5F5F5';
 					document.getElementById("cert-resp").style.background = '#F5F5F5';
-									
-					
-			 }else{
-				 
+
+			 }
+			 else {
 				 document.getElementById("cert-prin").style.background = '#F5F5F5';
 					document.getElementById("cert-resp").style.background = '#F5F5F5';
-					
 			 }
 			
 			// funcion para deshabilitar una aplicacion
@@ -727,9 +689,48 @@
 				     text.style.display = "block";
 				   
 				  }
+			}
+				
+			 
+				
+			// funcion para añadir o eliminar responsables de una aplicacion
+			$(function () { 
+				function moveItems(origin, dest) {
+			    	$(origin).find(':selected').appendTo(dest);
 				}
 				
-	
+				$('#moverright').on('click', function () {
+				    moveItems('#listadoCompletoResponsables', '#listadoAplicacionResponsables');
+				});
+				
+				$('#moverleft').on('click', function () {
+				    moveItems('#listadoAplicacionResponsables', '#listadoCompletoResponsables');
+				});
+			});
+			
+			//funcion para seleccionar todos los datos del segundo select
+			
+
+				
+			function selectResponsables() {
+				var sel = $("#listadoAplicacionResponsables");
+				for (var i = 0; i < sel[0].length; ++i) {
+					sel[0].options[i].selected = true;
+				}
+				     
+			        $("#frmApplication").submit(); // Submit the form
+			    
+			
+				
+			}
+			
+			/* function selectResponsables() {
+				for (i = 0; i < document.form.test.options.length; i++) {
+					document.form.test.options[i].selected = true;
+				}
+				form.submit();
+			} */
+			
 		</script>
    	</div>
 </body>

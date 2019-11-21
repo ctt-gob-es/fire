@@ -108,6 +108,14 @@
 					<target>${jdk.version}</target>
 				</configuration>
 			</plugin>
+			
+			<!-- Comprobacion de seguridad de dependencias -->
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>5.2.2</version>
+			</plugin>
+			
 		</plugins>
 		
 		<resources>
@@ -120,5 +128,8 @@
 			</resource>
 		</resources>
 	</build>
+
+	
+	
 </project>
 

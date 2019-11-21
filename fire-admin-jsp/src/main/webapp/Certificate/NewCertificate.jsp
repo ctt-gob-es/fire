@@ -32,7 +32,7 @@
 	}
 
 	final String EMPTY = "";//$NON-NLS-1$
-	String id = request.getParameter("id-cert");//$NON-NLS-1$
+	String id = request.getParameter("id-certificate");//$NON-NLS-1$
 	String nameCert = request.getParameter("nombre-cert");//$NON-NLS-1$
 	final int op = Integer.parseInt(request.getParameter("op"));//$NON-NLS-1$
 	
@@ -127,8 +127,8 @@
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script>
 	/*Importante estas variables (requestTypeCount y requestType) deben estar declaradas antes que la llamada a ../resources/js/certificate.js*/
-	requestTypeCount="countRecordsCertApp&id-cert="+<%= id%>;
-	requestType="getRecordsCertApp&id-cert="+<%= id%>;
+	requestTypeCount="countRecordsCertApp&id-certificate="+<%= id%>;
+	requestType="getRecordsCertApp&id-certificate="+<%= id%>;
 	var op=<%= op%>;	
 	$(function() {
 	     $("input:file").change(function (event){
@@ -231,7 +231,7 @@
 			Los campos con [*] al menos uno es obligatorio
 		<%} %>
 		</p>
-			<form id="frmCertificate" method="POST" autocomplete="off" action="../newCert?op=<%= op%>&id-cert=<%= cer.getId() != null ? cer.getId() : EMPTY %>" enctype="multipart/form-data" onsubmit="isCert()">
+			<form id="frmCertificate" method="POST" autocomplete="off" action="../newCert?op=<%= op%>&id-certificate=<%= cer.getId() != null ? cer.getId() : EMPTY %>" enctype="multipart/form-data" onsubmit="isCert()">
 							
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				<div style="display: inline-block; width: 20%;margin: 3px;">
@@ -239,8 +239,8 @@
 						<label for="nombre-cer" style="color: #404040">* Nombre de certificado</label>
 				</div>
 				<div  style="display: inline-block; width: 78%;margin: 3px;">
-						<input id="nombre-cer" class="edit-txt" type="text" name="nombre-cer" style="width: 80%;margin-top:3px;" 
-						value="<%= request.getParameter("nombre-cert") != null ? request.getParameter("nombre-cert") : EMPTY %>"> 
+						<input id="nombre-cer" class="edit-txt" type="text" name="<%= ServiceParams.PARAM_NAME_CERT %>" style="width: 80%;margin-top:3px;" 
+						value="<%= nameCert != null ? nameCert : EMPTY %>"> 
 				</div>
 										
 			</div>				
@@ -254,21 +254,21 @@
 							<label for="fichero-firma-prin" style="color: #404040">[*] Certificado 1</label>
 						</div>				
 						<div  style="display: inline-block; width:52%;margin: 3px;">
-							<input id="fichero-firma-prin" type="file" name="fichero-firma-prin" accept=".cer"/>										
+							<input id="fichero-firma-prin" type="file" name="<%= ServiceParams.PARAM_CER_PRIN %>" accept=".cer"/>										
 						</div>
-						<%if(op == 2){ %>
-						<input type="hidden" id="b64CertPrin" name="b64CertPrin" value="<%= b64CertPrin%>">
+						<% if(op == 2){ %>
+						<input type="hidden" id="b64CertPrin" name="b64CertPrin" value="<%= b64CertPrin %>">
 						
 						<div  style="display: inline-block; width: 20%;margin:3px;">
 							<input id="cleanCertPrin-button" class="btn-borrar-cert" name="cleanCertPrin-button" 
 							type="button" value="Borrar" title="Borrar el certificado" onclick="cleanCertificate('fichero-firma-prin','cert-prin','b64CertPrin');" />
 						</div>
-						<%} %>	
+						<% } %>	
 					</div>											
 					<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
-						<%if (certDataPrincipal != null && !certDataPrincipal.isEmpty()) { %>
-							<p><%= certDataPrincipal%></p>							
-						<%}%>						
+						<% if (certDataPrincipal != null && !certDataPrincipal.isEmpty()) { %>
+							<p><%= certDataPrincipal %></p>							
+						<% } %>						
 					</div>
 				</div>
 				<div style="display: inline-block; width: 48%;margin: 3px;">
@@ -277,26 +277,26 @@
 							<label for="fichero-firma-resp"  style="color: #404040">[*] Certificado 2</label>
 						</div>
 						<div  style="display: inline-block; width: 52%;margin: 3px;">
-							<input id="fichero-firma-resp" type="file" name="fichero-firma-resp" accept=".cer"/>										
+							<input id="fichero-firma-resp" type="file" name="<%= ServiceParams.PARAM_CER_RESP %>" accept=".cer"/>										
 						</div>
-						<%if(op == 2){ %>
-						<input type="hidden" id="b64CertBkup" name="b64CertBkup" value="<%= b64CertBkup%>">
+						<% if(op == 2){ %>
+						<input type="hidden" id="b64CertBkup" name="<%= ServiceParams.PARAM_CERB64RESP %>" value="<%= b64CertBkup %>">
 							
 						<div  style="display: inline-block; width: 20%;margin: 3px;">						
 							<input id="cleanCertResp-button" class="btn-borrar-cert" name="cleanCertResp-button"
 							type="button" value="Borrar" title="Borrar el certificado" onclick="cleanCertificate('fichero-firma-resp','cert-resp','b64CertBkup')" />
 						</div>
-						<%} %>
+						<% } %>
 					</div>
 								
 					<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
-						<%if(certDataBkup != null && !certDataBkup.isEmpty()) { %>
+						<% if(certDataBkup != null && !certDataBkup.isEmpty()) { %>
 						
 							<p><%= certDataBkup %></p>						
-						<%}%>
+						<% } %>
 					</div>					
 				</div>			
-				<%}else{%>
+				<% }else{ %>
 				<div style="display: inline-block; width: 48%;margin: 3px;">
 					<div>
 						<div style="display: inline-block;width: 75%;">
@@ -304,18 +304,18 @@
 						</div>				
 									
 						<div  style="display: inline-block; width: 20%;margin:3px;">
-							<textarea style="display:none;" id="b64CertPrin" name="b64CertPrin"><%= b64CertPrin%></textarea>
-							<%if(certDataPrincipal != null && !certDataPrincipal.isEmpty()){ %>	
+							<textarea style="display:none;" id="b64CertPrin" name="<%= ServiceParams.PARAM_CERB64PRIM %>"><%= b64CertPrin %></textarea>
+							<% if (certDataPrincipal != null && !certDataPrincipal.isEmpty()){ %>	
 							<input id="CertPrincipal-button" class="btn-borrar-cert" name="add-usr-btn" type="button" value="Descargar .cer" 
 							title="Descargar certificado en fichero con formato .cer" onclick="downLoadCert('b64CertPrin','1')" />
-							<%}%>
+							<% } %>
 						</div>
 						
 					</div>											
 					<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
-						<%if(certDataPrincipal != null && !certDataPrincipal.isEmpty()){ %>
+						<% if(certDataPrincipal != null && !certDataPrincipal.isEmpty()){ %>
 							<p><%= certDataPrincipal %></p>							
-						<%}%>						
+						<% } %>						
 					</div>
 				</div>
 				<div style="display: inline-block; width: 48%;margin: 3px;">
@@ -324,25 +324,25 @@
 							<label for="cert-resp"  style="color: #404040">[*] Certificado 2</label>
 						</div>															
 						<div  style="display: inline-block; width: 20%;margin: 3px;">						
-							<textarea style="display:none;" id="b64CertBkup" name="b64CertBkup"><%= b64CertBkup%></textarea>
-							<%if(certDataBkup != null && !certDataBkup.isEmpty()){ %>	
+							<textarea style="display:none;" id="b64CertBkup" name="<%= ServiceParams.PARAM_CERB64RESP %>"><%= b64CertBkup %></textarea>
+							<% if(certDataBkup != null && !certDataBkup.isEmpty()){ %>	
 							<input id="CertBkup-button" class="btn-borrar-cert" name="add-usr-btn" type="button" value="Descargar .cer" title="Descargar certificado en fichero con formato .cer" onclick="downLoadCert('b64CertBkup','2')" />
-							<%}%>
+							<% } %>
 						</div>					
 					</div>				
 					<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 90%;height:8em;overflow-y: auto;margin-top:3px;resize:none">
-						<%if(certDataBkup != null && !"".equals(certDataBkup)){ %>
+						<% if(certDataBkup != null && !"".equals(certDataBkup)){ %>
 							<p><%= certDataBkup %></p>						
-						<%}%>
+						<% } %>
 					</div>					
 				</div>			
 				
-				<%} %>																							
+				<% } %>																							
 			</div>
-			<% 
+			<%
 		   	if (op > 0) {
-		   			final String msg = (op == 1 ) ? "Crear certificado" : "Guardar cambios";   //$NON-NLS-1$ //$NON-NLS-2$
-					final String tit= (op == 1 ) ? "Crea nuevo certificado" : "Guarda las modificaciones realizadas";//$NON-NLS-1$ //$NON-NLS-2$
+		   			final String msg = (op == 1 ) ? "Crear certificado" : "Guardar cambios";   
+					final String tit= (op == 1 ) ? "Crea nuevo certificado" : "Guarda las modificaciones realizadas";
 					
 		   	%>	
 			<fieldset class="fieldset-clavefirma" >			
@@ -364,7 +364,7 @@
 		<fieldset>
 			<legend>Aplicaciones</legend>
 			<div id="data" style="display: block-inline; text-align:center; overflow-y: auto;margin-top:3px;resize:none">
-				<h4>No hay Aplicaciones asociadas al certificado <%=nameCert%> </h4>		
+				<h4>No hay Aplicaciones asociadas al certificado <%= nameCert %> </h4>		
 			</div>
 
 		</fieldset>
@@ -376,7 +376,7 @@
 				</div>
 			</div>	
 		</fieldset>
-		<%} %>
+		<% } %>
 	
 		<script>
 			//bloqueamos los campos en caso de que sea una operacion de solo lectura
@@ -392,10 +392,10 @@
 				document.getElementById("cert-resp").style.background = '#F5F5F5';
 				
 			}
-					
+
 			// quitamos los espacios en blanco que se han agregado en el certificado
 			//document.getElementById("cert-prin").value = document.getElementById("cert-prin").value.trim();
-			if (<%= Boolean.parseBoolean(request.getParameter("error")) %>){ 
+			if (<%= Boolean.parseBoolean(request.getParameter("error")) %>){
 				alert('El certificado introducido no es correcto, por favor introduzca un certificado valido');
 				document.getElementById("fichero-firma-prin").focus();
 			}

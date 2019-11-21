@@ -76,12 +76,12 @@ $(document)
 							htmlTableBody = htmlTableBody + "<td>"+ JSONData.CertList[i].fec_alta+ "</td>";														
 							
 							htmlTableBody = htmlTableBody + "<td>";
-							htmlTableBody = htmlTableBody + "<a href='NewCertificate.jsp?id-cert=" + JSONData.CertList[i].id_certificado + "&op=0&nombre-cert="
+							htmlTableBody = htmlTableBody + "<a href='NewCertificate.jsp?id-certificate=" + JSONData.CertList[i].id_certificado + "&op=0&nombre-cert="
 									+ JSONData.CertList[i].nombre_cert + "' title='Visualizar'><img src='../resources/img/details_icon.png'/></a>";
-							htmlTableBody = htmlTableBody + "<a href='NewCertificate.jsp?id-cert=" + JSONData.CertList[i].id_certificado + "&op=2&nombre-cert="
+							htmlTableBody = htmlTableBody + "<a href='NewCertificate.jsp?id-certificate=" + JSONData.CertList[i].id_certificado + "&op=2&nombre-cert="
 									+ JSONData.CertList[i].nombre_cert + "' title='Editar'><img src='../resources/img/editar_icon.png'/></a>";
 							htmlTableBody = htmlTableBody + "<a href='#' title='Eliminar'><img src='../resources/img/delete_icon.png' onclick='return confirmar(\""
-									+ JSONData.CertList[i].nombre_cert+"\","+JSONData.CertList[i].id_certificado + ",\"../deleteCert?id-cert=\")'/></a>";
+									+ JSONData.CertList[i].nombre_cert+"\","+JSONData.CertList[i].id_certificado + ",\"../deleteCert?id-certificate=\")'/></a>";
 							htmlTableBody = htmlTableBody + "</td></tr>";
 
 							currentIndex++;
@@ -89,7 +89,7 @@ $(document)
 						$("#data").append(htmlTableHead + htmlTableBody + htmlTableFoot);
 
 					}
-
+					
 					function printApplicationsByCertificateTable(JSONData,
 							recordsToFetch) {
 
@@ -102,35 +102,44 @@ $(document)
 								"</thead><tbody>";
 						var htmlTableBody = "";
 						var htmlTableFoot = "</tbody></table>";
-
-						for (i = 0; i < recordsToFetch; ++i) {
-							htmlTableBody = htmlTableBody
-									+ "<tr><td>"
-									+ dataUndefined(JSONData.AppList[i].nombre)
-									+ "</td><td>"
-									+ dataUndefined(JSONData.AppList[i].id)
-									+ "</td><td>"
-									+ dataUndefined(JSONData.AppList[i].nombre_responsable)
-									+ "<br>";
-
-							if (JSONData.AppList[i].correo != null
-									&& dataUndefined(JSONData.AppList[i].correo) != ""
-									&& JSONData.AppList[i].correo != "") {
-								htmlTableBody = htmlTableBody
-										+ "<a href='mailto://"
-										+ JSONData.AppList[i].correo + "'>"
-										+ JSONData.AppList[i].correo + "</a>";
+						var lastAppId = null;
+			        	var newAppList = [];
+			        	
+			        	for (var i = 0; i < JSONData.AppList.length; i++) {
+			        		
+			        		if (JSONData.AppList[i].id == lastAppId) {
+			        			var lastApp = newAppList[newAppList.length - 1];
+			        			lastApp.nombre_responsable[lastApp.nombre_responsable.length] = JSONData.AppList[i].nombre_responsable; 
+			        		}
+			        		else {
+			        			newAppList[newAppList.length] = JSONData.AppList[i];
+								var responsable = newAppList[newAppList.length - 1].nombre_responsable;
+			        			newAppList[newAppList.length - 1].nombre_responsable = [];
+			        			newAppList[newAppList.length - 1].nombre_responsable[0] = responsable;
+									lastAppId = JSONData.AppList[i].id;
+			        		}
+			        	}
+			        		
+			        	
+			        	
+			        	
+			        	for (i = 0; i < Math.min(newAppList.length, recordsToFetch); ++i){
+			        		htmlTableBody = htmlTableBody + "<tr><td>" + dataUndefined(newAppList[i].nombre) + "</td>";
+			        		
+			        		htmlTableBody = htmlTableBody +	"<td>" + dataUndefined(newAppList[i].id) + "</td>";
+			        		htmlTableBody = htmlTableBody + "<td>";
+			        		
+			        		var responsablesText = "";
+			        		for (j = 0; j < newAppList[i].nombre_responsable.length; j++){
+			        			
+			        			responsablesText = responsablesText + dataUndefined(newAppList[i].nombre_responsable[j]);
+			    				if (j < newAppList[i].nombre_responsable.length - 1) {
+			    					responsablesText = responsablesText + "</br>";
+			    				}
 							}
-							if (JSONData.AppList[i].telefono != null
-									&& dataUndefined(JSONData.AppList[i].telefono) != ""
-									&& JSONData.AppList[i].telefono != "") {
-								htmlTableBody = htmlTableBody
-										+ "(<a href='tel://"
-										+ JSONData.AppList[i].telefono + "'>"
-										+ JSONData.AppList[i].telefono
-										+ "</a>)";
-							}
-							
+			        		
+			        		
+			        		htmlTableBody = htmlTableBody + responsablesText + "</td>";
 //							fecAlta = new Date(JSONData.AppList[i].alta);							
 //							htmlTableBody = htmlTableBody + "</td><td>"+ convertDateFormat(fecAlta) + "</td>";
 							htmlTableBody = htmlTableBody + "</td><td>"+ JSONData.AppList[i].alta+ "</td>";
@@ -166,7 +175,7 @@ $(document)
 
 	function confirmar(nombreCert, idCert, url) {	
 	
-		$.get("certificate?requestType=countRecordsCertApp&id-cert=" + idCert ,function(data){			
+		$.get("certificate?requestType=countRecordsCertApp&id-certificate=" + idCert ,function(data){			
 			var JSONData = JSON.parse(data);
 			totalRecords = JSONData.count;
 

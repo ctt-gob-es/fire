@@ -156,7 +156,7 @@
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
 					
-						<input id="login-usr" class="edit-txt" type="text" name="login-usr"   style="width: 80%;margin-top:3px;" 
+						<input id="login-usr" maxlength="9" class="edit-txt" type="text" name="<%=ServiceParams.PARAM_LOGINAME%>"  onBlur="onInputDniCallback(this.value)" style="width: 80%;margin-top:3px;" 
 						value="<%=user.getUserName() != null ? user.getUserName(): EMPTY%>"> 						
 						</div>
 						
@@ -169,8 +169,8 @@
 						</div>
 				</div>									
 			<%
-			}else{
-				%>
+													}else{
+												%>
 				<div style="display: inline" width: 100%;padding: 3px;">		
 				<div style="display: inline-block; width: 20%;margin: 3px;">
 					<!-- Label para la accesibilidad de la pagina -->
@@ -179,7 +179,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 				
-					<input id="login-usr" class="edit-txt" type="text" name="login-usr"   style="width: 80%;margin-top:3px;" 
+					<input id="login-usr" class="edit-txt" type="text" name="<%=ServiceParams.PARAM_LOGINAME%>"   style="width: 80%;margin-top:3px;" 
 					value="<%=user.getUserName() != null ? user.getUserName(): EMPTY%>"> 						
 					</div>
 					</div>
@@ -188,7 +188,7 @@
 			
 			if(op==1){
 			%>
-			<div style="margin: auto;width: 100%;padding: 3px;">	
+				<div style="margin: auto;width: 100%;padding: 3px;">	
 					<div style="display: inline-block; width: 20%;margin: 3px;">
 						<!-- Label para la accesibilidad de la pagina -->
 						<label for="passwd-usr" style="color: #404040" >* Contraseña</label>
@@ -202,7 +202,7 @@
 						<label for="passwd-usr-copy" style="color: #404040" >* Repetir contraseña</label>
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
-						<input id="passwd-usr-copy" type="password" class="edit-txt"  name="passwd-usr-copy" style="width: 80%;margin-top:3px;"
+						<input id="passwd-usr-copy" type="password" class="edit-txt" style="width: 80%;margin-top:3px;"
 						value="">
 					</div>		
 				</div>							
@@ -216,7 +216,7 @@
 						<label for="passwd-usr" style="color: #404040" >* Contraseña</label>
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
-						<input id="passwd-usr" type="password" class="edit-txt"  name="passwd-usr" style="width: 80%;margin-top:3px;"
+						<input id="passwd-usr" type="password" class="edit-txt"  name="<%=ServiceParams.PARAM_PASSWD%>" style="width: 80%;margin-top:3px;"
 						value="">
 					</div>
 					<div style="display: inline-block; width: 10%;margin: 3px;">
@@ -224,7 +224,7 @@
 						<label for="passwd-usr-copy" style="color: #404040" >* Repetir contraseña</label>
 					</div>
 					<div  style="display: inline-block; width: 30%;margin: 3px;">
-						<input id="passwd-usr-copy" type="password" class="edit-txt"  name="passwd-usr-copy" style="width: 80%;margin-top:3px;"
+						<input id="passwd-usr-copy" type="password" class="edit-txt" style="width: 80%;margin-top:3px;"
 						value="">
 					</div>		
 				</div>							
@@ -237,7 +237,7 @@
 					<label for="usr-name" style="color: #404040">* Nombre </label>
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
-						<input id="usr-name" class="edit-txt" type="text" name="usr-name" style="width: 80%;margin-top:3px;" 
+						<input id="usr-name" class="edit-txt" type="text" name="<%=ServiceParams.PARAM_USER_NAME%>" style="width: 80%;margin-top:3px;" 
 						value="<%=user.getName()!= null ? user.getName(): EMPTY%>"> 
 				</div>
 					
@@ -246,7 +246,7 @@
 					<label for="usr-surname" style="color: #404040">* Apellidos</label>
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
-					<input id="usr-surname" class="edit-txt" type="text" name="usr-surname" style="width: 80%;margin-top:3px;" 
+					<input id="usr-surname" class="edit-txt" type="text" name="<%=ServiceParams.PARAM_USERSURNAME%>" style="width: 80%;margin-top:3px;" 
 						value="<%=user.getSurname()!= null ? user.getSurname(): EMPTY%>"> 
 				</div>						
 			</div>	
@@ -257,7 +257,7 @@
 						<label for="email" style="color: #404040">* Correo electrónico</label>
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
-						<input id="email" class="edit-txt" type="text" name="email" style="width: 80%;margin-top:3px;" 
+						<input id="email" class="edit-txt" type="text" name="<%=ServiceParams.PARAM_USEREMAIL%>" style="width: 80%;margin-top:3px;" 
 						value="<%=user.getMail() != null ? user.getMail(): EMPTY%>"> 
 				</div>
 					
@@ -266,7 +266,7 @@
 					<label for="telf-contact" style="color: #404040">Telf. Contacto</label>
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
-					<input id="telf-contact" class="edit-txt" type="text" name="telf-contact" style="width: 80%;margin-top:10px;" 
+					<input id="telf-contact" class="edit-txt" type="text" name="<%=ServiceParams.PARAM_USERTELF%>" style="width: 80%;margin-top:10px;" 
 						value="<%=user.getTelephone() != null ? user.getTelephone(): EMPTY%>"> 
 				</div>						
 			</div>	
@@ -351,6 +351,7 @@
 			}
 			%>
 			document.getElementById("role-usr").addEventListener("change", roleSelection);
+			//document.getElementById("login-usr").addEventListener("resize", onInputDniCallback);
 			document.getElementById("login-usr").addEventListener("input", onInputDniCallback);
 			
 			
@@ -443,11 +444,11 @@
 				document.getElementById("login-usr-img").innerHTML='<img src="' + imagen + '" width="40" height="30" alt=""/>';
 
 			}else{
-				imagen = "../resources/img/incorrecto.png";
+				imagen = "../resources/img/sin_entrada_icon.png";
 				mensaje = "DNI incorrecto";
-				//color = '#F08080';
-				document.getElementById("msg").innerHTML = '';
-				document.getElementById("login-usr-img").innerHTML='';
+				color = '#F08080';
+				document.getElementById("msg").innerHTML = mensaje;
+				document.getElementById("login-usr-img").innerHTML='<img src="' + imagen + '" width="40" height="30" alt=""/>';
 			}
 			}
 			

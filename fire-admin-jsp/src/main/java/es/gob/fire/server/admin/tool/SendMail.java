@@ -44,9 +44,8 @@ public class SendMail {
     	final Mailer mailer = MailerBuilder
     	          .withSMTPServer(ConfigManager.getMailHost(), ConfigManager.getMailPort(), ConfigManager.getMailUsername(), ConfigManager.getMailPassword())
     	          .withTransportStrategy(TransportStrategy.SMTP_TLS)
-    	          .withSessionTimeout((int) ConfigManager.getExpiration())
-    	          .clearEmailAddressCriteria() // turns off email validation
-    	          //.withProperty("mail.smtp.sendpartial", true) //$NON-NLS-1$
+    	          .withSessionTimeout(new Integer(ConfigManager.getExpiration()))
+    	          .clearEmailAddressCriteria() // desactiva la validación de correo electrónico
     	          .buildMailer();
 
     	mailer.sendMail(email);

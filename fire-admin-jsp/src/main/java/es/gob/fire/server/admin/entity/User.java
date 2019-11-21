@@ -1,6 +1,7 @@
 package es.gob.fire.server.admin.entity;
 
 import java.sql.Date;
+import java.util.List;
 
 import es.gob.fire.server.admin.service.RolePermissions;
 
@@ -21,7 +22,7 @@ public class User {
 	private Date startdate;
 	private boolean root;
 	private CertificateFire certificate;
-	private Application responsibleName;
+	private List<Application> responsibles;
 
 
 
@@ -42,7 +43,7 @@ public class User {
 		this.role = 0;
 		this.startdate = null;
 		this.root = false;
-		this.responsibleName = null;
+		this.responsibles = null;
 		this.certificate = null;
 
 
@@ -262,15 +263,15 @@ public class User {
 	  * Obtiene el usuario responsable de la aplicaci&oacute;n
 	  * @return responsibleName nombre del responsable
 	  */
-	   public Application getResponsibleName() {
-		return this.responsibleName;
+	   public List<Application> getResponsibleName() {
+		return this.responsibles;
 	}
 	   /**
 	    * Establece el usuario responsable (tipo de usuario responsable en el sistema)
 	    * @param responsibleName
 	    */
-	   public void setResponsibleName(final Application responsibleName) {
-		this.responsibleName = responsibleName;
+	   public void setResponsibles(final List<Application> responsibles) {
+		this.responsibles = responsibles;
 	}
 	  /**
 	   *  Obtiene el certificado de la aplicaci&oacute;n

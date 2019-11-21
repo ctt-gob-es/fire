@@ -12,7 +12,7 @@ public class ServiceParams {
 	public static final String PARAM_ENABLED = "enabled"; //$NON-NLS-1$
 
 	/***Par&aacute;metro que indica el nombre del responsable de la aplicaci&oacute;n */
-	public static final String PARAM_RESP = "nombre-resp"; //$NON-NLS-1$
+	public static final String PARAM_RESPONSABLES = "listresp"; //$NON-NLS-1$
 
 	public static final String PARAM_CERTID = "id-certificate"; //$NON-NLS-1$
 
@@ -84,7 +84,7 @@ public class ServiceParams {
 	public static final String PARAM_IDUSER = "idUser";//$NON-NLS-1$
 
 	/***Par&aacute;metro que indica el login del usuario */
-	public static final String PARAM_LOGNAME = "login-usr"; //$NON-NLS-1$
+	public static final String PARAM_LOGINAME = "login-usr"; //$NON-NLS-1$
 
 	/***Par&aacute;metro que indica el password del usuario */
 	public static final String PARAM_PASSWD = "passwd-usr"; //$NON-NLS-1$
@@ -106,6 +106,8 @@ public class ServiceParams {
 
 	/***Par&aacute;metro que indica el tel&eacute; del usuario */
 	public static final String PARAM_USERTELF = "telf-contact";//$NON-NLS-1$
+	/***Par&aacute;metro que indica el tel&eacute; del usuario */
+	public static final String PARAM_FECHAALTA = "fec_alta";//$NON-NLS-1$
 
 	/***Par&aacute;metro que indica el hash del algoritmo */
 	public static final String SHA_2 = "SHA-256"; //$NON-NLS-1$

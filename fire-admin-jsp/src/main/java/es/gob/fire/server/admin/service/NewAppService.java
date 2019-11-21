@@ -44,10 +44,8 @@ public class NewAppService extends HttpServlet {
 
 		req.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
-
 		// Obtenemos los parametros enviados del formulario junto con el Certificado
 		final Parameters params = getParameters(req);
-
 
 		try {
 			final String id = params.getId();
@@ -55,7 +53,8 @@ public class NewAppService extends HttpServlet {
 				throw new IllegalArgumentException("El id del usuario es: " + id); //$NON-NLS-1$
 			}
 		} catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de usuario no soportado: " + ServiceParams.PARAM_APPID); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING,
+					"Se ha proporcionado un identificador de usuario no soportado: " + ServiceParams.PARAM_APPID); //$NON-NLS-1$
 			resp.sendRedirect("Application/AdminMainPage.jsp"); //$NON-NLS-1$
 			return;
 		}
@@ -69,15 +68,15 @@ public class NewAppService extends HttpServlet {
 				throw new IllegalArgumentException("Operacion no soportada: " + op); //$NON-NLS-1$
 			}
 		} catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Se ha proporcionado un identificador de operacion no soportado: " + ServiceParams.PARAM_OP); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING,
+					"Se ha proporcionado un identificador de operacion no soportado: " + ServiceParams.PARAM_OP); //$NON-NLS-1$
 			resp.sendRedirect("Application/AdminMainPage.jsp?op=alta&r=0&ent=app"); //$NON-NLS-1$
 			return;
 		}
 
-		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$;
+		final String stringOp = op == 1 ? "alta" : "edicion"; //$NON-NLS-1$//$NON-NLS-2$ ;
 
-
-		if (params.getName() == null || params.getRes() == null) {
+		if (params.getName() == null || params.getResponsables() == null) {
 			LOGGER.log(Level.SEVERE,
 					"No se han proporcionado todos los datos requeridos para la aplicacion (nombre y responsable)"); //$NON-NLS-1$
 			resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -86,29 +85,73 @@ public class NewAppService extends HttpServlet {
 
 		// Nueva aplicacion
 		if (op == 1) {
+			String idAplicacion;
 			LOGGER.info("Alta de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
 			try {
-				AplicationsDAO.createApplication(params.getName(), params.getRes(), params.getIdcertificate(),params.isHabilitado());
+				idAplicacion = AplicationsDAO.createApplication(params.getName(), params.getIdcertificate(),
+						params.isHabilitado());
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
+				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
+			}
+
+			try {
+				AplicationsDAO.createApplicationResponsable(idAplicacion, params.getResponsables());
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
 				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
 		}
+
 		// Editar aplicacion
 		else if (op == 2) {
 			LOGGER.info("Edicion de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
 			try {
 
-			 final boolean enable = params.isHabilitado();
-				AplicationsDAO.updateApplication(
-						params.getId(),
-						params.getName(),
-						params.getRes(),
-						params.getIdcertificate(),
+				final boolean enable = params.isHabilitado();
+				AplicationsDAO.updateApplication(params.getId(), params.getName(), params.getIdcertificate(),
 						params.isHabilitado());
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la actualizacion de la aplicacion", e); //$NON-NLS-1$
+				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
+			}
+
+			//primero eliminamos antes de actualizar y despues volvemos a crear
+
+			final String id = req.getParameter(ServiceParams.PARAM_APPID);
+
+			boolean isOk = true;
+			if (id == null) {
+				isOk = false;
+			} else {
+				try {
+					AplicationsDAO.removeApplication(id);
+				} catch (final Exception e) {
+					LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
+					resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
+					return;
+				}
+
+			}
+
+			String idAplicacion;
+			LOGGER.info("Alta de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
+			try {
+				idAplicacion = AplicationsDAO.createApplication(params.getName(), params.getIdcertificate(),
+						params.isHabilitado());
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
+				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
+			}
+
+			try {
+				AplicationsDAO.createApplicationResponsable(idAplicacion, params.getResponsables());
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
 				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
@@ -132,7 +175,18 @@ public class NewAppService extends HttpServlet {
 		final String disabledParam = req.getParameter(ServiceParams.PARAM_ENABLED);
 		final boolean enabled = disabledParam == null;
 
-		final String nombreResp = req.getParameter(ServiceParams.PARAM_RESP);
+//		System.out.println(" ==== LISTA DE PARAMETROS:");
+//		final Enumeration<String> paramNames = req.getParameterNames();
+//		while (paramNames.hasMoreElements()) {
+//			System.out.println(paramNames.nextElement());
+//		}
+//		System.out.println(" =========================");
+
+
+		final String[] nombreResp = req.getParameterValues(ServiceParams.PARAM_RESPONSABLES);
+
+		System.out.println(nombreResp);
+
 		final String idCertificate = req.getParameter(ServiceParams.PARAM_CERTID);
 		final String mail = req.getParameter(ServiceParams.PARAM_MAIL);
 		final String telf = req.getParameter(ServiceParams.PARAM_TEL);
@@ -152,8 +206,8 @@ public class NewAppService extends HttpServlet {
 		if (nombreApp != null && !nombreApp.isEmpty()) {
 			params.setName(nombreApp);
 		}
-		if (nombreResp != null && !nombreResp.isEmpty()) {
-			params.setRes(nombreResp);
+		if (nombreResp != null && nombreResp.length > 0) {
+			params.setResponsables(nombreResp);
 		}
 		if (idCertificate != null && !idCertificate.isEmpty()) {
 			params.setIdcertificate(idCertificate);
@@ -174,14 +228,12 @@ public class NewAppService extends HttpServlet {
 
 		private String id;
 		private String name;
-		private String res;
+		private String[] responsables;
 		private String email;
 		private String tel;
 		private String idcertificate;
 		private boolean habilitado;
 		private int op;
-
-
 
 
 		public String getId() {
@@ -206,18 +258,20 @@ public class NewAppService extends HttpServlet {
 		}
 
 		/**
-		 * Obtiene el nombre del responsable
-		 * @return
+		 * Recupera el nombre del responsable de la aplicaci&oacute;n.
+		 * @return Nombre del responsable de la aplicaci&oacute;n.
 		 */
-		String getRes() {
-			return this.res;
+		public String[] getResponsables() {
+			return this.responsables;
 		}
+
+
 		/**
-		 *  Establece el nombre del responsable
-		 * @param res
+		 * Establece el nombre del responsable de la aplicaci&oacute;n.
+		 * @param responsable Nombre del responsable de la aplicaci&oacute;n.
 		 */
-		void setRes(final String res) {
-			this.res = res;
+		public void setResponsables(final String[] responsables) {
+			this.responsables = responsables;
 		}
 		/**
 		 * Obtiene el e-mail del responsable

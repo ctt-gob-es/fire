@@ -38,52 +38,76 @@ $(document).ready(function(){
                
             });
             
-            
+            /*prueba de carlos raboso*/
             /*MOSTRAMOS POR PANTALLA LA CARGA DE TODAS LAS APLICACIONES*/
         /********************** SIN PAGINACIÓN FIN*******************************/
-        function printApplicationTable(JSONData, recordsToFetch){
+        function printApplicationTable(jsonData, recordsToFetch){
         
         	var htmlTableHead = "<table id='appTable' class='admin-table'>"
         			+ "<thead>" + "<tr>" + "<td>Aplicaci&oacute;n</td>"
-        			
         			+ "<td>ID</td>" + "<td>Responsable</td>"
         			+ "<td>Fecha Alta</td>"
         			+ "<td>Estado</td>"
         			+ "<td id='acciones'>Acciones</td>"
-        			+ "</tr>" + "</thead><tbody>";
+        			+ "</tr>" + "</thead>";
         	var htmlTableBody = "";
-        	var htmlTableFoot = "</tbody></table>";
+        	var htmlTableFoot = "</table>";
         	
-   		        		
-        	for(i = 0; i < recordsToFetch; ++i){
-        		htmlTableBody = htmlTableBody + "<tr><td>" + dataUndefined(JSONData.AppList[i].nombre) + "</td>";
+        	var lastAppId = null;
+        	var newAppList = [];
+        	
+        	for (var i = 0; i < jsonData.AppList.length; i++) {
         		
-        		htmlTableBody = htmlTableBody +	"<td>" + dataUndefined(JSONData.AppList[i].id) + "</td>";
-        		htmlTableBody = htmlTableBody + "<td>" + dataUndefined(JSONData.AppList[i].nombre_responsable) + "</td>"
-        		
-        		if ( JSONData.AppList[i].correo != null && dataUndefined(JSONData.AppList[i].correo) != "" && JSONData.AppList[i].correo != "") { 
-        			htmlTableBody=htmlTableBody + "<a href='mailto://" + JSONData.AppList[i].correo + "'>" + JSONData.AppList[i].correo + "</a>";
-        		} 
-        		if (JSONData.AppList[i].telefono != null && dataUndefined(JSONData.AppList[i].telefono) != "" && JSONData.AppList[i].telefono != "") { 
-        			htmlTableBody=htmlTableBody + "(<a href='tel://" + JSONData.AppList[i].telefono + "'>" + JSONData.AppList[i].telefono + "</a>)";
+        		if (jsonData.AppList[i].id == lastAppId) {
+        			var lastApp = newAppList[newAppList.length - 1];
+        			lastApp.nombre_responsable[lastApp.nombre_responsable.length] = jsonData.AppList[i].nombre_responsable; 
         		}
-
-        		htmlTableBody = htmlTableBody + "</td><td>" + JSONData.AppList[i].alta + "</td>";
-        		if (JSONData.AppList[i].habilitado){  
-        			htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(JSONData.AppList[i].habilitado) + '"><img  class = "habilitado" src="../resources/img/comprobado_icon.png"/></td>'
+        		else {
+        			newAppList[newAppList.length] = jsonData.AppList[i];
+					var responsable = newAppList[newAppList.length - 1].nombre_responsable;
+        			newAppList[newAppList.length - 1].nombre_responsable = [];
+        			newAppList[newAppList.length - 1].nombre_responsable[0] = responsable;
+						lastAppId = jsonData.AppList[i].id;
+        		}
+        	}
+        		
+        	
+        	
+        	
+        	for (i = 0; i < Math.min(newAppList.length, recordsToFetch); ++i){
+        		htmlTableBody = htmlTableBody + "<tr><td>" + dataUndefined(newAppList[i].nombre) + "</td>";
+        		
+        		htmlTableBody = htmlTableBody +	"<td>" + dataUndefined(newAppList[i].id) + "</td>";
+        		htmlTableBody = htmlTableBody + "<td>";
+        		
+        		var responsablesText = "";
+        		for (j = 0; j < newAppList[i].nombre_responsable.length; j++){
+        			
+        			responsablesText = responsablesText + dataUndefined(newAppList[i].nombre_responsable[j]);
+    				if (j < newAppList[i].nombre_responsable.length - 1) {
+    					responsablesText = responsablesText + "</br>";
+    				}
+				}
+        		
+        		
+        		htmlTableBody = htmlTableBody + responsablesText + "</td>";
+        		htmlTableBody = htmlTableBody + "<td>" + newAppList[i].alta + "</td>";
+        		if (newAppList[i].habilitado){  
+        			htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(newAppList[i].habilitado) + '"><img  class = "habilitado" src="../resources/img/comprobado_icon.png"/></td>'
         		} else {
-        			htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(JSONData.AppList[i].habilitado) + '"><img  class = "deshabilitado" src="../resources/img/sin_entrada_icon.png"/></td>'
+        			htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(newAppList[i].habilitado) + '"><img  class = "deshabilitado" src="../resources/img/sin_entrada_icon.png"/></td>'
         		}
 
         		htmlTableBody = htmlTableBody + "<td>";
         		
-        		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?id-app=" + JSONData.AppList[i].id + "&op=0' title='Visualizar'><img  src='../resources/img/details_icon.png'/></a>";
-        		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?id-app=" + JSONData.AppList[i].id + "&op=2' title='Editar'><img src='../resources/img/editar_icon.png'/></a>";        		
-        		htmlTableBody = htmlTableBody + "<a href='../deleteApp?id-app=" + JSONData.AppList[i].id + "' title='Eliminar'><img src='../resources/img/delete_icon.png' onclick='return confirmar(\"" + JSONData.AppList[i].nombre + "\")'/></a>";     
+        		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?id-app=" + newAppList[i].id + "&op=0' title='Visualizar'><img  src='../resources/img/details_icon.png'/></a>";
+        		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?id-app=" + newAppList[i].id + "&op=2' title='Editar'><img src='../resources/img/editar_icon.png'/></a>";        		
+        		htmlTableBody = htmlTableBody + "<a href='../deleteApp?id-app=" + newAppList[i].id + "' title='Eliminar'><img src='../resources/img/delete_icon.png' onclick='return confirmar(\"" + newAppList[i].nombre + "\")'/></a>";     
         		
         		htmlTableBody = htmlTableBody + "</td></tr>"; 
         		
         		currentIndex++;
+        		
         	}
         	$("#data").append(htmlTableHead + htmlTableBody + htmlTableFoot); 
         	
@@ -150,9 +174,9 @@ $(document).ready(function(){
 	 			ok = false;
 	 		}
 	 		
-	 		if ($("#nombre-resp").val() == "" ){
-	 			$('label[for=nombre-resp]').css({color:'red'});
-				$('#nombre-resp').css({backgroundColor:'#fcc'});
+	 		if ($("#listresp").val() == "" ){
+	 			$('label[for=listresp]').css({color:'red'});
+				$('#listresp').css({backgroundColor:'#fcc'});
 	 			e.preventDefault();
 	 			msg = msg + "El nombre del responsable no puede estar vacío\n";		
 	 			ok = false;

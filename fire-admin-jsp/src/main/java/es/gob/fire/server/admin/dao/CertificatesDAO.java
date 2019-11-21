@@ -397,7 +397,7 @@ public class CertificatesDAO {
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INSERT_CERTIFICATE);
 
 		st.setString(1, nombre);
-		st.setDate(2, new Date(new java.util.Date().getTime()));
+		st.setTimestamp(2, new Timestamp(new java.util.Date().getTime()));
 		st.setString(3, certPrincipal);
 		st.setString(4, certBackup);
 		st.setString(5, huellaPrincipal);

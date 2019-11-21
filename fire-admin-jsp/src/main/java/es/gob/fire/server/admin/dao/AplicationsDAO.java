@@ -19,6 +19,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,40 +58,44 @@ public class AplicationsDAO {
 
 	private static final String STATEMENT_SELECT_CONFIG_VALUE = "SELECT valor FROM tb_configuracion WHERE parametro = ?"; //$NON-NLS-1$
 
-	private static final String STATEMENT_SELECT_APPLICATIONS = "SELECT tb_app.id, tb_app.nombre, tb_usu.nombre, tb_usu.apellidos, tb_app.fecha_alta, tb_app.fk_certificado, tb_app.habilitado  \r\n" +
-			"FROM tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu \r\n" +
-			"WHERE tb_app.fk_responsable = tb_usu.id_usuario ORDER BY tb_app.nombre"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_APPLICATIONS = "SELECT tb_app.id, tb_app.nombre, tb_usu.nombre, tb_usu.apellidos, tb_app.fecha_alta, tb_app.fk_certificado, tb_app.habilitado " + //$NON-NLS-1$
+			"FROM tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu, tb_responsable_de_aplicaciones AS tb_resapp " + //$NON-NLS-1$
+			"WHERE  tb_usu.id_usuario = tb_resapp.id_responsables  AND tb_app.id = tb_resapp.id_aplicaciones ORDER BY tb_app.nombre"; //$NON-NLS-1$
 
-	private static final String STATEMENT_SELECT_APPLICATIONS_PAG = "SELECT id, nombre, fk_responsable, fecha_alta, fk_certificado, habilitado  FROM tb_aplicaciones ORDER BY nombre limit ?,?"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_APPLICATIONS_PAG = "SELECT id, nombre, fecha_alta, fk_certificado, habilitado  FROM tb_aplicaciones ORDER BY nombre limit ?,?"; //$NON-NLS-1$
 
 	private static final String ST_SELECT_APPLICATIONS_BYCERT = "SELECT tb_app.id, tb_app.nombre, tb_app.fecha_alta,tb_usu.nombre, tb_usu.apellidos, tb_app.fk_certificado " //$NON-NLS-1$
-	       + "FROM tb_certificados AS tb_cert, tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu " //$NON-NLS-1$
-	       + "WHERE tb_app.fk_responsable = tb_usu.id_usuario AND tb_app.fk_certificado = tb_cert.id_certificado and tb_cert.id_certificado=? ORDER BY tb_app.nombre "; //$NON-NLS-1$
+	       + "FROM tb_certificados AS tb_cert, tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu, tb_responsable_de_aplicaciones AS tb_resapp " //$NON-NLS-1$
+	       + "WHERE tb_usu.id_usuario = tb_resapp.id_responsables  AND tb_app.id = tb_resapp.id_aplicaciones AND tb_app.fk_certificado = tb_cert.id_certificado and tb_cert.id_certificado=? ORDER BY tb_app.nombre "; //$NON-NLS-1$
 
-	private static final String STATEMENT_SELECT_APPLICATIONS_COUNT = "SELECT count(*) FROM tb_aplicaciones"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_APPLICATIONS_COUNT = "SELECT count(*) FROM tb_responsable_de_aplicaciones"; //$NON-NLS-1$
 
 	private static final String ST_SELECT_APPLICATIONS_COUNT_BYCERT = "SELECT count(*) FROM tb_aplicaciones a, tb_certificados c where a.fk_certificado=c.id_certificado and c.id_certificado=?"; //$NON-NLS-1$
 
-	private static final String STATEMENT_INSERT_APPLICATION = "INSERT INTO tb_aplicaciones(id, nombre, fk_responsable,  fecha_alta,fk_certificado,habilitado ) VALUES (?, ?, ?, ?, ?,?)"; //$NON-NLS-1$
+	private static final String STATEMENT_INSERT_APPLICATION = "INSERT INTO tb_aplicaciones(id, nombre,  fecha_alta,fk_certificado,habilitado ) VALUES (?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 	private static final String STATEMENT_REMOVE_APPLICATION = "DELETE FROM tb_aplicaciones WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String STATEMENT_UPDATE_APPLICATION = "UPDATE tb_aplicaciones SET nombre=?, fk_responsable = ?,  fk_certificado=?, habilitado=?  WHERE id = ?";//$NON-NLS-1$
+	private static final String STATEMENT_UPDATE_APPLICATION = "UPDATE tb_aplicaciones SET nombre=?,  fk_certificado=?, habilitado=?  WHERE id = ?";//$NON-NLS-1$
 
 	private static final String KEY_ADMIN_PASS = "admin_pass"; //$NON-NLS-1$
 
-	private static final String STATEMENT_SELECT_APPLICATION_INFO = "SELECT tb_app.id, tb_app.nombre, tb_app.fecha_alta,tb_app.habilitado, " //$NON-NLS-1$
-			+ "tb_usu.id_usuario, tb_usu.nombre_usuario, tb_usu.nombre, tb_usu.apellidos, tb_usu.correo_elec, tb_usu.telf_contacto, tb_cert.id_certificado, tb_cert.nombre_cert, tb_cert.cert_principal, tb_cert.cert_backup " //$NON-NLS-1$
-			+ "FROM tb_certificados AS tb_cert, tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu " //$NON-NLS-1$
-			+ "WHERE tb_app.fk_responsable = tb_usu.id_usuario AND tb_app.fk_certificado = tb_cert.id_certificado AND tb_app.id = ?"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_APPLICATION_INFO = "SELECT tb_app.id, tb_app.nombre, tb_app.fecha_alta,tb_app.habilitado, tb_usu.id_usuario, tb_usu.nombre_usuario, tb_usu.nombre, \r\n" +  //$NON-NLS-1$
+						" tb_usu.apellidos, tb_usu.correo_elec, tb_usu.telf_contacto, tb_cert.id_certificado, tb_cert.nombre_cert, tb_cert.cert_principal, tb_cert.cert_backup\r\n" +  //$NON-NLS-1$
+						" FROM tb_certificados AS tb_cert, tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu, tb_responsable_de_aplicaciones AS tb_resapp\r\n" +  //$NON-NLS-1$
+						" WHERE tb_usu.id_usuario = tb_resapp.id_responsables AND tb_app.id = tb_resapp.id_aplicaciones AND tb_app.fk_certificado = tb_cert.id_certificado AND tb_app.id = ? ";  //$NON-NLS-1$
 
-	private static final String ST_SELECT_APPLICATIONS_BYUSERS = "SELECT tb_app.id, tb_app.nombre,tb_app.fk_responsable, tb_app.fecha_alta " //$NON-NLS-1$
-		       + "FROM tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu " //$NON-NLS-1$
-		       + "WHERE tb_app.fk_responsable = tb_usu.id_usuario AND tb_usu.id_usuario=? ORDER BY tb_app.nombre "; //$NON-NLS-1$
+	private static final String ST_SELECT_APPLICATIONS_BYUSERS = "SELECT tb_app.id, tb_app.nombre, tb_app.fecha_alta " //$NON-NLS-1$
+		       + "FROM tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu, tb_responsable_de_aplicaciones AS tb_resapp " //$NON-NLS-1$
+		       + "WHERE tb_usu.id_usuario = tb_resapp.id_responsables AND tb_app.id = tb_resapp.id_aplicaciones AND tb_usu.id_usuario=? ORDER BY tb_app.nombre "; //$NON-NLS-1$
 
-	private static final String ST_SELECT_APPLICATIONS_COUNT_BYUSERS = "SELECT count(*) FROM tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu WHERE tb_app.fk_responsable = tb_usu.id_usuario and tb_usu.id_usuario=?"; //$NON-NLS-1$
+	private static final String ST_SELECT_APPLICATIONS_COUNT_BYUSERS = " SELECT count(*) FROM tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu, tb_responsable_de_aplicaciones AS tb_resapp WHERE tb_usu.id_usuario = tb_resapp.id_responsables AND tb_app.id = tb_resapp.id_aplicaciones and tb_usu.id_usuario=?"; //$NON-NLS-1$
 
+	private static final String STATEMENT_INSERT_APPLICATION_RESPONSABLE =  "INSERT INTO tb_responsable_de_aplicaciones(id_responsables,id_aplicaciones) VALUES (?, ?)";  //$NON-NLS-1$
 
+	private static final String STATEMENT_UPDATE_APPLICATION_RESPONSABLE =  "UPDATE tb_responsable_de_aplicaciones SET id_responsables=? ,id_aplicaciones=? VALUES (?, ?)";  //$NON-NLS-1$
+
+	private static final String STATEMENT_INSERT_APPLICATION_FECHA = "INSERT INTO tb_aplicaciones(id, nombre, fecha_alta,fk_certificado,habilitado ) VALUES (?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 	/**
 	 * Comprueba contra base de datos que la contrase&ntilde;a indicada se corresponda
@@ -293,7 +299,7 @@ public class AplicationsDAO {
 			final ResultSet rs = st.executeQuery();
 			while (rs.next()) {
 				Date date= null;
-				final Timestamp timestamp = rs.getTimestamp(4);
+				final Timestamp timestamp = rs.getTimestamp(3);
 				if (timestamp != null) {
 					date = new Date(timestamp.getTime());
 				}
@@ -301,12 +307,12 @@ public class AplicationsDAO {
 				data.add(Json.createObjectBuilder()
 						.add("id", rs.getString(1)) //$NON-NLS-1$
 						.add("nombre", rs.getString(2)) //$NON-NLS-1$
-						.add("fk_responsable", rs.getString(3)) //$NON-NLS-1$
+						//.add("fk_responsable", rs.getString(3)) //$NON-NLS-1$
 						//.add("correo", rs.getString(4)!= null ? rs.getString(4) : "") //$NON-NLS-1$ //$NON-NLS-2$
 						//.add("telefono", rs.getString(5) != null ? rs.getString(5) : "") //$NON-NLS-1$ //$NON-NLS-2$
-						.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(4))) //$NON-NLS-1$
-						.add("fk_certificado", rs.getString(5)) //$NON-NLS-1$
-						.add("habilitado", rs.getString(6) !=null ? rs.getString(6) : "0")
+						.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(3))) //$NON-NLS-1$
+						.add("fk_certificado", rs.getString(4)) //$NON-NLS-1$
+						.add("habilitado", rs.getString(5) !=null ? rs.getString(6) : "0") //$NON-NLS-1$ //$NON-NLS-2$
 						);
 
 			}
@@ -386,31 +392,30 @@ public class AplicationsDAO {
 	/**
 	 * Agrega una nueva aplicaci&oacute;n al sistema.
 	 * @param nombre Nombre de la aplicacion.
-	 * @param fk_responsable Repsonsable de la aplicaci&oacute;n.
 	 * @param email Correo electr&oacute;nico de la aplicaci&oacute;n.
 	 * @param telefono N&uacute;mero de te&eacute;lefono de la aplicaci&oacute;n.
 	 * @param fkCer certificado en base 64 asignado a la la aplicaci&oacute;n.
+	 * @return Id aleatorio asignado a la aplicaci&oacute;n.
 	 * @throws SQLException Cuando no se puede insertar la nueva aplicacion en base de datos.
 	 * @throws GeneralSecurityException  Cuando no se puede generar el identificador aleatorio de la aplicaci&oacute;n.
 	 * @SQL INSERT INTO tb_aplicaciones(id, nombre, fk_responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?)
 	 */
-	public static void createApplication(final String nombre, final String fk_responsable, final String fkCer, final boolean habilitado)  throws SQLException, GeneralSecurityException {
+	public static String createApplication(final String nombre,  final String fkCer, final boolean habilitado)  throws SQLException, GeneralSecurityException {
 
 		final String id = generateId();
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INSERT_APPLICATION);
 
 		st.setString(1, id);
 		st.setString(2, nombre);
-		st.setString(3, fk_responsable);
-	//	st.setString(4, email);
-//		st.setString(5, telefono);
-		st.setDate(4, new Date(new java.util.Date().getTime()));
-	    st.setString(5, fkCer);
-	    st.setBoolean(6, habilitado);
+		st.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
+	    st.setString(4, fkCer);
+	    st.setBoolean(5, habilitado);
 
 		LOGGER.info("Damos de alta la aplicacion '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
 		st.execute();
 		st.close();
+
+		return id;
 	}
 
 	/**
@@ -462,16 +467,9 @@ public class AplicationsDAO {
 
 			st.setString(1, id);
 			final ResultSet rs = st.executeQuery();
+
+
 			if (rs.next()) {
-
-				final User responsable = new User();
-				responsable.setId(rs.getString(5));
-				responsable.setUserName(rs.getString(6));
-				responsable.setName(rs.getString(7));
-				responsable.setSurname(rs.getString(8));
-				responsable.setMail(rs.getString(9));
-				responsable.setTelephone(rs.getString(10));
-
 				final CertificateFire certificate = new CertificateFire();
 				certificate.setId(rs.getString(11));
 				certificate.setNombre(rs.getString(12));
@@ -495,11 +493,26 @@ public class AplicationsDAO {
 				result = new Application();
 				result.setId(rs.getString(1));
 				result.setNombre(rs.getString(2));
-				result.setResponsable(responsable);
 				result.setAlta(rs.getDate(3));
 				result.setHabilitado(rs.getBoolean(4));
 				result.setCertificate(certificate) ;
+
+				final List<User> responsables = new ArrayList<>() ;
+				do {
+					final User responsable = new User();
+					responsable.setId(rs.getString(5));
+					responsable.setUserName(rs.getString(6));
+					responsable.setName(rs.getString(7));
+					responsable.setSurname(rs.getString(8));
+					responsable.setMail(rs.getString(9));
+					responsable.setTelephone(rs.getString(10));
+
+					responsables.add(responsable);
+				} while (rs.next());
+
+				result.setResponsables(responsables);
 			}
+
 			rs.close();
 			st.close();
 		}
@@ -516,19 +529,18 @@ public class AplicationsDAO {
 	 * Actualizamos una aplicaci&oacute;n existente.
 	 * @param id Id de la aplicaci&oacute;n.
 	 * @param nombre Nombre de la aplicaci&oacute;n.
-	 * @param fk_responsable Responsable de la aplicaci&oacute;n.
 	 * @param fkCer certificado en base 64 asignado a la la aplicaci&oacute;n.
 	 * @throws SQLException si hay un problema en la conexi&oacute;n con la base de datos
 	 */
-	public static void updateApplication (final String id, final String nombre, final String fk_responsable,
+	public static void updateApplication (final String id, final String nombre,
 			final String fkCer, final boolean habilitado) throws SQLException{
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_UPDATE_APPLICATION);
 
 		st.setString(1, nombre);
-		st.setString(2, fk_responsable);
-	    st.setString(3, fkCer);
-	    st.setBoolean(4, habilitado);
-	    st.setString(5, id);
+		//st.setString(2, fk_responsable);
+	    st.setString(2, fkCer);
+	    st.setBoolean(3, habilitado);
+	    st.setString(4, id);
 
 
 		LOGGER.info("Actualizamos la aplicacion '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
@@ -554,15 +566,15 @@ public class AplicationsDAO {
 			while (rs.next()) {
 
 				Date date = null;
-				final Timestamp timestamp = rs.getTimestamp(4);
+				final Timestamp timestamp = rs.getTimestamp(3);
 				if (timestamp != null) {
 					date = new Date(timestamp.getTime());
 				}
 				data.add(Json.createObjectBuilder()
 						.add("id", rs.getString(1)) //$NON-NLS-1$
 						.add("nombre", rs.getString(2)) //$NON-NLS-1$
-						.add("fk_responsable",rs.getString(3)) //$NON-NLS-1$
-						.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(4))) //$NON-NLS-1$
+						//.add("fk_responsable",rs.getString(3)) //$NON-NLS-1$
+						.add("alta", es.gob.fire.server.admin.tool.Utils.getStringDateFormat(date !=null ? date : rs.getDate(3))) //$NON-NLS-1$
 
 						);
 			}
@@ -621,4 +633,85 @@ public class AplicationsDAO {
 
 	    return writer.toString();
 	}
+
+
+
+	/**
+	 * Agrega una nueva aplicaci&oacute;n al sistema a la que se añadiran responsables.
+	 * @param responsables
+	 * @param nombre Nombre de la aplicacion.
+	 * @param email Correo electr&oacute;nico de la aplicaci&oacute;n.
+	 * @param telefono N&uacute;mero de te&eacute;lefono de la aplicaci&oacute;n.
+	 * @param fkCer certificado en base 64 asignado a la la aplicaci&oacute;n.
+	 * @throws SQLException Cuando no se puede insertar la nueva aplicacion en base de datos.
+	 * @throws GeneralSecurityException  Cuando no se puede generar el identificador aleatorio de la aplicaci&oacute;n.
+	 * @SQL INSERT INTO tb_aplicaciones(id, nombre, fk_responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?)
+	 */
+	public static void createApplicationResponsable(final String idAplication, final String[] responsables)  throws SQLException, GeneralSecurityException {
+
+		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INSERT_APPLICATION_RESPONSABLE);
+
+		for (final String idResponsable : responsables) {
+			st.setString(1,  idResponsable);
+			st.setString(2,  idAplication);
+
+			st.execute();
+		}
+
+		LOGGER.info("Damos de alta la aplicacion  "); //$NON-NLS-1$
+		st.close();
+	}
+
+
+	/**
+	 * Actualizamos una aplicaci&oacute;n existente que tenga responsables.
+	 * @param id Id de la aplicaci&oacute;n.
+	 * @param nombre Nombre de la aplicaci&oacute;n.
+	 * @param fkCer certificado en base 64 asignado a la la aplicaci&oacute;n.
+	 * @throws SQLException si hay un problema en la conexi&oacute;n con la base de datos
+
+	public static void updateApplicationResponsable (final String idAplication, final String[] responsables) throws SQLException{
+		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_UPDATE_APPLICATION_RESPONSABLE);
+
+		private final final  [] String id_aplicacion = new []id_aplicacion;
+		st.setString(1, id_aplicacion);
+
+
+
+
+
+		LOGGER.info("Actualizamos la aplicacion '" + id_aplicacion + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
+		st.execute();
+		st.close();
+	}*/
+	/**
+	 * Agrega una nueva aplicaci&oacute;n al sistema.
+	 * @param nombre Nombre de la aplicacion.
+	 * @param email Correo electr&oacute;nico de la aplicaci&oacute;n.
+	 * @param telefono N&uacute;mero de te&eacute;lefono de la aplicaci&oacute;n.
+	 * @param fkCer certificado en base 64 asignado a la la aplicaci&oacute;n.
+	 * @return Id aleatorio asignado a la aplicaci&oacute;n.
+	 * @throws SQLException Cuando no se puede insertar la nueva aplicacion en base de datos.
+	 * @throws GeneralSecurityException  Cuando no se puede generar el identificador aleatorio de la aplicaci&oacute;n.
+	 * @SQL INSERT INTO tb_aplicaciones(id, nombre, fk_responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?)
+	 */
+	public static String createApplicationSinFecha(final String nombre,  final String fkCer, final boolean habilitado)  throws SQLException, GeneralSecurityException {
+
+		final String id = generateId();
+		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INSERT_APPLICATION_FECHA);
+
+		st.setString(1, id);
+		st.setString(2, nombre);
+		st.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
+		st.setString(4, fkCer);
+	    st.setBoolean(5, habilitado);
+
+		LOGGER.info("Damos de alta la aplicacion '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
+		st.execute();
+		st.close();
+
+		return id;
+	}
+
+
 }

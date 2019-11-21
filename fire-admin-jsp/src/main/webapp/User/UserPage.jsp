@@ -70,16 +70,14 @@ if (succ != null) {
 	
 </head>
 <body>
-<script>
 
-</script>
 <!-- Barra de navegacion -->
 	<jsp:include page="../resources/jsp/NavigationBar.jsp" />
 		
 	<!-- contenido -->
 	<div id="container">
 	
-	<div id="menu-bar">
+	<div id="menu-bar"  >
 		<input class="menu-btn" name="add-usr-btn" type="button" value="Alta de usuario" title="Crear un nuevo usuario" onclick="location.href='NewUser.jsp?op=1'"/>
 	</div>
 	
@@ -110,8 +108,8 @@ if (succ != null) {
 				</p>
 			<% } %>
 			
-		<div id="data">	
-				
+		<div id="data" style="display: block-inline; text-align:center;">	
+				<h4>No hay Usuarios</h4>	
 		</div>
 <!-- 		<br> -->
 <!-- 		<div id="nav_page" style="display: block-inline; text-align:right;"> -->

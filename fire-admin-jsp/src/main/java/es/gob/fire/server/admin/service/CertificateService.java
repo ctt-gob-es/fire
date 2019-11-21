@@ -24,7 +24,7 @@ public class CertificateService extends HttpServlet {
 		}
 
 		final String type = request.getParameter("requestType");//$NON-NLS-1$
-		final String idCert = request.getParameter("id-cert");//$NON-NLS-1$
+		final String idCert = request.getParameter("id-certificate");//$NON-NLS-1$
 
 		if (type == null) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);

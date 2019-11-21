@@ -58,12 +58,9 @@ public class NewUserService extends HttpServlet {
 		// Obtener el tipo de operacion 1-Alta 2-Edicion
 		int op;
 		final String idUser = req.getParameter(ServiceParams.PARAM_IDUSER);
-		final String username = req.getParameter(ServiceParams.PARAM_USERNAME);
+		final String username = req.getParameter(ServiceParams.PARAM_USER_NAME);
 		op = Integer.parseInt(req.getParameter(ServiceParams.PARAM_OP_USER));
 		final String stringOp = op == 1 ? "alta" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
-		final String stringOp4 = op == 4 ? "baja" : "edicion" ;  //$NON-NLS-1$//$NON-NLS-2$
-		 final String msg = ""; //$NON-NLS-1$
-
 
 		// Obtenemos los parametros enviados del formulario
 		final Parameters params = getParameters(req);
@@ -147,7 +144,7 @@ public class NewUserService extends HttpServlet {
 
 				final RolePermissions permissions = RolesDAO.getPermissions(usr.getRole());
 
-				if (params.getIdUser()==null || params.getUserName() == null || params.getUserSurname() == null ||
+				if (params.getIdUser() == null || params.getUserName() == null || params.getUserSurname() == null ||
 						params.getUserRole() == null) {
 					LOGGER.log(Level.SEVERE,
 							"No se han proporcionado todos los datos requeridos para la edicion del usuario (login, rol, nombre y apellidos)"); //$NON-NLS-1$
@@ -192,7 +189,7 @@ public class NewUserService extends HttpServlet {
 				// Comprobar que el correo de usuario no existe anteriormente en la tabla de usuarios dado de alta
 				final User mail = UsersDAO.getUserByMail(params.getUserEMail());
 				resp.setContentType("text/html");//$NON-NLS-1$
-				if (mail != null && mail.getId() != null && !"".equals(mail.getId())) { //$NON-NLS-1$
+				if (mail != null && mail.getId() != null && !mail.getId().isEmpty()) {
 					final String usrMail = "El usuario con direccion de correo '" + params.getUserEMail() + //$NON-NLS-1$
 							"' ya existe en el sistema."; //$NON-NLS-1$
 					resp.getWriter().write(usrMail);
@@ -243,25 +240,25 @@ private static Parameters getParameters(final HttpServletRequest req)  {
 
 	final Parameters params = new Parameters();
 
-	if(req.getParameter(ServiceParams.PARAM_IDUSER) != null && !req.getParameter(ServiceParams.PARAM_IDUSER).isEmpty()) {
+	if (req.getParameter(ServiceParams.PARAM_IDUSER) != null && !req.getParameter(ServiceParams.PARAM_IDUSER).isEmpty()) {
 		params.setIdUser(req.getParameter(ServiceParams.PARAM_IDUSER));
 	}
-	if(req.getParameter(ServiceParams.PARAM_LOGNAME) != null && !req.getParameter(ServiceParams.PARAM_LOGNAME).isEmpty()) {
-		params.setLoginUser(req.getParameter(ServiceParams.PARAM_LOGNAME));
+	if (req.getParameter(ServiceParams.PARAM_LOGINAME) != null && !req.getParameter(ServiceParams.PARAM_LOGINAME).isEmpty()) {
+		params.setLoginUser(req.getParameter(ServiceParams.PARAM_LOGINAME));
 	}
-	if(req.getParameter(ServiceParams.PARAM_PASSWD) != null && !req.getParameter(ServiceParams.PARAM_PASSWD).isEmpty()) {
+	if (req.getParameter(ServiceParams.PARAM_PASSWD) != null && !req.getParameter(ServiceParams.PARAM_PASSWD).isEmpty()) {
 		params.setPassword(req.getParameter(ServiceParams.PARAM_PASSWD));
 	}
-	if(req.getParameter(ServiceParams.PARAM_USER_ROLE) != null && !"".equals(req.getParameter(ServiceParams.PARAM_USER_ROLE))) {//$NON-NLS-1$
+	if (req.getParameter(ServiceParams.PARAM_USER_ROLE) != null && !"".equals(req.getParameter(ServiceParams.PARAM_USER_ROLE))) {//$NON-NLS-1$
 		params.setUserRole(req.getParameter(ServiceParams.PARAM_USER_ROLE));
 	}
-	if(req.getParameter(ServiceParams.PARAM_USERNAME) != null && !req.getParameter(ServiceParams.PARAM_USERNAME).isEmpty()) {
-		params.setUserName(req.getParameter(ServiceParams.PARAM_USERNAME));
+	if (req.getParameter(ServiceParams.PARAM_USER_NAME) != null && !req.getParameter(ServiceParams.PARAM_USER_NAME).isEmpty()) {
+		params.setUserName(req.getParameter(ServiceParams.PARAM_USER_NAME));
 	}
-	if(req.getParameter(ServiceParams.PARAM_USERSURNAME) != null && !req.getParameter(ServiceParams.PARAM_USERSURNAME).isEmpty()) {
+	if (req.getParameter(ServiceParams.PARAM_USERSURNAME) != null && !req.getParameter(ServiceParams.PARAM_USERSURNAME).isEmpty()) {
 		params.setUserSurname(req.getParameter(ServiceParams.PARAM_USERSURNAME));
 	}
-	if(req.getParameter(ServiceParams.PARAM_USEREMAIL) != null && !req.getParameter(ServiceParams.PARAM_USEREMAIL).isEmpty()) {
+	if (req.getParameter(ServiceParams.PARAM_USEREMAIL) != null && !req.getParameter(ServiceParams.PARAM_USEREMAIL).isEmpty()) {
 		params.setUserEMail(req.getParameter(ServiceParams.PARAM_USEREMAIL));
 	}
 	if(req.getParameter(ServiceParams.PARAM_USERTELF) != null && !"".equals(req.getParameter(ServiceParams.PARAM_USERTELF))) {//$NON-NLS-1$

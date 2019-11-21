@@ -44,7 +44,7 @@ public class ConfigManager {
 	 * de configuraci&oacute;n. Se utiliza si no se ha establecido la nueva variable. */
 	private static final String ENVIRONMENT_VAR_CONFIG_DIR_OLD = "clavefirma.config.path"; //$NON-NLS-1$
 
-	private static final long DEFAULT_EXPIRED_TIME = 1800000;
+	private static final int DEFAULT_EXPIRED_TIME = 1800000;
 
 	private static final int DEFAULT_MAIL_PORT = 587;
 
@@ -513,11 +513,11 @@ public class ConfigManager {
 	 * @return expira el mensaje
 	 *
 	 */
-	public static long getExpiration() {
+	public static int getExpiration() {
 
-		long mailExpired;
+		int mailExpired;
 		try {
-			mailExpired = Long.parseLong(getProperty(PARAM_PASSWORD_EXPIRATION));
+			mailExpired = Integer.parseInt(getProperty(PARAM_PASSWORD_EXPIRATION));
 		}
 		catch (final Exception e) {
 			LOGGER.severe(String.format("No se ha podido expirar el mensaje", PARAM_PASSWORD_EXPIRATION)); //$NON-NLS-1$

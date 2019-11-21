@@ -70,8 +70,8 @@ public class UsersDAO {
 
 	private static final String ST_SELECT_RESPONSIBLE_APPLICATION_INFO = "SELECT tb_app.id, tb_app.nombre, tb_app.fecha_alta, " //$NON-NLS-1$
 			+ "tb_usu.id_usuario, tb_usu.nombre_usuario, tb_usu.nombre, tb_usu.apellidos, tb_usu.correo_elec, tb_usu.telf_contacto, tb_cert.id_certificado, tb_cert.nombre_cert, tb_cert.cert_principal, tb_cert.cert_backup, tb_usu.fk_rol, tb_usu.fec_alta, tb_usu.usu_defecto " //$NON-NLS-1$
-			+ "FROM tb_certificados AS tb_cert, tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu " //$NON-NLS-1$
-			+ "WHERE tb_app.fk_responsable = tb_usu.id_usuario AND tb_app.fk_certificado = tb_cert.id_certificado AND tb_app.id = ?"; //$NON-NLS-1$
+			+ "FROM tb_certificados AS tb_cert, tb_aplicaciones AS tb_app, tb_usuarios AS tb_usu, tb_responsable_de_aplicaciones AS tb_resapp " //$NON-NLS-1$
+			+ "WHERE tb_usu.id_usuario = tb_resapp.id_responsables  AND tb_app.id = tb_resapp.id_aplicaciones AND tb_app.fk_certificado = tb_cert.id_certificado AND tb_app.id = ? ORDER BY tb_usu.apellidos"; //$NON-NLS-1$
 
 
 	private static final String ST_SELECT_EMAIL_BY_USERS = "SELECT tb_usu.id_usuario, tb_usu.nombre,tb_usu.nombre_usuario, tb_usu.correo_elec, tb_rol.permisos FROM tb_usuarios AS tb_usu, tb_roles AS tb_rol WHERE tb_usu.fk_rol = tb_rol.id AND (tb_usu.nombre_usuario = ? OR tb_usu.correo_elec = ?)"; //$NON-NLS-1$
@@ -443,7 +443,7 @@ public class UsersDAO {
 		st.setString(3, name);
 		st.setString(4, surname);
 		st.setString(5, email);
-		st.setDate(6, new Date(new java.util.Date().getTime()));
+		st.setTimestamp(6, new Timestamp(new java.util.Date().getTime()));
 		st.setString(7, telf);
 		st.setInt(8, Integer.parseInt(role));
 		st.execute();
@@ -563,7 +563,7 @@ public class UsersDAO {
 				certificate.setX509Principal(certPrincipal);
 				certificate.setX509Backup(certBackup);
 
-				user.setResponsibleName(responsibleName);
+			//	user.setResponsibleName(responsibleName);
 				user.setCertificate(certificate);
 
 

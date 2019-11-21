@@ -15,6 +15,18 @@ ul li.field-text {
 	margin:0;
 }
 
+
+div.centrado
+{
+    text-align: center;
+}
+
+div.centrado table 
+{
+    margin: 0 auto;
+    text-align: left;
+}
+
 #container {
 	min-width:750px; 
 	width:80%;
@@ -62,7 +74,7 @@ ul li.field-text {
 
 input[type=checkbox]
 {
-  /* Doble-tamaño Checkboxes */
+  /* Doble-tamaï¿½o Checkboxes */
   -ms-transform: scale(2); /* IE */
   -moz-transform: scale(2); /* FF */
   -webkit-transform: scale(2); /* Safari y Chrome */

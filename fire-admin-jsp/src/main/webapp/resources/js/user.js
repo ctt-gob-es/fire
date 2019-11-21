@@ -37,9 +37,22 @@
             
             function printUsersTable(JSONData, recordsToFetch){
             	
-            	var htmlTableHead = '<table class="admin-table"><thead><tr><th id="login_username">Usuario</th><th id="username">Nombre</th><th id="usersurname">Apellidos</th><th id="email">E-Mail</th><th id="telf">Telf. Contacto</th><th id="nombre_rol">Rol</th><th id="actions">Acciones</th></tr></thead>';
+            	var htmlTableHead = '<table class="admin-table">'
+            		+ "<thead>" + "<tr>"
+            		+ '<td id="login_username">Usuario</td>'
+            		+ '<td id="username">Nombre</td>'
+            		+ '<td id="usersurname">Apellidos</td>'
+            		+ '<td id="email">E-Mail</td>'
+            		+ '<td id="telf">Telf. Contacto</td>'
+            		+ '<td id="nombre_rol">Rol</td>'
+            		+ '<td id="actions">Acciones</td>'
+            		+ "</tr>" + "</thead>";
             	var htmlTableBody = "";
             	var htmlTableFoot = '</table>';
+            	
+            	
+            		
+            	
        		        		
             	for(i = 0; i < recordsToFetch; ++i){
             		htmlTableBody = htmlTableBody + '<tr><td headers="login_username">' + dataUndefined(JSONData.UsrList[i].nombre_usuario) + '</td>';        
@@ -47,13 +60,16 @@
             		htmlTableBody = htmlTableBody + '<td headers="usersurname">' + dataUndefined(JSONData.UsrList[i].apellidos) + '</td>';
             		htmlTableBody = htmlTableBody + '<td headers="email">' + dataUndefined(JSONData.UsrList[i].correo_elec) + '</td>';            		
             		htmlTableBody = htmlTableBody + '<td headers="telf">' + dataUndefined(JSONData.UsrList[i].telf_contacto) + '</td>';
+            		htmlTableBody = htmlTableBody + '<td headers="rol">' + traductor(JSONData.UsrList[i].nombre_rol) +'</td>';
             		
-            		htmlTableBody = htmlTableBody + '<td title="' + traductor(JSONData.UsrList[i].nombre_rol) + '" headers="nombre_rol"><img  class = "nombre_rol" src="../resources/img/' + dataUndefined(JSONData.UsrList[i].nombre_rol) + '_icon.png")/></td>';
+            		//Si se quiere volver a las imagenes se utilizara la linea de abajo
+            		//htmlTableBody = htmlTableBody + '<td title="' + traductor(JSONData.UsrList[i].nombre_rol) + '" headers="nombre_rol"><img  class = "nombre_rol" src="../resources/img/' + dataUndefined(JSONData.UsrList[i].nombre_rol) + '_icon.png")/></td>';
 
-            		htmlTableBody = htmlTableBody + '<td headers="actions">';            		
+            		htmlTableBody = htmlTableBody + '<td>';            		
             		htmlTableBody = htmlTableBody + '<a href="NewUser.jsp?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario + '&op=0" title="Visualizar"><img src="../resources/img/details_icon.png"/></a>';    				
             		htmlTableBody = htmlTableBody + '<a href="NewUser.jsp?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario + '&op=2" title="Editar"><img src="../resources/img/editar_icon.png"/></a>';
-            		if(JSONData.UsrList[i].usu_defecto == '0'){            		           		          			
+            		
+            		if(JSONData.UsrList[i].usu_defecto == '0'){
             			if ($("#userLogged").html().trim() == JSONData.UsrList[i].nombre_usuario){
             				htmlTableBody = htmlTableBody + '<a href="../deleteUsr?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario 
             				+ '" title="Eliminar"><img src="../resources/img/delete_icon.png" onclick="return confirmarBorradoUsuario(\'' + JSONData.UsrList[i].nombre_usuario + '\', true)"/></a>';	
@@ -61,7 +77,8 @@
             			else{            				
             				htmlTableBody = htmlTableBody + '<a href="../deleteUsr?id-usr=' + JSONData.UsrList[i].id_usuario + '&usr-name=' + JSONData.UsrList[i].nombre_usuario
             				+ '" title="Eliminar"><img src="../resources/img/delete_icon.png" onclick="return confirmarBorradoUsuario(\'' + JSONData.UsrList[i].nombre_usuario + '\', false)"/></a>';	
-            			}            			
+            			} 
+
             		}
             		htmlTableBody = htmlTableBody + '</td></tr>';
             	}

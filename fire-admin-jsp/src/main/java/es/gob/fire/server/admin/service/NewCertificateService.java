@@ -35,6 +35,7 @@ public class NewCertificateService extends HttpServlet {
 	private static final long serialVersionUID = -2026882282382737471L;
 
 	private static final Logger LOGGER = Logger.getLogger(NewCertificateService.class.getName());
+	private static final String PARAM_ID = "id-certificate"; //$NON-NLS-1$
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -134,12 +135,15 @@ public class NewCertificateService extends HttpServlet {
 						params.getHuella_prin(),
 						params.getB64Cert_resp(),
 						params.getHuella_resp());
+
 			} catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error en el alta del certificado", e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "Error al editar el certificado", e); //$NON-NLS-1$
 				response.sendRedirect("Certificate/CertificatePage.jsp?op=" + stringOp + "&r=0&ent=cer"); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
 		}
+
+
 		response.sendRedirect("Certificate/CertificatePage.jsp?op=" + stringOp + "&r=1&ent=cer"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -156,8 +160,8 @@ public class NewCertificateService extends HttpServlet {
 		final Parameters params = new Parameters();
 
 		try {
-			if(req.getParameter(ServiceParams.PARAM_ID_CERT) != null && !"".equals(req.getParameter(ServiceParams.PARAM_ID_CERT))) {//$NON-NLS-1$
-				params.setIdCert(req.getParameter(ServiceParams.PARAM_ID_CERT));
+			if(req.getParameter(ServiceParams.PARAM_CERTID) != null && !"".equals(req.getParameter(ServiceParams.PARAM_CERTID))) {//$NON-NLS-1$
+				params.setIdCert(req.getParameter(ServiceParams.PARAM_CERTID));
 			}
 
 			final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$

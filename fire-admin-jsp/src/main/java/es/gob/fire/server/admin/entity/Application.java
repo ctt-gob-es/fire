@@ -8,7 +8,9 @@
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 package es.gob.fire.server.admin.entity;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -20,7 +22,7 @@ public class Application {
 
 	private String nombre;
 
-	private User responsable;
+	private List<User> responsables;
 
 	private Date alta;
 
@@ -34,7 +36,7 @@ public class Application {
 	public Application(){
 		this.id = ""; //$NON-NLS-1$
 		this.nombre = ""; //$NON-NLS-1$
-		this.responsable = new User() ;
+		this.responsables = new ArrayList<>() ;
 		this.certificate = new CertificateFire();
 		this.habilitado = true;
 	}
@@ -78,8 +80,8 @@ public class Application {
 	 * Recupera el nombre del responsable de la aplicaci&oacute;n.
 	 * @return Nombre del responsable de la aplicaci&oacute;n.
 	 */
-	public User getResponsable() {
-		return this.responsable;
+	public List<User> getResponsables() {
+		return this.responsables;
 	}
 
 
@@ -87,8 +89,8 @@ public class Application {
 	 * Establece el nombre del responsable de la aplicaci&oacute;n.
 	 * @param responsable Nombre del responsable de la aplicaci&oacute;n.
 	 */
-	public void setResponsable(final User responsable) {
-		this.responsable = responsable;
+	public void setResponsables(final List<User> responsables) {
+		this.responsables = responsables;
 	}
 
 
