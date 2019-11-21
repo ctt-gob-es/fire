@@ -55,7 +55,17 @@ CREATE TABLE "TB_ROLES" (
   "permisos" VARCHAR2(45) DEFAULT NULL,
   CONSTRAINT "TB_ROLES_PK" PRIMARY KEY ("id") ENABLE,
   CONSTRAINT "TB_ROLES_UK1" UNIQUE ("nombre_rol") ENABLE
+  
 );
+
+
+--creamos nueva tabla de responsables de aplicaciones
+CREATE TABLE "TB_RESPONSABLE_DE_APLICACIONES" (
+  "id_responsables" NUMBER NOT NULL ENABLE,
+  "id_aplicaciones" VARCHAR2(48) NOT NULL ENABLE,
+  PRIMARY KEY ("id_responsables","id_aplicaciones")
+);
+
 
 --  Insertamos los permisos del usuario al inicializar la aplicacion
 
