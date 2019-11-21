@@ -57,9 +57,15 @@ CREATE TABLE `tb_roles` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
+--creamos la tabla sin asociar nada y luego la modificamos
+CREATE TABLE `tb_responsable_de_aplicaciones` (
+  `id_responsables` int(11) NOT NULL AUTO_INCREMENT,
+  `id_aplicaciones` varchar(48) NOT NULL,
+  
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
-
+ALTER TABLE prueba ADD PRIMARY KEY ( id_responsables , id_aplicaciones ) 
 
 
 
