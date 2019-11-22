@@ -1,6 +1,4 @@
 
-<%@page import="es.gob.fire.server.admin.dao.AplicationsDAO"%>
-<%@page import="es.gob.fire.server.admin.entity.Application" %>
 <%@page import="es.gob.fire.server.admin.dao.RolesDAO"%>
 <%@page import="es.gob.fire.server.admin.entity.Role"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
@@ -9,11 +7,6 @@
 <%@page import="es.gob.log.consumer.client.ServiceOperations"%>
 <%@page import="javax.json.JsonNumber"%>
 <%@page import="java.util.Date"%>
-<%@page import="javax.json.JsonString"%>
-<%@page import="javax.json.JsonArray"%>
-<%@page import="javax.json.JsonReader"%>
-<%@page import="javax.json.Json"%>
-<%@page import="javax.json.JsonObject"%>
 <%@page import="java.io.ByteArrayInputStream"%>
 <%@page import="java.text.SimpleDateFormat"%>
 
@@ -47,7 +40,6 @@
 	if (idUsr != null) {
 		try {
 			user = UsersDAO.getUser(idUsr);
-		
 		} catch (Exception e) {
 			response.sendRedirect("UserPage.jsp");
 			return;
@@ -73,7 +65,7 @@
 	subTitle = "Inserte los datos del nuevo usuario."; //$NON-NLS-1$
 	break;
 		case 2:
-	title = "Editar usuario " + user.getName() + " " + user.getSurname(); //$NON-NLS-1$ //$NON-NLS-2$
+	title = "Editar usuario " + user.getFirstName() + " " + user.getSurname(); //$NON-NLS-1$ //$NON-NLS-2$
 	subTitle = "Modifique los datos que desee editar."; //$NON-NLS-1$
 	break;
 		default:
@@ -91,8 +83,8 @@
 	<script src="../resources/js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script>
 	/*Importante estas variables (requestTypeCount y requestType) deben estar declaradas antes que la llamada a ../resources/js/certificate.js*/
-	requestTypeCount="countRecordsUsersApp&id-usr="+<%= idUsr%>;
-	requestType="getRecordsUsersApp&id-usr="+<%= idUsr%>;
+	requestTypeCount="countRecordsUsersApp&id-usr="+<%=idUsr%>;
+	requestType="getRecordsUsersApp&id-usr="+<%=idUsr%>;
 	
 	</script>
 	<script type="text/javascript">var op=<%=op%>;	</script>
@@ -124,15 +116,19 @@
 						<label for="role-usr" style="color: #404040">* Tipo de usuario</label>
 						<select id="role-usr" name="role-usr" class="edit-txt">
 						
-						<% if (user.getRole() == 0) { %>
+						<%
+													if (user.getRole() == 0) {
+												%>
 							<option value="">Seleccione un Rol</option>
-						<% } %>
+						<%
+							}
+						%>
 							
 						<%
-							for (Role role : roles) {
-						%>
-								<option value="<%= role.getId() %>" <%= user.getRole() == role.getId() ? "selected" : EMPTY %>>
-									<%= Role.getRoleLegibleText(role) %></option>
+														for (Role role : roles) {
+													%>
+								<option value="<%=role.getId()%>" <%=user.getRole() == role.getId() ? "selected" : EMPTY%>>
+									<%=Role.getRoleLegibleText(role)%></option>
 						<%
 							}
 						%>							
@@ -146,8 +142,8 @@
 						
 			
 			<%
- 			if(op==1 || op==0 ){
-			%>	
+ 																				if(op==1 || op==0 ){
+ 																			%>	
 				<div style="margin: auto;width: 100%;padding: 3px;">		
 					<div style="display: inline-block; width: 20%;margin: 3px;">
 						<!-- Label para la accesibilidad de la pagina -->
@@ -183,10 +179,10 @@
 					value="<%=user.getUserName() != null ? user.getUserName(): EMPTY%>"> 						
 					</div>
 					</div>
-			<%	
-			}
-			
-			if(op==1){
+			<%
+				}
+				
+				if(op==1){
 			%>
 				<div style="margin: auto;width: 100%;padding: 3px;">	
 					<div style="display: inline-block; width: 20%;margin: 3px;">
@@ -207,9 +203,8 @@
 					</div>		
 				</div>							
 			<%
-			}else if(op == 2){
-				
-			%>
+											}else if(op == 2){
+										%>
 			<div style="display: none" width: 100%;padding: 3px;">	
 					<div style="display: inline-block; width: 20%;margin: 3px;">
 						<!-- Label para la accesibilidad de la pagina -->
@@ -228,9 +223,9 @@
 						value="">
 					</div>		
 				</div>							
-			<%	
-			}
-			%>
+			<%
+											}
+										%>
 			<div style="margin: auto;width: 100%;padding: 3px;">
 				<div style="display: inline-block; width: 20%;margin: 3px;">
 					<!-- Label para la accesibilidad de la pagina -->
@@ -238,7 +233,7 @@
 				</div>
 				<div  style="display: inline-block; width: 30%;margin: 3px;">
 						<input id="usr-name" class="edit-txt" type="text" name="<%=ServiceParams.PARAM_USER_NAME%>" style="width: 80%;margin-top:3px;" 
-						value="<%=user.getName()!= null ? user.getName(): EMPTY%>"> 
+						value="<%=user.getFirstName()!= null ? user.getFirstName(): EMPTY%>"> 
 				</div>
 					
 				<div style="display: inline-block; width: 10%;margin: 3px;">
@@ -278,34 +273,36 @@
 					<input class="menu-btn" name="add-usr-btn" type="button" value="Volver" title="Volver a la p&aacute;gina de Usuarios" onclick="location.href='UserPage.jsp'" onclick="imgValidarDni()"/>
 				</div>
 		   		
-		   		<% 
-		   		if (op > 0) {
-		   			final String msg = (op == 1 ) ? "Crear usuario" : "Guardar cambios"; //$NON-NLS-1$ //$NON-NLS-2$
-					final String tit= (op == 1 ) ? "Crea nuevo usuario" : "Guarda las modificaciones realizadas"; //$NON-NLS-1$ //$NON-NLS-2$
-		   		%>
+		   		<%
+		   				   			if (op > 0) {
+		   				   				   			final String msg = (op == 1 ) ? "Crear usuario" : "Guardar cambios"; //$NON-NLS-1$ //$NON-NLS-2$
+		   				   					final String tit= (op == 1 ) ? "Crea nuevo usuario" : "Guarda las modificaciones realizadas"; //$NON-NLS-1$ //$NON-NLS-2$
+		   				   		%>
 			   		
 			   		<div  style="display: inline-block; width: 45%;margin: 3px;">
-			   			<input class="menu-btn" name="add-usr-btn" type="submit" value="<%= msg %>" title="<%=tit %>" >
+			   			<input class="menu-btn" name="add-usr-btn" type="submit" value="<%=msg%>" title="<%=tit%>" >
 			   		</div>
-		   		<% } %>
+		   		<%
+		   			}
+		   		%>
 		   	</div>	
 		</fieldset>	
 		</form>
 		<%
 			if (op == 0) {
-			%>
+		%>
 		<fieldset>
 		<script type="text/javascript">
 	/*Importante estas variables (requestTypeCount y requestType) deben estar declaradas antes que la llamada a ../resources/js/user.js*/
 			requestType="getRecordsUsersApp";
-			idUser = "<%= idUsr %>";
+			idUser = "<%=idUsr%>";
 </script>
 		
 			<legend>Responsables Aplicaciones</legend>
 			<div id="data" style="display: block-inline; text-align:center;">
 			
-				<h4>No hay Aplicaciones asociadas al usuario responsable <%=user.getName()%> <%=user.getSurname()%></h4>		
-			
+				<h4>No hay Aplicaciones asociadas al usuario responsable <%=user.getFirstName()%> <%=user.getSurname()%></h4>		
+
 			</div>
 
 		</fieldset>
@@ -318,55 +315,52 @@
 		<%
 		if (op == 2) {
 		%>
-		document.getElementById("login-usr").disabled = 'disabled';
-		document.getElementById("login-usr").style.background = '#F5F5F5';
+			document.getElementById("login-usr").disabled = 'disabled';
+			document.getElementById("login-usr").style.background = '#F5F5F5';
 		<%
 		}
 		%>
-			<%
-			if (op == 0) {
-			%>
+		<%
+		if (op == 0) {
+		%>
+		
+			//bloqueamos los campos en caso de que sea una operacion de solo lectura
+			document.getElementById("login-usr").disabled = 'disabled';
+			document.getElementById("login-usr").style.background = '#F5F5F5';
+			document.getElementById("role-usr").disabled = 'disabled';
+			document.getElementById("role-usr").style.background = '#F5F5F5';
+			document.getElementById("usr-name").disabled = 'disabled';
+			document.getElementById("usr-name").style.background = '#F5F5F5';
+			document.getElementById("usr-surname").disabled = 'disabled';
+			document.getElementById("usr-surname").style.background = '#F5F5F5';
+			document.getElementById("email").disabled = 'disabled';
+			document.getElementById("email").style.background = '#F5F5F5';
+			document.getElementById("telf-contact").disabled = 'disabled';
+			document.getElementById("telf-contact").style.background = '#F5F5F5';
+		<%
+		}
+		else if (user.isRoot()) {
+		%>
+			document.getElementById("role-usr").disabled = 'disabled';
+			document.getElementById("role-usr").style.background = '#F5F5F5';
 			
-				//bloqueamos los campos en caso de que sea una operacion de solo lectura
-				document.getElementById("login-usr").disabled = 'disabled';
-				document.getElementById("login-usr").style.background = '#F5F5F5';
-				document.getElementById("role-usr").disabled = 'disabled';
-				document.getElementById("role-usr").style.background = '#F5F5F5';
-				document.getElementById("usr-name").disabled = 'disabled';
-				document.getElementById("usr-name").style.background = '#F5F5F5';
-				document.getElementById("usr-surname").disabled = 'disabled';
-				document.getElementById("usr-surname").style.background = '#F5F5F5';
-				document.getElementById("email").disabled = 'disabled';
-				document.getElementById("email").style.background = '#F5F5F5';
-				document.getElementById("telf-contact").disabled = 'disabled';
-				document.getElementById("telf-contact").style.background = '#F5F5F5';
-			<%
+		<%
+		}
+		%>
+		document.getElementById("role-usr").addEventListener("change", roleSelection);
+		//document.getElementById("login-usr").addEventListener("resize", onInputDniCallback);
+		document.getElementById("login-usr").addEventListener("input", onInputDniCallback);
+
+		var rolesWithAccess = {};
+		<%
+		for (Role role : roles) {
+			if (role.getPermissions().hasLoginPermission()) {
+		%>
+				rolesWithAccess.id<%= role.getId() %> = true;
+		<% 
 			}
-			else if (user.isRoot()) {
-			%>
-				document.getElementById("role-usr").disabled = 'disabled';
-				document.getElementById("role-usr").style.background = '#F5F5F5';
-				
-			<%
-			}
-			%>
-			document.getElementById("role-usr").addEventListener("change", roleSelection);
-			//document.getElementById("login-usr").addEventListener("resize", onInputDniCallback);
-			document.getElementById("login-usr").addEventListener("input", onInputDniCallback);
-			
-			
-			
-			
-			var rolesWithAccess = {};
-			<%
-				for (Role role : roles) {
-					if (role.getPermissions().hasLoginPermission()) {
-			%>
-						rolesWithAccess.id<%= role.getId() %> = true;
-			<% 
-					}
-				}
-			%>
+		}
+		%>
 			
 
 		// recuperamos los valores de los usuarios que son responsables
@@ -383,11 +377,6 @@
 					}
 				}
 			%>	
-			
-			
-			
-			
-			
 			
 			
 			function roleSelection(evt) {

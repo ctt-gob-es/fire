@@ -1,10 +1,8 @@
 
 <%@page import="es.gob.fire.server.admin.tool.Base64"%>
-<%@page import="jdk.management.resource.internal.ApproverGroup"%>
 <%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.dao.CertificatesDAO"%>
 <%@page import="java.util.Date"%>
-<%@page import="java.text.DateFormat"%>
 <%@page import="java.util.List" %>
 <%@page import="es.gob.fire.server.admin.dao.AplicationsDAO" %>
 <%@page import="es.gob.fire.server.admin.entity.Application" %>
@@ -13,40 +11,22 @@
 <%@page import="es.gob.fire.server.admin.dao.UsersDAO" %>
 <%@page import="es.gob.fire.server.admin.dao.RolesDAO"%>
 <%@page import="es.gob.fire.server.admin.entity.Role"%>
-<%@page import="es.gob.fire.server.admin.service.ServiceParams"%>
 <%@page import="es.gob.fire.server.admin.entity.User" %>
-<%@page import="javax.json.JsonNumber"%>
-<%@page import="java.util.Date"%>
-<%@page import="javax.json.JsonString"%>
-<%@page import="javax.json.JsonArray"%>
-<%@page import="javax.json.JsonReader"%>
-<%@page import="javax.json.Json"%>
-<%@page import="javax.json.JsonObject"%>
-<%@page import="java.io.ByteArrayInputStream"%>
-<%@page import="java.text.SimpleDateFormat"%>
 
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	try{
-	if (session == null || !Boolean.parseBoolean((String) session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED))) {
-	//	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-		return;
-	}
-	}catch (final Exception e) {
+	if (session == null || !Boolean.parseBoolean(
+			(String) session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED))) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;
-		
 	}
-	String id = request.getParameter("id-app");//$NON-NLS-1$
-	final int op = Integer.parseInt(request.getParameter("op"));//$NON-NLS-1$
+
+	String id = request.getParameter(ServiceParams.PARAM_APPID);
+	final int op = Integer.parseInt(request.getParameter(ServiceParams.PARAM_OP));
 	final String name = request.getParameter(ServiceParams.PARAM_NAME);
-	final String email = request.getParameter(ServiceParams.PARAM_USEREMAIL);
-	final String tel = request.getParameter(ServiceParams.PARAM_TEL);
-	
-	
-	
+
 	final List<CertificateFire> lCert = CertificatesDAO.selectCertificateAll();
 
 	// op = 0 -> Solo lectura, no se puede modificar nada
@@ -58,31 +38,28 @@
 	String certDataBkup = "";//$NON-NLS-1$
 	String b64CertPrin = "";//$NON-NLS-1$
 	String b64CertBkup = "";//$NON-NLS-1$
-	
-	
+
 	switch (op) {
-		case 0:
-	title = "Ver la aplicaci&oacute;n " + id;//$NON-NLS-1$
-	subTitle = "Visualizaci&oacute;n de las aplicaciones y su responsable"; //$NON-NLS-1$
-	break;
-		case 1:
-	title = "Alta de nueva aplicaci&oacute;n"; //$NON-NLS-1$
-	subTitle = "Inserte los datos de la nueva aplicaci&oacute;n."; //$NON-NLS-1$
-	break;
-		case 2:
-	title = "Editar la aplicaci&oacute;n " + id; //$NON-NLS-1$
-	subTitle = "Modifique los datos que desee editar"; //$NON-NLS-1$
-	break;
-		
-		default:
-	response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
-	return;
+	case 0:
+		title = "Ver la aplicaci&oacute;n " + id;//$NON-NLS-1$
+		subTitle = "Visualizaci&oacute;n de las aplicaciones y su responsable"; //$NON-NLS-1$
+		break;
+	case 1:
+		title = "Alta de nueva aplicaci&oacute;n"; //$NON-NLS-1$
+		subTitle = "Inserte los datos de la nueva aplicaci&oacute;n."; //$NON-NLS-1$
+		break;
+	case 2:
+		title = "Editar la aplicaci&oacute;n " + id; //$NON-NLS-1$
+		subTitle = "Modifique los datos que desee editar"; //$NON-NLS-1$
+		break;
+
+	default:
+		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
+		return;
 	}
-	
-	
+
 	User[] usersResponsable = UsersDAO.getUserAppResponsables();
 
-	 
 	Application app = null;
 	if (id != null) {
 		try {
@@ -94,10 +71,10 @@
 	if (app == null) {
 		app = new Application();
 	}
-	
+
 	CertificateFire cert = null;
 	if (id != null) {
-		cert = CertificatesDAO.selectCertificateByID (id);
+		cert = CertificatesDAO.selectCertificateByID(id);
 	}
 	if (cert == null) {
 		cert = app.getCertificate();
@@ -105,7 +82,8 @@
 	if (app.getCertificate() != null) {
 		if (cert != null && cert.getX509Principal() != null) {
 			b64CertPrin = Base64.encode(cert.getX509Principal().getEncoded());
-			final String[] datCertificate = cert.getX509Principal().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
+			final String[] datCertificate = cert.getX509Principal().getSubjectX500Principal().getName()
+					.split(",");//$NON-NLS-1$
 			for (int i = 0; i < datCertificate.length; i++) {
 				certDataPrincipal += datCertificate[i] + "</br>";//$NON-NLS-1$
 			}
@@ -113,7 +91,7 @@
 			Date fecha = cert.getX509Principal().getNotAfter();
 			certDataPrincipal += "Fecha de Caducidad = " + Utils.getStringDateFormat(fecha);//$NON-NLS-1$
 		}
-		if (cert != null && cert.getX509Backup() != null ) {
+		if (cert != null && cert.getX509Backup() != null) {
 			b64CertBkup = Base64.encode(cert.getX509Backup().getEncoded());
 			final String[] datCertificate = cert.getX509Backup().getSubjectX500Principal().getName().split(",");//$NON-NLS-1$
 			for (int i = 0; i < datCertificate.length; i++) {
@@ -264,7 +242,7 @@
 					<label for="pasarOpciones(this.form)" >Listado de responsables del sistema</label>
 						<select name="listadoCompletoResponsables[]"  style="width:400px" multiple="multiple" id="listadoCompletoResponsables" size="8" >
 						<% for (User responsable : usersResponsable) { %>
-							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getName() %></option>
+							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getFirstName() %></option>
 						<% } %>
 						</select>
 						
@@ -284,7 +262,7 @@
 					<label for="listadoAplicacionResponsables" display: inline;>Listado de responsables de la aplicaci&oacute;n</label>
 						<select  style="width:400px" multiple="multiple"  id="listadoAplicacionResponsables" name="<%= ServiceParams.PARAM_RESPONSABLES %>"  size="8" >
 						<% for (User responsable : app.getResponsables()) { %>
-							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getName() %></option>
+							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getFirstName() %></option>
 						<% } %>
 						
 						</select>
@@ -295,8 +273,6 @@
 				<fieldset>
 				<legend>Responsables:</legend>
 					<table>
-				
-						
 						<thead>
 							<tr>
 							 <div>
@@ -313,18 +289,13 @@
 							</tr>
 						</thead>
 						<% for (User user : app.getResponsables()) { %>
-							<tr><td><%= user.getSurname() + "," + user.getName() %></td><td><%= user.getMail() %></td><td><%= user.getTelephone() %></td></tr>
+							<tr><td><%= user.getSurname() + "," + user.getFirstName() %></td><td><%= user.getMail() %></td><td><%= user.getTelephone() %></td></tr>
 						<% } %>
 					
 				<% } %>
-						
-							
 				</fieldset>				
 			</table>					
 			</div>	
-			
-			
-			
 			
 							
 			<div style="margin: auto;width: 100%;padding: 3px;">
@@ -401,7 +372,7 @@
 						
 						
 																
-						<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 90%;height:8.5em;overflow-y: auto;margin-top:3px;resize:none">
+						<div id="cert-prin" class="edit-txt" style="width: 90%;height:8.5em;overflow-y: auto;margin-top:3px;resize:none">
 							<% if (certDataPrincipal != null && !certDataPrincipal.isEmpty()) { %>
 								<p><%= certDataPrincipal %></p>							
 							<% } %>						
@@ -422,7 +393,7 @@
 							</div>	
 																								
 						</div>				
-						<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 90%;height:8.5em;overflow-y: auto;margin-top:3px;resize:none">
+						<div id="cert-resp" class="edit-txt" style="width: 90%;height:8.5em;overflow-y: auto;margin-top:3px;resize:none">
 							<% if (certDataBkup != null && !certDataBkup.isEmpty()) { %>
 								<p><%= certDataBkup %></p>						
 							<% } %>
@@ -587,7 +558,7 @@
 				<label for="listadoAplicacionResponsables">Listado de responsables de la aplicaci&oacute;n</label>
 					<select multiple id="listadoAplicacionResponsables" name="listadoAplicacionResponsables">
 					<% for (User responsable : app.getResponsables()) { %>
-						<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getName() %></option>
+						<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getFirstName() %></option>
 					<% } %>
 					</select>
 
@@ -605,7 +576,7 @@
 						</thead>
 						<% for (User user : app.getResponsables()) { %>
 							<tr>
-								<td align="center"><%= user.getSurname() + " " + user.getName() %></td>
+								<td align="center"><%= user.getSurname() + " " + user.getFirstName() %></td>
 								<td align="center"><%= user.getMail() %></td>
 								<td align="center"><%= user.getTelephone() %></td>
 							</tr>
@@ -650,7 +621,7 @@
 			document.getElementById("cert-resp").disabled = <%=  op == 0 %>;
 			
 			
-			// bloqueamos los campos email, teléfono, y certificados y cambiamos de color
+			// bloqueamos los campos necesarios y cambiamos de color
 			 if (op == 2) { 
 			
 				

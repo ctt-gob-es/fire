@@ -100,9 +100,9 @@ $(document).ready(function(){
 
         		htmlTableBody = htmlTableBody + "<td>";
         		
-        		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?id-app=" + newAppList[i].id + "&op=0' title='Visualizar'><img  src='../resources/img/details_icon.png'/></a>";
-        		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?id-app=" + newAppList[i].id + "&op=2' title='Editar'><img src='../resources/img/editar_icon.png'/></a>";        		
-        		htmlTableBody = htmlTableBody + "<a href='../deleteApp?id-app=" + newAppList[i].id + "' title='Eliminar'><img src='../resources/img/delete_icon.png' onclick='return confirmar(\"" + newAppList[i].nombre + "\")'/></a>";     
+        		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?appid=" + newAppList[i].id + "&op=0' title='Visualizar'><img  src='../resources/img/details_icon.png'/></a>";
+        		htmlTableBody = htmlTableBody + "<a href='NewApplication.jsp?appid=" + newAppList[i].id + "&op=2' title='Editar'><img src='../resources/img/editar_icon.png'/></a>";        		
+        		htmlTableBody = htmlTableBody + "<a href='../deleteApp?appid=" + newAppList[i].id + "' title='Eliminar'><img src='../resources/img/delete_icon.png' onclick='return confirmar(\"" + newAppList[i].nombre + "\")'/></a>";     
         		
         		htmlTableBody = htmlTableBody + "</td></tr>"; 
         		

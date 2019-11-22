@@ -14,7 +14,7 @@ public class User {
 	private String id;
 	private String userName;
 	private String password;
-	private String name;
+	private String firstName;
 	private String surname;
 	private String mail;
 	private String telephone;
@@ -36,7 +36,7 @@ public class User {
 		this.id = null;
 		this.userName = null;
 		this.password = null;
-		this.name = null;
+		this.firstName = null;
 		this.surname = null;
 		this.mail = null;
 		this.telephone = null;
@@ -63,7 +63,7 @@ public class User {
 		super();
 		this.userName = user_name;
 		this.password = password;
-		this.name = name;
+		this.firstName = name;
 		this.surname = surname;
 		this.role = role;
 		this.root = false;
@@ -91,7 +91,7 @@ public class User {
 		this.id = id_user;
 		this.userName = user_name;
 		this.password = password;
-		this.name = name;
+		this.firstName = name;
 		this.surname = surname;
 		this.mail = mail;
 		this.telephone = contac_phone;
@@ -164,15 +164,15 @@ public class User {
 	 * Obtiene el nombre de pila del usuario.
 	 * @return Nombre de pila del usuario.
 	 */
-	public final String getName() {
-		return this.name;
+	public final String getFirstName() {
+		return this.firstName;
 	}
 	/**
 	 * Establece el nombre de pila del usuario.
-	 * @param name Nombre de pila del usuario.
+	 * @param firstName Nombre de pila del usuario.
 	 */
-	public final void setName(final String name) {
-		this.name = name;
+	public final void setFirstName(final String firstName) {
+		this.firstName = firstName;
 	}
 	/**
 	 * Obtiene los apellidos del usuario.
@@ -290,7 +290,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return this.name + " " + this.surname; //$NON-NLS-1$
+		return this.id;
 	}
 
 

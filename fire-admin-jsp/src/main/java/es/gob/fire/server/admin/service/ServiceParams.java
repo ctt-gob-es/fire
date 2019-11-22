@@ -2,21 +2,21 @@ package es.gob.fire.server.admin.service;
 
 public class ServiceParams {
 
-	/***Par&aacute;metro que indica el id de la aplicaci&oacute;n */
+	/** Par&aacute;metro que indica el id de la aplicaci&oacute;n */
 	public static final String PARAM_APPID = "appid"; //$NON-NLS-1$
 
-	/***Par&aacute;metro que indica el nombre de la aplicaci&oacute;n */
+	/** Par&aacute;metro que indica el nombre de la aplicaci&oacute;n */
 	public static final String PARAM_NAME = "nombre-app"; //$NON-NLS-1$
 
-	/***Par&aacute;metro que indica el id de la aplicaci&oacute;n */
+	/** Par&aacute;metro que indica el id de la aplicaci&oacute;n */
 	public static final String PARAM_ENABLED = "enabled"; //$NON-NLS-1$
 
-	/***Par&aacute;metro que indica el nombre del responsable de la aplicaci&oacute;n */
+	/** Par&aacute;metro que indica el nombre del responsable de la aplicaci&oacute;n */
 	public static final String PARAM_RESPONSABLES = "listresp"; //$NON-NLS-1$
 
 	public static final String PARAM_CERTID = "id-certificate"; //$NON-NLS-1$
 
-	/***Par&aacute;metro que indica el tf del responsable de la aplicaci&oacute;n */
+	/** Par&aacute;metro que indica el tf del responsable de la aplicaci&oacute;n */
 	public static final String PARAM_TEL = "telf"; //$NON-NLS-1$
 
 	public static final String PARAM_USERID = "userid"; //$NON-NLS-1$

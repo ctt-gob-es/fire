@@ -47,18 +47,6 @@ public class NewAppService extends HttpServlet {
 		// Obtenemos los parametros enviados del formulario junto con el Certificado
 		final Parameters params = getParameters(req);
 
-		try {
-			final String id = params.getId();
-			if (id == null && id.isEmpty()) {
-				throw new IllegalArgumentException("El id del usuario es: " + id); //$NON-NLS-1$
-			}
-		} catch (final Exception e) {
-			LOGGER.log(Level.WARNING,
-					"Se ha proporcionado un identificador de usuario no soportado: " + ServiceParams.PARAM_APPID); //$NON-NLS-1$
-			resp.sendRedirect("Application/AdminMainPage.jsp"); //$NON-NLS-1$
-			return;
-		}
-
 		// Obtenemos el tipo de operacion 1-Alta 2-Edicion
 
 		int op;
@@ -85,8 +73,8 @@ public class NewAppService extends HttpServlet {
 
 		// Nueva aplicacion
 		if (op == 1) {
-			String idAplicacion;
 			LOGGER.info("Alta de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
+			String idAplicacion;
 			try {
 				idAplicacion = AplicationsDAO.createApplication(params.getName(), params.getIdcertificate(),
 						params.isHabilitado());
@@ -107,11 +95,12 @@ public class NewAppService extends HttpServlet {
 
 		// Editar aplicacion
 		else if (op == 2) {
-			LOGGER.info("Edicion de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
+			LOGGER.info("Edicion de la aplicacion con ID: " + params.getId()); //$NON-NLS-1$
 			try {
-
-				final boolean enable = params.isHabilitado();
-				AplicationsDAO.updateApplication(params.getId(), params.getName(), params.getIdcertificate(),
+				AplicationsDAO.updateApplication(
+						params.getId(),
+						params.getName(),
+						params.getIdcertificate(),
 						params.isHabilitado());
 			} catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la actualizacion de la aplicacion", e); //$NON-NLS-1$
@@ -119,39 +108,13 @@ public class NewAppService extends HttpServlet {
 				return;
 			}
 
-			//primero eliminamos antes de actualizar y despues volvemos a crear
-
-			final String id = req.getParameter(ServiceParams.PARAM_APPID);
-
-			boolean isOk = true;
-			if (id == null) {
-				isOk = false;
-			} else {
-				try {
-					AplicationsDAO.removeApplication(id);
-				} catch (final Exception e) {
-					LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
-					resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
-					return;
-				}
-
-			}
-
-			String idAplicacion;
-			LOGGER.info("Alta de la aplicacion con nombre: " + params.getName()); //$NON-NLS-1$
+			// Para actualizar la tabla de relaciones entre aplicaciones y sus responsables,
+			// eliminaremos todas las relaciones existentes de esta aplicacion y las crearemos
+			// con el nuevo listado de responsables
 			try {
-				idAplicacion = AplicationsDAO.createApplication(params.getName(), params.getIdcertificate(),
-						params.isHabilitado());
+				AplicationsDAO.updateApplicationResponsables(params.getId(), params.getResponsables());
 			} catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
-				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
-				return;
-			}
-
-			try {
-				AplicationsDAO.createApplicationResponsable(idAplicacion, params.getResponsables());
-			} catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error en el alta de la aplicacion", e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "Error al actualizar el listado de responsables de la aplicacion: " + params.getId(), e); //$NON-NLS-1$
 				resp.sendRedirect("Application/AdminMainPage.jsp?op=" + stringOp + "&r=0&ent=app"); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
@@ -184,8 +147,6 @@ public class NewAppService extends HttpServlet {
 
 
 		final String[] nombreResp = req.getParameterValues(ServiceParams.PARAM_RESPONSABLES);
-
-		System.out.println(nombreResp);
 
 		final String idCertificate = req.getParameter(ServiceParams.PARAM_CERTID);
 		final String mail = req.getParameter(ServiceParams.PARAM_MAIL);

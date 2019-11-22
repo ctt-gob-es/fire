@@ -135,8 +135,7 @@ public class UsersDAO {
 			st.close();
 			rs.close();
 		} catch (final Exception e) {
-			LOGGER.info("Error al acceder a la base datos: " + e //$NON-NLS-1$
-			);
+			LOGGER.log(Level.SEVERE, "Error al acceder a la base datos", e); //$NON-NLS-1$
 			throw new SQLException(e);
 		}
 		return value;
@@ -160,7 +159,7 @@ public class UsersDAO {
 				usr.setId(rs.getString(1));
 				usr.setUserName(rs.getString(2));
 				usr.setpassword(rs.getString(3));
-				usr.setName(rs.getString(4));
+				usr.setFirstName(rs.getString(4));
 				usr.setSurname(rs.getString(5));
 				if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 					usr.setMail(rs.getString(6));
@@ -203,7 +202,7 @@ public class UsersDAO {
 				usr.setId(rs.getString(1));
 				usr.setUserName(rs.getString(2));
 				usr.setpassword(rs.getString(3));
-				usr.setName(rs.getString(4));
+				usr.setFirstName(rs.getString(4));
 				usr.setSurname(rs.getString(5));
 				if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 					usr.setMail(rs.getString(6));
@@ -493,7 +492,7 @@ public class UsersDAO {
 				if (hasPermission) {
 					final User appResponsable = new User();
 					appResponsable.setId(rs.getString(1));
-					appResponsable.setName(rs.getString(2));
+					appResponsable.setFirstName(rs.getString(2));
 					appResponsable.setSurname(rs.getString(3));
 
 					userList.add(appResponsable);
@@ -530,7 +529,7 @@ public class UsersDAO {
 
 				user.setId(rs.getString(4));
 				user.setUserName(rs.getString(5));
-				user.setName(rs.getString(6));
+				user.setFirstName(rs.getString(6));
 				user.setSurname(rs.getString(7));
 
 				if(rs.getString(6) != null && !"".equals(rs.getString(8))) { //$NON-NLS-1$
@@ -605,7 +604,7 @@ public class UsersDAO {
 				usr = new User();
 
 				usr.setId(rs.getString(1));
-				usr.setName(rs.getString(2));
+				usr.setFirstName(rs.getString(2));
 				usr.setUserName(rs.getString(3));
 
 				if(rs.getString(4) != null && !"".equals(rs.getString(4))) { //$NON-NLS-1$
@@ -740,7 +739,7 @@ public class UsersDAO {
 				usr.setId(rs.getString(1));
 				usr.setUserName(rs.getString(2));
 				usr.setpassword(rs.getString(3));
-				usr.setName(rs.getString(4));
+				usr.setFirstName(rs.getString(4));
 				usr.setSurname(rs.getString(5));
 				if(rs.getString(6) != null && !"".equals(rs.getString(6))) { //$NON-NLS-1$
 					usr.setMail(rs.getString(6));

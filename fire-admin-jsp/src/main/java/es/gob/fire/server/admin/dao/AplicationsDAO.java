@@ -93,7 +93,7 @@ public class AplicationsDAO {
 
 	private static final String STATEMENT_INSERT_APPLICATION_RESPONSABLE =  "INSERT INTO tb_responsable_de_aplicaciones(id_responsables,id_aplicaciones) VALUES (?, ?)";  //$NON-NLS-1$
 
-	private static final String STATEMENT_UPDATE_APPLICATION_RESPONSABLE =  "UPDATE tb_responsable_de_aplicaciones SET id_responsables=? ,id_aplicaciones=? VALUES (?, ?)";  //$NON-NLS-1$
+	private static final String STATEMENT_DELETE_APPLICATION_RESPONSABLE_BY_APP =  "DELETE FROM tb_responsable_de_aplicaciones WHERE id_aplicaciones=?";  //$NON-NLS-1$
 
 	private static final String STATEMENT_INSERT_APPLICATION_FECHA = "INSERT INTO tb_aplicaciones(id, nombre, fecha_alta,fk_certificado,habilitado ) VALUES (?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
@@ -448,11 +448,13 @@ public class AplicationsDAO {
 	 */
 	public static void removeApplication(final String id) throws SQLException {
 
-		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_REMOVE_APPLICATION);
-		st.setString(1, id);
-		LOGGER.info("Damos de baja la aplicacion con el ID: " + LogUtils.cleanText(id)); //$NON-NLS-1$
-		st.execute();
-		st.close();
+		try (final PreparedStatement st = DbManager.prepareStatement(STATEMENT_REMOVE_APPLICATION);) {
+			st.setString(1, id);
+			LOGGER.info("Damos de baja la aplicacion con el ID: " + LogUtils.cleanText(id)); //$NON-NLS-1$
+			st.execute();
+		}
+
+		removeApplicationResponsables(id);
 	}
 
 	/**
@@ -502,7 +504,7 @@ public class AplicationsDAO {
 					final User responsable = new User();
 					responsable.setId(rs.getString(5));
 					responsable.setUserName(rs.getString(6));
-					responsable.setName(rs.getString(7));
+					responsable.setFirstName(rs.getString(7));
 					responsable.setSurname(rs.getString(8));
 					responsable.setMail(rs.getString(9));
 					responsable.setTelephone(rs.getString(10));
@@ -537,7 +539,6 @@ public class AplicationsDAO {
 		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_UPDATE_APPLICATION);
 
 		st.setString(1, nombre);
-		//st.setString(2, fk_responsable);
 	    st.setString(2, fkCer);
 	    st.setBoolean(3, habilitado);
 	    st.setString(4, id);
@@ -546,6 +547,37 @@ public class AplicationsDAO {
 		LOGGER.info("Actualizamos la aplicacion '" + nombre + "' con el ID: " + id); //$NON-NLS-1$ //$NON-NLS-2$
 		st.execute();
 		st.close();
+	}
+
+	/**
+	 * Actualiza las relaciones aplicaci&oacute;n-responsables de una aplicacion concreta.
+	 * @param idAplication Identificador de la aplicaci&oacute;n de la que se desean actualizar las relaciones.
+	 * @param responsables Listado actualizado con todos los responsables de la aplicaci&oacute;n.
+	 * @throws SQLException Cuando ocurre un error al establecer las nuevas relaciones.
+	 */
+	public static void updateApplicationResponsables(final String idAplication, final String[] responsables)  throws SQLException {
+
+		// Primero eliminamos las relaciones que ya existiesen
+		try (final PreparedStatement st = DbManager.prepareStatement(STATEMENT_DELETE_APPLICATION_RESPONSABLE_BY_APP);) {
+			st.setString(1,  idAplication);
+			st.execute();
+		}
+
+		// Despues creamos las relaciones finales
+		createApplicationResponsable(idAplication, responsables);
+	}
+
+	/**
+	 * Elimina las relaciones aplicaci&oacute;n-responsables de una aplicacion concreta.
+	 * @param idAplication Identificador de la aplicaci&oacute;n de la que se desean actualizar las relaciones.
+	 * @throws SQLException Cuando ocurre un error al eliminar las relaciones.
+	 */
+	public static void removeApplicationResponsables(final String idAplication)  throws SQLException {
+		// Eliminamos las relaciones de la aplicacion indicada
+		try (final PreparedStatement st = DbManager.prepareStatement(STATEMENT_DELETE_APPLICATION_RESPONSABLE_BY_APP);) {
+			st.setString(1,  idAplication);
+			st.execute();
+		}
 	}
 
 	/**
@@ -637,29 +669,21 @@ public class AplicationsDAO {
 
 
 	/**
-	 * Agrega una nueva aplicaci&oacute;n al sistema a la que se añadiran responsables.
-	 * @param responsables
-	 * @param nombre Nombre de la aplicacion.
-	 * @param email Correo electr&oacute;nico de la aplicaci&oacute;n.
-	 * @param telefono N&uacute;mero de te&eacute;lefono de la aplicaci&oacute;n.
-	 * @param fkCer certificado en base 64 asignado a la la aplicaci&oacute;n.
-	 * @throws SQLException Cuando no se puede insertar la nueva aplicacion en base de datos.
-	 * @throws GeneralSecurityException  Cuando no se puede generar el identificador aleatorio de la aplicaci&oacute;n.
-	 * @SQL INSERT INTO tb_aplicaciones(id, nombre, fk_responsable, resp_correo, resp_telefono, fecha_alta,fk_certificado ) VALUES (?, ?, ?, ?, ?)
+	 * Agrega una nueva aplicaci&oacute;n al sistema a la que se a&ntilde;adiran responsables.
+	 * @param idAplication Identificador de la aplicaci&oacute;n a la que se le desean asignar los responsables.
+	 * @param responsables Listado con todos los responsables de la aplicaci&oacute;n.
+	 * @throws SQLException Cuando ocurre un error al establecer las relaciones.
 	 */
-	public static void createApplicationResponsable(final String idAplication, final String[] responsables)  throws SQLException, GeneralSecurityException {
+	public static void createApplicationResponsable(final String idAplication, final String[] responsables)  throws SQLException {
 
-		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INSERT_APPLICATION_RESPONSABLE);
-
-		for (final String idResponsable : responsables) {
-			st.setString(1,  idResponsable);
+		try (final PreparedStatement st = DbManager.prepareStatement(STATEMENT_INSERT_APPLICATION_RESPONSABLE);) {
 			st.setString(2,  idAplication);
-
-			st.execute();
+			for (final String idResponsable : responsables) {
+				st.setString(1,  idResponsable);
+				st.execute();
+			}
 		}
-
-		LOGGER.info("Damos de alta la aplicacion  "); //$NON-NLS-1$
-		st.close();
+		LOGGER.info("Se asignan los responsables de la aplicacion " + idAplication); //$NON-NLS-1$
 	}
 
 

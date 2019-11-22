@@ -31,8 +31,6 @@ public class DeleteAppService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(DeleteAppService.class.getName());
 
-	private static final String PARAM_ID = "id-app"; //$NON-NLS-1$
-
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -43,7 +41,7 @@ public class DeleteAppService extends HttpServlet {
 			return;
 		}
 
-		final String id = req.getParameter(PARAM_ID);
+		final String id = req.getParameter(ServiceParams.PARAM_APPID);
 
 		LOGGER.info("Baja de la app con ID: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 

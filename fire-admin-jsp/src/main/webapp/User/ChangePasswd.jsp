@@ -28,7 +28,7 @@
 	String nombre = ""; //$NON-NLS-1$
 	String apellidos = ""; //$NON-NLS-1$
 	if (usr != null) {
-		nombre = usr.getName();
+		nombre = usr.getFirstName();
 		apellidos = usr.getSurname();
 	}
 	final String title = "Modificar contrase&ntilde;a"; //$NON-NLS-1$

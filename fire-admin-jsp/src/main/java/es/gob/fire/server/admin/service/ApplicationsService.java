@@ -17,6 +17,9 @@ import es.gob.fire.server.admin.tool.Utils;
 
 public class ApplicationsService extends HttpServlet{
 
+	/** Serial Id. */
+	private static final long serialVersionUID = -7670213357136781588L;
+
 	@Override
 	protected  void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
@@ -55,7 +58,6 @@ public class ApplicationsService extends HttpServlet{
 
 		if(req.equals("getCertificateId")){//$NON-NLS-1$
 			final String id = request.getParameter("id-cert");//$NON-NLS-1$
-			final String numCert = request.getParameter("num-cert");//$NON-NLS-1$
 			final CertificateFire cert = CertificatesDAO.selectCertificateByID(id);
 			if (cert != null) {
 				if (cert.getX509Principal() != null) {
