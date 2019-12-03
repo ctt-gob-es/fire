@@ -1,7 +1,9 @@
 package es.gob.log.consumer;
 
 import java.io.IOException;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Clase para la lectura de entradas de logs. Permite obtener, en base a un patr&oacute;n,
@@ -9,7 +11,7 @@ import java.util.logging.Logger;
  */
 class LogRegistryReader {
 
-	private static final Logger LOGGER = Logger.getLogger(LogRegistryReader.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogRegistryReader.class);
 
 	private final LogRegistryParser registryParser;
 
@@ -67,7 +69,7 @@ class LogRegistryReader {
 				registry = this.registryParser.parse(this.logReader);
 			}
 			catch (final InvalidRegistryFormatException e) {
-				LOGGER.warning("Error al procesar una entrada del fichero de log: " + e); //$NON-NLS-1$
+				LOGGER.warn("Error al procesar una entrada del fichero de log: " + e); //$NON-NLS-1$
 				registry = e.getRegistry();
 			}
 		}

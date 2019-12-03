@@ -1,5 +1,5 @@
 #############################################
-# Fichero de configuración de Logs    		# 
+# Fichero de configuraciï¿½n de Logs    		# 
 #############################################
 
 # Juego de caracteres del log (UTF-8, UTF-16, ISO-8859-1, etc.) 
@@ -20,16 +20,16 @@ levels=FINE,INFO,WARNING,SEVERE
 # SimpleDateFormat de Java (https://docs.oracle.com/javase/tutorial/i18n/format/simpleDateFormat.html).
 # Ejemplo de patrones:
 # - Patron de fecha de los logs de FIRe:
-#		yyyy-mm-dd HH:mm:ss
+#		yyyy-MM-dd HH:mm:ss
 # - Patron de fecha por defecto de Java Logging API (Valor por defecto):
-#		MMM dd, yyyy hh:mm:ss a
+#		MMM dd, yyyy HH:mm:ss a
 # - Patron de fecha por defecto de Logback y Log4J:
 #		HH:mm:ss.SSS
 #		
 # IMPORTANTE: Si se utilizan nombres de mes y dia de la semana, es obligatorio que
 # el idioma de la JVM sea el mismo que el de la JVM que genero el log
 
-dateTimeFormat=yyyy-mm-dd HH:mm:ss
+dateTimeFormat=yyyy-MM-dd HH:mm:ss
 
 # Patron de las lineas del log. Es un texto fijo que admite las siguientes particulas para
 # expresar la parte dinamica:

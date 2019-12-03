@@ -3,12 +3,13 @@ package es.gob.log.consumer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.CharBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LogSearchText {
 
-	private static final Logger LOGGER = Logger.getLogger(LogSearchText.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogSearchText.class);
 
 	private final LogInfo logInfo;
 	private int nLinesReaded = 0;
@@ -73,7 +74,7 @@ public class LogSearchText {
 
 		// Se anaden el resto de lineas
 		if (!found) {
-			LOGGER.log(Level.INFO,"No se han encontrado mas ocurrencias en la  busqueda"); //$NON-NLS-1$
+			LOGGER.info("No se han encontrado mas ocurrencias en la  busqueda"); //$NON-NLS-1$
 			return null;
 		}
 

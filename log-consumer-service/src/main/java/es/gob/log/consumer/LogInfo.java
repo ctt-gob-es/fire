@@ -8,16 +8,16 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Informaci&oacute;n sobre el log.
  */
 public class LogInfo implements Serializable {
 
-	/**
-	 *
-	 */
+	/** Serial Id. */
 	private static final long serialVersionUID = 1L;
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
@@ -42,7 +42,7 @@ public class LogInfo implements Serializable {
 
 	private static final String TIME_FORMAT_CHARSET = "aHkKhmsSzZX"; //$NON-NLS-1$
 
-	private static final Logger LOGGER = Logger.getLogger(LogInfo.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogInfo.class);
 
 	static {
 		final StringBuilder builder = new StringBuilder(70)
@@ -110,7 +110,7 @@ public class LogInfo implements Serializable {
 			this.charset = Charset.forName(config.getProperty(PROPERTY_CHARSET, DEFAULT_CHARSET.name()));
 		}
 		catch (final Exception e) {
-			LOGGER.warning(String.format(
+			LOGGER.warn(String.format(
 					"Se configuro un juego de caracteres no valido (%s), se usara el por defecto: %s", //$NON-NLS-1$
 					config.getProperty(PROPERTY_CHARSET),
 					DEFAULT_CHARSET.name()));

@@ -49,7 +49,7 @@ public class LogTail {
 			// obtenidas de la division del fichero en partes (PART_SIZE)
 			final long totalSize = Files.size(this.path);
 			setFilePosition(totalSize);
-			final int totalNext =  (int) (totalSize/this.PART_SIZE);
+			final int totalNext =  (int) (totalSize/this.PART_SIZE) + 1;
 			final int [] positions = new int [totalNext];
 			for (int i = 0; i < totalNext; i++) {
 				positions[i] = i * this.PART_SIZE;

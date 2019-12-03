@@ -2,6 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.logconsumer</groupId>
 	<artifactId>log-consumer-service</artifactId>
+	<version>${log-consumer.version}</version>
 	<packaging>war</packaging>
 
 	<parent>
@@ -36,6 +37,20 @@
 		    		<artifactId>javax.json</artifactId>
 				</dependency>
 				
+				<!--  API de logs. -->
+				<dependency>
+				    <groupId>org.slf4j</groupId>
+				    <artifactId>slf4j-api</artifactId>
+				    <version>1.7.29</version>
+				</dependency>
+				
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+					<version>1.7.29</version>
+				</dependency>
+
+				<!-- Servlets -->
 				<dependency>
 					<groupId>javax.servlet</groupId>
 					<artifactId>javax.servlet-api</artifactId>
@@ -43,6 +58,7 @@
 					<scope>provided</scope>
 				</dependency>
 				
+				<!-- JUnit -->
 				<dependency>
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
@@ -62,8 +78,7 @@
 			</dependencies>
 		</profile>
 	</profiles>
-  
-  
+
   <build>
     <plugins>
     
@@ -91,5 +106,15 @@
       </plugin>
 
     </plugins>
+    
+    <resources>
+		<resource>
+			<directory>src/main/resources/</directory>
+			<excludes>
+				<exclude>*.properties</exclude>
+			</excludes>
+			<filtering>false</filtering>
+		</resource>
+	</resources>
   </build>
 </project>

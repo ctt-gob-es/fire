@@ -3,7 +3,6 @@ package es.gob.log.consumer.service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -12,6 +11,9 @@ import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Clase para el procesado de las peticiones de validaci&oacute;n de login.
@@ -24,7 +26,7 @@ public class ValidationLoginManager {
 
 	private static final String CIPHER_PROVIDER = "SunJCE"; //$NON-NLS-1$
 
-	private static final Logger LOGGER = Logger.getLogger(ValidationLoginManager.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ValidationLoginManager.class);
 
 	public static byte[] process(final HttpServletRequest req, final HttpSession session)
 			throws SessionException {
@@ -56,7 +58,7 @@ public class ValidationLoginManager {
 			decipheredToken = decipherCryptoToken(cipheredToken, iv);
 		}
 		catch (final Exception e) {
-			LOGGER.severe("No ha sido posible descifrar el token de conexion: " + e); //$NON-NLS-1$
+			LOGGER.error("No ha sido posible descifrar el token de conexion: " + e); //$NON-NLS-1$
 			throw new SessionException("La informacion de acceso proporcionada no es valida", e); //$NON-NLS-1$
 		}
 

@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.StandardOpenOption;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.log.consumer.LogDownload;
 
@@ -19,7 +20,7 @@ import es.gob.log.consumer.LogDownload;
  */
 public class LogDownloadServiceManager {
 
-	private static final Logger LOGGER = Logger.getLogger(LogDownloadServiceManager.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogDownloadServiceManager.class);
 
 	/**
 	 * Procesa una peticion de descarga de fichero.
@@ -46,13 +47,13 @@ public class LogDownloadServiceManager {
 
 		Long fileDownloadPosition = new Long(0L);
 
-		if ((Long) session.getAttribute("FileDownloadPos") != null) { //$NON-NLS-1$
-			fileDownloadPosition = (Long)session.getAttribute("FileDownloadPos"); //$NON-NLS-1$
+		if ((Long) session.getAttribute(SessionParams.DOWNLOAD_FILE_POS) != null) {
+			fileDownloadPosition = (Long) session.getAttribute(SessionParams.DOWNLOAD_FILE_POS);
 		}
 
 		SeekableByteChannel channel;
-		if ((SeekableByteChannel) session.getAttribute("ChannelDownload") != null) { //$NON-NLS-1$
-			channel = (SeekableByteChannel) session.getAttribute("ChannelDownload"); //$NON-NLS-1$
+		if ((SeekableByteChannel) session.getAttribute(SessionParams.DOWNLOAD_CHANNEL) != null) {
+			channel = (SeekableByteChannel) session.getAttribute(SessionParams.DOWNLOAD_CHANNEL);
 		}
 		else {
 			try {
@@ -62,16 +63,16 @@ public class LogDownloadServiceManager {
 				removeDownloadSessions(req);
 				throw new IOException("Ocurrio un error durante la apertura del fichero de log", e);
 			}
-			session.setAttribute("ChannelDownload", channel); //$NON-NLS-1$
+			session.setAttribute(SessionParams.DOWNLOAD_CHANNEL, channel);
 		}
 
 		LogDownload download;
-		if ((LogDownload) session.getAttribute("Download") != null) { //$NON-NLS-1$
-			download = (LogDownload) session.getAttribute("Download");//$NON-NLS-1$
+		if ((LogDownload) session.getAttribute(SessionParams.DOWNLOAD_FILE) != null) {
+			download = (LogDownload) session.getAttribute(SessionParams.DOWNLOAD_FILE);
 		}
 		else {
 			download =  new LogDownload(logFileName, channel);
-			session.setAttribute("Download", download); //$NON-NLS-1$
+			session.setAttribute(SessionParams.DOWNLOAD_FILE, download);
 		}
 
 		DataFragment result;
@@ -89,7 +90,7 @@ public class LogDownloadServiceManager {
 		}
 
 		if (download.getPosition() > 0L) {
-			session.setAttribute("FileDownloadPos", new Long(download.getPosition())); //$NON-NLS-1$
+			session.setAttribute(SessionParams.DOWNLOAD_FILE_POS, new Long(download.getPosition()));
 		}
 
 		if (result.isComplete()) {
@@ -105,18 +106,18 @@ public class LogDownloadServiceManager {
 			return;
 		}
 
-		final Object channelObject = session.getAttribute("ChannelDownload"); //$NON-NLS-1$
+		final Object channelObject = session.getAttribute(SessionParams.DOWNLOAD_CHANNEL);
 		if (channelObject != null && channelObject instanceof SeekableByteChannel) {
 			final SeekableByteChannel channel = (SeekableByteChannel) channelObject;
 			try {
 				channel.close();
 			} catch (final IOException e) {
-				LOGGER.log(Level.WARNING, "No se pudo cerrar el canal del fichero de log", e); //$NON-NLS-1$
+				LOGGER.warn("No se pudo cerrar el canal del fichero de log", e); //$NON-NLS-1$
 			}
 		}
 
-		session.removeAttribute("ChannelDownload"); //$NON-NLS-1$
-		session.removeAttribute("Download"); //$NON-NLS-1$
-		session.removeAttribute("FileDownloadPos"); //$NON-NLS-1$
+		session.removeAttribute(SessionParams.DOWNLOAD_CHANNEL);
+		session.removeAttribute(SessionParams.DOWNLOAD_FILE);
+		session.removeAttribute(SessionParams.DOWNLOAD_FILE_POS);
 	}
 }

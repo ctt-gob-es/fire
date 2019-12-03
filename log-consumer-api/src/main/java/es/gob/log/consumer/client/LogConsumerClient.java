@@ -10,8 +10,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -21,6 +19,9 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import es.gob.log.consumer.client.HttpManager.UrlHttpMethod;
 
 /**
@@ -28,7 +29,7 @@ import es.gob.log.consumer.client.HttpManager.UrlHttpMethod;
  */
 public class LogConsumerClient {
 
-	private static final Logger LOGGER = Logger.getLogger(LogConsumerClient.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogConsumerClient.class);
 
 	/** Status code devuelto en las conexiones HTTP para indicar &eacute;xito en la
 	 * operaci&oacute;n. */
@@ -58,7 +59,6 @@ public class LogConsumerClient {
 	 */
 	public LogConsumerClient() {
 		this.conn = new HttpManager();
-
 	}
 
 	/**
@@ -88,10 +88,16 @@ public class LogConsumerClient {
 
 		if (this.serviceUrl != null) {
 			try {
-				closeFile();
+				launchCloseFileRequest();
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.WARNING, "No se pudo cerrar el fichero abierto", e); //$NON-NLS-1$
+				LOGGER.debug("Si habia un fichero abierto, no se pudo cerrar", e); //$NON-NLS-1$
+			}
+			try {
+				launchCloseConnectionRequest();
+			}
+			catch (final Exception e) {
+				LOGGER.debug("Si habia una conexion abierta, no se pudo cerrar", e); //$NON-NLS-1$
 			}
 		}
 
@@ -100,6 +106,15 @@ public class LogConsumerClient {
 		// Solicitamos login
 		StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.REQUEST_LOGIN.getId()); //$NON-NLS-1$
+
+
+
+
+		LOGGER.info("Lanzamos la peticion de inicio de sesion");
+
+
+
+
 
 		HttpResponse response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 
@@ -123,8 +138,17 @@ public class LogConsumerClient {
 		}
 
 		if (token == null || iv == null) {
+			LOGGER.error("No se ha obtenido el token de autenticacion y la configuracion necesaria"); //$NON-NLS-1$
 			throw new IOException("No se ha obtenido el token de autenticacion y la configuracion necesaria"); //$NON-NLS-1$
 		}
+
+
+
+
+		LOGGER.info("Ciframos el token");
+
+
+
 
 		// Procesamos el token
 		final byte[] cipherKey = Base64.decode(keyB64);
@@ -132,13 +156,21 @@ public class LogConsumerClient {
 		try {
 			cipheredToken = Cipherer.cipher(token, cipherKey, iv);
 		} catch (final GeneralSecurityException e) {
-			throw new IOException("No se pudo negociar la sesion con el servidor", e); //$NON-NLS-1$
+			LOGGER.error("Error al cifrar el token de inicio de sesion", e); //$NON-NLS-1$
+			throw new IOException("Error al cifrar el token de inicio de sesion", e); //$NON-NLS-1$
 		}
 
 		// Solicitamos validacion de login
 		urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?op=").append(ServiceOperations.VALIDATE_LOGIN.getId()) //$NON-NLS-1$
 				.append("&sc=").append(Base64.encode(cipheredToken, true)); //$NON-NLS-1$
+
+
+
+
+		LOGGER.info("Enviamos a validar el token cifrado");
+
+
 
 		response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.POST);
 
@@ -152,7 +184,14 @@ public class LogConsumerClient {
 			}
 		}
 
+
+
+		LOGGER.info("Fin del login");
+
+
+
 		if (!logged) {
+			LOGGER.warn("El servidor nego el acceso al usuario"); //$NON-NLS-1$
 			throw new IOException("El servidor nego el acceso al usuario"); //$NON-NLS-1$
 		}
 	}
@@ -162,18 +201,22 @@ public class LogConsumerClient {
 	 */
 	public void closeConnection() {
 
+		// Hacemos la peticion y no atendemos al resultado, ya que en caso de error igualmente la
+		// sesion habria quedado invalidada
+		try {
+			launchCloseConnectionRequest();
+		}
+		catch (final Exception e) {
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+		}
+	}
+
+	private HttpResponse launchCloseConnectionRequest() throws IOException {
 		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
 				.append("?").append(ServiceParams.OPERATION) //$NON-NLS-1$
 				.append("=").append(ServiceOperations.CLOSE_CONNECTION.getId() ); //$NON-NLS-1$
 
-		// Hacemos la peticion y no atendemos al resultado, ya que en caso de error igualmente la
-		// sesion habria quedado invalidada
-		try {
-			this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
-		}
-		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
-		}
+		return this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 	}
 
 	/**
@@ -216,7 +259,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(requestUrl.toString(), HttpManager.UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			return createErrorMessage("Error de conexion con el servidor", 0); //$NON-NLS-1$
 		}
 
@@ -241,14 +284,14 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al solicitar un eco: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al solicitar un eco: " + new String(response.getContent())); //$NON-NLS-1$
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			result = createErrorMessage(errorParser.getMessage(), errorParser.getStatus());
 		}
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
@@ -275,7 +318,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			return createErrorMessage("Error de conexion con el servidor", 0).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -293,7 +336,7 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al listar los ficheros de log: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al listar los ficheros de log: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			result = createErrorMessage(errorParser.getMessage(), errorParser.getStatus());
@@ -301,7 +344,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
@@ -332,7 +375,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			logInfo = new LogInfo();
 			logInfo.setError(new LogError(LogError.EC_CONNECTION, "Error de conexion con el servidor")); //$NON-NLS-1$
 			return logInfo;
@@ -348,7 +391,7 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al abrir un fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al abrir un fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			logInfo = new LogInfo();
@@ -357,7 +400,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			logInfo = new LogInfo();
 			logInfo.setError(new LogError("HTTP" + response.statusCode, "Error devuelto por el servidor")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -387,7 +430,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			return createErrorMessage("Error de conexion con el servidor", 0).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -414,7 +457,7 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al abrir un fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al abrir un fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			result = createErrorMessage(errorParser.getMessage(), errorParser.getStatus());
@@ -422,7 +465,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
@@ -435,18 +478,14 @@ public class LogConsumerClient {
 	 */
 	public LogResult closeFile() {
 
-		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
-				.append("?").append(ServiceParams.OPERATION) //$NON-NLS-1$
-				.append("=").append(ServiceOperations.CLOSE_FILE.getId()); //$NON-NLS-1$
-
 		HttpResponse response;
 		try {
-			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
+			response = launchCloseFileRequest();
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error de conexion con el servidor de logs", e); //$NON-NLS-1$
 			final LogResult result = new LogResult();
-			result.setError(new LogError(LogError.EC_CONNECTION, "Error de conexion con el servidor"));
+			result.setError(new LogError(LogError.EC_CONNECTION, "Error de conexion con el servidor de logs")); //$NON-NLS-1$
 			return result;
 		}
 
@@ -454,12 +493,12 @@ public class LogConsumerClient {
 
 		// La peticion se tramito correctamente
 		if (response.statusCode == STATUSCODE_OK) {
-			result.setMessage("Fichero cerrado correctamente");
+			result.setMessage("Fichero cerrado correctamente"); //$NON-NLS-1$
 		}
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al cerrar un fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al cerrar un fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			result.setError(new LogError(LogError.EC_CONTROLLED, errorParser.getMessage()));
@@ -467,11 +506,19 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
-			result.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado"));
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			result.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado")); //$NON-NLS-1$
 		}
 
 		return result;
+	}
+
+	private HttpResponse launchCloseFileRequest() throws IOException {
+		final StringBuilder urlBuilder = new StringBuilder(this.serviceUrl)
+				.append("?").append(ServiceParams.OPERATION) //$NON-NLS-1$
+				.append("=").append(ServiceOperations.CLOSE_FILE.getId()); //$NON-NLS-1$
+
+		return this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 	}
 
 	/**
@@ -493,7 +540,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			return createErrorMessage("Error de conexion con el servidor", 0).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -518,7 +565,7 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al cerrar un fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al cerrar un fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			result = createErrorMessage(errorParser.getMessage(), errorParser.getStatus());
@@ -526,7 +573,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
@@ -556,7 +603,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			final LogData logData = new LogData();
 			logData.setError(new LogError(LogError.EC_CONNECTION, "Error de conexion con el servidor")); //$NON-NLS-1$
 			return logData;
@@ -573,7 +620,7 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al recuperar las ultimas lineas del fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al recuperar las ultimas lineas del fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			logData.setError(new LogError(LogError.EC_CONTROLLED, errorParser.getMessage()));
@@ -581,8 +628,8 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
-			logData.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado"));
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			logData.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado")); //$NON-NLS-1$
 		}
 
 		return logData;
@@ -611,7 +658,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			return createErrorMessage("Error de conexion con el servidor", 0).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -636,7 +683,7 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al recuperar las ultimas lineas del fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al recuperar las ultimas lineas del fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			result = createErrorMessage(errorParser.getMessage(), errorParser.getStatus());
@@ -644,7 +691,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
@@ -668,7 +715,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			final LogData logData = new LogData();
 			logData.setError(new LogError(LogError.EC_CONNECTION, "Error de conexion con el servidor")); //$NON-NLS-1$
 			return logData;
@@ -685,13 +732,13 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al recuperar los registros adicionales del fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al recuperar los registros adicionales del fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 
 			// No se encuentran mas resultados
 			if (Integer.parseInt(errorParser.getStatus()) == STATUSCODE_NO_CONTENT) {
-				LOGGER.log(Level.WARNING, "No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
+				LOGGER.warn("No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
 				logData.setError(new LogError(LogError.EC_NO_MORE_LINES, errorParser.getMessage()));
 			}
 			// Cualquier otro error
@@ -702,8 +749,8 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
-			logData.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado"));
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			logData.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado")); //$NON-NLS-1$
 		}
 
 		return logData;
@@ -727,7 +774,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			return createErrorMessage("Error de conexion con el servidor", 0).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -752,7 +799,7 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al solicitar mas logs: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al solicitar mas logs: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			result = createErrorMessage(errorParser.getMessage(), errorParser.getStatus());
@@ -760,7 +807,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
@@ -794,7 +841,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			final LogData logData = new LogData();
 			logData.setError(new LogError(LogError.EC_CONNECTION, "Error de conexion con el servidor")); //$NON-NLS-1$
 			return logData;
@@ -811,13 +858,13 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al recuperar registros filtrados del fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al recuperar registros filtrados del fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 
 			// No se encuentran mas resultados
 			if (Integer.parseInt(errorParser.getStatus()) == STATUSCODE_NO_CONTENT) {
-				LOGGER.log(Level.WARNING, "No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
+				LOGGER.warn("No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
 				logData.setError(new LogError(LogError.EC_NO_MORE_LINES, errorParser.getMessage()));
 			}
 			// Cualquier otro error
@@ -828,8 +875,8 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
-			logData.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado"));
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			logData.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado")); //$NON-NLS-1$
 		}
 
 		return logData;
@@ -862,7 +909,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			return createErrorMessage("Error de conexion con el servidor", 0).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -886,13 +933,13 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al solicitar logs filtrados: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al solicitar logs filtrados: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 
 			// No se encuentran mas resultados
 			if (Integer.parseInt(errorParser.getStatus()) == STATUSCODE_NO_CONTENT) {
-				LOGGER.log(Level.WARNING, "No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
+				LOGGER.warn("No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
 				result = createErrorMessage(errorParser.getMessage(), LogError.EC_NO_MORE_LINES);
 			}
 			// Cualquier otro error
@@ -904,7 +951,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
@@ -944,7 +991,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			final LogData logData = new LogData();
 			logData.setError(new LogError(LogError.EC_CONNECTION, "Error de conexion con el servidor")); //$NON-NLS-1$
 			return logData;
@@ -961,13 +1008,13 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al recuperar las l&iacute;neas buscadas del fichero: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al recuperar las l&iacute;neas buscadas del fichero: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 
 			// No se encuentran mas resultados
 			if (Integer.parseInt(errorParser.getStatus()) == STATUSCODE_NO_CONTENT) {
-				LOGGER.log(Level.WARNING, "No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
+				LOGGER.warn("No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
 				logData.setError(new LogError(LogError.EC_NO_MORE_LINES, errorParser.getMessage()));
 			}
 			// Cualquier otro error
@@ -978,8 +1025,8 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
-			logData.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado"));
+			LOGGER.error("No se ha podido conectar con el servicio indicado: {}", new String(response.getContent())); //$NON-NLS-1$
+			logData.setError(new LogError(LogError.EC_UNKNOWN, "No se ha podido conectar con el servicio indicado")); //$NON-NLS-1$
 		}
 
 		return logData;
@@ -1022,7 +1069,7 @@ public class LogConsumerClient {
 			response = this.conn.readUrl(urlBuilder.toString(), UrlHttpMethod.GET);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
+			LOGGER.error("Error en la conexion con el servidor de logs", e); //$NON-NLS-1$
 			return createErrorMessage("Error de conexion con el servidor", 0).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -1047,13 +1094,13 @@ public class LogConsumerClient {
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al solicitar busqueda de texto: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al solicitar busqueda de texto: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 
 			// No se encuentran mas resultados
 			if (Integer.parseInt(errorParser.getStatus()) == STATUSCODE_NO_CONTENT) {
-				LOGGER.log(Level.WARNING, "No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
+				LOGGER.warn("No se encuentran mas resultados en el fichero"); //$NON-NLS-1$
 				result = createErrorMessage(errorParser.getMessage(), LogError.EC_NO_MORE_LINES);
 			}
 			// Cualquier otro error
@@ -1064,7 +1111,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
@@ -1107,22 +1154,22 @@ public class LogConsumerClient {
 			} while (response.statusCode == STATUSCODE_PARTIAL_CONTENT);
 		}
 		catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado para descargar el fichero de log o no se pudo guardar", e); //$NON-NLS-1$
-			return new DownloadedLogFile(new LogError("0", "Error la descargar o guardar el fichero")); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado para descargar el fichero de log o no se pudo guardar", e); //$NON-NLS-1$
+			return new DownloadedLogFile(new LogError("0", "Error la descargar o guardar el fichero")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		// La peticion se tramito correctamente
 		if (response.statusCode == STATUSCODE_OK) {
 			// Si al final del proceso no hay fichero, se interpretara como un error de guardado
 			if (!outputFile.exists()) {
-				LOGGER.log(Level.SEVERE, "El fichero de log no se ha guardado"); //$NON-NLS-1$
-				return new DownloadedLogFile(new LogError(Integer.toString(response.statusCode), "El fichero de log no se ha guardado"));
+				LOGGER.error("El fichero de log no se ha guardado"); //$NON-NLS-1$
+				return new DownloadedLogFile(new LogError(Integer.toString(response.statusCode), "El fichero de log no se ha guardado")); //$NON-NLS-1$
 			}
 		}
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al solicitar busqueda de texto: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al solicitar busqueda de texto: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			return new DownloadedLogFile(new LogError(errorParser.getStatus(), errorParser.getMessage()));
@@ -1130,8 +1177,8 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
-			return new DownloadedLogFile(new LogError(Integer.toString(response.statusCode), "No se ha podido conectar con el servicio indicado"));
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			return new DownloadedLogFile(new LogError(Integer.toString(response.statusCode), "No se ha podido conectar con el servicio indicado")); //$NON-NLS-1$
 		}
 
 		// Resultado correcto
@@ -1159,7 +1206,7 @@ public class LogConsumerClient {
 		}
 
 		if (!dir.isDirectory() || !dir.canWrite()) {
-			LOGGER.log(Level.SEVERE, String.format("El directorio '%1s' no existe o no tiene permisos de escritura", downloadDir)); //$NON-NLS-1$
+			LOGGER.error(String.format("El directorio '{}' no existe o no tiene permisos de escritura", downloadDir)); //$NON-NLS-1$
 			return createErrorMessage("Problema en servidor al descargar el fichero", 500).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -1187,7 +1234,7 @@ public class LogConsumerClient {
 			} while (response.statusCode == STATUSCODE_PARTIAL_CONTENT);
 		}
 		catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado para descargar el fichero de log o no se pudo guardar", e); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado para descargar el fichero de log o no se pudo guardar", e); //$NON-NLS-1$
 			return createErrorMessage("Error la descargar o guardar el fichero", 0).getBytes(getCharsetContent()); //$NON-NLS-1$
 		}
 
@@ -1212,14 +1259,14 @@ public class LogConsumerClient {
 			}
 			// Si al final del proceso no hay fichero, se interpretara como un error de guardado
 			else {
-				LOGGER.log(Level.SEVERE, "El fichero de log no se ha guardado"); //$NON-NLS-1$
+				LOGGER.error("El fichero de log no se ha guardado"); //$NON-NLS-1$
 				result = createErrorMessage("El fichero de log no se ha guardado", response.statusCode); //$NON-NLS-1$
 			}
 		}
 
 		// Error controlado devuelto por el servidor
 		else if (response.statusCode == STATUSCODE_CONTROLLED_ERROR) {
-			LOGGER.log(Level.WARNING, "Mensaje devuelto por el servidor al solicitar busqueda de texto: " + //$NON-NLS-1$
+			LOGGER.warn("Mensaje devuelto por el servidor al solicitar busqueda de texto: " + //$NON-NLS-1$
 					new String(response.getContent()));
 			final ServerErrorParser errorParser = new ServerErrorParser(response.getContent());
 			result = createErrorMessage(errorParser.getMessage(), errorParser.getStatus());
@@ -1227,7 +1274,7 @@ public class LogConsumerClient {
 
 		// Error no controlado devuelto por el servidor
 		else {
-			LOGGER.log(Level.SEVERE, "No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
+			LOGGER.error("No se ha podido conectar con el servicio indicado: " + new String(response.getContent())); //$NON-NLS-1$
 			result = createErrorMessage("No se ha podido conectar con el servicio indicado", response.statusCode); //$NON-NLS-1$
 		}
 
