@@ -142,8 +142,8 @@
 						
 			
 			<%
- 																				if(op==1 || op==0 ){
- 																			%>	
+ 				if(op==1 || op==0 ){
+ 									%>	
 				<div style="margin: auto;width: 100%;padding: 3px;">		
 					<div style="display: inline-block; width: 20%;margin: 3px;">
 						<!-- Label para la accesibilidad de la pagina -->
@@ -341,8 +341,14 @@
 		}
 		else if (user.isRoot()) {
 		%>
+
+	    
+
+	    
 			document.getElementById("role-usr").disabled = 'disabled';
 			document.getElementById("role-usr").style.background = '#F5F5F5';
+			
+		
 			
 		<%
 		}

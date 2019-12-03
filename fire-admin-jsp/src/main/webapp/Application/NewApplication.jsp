@@ -26,7 +26,7 @@
 	String id = request.getParameter(ServiceParams.PARAM_APPID);
 	final int op = Integer.parseInt(request.getParameter(ServiceParams.PARAM_OP));
 	final String name = request.getParameter(ServiceParams.PARAM_NAME);
-
+	final String EMPTY = ""; //$NON-NLS-1$
 	final List<CertificateFire> lCert = CertificatesDAO.selectCertificateAll();
 
 	// op = 0 -> Solo lectura, no se puede modificar nada
@@ -242,7 +242,7 @@
 					<label for="pasarOpciones(this.form)" >Listado de responsables del sistema</label>
 						<select name="listadoCompletoResponsables[]"  style="width:400px" multiple="multiple" id="listadoCompletoResponsables" size="8" >
 						<% for (User responsable : usersResponsable) { %>
-							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getFirstName() %></option>
+							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + " " +responsable.getFirstName()  + " " + "(" + responsable.getUserName() + ")"%></option>
 						<% } %>
 						</select>
 						
@@ -251,10 +251,11 @@
 				
 				<div style='float: center; margin: 30px; padding: 5px;'>
 					<br></br>
-					<br></br>
 					<input type="button" id="moverright"  value="Añadir »" >
+				
 					<br></br>
 					<input type="button" id="moverleft"    value="« Eliminar" >
+				
 				</div>
 				
 				
@@ -262,7 +263,7 @@
 					<label for="listadoAplicacionResponsables" display: inline;>Listado de responsables de la aplicaci&oacute;n</label>
 						<select  style="width:400px" multiple="multiple"  id="listadoAplicacionResponsables" name="<%= ServiceParams.PARAM_RESPONSABLES %>"  size="8" >
 						<% for (User responsable : app.getResponsables()) { %>
-							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getFirstName() %></option>
+							<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + " " +responsable.getFirstName()  + " " + "(" + responsable.getUserName() + ")"%></option>
 						<% } %>
 						
 						</select>
@@ -426,7 +427,7 @@
 		
 		<% }else { %>	
 		<p>Los campos con * son obligatorios</p>
-			<form id="frmApplication" method="POST" autocomplete="off" action="../newApp" onsubmit="isCert()" >
+			<form id="frmApplication" method="POST"  autocomplete="off" action="../newApp" onsubmit="isCert()" >
 			
 			<input type="hidden" name="<%= ServiceParams.PARAM_APPID %>" value="<%=  id %>" />
 			<input type="hidden" name="<%= ServiceParams.PARAM_OP %>" value="<%=  op %>" />  
@@ -558,7 +559,7 @@
 				<label for="listadoAplicacionResponsables">Listado de responsables de la aplicaci&oacute;n</label>
 					<select multiple id="listadoAplicacionResponsables" name="listadoAplicacionResponsables">
 					<% for (User responsable : app.getResponsables()) { %>
-						<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + responsable.getFirstName() %></option>
+						<option value="<%= responsable.getId() %>"> <%= responsable.getSurname() + "," + " " +responsable.getFirstName()  + " " + "(" + responsable.getUserName() + ")"%></option>
 					<% } %>
 					</select>
 
@@ -578,7 +579,7 @@
 							<tr>
 								<td align="center"><%= user.getSurname() + " " + user.getFirstName() %></td>
 								<td align="center"><%= user.getMail() %></td>
-								<td align="center"><%= user.getTelephone() %></td>
+								<td align="center"><%=user.getTelephone() != null ? user.getTelephone(): EMPTY %></td>
 							</tr>
 						<% } %>
 					</table>	
@@ -653,35 +654,18 @@
 				  
 				  
 				  if (checkBox.checked == false && op == 1 || op == 2){
-				    text.style.display = "none";
+				    //text.style.display = "none";
 				 
 				    
 				  } else {
-				     text.style.display = "block";
+				    // text.style.display = "block";
 				   
 				  }
 			}
 				
-			 
-				
-			// funcion para añadir o eliminar responsables de una aplicacion
-			$(function () { 
-				function moveItems(origin, dest) {
-			    	$(origin).find(':selected').appendTo(dest);
-				}
-				
-				$('#moverright').on('click', function () {
-				    moveItems('#listadoCompletoResponsables', '#listadoAplicacionResponsables');
-				});
-				
-				$('#moverleft').on('click', function () {
-				    moveItems('#listadoAplicacionResponsables', '#listadoCompletoResponsables');
-				});
-			});
 			
-			//funcion para seleccionar todos los datos del segundo select
-			
-
+	
+				//función para el guardado del formulario
 				
 			function selectResponsables() {
 				var sel = $("#listadoAplicacionResponsables");
@@ -689,20 +673,40 @@
 					sel[0].options[i].selected = true;
 				}
 				     
-			        $("#frmApplication").submit(); // Submit the form
-			    
-			
-				
+			        $("#frmApplication").submit();
 			}
 			
-			/* function selectResponsables() {
-				for (i = 0; i < document.form.test.options.length; i++) {
-					document.form.test.options[i].selected = true;
-				}
-				form.submit();
-			} */
 			
-		</script>
+			//función para añadir o eliminar los usuarios responsables de las cajas de texto
+			
+			(function () {
+			    $('#moverright').click(function (e) {
+			        var selectedOpts = $('#listadoCompletoResponsables option:selected');
+			        if (selectedOpts.length == 0) {
+			            alert("Nada que mover.");
+			            e.preventDefault();
+			        }
+			        $('#listadoAplicacionResponsables').append($(selectedOpts).clone());
+			        $(selectedOpts).remove();
+			        e.preventDefault();
+			    });
+
+
+			    $('#moverleft').click(function (e) {
+			        var selectedOpts = $('#listadoAplicacionResponsables option:selected');
+			        if (selectedOpts.length == 0) {
+			            alert("Nada que mover.");
+			            e.preventDefault();
+			        }
+			        $('#listadoCompletoResponsables').append($(selectedOpts).clone());
+			        $(selectedOpts).remove();
+			        e.preventDefault();
+			    });
+			    
+			}(jQuery));
+			
+			</script>	
+
    	</div>
 </body>
 </html>

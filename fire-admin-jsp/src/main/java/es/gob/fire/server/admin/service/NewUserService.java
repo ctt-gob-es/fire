@@ -144,6 +144,33 @@ public class NewUserService extends HttpServlet {
 
 				final RolePermissions permissions = RolesDAO.getPermissions(usr.getRole());
 
+				if (usr == null || usr.isRoot()) {
+					if (params.getIdUser() == null || params.getUserName() == null || params.getUserSurname() == null ) {
+						LOGGER.log(Level.SEVERE,
+								"No se han proporcionado todos los datos requeridos para la edicion del usuario (login, nombre y apellidos)"); //$NON-NLS-1$
+						isOk = false;
+					}else {
+						LOGGER.info("Edicion del usuario con nombre de login: " + params.getLoginUser()); //$NON-NLS-1$
+						try {
+							if (permissions == null || !permissions.hasAppResponsable()) {
+								UsersDAO.updateUserRoot(params.getIdUser(), params.getUserName(),
+										params.getUserSurname(), params.getUserEMail(),
+										params.getUserTelf());
+							} else {
+
+								UsersDAO.updateUserRoot(params.getIdUser(), params.getUserName(),
+										params.getUserSurname(), params.getUserEMail(),
+										params.getUserTelf());
+							}
+						}
+						catch (final Exception e) {
+							LOGGER.log(Level.SEVERE, "Error en la edicion del usuario", e); //$NON-NLS-1$
+							isOk = false;
+						}
+					}
+
+				}else {
+
 				if (params.getIdUser() == null || params.getUserName() == null || params.getUserSurname() == null ||
 						params.getUserRole() == null) {
 					LOGGER.log(Level.SEVERE,
@@ -169,9 +196,9 @@ public class NewUserService extends HttpServlet {
 						isOk = false;
 					}
 				}
+
+				}
 			}
-
-
 			else if(op == 3 && params.getLoginUser() != null ){
 				// Comprobar que el login de usuario no existe anteriormente en la tabla de usuarios dado de alta
 				final User usr = UsersDAO.getUserByName(params.getLoginUser());
@@ -282,7 +309,7 @@ static class Parameters {
 
 	/**
 	 * Obtiene el login (nombre con el que se accede a la aplicaci&oacute;n) del usuario
-	 * @return
+	 * @return login
 	 */
 	final String getLoginUser() {
 		return this.loginUser;

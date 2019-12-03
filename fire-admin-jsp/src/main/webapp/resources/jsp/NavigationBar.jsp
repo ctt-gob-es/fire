@@ -16,7 +16,7 @@
 			<li id="header">				
 					<nav>
 						<ul class="nav">
-							<li><a>Usuarios</a>
+							<li><a class="enl_mnu" href="../User/UserPage.jsp" title="Gestiona las cuentas de usuarios permitiendo: visualizar, crear, modificar y eliminar.">Usuarios</a>
 								<ul>
 									<li><a class="enl_mnu" href="../User/UserPage.jsp" title="Gestiona las cuentas de usuarios permitiendo: visualizar, crear, modificar y eliminar.">Gesti&oacute;n</a></li>
 									<li><a class="enl_mnu" href="../User/ChangePasswd.jsp?usr-name=<%= userLogged%>&op=3" title="Modificar contraseña del usuario logado">Cambio de contraseña</a></li>

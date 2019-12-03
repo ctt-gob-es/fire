@@ -54,13 +54,15 @@ public class UsersDAO {
 			+ "WHERE tb_usu.fk_rol = tb_rol.id  ORDER BY tb_usu.nombre_usuario"; //$NON-NLS-1$
 
 
-	private static final String ST_SELECT_ALL_USERS_PERMISSIONS = "SELECT  id_usuario, nombre, apellidos, permisos  FROM tb_usuarios, tb_roles WHERE tb_roles.id = tb_usuarios.fk_rol";//$NON-NLS-1$
+	private static final String ST_SELECT_ALL_USERS_PERMISSIONS = "SELECT  id_usuario,nombre_usuario, nombre, apellidos, permisos  FROM tb_usuarios, tb_roles WHERE tb_roles.id = tb_usuarios.fk_rol";//$NON-NLS-1$
 
 	private static final String ST_SELECT_ALL_USERS_COUNT = "SELECT count(*) FROM tb_usuarios"; //$NON-NLS-1$
 
 	private static final String ST_SELECT_ALL_USERS_PAG = "SELECT id_usuario, nombre_usuario, clave,nombre, apellidos, correo_elec, telf_contacto, fk_rol, fec_alta, usu_defecto FROM tb_usuarios ORDER BY id_usuario limit ?,?";//$NON-NLS-1$
 
 	private static final String ST_UDATE_USER_BY_ID = "UPDATE tb_usuarios SET  nombre=?, apellidos=?, correo_elec=?, fk_rol=?, telf_contacto=? WHERE id_usuario = ?";//$NON-NLS-1$
+
+	private static final String ST_UDATE_USER_ROOT_BY_ID = "UPDATE tb_usuarios SET  nombre=?, apellidos=?, correo_elec=?, telf_contacto=? WHERE id_usuario = ?";//$NON-NLS-1$
 
 	private static final String ST_UDATE_PASSWD_BY_ID = "UPDATE tb_usuarios SET clave=? WHERE id_usuario = ?";//$NON-NLS-1$
 
@@ -420,7 +422,32 @@ public class UsersDAO {
 		st.close();
 	}
 
+	/**
+	 * Actualiza los datos de un usuario existente
+	 * @param idUser Identificador del usuario.
+	 * @param name Nombre de pila del usuario.
+	 * @param surname Apellidos.
+	 * @param email Correo electr&oacute;nico.
+	 * @param telf Tel&eacute;fono.
+	 * @param string
+	 * @throws SQLException
+	 */
+	public static void updateUserRoot (final String idUser, final String name, final String surname, final String email, final String telf) throws SQLException {
+		final PreparedStatement st = DbManager.prepareStatement(ST_UDATE_USER_ROOT_BY_ID);
 
+		st.setString(1, name);
+		st.setString(2, surname);
+		st.setString(3, email);
+		//st.setString(4, role);
+		st.setString(4, telf);
+		st.setString(5, idUser);
+
+
+		LOGGER.info("Actualizamos el usuario '" + name + " " + surname + "' con el ID: " + idUser); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		st.execute();
+		st.close();
+	}
 
 	/**
 	 * A&ntilde;ade un nuevo usuario al sistema.
@@ -486,14 +513,15 @@ public class UsersDAO {
 			final ResultSet rs = st.executeQuery();
 			while (rs.next()) {
 
-				final String permissions = rs.getString(4);
+				final String permissions = rs.getString(5);
 				final boolean hasPermission = RolePermissions.hasPermission(permissions, RolePermissions.PERMISION_APP_RESPONSABLE);
 
 				if (hasPermission) {
 					final User appResponsable = new User();
 					appResponsable.setId(rs.getString(1));
-					appResponsable.setFirstName(rs.getString(2));
-					appResponsable.setSurname(rs.getString(3));
+					appResponsable.setFirstName(rs.getString(3));
+					appResponsable.setSurname(rs.getString(4));
+					appResponsable.setUserName(rs.getString(2));
 
 					userList.add(appResponsable);
 				}

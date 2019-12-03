@@ -76,7 +76,7 @@ $(document).ready(function(){
 				e.preventDefault();			
 				$('label[for=email]').css({color:'red'});
 				$('#email').css({backgroundColor:'#fcc'});
-				msg = msg + "Debe introducir mail correcto para el usuario\n";
+				msg = msg + "Debe introducir un correo electrónico correcto para el usuario\n";
 				ok = false;
 			}
 			if(op == 1 && $("#email").val() != ""){			
