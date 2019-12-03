@@ -1,12 +1,11 @@
 package es.gob.log.consumer.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,6 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import es.gob.log.consumer.LogConstants;
+import es.gob.log.consumer.LogDirInfo;
 import es.gob.log.consumer.LogFiles;
 
 /**
@@ -24,7 +28,7 @@ public class LogService extends HttpServlet {
 	/** Serial ID. */
 	private static final long serialVersionUID = -8162434026674748888L;
 
-	private static final Logger LOGGER = Logger.getLogger(LogService.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogService.class);
 
 	/** Status code personalizado que se proporciona cuando se quiere notificar
 	 * un error interno controlado. */
@@ -32,17 +36,46 @@ public class LogService extends HttpServlet {
 
 	private static final int ERROR_SEPARATOR = '|';
 
-	private static File pathLogs = null;
+	private File pathLogs = null;
 
+	private LogDirInfo logDirInfo = null;
 
 	@Override
 	public void init() throws ServletException {
-		super.init();
 
-		pathLogs = ConfigManager.getInstance().getLogsDir();
-		if (pathLogs == null || !pathLogs.isDirectory()) {
-			LOGGER.severe("No se ha configurado un directorio de logs valido: " + pathLogs); //$NON-NLS-1$
-			throw new ServletException("No se ha configurado un directorio de logs valido: " + pathLogs); //$NON-NLS-1$
+		LOGGER.debug("Se inicia el servicio de consulta de logs");
+
+		// Cargamos el directorio de logs
+		this.pathLogs = ConfigManager.getInstance().getLogsDir();
+		if (this.pathLogs == null || !this.pathLogs.isDirectory()) {
+			LOGGER.error("No se ha configurado un directorio de logs valido: " + this.pathLogs); //$NON-NLS-1$
+			throw new ServletException("No se ha configurado un directorio de logs valido: " + this.pathLogs); //$NON-NLS-1$
+		}
+
+		// Comprobamos si en el directorio hay un fichero con la configuracion general para los
+		// ficheros de log. Si lo hay, extraemos tambien de el informacion adicional.
+		final File defaultLogInfoFile = new File(this.pathLogs, LogConstants.FILE_EXT_LOGINFO);
+		if (defaultLogInfoFile.isFile()) {
+			LOGGER.info("Se ha encontrado un fichero '" + LogConstants.FILE_EXT_LOGINFO + //$NON-NLS-1$
+			            "' con la configuracion general del directorio"); //$NON-NLS-1$
+
+			// Se carga la configuracion del fichero referente al directorio
+			this.logDirInfo = new LogDirInfo();
+			try (FileInputStream fis = new FileInputStream(defaultLogInfoFile)) {
+				this.logDirInfo.load(fis);
+			}
+			catch (final IOException e) {
+				LOGGER.warn("No se ha podido leer el fichero '" + //$NON-NLS-1$
+						LogConstants.FILE_EXT_LOGINFO +
+						"' con la configuracion general del directorio", e); //$NON-NLS-1$
+				this.logDirInfo = null;
+			}
+
+			// Si el fichero existe pero no se configura nada en el referente al directorio
+			// se omite esta configuracion
+			if (this.logDirInfo != null && !this.logDirInfo.hasConfiguration()) {
+				this.logDirInfo = null;
+			}
 		}
 	}
 
@@ -57,7 +90,7 @@ public class LogService extends HttpServlet {
 		final String opString = req.getParameter(ServiceParams.OPERATION);
 
 		if (opString == null) {
-			LOGGER.warning("No se ha indicado codigo de operacion"); //$NON-NLS-1$
+			LOGGER.warn("No se ha indicado codigo de operacion"); //$NON-NLS-1$
 			sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "No se ha indicado codigo de operacion"); //$NON-NLS-1$
 			return;
 		}
@@ -68,7 +101,7 @@ public class LogService extends HttpServlet {
 			op = checkOperation(opString);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString.replaceAll("[\r\n]", ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			LOGGER.warn(String.format("Codigo de operacion no soportado (%s). Se rechaza la peticion.", opString.replaceAll("[\r\n]", ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "Codigo de operacion no soportado"); //$NON-NLS-1$
 			return;
 		}
@@ -92,7 +125,7 @@ public class LogService extends HttpServlet {
 					result = validateLogin(req);
 					break;
 				default:
-					LOGGER.warning("Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
+					LOGGER.warn("Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
 					sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada sin login previo a pesar de estar marcada como tal. Este resultado refleja un problema en el codigo del servicio"); //$NON-NLS-1$
 					return;
 				}
@@ -102,11 +135,11 @@ public class LogService extends HttpServlet {
 				switch (op) {
 				case GET_LOG_FILES:
 					LOGGER.info("Solicitud entrante de listado de ficheros"); //$NON-NLS-1$
-					result = getLogFiles(pathLogs);
+					result = getLogFiles(this.pathLogs, this.logDirInfo);
 					break;
 				case OPEN_FILE:
 					LOGGER.info("Solicitud entrante de apertura de fichero"); //$NON-NLS-1$
-					result = openFile(req);
+					result = openFile(req, this.logDirInfo);
 					break;
 				case CLOSE_FILE:
 					LOGGER.info("Solicitud entrante de cierre de fichero"); //$NON-NLS-1$
@@ -134,7 +167,7 @@ public class LogService extends HttpServlet {
 					break;
 				case DOWNLOAD:
 					LOGGER.info("Solicitud entrante de descarga de fichero"); //$NON-NLS-1$
-					final DataFragment data = download(req, pathLogs);
+					final DataFragment data = download(req, this.pathLogs);
 					if (!data.isComplete()) {
 						resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 					}
@@ -146,44 +179,44 @@ public class LogService extends HttpServlet {
 					result = "Conexion cerrada".getBytes(); //$NON-NLS-1$
 					break;
 				default:
-					LOGGER.warning(String.format("Operacion no soportada: %s", op)); //$NON-NLS-1$
+					LOGGER.warn("Operacion no soportada: " + op); //$NON-NLS-1$
 					sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "Operacion no soportada: " + op); //$NON-NLS-1$
 					return;
 				}
 			}
 			else {
-				LOGGER.warning("El cliente no inicio sesion. Se rechaza la peticion."); //$NON-NLS-1$
+				LOGGER.warn("El cliente no inicio sesion. Se rechaza la peticion."); //$NON-NLS-1$
 				sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "El cliente no inicio sesion"); //$NON-NLS-1$
 				return;
 			}
 		}
 		catch (final NoResultException e) {
-			LOGGER.log(Level.INFO, "Se notifica al cliente que no se pudo obtener un resultado"); //$NON-NLS-1$
+			LOGGER.info("Se notifica al cliente que no se pudo obtener un resultado"); //$NON-NLS-1$
 			sendControlledError(resp, HttpServletResponse.SC_NO_CONTENT, e.getLocalizedMessage());
 			return;
 		}
 		catch (final IllegalArgumentException e) {
-			LOGGER.log(Level.WARNING, "Se envio una peticion con parametros no validos: " + e); //$NON-NLS-1$
+			LOGGER.warn("Se envio una peticion con parametros no validos", e); //$NON-NLS-1$
 			sendControlledError(resp, HttpServletResponse.SC_BAD_REQUEST, "Se envio una peticion con parametros no validos"); //$NON-NLS-1$
 			return;
 		}
 		catch (final SessionException e) {
-			LOGGER.log(Level.WARNING,"Se solicito una operacion sin haber abierto sesion u ocurrio un error al abrirla",e); //$NON-NLS-1$
+			LOGGER.warn("Se solicito una operacion sin haber abierto sesion u ocurrio un error al abrirla", e); //$NON-NLS-1$
 			sendControlledError(resp, HttpServletResponse.SC_UNAUTHORIZED, "Sesion no iniciada"); //$NON-NLS-1$
 			return;
 		}
 		catch (final UnsupportedEncodingException e) {
-			LOGGER.log(Level.SEVERE,"Codificacion no soportada",e); //$NON-NLS-1$
+			LOGGER.error("Codificacion no soportada", e); //$NON-NLS-1$
 			sendControlledError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "La codificacion no es valida."); //$NON-NLS-1$
 			return;
 		}
 		catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
+			LOGGER.error("Ocurrio un error al procesar la peticion", e); //$NON-NLS-1$
 			sendControlledError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ocurrio un error al procesar la peticion"); //$NON-NLS-1$
 			return;
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Ocurrio un error desconocido al procesar la peticion", e); //$NON-NLS-1$
+			LOGGER.error("Ocurrio un error desconocido al procesar la peticion", e); //$NON-NLS-1$
 			sendControlledError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ocurrio un error desconocido al procesar la peticion"); //$NON-NLS-1$
 			return;
 		}
@@ -293,42 +326,44 @@ public class LogService extends HttpServlet {
 	 * ficheros con extendi&oacute;n log exitentes en el servidor con los datos nombre, fecha y
 	 * tama&ntilde;o. En caso de no encontrar ficheros, la cadena en formato JSON lo indica como
 	 * mensaje de error.
-	 * @param logsDir Directorio copn los ficheros de log.
+	 * @param logsDir Directorio con los ficheros de log.
+	 * @param dirInfo Configuraci&oacute;n referente al directorio que se quiere listar.
 	 * @return Array de bytes de un JSON con el listado de ficheros o con un mensaje de error.
 	 */
-	private static byte[] getLogFiles (final File logsDir)  {
-		return LogFiles.getLogFiles(logsDir);
+	private static byte[] getLogFiles (final File logsDir, final LogDirInfo dirInfo)  {
+		return LogFiles.getLogFiles(logsDir, dirInfo);
 	}
 
 	/**
-	 *
+	 * Prepara un fichero para ser procesado.
 	 * @param req Petici&oacute;n HTTP con los par&aacute;metros necesarios.
+	 * @param dirInfo Configuraci&oacute;n referente al directorio que se quiere listar.
 	 * @return JSON con la informaci&oacute;n necesaria para el tratamiento del fichero.
 	 * @throws IOException Cuando No se puede encontrar o abrir el fichero.
 	 * @throws IllegalArgumentException Cuando no se env&iacute;a el nombre de fichero o el valor no es v&aacute;lido.
 	 */
-	private static byte[] openFile(final HttpServletRequest req) throws IOException {
-		return LogOpenServiceManager.process(req);
+	private static byte[] openFile(final HttpServletRequest req, final LogDirInfo dirInfo) throws IOException {
+		return LogOpenServiceManager.process(req, dirInfo);
 	}
 
 	private static boolean closeFile(final HttpServletRequest req) {
 
 		final HttpSession session = req.getSession(false);
 
-		session.removeAttribute("Reader"); //$NON-NLS-1$
-		session.removeAttribute("LogInfo"); //$NON-NLS-1$
-		session.removeAttribute("FilePosition"); //$NON-NLS-1$
-		session.removeAttribute("FileSize"); //$NON-NLS-1$
+		session.removeAttribute(SessionParams.FILE_READER);
+		session.removeAttribute(SessionParams.LOG_INFO);
+		session.removeAttribute(SessionParams.FILE_POSITION);
+		session.removeAttribute(SessionParams.FILE_SIZE);
 
-		final Object channelObject = session.getAttribute("Channel"); //$NON-NLS-1$
+		final Object channelObject = session.getAttribute(SessionParams.FILE_CHANNEL);
 
-		session.removeAttribute("Channel"); //$NON-NLS-1$
+		session.removeAttribute(SessionParams.FILE_CHANNEL);
 
 		if (channelObject != null && channelObject instanceof AsynchronousFileChannel) {
 			try {
 				((AsynchronousFileChannel) channelObject).close();
 			} catch (final IOException e) {
-				LOGGER.log(Level.SEVERE, "No se ha cerrado correctamente el fichero de log: ", e); //$NON-NLS-1$
+				LOGGER.error("No se ha cerrado correctamente el fichero de log: ", e); //$NON-NLS-1$
 				return false;
 			}
 		}

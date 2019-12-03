@@ -13,7 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
+
+import org.slf4j.LoggerFactory;
 
 /**
  * Clase para la lectura completa de un fichero por medio cargas segmentadas
@@ -233,7 +234,7 @@ public class FragmentedFileReader implements LogReader {
 			}
 			catch (final Exception e) {
 				// La linea es demasiado larga y la cortamos ahi
-				Logger.getLogger(FragmentedFileReader.class.getName()).warning("Linea demasiado larga. Se cortara");
+				LoggerFactory.getLogger(FragmentedFileReader.class).warn("Linea demasiado larga. Se cortara"); //$NON-NLS-1$
 				this.charactersReaded--;
 				this.filePosition += this.charactersReaded;
 				moreLines = true;

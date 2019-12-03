@@ -33,8 +33,6 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -47,12 +45,15 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** Clase para la lectura y env&iacute;o de datos a URL remotas.
  * @author Carlos Gamuci.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 class HttpManager {
 
-	private static final Logger LOGGER = Logger.getLogger(HttpManager.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpManager.class);
 
 	private static final String HTTPS = "https"; //$NON-NLS-1$
 
@@ -196,7 +197,7 @@ class HttpManager {
 				}
 			}
 			catch(final Exception e) {
-				LOGGER.warning("No se ha podido ajustar la confianza SSL, es posible que no se pueda completar la conexion: " + e); //$NON-NLS-1$
+				LOGGER.warn("No se ha podido ajustar la confianza SSL, es posible que no se pueda completar la conexion: " + e); //$NON-NLS-1$
 			}
 		}
 
@@ -284,7 +285,7 @@ class HttpManager {
 				}
 			}
 			catch(final Exception e) {
-				LOGGER.warning("No se ha podido reestablecer la confianza SSL despues de realizar la conexion: " + e); //$NON-NLS-1$
+				LOGGER.warn("No se ha podido reestablecer la confianza SSL despues de realizar la conexion: " + e); //$NON-NLS-1$
 			}
 		}
 
@@ -303,7 +304,7 @@ class HttpManager {
 			return InetAddress.getByName(url.getHost()).isLoopbackAddress();
 		}
 		catch (final Exception e) {
-			LOGGER.warning("Error comprobando si una URL es el bucle local: " + e); //$NON-NLS-1$
+			LOGGER.warn("Error comprobando si una URL es el bucle local: " + e); //$NON-NLS-1$
 			return false;
 		}
 	}
@@ -311,9 +312,7 @@ class HttpManager {
 	/** Reconfigura el gestor de confianza por defecto para las conexi&oacute;nes. */
 	private static void unconfigureCustomTrustManager() {
 		HttpsURLConnection.setDefaultSSLSocketFactory(DEFAULT_SSL_SOCKET_FACTORY);
-		LOGGER.fine(
-			"Reabilitado el gestior de confianza SSL por defecto" //$NON-NLS-1$
-		);
+		LOGGER.debug("Reabilitado el gestor de confianza SSL por defecto"); //$NON-NLS-1$
 	}
 
 	/** Deshabilita las comprobaciones de certificados en conexiones SSL, acept&aacute;dose entonces
@@ -338,10 +337,9 @@ class HttpManager {
 		catch(final Exception e) {
 			// En ocasiones, los servidores de aplicaciones establecen configuraciones de KeyStore
 			// que no se pueden cargar aqui, y no es algo controlable por las aplicaciones
-			LOGGER.log(
-				Level.SEVERE,
-				"No ha sido posible obtener el KeyManager con el KeyStore '" + System.getProperty(KEYSTORE) + //$NON-NLS-1$
-					"', se usara null: " + e, //$NON-NLS-1$
+			LOGGER.error(
+				"No ha sido posible obtener el KeyManager con el KeyStore '" + //$NON-NLS-1$
+						System.getProperty(KEYSTORE) + "', se usara null", //$NON-NLS-1$
 				e
 			);
 			km = null;
@@ -360,9 +358,7 @@ class HttpManager {
 				}
 			}
 		);
-		LOGGER.fine(
-			"Configurado el TrustManager a medida para las conexiones SSL" //$NON-NLS-1$
-		);
+		LOGGER.debug("Configurado el TrustManager a medida para las conexiones SSL"); //$NON-NLS-1$
 	}
 
 	/** Habilita las comprobaciones de certificados en conexiones SSL dej&aacute;ndolas con su
@@ -370,9 +366,7 @@ class HttpManager {
 	public static void enableSslChecks() {
 		HttpsURLConnection.setDefaultSSLSocketFactory(DEFAULT_SSL_SOCKET_FACTORY);
 		HttpsURLConnection.setDefaultHostnameVerifier(DEFAULT_HOSTNAME_VERIFIER);
-		LOGGER.fine(
-			"Habilitadas comprobaciones SSL" //$NON-NLS-1$
-		);
+		LOGGER.debug("Habilitadas comprobaciones SSL"); //$NON-NLS-1$
 	}
 
 	/** Deshabilita las comprobaciones de certificados en conexiones SSL, acept&aacute;dose entonces
@@ -397,12 +391,11 @@ class HttpManager {
 		catch(final Exception e) {
 			// En ocasiones, los servidores de aplicaciones establecen configuraciones de KeyStore
 			// que no se pueden cargar aqui, y no es algo controlable por las aplicaciones
-			LOGGER.log(
-				Level.SEVERE,
-				"No ha sido posible obtener el KeyManager con el KeyStore '" + System.getProperty(KEYSTORE) + //$NON-NLS-1$
-					"', se usara null: " + e, //$NON-NLS-1$
-				e
-			);
+			LOGGER.error(
+					"No ha sido posible obtener el KeyManager con el KeyStore '" + //$NON-NLS-1$
+							System.getProperty(KEYSTORE) + "', se usara null: " + e, //$NON-NLS-1$
+							e
+					);
 			km = null;
 		}
 		sc.init(
@@ -419,9 +412,7 @@ class HttpManager {
 				}
 			}
 		);
-		LOGGER.fine(
-			"Deshabilitadas comprobaciones SSL" //$NON-NLS-1$
-		);
+		LOGGER.debug("Deshabilitadas comprobaciones SSL"); //$NON-NLS-1$
 	}
 
 	/** Devuelve un KeyManager a utilizar cuando se desea deshabilitar las comprobaciones de certificados en las conexiones SSL.
@@ -445,7 +436,7 @@ class HttpManager {
 		}
 		final File f = new File(keyStore);
 		if (!f.isFile() || !f.canRead()) {
-			LOGGER.warning("El KeyStore SSL no existe o no es legible: " + f.getAbsolutePath()); //$NON-NLS-1$
+			LOGGER.warn("El KeyStore SSL no existe o no es legible: " + f.getAbsolutePath()); //$NON-NLS-1$
 			return null;
 		}
 		final KeyStore keystore = KeyStore.getInstance(
@@ -479,7 +470,7 @@ class HttpManager {
 			trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 			trustManagerFactory.init(trustStore);
 		} catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "No se pudo cargar el gestoy para los certificados SSL", e);
+			LOGGER.warn("No se pudo inicializar el almacen de certificados de confianza para la conexiones SSL", e); //$NON-NLS-1$
 			return;
 		}
 		this.trustStoreManagers = trustManagerFactory.getTrustManagers();

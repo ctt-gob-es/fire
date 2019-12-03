@@ -1,12 +1,11 @@
 package es.gob.log.consumer.service;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.LoggerFactory;
 
 import es.gob.log.register.LogServiceRegister;
 
@@ -55,10 +54,8 @@ public class SystemInitializer extends HttpServlet {
 			}
 		}
 		catch (final Exception e) {
-			Logger.getLogger(SystemInitializer.class.getName()).log(
-			                                      Level.WARNING,
-			                                      "No se pudo registrar el nodo de consulta de logs mediante el conector: " + registerClass,
-			                                      e);
+			LoggerFactory.getLogger(SystemInitializer.class)
+				.warn("No se pudo registrar el nodo de consulta de logs mediante el conector: " + registerClass, e); //$NON-NLS-1$
 		}
 	}
 }

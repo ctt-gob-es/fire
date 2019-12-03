@@ -2,11 +2,12 @@ package es.gob.log.consumer.service;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousFileChannel;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.log.consumer.InvalidPatternException;
 import es.gob.log.consumer.LogInfo;
@@ -15,7 +16,7 @@ import es.gob.log.consumer.LogSearchText;
 
 public class LogSearchServiceManager {
 
-	private static final Logger LOGGER = Logger.getLogger(LogTailServiceManager.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogTailServiceManager.class);
 
 	/**
 	 * @param req
@@ -52,11 +53,11 @@ public class LogSearchServiceManager {
 		}
 
 		final HttpSession session = req.getSession(false);
-		final LogInfo info = (LogInfo) session.getAttribute("LogInfo"); //$NON-NLS-1$
-		final LogReader reader = (LogReader) session.getAttribute("Reader"); //$NON-NLS-1$
-		final Long fileSize = (Long) session.getAttribute("FileSize");  //$NON-NLS-1$
-		final AsynchronousFileChannel channel = (AsynchronousFileChannel) session.getAttribute("Channel"); //$NON-NLS-1$
-		Long filePosition = (Long) session.getAttribute("FilePosition");//$NON-NLS-1$
+		final LogInfo info = (LogInfo) session.getAttribute(SessionParams.LOG_INFO);
+		final LogReader reader = (LogReader) session.getAttribute(SessionParams.FILE_READER);
+		final Long fileSize = (Long) session.getAttribute(SessionParams.FILE_SIZE);
+		final AsynchronousFileChannel channel = (AsynchronousFileChannel) session.getAttribute(SessionParams.FILE_CHANNEL);
+		Long filePosition = (Long) session.getAttribute(SessionParams.FILE_POSITION);
 
 		byte[] result = null;
 
@@ -67,12 +68,12 @@ public class LogSearchServiceManager {
 				// Reset de la posicion de sesion de tail
 				if (filePosition != null && filePosition.longValue() > 0L) {
 					filePosition = new Long(0L);
-					session.setAttribute("FilePosition", filePosition); //$NON-NLS-1$
+					session.setAttribute(SessionParams.FILE_POSITION, filePosition);
 				}
 			}
 
 			if (channel.size() > fileSize.longValue() && reader.isEndFile()) {
-				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
+				session.setAttribute(SessionParams.FILE_SIZE, new Long (channel.size()));
 				if (reader.getFilePosition() > 0L) {
 					reader.reload(reader.getFilePosition());
 				}
@@ -87,23 +88,23 @@ public class LogSearchServiceManager {
 				result = logSearch.searchText(numLines, text, sdateTime, reader);
 			}
 
-			session.setAttribute("Reader", reader); //$NON-NLS-1$
+			session.setAttribute(SessionParams.FILE_READER, reader);
 
 			if (result == null) {
 				throw new NoResultException("No se han encontrado mas ocurrencias en la busqueda"); //$NON-NLS-1$
 			}
 
 		} catch (final NoResultException e) {
-			LOGGER.log(Level.INFO, "No se han obtenido resultados: " + e.getMessage()); //$NON-NLS-1$
+			LOGGER.info("No se han obtenido resultados: " + e.getMessage()); //$NON-NLS-1$
 			throw e;
 		} catch (final InvalidPatternException e) {
-			LOGGER.log(Level.SEVERE, "El patron indicado con la forma de los registros del log, no es valido" , e); //$NON-NLS-1$
+			LOGGER.error("El patron indicado con la forma de los registros del log, no es valido" , e); //$NON-NLS-1$
 			throw new NoResultException("El patron indicado con la forma de los registros del log, no es valido", e); //$NON-NLS-1$
 		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "No se ha podido leer el fichero", e); //$NON-NLS-1$
+			LOGGER.error("No se ha podido leer el fichero", e); //$NON-NLS-1$
 			throw new NoResultException("No se ha podido leer el fichero", e); //$NON-NLS-1$
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error desconocido al procesar la peticion busqueda", e); //$NON-NLS-1$
+			LOGGER.error("Error desconocido al procesar la peticion busqueda", e); //$NON-NLS-1$
 			throw new NoResultException("Error desconocido al procesar la peticion busqueda", e); //$NON-NLS-1$
 		}
 

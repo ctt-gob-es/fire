@@ -2,11 +2,12 @@ package es.gob.log.consumer.service;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousFileChannel;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.log.consumer.Criteria;
 import es.gob.log.consumer.InvalidPatternException;
@@ -19,7 +20,7 @@ import es.gob.log.consumer.LogReader;
  */
 public class LogFilteredServiceManager {
 
-	private static final Logger LOGGER = Logger.getLogger(LogFilteredServiceManager.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogFilteredServiceManager.class);
 
 	private static final int DEFAULT_NUM_LINES = 50;
 
@@ -82,11 +83,11 @@ public class LogFilteredServiceManager {
 
 		// Obtenemos los datos guardados de sesion
 		final HttpSession session = req.getSession(false);
-		final LogInfo info = (LogInfo) session.getAttribute("LogInfo"); //$NON-NLS-1$
-		final LogReader reader = (LogReader) session.getAttribute("Reader"); //$NON-NLS-1$
-		final Long fileSize = (Long) session.getAttribute("FileSize");  //$NON-NLS-1$
-		final AsynchronousFileChannel channel = (AsynchronousFileChannel) session.getAttribute("Channel"); //$NON-NLS-1$
-		Long filePosition = (Long) session.getAttribute("FilePosition");//$NON-NLS-1$
+		final LogInfo info = (LogInfo) session.getAttribute(SessionParams.LOG_INFO);
+		final LogReader reader = (LogReader) session.getAttribute(SessionParams.FILE_READER);
+		final Long fileSize = (Long) session.getAttribute(SessionParams.FILE_SIZE);
+		final AsynchronousFileChannel channel = (AsynchronousFileChannel) session.getAttribute(SessionParams.FILE_CHANNEL);
+		Long filePosition = (Long) session.getAttribute(SessionParams.FILE_POSITION);
 
 		byte[] result = null;
 		try {
@@ -100,13 +101,13 @@ public class LogFilteredServiceManager {
 				//Reset de la posicion de sesion de tail
 				if (filePosition != null && filePosition.longValue() > 0L) {
 					filePosition = new Long(0L);
-					session.setAttribute("FilePosition", filePosition); //$NON-NLS-1$
+					session.setAttribute(SessionParams.FILE_POSITION, filePosition);
 				}
 			}
 
 			// Se recarga el registro en caso de que el tamanno del fichero haya aumentado
 			if (channel.size() > fileSize.longValue() && reader.isEndFile()) {
-				session.setAttribute("FileSize", new Long (channel.size())); //$NON-NLS-1$
+				session.setAttribute(SessionParams.FILE_SIZE, new Long (channel.size()));
 				if(reader.getFilePosition() > 0L) {
 					reader.reload(reader.getFilePosition());
 				}
@@ -116,25 +117,25 @@ public class LogFilteredServiceManager {
 			filter.setCriteria(crit);
 			result = filter.filter(numLines);
 
+			// Actualizamos el estado del lector
+			session.setAttribute(SessionParams.FILE_READER, reader);
+
 			if (result != null && result.length <= 0) {
-				session.setAttribute("Reader", reader); //$NON-NLS-1$
-				LOGGER.log(Level.INFO,"No se han encontrado mas ocurrencias en el filtrado"); //$NON-NLS-1$
+				LOGGER.info("No se han encontrado mas ocurrencias en el filtrado"); //$NON-NLS-1$
 				throw new NoResultException("No se han encontrado mas ocurrencias en el filtrado"); //$NON-NLS-1$
 			}
 
-			session.setAttribute("Reader", reader); //$NON-NLS-1$
-
 		} catch (final NoResultException e) {
-			LOGGER.log(Level.INFO, "No se han encontrado mas resultados: " + e); //$NON-NLS-1$
+			LOGGER.info("No se han encontrado mas resultados: " + e); //$NON-NLS-1$
 			throw e;
 		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "No se ha podido leer el fichero", e); //$NON-NLS-1$
+			LOGGER.error("No se ha podido leer el fichero", e); //$NON-NLS-1$
 			throw new IOException("No se ha podido leer el fichero", e); //$NON-NLS-1$
 		} catch (final InvalidPatternException e) {
-			LOGGER.log(Level.SEVERE, "Error en la operacion de filtrado, patron incorrecto", e); //$NON-NLS-1$
+			LOGGER.error("Error en la operacion de filtrado, patron incorrecto", e); //$NON-NLS-1$
 			throw new IOException("Error en la operacion de filtrado, patron incorrecto", e); //$NON-NLS-1$
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error desconocido en la operacion de filtrado", e); //$NON-NLS-1$
+			LOGGER.error("Error desconocido en la operacion de filtrado", e); //$NON-NLS-1$
 			throw new IOException("Error desconocido en la operacion de filtrado", e); //$NON-NLS-1$
 		}
 

@@ -87,14 +87,31 @@ public class ParticleParserFactory {
 
 		private final SimpleDateFormat formatter;
 
+		/** Texto a partir del cual se construye el parser de fechas. */
+		private final String dateFormatText;
+
+		/** Numero de veces que el delimitador de este analizador aparece dentro del texto que
+		 * debemos analizar. Esto sirve para saltar esas primeras entradas que tambi&acute;n forman
+		 * parte de la fecha. Se calcula al parsear el valor por primera vez ya que hasta entonces
+		 * no sabemos cu&aacute;l sera el delimitador. */
+		private int numTimesLimit = -1;
+
+
+
+
 		public DateParticleParser(final String dateFormat) {
-			this.formatter = dateFormat != null ?
-					new SimpleDateFormat(dateFormat) : null;
+			this.dateFormatText = dateFormat;
+			this.formatter = this.dateFormatText != null ?
+					new SimpleDateFormat(this.dateFormatText) : null;
 		}
 
 		@Override
 		public void parse(final LogReader reader, final LogRegistry registry)
 				throws IOException, InvalidRegistryFormatException {
+
+			if (this.dateFormatText == null) {
+				throw new InvalidRegistryFormatException("No se ha indicado el formato de fecha"); //$NON-NLS-1$
+			}
 
 			final CharBuffer line = reader.getCurrentLine();
 
@@ -116,7 +133,13 @@ public class ParticleParserFactory {
 					}
 				}
 				else {
-					final int idx = line.toString().indexOf(this.nextLimit);
+
+					// La primera vez, se calcula cuantas veces el limite de la fecha esta contenido en el propio formato
+					if (this.numTimesLimit == -1) {
+						this.numTimesLimit = calculateNumTimesLimit();
+					}
+
+					final int idx = calculateLimitPos(line);
 					if (idx == -1) {
 						throw new InvalidRegistryFormatException("No se ha encontrado el limite de la fecha"); //$NON-NLS-1$
 					}
@@ -138,6 +161,52 @@ public class ParticleParserFactory {
 			if (registry != null) {
 				registry.setCurrentMillis(date.getTime());
 			}
+		}
+
+		/**
+		 * Calcula el n&uacute;mero de veces que el l&iacute;mite se encuentra de forma completa y
+		 * exclusiva en el formato de fecha. Por ejemplo, un espacio puede determinar el fin de la
+		 * fecha, pero la propia fecha puede contener un espacio o m&aacute;s.
+		 * @param dateFormat Formato de fecha.
+		 * @param limit L&iacute;mite que marca el final de la fecha.
+		 * @return N&uacute;mero de veces que el l&iacute;mite est&aacute; dentro del propio formato.
+		 */
+		private int calculateNumTimesLimit() {
+			int count = 0;
+			int pos = 0;
+			while((pos = this.dateFormatText.indexOf(this.nextLimit, pos)) > -1) {
+				count++;
+				pos += this.nextLimit.length();
+			}
+			return count;
+		}
+
+		/**
+		 * Identifica donde termina la fecha en una l&iacute;nea cuadno se conoce la cadena
+		 * delimitadora.
+		 * @param line L&iacute;nea en el que busca la posici&oacute;n final de la fecha.
+		 * @return Posici&oacute;n de la cadena que pone fin a la fecha o {@code -1} cuando no
+		 * se localiza el fin.
+		 */
+		private int calculateLimitPos(final CharBuffer line) {
+
+			int pos = 0;
+			int count = 0;
+			final String lineText = line.toString();
+			do {
+				pos = lineText.indexOf(this.nextLimit, pos);
+				count++;
+				if (pos != -1 && count <= this.numTimesLimit) {
+					pos += this.nextLimit.length();
+				}
+
+			} while (pos != -1 && count <= this.numTimesLimit);
+
+			// Si no la hemos encontrado todas las veces que debiamos, indicamos que no se ha encontrado un limite valido
+			if (count <= this.numTimesLimit) {
+				pos = -1;
+			}
+			return pos;
 		}
 
 		@Override
@@ -391,7 +460,7 @@ public class ParticleParserFactory {
 				// La cadena indefinida debe estar seguida de una cadena o un salto de linea
 				if (parsers[i] instanceof UndefinedStringParser) {
 					if (parsers[i].nextLimit == null) {
-						throw new InvalidPatternException("La particula de texto indefinido debe estar seguida por un delimitador o un salto de linea"); //$NON-NLS-1$
+						throw new InvalidPatternException("La particula de texto indefinido debe ser la ultima del patron o estar seguida por un delimitador o un salto de linea"); //$NON-NLS-1$
 					}
 				}
 

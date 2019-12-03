@@ -5,16 +5,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Gestor de la configuraci&oacute;n del servicio.
  */
 public class ConfigManager {
 
-	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
 
 	private static final String CONFIG_FILENAME = "logconsumer.properties"; //$NON-NLS-1$
 
@@ -43,7 +46,7 @@ public class ConfigManager {
 				instance.load();
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE,
+				LOGGER.error(
 						"No se ha podido cargar el fichero de configuracion del servicio de consulta de logs", //$NON-NLS-1$
 						e);
 				instance = null;
@@ -81,13 +84,14 @@ public class ConfigManager {
 				// nos hayamos salido del directorio de configuracion indicado
 				if (configFile.isFile() && configFile.canRead() &&
 						configFile.getCanonicalPath().startsWith(new File(configDir).getCanonicalPath())) {
-					try (InputStream is = new FileInputStream(configFile);) {
-						config.load(is);
+					try (InputStream is = new FileInputStream(configFile);
+							InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);) {
+						config.load(isr);
 						loaded = true;
 					}
 				}
 				else {
-					LOGGER.warning(
+					LOGGER.warn(
 							"El fichero " + configFilename + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
 									ENVIRONMENT_VAR_CONFIG_DIR + ". El fichero debe encontrase dentro del directorio '" + configDir + //$NON-NLS-1$
 							"'.\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
@@ -96,11 +100,12 @@ public class ConfigManager {
 
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio
 			if (!loaded) {
-				try (InputStream is = ConfigManager.class.getResourceAsStream('/' + configFilename);) {
+				try (InputStream is = ConfigManager.class.getResourceAsStream('/' + configFilename);
+						InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);) {
 					if (is == null) {
 						throw new FileNotFoundException();
 					}
-					config.load(is);
+					config.load(isr);
 				}
 			}
 		}
@@ -124,7 +129,7 @@ public class ConfigManager {
 		try {
 			return Base64.decode(encodedKey);
 		} catch (final IOException e) {
-			LOGGER.severe("La clave de autorizacion no esta correctamente codificada: " + e); //$NON-NLS-1$
+			LOGGER.error("La clave de autorizacion no esta correctamente codificada: " + e); //$NON-NLS-1$
 			return null;
 		}
 	}
