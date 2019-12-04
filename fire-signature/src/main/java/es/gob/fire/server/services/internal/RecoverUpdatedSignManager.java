@@ -125,12 +125,14 @@ public class RecoverUpdatedSignManager {
         	return;
         }
 
+        final String docManager = connConfig != null ? connConfig.getDocumentManager() : null;
+
         // Si debemos seguir esperando, actualizamos la situacion en el gestor de documentos
         // y devolvemos la informacion del nuevo tiempo de gracia
         if (upgradeResult.getState() == State.PENDING) {
         	LOGGER.log(Level.INFO, logF.f("Se solicita la espera de un nuevo periodo de gracia para la operacion asincrona " + asyncId)); //$NON-NLS-1$
         	try {
-        		updateAsynOperation(upgradeResult, appId, connConfig.getDocumentManager());
+        		updateAsynOperation(upgradeResult, appId, docManager);
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.WARNING,
@@ -146,7 +148,7 @@ public class RecoverUpdatedSignManager {
         byte[] partialResult;
         try {
         	partialResult = storeWithDocumentManager(upgradeResult, asyncId, appId,
-        		connConfig.getDocumentManager(), logF);
+        			docManager, logF);
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se pudo almacenar la firma con el gestor de documentos indicado"), e); //$NON-NLS-1$

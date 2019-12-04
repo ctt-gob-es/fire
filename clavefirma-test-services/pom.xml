@@ -5,9 +5,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.clavefirma</groupId>
 	<artifactId>clavefirma-test-services</artifactId>
-	<version>2.4-SNAPSHOT</version>
-	<name>clavefirma-test-services</name>
 	<packaging>war</packaging>
+
+	<name>clavefirma-test-services</name>
+	<description>Simulador de Cl@ve Firma para pruebas</description>
 
 	<parent>
 		<groupId>es.gob.fire</groupId>
@@ -20,7 +21,7 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-connector</artifactId>
-			<version>2.4-SNAPSHOT</version>
+								  
 		</dependency>
 
 		<dependency>
@@ -37,7 +38,7 @@
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
-			<version>1.0</version>
+						 
 		</dependency>
 
 		<dependency>
@@ -50,8 +51,8 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
+						   
+					  
 		</dependency> 
 
 	</dependencies>
@@ -86,10 +87,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
 				</configuration>
 			</plugin>
 		</plugins>

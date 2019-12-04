@@ -61,10 +61,10 @@ final class DssServicesUtils {
         // Definimos el tipo de nodo en el que se declara la firma
         String firmaNode;
         if (isBinary) {
-            LOGGER.info("La firma es binaria"); //$NON-NLS-1$
+            LOGGER.fine("La firma es binaria"); //$NON-NLS-1$
             firmaNode = "<dss:Base64Signature>" + Base64.encode(firma) + "</dss:Base64Signature>"; //$NON-NLS-1$ //$NON-NLS-2$
         } else if (firmaXml != null && isEnveloping(firmaXml)) {
-            LOGGER.info("La firma es XML enveloping"); //$NON-NLS-1$
+            LOGGER.fine("La firma es XML enveloping"); //$NON-NLS-1$
             // Quitamos la cabecera XML
             final String encoding = firmaXml.getInputEncoding();
             try {
@@ -76,7 +76,7 @@ final class DssServicesUtils {
             }
             firmaNode = removeXmlHeader(firmaNode);
         } else {
-            LOGGER.info("La firma es XML enveloped o detached"); //$NON-NLS-1$
+            LOGGER.fine("La firma es XML enveloped o detached"); //$NON-NLS-1$
             firmaNode = "<dss:Base64XML>" + Base64.encode(firma) + "</dss:Base64XML>"; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
@@ -214,10 +214,10 @@ final class DssServicesUtils {
         // Definimos el tipo de nodo en el que se declara la firma
         String firmaNode;
         if (isBinary) {
-            LOGGER.info("La firma es binaria"); //$NON-NLS-1$
+            LOGGER.fine("La firma es binaria"); //$NON-NLS-1$
             firmaNode = "<dss:Base64Signature>" + Base64.encode(firma) + "</dss:Base64Signature>"; //$NON-NLS-1$ //$NON-NLS-2$
         } else if (firmaXml != null && isEnveloping(firmaXml)) {
-            LOGGER.info("La firma es XML enveloping"); //$NON-NLS-1$
+            LOGGER.fine("La firma es XML enveloping"); //$NON-NLS-1$
             // Quitamos la cabecera XML
             final String encoding = firmaXml.getInputEncoding();
             try {
@@ -229,7 +229,7 @@ final class DssServicesUtils {
             }
             firmaNode = removeXmlHeader(firmaNode);
         } else {
-            LOGGER.info("La firma es XML enveloped o detached"); //$NON-NLS-1$
+            LOGGER.fine("La firma es XML enveloped o detached"); //$NON-NLS-1$
             firmaNode = "<dss:Base64XML>" + Base64.encode(firma) + "</dss:Base64XML>"; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
