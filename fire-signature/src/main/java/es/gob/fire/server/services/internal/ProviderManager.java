@@ -109,7 +109,8 @@ public class ProviderManager {
 		}
 		else {
 			final String classname = ConfigManager.getProviderClass(providerName);
-			infoProperties = loadProviderInfoProperties(classname);
+			final String infoFilename = ConfigManager.getProviderInfoFile(providerName);
+			infoProperties = loadProviderInfoProperties(classname, infoFilename);
 		}
 		return new ProviderInfo(providerName, infoProperties);
 	}
@@ -152,22 +153,43 @@ public class ProviderManager {
 	 * @param classname Clase conectora del proveedor.
 	 * @return Properties cargado.
 	 */
-	private static Properties loadProviderInfoProperties(final String classname) {
+	// añadir if y else
+	private static Properties loadProviderInfoProperties(final String classname, final String infoFilename) {
 
-		String classPath;
-		if (classname.lastIndexOf('.') == -1) {
-			classPath = classname;
-		} else {
-			classPath = classname.substring(0, classname.lastIndexOf('.')).replace('.', '/');
+		Properties infoProperties;
+
+		if (infoFilename == null) {
+			String classPath;
+
+			if (classname.lastIndexOf('.') == -1) {
+				classPath = classname;
+			} else {
+				classPath = classname.substring(0, classname.lastIndexOf('.')).replace('.', '/');
+			}
+			if (!classPath.startsWith("/")) { //$NON-NLS-1$
+				classPath = "/" + classPath; //$NON-NLS-1$
+			}
+			if (!classPath.endsWith("/")) { //$NON-NLS-1$
+				classPath += "/"; //$NON-NLS-1$
+			}
+
+			final String providerInfoPath = classPath + PROVIDER_INFO_FILE;
+			infoProperties = loadInternalProperties(providerInfoPath);
 		}
-		if (!classPath.startsWith("/")) { //$NON-NLS-1$
-			classPath = "/" + classPath; //$NON-NLS-1$
+		else {
+			try {
+				infoProperties = ConfigFileLoader.loadConfigFile(infoFilename);
+			}
+			catch (final Exception e) {
+				LOGGER.warning(
+						String.format(
+								"No se ha encontrado o no ha podido cargarse el fichero externo '%s'", //$NON-NLS-1$
+								infoFilename)
+						);
+				infoProperties = new Properties();
+			}
 		}
-		if (!classPath.endsWith("/")) { //$NON-NLS-1$
-			classPath += "/"; //$NON-NLS-1$
-		}
-		final String providerInfoPath = classPath + PROVIDER_INFO_FILE;
-		return loadInternalProperties(providerInfoPath);
+		return infoProperties;
 	}
 
 	/**

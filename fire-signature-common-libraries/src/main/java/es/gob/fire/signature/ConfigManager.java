@@ -49,6 +49,12 @@ public class ConfigManager {
 	 * Ejemplo: provider.NOMBRE_PROVEEDOR.secure=true */
 	private static final String SUFIX_PROP_SECURE_PROVIDER = ".secure"; //$NON-NLS-1$
 
+	/** Sufijo utilizado junto prefijo y nombre de un proveedor para determinar si este se ha
+	 * configurado como un proveedor seguro o no.
+	 * Ejemplo: provider.NOMBRE_PROVEEDOR.secure=true */
+
+	private static final String SUFIX_PROP_INFO_FILE_PROVIDER = ".info.file"; //$NON-NLS-1$
+
 	/** Propiedad con la clase encargada de la validaci&oacute;n y actualizaci&oacute;n de las firmas. */
 	private static final String PROP_VALIDATOR_CLASS = "validator.class"; //$NON-NLS-1$
 
@@ -235,7 +241,23 @@ public class ConfigManager {
 	 */
 	public static String getProviderClass(final String name) {
 		return getProperty(PREFIX_PROP_PROVIDER + name);
+
 	}
+
+
+	/**
+	 * Recupera el fichero externo de la conexi&oacute;n de un proveedor.
+	 * @param name Nombre del proveedor.
+	 * @return fichero externo o null si no está definido
+	 */
+	public static String getProviderInfoFile(final String name) {
+		// El proveedor local no tiene configuracion externa
+		if (PROVIDER_LOCAL.equalsIgnoreCase(name)) {
+			return null;
+		}
+		return getProperty(PREFIX_PROP_PROVIDER + name + SUFIX_PROP_INFO_FILE_PROVIDER);
+	}
+
 
 	/**
 	 * Identifica si se ha configurado un proveedor como seguro y, por lo tanto, no es

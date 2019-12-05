@@ -16,7 +16,7 @@
 		<jdk.version>1.7</jdk.version>
 		
 		<fire.version>2.4-SNAPSHOT</fire.version>
-		<clienteafirma.version>1.6.5</clienteafirma.version>
+		<clienteafirma.version>1.7-SNAPSHOT</clienteafirma.version>
 		<fnmt.version>0.2</fnmt.version>
 		<log-consumer.version>1.2</log-consumer.version>
 		
