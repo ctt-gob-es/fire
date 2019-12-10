@@ -51,7 +51,7 @@ public class ConfigManager {
 
 	/** Sufijo utilizado junto prefijo y nombre de un proveedor para determinar si este se ha
 	 * configurado como un proveedor seguro o no.
-	 * Ejemplo: provider.NOMBRE_PROVEEDOR.secure=true */
+	 * Ejemplo: provider.NOMBRE_PROVEEDOR.info.file=true */
 
 	private static final String SUFIX_PROP_INFO_FILE_PROVIDER = ".info.file"; //$NON-NLS-1$
 

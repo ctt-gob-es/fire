@@ -153,7 +153,7 @@ public class ProviderManager {
 	 * @param classname Clase conectora del proveedor.
 	 * @return Properties cargado.
 	 */
-	// añadir if y else
+
 	private static Properties loadProviderInfoProperties(final String classname, final String infoFilename) {
 
 		Properties infoProperties;
@@ -176,6 +176,8 @@ public class ProviderManager {
 			final String providerInfoPath = classPath + PROVIDER_INFO_FILE;
 			infoProperties = loadInternalProperties(providerInfoPath);
 		}
+
+		//Al no cargarse el fichero interno, se cargará el fichero externo.
 		else {
 			try {
 				infoProperties = ConfigFileLoader.loadConfigFile(infoFilename);
