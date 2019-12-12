@@ -21,7 +21,8 @@
 	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
-	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, true, false);
+	// Cargamos la sesion que deberia estar en memoria, pero permitimos su carga de otras fuentes
+	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, false, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
@@ -42,7 +43,7 @@
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 		errorUrl = connConfig.getRedirectErrorUrl();
 		if (errorUrl != null) {
-	errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
+			errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 		}
 	}
     
