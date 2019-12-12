@@ -1,0 +1,6 @@
+
+# Informacion de la aplicacion cargada desde fuentes externas (como el pom.xml)
+project.version=${project.version}
+
+# Anyo actual obtenido en el momento del empaquetado
+copyright.year=${current.year}

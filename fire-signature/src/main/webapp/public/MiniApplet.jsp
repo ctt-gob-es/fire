@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.afirma.core.misc.AOUtil"%>
 <%@page import="java.nio.charset.StandardCharsets"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
@@ -490,7 +491,7 @@
 		</div>
 		<div class="footer_bottom wrapper">
 			<div class="comp_left">
-			  <p class="footer-text">&copy; 2018 Gobierno de Espa&ntilde;a - FIRe</p> 
+			  <p class="footer-text">FIRe v<%= ProjectConstants.VERSION %> &copy; <%= ProjectConstants.COPY_YEAR %> Gobierno de Espa&ntilde;a</p>
 			</div>
 		</div>
 	</footer>

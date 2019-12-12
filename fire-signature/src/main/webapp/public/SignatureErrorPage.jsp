@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
@@ -153,7 +154,7 @@
 		</div>
 		<div class="footer_bottom wrapper">
 			<div class="comp_left">
-			  <p class="footer-text">&copy; 2018 Gobierno de Espa&ntilde;a - FIRe</p> 
+			  <p class="footer-text">FIRe v<%= ProjectConstants.VERSION %> &copy; <%= ProjectConstants.COPY_YEAR %> Gobierno de Espa&ntilde;a</p>
 			</div>
 		</div>
 	</footer>
