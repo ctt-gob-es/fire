@@ -1,16 +1,16 @@
 <?php
 
-/** Copyright (C) 2017 [Gobierno de Espana]
+/** Copyright (C) 2019 [Gobierno de Espana]
  * This file is part of FIRe.
  * FIRe is free software; you can redistribute it and/or modify it under the terms of:
  *   - the GNU General Public License as published by the Free Software Foundation;
  *     either version 2 of the License, or (at your option) any later version.
  *   - or The European Software License; either version 1.1 or (at your option) any later version.
- * Date: 08/09/2017
+ * Date: 29/11/2019
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 
- /* ================= Componente distribuido PHP de FIRe (Version 2.3) ================= */
+ /* ================= Componente distribuido PHP de FIRe (Version 2.4) ================= */
  
 	// Definimos la url del servicio de FIRe
 	define ("SERVICEURL","https://127.0.0.1:8443/fire-signature/fireService");
@@ -96,6 +96,7 @@
 	/**
 	 * Compone la firma electronica y la devuelve.
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $subjectId Identificador del usuario (numero de DNI).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a sign()).
 	 * @param $upgrade Formato longevo al que actualizar la firma.
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
@@ -104,9 +105,12 @@
 	 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 	 */
-	function recoverSign($appId, $transactionId, $upgrade){
+	function recoverSign($appId, $subjectId, $transactionId, $upgrade=null){
 		
 		// Comprobamos las variables de entrada
+		if (empty($subjectId)) {
+            throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+		}
 		if (empty($transactionId)) {
 		    throw new InvalidArgumentException("El id de la transaccion no puede ser nulo");
 		}
@@ -115,8 +119,9 @@
 		$URL_SERVICE = SERVICEURL;
 		$URL_SERVICE_PARAMS = array(
 			"op" => 2, // El tipo de operacion solicitada es RECOVER_SIGN (2)
-			"transactionid" => $transactionId,
-			"appid" => $appId
+			"appid" => $appId,
+			"subjectid" => $subjectId,
+			"transactionid" => $transactionId
 		);
 		
 		if ($upgrade != null) {
@@ -135,8 +140,9 @@
 		// Si no tenemos el binario resultante, lo pedimos
 		$URL_SERVICE_PARAMS = array(
 			"op" => 11, // El tipo de operacion solicitada es RECOVER_SIGN_RESULT (11)
-			"transactionid" => $transactionId,
-			"appid" => $appId
+			"appid" => $appId,
+			"subjectid" => $subjectId,
+			"transactionid" => $transactionId				
 		);
 		
 		// Llamamos al servicio
@@ -149,6 +155,7 @@
 	/**
 	 * Obtiene el error obtenido al realizar la firma.
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $subjectId Identificador del usuario (numero de DNI).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a sign()).
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 	 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
@@ -156,8 +163,11 @@
 	 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 	 */
-	function recoverError($appId, $transactionId){
+	function recoverError($appId, $subjectId, $transactionId){
 		// Comprobamos las variables de entrada
+		if (empty($subjectId)) {
+			throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+		}
 		if (empty($transactionId)) {
 		    throw new InvalidArgumentException("El id de la transaccion no puede ser nulo");
 		}
@@ -166,8 +176,10 @@
 		$URL_SERVICE = SERVICEURL;
 		$URL_SERVICE_PARAMS = array(
 			"op" => 99, // El tipo de operacion solicitada es RECOVER_ERROR (99)
-			"transactionid" => $transactionId,
-			"appid" => $appId
+			"appid" => $appId,
+			"subjectid" => $subjectId,
+			"transactionid" => $transactionId
+							
 		);
 
 		// Llamamos al servicio remoto
@@ -231,7 +243,7 @@
 		);
 
 		// Si se ha indicado un formato de upgrade, lo actualizamos
-        if (!isset($upgrade) && !empty($upgrade)) {
+        if (isset($upgrade) && !empty($upgrade)) {
 			$URL_SERVICE_PARAMS["upgrade"] = $upgrade;
 		}
 		
@@ -246,11 +258,11 @@
 	 * Incluye un documento en el proceso batch.
 	 * A partir del identificador de la transaccion incluye un documento en el batch para su posterior firma.
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $subjectId Identificador del usuario (numero de DNI).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
 	 * @param $documentId Identificador unico del documento que se adjunta al lote.
-     * @param $document Datos a firmar como parte del lote.
-     * @param $confB64 Configuraci&oacute;n de la operaci&oacute;n.
-	 * de exito y error ("redirectOkUrl" y "redirectErrorUrl", respectivamente).
+     * @param $documentB64 Datos a firmar como parte del lote codificados en base 64.
+	 * @param $confB64 Configuraci&oacute;n de la operaci&oacute;n particular codificada en base 64.
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 	 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
 	 * @throws HttpNetworkException Cuando ocurre un problema en la comunicacion.
@@ -259,8 +271,11 @@
 	 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 	 */
-	function addDocumentToBatch($appId, $transactionId, $documentId, $documentB64, $confB64){
+	function addDocumentToBatch($appId, $subjectId, $transactionId, $documentId, $documentB64, $confB64){
 		// Comprobamos las variables de entrada
+		if (empty($subjectId)) {
+            throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+		}
 		if (empty($transactionId)) {
             throw new InvalidArgumentException("El identificador de la transaccion no puede ser nulo");
 		}
@@ -280,6 +295,7 @@
 		$URL_SERVICE_PARAMS = array(
 			"op" => 6, // El tipo de operacion solicitada es ADD_DOCUMENT_TO_BATCH (6)
 			"appid" => $appId,
+			"subjectid" => $subjectId,				
 			"transactionid" => $transactionId,
 			"docid" => $documentId,
 			"dat" => $documentB64us,
@@ -295,15 +311,16 @@
 	 * Incluye un documento en el proceso batch con una configuracion de firma diferente a la de por defecto.
 	 * A partir del identificador de la transaccion incluye un documento en el batch para su posterior firma.
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $subjectId Identificador del usuario (numero de DNI).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
 	 * @param $documentId Identificador unico del documento que se adjunta al lote.
-     * @param $document Datos a firmar como parte del lote.
+     * @param $documentB64 Datos a firmar como parte del lote codificados en base 64.
 	 * @param $op Operacion a realizar ('sign', 'cosign' o 'countersign').
 	 * @param $ft Formato de firma ('CAdES', 'XAdES', 'PAdES'...)
-	 * @param $propB64 Configuracion de la operacion de firma. Equivalente al extraParams del MiniApplet @firma.
+	 * @param $propB64 Configuracion de la operacion de firma codificada en base 64. Equivalente al extraParams
+	 * del MiniApplet @firma.
 	 * @param $upgrade Actualizacion.
-     * @param $confB64 Configuraci&oacute;n de la operaci&oacute;n.
-	 * de exito y error ("redirectOkUrl" y "redirectErrorUrl", respectivamente).
+     * @param $confB64 Configuraci&oacute;n de la operaci&oacute;n particular codificada en base 64.
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 	 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
 	 * @throws HttpNetworkException Cuando ocurre un problema en la comunicacion.
@@ -312,8 +329,11 @@
 	 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 	 */
-	function addCustomDocumentToBatch($appId, $transactionId, $documentId, $documentB64, $op, $ft, $propB64, $upgrade, $confB64){
+	function addCustomDocumentToBatch($appId, $subjectId, $transactionId, $documentId, $documentB64, $op, $ft, $propB64, $upgrade, $confB64){
 		// Comprobamos las variables de entrada
+		if (empty($subjectId)) {
+            throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+		}
 		if (empty($transactionId)) {
             throw new InvalidArgumentException("El identificador de la transaccion no puede ser nulo");
 		}
@@ -343,6 +363,7 @@
 		$URL_SERVICE_PARAMS = array(
 			"op" => 6, // El tipo de operacion solicitada es ADD_DOCUMENT_TO_BATCH (6)
 			"appid" => $appId,
+			"subjectid" => $subjectId,
 			"transactionid" => $transactionId,
 			"docid" => $documentId,
 			"dat" => $documentB64us,
@@ -368,6 +389,7 @@
 	 * firma trifasica.
 	 * @return Objeto SignOperationResult con el identificador de transaccion y la URL de redireccion.
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $subjectId Identificador del usuario (numero de DNI).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
      * @param $stopOnError Indicador de parar la operacion al producirse un error.
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
@@ -376,8 +398,11 @@
 	 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 	 */
-	function signBatch($appId, $transactionId, $stopOnError){
+	function signBatch($appId, $subjectId, $transactionId, $stopOnError){
 		// Comprobamos las variables de entrada
+		if (empty($subjectId)) {
+            throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+		}
 		if (empty($transactionId)) {
             throw new InvalidArgumentException("El identificador de la transaccion no puede ser nulo");
 		}
@@ -401,6 +426,7 @@
 	/**
 	 * Obtiene el resultado de firma del batch.
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $subjectId Identificador del usuario (numero de DNI).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 	 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
@@ -408,9 +434,12 @@
 	 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 	 */
-	function recoverBatchResult	($appId, $transactionId){
+	function recoverBatchResult	($appId, $subjectId, $transactionId){
 		
 		// Comprobamos las variables de entrada
+		if (empty($subjectId)) {
+            throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+		}
 		if (empty($transactionId)) {
 		    throw new InvalidArgumentException("El id de la transaccion no puede ser nulo");
 		}
@@ -419,8 +448,9 @@
 		$URL_SERVICE = SERVICEURL;
 		$URL_SERVICE_PARAMS = array(
 			"op" => 8, // El tipo de operacion solicitada es RECOVER_BATCH (8)
-			"transactionid" => $transactionId,
-			"appid" => $appId
+			"appid" => $appId,
+			"subjectid" => $subjectId,
+			"transactionid" => $transactionId
 		);
 
 		// Llamamos al servicio remoto
@@ -442,6 +472,7 @@
 	/**
 	 * Obtiene el progreso de firma del batch.
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $subjectId Identificador del usuario (numero de DNI).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 	 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
@@ -449,9 +480,12 @@
 	 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 	 */
-	function recoverBatchResultState($appId, $transactionId){
+	function recoverBatchResultState($appId, $subjectId, $transactionId){
 		
 		// Comprobamos las variables de entrada
+		if (empty($subjectId)) {
+			throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+		}
 		if (empty($transactionId)) {
 		    throw new InvalidArgumentException("El id de la transaccion no puede ser nulo");
 		}
@@ -460,8 +494,9 @@
 		$URL_SERVICE = SERVICEURL;
 		$URL_SERVICE_PARAMS = array(
 			"op" => 9, // El tipo de operacion solicitada es RECOVER_BATCH_STATE (9)
-			"transactionid" => $transactionId,
-			"appid" => $appId
+ 			"appid" => $appId,
+			"subjectid" => $subjectId,
+			"transactionid" => $transactionId
 		);
 
 		// Llamamos al servicio remoto
@@ -473,6 +508,7 @@
 	/**
 	 * Obtiene la firma de uno de los documentos del batch.
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $subjectId Identificador del usuario (numero de DNI).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
 	 * @param $docId Identificador del documento del batch cuya firma queremos obtener.
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
@@ -483,19 +519,26 @@
 	 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 	 */
-	function recoverBatchSign($appId, $transactionId, $docId){
+	function recoverBatchSign($appId, $subjectId, $transactionId, $docId){
 		
 		// Comprobamos las variables de entrada
+		if (empty($subjectId)) {
+			throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+		}
 		if (empty($transactionId)) {
 		    throw new InvalidArgumentException("El id de la transaccion no puede ser nulo");
+		}
+		if (empty($docId)) {
+            throw new InvalidArgumentException("El identificador de documento no puede ser nulo");
 		}
 		
 		// Componemos la URL de llamada al servicio remoto
 		$URL_SERVICE = SERVICEURL;
 		$URL_SERVICE_PARAMS = array(
 			"op" => 10, // El tipo de operacion solicitada es RECOVER_BATCH_SIGN (10)
-			"transactionid" => $transactionId,
 			"appid" => $appId,
+			"subjectid" => $subjectId,				 
+			"transactionid" => $transactionId,
 			"docid" => $docId
 		);
 
@@ -617,7 +660,7 @@
 			throw new InvalidBatchDocumentException("El documento no existe en el lote");
 		}
 		else if ($http_code == 536) {
-			throw new InvalidBatchDocumentException("Fallo la firma del documento que se intenta recuperar");
+			throw new InvalidBatchDocumentException("La firma solicitada no se encuentra disponible");
 		}
 		else if ($http_code == 537) {
 			throw new HttpOperationException("Se intenta firmar un lote sin documentos");

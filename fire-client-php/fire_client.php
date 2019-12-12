@@ -1,6 +1,6 @@
 <?php
 
-/** Copyright (C) 2017 [Gobierno de Espana]
+/** Copyright (C) 2019 [Gobierno de Espana]
  * This file is part of FIRe.
  * FIRe is free software; you can redistribute it and/or modify it under the terms of:
  *   - the GNU General Public License as published by the Free Software Foundation;
@@ -178,7 +178,7 @@
 		
 		/**
 		 * Obtiene el error obtenido al realizar la firma.
-		 * @param $subjectId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+		 * @param $subjectId Identificador del usuario (numero de DNI).
 		 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a sign()).
 		 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 		 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.

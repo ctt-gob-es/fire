@@ -7,7 +7,7 @@
 	// Cargamos el componente distribuido de FIRe
 	include 'fire_client.php';
 
-	$docId = "1573733664278249577";	// Identificador de la transaccion	
+	$docId = "1573733664278249577";	// Identificador del documento asincrono que queremos recuperar
 	
 	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
 	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
