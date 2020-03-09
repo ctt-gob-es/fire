@@ -73,10 +73,10 @@
 
 	if (baseUrl != null && !baseUrl.endsWith("/public/")) { //$NON-NLS-1$
 		if (baseUrl.endsWith("/public")) { //$NON-NLS-1$
-	baseUrl += "/"; //$NON-NLS-1$
+			baseUrl += "/"; //$NON-NLS-1$
 		}
 		else {
-	baseUrl += "/public/"; //$NON-NLS-1$
+			baseUrl += "/public/"; //$NON-NLS-1$
 		}
 	}
 
@@ -112,8 +112,7 @@
 		(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 	final String successUrl = connConfig.getRedirectSuccessUrl();
 	final String errorUrl = connConfig.getRedirectErrorUrl();
-	final boolean afirmaNative = !connConfig.isAutoFirmaWSEnabled();
-	
+
 	final String formFunction = isBatchOperation ? "doSignBatch()" : "doSign()"; //$NON-NLS-1$ //$NON-NLS-2$
 	
 	// Obtenemos si el origen del certificado vino forzado por la aplicacion. Si es asi, se
@@ -181,17 +180,16 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 	<meta name="description" content="Firma con certificado local">
-	<meta name="author" content="Ministerio de Hacienda y Función Pública">
+	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Firma con certificado local</title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
-<!-- 	<link rel="stylesheet" type="text/css" href="css/modules.css"> -->
+	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
 	<link rel="stylesheet" type="text/css" href="css/modMiniApplet.css">
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
-	<script type="text/javascript" src="js/miniapplet.js"></script>
-	<script type="text/javascript" src="js/deployJava.js"></script>
+	<script type="text/javascript" src="js/autoscript.js"></script>
 	<script type="text/javascript">
 		
 		<% if (isBatchOperation) { %>
@@ -208,7 +206,7 @@
 
 				try {
 					showProgress();
-					MiniApplet.signBatch(
+					AutoScript.signBatch(
 						batchXmlB64,
 						preSignUrl,
 						postSignUrl,
@@ -217,7 +215,7 @@
 						sendErrorCallback);
 	
 				} catch (e) {
-					sendErrorCallback(MiniApplet.getErrorType(), MiniApplet.getErrorMessage());
+					sendErrorCallback(AutoScript.getErrorType(), AutoScript.getErrorMessage());
 				}
 			}
 			
@@ -245,7 +243,7 @@
 				try {				
 					showProgress();
 					if (cop.toUpperCase() === "SIGN") {
-						MiniApplet.sign(
+						AutoScript.sign(
 							refB64,
 							algorithm,
 							format,
@@ -254,7 +252,7 @@
 							sendErrorCallback);
 					}
 					else if (cop.toUpperCase() === "COSIGN") {
-						MiniApplet.coSign(
+						AutoScript.coSign(
 								refB64,
 							null,
 							algorithm,
@@ -264,7 +262,7 @@
 							sendErrorCallback);
 					}
 					else if (cop.toUpperCase() === "COUNTERSIGN") {
-						MiniApplet.counterSign(
+						AutoScript.counterSign(
 							refB64,
 							algorithm,
 							format,
@@ -279,7 +277,7 @@
 					
 				} catch(e) {
 					hideProgress();
-					sendErrorCallback(MiniApplet.getErrorType(), MiniApplet.getErrorMessage());
+					sendErrorCallback(AutoScript.getErrorType(), AutoScript.getErrorMessage());
 				}
 			}
 
@@ -329,43 +327,28 @@
 			 * @firma que se encuentre cargado.
 			 */
 			function updateRequirementsText() {
-				var hrefJava="https://www.java.com/es/download/";
-				var hrefAutofirma="http://firmaelectronica.gob.es/Home/Descargas";
-				var hrefAndroid="https://play.google.com/store/apps/details?id=es.gob.afirma";
-				var hrefIOS="https://itunes.apple.com/es/app/cliente-firma-movil/id627410001?mt=8&uo=4";
-				var href;
 				var app;
 				var appVersion;
-				if (MiniApplet.echo() === "Cliente JavaScript") {
-					if (MiniApplet.isAndroid()) {
-						app = "Cliente @firma Android";
-						appVersion = "Cliente m\u00F3vil @firma 1.5 o superior";
-						href=hrefAndroid;
-					}
-					else if (MiniApplet.isIOS()) {
-						app = "Cliente @firma iOS";
-						appVersion = "Cliente m\u00F3vil @firma 1.5 o superior";
-						href=hrefIOS;
-					}
-					else if (<%= ConfigManager.getClienteAfirmaForceNative() %>) {
-						app = "AutoFirma";
-						appVersion = "AutoFirma 1.5 o superior";
-						href=hrefAutofirma;
-					}
-					else {
-						app = "AutoFirma WebStart";
-						appVersion = "Java 8 o superior";
-						href=hrefJava;
-					}
+				var href;
+				if (AutoScript.isAndroid()) {
+					app = "Cliente @firma Android";
+					appVersion = "Cliente m\u00F3vil @firma 1.5.2 o superior";
+					href = "https://play.google.com/store/apps/details?id=es.gob.afirma";
+				}
+				else if (AutoScript.isIOS()) {
+					app = "Cliente @firma iOS";
+					appVersion = "Cliente m\u00F3vil @firma 1.5 o superior";
+					href = "https://itunes.apple.com/es/app/cliente-firma-movil/id627410001?mt=8&uo=4";
 				}
 				else {
-					app = "MiniApplet @firma";
-					appVersion = "Java 7 o superior";
-					href=hrefJava;
+					app = "AutoFirma";
+					appVersion = "AutoFirma 1.7.0 o superior";
+					href = "http://firmaelectronica.gob.es/Home/Descargas";
 				}
-				document.getElementById("linkDownload").href=href;
+
 				document.getElementById("signningApp").innerText = app;
 				document.getElementById("signningAppVersion").innerText = appVersion;
+				document.getElementById("linkDownload").href = href;
 			}
 		</script>
 
@@ -375,7 +358,7 @@
 	<header>
 		<div class="header_top wrapper">
 			<div class="mod_claim_izq">
-				<div class="mod_claim_in mod_claim_in_izq">
+				<div class="mod_claim_in mod_claim_in_izq mod_claim_in_image">
 					<a title="Logo">
 						<img alt="Logo" src="<%= logoUrl %>">
 					</a> 
@@ -430,9 +413,9 @@
 			</div>		
 			<div class="nota-firmar">
 					<span class="bold">Advertencia:</span> 
-					La firma se va a realizar con <span id="signningApp" class="bold">MiniApplet @firma</span>. 
+					La firma se va a realizar con <span id="signningApp" class="bold">AutoFirma</span>. 
 					Aseg&uacute;rese de tener instalado 
-						<a id="linkDownload" href="#" target="_blanc"> <span id="signningAppVersion" class="bold">Java 7 o superior</span>.</a>		
+						<a id="linkDownload" href="#" target="_blanc"> <span id="signningAppVersion" class="bold">AutoFirma</span>.</a>		
 			</div>
 			
 
@@ -497,21 +480,10 @@
 	</footer>
 
 	<script type="text/javascript">
-	
-		// En caso de que podemos comprobar si el navegador tiene Java, evitamos configurar
-		// la carga JNLP si no lo tiene
-		if (deployJava.versionCheck("1.8+")) {
-			MiniApplet.setJnlpService("<%= baseUrl %>afirma/afirmaJnlpService");
-			MiniApplet.setForceAFirma(<%= afirmaNative %>);
-		}
 
-		MiniApplet.setForceWSMode(true);
-		<% if (ConfigManager.getClienteAfirmaForceAutoFirma()) { %>
-			MiniApplet.cargarAppAfirma("<%= baseUrl %>afirma");
-		<% } else { %>
-			MiniApplet.cargarMiniApplet("<%= baseUrl %>afirma");
-		<% } %>
-		MiniApplet.setServlets("<%= baseUrl %>afirma/storage", "<%= baseUrl %>afirma/retrieve");
+		AutoScript.setForceWSMode(true);
+		AutoScript.cargarAppAfirma("<%= baseUrl %>afirma");
+		AutoScript.setServlets("<%= baseUrl %>afirma/storage", "<%= baseUrl %>afirma/retrieve");
 
 		// Actualizamos el texto de requisitos
 		updateRequirementsText();

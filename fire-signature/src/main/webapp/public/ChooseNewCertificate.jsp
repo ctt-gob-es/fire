@@ -112,14 +112,14 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 	<meta name="description" content="Selección del certificado recién generado">
-	<meta name="author" content="Ministerio de Hacienda y Función Pública">
+	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Selección de certificado de firma</title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
-		<link rel="stylesheet" type="text/css" href="css/modChooseNewCertificate.css">
-<!-- 	<link rel="stylesheet" type="text/css" href="css/modules.css"> -->
+	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
+	<link rel="stylesheet" type="text/css" href="css/modChooseCertificate.css">
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 
 </head>
@@ -128,7 +128,7 @@
 	<header>
 		<div class="header_top wrapper">
 			<div class="mod_claim_izq">
-				<div class="mod_claim_in mod_claim_in_izq">
+				<div class="mod_claim_in mod_claim_in_izq mod_claim_in_image">
 					<a title="Logo">
 						<img alt="Logo" src="<%= logoUrl %>">
 					</a>  

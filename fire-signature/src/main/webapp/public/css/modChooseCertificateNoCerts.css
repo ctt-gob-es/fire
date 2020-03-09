@@ -13,17 +13,6 @@
 .clear {clear: both;}
 .no-float {float: none !important;}
 
-.mod_claim_izq { width: 100%; } 
-.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 3em; vertical-align: top;}
-
-.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 63%; color: #707070;margin-top: -0.65em;}
-.mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-.mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
-
-.mod_footer .footer_top .footer-text-big {font-size: 1em; font-weight: bold; display: inline-block; vertical-align: super;}
-.mod_footer .footer_bottom {vertical-align: super; }
-.mod_footer .footer_bottom .footer-text { font-size: 1em; font-weight: bold; }
-
 .contenido {display: block; width: 100%; margin: 0 auto; height: auto;  position: relative;z-index:9;}
 
 .contenido .title {color: #dd5a00; text-align: center; margin: 0 auto; font-weight: bold; font-size:1.8em; padding-top:1em; padding-bottom:1em;}
@@ -32,76 +21,53 @@
 .contenido-error {width: 750px;}
 .contenido-error .title-error {color: #ac0306;margin: 0 auto;font-size:29px;padding-top: 1.5em;line-height: 31px;width: 750px;margin-bottom: 1em;font-weight:bold;}
 
-.contenido-error .error-box {width: 100%;display: block; box-sizing: border-box;padding: 1em 0;margin-top: -2.5em; text-align: center;}
+.contenido-error .error-box {width: 100%;display: block; box-sizing: border-box;padding: 1em 0;text-align: center;}
 
 .contenido-error .error-box .button_firmar {margin 0 auto;padding: 0.4em 2em;border-style: none;  border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:19px;}
 .contenido-error .error-box .button_firmar:hover {text-decoration: underline; cursor:pointer;}
-.contenido-error .container-box-error-new {width: 100%; display: block;position: relative;top:2em;}
-.contenido-error .container-box-error-local {width: 100%; display: block;position: relative;top:4em;}
+.contenido-error .container-box-error-new {width: 100%; display: block;position: relative;}
+.contenido-error .container-box-error-local {width: 100%; display: block;position: relative;}
 
-.container-textbox-error{display: block;width:100%;position:relative; top:-2em;}
+.container-textbox-error{display: block;width:100%;position:relative; }
 
 .contenido-error .text-error-box {color #707070;font-size: 17px;margin-bottom: 0.75em;text-align: center;margin-top: 1.5em;}
 
-
-
 .container-box-title{width: 100%;margin-top: 2em;margin-bottom:2em; display: block;position: relative;}
 .container_tit{ width:100%;display:block;}
-.container_btn_operation {width: 100%; display: block; margin-top: 8.5em; text-align: center;
+.container_btn_operation {width: 100%; display: block; margin-top: 4em; margin-bottom: 2em; text-align: center;
 }
 
 
-.button-volver {width: 80px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
+.button-volver {width: 80px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
 .button-volver:hover {text-decoration: underline; cursor:pointer;}
 
-.button-cancelar { width: 80px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
+.button-cancelar { width: 80px;padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
 .button-cancelar:hover {text-decoration: underline;}
 
-.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 1px;position: relative;right: 3px;}
+.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;position: relative;}
 
 /*MEDIUM RESOLUTION STYLES*/
 @media screen and (max-width: 864px) and (min-width: 681px){  
-	
-	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido-error {width: 640px;}
-	.container-box-title{width: 100%;margin-top: 2em; margin-bottom: 2em;margin-left:auto;margin-right:auto; display: block;position: relative;}
-
+	.container-box-title{width: 100%;margin: 2em auto;display: block;position: relative;}
 }
 
 @media screen and (max-width: 680px)and (min-width: 576px) {  
-	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 63%; color: #707070;margin-top: -0.40em;}
-	.mod_claim_text { margin-left: 0.5em;  font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec {margin-left: 0.5em;  font-family: Verdana; font-size: 1.3em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	
 	.contenido-error {width: 536px;}
-	.container-box-title{width: 100%;margin-top: 2em; margin-bottom: 2em;margin-left:auto;margin-right:auto; display: block;position: relative;}
-
-	
+	.container-box-title{width: 100%;margin: 2em auto;display: block;position: relative;}
 }
 
 @media screen and (max-width: 575px)and (min-width: 481px) {  
-
-	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 63%; color: #707070;margin-top: -0.20em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	
 	.contenido-error {width: 441px;}
-	.container-box-title{width: 100%;margin-top: 2em; margin-bottom: 2em;margin-left:auto;margin-right:auto; display: block;position: relative;}
+	.container-box-title{width: 100%;margin-top: 2em auto;display: block;position: relative;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:1em; padding-bottom:0.3em;}
 
 }
 
 @media screen and (max-width: 480px) {  
 
-	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display:block;width:100%; color: #707070;margin-top: 0.20em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 0.75em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	
 	.contenido-error {width: 80%;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.1em; padding-top:1em; padding-bottom:0.3em;}
 	.container-box-title{width: 100%; display: block;position: relative;}
@@ -109,8 +75,6 @@
 	
 	.contenido-error .error-box {width: 100%;display: block; box-sizing: border-box;padding: 1em 0; text-align: center;margin-bottom: 2em;}
 	
-	.contenido-error .error-box .button_firmar {margin 0 auto;padding: 0.4em 1em;border-style: none;  border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:16px;}
+	.contenido-error .error-box .button_firmar {margin: 0 auto;padding: 0.4em 1em;border-style: none;  border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size:16px;}
 	.container_tit{ width:100%;display: block;}
-	
-	
 }

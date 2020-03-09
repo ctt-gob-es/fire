@@ -13,15 +13,8 @@
 .clear {clear: both;}
 .no-float {float: none !important;}
 
-
-.mod_claim_izq { width: 100%; } 
-.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 3em; vertical-align: top;}
-.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 63%; color: #707070;margin-top: -0.65em;}
-.mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-.mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
-
 .contenido {display: block; width: 100%; margin: 0 auto; height: auto;  position: relative;z-index:9;}
-.container-title{ display:block; width:100%;position: relative; height:4em; margin-top: 2em;margin-bottom: 2em;}
+.container-title{ display:block; width:100%;position: relative; height:4em; margin-top: 1em;}
 .container-title .title-head{display: block; width:100%;  text-align: center;}/*position: absolute;*/
 .container-title .title-button{display: inline-flex; width:100%;  text-align: center;}/*position: absolute;*/
 
@@ -50,18 +43,9 @@
 
 .formProvider{height: 0px;}
 /*****************************************/
-@media screen and (max-width: 864px) and (min-width: 601px){  
-	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	
-}
+
 /********************************/
 @media screen and (max-width: 600px)and (min-width: 481px) { 
-	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 1em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.40em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;}
 }
 /******************************/
@@ -72,12 +56,7 @@
 	.container-title .title-button{display: grig; width:100%;}
 	/*.button-cancelar {z-index:10; float: left;width: 60px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 12px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
 	.button-cancelar:hover {text-decoration: underline;}*/
-	
-	
-	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top:0em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 0.85em; color: #707070; vertical-align: bottom; font-weight: bold;}
+
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;}
 }
 
@@ -88,10 +67,5 @@
 	/*.button-cancelar {z-index:10; float: left;width: 60px;padding: 0.2em 0.3em 0.3em 0.3em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 12px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
 	.button-cancelar:hover {text-decoration: underline;}*/
 	
-	
-	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.2em; vertical-align: top;}
-	.mod_claim_in_der { display: inline-block;width: 95%; color: #707070;margin-top:0em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 0.85em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.3em; padding-top:1em; padding-bottom:1em;}
 }

@@ -7,44 +7,24 @@
 
 /*Inicial*/
 
-.mod_claim_izq { width: 100%; } 
-.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 3em; vertical-align: top;}
-.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 63%; color: #707070;margin-top: -0.65em;}
-
-.mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-.mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
-
-.mod_footer .footer_top .footer-text-big {font-size: 1em; font-weight: bold; display: inline-block; vertical-align: super;}
-.mod_footer .footer_bottom {vertical-align: super; }
-.mod_footer .footer_bottom .footer-text { font-size: 1em; font-weight: bold; }
-
-
-
-
 .contenido {display: block; width: 100%; margin: 0 auto; height: auto;  position: relative;z-index:9;text-align: center}/*width: 665px;min-height:40em;*/
 .contenido .title {color: #dd5a00; text-align: center; margin-top: 1.5em; margin-bottom: 1.5em; font-weight: bold; font-size:1.5em; padding-top:0.5em; }
 .contenido .subtitle {color: #707070; text-align: center;margin: 0 auto; font-weight: bold; font-size:1em;padding-top:0.5em; }
 
-
 .container-box-title{width: 870px; margin: 2em; display: block; position: relative; margin-left: auto; margin-right: auto;}
 .contenido-opciones {width: 70%; height:auto; display:block;position: relative;margin: auto;padding-left: 1em;padding-right: 1em;}
-.contenido-opciones .botones {width:100%; position:relative; top:5em; text-align: center;}
-.botones .containerbutton{display: inline-block; margin-left: auto; margin-right: auto; width: 48%;}
-.mensaje-error {color #707070;font-size: 18px;margin-bottom: 1em;text-align: center;position: relative;top:0.5em;}
-.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: -2px;position: relative;right:6px;}
+.contenido-opciones .botones {width:100%; position:relative; text-align: center; display:flex;flex-wrap: wrap-reverse;}
+.botones .containerbutton{display: inline-block; margin: 1.5em auto 0 auto; min-width: 45%;}
+.botones .separatorbutton{ display: inline-block;width: 5%;}
+.mensaje-error {color #707070;font-size: 18px;margin-bottom: 1em;text-align: center;position: relative}
+.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;position: relative;}
 #errorMsg{text-align: center;}
 
+.button-volver {padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold;text-decoration: none;}
+.button-volver:hover {text-decoration: underline;}
 
-
-
-
-.button-volver {padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
-.button-volver:hover {text-decoration: underline; cursor:pointer;}
-
-.button-cancelar {padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}/*margin-top: 1em;*/
-.button-cancelar:hover {text-decoration: underline;cursor:pointer;}
-
-
+.button-cancelar {padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; text-decoration: none;}
+.button-cancelar:hover {text-decoration: underline;}
 
 .hide {display: none !important;}
 .temp-hide {display: none;}
@@ -59,17 +39,11 @@
 /*MEDIUM RESOLUTION STYLES*/
 @media screen and (max-width: 864px) and (min-width: 681px){  
 
-
-
-	.mod_claim_in_der { margin-left: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	
 	.container-box-title{width: 90%;margin: 2em; display: block;position: relative; margin-left: auto;margin-right: auto;}
 	.contenido-opciones {width: 90%; height:auto; display:block;position: relative;margin: auto;padding-left: 1em;padding-right: 1em;}
-	.container_btn_operation{float: right; width:20%;display: inline-block;margin-top: 1em;}
+	.container_btn_operation{width:20%;display: inline-block;margin-top: 1em;}
 
-	.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 0px;position: relative;right:6px;}
+	.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;position: relative;}
 	
 }
 
@@ -79,61 +53,41 @@
 
 	.container-box-title{width: 90%;margin: 2em; display: block;position: relative; margin-left: auto;margin-right: auto;}
 	.contenido-opciones {width: 90%; height:auto; display:block;position: relative;margin: auto;padding-left: 1em;padding-right: 1em;}
-	.container_btn_operation{float: right; width:20%;display: inline-block;margin-top: 1em;}
+	.container_btn_operation{width:20%;display: inline-block;margin-top: 1em;}
 	
-
-  	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 63%; color: #707070;margin-top: -0.40em;}
-	.mod_claim_text { margin-left: 0.5em;  font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec {margin-left: 0.5em;  font-family: Verdana; font-size: 1.3em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:0.3em; padding-bottom:0.3em;}
 	
-	.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 0px;position: relative;right:6px;}
+	.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;position: relative;}
 
 
 }
 
 @media screen and (max-width: 575px)and (min-width: 421px) {  
-
-	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display: inline-block;width: 63%; color: #707070;margin-top: -0.20em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:1em; padding-bottom:0.3em;}
-
 		
-	.container_btn_operation{float: right; width:15%;display: inline-block;margin-top: 0.1em;}
+	.container_btn_operation{width:15%;display: inline-block;margin-top: 0.1em;}
 	
-	.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;top: 9px;position: absolute;right: 0.3em;}
+	.arrow-right {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-left: 8px solid #707070; display: inline-block;position: absolute;}
 	
 	.container-box-title{width: 90%;margin: 2em; display: block;position: relative; margin-left: auto;margin-right: auto;}
 	.contenido-opciones {width: 90%; height:auto; display:block;position: relative;margin: auto;padding-left: 1em;padding-right: 1em;}
-	.container_btn_operation{float: right; width:20%;display: inline-block;margin-top: 1em;}
+	.container_btn_operation{width:20%;display: inline-block;margin-top: 1em;}
 	
-	.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 0px;position: relative;right:6px;}
-
+	.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;position: relative;}
 }
 
 @media screen and (max-width: 420px) {  
 
-	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
-	.mod_claim_in_der { margin-left: 0.5em; display: block;width: 100%; color: #707070;margin-top: 0.20em;}
-	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
-	.mod_claim_text_sec { font-family: Verdana; font-size: 0.75em; color: #707070; vertical-align: bottom; font-weight: bold;}
 	.contenido .title {color: #dd5a00; text-align: center;margin: 0 auto; font-weight: bold; font-size:1.5em; padding-top:1em; padding-bottom:1em;}
 		
 	.container-box-title{width: 90%;margin: 2em; display: block;position: relative; margin-left: auto;margin-right: auto;}
 	.contenido-opciones {width: 90%; height:auto; display:block;position: relative;margin: auto;padding-left: 1em;padding-right: 1em;}
-	.container_btn_operation{float: right; width:20%;display: inline-block;margin-top: 1em;}
+	.container_btn_operation{width:20%;display: inline-block;margin-top: 1em;}
 	
 	.button-volver {padding: 0.2em 0.8em 0.2em 0.8em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
 	.button-cancelar {padding: 0.2em 0.8em 0.2em 0.8em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
 	
-	.mensaje-error {color #707070;font-size: 14px;margin-bottom: 1em;text-align: center;position: relative;top:1em;}
-	.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;top: 0px;position: relative;right:6px;}
-
-
-
-
+	.mensaje-error {color #707070;font-size: 14px;margin-bottom: 1em;text-align: center;position: relative;}
+	.arrow-left-white {width: 0;height: 0;border-top: 5px solid transparent;border-bottom: 5px solid transparent;border-right: 8px solid #ffffff;display: inline-block;position: relative;}
 }

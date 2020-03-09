@@ -1,0 +1,71 @@
+@charset "UTF-8";
+/*****************************************************************************
+*    Proyecto: FIRe
+*    Titulo: headerFooter.css
+*    Desripcion: Estilos para las cabeceras y pies de pagina
+******************************************************************************/
+
+/*------------------------------ HEADER ---------------------------------------*/
+
+header {width: 100%; border-top: 2px solid #FF6600; background-image: -webkit-linear-gradient(0deg, #dededf 50%, #d4d0cd 50%);}
+header .header_top { position: relative; height: auto; padding: 2% 0; background: url(../img/general/dms/bg-cabecera.png) top left no-repeat;text-align: center;}
+header .header_bottom { position: relative;}
+header .header_menu_right {float: right; width: 65%}
+
+
+.mod_claim_izq { width: 100%; } 
+.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 3em; vertical-align: top;}
+.mod_claim_in_der { margin-left: 1em; margin-right: 1em; display: inline-block;width: 63%; color: #707070;margin-top: -0.65em;}
+.mod_claim_in_image img { height: 3.33em; }
+.mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+.mod_claim_text_sec { font-family: Verdana; font-size: 1.5em; color: #707070; vertical-align: bottom; font-weight: bold;}
+
+/*------------------------------ FOOTER ---------------------------------------*/
+
+footer {flex-shrink: 0; width: 100%;color: #fff;background: #707070;border-top: 3px solid #dd5a05;}
+footer .footer_top { position: relative; width:100%; min-height: 2.67em; padding-left: 0em; margin-top: 1em;}
+footer .footer_top .txt_alignL{  padding-left: 3em;}
+footer .footer_top img {max-width: 100%; width: 80px;}
+footer .footer_main { position: relative; padding-bottom: 1em; }
+footer .footer_bottom { position: relative; width:100%; padding: 0em 0em 1em 0em;}
+footer .footer_bottom .comp_left { padding-left: 3em;}
+
+.mod_footer .footer_bottom {vertical-align: super; }
+.mod_footer .footer_bottom .footer-text { font-size: 1em; font-weight: bold; }
+
+
+/*****************************************/
+@media screen and (max-width: 864px) and (min-width: 601px){  
+	.mod_claim_in_der { margin-left: 1em; margin-right: 1em; display: inline-block;width: 70%; color: #707070;margin-top: -0.65em;}
+	.mod_claim_in_image img { height: 2.33em; }
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	
+}
+/********************************/
+@media screen and (max-width: 600px)and (min-width: 481px) { 
+	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 1em; vertical-align: top;}
+	.mod_claim_in_der { margin-left: 0.5em; margin-right: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top: -0.40em;}
+	.mod_claim_in_image img { height: 2.33em; }
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 2em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 1em; color: #707070; vertical-align: bottom; font-weight: bold;}
+}
+/******************************/
+
+@media screen and (max-width: 480px) and (min-width: 381px){ 
+
+	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.5em; vertical-align: top;}
+	.mod_claim_in_der { margin-left: 0.5em; margin-right: 0.5em; display: inline-block;width: 65%; color: #707070;margin-top:0em;}
+	.mod_claim_in_image img { height: 2.33em; }
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 0.85em; color: #707070; vertical-align: bottom; font-weight: bold;}
+}
+
+@media screen and (max-width: 380px) { 
+
+	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.2em; vertical-align: top;}
+	.mod_claim_in_der { display: inline-block;width: 95%; color: #707070;margin-top:0em;}
+	.mod_claim_in_image img { height: 2.33em; }
+	.mod_claim_text { font-family: "Helvetica Neue 35 Light",Arial, Verdana; font-size: 1.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
+	.mod_claim_text_sec { font-family: Verdana; font-size: 0.85em; color: #707070; vertical-align: bottom; font-weight: bold;}
+}
