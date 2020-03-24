@@ -126,6 +126,7 @@ public class ProviderManager {
 		Properties providerConfig;
 		try {
 			providerConfig = ConfigFileLoader.loadConfigFile(providerConfigFilename);
+
 		} catch (final FileNotFoundException e) {
 			LOGGER.warning(String.format(
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
@@ -142,25 +143,52 @@ public class ProviderManager {
 			providerConfig = new Properties();
 		}
 
+		try {
+			providerConfig = ConfigManager.mapEnvironmentVariables(providerConfig);
+		}
+		catch (final Exception e) {
+			LOGGER.log(
+					Level.SEVERE,
+					String.format(
+							"No se han podido mapear las variables declaradas en el fichero de configuracion del proveedor %s", //$NON-NLS-1$
+							LogUtils.cleanText(providerName)),
+					e);
+		}
+
 		return providerConfig;
 	}
 
 	/**
 	 * Carga el fichero interno de propiedades del proveedor en el que se encuentra
-	 * la informaci&oacute;n generica que debe proporcionar. El fichero debe tener
+	 * la informaci&oacute;n gen&eacute;rica que debe proporcionar. El fichero debe tener
 	 * el nombre determinado por {@link #PROVIDER_INFO_FILE} y encontrarse en el
 	 * mismo paquete que la clase conectora.
 	 * @param classname Clase conectora del proveedor.
-	 * @return Properties cargado.
+	 * @param infoFilename Nombre del fichero con las propiedades visuales y comprobaciones del
+	 * proveedor.
+	 * @return Propiedades de visualizaci&oacute;n.
 	 */
-
 	private static Properties loadProviderInfoProperties(final String classname, final String infoFilename) {
 
 		Properties infoProperties;
 
-		if (infoFilename == null) {
+		// Si se configuro un fichero externo con la informacion del proveedor, se cargara
+		if (infoFilename != null) {
+			try {
+				infoProperties = ConfigFileLoader.loadConfigFile(infoFilename);
+			}
+			catch (final Exception e) {
+				LOGGER.warning(
+						String.format(
+								"No se ha encontrado o no ha podido cargarse el fichero externo '%s'", //$NON-NLS-1$
+								infoFilename)
+						);
+				infoProperties = new Properties();
+			}
+		}
+		// En caso contrario, se carga el fichero interno
+		else {
 			String classPath;
-
 			if (classname.lastIndexOf('.') == -1) {
 				classPath = classname;
 			} else {
@@ -175,21 +203,6 @@ public class ProviderManager {
 
 			final String providerInfoPath = classPath + PROVIDER_INFO_FILE;
 			infoProperties = loadInternalProperties(providerInfoPath);
-		}
-
-		//Al no cargarse el fichero interno, se cargará el fichero externo.
-		else {
-			try {
-				infoProperties = ConfigFileLoader.loadConfigFile(infoFilename);
-			}
-			catch (final Exception e) {
-				LOGGER.warning(
-						String.format(
-								"No se ha encontrado o no ha podido cargarse el fichero externo '%s'", //$NON-NLS-1$
-								infoFilename)
-						);
-				infoProperties = new Properties();
-			}
 		}
 		return infoProperties;
 	}

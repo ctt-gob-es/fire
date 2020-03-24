@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<%@page import="java.util.Enumeration"%>
+<%@page import="java.util.logging.Logger"%>
+<%@page import="java.util.Collection"%>
 <%@page import="es.gob.fire.test.webapp.ErrorHelper"%>
 <%@page import="es.gob.fire.client.TransactionResult"%>
 <html>

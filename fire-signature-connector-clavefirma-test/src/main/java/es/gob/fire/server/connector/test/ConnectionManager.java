@@ -103,9 +103,10 @@ public class ConnectionManager {
 			return;
 		}
 
+		File ksFile = null;
         final String keyStore = config.getProperty(KEYSTORE_PROPERTY);
         if (keyStore != null && !keyStore.isEmpty()) {
-        	final File ksFile = new File(keyStore);
+        	ksFile = new File(keyStore);
         	if (!ksFile.exists() || !ksFile.isFile() || !ksFile.canRead()) {
         		throw new IllegalArgumentException(
         				"El almacen de certificados de autenticacion SSL no existe o no puede leerse" //$NON-NLS-1$
@@ -125,10 +126,10 @@ public class ConnectionManager {
         }
 
         KeyStore ks = null;
-        if (keyStore != null && ksPassword != null) {
+        if (ksFile != null && ksPassword != null) {
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
 
-        	final FileInputStream ksFis = new FileInputStream(new File(keyStore));
+        	final FileInputStream ksFis = new FileInputStream(ksFile);
         	ks.load(ksFis, ksPassword);
         	ksFis.close();
         }

@@ -149,7 +149,7 @@ public class StatisticsDBLoader {
 		System.out.println(String.format("\tjava -jar %1s [Opciones]\n", JAR_NAME)); //$NON-NLS-1$
 		System.out.println("\t\tCarga los datos usando las opciones proporcionadas.\n"); //$NON-NLS-1$
 		System.out.println(String.format("\tjava -Dfire.config.path=\"DIRECTORIO_CONFIGURACION\" -jar %1s\n", JAR_NAME)); //$NON-NLS-1$
-		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero config.propeties que se encuentra en el \n" //$NON-NLS-1$
+		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero config.properties que se encuentra en el \n" //$NON-NLS-1$
 				+ "\t\tdirectorio configurado.\n"); //$NON-NLS-1$
 		System.out.println(String.format("\tjava -cp \"Ruta_JDBC;%1s\" es.gob.fire.statistics.cmd.StatisticsDBLoader [Opciones]\n", JAR_NAME)); //$NON-NLS-1$
 		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero config.propeties que se encuentra \n" //$NON-NLS-1$

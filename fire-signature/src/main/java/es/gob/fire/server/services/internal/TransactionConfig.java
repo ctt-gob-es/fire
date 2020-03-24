@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.Properties;
 
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.signature.ConfigManager;
 
 /**
  * Configuraci&oacute;n asociada a una transacci&oacute;n.
@@ -107,18 +106,6 @@ public class TransactionConfig implements Serializable {
 	 */
 	public String getAppTitle() {
 		return this.config.getProperty(PARAM_APPLICATION_TITLE);
-	}
-
-	/**
-	 * Indica si se debe cargar AutoFirma como aplicaci&oacute;n WebStart.
-	 * @return {@code true} si se debe cargar AutoFirma WebStart, {@code false}
-	 * en si se debe cargar Autofirma nativo.
-	 */
-	public boolean isAutoFirmaWSEnabled() {
-		final String afirmaWS = this.config.getProperty(PARAM_AUTOFIRMA_WS);
-		return afirmaWS != null ?
-			Boolean.parseBoolean(afirmaWS) :
-			!ConfigManager.getClienteAfirmaForceNative();
 	}
 
 	/**

@@ -37,6 +37,7 @@ public final class FireApi {
     private static final String TAG_VALUE_DATA = "$$DATA$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_TRANSACTION = "$$TRANSACTION$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_UPGRADE = "$$UPGRADE$$"; //$NON-NLS-1$
+    private static final String TAG_VALUE_ALLOW_PARTIAL_UPGRADE = "$$PARTIAL$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_DOCUMENT_ID = "$$DOCID$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_STOP_ON_ERROR = "$$STOPERROR$$"; //$NON-NLS-1$
 
@@ -102,6 +103,18 @@ public final class FireApi {
     private static final String URL_PARAMETERS_RECOVER_ERROR =
     		"&transactionid=" + TAG_VALUE_TRANSACTION; //$NON-NLS-1$
 
+    private static final String URL_ASYNC_PARAMETERS_BASE =
+            "op=" + TAG_VALUE_OPERATION + //$NON-NLS-1$
+            "&appid=" + TAG_VALUE_APP_ID; //$NON-NLS-1$
+
+    private static final String URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE =
+    		"&docid=" + TAG_VALUE_DOCUMENT_ID + //$NON-NLS-1$
+    		"&upgrade=" + TAG_VALUE_UPGRADE + //$NON-NLS-1$
+    		"&partial=" + TAG_VALUE_ALLOW_PARTIAL_UPGRADE + //$NON-NLS-1$
+    		"&config=" + TAG_VALUE_CONFIG; //$NON-NLS-1$
+
+    private static final String URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE_RESULT =
+    		"&docid=" + TAG_VALUE_DOCUMENT_ID; //$NON-NLS-1$
     private static String SERVICE_URL;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FireApi.class);
@@ -462,6 +475,134 @@ public final class FireApi {
         	LOGGER.error(
         			"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
         			e);
+        	throw new IOException(e);
+        }
+
+        result.setResult(signature);
+
+        return result;
+    }
+
+    /**
+     * Recupera una firma solicitada y tratada de recuperar anteriormente, pero para la que se
+     * estableci&oacute; la espera de un periodo de gracia.
+     *
+     * @param appId
+     *            Identificador de aplicaci&oacute;n que realiza la
+     *            petici&oacute;n.
+     * @param docId
+     *            Identificador de documento remitida en la anterior solicitud de recuperaci&oacute;n.
+     * @param upgrade
+     *            Formato al que solicitamos anteriormente mejorar la firma (puede ser
+     *            <code>null</code>).
+     * @param upgradeConfig Configuraci&oacute;n adicional para la plataforma de actualizaci&oacute;n
+     * 			  de firmas.
+     * @param allowPartial Indica si se debe devolver la firma incluso si s&oacute;lo se
+     * actualiz&oacute; parcialmente y no hasta el formato indicado. Si no se indica el
+     * par&aacute;metro {@code upgrade}, este valor se ignorar&aacute;.
+     * @return Resultado de la recuperaci&oacute;n de la firma.
+     * @throws IllegalArgumentException
+     * 			   Si se proporciona a nulo el identificados de transacci&oacute;n
+     * 			   o el de usuario.
+     * @throws IOException
+     *             Si hay problemas en la llamada al servicio de red.
+     * @throws HttpNetworkException
+     * 				Cuando se produce un error de red.
+     * @throws HttpForbiddenException
+     * 				Cuando se deniega el acceso al componente central.
+     * @throws HttpOperationException
+     * 			   Si se produjo un error durante la operaci&oacute;n de firma.
+     * @throws InvalidTransactionException
+     * 			   Cuando la transacci&oacute;n no existe o est&aacute; caducada.
+     */
+    public static TransactionResult recoverAsyncSign(final String appId, final String docId,
+    		final String upgrade, final Properties upgradeConfig, final boolean allowPartial)
+    				throws IOException, HttpNetworkException, HttpForbiddenException,
+    				HttpOperationException, InvalidTransactionException {
+
+        if (docId == null || docId.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "El identificador del documento firmado no puede ser nulo" //$NON-NLS-1$
+            );
+        }
+
+        // Componemos la URL
+        String urlParameters =
+        		URL_ASYNC_PARAMETERS_BASE
+        		.replace(TAG_VALUE_APP_ID, appId)
+        		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_UPDATED_SIGN.getId()) +
+        		URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE
+                .replace(TAG_VALUE_DOCUMENT_ID, docId)
+        		.replace(TAG_VALUE_ALLOW_PARTIAL_UPGRADE, Boolean.toString(allowPartial));
+
+        // Establecemos el formato de update y la configuracion para el validador si se han
+        // establecido. Si no, los eliminamos de la URL
+        if (upgrade != null && !upgrade.isEmpty()) {
+        	urlParameters = urlParameters.replace(TAG_VALUE_UPGRADE, upgrade);
+        }
+        else {
+        	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        if (upgradeConfig != null && !upgrade.isEmpty()) {
+        	urlParameters = urlParameters.replace(TAG_VALUE_CONFIG, Utils.properties2Base64(upgradeConfig, true));
+        }
+        else {
+        	urlParameters = urlParameters.replace("&config=" + TAG_VALUE_CONFIG , ""); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        TransactionResult result;
+        try {
+        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, conn.readUrl(SERVICE_URL, urlParameters, Method.GET));
+        } catch (final HttpError e) {
+        	LOGGER.error("Error en la llamada al servicio de recuperacion asincrona de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
+        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+        		throw new HttpForbiddenException(e);
+        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+        		throw new HttpNetworkException(e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.UPGRADING_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.UPGRADING_ERROR.getErrorDescription(), e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorDescription(), e);
+        	} else {
+        		throw new HttpOperationException(e.getMessage(), e);
+        	}
+        }
+        catch (final Exception e) {
+        	LOGGER.error("Error en la comunicacion con el servicio de recuperacion asincrona de firma", e); //$NON-NLS-1$
+        	throw new IOException(e);
+        }
+
+        // Si el resultado es un error, si tiene un periodo de gracia o si ya contiene la firma, lo devolvemos
+        if (result.getErrorCode() != 0 || result.getGracePeriod() != null || result.getResult() != null) {
+        	return result;
+        }
+
+        // Si no es alguno de los anteriores es que ya esta lista la firma y
+        // hacemos una nueva llamada para descargarla
+        urlParameters =
+        		URL_ASYNC_PARAMETERS_BASE
+        			.replace(TAG_VALUE_APP_ID, appId)
+        			.replace(TAG_VALUE_OPERATION, FIReServiceOperation.RECOVER_UPDATED_SIGN_RESULT.getId()) +
+        			URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE_RESULT
+        			.replace(TAG_VALUE_DOCUMENT_ID, docId);
+
+        byte[] signature;
+        try {
+        	 signature = conn.readUrl(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final HttpError e) {
+        	LOGGER.error("Error en la llamada al servicio de recuperacion de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
+        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+        		throw new HttpForbiddenException(e);
+        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+        		throw new HttpNetworkException(e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
+        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
+        	} else {
+        		throw new HttpOperationException(e.getMessage(), e);
+        	}
+        }
+        catch (final Exception e) {
+        	LOGGER.error("Error en la comunicacion con el servicio de recuperacion de firma", e); //$NON-NLS-1$
         	throw new IOException(e);
         }
 

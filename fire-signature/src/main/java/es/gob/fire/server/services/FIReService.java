@@ -57,7 +57,6 @@ public class FIReService extends HttpServlet {
 	    	ConfigManager.checkConfiguration();
 		}
     	catch (final Exception e) {
-
     		LOGGER.severe("No se pudo cargar la configuracion del componente central de FIRe: " + e); //$NON-NLS-1$
     		return;
     	}
@@ -71,6 +70,14 @@ public class FIReService extends HttpServlet {
 				"No se pudo configurar la salida de los logs de FIRe a un fichero externo: " + e //$NON-NLS-1$
 			);
 		}
+
+    	// Configuramos la utenticacion del proxy
+    	try {
+    		NetworkAuthenticator.configure();
+    	}
+    	catch(final Throwable e) {
+    		LOGGER.log(Level.WARNING, "No se pudo configurar el autenticador para el proxy", e); //$NON-NLS-1$
+    	}
 
     	// Codigo para programar el volcado de estadisticas a BD si procede
 		try {

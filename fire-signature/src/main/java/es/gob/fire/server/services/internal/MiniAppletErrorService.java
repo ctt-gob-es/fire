@@ -17,9 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.server.services.FIReServiceOperation;
-import es.gob.fire.server.services.statistics.TransactionType;
-
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
  */
@@ -62,18 +59,25 @@ public class MiniAppletErrorService extends HttpServlet {
         final TransactionConfig connConfig	=
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
-        // Obtenemos la operacion (SIGN o BATCH)
-        final FIReServiceOperation fsop = FIReServiceOperation.parse(session.getString(ServiceParams.SESSION_PARAM_OPERATION)) ;
-		final TransactionType op = TransactionType.valueOf(fsop);
-
+        // Si no se encuentra en la sesion la URL de redireccion de error, redirigimos al usuario
+        // a la pagina de error indicada por parametro
     	if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
     		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
     	}
+    	// Si la URL de redireccion de error estaba en la sesion, redirigimos al usuario a esa pagina
     	else {
         	ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, true, errorMessage);
         	errorUrl = connConfig.getRedirectErrorUrl();
     	}
 
-        response.sendRedirect(errorUrl);
+    	// Si se ha definido la URL de error de una forma u otra, se redirige a ella. Si no, se
+    	// devuelve un error
+    	if (errorUrl != null) {
+    		response.sendRedirect(errorUrl);
+    	}
+    	else {
+    		LOGGER.warning("No se proporciono la URL de redireccion de error y se devuelve BAD_REQUEST"); //$NON-NLS-1$
+    		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    	}
 	}
 }

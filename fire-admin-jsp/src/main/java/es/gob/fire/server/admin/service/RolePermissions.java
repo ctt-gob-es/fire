@@ -1,14 +1,9 @@
 package es.gob.fire.server.admin.service;
 
-import java.util.logging.Logger;
-
 public class RolePermissions {
 
-	private static final Logger LOGGER = Logger.getLogger(RolePermissions.class.getName());
-	private static final String PARAM_USER_ROLE = "role-usr";//$NON-NLS-1$
-
-	public static final String PERMISION_LOGIN_ACCESS = "1";
-	public static final String PERMISION_APP_RESPONSABLE = "2";
+	public static final String PERMISION_LOGIN_ACCESS = "1"; //$NON-NLS-1$
+	public static final String PERMISION_APP_RESPONSABLE = "2"; //$NON-NLS-1$
 
 
 	private boolean loginPermission;
@@ -24,7 +19,7 @@ public class RolePermissions {
 		final RolePermissions userPermissions = new RolePermissions();
 
 		if (permissions != null) {
-			for (final String permission : permissions.split(",")) {
+			for (final String permission : permissions.split(",")) { //$NON-NLS-1$
 				switch (permission) {
 
 				case PERMISION_LOGIN_ACCESS:	// Permiso de acceso

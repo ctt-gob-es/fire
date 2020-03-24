@@ -55,7 +55,7 @@ public final class SessionCollector {
 
     	// Cargamos el DAO de sesiones compartidas
     	final String daoType = ConfigManager.getSessionsDao();
-    	if (daoType == null || daoType.isEmpty()) {
+    	if (daoType == null || daoType.trim().isEmpty()) {
     		LOGGER.warning("No se configuro un gestor de sesiones. " //$NON-NLS-1$
     				+ "El componente central solo funcionara sobre despliegues en un unico nodo."); //$NON-NLS-1$
     	}
@@ -173,6 +173,10 @@ public final class SessionCollector {
 					LOGGER.fine("Sesion cargada de almacenamiento persistente"); //$NON-NLS-1$
 				}
 			}
+		}
+
+		if (onlyLoaded && fireSession == null) {
+			LOGGER.fine("Se esperaba que la sesion estuviese en memoria y no fue asi"); //$NON-NLS-1$
 		}
 
 		// Comprobamos que los datos de la sesion se correspondan con los del usuario indicado

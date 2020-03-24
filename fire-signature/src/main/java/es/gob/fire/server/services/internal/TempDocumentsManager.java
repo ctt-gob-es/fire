@@ -23,9 +23,9 @@ public class TempDocumentsManager {
 	static {
 		TempDocumentsDAO associatedDao;
 		final String documentsDaoClassname = ConfigManager.getTempDocumentsDao();
-		if (documentsDaoClassname != null) {
+		if (documentsDaoClassname != null && !documentsDaoClassname.trim().isEmpty()) {
 			try {
-				associatedDao = (TempDocumentsDAO) Class.forName(documentsDaoClassname).getConstructor().newInstance();
+				associatedDao = (TempDocumentsDAO) Class.forName(documentsDaoClassname.trim()).getConstructor().newInstance();
 			} catch (final Exception e) {
 				LOGGER.severe("Error al cargar del gestor para la comparticion de sesiones entre nodos: " + e); //$NON-NLS-1$
 				associatedDao = null;

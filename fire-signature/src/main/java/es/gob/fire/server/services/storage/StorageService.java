@@ -27,8 +27,8 @@ import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 
 /** Servicio de almacenamiento temporal de firmas. &Uacute;til para servir de intermediario en comunicaci&oacute;n
- * entre JavaScript y <i>Apps</i> m&oacute;viles nativas.
- * @author Tom&aacute;s Garc&iacute;a-;er&aacute;s */
+ * entre JavaScript y el cliente Afirma.
+ * @author Tom&aacute;s Garc&iacute;a-;er&aacute;s. */
 public final class StorageService extends HttpServlet {
 
 	private static final long serialVersionUID = -3272368448371213403L;
@@ -45,7 +45,7 @@ public final class StorageService extends HttpServlet {
 	/** Nombre del par&aacute;metro con el identificador del fichero temporal. */
 	private static final String PARAMETER_NAME_ID = "id"; //$NON-NLS-1$
 
-	/** Nombre del par&aacute;metro con la versi&oacute;n de la sintaxis de petici&oacute; utilizada. */
+	/** Nombre del par&aacute;metro con la versi&oacute;n de la sintaxis de petici&oacute;n utilizada. */
 	private static final String PARAMETER_NAME_SYNTAX_VERSION = "v"; //$NON-NLS-1$
 
 	/** Nombre del par&aacute;metro con los datos a firmar. */
@@ -109,12 +109,10 @@ public final class StorageService extends HttpServlet {
 		LOGGER.fine("== FIN DEL GUARDADO =="); //$NON-NLS-1$
 	}
 
-	/**
-	 * Almacena una firma en servidor.
-	 * @param response Respuesta a la petici&oacute;n.
-	 * @param request Petici&oacute;n.
-	 * @throws IOException Cuando ocurre un error al general la respuesta.
-	 */
+	/** Almacena una firma en servidor.
+	 * @param out Flujo de datos para la respuesta a la petici&oacute;n.
+	 * @param params Par&aacute;metros de la petici&oacute;n.
+	 * @throws IOException Cuando ocurre un error al general la respuesta. */
 	private static void storeSign(final PrintWriter out, final Hashtable<String, String> params) throws IOException {
 
 		final String id = params.get(PARAMETER_NAME_ID);

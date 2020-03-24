@@ -1,8 +1,8 @@
-#La cadena PARAM_USER se sustituye por en usuario de la sesion logado.
+#La cadena PARAM_USER se sustituye por el usuario para el que se inicia la operacion.
 #La cadena PARAM_PROVIDER se sustituye por el proveedor seleccionado.
 
 # Errores generales
-1=El usuario PARAM_USER no est&aacute; dado de alta en el proveedor PARAM_PROVIDER. Pulse bot&oacute;n Volver para seleccionar otro proveedor. 
+1=El usuario PARAM_USER no est&aacute; dado de alta en el proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor. 
 2=Error en los datos del estado del usuario PARAM_USER.
 3=Se ha producido un error desconocido. Pulse el bot&oacute;n de iniciar aplicaci&oacute;n.
 4=Operaci&oacute;n cancelada por el usuario PARAM_USER.
@@ -12,11 +12,11 @@
 8=Se ha producido un error externo a FIRe despu&eacute;s de redirigir al usuario  PARAM_USER a la pasarela del proveedor PARAM_PROVIDER.
 
 # Errores especificos del servicios de listado de certificados
-101=Error al obtener el certificado del usuario PARAM_USER del  proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
-102=Error al conectar con el servicio del proveedor PARAM_PROVIDER , para obtener los certificados del usuario  PARAM_USER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
+101=Error al obtener los certificados del usuario PARAM_USER del proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
+102=No se pudieron obtener los certificados del usuario PARAM_USER por un error de conexión con el proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
 103=Los certificados del usuario PARAM_USER del proveedor PARAM_PROVIDER est&aacute;n bloqueados. Consulte con su proveedor si esta condición es temporal o necesita de algún trámite externo. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
 104=El usuario PARAM_USER realiz&oacute; un registro no fehaciente con el proveedor PARAM_PROVIDER y no tiene certificados de firma emitidos.  Es posible que no pueda disponer de estos certificados o que necesite cumplimentar alg&uacute;n requisito con dicho proveedor. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.
-105=El usuario PARAM_USER no tiene certificados de firma y el conector no permite generarlos al vuelo. 
+105=El usuario PARAM_USER no tiene certificados de firma y no se permite generarlos desde FIRe. 
 
 # Errores propios de la operacion de firma
 201=Error durante la operaci&oacute;n de firma del proveedor PARAM_PROVIDER. Pulse el bot&oacute;n Volver para seleccionar otro proveedor.

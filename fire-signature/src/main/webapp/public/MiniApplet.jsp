@@ -189,6 +189,7 @@
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
 	<link rel="stylesheet" type="text/css" href="css/modMiniApplet.css">
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
+<!-- <script type="text/javascript" src="js/miniapplet_1_6_5.js"></script> -->
 	<script type="text/javascript" src="js/autoscript.js"></script>
 	<script type="text/javascript">
 		

@@ -52,6 +52,17 @@ public class SignatureValidatorBuilder {
 			}
 
 			try {
+				config = ConfigManager.mapEnvironmentVariables(config);
+			}
+			catch (final Exception e) {
+				LOGGER.log(Level.SEVERE,
+						"No se pudieron mapear las variables de entorno en el fichero de configuracion " + DEFAULT_PLATFORM_FILENAME, //$NON-NLS-1$
+						e);
+				validator = null;
+				throw new  ValidatorException("No se pudieron mapear las variables de entorno en el fichero de configuracion", e); //$NON-NLS-1$
+			}
+
+			try {
 				validator.init(config);
 			}
 			catch (final Exception e) {

@@ -24,6 +24,7 @@ import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESASiCSTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
 import es.gob.fire.signature.ConfigFileLoader;
+import es.gob.fire.signature.ConfigManager;
 
 /** Constantes para la definici&oacute;n de una firma independiente.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -41,6 +42,7 @@ public final class SingleSignConstants {
 	static {
 		try {
 			config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
+			config = ConfigManager.mapEnvironmentVariables(config);
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No se pudo cargar el fichero de configuracion " + CONFIG_FILE, e); //$NON-NLS-1$

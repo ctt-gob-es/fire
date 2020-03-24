@@ -60,8 +60,8 @@ public class SignBatchResult {
 	}
 
 	/**
-	 * Detalle del resultado de la operaci&oacute;n.
-	 * @return Detalle del resultado de firma.
+	 * Detalle del error producido si la firma no se gener&oacute; correctamente.
+	 * @return C&oacute;digo de error producido.
 	 */
 	public String getErrotType() {
 		return this.errorType;

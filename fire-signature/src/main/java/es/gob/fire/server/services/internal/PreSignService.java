@@ -62,7 +62,6 @@ public final class PreSignService extends HttpServlet {
     	final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
     	final String userId  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
     	final String certB64        = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
-    	final boolean originForced  = Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
     	String redirectErrorUrl 	= request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
         // Comprobamos que se hayan prorcionado los parametros indispensables
@@ -121,6 +120,7 @@ public final class PreSignService extends HttpServlet {
         final String subOperation   = session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
         final String format         = session.getString(ServiceParams.SESSION_PARAM_FORMAT);
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+    	final boolean originForced  = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
         final boolean stopOnError   = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
         final TransactionConfig connConfig =
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);

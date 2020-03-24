@@ -65,7 +65,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 	private static final String PARAM_VALUE_OPERATION_PRESIGN = "pre"; //$NON-NLS-1$
 	private static final String PARAM_VALUE_OPERATION_POSTSIGN = "post"; //$NON-NLS-1$
 
-	private static final String PARAM_NAME_SIGNATURE_OPERATION = "cop"; //$NON-NLS-1$
+	private static final String PARAM_NAME_SUB_OPERATION = "cop"; //$NON-NLS-1$
 
 	// Parametros que necesitamos para la prefirma
 	private static final String PARAM_NAME_DOCID = "doc"; //$NON-NLS-1$
@@ -134,7 +134,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		// Obtenemos el codigo de operacion
-		final SignOperation subOperation = SignOperation.parse(parameters.get(PARAM_NAME_SIGNATURE_OPERATION));
+		final SignOperation subOperation = SignOperation.parse(parameters.get(PARAM_NAME_SUB_OPERATION));
 		if (subOperation == null) {
 			sendResponse(response, ErrorManager.getErrorMessage(13));
 			return;
@@ -193,8 +193,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		if (sessionData != null) {
-			LOGGER.fine("Recibidos los siguientes datos de sesion para '" + operation + "':\n"
-					+ new String(sessionData, DEFAULT_CHARSET));
+			LOGGER.fine(String.format("Recibidos los siguientes datos de sesion para '%s':\n%s", //$NON-NLS-1$
+					operation, new String(sessionData, DEFAULT_CHARSET)));
 		}
 
 		// Obtenemos el certificado

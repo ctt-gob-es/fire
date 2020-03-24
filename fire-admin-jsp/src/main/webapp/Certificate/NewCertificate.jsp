@@ -180,6 +180,7 @@
 			save.href = event.target.result;
 			save.target = '_blank';
 			save.download = fileName || 'certificado.cer';
+			save.rel = 'noopener';
 			var clicEvent = new MouseEvent('click', {
 				'view' : window,
 				'bubbles' : true,

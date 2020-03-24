@@ -34,6 +34,10 @@ class TestHelper {
 
 	private static final Logger LOGGER = Logger.getLogger(TestHelper.class.getName());
 
+	private static final String SYS_PROP_PREFIX = "${"; //$NON-NLS-1$
+
+	private static final String SYS_PROP_SUFIX = "}"; //$NON-NLS-1$
+
 	private static final String DEFAULT_ENCODING = "utf-8"; //$NON-NLS-1$
 
 	/** Nombre del fichero de configuraci&oacute;n. */
@@ -192,6 +196,13 @@ class TestHelper {
 				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
 			}
 		}
+
+		// Expandimos las propiedades configuradas con los parametros proporcionados
+		// en el arranque del servidor
+		for (final String key : config.keySet().toArray(new String[0])) {
+			config.setProperty(key, mapSystemProperties(config.getProperty(key)));
+		}
+
 		return config;
 	}
 
@@ -248,10 +259,10 @@ class TestHelper {
 	 */
 	static String getSubjectPassword(final String subjectId) throws IOException, InvalidUserException {
 
-		final InputStream fis = new FileInputStream(doSubjectExist(subjectId));
+		final InputStream is = doSubjectExist(subjectId);
 		final Properties tempProperties = new Properties();
-		tempProperties.load(fis);
-		fis.close();
+		tempProperties.load(is);
+		is.close();
 		return tempProperties.getProperty(TEST_USER_PROPERTY_PASSWORD);
 	}
 
@@ -292,29 +303,18 @@ class TestHelper {
 		return tempProperties.getProperty(TEST_USER_PROPERTY_PASSWORD, ""); //$NON-NLS-1$
 	}
 
-	static File doSubjectExist(final String subjectId) throws IOException, InvalidUserException {
+	static InputStream doSubjectExist(final String subjectId) throws InvalidUserException {
 		if (subjectId == null) {
 			throw new IllegalArgumentException(
 					"El identificador del titular no puede ser nulo" //$NON-NLS-1$
 					);
 		}
-		final File f;
-		final URL subUrl = TestGetCertificateService.class.getResource("/testservice/"+ subjectId + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (subUrl == null) {
+		final InputStream resIs = TestGetCertificateService.class.getResourceAsStream(
+				"/testservice/"+ subjectId + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (resIs == null) {
 			throw new InvalidUserException("El titular no existe: " + subjectId); //$NON-NLS-1$
 		}
-		try {
-			f = new File(
-					subUrl.toURI()
-					);
-		}
-		catch (final Exception e) {
-			throw new IOException("Error comprobando el ID del titular: " + e, e); //$NON-NLS-1$
-		}
-		if (!f.isFile() || !f.canRead()) {
-			throw new InvalidUserException("El titular no existe: " + subjectId); //$NON-NLS-1$
-		}
-		return f;
+		return resIs;
 	}
 
 	/**
@@ -334,9 +334,9 @@ class TestHelper {
 
 		final Properties tempProperties = new Properties();
 		try {
-			final InputStream fis = new FileInputStream(doSubjectExist(subjectId));
-			tempProperties.load(fis);
-			fis.close();
+			final InputStream is = doSubjectExist(subjectId);
+			tempProperties.load(is);
+			is.close();
 		}
 		catch(final IOException e) {
 			throw new InvalidUserException("No se ha podido cargar el fichero descriptor del usuario", e); //$NON-NLS-1$
@@ -427,9 +427,9 @@ class TestHelper {
 
 		final Properties tempProperties = new Properties();
 		try {
-			final InputStream fis = new FileInputStream(doSubjectExist(subjectId));
-			tempProperties.load(fis);
-			fis.close();
+			final InputStream is = doSubjectExist(subjectId);
+			tempProperties.load(is);
+			is.close();
 		}
 		catch(final IOException e) {
 			throw new InvalidUserException("No se ha podido cargar el fichero descriptor del usuario", e); //$NON-NLS-1$
@@ -442,5 +442,35 @@ class TestHelper {
 		if (!STATE_NOCERT.equalsIgnoreCase(tempProperties.getProperty(TEST_USER_PROPERTY_STATE))) {
 			throw new FIReCertificateAvailableException("El usuario ya tiene el numero maximo de certificados de firma"); //$NON-NLS-1$
 		}
+	}
+
+	/**
+	 * Mapea las propiedades del sistema que haya en el texto que se referencien de
+	 * la forma: ${propiedad}
+	 * @param text Texto en el que se pueden encontrar las referencias a las propiedades
+	 * del sistema.
+	 * @return Cadena con las part&iacute;culas traducidas a los valores indicados como propiedades
+	 * del sistema. Si no se encuentra la propiedad definida, no se modificar&aacute;.
+	 */
+	private static String mapSystemProperties(final String text) {
+
+		if (text == null) {
+			return null;
+		}
+
+		int pos = -1;
+		int pos2 = 0;
+		String mappedText = text;
+		while ((pos = mappedText.indexOf(SYS_PROP_PREFIX, pos + 1)) > -1 && pos2 > -1) {
+			pos2 = mappedText.indexOf(SYS_PROP_SUFIX, pos + SYS_PROP_PREFIX.length());
+			if (pos2 > pos) {
+				final String prop = mappedText.substring(pos + SYS_PROP_PREFIX.length(), pos2);
+				final String value = System.getProperty(prop, null);
+				if (value != null) {
+					mappedText = mappedText.replace(SYS_PROP_PREFIX + prop + SYS_PROP_SUFIX, value);
+				}
+			}
+		}
+		return mappedText;
 	}
 }

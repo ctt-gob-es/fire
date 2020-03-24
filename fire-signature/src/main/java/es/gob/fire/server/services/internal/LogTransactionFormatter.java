@@ -5,7 +5,7 @@ package es.gob.fire.server.services.internal;
  */
 public class LogTransactionFormatter {
 
-	private final String appId;
+	private String appId;
 
 	private String transactionId;
 
@@ -20,6 +20,10 @@ public class LogTransactionFormatter {
 
 	public String getAppId() {
 		return this.appId;
+	}
+
+	public void setAppId(final String appId) {
+		this.appId = appId;
 	}
 
 	public String getTransactionId() {

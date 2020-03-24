@@ -595,9 +595,9 @@ public class FireClient {
      *            <code>null</code>).
      * @param upgradeConfig Configuraci&oacute;n adicional para la plataforma de actualizaci&oacute;n
      * 			  de firmas.
-     * @param allowPartial Indica si se debe devolver la firma incluso si s&oacute;lo se actualiza
-     * parcialmente hasta el formato indicado. Si no se indica el parametro {@code upgrade}, este
-     * valor se ignorar&aacute;.
+     * @param allowPartial Indica si se debe devolver la firma incluso si s&oacute;lo se
+     * actualiz&oacute; parcialmente y no hasta el formato indicado. Si no se indica el
+     * par&aacute;metro {@code upgrade}, este valor se ignorar&aacute;.
      * @return Resultado de la recuperaci&oacute;n de la firma.
      * @throws IllegalArgumentException
      * 			   Si se proporciona a nulo el identificados de transacci&oacute;n
@@ -659,8 +659,8 @@ public class FireClient {
         		throw new HttpNetworkException(e);
         	} else if (e.getResponseCode() == HttpCustomErrors.UPGRADING_ERROR.getErrorCode()) {
         		throw new HttpOperationException(HttpCustomErrors.UPGRADING_ERROR.getErrorDescription(), e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorDescription(), e);
+        	} else if (e.getResponseCode() == HttpCustomErrors.SAVING_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.SAVING_ERROR.getErrorDescription(), e);
         	} else {
         		throw new HttpOperationException(e.getMessage(), e);
         	}
@@ -675,7 +675,8 @@ public class FireClient {
         	return result;
         }
 
-        // Si no tenemos la firma, hacemos una nueva llamada para descargarla
+        // Si no es alguno de los anteriores es que ya esta lista la firma y
+        // hacemos una nueva llamada para descargarla
         urlParameters =
         		URL_ASYNC_PARAMETERS_BASE
         			.replace(TAG_VALUE_APP_ID, this.appId)
@@ -692,8 +693,6 @@ public class FireClient {
         		throw new HttpForbiddenException(e);
         	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
         		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
         	} else {
         		throw new HttpOperationException(e.getMessage(), e);
         	}

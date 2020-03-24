@@ -93,10 +93,12 @@ public class DbManager {
 	/**
 	 * Obtiene la conexi&oacute;n de base de datos.
 	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo conectar.
+	 * @throws SQLException Cuando no se puede obtener una conexion con la base de datos.
 	 */
-	private static Connection getConnection() {
+	private static Connection getConnection() throws SQLException {
 		try {
 			if (!conn.isValid(2)) {
+				conn.close();
 				LOGGER.warning("La conexion con base de datos ha dejado de ser valida"); //$NON-NLS-1$
 				conn = null;
 			}
@@ -111,6 +113,10 @@ public class DbManager {
 				initialize();
 			} catch (final AdminFilesNotFoundException e) {
 				LOGGER.log(Level.SEVERE, "No se ha encontrado el fichero de configuracion del modulo", e); //$NON-NLS-1$
+			}
+
+			if (conn == null) {
+				throw new SQLException("No se pudo obtener una conexion con la base de datos"); //$NON-NLS-1$
 			}
 		}
 

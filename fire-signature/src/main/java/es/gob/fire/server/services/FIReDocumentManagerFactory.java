@@ -111,6 +111,15 @@ public class FIReDocumentManagerFactory {
 						"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
 			}
 
+			try {
+				config = ConfigManager.mapEnvironmentVariables(config);
+			} catch (final Exception e) {
+				LOGGER.warning(
+						"No se pudieron mapear las variables de entorno en el fichero de configuracion: " + //$NON-NLS-1$
+								getDocManagerConfigFilename(managerName) +
+								e);
+			}
+
 			// Desciframos las claves del fichero de configuracion si es necesario
 			if (config != null && ConfigManager.hasDecipher()) {
 				for (final String key : config.keySet().toArray(new String[config.size()])) {

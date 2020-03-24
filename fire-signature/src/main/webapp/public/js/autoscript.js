@@ -3305,6 +3305,7 @@ var AutoScript = ( function ( window, undefined ) {
 				if (currentOperation == OPERATION_BATCH) {
 					var result;
 					var certificate = null;
+										
 					var sepPos = html.indexOf('|');
 
 					// En caso de recibir un unico parametro, este sera la firma en el caso de las operaciones de firma y el
@@ -3320,7 +3321,7 @@ var AutoScript = ( function ( window, undefined ) {
 					else {
 						if (cipherKey != undefined && cipherKey != null) {
 							result = decipher(html.substring(0, sepPos), cipherKey, true);
-							certificate = decipher(html.substring(sepPos + 1), cipherKey);
+							certificate = decipher(html.substring(sepPos + 1), cipherKey, true);
 						}
 						else {
 							result = fromBase64UrlSaveToBase64(html.substring(0, sepPos));
@@ -3568,8 +3569,10 @@ var AutoScript = ( function ( window, undefined ) {
 								
 				var dotPos = cipheredData.indexOf('.');
 				var padding = cipheredData.substr(0, dotPos);
-				
-				var deciphered = Cipher.des(key, Cipher.base64ToString(fromBase64UrlSaveToBase64(cipheredData.substr(dotPos + 1))), 0, 0, null);
+
+				var predeciphered = fromBase64UrlSaveToBase64(cipheredData.substr(dotPos + 1));
+				var deciphered = Cipher.des(key, Cipher.base64ToString(predeciphered), 0, 0, null);
+
 				return Cipher.stringToBase64(deciphered.substr(0, deciphered.length - parseInt(padding) - (intermediate ? 0 : 8)));
 			}
 			

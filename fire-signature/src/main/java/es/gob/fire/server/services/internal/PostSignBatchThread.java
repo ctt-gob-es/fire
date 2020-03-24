@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.upgrade.SignatureValidator;
+import es.gob.fire.upgrade.UpgradeParams;
 import es.gob.fire.upgrade.UpgradeResult;
 import es.gob.fire.upgrade.VerifyException;
 import es.gob.fire.upgrade.VerifyResult;
@@ -149,6 +150,20 @@ class PostSignBatchThread extends ConcurrentProcessThread {
     	    			interrupt();
     	    			return;
     	    		}
+
+    				boolean allowPartialUpgrade = false;
+    				if (upgradeConfig != null) {
+    					allowPartialUpgrade = Boolean.parseBoolean(upgradeConfig.getProperty(UpgradeParams.ALLOW_PARTIAL_UPGRADE));
+    				}
+
+    		        // Comprobamos si era necesario recuperar la firma totalmente actualizada y si se ha hecho asi
+    		        if (!allowPartialUpgrade && upgradeResult.getState() == UpgradeResult.State.PARTIAL) {
+    	    			LOGGER.log(Level.WARNING, logF.f("No se pudo actualizar hasta el formato solicitado la firma del documento: " + this.docId)); //$NON-NLS-1$
+    	    			this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
+    	    			setFailed(true);
+    	    			interrupt();
+    	    			return;
+    		        }
 
     				if (upgradeResult.getState() == UpgradeResult.State.PENDING) {
     					processResult = new PostProcessResult(upgradeResult.getGracePeriodInfo());

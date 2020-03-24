@@ -17,9 +17,14 @@ import com.openlandsw.rss.gateway.exception.SafeCertGateWayException;
  */
 public class ClaveFirmaErrorManager {
 
+	/** Error de usuario desconocido devuelto por la pasarela. */
 	static final String ERROR_CODE_UNKNOWN_USER = "OPQUEFIL00003"; //$NON-NLS-1$
 
+	/** Error de registro d&eacute;bil devuelto por la pasarela. */
 	static final String ERROR_CODE_WEAK_REGISTRY = "OPSTR00023"; //$NON-NLS-1$
+
+	/** Error de registro d&eacute;bil devuelto por el GCC. */
+	static final String ERROR_CODE_GCC_WEAK_REGISTRY = "ADMINWS_0039"; //$NON-NLS-1$
 
 	private static final String ERROR_TEXT_CERT_AVAILABLE = "El titular ya dispone de un certificado para el uso indicado"; //$NON-NLS-1$
 

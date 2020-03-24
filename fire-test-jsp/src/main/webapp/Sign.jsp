@@ -101,6 +101,7 @@
 				   - filters=keyusage.nonrepudiation:true
 				  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
 				  de certificados de firma. -->
+ 
 				<input id="extraparams-conf" type="hidden" name="extraParams"
 				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true\nexpPolicy=FirmaAGE".getBytes()) %>" />
 

@@ -29,6 +29,10 @@ public class ConfigManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
 
+	private static final String SYS_PROP_PREFIX = "${"; //$NON-NLS-1$
+
+	private static final String SYS_PROP_SUFIX = "}"; //$NON-NLS-1$
+
 	private static final String PROP_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
 
 	private static final String PROP_DB_CONNECTION = "bbdd.conn"; //$NON-NLS-1$
@@ -49,10 +53,9 @@ public class ConfigManager {
 	 * Ejemplo: provider.NOMBRE_PROVEEDOR.secure=true */
 	private static final String SUFIX_PROP_SECURE_PROVIDER = ".secure"; //$NON-NLS-1$
 
-	/** Sufijo utilizado junto prefijo y nombre de un proveedor para determinar si este se ha
-	 * configurado como un proveedor seguro o no.
-	 * Ejemplo: provider.NOMBRE_PROVEEDOR.info.file=true */
-
+	/** Sufijo utilizado junto prefijo y nombre de un proveedor para determinar si se debe cargar
+	 * un fichero externo con la informaci&oacute;n del proveedor en lugar de su fichero externo.
+	 * Ejemplo: provider.NOMBRE_PROVEEDOR.info.file=/users/usuario/fire_config/proveedorinfo.properties */
 	private static final String SUFIX_PROP_INFO_FILE_PROVIDER = ".info.file"; //$NON-NLS-1$
 
 	/** Propiedad con la clase encargada de la validaci&oacute;n y actualizaci&oacute;n de las firmas. */
@@ -79,10 +82,6 @@ public class ConfigManager {
 
 	/** Segundos que, por defecto, tardan los ficheros temporales del cliente @firma en caducar. */
 	private static final int DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT = 600; // 10 minutos
-
-	private static final String PROP_CLIENTEAFIRMA_FORCE_AUTOFIRMA = "clienteafirma.forceAutoFirma"; //$NON-NLS-1$
-
-	private static final String PROP_CLIENTEAFIRMA_FORCE_NATIVE = "clienteafirma.forceNative"; //$NON-NLS-1$
 
 	private static final String PROP_FIRE_PAGES_TITLE = "pages.title"; //$NON-NLS-1$
 
@@ -112,7 +111,9 @@ public class ConfigManager {
 
 	private static final String PROP_LOGS_LEVEL_GENERAL = "logs.level"; //$NON-NLS-1$
 
-	private static final String DEFAULT_LOGS_LEVEL = "WARNING"; //$NON-NLS-1$
+	private static final String DEFAULT_FIRE_LOGS_LEVEL = "INFO"; //$NON-NLS-1$
+	private static final String DEFAULT_AFIRMA_LOGS_LEVEL = "WARNING"; //$NON-NLS-1$
+	private static final String DEFAULT_GENERAL_LOGS_LEVEL = "OFF"; //$NON-NLS-1$
 
 	private static final String PROP_HTTP_CERT_ATTR = "http.cert.attr"; //$NON-NLS-1$
 
@@ -188,6 +189,13 @@ public class ConfigManager {
 			catch (final Exception e) {
 				LOGGER.severe("No se pudo cargar el fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
 				throw new ConfigFilesException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
+			}
+
+			try {
+				config = mapEnvironmentVariables(config);
+			}
+			catch (final Exception e) {
+				LOGGER.severe("No se pudieron mapear las variables de entorno del fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
 			}
 
 			if (config.containsKey(PARAM_CIPHER_CLASS)) {
@@ -590,26 +598,6 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera de la configuraci&oacute;n si debe forzarse el uso de una aplicaci&oacute;n
-	 * externa distinta al MiniApplet para la firma.
-	 * @return {@code true} si debe forzarse el uso de una aplicaci&oacute;n externa,
-	 * {@code false} en caso contrario.
-	 */
-	public static boolean getClienteAfirmaForceAutoFirma() {
-			return Boolean.parseBoolean(getProperty(PROP_CLIENTEAFIRMA_FORCE_AUTOFIRMA));
-	}
-
-	/**
-	 * Recupera de la configuraci&oacute;n si debe forzarse el uso de la version nativa de AutoFirma,
-	 * no la version WebStart.
-	 * @return {@code false} si se configur&oacute; el uso de AutoFirma WebStart (valor "false"),
-	 * {@code true} en caso contrario.
-	 */
-	public static boolean getClienteAfirmaForceNative() {
-		return !Boolean.FALSE.toString().equalsIgnoreCase(getProperty(PROP_CLIENTEAFIRMA_FORCE_NATIVE));
-	}
-
-	/**
 	 * Recupera el t&iacute;tulo a asignar a las p&aacute;ginas web del componente central.
 	 * @return T&iacute;tulo configurado para las paginas o cadena vac&iacute;a si no se
 	 * especific&oacute; uno.
@@ -779,7 +767,7 @@ public class ConfigManager {
 	  * se configur&oacute; un valor no valido.
 	  */
 	 public static String getLogsLevel() {
-		 return getProperty(PROP_LOGS_LEVEL_GENERAL, DEFAULT_LOGS_LEVEL);
+		 return getProperty(PROP_LOGS_LEVEL_GENERAL, DEFAULT_GENERAL_LOGS_LEVEL);
 	 }
 
 	 /**
@@ -787,7 +775,7 @@ public class ConfigManager {
 	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;.
 	  */
 	 public static String getLogsLevelFire() {
-		 return getProperty(PROP_LOGS_LEVEL_FIRE, getLogsLevel());
+		 return getProperty(PROP_LOGS_LEVEL_FIRE, DEFAULT_FIRE_LOGS_LEVEL);
 	 }
 
 	 /**
@@ -795,7 +783,7 @@ public class ConfigManager {
 	  * @return Nivel de log configurado o el nivel general si no se configur&oacute;.
 	  */
 	 public static String getLogsLevelAfirma() {
-		 return getProperty(PROP_LOGS_LEVEL_AFIRMA, getLogsLevel());
+		 return getProperty(PROP_LOGS_LEVEL_AFIRMA, DEFAULT_AFIRMA_LOGS_LEVEL);
 	 }
 
 	 /**
@@ -926,5 +914,57 @@ public class ConfigManager {
 		return text.substring(0, idx1) +
 				decipherImpl.decipher(Base64.decode(base64Text)) +
 				text.substring(idx2 + SUFIX_CIPHERED_TEXT.length());
+	}
+
+	/**
+	 * Sustituye las variables contenidas en los valores del objeto de propiedades por
+	 * los valores establecidos a trav&eacute;s de variables de entorno. Las variables
+	 * se declaran antecediendola con la part&iacute;cula "${" y cerrando con "}". Por
+	 * ejemplo: <code>${variable}</code>.
+	 * <br>Las variables a las que no se les asignen valor se quedan tal cual.
+	 * @param prop Objeto de propiedades.
+	 * @return Un nuevo objeto de propiedades con las variables reemplazadas.
+	 */
+	public static Properties mapEnvironmentVariables(final Properties prop) {
+
+		if (prop == null) {
+			return null;
+		}
+
+		final Properties mappedProperties = new Properties();
+		for (final String k : prop.keySet().toArray(new String[0])) {
+			mappedProperties.setProperty(k, mapSystemProperties(prop.getProperty(k)));
+		}
+		return mappedProperties;
+	}
+
+	/**
+	 * Mapea las propiedades del sistema que haya en el texto que se referencien de
+	 * la forma: ${propiedad}
+	 * @param text Texto en el que se pueden encontrar las referencias a las propiedades
+	 * del sistema.
+	 * @return Cadena con las part&iacute;culas traducidas a los valores indicados como propiedades
+	 * del sistema. Si no se encuentra la propiedad definida, no se modificar&aacute;.
+	 */
+	private static String mapSystemProperties(final String text) {
+
+		if (text == null) {
+			return null;
+		}
+
+		int pos = -1;
+		int pos2 = 0;
+		String mappedText = text;
+		while ((pos = mappedText.indexOf(SYS_PROP_PREFIX, pos + 1)) > -1 && pos2 > -1) {
+			pos2 = mappedText.indexOf(SYS_PROP_SUFIX, pos + SYS_PROP_PREFIX.length());
+			if (pos2 > pos) {
+				final String prop = mappedText.substring(pos + SYS_PROP_PREFIX.length(), pos2);
+				final String value = System.getProperty(prop, null);
+				if (value != null) {
+					mappedText = mappedText.replace(SYS_PROP_PREFIX + prop + SYS_PROP_SUFIX, value);
+				}
+			}
+		}
+		return mappedText;
 	}
 }

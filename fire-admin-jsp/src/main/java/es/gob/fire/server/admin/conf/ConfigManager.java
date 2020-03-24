@@ -15,11 +15,15 @@ public class ConfigManager {
 
 	private static final Logger LOGGER = Logger.getLogger(ConfigManager.class.getName());
 
+	private static final String SYS_PROP_PREFIX = "${"; //$NON-NLS-1$
+
+	private static final String SYS_PROP_SUFIX = "}"; //$NON-NLS-1$
+
 	private static final String CONFIG_FILE = "admin_config.properties";//$NON-NLS-1$
 
 	private static final String PARAM_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
 	private static final String PARAM_DB_CONN = "bbdd.conn"; //$NON-NLS-1$
-	private static final String PARAM_TEMP_DIR = "tempdir";//$NON-NLS-1$
+	private static final String PARAM_TEMP_DIR = "temp.dir";//$NON-NLS-1$
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 
 	private static final String PARAM_MAIL_FROM_ADDRESS = "mail.from.address"; //$NON-NLS-1$
@@ -134,6 +138,12 @@ public class ConfigManager {
 					"No se ha podido cargar un directorio temporal por defecto, se debera configurar expresamente en el fichero de propiedades: "  + e1 //$NON-NLS-1$
 				);
 			}
+		}
+
+		// Expandimos las propiedades configuradas con los parametros proporcionados
+		// en el arranque del servidor
+		for (final String key : dbConfig.keySet().toArray(new String[0])) {
+			dbConfig.setProperty(key, mapSystemProperties(dbConfig.getProperty(key)));
 		}
 
 		config = dbConfig;
@@ -370,5 +380,35 @@ public class ConfigManager {
 			passwordExpirationTime = DEFAULT_EXPIRED_TIME;
 		}
 		return passwordExpirationTime;
+	}
+
+	/**
+	 * Mapea las propiedades del sistema que haya en el texto que se referencien de
+	 * la forma: ${propiedad}
+	 * @param text Texto en el que se pueden encontrar las referencias a las propiedades
+	 * del sistema.
+	 * @return Cadena con las part&iacute;culas traducidas a los valores indicados como propiedades
+	 * del sistema. Si no se encuentra la propiedad definida, no se modificar&aacute;.
+	 */
+	private static String mapSystemProperties(final String text) {
+
+		if (text == null) {
+			return null;
+		}
+
+		int pos = -1;
+		int pos2 = 0;
+		String mappedText = text;
+		while ((pos = mappedText.indexOf(SYS_PROP_PREFIX, pos + 1)) > -1 && pos2 > -1) {
+			pos2 = mappedText.indexOf(SYS_PROP_SUFIX, pos + SYS_PROP_PREFIX.length());
+			if (pos2 > pos) {
+				final String prop = mappedText.substring(pos + SYS_PROP_PREFIX.length(), pos2);
+				final String value = System.getProperty(prop, null);
+				if (value != null) {
+					mappedText = mappedText.replace(SYS_PROP_PREFIX + prop + SYS_PROP_SUFIX, value);
+				}
+			}
+		}
+		return mappedText;
 	}
 }

@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
 
@@ -28,7 +27,6 @@ import es.gob.fire.signature.ConfigManager;
 public class SignBatchManager {
 
 	private static final Logger LOGGER = Logger.getLogger(SignBatchManager.class.getName());
-	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 
 	/**

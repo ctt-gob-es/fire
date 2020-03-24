@@ -108,13 +108,6 @@
   	<servlet-name>PostSignBatchService</servlet-name>
   	<servlet-class>es.gob.fire.server.services.batch.BatchPostsigner</servlet-class>
   </servlet>
-  <servlet>
-  	<description>
-  	</description>
-  	<display-name>AutoFirmaJnlpService</display-name>
-  	<servlet-name>AutoFirmaJnlpService</servlet-name>
-  	<servlet-class>es.gob.fire.server.services.autofirma.AutoFirmaJnlpService</servlet-class>
-  </servlet>
 
   <servlet-mapping>
   	<servlet-name>fireService</servlet-name>
@@ -183,9 +176,5 @@
   <servlet-mapping>
   	<servlet-name>PostSignBatchService</servlet-name>
   	<url-pattern>/public/afirma/postSignBatchService</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-  	<servlet-name>AutoFirmaJnlpService</servlet-name>
-  	<url-pattern>/public/afirma/afirmaJnlpService</url-pattern>
   </servlet-mapping>
 </web-app>

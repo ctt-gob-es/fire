@@ -44,6 +44,11 @@
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-upgrade</artifactId>
 				</dependency>
+				
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-upgrade-afirma</artifactId>
+				</dependency>
 		
 				<dependency>
 					<groupId>es.gob.fire</groupId>

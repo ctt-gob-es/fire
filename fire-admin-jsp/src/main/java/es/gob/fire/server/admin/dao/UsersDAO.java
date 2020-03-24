@@ -182,9 +182,10 @@ public class UsersDAO {
 		}
 
 		// Si se recupero el usuario, le configuramos los permisos
-		if (usr != null) {
-			usr.setPermissions(RolesDAO.getPermissions(usr.getRole()));
+		if (usr == null) {
+			throw new SQLException("No se encontro al usuario indicado en la base de datos"); //$NON-NLS-1$
 		}
+		usr.setPermissions(RolesDAO.getPermissions(usr.getRole()));
 
 		return usr;
 	}

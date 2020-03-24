@@ -30,17 +30,17 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 
 	private static final Logger LOGGER = Logger.getLogger(DBSessionsDAO.class.getName());
 
-	private static final String DB_STATEMENT_CHECK_SESSION = "SELECT id FROM tb_sesiones WHERE id = ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_CHECK_SESSION = "SELECT id FROM tb_comp_sesiones WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_UPDATE_SESSION = "UPDATE tb_sesiones SET sesion=?, f_modificacion=? WHERE id = ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_UPDATE_SESSION = "UPDATE tb_comp_sesiones SET sesion=?, f_modificacion=? WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_INSERT_SESSION = "INSERT INTO tb_sesiones(id, sesion, f_modificacion) VALUES (?, ?, ?)"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_INSERT_SESSION = "INSERT INTO tb_comp_sesiones(id, sesion, f_modificacion) VALUES (?, ?, ?)"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_RECOVER_SESSION = "SELECT sesion, f_modificacion FROM tb_sesiones WHERE id = ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_RECOVER_SESSION = "SELECT sesion, f_modificacion FROM tb_comp_sesiones WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_REMOVE_SESSION = "DELETE FROM tb_sesiones WHERE id = ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_REMOVE_SESSION = "DELETE FROM tb_comp_sesiones WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_REMOVE_EXPIRED_SESSIONS = "DELETE FROM tb_sesiones WHERE f_modificacion < ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_REMOVE_EXPIRED_SESSIONS = "DELETE FROM tb_comp_sesiones WHERE f_modificacion < ?"; //$NON-NLS-1$
 
 	private final TempDocumentsDAO documentsDAO;
 

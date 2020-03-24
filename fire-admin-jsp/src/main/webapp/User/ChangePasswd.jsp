@@ -10,10 +10,9 @@
 	}
 
 	final Object state = session.getAttribute(ServiceParams.SESSION_ATTR_INITIALIZED);
-	final String loggedUsr=(String)session.getAttribute(ServiceParams.SESSION_ATTR_USER);
-	final String pass=(String)session.getAttribute(ServiceParams.SESSION_ATTR_USER);
+	final String loggedUsr = (String)session.getAttribute(ServiceParams.SESSION_ATTR_USER);
+	final String pass = (String)session.getAttribute(ServiceParams.SESSION_ATTR_USER);
 
-		
 	if (state == null || !Boolean.parseBoolean((String) state) || loggedUsr==null ) {
 		response.sendRedirect("../Login.jsp?login=fail"); //$NON-NLS-1$
 		return;

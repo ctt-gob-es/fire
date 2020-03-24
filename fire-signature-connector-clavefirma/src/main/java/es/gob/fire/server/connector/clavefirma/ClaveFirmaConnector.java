@@ -323,7 +323,7 @@ public final class ClaveFirmaConnector extends FIReConnector {
     @Override
     public void endSign(final String transactionId) {
     	try {
-            final EndTransactionResult ets = new GateWayAPI().endTransaction(transactionId);
+            final EndTransactionResult ets = getGateWayApi().endTransaction(transactionId);
             LOGGER.fine(
                 "Transaccion de firma cerrada: " + ets.getDescription() //$NON-NLS-1$
             );
@@ -486,6 +486,11 @@ public final class ClaveFirmaConnector extends FIReConnector {
 			intermediateResult = gatewayApi.startOpTransaction(ownerId, opInfo, paramsList);
 		} catch (final SafeCertGateWayException e) {
 			if (ClaveFirmaErrorManager.ERROR_CODE_WEAK_REGISTRY.equals(e.getCode())) {
+				return true;
+			}
+			if (ClaveFirmaErrorManager.ERROR_CODE_GCC_WEAK_REGISTRY.equals(e.getCode())) {
+				LOGGER.warning("Error de registro debil devuelto por el GCC y no por la pasarela de firma: " + //$NON-NLS-1$
+						ClaveFirmaErrorManager.ERROR_CODE_GCC_WEAK_REGISTRY);
 				return true;
 			}
 			LOGGER.warning("Error al comprobar si el usuario realizo un registro debil. Codigo de error: " + e.getCode()); //$NON-NLS-1$

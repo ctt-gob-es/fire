@@ -44,6 +44,7 @@ import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.GracePeriodInfo;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;
+import es.gob.fire.upgrade.UpgradeParams;
 import es.gob.fire.upgrade.UpgradeResult;
 import es.gob.fire.upgrade.UpgradeResult.State;
 import es.gob.fire.upgrade.UpgraderUtils;
@@ -401,7 +402,7 @@ public class RecoverSignManager {
 
 			boolean allowPartialUpgrade = false;
 			if (upgraderConfig != null) {
-				allowPartialUpgrade = Boolean.parseBoolean(upgraderConfig.getProperty("allowPartialUpgrade"));
+				allowPartialUpgrade = Boolean.parseBoolean(upgraderConfig.getProperty(UpgradeParams.ALLOW_PARTIAL_UPGRADE));
 			}
 
 	        // Comprobamos si era necesario recuperar la firma totalmente actualizada y si se ha hecho asi

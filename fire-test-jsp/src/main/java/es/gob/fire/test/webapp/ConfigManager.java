@@ -41,6 +41,10 @@ public class ConfigManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
 
+	private static final String SYS_PROP_PREFIX = "${"; //$NON-NLS-1$
+
+	private static final String SYS_PROP_SUFIX = "}"; //$NON-NLS-1$
+
 	private Properties config = null;
 
 	/**
@@ -68,6 +72,8 @@ public class ConfigManager {
 		catch (final Exception e) {
 			LOGGER.error("No se pudo cargar el fichero de configuracion {}", CONFIG_FILE, e); //$NON-NLS-1$
 		}
+
+		this.config = mapEnvironmentVariables(this.config);
 	}
 
 	/**
@@ -154,5 +160,57 @@ public class ConfigManager {
 			this.fireClient = new FireClient(appId, new FakePasswordDecipher());
 		}
 		return this.fireClient;
+	}
+
+	/**
+	 * Sustituye las variables contenidas en los valores del objeto de propiedades por
+	 * los valores establecidos a trav&eacute;s de variables de entorno. Las variables
+	 * se declaran antecediendola con la part&iacute;cula "${" y cerrando con "}". Por
+	 * ejemplo: <code>${variable}</code>.
+	 * <br>Las variables a las que no se les asignen valor se quedan tal cual.
+	 * @param prop Objeto de propiedades.
+	 * @return Un nuevo objeto de propiedades con las variables reemplazadas.
+	 */
+	public static Properties mapEnvironmentVariables(final Properties prop) {
+
+		if (prop == null) {
+			return null;
+		}
+
+		final Properties mappedProperties = new Properties();
+		for (final String k : prop.keySet().toArray(new String[0])) {
+			mappedProperties.setProperty(k, mapSystemProperties(prop.getProperty(k)));
+		}
+		return mappedProperties;
+	}
+
+	/**
+	 * Mapea las propiedades del sistema que haya en el texto que se referencien de
+	 * la forma: ${propiedad}
+	 * @param text Texto en el que se pueden encontrar las referencias a las propiedades
+	 * del sistema.
+	 * @return Cadena con las part&iacute;culas traducidas a los valores indicados como propiedades
+	 * del sistema. Si no se encuentra la propiedad definida, no se modificar&aacute;.
+	 */
+	private static String mapSystemProperties(final String text) {
+
+		if (text == null) {
+			return null;
+		}
+
+		int pos = -1;
+		int pos2 = 0;
+		String mappedText = text;
+		while ((pos = mappedText.indexOf(SYS_PROP_PREFIX, pos + 1)) > -1 && pos2 > -1) {
+			pos2 = mappedText.indexOf(SYS_PROP_SUFIX, pos + SYS_PROP_PREFIX.length());
+			if (pos2 > pos) {
+				final String prop = mappedText.substring(pos + SYS_PROP_PREFIX.length(), pos2);
+				final String value = System.getProperty(prop, null);
+				if (value != null) {
+					mappedText = mappedText.replace(SYS_PROP_PREFIX + prop + SYS_PROP_SUFIX, value);
+				}
+			}
+		}
+		return mappedText;
 	}
 }

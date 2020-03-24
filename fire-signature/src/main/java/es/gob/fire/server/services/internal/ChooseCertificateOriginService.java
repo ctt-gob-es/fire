@@ -90,6 +90,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
 		}
 
+		// Terminamos de configurar el formateador para los logs
+		final String appId = session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+		logF.setAppId(appId);
 
 		final String userAgent = request.getHeader("user-agent"); //$NON-NLS-1$
 	    final Browser browser =  Browser.identify(userAgent);
@@ -129,11 +132,10 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		SessionCollector.commit(session);
 
 		try {
-			request.getRequestDispatcher(FirePages.PG_MINI_APPLET).forward(request, response);
-			return;
+			request.getRequestDispatcher(FirePages.PG_CLIENTE_AFIRMA).forward(request, response);
 		} catch (final ServletException e) {
-			LOGGER.warning(logF.f("No se pudo continuar hasta la pagina del MiniApplet. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
-			response.sendRedirect(FirePages.PG_MINI_APPLET+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se pudo continuar hasta la pagina de firma local. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
+			response.sendRedirect(FirePages.PG_CLIENTE_AFIRMA+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
 
@@ -205,7 +207,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			return;
 		}
 		catch (final FIReCertificateException e) {
-			LOGGER.log(Level.SEVERE, logF.f("No se ha podido recuperar los certificados del usuario " + subjectId), e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, logF.f("No se han podido recuperar los certificados del usuario " + subjectId), e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);

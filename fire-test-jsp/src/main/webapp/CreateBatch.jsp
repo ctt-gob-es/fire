@@ -96,10 +96,10 @@
 				 <!-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
 				   - mode=implicit
 				   - filters=keyusage.nonrepudiation:true
-				  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
-				  de certificados de firma. -->
+				  Con ellos se generan firmas que contienen los datos firmados, solo se permite el uso
+				  de certificados de firma y se aplica la politica de firma de la AGE. -->
 				<input id="extraparams-conf" type="hidden" name="extraParams"
-				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true\nexpPolicy=FirmaAGE".getBytes()) %>"/>
+				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true".getBytes()) %>"/>
 
 				<div style="margin-top:30px;text-align: center; ">
 					<input  id="submit-btn"  type="submit" value="AGREGAR DOCUMENTOS AL LOTE">

@@ -21,7 +21,6 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-connector</artifactId>
-								  
 		</dependency>
 
 		<dependency>
@@ -51,8 +50,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-						   
-					  
 		</dependency> 
 
 	</dependencies>

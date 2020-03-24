@@ -18,17 +18,17 @@ import es.gob.fire.signature.DbManager;
  */
 public class DBTempDocumentsDAO implements TempDocumentsDAO {
 
-	private static final String DB_STATEMENT_CHECK_DOCUMENT = "SELECT id FROM tb_documentos WHERE id = ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_CHECK_DOCUMENT = "SELECT id FROM tb_comp_documentos WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_UPDATE_DOCUMENT = "UPDATE tb_documentos SET datos=?, f_modificacion=? WHERE id = ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_UPDATE_DOCUMENT = "UPDATE tb_comp_documentos SET datos=?, f_modificacion=? WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_INSERT_DOCUMENT = "INSERT INTO tb_documentos(id, datos, f_modificacion) VALUES (?, ?, ?)"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_INSERT_DOCUMENT = "INSERT INTO tb_comp_documentos(id, datos, f_modificacion) VALUES (?, ?, ?)"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_RECOVER_DOCUMENT = "SELECT datos, f_modificacion FROM tb_documentos WHERE id = ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_RECOVER_DOCUMENT = "SELECT datos, f_modificacion FROM tb_comp_documentos WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_REMOVE_DOCUMENT = "DELETE FROM tb_documentos WHERE id = ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_REMOVE_DOCUMENT = "DELETE FROM tb_comp_documentos WHERE id = ?"; //$NON-NLS-1$
 
-	private static final String DB_STATEMENT_REMOVE_EXPIRED_DOCUMENTS = "DELETE FROM tb_documentos WHERE f_modificacion < ?"; //$NON-NLS-1$
+	private static final String DB_STATEMENT_REMOVE_EXPIRED_DOCUMENTS = "DELETE FROM tb_comp_documentos WHERE f_modificacion < ?"; //$NON-NLS-1$
 
 	private static final Logger LOGGER = Logger.getLogger(DBTempDocumentsDAO.class.getName());
 

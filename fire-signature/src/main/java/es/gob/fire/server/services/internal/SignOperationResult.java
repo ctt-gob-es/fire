@@ -29,7 +29,6 @@ public final class SignOperationResult {
     /**
      * Crea el resultado de una operaci&oacute;n de carga de datos a firmar a
      * partir de su defici&oacute;n JSON.
-     *
      * @param json
      *            Definici&oacute;n JSON del resultado de una operaci&oacute;n
      *            de carga de datos a firmar.
@@ -43,16 +42,18 @@ public final class SignOperationResult {
                     "El JSON de definicion no puede ser nulo" //$NON-NLS-1$
             );
         }
-        final JsonReader jsonReader = Json
-                .createReader(new ByteArrayInputStream(json));
-        final JsonObject jsonObject = jsonReader.readObject();
-        final String id = jsonObject.getString("transactionid"); //$NON-NLS-1$
-        final String redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
-        jsonReader.close();
+
+        String id;
+        String redirect;
+        try (final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));) {
+        	final JsonObject jsonObject = jsonReader.readObject();
+        	id = jsonObject.getString("transactionid"); //$NON-NLS-1$
+        	redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
+        }
 
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Es obligatorio que el JSON contenga el identificador de la transacci&oacute;n" //$NON-NLS-1$
+                    "Es obligatorio que el JSON contenga el identificador de la transaccion" //$NON-NLS-1$
             );
         }
 
@@ -64,7 +65,6 @@ public final class SignOperationResult {
 
         this.transactionId = id;
         this.redirectUrl = redirect;
-
     }
 
     /**
