@@ -549,6 +549,74 @@
 	}
 	
 	/**
+	 * Recupera una firma generada anteriormente y para la que se solicito la espera de un
+	 * periodo de gracia antes de su recuperacion.
+	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
+	 * @param $docId Identificador del documento obtenido del perioro de gracia.
+	 * @param $upgrade Formato longevo al que se solicit&oacute; actualizar la firma. Si se indica, se
+	 * usara para comprobar que la firma se actualizo al formato solicitado.
+	 * @param $confB64 Properties de configuracion adicional para la plataforma de validacion codificada en en base64.
+	 * @param partial Booleano que indica si se acepta o no una actualizacion parcial de la firma.
+	 * @return Resultado con la firma recibida o un nuevo periodo de gracia.
+	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
+	 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
+	 * @throws HttpNetworkException Cuando ocurre un problema en la comunicacion.
+	 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
+	 */
+	function recoverAsyncSign($appId, $docId, $upgrade, $confB64, $partial){
+		
+		// Comprobamos las variables de entrada
+		if (empty($docId)) {
+			throw new InvalidArgumentException("El identificador del documento firmado no puede ser nulo");
+		}
+
+		// Recodificamos los parametros que lo necesiten para asegurar la correcta transmision por URL
+		$b64SpC = array("+", "/"); 
+		$b64UrlSafeSpC = array("-", "_");
+		
+		$confB64us = ($confB64 != null) ? str_replace($b64SpC, $b64UrlSafeSpC, $confB64) : "";
+
+		// Componemos la URL de llamada al servicio remoto
+		$URL_SERVICE = SERVICEURL;
+		$URL_SERVICE_PARAMS = array(
+			"op" => 70, // El tipo de operacion solicitada es RECOVER_UPDATED_SIGN (70)
+			"appid" => $appId,
+			"docid" => $docId,
+			"config" => $confB64us,
+			"partial" => $partial
+		);
+		
+		if (!empty($upgrade)) {
+			$URL_SERVICE_PARAMS["upgrade"] = $upgrade;
+		}
+		
+		// Llamamos al servicio remoto
+		$response = connect($URL_SERVICE, $URL_SERVICE_PARAMS);
+		
+		// Si la respuesta notifica un error, senala que hay que esperar un periodo de gracia para obtener el
+		// binario firmado o si ya incluye la firma, se devuelve
+		$transaction = new TransactionResult($response);
+		if (isset($transaction->errorCode) || isset($transaction->gracePeriod) || isset($transaction->result)) {
+			return $transaction;
+		}
+		
+		// Si no tenemos el binario resultante, lo pedimos
+		$URL_SERVICE_PARAMS = array(
+			"op" => 71, // El tipo de operacion solicitada es RECOVER_UPDATED_SIGN_RESULT (71)
+			"appid" => $appId,
+			"docid" => $docId
+		);
+		
+		// Llamamos al servicio
+		$response = connect($URL_SERVICE, $URL_SERVICE_PARAMS);
+		
+		// Agregamos el resultado recibido como firma resultante de la operacion
+		$transaction->result = $response;
+		
+		return $transaction;
+	}
+	
+	/**
 	 * Funcion que realiza la conexion a la URL pasada en parametro, enviando los parametros de conexion por POST.
 	 * @param string $URL La url a la que intentar conectarse.
 	 * @param array $urlParams Los parametros necesarios para el intento de conexion.

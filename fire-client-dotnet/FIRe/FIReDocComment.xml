@@ -187,6 +187,7 @@
             de certificados de confianza del sistema.</description></item>
             <item><term>ssl_client_pkcs12:</term><description>Ruta absoluta del almacén con el certificado de autenticación SSL cliente.</description></item>
             <item><term>ssl_client_pass:</term><description>Contraseña del almacén con el certificado de autenticación SSL cliente.</description></item>
+            <item><term>ssl_client_alias:</term><description>Alias del certificado que se debe usar para la autenticación. Si no se indica, se usará el primero que se encuentre en el almacén.</description></item>
             </list>
             Los valores del registro de Windows se leen de las clave: <code>HKEY_CURRENT_USER\Software\FIRe</code>
             </summary>
@@ -240,6 +241,12 @@
             Obtiene la contraseña del almacén del certificado cliente SSL.
             </summary>
             <returns>Contraseña del almacén.</returns>
+        </member>
+        <member name="M:FIRe.FireConfig.getSSLClientAlias">
+            <summary>
+            Obtiene el alias del certificado cliente SSL.
+            </summary>
+            <returns>Alias del certificado cliente SSL.</returns>
         </member>
         <member name="T:FIRe.ConfigManager">
             <summary>Clase para la gestor de la configuración del componente distribuido.</summary>
@@ -297,7 +304,13 @@
             <summary>
             Obtiene del registro la contraseña del almacén del certificado cliente SSL.
             </summary>
-            <returns>Contraseña del almacén.</returns>
+            <returns>Contraseña del almacén o <code>null</code> si no se configuró.</returns>
+        </member>
+        <member name="M:FIRe.ConfigManager.getSSLClientAlias">
+            <summary>
+            Obtiene del registro el alias  del certificado cliente SSL.
+            </summary>
+            <returns>Alias del certificado o <code>null</code> si no se configuró.</returns>
         </member>
         <member name="M:FIRe.ConfigManager.getRegistryKey(System.String,System.String)">
             <summary>
@@ -1355,6 +1368,24 @@
             <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
             <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
             <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        </member>
+        <member name="M:FIRe.FireApi.recoverAsyncSign(System.String,System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            Recupera una firma enviada a generar anteriormente y para la que se solicitó esperar un periodo de gracia.
+            </summary>
+            <param name="appId">Identificador de la aplicación.</param>
+            <param name="docId">Identificador de documento recibido de la  usuario propietario de los certificados de firma.</param>
+            <param name="upgrade">Formato al que solicitamos actualizar la firma. Si se indica, se comprobará que la
+            firma devuelta esté en el formato indicado.</param>
+            <param name="confB64">Properties codificado en base 64 con configuración adicional para la plataforma de
+            actualización de firma. </param>
+            <param name="allowPartial">Indica si se debe devolver la firma incluso si no se ha actualizado al formato
+            solicitado.</param>
+            <returns>Resultado con la firma recuperada o un nuevo periodo de gracia.</returns>
+            <exception cref="T:System.ArgumentException">Cuando se proporciona nulo o vacío un parámetro obligatorio.</exception>
+            <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error durante la operación.</exception>
         </member>
         <member name="M:FIRe.FireApi.getResponseToPostPetition(System.String,System.String)">
             <summary>

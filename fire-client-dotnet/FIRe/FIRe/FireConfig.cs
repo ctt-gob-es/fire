@@ -24,17 +24,18 @@ namespace FIRe
     /// de certificados de confianza del sistema.</description></item>
     /// <item><term>ssl_client_pkcs12:</term><description>Ruta absoluta del almacén con el certificado de autenticación SSL cliente.</description></item>
     /// <item><term>ssl_client_pass:</term><description>Contraseña del almacén con el certificado de autenticación SSL cliente.</description></item>
+    /// <item><term>ssl_client_alias:</term><description>Alias del certificado que se debe usar para la autenticación. Si no se indica, se usará el primero que se encuentre en el almacén.</description></item>
     /// </list>
     /// Los valores del registro de Windows se leen de las clave: <code>HKEY_CURRENT_USER\Software\FIRe</code>
     /// </summary>
     class FireConfig
     {
-
         private static readonly string KEY_FIRE_SERVICE = "fire_service";
         private static readonly string KEY_ADMIT_ALL_CERTS = "admit_all_certs";
         private static readonly string KEY_SSL_CLIENT_PKCS12 = "ssl_client_pkcs12";
         private static readonly string KEY_SSL_CLIENT_PASS = "ssl_client_pass";
-
+        private static readonly string KEY_SSL_CLIENT_ALIAS = "ssl_client_alias";
+        
         private readonly Dictionary<string, string> config;
 
         /// <summary>
@@ -54,6 +55,7 @@ namespace FIRe
             this.config.Add(KEY_ADMIT_ALL_CERTS, ConfigManager.getSSLAdmitAllCerts());
             this.config.Add(KEY_SSL_CLIENT_PKCS12, ConfigManager.getSSLClientPkcs12());
             this.config.Add(KEY_SSL_CLIENT_PASS, ConfigManager.getSSLClientPass());
+            this.config.Add(KEY_SSL_CLIENT_ALIAS, ConfigManager.getSSLClientAlias());
         }
 
         /// <summary>
@@ -75,6 +77,7 @@ namespace FIRe
             initConfigKey(this.config, KEY_ADMIT_ALL_CERTS, config, ConfigManager.getSSLAdmitAllCerts());
             initConfigKey(this.config, KEY_SSL_CLIENT_PKCS12, config, ConfigManager.getSSLClientPkcs12());
             initConfigKey(this.config, KEY_SSL_CLIENT_PASS, config, ConfigManager.getSSLClientPass());
+            initConfigKey(this.config, KEY_SSL_CLIENT_ALIAS, config, ConfigManager.getSSLClientAlias());
         }
 
         /// <summary>
@@ -134,6 +137,15 @@ namespace FIRe
         public string getSSLClientPass()
         {
             return this.config.ContainsKey(KEY_SSL_CLIENT_PASS) ? this.config[KEY_SSL_CLIENT_PASS] : null;
+        }
+
+        /// <summary>
+        /// Obtiene el alias del certificado cliente SSL.
+        /// </summary>
+        /// <returns>Alias del certificado cliente SSL.</returns>
+        public string getSSLClientAlias()
+        {
+            return this.config.ContainsKey(KEY_SSL_CLIENT_ALIAS) ? this.config[KEY_SSL_CLIENT_ALIAS] : null;
         }
 
         public Dictionary<string, string> getConfig()

@@ -25,11 +25,10 @@ namespace FIRe
         private static readonly string REGISTRY_VALUE_SIGN_SERVICE = "sign_service";
         private static readonly string REGISTRY_KEY_FIRE = "SOFTWARE\\FIRe";
         private static readonly string REGISTRY_VALUE_FIRE_SERVICE = "fire_service";
-
         private static readonly string REGISTRY_VALUE_ADMIT_ALL_CERTS = "admit_all_certs";
         private static readonly string REGISTRY_VALUE_SSL_CLIENT_PKCS12 = "ssl_client_pkcs12";
         private static readonly string REGISTRY_VALUE_SSL_CLIENT_PASS = "ssl_client_pass";
-
+        private static readonly string REGISTRY_VALUE_SSL_CLIENT_ALIAS = "ssl_client_alias";
         
         /// <summary>
         /// Obtiene del registro la URL para hacer uso de los servicios de clavefirma v2 (FIRe).
@@ -117,13 +116,27 @@ namespace FIRe
         /// <summary>
         /// Obtiene del registro la contraseña del almacén del certificado cliente SSL.
         /// </summary>
-        /// <returns>Contraseña del almacén.</returns>
+        /// <returns>Contraseña del almacén o <code>null</code> si no se configuró.</returns>
         public static string getSSLClientPass()
         {
             string clientPass = getRegistryKey(REGISTRY_KEY_FIRE, REGISTRY_VALUE_SSL_CLIENT_PASS);
             if (clientPass == null)
             {
                 clientPass = getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_SSL_CLIENT_PASS);
+            }
+            return clientPass;
+        }
+
+        /// <summary>
+        /// Obtiene del registro el alias  del certificado cliente SSL.
+        /// </summary>
+        /// <returns>Alias del certificado o <code>null</code> si no se configuró.</returns>
+        public static string getSSLClientAlias()
+        {
+            string clientPass = getRegistryKey(REGISTRY_KEY_FIRE, REGISTRY_VALUE_SSL_CLIENT_ALIAS);
+            if (clientPass == null)
+            {
+                clientPass = getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_SSL_CLIENT_ALIAS);
             }
             return clientPass;
         }

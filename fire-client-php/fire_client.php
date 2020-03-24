@@ -33,7 +33,7 @@
 		var $appId;
 		
 		/**
-		 * Construye el cliente para la ejecuci&oacute;n de operaciones de firma con FIRe.
+		 * Construye el cliente para la ejecucion de operaciones de firma con FIRe.
 		 * @param $id Identificador de la aplicacion (proporcionado por el administrador del servidor de FIRe).
 		 */
 		function __construct ($id){
@@ -282,7 +282,7 @@
 		 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
 		 * @param $documentId Identificador unico del documento que se adjunta al lote.
 		 * @param $documentB64 Datos a firmar como parte del lote codificados en base 64.
-		 * @param $confB64 Configuraci&oacute;n de la operaci&oacute;n particular codificada en base 64.
+		 * @param $confB64 Configuracion de la operacion particular codificada en base 64.
 		 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 		 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
 		 * @throws HttpNetworkException Cuando ocurre un problema en la comunicacion.
@@ -339,7 +339,7 @@
 		 * @param $propB64 Configuracion de la operacion de firma codificada en base 64. Equivalente al extraParams
 		 * del MiniApplet @firma.
 		 * @param $upgrade Actualizacion.
-		 * @param $confB64 Configuraci&oacute;n de la operaci&oacute;n particular codificada en base 64.
+		 * @param $confB64 Configuracion de la operacion particular codificada en base 64.
 		 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
 		 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
 		 * @throws HttpNetworkException Cuando ocurre un problema en la comunicacion.
@@ -562,7 +562,7 @@
 		 * Recupera una firma generada anteriormente y para la que se solicito la espera de un
 		 * periodo de gracia antes de su recuperacion.
 		 * @param $docId Identificador del documento obtenido del perioro de gracia.
-		 * @param $upgrade Formato longevo al que se solicit&oacute; actualizar la firma. Si se indica, se
+		 * @param $upgrade Formato longevo al que se solicito actualizar la firma. Si se indica, se
 		 * usara para comprobar que la firma se actualizo al formato solicitado.
 		 * @param $confB64 Properties de configuracion adicional para la plataforma de validacion codificada en en base64.
 		 * @param partial Booleano que indica si se acepta o no una actualizacion parcial de la firma.
@@ -919,10 +919,10 @@
 	 */
 	class TransactionResult{
 		
-		// Especifica que la transacci&oacute;n finaliz&oacute; correctamente.
+		// Especifica que la transaccion finalizo correctamente.
 		public static $STATE_OK = 0;
 		
-		// Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
+		// Especifica que la transaccion no pudo finalizar debido a un error.
 		public static $STATE_ERROR = -1;
 			
 		// Especifica que la transaccion aun no ha finalizado y se debera pedir el resultamos
