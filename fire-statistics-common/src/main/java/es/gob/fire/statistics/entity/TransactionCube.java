@@ -33,8 +33,8 @@ public class TransactionCube {
 	 * Construye un objeto cargando sus propiedades de una cadena de texto con el formato
 	 * "Aplicacion;Operacion;Proveedor;ProveedorForzado;ResultadoOperacion;IdTransaccion".<br>
 	 * <ul>
-	 * <li>ProveedorForzado => 0 si es {@code false}, 1 si es {@code true}.</li>
-	 * <li>resultSign => 0 si es {@code false}, 1 si es {@code true}.</li>
+	 * <li>ProveedorForzado: 0 si es {@code false}, 1 si es {@code true}.</li>
+	 * <li>resultSign: 0 si es {@code false}, 1 si es {@code true}.</li>
 	 * </ul>
 	 * @param registry Cadena de texto con las propiedades de la transacci&oacute;n.
 	 * @return Informaci&oacute;n de la transacci&oacute;n.
@@ -166,8 +166,8 @@ public class TransactionCube {
 	 * Devuelve una cadena con las propiedades del objeto
 	 * con el formato "Aplicacion;Operacion;Proveedor;ProveedorForzado;ResultadoOperacion;IdTransaccion".<br>
 	 * <ul>
-	 * <li>ProveedorForzado => 0 si es {@code false}, 1 si es {@code true}.</li>
-	 * <li>resultSign => 0 si es {@code false}, 1 si es {@code true}.</li>
+	 * <li>ProveedorForzado: 0 si es {@code false}, 1 si es {@code true}.</li>
+	 * <li>resultSign: 0 si es {@code false}, 1 si es {@code true}.</li>
 	 * </ul>
 	 */
 	@Override

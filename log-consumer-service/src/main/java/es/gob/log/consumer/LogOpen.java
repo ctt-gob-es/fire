@@ -61,7 +61,7 @@ public class LogOpen {
 
 	/**
 	 * Obtiene la entidad LogInfo con la informaci&oacute;n cargada
-	 * @return
+	 * @return Informaci&oacute;n sobre el fichero de log.
 	 */
 	public final LogInfo getLogInfo() {
 		return this.logInfo;
@@ -69,7 +69,7 @@ public class LogOpen {
 
 	/**
 	 * Obtiene  LogReader del fichero abierto en modo lectura, inicializado en la posici&oacute;n 0
-	 * @return
+	 * @return Lector para el log.
 	 */
 	public final LogReader getReader() {
 		return this.reader;
@@ -77,7 +77,7 @@ public class LogOpen {
 
 	/**
 	 * Obtiene  AsynchronousFileChannel, canal de fichero abierto en modo lectura
-	 * @return
+	 * @return Canal de lectura de fichero.
 	 */
 	public final AsynchronousFileChannel getChannel() {
 		return this.channel;

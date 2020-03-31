@@ -73,9 +73,9 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
 
     /**
      * Publish an {@code LogRecord}.
-     * <p/>
+     * <p>
      * The logging request was made initially to a Logger object, which initialized the LogRecord and forwarded it here.
-     * <p/>
+     * <p>
      * The {@code ExtHandler} is responsible for formatting the message, when and if necessary. The formatting should
      * include localization.
      *
@@ -387,26 +387,20 @@ public abstract class ExtHandler extends Handler implements FlushableCloseable, 
      * required.
      * </p>
      *
-     * @return {@code true} if the caller should be calculated, otherwise {@code false} if it can be skipped
-     *
-     * @see LogRecord#getSourceClassName()
-     * @see LogRecord#getSourceFileName()
-     * @see LogRecord#getSourceLineNumber()
-     * @see LogRecord#getSourceMethodName()
+     * @return {@code true} if the caller should be calculated, otherwise {@code false} if it can be skipped.
      */
     @SuppressWarnings("WeakerAccess")
     public boolean isCallerCalculationRequired() {
         Formatter formatter = getFormatter();
         if (formatterRequiresCallerCalculation(formatter)) {
             return true;
-        } else {
-            final Handler[] handlers = getHandlers();
-            for (final Handler handler : handlers) {
-                formatter = handler.getFormatter();
-                if (formatterRequiresCallerCalculation(formatter)) {
-                    return true;
-                }
-            }
+        }
+        final Handler[] hdls = getHandlers();
+        for (final Handler handler : hdls) {
+        	formatter = handler.getFormatter();
+        	if (formatterRequiresCallerCalculation(formatter)) {
+        		return true;
+        	}
         }
         return false;
     }

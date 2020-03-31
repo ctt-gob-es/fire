@@ -228,7 +228,7 @@ public class TransactionResult {
 
 	/**
 	 * Establece el certificado utilizado para la firma.
-	 * @param Certificado de firma.
+	 * @param signingCert Certificado de firma.
 	 */
 	public void setSigningCert(final X509Certificate signingCert) {
 		this.signingCert = signingCert;
@@ -251,7 +251,7 @@ public class TransactionResult {
 	}
 
 	/**
-	 * Recupera la informaci&opacute;n del periodo de gracia necesario para recuperar la firma.
+	 * Recupera la informaci&oacute;n del periodo de gracia necesario para recuperar la firma.
 	 * @return Informaci&oacute;n del periodo de gracia o {@code null} si no lo hay.
 	 */
 	public GracePeriodInfo getGracePeriod() {
@@ -260,7 +260,7 @@ public class TransactionResult {
 
 	/**
 	 * Establece la informaci&oacute;n del periodo de gracia necesario para recuperar la firma.
-	 * @param Informaci&oacute;n del periodo de gracia.
+	 * @param gracePeriod Informaci&oacute;n del periodo de gracia.
 	 */
 	public void setGracePeriod(final GracePeriodInfo gracePeriod) {
 		this.gracePeriod = gracePeriod;
@@ -280,7 +280,7 @@ public class TransactionResult {
 
 	/**
 	 * Establece el resultado de la transacci&oacute;n.
-	 * @param result
+	 * @param result Resultado de la transacci&oacute;n.
 	 */
 	public void setResult(final byte[] result) {
 		this.result = result;

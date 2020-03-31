@@ -14,9 +14,8 @@ public class StatisticsConfig {
 
 	/**
 	 * Carga la configuraci&oacute;n para la generaci&oacute;n de los datos estad&iacute;sticos.
-	 * @param config Configuraci&oacute;n de la aplicaci&oacute;n.
 	 * @return Configuraci&oacute;n para la generaci&oacute;n de los datos estad&iacute;sticos.
-	 * @throws Cuando se indica una politica de firma no valida.
+	 * @throws IllegalArgumentException Cuando se indica una politica de firma no valida.
 	 */
 	public static StatisticsConfig load() throws IllegalArgumentException {
 

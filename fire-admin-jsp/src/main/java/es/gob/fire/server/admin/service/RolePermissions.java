@@ -10,9 +10,9 @@ public class RolePermissions {
 	private boolean appResponsable;
 
 /**
- * Se obtiene los permisos que estan asociados a cada rol
- * @param permissions
- * @return
+ * Se obtiene los permisos que estan asociados a cada rol.
+ * @param permissions Cadena con los permisos habilitados para el rol.
+ * @return Permisos.
  */
 	public static RolePermissions getInstance(final String permissions) {
 

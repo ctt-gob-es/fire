@@ -14,15 +14,19 @@ import es.gob.log.consumer.LogInfo;
 import es.gob.log.consumer.LogReader;
 import es.gob.log.consumer.LogSearchText;
 
+/**
+ * Manejador encargado de realizar b&uacute;squedas de texto en los ficheros de log.
+ */
 public class LogSearchServiceManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LogTailServiceManager.class);
 
 	/**
-	 * @param req
-	 * @return
-	 * @throws IOException
-	 * @throws NoResultException
+	 * Procesa una petici&oacute;n de b&uacute;squeda de texto.
+	 * @param req Petici&oacute;n HTTP de b&uacute;squeda de texto.
+	 * @return Contenido del log resultado de la b&uacute;squeda.
+	 * @throws IOException Cuando se produce un error durante la lectura o proceso del log.
+	 * @throws NoResultException Cuando no se encuentra el texto b&uacute;scado en el log.
 	 */
 	public final static byte[] process(final HttpServletRequest req) throws IOException, NoResultException {
 

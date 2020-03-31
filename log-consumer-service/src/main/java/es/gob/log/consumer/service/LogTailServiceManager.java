@@ -15,19 +15,17 @@ import es.gob.log.consumer.LogReader;
 import es.gob.log.consumer.LogTail;
 
 /**
- *
- * @author Adolfo.Navarro
- *
+ * Manejador encargado de obtener las &uacute;ltimas l&iacute;neas de un fichero de log.
  */
 public class LogTailServiceManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LogTailServiceManager.class);
 
 	/**
-	 *
-	 * @param req
-	 * @return
-	 * @throws IOException
+	 * Procesa una petici&oacute;n de obtenci&oacute;n de las &uacute;ltimas l&iacute;neas de un log.
+	 * @param req Petici&oacute;n HTTP de obtenci&oacute;n de l&iacute;neas.
+	 * @return Contenido del log resultado de la obtenci&oacute;n.
+	 * @throws IOException Cuando se produce un error durante la lectura o proceso del log.
 	 */
 	public final static byte[] process(final HttpServletRequest req) throws IOException  {
 

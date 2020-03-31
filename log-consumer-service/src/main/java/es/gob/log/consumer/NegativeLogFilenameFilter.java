@@ -20,6 +20,7 @@ public class NegativeLogFilenameFilter extends LogFilenameFilter {
 
 	/**
 	 * Crea el filtro con los patrones por defecto y los indicados.
+	 * @param patterns Patrones para la identificaci&oacute;n de ficheros.
 	 */
 	public NegativeLogFilenameFilter(final String[] patterns) {
 		this.patternList = new ArrayList<>();

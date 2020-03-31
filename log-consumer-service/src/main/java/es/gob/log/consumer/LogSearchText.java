@@ -14,7 +14,8 @@ public class LogSearchText {
 	private final LogInfo logInfo;
 	private int nLinesReaded = 0;
 
-	/** Construye el objeto para la b&uacute;squeda de texto en un log.  */
+	/** Construye el objeto para la b&uacute;squeda de texto en un log.
+	 * @param logInfo Informaci&oacute;n del log cargado. */
 	public LogSearchText(final LogInfo logInfo) {
 		this.logInfo = logInfo;
 	}
@@ -41,7 +42,8 @@ public class LogSearchText {
 	 * 	y las consecutivas l&iacute;neas hasta el m&aacute;ximo indicado como par&aacute;metro.
 	 * @param numLines N&uacute;mero m&aacute;ximo de l&iacute;neas a recuperar.
 	 * @param text Texto a buscar.
-	 * @param date Fecha m&iacute;nima en la que se puede debieron imprimir los registros.
+	 * @param dateTimeMillisec Fecha m&iacute;nima en milisegundos en la que se puede debieron imprimir los registros.
+	 * @param reader Lector para el acceso al texto.
 	 * @return Bytes de los registros recuperados.
 	 * @throws IOException Cuando ocurre un error durante la operaci&oacute;n.
 	 * @throws InvalidPatternException Cuando se encuentra un loginfo para el fichero de log

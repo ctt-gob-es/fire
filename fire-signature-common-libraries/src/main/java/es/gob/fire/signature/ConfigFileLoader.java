@@ -35,7 +35,7 @@ public class ConfigFileLoader {
 	 * Carga un fichero de configuraci&oacute;n del directorio configurado
 	 * o del classpath si no se configur&oacute;.
 	 * @param configFilename Nombre del fichero de configuraci&oacute;n.
-	 * @return Propiedades de fichero de configuraci&oacute:n.
+	 * @return Propiedades de fichero de configuraci&oacute;n.
 	 * @throws IOException Cuando no se puede cargar el fichero de configuraci&oacute;n.
 	 * @throws FileNotFoundException Cuando no se encuentra el fichero de configuraci&oacute;n.
 	 */

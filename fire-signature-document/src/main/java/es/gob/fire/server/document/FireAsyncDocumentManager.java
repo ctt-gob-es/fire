@@ -54,6 +54,7 @@ public interface FireAsyncDocumentManager extends FIReDocumentManager {
 	 * @param appId Identificador de la aplicaci&oacute;n que solicita la firma.
 	 * @param signature Firma recuperada (ya actualizada).
 	 * @param upgradeFormat Formato al que se ha actualizado la firma.
+	 * @return Valor devuelto por el gestor de documentos.
 	 * @throws IOException Cuando falla el guardado de la firma.
 	 */
 	byte[] storeAsyncDocument(String asyncId, String appId, byte[] signature,

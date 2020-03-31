@@ -20,18 +20,18 @@ public class UserRestorationInfo {
 		this.restoreExpired= false;
 	}
 
-	 /**
-	    * Establece el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	    * @return c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a.
-	    */
+	/**
+	 * Establece el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a.
+	 * @return C&oacute;digo de renovaci&oacute;n de contrase&ntilde;a.
+	 */
 
 	public String getCodeInfo() {
 		return this.codeInfo;
 	}
 	/**
-	  * Obtiene el c&oacute;digo al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	  * @param El c&oacute;digo del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	  */
+	 * Obtiene el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a.
+	 * @param codeInfo C&oacute;digo de renovaci&oacute;n de contrase&ntilde;a.
+	 */
 
 	public void setCodeInfo(final String codeInfo) {
 		this.codeInfo = codeInfo;
@@ -45,10 +45,9 @@ public class UserRestorationInfo {
 		return this.renovationDate;
 	}
 	/**
-	  * Obtiene la fecha de creacion de la url al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	  * @param La fecha de creacion de la url al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	  */
-
+	 * Obtiene la fecha de creaci&oacute;n de la URL.
+	 * @param renovationDate Fecha de creaci&oacute;n de la URL.
+	 */
 	public void setRenovationDate(final Date renovationDate) {
 		this.renovationDate = renovationDate;
 	}
@@ -57,47 +56,45 @@ public class UserRestorationInfo {
 	 * Establece el tiempo del c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
 	 * @return El tiempo del c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
 	 */
-	 public boolean hasRestoreExpire() {
-	    	return this.restoreExpired;
-	    	    }
-	 /**
-	  * Obtiene el tiempo del c&oacute;digo al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	  * @param el tiempo del c&oacute;digo del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	  */
-	 public void setRestoreExpired(final boolean restoreExpired) {
-			this.restoreExpired = restoreExpired;
-	    }
+	public boolean hasRestoreExpire() {
+		return this.restoreExpired;
+	}
+	/**
+	 * Obtiene el tiempo del c&oacute;digo al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 * @param restoreExpired El tiempo del c&oacute;digo del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 */
+	public void setRestoreExpired(final boolean restoreExpired) {
+		this.restoreExpired = restoreExpired;
+	}
 
-	 /**
-	  * Establece el id del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	  * @return El id del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-	  */
-		public String getId() {
-			return this.id;
-		}
-		/**
-		  * Obtiene el id del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-		  * @param El id del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-		  */
-		public void setId(final String id) {
-			this.id = id;
-		}
-
-
-		/**
-		  * Establece el nombre del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-		  * @return El nombre del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-		  */
-		public String getName() {
-			return this.name;
-		}
-		/**
-		  * Obtiene el nombre del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-		  * @param el nombre del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
-		  */
-		public void setName(final String name) {
-			this.name = name;
-		}
+	/**
+	 * Establece el id del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 * @return El id del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 */
+	public String getId() {
+		return this.id;
+	}
+	/**
+	 * Obtiene el id del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 * @param El id del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 */
+	public void setId(final String id) {
+		this.id = id;
+	}
 
 
+	/**
+	 * Establece el nombre del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 * @return El nombre del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 */
+	public String getName() {
+		return this.name;
+	}
+	/**
+	 * Obtiene el nombre del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 * @param el nombre del usuario al que se le va a enviar el c&oacute;digo de renovaci&oacute;n de contrase&ntilde;a
+	 */
+	public void setName(final String name) {
+		this.name = name;
+	}
 }

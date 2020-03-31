@@ -40,6 +40,7 @@ public class CreateBatchManager {
 	/**
 	 * Create un lote de firma.
 	 * @param request Petici&oacute;n para la creaci&oacute;n del lote.
+	 * @param appName Nombre de la aplicaci&oacute;n.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta de la creaci&oacute;n del lote.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.

@@ -38,7 +38,7 @@ public class DataFragment {
 
 	/**
 	 * Indica si los datos contenidos est&aacute;n completos o si son un fragmento de otro dato.
-	 * @return
+	 * @return {@code true} si est&aacute; completo, {@code false} en caso contrario.
 	 */
 	public boolean isComplete() {
 		return this.complete;

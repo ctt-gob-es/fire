@@ -118,6 +118,8 @@ public class DbManager {
 	/**
 	 * Establece si debe realizarse commit despu&eacute;s de cada sentencia de modificaci&oacute;n
 	 * de la base de datos.
+	 * @param autoCommit {@code true} para indicar que debe hacerse commit autom&aacute;ticamente,
+	 * {@code false} en caso contrario.
 	 * @throws SQLException Cuando no se puede modificar la opci&oacute;n de AutoCommit.
 	 */
 	public static void setAutoCommit(final boolean autoCommit) throws SQLException {

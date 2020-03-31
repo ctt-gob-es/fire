@@ -101,11 +101,11 @@ public final class SessionCollector {
     }
 
     /**
-	 * Recupera una sesi&oacute;n activa con el identificador indicado de un usuario concreto.<br/>
+	 * Recupera una sesi&oacute;n activa con el identificador indicado de un usuario concreto.<br>
 	 * La sesi&oacute;n se carga de las distintas fuentes disponibles, a menos que se indique
 	 * que s&oacute;lo se obtenga si ya est&aacute; cargada en memoria. Este es un mecanismo
 	 * de seguridad con el que poder evitar que un usuario logueado empiece a reclamar transacciones
-	 * de otros usuarios.<br/>
+	 * de otros usuarios.<br>
 	 * Por orden de prioridad, los datos de sesi&oacute;n se recuperan de:
 	 * <ol>
 	 * <li>La propia sesi&oacute;n HTTP.</li>

@@ -58,7 +58,7 @@ public class CompactedData {
 
 	/**
 	 * Agrega un nuevo registro del cubo de transacciones al conjunto de datos.
-	 * @param signatureCube Registro del cubo de transacciones.
+	 * @param transactionCube Registro del cubo de transacciones.
 	 */
 	public void addTransactionData(final TransactionCube transactionCube) {
 

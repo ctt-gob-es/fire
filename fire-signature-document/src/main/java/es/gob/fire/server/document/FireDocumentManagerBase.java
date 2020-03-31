@@ -37,6 +37,7 @@ public abstract class FireDocumentManagerBase implements FireAsyncDocumentManage
 	 * permiten obtener el certificado de firma en la firma de lotes, as&iacute; que en los casos
 	 * de firma de lotes con certificado local este par&aacute;metro ser&aacute; nulo.
 	 * @param format Formato de firma.
+	 * @param upgradeFormat Formato longevo de la firma proporcionada.
 	 * @param extraParams Par&aacute;metros para la configuraci&oacute;n de la firma.
 	 * @return Resultado que obtendr&aacute; la aplicaci&oacute;n cliente. En caso de usarse
 	 * cadenas de texto, se deben codificar en UTF-8.

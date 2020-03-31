@@ -19,7 +19,6 @@ public class PostProcessResult {
 	 * Construye el resultado del postproceso de la firma en donde se proporciona
 	 * la firma obtenida.
 	 * @param result Firma resultante.
-	 * @param format Identificador del formato longevo.
 	 */
 	public PostProcessResult(final byte[] result) {
 		this.result = result;

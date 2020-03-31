@@ -28,13 +28,14 @@ public interface LogReader {
 	void load() throws IOException;
 
 	/**
-	 * Inicia el proceso de carga del log indicando una posici&oacute;n
-	 * @param position
-	 * @throws IOException
+	 * Inicia el proceso de carga del log indicando una posici&oacute;n.
+	 * @param position Posici&oacute;n del fichero a partir de la cual cargar.
+	 * @throws IOException Cuando falla la carga.
 	 */
 	void load(final long position) throws IOException;
 
-	/** Inicia el proceso de carga del log.
+	/** Cierra y reinicia el proceso de carga del log a partir de una posici&oacute;n.
+	 * @param position Posici&oacute;n del fichero a partir de la cual cargar.
 	 * @throws IOException Cuando se produce un error durante la carga. */
 	void reload(final long position) throws IOException;
 
@@ -86,8 +87,8 @@ public interface LogReader {
 	 boolean isEndFile();
 
 	 /**
-	  * Estaqblece el indicador de si hemos llegado al final de la lectura del fichero.
-	  * @return
+	  * Establece el indicador de si hemos llegado al final de la lectura del fichero.
+	  * @param endOfFile Se&ntilde;ala si hemos alacanzado el final de fichero.
 	  */
 	 void setEndFile(final boolean endOfFile);
 

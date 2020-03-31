@@ -124,14 +124,14 @@ public class Browser {
 	}
 	/**
 	 * Recupera el nombre del navegador
-	 * @return
+	 * @return Nombre del navegador.
 	 */
 	public final String getName() {
 		return this.name;
 	}
 	/**
 	 * Establece el nombre del navegador
-	 * @param name
+	 * @param name Nombre del navegador.
 	 */
 	public final void setName(final String name) {
 		this.name = name;

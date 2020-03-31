@@ -29,9 +29,9 @@ public class SignatureCube {
 	 * Construye un objeto cargando sus propiedades de una cadena de texto con el formato
 	 * "Formato;FormatoMejorado;Algoritmo;Proveedor;Navegador;ResultadoOperacion;IdTransaccion;Tama&ntilde;oFichero".<br>
 	 * <ul>
-	 * <li>FormatoMejorado => Formato longevo de firma o vacio si no se solicit&oacute; actualizar.</li>
-	 * <li>ResultadoOperacion => 0 si la operaci&oacute;n fall&oacute;, 1 en caso contrario.</li>
-	 * <li>Tama&ntilde;oFichero => Tama&ntilde;o del fichero firmado en bytes.</li>
+	 * <li>FormatoMejorado: Formato longevo de firma o vacio si no se solicit&oacute; actualizar.</li>
+	 * <li>ResultadoOperacion: 0 si la operaci&oacute;n fall&oacute;, 1 en caso contrario.</li>
+	 * <li>Tama&ntilde;oFichero: Tama&ntilde;o del fichero firmado en bytes.</li>
 	 * </ul>
 	 * @param registry Cadena de texto con las propiedades de la transacci&oacute;n.
 	 * @return Informaci&oacute;n de la transacci&oacute;n.
@@ -111,50 +111,50 @@ public class SignatureCube {
 	/* Getter & Setter */
 
 	/**
-	 * Obtiene la fecha
-	 * @return
+	 * Obtiene la fecha.
+	 * @return Fecha de firma.
 	 */
 	public final Date getDate() {
 		return this.date;
 	}
 	/**
-	 * Establece la fecha
-	 * @param date
+	 * Establece la fecha.
+	 * @param date Fecha de firma.
 	 */
 	public final void setDate(final Date date) {
 		this.date = date;
 	}
 	/**
 	 * Obtiene el formtato del cubo de la firma
-	 * @return
+	 * @return Formato de firma.
 	 */
 	public final String getFormat() {
 		return this.format;
 	}
 	/**
 	 * Establece el formtato del cubo de la firma
-	 * @param format
+	 * @param format Formato de firma.
 	 */
 	public final void setFormat(final String format) {
 		this.format = format;
 	}
 	/**
 	 * Obtiene el algoritmo del cubo de la firma
-	 * @return
+	 * @return Algoritmo de firma.
 	 */
 	public final String getAlgorithm() {
 		return this.algorithm;
 	}
 	/**
 	 *Establece el algoritmo del cubo de la firma
-	 * @param algorithm
+	 * @param algorithm Algoritmo de firma.
 	 */
 	public final void setAlgorithm(final String algorithm) {
 		this.algorithm = algorithm;
 	}
 	/**
 	 * Obtiene el proveedor del cubo de la firma
-	 * @return
+	 * @return Proveedor de certificados utilizado en la firma.
 	 */
 	public final String getProvider() {
 		return this.provider;
@@ -162,23 +162,23 @@ public class SignatureCube {
 
 	/**
 	 * Establece el proveedor del cubo de la firma
-	 * @param provider
+	 * @param provider Proveedor de certificados utilizado en la firma.
 	 */
 	public final void setProvider(final String provider) {
 		this.provider = provider;
 	}
 
 	/**
-	 * Obtiene el Navegador  del cubo de la firma
-	 * @return
+	 * Obtiene el navegador  del cubo de la firma.
+	 * @return Navegador utilizado en la operaci&oacute;n.
 	 */
 	public final String getBrowser() {
 		return this.browser;
 	}
 
 	/**
-	 *  Establece el Navegador  del cubo de la firma
-	 * @param browser
+	 *  Establece el navegador del cubo de la firma.
+	 * @param browser Navegador utilizado en la operaci&oacute;n.
 	 */
 	public final void setBrowser(final String browser) {
 		this.browser = browser;
@@ -186,55 +186,95 @@ public class SignatureCube {
 
 	/**
 	 * Indica si la firma termin&oacute; correctamente.
-	 * @return
+	 * @return {@code true} si la firma se complet&oacute; correctamente, {@code false} en caso contrario.
 	 */
 	public final boolean isResultSign() {
 		return this.resultSign;
 	}
 	/**
 	 * Establece si la firma termin&oacute; correctamente o no.
-	 * @param resultSign
+	 * @param resultSign Resultado de la operaci&oacute;n de firma.
 	 */
 	public final void setResultSign(final boolean resultSign) {
 		this.resultSign = resultSign;
 	}
 
+	/**
+	 * Recupera el identificador de transaci&oacute;n en la cual se realiz&oacute; la firma.
+	 * @return Identificador de transaci&oacute;n en la cual se realiz&oacute; la firma.
+	 */
 	public String getIdTransaction() {
 		return this.idTransaction;
 	}
 
+	/**
+	 * Establece el identificador de transaci&oacute;n en la cual se realiz&oacute; la firma.
+	 * @param idTransaction Identificador de transaci&oacute;n en la cual se realiz&oacute; la firma.
+	 */
 	public void setIdTransaction(final String idTransaction) {
 		this.idTransaction = idTransaction;
 	}
 
+	/**
+	 * Recupera el tama&ntilde;o de datos firmados.
+	 * @return Tama&ntilde;o de los datos firmados.
+	 */
 	public final long getDataSize() {
 		return this.dataSize;
 	}
 
+	/**
+	 * Establece el tama&ntilde;o de datos firmados.
+	 * @param size Tama&ntilde;o de los datos firmados.
+	 */
 	public final void setDataSize(final long size) {
 		this.dataSize = size;
 	}
 
+	/**
+	 * Establece el formato longevo al que se actualiz&oacute; la firma.
+	 * @return Formato longevo al que se actualiz&oacute; la firma.
+	 */
 	public final String getImprovedFormat() {
 		return this.improvedFormat;
 	}
 
+	/**
+	 * Recupera el formato longevo al que se actualiz&oacute; la firma.
+	 * @param improvedFormat Formato longevo al que se actualiz&oacute; la firma.
+	 */
 	public final void setImprovedFormat(final String improvedFormat) {
 		this.improvedFormat = improvedFormat;
 	}
 
+	/**
+	 * Recupera el c&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la firma.
+	 * @return C&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la firma.
+	 */
 	public final String getApplication() {
 		return this.application;
 	}
 
+	/**
+	 * Establece el c&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la firma.
+	 * @param aplication C&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la firma.
+	 */
 	public final void setApplication(final String aplication) {
 		this.application = aplication;
 	}
 
+	/**
+	 * Agrega un n&uacute;mero de firmas al total de firmas acorde a la configuraci&oacute;n establecida.
+	 * @param n N&uacute;mero de firmas.
+	 */
 	public void addToTotal(final long n) {
 		this.total += n;
 	}
 
+	/**
+	 * Recupera el n&uacute;mero total de firmas que se realizaron acorde a la configuraci&oacute;n establecida.
+	 * @return N&uacute;mero total de firmas.
+	 */
 	public long getTotal() {
 		return this.total;
 	}
@@ -243,9 +283,9 @@ public class SignatureCube {
 	 * Devuelve una cadena con las propiedades del objeto con el formato
 	 * "Formato;FormatoMejorado;Algoritmo;Proveedor;Navegador;ResultadoOperacion;IdTransaccion;Tama&ntilde;oFichero".<br>
 	 * <ul>
-	 * <li>FormatoMejorado => Formato longevo de firma o vacio si no se solicit&oacute; actualizar.</li>
-	 * <li>ResultadoOperacion => 0 si la operaci&oacute;n fall&oacute;, 1 en caso contrario.</li>
-	 * <li>Tama&ntilde;oFichero => Tama&ntilde;o del fichero firmado en bytes.</li>
+	 * <li>FormatoMejorado: Formato longevo de firma o vacio si no se solicit&oacute; actualizar.</li>
+	 * <li>ResultadoOperacion: 0 si la operaci&oacute;n fall&oacute;, 1 en caso contrario.</li>
+	 * <li>Tama&ntilde;oFichero: Tama&ntilde;o del fichero firmado en bytes.</li>
 	 * </ul>
 	 */
 	@Override
@@ -311,7 +351,7 @@ public class SignatureCube {
 
 	/**
 	 * Compara este objeto con otro.
-	 * @param object Objeto con el que comparar.
+	 * @param obj Objeto con el que comparar.
 	 * @return true si son iguales , false si son distintos
 	 */
 	@Override

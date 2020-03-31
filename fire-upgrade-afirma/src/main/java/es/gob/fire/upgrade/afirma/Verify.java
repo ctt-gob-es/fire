@@ -11,7 +11,6 @@ package es.gob.fire.upgrade.afirma;
 
 import java.io.IOException;
 
-import es.gob.fire.upgrade.VerifyException;
 import es.gob.fire.upgrade.VerifyResult;
 
 /**
@@ -42,9 +41,6 @@ public final class Verify {
 	 * @throws PlatformWsException
 	 *             Si hay problemas con los servicios Web de la plataforma
 	 *             Afirma.
-	 * @throws VerifyException
-	 *             Si hay problemas en la propia validaci&oacute;n del
-	 *             certificado.
 	 */
 	public static VerifyResult verifySignature(final AfirmaConnector conn,
 			final byte[] signature, final String afirmaAppName) throws IOException,

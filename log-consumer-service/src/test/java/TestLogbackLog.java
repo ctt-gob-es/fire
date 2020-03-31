@@ -5,6 +5,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.gob.log.consumer.Criteria;
@@ -16,6 +17,7 @@ import es.gob.log.consumer.LogReader;
 public class TestLogbackLog {
 
 	@Test
+	@Ignore
 	public void test() throws Exception {
 
 			LogInfo info;

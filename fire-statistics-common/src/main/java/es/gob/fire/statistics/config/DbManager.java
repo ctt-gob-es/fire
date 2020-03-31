@@ -102,14 +102,14 @@ public class DbManager {
 
 	/**
 	 * Realiza a acci&oacute;n de commit desde la &uacute;ltima acci&oacute;n de commit o rollback anterior
-	 * @throws SQLException
+	 * @throws SQLException Error al confirmar la transacci&oacute;n.
 	 */
 	public static void runCommit() throws SQLException {
 		getConnection().commit();
 	}
 	/**
-	 * Deshace todos los cambios de la actual transacci&oacute;n
-	 * @throws SQLException
+	 * Deshace todos los cambios de la actual transacci&oacute;n.
+	 * @throws SQLException Cuando ocurre alg&uacute;n error.
 	 */
 	public static void runRollBack() throws SQLException {
 		getConnection().rollback();

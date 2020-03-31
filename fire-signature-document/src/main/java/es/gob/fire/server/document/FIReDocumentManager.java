@@ -16,7 +16,7 @@ import java.util.Properties;
 /** Interfaz para la recuperaci&oacute;n de documentos desde un servidor o repositorio documental.
  * <u>ES OBLIGATORIO</u>, que las clases que implementen esta interfaz no definan un constructor
  * o que este sea el contructor p&uacute;blico por defecto.<br>
- * Si se encuentra en el directorio de configuraci&oacuute;n o en el <i>classpath</i> un fichero
+ * Si se encuentra en el directorio de configuraci&oacute;n o en el <i>classpath</i> un fichero
  * con el nombre "docmanager.NOMBRE_DOCUMENT_MANAGER.properties", se cargar&aacute; como fichero
  * de propiedades y se ejecutar&aacute; el m&eacute;rodo init() de la case antes de realizar cualquier
  * llamada a los m&eacute;todos getDocument y storeDocument. Si no se encuentra este fichero, no se

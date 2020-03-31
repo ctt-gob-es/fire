@@ -48,16 +48,17 @@ public class LogData {
 
 	/**
 	 * Serializa el objeto en forma de JSON.
+	 * @param cs Juego de caracteres.
 	 * @return JSON con los valores del objeto.
 	 */
-	public String toJson(final Charset charset) {
+	public String toJson(final Charset cs) {
 
 		if (this.error != null) {
 			return this.error.toJson();
 		}
 
 		final JsonObjectBuilder logData = Json.createObjectBuilder()
-				.add("log", new String(this.log, charset)); //$NON-NLS-1$
+				.add("log", new String(this.log, cs)); //$NON-NLS-1$
 
 		final StringWriter resultWriter = new StringWriter();
 		try (final JsonWriter jw = Json.createWriter(resultWriter)) {

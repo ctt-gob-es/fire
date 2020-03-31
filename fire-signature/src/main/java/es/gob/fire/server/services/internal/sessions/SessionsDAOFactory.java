@@ -28,7 +28,7 @@ public class SessionsDAOFactory {
 	/**
 	 * Recupera una instancia de un gestor de sesiones para que se compartan entre
 	 * los distintos nodos en los que se despliegue el componente central de FIRe.
-	 * @param type Nombre del gestor.
+	 * @param classname Nombre de la clase gestora.
 	 * @return Gestor de sesiones.
 	 */
 	public static SessionsDAO getInstance(final String classname) {

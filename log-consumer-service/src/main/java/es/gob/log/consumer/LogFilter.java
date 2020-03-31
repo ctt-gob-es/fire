@@ -54,7 +54,7 @@ public class LogFilter {
 	}
 
 	/**
-	 * Carga lector de logs y lo prepara para una operaci&oacute;n de b&uaacute;squeda
+	 * Carga lector de logs y lo prepara para una operaci&oacute;n de b&uacute;squeda
 	 * sobre una porci&oacute;n filtrada del log.
 	 * @param reader Lector de logs.
 	 * @throws IOException Cuando ocurre al cargar el lector.
@@ -178,7 +178,7 @@ public class LogFilter {
 
 	/**
 	 * Indica si el fichero de log a&uacute;n puede incluir entradas que se ajusten
-	 * al filtro en base al que se cargaron entradas la &uacte;tima vez.
+	 * al filtro en base al que se cargaron entradas la &uacute;tima vez.
 	 * @return {@code true} si a&uacute;n puede incluir entradas, {@code false} en
 	 * caso contrario.
 	 */

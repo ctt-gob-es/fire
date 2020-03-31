@@ -21,14 +21,14 @@ package es.gob.fire.logs;
 
 /**
  * Allows objects to be locked for modification.
- * <p/>
+ * <p>
  * When an object is {@link #protect(Object) protected}, modifications to the object are not allowed. To allow
  * modifications for the object, the {@link #enableAccess(Object)} or the {@link #unprotect(Object)} methods must be
  * invoked.
- * <p/>
+ * <p>
  * To protect the object after {@link #enableAccess(Object) enabling} access, invoke the {@link #disableAccess()}
  * access.
- * <p/>
+ * <p>
  * Note that {@link #enableAccess(Object) enabling} or {@link #disableAccess() disabling} access only applies to the
  * current thread.
  *

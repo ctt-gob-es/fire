@@ -90,7 +90,7 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 
 	/**
 	 * Establece el certificado utilizado para la firma.
-	 * @param Certificado de firma.
+	 * @param signingCert Certificado de firma.
 	 */
 	public void setSigningCert(final X509Certificate signingCert) {
 		this.signingCert = signingCert;

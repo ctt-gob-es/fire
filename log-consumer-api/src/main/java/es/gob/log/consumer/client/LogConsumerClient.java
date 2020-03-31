@@ -54,8 +54,6 @@ public class LogConsumerClient {
 
 	/**
 	 * Construye el cliente para la consulta de logs.
-	 * @param disableSslChecks Deshabilita las comprobaciones sobre el certificado
-	 * SSL servidor.
 	 */
 	public LogConsumerClient() {
 		this.conn = new HttpManager();
@@ -589,7 +587,7 @@ public class LogConsumerClient {
 	 * <code>{"Error":[{"Code":CODIGO_ERROR,"Message":"MENSAJE_ERROR"}]}</code>
 	 * @param numLines N&uacute;mero de l&iacute;neas a recuperar.
 	 * @param filename Nombre del fichero de log.
-	 * @return Objeto con los bytes de las &ulacute;timas l&iacute;neas del fichero.
+	 * @return Objeto con los bytes de las &uacute;timas l&iacute;neas del fichero.
 	 */
 	public LogData getLogTail(final int numLines, final String filename) {
 
@@ -760,7 +758,6 @@ public class LogConsumerClient {
 	 * Obtiene en formato JSON las siguientes l&iacute;neas del fichero continuando por la
 	 * petici&oacute;n anterior.
 	 * @param numLines N&uacute;mero de l&iacute;neas a devolver.
-	 * @param filename Nombre del fichero.
 	 * @return Bytes de la estructura JSON con las l&iacute;neas del fichero.
 	 */
 	public byte[] getMoreLogJson(final int numLines) {
@@ -1125,7 +1122,6 @@ public class LogConsumerClient {
 	 * En caso de error:<br>
 	 * <code>{"Error":[{"Code":CODIGO_ERROR,"Message":"MENSAJE_ERROR"}]}</code>
 	 * @param fileName Nombre del fichero a descargar.
-	 * @param reset Indica que reinicie el fichero para asegurar que no se empieza la descarga desde un punto intermedio.
 	 * @param downloadDir Directorio al que descargar el fichero.
 	 * @return Bytes del JSON con el resultado de la operaci&oacute;n.
 	 */
@@ -1192,7 +1188,6 @@ public class LogConsumerClient {
 	 * En caso de error:<br>
 	 * <code>{"Error":[{"Code":CODIGO_ERROR,"Message":"MENSAJE_ERROR"}]}</code>
 	 * @param fileName Nombre del fichero a descargar.
-	 * @param reset Indica que reinicie el fichero para asegurar que no se empieza la descarga desde un punto intermedio.
 	 * @param downloadDir Directorio al que descargar el fichero.
 	 * @return Bytes del JSON con el resultado de la operaci&oacute;n.
 	 */

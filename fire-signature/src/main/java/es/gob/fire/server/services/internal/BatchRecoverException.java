@@ -27,8 +27,8 @@ public class BatchRecoverException extends Exception {
 	}
 
 	/**
-	 * Resultado estado
-	 * @return
+	 * Estado resultante.
+	 * @return  Estado.
 	 */
 	public String getResultState() {
 		return this.resultState;

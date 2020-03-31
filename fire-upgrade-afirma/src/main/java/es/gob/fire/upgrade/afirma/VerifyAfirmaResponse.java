@@ -29,7 +29,7 @@ public class VerifyAfirmaResponse {
 	/**
 	 * Construye el objeto de respuesta en base a los datos remitidos por la
 	 * Plataforma @firma.
-	 * @param response Respuesta del metodo de validaci&oacute;n de firma de
+	 * @param xml XML de respuesta del metodo de validaci&oacute;n de firma de
 	 * de la Plataforma @firma.
 	 * @throws SAXException Cuando no se recibe un XML v&aacute;lido.
 	 * @throws ParserConfigurationException Cuando el parser XML no esta correctamente configurado.

@@ -12,9 +12,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 /**
- *
- * @author Adolfo.Navarro
- *
+ * Manejador para la lectura de las &uacute;ltimas l&iacute;neas del log.
  */
 public class LogTail {
 
@@ -24,8 +22,9 @@ public class LogTail {
 	private final LogInfo logInfor;
 	private final Path path;
 
-	/**Constructor
-	 * @throws InvalidPatternException */
+	/** Construye la informaci&oacute;n.
+	 * @param logInfo Informaci&oacute;n del fichero de log.
+	 * @param path Ruta del fichero de log. */
 	public LogTail(final LogInfo logInfo, final String path)  {
 		this.logInfor = logInfo;
 		this.path = Paths.get(path);
@@ -131,8 +130,8 @@ public class LogTail {
 	}
 
 	/**
-	 * Obtiene la posici&oacute;n
-	 * @return
+	 * Obtiene la posici&oacute;n del fichero.
+	 * @return Posici&oacute;n actual en el fichero.
 	 */
 	public final long getFilePosition() {
 		return this.filePosition;

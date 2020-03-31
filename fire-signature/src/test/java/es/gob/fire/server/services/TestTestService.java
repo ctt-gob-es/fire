@@ -41,7 +41,7 @@ public final class TestTestService {
 		"</xml>"; //$NON-NLS-1$
 
 	/** Prueba de carga de datos.
-	 * @throws Exception */
+	 * @throws Exception Cuando falla la carga. */
 	@SuppressWarnings("static-method")
 	@Test
 	@Ignore

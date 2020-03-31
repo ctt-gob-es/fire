@@ -26,7 +26,7 @@ public class ValidatorException extends Exception {
     }
 
 	/** Construye la excepci&oacute;n.
-	 * @param e Motivo por el que se crea la excepci&oacute;n. */
+	 * @param cause Motivo por el que se crea la excepci&oacute;n. */
 	public ValidatorException(final Throwable cause) {
 	    super(cause);
     }

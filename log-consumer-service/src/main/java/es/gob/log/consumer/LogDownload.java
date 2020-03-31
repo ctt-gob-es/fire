@@ -47,7 +47,7 @@ public class LogDownload {
 	 * m&eacute;todo {@link #hasMore}.<br>
 	 * En la primera llamada a este m&eacute;todo, se establece la posicion a su
 	 * inicio para que se descargue todo el log.
-	 * @return Fragmento comprimido del log o {@code null} si no hab&iacute}
+	 * @return Fragmento comprimido del log o {@code null} si no hab&iacute;a.
 	 * @throws IOException Cuando ocurre un error en la lectura de datos del canal
 	 * o en la compresi&oacute;n de los datos de salida.
 	 */

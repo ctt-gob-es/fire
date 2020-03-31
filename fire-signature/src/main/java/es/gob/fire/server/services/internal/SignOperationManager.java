@@ -41,6 +41,7 @@ public class SignOperationManager {
 	/**
 	 * Inicia la operaci&oacute;n de firma asociada al componente central.
 	 * @param request Solicitud HTTP.
+	 * @param appName Nombre de la aplicaci&oacute;n.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param response Respuesta HTTP.
 	 * @throws IOException Cuando se produce un error en la comunicaci&oacute;n con el cliente

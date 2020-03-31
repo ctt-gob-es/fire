@@ -24,7 +24,7 @@ public class DuplicateDocumentException extends Exception {
 		super();
 	}
 
-	/** Construye la excepci&oacute;n con su descripci&ocute;n y la causa.
+	/** Construye la excepci&oacute;n con su descripci&oacute;n y la causa.
 	 * @param msg Mensaje de error.
 	 * @param cause Causa de la excepci&oacute;n. */
 	public DuplicateDocumentException(final String msg, final Throwable cause) {

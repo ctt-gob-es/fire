@@ -38,6 +38,7 @@ public class ConfigManager {
 
 	/**
 	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
+	 * @param configFile Nombre del fichero de configuraci&oacute;n.
 	 * @throws ConfigFilesException Si no encuentra el fichero indicado como parametro .properties.
 	 */
 	public static void checkConfiguration(final String configFile) throws ConfigFilesException {

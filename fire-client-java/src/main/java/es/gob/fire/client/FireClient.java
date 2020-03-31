@@ -20,7 +20,7 @@ import es.gob.fire.client.HttpsConnection.Method;
 
 /**
  * Cliente para el acceso al componente central de FIRe. Mediante esta clase se pueden
- * ejecutar todas las operaciones soportadas por FIRe.<br/>
+ * ejecutar todas las operaciones soportadas por FIRe.<br>
  * Para la configuraci&oacute;n de la conexi&oacute;n con FIRe es necesario que se
  * proporcionen ciertos par&aacute;metros a trav&eacute;s de un objeto de propiedades
  * o que estas est&eacute;n establecidas en el fichero de configuraci&oacute;n
@@ -163,7 +163,7 @@ public class FireClient {
 	 * Construye el cliente de FIRe cargando la configuraci&oacute;n para la
 	 * conexi&oacute;n con el componente central del fichero
 	 * <i>client_config.properties</i> del directorio configurado a trav&eacute;s
-	 * de propiedades del sistema o del <i>classpath</i>.<br/>
+	 * de propiedades del sistema o del <i>classpath</i>.<br>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 * Javadoc de la clase ({@link FireClient}).
 	 * @param appId Identificador de aplicaci&oacute;n.
@@ -175,11 +175,11 @@ public class FireClient {
 	}
 
 	/**
-	 * Construye el cliente de FIRe a partir de la configuraci&oacute;n proporcionada.<br/>
+	 * Construye el cliente de FIRe a partir de la configuraci&oacute;n proporcionada.<br>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 * Javadoc de la clase ({@link FireClient}).
 	 * @param appId Identificador de aplicaci&oacute;n.
-	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br/>
+	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 * Javadoc de la clase ({@link FireClient}).
 	 */
@@ -191,14 +191,14 @@ public class FireClient {
 	 * Construye el cliente de FIRe cargando la configuraci&oacute;n para la
 	 * conexi&oacute;n con el componente central del fichero
 	 * <i>client_config.properties</i> del directorio configurado a trav&eacute;s
-	 * de propiedades del sistema o del <i>classpath</i>.<br/>
+	 * de propiedades del sistema o del <i>classpath</i>.<br>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 * Javadoc de la clase ({@link FireClient}).
 	 * @param appId Identificador de aplicaci&oacute;n.
 	 * @param decipher Objeto para el descifrado de las contrase&ntilde;as definidas en el
 	 * objeto de propiedades. Si se pasa {@code null}, se entender&aacute;a que las
-	 * contrase&ntildes;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
-	 * tener la forma {@ciphered: PASSWORD_CIFRADA_EN_BASE64 }.
+	 * contrase&ntilde;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
+	 * tener la forma {&#x40;ciphered: PASSWORD_CIFRADA_EN_BASE64 }.
 	 * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero
 	 * de configuraci&oacute;n.
 	 */
@@ -209,13 +209,13 @@ public class FireClient {
 	/**
 	 * Construye el cliente de FIRe a partir de la configuraci&oacute;n proporcionada.
 	 * @param appId Identificador de aplicaci&oacute;n.
-	 * @param config Configuraci&oacute;n para la conexion con el componente central.<br/>
+	 * @param config Configuraci&oacute;n para la conexi&oacute;n con el componente central.<br>
 	 * Las propiedades necesarias de la configuraci&oacute;n se detallan en el
 	 * Javadoc de la clase ({@link FireClient}).
 	 * @param decipher Objeto para el descifrado de las contrase&ntilde;as definidas en el
 	 * objeto de propiedades. Si se pasa {@code null}, se entender&aacute;a que las
-	 * contrase&ntildes;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
-	 * tener la forma {@ciphered: PASSWORD_CIFRADA_EN_BASE64 }.
+	 * contrase&ntilde;s est&aacute;n en claro. Las contrase&ntilde;as cifradas deben
+	 * tener la forma {&#x40;ciphered: PASSWORD_CIFRADA_EN_BASE64 }.
 	 */
 	public FireClient(final String appId, final Properties config, final PasswordDecipher decipher) {
 
@@ -418,7 +418,7 @@ public class FireClient {
     /**
      * Completa y recupera el resultado de firma de los datos, que puede contener la firma generada,
      * un periodo de gracia que habr&aacute; que esperar antes de recuperar la firma con
-     * {@link #recoverAsyncSign(String, String)} o un mensaje de error.
+     * {@link #recoverAsyncSign(String, String, Properties, boolean)} o un mensaje de error.
      *
      * @param transactionId
      *            Identificador de la transacci&oacute;n.
@@ -451,7 +451,7 @@ public class FireClient {
     /**
      * Completa y recupera el resultado de firma de los datos, que puede contener la firma generada,
      * un periodo de gracia que habr&aacute; que esperar antes de recuperar la firma con
-     * {@link #recoverAsyncSign(String, String)} o un mensaje de error.
+     * {@link #recoverAsyncSign(String, String, Properties, boolean)} o un mensaje de error.
      *
      * @param transactionId
      *            Identificador de la transacci&oacute;n.

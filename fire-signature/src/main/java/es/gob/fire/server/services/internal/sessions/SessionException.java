@@ -9,7 +9,7 @@ public class SessionException extends Exception {
 	private static final long serialVersionUID = -1475752597406718059L;
 
 	/**
-	 * Construye la excepci&oacuate;n con el mensaje descriptivo.
+	 * Construye la excepci&oacute;n con el mensaje descriptivo.
 	 * @param msg Mensaje descriptivo.
 	 */
 	public SessionException(final String msg) {
@@ -17,7 +17,7 @@ public class SessionException extends Exception {
 	}
 
 	/**
-	 * Construye la excepci&oacuate;n con el mensaje descriptivo y su causa.
+	 * Construye la excepci&oacute;n con el mensaje descriptivo y su causa.
 	 * @param msg Mensaje descriptivo.
 	 * @param cause Motivo por el que se lanza la excepci&oacute;n.
 	 */

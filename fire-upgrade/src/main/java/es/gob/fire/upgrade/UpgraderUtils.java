@@ -16,7 +16,7 @@ public class UpgraderUtils {
 	 * retirar&aacute; dicho pref&iacute;jo.
 	 * propiedades pasan a estar en el {@code Properties} resultado y deja de estar en el
 	 * {@code Properties} de entrada.
-	 * @param properties Entrada de las que se extraer&aacute;n las propiedades.
+	 * @param config Entrada de las que se extraer&aacute;n las propiedades.
 	 * @return Propiedades extra&iacute;das o {@code null} si no se han definido propiedades.
 	 */
 	public static Properties extractUpdaterProperties(final Properties config) {

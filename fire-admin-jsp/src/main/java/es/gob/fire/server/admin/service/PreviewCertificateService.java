@@ -114,16 +114,16 @@ public class PreviewCertificateService extends HttpServlet {
 	}
 
 	/**
-	 * Obtiene el certificado
-	 * @return
+	 * Obtiene el certificado.
+	 * @return Certificado.
 	 */
 	public final X509Certificate getCert() {
 		return this.cert;
 	}
 
 	/**
-	 * Establece el certificado
-	 * @param cert
+	 * Establece el certificado.
+	 * @param cert Certificado.
 	 */
 	public final void setCert(final X509Certificate cert) {
 		this.cert = cert;

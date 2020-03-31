@@ -47,7 +47,7 @@ public interface SignatureValidator {
 	 * @param signature Firma electr&oacute;nica a validar.
 	 * @param config Opciones de configuraci&oacute;n adicionales para la operaci&oacute;n.
 	 * @return Resultado de la operaci&oacute;n de actualizaci&oacute;n.
-	 * @throws UpgradeException Cuando ocurre un error durante la actualizaci&oacute;n de la firma.
+	 * @throws VerifyException Cuando ocurre un error durante la validaci&oacute;n de la firma.
 	 */
 	VerifyResult validateSignature(byte[] signature, Properties config) throws VerifyException;
 }
