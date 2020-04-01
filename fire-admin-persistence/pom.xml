@@ -2,14 +2,15 @@
   <modelVersion>4.0.0</modelVersion>
   
   
-  	<parent>
-		<groupId>es.gob.fire</groupId>
-		<artifactId>fire-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>
+  	
 	<artifactId>fire-admin-persistence</artifactId>
 	<name>fire-admin-persistence</name>
 	<packaging>jar</packaging>
+	<parent>
+		<groupId>es.gob.fire</groupId>
+		<artifactId>fire-artifacts</artifactId> 
+		<version>2.4-SNAPSHOT</version> 
+	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -24,6 +25,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<version>${spring.version}</version>
 		</dependency>
 		
 		<!--  Licencia Apache 2.0 -->

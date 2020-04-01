@@ -16,15 +16,16 @@
 		<jdk.version>1.7</jdk.version>
 		
 		<fire.version>2.4-SNAPSHOT</fire.version>
-		<clienteafirma.version>1.7-SNAPSHOT</clienteafirma.version>
+		<clienteafirma.version>1.6.5</clienteafirma.version>
 		<fnmt.version>0.2</fnmt.version>
 		<log-consumer.version>1.2</log-consumer.version>
 		
 		<javax.json-api.version>1.0</javax.json-api.version>
 		<org.glassfish-javax.json.version>1.0.4</org.glassfish-javax.json.version>
 		<junit.version>4.8.2</junit.version>
-		
+		<spring.version>2.0.1.RELEASE</spring.version>
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+		<hibernate.version>5.2.13.Final</hibernate.version>
 	</properties>
 
 	<url>https://administracionelectronica.gob.es/ctt/fire</url>
@@ -66,6 +67,9 @@
 			</activation>
 	
 			<modules>
+				<module>fire-admin-persistence</module>
+				<module>fire-admin-core</module>
+				<module>fire-admin-web</module>
 				<module>clavefirma-test-services</module>
 				<module>fire-admin-jsp</module>
 				<module>fire-client-java</module>
@@ -98,6 +102,22 @@
 
 	<dependencyManagement>
 	  <dependencies>
+	  
+	  <dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-admin-persistence</artifactId>
+		  <version>${fire.version}</version>
+		</dependency> 
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-admin-core</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>  
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-admin-web</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>   
 	  
 	  	<dependency>
 		  <groupId>es.gob.afirma</groupId>
@@ -212,6 +232,152 @@
 			<artifactId>javax.json</artifactId>
 			<version>${org.glassfish-javax.json.version}</version>
 		</dependency>
+		
+		<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<version>2.5</version>
+			</dependency>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.16</version>
+			</dependency>
+			<!-- Spring Boot 2 -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-jpa</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-security</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-thymeleaf</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-rest</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-validation</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.thymeleaf.extras</groupId>
+				<artifactId>thymeleaf-extras-springsecurity4</artifactId>
+				<version>3.0.2.RELEASE</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-tomcat</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<!-- Spring Boot 2 -->
+			<!-- Hibernate 5 -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-infinispan</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<!-- Hibernate 5 -->
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.2</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.apache.commons</groupId>
+			    <artifactId>commons-text</artifactId>
+			    <version>1.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk16</artifactId>
+				<version>1.46</version>
+			</dependency>
+		
+		<!--  Jackson -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.jaxrs</groupId>
+				<artifactId>jackson-jaxrs-json-provider</artifactId>
+				<version>2.9.4</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>2.9.4</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.eclipse</groupId>
+			    <artifactId>yasson</artifactId>
+			    <version>1.0.2</version>
+			</dependency>
+			<dependency>
+			    <groupId>javax.json</groupId>
+			    <artifactId>javax.json-api</artifactId>
+			    <version>1.1.3</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.glassfish</groupId>
+			    <artifactId>javax.json</artifactId>
+			    <version>1.1.3</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>2.0.1.Final</version>
+			</dependency>
+			
+			<!-- Rest -->
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-client</artifactId>
+				<version>3.5.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxrs</artifactId>
+				<version>3.5.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jackson2-provider</artifactId>
+				<version>3.5.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.spec.javax.ws.rs</groupId>
+				<artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+				<version>1.0.0.Final</version>
+			</dependency>
+		
+		
 
 		<dependency>
 		  <groupId>junit</groupId>
@@ -221,6 +387,7 @@
 		</dependency>
 	  </dependencies>
 	</dependencyManagement>
+	
 	
 	<build>
 		<plugins>
@@ -248,7 +415,162 @@
 					<tagNameFormat>${project.name}_@{project.version}</tagNameFormat>
 				</configuration>
 			</plugin>
+		
+	
+	<!-- Definición de los plugins genéricos -->
+		
+			<!-- Plugin para generar la fecha de empaquetado que se incluirá en el 
+				manifest. -->
+<!--
+			<plugin>
+				<groupId>com.keyboardsamurais.maven</groupId>
+				<artifactId>maven-timestamp-plugin</artifactId>
+				<version>1.0</version>
+				<configuration>
+					<propertyName>timestamp</propertyName>
+					<timestampPattern>dd/MM/yyyy HH:mm</timestampPattern>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>clean</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+-->
+			<!-- Plugin para generar las fuentes -->
+<!--			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<skipSource>${plugin.source.skip}</skipSource>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+-->
+			<!-- Plugin para generar el javadoc -->
+<!--
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<skip>${plugin.javadoc.skip}</skip>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.6</version>
+				<configuration>
+					<locales>es,en</locales>
+				</configuration>
+			</plugin>
+-->
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.2,)
+										</versionRange>
+										<goals>
+											<goal>copy</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore/>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
+	
+	<!-- CONFIGURACIÓN REPOSITORIOS MAVEN: JBOSS Y MAVEN CENTRAL -->
+	<repositories>
+		
+		<repository>
+			<id>Maven-Central-Repository</id>
+			<name>Maven Central Repository</name>
+			<url>http://central.maven.org/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</repository>
+		
+	<!--	<repository>
+			<id>jboss-public-repository-group</id>
+			<name>JBoss Public Maven Repository Group</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</repository>-->
+		
+	</repositories>
+	<!-- <pluginRepositories>
+		<pluginRepository>
+			<id>jboss-public-repository-group</id>
+			<name>JBoss Public Maven Repository Group</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories> -->
 
 </project>
