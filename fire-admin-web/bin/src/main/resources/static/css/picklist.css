@@ -1,0 +1,16 @@
+/**
+ * Picklist jquery + bootstrap CSS
+ */
+ 
+ .pickListButtons {
+  padding: 10px;
+  text-align: center;
+}
+
+.pickListButtons button {
+  margin-bottom: 5px;
+}
+
+.pickListSelect {
+  height: 200px !important;
+}

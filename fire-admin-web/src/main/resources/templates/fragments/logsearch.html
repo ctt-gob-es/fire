@@ -1,0 +1,182 @@
+<div class="container-fluid" id="searchLog">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="bgc-white bd bdrs-3 p-20 mB-20">
+				<div class="mon-toolbar">
+					<h4 class="c-grey-900 mB-20 mon-distribution-left">
+						<span th:text="${connectioninfo.serviceName + ': ' + connectioninfo.filename}" />
+					</h4>
+					<div class="mon-panel-close mon-distribution-right">
+						<button type="button" id="close-button" class="btn btn-secondary">Cerrar fichero</button>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+				<h6 class="c-grey-900" th:text="#{log.search.admin.title}"></h6>
+				 <div id="resultLogging" role="alert"><strong id="resultLoggingText"></strong></div>
+				<div class="mon-toolbar">
+					<div class="mon-distribution-left">
+						<ul class="nav nav-tabs">
+						<li class="nav-item">
+					      <a class="nav-link active" data-toggle="tab" href="#lastlines-pane" id="lastlines-tab">&Uacute;ltimas l&iacute;neas</a>
+					    </li>
+					    <li class="nav-item">
+					      <a class="nav-link" data-toggle="tab" href="#filterlogs-pane" id="filterlogs-tab">Filtrar trazas</a>
+					    </li>
+					    <li class="nav-item">
+					      <a class="nav-link" data-toggle="tab" href="#searchtext-pane" id="searchtext-tab">Buscar texto</a>
+					    </li>
+						</ul>
+					</div>
+					<div class="mon-distribution-right">
+						<form class="form-inline">
+							<button type="button" id="download-button" class="btn btn-primary">Descargar fichero</button>
+						</form>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+				
+				<!-- Formulario invisible de parametros -->
+				<form class="hidden-element" th:object="${searchinfoform}">
+					<input type="hidden" id="data-filename" th:field="*{filename}" />
+					<input type="hidden" id="data-charset" th:field="*{charset}" />
+					<input type="hidden" id="data-date" th:field="*{date}" />
+					<input type="hidden" id="data-time" th:field="*{time}" />
+					<input type="hidden" id="data-datetimeformat" th:field="*{dateTimeFormat}" />
+					<input type="hidden" id="data-levels" th:field="*{levels}" />
+				</form>
+				
+				
+				<!-- Tab panes -->
+				<div class="tab-content mon-vertical-padding">
+				
+				  <!-- ULTIMAS LINEAS -->
+				  <div class="tab-pane active" id="lastlines-pane">
+				  	 <div class="row">
+				  	 	<!-- Formulario de busqueda -->
+				  	 	<div class="col-md-3 col-lg-2">
+				  	 		<form>
+				  	 		  <div class="form-group">
+				  	 		  	<input type="hidden" id="lastlines-more" class="form-control" value="false">
+				  	 			<label for="numlines-lastlines">N&uacute;mero de l&iacute;neas:</label>
+				  	 			<select id="numlines-lastlines" name="numlines" class="form-control">
+				  	 				<option value="50">50</option>
+				  	 				<option value="200">200</option>
+				  	 				<option value="500">500</option>
+				  	 			</select>
+				  	 			<br>
+				  	 			<div class="mon-button-panel">
+				  	 				<button type="button" class="button-lastlines btn btn-primary" id="lastlines-button">Consultar</button>
+				  	 				<button type="button" class="btn btn-secondary hidden" id="lastlines-reset-button">Reiniciar</button>
+				  	 			</div>
+				  	 		  </div>
+				  	 		</form>
+				  	 	</div>
+				  	 	<!-- Panel de consulta -->
+				  	 	<div class="col-md-9 col-lg-10">
+				  	 		<textarea cols="50" rows="20" class="form-control mon-log-panel" id="lastlines-result" readonly></textarea>
+				  	 	</div>
+				  	 </div>
+				  </div>
+
+				  <!-- FILTRADO DE LOGS -->
+				  <div class="tab-pane fade" id="filterlogs-pane">
+				  	 <div class="row">
+
+				  	 	<!-- Formulario de busqueda -->
+				  	 	<div class="col-md-3 col-lg-2">
+				  	 		<form>
+				  	 		  <div class="form-group">
+				  	 		  <input type="hidden" id="filterlogs-more" class="form-control" value="false">
+				  	 			<label for="numlines-filterlogs">N&uacute;mero de l&iacute;neas:</label>
+				  	 			<select id="numlines-filterlogs" name="numlines" class="form-control">
+				  	 				<option value="50">50</option>
+				  	 				<option value="200">200</option>
+				  	 				<option value="500">500</option>
+				  	 			</select>
+				  	 			<br>
+				  	 			<!--  Fecha/hora inico de rango -->
+					  	 		<div id="datetimepicker-filterlogs-pane">
+					  	 			<label for="start-datetimepicker-filterlogs">Fecha/hora de inicio:</label>
+									<input type="text" id="start-datetimepicker-filterlogs" name="start-date" class="form-control" style="overflow:hidden" onblur="validate(this);" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4} [0-9]{2}:[0-9]{2}">
+					  	 			<div id="invalid-start-date-filterlogs" class="invalid-feedback">El formato de la fecha no es v&aacute;lido.</div>
+									<br>
+					  	 			<!--  Fecha/hora fin de rango -->
+					  	 			<label for="end-datetimepicker-filterlogs">Fecha/hora de fin:</label>
+						  	 		<input type="text" id="end-datetimepicker-filterlogs" name="end-date" class="form-control" style="overflow:hidden" onblur="validate(this);" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4} [0-9]{2}:[0-9]{2}">
+					  	 			<div id="invalid-end-date-filterlogs" class="invalid-feedback">El formato de la fecha no es v&aacute;lido.</div>
+						  	 		<br>
+					  	 		</div>
+					  	 		<!--  Nivel de log -->
+					  	 		<div id="loglevel-filterlogs-pane">
+					  	 			<label for="loglevel-filterlogs">Nivel m&iacute;nimo de log:</label>
+						  	 		<select id="loglevel-filterlogs" name="log-level" class="form-control"></select>
+					  	 			<br>
+				  	 			</div>
+				  	 			<div class="mon-button-panel">
+				  	 				<button type="button" class="btn btn-primary" id="filterlogs-button">Consultar</button>
+				  	 				<button type="button" class="btn btn-secondary hidden" id="filterlogs-reset-button">Reiniciar</button>
+				  	 			</div>
+				  	 		  </div>
+				  	 		</form>
+				  	 	</div>
+				  	 	
+				  	 	<!-- Panel de consulta -->
+				  	 	<div class="col-md-9 col-lg-10">
+				  	 		<textarea rows="20" class="form-control mon-log-panel" id="filterlogs-result" readonly></textarea>
+				  	 	</div>
+				  	 </div>
+				  </div>
+				  
+				  <!-- BUSQUEDA DE TEXTO -->
+				  <div class="tab-pane fade" id="searchtext-pane">
+				  	 <div class="row">
+
+				  	 	<!-- Formulario de busqueda -->
+				  	 	<div class="col-md-3 col-lg-2">
+				  	 		<form>
+				  	 		  <div class="form-group">
+				  	 		  <input type="hidden" id="searchtext-next" class="form-control" value="false">
+				  	 			<label for="numlines-searchtext">N&uacute;mero de l&iacute;neas:</label>
+				  	 			<select id="numlines-searchtext" name="numlines" class="form-control">
+				  	 				<option value="50">50</option>
+				  	 				<option value="200">200</option>
+				  	 				<option value="500">500</option>
+				  	 			</select>
+				  	 			<br>
+				  	 			<!--  Texto de busqueda -->
+				  	 			<label for="text-searchtext">Texto de b&uacute;squeda:</label>
+					  	 		<input type="text" id="text-searchtext" name="text" class="form-control" style="overflow:hidden" onblur="validate(this);" required="" pattern=".{3,200}"/>
+					  	 		 <div id="invalid-text" class="invalid-feedback">El campo 'Texto' es obligatorio y debe tener entre 3 y 200 caracteres.</div>
+					  	 		<br>
+				  	 			<!--  Fecha/hora inico de rango -->
+				  	 			<div id="datetimepicker-searchtext-pane">
+					  	 			<label for="start-datetimepicker-searchtext">Fecha/hora de inicio:</label>
+					  	 			<input type="text" id="start-datetimepicker-searchtext" name="start-date" class="form-control" style="overflow:hidden" onblur="validate(this);" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4} [0-9]{2}:[0-9]{2}">
+					  	 			<div id="invalid-start-date-searchtext" class="invalid-feedback">El formato de la fecha no es v&aacute;lido.</div>
+					  	 			<br>
+				  	 			</div>
+				  	 			<div class="mon-button-panel">
+				  	 				<button type="button" class="btn btn-primary" id="searchtext-button">Consultar</button>
+				  	 				<button type="button" class="btn btn-primary hidden" id="searchTextMore-button">M&aacute;s</button>
+				  	 				<button type="button" class="btn btn-secondary hidden" id="searchtext-reset-button">Reiniciar</button>
+				  	 					
+				  	 			</div>
+				  	 		</div>
+				  	 	</form>
+				  	 	 	</div>
+				  	 	
+				  	 	<!-- Panel de consulta -->
+				  	 	<div class="col-md-9 col-lg-10">
+				  	 		<pre>
+				  	 			<div class="form-control mon-log-panel-search" id="searchtext-result"></div>
+				  	 		</pre>
+				  	 	</div>
+				  	 </div>
+				  </div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="js/jquery/jquery.datetimepicker.js"></script>
+<script src="js/searchlogs/search.js"></script>

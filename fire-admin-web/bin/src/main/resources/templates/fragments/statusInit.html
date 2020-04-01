@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <!-- head -->
+  <head th:replace="fragments/head"></head>
+  <body class="app">
+  	<script th:replace="fragments/script"></script>
+  	<div th:replace="fragments/loading"></div>
+    
+    <!-- @App Content -->
+    <!-- =================================================== -->
+    <div>
+      <!-- #Left Sidebar ==================== -->
+	<div th:replace="fragments/sidebar"></div>
+
+      <!-- #Main ============================ -->
+      <div class="page-container">
+        <!-- ### $Topbar ### -->
+		<div th:replace="fragments/navbar"></div>
+
+        <!-- ### $App Screen Content ### -->
+        <main class='main-content bgc-grey-100'>
+          <div id='mainContent'>
+            <div id="optionReplacement">
+            	<div class="bgc-white bd bdrs-3 p-20 mB-20">
+					<div class="container-fluid">
+						<input type="button" th:value="#{button.view.refresh}" class="btn btn-primary" onClick="window.location.reload()">
+						<br>
+						
+						<!-- Tabla resumen -->
+						<h4 class="c-grey-900 mB-20" th:text="#{table.summary.title}"></h4>
+							
+							<div class="masonry-sizer col-md-12 border border-light border-3 bg-light">
+								<table data-page-length='50' id="summaryTable" class="display"
+									style="cellspacing: 0; width: 100%;">
+									<thead>
+										<tr>
+											<th th:text="#{table.summary.status}">Status img</th>
+											<th></th>
+											<th th:text="#{table.summary.type}">Type</th>
+											<th th:text="#{table.summary.description}">Description</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="sum : ${summary}">
+											<td th:if="${sum.status eq 2}"><i
+												class="c-red-500 ti-control-record"></i></td>
+											<td th:if="${sum.status eq 1}"><i
+												class="c-yellow-500 ti-control-record"></i></td>
+											<td th:if="${sum.status eq 0}"><i
+												class="c-green-500 ti-control-record"></i></td>
+											<td th:if="${sum.status eq null}" th:text="#{error.spie.connection}" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></td>
+											<td th:text="${sum.status}"></td>
+											<td th:text="${sum.type}"></td>
+											<td th:text="${sum.description}"></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- Fin tabla resumen -->						
+						
+						<!-- Tabla de resultados VIP -->
+						<h4 class="c-grey-900 mB-20" th:text="#{table.status.vip.title}"></h4>
+							<div th:if="${statusVip.error != null}" class="masonry-sizer col-md-12">
+								<div id="errorModalService" class="alert alert-danger" role="alert">
+									<strong th:text=${statusVip.error}></strong>
+								</div>
+							</div>
+							<div th:if="${statusVip.error == null}" class="masonry-sizer col-md-12 border border-light border-3 bg-light">
+								<table data-page-length='50' id="statusVipTable" class="display"
+									style="cellspacing: 0; width: 100%;">
+									<thead>
+										<tr>
+											<th th:text="#{table.status.vip.view}">Status Aux img</th>
+											<th></th>
+											<th th:text="#{table.status.vip.service}">Service</th>
+											<th th:text="#{table.status.vip.averageTime}">Average
+												Time</th>
+											<th th:text="#{table.status.vip.samplingTime}">Sampling
+												Time</th>
+											<th></th>
+											<th th:text="#{table.status.vip.info}">urls</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="stVip : ${statusVip.data}">
+											<td th:if="${stVip.statusAux eq 2}"><i
+												class="c-red-500 ti-control-record"></i></td>
+											<td th:if="${stVip.statusAux eq 1}"><i
+												class="c-yellow-500 ti-control-record"></i></td>
+											<td th:if="${stVip.statusAux eq 0}"><i
+												class="c-green-500 ti-control-record"></i></td>
+											<td th:text="${stVip.statusAux}"></td>
+											<td th:text="${stVip.service}"></td>
+											<td th:text="${stVip.averageTime}"></td>
+											<td th:text="${stVip.samplingTime}"></td>
+											<td th:text="${stVip.partialRequestResult}"></td>
+											<td><i class='c-blue-500 ti-search'> </i></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- Fin tabla VIP -->
+							<!-- Tabla de resultados SPIE -->
+							<h4 class="c-grey-900 mB-20" th:text="#{table.status.spie.title}"></h4>
+							<div th:if="${statusSpie.error != null}" class="masonry-sizer col-md-12"> 
+								<div id="errorModalService" class="alert alert-danger" role="alert">
+									<strong th:text=${statusSpie.error}></strong>
+								</div>
+							</div>
+							<div th:if="${statusSpie.error == null}" class="masonry-sizer col-md-12 border border-light border-3 bg-light">
+								<table data-page-length='50' id="statusSpieTable" class="display"
+									style="cellspacing: 0; width: 100%;">
+									<thead>
+										<tr>
+											<th th:text="#{table.status.spie.view}">Status Aux img</th>
+											<th></th>
+											<th th:text="#{table.status.spie.system}">System</th>
+											<th th:text="#{table.status.spie.node}">Node</th>
+											<th th:text="#{table.status.spie.node.address}">Node address</th>
+											<th th:text="#{table.status.spie.type}">SPIE type</th>
+											<th></th>
+											<th th:text="#{table.status.spie.info}">urls</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="stSpie : ${statusSpie.data}">
+											<td th:if="${stSpie.statusValue eq 2}"><i
+												class="c-red-500 ti-control-record"></i></td>
+											<td th:if="${stSpie.statusValue eq 1}"><i
+												class="c-yellow-500 ti-control-record"></i></td>
+											<td th:if="${stSpie.statusValue eq 0}"><i
+												class="c-green-500 ti-control-record"></i></td>
+											<td th:if="${stSpie.statusValue eq null}"
+												th:text="#{error.spie.connection}"
+												class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></td>
+											<td th:text="${stSpie.statusValue}"></td>
+											<td th:text="${stSpie.system}"></td>
+											<td th:text="${stSpie.nodeName}"></td>
+											<td th:text="${stSpie.nodeAddress}"></td>
+											<td th:text="${stSpie.spieService}"></td>
+											<td th:text="${stSpie.partialRequestResult}"></td>
+											<td th:if="${stSpie.partialRequestResult != null}"><i
+												class='c-blue-500 ti-search'></i></td>
+											<td th:if="${stSpie.partialRequestResult == null}">-</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- Fin tabla SPIE -->
+						</div>
+				</div>
+            </div>
+            <div id="modal"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style type="text/css">
+td.details-control {
+    content: "\e610";
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    content: "\e610";
+}
+</style>
+
+<script th:inline="javascript">
+
+$(document).ready(function() {
+		
+	// Tabla de resumen
+	
+	var tableSummary = $('#summaryTable').DataTable({
+		"pagingType" : "full_numbers",
+		"initComplete" : function(settings, json) {
+			//eliminamos el scroll inferior
+			$('#summaryTable_wrapper .dataTables_scrollBody').css("overflow-x", "hidden");
+			$('#summaryTable_length').addClass("hidden");
+			//$('#statusSpieTable_filter').addClass("hidden");
+			$('#summaryTable_info').addClass("hidden");
+			$('#summaryTable_paginate').addClass("hidden");
+		},
+		"language": {
+	        "url": "js/datatables/i18n/spanish.json",
+	        select: {
+	            rows: {
+	                _: "%d filas seleccionadas",
+	                1: "1 fila seleccionada"
+	            }
+	          }
+	     },
+		"columnDefs" : [ 
+			{
+				"targets" : [ 1 ],
+				"visible" : false,
+				"searchable" : false
+			}
+		],
+		"order" : [ 1, 'desc' ],
+		responsive : {
+			details : {
+				type : 'column',
+				target : -1
+			}
+		}
+
+	});
+	
+	var tableVipInterval = $('#statusVipTable').DataTable({
+		"pagingType" : "full_numbers",
+		"initComplete" : function(settings, json) {
+			//eliminamos el scroll inferior
+			$('#statusVipTable_wrapper .dataTables_scrollBody').css("overflow-x", "hidden");
+			$('#statusVipTable_length').addClass("hidden");
+			//$('#statusVipTable_filter').addClass("hidden");
+			$('#statusVipTable_info').addClass("hidden");
+			$('#statusVipTable_paginate').addClass("hidden");
+		},
+		"language": {
+	        "url": "js/datatables/i18n/spanish.json",
+	        select: {
+	            rows: {
+	                _: "%d filas seleccionadas",
+	                1: "1 fila seleccionada"
+	            }
+	          }
+	        },
+		"columnDefs" : [ 
+			{
+				"targets" : [ 1 ],
+				"visible" : false,
+				"searchable" : false
+			},
+			{
+				"targets" : [ 5 ],
+				"visible" : false,
+				"searchable" : false
+			},
+			{
+				"targets" : [ 6 ],
+                "className": 'details-control',
+                "orderable": false,
+				"visible" : true,
+                "data": "H",
+                "defaultContent": ''
+            }
+		],
+		"order" : [ 1, 'desc' ],
+		responsive : {
+			details : {
+				type : 'column',
+				target : -1
+			}
+		}
+
+	});
+	
+	// Add event listener for opening and closing details
+	$('#statusVipTable tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = tableVipInterval.row( tr );
+ 
+        if ( row.child.isShown() ) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+        }
+        else {
+            // Open this row
+            row.child( formatVip(row.data()) ).show();
+            tr.addClass('shown');
+        }
+    });
+	
+	var tableSpieInterval = $('#statusSpieTable').DataTable({
+		"pagingType" : "full_numbers",
+		"initComplete" : function(settings, json) {
+			//eliminamos el scroll inferior
+			$('#statusSpieTable_wrapper .dataTables_scrollBody').css("overflow-x", "hidden");
+			$('#statusSpieTable_length').addClass("hidden");
+			//$('#statusSpieTable_filter').addClass("hidden");
+			$('#statusSpieTable_info').addClass("hidden");
+			$('#statusSpieTable_paginate').addClass("hidden");
+		},
+		"language": {
+	        "url": "js/datatables/i18n/spanish.json",
+	        select: {
+	            rows: {
+	                _: "%d filas seleccionadas",
+	                1: "1 fila seleccionada"
+	            }
+	          }
+	        },
+		"columnDefs" : [ 
+			{
+				"targets" : [ 1 ],
+				"visible" : false,
+				"searchable" : false
+			},
+			{
+				"targets" : [ 6 ],
+				"visible" : false,
+				"searchable" : false
+			},
+			{
+				"targets" : [ 7 ],
+				"createdCell": function (td, cellData, rowData, row, col) {
+					
+                    if ( cellData != '-' ) {
+                      $(td).addClass('details-control')
+                    }
+                 },
+	            "orderable": false,
+				"visible" : true,
+	            "data": "H",
+	            "defaultContent": ''
+	        }
+		],
+		"order" : [ 1, 'desc' ],
+		responsive : {
+			details : {
+				type : 'column',
+				target : -1
+			}
+		}
+
+	});
+	
+	// Add event listener for opening and closing details
+	$('#statusSpieTable tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = tableSpieInterval.row( tr );
+ 
+        if ( row.child.isShown() ) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+        }
+        else {
+            // Open this row
+            row.child( formatSpie(row.data()) ).show();
+            tr.addClass('shown');
+        }
+    });
+		
+	var actionStatus = /*[[@{/status}]]*/;
+	setInterval(function(){
+		if (tableSummary.table.length > 0 && tableVipInterval.table.length > 0 && tableSpieInterval.table.length > 0) {
+			loadIntoAjax(null, actionStatus, 'optionReplacement', 'GET', null, true);
+		}
+		
+	}, 15000);
+});
+
+function formatVip ( d ) {
+    var result = '<table id="statusVipTable" class="display" style="cellspacing: 0; width: 100%; background-color: lightgrey;">';
+	
+    $.each( d, function( key, value ) {
+		if(key === '5'){
+			if (value == "" || value == "{}"){
+				result += '<thead></thead>';
+				result += '<tbody>';
+				result += '<tr><td>'+ [[#{message.view.noInfo}]] +'</td></tr>';
+			}else{
+				result += '<thead><tr><th>'+ [[#{table.status.vip.infoFile}]] +'</th><th>'+ [[#{table.status.vip.averageTime}]] +'</th></tr></thead>';
+				result += '<tbody>';
+				value = $.trim(value);
+				value = value.replace("{", "");
+				value = value.replace("}", "");
+				var files = value.split(",");
+				for(var i=0; i<files.length;i++){
+					var filesAux = files[i].split("=");
+					var pos = filesAux[0].search('grupo');
+					if(pos >= 0){
+						var filName = filesAux[0].substr(pos);
+					}
+					result += '<tr><td>'+filName+'</td><td>'+filesAux[1]+'</td></tr>';
+				}
+			}
+		}
+	});
+	result += '</tbody>';
+	result += '</table>';
+    
+    return result;
+}
+var spieAvgDetails = /*[[${spieAvgDetails}]]*/ [];
+function formatSpie ( d ) {
+    var result = '<table id="statusSpieTable" class="display" style="cellspacing: 0; width: 100%; background-color: lightgrey;">';
+	hide();
+    $.each( d, function( key, value ) {
+		if(key === '6'){
+			if (value == "" || value == "{}"){
+				result += '<thead></thead>';
+				result += '<tbody>';
+				result += '<tr><td>'+ [[#{message.view.noInfo}]] +'</td></tr>';
+			}else{
+				result += '<thead><tr><th>'+ 
+							[[#{table.status.spie.avg.serviceName}]] +
+							'</th><th>'+
+							[[#{table.status.spie.avg.time}]] +
+							'</th><th>'+
+							[[#{table.status.spie.avg.maxtime}]] +
+							'</th><th>'+
+							[[#{table.status.spie.avg.nabove}]] +	
+							'</th><th>'+
+							[[#{table.status.spie.avg.ntotal}]] +
+							'</th></tr></thead>';
+				result += '<tbody>';
+				for(var i=0; i<spieAvgDetails.length;i++){
+					result += '<tr><td>'+spieAvgDetails[i].serviceName+'</td><td>'+spieAvgDetails[i].avgTime+'</td><td>'+spieAvgDetails[i].maxTime+'</td><td>'+spieAvgDetails[i].numTransAboveMax+'</td><td>'+spieAvgDetails[i].totalNumTrans+'</td></tr>';
+				}
+			}
+		}
+	});
+	result += '</tbody>';
+	result += '</table>';
+    
+    return result;
+}
+
+
+
+</script>

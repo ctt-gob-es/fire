@@ -1,0 +1,22 @@
+<!-- capa a mostrar cuando se va a recargar la página -->
+<div class="page-loading-layer">
+	<div class="page-loading">
+		<!--Cargando página-->
+	</div>
+</div>
+
+<!-- capa a mostrar en fragmentos en recarga (el div superior con id no se muestra, sólo el contenido) -->
+<div id="fragment-loading-layer-parent">
+	<div id="fragment-loading-layer" class="fragment-loading-layer">
+		<div class="fragment-loading">
+			<!--Cargando fragmento...-->
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	/* capa cargando al cambiar de pantalla, con un retardo (para evitar que aparezca en transiciones rápidas) */
+	$(window).on("unload", function(e) {
+		$(".page-loading-layer").show("fade", 500);
+	});
+</script>

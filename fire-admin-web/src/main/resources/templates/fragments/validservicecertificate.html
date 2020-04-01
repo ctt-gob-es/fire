@@ -1,0 +1,265 @@
+<div class="row gap-20 masonry pos-r">
+	<div class="masonry-sizer col-md-12"></div>
+	<div class="masonry-item col-md-12">
+		<div class="bgc-white p-20 bd">
+			<h6 class="c-grey-900" th:text="#{validService.admin.title}"></h6>
+			<div class="mT-30">
+				<form name="altEditor-form" role="form" id="validServiceForm" th:object="${validServiceForm}" th:action="@{/savevalidservice}" method="post">
+									
+					<div id="resultValidService" role="alert"/>
+									
+					<input type='hidden' class='primarykey' id="idValidService" name="idValidService" th:field="*{idValidService}">
+					<input type='hidden' class='primarykey' id="valueIsSecure" name="valueIsSecure" th:field="*{isSecure}">
+					<input type='hidden' class='primarykey' id="valueIsEnableValidationJob" name="valueIsEnableValidationJob" th:field="*{isEnableValidationJob}">
+					
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							
+							<label for="application" class="col-form-label" th:text="#{form.validservice.application}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+									var messageApplication = /*[[#{form.validservice.application.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageApplication);" type="text" id="application" th:field="*{application}" style="overflow:hidden" class="form-control" required pattern=".{3,100}" />
+							<div id="invalid-application" class="invalid-feedback" ></div>
+						</div>
+						<div class="form-group col-md-6">
+							<label for="host" class="col-form-label" th:text="#{form.validservice.host}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+									var messageHost = /*[[#{form.validservice.host.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageHost);" type="text" id="host" th:field="*{host}" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<div id="invalid-host" class="invalid-feedback" ></div>
+						</div>
+						
+					</div>
+					
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<div class="checkbox checkbox-circle checkbox-info peers ai-c cb-center">
+								<input type="checkbox" id="isSecure" name="isSecure" class="peer">
+									<label for="isSecure" class="peers peer-greed js-sb ai-c">
+										<span class="peer peer-greed" th:text="#{form.validservice.issecure}"></span>
+									</label>
+							</div>
+						</div>	
+						<div class="form-group col-md-4">
+							<label for="port" class="col-form-label" th:text="#{form.validservice.port}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+									var messagePort = /*[[#{form.validservice.port.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messagePort);" type="text" id="port" th:field="*{port}" style="overflow:hidden" class="form-control" required pattern=".{1,5}"/>
+							<div id="invalid-port" class="invalid-feedback" ></div>
+						</div>
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group col-md-6">
+						
+						<label for="authenticationType" class="col-form-label" th:text="#{form.validservice.authenticationType}"></label>
+						
+						<select id="platform" class="form-control" th:field="*{authenticationType}" required>
+								<option selected="selected" value="-1" th:text="#{form.validservice.select.authenticationType}"></option>
+								<option th:each="at: ${authenticationTypes}" th:value="${at.idAuthenticationType}" th:text="${at.tokenName}"></option>
+						</select>
+						
+					</div>
+					
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label for="user" class="col-form-label" th:text="#{form.validservice.user}"></label>
+								<script th:inline="javascript">
+									/*<![CDATA[*/
+										var messageUser = /*[[#{form.validservice.user.pattern}]]*/ 'default';
+									/*]]>*/
+								</script>
+								<input readonly onblur="validate(this,messageUser);" type="text" id="user" th:field="*{user}" style="overflow:hidden" class="form-control"  pattern=".{1,100}"/>
+								<div id="invalid-user" class="invalid-feedback" ></div>
+						</div>
+						
+						<div class="form-group col-md-6">
+							<label for="pass" class="col-form-label" th:text="#{form.validservice.pass}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+									var messagePass = /*[[#{form.validservice.pass.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input readonly onblur="validate(this,messagePass);" type="password" id="pass" th:field="*{pass}" style="overflow:hidden" class="form-control" pattern=".{1,255}"/>
+							<div id="invalid-pass" class="invalid-feedback" ></div>
+						</div>
+						
+						<div style="clear:both;"/>
+						
+						<div class="form-group col-md-6">
+						
+							<label for="validServCertificateAuth" class="col-form-label" th:text="#{form.validservice.certificate}"></label>
+							
+							<select id="validServCertificateAuth" class="form-control" th:field="*{validServiceCertificate}">
+								<option selected="selected" value="-1" th:text="#{form.validservice.selectcert}"></option>
+								<option th:each="ac: ${validservicecerts}" th:value="${ac.idSystemCertificate}" th:text="${ac.alias}"></option>
+							</select>
+							<div style="clear:both;"/>	
+						</div>
+						
+						<div class="form-row">
+						<div class="form-group col-md-6">
+							<div class="checkbox checkbox-circle checkbox-info peers ai-c cb-center">
+								<input type="checkbox" id="isEnableValidationJob" name="isEnableValidationJob" class="peer">
+									<label for="isEnableValidationJob" class="peers peer-greed js-sb ai-c">
+										<span class="peer peer-greed" th:text="#{form.validservice.isenablevalidationjob}"></span>
+									</label>
+							</div>
+						</div>	
+						<div class="form-group col-md-6">
+							<label for="cronExpression" class="col-form-label" th:text="#{form.validservice.cronexpression}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+									var messageCron = /*[[#{form.validservice.cron.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input readonly onblur="validate(this,messageCron);" type="text" id="cronExpression" th:field="*{cronExpression}" style="overflow:hidden" class="form-control"/>
+							<div id="invalid-cronExpression" class="invalid-feedback" ></div>
+						
+						</div>
+					</div>
+						
+					</div>
+
+					<button type="submit" id="validServiceBtn" class="btn btn-primary" th:text="#{button.save}"></button>
+
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script th:inline="javascript">
+
+	$(document).ready(function () {
+		
+		// Inicialización con valor correcto del checkbox
+		if ($("#valueIsSecure").val() == 'true') {
+			$("#isSecure").prop('checked', true);
+			$("#isSecure").attr('value', true);
+        } else {
+        	$("#isSecure").prop('checked', false);
+        	$("#isSecure").attr('value', false);
+        }
+		
+		if ($("#valueIsEnableValidationJob").val() == 'true') {
+			$("#isEnableValidationJob").prop('checked', true);
+			$("#isEnableValidationJob").attr('value', true);
+			$('#cronExpression').removeAttr("readonly");
+			$('#cronExpression').attr('required', true);
+        } else {
+        	$("#isEnableValidationJob").prop('checked', false);
+        	$("#isEnableValidationJob").attr('value', false);
+        	$('#cronExpression').attr('readonly', true);
+	        $('#cronExpression').val('');
+			$('#cronExpression').removeAttr('required');
+        }
+		
+		if ($("#platform").val() == 2) {
+        	$('#user').attr('readonly', false);
+        	$('#pass').attr('readonly', false);
+			$('#user').attr('required', true);
+			$('#pass').attr('required', true);
+        }
+        else {
+        	$('#user').attr('readonly', true);
+        	$('#pass').attr('readonly', true);
+			$('#user').removeAttr('required');
+			$('#pass').removeAttr('required');
+			$('#user').val('');
+        	$('#pass').val('');
+        }
+			
+	    $("#isSecure").change(function () {
+	        if ($(this).is(":checked")) {
+	        	$(this).attr('value', 'true');
+	        	$('#valueIsSecure').attr('value', 'true');
+	        }
+	        else {
+	        	$(this).attr('value', 'false');
+	        	$('#valueIsSecure').attr('value', 'false');
+	        }
+	    });
+	    
+	    $("#isEnableValidationJob").change(function () {
+	        if ($(this).is(":checked")) {
+	        	$(this).attr('value', 'true');
+	        	$('#valueIsEnableValidationJob').attr('value', 'true');
+	            $('#cronExpression').removeAttr("readonly");
+				$('#cronExpression').attr('required', true);
+	        }
+	        else {
+	        	$(this).attr('value', 'false');
+	        	$('#valueIsEnableValidationJob').attr('value', 'false');
+	            $('#cronExpression').attr('readonly', true);
+	            $('#cronExpression').val('');
+				$('#cronExpression').removeAttr('required');
+	        }
+	    });
+	    
+	    $("#platform").change(function () {
+	        if ($("#platform").val() == 2) {
+	        	$('#user').attr('readonly', false);
+	        	$('#pass').attr('readonly', false);
+				$('#user').attr('required', true);
+				$('#pass').attr('required', true);
+	        }
+	        else {
+	        	$('#user').attr('readonly', true);
+	        	$('#pass').attr('readonly', true);
+				$('#user').removeAttr('required');
+				$('#pass').removeAttr('required');
+				$('#user').val('');
+	        	$('#pass').val('');
+	        }
+	    }); 
+	});
+	
+	//$( "#validServiceBtn" ).click(function( event ) {
+	$("#validServiceForm").on("submit", function (event) {
+		  event.preventDefault();
+		  var formData = JSON.stringify($("#validServiceForm").serializeJSON());
+		  var url = /*[[@{/savevalidservice}]]*/;
+		  $('#resultValidServiceText').remove();
+		  loading();
+		  
+		  $.ajax({
+			  type: "POST",
+			  url: url,
+			  data: formData,
+			  success: function(data) {
+				hide();
+				$('#resultValidService').addClass( "alert alert-success" );
+				$('#resultValidService').append('<strong id="resultValidServiceText">' + [[#{validService.admin.ok.save}]] + '</strong>');
+			  },
+			  error:function(xhr,status,error) {
+				var responseText = jQuery.parseJSON(xhr.responseText);
+              	var messageException = responseText.message;
+              	var messageError = "";
+              	if (messageException.includes("ConstraintViolationException")) {
+            		messageError = [[#{validService.admin.error.oneTypeAccess}]];
+            	} else if (messageException.includes("NoCertForAuthentication")) 
+            		messageError = [[#{validService.admin.error.oneCert}]];
+              	else {
+            		messageError = [[#{validService.admin.error.save}]];
+            	}
+				  hide();
+              	$('#resultValidService').addClass( "alert alert-danger" );
+              	var divMessageError = '<strong id="resultValidServiceText">' + messageError + '</strong>';
+              	$('#resultValidService').append(divMessageError);
+              },
+			  dataType: "json",
+			  contentType : "application/json"
+			});
+		});
+
+</script>

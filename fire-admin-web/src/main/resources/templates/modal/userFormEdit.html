@@ -1,0 +1,113 @@
+<div class="modal" tabindex="-1" role="dialog" id="modalEdit">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Editar registro</h4>
+				<button type="button" class="close" onclick="closeButton('modalEdit')" aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form name="altEditor-form" role="form" id="userFormEdit" th:object="${userformEdit}" th:action="@{/menueditsave}" method="post">
+					<input type='hidden' class='primarykey' id="idUserMonitorizaEdit" th:field="*{idUserMonitorizaEdit}">
+					
+					<div class="form-group">
+						
+							<label for="nameEdit" class="col-form-label" th:text="#{form.user.name}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
+							<div id="invalid-name" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group">
+						
+							<label for="surnamesEdit" class="col-form-label" th:text="#{form.user.surnames}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<div id="invalid-surnames" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group">
+						
+							<label for="usernameEdit" class="col-form-label" th:text="#{form.user.login}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageLogin = /*[[#{form.user.login.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageLogin);" type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" class="form-control" required pattern=".{5,30}"/>
+							<div id="invalid-login" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group">
+						
+							<label for="emailEdit" class="col-form-label" th:text="#{form.user.email}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" style="overflow:hidden" class="form-control" required/>
+							<div id="invalid-email" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" onclick="closeButton('modalEdit')">Cerrar</button>
+				<button type="submit" id="editBtnModal" class="btn btn-primary">Guardar cambios</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script th:inline="javascript">
+	$( "#editBtnModal" ).click(function( event ) {
+		  event.preventDefault();
+			
+		  var formData = JSON.stringify($("#userFormEdit").serializeJSON());
+		  var url = /*[[@{/menueditsave}]]*/;
+		  
+		  loading();
+		  
+		  $.ajax({
+			  type: "POST",
+			  url: url,
+			  data: formData,
+			  success: function(data){
+				hide();
+				
+				if ($('#errorModalEdit').length > 0){
+					$('#errorModalEdit').remove();
+				}
+				
+				$('#modalEdit').modal('hide');
+				$('#modalEdit').remove();
+				
+			  },
+			  error:function(){
+				  hide();
+				  if (!$('#errorModalEdit').length > 0){
+				  	$('#userFormEdit').append('<div id="errorModalEdit" class="alert alert-danger" role="alert"><strong>Error inesperado, int\u00E9ntelo mas tarde!</strong></div>');
+				  }
+			  },
+			  dataType: "json",
+			  contentType : "application/json"
+		});
+	});
+</script>

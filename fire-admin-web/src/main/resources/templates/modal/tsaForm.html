@@ -1,0 +1,196 @@
+<form name="altEditor-form" role="form" id="tsaForm" th:object="${tsaform}" th:action="@{/savetsa}" method="post">
+
+    <input type='hidden' class='primarykey' id="idPlatform" th:field="*{idPlatform}">
+
+    <div class="form-group">
+
+        <label for="name" class="col-form-label" th:text="#{form.platform.tsa.name}"></label>
+        <script th:inline="javascript">
+				/*<![CDATA[*/
+				    var messageName = /*[[#{form.platform.name.pattern}]]*/ 'default';
+				/*]]>*/
+
+
+        </script>
+        <input onblur="validate(this,messageName);" type="text" id="name" th:field="*{name}" style="overflow:hidden"
+               class="form-control" required pattern=".{3,30}"/>
+        <div id="invalid-name" class="invalid-feedback"></div>
+
+        <div style="clear:both;"/>
+    </div>
+
+    <div class="form-group">
+
+        <label for="host" class="col-form-label" th:text="#{form.platform.tsa.host}"></label>
+        <script th:inline="javascript">
+				/*<![CDATA[*/
+				    var messageHost = /*[[#{form.platform.host.pattern}]]*/ 'default';
+				/*]]>*/
+
+
+        </script>
+        <input onblur="validate(this,messageHost);" type="text" id="host" th:field="*{host}" style="overflow:hidden"
+               class="form-control" required pattern=".{3,30}"/>
+        <div id="invalid-host" class="invalid-feedback"></div>
+
+        <div style="clear:both;"/>
+    </div>
+
+    <div class="form-group">
+
+        <label for="port" class="col-form-label" th:text="#{form.platform.tsa.port}"></label>
+        <script th:inline="javascript">
+				/*<![CDATA[*/
+				    var messagePort = /*[[#{form.platform.port.pattern}]]*/ 'default';
+				/*]]>*/
+
+
+        </script>
+        <input onblur="validate(this,messagePort);" type="text" id="port" th:field="*{port}" style="overflow:hidden"
+               class="form-control" max="5"/>
+        <div id="invalid-port" class="invalid-feedback"></div>
+
+        <div style="clear:both;"/>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <div class="checkbox checkbox-circle checkbox-info peers ai-c cb-center">
+                <input type="checkbox" id="isSecure" th:checked="${tsaform.isSecure}" class="peer">
+                <label for="isSecure" class="peers peer-greed js-sb ai-c">
+                    <span class="peer peer-greed" th:text="#{form.platform.afirma.issecure}"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+
+        <label for="servicecontext" class="col-form-label" th:text="#{form.platform.tsa.servicecontext}"></label>
+        <input onblur="validateSOAP();" type="text" id="serviceContext" th:field="*{serviceContext}"
+               style="overflow:hidden" class="form-control"/>
+        <div id="invalid-servicecontext" class="invalid-modal"></div>
+
+        <div style="clear:both;"/>
+    </div>
+
+    <div class="form-group">
+
+        <label for="rfc3161context" class="col-form-label" th:text="#{form.platform.tsa.rfc3161context}"></label>
+        <input onblur="validateRFC3161();" type="text" id="rfc3161Context" th:field="*{rfc3161Context}"
+               style="overflow:hidden" class="form-control"/>
+        <div id="invalid-rfc3161service" class="invalid-modal"></div>
+
+        <div style="clear:both;"/>
+    </div>
+
+    <div class="form-group">
+
+        <label for="rfc3161port" class="col-form-label" th:text="#{form.platform.tsa.rfc3161port}"></label>
+        <input type="text" onblur="validate(this,messagePort);" id="rfc3161Port" th:field="*{rfc3161Port}"
+               style="overflow:hidden" class="form-control" pattern="[0-9]{1,5}"/>
+        <div id="invalid-rfc3161service" class="invalid-modal"></div>
+
+        <div style="clear:both;"/>
+    </div>
+
+    <div class="form-group">
+        <div class="checkbox checkbox-circle checkbox-info peers ai-c cb-center">
+            <input type="checkbox" id="useRfc3161Auth" th:checked="${tsaform.useRfc3161Auth}" class="peer"/>
+            <label for="useRfc3161Auth" class="peers peer-greed js-sb ai-c">
+                <span class="peer peer-greed" th:text="#{form.platform.tsa.useRfc3161Auth}"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+
+        <label for="rfc3161Certificate" class="col-form-label" th:text="#{form.platform.tsa.rfc3161authcert}"></label>
+        <select id="rfc3161Certificate" class="form-control" th:field="*{rfc3161Certificate}">
+            <option selected="selected" value="-1" th:text="#{form.platform.tsa.selectcert}"></option>
+            <option th:each="ac: ${authcerts}" th:value="${ac.idSystemCertificate}" th:text="${ac.alias}"></option>
+        </select>
+
+        <div style="clear:both;"/>
+    </div>
+
+</form>
+
+<script th:inline="javascript">
+
+	$(document).ready(function () {
+		
+		// Inicialización con valor correcto del checkbox isSecure
+		if ($("#isSecure").is(":checked")) {
+            $(this).attr('value', 'true');
+	    } else {
+	    	$("#isSecure").attr('value', 'false');
+	    }
+			
+	    $("#isSecure").change(function () {
+	        if ($(this).is(":checked")) {
+	        	$(this).attr('value', 'true');
+	        }
+	        else {
+	        	$(this).attr('value', 'false');
+	        }
+	    });
+	    
+	    
+	    var selectCertMsg = /*[[#{form.platform.tsa.selectcert}]]*/;
+	    
+	 // Inicialización con valor correcto del checkbox useRfc3161Auth
+		if ($("#useRfc3161Auth").is(":checked")) {
+			//$('#rfc3161Certificate').attr('disabled', false);
+			$("#useRfc3161Auth").val('true');
+	    	$('#rfc3161Certificate').attr('required', true);
+	    } else {
+	    	$("#useRfc3161Auth").attr('value', 'false');
+	    	$('#rfc3161Certificate').val(-1);
+			$('#rfc3161Certificate').attr('disabled', true);
+	    	$('#rfc3161Certificate').attr('required', false);
+	    }
+			
+	    $("#useRfc3161Auth").change(function () {
+	        if ($(this).is(":checked")) {
+	        	$('#rfc3161Certificate').attr("disabled", false);
+	        	$(this).attr('value', 'true');
+	            $('#rfc3161Certificate').val(-1);
+				$('#rfc3161Certificate').attr('required', true);
+	        }
+	        else {
+	        	$(this).attr('value', 'false');
+	        	$('#rfc3161Certificate').attr('disabled', true);
+	        	$('#rfc3161Certificate').val(-1);
+				$('#rfc3161Certificate').attr('required', false);
+	        }
+	    });
+	});
+	
+	function validateSOAP(){
+		
+		var messageSOAP = /*[[#{form.platform.servicecontext.pattern}]]*/ 'default';
+		if ($('#serviceContext').val() == '' || ($('#serviceContext').val().length > 50 || $('#serviceContext').val().length < 7)){
+			$('#invalid-servicecontext').html(messageSOAP);
+			$('#invalid-servicecontext').addClass("invalid-modal");
+		}else{
+			$('#invalid-servicecontext').html('');
+			$('#invalid-servicecontext').removeClass("invalid-modal");
+		}
+	}
+	
+	function validateRFC3161(){
+		
+		var messageRFC3161 = /*[[#{form.platform.rfc3161context.pattern}]]*/ 'default';
+		if ($('#rfc3161Context').val() == '' || ($('#rfc3161Context').val().length > 50 || $('#rfc3161Context').val().length < 7)){
+			$('#invalid-rfc3161Context').html(messageRFC3161);
+			$('#invalid-rfc3161Context').addClass("invalid-modal");
+		}else{
+			$('#invalid-rfc3161Context').html('');
+			$('#invalid-rfc3161Context').removeClass("invalid-modal");
+		}
+	}
+
+
+
+</script>

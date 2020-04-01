@@ -1,0 +1,122 @@
+<form name="altEditor-form" role="form" id="afirmaForm" th:object="${afirmaform}" th:action="@{/saveafirma}" method="post">
+					
+	<input type='hidden' class='primarykey' id="idPlatform" th:field="*{idPlatform}">
+	
+	<div class="form-group">
+		
+			<label for="name" class="col-form-label" th:text="#{form.platform.afirma.name}"></label>
+			<script th:inline="javascript">
+				/*<![CDATA[*/
+				    var messageName = /*[[#{form.platform.name.pattern}]]*/ 'default';
+				/*]]>*/
+			</script>
+			<input onblur="validate(this,messageName);" type="text" id="name" th:field="*{name}" style="overflow:hidden" class="form-control" required pattern=".{3,30}" />
+			<div id="invalid-name" class="invalid-feedback" ></div>
+		
+		<div style="clear:both;"/>
+	</div>
+	
+	<div class="form-group">
+		
+			<label for="host" class="col-form-label" th:text="#{form.platform.afirma.host}"></label>
+			<script th:inline="javascript">
+				/*<![CDATA[*/
+				    var messageHost = /*[[#{form.platform.host.pattern}]]*/ 'default';
+				/*]]>*/
+			</script>
+			<input onblur="validate(this,messageHost);" type="text" id="host" th:field="*{host}" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+			<div id="invalid-host" class="invalid-feedback" ></div>
+		
+		<div style="clear:both;"/>
+	</div>
+	
+	<div class="form-group">
+		
+			<label for="port" class="col-form-label" th:text="#{form.platform.afirma.port}"></label>
+			<script th:inline="javascript">
+				/*<![CDATA[*/
+				    var messagePort = /*[[#{form.platform.port.pattern}]]*/ 'default';
+				/*]]>*/
+			</script>
+			<input onblur="validate(this,messagePort);" type="text" id="port" th:field="*{port}" style="overflow:hidden" class="form-control" max="5"/>
+			<div id="invalid-port" class="invalid-feedback" ></div>
+		
+		<div style="clear:both;"/>
+	</div>
+	
+	<div class="form-row">
+		<div class="form-group col-md-12">
+			<div class="checkbox checkbox-circle checkbox-info peers ai-c cb-center">
+				<input type="checkbox" id="isSecure" th:checked="${afirmaform.isSecure}" class="peer">
+					<label for="isSecure" class="peers peer-greed js-sb ai-c">
+						<span class="peer peer-greed" th:text="#{form.platform.afirma.issecure}"></span>
+					</label>
+			</div>
+		</div>
+	</div>
+	
+	<div class="form-group">
+		
+			<label for="servicecontext" class="col-form-label" th:text="#{form.platform.afirma.servicecontext}"></label>
+			<input onblur="validateSOAP();" type="text" id="serviceContext" th:field="*{serviceContext}" style="overflow:hidden" class="form-control" />
+			<div id="invalid-servicecontext" class="invalid-modal" ></div>
+		
+		<div style="clear:both;"/>
+	</div>
+	
+	<div class="form-group">
+		
+			<label for="ocspcontext" class="col-form-label" th:text="#{form.platform.afirma.ocspcontext}"></label>
+			<input onblur="validateOCSP();" type="text" id="ocspContext" th:field="*{ocspContext}" style="overflow:hidden" class="form-control" />
+			<div id="invalid-ocspservice" class="invalid-modal" ></div>
+		
+		<div style="clear:both;"/>
+	</div>
+
+</form>
+
+<script th:inline="javascript">
+
+	$(document).ready(function () {
+
+		// Inicialización con valor correcto del checkbox isSecure
+		if ($("#isSecure").is(":checked")) {
+	    	$("#isSecure").attr('value', 'true');
+	    } else {
+	    	$("#isSecure").attr('value', 'false');
+	    }
+
+	    $("#isSecure").change(function () {
+	        if ($(this).is(":checked")) {
+	        	$(this).attr('value', 'true');
+	        }else {
+	        	$(this).attr('value', 'false');
+	        }
+	    });
+   });
+
+	function validateSOAP(){
+		
+		var messageSOAP = /*[[#{form.platform.servicecontext.pattern}]]*/ 'default';
+		if ($('#serviceContext').val() == '' || ($('#serviceContext').val().length > 50 || $('#serviceContext').val().length < 7)){
+			$('#invalid-servicecontext').html(messageSOAP);
+			$('#invalid-servicecontext').addClass("invalid-modal");
+		}else{
+			$('#invalid-servicecontext').html('');
+			$('#invalid-servicecontext').removeClass("invalid-modal");
+		}
+	}
+	
+	function validateOCSP(){
+		
+		var messageOCSP = /*[[#{form.platform.ocspContext.pattern}]]*/ 'default';
+		if ($('#ocspContext').val() == '' || ($('#ocspContext').val().length > 50 || $('#ocspContext').val().length < 7)){
+			$('#invalid-ocspservice').html(messageOCSP);
+			$('#invalid-ocspservice').addClass("invalid-modal");
+		}else{
+			$('#invalid-ocspservice').html('');
+			$('#invalid-ocspservice').removeClass("invalid-modal");
+		}
+	}
+
+</script>

@@ -1,0 +1,53 @@
+<form name="altEditor-form" role="form" id="sslForm" th:object="${sslform}" th:action="@{/savessl}" method="post" enctype="multipart/form-data">
+					
+			<input type='hidden' class='primarykey' id="idSystemCertificate" th:field="*{idSystemCertificate}">
+									
+			<div class="form-group">
+				
+					<label for="alias" class="col-form-label" th:text="#{form.ssl.alias}"></label>
+					<script th:inline="javascript">
+						/*<![CDATA[*/
+						    var messageName = /*[[#{form.valid.keystore.alias.pattern}]]*/ 'default';
+						/*]]>*/
+					</script>
+					<input onblur="validate(this,messageName);" type="text" id="alias" th:field="*{alias}" style="overflow:hidden" class="form-control" required pattern=".{3,50}" />
+					<div id="invalid-alias" class="invalid-feedback"></div>
+				
+				<div style="clear:both;"/>
+			</div>
+			
+			<div class="form-group">
+			
+				<div class="custom-file" id="customFile" lang="es">
+						<label for="file" th:text="#{form.service.file}"></label> 
+						<input type="file" class="custom-file-input" id="file" th:field="*{file}" aria-describedby="fileHelp">
+						<label class="custom-file-label" for="file" th:text="#{form.ssl.file.choose}"></label>
+				</div>
+				<div style="clear:both;"/>
+			</div>
+							
+</form>
+<script>
+$("input[type=file]").change(function () {
+
+  var fieldVal = $(this).val();
+
+  // Change the node's value by removing the fake path (Chrome)
+  fieldVal = fieldVal.replace("C:\\fakepath\\", "");
+
+  if (fieldVal != undefined || fieldVal != "") {
+	    $(this).next(".custom-file-label").attr('data-content', fieldVal);
+	    $(this).next(".custom-file-label").text(fieldVal);
+	  }
+
+});
+
+$(function(){
+    $('#sslForm').find('input,select').keydown(function(event){
+        if ( event.keyCode == 13 ){
+            event.preventDefault();
+        }
+    });
+});
+
+</script>

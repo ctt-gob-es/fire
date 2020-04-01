@@ -1,0 +1,156 @@
+      <div class="sidebar">
+        <div class="sidebar-inner">
+          <!-- ### $Sidebar Header ### -->
+          <div class="sidebar-logo">
+            <div class="peers ai-c fxw-nw">
+              <div class="peer peer-greed">
+                <a class="sidebar-link td-n" th:href="@{/inicio}">
+                  <div id="aStatus" class="peers ai-c fxw-nw">
+                    <div class="peer">
+                      <div class="logo">
+                         <img class="fire-admin-front-img3" th:src="@{images/Logo_FIRe_02.jpg}"
+						alt="FIRe"   sizes="(min-width: 600px) 200px, 50vw"/>
+                      </div>
+                    </div>
+                    <div class="peer peer-greed">
+                      <h5 class="lh-1 mB-0 logo-text"></h5>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="peer">
+                <div class="mobile-toggle sidebar-toggle">
+                  <a href="" class="td-n">
+                    <i class="ti-arrow-circle-left"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <script th:inline="javascript">
+			var actionStatus = /*[[@{/status}]]*/;
+			$('#aStatus').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatus, 'optionReplacement', 'GET', null, true); return false;});
+          </script>
+
+          <!-- ### $Sidebar Menu ### -->
+          <form id="formMenu" class="form-sidebar"> 
+      	   	<ul class="sidebar-menu scrollable pos-r">
+	            <li class="nav-item mT-30 active">
+	              <!-- <a class="sidebar-link" th:href="@{/inicio}">
+	                <span class="icon-holder">
+	                  <i class="c-blue-500 ti-home"></i>
+	                </span>
+	                <span class="title" th:text="#{menu.inicio}"></span>
+	              </a>
+	              <a id="aInicio" class='sidebar-link' href="#">
+	                <span class="icon-holder">
+	                  <i class="c-blue-500 ti-home"></i>
+	                </span>
+	                <span class="title" th:text="#{menu.inicio}"></span>
+				      <script th:inline="javascript">
+						var actionStatus = /*[[@{/status}]]*/;
+						$('#aInicio').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatus, 'optionReplacement', 'GET', null, true); return false;});
+			          </script>
+	              </a> -->
+	            </li>
+	           
+	            <!-- Aplicaciones -->
+				<li class="nav-item">
+	              <a id="aServiceAdmin" class='sidebar-link' href="#">
+	                <span class="icon-holder">
+	                  <i class="c-green-500 ti-panel"></i>
+	                </span>
+	                <span class="title" th:text="#{menu.admin.service}"></span>
+	                 <script th:inline="javascript">
+	                 	var actionService = /*[[@{/serviceadmin}]]*/;
+	                 	$('#aServiceAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionService, 'optionReplacement', 'GET', null, true); return false;});
+	                </script>
+	              </a>
+	            </li>
+	            <!-- Fin aplicaciones -->
+	           
+                
+                
+                                
+	            <li class="nav-item">
+	              <a id="aUserAdmin" class='sidebar-link' href="#">
+	                <span class="icon-holder">
+	                  <i class="c-brown-500 ti-user"></i>
+	                </span>
+	                <span class="title" th:text="#{menu.admin.user}"></span>
+	                 <script th:inline="javascript">
+	                 	var actionUser = /*[[@{/useradmin}]]*/;
+	                 	$('#aUserAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionUser, 'optionReplacement', 'GET', null, true); return false;});
+	                </script>
+	              </a>
+	            </li>
+	           
+				
+	            
+	            <!--  Certificados -->
+	                 <li class="nav-item dropdown">
+	              <a id="aKeystoreAdmin" class="dropdown-toggle" href="javascript:void(0);">
+	                <span class="icon-holder">
+	                  <i class="c-brown-500 ti-key"></i>
+	                </span>
+	                <span class="title" th:text="#{menu.admin.keystore}"></span>
+	                <script th:inline="javascript">
+		                 			var actionSsl = /*[[@{/ssladmin}]]*/;
+		                 			$('#aSslAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionSsl, 'optionReplacement', 'GET', null, true); return false;});
+		               			</script>
+	              </a> 
+				   
+				</li>
+				
+				<!-- Fin Certificados -->
+				
+				  <!-- Logs -->
+				  
+	            <li class="nav-item">
+	              <a id="aSplAdmin" class='sidebar-link' href="#">
+	                <span class="icon-holder">
+	                  <i class="c-brown-500 ti-receipt"></i>
+	                </span>
+	                <span class="title" th:text="#{menu.admin.spl}"></span>
+	                 <script th:inline="javascript">
+	                 	var actionSpl = /*[[@{/spl}]]*/;
+	                 	$('#aSplAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionSpl, 'optionReplacement', 'GET', null, true); return false;});
+	                </script>
+	              </a>
+	            </li>
+	       
+				
+                
+                <!-- Fin Logs -->
+                
+                
+                 <!-- Estadisticas -->
+                
+                 <li class="nav-item dropdown">
+	              <a id="aStatsAdmin" class="dropdown-toggle" href="javascript:void(0);">
+	                <span class="icon-holder">
+	                  <i class="c-black-500 ti-stats-up"></i>
+	                </span>
+	                <span class="title" th:text="#{menu.admin.stats}"></span>
+	              </a> 
+				   <ul class="dropdown-menu">
+						<li>
+							<a id="aStatsVipAdmin" class='sidebar-link' href="#">
+							    <span class="title" th:text="#{menu.admin.stats.vip}"></span>
+								<script th:inline="javascript">
+		                 			var actionStatsVip = /*[[@{/statsvip}]]*/;
+		                 			$('#aStatsVipAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatsVip, 'optionReplacement', 'GET', null, true); return false;});
+		               			</script>
+	               			</a>
+	               		</li>
+	               		
+				   </ul>
+				</li>
+                
+                <!-- Fin estadisticas -->
+               
+	          </ul>
+          </form>
+        </div>
+      </div>

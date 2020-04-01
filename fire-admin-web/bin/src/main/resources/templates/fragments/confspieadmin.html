@@ -1,0 +1,324 @@
+<div class="row gap-20 masonry pos-r">
+	<div class="masonry-sizer col-md-12"></div>
+	<div class="masonry-item col-md-6">
+		<div class="bgc-white p-20 bd">
+			<h4 class="c-grey-900" th:text="#{confSpie.admin.title}"></h4>
+			<div class="mT-30">
+				<form id="newConfSpieForm" th:object="${confSpieForm}" th:action="@{/saveconfspie}" method="post">
+					<input type='hidden' id="idConfSpie" th:field="*{idConfSpie}">
+					<input type='hidden' id="frequencyAFirma" th:field="*{frequencyAFirma}">
+					<input type='hidden' id="frequencyTsa" th:field="*{frequencyTsa}">
+					
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="percentAcceptForm" th:text="#{form.confSpie.percentAccept}"></label> 
+							<input type="number" class="form-control" id="percentAcceptForm" th:field="*{percentAccept}" required>
+						</div>
+					</div>
+					
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="frequencyAFirmaTime" th:text="#{form.confSpie.frequencyAFirma}"></label> 
+							<input type="time" class="form-control" id="frequencyAFirmaTime" th:field="*{frequencyAFirmaTime}" step="1" required>
+						</div>
+					</div>
+					
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="frequencyTsaTime" th:text="#{form.confSpie.frequencyTsa}"></label> 
+							<input type="time" class="form-control" id="frequencyTsaTime" th:field="*{frequencyTsaTime}" step="1" required>
+						</div>
+					</div>
+					
+					<div class="form-row">
+						<div class="form-group col-md-11">
+							<label for="methodName" th:text="#{form.confSpie.methodName}"></label> 
+							<input type="text" class="form-control" id="methodName">
+						</div>
+						<div class="form-group col-md-1">
+							<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> 
+							<button id="addBtn" class="btn btn-primary">
+								<i class="c-black-500 ti-plus"></i>
+							</button>
+						</div>
+					</div>
+					
+					<div class="bgc-white bd bdrs-3 p-20 mB-20">
+						<h6 class="c-grey-900 mB-20" th:text="#{table.methodVal.title}"></h6>
+						<table id="metValTable" class="display"
+							style="cellspacing: 0; width: 100%;">
+							<thead>
+								<tr>
+									<th th:text="#{table.methodVal.name}">Method Name</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody th:if="${not #lists.isEmpty(methods)}">
+								<tr th:each="mv : ${methods}">
+									<td width="90%" th:text="${mv}"></td>
+									<td width="10%" class="delete-control"><i class="c-blue-500 ti-close" tabindex="0"> </i></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					
+					<button id="saveBtn" type="submit" class="btn btn-primary" 
+						th:utext="#{button.save}">
+					</button>
+					
+					<button id="cleanBtn" class="btn btn-primary" 
+						onclick="cleanForm('#newConfSpieForm');"
+						th:utext="#{button.cleanForm}">
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+</div>
+
+<style type="text/css">
+td.delete-control {
+    content: "\e646";
+    cursor: pointer;
+}
+td.highlight {
+    background-color: whitesmoke !important;
+}
+</style>
+
+<script th:inline="javascript">
+
+$(document).ready(function() {
+	
+	if ($('#idConfSpie')[0].value != null){
+		completeInit();
+	}
+	
+	var tableMethodVal = $('#metValTable').DataTable({
+		"pagingType" : "full_numbers",
+		"initComplete" : function(settings, json) {
+			//eliminamos el scroll inferior
+			$('#metValTable_wrapper .dataTables_scrollBody').css("overflow-x", "hidden");
+			$('#metValTable_length').addClass("hidden");
+			$('#metValTable_filter').addClass("hidden");
+			$('#metValTable_info').addClass("hidden");
+			$('#metValTable_paginate').addClass("hidden");
+			$('#metValTable thead').addClass("hidden");
+		},
+		"columnDefs" : [ 
+		{
+			"targets" : [ 0 ],
+			"width": "90%"
+		},
+		{
+			"targets" : [ 1 ],
+			"className": 'delete-control',
+			"orderable": false,
+			"visible" : true,
+			"data": "H",
+			"defaultContent": '<i class="c-blue-500 ti-close"> </i>',
+			"width": "10%"
+		}],
+		select : {
+			style : 'single'
+		},
+		"pageLength": 50,
+		responsive : {
+			details : {
+				type : 'column',
+				target : -1
+			}
+		}
+
+	});
+	
+	$( "#addBtn" ).click(function( event ) {
+		event.preventDefault();
+		var methodName = $('#methodName').val();
+		
+		if($('#methodName').val() != null){
+			var countRow = tableMethodVal.data().count();
+			tableMethodVal.row.add([
+				methodName
+			]).draw();
+		}else{
+			if ($('#errorModalConfSpie').length > 0){
+				 $('#errorModalConfSpie').remove();
+			  }
+		  $('#newConfSpieForm').append('<div id="errorModalConfSpie" class="alert alert-danger" role="alert"><strong>' + [[#{spie.admin.error.addMetVal}]] + '</strong></div>');
+		}
+
+	});
+	
+	$('#metValTable tbody').on('click', 'td.delete-control', function () {
+		tableMethodVal.row( $(this).parents('tr') ).remove().draw();
+    });
+	
+	$( "#saveBtn" ).click(function( event ) {
+		  event.preventDefault();
+
+		  //Procedemos a transformar los timer en ms
+		  var freqAfirma = checkTypeTime($("#frequencyAFirmaTime"));
+		  if (freqAfirma != $("#frequencyAFirmaTime")[0].value){
+		    $("#newConfSpieForm input")[4].value = freqAfirma;
+		  }
+		  $("#newConfSpieForm input")[1].value = timeToMillisecond(freqAfirma);
+		  
+		  var freqTsa = checkTypeTime($('#frequencyTsaTime'));
+		  if (freqTsa != $('#frequencyTsaTime')[0].value){
+		    $("#newConfSpieForm input")[5].value = freqTsa;
+		  }
+		  $("#newConfSpieForm input")[2].value = timeToMillisecond(freqTsa);
+		  
+		  var formData = JSON.stringify($("#newConfSpieForm").serializeJSON());
+		  var url = /*[[@{/saveconfspie}]]*/ null;
+
+		  loading();
+		  if ($('#newConfSpieForm')[0].checkValidity() === false) {
+			  hide();
+			  
+			  $('#newConfSpieForm *').filter(':input').each(function(){
+	  	    
+		          if(!$(this)[0].checkValidity()){
+		      	   	$("#" + $(this).attr('id')).addClass("has-error");
+		      	  } else {
+		      	   	$("#" + $(this).attr('id')).removeClass("has-error");
+		      	  }
+	  	  });
+
+		  } else{
+			  
+			  // Añadimos los metodos de validacion al formData
+			  var dataTable = tableMethodVal.rows().data();
+			  var methods = "[";
+			  for(var i=0; i<dataTable.length; i++){
+			    if (dataTable[i]["H"] != null){
+					methods += '"' + dataTable[i][0] + '"';
+				}else{
+					methods += '"' + dataTable[i] + '"';
+				}
+				if(i < (dataTable.length-1)){
+					methods += ", ";
+				}
+			  }
+			  methods += "]";
+			  
+			  formData = formData.substr(0, formData.length-1);
+			  formData += ', "methodValidations": ';
+			  formData += methods;
+			  formData += "}";
+		  
+			  $.ajax({
+				  type: "POST",
+				  url: url,
+				  data: formData,
+				  dataType: "json",
+				  contentType : "application/json",
+				  success: function(data, error){
+					  hide();
+					  
+					  $('#idConfSpie').val(data.idConfSpie);
+					  $('#percentAcceptForm').val(data.percentAccept);
+					  $('#frequencyAFirma').val(data.frequencyAFirma);
+					  $('#frequencyTsa').val(data.frequencyTsa);
+					  
+					  $('#newConfSpieForm *').filter(':input').each(function(){
+						 $("#" + $(this).attr('id')).removeClass("has-error");
+					  });
+					   
+					  if ($('#errorModalConfSpie').length > 0){
+						 $('#errorModalConfSpie').remove();
+					  }
+					  
+				  },
+				  error:function(){
+					  hide();
+					  if ($('#errorModalConfSpie').length > 0){
+							 $('#errorModalConfSpie').remove();
+						  }
+					  $('#newConfSpieForm').append('<div id="errorModalConfSpie" class="alert alert-danger" role="alert"><strong>' + [[#{spie.admin.error.saveConfSpie}]] + '</strong></div>');
+				  }
+				});
+		  }
+
+	});
+	
+});
+
+function completeInit(){
+	
+	var timeFirma = millisecondToTime($('#frequencyAFirma')[0].value);
+	var timeTsa = millisecondToTime($('#frequencyTsa')[0].value);
+
+	$('#frequencyAFirmaTime').val(timeFirma);
+	$('#frequencyTsaTime').val(timeTsa);
+	
+}
+	
+function cleanForm(f){
+	
+	$(f + ' *').filter(':input').each(function(){
+		$(this).val('');
+		$(this).next(".custom-file-label").attr('data-content', '');
+		$(this).next(".custom-file-label").text('');
+	});
+	$(f + ' *').filter('span').each(function(){
+		$(this).text('');
+	});
+	$(f + ' *').filter('select').each(function(){
+		$(this).value = -1;
+	});
+
+}
+
+function timeToMillisecond(s){
+
+	var numValue =  s;
+	
+	if (numValue.indexOf(':') != -1){
+		var splitValue = numValue.split(':');
+		var finalValue = 0;
+		if (splitValue.length == 2){
+			finalValue = (+splitValue[0]) * 60 * 60 + (+splitValue[1]) * 60;
+		} else if (splitValue.length == 3){
+			finalValue = (+splitValue[0]) * 60 * 60 + (+splitValue[1]) * 60 + (+splitValue[2]);
+		}
+
+		finalValue = finalValue * 1000;
+	}else{
+		finalValue = numValue;
+	}
+	
+	return finalValue;
+}
+
+function millisecondToTime(s){
+	
+	function pad(n, z) {
+		z = z || 2;
+		return ('00' + n).slice(-z);
+	}
+
+	var ms = s % 1000;
+	s = (s - ms) / 1000;
+	var secs = s % 60;
+	s = (s - secs) / 60;
+	var mins = s % 60;
+	var hrs = (s - mins) / 60;
+
+ 	return pad(hrs) + ':' + pad(mins) + ':' + pad(secs);
+}
+
+function checkTypeTime(id){
+	var numValue =  $(id)[0].value;
+	if (numValue.indexOf(':') != -1){
+		var splitValue = numValue.split(':');
+		if (splitValue.length == 2){
+			numValue += ":00"
+		}
+	}
+	return numValue;
+}
+
+</script>
