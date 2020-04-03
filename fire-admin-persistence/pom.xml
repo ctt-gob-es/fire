@@ -1,105 +1,82 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  
-  
-  	
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
 	<artifactId>fire-admin-persistence</artifactId>
 	<name>fire-admin-persistence</name>
 	<packaging>jar</packaging>
 	<parent>
 		<groupId>es.gob.fire</groupId>
-		<artifactId>fire-artifacts</artifactId> 
-		<version>2.4-SNAPSHOT</version> 
+		<artifactId>fire-artifacts</artifactId>
+		<version>2.4-SNAPSHOT</version>
 	</parent>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-admin-core</artifactId>
 		</dependency>
-		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<version>${spring.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.aspectj</groupId>
+					<artifactId>aspectjweaver</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
-		<!--  Licencia Apache 2.0 -->
+		<!-- Licencia Apache 2.0 -->
 		<dependency>
 			<groupId>com.github.darrachequesne</groupId>
 			<artifactId>spring-data-jpa-datatables</artifactId>
 			<version>5.0.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>commons-beanutils</groupId>
-		    <artifactId>commons-beanutils</artifactId>
-		    <version>1.9.3</version>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
 		</dependency>
-		<!-- Importación de MultipartFile para DTOs -->
 		<dependency>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-web</artifactId>
-		    <version>5.0.4.RELEASE</version>
-		    <scope>provided</scope>
+			<groupId>javax.json</groupId>
+			<artifactId>javax.json-api</artifactId>
 		</dependency>
-		
 		<dependency>
-			    <groupId>javax.json</groupId>
-			    <artifactId>javax.json-api</artifactId>			    
-			</dependency>
-			
-			<dependency>
-			    <groupId>org.glassfish</groupId>
-			    <artifactId>javax.json</artifactId>
-			</dependency>
-			
-			<dependency>
-				<groupId>javax.validation</groupId>
-				<artifactId>validation-api</artifactId>
-			</dependency>
-			
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-data-jpa</artifactId>
-			</dependency>
-			
-			<!--  Jackson -->
-			<dependency>
-				<groupId>com.fasterxml.jackson.jaxrs</groupId>
-				<artifactId>jackson-jaxrs-json-provider</artifactId>
-			</dependency>
-			
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-annotations</artifactId>
-			</dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+		</dependency>
+		<!-- Jackson -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
 	</dependencies>
+
 	<build>
-	<!--
-		<resources>
-			<resource>
-				<directory>../</directory>
-				<includes>
-					<include>LICENSE.txt</include>
-				</includes>
-				<targetPath>${basedir}/target/classes/META-INF</targetPath>
-			</resource>
-			<resource>
-				<directory>${basedir}/src/main/resources</directory>
-			</resource>
-		</resources>
-	-->
+		<!-- <resources> <resource> <directory>../</directory> <includes> <include>LICENSE.txt</include> 
+			</includes> <targetPath>${basedir}/target/classes/META-INF</targetPath> </resource> 
+			<resource> <directory>${basedir}/src/main/resources</directory> </resource> 
+			</resources> -->
 		<plugins>
 			<!-- Plugin para generar el jar referente a la parte de persistencia en 
 				base de datos. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
+				<version>3.1.1</version>
 				<configuration>
 					<archive>
 						<manifestEntries>
@@ -114,5 +91,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>
