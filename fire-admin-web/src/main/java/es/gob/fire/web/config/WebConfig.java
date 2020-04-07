@@ -7,21 +7,18 @@
  * @author Consejería de Turismo, Regeneración, Justicia y Administración Local de la Junta de Andalucía.
  * @version 1.0, 14 oct. 2019.
  */
-package es.gob.fire.web.spring.config;
+package es.gob.fire.web.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import es.gob.fire.core.constant.Constants;
-import es.gob.fire.web.util.FileUtilsDirectory;
-import es.gob.fire.web.util.UtilsServer;
+import es.gob.fire.core.util.FileUtilsDirectory;
+import es.gob.fire.core.util.UtilsServer;
 
 /** 
  * <p>Class that registers the different beans used in the application.</p>

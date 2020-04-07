@@ -7,7 +7,7 @@
  * @author Consejería de Turismo, Regeneración, Justicia y Administración Local de la Junta de Andalucía.
  * @version 1.0, 14 oct. 2019.
  */
-package es.gob.fire.web.util;
+package es.gob.fire.core.util;
 
 import es.gob.fire.core.constant.Constants;
 

@@ -22,7 +22,7 @@
  * @author Gobierno de España.
  * @version 1.0, 7 mar. 2018.
  */
-package es.gob.fire.web.spring;
+package es.gob.fire.web.config;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package es.gob.fire.web.spring.config;
+package es.gob.fire.web.config;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 

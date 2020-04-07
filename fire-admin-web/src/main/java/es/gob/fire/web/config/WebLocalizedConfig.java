@@ -22,7 +22,7 @@
  * @author Gobierno de España.
  * @version 1.0, 13 jun. 2018.
  */
-package es.gob.fire.web.spring.config;
+package es.gob.fire.web.config;
 
 import java.util.Locale;
 

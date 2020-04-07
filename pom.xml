@@ -17,8 +17,8 @@
 	</parent>
 	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+
 		<jdk.version>1.7</jdk.version>
 		
 		<fire.version>2.4-SNAPSHOT</fire.version>
@@ -30,6 +30,7 @@
 		<org.glassfish-javax.json.version>1.0.4</org.glassfish-javax.json.version>
 		<junit.version>4.8.2</junit.version>
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+		<hibernate.version>5.2.13.Final</hibernate.version>
 	</properties>
 
 	<url>https://administracionelectronica.gob.es/ctt/fire</url>
@@ -105,139 +106,154 @@
 	</profiles>
 
 	<dependencyManagement>
-	  <dependencies>
-	  
-	  <dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-admin-persistence</artifactId>
-		  <version>${fire.version}</version>
-		</dependency> 
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-admin-core</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>  
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-admin-web</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>   
-	  
-	  	<dependency>
-		  <groupId>es.gob.afirma</groupId>
-		  <artifactId>afirma-core</artifactId>
-		  <version>${clienteafirma.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.afirma</groupId>
-		  <artifactId>afirma-server-triphase-signer-core</artifactId>
-		  <version>${clienteafirma.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-client</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-common-libraries</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-connector</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-connector-clavefirma</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-connector-clavefirma-test</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-document</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-decipher</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-upgrade</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-upgrade-afirma</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-statistics-common</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-log-handlers</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-	  
-		<dependency>
-			<groupId>es.fnmt.fire</groupId>
-			<artifactId>fnmt-fire-connector</artifactId>
-			<version>${fnmt.version}</version>
-		</dependency>
-	  
-	  	<dependency>
-			<groupId>es.gob.logconsumer</groupId>
-  			<artifactId>log-consumer-api</artifactId>
-  			<version>${log-consumer.version}</version>
-  		</dependency>
-	  
-		<dependency>
-			<groupId>es.gob.logconsumer</groupId>
-  			<artifactId>log-consumer-service</artifactId>
-  			<version>${log-consumer.version}</version>
-  		</dependency>
-		
-		<dependency>
-			<groupId>es.gob.logconsumer</groupId>
-  			<artifactId>log-consumer-register</artifactId>
-  			<version>${log-consumer.version}</version>
-  		</dependency>
-	  
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<version>${javax.json-api.version}</version>
-		</dependency>
+		<dependencies>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-persistence</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-core</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-web</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>${org.glassfish-javax.json.version}</version>
-		</dependency>
-		
-		<dependency>
+			<dependency>
+				<groupId>es.gob.afirma</groupId>
+				<artifactId>afirma-core</artifactId>
+				<version>${clienteafirma.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.afirma</groupId>
+				<artifactId>afirma-server-triphase-signer-core</artifactId>
+				<version>${clienteafirma.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-client</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-common-libraries</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-connector</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-connector-clavefirma</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-connector-clavefirma-test</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-document</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-decipher</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-upgrade</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-upgrade-afirma</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<!-- Hibernate 5 -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-infinispan</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<!-- Hibernate 5 -->
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-statistics-common</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-log-handlers</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.fnmt.fire</groupId>
+				<artifactId>fnmt-fire-connector</artifactId>
+				<version>${fnmt.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.logconsumer</groupId>
+				<artifactId>log-consumer-api</artifactId>
+				<version>${log-consumer.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.logconsumer</groupId>
+				<artifactId>log-consumer-service</artifactId>
+				<version>${log-consumer.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.logconsumer</groupId>
+				<artifactId>log-consumer-register</artifactId>
+				<version>${log-consumer.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.json</groupId>
+				<artifactId>javax.json-api</artifactId>
+				<version>${javax.json-api.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.json</artifactId>
+				<version>${org.glassfish-javax.json.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>servlet-api</artifactId>
 				<version>2.5</version>
@@ -253,17 +269,17 @@
 				<version>1.2</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.commons</groupId>
-			    <artifactId>commons-text</artifactId>
-			    <version>1.4</version>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk16</artifactId>
 				<version>1.46</version>
 			</dependency>
-		
-		<!--  Jackson -->
+
+			<!-- Jackson -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.jaxrs</groupId>
 				<artifactId>jackson-jaxrs-json-provider</artifactId>
@@ -275,26 +291,26 @@
 				<version>2.9.4</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.eclipse</groupId>
-			    <artifactId>yasson</artifactId>
-			    <version>1.0.2</version>
+				<groupId>org.eclipse</groupId>
+				<artifactId>yasson</artifactId>
+				<version>1.0.2</version>
 			</dependency>
 			<dependency>
-			    <groupId>javax.json</groupId>
-			    <artifactId>javax.json-api</artifactId>
-			    <version>1.1.3</version>
+				<groupId>javax.json</groupId>
+				<artifactId>javax.json-api</artifactId>
+				<version>1.1.3</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.glassfish</groupId>
-			    <artifactId>javax.json</artifactId>
-			    <version>1.1.3</version>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.json</artifactId>
+				<version>1.1.3</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
 				<version>2.0.1.Final</version>
 			</dependency>
-			
+
 			<!-- Rest -->
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
@@ -316,19 +332,17 @@
 				<artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
 				<version>1.0.0.Final</version>
 			</dependency>
-		
-		
 
-		<dependency>
-		  <groupId>junit</groupId>
-		  <artifactId>junit</artifactId>
-		  <version>${junit.version}</version>
-		  <scope>test</scope>
-		</dependency>
-	  </dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
 	</dependencyManagement>
-	
-	
+
+
 	<build>
 		<plugins>
 		

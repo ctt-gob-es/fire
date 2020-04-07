@@ -63,32 +63,32 @@ public class JpaConfig {
 	 * Attribute that represents the driver data base.
 	 */
 	@Value("${datasource.driver}")
-	private String driver/* = "oracle.jdbc.driver.OracleDriver"*/;
+	private String driver;
 	/**
 	 * Attribute that represents the URL data base.
 	 */
 	@Value("${datasource.url}")
-	private String url/* = "jdbc:oracle:thin:@//localhost:1521/orcl"*/;
+	private String url;
 	/**
 	 * Attribute that represents the user data base.
 	 */
 	@Value("${datasource.user}")
-	private String user/* = "FIREOWNER"*/;
+	private String user;
 	/**
 	 * Attribute that represents the user pass data base.
 	 */
 	@Value("${datasource.pass}")
-	private String pass/* = "12345"*/;
+	private String pass;
 	/**
 	 * Attribute that represents the dialect data base.
 	 */
 	@Value("${hibernate.dialect}")
-	private String dialect/* = "org.hibernate.dialect.Oracle10gDialect"*/;
+	private String dialect;
 	/**
 	 * Attribute that shows SQL (true), or not (false).
 	 */
 	@Value("${hibernate.showSQL}")
-	private boolean showSQL/* = true*/;
+	private boolean showSQL;
 
 	/**
 	 * Method that configures the data source.
@@ -113,7 +113,7 @@ public class JpaConfig {
 	public EntityManagerFactory configureEntityManagerFactory() throws SQLException {
 		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
 		entityManagerFactoryBean.setDataSource(configureDataSource());
-		entityManagerFactoryBean.setPackagesToScan("es.gob.fire.persistence");
+		entityManagerFactoryBean.setPackagesToScan(Constants.MAIN_PERSISTENCE_PROJECT_PACKAGE);
 		entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
 		Properties jpaProperties = new Properties();
