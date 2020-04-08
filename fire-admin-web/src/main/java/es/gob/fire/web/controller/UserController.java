@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.gob.fire.persistence.model.entity.User;
-import es.gob.fire.persistence.service.ifaces.IUserService;
+import es.gob.fire.persistence.service.IUserService;
 
 /**
  * <p>
@@ -70,7 +70,7 @@ public class UserController {
 	 */
 	@RequestMapping(value = "menupass")
 	public String menuPass(@RequestParam("username") final String username, final Model model) {
-		final User user = this.userService.getUserByUsername(username);
+		final User user = this.userService.getUserByUserName(username);
 		//final UserPasswordDTO userFormPassword = new UserPasswordDTO();
 
 	//	userFormPassword.setIdUserFirePass(user.getIdUser());
@@ -87,7 +87,7 @@ public class UserController {
 	 */
 	@RequestMapping(value = "menuedit")
 	public String menuEdit(@RequestParam("username") final String username, final Model model) {
-		final User user = this.userService.getUserByUsername(username);
+		final User user = this.userService.getUserByUserName(username);
 		//final UserEditDTO userFormEdit = new UserEditDTO();
 //
 //		userFormEdit.setIdUserFireEdit(user.getIdUser());

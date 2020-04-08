@@ -1,4 +1,4 @@
-package es.gob.fire.authentication;
+package es.gob.fire.web.authentication;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 import es.gob.fire.core.util.Base64;
 import es.gob.fire.persistence.model.entity.User;
-import es.gob.fire.persistence.service.ifaces.IUserService;
+import es.gob.fire.persistence.service.IUserService;
 
 /**
  * Cheetah spring custom authentication provider.
@@ -74,7 +74,7 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 		String userName = authentication.getName();
 		String password = authentication.getCredentials().toString();
 		// Search the user in database
-		User user = userService.getUserByUsername(userName);
+		User user = userService.getUserByUserName(userName);
 
 		if (user != null) {
 			// If password is OK

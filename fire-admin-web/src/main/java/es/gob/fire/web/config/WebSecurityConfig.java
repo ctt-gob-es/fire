@@ -33,7 +33,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import es.gob.fire.authentication.CustomUserAuthentication;
+import es.gob.fire.web.authentication.CustomUserAuthentication;
 
 /** 
  * <p>Class that enables and configures the security of the Valet application. </p>

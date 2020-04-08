@@ -64,14 +64,14 @@ public class UserDetailsServiceImpl implements UserDetailsService  {
      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
      */
     @Override
-    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException
+    public UserDetails loadUserByUsername(final String userName) throws UsernameNotFoundException
     {
-    	final User curruser = this.repository.findByUsername(username);
+    	final User curruser = this.repository.findByUserName(userName);
 
         UserDetails user = null;
 
         if (curruser != null) {
-        	user = new org.springframework.security.core.userdetails.User(username, curruser.getPassword(), true,
+        	user = new org.springframework.security.core.userdetails.User(userName, curruser.getPassword(), true,
         	                                                      		true, true, true, AuthorityUtils.createAuthorityList("USER"));
         } else {
 

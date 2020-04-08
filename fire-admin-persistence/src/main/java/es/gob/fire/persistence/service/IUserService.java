@@ -22,7 +22,7 @@
  * @author Gobierno de España.
  * @version 1.0, 15/06/2018.
  */
-package es.gob.fire.persistence.service.ifaces;
+package es.gob.fire.persistence.service;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
@@ -36,17 +36,17 @@ import es.gob.fire.persistence.model.entity.User;
 public interface IUserService {
 	/**
 	 * Method that obtains an user by its identifier.
-	 * @param id The user identifier.
-	 * @return {@link UserValet}
+	 * @param userId The user identifier.
+	 * @return {@link User}
 	 */
-	User getUserById(Long id);
+	User getUserByUserId(Long userId);
 	
 	/**
-	 * Method that obtains an user by its login.
-	 * @param username The user login.
+	 * Method that obtains an user by its user name.
+	 * @param userName The user login.
 	 * @return {@link UserValet}
 	 */
-	User getUserByUsername(String username);
+	User getUserByUserName(String userName);
 	
 	/**
 	 * Method that stores a user in the persistence.

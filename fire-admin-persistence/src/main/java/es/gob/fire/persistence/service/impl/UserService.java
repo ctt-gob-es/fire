@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 import es.gob.fire.persistence.model.entity.User;
 import es.gob.fire.persistence.model.repository.UserRepository;
 import es.gob.fire.persistence.model.repository.datatable.UserDataTablesRepository;
-import es.gob.fire.persistence.service.ifaces.IUserService;
+import es.gob.fire.persistence.service.IUserService;
 
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
@@ -57,16 +57,16 @@ public class UserService implements IUserService {
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.valet.persistence.configuration.services.ifaces.IUserValetService#getUserValetById(java.lang.Long)
+	 * @see es.gob.fire.persistence.services.IUserService#getUsertByUserId(java.lang.Long)
 	 */
 	@Override
-	public User getUserById(Long id) {
-		return repository.findByIdUser(id);
+	public User getUserByUserId(Long userId) {
+		return repository.findByUserId(userId);
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.valet.persistence.configuration.services.ifaces.IUserValetService#saveUserValet(es.gob.valet.persistence.configuration.model.entity.UserValet)
+	 * @see es.gob.fire.persistence.services.IUserService#saveUser(es.gob.fire.persistence.model.entity.User)
 	 */
 	@Override
 	public User saveUser(User user) {
@@ -76,7 +76,7 @@ public class UserService implements IUserService {
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.valet.persistence.configuration.services.ifaces.IUserValetService#deleteUserValet(java.lang.Long)
+	 * @see es.gob.fire.persistence.services.IUserService#deleteUser(java.lang.Long)
 	 */
 	@Override
 	public void deleteUser(Long userId) {
@@ -86,7 +86,7 @@ public class UserService implements IUserService {
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.valet.persistence.configuration.services.ifaces.IUserValetService#getAllUserValet()
+	 * @see es.gob.fire.persistence.services.IUserService#getAllUse()
 	 */
 	@Override
 	public Iterable<User> getAllUser() {
@@ -95,25 +95,20 @@ public class UserService implements IUserService {
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.valet.persistence.configuration.services.ifaces.IUserValetService#getUserValetByLogin(java.lang.String)
+	 * @see es.gob.fire.persistence.services.IUserService#getUserByUserName(java.lang.String)
 	 */
 	@Override
-	public User getUserByUsername(String username) {
-		return repository.findByUsername(username);
+	public User getUserByUserName(final String userName) {
+		return repository.findByUserName(userName);
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.valet.persistence.configuration.services.ifaces.IUserValetService#findAll(org.springframework.data.jpa.datatables.mapping.DataTablesInput)
+	 * @see es.gob.fire.persistence.services.IUserService#findAll(org.springframework.data.jpa.datatables.mapping.DataTablesInput)
 	 */
 	@Override
 	public DataTablesOutput<User> getAllUser(DataTablesInput input) {
-
 		return dtRepository.findAll(input);
 	}
 
 }
-
-
-
-
