@@ -101,7 +101,8 @@ public final class FIReTriHelper {
             		docBytes,
             		algorithm,
                     new X509Certificate[] { signerCert },
-                    expandedParams
+                    expandedParams,
+                    false
                 );
             }
             catch (final Throwable e) {
@@ -116,7 +117,8 @@ public final class FIReTriHelper {
             		docBytes,
             		algorithm,
                     new X509Certificate[] { signerCert },
-                    expandedParams
+                    expandedParams,
+                    false
                 );
             }
             catch (final Throwable e) {
@@ -141,7 +143,8 @@ public final class FIReTriHelper {
                     algorithm,
                     new X509Certificate[] { signerCert },
                     expandedParams,
-                    target
+                    target,
+                    false
                 );
             }
             catch (final Throwable e) {
@@ -255,7 +258,8 @@ public final class FIReTriHelper {
         					doc.getData(),
         					algorithm,
         					new X509Certificate[] { signerCert },
-        					expandedParams
+        					expandedParams,
+        					false
         					);
         		}
         		catch (final Exception e) {
@@ -272,7 +276,8 @@ public final class FIReTriHelper {
         					doc.getData(),
         					algorithm,
         					new X509Certificate[] { signerCert },
-        					expandedParams
+        					expandedParams,
+        					false
         					);
         		}
         		catch (final Exception e) {
@@ -299,7 +304,8 @@ public final class FIReTriHelper {
         					algorithm,
         					new X509Certificate[] { signerCert },
         					expandedParams,
-        					target
+        					target,
+        					false
         					);
         		}
         		catch (final Exception e) {

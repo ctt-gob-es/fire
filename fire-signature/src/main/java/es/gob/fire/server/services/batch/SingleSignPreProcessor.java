@@ -81,14 +81,16 @@ final class SingleSignPreProcessor {
 						docBytes,
 						algorithm.toString(),
 						certChain,
-						extraParams
+						extraParams,
+    					false
 					);
 			case COSIGN:
 				return prep.preProcessPreCoSign(
 						docBytes,
 						algorithm.toString(),
 						certChain,
-						extraParams
+						extraParams,
+    					false
 					);
 			case COUNTERSIGN:
 				final CounterSignTarget target = CounterSignTarget.getTarget(
@@ -104,7 +106,8 @@ final class SingleSignPreProcessor {
 						algorithm.toString(),
 						certChain,
 						extraParams,
-						target
+						target,
+    					false
 					);
 			default:
 				throw new UnsupportedOperationException(

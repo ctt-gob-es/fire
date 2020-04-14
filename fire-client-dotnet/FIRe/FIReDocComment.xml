@@ -533,7 +533,7 @@
             <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
             <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error durante la operación.</exception>
         </member>
-        <member name="M:FIRe.FireClient.getResponseToPostPetition(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+        <member name="M:FIRe.FireClient.GetResponseToPostPetition(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
             <summary>
             Realiza una peticion POST y devuelve un byte array con la respuesta.
             </summary>
@@ -551,7 +551,7 @@
             <exception cref="T:FIRe.InvalidBatchDocumentException">Cuando se solicita la firma de un documento de un lote que no existe o que no se firmó correctamente.</exception>
             <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
         </member>
-        <member name="M:FIRe.FireClient.deserializedBatchResult(System.String)">
+        <member name="M:FIRe.FireClient.DeserializedBatchResult(System.String)">
             <summary>
              Deserializa una estructura JSON para obtener de ella un objeto de tipo FireBatchResult.
             </summary>
@@ -649,6 +649,9 @@
         </member>
         <member name="F:FIRe.HttpCustomErrors.INVALID_DOCUMENT_MANAGER">
             Error devuelto cuando se solicita el uso de un gestor que no existe o que no le está permitido a la aplicación.
+        </member>
+        <member name="F:FIRe.HttpCustomErrors.DOCUMENT_MANAGER_ERROR">
+            Error devuelto cuando falla la obtención de un documento a través del FireDocumentManager configurado.
         </member>
         <member name="T:FIRe.ConnectionManager">
             <summary>Clase para la codificación de datos binarios en cadenas Base64 y viceversa.</summary>

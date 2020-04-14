@@ -203,9 +203,11 @@ public final class FireApi {
      * 				Cuando se produce un error de red.
      * @throws HttpForbiddenException
      * 				Cuando se deniega el acceso al componente central.
-     * @throws HttpOperationException Error gen&eacute;rico en la operaci&oacute;n de firma.
-     * @throws ClientConfigFilesNotFoundException Si no se ha encontrado en el sistema
-     * el fichero de configuraci&oacute;n.
+     * @throws HttpOperationException
+     * 				Error gen&eacute;rico en la operaci&oacute;n de firma.
+     * @throws ClientConfigFilesNotFoundException
+     * 				Si no se ha encontrado en el sistema el fichero de
+     * 				configuraci&oacute;n.
      */
     public static SignOperationResult sign(final String appId,
     		final String subjectId,
@@ -348,6 +350,8 @@ public final class FireApi {
                 throw new HttpNetworkException(e);
             } else if (e.getResponseCode() == HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorCode()) {
         		throw new HttpOperationException(HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorDescription(), e);
+            } else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
             } else {
                 throw new HttpOperationException(e.getResponseDescription(), e);
             }
@@ -787,10 +791,13 @@ public final class FireApi {
         	// Se intento agregar un documento con un identificador que ya existe
         	} else if (e.getResponseCode() == HttpCustomErrors.DUPLICATE_DOCUMENT.getErrorCode()) {
         		throw new DuplicateDocumentException(HttpCustomErrors.DUPLICATE_DOCUMENT.getErrorDescription(), e);
-        	// Se excedio el numero maximo de documentos permitidos en un lote
+        	// La transaccion no es valida o ya a caducado
     		} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
     			throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-    		} else {
+    		// No se pudo recuperar el documento a traves del DocumentManager configurado
+    		} else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
+            } else {
         		throw new HttpOperationException(e.getResponseDescription(), e);
         	}
         }
@@ -829,7 +836,8 @@ public final class FireApi {
      * @throws InvalidTransactionException
      * 			   Cuando la transacci&oacute;n no existe o est&aacute; caducada.
      * @throws DuplicateDocumentException
-     * 				Cuando se el identificador de documento ya se us&oacute; para otro documento del lote.
+     * 				Cuando se el identificador de documento ya se us&oacute; para
+     * 				otro documento del lote.
      */
     public static void addDocumentToBatch(final String appId, final String transactionId,
     		final String documentId, final byte[] document,
@@ -868,7 +876,6 @@ public final class FireApi {
                 .replace(TAG_VALUE_EXTRA_PARAM, doBase64UrlSafe(propB64))
                 .replace(TAG_VALUE_CONFIG, Utils.properties2Base64(config, true));
 
-
         // Si se ha indicado un formato de upgrade, lo actualizamos; si no, lo eliminamos de la URL
         if (upgrade != null && !upgrade.isEmpty()) {
         	urlParameters = urlParameters.replace(TAG_VALUE_UPGRADE, upgrade);
@@ -898,7 +905,10 @@ public final class FireApi {
         	// La transaccion no es valida o ya a caducado
     		} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
     			throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-    		} else {
+    		// No se pudo recuperar el documento a traves del DocumentManager configurado
+    		} else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
+            } else {
         		throw new HttpOperationException(e.getResponseDescription(), e);
         	}
         }

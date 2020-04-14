@@ -24,6 +24,7 @@ import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReServiceOperation;
+import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
@@ -220,18 +221,16 @@ public class SignOperationManager {
         	data = docManager.getDocument(docId, appId, format, extraParams);
         }
         catch (final Exception e) {
-    		LOGGER.log(Level.SEVERE, logF.f("Error al obtener los datos a firmar"), e); //$NON-NLS-1$
+    		LOGGER.log(Level.SEVERE, logF.f("Error al obtener los datos a firmar del servidor remoto"), e); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"Error al obtener los datos a firmar"); //$NON-NLS-1$
+    		response.sendError(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode(), "Mensaje de la respuesta de error");
     		return;
         }
 
     	if (data == null) {
-    		LOGGER.severe(logF.f("No se han podido obtener los datos a firmar")); //$NON-NLS-1$
+    		LOGGER.severe(logF.f("No se han obtenido los datos a firmar")); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"No se han podido obtener los datos a firmar"); //$NON-NLS-1$
+    		response.sendError(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode());
     		return;
     	}
 

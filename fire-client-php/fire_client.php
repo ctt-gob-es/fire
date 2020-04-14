@@ -667,17 +667,17 @@
 			
 			$response = curl_exec($ch);
 
-			if (!$response) {
-				echo "Error en la llamada al servicio $URL";
-				throw new HttpNetworkException("Error: " . curl_error($ch) . " - Code: " . curl_errno($ch));
-			}
-
 			$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 			curl_close($ch);
 
 			if ($http_code != 200) {
 				$this->throwCustomException($http_code);
+			}
+
+			if (!$response) {
+				error_log("La llamada al servicio de FIRe no devolvio respuesta");
+				throw new HttpNetworkException("No se obtuvo respuesta del servidor. Error: '" . curl_error($ch) . "' - Codigo: " . curl_errno($ch));
 			}
 			
 			return $response;
@@ -693,12 +693,14 @@
 		 * @throws NumDocumentsExceededException Cuando se agregan mas documentos de los permitidos a un lote.
 		 * @throws DuplicateDocumentException Cuando se agrega a un lote un documento con un identificador ya utilizado en el lote.
 		 * @throws BatchNoSignedException Cuando se intenta recuperar el resultado de un lote antes de firmar el lote.
-		 * @throws InvalidBatchDocumentException Cuando Se solicita un documento que no existe o que no se firmo correctamente en un lote.
+		 * @throws InvalidBatchDocumentException Cuando se solicita un documento que no existe o que no se firmo correctamente en un lote.
 		 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 		 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 		 */
 		function throwCustomException($http_code)
 		{
+			error_log("Se obtuvo un error de la llamada al servicio de FIRe. StatusCode: ".$http_code);
+			
 			if ($http_code == 403) {
 				throw new HttpForbiddenException("Acceso no autorizado");
 			}
@@ -748,6 +750,9 @@
 			else if ($http_code == 539) {
 				throw new HttpOperationException("Gestor de documentos no valido");
 			}
+			else if ($http_code == 540) {
+				throw new HttpOperationException("Error al obtener un documento a traves del gestor en el servidor");
+			}
 			else if ($http_code / 100 >= 3) {
 				throw new HttpOperationException("Error indeterminado (".$http_code.")");
 			}
@@ -756,9 +761,9 @@
 
 	class HttpOperationException extends Exception { }
 	
-	class HttpForbiddenException extends HttpOperationException { }
+	class HttpForbiddenException extends Exception { }
 		
-	class HttpNetworkException extends HttpOperationException { }
+	class HttpNetworkException extends Exception { }
 	
 	class NumDocumentsExceededException extends HttpOperationException { }
 	

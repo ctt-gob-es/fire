@@ -402,12 +402,13 @@ public class FireClient {
         } catch (final HttpError e) {
             LOGGER.error("Error en la llamada al servicio de firma: {}", //$NON-NLS-1$
             			e.getResponseDescription());
-            switch (e.getResponseCode()) {
-            case HttpURLConnection.HTTP_FORBIDDEN:
+            if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                 throw new HttpForbiddenException(e);
-            case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
+            } else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
                 throw new HttpNetworkException(e);
-            default:
+            } else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
+            } else {
                 throw new HttpOperationException(e.getResponseDescription(), e);
             }
         }
@@ -818,7 +819,7 @@ public class FireClient {
     		final String documentId, final byte[] document, final Properties config)
     				throws IOException, HttpForbiddenException, HttpNetworkException,
     				NumDocumentsExceededException, DuplicateDocumentException,
-    				InvalidTransactionException, HttpOperationException {
+    				HttpOperationException, InvalidTransactionException {
 
         if (transactionId == null) {
             throw new InvalidTransactionException(
@@ -871,7 +872,10 @@ public class FireClient {
         	// Se excedio el numero maximo de documentos permitidos en un lote
     		} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
     			throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-    		} else {
+    		// No se pudo recuperar el documento a traves del DocumentManager configurado
+    		} else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
+            } else {
         		throw new HttpOperationException(e.getResponseDescription(), e);
         	}
         }
@@ -902,12 +906,10 @@ public class FireClient {
      * @throws HttpForbiddenException Cuando no se tiene acceso al servicio remoto.
      * @throws HttpNetworkException Cuando ocurre un error de red.
      * @throws HttpOperationException Cuando ocurre un error durante la ejecuci&oacute;n.
+     * @throws InvalidTransactionException Cuando la transacci&oacute;n no existe o est&aacute;
+     * caducada.
      * @throws NumDocumentsExceededException Cuando se intentan agregar m&aacute;s documentos
      * de los permitidos al lote.
-     * @throws InvalidTransactionException
-     * 			   Cuando la transacci&oacute;n no existe o est&aacute; caducada.
-     * @throws DuplicateDocumentException
-     * 				Cuando se el identificador de documento ya se us&oacute; para otro documento del lote.
      */
     public void addDocumentToBatch(final String transactionId, final String subjectId,
     		final String documentId, final byte[] document,
@@ -976,7 +978,10 @@ public class FireClient {
         	// Se excedio el numero maximo de documentos permitidos en un lote
     		} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
     			throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-    		} else {
+    		// No se pudo recuperar el documento a traves del DocumentManager configurado
+    		} else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
+        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
+            } else {
         		throw new HttpOperationException(e.getResponseDescription(), e);
         	}
         }

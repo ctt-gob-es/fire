@@ -85,7 +85,7 @@ public class MiniAppletHelper {
 				.append(XML_ELEMENT_SUBOPERATION).append(">").append(signConfig.getCryptoOperation()) //$NON-NLS-1$
 				.append("</").append(XML_ELEMENT_SUBOPERATION).append(">\n  <"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		// Para que la configuracion de actualizacion de la firma llegue al servidor DocumentManager del
+		// Para que la configuracion de actualizacion de la firma llegue al DocumentManager del
 		// servidor trifasico, la metemos dentro de los extraParams que se le enviaran
 		final Properties extraParams = signConfig.getExtraParams();
 		if (signConfig.getUpgrade() != null && !signConfig.getUpgrade().isEmpty()) {

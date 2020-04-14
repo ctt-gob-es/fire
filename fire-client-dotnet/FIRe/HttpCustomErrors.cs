@@ -49,5 +49,7 @@ namespace FIRe
         public const string INVALID_SIGNATURE_ERROR = "538";
         /// Error devuelto cuando se solicita el uso de un gestor que no existe o que no le está permitido a la aplicación.
         public const string INVALID_DOCUMENT_MANAGER = "539";
+        /// Error devuelto cuando falla la obtención de un documento a través del FireDocumentManager configurado.
+        public const string DOCUMENT_MANAGER_ERROR = "540";
     }
 }

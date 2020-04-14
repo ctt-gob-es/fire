@@ -40,7 +40,8 @@ public class Pkcs1TriPhasePreProcessor implements TriPhasePreProcessor {
 	private static final String PROPERTY_NAME_PKCS1_SIGN = "PK1"; //$NON-NLS-1$
 
 	@Override
-	public TriphaseData preProcessPreSign(final byte[] data, final String algorithm, final X509Certificate[] cert, final Properties extraParams)
+	public TriphaseData preProcessPreSign(final byte[] data, final String algorithm,
+			final X509Certificate[] cert, final Properties extraParams, final boolean checkSignatures)
 			throws IOException, AOException {
 
 		// En una firma PKCS1, los datos que nos pasan son directamente la prefirma
@@ -54,14 +55,16 @@ public class Pkcs1TriPhasePreProcessor implements TriPhasePreProcessor {
 	}
 
 	@Override
-	public TriphaseData preProcessPreCoSign(final byte[] data, final String algorithm, final X509Certificate[] cert, final Properties extraParams)
+	public TriphaseData preProcessPreCoSign(final byte[] data, final String algorithm, final X509Certificate[] cert,
+			final Properties extraParams, final boolean checkSignatures)
 			throws IOException, AOException {
 		throw new UnsupportedOperationException("Las firmas PKCS#1 no admiten multifirmas"); //$NON-NLS-1$
 	}
 
 	@Override
-	public TriphaseData preProcessPreCounterSign(final byte[] sign, final String algorithm, final X509Certificate[] cert, final Properties extraParams,
-			final CounterSignTarget targets) throws IOException, AOException {
+	public TriphaseData preProcessPreCounterSign(final byte[] sign, final String algorithm, final X509Certificate[] cert,
+			final Properties extraParams, final CounterSignTarget targets, final boolean checkSignatures)
+					throws IOException, AOException {
 		throw new UnsupportedOperationException("Las firmas PKCS#1 no admiten multifirmas"); //$NON-NLS-1$
 	}
 

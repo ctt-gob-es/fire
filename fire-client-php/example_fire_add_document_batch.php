@@ -12,10 +12,7 @@
 	$subjectId = "00001";		// DNI de la persona
 	$transactionId = "1bf458ac-6940-4be9-bd26-86d6ba82f898";	// Identificador de la transaccion
 	$documentB64 = base64_encode("Hola Mundo!!");				// Simulacion de documento para agregarlo al batch
-	$conf = "redirectOkUrl=http://www.google.es"."\n".	// URL a la que llegara si el usuario se autentica correctamente
-			"redirectErrorUrl=http://www.ibm.com";		// URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
-	$confB64 = base64_encode($conf);
-	
+	$confB64 = null;
 	
 	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
 	$generateResult;
@@ -25,7 +22,7 @@
 			$transactionId,	// Identificador de transaccion recuperado en la operacion createBatch()
 			"0001",			// Identificador del documento
 			$documentB64,	// Documento a incluir
-			$confB64		// Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
+			$confB64		// Configuracion del servicio en base 64
 		);
 		echo "<br><b>Fichero 1 incluido en el batch correctamente</b><br>";
 	}
@@ -43,7 +40,7 @@
 			"CAdES",		// Formato de firma (CAdES, XAdES, PAdES...)
 			null,			// Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
 			null,			// Actualizacion
-			$confB64		// Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
+			$confB64		// Configuracion del servicio en base 64
 		);
 		echo "<br><b>Fichero 2 con parametros de firma propios incluido en el batch correctamente</b><br>";
 	}

@@ -302,7 +302,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 							docBytes,
 							algorithm,
 							signerCertChain,
-							extraParams
+							extraParams,
+        					false
 						);
 					break;
 				case COSIGN:
@@ -310,7 +311,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 							docBytes,
 							algorithm,
 							signerCertChain,
-							extraParams
+							extraParams,
+        					false
 						);
 					break;
 				case COUNTERSIGN:
@@ -327,7 +329,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 						algorithm,
 						signerCertChain,
 						extraParams,
-						target
+						target,
+    					false
 					);
 					break;
 

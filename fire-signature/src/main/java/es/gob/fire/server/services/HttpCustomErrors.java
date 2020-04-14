@@ -67,7 +67,11 @@ public enum HttpCustomErrors {
 	INVALID_SIGNATURE_ERROR(538, "La firma generada no es valida"), //$NON-NLS-1$
 
 	/** Error devuelto cuando se detecta que la firma generada no es v&aacute;lida. */
-	INVALID_DOCUMENT_MANAGER(539, "Gestor de documentos no valido"); //$NON-NLS-1$
+	INVALID_DOCUMENT_MANAGER(539, "Gestor de documentos no valido"), //$NON-NLS-1$
+
+	/** Error devuelto cuando falla la obtenci&oacute;n de un documento a trav&eacute;s del FireDocumentManager
+	 * configurado. */
+	DOCUMENT_MANAGER_ERROR(540, "Error al obtener un documento a traves del gestor en el servidor"); //$NON-NLS-1$
 
 	private final int errorCode;
 	private final String errorDescription;

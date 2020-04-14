@@ -261,7 +261,7 @@ namespace FIRe
                 .Replace(CONF, confB64.Replace('+', '-').Replace('/', '_'));
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
 
             // Mostramos los datos obtenidos
             return new FireLoadResult(System.Text.Encoding.UTF8.GetString(bytes));
@@ -345,7 +345,7 @@ namespace FIRe
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
 
             // Identificamos los datos obtenidos
             FireTransactionResult result;
@@ -372,7 +372,7 @@ namespace FIRe
                 .Replace(OP, OP_CODE_RECOVER_SIGN_RESULT); // El tipo de operacion solicitada es RECOVER_SIGN_RESULT
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
             result.Result = bytes;
 
             return result;
@@ -415,7 +415,7 @@ namespace FIRe
                 .Replace(TRANSACTION, transactionId);
 
             //  Realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
 
             try {
                 return new FireTransactionResult(bytes);
@@ -504,7 +504,7 @@ namespace FIRe
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
             // Mostramos los datos obtenidos
             return new FireTransactionIdResult(System.Text.Encoding.UTF8.GetString(bytes));
         }
@@ -563,9 +563,9 @@ namespace FIRe
                 .Replace(CONF, string.IsNullOrEmpty(confB64) ? "" : confB64.Replace('+', '-').Replace('/', '_'));
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
         }
-        
+
         /// <summary>
         /// Incluye en el batch un documento con una configuración de firma propia para realizar una firma por lotes.
         /// </summary>
@@ -652,7 +652,7 @@ namespace FIRe
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
         }
 
         /// <summary>
@@ -696,7 +696,7 @@ namespace FIRe
                 .Replace(STOPONERROR, stopOnError.ToString());
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
             // Mostramos los datos obtenidos
             return new FireLoadResult(System.Text.Encoding.UTF8.GetString(bytes));
         }
@@ -738,12 +738,12 @@ namespace FIRe
                 .Replace(OP, OP_CODE_RECOVER_BATCH); // El tipo de operacion solicitada es RECOVER_BATCH
 
             //  Realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
             FireBatchResult batchResult;
             try
             {
                 // Componemos el objeto de resultado con la respuesta del servicio
-                BatchResultJson batchResultJson = deserializedBatchResult(System.Text.Encoding.UTF8.GetString(bytes));
+                BatchResultJson batchResultJson = DeserializedBatchResult(System.Text.Encoding.UTF8.GetString(bytes));
                 batchResult = FireBatchResult.Parse(batchResultJson);
             }
             catch (Exception e)
@@ -790,7 +790,7 @@ namespace FIRe
                 .Replace(OP, OP_CODE_RECOVER_BATCH_STATE); // El tipo de operacion solicitada es RECOVER_BATCH_STATE
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
             
             // Mostramos los datos obtenidos
             return float.Parse(System.Text.Encoding.UTF8.GetString(bytes), System.Globalization.CultureInfo.InvariantCulture);
@@ -844,7 +844,7 @@ namespace FIRe
                 .Replace(OP, OP_CODE_RECOVER_BATCH_SIGN); // El tipo de operacion solicitada es RECOVER_BATCH_SIGN
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
             try
             {
                 return new FireTransactionResult(bytes);
@@ -912,7 +912,7 @@ namespace FIRe
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
 
             // Identificamos los datos obtenidos
             FireTransactionResult result;
@@ -938,7 +938,7 @@ namespace FIRe
                 .Replace(OP, OP_CODE_RECOVER_ASYNC_SIGN_RESULT); // El tipo de operacion solicitada es RECOVER_ASYNC_SIGN_RESULT
 
             //  Realizamos la peticion al servicio y recibimos los datos de la peticion
-            bytes = getResponseToPostPetition(url, urlParameters, this.config.getConfig());
+            bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
             result.Result = bytes;
 
             return result;
@@ -960,7 +960,7 @@ namespace FIRe
         /// <exception cref="BatchNoSignedException">Cuando se intenta recuperar la firma de un documento de un lote antes de firmar el propio lote.</exception>
         /// <exception cref="InvalidBatchDocumentException">Cuando se solicita la firma de un documento de un lote que no existe o que no se firmó correctamente.</exception>
         /// <exception cref="InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
-        private static byte[] getResponseToPostPetition(string url, string urlParameters, Dictionary<String, String> config)
+        private static byte[] GetResponseToPostPetition(string url, string urlParameters, Dictionary<String, String> config)
         {
             HttpWebResponse response = null;
             Stream dataStream = null;
@@ -1012,18 +1012,20 @@ namespace FIRe
                             throw new InvalidBatchDocumentException("El documento no existe en el lote", e);
                         case (HttpCustomErrors.INVALID_DOCUMENT_MANAGER):
                             throw new HttpOperationException("Gestor de documentos no valido", e);
+                        case (HttpCustomErrors.DOCUMENT_MANAGER_ERROR):
+                            throw new HttpOperationException("Error al obtener un documento a traves del gestor en el servidor", e);
                     }
-                    throw new HttpForbiddenException("Error durante la operacion de firma", e);
+                    throw new HttpOperationException("Error durante la operacion de firma", e);
                 }
                 throw new HttpNetworkException("Error al realizar la conexion: " + e.Message, e);
             }
             catch (ProtocolViolationException e)
             {
-                throw new HttpNetworkException("Ha ocurrido un problema con el protocolo :" + e.Message, e);
+                throw new HttpNetworkException("Ha ocurrido un problema con el protocolo:" + e.Message, e);
             }
             catch (InvalidOperationException e)
             {
-                throw new HttpNetworkException("Operacion no permitida :" + e.Message, e);
+                throw new HttpNetworkException("Operacion HTTP no permitida por el servicio:" + e.Message, e);
             }
             catch (IOException e)
             {
@@ -1046,7 +1048,7 @@ namespace FIRe
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
         /// <returns></returns>
-        private static BatchResultJson deserializedBatchResult(string JSON)
+        private static BatchResultJson DeserializedBatchResult(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
             return json_serializer.Deserialize<BatchResultJson>(JSON);
