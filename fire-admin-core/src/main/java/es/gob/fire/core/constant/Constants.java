@@ -52,6 +52,11 @@ public final class Constants {
 	public static final String MESSAGES = "messages";
 	
 	/**
+	 * Attribute that represents the row index value for the data table in case of error.
+	 */
+	public static final String ROW_INDEX_ERROR = "-1";
+	
+	/**
 	 * Constructor method for the class Constants.java.
 	 */
 	private Constants() {

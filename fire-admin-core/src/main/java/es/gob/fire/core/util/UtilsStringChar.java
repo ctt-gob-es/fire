@@ -1,26 +1,21 @@
 /*
-/*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
- * This program is licensed and may be used, modified and redistributed under the  terms
- * of the European Public License (EUPL), either version 1.1 or (at your option)
- * any later version as soon as they are approved by the European Commission.
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and
- * more details.
- * You should have received a copy of the EUPL1.1 license
- * along with this program; if not, you may find it at
- * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
- ******************************************************************************/
+ * Este fichero forma parte de la plataforma de @firma.
+ * La plataforma de @firma es de libre distribución cuyo código fuente puede ser consultado
+ * y descargado desde http://forja-ctt.administracionelectronica.gob.es
+ *
+ * Copyright 2016 Gobierno de España
+ * Este fichero se distribuye bajo las licencias EUPL versión 1.1  y GPL versión 3, o superiores, según las
+ * condiciones que figuran en el fichero 'LICENSE.txt' que se acompaña.  Si se   distribuyera este
+ * fichero individualmente, deben incluirse aquí las condiciones expresadas allí.
+ */
 
 /**
- * <b>File:</b><p>es.gob.valet.commons.utils.UtilsStringChar.java.</p>
+ * <b>File:</b><p>es.gob.monitoriza.utilidades.UtilsStringChar.java.</p>
  * <b>Description:</b><p>Class that provides functionality for managing strings and characters.</p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>10/09/2018.</p>
  * @author Gobierno de España.
- * @version 1.9, 18/02/2019.
+ * @version 1.0, 14/04/2020.
  */
 package es.gob.fire.core.util;
 
@@ -28,8 +23,8 @@ import org.apache.commons.codec.binary.Hex;
 
 /**
  * <p>Class that provides functionality for managing strings and characters.</p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.9, 18/02/2019.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.0, 14/04/2020.
  */
 public final class UtilsStringChar {
 
@@ -149,6 +144,16 @@ public final class UtilsStringChar {
 	 * Constant attribute that represents the string to identify the symbol: <code>-</code>.
 	 */
 	public static final String SYMBOL_HYPHEN_STRING = String.valueOf(SYMBOL_HYPHEN);
+	
+	/**
+	 * Constant attribute that represents the char to identify the symbol: <code>_</code>.
+	 */
+	public static final char SYMBOL_UNDERSCORE = '_';
+
+	/**
+	 * Constant attribute that represents the string to identify the symbol: <code>-</code>.
+	 */
+	public static final String SYMBOL_UNDERSCORE_STRING = String.valueOf(SYMBOL_UNDERSCORE);
 
 	/**
 	 * Constant attribute that represents the char to identify the symbol: <code>,</code>.
@@ -201,26 +206,6 @@ public final class UtilsStringChar {
 	public static final String SYMBOL_ESCAPED_BACKSLASH_STRING = String.valueOf(SYMBOL_ESCAPED_BACKSLASH);
 
 	/**
-	 * Constant attribute that represents the char to identify the symbol: <code>[</code>.
-	 */
-	public static final char SYMBOL_OPEN_SQUARE_BRACKET = '[';
-
-	/**
-	 * Constant attribute that represents the string to identify the symbol: <code>[</code>.
-	 */
-	public static final String SYMBOL_OPEN_SQUARE_BRACKET_STRING = String.valueOf(SYMBOL_OPEN_SQUARE_BRACKET);
-
-	/**
-	 * Constant attribute that represents the char to identify the symbol: <code>]</code>.
-	 */
-	public static final char SYMBOL_CLOSE_SQUARE_BRACKET = ']';
-
-	/**
-	 * Constant attribute that represents the string to identify the symbol: <code>]</code>.
-	 */
-	public static final String SYMBOL_CLOSE_SQUARE_BRACKET_STRING = String.valueOf(SYMBOL_CLOSE_SQUARE_BRACKET);
-
-	/**
 	 * Constant attribute that represents the char to identify the symbol: <code>(</code>.
 	 */
 	public static final char SYMBOL_OPEN_BRACKET = '(';
@@ -249,16 +234,6 @@ public final class UtilsStringChar {
 	 * Constant attribute that represents the string to identify the symbol: <code>*</code>.
 	 */
 	public static final String SYMBOL_ASTERISK_STRING = String.valueOf(SYMBOL_ASTERISK);
-
-	/**
-	 * Constant attribute that represents the char to identify the symbol: <code>|</code>.
-	 */
-	public static final char SYMBOL_PIPE = '|';
-
-	/**
-	 * Constant attribute that represents the string to identify the symbol: <code>|</code>.
-	 */
-	public static final String SYMBOL_PIPE_STRING = String.valueOf(SYMBOL_PIPE);
 
 	/**
 	 * Constant attribute that represents the array with all the characters defined as constants in this class.

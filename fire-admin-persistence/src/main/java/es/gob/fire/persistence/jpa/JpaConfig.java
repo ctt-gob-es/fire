@@ -15,8 +15,8 @@
  ******************************************************************************/
 
 /** 
- * <b>File:</b><p>es.gob.fire.persistence.configuration.jpa.JpaConfig.java.</p>
- * <b>Description:</b><p> .</p>
+ * <b>File:</b><p>es.gob.fire.persistence.jpa.JpaConfig.java.</p>
+ * <b>Description:</b><p>Class that manages the data base configuration.</p>
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>01/04/2020.</p>
  * @author Gobierno de España.
@@ -30,8 +30,8 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -44,20 +44,36 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import es.gob.fire.core.constant.Constants;
+import es.gob.fire.core.util.FileUtilsDirectory;
+import es.gob.fire.core.util.UtilsServer;
 
 /** 
- * <p>Class .</p>
+ * <p>Class that manages the data base configuration.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
  * @version 1.0, 01/04/2020.
  */
+
+
 @Configuration
-@EnableAutoConfiguration
 @ComponentScan(Constants.MAIN_PROJECT_PACKAGE)
 @EntityScan(Constants.MAIN_ENTITY_PROJECT_PACKAGE)
+@EnableTransactionManagement
 @EnableJpaRepositories(repositoryFactoryBeanClass = DataTablesRepositoryFactoryBean.class, basePackages = Constants.MAIN_REPOSITORY_PROJECT_PACKAGE)
 public class JpaConfig {
+
+	/**
+	 * Constant attribute that represents the file name of the configuration
+	 * properties for configure MySql strategy identity.
+	 */
+	private static final String CONF_IDENTITY_MYSQL = "mysql-orm.xml";
+
+	/**
+	 * Constant attribute that represents the MySql dialect.
+	 */
+	private static final String MYSQL_DIALECT = "org.hibernate.dialect.MySQLDialect";
 
 	/**
 	 * Attribute that represents the driver data base.
@@ -115,10 +131,16 @@ public class JpaConfig {
 		entityManagerFactoryBean.setDataSource(configureDataSource());
 		entityManagerFactoryBean.setPackagesToScan(Constants.MAIN_PERSISTENCE_PROJECT_PACKAGE);
 		entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-
 		Properties jpaProperties = new Properties();
+		if (StringUtils.equals(dialect, MYSQL_DIALECT)) {
+			entityManagerFactoryBean.setMappingResources("file:///"+FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), CONF_IDENTITY_MYSQL));
+			jpaProperties.put(org.hibernate.cfg.Environment.GLOBALLY_QUOTED_IDENTIFIERS, Boolean.TRUE);
+			//jpaProperties.put("spring.jpa.hibernate.naming.implicit-strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl");
+			//jpaProperties.put("spring.jpa.hibernate.naming.physical-strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
+		}
 		jpaProperties.put(org.hibernate.cfg.Environment.DIALECT, dialect);
 		jpaProperties.put(org.hibernate.cfg.Environment.SHOW_SQL, showSQL);
+		
 		entityManagerFactoryBean.setJpaProperties(jpaProperties);
 		entityManagerFactoryBean.afterPropertiesSet();
 		
@@ -131,7 +153,7 @@ public class JpaConfig {
 	 * @return PlatformTransactionManager
 	 */
 	@Bean(name = "transactionManager")
-	public PlatformTransactionManager annotationDrivenTransactionManager() throws SQLException  {
+	public PlatformTransactionManager annotationDrivenTransactionManager() throws SQLException {
 		return new JpaTransactionManager(configureEntityManagerFactory());
 	}
 
@@ -140,11 +162,11 @@ public class JpaConfig {
 	 * 
 	 * @return HibernateExceptionTranslator
 	 */
-    @Bean(name = "hibernateExceptionTranslator")
-    public HibernateExceptionTranslator hibernateExceptionTranslator() {
-    	return new HibernateExceptionTranslator();
-    }
-	
+	@Bean(name = "hibernateExceptionTranslator")
+	public HibernateExceptionTranslator hibernateExceptionTranslator() {
+		return new HibernateExceptionTranslator();
+	}
+
 	/**
 	 * Gets the value of the attribute {@link #driver}.
 	 * @return the value of the attribute {@link #driver}.
@@ -160,7 +182,7 @@ public class JpaConfig {
 	public void setDriver(final String driverP) {
 		this.driver = driverP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #url}.
 	 * @return the value of the attribute {@link #url}.
@@ -168,7 +190,7 @@ public class JpaConfig {
 	public String getUrl() {
 		return url;
 	}
-	
+
 	/**
 	 * Sets the value of the attribute {@link #url}.
 	 * @param urlP The value for the attribute {@link #url}.
@@ -176,7 +198,7 @@ public class JpaConfig {
 	public void setUrl(final String urlP) {
 		this.url = urlP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #user}.
 	 * @return the value of the attribute {@link #user}.
@@ -184,7 +206,7 @@ public class JpaConfig {
 	public String getUser() {
 		return user;
 	}
-	
+
 	/**
 	 * Sets the value of the attribute {@link #user}.
 	 * @param userP The value for the attribute {@link #user}.
@@ -192,7 +214,7 @@ public class JpaConfig {
 	public void setUser(final String userP) {
 		this.user = userP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #pass}.
 	 * @return the value of the attribute {@link #pass}.
@@ -200,7 +222,7 @@ public class JpaConfig {
 	public String getPass() {
 		return pass;
 	}
-	
+
 	/**
 	 * Sets the value of the attribute {@link #pass}.
 	 * @param passP The value for the attribute {@link #pass}.
@@ -208,7 +230,7 @@ public class JpaConfig {
 	public void setPass(final String passP) {
 		this.pass = passP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #dialect}.
 	 * @return the value of the attribute {@link #dialect}.
@@ -216,7 +238,7 @@ public class JpaConfig {
 	public String getDialect() {
 		return dialect;
 	}
-	
+
 	/**
 	 * Sets the value of the attribute {@link #dialect}.
 	 * @param dialectP The value for the attribute {@link #dialect}.
@@ -232,7 +254,7 @@ public class JpaConfig {
 	public boolean isShowSQL() {
 		return showSQL;
 	}
-	
+
 	/**
 	 * Sets the value of the attribute {@link #showSQL}.
 	 * @param showSQLP The value for the attribute {@link #showSQL}.
@@ -240,5 +262,5 @@ public class JpaConfig {
 	public void setShowSQL(final boolean showSQLP) {
 		this.showSQL = showSQLP;
 	}
-	
+
 }

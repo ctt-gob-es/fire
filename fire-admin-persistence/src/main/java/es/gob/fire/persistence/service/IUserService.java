@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 /** 
- * <b>File:</b><p>es.gob.valet.service.IUserValetService.java.</p>
+ * <b>File:</b><p>es.gob.fire.persistence.service.IUserService.java.</p>
  * <b>Description:</b><p> .</p>
   * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>15/06/2018.</p>
@@ -26,6 +26,9 @@ package es.gob.fire.persistence.service;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import es.gob.fire.core.dto.UserDTO;
+import es.gob.fire.core.dto.UserEditDTO;
+import es.gob.fire.core.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.User;
 
 /** 
@@ -44,16 +47,29 @@ public interface IUserService {
 	/**
 	 * Method that obtains an user by its user name.
 	 * @param userName The user login.
-	 * @return {@link UserValet}
+	 * @return {@link User}
 	 */
 	User getUserByUserName(String userName);
 	
 	/**
 	 * Method that stores a user in the persistence.
-	 * @param user a {@link UserValet} with the information of the user.
-	 * @return {@link UserValet} The user. 
+	 * @param user a {@link User} with the information of the user.
+	 * @return {@link User} The user.
 	 */
 	User saveUser(User user);
+	
+	/** Method that stores a user in the persistence from User DTO object.
+	 * @param userDto a {@link UserDTO} with the information of the user.
+	 * @return {@link User} The user.
+	 */
+	User saveUser(UserDTO userDto);
+	
+	/**
+	 * Method that updates a user in the persistence.
+	 * @param userEditDto a {@link UserEditDTO} with the information of the user.
+	 * @return {@link User} The user.
+	 */
+	User updateUser(UserEditDTO userEditDto);
 			
 	/**
 	 * Method that deletes a user in the persistence.
@@ -63,7 +79,7 @@ public interface IUserService {
 	
 	/**
 	 * Method that gets all the users from the persistence.
-	 * @return a {@link Iterable<UserValet>} with the information of all users.
+	 * @return a {@link Iterable<User>} with the information of all users.
 	 */
 	Iterable<User> getAllUser();
 		
@@ -73,10 +89,15 @@ public interface IUserService {
 	 * @return {@link DataTablesOutput}
 	 */
 	DataTablesOutput<User> getAllUser(DataTablesInput input);
+	
+	/**
+	 * Method that change the password of a user.
+	 * @param userPasswordDto a {@link UserPasswordDTO} with the information of the user.
+	 * @return {@link String} The result of the password change:
+	 * 		0: Change success
+	 * 	   -1: Old password and new password doesn't match
+	 *     -2: Error updating the user with new password
+	 */
+	String changeUserPassword(UserPasswordDTO userPasswordDto);
+	
 }
-
-
-
-
-
-

@@ -33,35 +33,35 @@
                       <span>Editar datos personales</span> 
                        <script th:inline="javascript">
                       
-                       	var menuEdit = /*[[@{/menuedit}]]*/;
- 	      				var username = /*[[${#httpServletRequest.remoteUser}]]*/;
- 	      				$('#aUser').click(function(e){
-	      					e.preventDefault(); 
-	      					
- 	      					$.ajax({
- 	      						url : menuEdit,
- 	      						type : 'GET',
-	      						data : $.param({'username':username}),
-	      						cache : false,
- 	      						success : function(data) {
- 	      							hide();
- 	      							$("body").append(data);
+                          var menuEdit = /*[[@{/menuedit}]]*/;
+                                 var username = /*[[${#httpServletRequest.remoteUser}]]*/;
+                                 $('#aUser').click(function(e){
+                                        e.preventDefault(); 
+                                        
+                                        $.ajax({
+                                              url : menuEdit,
+                                              type : 'GET',
+                                               data : $.param({'username':username}),
+                                               cache : false,
+                                              success : function(data) {
+                                                     hide();
+                                                     $("body").append(data);
 
- 	      							$('#modalEdit').modal({
- 	      		                    	backdrop: 'static',
-	      		                        keyboard: true, 
- 	      		                        show: true
- 	      		                	});
- 	      						},
- 	      						error : function() {}
- 	      					});
-	      					
- 	      					return false;
- 	      				});
-	                 	
- 	                </script> 
+                                                     $('#modalEdit').modal({
+                                             backdrop: 'static',
+                                            keyboard: true, 
+                                            show: true
+                                       });
+                                              },
+                                              error : function() {}
+                                       });
+                                        
+                                        return false;
+                                 });
+                           
+                       </script> 
                      </a> 
-                   </li> 
+                   </li>
                   
                   <li>
                     <a href="#" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700" id="aPass">
@@ -101,7 +101,8 @@
                   
                   <li role="separator" class="divider"></li>
                   <li>
-	                  <form id="logoutForm" th:action="@{/login?logout}" class="form-logout">
+					 <form id="logoutForm" th:action="@{/logout}" class="form-logout">
+					 	<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 	                    <a onclick="logout();return false;" href="#" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700">
 						 <i class="ti-power-off mR-10"></i>
 						 <span th:text="#{fire-admin-web.general.logout}"></span>
@@ -113,7 +114,7 @@
               <li class="dropdown">
               	<img id="logo_gob" th:src="@{images/cabeceraLogoGobierno.png}"
 				alt="Gobierno de Espa&ntilde;a"
-				class="fire-navbar-logo-gobierno">
+				class="monitoriza-navbar-logo-gobierno">
               </li>
             </ul>
           </div>

@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 /** 
- * <b>File:</b><p>es.gob.valet.exception.ThenCheckIt.java.</p>
+ * <b>File:</b><p>es.gob.fire.core.rest.exception.ThenCheckIt.java.</p>
  * <b>Description:</b><p>Interface to specify the order of validation.</p>
   * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>19 jun. 2018.</p>

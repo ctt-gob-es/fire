@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 /** 
- * <b>File:</b><p>es.gob.valet.exception.CheckItFirst.java.</p>
+ * <b>File:</b><p>es.gob.fire.core.rest.exception.CheckItFirst.java.</p>
  * <b>Description:</b><p> Interface to be used to indicate the order of the checks.</p>
   * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>19 jun. 2018.</p>

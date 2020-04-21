@@ -65,29 +65,24 @@ $(document).ready(function() {
       return pattern === (window.location.pathname).substr(1);
     })
     .addClass('active');
-
-  // ٍSidebar Toggle
-//  $('.sidebar-toggle').on('click', e => {
-//    $('.app').toggleClass('is-collapsed');
-//    e.preventDefault();
-//  });
   
   $('.sidebar-toggle').on('click', function(e){
 	    $('.app').toggleClass('is-collapsed');
+	    $('#fireImageLogo').toggle();
 	    e.preventDefault();
 	  });
 
+  $(' .sidebar ').hover(function() {
+	  if ($('.app').hasClass('is-collapsed')) {
+		  $('#fireImageLogo').toggle();
+	  }
+	});
+  
   /**
    * Wait untill sidebar fully toggled (animated in/out)
    * then trigger window resize event in order to recalculate
    * masonry layout widths and gutters.
    */
-//  $('#sidebar-toggle').click(e => {
-//    e.preventDefault();
-//    setTimeout(() => {
-//      window.dispatchEvent(window.EVENT);
-//    }, 300);
-//  });
   
   $('#sidebar-toggle').click(function(e){
 	    e.preventDefault();

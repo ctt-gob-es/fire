@@ -1,0 +1,114 @@
+<form name="altEditor-form" role="form" id="logServerForm" th:object="${logServerForm}" th:action="@{/savelogserver}" method="post">
+					
+	<input type='hidden' class='primarykey' id="logServerId" th:field="*{logServerId}">
+	
+	<div class="form-group">
+		
+			<label for="name" class="col-form-label" th:text="#{form.log.server.name}"></label>
+			<script th:inline="javascript">
+				/*<![CDATA[*/
+				    var messageName = /*[[#{form.log.server.name.pattern}]]*/ 'default';
+				/*]]>*/
+			</script>
+			<input onblur="validate(this, messageName);" type="text" id="name" th:field="*{name}" style="overflow:hidden" class="form-control" required pattern=".{1,45}" />
+			<div id="invalid-name" class="invalid-feedback" ></div>
+		
+		<div style="clear:both;"/>
+	</div>
+	
+	<div class="form-group">
+		
+		<label for="url" class="col-form-label" th:text="#{form.log.server.url.service}"></label>
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			    var messageUrl = /*[[#{form.log.server.url.service.pattern}]]*/ 'default';
+			/*]]>*/
+		</script>
+		<input onblur="validate(this, messageUrl);" type="text" id="urlService" th:field="*{urlService}" style="overflow:hidden" class="form-control" required pattern=".{3,500}"/>
+		<div id="invalid-url" class="invalid-feedback" ></div>
+	
+		<div style="clear:both;"/>
+	</div>
+		
+	<div class="form-group">
+		
+		<label for="key" class="col-form-label" th:text="#{form.log.server.key}"></label>
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			    var messageKey = /*[[#{form.log.server.key.pattern}]]*/ 'default';
+			/*]]>*/
+		</script>
+		<input onblur="validate(this, messageKey);" type="text" id="key" th:field="*{key}" style="overflow:hidden" class="form-control" required pattern=".{3,45}"/>
+		<div id="invalid-key" class="invalid-feedback" ></div>
+	
+		<div style="clear:both;"/>
+	</div>
+	
+	<div class="form-row">
+		<div class="form-group col-md-6">
+			<label for="verifySSL" th:text="#{form.log.server.verify.ssl}"></label>
+			<input type="checkbox" id="verifySSL" th:checked="${logServerForm.verifySSL}" th:value="${logServerForm.verifySSL}">
+		</div>
+	</div>
+	
+	<div class="form-row">
+		<button type="button" class="btn btn-secondary" id="check-connection-button" >Comprobar conexi&oacute;n</button>
+		<span id="connection-result" class="mon-alert-message" role="alert"></span>
+	</div>
+</form>
+
+<script th:inline="javascript">
+$(document).ready(function () {
+	
+	// Inicialización con valor correcto del checkbox
+	if ($("#verifySSL").val() == 'true') {
+		$("#logServerForm.verifySSL").prop('checked', true);
+		$("#logServerForm.verifySSL").attr('value', true);
+    } else {
+    	$("#logServerForm.verifySSL").prop('checked', false);
+    	$("#logServerForm.verifySSL").attr('value', false);
+    }
+	
+	$("#verifySSL").change(function () {
+        if ($(this).is(":checked")) {
+        	$(this).attr('value', 'true');
+        	$('#verifySSL').attr('value', 'true');
+        }
+        else {
+        	$(this).attr('value', 'false');
+        	$('#verifySSL').attr('value', 'false');
+        }
+    });
+
+    $("#check-connection-button").on("click", function () {
+
+    	$.ajax("checklogserver", {
+	        type: 'POST',
+	        data: $.param({'urlTex': $('#urlService').val()}),
+	        success: function(data, status, response) {
+
+				console.log("Conexion correcta");
+				
+				console.log(data);
+				
+				if (data === true) {
+					$("#connection-result").removeClass("alert-success alert-danger");
+					$("#connection-result").addClass("alert-success");
+					$("#connection-result").html("<strong>Conexi&oacute;n correcta</strong>");
+				}
+				else {
+					$("#connection-result").removeClass("alert-success alert-danger");
+		        	$("#connection-result").addClass("alert-danger");
+		        	$("#connection-result").html("<strong>No se ha podido conectar con el servidor</strong>");	
+				}
+	        },
+	        error: function(err) {
+	        	console.log("Conexion fallida");
+	        	$("#connection-result").removeClass("alert-success alert-danger");
+	        	$("#connection-result").addClass("alert-danger");
+	        	$("#connection-result").html("<strong>No se ha podido comprobar la conexi&oacute;n con el servidor</strong>");
+			}
+		});
+    });
+});
+</script>

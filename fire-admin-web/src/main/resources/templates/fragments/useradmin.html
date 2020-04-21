@@ -13,9 +13,7 @@
 							<th th:text="#{table.user.login}"></th>
 							<th th:text="#{table.user.name}"></th>
 							<th th:text="#{table.user.surname}"></th>
-							<th th:text="#{table.user.password}"></th>
 							<th th:text="#{table.user.email}"></th>
-							<th th:text="#{table.user.cert.correct}"></th>
 						</tr>
 					</thead>
 				</table>
@@ -233,15 +231,13 @@ $(document).ready(function() {
 	        },
 	       
 		"columns": [
-	        { "data": "idUserFire",
+	        { "data": "userId",
 	          "visible": false},
 	        { "data": "name" },
 	        { "data": "surnames" },
-	        { "data": "username" },
 	        { "data": "password",
 	          "visible": false},
-	        { "data": "email" },
-	        { "data": "someCertNotValid" }
+	        { "data": "email" }
 	        ]
 		}).on('crudaction', function(e, accion, idUserFire, data, rowindex){
 		    // e          Evento Jquery

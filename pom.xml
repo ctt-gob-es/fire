@@ -19,7 +19,8 @@
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 
-		<jdk.version>1.7</jdk.version>
+		<!-- <jdk.version>1.7</jdk.version> -->
+		<jdk.version>1.8</jdk.version>
 		
 		<fire.version>2.4-SNAPSHOT</fire.version>
 		<clienteafirma.version>1.6.5</clienteafirma.version>
@@ -75,6 +76,7 @@
 				<module>fire-admin-persistence</module>
 				<module>fire-admin-core</module>
 				<module>fire-admin-web</module>
+				<module>fire-admin-i18n</module>
 				<module>clavefirma-test-services</module>
 				<module>fire-admin-jsp</module>
 				<module>fire-client-java</module>
@@ -122,7 +124,11 @@
 				<artifactId>fire-admin-web</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-i18n</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>es.gob.afirma</groupId>
 				<artifactId>afirma-core</artifactId>

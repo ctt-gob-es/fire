@@ -524,16 +524,12 @@ iframe {
 	
 }
 
-
-
-
 .fire-admin-front-img3 {
+	width: 100%;
 	width:300%;
 	height:300%;
-	 margin-top: .6em;
-  margin-bottom: .4em;
-  margin-left: 1em;
-  margin-right: .5em;
+	top: 9px;
+	position: relative;
 	
 }
 

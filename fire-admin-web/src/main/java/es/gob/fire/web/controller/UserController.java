@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import es.gob.fire.core.dto.UserDTO;
+import es.gob.fire.core.dto.UserEditDTO;
+import es.gob.fire.core.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
-import es.gob.fire.web.form.UserForm;
-import es.gob.fire.web.form.UserFormEdit;
-import es.gob.fire.web.form.UserFormPassword;
 
 /**
  * <p>
@@ -45,8 +45,8 @@ public class UserController {
 	 */
 	@RequestMapping(value = "useradmin")
 	public String index(final Model model) {
-		model.addAttribute("userFormPassword", new UserFormPassword());
-		model.addAttribute("userformEdit", new UserFormEdit());
+		model.addAttribute("userFormPassword", new UserPasswordDTO());
+		model.addAttribute("userformEdit", new UserEditDTO());
 		return "fragments/useradmin.html";
 	}
 
@@ -60,7 +60,7 @@ public class UserController {
 	 */
 	@RequestMapping(value = "adduser", method = RequestMethod.POST)
 	public String addUser(final Model model) {
-		model.addAttribute("userform", new UserForm());
+		model.addAttribute("userform", new UserDTO());
 		model.addAttribute("accion", "add");
 		return "modal/userForm";
 	}
@@ -74,7 +74,7 @@ public class UserController {
 	@RequestMapping(value = "menupass")
 	public String menuPass(@RequestParam("username") final String username, final Model model) {
 		final User user = this.userService.getUserByUserName(username);
-		final UserFormPassword userFormPassword = new UserFormPassword();
+		final UserPasswordDTO userFormPassword = new UserPasswordDTO();
 
 		userFormPassword.setIdUserFirePass(user.getUserId());
 
@@ -91,7 +91,7 @@ public class UserController {
 	@RequestMapping(value = "menuedit")
 	public String menuEdit(@RequestParam("username") final String username, final Model model) {
 		final User user = this.userService.getUserByUserName(username);
-		final UserFormEdit userFormEdit = new UserFormEdit();
+		final UserEditDTO userFormEdit = new UserEditDTO();
 
 		userFormEdit.setIdUserFireEdit(user.getUserId());
 		userFormEdit.setNameEdit(user.getName());

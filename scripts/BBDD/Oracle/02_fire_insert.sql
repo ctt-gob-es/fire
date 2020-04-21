@@ -15,6 +15,7 @@ VALUES(3,'contact');
 -- USUARIO POR DEFECTO --------
 INSERT INTO TB_USUARIOS ("nombre_usuario","clave","nombre","apellidos","usu_defecto","fk_rol") 
 VALUES('admin','$2y$12$JfP4bTV0i29Mnb3XBPOQl.L8JdbTrpn4fQljv8EEJKIp6NRZLB5TC','default name','default surnames',1,1);
+-- VALUES('admin','$2y$12$JfP4bTV0i29Mnb3XBPOQl.L8JdbTrpn4fQljv8EEJKIp6NRZLB5TC','default name','default surnames',1,1);
 
 
 COMMIT;

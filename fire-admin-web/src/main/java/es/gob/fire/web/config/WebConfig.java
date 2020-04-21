@@ -9,12 +9,18 @@
  */
 package es.gob.fire.web.config;
 
+import java.util.Locale;
+
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import es.gob.fire.core.constant.Constants;
 import es.gob.fire.core.util.FileUtilsDirectory;
@@ -34,7 +40,12 @@ public class WebConfig implements WebMvcConfigurer {
 	 * properties for configure persistence.
 	 */
 	private static final String PROPS_CONF_FILE_PERSISTENCE = "persistence.properties";
-	
+
+	/**
+	 * Attribute that represents the messages path.
+	 */
+	private static final String MESSAGE_SOURCE = "classpath:messages/i18n/messages";
+
 	/**
 	 * Method that registers a property.
 	 * 
@@ -42,9 +53,25 @@ public class WebConfig implements WebMvcConfigurer {
 	 */
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+		final PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
 		propertySourcesPlaceholderConfigurer.setLocations(new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_PERSISTENCE)));
 		return propertySourcesPlaceholderConfigurer;
+	}
+
+	@Bean
+	public MessageSource messageSource() {
+		final ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setBasename(MESSAGE_SOURCE);
+		messageSource.setDefaultEncoding("UTF-8");
+		messageSource.setUseCodeAsDefaultMessage(Boolean.TRUE);
+		return messageSource;
+	}
+
+	@Bean
+	public LocaleResolver localeResolver() {
+		final SessionLocaleResolver sessionLocaleResolver = new SessionLocaleResolver();
+		sessionLocaleResolver.setDefaultLocale(new Locale("es", "ES"));
+		return sessionLocaleResolver;
 	}
 
 }

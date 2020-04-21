@@ -43,6 +43,12 @@ import es.gob.fire.web.authentication.CustomUserAuthentication;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
+	
+	/**
+	 * Constant that represents the name of the cookie for session tracking. 
+	 */
+	public static final String SESSION_TRACKING_COOKIE_NAME = "JSESSIONID";
+	
 	/**
 	 * Attribute that represents the injected service for user authentication. 
 	 */
@@ -54,37 +60,36 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	 * @see org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter#configure(org.springframework.security.config.annotation.web.builders.HttpSecurity)
 	 */
 	@Override
-    protected void configure(HttpSecurity http) throws Exception {
-        
-      http
-        .authorizeRequests()
-        	.antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**")
-        	.permitAll() // Enable css, images and js when logged out
-        	.and()
-        .authorizeRequests()
-          	.antMatchers("/", "add", "delete/{id}", "edit/{id}", "save", "users")
-            .permitAll()
-            .anyRequest()
-            .authenticated()
-            .and()
-        .formLogin()
-            .loginPage("/")
-            .defaultSuccessUrl("/inicio")
-            .permitAll()
-            .and()
-        .logout()
-            .permitAll()
-            .and()
-        .httpBasic()
-        	.and()
-        .csrf()
-        	.disable()			//Disable CSRF
-        .sessionManagement()
-	        .sessionFixation().migrateSession()
-	    	.maximumSessions(1)
-	    	.maxSessionsPreventsLogin(false)
-	    	.expiredUrl("/login.html"); 
-
+    protected void configure(HttpSecurity http) throws Exception {  
+      http.authorizeRequests()
+	    .antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/invalidSession", "/mailpasswordrestoration")
+	    .permitAll() // Enable css, images and js when logged out
+		.and()
+		.authorizeRequests()
+		.antMatchers("/", "add", "delete/{id}", "edit/{id}", "save", "users")
+		.permitAll()
+		.anyRequest()
+		.authenticated()
+		.and()
+		.formLogin()
+        .loginPage("/")
+        .defaultSuccessUrl("/inicio")
+        .permitAll()
+        .and()
+		.logout().invalidateHttpSession(false).deleteCookies(SESSION_TRACKING_COOKIE_NAME).clearAuthentication(true).logoutSuccessUrl("/")
+		.permitAll()
+		.and()
+		.httpBasic()
+		.and()
+		.csrf()
+		.disable() // Disable CSRF
+		.sessionManagement()
+		.sessionFixation().migrateSession()
+		.maximumSessions(1)
+		.expiredUrl("/")
+		.and()
+		.invalidSessionUrl("/invalidSession");
+      
     }
 
 	/**
