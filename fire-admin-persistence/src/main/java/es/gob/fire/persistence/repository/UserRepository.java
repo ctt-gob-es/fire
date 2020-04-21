@@ -1,9 +1,9 @@
-package es.gob.fire.persistence.model.repository;
+package es.gob.fire.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import es.gob.fire.persistence.model.entity.User;
+import es.gob.fire.persistence.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>  {

@@ -27,41 +27,41 @@
                   </div>
                 </a>
                 <ul class="dropdown-menu fsz-sm">
-<!--                   <li> -->
-<!--                     <a href="#" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700" id="aUser"> -->
-<!--                       <i class="ti-settings mR-10"></i> -->
-<!--                       <span>Editar datos personales</span> -->
-<!--                       <script th:inline="javascript"> -->
+                   <li> 
+                     <a href="#" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700" id="aUser"> 
+                       <i class="ti-settings mR-10"></i> 
+                      <span>Editar datos personales</span> 
+                       <script th:inline="javascript">
                       
-//                       	var menuEdit = /*[[@{/menuedit}]]*/;
-// 	      				var username = /*[[${#httpServletRequest.remoteUser}]]*/;
-// 	      				$('#aUser').click(function(e){
-// 	      					e.preventDefault(); 
+                       	var menuEdit = /*[[@{/menuedit}]]*/;
+ 	      				var username = /*[[${#httpServletRequest.remoteUser}]]*/;
+ 	      				$('#aUser').click(function(e){
+	      					e.preventDefault(); 
 	      					
-// 	      					$.ajax({
-// 	      						url : menuEdit,
-// 	      						type : 'GET',
-// 	      						data : $.param({'username':username}),
-// 	      						cache : false,
-// 	      						success : function(data) {
-// 	      							hide();
-// 	      							$("body").append(data);
+ 	      					$.ajax({
+ 	      						url : menuEdit,
+ 	      						type : 'GET',
+	      						data : $.param({'username':username}),
+	      						cache : false,
+ 	      						success : function(data) {
+ 	      							hide();
+ 	      							$("body").append(data);
 
-// 	      							$('#modalEdit').modal({
-// 	      		                    	backdrop: 'static',
-// 	      		                        keyboard: true, 
-// 	      		                        show: true
-// 	      		                	});
-// 	      						},
-// 	      						error : function() {}
-// 	      					});
+ 	      							$('#modalEdit').modal({
+ 	      		                    	backdrop: 'static',
+	      		                        keyboard: true, 
+ 	      		                        show: true
+ 	      		                	});
+ 	      						},
+ 	      						error : function() {}
+ 	      					});
 	      					
-// 	      					return false;
-// 	      				});
+ 	      					return false;
+ 	      				});
 	                 	
-<!-- 	                </script> -->
-<!--                     </a> -->
-<!--                   </li> -->
+ 	                </script> 
+                     </a> 
+                   </li> 
                   
                   <li>
                     <a href="#" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700" id="aPass">
@@ -113,7 +113,7 @@
               <li class="dropdown">
               	<img id="logo_gob" th:src="@{images/cabeceraLogoGobierno.png}"
 				alt="Gobierno de Espa&ntilde;a"
-				class="monitoriza-navbar-logo-gobierno">
+				class="fire-navbar-logo-gobierno">
               </li>
             </ul>
           </div>

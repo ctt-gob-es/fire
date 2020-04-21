@@ -33,8 +33,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.persistence.model.entity.User;
-import es.gob.fire.persistence.model.repository.UserRepository;
+import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.repository.UserRepository;
 
 /**
  * <p>Service for retrieving the user's authentication and authorization information from a registered user.</p>

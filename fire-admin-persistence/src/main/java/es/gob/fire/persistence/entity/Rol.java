@@ -1,4 +1,4 @@
-package es.gob.fire.persistence.model.entity;
+package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
 

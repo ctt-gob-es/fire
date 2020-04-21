@@ -29,9 +29,9 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.persistence.model.entity.User;
-import es.gob.fire.persistence.model.repository.UserRepository;
-import es.gob.fire.persistence.model.repository.datatable.UserDataTablesRepository;
+import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.repository.UserRepository;
+import es.gob.fire.persistence.repository.datatable.UserDataTablesRepository;
 import es.gob.fire.persistence.service.IUserService;
 
 /**
@@ -66,7 +66,7 @@ public class UserService implements IUserService {
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.IUserService#saveUser(es.gob.fire.persistence.model.entity.User)
+	 * @see es.gob.fire.persistence.services.IUserService#saveUser(es.gob.fire.persistence.entity.User)
 	 */
 	@Override
 	public User saveUser(User user) {

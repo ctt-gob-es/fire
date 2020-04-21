@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import es.gob.fire.persistence.model.repository.UserRepository;
+import es.gob.fire.persistence.repository.UserRepository;
 
 @Controller
 public class AppController {
@@ -25,7 +25,7 @@ public class AppController {
 	public String user() {
 		return "user-form";
 	}
-//
+
 //	@GetMapping("useradmin")
 //	public String index(final Model model)  {
 //		return "fragments/useradmin.html";

@@ -26,7 +26,7 @@ package es.gob.fire.persistence.service;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
-import es.gob.fire.persistence.model.entity.User;
+import es.gob.fire.persistence.entity.User;
 
 /** 
  * <p>Interface that provides communication with the operations of the persistence layer.</p>

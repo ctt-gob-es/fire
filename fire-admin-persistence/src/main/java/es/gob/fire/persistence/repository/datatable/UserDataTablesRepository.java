@@ -1,9 +1,9 @@
-package es.gob.fire.persistence.model.repository.datatable;
+package es.gob.fire.persistence.repository.datatable;
 
  
 	import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 
-import es.gob.fire.persistence.model.entity.User;
+import es.gob.fire.persistence.entity.User;
 
 	/** 
 	 * <p>Interface that provides CRUD functionality for the UserValet entity and DataTables.</p>

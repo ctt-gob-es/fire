@@ -39,12 +39,12 @@ public final class Constants {
 	/**
 	 * Attribute that represents the main entity project package.
 	 */
-	public static final String MAIN_ENTITY_PROJECT_PACKAGE = "es.gob.fire.persistence.model.entity";
+	public static final String MAIN_ENTITY_PROJECT_PACKAGE = "es.gob.fire.persistence.entity";
 	
 	/**
 	 * Attribute that represents the main repository project package.
 	 */
-	public static final String MAIN_REPOSITORY_PROJECT_PACKAGE = "es.gob.fire.persistence.model.repository";
+	public static final String MAIN_REPOSITORY_PROJECT_PACKAGE = "es.gob.fire.persistence.repository";
 	
 	/**
 	 * Attribute that represents the messages directory.

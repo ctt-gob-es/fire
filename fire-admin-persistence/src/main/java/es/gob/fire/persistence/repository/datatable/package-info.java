@@ -15,16 +15,16 @@
  ******************************************************************************/
 
 /** 
- * <b>File:</b><p>es.gob.fire.persistence.model.repository.package-info.java.</p>
- * <b>Description:</b><p>Package that contains the application repositories.</p>
+ * <b>File:</b><p>es.gob.fire.persistence.repository.datatable.package-info.java.</p>
+ * <b>Description:</b><p>Package that contains the application data table repositories.</p>
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>08/04/2020.</p>
  * @author Gobierno de España.
  * @version 1.0, 08/04/2020.
  */
 /** 
- * <p>Package that contains the application repositories.</p>
+ * <p>Package that contains the application data table repositories.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
  * @version 1.0, 08/04/2020.
  */
-package es.gob.fire.persistence.model.repository;
+package es.gob.fire.persistence.repository.datatable;
