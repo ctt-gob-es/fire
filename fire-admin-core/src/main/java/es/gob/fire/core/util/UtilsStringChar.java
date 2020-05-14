@@ -251,11 +251,8 @@ public final class UtilsStringChar {
 	 * @return a boolean with <code>true</code> value whether the string is null or empty, or <code>false</code> value in another case.
 	 */
 	public static boolean isNullOrEmpty(String str) {
-
 		if (str == null || str.isEmpty()) {
-
 			return true;
-
 		}
 		return false;
 	}
@@ -266,15 +263,10 @@ public final class UtilsStringChar {
 	 * @return a boolean with <code>true</code> value whether the string is null or empty, or <code>false</code> value in another case.
 	 */
 	public static boolean isNullOrEmptyTrim(String str) {
-
 		if (str == null || str.trim().isEmpty()) {
-
 			return true;
-
 		}
-
 		return false;
-
 	}
 
 	/**
@@ -284,9 +276,7 @@ public final class UtilsStringChar {
 	 * (true) or not (false).
 	 */
 	public static boolean containsSomeOfTheCharacterSet(String str) {
-
 		return containsSomeOfTheCharacterSetInTheSet(str, UtilsStringChar.CHARACTERS_SET_TO_VALIDATORS);
-
 	}
 
 	/**
@@ -297,34 +287,25 @@ public final class UtilsStringChar {
 	 * (true) or not (false).
 	 */
 	public static boolean containsSomeOfTheCharacterSetInTheSet(String str, char[ ] characterSet) {
-
 		// Si la cadena de entrada es nula o vacía, devolvemos false.
 		if (UtilsStringChar.isNullOrEmpty(str)) {
 			return false;
 		}
-
 		// Si el conjunto de caracteres es nulo o vacío, devolvemos true.
 		if (characterSet == null || characterSet.length == 0) {
 			return true;
 		}
-
 		// Recorremos todos los caracteres y comprobamos si alguno está
 		// contenido
 		// en la cadena que se recibe como parámetro.
 		for (int index = 0; index < characterSet.length; index++) {
-
 			char actualChar = characterSet[index];
 			if (str.indexOf(actualChar) >= 0) {
-
 				return true;
-
 			}
-
 		}
-
 		// Si llegamos aquí, es que no contiene ninguno de los caracteres.
 		return false;
-
 	}
 
 	/**
@@ -364,12 +345,10 @@ public final class UtilsStringChar {
 	 * @param sb String builder to clean. If it is <code>null</code>, this method do nothing.
 	 */
 	public static void cleanStringBuilder(StringBuilder sb) {
-
 		if (sb != null) {
 			sb.setLength(0);
 			sb.trimToSize();
 		}
-
 	}
 
 	/**
@@ -381,12 +360,9 @@ public final class UtilsStringChar {
 	 * string after removes the blanks.
 	 */
 	public static String removeBlanksFromString(String string) {
-
 		String result = EMPTY_STRING;
-
 		// Si la cadena a tratar no es nula...
 		if (string != null) {
-
 			// Eliminamos los espacios por delante y detrás.
 			result = string.trim();
 			// Eliminamos los saltos de línea.
@@ -399,9 +375,7 @@ public final class UtilsStringChar {
 			result = result.replaceAll(SPECIAL_BLANK_SPACE_STRING, EMPTY_STRING);
 
 		}
-
 		return result;
-
 	}
 
 }

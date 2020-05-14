@@ -12,8 +12,11 @@
 							<th></th>
 							<th th:text="#{table.user.login}"></th>
 							<th th:text="#{table.user.name}"></th>
-							<th th:text="#{table.user.surname}"></th>
+							<th th:text="#{table.user.surnames}"></th>
+							<th th:text="#{table.user.password}"></th>
 							<th th:text="#{table.user.email}"></th>
+							<th th:text="#{table.user.telf}"></th>
+							<th th:text="#{table.user.rol}"></th>
 						</tr>
 					</thead>
 				</table>
@@ -178,12 +181,16 @@ $(document).ready(function() {
 						  var surnames = d.data()[0][a[2].id];
 						  var username = d.data()[0][a[3].id];
 						  var email = d.data()[0][a[5].id];
+						  var phone = d.data()[0][a[6].id];
+						  //var rol = d.data()[0][a[7].id];
 						  
 						  $("#idUserFireEdit").val(idUserFireEdit);
 						  $("#nameEdit").val(name);
 						  $("#surnamesEdit").val(surnames);
 						  $("#usernameEdit").val(username);
 						  $("#emailEdit").val(email);
+						  $("#telfEdit").val(phone);
+						 // $("#rolEdit").val(rol);
 						
 	    			  }
 	    		  }, 
@@ -233,11 +240,14 @@ $(document).ready(function() {
 		"columns": [
 	        { "data": "userId",
 	          "visible": false},
+	          { "data": "userName" },
 	        { "data": "name" },
 	        { "data": "surnames" },
 	        { "data": "password",
 	          "visible": false},
-	        { "data": "email" }
+	        { "data": "email" },
+	        { "data": "phone" },
+	        { "data": "rol" }
 	        ]
 		}).on('crudaction', function(e, accion, idUserFire, data, rowindex){
 		    // e          Evento Jquery

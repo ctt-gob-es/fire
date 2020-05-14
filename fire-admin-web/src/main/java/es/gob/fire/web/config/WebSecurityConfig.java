@@ -31,8 +31,9 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
+import es.gob.fire.core.constant.Constants;
 import es.gob.fire.web.authentication.CustomUserAuthentication;
 
 /** 
@@ -62,12 +63,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	@Override
     protected void configure(HttpSecurity http) throws Exception {  
       http.authorizeRequests()
-	    .antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/invalidSession", "/mailpasswordrestoration")
+	    .antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/chartist/**", "/mailpasswordrestoration", "/mailRestorePasswordUser/**", "/restorepassword")
 	    .permitAll() // Enable css, images and js when logged out
 		.and()
 		.authorizeRequests()
 		.antMatchers("/", "add", "delete/{id}", "edit/{id}", "save", "users")
-		.permitAll()
+		.access("hasRole(" + Constants.ROLE_ADMIN + ")")
 		.anyRequest()
 		.authenticated()
 		.and()
@@ -76,7 +77,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         .defaultSuccessUrl("/inicio")
         .permitAll()
         .and()
-		.logout().invalidateHttpSession(false).deleteCookies(SESSION_TRACKING_COOKIE_NAME).clearAuthentication(true).logoutSuccessUrl("/")
+		.logout().invalidateHttpSession(true).deleteCookies(SESSION_TRACKING_COOKIE_NAME).clearAuthentication(true).logoutSuccessUrl("/?logout")
 		.permitAll()
 		.and()
 		.httpBasic()
@@ -84,13 +85,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 		.csrf()
 		.disable() // Disable CSRF
 		.sessionManagement()
-		.sessionFixation().migrateSession()
-		.maximumSessions(1)
-		.expiredUrl("/")
-		.and()
-		.invalidSessionUrl("/invalidSession");
-      
+        .sessionFixation().migrateSession()
+    	.maximumSessions(1)
+    	.maxSessionsPreventsLogin(false)
+    	.expiredUrl("/login.html");
     }
+	
+	/**
+	 * Method that creates a new HttpSessionEventPublisher instance.
+	 * @return new HttpSessionEventPublisher instance
+	 */
+	@Bean
+	public HttpSessionEventPublisher httpSessionEventPublisher() {
+	    return new HttpSessionEventPublisher();
+	}
 
 	/**
      * Method that sets the authentication global configuration.

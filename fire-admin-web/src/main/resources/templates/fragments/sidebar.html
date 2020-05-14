@@ -119,33 +119,23 @@
 	                </script>
 	              </a>
 	            </li>
-	       
-				
-                
+	            
                 <!-- Fin Logs -->
                 
                 
                  <!-- Estadisticas -->
                 
-                 <li class="nav-item dropdown">
-	              <a id="aStatsAdmin" class="dropdown-toggle" href="javascript:void(0);">
-	                <span class="icon-holder">
-	                  <i class="c-black-500 ti-stats-up"></i>
-	                </span>
-	                <span class="title" th:text="#{menu.admin.stats}"></span>
-	              </a> 
-				   <ul class="dropdown-menu">
-						<li>
-							<a id="aStatsVipAdmin" class='sidebar-link' href="#">
-							    <span class="title" th:text="#{menu.admin.stats.vip}"></span>
-								<script th:inline="javascript">
-		                 			var actionStatsVip = /*[[@{/statsvip}]]*/;
-		                 			$('#aStatsVipAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatsVip, 'optionReplacement', 'GET', null, true); return false;});
-		               			</script>
-	               			</a>
-	               		</li>
-	               		
-				   </ul>
+                <li class="nav-item">
+	             	<a id="aStatsAdmin" class='sidebar-link' href="#">
+	              		<span class="icon-holder">
+	                		<i class="c-black-500 ti-receipt"></i>
+	                	</span>
+	                	<span class="title" th:text="#{menu.admin.stats}"></span>
+						<script th:inline="javascript">
+               				var actionStatistics = /*[[@{/statistics}]]*/;
+               				$('#aStatsAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatistics, 'optionReplacement', 'GET', null, true); return false;});
+             			</script>
+            		</a>
 				</li>
                 
                 <!-- Fin estadisticas -->

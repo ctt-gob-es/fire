@@ -32,7 +32,7 @@ import es.gob.fire.core.util.UtilsServer;
  * @version 1.0, 14 oct. 2019.
  */
 @Configuration
-@ComponentScan(basePackages = { Constants.MAIN_PERSISTENCE_PROJECT_PACKAGE }, useDefaultFilters = true)
+@ComponentScan(basePackages = { Constants.MAIN_PERSISTENCE_PROJECT_PACKAGE, Constants.MAIN_WEB_PROJECT_PACKAGE }, useDefaultFilters = true)
 public class WebConfig implements WebMvcConfigurer {
 
 	/**
@@ -41,6 +41,12 @@ public class WebConfig implements WebMvcConfigurer {
 	 */
 	private static final String PROPS_CONF_FILE_PERSISTENCE = "persistence.properties";
 
+	/**
+	 * Constant attribute that represents the file name of the configuration
+	 * properties for configure the mail.
+	 */
+	private static final String PROPS_CONF_FILE_MAIL = "mail.properties";
+	
 	/**
 	 * Attribute that represents the messages path.
 	 */
@@ -54,7 +60,8 @@ public class WebConfig implements WebMvcConfigurer {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-		propertySourcesPlaceholderConfigurer.setLocations(new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_PERSISTENCE)));
+		propertySourcesPlaceholderConfigurer.setLocations(new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_PERSISTENCE)),
+														new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_MAIL)));
 		return propertySourcesPlaceholderConfigurer;
 	}
 

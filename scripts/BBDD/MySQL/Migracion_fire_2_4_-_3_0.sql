@@ -3,9 +3,13 @@
 
 -- TABLA TB_USUARIOS
   
--- Eliminamos los campos del responsable
+-- Aumentamos el tamaño del campo CLAVE a 2000
 ALTER TABLE `TB_USUARIOS`
 MODIFY CLAVE VARCHAR(2000);
+
+-- Aumentamos el tamaño del campo CODIGO_RENOVACION a 100
+ALTER TABLE `TB_USUARIOS`
+MODIFY CODIGO_RENOVACION VARCHAR(100);
 
 
 

@@ -1,0 +1,193 @@
+<div class="row gap-20 masonry pos-r">
+	<div class="masonry-sizer col-md-12"></div>
+	<div class="masonry-item col-md-12">
+		<div class="bgc-white p-20 bd">
+			<h4 class="c-grey-900" th:text="#{query.statistics.admin}"></h4>
+			<div class="mT-30">
+				<form id="statisticsForm" name="statisticsForm" role="form"
+					th:action="@{/statistics}" method="post">
+
+					<div class="form-row">
+						<div class="form-group col-md-5">
+							<label for="query" th:text="#{form.statistics.query}"></label> <select
+								id="query" name="query" class="form-control">
+								<option selected="selected" value=""
+									th:text="#{form.statistics.select.query}"></option>
+								<option th:each="q: ${queries}" th:value="${q.name}"
+									th:text="${q.name}"></option>
+							</select>
+							<div id="invalid-query" class="invalid-feedback">Se debe selccionar una consulta.</div>
+						</div>
+
+						<!--  Mes -->
+						<div class="form-group col-md-statistics-month">
+							<div id="datepicker-statistics-pane">
+								<label for="month-datepicker-statistics"
+									th:text="#{form.statistics.month}"></label> <input type="text"
+									id="month-datepicker-statistics" name="monthDate"
+									class="form-control" style="overflow: hidden"
+									onblur="validateMonthDate(this);" pattern="\d{1,2}/\d{4}">
+								<div id="invalid-month-date-statistics" class="invalid-feedback">El
+									formato de la fecha no es v&aacute;lido.</div>
+							</div>
+						</div>
+
+					</div>
+
+					<button id="statisticsBtn" type="submit" class="btn btn-primary"
+						th:text="#{button.statistics.query}"></button>
+					<button type="button" id="cleanQueryStatisticsBtn"
+						class="btn btn-primary" th:text="#{button.cleanForm}"></button>
+				</form>
+			</div>
+		</div>
+
+		<div id="queryStatisticsTableDiv"></div>
+	</div>
+
+</div>
+
+<link type="text/css" rel="stylesheet"
+	th:href="@{css/jquery-ui.min.css}" />
+<link type="text/css" rel="stylesheet"
+	th:href="@{css/jquery-ui.theme.min.css}" />
+<link type="text/css" rel="stylesheet"
+	th:href="@{css/jquery.ui.timepicker.css}" />
+
+<script th:inline="javascript">
+
+$(function() {
+	var yearDef = new Date().getFullYear();
+	var monthDef = new Date().getMonth()-1;
+
+	
+     $('#month-datepicker-statistics').datepicker({
+	    dateFormat: "mm/yy",
+	    changeMonth: true,
+	    changeYear: true,                 
+	    showButtonPanel: true,
+	    defaultDate: new Date(yearDef, monthDef, 1),
+	    closeText: 'Cerrar',
+		prevText: '<Ant',
+		nextText: 'Sig>',
+		currentText: 'Hoy',
+		monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+		monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
+	    onClose: function(dateText, inst) {
+	        function isDonePressed(){
+	            return ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1);
+	        }
+	        if (isDonePressed()){
+	            var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+	            var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+	            $(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');                               
+	            $('.date-picker').focusout()//Added to remove focus from datepicker input box on selecting date
+	        }
+	    },
+	    beforeShow : function(input, inst) {
+	        inst.dpDiv.addClass('month_year_datepicker')
+	        if ((datestr = $(this).val()).length > 0) {
+	            year = datestr.substring(datestr.length-4, datestr.length);
+	            month = datestr.substring(0, 2);
+	            $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
+	            $(this).datepicker('setDate', new Date(year, month-1, 1));
+	            $(".ui-datepicker-calendar").hide();
+	        }
+	    }
+	})
+});
+
+$("#query").change(function() {
+	if (!$('select[name=query] option').filter(':selected').val() == "") {
+		  error = true;
+		  if (!$("#invalid-query").is("visible")) {
+			  $('#query').removeClass("is-invalid");
+			  $("#invalid-query").hide();
+		} 
+	}
+});
+
+$( "#statisticsBtn" ).click(function( event ) {
+	  hide();
+	  event.preventDefault();
+	  var error = false;
+	  if ($('#month-datepicker-statistics').val() == '') {
+		  error = true;
+		if (!$("#invalid-month-date-statistics").is("visible")) {
+				$('#month-datepicker-statistics').addClass("is-invalid");
+				$("#invalid-month-date-statistics").show();
+		}
+	  }
+	  
+	  if ($('select[name=query] option').filter(':selected').val() == "") {
+		  error = true;
+		  if (!$("#invalid-query").is("visible")) {
+			  $('#query').addClass("is-invalid");
+			  $("#invalid-query").show();
+		} 
+	  }
+	  
+	  if (!error) {
+		  if ($("#statisticsForm")[0].checkValidity()) {
+			  $('#statisticsForm *').filter(':input').each(function(){
+				  $("#" + $(this).attr('id')).removeClass("has-error");
+			  });
+			  
+			  var actionQuery = /*[[@{/statisticsresult}]]*/;
+			  loadIntoAjax('statisticsForm', actionQuery, 'queryStatisticsTableDiv', 'GET', null, true);
+		  }	else {
+		  
+			$('#statisticsForm *').filter(':input').each(function(){
+		      	    
+		          if(!$(this)[0].checkValidity()){
+		      	   	$("#" + $(this).attr('id')).addClass("has-error");
+		      	  } else {
+		      	   	$("#" + $(this).attr('id')).removeClass("has-error");
+		      	  }
+	      	    
+	      	  });
+		   }  
+	  }
+	});
+	
+	$( "#cleanQueryStatisticsBtn" ).click(function( event ) {
+		$('#query').prop('selectedIndex', '');
+		$('#month-datepicker-statistics').val('');
+		$('#month-datepicker-statistics').removeClass("is-invalid");
+		if ($("#invalid-month-date-statistics").is("visible")) {
+			$("#invalid-month-date-statistics").hide();
+			$("#invalid-month-date-statistics").css("display", "block");
+		}
+		$('#query').removeClass("is-invalid");
+		if ($("#invalid-query").is("visible")) {
+			$("#invalid-query").hide();
+			$("#invalid-query").css("display", "block");
+		}
+		$('#queryStatisticsTableDiv').hide();
+	});
+	
+	function validateMonthDate(obj) {
+		var valid;
+	  	if (!obj.checkValidity()) {
+			$("#" + $(obj).attr('id')).addClass("is-invalid");
+			valid = false;
+			if (!$("#invalid-month-date-statistics").is("visible")) {
+				$("#invalid-month-date-statistics").show();
+			}
+	  	} else {
+			$("#" + $(obj).attr('id')).removeClass("is-invalid");
+			valid = true;
+			if ($("#invalid-month-date-statistics").is("visible")) {
+				$("#invalid-month-date-statistics").hide();
+			}
+	  	}
+		return valid;
+	}
+	
+</script>
+
+<style>
+.ui-datepicker-calendar {
+	display: none;
+}
+</style>

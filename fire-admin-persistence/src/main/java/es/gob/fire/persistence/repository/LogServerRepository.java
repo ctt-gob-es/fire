@@ -16,7 +16,7 @@
 
 /** 
  * <b>File:</b><p>es.gob.fire.persistence.repository.LogServerRepository.java.</p>
- * <b>Description:</b><p>Class that represents the user repository.</p>
+ * <b>Description:</b><p>Class that represents the transaction repository.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>01/04/2020.</p>
  * @author Gobierno de España.

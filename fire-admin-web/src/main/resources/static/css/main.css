@@ -126,6 +126,16 @@ button:hover {
 	cursor: pointer;
 }
 
+a {
+	outline: none !important;
+	border: none;
+	background: transparent;
+}
+
+a:hover {
+	cursor: pointer;
+}
+
 iframe {
 	border: none !important;
 }
