@@ -92,6 +92,19 @@ public class UserDTO {
     @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
     private String email = UtilsStringChar.EMPTY_STRING;
 
+	/**
+	 * Attribute that represents the value of the input telf of the user in the form. 
+	 */
+	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.telf.notempty}")
+    @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
+    private String telf = UtilsStringChar.EMPTY_STRING;
+	
+	/**
+	 * Attribute that represents the value of the input rol of the user in the form. 
+	 */
+	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.rol.notempty}")
+    @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
+    private String rol = UtilsStringChar.EMPTY_STRING;
 	
 	/**
 	 * Gets the value of the attribute {@link #idUserValet}.
@@ -217,7 +230,39 @@ public class UserDTO {
 	public void setEmail(String emailParam) {
 		this.email = emailParam;
 	}
-			
+	
+	/**
+	 * Gets the value of the attribute {@link #rol}.
+	 * @return the value of the attribute {@link #rol}.
+	 */
+	public String getTelf() {
+		return telf;
+	}
+
+	
+	/**
+	 * Sets the value of the attribute {@link #rol}.
+	 * @param emailParam The value for the attribute {@link #rol}.
+	 */
+	public void setTelf(String telfParam) {
+		this.rol = telfParam;
+	}
+	/**
+	 * Gets the value of the attribute {@link #rol}.
+	 * @return the value of the attribute {@link #rol}.
+	 */
+	public String getRol() {
+		return rol;
+	}
+
+	
+	/**
+	 * Sets the value of the attribute {@link #rol}.
+	 * @param emailParam The value for the attribute {@link #rol}.
+	 */
+	public void setRol(String rolParam) {
+		this.rol = rolParam;
+	}
 	
 	
 }

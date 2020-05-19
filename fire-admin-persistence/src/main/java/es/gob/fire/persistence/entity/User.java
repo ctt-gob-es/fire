@@ -2,7 +2,9 @@ package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,9 +13,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -103,7 +108,7 @@ public class User implements Serializable {
 	/**
 	 * Attribute that represents the rol.
 	 */
-	private Rol rol;
+	private List<Rol> rol;
 	
 	/**
 	 * Attribute that represents the system certificates.
@@ -116,7 +121,7 @@ public class User implements Serializable {
 	 */
 	@Id
 	@Column(name = "ID_USUARIO", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy=GenerationType.IDENTITY) 
 	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public Long getUserId() {
@@ -206,6 +211,26 @@ public class User implements Serializable {
 	public void setName(final String nameP) {
 		this.name = nameP;
 	}
+	
+	/**
+	 * Gets the value of the attribute {@link #surnames}.
+	 * @return the value of the attribute {@link #surnames}.
+	 */
+	@Column(name = "APELLIDOS", nullable = false, length = NumberConstants.NUM150)
+	@Size(max = NumberConstants.NUM150)
+	@NotNull
+	@JsonView(DataTablesOutput.View.class)
+	public String getSurnames() {
+		return this.surnames;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #surnames}.
+	 * @param surnamesP The value for the attribute {@link #surnames}.
+	 */
+	public void setSurnames(final String surnamesP) {
+		this.surnames = surnamesP;
+	}
 
 	/**
 	 * Gets the value of the attribute {@link #password}.
@@ -227,25 +252,7 @@ public class User implements Serializable {
 		this.password = passwordP;
 	}
 
-	/**
-	 * Gets the value of the attribute {@link #surnames}.
-	 * @return the value of the attribute {@link #surnames}.
-	 */
-	@Column(name = "APELLIDOS", nullable = false, length = NumberConstants.NUM150)
-	@Size(max = NumberConstants.NUM150)
-	@NotNull
-	@JsonView(DataTablesOutput.View.class)
-	public String getSurnames() {
-		return this.surnames;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #surnames}.
-	 * @param surnamesP The value for the attribute {@link #surnames}.
-	 */
-	public void setSurnames(final String surnamesP) {
-		this.surnames = surnamesP;
-	}
+	
 	
 	/**
 	 * Gets the value of the attribute {@link #startDate}.
@@ -339,23 +346,31 @@ public class User implements Serializable {
 	this.restPassword = restPasswordP;
    }
    
-   /**
+
+	/**
 	 * Gets the value of the attribute {@link #rol}.
 	 * @return the value of the attribute {@link #rol}.
 	 */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "FK_ROL", nullable = false)
-	@NotNull
-	public Rol getRol() {
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	//@OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+   @OneToMany(mappedBy="user", cascade={CascadeType.ALL})
+	
+	public List<Rol> getRol() {
+		// CHECKSTYLE:ON
 		return rol;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #rol}.
-	 * @param rolP The value for the attribute {@link #rol}.
+	 * @param systemCertificates The value for the attribute {@link #rol}.
 	 */
-	public void setRol(final Rol rolP) {
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	public void setRol(List<Rol> rolP) {
+		// CHECKSTYLE:ON
 		this.rol = rolP;
 	}
+
 	
 }

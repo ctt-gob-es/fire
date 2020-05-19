@@ -80,6 +80,24 @@ public class UserEditDTO {
 
 	
 	/**
+	 * Attribute that represents the value of the input telf of the user in
+	 * the form.
+	 */
+	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.telf.notempty}")
+	@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	private String telfEdit = UtilsStringChar.EMPTY_STRING;
+	
+	
+	/**
+	 * Attribute that represents the value of the input rol of the user in
+	 * the form.
+	 */
+	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.rol.notempty}")
+	@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	private String rolEdit = UtilsStringChar.EMPTY_STRING;
+	
+	
+	/**
 	 * Gets the value of the attribute {@link #idUserFireEdit}.
 	 * @return the value of the attribute {@link #idUserFireEdit}.
 	 */
@@ -167,6 +185,40 @@ public class UserEditDTO {
 	 */
 	public void setEmailEdit(String emailEditParam) {
 		this.emailEdit = emailEditParam;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #telfEdit}.
+	 * @return the value of the attribute {@link #telfEdit}.
+	 */
+	public String getTelfEdit() {
+		return telfEdit;
+	}
+
+	
+	/**
+	 * Sets the value of the attribute {@link #telfEdit}.
+	 * @param surnamesEditParam The value for the attribute {@link #telfEdit}.
+	 */
+	public void setTelfEdit(String telfEditParam) {
+		this.telfEdit = telfEditParam;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #rolEdit}.
+	 * @return the value of the attribute {@link #rolEdit}.
+	 */
+	public String getRolEdit() {
+		return rolEdit;
+	}
+
+	
+	/**
+	 * Sets the value of the attribute {@link #rolEdit}.
+	 * @param surnamesEditParam The value for the attribute {@link #rolfEdit}.
+	 */
+	public void setRolEdit(String rolEditParam) {
+		this.rolEdit = rolEditParam;
 	}
 
 

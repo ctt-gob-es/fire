@@ -12,8 +12,11 @@
 							<th></th>
 							<th th:text="#{table.user.login}"></th>
 							<th th:text="#{table.user.name}"></th>
-							<th th:text="#{table.user.surname}"></th>
+							<th th:text="#{table.user.surnames}"></th>
+							<th th:text="#{table.user.password}"></th>
 							<th th:text="#{table.user.email}"></th>
+							<th th:text="#{table.user.telf}"></th>
+							<th th:text="#{table.user.rol}"></th>
 						</tr>
 					</thead>
 				</table>
@@ -43,7 +46,7 @@
 								    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
+							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
 							<div id="invalid-name" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -57,7 +60,7 @@
 								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
 							<div id="invalid-surnames" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -85,8 +88,36 @@
 								    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" style="overflow:hidden" class="form-control" required/>
+							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required/>
 							<div id="invalid-email" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group-modal">
+						
+							<label for="telfEdit" class="col-form-label" th:text="#{form.user.telf}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageTelf);" type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<div id="invalid-telf" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group-modal">
+						
+							<label for="rolEdit" class="col-form-label" th:text="#{form.user.rol}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageRol);" type="text" id="rolEdit" th:field="*{rolEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<div id="invalid-rol" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
 					</div>
@@ -178,12 +209,16 @@ $(document).ready(function() {
 						  var surnames = d.data()[0][a[2].id];
 						  var username = d.data()[0][a[3].id];
 						  var email = d.data()[0][a[5].id];
+						  var phone = d.data()[0][a[6].id];
+						  //var rol = d.data()[0][a[7].id];
 						  
 						  $("#idUserFireEdit").val(idUserFireEdit);
 						  $("#nameEdit").val(name);
 						  $("#surnamesEdit").val(surnames);
 						  $("#usernameEdit").val(username);
 						  $("#emailEdit").val(email);
+						  $("#telfEdit").val(phone);
+						 // $("#rolEdit").val(rol);
 						
 	    			  }
 	    		  }, 
@@ -233,11 +268,14 @@ $(document).ready(function() {
 		"columns": [
 	        { "data": "userId",
 	          "visible": false},
+	          { "data": "userName" },
 	        { "data": "name" },
 	        { "data": "surnames" },
 	        { "data": "password",
 	          "visible": false},
-	        { "data": "email" }
+	        { "data": "email" },
+	        { "data": "phone" },
+	        { "data": "rol" }
 	        ]
 		}).on('crudaction', function(e, accion, idUserFire, data, rowindex){
 		    // e          Evento Jquery

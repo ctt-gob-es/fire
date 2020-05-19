@@ -92,7 +92,7 @@ public class UserRestController {
 	/**
 	 * Attribute that represents the user column someCertNotValid. 
 	 */
-	private static final String COLUMN_CERT_NOT_VALID = "someCertNotValid";
+	private static final String COLUMN_CERT_NOT_VALID = "rol";
 	
 	/**
 	 * Constant that represents the key Json 'errorSaveUser'.

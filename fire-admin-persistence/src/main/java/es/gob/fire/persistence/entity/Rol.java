@@ -4,9 +4,12 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -34,6 +37,12 @@ public class Rol implements Serializable {
 	 * Class serial version.
 	 */
 	private static final long serialVersionUID = -60419018366799736L;
+	/**
+	 * tipos de permisos
+	 */
+	public static final int ID_ADMIN = 1;
+	public static final int ID_RESPONSIBLE = 2;
+	public static final int ID_CONTACT = 3;
 
 	/**
 	 * Attribute that represents the rol id.
@@ -49,6 +58,12 @@ public class Rol implements Serializable {
 	 * Attribute that represents the permissions.
 	 */
 	private String permissions;
+	
+	/**
+	 * Attribute that represents the user .
+	 */
+	private User user;
+	
 
 	/**
 	 * Gets the value of the attribute {@link #rolId}.
@@ -109,5 +124,42 @@ public class Rol implements Serializable {
 	public void setPermissions(final String permissionsP) {
 		this.permissions = permissionsP;
 	}
+	/**
+	 * Gets the value of the attribute {@link #user}.
+	 * @return the value of the attribute {@link #user}.
+	 */
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	@ManyToOne
+	@JoinColumn(name="userId", nullable=false)
+	public User getUser() {
+		// CHECKSTYLE:ON
+		return user;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #user}.
+	 * @param userMonitoriza The value for the attribute {@link #user}.
+	 */
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	public void setUser(User user) {
+		// CHECKSTYLE:ON
+		this.user = user;
+	}
 	
+	
+	public static String getRoleLegibleText(final Rol rol) {
+
+		switch (rol.getRolId()) {
+		case ID_ADMIN:
+			return "Administrador"; //$NON-NLS-1$
+		case ID_RESPONSIBLE:
+			return "Responsable"; //$NON-NLS-1$
+		case ID_CONTACT:
+			return "Contacto"; //$NON-NLS-1$
+		default:
+			return rol.getRolName();
+		}
+	}
 }
