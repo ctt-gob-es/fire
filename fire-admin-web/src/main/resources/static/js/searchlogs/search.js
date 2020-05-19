@@ -688,9 +688,6 @@ $(document).ready(function() {
 	
 	// Formulario de consultas en la busqueda de texto
 	$('#searchTextMore-button').on('click', onClickSearchTextMore);
-
-	
-	
 	
 	// Pestanas
 	$('#lastlines-tab').on('click', onClickFilterLogsReset);

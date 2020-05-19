@@ -157,6 +157,24 @@ public class UserService implements IUserService {
 	public User getUserByUserName(final String userName) {
 		return repository.findByUserName(userName);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IUserService#getUserByRenovationCode(java.lang.String)
+	 */
+	@Override
+	public User getUserByRenovationCode(final String renovationCode) {
+		return repository.findByRenovationCode(renovationCode);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IUserService#getUserByUserNameOrEmail(java.lang.String,java.lang.String)
+	 */
+	@Override
+	public User getUserByUserNameOrEmail(final String userName, final String email) {
+		return repository.findByUserNameOrEmail(userName, email);
+	}
 
 	/**
 	 * {@inheritDoc}

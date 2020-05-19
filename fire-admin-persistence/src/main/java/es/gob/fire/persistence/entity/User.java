@@ -295,8 +295,8 @@ public class User implements Serializable {
 	 * Gets the value of the attribute {@link #renovationCode}.
 	 * @return the value of the attribute {@link #renovationCode}.
 	 */
-	@Column(name = "CODIGO_RENOVACION", nullable = true, unique = true, length = NumberConstants.NUM90)
-	@Size(max = NumberConstants.NUM90)
+	@Column(name = "CODIGO_RENOVACION", nullable = true, unique = true, length = NumberConstants.NUM100)
+	@Size(max = NumberConstants.NUM100)
 	public String getRenovationCode() {
 		return renovationCode;
 	}

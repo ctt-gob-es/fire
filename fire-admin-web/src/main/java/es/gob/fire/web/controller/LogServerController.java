@@ -53,6 +53,7 @@ public class LogServerController {
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(LogServerController.class);
+	
 	/**
 	 * Attribute that represents the service object for managing the log server.
 	 */

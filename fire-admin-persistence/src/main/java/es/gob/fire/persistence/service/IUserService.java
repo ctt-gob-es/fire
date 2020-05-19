@@ -52,6 +52,21 @@ public interface IUserService {
 	User getUserByUserName(String userName);
 	
 	/**
+	 * Method that obtains an user by its user name or email.
+	 * @param userName The user login.
+	 * @param email The user email.
+	 * @return {@link User}
+	 */
+	User getUserByUserNameOrEmail(String userName, String email);
+	
+	/**
+	 * Method that obtains an user by its user renovation code.
+	 * @param renovationCode The user renovation code.
+	 * @return {@link User}
+	 */
+	User getUserByRenovationCode(String renovationCode);
+	
+	/**
 	 * Method that stores a user in the persistence.
 	 * @param user a {@link User} with the information of the user.
 	 * @return {@link User} The user.

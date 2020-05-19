@@ -149,17 +149,17 @@ public class Rol implements Serializable {
 	}
 	
 	
-	public static String getRoleLegibleText(final Rol rol) {
-
-		switch (rol.getRolId()) {
-		case ID_ADMIN:
-			return "Administrador"; //$NON-NLS-1$
-		case ID_RESPONSIBLE:
-			return "Responsable"; //$NON-NLS-1$
-		case ID_CONTACT:
-			return "Contacto"; //$NON-NLS-1$
-		default:
-			return rol.getRolName();
-		}
-	}
+//	public static String getRoleLegibleText(final Rol rol) {
+//
+//		switch (rol.getRolId()) {
+//		case ID_ADMIN:
+//			return "Administrador"; //$NON-NLS-1$
+//		case ID_RESPONSIBLE:
+//			return "Responsable"; //$NON-NLS-1$
+//		case ID_CONTACT:
+//			return "Contacto"; //$NON-NLS-1$
+//		default:
+//			return rol.getRolName();
+//		}
+//	}
 }

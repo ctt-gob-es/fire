@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 /** 
- * <b>File:</b><p>es.gob.fire.persistence.repository.datatable.UserDataTablesRepository.java.</p>
+ * <b>File:</b><p>es.gob.fire.persistence.repository.datatable.LogServerDataTablesRepository.java.</p>
  * <b>Description:</b><p>Class that represents the log server data table repository.</p>
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>01/04/2020.</p>
