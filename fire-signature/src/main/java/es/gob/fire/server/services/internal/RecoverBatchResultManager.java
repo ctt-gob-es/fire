@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +36,7 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
+import es.gob.fire.server.services.crypto.CryptoHelper;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
@@ -237,12 +239,30 @@ public class RecoverBatchResultManager {
         		return;
         	}
         	catch(final Exception e) {
-        		LOGGER.log(Level.SEVERE, logF.f("Ocurrio un error durante la operacion de firma"), e); //$NON-NLS-1$
+        		LOGGER.log(Level.SEVERE, logF.f("Ocurrio un error durante la operacion de firma de lote en la nube"), e); //$NON-NLS-1$
         		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpCustomErrors.SIGN_ERROR.getErrorCode());
         		return;
         	}
+
+        	// Verificamos cada uno de los PKCS#1 generados
+    		final Set<String> keys = ret.keySet();
+    		for (final String key : keys) {
+
+    			final byte[] pkcs1 = ret.get(key);
+    			try {
+    				CryptoHelper.verifyPkcs1(pkcs1, signingCert.getPublicKey());
+    			}
+    			catch (final Exception e) {
+            		LOGGER.log(Level.SEVERE, logF.f("Error de integridad. Uno de los PKCS#1 recibido no se genero con el certificado indicado"), e); //$NON-NLS-1$
+            		TRANSLOGGER.register(session, false);
+            		SessionCollector.removeSession(session);
+            		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            				"Error de integridad. Uno de los PKCS#1 recibido no se genero con el certificado indicado: " + e); //$NON-NLS-1$
+            		return;
+    			}
+    		}
 
         	final TriphaseData td;
         	try {

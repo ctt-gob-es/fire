@@ -12,6 +12,7 @@ package es.gob.fire.server.services.internal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -38,6 +39,7 @@ import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
+import es.gob.fire.server.services.crypto.CryptoHelper;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
@@ -221,7 +223,7 @@ public class RecoverSignManager {
     		// Realizamos la segunda fase de la firma trifasica
     		LOGGER.info(logF.f("Se solicita el PKCS#1 al proveedor " + providerName)); //$NON-NLS-1$
     		try {
-    			td = triphaseSign(providerName, remoteTrId, connConfig, td);
+    			td = triphaseSign(providerName, remoteTrId, connConfig, td, signingCert);
     		}
     		catch (final IllegalArgumentException e) {
     			LOGGER.log(Level.SEVERE, logF.f("Parametro no valido"), e); //$NON-NLS-1$
@@ -463,7 +465,8 @@ public class RecoverSignManager {
 	}
 
 	/**
-	 * Recupera el PKCS#1 de una firma del proveedor de firma en la nube que la gener&oacute;.
+	 * Recupera el PKCS#1 de una firma del proveedor de firma en la nube que la gener&oacute;
+	 * y comprueba que realmente se generasen con el certificado indicado.
 	 * @param providerName Nombre del proveedor.
 	 * @param remoteTrId Identificador de transacci&oacute;n del proveedor.
 	 * @param trConfig Configuraci&oacute;n para el proveedor.
@@ -475,7 +478,7 @@ public class RecoverSignManager {
 	 * @throws FireInternalException Cuando se produce cualquier otro error.
 	 */
 	private static TriphaseData triphaseSign(final String providerName, final String remoteTrId,
-			final TransactionConfig trConfig, final TriphaseData td)
+			final TransactionConfig trConfig, final TriphaseData td, final Certificate signingCert)
 					throws IllegalArgumentException, FIReConnectorUnknownUserException,
 					FIReSignatureException, FireInternalException {
 
@@ -503,7 +506,17 @@ public class RecoverSignManager {
 		// Insertamos los PKCS#1 en la sesion trifasica
 		final Set<String> keys = ret.keySet();
 		for (final String key : keys) {
-			FIReTriHelper.addPkcs1ToTriSign(ret.get(key), key, td);
+
+			final byte[] pkcs1 = ret.get(key);
+
+			try {
+				CryptoHelper.verifyPkcs1(pkcs1, signingCert.getPublicKey());
+			}
+			catch (final Exception e) {
+				throw new FIReSignatureException("Error de integridad. El PKCS#1 recibido no se genero con el certificado indicado", e); //$NON-NLS-1$
+			}
+
+			FIReTriHelper.addPkcs1ToTriSign(pkcs1, key, td);
 		}
 
 		return td;

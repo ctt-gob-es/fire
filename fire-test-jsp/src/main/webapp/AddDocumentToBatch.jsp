@@ -146,8 +146,13 @@
 								<label for="upgrade-verify">Validar</label><br>
 				   	</fieldset>
 
+					<!-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
+					   - mode=implicit
+					   - filters=keyusage.nonrepudiation:true;nonexpired:
+					  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
+					  de certificados de firma no caducados. -->
 					<input id="extraparams-conf" type="hidden" name="extraParams"
-						value="<%= Base64.encode("mode=implicit".getBytes()) %>"/>
+						value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true;nonexpired:".getBytes()) %>"/>
 				</fieldset>
 
 				<div style="margin-top:30px;text-align: left;">

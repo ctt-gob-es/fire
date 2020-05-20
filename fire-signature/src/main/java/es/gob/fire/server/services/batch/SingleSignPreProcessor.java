@@ -21,6 +21,7 @@ import es.gob.afirma.core.signers.ExtraParamsProcessor;
 import es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyException;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
+import es.gob.fire.server.services.FIReTriHelper;
 
 final class SingleSignPreProcessor {
 
@@ -75,23 +76,26 @@ final class SingleSignPreProcessor {
 			extraParams = sSign.getExtraParams();
 		}
 
+		TriphaseData td;
 		switch(sSign.getSubOperation()) {
 			case SIGN:
-				return prep.preProcessPreSign(
+				td = prep.preProcessPreSign(
 						docBytes,
 						algorithm.toString(),
 						certChain,
 						extraParams,
     					false
 					);
+				break;
 			case COSIGN:
-				return prep.preProcessPreCoSign(
+				td = prep.preProcessPreCoSign(
 						docBytes,
 						algorithm.toString(),
 						certChain,
 						extraParams,
     					false
 					);
+				break;
 			case COUNTERSIGN:
 				final CounterSignTarget target = CounterSignTarget.getTarget(
 					extraParams.getProperty("target", CounterSignTarget.LEAFS.name()) //$NON-NLS-1$
@@ -101,7 +105,7 @@ final class SingleSignPreProcessor {
 						"Objetivo de contrafirma no soportado en proceso por lotes: " + target //$NON-NLS-1$
 					);
 				}
-				return prep.preProcessPreCounterSign(
+				td = prep.preProcessPreCounterSign(
 						docBytes,
 						algorithm.toString(),
 						certChain,
@@ -109,13 +113,21 @@ final class SingleSignPreProcessor {
 						target,
     					false
 					);
+				break;
 			default:
 				throw new UnsupportedOperationException(
 					"Operacion no soportada: " + sSign.getSubOperation() //$NON-NLS-1$
 				);
 		}
 
+		// Agregamos los codigos de verificacion para posteriormente poder comprobar
+		// que el PKCS#1 recibido se genero con el certificado de firma
+		try {
+			FIReTriHelper.addVerificationCodes(td, certChain[0]);
+		} catch (final Exception e) {
+			throw new AOException("No se pudo agregar le codigo de verfificacion de firmas", e); //$NON-NLS-1$
+		}
+
+		return td;
 	}
-
-
 }

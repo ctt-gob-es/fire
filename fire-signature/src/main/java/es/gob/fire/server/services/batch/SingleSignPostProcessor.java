@@ -25,6 +25,7 @@ import es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyExcepti
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
+import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 final class SingleSignPostProcessor {
@@ -70,6 +71,13 @@ final class SingleSignPostProcessor {
 		}
 
 		final TriphaseData td = cleanTriphaseData(tdata, sSign.getId());
+
+		try {
+			FIReTriHelper.checkSignaturesIntegrity(td, certChain[0]);
+		}
+		catch (final Exception e) {
+			throw new AOException("Error en la verificacion de los PKCS#1 de las firmas recibidas", e); //$NON-NLS-1$
+		}
 
 		// Instanciamos el preprocesador adecuado
 		final TriPhasePreProcessor prep = SingleSignConstants.getTriPhasePreProcessor(sSign);

@@ -98,12 +98,14 @@
 				
 				 <!-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
 				   - mode=implicit
-				   - filters=keyusage.nonrepudiation:true
-				  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
-				  de certificados de firma. -->
+				   - filters=keyusage.nonrepudiation:true;nonexpired:
+				   - expPolicy=FirmaAGE
+				  Con ellos se generan firmas que contienen los datos firmados, solo se permite el uso
+				  de certificados de firma no caducados y se declara la ultima version de la política
+				  de firma de la AGE. -->
  
 				<input id="extraparams-conf" type="hidden" name="extraParams"
-				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true\nexpPolicy=FirmaAGE".getBytes()) %>" />
+	 				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true;nonexpired:\nexpPolicy=FirmaAGE".getBytes()) %>" />
 
 				<div style="margin-top: 10px; text-align: left; ">
 					<label for="fichero-firma">Seleccionar documento:</label><br>

@@ -71,6 +71,8 @@ public class ConfigManager {
 
 	private static final String PROP_ALTERNATIVE_XMLDSIG = "signature.alternativeXmldsig"; //$NON-NLS-1$
 
+	private static final String PROP_LOCAL_VERIFICATION_KEY = "local.verification.key"; //$NON-NLS-1$
+
 	private static final String PROP_BATCH_MAX_DOCUMENTS = "batch.maxDocuments"; //$NON-NLS-1$
 
 	private static final String PROP_FIRE_TEMP_TIMEOUT = "temp.fire.timeout"; //$NON-NLS-1$
@@ -340,9 +342,20 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera el numero maximo de documentos que se pueden agregar a un lote de firma.
-	 * Si se devuelve el valor {@code #UNLIMITED_NUM_DOCUMENTS} se debe considerar que
-	 * no hay l&iacute;mite al n&uacute;mero de documentos de un lote.
+	 * Recupera el texto para la composici&oacute;n de la clave HMac para la
+	 * verificaci&oacute;n de del PKCS#1 de la firma.
+	 * @return
+	 */
+	public static String getHMacKey() {
+		final String verificationKey = config.getProperty(PROP_LOCAL_VERIFICATION_KEY);
+		return verificationKey != null && verificationKey.length() > 0 ? verificationKey : null;
+	}
+
+	/**
+	 * Recupera el n&uacute;mero m&aacute;ximo de documentos que se pueden agregar a
+	 * un lote de firma. Si se devuelve el valor {@code #UNLIMITED_NUM_DOCUMENTS} se
+	 * debe considerar que no hay l&iacute;mite al n&uacute;mero de documentos de un
+	 * lote.
 	 * @return N&uacute;mero de documentos que se pueden agregar a un lote.
 	 */
 	public static int getBatchMaxDocuments() {
