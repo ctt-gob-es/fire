@@ -31,8 +31,6 @@
 				 th:text="#{fire-admin-web.login.error}"></div>
 				<div class="alert alert-warning" th:if="${param.logout}"
 				 th:text="#{fire-admin-web.login.warn.logout}"></div>
-				 <div class="alert alert-danger" th:if="${mailerror}"
-				 th:text="${mailErrorMessage}"></div>
 				 <div class="alert alert-danger" th:if="${restoreerror}"
 				 th:text="${restoreErrorMessage}"></div>
 				 <div class="alert alert-success" th:if="${mailsuccess}"
