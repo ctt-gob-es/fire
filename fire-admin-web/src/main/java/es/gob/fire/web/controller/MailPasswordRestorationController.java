@@ -113,8 +113,9 @@ public class MailPasswordRestorationController {
 	 * @throws AddressException
 	 */
 	@RequestMapping(value = "mailpasswordrestoration", method = RequestMethod.POST)
-	public String mialRestorePassword(@RequestParam("userNameOrEmail") final String userNameOrEmail,
+	public String mialRestorePassword(@RequestParam("userNameOrEmail") final String userNameOrEmail, 
 			final HttpServletRequest request, final Model model) throws Exception {
+		String result = "login.html";
 		try {
 			User user = userService.getUserByUserNameOrEmail(userNameOrEmail, userNameOrEmail);
 			if (user != null /* && user.getEmail() != null */ /*
@@ -140,14 +141,15 @@ public class MailPasswordRestorationController {
 				mailSenderService.sendEmail(user, restorationUrl);
 				model.addAttribute("mailsuccess", Boolean.TRUE);
 			} else {
-				// model.addAttribute("nouserfound", Boolean.TRUE);
 				model.addAttribute("mailerror", Boolean.TRUE);
 				model.addAttribute("mailErrorMessage", "El usuario indicado no se encuentra registrado en el sistema");
+				result = "mailpasswordrestoration.html";
 			}
 		} catch (IOException | MessagingException e) {
 			model.addAttribute("mailErrorMessage", "No ha sido posible enviar el correo");
+			result = "mailpasswordrestoration.html";
 		}
-		return "login.html";
+		return result;
 	}
 
 	/**
@@ -223,6 +225,7 @@ public class MailPasswordRestorationController {
 					userService.saveUser(user);
 					session.setAttribute("restoreUserId", user.getUserId());
 					session.setAttribute("restoreUserCode", code);
+					model.addAttribute("username", user.getUserName());
 				}
 			}
 
