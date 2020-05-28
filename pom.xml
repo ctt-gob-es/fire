@@ -398,8 +398,7 @@
 					<compilerArgs>
 						<arg>-Xbootclasspath:${java.home}/lib/jsse.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</arg>
 					</compilerArgs>
-					<debug>true</debug>
-					<debuglevel>lines,vars,source</debuglevel>
+					<debug>false</debug>
 				</configuration>
 			</plugin>
 
