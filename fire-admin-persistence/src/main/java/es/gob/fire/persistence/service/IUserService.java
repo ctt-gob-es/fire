@@ -26,9 +26,9 @@ package es.gob.fire.persistence.service;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
-import es.gob.fire.core.dto.UserDTO;
-import es.gob.fire.core.dto.UserEditDTO;
-import es.gob.fire.core.dto.UserPasswordDTO;
+import es.gob.fire.persistence.dto.UserDTO;
+import es.gob.fire.persistence.dto.UserEditDTO;
+import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.User;
 
 /** 

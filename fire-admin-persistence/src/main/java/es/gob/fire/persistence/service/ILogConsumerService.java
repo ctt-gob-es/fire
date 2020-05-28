@@ -27,10 +27,10 @@ package es.gob.fire.persistence.service;
 import java.io.IOException;
 import java.security.KeyStore;
 
-import es.gob.fire.core.dto.DownloadedLogFileDTO;
-import es.gob.fire.core.dto.LogDataDTO;
-import es.gob.fire.core.dto.LogFileInfoDTO;
-import es.gob.fire.core.dto.LogFilesDTO;
+import es.gob.fire.persistence.dto.DownloadedLogFileDTO;
+import es.gob.fire.persistence.dto.LogDataDTO;
+import es.gob.fire.persistence.dto.LogFileInfoDTO;
+import es.gob.fire.persistence.dto.LogFilesDTO;
 
 /**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>

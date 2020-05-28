@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.WebApplicationContext;
 
-import es.gob.fire.core.dto.LogConsumerConnectionDTO;
+import es.gob.fire.persistence.dto.LogConsumerConnectionDTO;
 import es.gob.log.consumer.client.LogConsumerClient;
 
 /**

@@ -16,7 +16,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
-import es.gob.fire.core.constant.NumberConstants;
+import es.gob.fire.commons.utils.NumberConstants;
 
 import com.fasterxml.jackson.annotation.JsonView;
 

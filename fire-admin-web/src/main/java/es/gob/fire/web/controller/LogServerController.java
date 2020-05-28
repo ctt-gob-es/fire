@@ -34,9 +34,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import es.gob.fire.core.dto.LogConsumerConnectionDTO;
-import es.gob.fire.core.dto.LogFileInfoDTO;
-import es.gob.fire.core.dto.LogServerDTO;
+import es.gob.fire.persistence.dto.LogConsumerConnectionDTO;
+import es.gob.fire.persistence.dto.LogFileInfoDTO;
+import es.gob.fire.persistence.dto.LogServerDTO;
 import es.gob.fire.persistence.entity.LogServer;
 import es.gob.fire.persistence.service.ILogConsumerService;
 import es.gob.fire.persistence.service.ILogServerService;

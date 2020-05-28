@@ -27,7 +27,7 @@ package es.gob.fire.persistence.service;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
-import es.gob.fire.core.dto.LogServerDTO;
+import es.gob.fire.persistence.dto.LogServerDTO;
 import es.gob.fire.persistence.entity.LogServer;
 
 /** 

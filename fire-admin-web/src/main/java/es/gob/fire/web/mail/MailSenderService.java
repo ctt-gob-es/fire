@@ -29,8 +29,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.core.constant.Constants;
-import es.gob.fire.core.util.UtilsStringChar;
+import es.gob.fire.commons.utils.Constants;
+import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.entity.User;
 
 /** 

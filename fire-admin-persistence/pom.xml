@@ -18,7 +18,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-admin-core</artifactId>
+			<artifactId>fire-admin-commons-util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.logconsumer</groupId>
@@ -33,10 +33,10 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
-		</dependency>
+		</dependency> -->
 		<!-- Jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -46,6 +46,33 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>	
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.aspectj</groupId>
+					<artifactId>aspectjweaver</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.github.darrachequesne</groupId>
+			<artifactId>spring-data-jpa-datatables</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
 		</dependency>
 	</dependencies>
 

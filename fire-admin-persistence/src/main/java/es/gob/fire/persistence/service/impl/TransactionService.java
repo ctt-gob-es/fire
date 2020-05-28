@@ -38,7 +38,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.core.dto.TransactionDTO;
+import es.gob.fire.persistence.dto.TransactionDTO;
 import es.gob.fire.persistence.entity.Transaction;
 import es.gob.fire.persistence.repository.TransactionRepository;
 import es.gob.fire.persistence.repository.datatable.TransactionDataTablesRepository;

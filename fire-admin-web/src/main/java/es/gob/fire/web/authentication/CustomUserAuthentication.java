@@ -21,9 +21,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.core.constant.Constants;
-import es.gob.fire.core.util.Base64;
-import es.gob.fire.core.util.UtilsStringChar;
+import es.gob.fire.commons.utils.Constants;
+import es.gob.fire.commons.utils.Base64;
+import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 

@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.core.constant.NumberConstants;
+import es.gob.fire.commons.utils.NumberConstants;
 
 /**
  * <p>Class that maps the <i>USER_MONITORIZA</i> database table as a Plain Old Java Object.</p>
@@ -346,6 +346,7 @@ public class User implements Serializable {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "FK_ROL", nullable = false)
 	@NotNull
+	@JsonView(DataTablesOutput.View.class)
 	public Rol getRol() {
 		return rol;
 	}

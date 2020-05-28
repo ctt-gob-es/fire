@@ -46,9 +46,9 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import es.gob.fire.core.constant.Constants;
-import es.gob.fire.core.util.FileUtilsDirectory;
-import es.gob.fire.core.util.UtilsServer;
+import es.gob.fire.commons.utils.Constants;
+import es.gob.fire.commons.utils.FileUtilsDirectory;
+import es.gob.fire.commons.utils.UtilsServer;
 
 /** 
  * <p>Class that manages the data base configuration.</p>

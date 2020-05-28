@@ -22,9 +22,9 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
-import es.gob.fire.core.constant.Constants;
-import es.gob.fire.core.util.FileUtilsDirectory;
-import es.gob.fire.core.util.UtilsServer;
+import es.gob.fire.commons.utils.Constants;
+import es.gob.fire.commons.utils.FileUtilsDirectory;
+import es.gob.fire.commons.utils.UtilsServer;
 
 /** 
  * <p>Class that registers the different beans used in the application.</p>
