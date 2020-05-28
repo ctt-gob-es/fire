@@ -36,12 +36,12 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import es.gob.fire.core.dto.DownloadedLogFileDTO;
-import es.gob.fire.core.dto.LogDataDTO;
-import es.gob.fire.core.dto.LogFileInfoDTO;
-import es.gob.fire.core.dto.LogFilesDTO;
-import es.gob.fire.core.dto.RowLogFileErrorDTO;
-import es.gob.fire.core.log.LogErrors;
+import es.gob.fire.persistence.dto.DownloadedLogFileDTO;
+import es.gob.fire.persistence.dto.LogDataDTO;
+import es.gob.fire.persistence.dto.LogFileInfoDTO;
+import es.gob.fire.persistence.dto.LogFilesDTO;
+import es.gob.fire.persistence.dto.RowLogFileErrorDTO;
+import es.gob.fire.commons.log.LogErrors;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.service.ILogConsumerService;

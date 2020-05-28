@@ -24,7 +24,6 @@
 package es.gob.fire.persistence.service.impl;
 import javax.transaction.Transactional;
 
-import org.apache.cxf.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -32,10 +31,11 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import es.gob.fire.core.dto.UserDTO;
-import es.gob.fire.core.dto.UserEditDTO;
-import es.gob.fire.core.dto.UserPasswordDTO;
+import es.gob.fire.persistence.dto.UserDTO;
+import es.gob.fire.persistence.dto.UserEditDTO;
+import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.repository.UserRepository;
 import es.gob.fire.persistence.repository.datatable.UserDataTablesRepository;

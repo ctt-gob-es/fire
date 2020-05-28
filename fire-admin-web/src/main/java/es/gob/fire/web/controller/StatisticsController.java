@@ -39,10 +39,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import es.gob.fire.core.constant.NumberConstants;
-import es.gob.fire.core.dto.SignatureDTO;
-import es.gob.fire.core.dto.TransactionDTO;
-import es.gob.fire.core.util.QueryEnum;
+import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.persistence.dto.SignatureDTO;
+import es.gob.fire.persistence.dto.TransactionDTO;
+import es.gob.fire.commons.utils.QueryEnum;
 import es.gob.fire.persistence.service.ISignatureService;
 import es.gob.fire.persistence.service.ITransactionService;
 

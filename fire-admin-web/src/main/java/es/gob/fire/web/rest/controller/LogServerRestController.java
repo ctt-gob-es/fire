@@ -58,15 +58,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.core.constant.Constants;
-import es.gob.fire.core.dto.DownloadedLogFileDTO;
-import es.gob.fire.core.dto.LogDataDTO;
-import es.gob.fire.core.dto.LogFilesDTO;
-import es.gob.fire.core.dto.LogFilterFormDTO;
-import es.gob.fire.core.dto.LogLastLinesFormDTO;
-import es.gob.fire.core.dto.LogSearchTextFormDTO;
-import es.gob.fire.core.dto.LogServerDTO;
-import es.gob.fire.core.dto.RowLogFileDTO;
+import es.gob.fire.commons.utils.Constants;
+import es.gob.fire.persistence.dto.DownloadedLogFileDTO;
+import es.gob.fire.persistence.dto.LogDataDTO;
+import es.gob.fire.persistence.dto.LogFilesDTO;
+import es.gob.fire.persistence.dto.LogFilterFormDTO;
+import es.gob.fire.persistence.dto.LogLastLinesFormDTO;
+import es.gob.fire.persistence.dto.LogSearchTextFormDTO;
+import es.gob.fire.persistence.dto.LogServerDTO;
+import es.gob.fire.persistence.dto.RowLogFileDTO;
 import es.gob.fire.persistence.entity.LogServer;
 import es.gob.fire.persistence.service.ILogConsumerService;
 import es.gob.fire.persistence.service.ILogServerService;

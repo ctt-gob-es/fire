@@ -38,7 +38,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.core.dto.SignatureDTO;
+import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.entity.Signature;
 import es.gob.fire.persistence.repository.SignatureRepository;
 import es.gob.fire.persistence.repository.datatable.SignatureDataTablesRepository;

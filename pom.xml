@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
@@ -77,6 +76,7 @@
 				<module>fire-admin-core</module>
 				<module>fire-admin-web</module>
 				<module>fire-admin-i18n</module>
+				<module>fire-admin-commons-util</module>
 				<module>clavefirma-test-services</module>
 				<module>fire-admin-jsp</module>
 				<module>fire-client-java</module>
@@ -127,6 +127,11 @@
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-admin-i18n</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-commons-util</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
 			<dependency>
@@ -385,7 +390,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
+				<!-- <version>${maven-compiler-plugin.version}</version> -->
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
@@ -393,7 +398,8 @@
 					<compilerArgs>
 						<arg>-Xbootclasspath:${java.home}/lib/jsse.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</arg>
 					</compilerArgs>
-					<debug>false</debug>
+					<debug>true</debug>
+					<debuglevel>lines,vars,source</debuglevel>
 				</configuration>
 			</plugin>
 
@@ -563,4 +569,7 @@
 		</pluginRepository>
 	</pluginRepositories> -->
 
+  <modules>
+    <module>fire-admin-commons-util</module>
+  </modules>
 </project>

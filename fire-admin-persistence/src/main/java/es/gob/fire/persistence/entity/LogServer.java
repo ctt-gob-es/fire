@@ -43,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.core.constant.NumberConstants;
+import es.gob.fire.commons.utils.NumberConstants;
 
 /** 
  * <p>Class that maps the <i>TB_SERVIDORES_LOG</i> database table as a Plain Old Java Object.</p>

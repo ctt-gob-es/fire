@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import es.gob.fire.core.dto.UserDTO;
-import es.gob.fire.core.dto.UserEditDTO;
-import es.gob.fire.core.dto.UserPasswordDTO;
+import es.gob.fire.persistence.dto.UserDTO;
+import es.gob.fire.persistence.dto.UserEditDTO;
+import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 

@@ -29,7 +29,7 @@ import java.util.List;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
-import es.gob.fire.core.dto.TransactionDTO;
+import es.gob.fire.persistence.dto.TransactionDTO;
 import es.gob.fire.persistence.entity.Transaction;
 
 /** 

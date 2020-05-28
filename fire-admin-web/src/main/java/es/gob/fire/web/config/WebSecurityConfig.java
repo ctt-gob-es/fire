@@ -33,7 +33,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
-import es.gob.fire.core.constant.Constants;
+import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.web.authentication.CustomUserAuthentication;
 
 /** 

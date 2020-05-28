@@ -29,7 +29,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.core.dto.LogServerDTO;
+import es.gob.fire.persistence.dto.LogServerDTO;
 import es.gob.fire.persistence.entity.LogServer;
 import es.gob.fire.persistence.repository.LogServerRepository;
 import es.gob.fire.persistence.repository.datatable.LogServerDataTablesRepository;

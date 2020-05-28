@@ -86,7 +86,7 @@
 					<label for="telf" class="col-form-label" th:text="#{form.user.telf}"></label>
 					<script th:inline="javascript">
 						/*<![CDATA[*/
-						    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
+						    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
 					<input onblur="validate(this,messageTelf);" type="number" name="telfAdd" id="telfAdd" th:field="*{telefono}" autocomplete="off" style="overflow:hidden" class="form-control" required/>
@@ -100,10 +100,16 @@
 					<label for="rol" class="col-form-label" th:text="#{form.user.rol}"></label>
 					<script th:inline="javascript">
 						/*<![CDATA[*/
-						    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
+						    var messageRol = /*[[#{form.user.rol.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageRol);" type="number" name="rolAdd" id="rolAdd" th:field="*{rol}" style="overflow:hidden" class="form-control" required/>
+					<select
+								id="query" name="query" class="form-control">
+								<option selected="selected" value=""
+									th:text="#{form.user.Editrol.pattern}"></option>
+								<option th:each="q: ${queries}" th:value="${q.name}"
+									th:text="${q.name}"></option>
+							</select>
 					<div id="invalid-rolAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>

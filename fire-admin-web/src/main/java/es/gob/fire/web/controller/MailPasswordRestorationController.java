@@ -140,6 +140,8 @@ public class MailPasswordRestorationController {
 				// Enviamos el email
 				mailSenderService.sendEmail(user, restorationUrl);
 				model.addAttribute("mailsuccess", Boolean.TRUE);
+				model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
+
 			} else {
 				model.addAttribute("mailerror", Boolean.TRUE);
 				model.addAttribute("mailErrorMessage", "El usuario indicado no se encuentra registrado en el sistema");
