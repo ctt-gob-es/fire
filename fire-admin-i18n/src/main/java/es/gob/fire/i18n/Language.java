@@ -183,7 +183,7 @@ public final class Language {
 	 * @param key Key for obtain the message.
 	 * @return String with the message.
 	 */
-	public static String getResWebMonitoriza(String key) {
+	public static String getResWebFire(String key) {
 		return resWebAdminBundle.getString(key);
 	}
 	
