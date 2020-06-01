@@ -79,15 +79,15 @@ public class ManagerPersistenceConfigurationServices {
 	 * Attribute that represents the services for the configuration persistence: ValET Users.
 	 */
 	@Autowired
-	private IUserService userValetService;
+	private IUserService userFireService;
 
 	
 	/**
-	 * Gets the value of the attribute {@link #userValetService}.
-	 * @return the value of the attribute {@link #userValetService}.
+	 * Gets the value of the attribute {@link #userFireService}.
+	 * @return the value of the attribute {@link #userFireService}.
 	 */
-	public final IUserService getUserValetService() {
-		return userValetService;
+	public final IUserService getUserFireService() {
+		return userFireService;
 	}
 
 }

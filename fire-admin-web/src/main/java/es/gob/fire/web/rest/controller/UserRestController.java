@@ -175,9 +175,9 @@ public class UserRestController {
 
 				listNewUser.add(user);
 			} catch (Exception e) {
-				LOGGER.error(Language.getResWebMonitoriza(IWebLogMessages.ERRORWEB022), e);
+				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
 				listNewUser = StreamSupport.stream(userService.getAllUser().spliterator(), false).collect(Collectors.toList());
-				json.put(KEY_JS_ERROR_SAVE_USER, Language.getResWebMonitoriza(IWebLogMessages.ERRORWEB022));
+				json.put(KEY_JS_ERROR_SAVE_USER, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
 				dtOutput.setError(json.toString());
 			}
 		}

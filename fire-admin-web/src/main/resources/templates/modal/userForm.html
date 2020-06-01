@@ -1,6 +1,6 @@
 <form name="altEditor-form" role="form" id="userForm" th:object="${userform}" th:action="@{/saveuser}" method="post">
 					
-			<input type='hidden' class='primarykey' id="idUserMonitoriza" th:field="*{idUserMonitoriza}">
+			<input type='hidden' class='primarykey' id="idUserFire" th:field="*{idUserFire}">
 			
 			<div class="form-group">
 				
@@ -42,6 +42,14 @@
 					<div id="invalid-loginAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
+			</div>
+			
+			<div class="form-group">
+			
+				<label for="idRol" th:text="#{form.user.rol}"></label>
+					<select id="rolId" name="rolId" class="form-control" th:field="*{rolId}">
+						<option th:each="rol: ${listRoles}" th:value="${rol.rolId}" th:text="${rol.rolName}" th:selected="${userform.rolId == rol.rolId}"></option>
+					</select>
 			</div>
 			
 			<div class="form-group">

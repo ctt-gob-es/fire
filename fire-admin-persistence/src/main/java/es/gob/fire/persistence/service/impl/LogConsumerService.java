@@ -133,7 +133,7 @@ public class LogConsumerService implements ILogConsumerService {
 			final byte[ ] logFilesJson = this.logConsumerBean.getLogFiles();
 			logFiles = new Gson().fromJson(new String(logFilesJson), listType);
 		} catch (final JsonSyntaxException e) {
-			final String errorJson = Language.getResWebMonitoriza(IWebLogMessages.ERRORWEB025);
+			final String errorJson = Language.getResWebFire(IWebLogMessages.ERRORWEB025);
 			final RowLogFileErrorDTO errorDTO = new RowLogFileErrorDTO();
 			errorDTO.setCode(400);
 			errorDTO.setMessage(errorJson);
@@ -151,7 +151,7 @@ public class LogConsumerService implements ILogConsumerService {
 		final LogFileInfoDTO logFileInfo = new LogFileInfoDTO();
 		final LogInfo logInfo = this.logConsumerBean.openFile(logFilename);
 		if (logInfo.getError() != null) {
-			final String errorMsg = Language.getResWebMonitoriza(IWebLogMessages.ERRORWEB026);
+			final String errorMsg = Language.getResWebFire(IWebLogMessages.ERRORWEB026);
 			logFileInfo.setError(errorMsg);
 		} else {
 			logFileInfo.setFilename(logFilename);
@@ -187,7 +187,7 @@ public class LogConsumerService implements ILogConsumerService {
 		final String tempDir = System.getProperty("java.io.tmpdir");
 		final DownloadedLogFile downloadedFile = this.logConsumerBean.download(logFilename, tempDir);
 		if (downloadedFile.getError() != null) {
-			final String errorMsg = Language.getResWebMonitoriza(IWebLogMessages.ERRORWEB027);
+			final String errorMsg = Language.getResWebFire(IWebLogMessages.ERRORWEB027);
 			logFileInfo.setError(errorMsg);
 		} else {
 			final File logFile = new File(downloadedFile.getPath());
@@ -197,7 +197,7 @@ public class LogConsumerService implements ILogConsumerService {
 				logFileInfo.setContentType("application/zip");
 			} catch (final IOException e) {
 				LOGGER.error("No se pudo leer el fichero de log almacenado en el directorio temporal", e);
-				logFileInfo.setError(Language.getResWebMonitoriza(IWebLogMessages.ERRORWEB028));
+				logFileInfo.setError(Language.getResWebFire(IWebLogMessages.ERRORWEB028));
 			}
 		}
 		return logFileInfo;

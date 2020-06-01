@@ -7,16 +7,16 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -116,8 +116,8 @@ public class User implements Serializable {
 	 */
 	@Id
 	@Column(name = "ID_USUARIO", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@NotNull
+	@GeneratedValue(generator = "tb_usuarios_seq")
+	@GenericGenerator(name = "tb_usuarios_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_USUARIOS_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
 	@JsonView(DataTablesOutput.View.class)
 	public Long getUserId() {
 		return this.userId;
@@ -137,7 +137,6 @@ public class User implements Serializable {
 	 */
 	@Column(name = "NOMBRE_USUARIO", nullable = false, length = NumberConstants.NUM30, unique = true)
 	@Size(max = NumberConstants.NUM30)
-	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public String getUserName() {
 		return this.userName;
@@ -193,7 +192,6 @@ public class User implements Serializable {
 	 */
 	@Column(name = "NOMBRE", nullable = false, length = NumberConstants.NUM45)
 	@Size(max = NumberConstants.NUM45)
-	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public String getName() {
 		return this.name;
@@ -213,7 +211,6 @@ public class User implements Serializable {
 	 */
 	@Column(name = "CLAVE", nullable = false, length = NumberConstants.NUM2000)
 	@Size(max = NumberConstants.NUM2000)
-	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public String getPassword() {
 		return this.password;
@@ -233,7 +230,6 @@ public class User implements Serializable {
 	 */
 	@Column(name = "APELLIDOS", nullable = false, length = NumberConstants.NUM150)
 	@Size(max = NumberConstants.NUM150)
-	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public String getSurnames() {
 		return this.surnames;
@@ -253,7 +249,6 @@ public class User implements Serializable {
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "FEC_ALTA", nullable = false, length = NumberConstants.NUM6)
-	@NotNull
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -271,7 +266,6 @@ public class User implements Serializable {
 	 * @return the value of the attribute {@link #root}.
 	 */
    @Column(name = "USU_DEFECTO", nullable = false)
-   @NotNull
    public Boolean getRoot() {
 	return root;
    }
@@ -308,7 +302,6 @@ public class User implements Serializable {
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "FEC_RENOVACION", nullable = false, length = NumberConstants.NUM6)
-	@NotNull
 	public Date getRenovationDate() {
 		return renovationDate;
 	}
@@ -326,7 +319,6 @@ public class User implements Serializable {
 	 * @return the value of the attribute {@link #restPassword}.
 	 */
    @Column(name = "REST_CLAVE", nullable = false)
-   @NotNull
    public Boolean getRestPassword() {
 	return restPassword;
    }
@@ -345,7 +337,6 @@ public class User implements Serializable {
 	 */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "FK_ROL", nullable = false)
-	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public Rol getRol() {
 		return rol;
