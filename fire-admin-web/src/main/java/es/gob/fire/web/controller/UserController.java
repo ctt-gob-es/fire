@@ -106,6 +106,7 @@ public class UserController {
 		userFormEdit.setSurnamesEdit(user.getSurnames());
 		userFormEdit.setEmailEdit(user.getEmail());
 		userFormEdit.setUsernameEdit(user.getUserName());
+		userFormEdit.setRolId(user.getRol().getRolId());
 
 		model.addAttribute("userformEdit", userFormEdit);
 		return "modal/userFormEdit.html";

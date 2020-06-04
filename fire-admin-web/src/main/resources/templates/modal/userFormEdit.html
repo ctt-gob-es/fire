@@ -54,6 +54,14 @@
 					</div>
 					
 					<div class="form-group">
+			
+						<label for="idRol" th:text="#{form.user.rol}"></label>
+						<select id="rolId" name="rolId" class="form-control" th:field="*{rolId}">
+							<option th:each="rol: ${listRoles}" th:value="${rol.rolId}" th:text="${rol.rolName}" th:selected="${userform.rolId == rol.rolId}"></option>
+						</select>
+					</div>
+					
+					<div class="form-group">
 						
 							<label for="emailEdit" class="col-form-label" th:text="#{form.user.email}"></label>
 							<script th:inline="javascript">

@@ -77,6 +77,11 @@ public class UserEditDTO {
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.email.notempty}")
 	@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM255, groups = ThenCheckIt.class)
 	private String emailEdit = UtilsStringChar.EMPTY_STRING;
+	
+	/**
+	 * Attribute that represents the identifier for the use role selected in the user form.
+	 */
+	private Long rolId;
 
 	
 	/**
@@ -169,6 +174,21 @@ public class UserEditDTO {
 		this.emailEdit = emailEditParam;
 	}
 
+	/**
+	 * Gets the value of the attribute {@link #rolId}.
+	 * @return the value of the attribute {@link #rolId}.
+	 */
+	public Long getRolId() {
+		return rolId;
+	}
 
+	
+	/**
+	 * Sets the value of the attribute {@link #rolId}.
+	 * @param rolIdParam The value for the attribute {@link #rolId}.
+	 */
+	public void setRolId(Long rolIdParam) {
+		this.rolId = rolIdParam;
+	}
 
 }
