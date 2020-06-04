@@ -23,12 +23,15 @@
  * @version 1.0, 15/06/2018.
  */
 package es.gob.fire.persistence.service;
+import java.util.List;
+
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
+import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
 
 /** 
@@ -97,6 +100,12 @@ public interface IUserService {
 	 * @return a {@link Iterable<User>} with the information of all users.
 	 */
 	Iterable<User> getAllUser();
+	
+	/**
+	 * Method that gets all the user roles from the persistence.
+	 * @return a {@link Iterable<Rol>} with the information of all roles.
+	 */
+	List<Rol> getAllRol();
 		
 	/**
 	 * Method that gets the list for the given {@link DataTablesInput}.

@@ -69,7 +69,7 @@ public final class UtilsKeyStore {
 		try {
 			InputStream inputStreamKs = new FileInputStream(pathSslTruststore);
 			// Accedemos al almacén de confianza SSL
-			msgError = Language.getResWebMonitoriza(IWebLogMessages.ERRORWEB029);
+			msgError = Language.getResWebFire(IWebLogMessages.ERRORWEB029);
 			cer = KeyStore.getInstance(typeSslTruststore);
 			cer.load(inputStreamKs, passSslTruststore.toCharArray());
 		} catch (KeyStoreException | NoSuchAlgorithmException

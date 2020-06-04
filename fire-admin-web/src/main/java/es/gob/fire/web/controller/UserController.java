@@ -1,5 +1,8 @@
 package es.gob.fire.web.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,11 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import es.gob.fire.persistence.dto.RolDTO;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
+import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
+import es.gob.fire.persistence.service.ManagerPersistenceServices;
 
 /**
  * <p>
@@ -60,6 +66,8 @@ public class UserController {
 	 */
 	@RequestMapping(value = "adduser", method = RequestMethod.POST)
 	public String addUser(final Model model) {
+		
+		model.addAttribute("listRoles", loadRoles());
 		model.addAttribute("userform", new UserDTO());
 		model.addAttribute("accion", "add");
 		return "modal/userForm";
@@ -117,19 +125,21 @@ public class UserController {
 //	}
 
 	/**
-	 * Method that maps the add user web request to the controller and sets the
-	 * backing form.
-	 *
-	 * @param model
-	 *            Holder object for model attributes.
-	 * @return String that represents the name of the view to forward.
-//	 */
-//	@RequestMapping(value = "addcertuser", method = RequestMethod.POST)
-//	public String addcertuserForm(final Model model) {
-////		model.addAttribute("certUserForm", new CertificateDTO());
-////		model.addAttribute("accion", "add");
-//		return "modal/certUserForm";
-//	}
+	 * Method that loads association types.
+	 * @return List of constants that represents the different association types.
+	 */
+	private List<RolDTO> loadRoles() {
+		List<RolDTO> listRoles = new ArrayList<RolDTO>();
+		// obtenemos los tipos de planificadores.
+		IUserService userService = ManagerPersistenceServices.getInstance().getManagerPersistenceConfigurationServices().getUserFireService();
+		List<Rol> listRol = userService.getAllRol();
+		for (Rol rol: listRol) {
+			RolDTO item = new RolDTO(rol.getRolId(), rol.getRolName(), rol.getPermissions());
+			listRoles.add(item);
+		}
+
+		return listRoles;
+	}
 
 	/**
 	 * Get userService.

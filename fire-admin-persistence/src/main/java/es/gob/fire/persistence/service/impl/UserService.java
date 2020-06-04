@@ -22,6 +22,9 @@
  * @version 1.0, 15/06/2018.
  */
 package es.gob.fire.persistence.service.impl;
+import java.util.Date;
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +39,9 @@ import org.springframework.util.StringUtils;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
+import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.repository.RolRepository;
 import es.gob.fire.persistence.repository.UserRepository;
 import es.gob.fire.persistence.repository.datatable.UserDataTablesRepository;
 import es.gob.fire.persistence.service.IUserService;
@@ -55,6 +60,12 @@ public class UserService implements IUserService {
 	 */
 	@Autowired
 	private UserRepository repository;
+	
+	/**
+	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
+	 */
+	@Autowired
+	private RolRepository rolRepository;
 
 	/**
 	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
@@ -101,9 +112,14 @@ public class UserService implements IUserService {
 			user.setPassword(hashPwd);
 		}
 		
+		user.setUserName(userDto.getLogin());
 		user.setName(userDto.getName());
 		user.setSurnames(userDto.getSurnames());
 		user.setEmail(userDto.getEmail());
+		user.setStartDate(new Date());
+		user.setRol(rolRepository.findByRolId(userDto.getRolId()));
+		user.setRenovationDate(new Date());
+		user.setRoot(Boolean.FALSE);
 		//TODO Rellenar los campos que faltan
 		return repository.save(user);
 	}
@@ -145,7 +161,7 @@ public class UserService implements IUserService {
 	 * @see es.gob.fire.persistence.services.IUserService#getAllUse()
 	 */
 	@Override
-	public Iterable<User> getAllUser() {
+	public List<User> getAllUser() {
 		return repository.findAll();
 	}
 
@@ -211,6 +227,12 @@ public class UserService implements IUserService {
 			throw e;
 		}
 		return result;	
+	}
+
+	@Override
+	public List<Rol> getAllRol() {
+		
+		return rolRepository.findAll();
 	}
 
 }

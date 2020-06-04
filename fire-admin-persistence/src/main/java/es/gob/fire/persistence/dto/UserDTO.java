@@ -91,6 +91,11 @@ public class UserDTO {
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.email.notempty}")
     @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
     private String email = UtilsStringChar.EMPTY_STRING;
+	
+	/**
+	 * Attribute that represents the identifier for the use role selected in the user form.
+	 */
+	private Long rolId;
 
 	/**
 	 * Attribute that represents the value of the input telf of the user in the form. 
