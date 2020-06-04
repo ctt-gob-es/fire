@@ -12,7 +12,7 @@
 							<th></th>
 							<th th:text="#{table.user.login}"></th>
 							<th th:text="#{table.user.name}"></th>
-							<th th:text="#{table.user.surname}"></th>
+							<th th:text="#{table.user.surnames}"></th>
 							<th th:text="#{table.user.password}"></th>
 							<th th:text="#{table.user.email}"></th>
 							<th th:text="#{table.user.telf}"></th>
@@ -46,7 +46,7 @@
 								    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
+							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
 							<div id="invalid-name" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -60,7 +60,7 @@
 								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
 							<div id="invalid-surnames" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -88,8 +88,43 @@
 								    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" style="overflow:hidden" class="form-control" required/>
+							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required/>
 							<div id="invalid-email" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group-modal">
+						
+							<label for="telfEdit" class="col-form-label" th:text="#{form.user.telf}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageTelf = /*[[#{form.user.surnames.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageTelf);" type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<div id="invalid-telf" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group-modal">
+						
+							<label for="rolEdit" class="col-form-label" th:text="#{form.user.rol}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageRol = /*[[#{form.user.surnames.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<select
+						id="query" name="query" class="form-control">
+						<option selected="selected" value="" th:disabled="disabled"
+							th:text="#{form.user.Editrol.pattern}"></option>
+						<option  th:value="'1'" th:text="#{form.user.rol.administrador}"></option>
+   						<option  th:value="'2'" th:text="#{form.user.rol.responsable}"></option>
+   						<option  th:value="'3'" th:text="#{form.user.rol.contacto}"></option>		
+					</select>
+							<div id="invalid-rol" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
 					</div>
@@ -279,7 +314,7 @@ $(document).ready(function() {
 		            	    
 		            	});
 		                
-		                // Esto es necesario para forzar que se muestren mensajes de validación de cliente
+		                // Esto es necesario para forzar que se muestren mensajes de validaciĂ³n de cliente
 		                $('<input type="submit">').hide().appendTo($('#userForm')).click().remove();
 		            } else {
 		            	if ($('#passwordAdd').val() != $('#confirmPasswordAdd').val()){

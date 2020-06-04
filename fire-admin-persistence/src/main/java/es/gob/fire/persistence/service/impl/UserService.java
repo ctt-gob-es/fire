@@ -99,8 +99,8 @@ public class UserService implements IUserService {
 	@Transactional
 	public User saveUser(UserDTO userDto) {
 		User user = null;
-		if (userDto.getIdUserFire() != null) {
-			user = repository.findByUserId(userDto.getIdUserFire());
+		if (userDto.getUserId() != null) {
+			user = repository.findByUserId(userDto.getUserId());
 		} else {
 			user = new User();
 		}

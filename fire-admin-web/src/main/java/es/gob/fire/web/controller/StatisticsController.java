@@ -98,7 +98,7 @@ public class StatisticsController {
 	 * @return String that represents the name of the view to forward.
 	 */
 	@RequestMapping(value = "statisticsresult", method = RequestMethod.GET)
-    public String queryVipTime(final Model model, final @RequestParam("query") String query, final @RequestParam("monthDate") String monthDate) {
+    public String statisticsResult(final Model model, final @RequestParam("query") String query, final @RequestParam("monthDate") String monthDate) {
 		List<TransactionDTO> transactions = null;
 		List<SignatureDTO> signatures = null;
 		

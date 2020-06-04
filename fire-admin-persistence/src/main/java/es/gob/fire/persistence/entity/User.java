@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.persistence.validatorDNI.Nif;
 
 /**
  * <p>Class that maps the <i>USER_MONITORIZA</i> database table as a Plain Old Java Object.</p>
@@ -106,9 +107,10 @@ public class User implements Serializable {
 	private Rol rol;
 	
 	/**
-	 * Attribute that represents the system certificates.
+	 * Attribute that represents the DNI.
 	 */
-	//private List<SystemCertificate> systemCertificates;
+	
+	private String nif;	
 
 	/**
 	 * Gets the value of the attribute {@link #userId}.
@@ -135,8 +137,10 @@ public class User implements Serializable {
 	 * Gets the value of the attribute {@link #userName}.
 	 * @return the value of the attribute {@link #userName}.
 	 */
+	
 	@Column(name = "NOMBRE_USUARIO", nullable = false, length = NumberConstants.NUM30, unique = true)
 	@Size(max = NumberConstants.NUM30)
+	@Nif
 	@JsonView(DataTablesOutput.View.class)
 	public String getUserName() {
 		return this.userName;

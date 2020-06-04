@@ -57,6 +57,7 @@ public class WebConfig implements WebMvcConfigurer {
 	 * 
 	 * @return PropertySourcesPlaceholderConfigurer
 	 */
+	
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();

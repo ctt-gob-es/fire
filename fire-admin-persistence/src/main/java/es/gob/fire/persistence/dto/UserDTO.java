@@ -47,7 +47,7 @@ public class UserDTO {
 	/**
 	 * Attribute that represents the value of the primary key as a hidden input in the form. 
 	 */
-	private Long idUserFire = null;
+	private Long userId;
 	
 	/**
 	 * Attribute that represents the value of the input name of the user in the form. 
@@ -93,26 +93,32 @@ public class UserDTO {
     private String email = UtilsStringChar.EMPTY_STRING;
 	
 	/**
-	 * Attribute that represents the identifier for the use role selected in the user form.
+	 * Attribute that represents the value of the input telf of the user in the form. 
 	 */
-	private Long rolId;
-
+	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.telf.notempty}")
+    @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
+    private String telf = UtilsStringChar.EMPTY_STRING;
 	
 	/**
-	 * Gets the value of the attribute {@link #idUserValet}.
-	 * @return the value of the attribute {@link #idUserValet}.
+	 * Attribute that represents the identifier for the use role selected in the user form.
 	 */
-	public Long getIdUserFire() {
-		return idUserFire;
+	private Long rolId;	
+		
+	/**
+	 * Gets the value of the attribute {@link #userId}.
+	 * @return the value of the attribute {@link #userId}.
+	 */
+	public Long getUserId() {
+		return userId;
 	}
 
 	
 	/**
-	 * Sets the value of the attribute {@link #idUserValet}.
-	 * @param idUserValetParam The value for the attribute {@link #idUserValet}.
+	 * Sets the value of the attribute {@link #userId}.
+	 * @param userIdParam The value for the attribute {@link #userId}.
 	 */
-	public void setIdUserFire(Long idUserFireParam) {
-		this.idUserFire = idUserFireParam;
+	public void setUserId(Long userIdParam) {
+		this.userId = userIdParam;
 	}
 
 	
@@ -222,25 +228,32 @@ public class UserDTO {
 	public void setEmail(String emailParam) {
 		this.email = emailParam;
 	}
-
-
+	
 	/**
-	 * Gets the value of the attribute {@link #rolId}.
-	 * @return the value of the attribute {@link #rolId}.
+	 * Gets the value of the attribute {@link #rol}.
+	 * @return the value of the attribute {@link #rol}.
 	 */
+	public String getTelf() {
+		return telf;
+	}
+
+	
+	/**
+	 * Sets the value of the attribute {@link #rol}.
+	 * @param emailParam The value for the attribute {@link #rol}.
+	 */
+	public void setTelf(String telfParam) {
+		this.telf = telfParam;
+	}
+
+
 	public Long getRolId() {
 		return rolId;
 	}
 
-	
-	/**
-	 * Sets the value of the attribute {@link #rolId}.
-	 * @param rolIdParam The value for the attribute {@link #rolId}.
-	 */
-	public void setRolId(Long rolIdParam) {
-		this.rolId = rolIdParam;
+
+	public void setRolId(Long rolId) {
+		this.rolId = rolId;
 	}
-			
-	
-	
+		
 }
