@@ -72,8 +72,8 @@ public class UserController {
 	 * @return String that represents the navigation HTML fragment
 	 */
 	@RequestMapping(value = "menupass")
-	public String menuPass(@RequestParam("username") final String username, final Model model) {
-		final User user = this.userService.getUserByUserName(username);
+	public String menuPass(@RequestParam("id") final Long userId, final Model model) {
+		final User user = this.userService.getUserByUserId(userId);
 		final UserPasswordDTO userFormPassword = new UserPasswordDTO();
 
 		userFormPassword.setIdUserFirePass(user.getUserId());
@@ -88,33 +88,33 @@ public class UserController {
 	 * @param model view Model object
 	 * @return String that represents the navigation HTML fragment
 	 */
-	@RequestMapping(value = "menuedit")
-	public String menuEdit(@RequestParam("username") final String username, final Model model) {
-		final User user = this.userService.getUserByUserName(username);
+	@RequestMapping(value = "menuedit", method = { RequestMethod.POST, RequestMethod.GET })
+	public String menuEdit(@RequestParam("id") final Long userId, final Model model) {
+		final User user = this.userService.getUserByUserId(userId);
 		final UserEditDTO userFormEdit = new UserEditDTO();
 
-		userFormEdit.setIdUserFireEdit(user.getUserId());
+		userFormEdit.setIdUserFireEdit(userId);
 		userFormEdit.setNameEdit(user.getName());
 		userFormEdit.setSurnamesEdit(user.getSurnames());
 		userFormEdit.setEmailEdit(user.getEmail());
 		userFormEdit.setUsernameEdit(user.getUserName());
 
 		model.addAttribute("userformEdit", userFormEdit);
-		return "modal/userFormEdit.html";
+		return "modal/useradmin.html";
 	}
 
-	/**
-	 * Method that maps the add user certificate web requests to the controller and forwards to the form
-	 * to the view.
-	 * @param model Holder object for model attributes.
-	 * @param idUser Identifier for the idUser
-	 * @return String that represents the name of the view to forward.
-	 */
-	@RequestMapping(value = "/managecertuser/{idUser}")
-	public String manageCertUser(final Model model, @PathVariable("idUser") final Long idUser) {
-		model.addAttribute("idUser", idUser);
-		return "modal/certUser.html";
-	}
+//	/**
+//	 * Method that maps the add user certificate web requests to the controller and forwards to the form
+//	 * to the view.
+//	 * @param model Holder object for model attributes.
+//	 * @param userId Identifier for the idUser
+//	 * @return String that represents the name of the view to forward.
+//	 */
+//	@RequestMapping(value = "/managecertuser/{idUser}")
+//	public String manageCertUser(final Model model, @PathVariable("idUser") final Long userId) {
+//		model.addAttribute("idUser", userId);
+//		return "modal/certUser.html";
+//	}
 
 	/**
 	 * Method that maps the add user web request to the controller and sets the

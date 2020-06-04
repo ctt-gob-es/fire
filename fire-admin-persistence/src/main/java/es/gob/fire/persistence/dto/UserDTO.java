@@ -47,7 +47,7 @@ public class UserDTO {
 	/**
 	 * Attribute that represents the value of the primary key as a hidden input in the form. 
 	 */
-	private Long idUserFire = null;
+	private Long userId;
 	
 	/**
 	 * Attribute that represents the value of the input name of the user in the form. 
@@ -107,20 +107,20 @@ public class UserDTO {
     private String rol = UtilsStringChar.EMPTY_STRING;
 	
 	/**
-	 * Gets the value of the attribute {@link #idUserValet}.
-	 * @return the value of the attribute {@link #idUserValet}.
+	 * Gets the value of the attribute {@link #userId}.
+	 * @return the value of the attribute {@link #userId}.
 	 */
 	public Long getIdUserFire() {
-		return idUserFire;
+		return userId;
 	}
 
 	
 	/**
-	 * Sets the value of the attribute {@link #idUserValet}.
-	 * @param idUserValetParam The value for the attribute {@link #idUserValet}.
+	 * Sets the value of the attribute {@link #userId}.
+	 * @param idUserValetParam The value for the attribute {@link #userId}.
 	 */
 	public void setIdUserFire(Long idUserFireParam) {
-		this.idUserFire = idUserFireParam;
+		this.userId = idUserFireParam;
 	}
 
 	

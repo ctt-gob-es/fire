@@ -54,6 +54,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
+import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.Language;
@@ -82,7 +83,7 @@ public class UserRestController {
 	/**
 	 * Attribute that represents the identifier of the html input id field for the user.
 	 */
-	private static final String FIELD_ID_USER = "idUser";
+	private static final String FIELD_ID_USER = "userId";
 
 	/**
 	 * Attribute that represents the span text.
@@ -141,8 +142,17 @@ public class UserRestController {
 	@RequestMapping(path = "/deleteuser", method = RequestMethod.POST)
 	@Transactional
 	public String deleteUser(@RequestParam("id") final Long userId, @RequestParam("index") final String index) {
+		String userIndex = index;
+		
+		try {
 		userService.deleteUser(userId);
-		return index;
+		} catch (final Exception e) {
+			userIndex = Constants.ROW_INDEX_ERROR;
+		}
+		return userIndex;
+		
+		
+		
 	}
 
 	/**

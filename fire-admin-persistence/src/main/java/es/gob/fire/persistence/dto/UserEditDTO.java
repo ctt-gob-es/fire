@@ -44,7 +44,7 @@ public class UserEditDTO {
 	 * Attribute that represents the value of the primary key as a hidden input
 	 * in the form.
 	 */
-	private Long idUserFireEdit = null;
+	private Long idUserFireEdit;
 
 	/**
 	 * Attribute that represents the value of the input name of the user in the

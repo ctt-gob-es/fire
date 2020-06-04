@@ -19,7 +19,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
-import es.gob.fire.core.constant.NumberConstants;
+import es.gob.fire.commons.utils.NumberConstants;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -59,10 +59,6 @@ public class Rol implements Serializable {
 	 */
 	private String permissions;
 	
-	/**
-	 * Attribute that represents the user .
-	 */
-	private User user;
 	
 
 	/**
@@ -124,29 +120,7 @@ public class Rol implements Serializable {
 	public void setPermissions(final String permissionsP) {
 		this.permissions = permissionsP;
 	}
-	/**
-	 * Gets the value of the attribute {@link #user}.
-	 * @return the value of the attribute {@link #user}.
-	 */
-	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
-	// because Hibernate JPA needs not final access methods.
-	@ManyToOne
-	@JoinColumn(name="userId", nullable=false)
-	public User getUser() {
-		// CHECKSTYLE:ON
-		return user;
-	}
 
-	/**
-	 * Sets the value of the attribute {@link #user}.
-	 * @param userMonitoriza The value for the attribute {@link #user}.
-	 */
-	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
-	// because Hibernate JPA needs not final access methods.
-	public void setUser(User user) {
-		// CHECKSTYLE:ON
-		this.user = user;
-	}
 	
 	
 //	public static String getRoleLegibleText(final Rol rol) {

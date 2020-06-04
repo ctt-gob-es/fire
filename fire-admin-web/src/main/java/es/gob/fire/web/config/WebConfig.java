@@ -57,6 +57,14 @@ public class WebConfig implements WebMvcConfigurer {
 	 * 
 	 * @return PropertySourcesPlaceholderConfigurer
 	 */
+	
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		final PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+		propertySourcesPlaceholderConfigurer.setLocations(new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_PERSISTENCE)),
+														new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_MAIL)));
+		return propertySourcesPlaceholderConfigurer;
+	}
 
 	@Bean
 	public MessageSource messageSource() {

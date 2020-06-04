@@ -89,7 +89,8 @@
 						    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageTelf);" type="number" name="telfAdd" id="telfAdd" th:field="*{telefono}" autocomplete="off" style="overflow:hidden" class="form-control" required/>
+					<input onblur="validate(this,messageTelf);" type="text" name="telfAdd" id="telfAdd" th:field="*{telf}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+					
 					<div id="invalid-telfAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -104,12 +105,13 @@
 						/*]]>*/
 					</script>
 					<select
-								id="query" name="query" class="form-control">
-								<option selected="selected" value=""
-									th:text="#{form.user.Editrol.pattern}"></option>
-								<option th:each="q: ${queries}" th:value="${q.name}"
-									th:text="${q.name}"></option>
-							</select>
+						id="query" name="query" class="form-control">
+						<option selected="selected" value="" th:disabled="disabled"
+							th:text="#{form.user.Editrol.pattern}"></option>
+						<option  th:value="'1'" th:text="#{form.user.rol.administrador}"></option>
+   						<option  th:value="'2'" th:text="#{form.user.rol.responsable}"></option>
+   						<option  th:value="'3'" th:text="#{form.user.rol.contacto}"></option>		
+					</select>
 					<div id="invalid-rolAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>

@@ -2,9 +2,7 @@ package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,12 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -28,7 +23,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.core.constant.NumberConstants;
+import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.persistence.validatorDNI.Nif;
 
 /**
  * <p>Class that maps the <i>USER_MONITORIZA</i> database table as a Plain Old Java Object.</p>
@@ -108,12 +104,13 @@ public class User implements Serializable {
 	/**
 	 * Attribute that represents the rol.
 	 */
-	private List<Rol> rol;
+	private Rol rol;
 	
 	/**
-	 * Attribute that represents the system certificates.
+	 * Attribute that represents the DNI.
 	 */
-	//private List<SystemCertificate> systemCertificates;
+	
+	private String nif;	
 
 	/**
 	 * Gets the value of the attribute {@link #userId}.
@@ -121,7 +118,7 @@ public class User implements Serializable {
 	 */
 	@Id
 	@Column(name = "ID_USUARIO", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(strategy=GenerationType.IDENTITY) 
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public Long getUserId() {
@@ -140,9 +137,11 @@ public class User implements Serializable {
 	 * Gets the value of the attribute {@link #userName}.
 	 * @return the value of the attribute {@link #userName}.
 	 */
+	
 	@Column(name = "NOMBRE_USUARIO", nullable = false, length = NumberConstants.NUM30, unique = true)
 	@Size(max = NumberConstants.NUM30)
 	@NotNull
+	@Nif
 	@JsonView(DataTablesOutput.View.class)
 	public String getUserName() {
 		return this.userName;
@@ -211,26 +210,6 @@ public class User implements Serializable {
 	public void setName(final String nameP) {
 		this.name = nameP;
 	}
-	
-	/**
-	 * Gets the value of the attribute {@link #surnames}.
-	 * @return the value of the attribute {@link #surnames}.
-	 */
-	@Column(name = "APELLIDOS", nullable = false, length = NumberConstants.NUM150)
-	@Size(max = NumberConstants.NUM150)
-	@NotNull
-	@JsonView(DataTablesOutput.View.class)
-	public String getSurnames() {
-		return this.surnames;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #surnames}.
-	 * @param surnamesP The value for the attribute {@link #surnames}.
-	 */
-	public void setSurnames(final String surnamesP) {
-		this.surnames = surnamesP;
-	}
 
 	/**
 	 * Gets the value of the attribute {@link #password}.
@@ -252,7 +231,25 @@ public class User implements Serializable {
 		this.password = passwordP;
 	}
 
-	
+	/**
+	 * Gets the value of the attribute {@link #surnames}.
+	 * @return the value of the attribute {@link #surnames}.
+	 */
+	@Column(name = "APELLIDOS", nullable = false, length = NumberConstants.NUM150)
+	@Size(max = NumberConstants.NUM150)
+	@NotNull
+	@JsonView(DataTablesOutput.View.class)
+	public String getSurnames() {
+		return this.surnames;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #surnames}.
+	 * @param surnamesP The value for the attribute {@link #surnames}.
+	 */
+	public void setSurnames(final String surnamesP) {
+		this.surnames = surnamesP;
+	}
 	
 	/**
 	 * Gets the value of the attribute {@link #startDate}.
@@ -346,31 +343,24 @@ public class User implements Serializable {
 	this.restPassword = restPasswordP;
    }
    
-
-	/**
+   /**
 	 * Gets the value of the attribute {@link #rol}.
 	 * @return the value of the attribute {@link #rol}.
 	 */
-	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
-	// because Hibernate JPA needs not final access methods.
-	//@OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
-   @OneToMany(mappedBy="user", cascade={CascadeType.ALL})
-	
-	public List<Rol> getRol() {
-		// CHECKSTYLE:ON
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "FK_ROL", nullable = false)
+	@NotNull
+	@JsonView(DataTablesOutput.View.class)
+	public Rol getRol() {
 		return rol;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #rol}.
-	 * @param systemCertificates The value for the attribute {@link #rol}.
+	 * @param rolP The value for the attribute {@link #rol}.
 	 */
-	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
-	// because Hibernate JPA needs not final access methods.
-	public void setRol(List<Rol> rolP) {
-		// CHECKSTYLE:ON
+	public void setRol(final Rol rolP) {
 		this.rol = rolP;
 	}
-
 	
 }

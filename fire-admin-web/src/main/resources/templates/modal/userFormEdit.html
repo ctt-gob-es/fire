@@ -9,7 +9,7 @@
 			</div>
 			<div class="modal-body">
 				<form name="altEditor-form" role="form" id="userFormEdit" th:object="${userformEdit}" th:action="@{/menueditsave}" method="post">
-					<input type='hidden' class='primarykey' id="idUserMonitorizaEdit" th:field="*{idUserMonitorizaEdit}">
+					<input type='hidden' class='primarykey' id="idUserFireEdit" th:field="*{idUserFireEdit}">
 					
 					<div class="form-group">
 						
@@ -94,8 +94,11 @@
 								id="query" name="query" class="form-control">
 								<option selected="selected" value=""
 									th:text="#{form.user.Editrol.pattern}"></option>
-								<option th:each="q: ${queries}" th:value="${q.name}"
-									th:text="${q.name}"></option>
+								<option selected="selected" value="" th:disabled="disabled"
+							th:text="#{form.user.Editrol.pattern}"></option>
+						<option  th:value="'1'" th:text="#{form.user.rol.administrador}"></option>
+   						<option  th:value="'2'" th:text="#{form.user.rol.responsable}"></option>
+   						<option  th:value="'3'" th:text="#{form.user.rol.contacto}"></option>
 							</select>
 							<div id="invalid-rol" class="invalid-feedback" ></div>
 						

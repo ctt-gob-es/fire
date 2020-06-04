@@ -88,9 +88,9 @@ public interface IUserService {
 			
 	/**
 	 * Method that deletes a user in the persistence.
-	 * @param id {@link Integer} that represents the user identifier to delete.
+	 * @param userId {@link Integer} that represents the user identifier to delete.
 	 */
-	void deleteUser(Long id);
+	void deleteUser(Long userId);
 	
 	/**
 	 * Method that gets all the users from the persistence.
