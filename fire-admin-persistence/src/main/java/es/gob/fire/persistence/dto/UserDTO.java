@@ -250,7 +250,7 @@ public class UserDTO {
 	 * @param emailParam The value for the attribute {@link #rol}.
 	 */
 	public void setTelf(String telfParam) {
-		this.rol = telfParam;
+		this.telf = telfParam;
 	}
 	/**
 	 * Gets the value of the attribute {@link #rol}.
