@@ -33,7 +33,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.persistence.service.ManagerPersistenceConfigurationServices.*;
+import es.gob.fire.persistence.service.config.*;
 
 /**
  * <p>Manager singleton instance for the use of the persistence services

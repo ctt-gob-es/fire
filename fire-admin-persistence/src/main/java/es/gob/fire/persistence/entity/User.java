@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import es.gob.fire.commons.utils.NumberConstants;
-import es.gob.fire.persistence.validatorDNI.Nif;
+import es.gob.fire.persistence.validatordni.Nif;
 
 /**
  * <p>Class that maps the <i>USER_MONITORIZA</i> database table as a Plain Old Java Object.</p>

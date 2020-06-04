@@ -23,7 +23,7 @@
  * @author Gobierno de España.
  * @version 1.0, 17/04/2020.
  */
-package es.gob.fire.persistence.service.ManagerPersistenceConfigurationServices;
+package es.gob.fire.persistence.service.config;
 
 
 import javax.annotation.PostConstruct;

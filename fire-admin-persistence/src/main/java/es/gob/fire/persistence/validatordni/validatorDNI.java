@@ -1,4 +1,4 @@
-package es.gob.fire.persistence.validatorDNI;
+package es.gob.fire.persistence.validatordni;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import es.gob.fire.persistence.validatorDNI.Nif;
+import es.gob.fire.persistence.validatordni.Nif;
 
 public class validatorDNI implements ConstraintValidator<Nif, String> {
 	 

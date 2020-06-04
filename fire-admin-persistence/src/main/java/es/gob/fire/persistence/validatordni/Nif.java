@@ -1,4 +1,4 @@
-package es.gob.fire.persistence.validatorDNI;
+package es.gob.fire.persistence.validatordni;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import es.gob.fire.persistence.validatorDNI.validatorDNI;
+import es.gob.fire.persistence.validatordni.validatorDNI;
  
 @Target({ METHOD, FIELD, ANNOTATION_TYPE })
 @Retention(RUNTIME)
