@@ -138,14 +138,16 @@ public class MailPasswordRestorationController {
 				final String restorationUrl = getRestorationPageUrl(request, renovationCodeURL);
 
 				// Enviamos el email
-				mailSenderService.sendEmail(user, restorationUrl);
-				model.addAttribute("mailsuccess", Boolean.TRUE);
+                mailSenderService.sendEmail(user, restorationUrl);
+                model.addAttribute("mailsuccess", Boolean.TRUE);
+                model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
 			} else {
 				model.addAttribute("mailerror", Boolean.TRUE);
 				model.addAttribute("mailErrorMessage", "El usuario indicado no se encuentra registrado en el sistema");
 				result = "mailpasswordrestoration.html";
 			}
 		} catch (IOException | MessagingException e) {
+			LOGGER.error("No ha sido posible enviar el correo", e);
 			model.addAttribute("mailErrorMessage", "No ha sido posible enviar el correo");
 			result = "mailpasswordrestoration.html";
 		}
