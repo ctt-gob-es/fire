@@ -8,7 +8,7 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<form name="altEditor-form" role="form" id="userFormEdit" th:object="${userformEdit}" th:action="@{/menueditsave}" method="post">
+				<form name="altEditor-form" role="form" id="userformedit" th:object="${userformedit}" th:action="@{/menueditsave}" method="post">
 					<input type='hidden' class='primarykey' id="idUserFireEdit" th:field="*{idUserFireEdit}">
 					
 					<div class="form-group">
@@ -56,9 +56,11 @@
 					<div class="form-group">
 			
 						<label for="idRol" th:text="#{form.user.rol}"></label>
-						<select id="rolId" name="rolId" class="form-control" th:field="*{rolId}">
-							<option th:each="rol: ${listRoles}" th:value="${rol.rolId}" th:text="${rol.rolName}" th:selected="${userform.rolId == rol.rolId}"></option>
-						</select>
+							<select id="rolId" name="rolId" class="form-control" th:field="*{rolId}">
+								<option selected="selected" value="" th:disabled="disabled"
+										th:text="#{form.user.Editrol.pattern}"></option>
+									<option th:each="rol: ${listRoles}" th:value="${rol.rolId}" th:text="${rol.rolName}" th:selected="${userformedit.rolId == rol.rolId}"></option>
+							</select>
 					</div>
 					
 					<div class="form-group">

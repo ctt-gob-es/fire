@@ -97,7 +97,7 @@ public class UserDTO {
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.telf.notempty}")
     @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
-    private String telf = UtilsStringChar.EMPTY_STRING;
+    private String phone = UtilsStringChar.EMPTY_STRING;
 	
 	/**
 	 * Attribute that represents the identifier for the use role selected in the user form.
@@ -233,17 +233,16 @@ public class UserDTO {
 	 * Gets the value of the attribute {@link #rol}.
 	 * @return the value of the attribute {@link #rol}.
 	 */
-	public String getTelf() {
-		return telf;
+	public String getPhone() {
+		return this.phone;
 	}
 
-	
 	/**
-	 * Sets the value of the attribute {@link #rol}.
-	 * @param emailParam The value for the attribute {@link #rol}.
+	 * Sets the value of the attribute {@link #phone}.
+	 * @param phoneP The value for the attribute {@link #phone}.
 	 */
-	public void setTelf(String telfParam) {
-		this.telf = telfParam;
+	public void setPhone(final String phoneP) {
+		this.phone = phoneP;
 	}
 
 

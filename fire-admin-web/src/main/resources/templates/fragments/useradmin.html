@@ -25,118 +25,7 @@
 	</div>
 </div>
 
-<div class="modal" tabindex="-1" role="dialog" id="modalEditAdmin">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title" th:text="#{table.user.action.edit}"></h4>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form name="altEditor-form" role="form" id="userFormEdit" th:object="${userformEdit}" th:action="@{/saveuseredit}" method="post">
-					<input type='hidden' class='primarykey' id="idUserFireEdit" th:field="*{idUserFireEdit}">
-					
-					<div class="form-group-modal">
-						
-							<label for="nameEdit" class="col-form-label" th:text="#{form.user.name}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
-							<div id="invalid-name" class="invalid-feedback" ></div>
-						
-						<div style="clear:both;"/>
-					</div>
-					
-					<div class="form-group-modal">
-						
-							<label for="surnamesEdit" class="col-form-label" th:text="#{form.user.surnames}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
-							<div id="invalid-surnames" class="invalid-feedback" ></div>
-						
-						<div style="clear:both;"/>
-					</div>
-					
-					<div class="form-group-modal">
-						
-							<label for="usernameEdit" class="col-form-label" th:text="#{form.user.login}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageLogin = /*[[#{form.user.login.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageLogin);" type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" class="form-control" required pattern=".{5,30}"/>
-							<div id="invalid-login" class="invalid-feedback" ></div>
-						
-						<div style="clear:both;"/>
-					</div>
-					
-					<div class="form-group-modal">
-						
-							<label for="emailEdit" class="col-form-label" th:text="#{form.user.email}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required/>
-							<div id="invalid-email" class="invalid-feedback" ></div>
-						
-						<div style="clear:both;"/>
-					</div>
-					
-					<div class="form-group-modal">
-						
-							<label for="telfEdit" class="col-form-label" th:text="#{form.user.telf}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageTelf = /*[[#{form.user.surnames.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageTelf);" type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
-							<div id="invalid-telf" class="invalid-feedback" ></div>
-						
-						<div style="clear:both;"/>
-					</div>
-					
-					<div class="form-group-modal">
-						
-							<label for="rolEdit" class="col-form-label" th:text="#{form.user.rol}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageRol = /*[[#{form.user.surnames.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<select
-						id="query" name="query" class="form-control">
-						<option selected="selected" value="" th:disabled="disabled"
-							th:text="#{form.user.Editrol.pattern}"></option>
-						<option  th:value="'1'" th:text="#{form.user.rol.administrador}"></option>
-   						<option  th:value="'2'" th:text="#{form.user.rol.responsable}"></option>
-   						<option  th:value="'3'" th:text="#{form.user.rol.contacto}"></option>		
-					</select>
-							<div id="invalid-rol" class="invalid-feedback" ></div>
-						
-						<div style="clear:both;"/>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{button.close}"></button>
-				<button type="submit" id="editBtn" class="btn btn-primary"th:text="#{button.save}"></button>
-			</div>
-		</div>
-	</div>
-</div>
+
 
 <div class="modal" tabindex="-1" role="dialog" id="modalPassword">
 	<div class="modal-dialog">
@@ -198,37 +87,32 @@ $(document).ready(function() {
 	    altEditor: true,
 	    buttons: [{text: 'Agregar',name: 'add'}, 
 	    		  {extend: 'selected',text: 'Editar',name: 'editt',
-	    			  action: function ( e, dt, node, config ) {
-					  
-						$('#modalEditAdmin').modal('show');
-	    				  
-	    				  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
-							id: o.context[0].aoColumns[e].mData,
-							title: o.context[0].aoColumns[e].sTitle                
-						  });
-						  
-						  var d = dt.rows({
-	                        selected: !0
-						  });
-							
-						  var idUserFireEdit = d.data()[0][a[0].id];
-						  var name = d.data()[0][a[1].id];
-						  var surnames = d.data()[0][a[2].id];
-						  var username = d.data()[0][a[3].id];
-						  var email = d.data()[0][a[5].id];
-						  var phone = d.data()[0][a[6].id];
-						  //var rol = d.data()[0][a[7].id];
-						  
-						  $("#idUserFireEdit").val(idUserFireEdit);
-						  $("#nameEdit").val(name);
-						  $("#surnamesEdit").val(surnames);
-						  $("#usernameEdit").val(username);
-						  $("#emailEdit").val(email);
-						  $("#telfEdit").val(phone);
-						 // $("#rolEdit").val(rol);
-						
-	    			  }
-	    		  }, 
+	    	 action: function ( e, dt, node, config ) {	    				  
+				  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+					id: o.context[0].aoColumns[e].mData,
+					title: o.context[0].aoColumns[e].sTitle                
+				  });
+				  
+				  var d = dt.rows({
+                   selected: !0
+				  });
+				  var name = d.data()[0][a[1].id];
+				  var menuEdit = /*[[@{/menuedit}]]*/;
+				  $.ajax({
+ 						url : menuEdit,
+ 						type : 'GET',
+ 						data : $.param({'username':name}),
+ 						cache : false,
+ 						success : function(data) {
+ 							hide();
+ 							$('#modal').html(data);
+ 							$('#modalEdit').modal('show');																
+ 						},
+ 						error : function() {}
+ 					});
+			  }
+		  }, 
+
 	    		  {extend: 'selected',text: 'Eliminar',name: 'delete'}, 
 	    		  
 					{extend: 'selected',text: 'Visualizar',name: 'manageCertificates',
@@ -248,6 +132,7 @@ $(document).ready(function() {
 		            		  loadIntoAjax('formMenu', manageCertUser + "/" + idUserFireEdit, 'optionReplacement', 'GET', null, true); return false;
 		    				}
 						}],
+						
 	    "iTotalRecords": "totalElements",
         "iTotalDisplayRecords": "numberOfElements",
 	    
@@ -368,7 +253,7 @@ $(document).ready(function() {
 		            break;
 		        case 'delete':
 		            $.ajax(actionDelete,{
-		            	data:$.param({'id':data.idUserFire, 'index':rowindex}),
+		            	data:$.param({'id':data.userId, 'index':rowindex}),
 		                type:'POST',
 		                success: function(data){
 		                    
@@ -460,7 +345,7 @@ $(document).ready(function() {
 					$('#errorModalEdit').remove();
 				}
 				
-				$('#modalEditAdmin').modal('hide');
+				$('#modalEdit').modal('hide');
 				
 			  },
 			  error:function(){

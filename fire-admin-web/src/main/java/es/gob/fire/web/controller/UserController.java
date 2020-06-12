@@ -98,17 +98,19 @@ public class UserController {
 	 */
 	@RequestMapping(value = "menuedit")
 	public String menuEdit(@RequestParam("username") final String username, final Model model) {
-		final User user = this.userService.getUserByUserName(username);
-		final UserEditDTO userFormEdit = new UserEditDTO();
+		 User user = this.userService.getUserByUserName(username);
+		 UserEditDTO userformedit = new UserEditDTO();
 
-		userFormEdit.setIdUserFireEdit(user.getUserId());
-		userFormEdit.setNameEdit(user.getName());
-		userFormEdit.setSurnamesEdit(user.getSurnames());
-		userFormEdit.setEmailEdit(user.getEmail());
-		userFormEdit.setUsernameEdit(user.getUserName());
-		userFormEdit.setRolId(user.getRol().getRolId());
+		userformedit.setIdUserFireEdit(user.getUserId());
+		userformedit.setNameEdit(user.getName());
+		userformedit.setSurnamesEdit(user.getSurnames());
+		userformedit.setEmailEdit(user.getEmail());
+		userformedit.setUsernameEdit(user.getUserName());
+		userformedit.setRolId(user.getRol().getRolId());
+		//userformedit.setTelfEdit(user.getTelfEdit());
 
-		model.addAttribute("userformEdit", userFormEdit);
+		model.addAttribute("listRoles", loadRoles());
+		model.addAttribute("userformedit", userformedit);
 		return "modal/userFormEdit.html";
 	}
 
@@ -137,6 +139,7 @@ public class UserController {
 		for (Rol rol: listRol) {
 			RolDTO item = new RolDTO(rol.getRolId(), rol.getRolName(), rol.getPermissions());
 			listRoles.add(item);
+			
 		}
 
 		return listRoles;

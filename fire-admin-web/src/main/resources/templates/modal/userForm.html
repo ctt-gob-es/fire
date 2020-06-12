@@ -10,7 +10,7 @@
 						    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageName);" type="text" name="nameAdd" autocomplete="off" id="nameAdd" th:field="*{name}" class="form-control"  pattern=".{3,15}" required />
+					<input onblur="validate(this,messageName);" type="text" name="nameAdd"  autocomplete="nope" id="nameAdd" th:field="*{name}" class="form-control"  pattern=".{3,15}" required />
 					<div id="invalid-nameAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -24,7 +24,7 @@
 						    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageSurname);" type="text" name="surnamesAdd" autocomplete="off" id="surnamesAdd" th:field="*{surnames}" class="form-control" required pattern=".{3,30}"/>
+					<input onblur="validate(this,messageSurname);" type="text" name="surnamesAdd" autocomplete="nope" id="surnamesAdd" th:field="*{surnames}" class="form-control" required pattern=".{3,30}"/>
 					<div id="invalid-surnamesAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -38,7 +38,7 @@
 						    var messageLogin = /*[[#{form.user.login.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageLogin);" type="text" name="loginAdd" id="loginAdd" th:field="*{login}" style="overflow:hidden" class="form-control"  required pattern=".{5,30}"/>
+					<input onblur="validate(this,messageLogin);" type="text" name="loginAdd" id="loginAdd" autocomplete="nope" th:field="*{login}" style="overflow:hidden" class="form-control"  required pattern=".{5,30}"/>
 					<div id="invalid-loginAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -48,6 +48,8 @@
 			
 				<label for="idRol" th:text="#{form.user.rol}"></label>
 					<select id="rolId" name="rolId" class="form-control" th:field="*{rolId}">
+					<option selected="selected" value="" th:disabled="disabled"
+							th:text="#{form.user.Editrol.pattern}"></option>
 						<option th:each="rol: ${listRoles}" th:value="${rol.rolId}" th:text="${rol.rolName}" th:selected="${userform.rolId == rol.rolId}"></option>
 					</select>
 			</div>
@@ -84,7 +86,7 @@
 						    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageEmail);" type="email" name="emailAdd" id="emailAdd" th:field="*{email}" style="overflow:hidden" class="form-control"autocomplete="off"  required/>
+					<input onblur="validate(this,messageEmail);" type="email" name="emailAdd" id="emailAdd" th:field="*{email}" style="overflow:hidden" class="form-control" autocomplete="nope"  required/>
 					<div id="invalid-emailAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -97,33 +99,14 @@
 						    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageTelf);" type="text" name="telfAdd" id="telfAdd" th:field="*{telf}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+					<input onblur="validate(this,messageTelf);" type="number" name="telfAdd" id="telfAdd" th:field="*{telf}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
 					
 					<div id="invalid-telfAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
 			</div>
 			
-			<div class="form-group">
-				
-					<label for="rol" class="col-form-label" th:text="#{form.user.rol}"></label>
-					<script th:inline="javascript">
-						/*<![CDATA[*/
-						    var messageRol = /*[[#{form.user.rol.pattern}]]*/ 'default';
-						/*]]>*/
-					</script>
-					<select
-						id="query" name="query" class="form-control">
-						<option selected="selected" value="" th:disabled="disabled"
-							th:text="#{form.user.Editrol.pattern}"></option>
-						<option  th:value="'1'" th:text="#{form.user.rol.administrador}"></option>
-   						<option  th:value="'2'" th:text="#{form.user.rol.responsable}"></option>
-   						<option  th:value="'3'" th:text="#{form.user.rol.contacto}"></option>		
-					</select>
-					<div id="invalid-rolAdd" class="invalid-modal" ></div>
-				
-				<div style="clear:both;"/>
-			</div>
+			
 							
 </form>
 
