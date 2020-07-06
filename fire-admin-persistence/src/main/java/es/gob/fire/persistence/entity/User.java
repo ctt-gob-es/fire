@@ -74,7 +74,7 @@ public class User implements Serializable {
 	/**
 	 * Attribute that represents the phone.
 	 */
-	private Integer phone;
+	private String phone;
 	
 	/**
 	 * Attribute that represents the startDate.
@@ -140,7 +140,7 @@ public class User implements Serializable {
 	
 	@Column(name = "NOMBRE_USUARIO", nullable = false, length = NumberConstants.NUM30, unique = true)
 	@Size(max = NumberConstants.NUM30)
-	@Nif
+//	@Nif
 	@JsonView(DataTablesOutput.View.class)
 	public String getUserName() {
 		return this.userName;
@@ -179,7 +179,7 @@ public class User implements Serializable {
 	 */
 	@Column(name = "TELF_CONTACTO", nullable = true, length = NumberConstants.NUM45)
 	@JsonView(DataTablesOutput.View.class)
-	public Integer getPhone() {
+	public String getPhone() {
 		return this.phone;
 	}
 
@@ -187,7 +187,7 @@ public class User implements Serializable {
 	 * Sets the value of the attribute {@link #phone}.
 	 * @param phoneP The value for the attribute {@link #phone}.
 	 */
-	public void setPhone(final Integer phoneP) {
+	public void setPhone(final String phoneP) {
 		this.phone = phoneP;
 	}
 	/**

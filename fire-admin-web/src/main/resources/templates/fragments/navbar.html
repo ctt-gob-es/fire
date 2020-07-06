@@ -27,77 +27,7 @@
                   </div>
                 </a>
                 <ul class="dropdown-menu fsz-sm">
-                   <li> 
-                     <a href="#" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700" id="aUser"> 
-                       <i class="ti-settings mR-10"></i> 
-                      <span>Editar datos personales</span> 
-                       <script th:inline="javascript">
-                      
-                          var menuEdit = /*[[@{/menuedit}]]*/;
-                                 var username = /*[[${#httpServletRequest.remoteUser}]]*/;
-                                 $('#aUser').click(function(e){
-                                        e.preventDefault(); 
-                                        
-                                        $.ajax({
-                                              url : menuEdit,
-                                              type : 'GET',
-                                               data : $.param({'username':username}),
-                                               cache : false,
-                                              success : function(data) {
-                                                     hide();
-                                                     $("body").append(data);
 
-                                                     $('#modalEdit').modal({
-                                             backdrop: 'static',
-                                            keyboard: true, 
-                                            show: true
-                                       });
-                                              },
-                                              error : function() {}
-                                       });
-                                        
-                                        return false;
-                                 });
-                           
-                       </script> 
-                     </a> 
-                   </li>
-                  
-                  <li>
-                    <a href="#" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700" id="aPass">
-                      <i class="ti-unlock mR-10"></i>
-                      <span>Cambiar contrase&ntilde;a</span>
-                      <script th:inline="javascript">
-                      
-                      	var menuPass = /*[[@{/menupass}]]*/;
-	      				var username = /*[[${#httpServletRequest.remoteUser}]]*/;
-	      				$('#aPass').click(function(e){
-	      					e.preventDefault(); 
-	      					
-	      					$.ajax({
-	      						url : menuPass,
-	      						type : 'GET',
-	      						data : $.param({'username':username}),
-	      						cache : false,
-	      						success : function(data) {
-	      							hide();
-	      							$("body").append(data);
-
-	      							$('#modalPassword').modal({
-	      		                    	backdrop: 'static',
-	      		                        keyboard: true, 
-	      		                        show: true
-	      		                	});
-	      						},
-	      						error : function() {}
-	      					});
-	      					
-	      					return false;
-	      				});
-	                 	
-	                </script>
-                    </a>
-                  </li>
                   
                   <li role="separator" class="divider"></li>
                   <li>

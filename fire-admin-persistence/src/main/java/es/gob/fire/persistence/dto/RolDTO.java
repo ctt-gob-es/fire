@@ -57,6 +57,7 @@ public class RolDTO {
 		this.rolId = rolId;
 		this.rolName = rolName;
 		this.permissions = permissions;
+		
 	}
 
 	/**

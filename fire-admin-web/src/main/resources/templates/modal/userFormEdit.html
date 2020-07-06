@@ -8,7 +8,7 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<form name="altEditor-form" role="form" id="userformedit" th:object="${userformedit}" th:action="@{/menueditsave}" method="post">
+				<form name="altEditor-form" role="form" id="userFormEdit" th:object="${userformedit}" th:action="@{/saveuseredit}" method="post">
 					<input type='hidden' class='primarykey' id="idUserFireEdit" th:field="*{idUserFireEdit}">
 					
 					<div class="form-group">
@@ -19,7 +19,7 @@
 								    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
+							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{3,15}" />
 							<div id="invalid-name" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -33,7 +33,7 @@
 								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{3,30}"/>
 							<div id="invalid-surnames" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -47,7 +47,7 @@
 								    var messageLogin = /*[[#{form.user.login.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageLogin);" type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" class="form-control" required pattern=".{5,30}"/>
+							<input onblur="validate(this,messageLogin);" type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{5,30}"/>
 							<div id="invalid-login" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -71,7 +71,7 @@
 								    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" style="overflow:hidden" class="form-control" required/>
+							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" autocomplete="nope" style="overflow:hidden" class="form-control" required/>
 							<div id="invalid-email" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -82,10 +82,10 @@
 							<label for="telfEdit" class="col-form-label" th:text="#{form.user.telf}"></label>
 							<script th:inline="javascript">
 								/*<![CDATA[*/
-								    var messageTelf = /*[[#{form.user.name.pattern}]]*/ 'default';
+								    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageName);" type="text" id="telfEdit" th:field="*{telfEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
+							<input onblur="validate(this,messageName);" type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="nope" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
 							<div id="invalid-telf" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -129,7 +129,8 @@
 		  event.preventDefault();
 			
 		  var formData = JSON.stringify($("#userFormEdit").serializeJSON());
-		  var url = /*[[@{/menueditsave}]]*/;
+		  var tbl = $('#userTable').DataTable();
+		  var url = /*[[@{/saveuseredit}]]*/;
 		  
 		  loading();
 		  
@@ -145,7 +146,7 @@
 				}
 				
 				$('#modalEdit').modal('hide');
-				$('#modalEdit').remove();
+				tbl.row.add($(data.data)).draw(false);
 				
 			  },
 			  error:function(){
@@ -158,4 +159,6 @@
 			  contentType : "application/json"
 		});
 	});
+	
+	
 </script>

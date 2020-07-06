@@ -79,7 +79,6 @@ $(document).ready(function() {
 	var getusers = /*[[@{/usersdatatable}]]*/;
 	var editTemplate = /*[[@{/edituser}]]*/;
 	var addTemplate = /*[[@{/adduser}]]*/;
-	var manageCertUser = /*[[@{/managecertuser}]]*/;
 	var tbl = $('#userTable').DataTable({
 		dom: 'Bfrtip',
 	    select: 'single',
@@ -112,10 +111,20 @@ $(document).ready(function() {
  					});
 			  }
 		  }, 
-
+// 		  var idUserFireEdit = d.data()[0][a[0].id];
+// 		  var name = d.data()[0][a[1].id];
+// 		  var surnames = d.data()[0][a[2].id];
+// 		  var login = d.data()[0][a[3].id];
+// 		  var email = d.data()[0][a[5].id];
+		  
+// 		  $("#idUserFireEdit").val(idUserFireEdit);
+// 		  $("#nameEdit").val(name);
+// 		  $("#surnamesEdit").val(surnames);
+// 		  $("#loginEdit").val(login);
+// 		  $("#emailEdit").val(email);
 	    		  {extend: 'selected',text: 'Eliminar',name: 'delete'}, 
 	    		  
-					{extend: 'selected',text: 'Visualizar',name: 'manageCertificates',
+					{
 		    			  action: function ( e, dt, node, config ) {
 		    				  
 							  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
@@ -129,7 +138,7 @@ $(document).ready(function() {
 								
 							  var idUserFireEdit = d.data()[0][a[0].id];
 							  $("#idUserFireEdit").val(idUserFireEdit);
-		            		  loadIntoAjax('formMenu', manageCertUser + "/" + idUserFireEdit, 'optionReplacement', 'GET', null, true); return false;
+		            		  loadIntoAjax('formMenu', idUserFireEdit, 'optionReplacement', 'GET', null, true); return false;
 		    				}
 						}],
 						
@@ -328,6 +337,7 @@ $(document).ready(function() {
 		  event.preventDefault();
 			
 		  var formData = JSON.stringify($("#userFormEdit").serializeJSON());
+		  
 		  var url = /*[[@{/saveuseredit}]]*/;
 		  
 		  loading();

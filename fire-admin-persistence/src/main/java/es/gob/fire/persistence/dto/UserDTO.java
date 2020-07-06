@@ -67,22 +67,22 @@ public class UserDTO {
 	 * Attribute that represents the value of the input username of the user in the form. 
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.login.notempty}")
-    @Size(min=NumberConstants.NUM5, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
+    //@Size(min=NumberConstants.NUM5, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
     private String login = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input password of the user in the form. 
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.password.notempty}")
-    @Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
-	@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message="{form.valid.user.password.noPattern}", groups=ThenCheckIt.class)
+    //@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
+	//@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message="{form.valid.user.password.noPattern}", groups=ThenCheckIt.class)
     private String password = UtilsStringChar.EMPTY_STRING;
 	
 	/**
 	 * Attribute that represents the value of the input password of the user in the form. 
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.confirmPassword.notempty}")
-    @Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
+    //@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
     private String confirmPassword = UtilsStringChar.EMPTY_STRING;
 		
 	/**
@@ -97,7 +97,7 @@ public class UserDTO {
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.telf.notempty}")
     @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
-    private String phone = UtilsStringChar.EMPTY_STRING;
+    private String telfAdd = UtilsStringChar.EMPTY_STRING;
 	
 	/**
 	 * Attribute that represents the identifier for the use role selected in the user form.
@@ -233,16 +233,16 @@ public class UserDTO {
 	 * Gets the value of the attribute {@link #rol}.
 	 * @return the value of the attribute {@link #rol}.
 	 */
-	public String getPhone() {
-		return this.phone;
+	public String getTelf() {
+		return this.telfAdd;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #phone}.
 	 * @param phoneP The value for the attribute {@link #phone}.
 	 */
-	public void setPhone(final String phoneP) {
-		this.phone = phoneP;
+	public void setTelf(final String telfP) {
+		this.telfAdd = telfP;
 	}
 
 

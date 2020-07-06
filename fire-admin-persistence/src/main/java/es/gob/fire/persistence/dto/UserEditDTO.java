@@ -50,32 +50,32 @@ public class UserEditDTO {
 	 * Attribute that represents the value of the input name of the user in the
 	 * form.
 	 */
-	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.name.notempty}")
-	@Size(min = 1, max = NumberConstants.NUM15, groups = ThenCheckIt.class)
+	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.name.notempty}")
+	//@Size(min = 1, max = NumberConstants.NUM15, groups = ThenCheckIt.class)
 	private String nameEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input surnames of the user in
 	 * the form.
 	 */
-	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.surnames.notempty}")
-	@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.surnames.notempty}")
+	//@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String surnamesEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input username of the user in
 	 * the form.
 	 */
-	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.login.notempty}")
-	@Size(min = NumberConstants.NUM5, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.login.notempty}")
+	//@Size(min = NumberConstants.NUM5, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String usernameEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input email of the user in the
 	 * form.
 	 */
-	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.email.notempty}")
-	@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM255, groups = ThenCheckIt.class)
+	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.email.notempty}")
+	//@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM255, groups = ThenCheckIt.class)
 	private String emailEdit = UtilsStringChar.EMPTY_STRING;
 	
 	/**
@@ -88,8 +88,8 @@ public class UserEditDTO {
 	 * Attribute that represents the value of the input telf of the user in
 	 * the form.
 	 */
-	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.telf.notempty}")
-	@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.telf.notempty}")
+	//@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String telfEdit = UtilsStringChar.EMPTY_STRING;
 	
 	
@@ -97,8 +97,8 @@ public class UserEditDTO {
 	 * Attribute that represents the value of the input rol of the user in
 	 * the form.
 	 */
-	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.rol.notempty}")
-	@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.rol.notempty}")
+	//@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String rolEdit = UtilsStringChar.EMPTY_STRING;
 	
 	
