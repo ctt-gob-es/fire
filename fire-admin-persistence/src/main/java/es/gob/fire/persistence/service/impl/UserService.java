@@ -93,7 +93,7 @@ public class UserService implements IUserService {
 	
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.monitoriza.service.IUserService#saveUser(es.gob.monitoriza.persistence.configuration.dto.UserDTO)
+	 * @see es.gob.fire.service.IUserService#saveUser(es.gob.fire.persistence.configuration.dto.UserDTO)
 	 */
 	@Override
 	@Transactional
@@ -120,13 +120,14 @@ public class UserService implements IUserService {
 		user.setRol(rolRepository.findByRolId(userDto.getRolId()));
 		user.setRenovationDate(new Date());
 		user.setRoot(Boolean.FALSE);
+		user.setPhone(userDto.getTelf());
 		//TODO Rellenar los campos que faltan
 		return repository.save(user);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.monitoriza.service.IUserMonitorizaService#updateUserMonitoriza(es.gob.monitoriza.persistence.configuration.dto.UserDTO)
+	 * @see es.gob.fire.service.IUserService#updateUser(es.gob.fire.persistence.configuration.dto.UserDTO)
 	 */
 	@Override
 	@Transactional
@@ -141,7 +142,10 @@ public class UserService implements IUserService {
 		}
 		user.setName(userDto.getNameEdit());
 		user.setSurnames(userDto.getSurnamesEdit());
+		user.setUserName(userDto.getUsernameEdit());
 		user.setEmail(userDto.getEmailEdit());
+		user.setRol(rolRepository.findByRolId(userDto.getRolId()));
+		user.setPhone(userDto.getTelfEdit());
 		//TODO Rellenar los campos que faltan
 
 		return repository.save(user);
@@ -155,7 +159,7 @@ public class UserService implements IUserService {
 	public void deleteUser(Long userId) {
 		repository.deleteById(userId);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IUserService#getAllUse()
@@ -203,7 +207,7 @@ public class UserService implements IUserService {
 	
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.monitoriza.service.IUserMonitorizaService#changeUserMonitorizaPassword(es.gob.monitoriza.persistence.configuration.dto.UserPasswordDTO)
+	 * @see es.gob.fire.service.IUserService#changeUserPassword(es.gob.fire.persistence.configuration.dto.UserPasswordDTO)
 	 */
 	@Override
 	@Transactional

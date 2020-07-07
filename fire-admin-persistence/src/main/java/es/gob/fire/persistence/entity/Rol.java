@@ -49,6 +49,11 @@ public class Rol implements Serializable {
 	 * Attribute that represents the permissions.
 	 */
 	private String permissions;
+	
+	/**
+	 * Attribute that represents the permissions.
+	 */
+	
 
 	/**
 	 * Gets the value of the attribute {@link #rolId}.

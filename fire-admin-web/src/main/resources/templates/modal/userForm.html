@@ -38,7 +38,7 @@
 						    var messageLogin = /*[[#{form.user.login.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageLogin);" type="text" name="loginAdd" id="loginAdd" autocomplete="nope" th:field="*{login}" style="overflow:hidden" class="form-control"  required pattern=".{5,30}"/>
+					<input onblur="validate(this,messageLogin);" type="text" name="loginAdd" autocomplete="nope" id="loginAdd"  th:field="*{login}" style="overflow:hidden" class="form-control"  required pattern=".{5,30}"/>
 					<div id="invalid-loginAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -63,7 +63,7 @@
 						/*]]>*/
 					</script>
 					<input type="password" style="display:none">
-					<input onblur="validate(this,messagePassword);" type="password" name="passwordAdd" id="passwordAdd" th:field="*{password}" class="form-control"  pattern=".{7,30}" required />
+					<input onblur="validate(this,messagePassword);" type="password" name="passwordAdd" id="passwordAdd" th:field="*{password}" class="form-control"  required />
 					<div id="invalid-passwordAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -72,7 +72,7 @@
 			<div class="form-group">
 				
 					<label for="confirmPassword" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
-					<input onblur="validateConfirmPassword();" type="password" name="confirmPassword" id="confirmPasswordAdd" th:field="*{confirmPassword}" class="form-control"  pattern=".{7,30}" required />
+					<input onblur="validateConfirmPassword();" type="password" name="confirmPassword" id="confirmPasswordAdd" th:field="*{confirmPassword}" class="form-control"  required />
 					<div id="invalid-confirmPassword" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -86,7 +86,7 @@
 						    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageEmail);" type="email" name="emailAdd" id="emailAdd" th:field="*{email}" style="overflow:hidden" class="form-control" autocomplete="nope"  required/>
+					<input onblur="validate(this,messageEmail);" type="email" name="emailAdd" autocomplete="nope" id="emailAdd" th:field="*{email}" style="overflow:hidden" class="form-control"   required/>
 					<div id="invalid-emailAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -99,7 +99,7 @@
 						    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageTelf);" type="number" name="telfAdd" id="telfAdd" th:field="*{telf}" autocomplete="off" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+					<input onblur="validate(this,messageTelf);" type="text" name="telfAdd" autocomplete="nope" id="telfAdd" th:field="*{telf}"  style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
 					
 					<div id="invalid-telfAdd" class="invalid-modal" ></div>
 				
@@ -118,11 +118,8 @@ function validateConfirmPassword(){
     var repass = $('#confirmPasswordAdd').val();
 	var messageConfirmPassword = /*[[#{form.user.confirmPassword.pattern}]]*/ 'default';
 	
-	if(($('#passwordAdd').val().length == 0) || ($('#confirmPasswordAdd').val().length == 0)){
-		$('#invalid-confirmPassword').html(messageConfirmPassword);
-		$('#invalid-confirmPassword').addClass("invalid-modal");
-    }
-    else if (pass != repass) {
+ 
+    	if (pass != repass) {
     	$('#invalid-confirmPassword').html(messageConfirmPassword);
 		$('#invalid-confirmPassword').addClass("invalid-modal");
     }
@@ -132,5 +129,7 @@ function validateConfirmPassword(){
     }
 	
 }
+
+
 
 </script>

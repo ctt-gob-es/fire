@@ -1,6 +1,7 @@
 package es.gob.fire.web.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,7 @@ public class UserController {
 	 */
 	@RequestMapping(value = "menuedit")
 	public String menuEdit(@RequestParam("username") final String username, final Model model) {
-		 User user = this.userService.getUserByUserName(username);
+		 User user = userService.getUserByUserName(username);
 		 UserEditDTO userformedit = new UserEditDTO();
 
 		userformedit.setIdUserFireEdit(user.getUserId());
@@ -107,12 +108,15 @@ public class UserController {
 		userformedit.setEmailEdit(user.getEmail());
 		userformedit.setUsernameEdit(user.getUserName());
 		userformedit.setRolId(user.getRol().getRolId());
-		//userformedit.setTelfEdit(user.getTelfEdit());
+		userformedit.setTelfEdit(user.getPhone());
 
 		model.addAttribute("listRoles", loadRoles());
 		model.addAttribute("userformedit", userformedit);
 		return "modal/userFormEdit.html";
 	}
+	
+		
+
 
 	/**
 	 * Method that maps the add user certificate web requests to the controller and forwards to the form
@@ -144,7 +148,10 @@ public class UserController {
 
 		return listRoles;
 	}
-
+	
+	
+	
+	
 	/**
 	 * Get userService.
 	 * @return userService
