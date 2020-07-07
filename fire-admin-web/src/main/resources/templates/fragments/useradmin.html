@@ -122,25 +122,10 @@ $(document).ready(function() {
 // 		  $("#surnamesEdit").val(surnames);
 // 		  $("#loginEdit").val(login);
 // 		  $("#emailEdit").val(email);
-	    		  {extend: 'selected',text: 'Eliminar',name: 'delete'}, 
+	    		  {extend: 'selected',text: 'Eliminar',name: 'delete'}
 	    		  
-					{
-		    			  action: function ( e, dt, node, config ) {
-		    				  
-							  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
-								id: o.context[0].aoColumns[e].mData,
-								title: o.context[0].aoColumns[e].sTitle                
-							  });
-							  
-							  var d = dt.rows({
-		                        selected: !0
-							  });
-								
-							  var idUserFireEdit = d.data()[0][a[0].id];
-							  $("#idUserFireEdit").val(idUserFireEdit);
-		            		  loadIntoAjax('formMenu', idUserFireEdit, 'optionReplacement', 'GET', null, true); return false;
-		    				}
-						}],
+					
+						],
 						
 	    "iTotalRecords": "totalElements",
         "iTotalDisplayRecords": "numberOfElements",
