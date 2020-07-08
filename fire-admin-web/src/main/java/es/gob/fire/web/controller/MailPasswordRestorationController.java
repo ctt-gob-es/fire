@@ -26,6 +26,8 @@ package es.gob.fire.web.controller;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -134,7 +136,9 @@ public class MailPasswordRestorationController {
 				// Construimos la URL para restaurar la contraseña
 				// Para evitar errores recuperando el parámetro code,
 				// parseamos los símbolos más antes de enviar la URL al usuario
-				String renovationCodeURL = renovationCode.replace("+", "%2B");
+				//String renovationCodeURL = renovationCode.replace("+", "%2B");
+				String renovationCodeURL = URLEncoder.encode(renovationCode, StandardCharsets.UTF_8.toString());
+				
 				final String restorationUrl = getRestorationPageUrl(request, renovationCodeURL);
 
 				// Enviamos el email
