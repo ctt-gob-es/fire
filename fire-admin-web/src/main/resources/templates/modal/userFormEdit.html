@@ -85,7 +85,7 @@
 								    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageName);" type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="nope" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
+							<input onblur="validate(this,messageName);" type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="nope" style="overflow:hidden" class="form-control"  />
 							<div id="invalid-telf" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
