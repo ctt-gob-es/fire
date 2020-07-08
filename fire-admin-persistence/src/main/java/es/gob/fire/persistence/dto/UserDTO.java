@@ -96,7 +96,7 @@ public class UserDTO {
 	 * Attribute that represents the value of the input telf of the user in the form. 
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.telf.notempty}")
-    @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
+   // @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
     private String telfAdd = UtilsStringChar.EMPTY_STRING;
 	
 	/**

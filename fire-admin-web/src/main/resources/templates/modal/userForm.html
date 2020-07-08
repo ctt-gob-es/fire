@@ -99,7 +99,7 @@
 						    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
 						/*]]>*/
 					</script>
-					<input onblur="validate(this,messageTelf);" type="text" name="telfAdd" autocomplete="nope" id="telfAdd" th:field="*{telf}"  style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+					<input onblur="validate(this,messageTelf);" type="text" name="telfAdd" autocomplete="nope" id="telfAdd" th:field="*{telf}"  style="overflow:hidden" class="form-control" />
 					
 					<div id="invalid-telfAdd" class="invalid-modal" ></div>
 				
