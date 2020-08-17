@@ -174,7 +174,7 @@ public final class Language {
 	 * @param values Values for insert in the message.
 	 * @return String with the message well-formed.
 	 */
-	public static String getFormatResWebMonitoriza(String key, Object[ ] values) {
+	public static String getFormatResWebFire(String key, Object[ ] values) {
 		return new MessageFormat(resWebAdminBundle.getString(key), currentLocale).format(values);
 	}
 

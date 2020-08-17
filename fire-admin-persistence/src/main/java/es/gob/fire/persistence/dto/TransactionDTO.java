@@ -196,5 +196,6 @@ public class TransactionDTO {
 	public void setTotalBatch(final Integer totalBatchP) {
 		this.totalBatch = totalBatchP;
 	}
+	
 
 }

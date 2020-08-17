@@ -86,9 +86,19 @@ public interface NumberConstants {
 	 * Constant attribute that represents the number 10 (type long).
 	 */
 	long NUM_10_LONG = 10l;
+	
+	/**
+	 * Constant attribute that represents the number 0.
+	 */
+	int NUM0 = 0;
+	
+	/**
+	 * Constant attribute that represents the number 1.
+	 */
+	int NUM1 = 1;
 
 	/**
-	 * Constant attribute that represents the number 3.
+	 * Constant attribute that represents the number 2.
 	 */
 	int NUM2 = 2;
 
