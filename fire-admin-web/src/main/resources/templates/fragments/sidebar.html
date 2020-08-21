@@ -95,8 +95,8 @@
 	                </span>
 	                <span class="title" th:text="#{menu.admin.keystore}"></span>
 	                <script th:inline="javascript">
-		                 			var actionSsl = /*[[@{/ssladmin}]]*/;
-		                 			$('#aSslAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionSsl, 'optionReplacement', 'GET', null, true); return false;});
+		                 			var certificateAdmin = /*[[@{/certificateadmin}]]*/;
+		                 			$('#aKeystoreAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', certificateAdmin, 'optionReplacement', 'GET', null, true); return false;});
 		               			</script>
 	              </a> 
 				   
