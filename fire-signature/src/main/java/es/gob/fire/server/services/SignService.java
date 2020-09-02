@@ -33,6 +33,7 @@ import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.internal.ProviderManager;
+import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignatureValidatorBuilder;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
@@ -63,7 +64,6 @@ public final class SignService extends HttpServlet {
     private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_DATA = "data"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_TRIPHASE_DATA = "tri"; //$NON-NLS-1$
-    private static final String PARAMETER_NAME_CONFIG = "config"; //$NON-NLS-1$
 
     @Override
     public void init() throws ServletException {
@@ -109,7 +109,7 @@ public final class SignService extends HttpServlet {
         final String transactId = params.getParameter(PARAMETER_NAME_TRANSACTION_ID);
         final String dataB64    = params.getParameter(PARAMETER_NAME_DATA);
         final String tdB64      = params.getParameter(PARAMETER_NAME_TRIPHASE_DATA);
-        final String configB64  = params.getParameter(PARAMETER_NAME_CONFIG);
+        String providerName  	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 
         if (ConfigManager.isCheckApplicationNeeded()) {
         	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
@@ -162,22 +162,13 @@ public final class SignService extends HttpServlet {
     	}
 
     	// Obtenemos el conector con el backend ya configurado
-        Properties config = null;
-    	if (configB64 != null && configB64.length() > 0) {
-    		try {
-    			config = ServiceUtil.base642Properties(configB64);
-    		}
-    		catch (final Exception e) {
-            	LOGGER.log(Level.SEVERE, "Error al decodificar las configuracion de los proveedores de firma", e); //$NON-NLS-1$
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Error al decodificar las configuracion de los proveedores de firma: " + e); //$NON-NLS-1$
-                return;
-			}
-    	}
-
+        final Properties config = null;
         final FIReConnector connector;
         try {
-    		connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
+        	if (providerName == null) {
+        		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
+        	}
+    		connector = ProviderManager.getProviderConnector(providerName, null);
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$

@@ -326,7 +326,7 @@ public final class PreSignService extends HttpServlet {
         // Obtenemos el conector con el backend ya configurado
         final FIReConnector connector;
         try {
-            connector = ProviderManager.initTransacction(providerName, connConfig.getProperties());
+            connector = ProviderManager.getProviderConnector(providerName, connConfig.getProperties());
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$

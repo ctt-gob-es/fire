@@ -490,7 +490,7 @@ public class RecoverSignManager {
 		// Obtenemos el conector con el backend ya configurado
 		final FIReConnector connector;
 		try {
-			connector = ProviderManager.initTransacction(providerName, trConfig.getProperties());
+			connector = ProviderManager.getProviderConnector(providerName, trConfig.getProperties());
 		}
 		catch (final FIReConnectorFactoryException e) {
 			throw new FireInternalException("Error al configurar el conector del proveedor de firma", e); //$NON-NLS-1$

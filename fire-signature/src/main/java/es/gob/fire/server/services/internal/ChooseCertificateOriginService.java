@@ -43,7 +43,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
@@ -112,7 +112,13 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		// Si no se selecciono firma local, se firmara con un proveedor de firma en la nube
 		else {
-			signWithProvider(origin, session, request, response, redirectErrorUrl, originForced, logF);
+			try {
+				signWithProvider(origin, session, request, response, redirectErrorUrl, originForced, logF);
+			} catch (final ServletException e) {
+				LOGGER.log(Level.SEVERE, logF.f("Error al redirigir al usuario a una de las pantallas de exito"), e); //$NON-NLS-1$
+				response.sendRedirect(redirectErrorUrl);
+				return;
+			}
 		}
 	}
 
@@ -135,7 +141,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			request.getRequestDispatcher(FirePages.PG_CLIENTE_AFIRMA).forward(request, response);
 		} catch (final ServletException e) {
 			LOGGER.warning(logF.f("No se pudo continuar hasta la pagina de firma local. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
-			response.sendRedirect(FirePages.PG_CLIENTE_AFIRMA+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
+			response.sendRedirect(FirePages.PG_CLIENTE_AFIRMA + "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
 
@@ -176,7 +182,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		X509Certificate[] certificates = null;
 		try {
 			LOGGER.info(logF.f("Se ha seleccionado el proveedor " + providerName.replaceAll("[\r\n]",""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			final FIReConnector connector = ProviderManager.initTransacction(
+			final FIReConnector connector = ProviderManager.getProviderConnector(
 					providerName,
 					connConfig.getProperties()
 			);
@@ -261,6 +267,17 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			}
 			return;
 		}
+		catch (final Error e) {
+			LOGGER.log(Level.SEVERE, logF.f("Error grave, probablemente relacionado con la inicializacion del conector"), e); //$NON-NLS-1$
+			ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, originForced);
+			if (originForced) {
+				response.sendRedirect(redirectErrorUrl);
+			}
+			else {
+				 request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
+			}
+			return;
+		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, logF.f("Error indeterminado al recuperar los certificados del usuario " + subjectId), e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
@@ -283,7 +300,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch (final ServletException e) {
 			LOGGER.warning(logF.f("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
-			response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE+"?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
+			response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE + "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
 	}

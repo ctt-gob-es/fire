@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.internal.GenerateCertificateManager;
+import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
@@ -38,6 +39,8 @@ public final class GenerateCertificateService extends HttpServlet {
 
     private static final String PARAMETER_NAME_SUBJECT_ID = "subjectid"; //$NON-NLS-1$
     private static final String OLD_PARAMETER_NAME_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
+
+    private static final String PARAMETER_NAME_CERT_ORIGIN = "certorigin"; //$NON-NLS-1$
 
     @Override
     public void init() throws ServletException {
@@ -72,7 +75,7 @@ public final class GenerateCertificateService extends HttpServlet {
 
     	final RequestParameters params = RequestParameters.extractParameters(request);
 
-    	updateParams(params);
+    	updateParamNames(params);
 
     	final String appId = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
 
@@ -121,12 +124,20 @@ public final class GenerateCertificateService extends HttpServlet {
     		LOGGER.fine("No se validara el certificado");//$NON-NLS-1$
     	}
 
+    	// Comprobamos si se indica un proveedor y, si no, se utiliza el
+    	// por defecto de Clave Firma
+    	String certOrigin = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
+    	if (certOrigin == null) {
+    		certOrigin = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
+    	}
+    	params.put(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
+
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion
     	GenerateCertificateManager.generateCertificate(params, response);
     }
 
-    private static void updateParams(final RequestParameters params) {
+    private static void updateParamNames(final RequestParameters params) {
     	params.replaceParamKey(OLD_PARAMETER_NAME_APPLICATION_ID, PARAMETER_NAME_APPLICATION_ID);
     	params.replaceParamKey(OLD_PARAMETER_NAME_SUBJECT_ID, PARAMETER_NAME_SUBJECT_ID);
     }

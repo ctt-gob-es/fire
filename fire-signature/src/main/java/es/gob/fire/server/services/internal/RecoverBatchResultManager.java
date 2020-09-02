@@ -209,7 +209,7 @@ public class RecoverBatchResultManager {
         	// Obtenemos el conector con el backend ya configurado
         	final FIReConnector connector;
         	try {
-        		connector = ProviderManager.initTransacction(origin, connConfig.getProperties());
+        		connector = ProviderManager.getProviderConnector(origin, connConfig.getProperties());
         	}
         	catch (final FIReConnectorFactoryException e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$

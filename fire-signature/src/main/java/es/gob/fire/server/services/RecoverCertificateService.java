@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.internal.RecoverCertificateManager;
+import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
@@ -120,6 +121,14 @@ public final class RecoverCertificateService extends HttpServlet {
     	else {
     		LOGGER.fine("No se validara el certificado");//$NON-NLS-1$
     	}
+
+    	// Comprobamos si se indica un proveedor y, si no, se utiliza el
+    	// por defecto de Clave Firma
+    	String certOrigin = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
+    	if (certOrigin == null) {
+    		certOrigin = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
+    	}
+    	params.put(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
 
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion

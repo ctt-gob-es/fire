@@ -144,7 +144,7 @@ public class GenerateCertificateManager {
 	public static GenerateCertificateResult generateCertificate(final String providerName, final String subjectId, final Properties config) throws IOException, FIReConnectorFactoryException, FIReCertificateAvailableException, FIReCertificateException, FIReConnectorNetworkException, FIReConnectorUnknownUserException, WeakRegistryException {
 
     	// Obtenemos el conector con el backend ya configurado
-    	final FIReConnector connector = ProviderManager.initTransacction(providerName, config);
+    	final FIReConnector connector = ProviderManager.getProviderConnector(providerName, config);
 
         return connector.generateCertificate(subjectId);
 	}

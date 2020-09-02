@@ -223,7 +223,7 @@ public class SignOperationManager {
         catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al obtener los datos a firmar del servidor remoto"), e); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
-    		response.sendError(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode(), "Mensaje de la respuesta de error");
+    		response.sendError(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode(), e.toString());
     		return;
         }
 

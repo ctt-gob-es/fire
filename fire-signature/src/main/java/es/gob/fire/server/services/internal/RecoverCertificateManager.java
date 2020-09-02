@@ -52,6 +52,7 @@ public class RecoverCertificateManager {
 		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
         final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
         final String configB64  = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
+        final String configuredProvider  = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
 
@@ -69,11 +70,16 @@ public class RecoverCertificateManager {
     		config = ServiceUtil.base642Properties(configB64);
     	}
 
+    	String provider = configuredProvider;
+    	if (provider == null) {
+    		provider = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
+    	}
+
     	LOGGER.info(logF.f("Recuperamos el certificado de usuario")); //$NON-NLS-1$
 
     	byte[] newCertEncoded;
         try {
-        	newCertEncoded = recoverCertificate(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, transactionId, config);
+        	newCertEncoded = recoverCertificate(provider, transactionId, config);
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
@@ -122,7 +128,7 @@ public class RecoverCertificateManager {
 					FIReConnectorFactoryException {
 
 		// Obtenemos el conector con el backend ya configurado
-		final FIReConnector connector = ProviderManager.initTransacction(providerName, config);
+		final FIReConnector connector = ProviderManager.getProviderConnector(providerName, config);
 
 		// Recuperamos el certificado
 		return connector.recoverCertificate(transactionId);

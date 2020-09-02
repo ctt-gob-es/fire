@@ -37,13 +37,13 @@ public class ProviderManager {
 	public static final String PROVIDER_NAME_LOCAL = "local"; //$NON-NLS-1$
 
 	/**
-	 * Inicializamos una transacci&oacute;n a trav&eacute;s de un proveedor.
+	 * Obtenemos el conector necesario para operar con un proveedor de firma en la nube.
 	 * @param providerName Nombre del proveedor.
-	 * @param transactionConfig Configuraci&oacute;n de la transacci&oacute;n.
+	 * @param transactionConfig Configuraci&oacute;n a aplicar al conector.
 	 * @return Conector con el proveedor ya configurado para realizar cualquier transacci&oacute;n.
-	 * @throws FIReConnectorFactoryException Cuando falle la inicializaci&oacute;n del conector.
+	 * @throws FIReConnectorFactoryException Cuando falla la inicializaci&oacute;n del conector.
 	 */
-	public static FIReConnector initTransacction(final String providerName, final Properties transactionConfig)
+	public static FIReConnector getProviderConnector(final String providerName, final Properties transactionConfig)
 			throws FIReConnectorFactoryException{
 
 		// Obtenemos la clase del connector

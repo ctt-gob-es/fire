@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +30,7 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.internal.ProviderManager;
+import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
@@ -43,7 +43,6 @@ public final class CertificateService extends HttpServlet {
 
 	private static final String PARAM_APPLICATION_ID = "appId"; //$NON-NLS-1$
     private static final String PARAM_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
-    private static final String PARAM_CONFIG = "config"; //$NON-NLS-1$
 
     private static final Logger LOGGER = Logger.getLogger(CertificateService.class.getName());
 
@@ -144,12 +143,11 @@ public final class CertificateService extends HttpServlet {
         // Obtenemos el conector con el backend ya configurado
         final FIReConnector connector;
         try {
-        	Properties config = null;
-        	final String configB64 = params.getParameter(PARAM_CONFIG);
-        	if (configB64 != null && configB64.length() > 0) {
-        		config = ServiceUtil.base642Properties(configB64);
+        	String providerName = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
+        	if (providerName == null) {
+        		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
         	}
-            connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
+            connector = ProviderManager.getProviderConnector(providerName, null);
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$

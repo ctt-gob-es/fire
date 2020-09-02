@@ -31,6 +31,7 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.internal.ProviderManager;
+import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
@@ -97,6 +98,7 @@ public final class LoadService extends HttpServlet {
         final String subOperation   = params.getParameter(PARAMETER_NAME_OPERATION);
         final String format         = params.getParameter(PARAMETER_NAME_FORMAT);
         final String dataB64        = params.getParameter(PARAMETER_NAME_DATA);
+        String providerName  	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 
     	if (ConfigManager.isCheckApplicationNeeded()){
         	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
@@ -221,7 +223,10 @@ public final class LoadService extends HttpServlet {
         	if (configB64 != null && configB64.length() > 0) {
         		config = ServiceUtil.base642Properties(configB64);
         	}
-            connector = ProviderManager.initTransacction(ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA, config);
+        	if (providerName == null) {
+        		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
+        	}
+            connector = ProviderManager.getProviderConnector(providerName, config);
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
