@@ -36,7 +36,7 @@ namespace FIRe
         /// <returns>URL configurada en el registro.</returns>
         public static string getFireService()
         {
-            return getRegistryKey(REGISTRY_KEY_FIRE, REGISTRY_VALUE_FIRE_SERVICE);
+            return getFireRegistryKey(REGISTRY_VALUE_FIRE_SERVICE);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace FIRe
         /// <returns>URL configurada en el registro.</returns>
         public static string getUrlListCertsService()
         {
-            return getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_LIST_CERTS_SERVICE);
+            return getLegacyRegistryKey(REGISTRY_VALUE_LIST_CERTS_SERVICE);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace FIRe
         /// <returns>URL configurada en el registro.</returns>
         public static string getUrlGenerateCertService()
         {
-            return getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_GENERATE_CERT_SERVICE);
+            return getLegacyRegistryKey(REGISTRY_VALUE_GENERATE_CERT_SERVICE);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace FIRe
         /// <returns>URL configurada en el registro.</returns>
         public static string getUrlRecoverCertService()
         {
-            return getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_RECOVER_CERT_SERVICE);
+            return getLegacyRegistryKey(REGISTRY_VALUE_RECOVER_CERT_SERVICE);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace FIRe
         /// <returns>URL configurada en el registro.</returns>
         public static string getUrlLoadService()
         {
-            return getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_LOAD_SERVICE_VALUE);
+            return getLegacyRegistryKey(REGISTRY_VALUE_LOAD_SERVICE_VALUE);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace FIRe
         /// <returns>URL configurada en el registro.</returns>
         public static string getUrlSignService()
         {
-            return getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_SIGN_SERVICE);
+            return getLegacyRegistryKey(REGISTRY_VALUE_SIGN_SERVICE);
         }
 
         /// <summary>
@@ -91,12 +91,7 @@ namespace FIRe
         /// false en caso contrario.</returns>
         public static string getSSLAdmitAllCerts()
         {
-            string allCerts = getRegistryKey(REGISTRY_KEY_FIRE, REGISTRY_VALUE_ADMIT_ALL_CERTS);
-            if (allCerts == null)
-            {
-                allCerts = getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_ADMIT_ALL_CERTS);
-            }
-            return allCerts;
+            return getLegacyRegistryKey(REGISTRY_VALUE_ADMIT_ALL_CERTS);
         }
 
         /// <summary>
@@ -105,12 +100,7 @@ namespace FIRe
         /// <returns>Ruta del almacén PKCS#12 con el certificado y clave SSL cliente.</returns>
         public static string getSSLClientPkcs12()
         {
-            string clientPkcs12 = getRegistryKey(REGISTRY_KEY_FIRE, REGISTRY_VALUE_SSL_CLIENT_PKCS12);
-            if (clientPkcs12 == null)
-            {
-                clientPkcs12 = getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_SSL_CLIENT_PKCS12);
-            }
-            return clientPkcs12;
+            return getLegacyRegistryKey(REGISTRY_VALUE_SSL_CLIENT_PKCS12);
         }
 
         /// <summary>
@@ -119,12 +109,7 @@ namespace FIRe
         /// <returns>Contraseña del almacén o <code>null</code> si no se configuró.</returns>
         public static string getSSLClientPass()
         {
-            string clientPass = getRegistryKey(REGISTRY_KEY_FIRE, REGISTRY_VALUE_SSL_CLIENT_PASS);
-            if (clientPass == null)
-            {
-                clientPass = getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_SSL_CLIENT_PASS);
-            }
-            return clientPass;
+            return getLegacyRegistryKey(REGISTRY_VALUE_SSL_CLIENT_PASS);
         }
 
         /// <summary>
@@ -133,12 +118,7 @@ namespace FIRe
         /// <returns>Alias del certificado o <code>null</code> si no se configuró.</returns>
         public static string getSSLClientAlias()
         {
-            string clientPass = getRegistryKey(REGISTRY_KEY_FIRE, REGISTRY_VALUE_SSL_CLIENT_ALIAS);
-            if (clientPass == null)
-            {
-                clientPass = getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, REGISTRY_VALUE_SSL_CLIENT_ALIAS);
-            }
-            return clientPass;
+            return getLegacyRegistryKey(REGISTRY_VALUE_SSL_CLIENT_ALIAS);
         }
 
         /// <summary>
@@ -160,5 +140,32 @@ namespace FIRe
 
             return value;
         }
-    }
+
+        /// <summary>
+        /// Obtiene un valor de configuración de FIRe.
+        /// </summary>
+        /// <param name="valueName">Nombre del valor de registro</param>
+        /// <returns>Valor del registro o nulo si no se encontró configurado.</returns>
+        private static string getFireRegistryKey(string valueName)
+        {
+            return getRegistryKey(REGISTRY_KEY_FIRE, valueName);
+        }
+
+        /// <summary>
+        /// Obtiene un valor de configuración antiguo de FIRe. Estos se buscaran primero
+        /// en la nueva clave de registro de FIRe y, si no se encuentra, en las claves de registro
+        /// que se utilizaban anteriormente.
+        /// </summary>
+        /// <param name="valueName">Nombre del valor de registro</param>
+        /// <returns>Valor del registro o nulo si no se encontró configurado.</returns>
+        private static string getLegacyRegistryKey(string valueName)
+        {
+            string value = getFireRegistryKey(valueName);
+            if (string.IsNullOrEmpty(value))
+            {
+                value = getRegistryKey(REGISTRY_KEY_CLAVEFIRMA, valueName);
+            }
+            return value;
+        }
+}
 }

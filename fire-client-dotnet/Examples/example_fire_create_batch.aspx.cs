@@ -26,6 +26,18 @@ public partial class example_fire_create_batch : System.Web.UI.Page
                 upgradeFormat,  // Actualizacion
                 confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
             );
+/*
+            loadResult = FireApi.createBatchProcess(
+                appId, // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                "00001",        // DNI de la persona
+                "sign",         // Operacion criptografica (sign, cosign o countersign)
+                "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
+                "SHA1withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
+                extraParamsB64, // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
+                upgradeFormat,  // Actualizacion
+                confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
+            );
+*/
         }
         catch (Exception ex)
         {

@@ -37,24 +37,48 @@ namespace FIRe
             "appId=" + TAG_NAME_APP_ID +
             "&transactionId=" + TAG_NAME_TRANSACTION_ID;
 
-        /// <summary>Genera un nuevo certificado de firma.</summary>
+
+        /// <summary>Genera un nuevo certificado de firma para el proveedor de firma en la nube por defecto.</summary>
         /// <param name="appId">Identificador de la aplicación.</param>
         /// <param name="subjectId">Identificador del titular al que generar el certificado.</param>
         /// <param name="confB64">Configuración a indicar al servicio remoto (dependiente de la implementación).</param>
         /// <returns>Resultado del proceso de generación.</returns>
         /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido o la repuesta del servidor
-		/// no es correcta.</exception>
-		/// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+        /// no es correcta.</exception>
+        /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
         /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
         /// <exception cref="HttpCertificateAvailableException">Cuando se solicita crear una certificado para un usuario que ya tiene.</exception>
         /// <exception cref="HttpNoUserException">Cuando el usuario no está dado de alta en el sistema.</exception>
         /// <exception cref="HttpWeakRegistryException">Cuando el usuario realizó un registro débil y no puede tener certificados de firma.</exception>
         /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
-		/// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
         public static GenerateCertificateResult generateCertificate(
-                                            String appId,
-                                            String subjectId,
-                                            String confB64)
+                                            string appId,
+                                            string subjectId,
+                                            string confB64)
+        {
+            return generateCertificate(appId, subjectId, confB64, null);
+        }
+            /// <summary>Genera un nuevo certificado de firma para un proveedor de firma en la nube.</summary>
+            /// <param name="appId">Identificador de la aplicación.</param>
+            /// <param name="subjectId">Identificador del titular al que generar el certificado.</param>
+            /// <param name="confB64">Configuración a indicar al servicio remoto (dependiente de la implementación).</param>
+            /// <param name="providerName">Nombre del proveedor de firma en la nube.</param>
+            /// <returns>Resultado del proceso de generación.</returns>
+            /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido o la repuesta del servidor
+            /// no es correcta.</exception>
+            /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+            /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+            /// <exception cref="HttpCertificateAvailableException">Cuando se solicita crear una certificado para un usuario que ya tiene.</exception>
+            /// <exception cref="HttpNoUserException">Cuando el usuario no está dado de alta en el sistema.</exception>
+            /// <exception cref="HttpWeakRegistryException">Cuando el usuario realizó un registro débil y no puede tener certificados de firma.</exception>
+            /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+            public static GenerateCertificateResult generateCertificate(
+                                            string appId,
+                                            string subjectId,
+                                            string confB64,
+                                            string providerName)
         {
 
             if (string.IsNullOrEmpty(subjectId))
@@ -70,11 +94,16 @@ namespace FIRe
                 .Replace(TAG_NAME_SUBJECT_ID, subjectId)
                 .Replace(TAG_NAME_CLAVEFIRMA_CONFIG, confB64 != null ? confB64.Replace('+', '-').Replace('/', '_') : "");
 
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                urlParameters += "&certorigin=" + providerName;
+            }
+
             string responseJSON = getResponseToPostPetition(url, urlParameters);
             return new GenerateCertificateResult(responseJSON);
         }
 
-        /// <summary>Carga datos para ser posteriormente firmados.</summary>
+        /// <summary>Carga datos para ser posteriormente firmados con le proveedor de firma en la nube por defecto.</summary>
         /// <param name="appId">Identificador de la aplicación.</param>
         /// <param name="transactionId">Identificador de la transacción en la que se generó el certificado.</param>
         /// <returns>Resultado de la carga.</returns>
@@ -85,8 +114,26 @@ namespace FIRe
         /// <exception cref="CryptographicException">Cuando no se puede decodificar el certificado recuperado.</exception>
 		/// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
         public static X509Certificate recoverCertificate(
-                                            String appId,
-                                            String transactionId)
+                                            string appId,
+                                            string transactionId)
+        {
+            return recoverCertificate(appId, transactionId, null);
+        }
+        /// <summary>Carga datos para ser posteriormente firmados con un proveedor de firma en la nube.</summary>
+        /// <param name="appId">Identificador de la aplicación.</param>
+        /// <param name="transactionId">Identificador de la transacción en la que se generó el certificado.</param>
+        /// <param name="providerName">Nombre del proveedor de firma en la nube.</param>
+        /// <returns>Resultado de la carga.</returns>
+        /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+        /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+        /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+        /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        /// <exception cref="CryptographicException">Cuando no se puede decodificar el certificado recuperado.</exception>
+        /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        public static X509Certificate recoverCertificate(
+                                        string appId,
+                                        string transactionId,
+                                        string providerName)
         {
 
             if (string.IsNullOrEmpty(transactionId))
@@ -100,6 +147,11 @@ namespace FIRe
             string urlParameters = URL_RECOVER_PARAMENTERS
                 .Replace(TAG_NAME_APP_ID, appId)
                 .Replace(TAG_NAME_TRANSACTION_ID, transactionId);
+
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                urlParameters += "&certorigin=" + providerName;
+            }
 
             var certEncoded = getResponseToGetPetition(url, urlParameters);
 

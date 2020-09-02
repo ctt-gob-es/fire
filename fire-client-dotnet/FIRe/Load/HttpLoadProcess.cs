@@ -31,7 +31,7 @@ namespace FIRe
         private static readonly String TAG_NAME_OPERATION = "$$SUBOPERATION$$";
         private static readonly String TAG_NAME_FORMAT = "$$FORMAT$$";
         private static readonly String TAG_NAME_DATA = "$$DATA$$";
-        
+
         private static readonly String URL_PARAMETERS =
             "appId=" + TAG_NAME_APP_ID +
             "&config=" + TAG_NAME_CLAVEFIRMA_CONFIG +
@@ -43,7 +43,7 @@ namespace FIRe
             "&format=" + TAG_NAME_FORMAT +
             "&dat=" + TAG_NAME_DATA;
 
-        /// <summary>Carga datos para ser posteriormente firmados.</summary>
+        /// <summary>Carga datos para ser posteriormente firmados usando el proveedor por defecto.</summary>
         /// <param name="appId">Identificador de la aplicación.</param>
         /// <param name="subjectId">Identificador del titular de la clave de firma.</param>
         /// <param name="op">Tipo de operación a realizar: firma, cofirma o contrafirma</param>
@@ -69,6 +69,38 @@ namespace FIRe
                                             String certB64,
                                             String dataB64,
                                             String confB64)
+        {
+            return loadData(appId, subjectId, op, ft, algth, propB64, certB64, dataB64, confB64, null);
+        }
+
+        /// <summary>Carga datos para ser posteriormente firmados con un proveedor de firma en la nube.</summary>
+        /// <param name="appId">Identificador de la aplicación.</param>
+        /// <param name="subjectId">Identificador del titular de la clave de firma.</param>
+        /// <param name="op">Tipo de operación a realizar: firma, cofirma o contrafirma</param>
+        /// <param name="ft">Formato de la operación.</param>
+        /// <param name="algth">Algoritmo de firma.</param>
+        /// <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+        /// <param name="certB64">Certificado de usuario para realizar la firma.</param>
+        /// <param name="dataB64">Datos a firmar.</param>
+        /// <param name="confB64">Configuración a indicar al servicio remoto (dependiente de la implementación).</param>
+        /// <param name="providerName">Nombre del proveedor de firma en la nube a utilizar.</param>
+        /// <returns>Resultado de la carga.</returns>
+        /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+        /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+        /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+        /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        public static LoadResult loadData(
+                                        string appId,
+                                        string subjectId,
+                                        string op,
+                                        string ft,
+                                        string algth,
+                                        string propB64,
+                                        string certB64,
+                                        string dataB64,
+                                        string confB64,
+                                        string providerName)
         {
 
             if (string.IsNullOrEmpty(subjectId))
@@ -119,6 +151,11 @@ namespace FIRe
                 .Replace(TAG_NAME_CERT, certB64.Replace('+', '-').Replace('/', '_'))
                 .Replace(TAG_NAME_DATA, dataB64.Replace('+', '-').Replace('/', '_'))
                 .Replace(TAG_NAME_CLAVEFIRMA_CONFIG, confB64 != null ? confB64.Replace('+', '-').Replace('/', '_') : "");
+
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                urlParameters += "&certorigin=" + providerName;
+            }
 
             string responseJSON = getResponseToPostPetition(url, urlParameters);
             return new LoadResult(responseJSON);

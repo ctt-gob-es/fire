@@ -9,7 +9,7 @@ public partial class example_fire_sign_batch : System.Web.UI.Page
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireLoadResult result;
-        string transactionId = "dcee82eb-e0cd-46ac-aa53-b7dc65ef1d9f";
+        string transactionId = "5e06f0bb-b812-40fb-87af-76770feed597";
         try
         {
             result = new FireClient("B244E473466F").signBatch( // Identificador de la aplicacion (dada de alta previamente en el sistema)
@@ -17,6 +17,14 @@ public partial class example_fire_sign_batch : System.Web.UI.Page
                 "00001",        // Identificador del usuario
                 false           // Indica si debe detenerse al encontrar un error
             );
+
+/*
+            result = FireApi.signBatch(
+                "B244E473466F", // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                transactionId,  // Identificador de transaccion generado en la funcion createBatch()
+                false           // Indica si debe detenerse al encontrar un error
+            );
+*/
         }
         catch (Exception ex)
         {

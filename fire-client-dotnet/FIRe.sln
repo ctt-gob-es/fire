@@ -29,6 +29,31 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Examples", "Examples\", "{2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example_console", "Example_console\Example_console.csproj", "{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}"
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Examples_old", "Examples_old\", "{CD456AC4-1EAC-474E-B77C-66ABE22EC049}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.2"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_58240"
+		Debug.AspNetCompiler.PhysicalPath = "Examples_old\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_58240\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_58240"
+		Release.AspNetCompiler.PhysicalPath = "Examples_old\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_58240\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "58240"
+		SlnRelativePath = "Examples_old\"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{246037E1-C1DC-4701-A912-3EB219CFEE43} = {246037E1-C1DC-4701-A912-3EB219CFEE43}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +72,10 @@ Global
 		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{32A04A01-7D2D-433F-852B-C0AA6CAC1B74}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{CD456AC4-1EAC-474E-B77C-66ABE22EC049}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD456AC4-1EAC-474E-B77C-66ABE22EC049}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD456AC4-1EAC-474E-B77C-66ABE22EC049}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD456AC4-1EAC-474E-B77C-66ABE22EC049}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

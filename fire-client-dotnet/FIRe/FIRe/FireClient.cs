@@ -791,7 +791,9 @@ namespace FIRe
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
             byte[] bytes = GetResponseToPostPetition(url, urlParameters, this.config.getConfig());
-            
+
+            System.Windows.Forms.MessageBox.Show("String: " + System.Text.Encoding.UTF8.GetString(bytes) + " Float: " + float.Parse(System.Text.Encoding.UTF8.GetString(bytes), System.Globalization.CultureInfo.InvariantCulture));
+
             // Mostramos los datos obtenidos
             return float.Parse(System.Text.Encoding.UTF8.GetString(bytes), System.Globalization.CultureInfo.InvariantCulture);
         }

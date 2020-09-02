@@ -54,9 +54,28 @@ namespace FIRe
         /// <exception cref="HttpWeakRegistryException">Cuando el usuario realizó un registro débil y no puede tener certificados de firma.</exception>
         /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
         /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
-        public static List<X509Certificate> getList(String appId, String subjectId)
+        public static List<X509Certificate> getList(string appId, string subjectId)
         {
-            
+            return getList(appId, subjectId, null);
+        }
+
+        /// <summary>
+        ///  Recuperar los certificados del sistema.
+        /// </summary>
+        /// <param name="appId">Identificador de la aplicación.</param>
+        /// <param name="subjectId">Identificador del titular de la clave de firma.</param>
+        /// <param name="providerName">Nombre del proveedor de firma en la nube.</param>
+        /// <returns>Listado de certificados</returns>
+        /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+        /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+        /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+        /// <exception cref="HttpNoUserException">Cuando el usuario no está dado de alta en el sistema.</exception>
+        /// <exception cref="HttpCertificateBlockedException">Cuando los certificados del usuario estén bloqueados.</exception>
+        /// <exception cref="HttpWeakRegistryException">Cuando el usuario realizó un registro débil y no puede tener certificados de firma.</exception>
+        /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        public static List<X509Certificate> getList(string appId, string subjectId, string providerName)
+        {
             if (string.IsNullOrEmpty(subjectId))
             {
                 throw new ArgumentException(
@@ -66,9 +85,21 @@ namespace FIRe
 
             // Generamos la URL
             string url = ConfigManager.getUrlListCertsService();
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new ConfigureException(
+                    "No se ha configurado la URL con el servicio de listado de certificados"
+                );
+            }
+
             string urlParameters = URL_PARAMETERS
                 .Replace(ID_TAG_SUBJECT, subjectId)
                 .Replace(ID_TAG_APP, appId);
+
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                urlParameters += "&certorigin=" + providerName;
+            }
 
             List<X509Certificate> certificates = new List<X509Certificate>();
             try

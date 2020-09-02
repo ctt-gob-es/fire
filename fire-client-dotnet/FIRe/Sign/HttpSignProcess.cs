@@ -31,7 +31,7 @@ namespace FIRe
 	    private static readonly String CERT = "%CERT%";
 	    private static readonly String DATA = "%DATA%"; 
 	    private static readonly String TRIPHASE_DATA = "%TDATA%";
-        
+
         private static readonly String URL_PARAMETERS =
             "appId=" + APP_ID +
             "&transactionid=" + TRANSACTION +
@@ -43,7 +43,7 @@ namespace FIRe
             "&tri=" + TRIPHASE_DATA;
 
         /// <summary>
-        /// Firma unos datos haciendo uso del servicio de red de firma en la nube.
+        /// Firma unos datos haciendo uso del servicio de firma en la nube por defecto.
         /// </summary>
         /// <param name="appId">Identificador de la aplicación.</param>
         /// <param name="transactionId">Identificador de la transacción.</param>
@@ -62,16 +62,53 @@ namespace FIRe
         /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
         /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
         public static byte[] sign(
-                              String appId,
-                              String transactionId,
-							  String op,
-			                  String ft,
-			                  String algth,
-			                  String propB64,
-			                  String cert,
-			                  String dataB64,
-			                  String tdB64,
-			                  String upgrade) {
+                              string appId,
+                              string transactionId,
+                              string op,
+                              string ft,
+                              string algth,
+                              string propB64,
+                              string cert,
+                              string dataB64,
+                              string tdB64,
+                              string upgrade)
+        {
+            return sign(appId, transactionId, op, ft, algth, propB64, cert, dataB64, tdB64, upgrade, null);
+        }
+
+        /// <summary>
+        /// Firma unos datos haciendo uso del servicio de firma en la nube.
+        /// </summary>
+        /// <param name="appId">Identificador de la aplicación.</param>
+        /// <param name="transactionId">Identificador de la transacción.</param>
+        /// <param name="op">Tipo de operaciónn a realizar: "sign", "cosign" o "countersign".</param>
+        /// <param name="ft">Formato de la operación: "XAdES", "PAdES", etc.</param>
+        /// <param name="algth">Algoritmo de firma.</param>
+        /// <param name="propB64">Propiedades extra a añadir a la firma (puede ser <code>null</code>).</param>
+        /// <param name="cert">Certificado de usuario para realizar la firma.</param>
+        /// <param name="dataB64"> Datos a firmar en base64.</param>
+        /// <param name="tdB64">Datos de la operación trifásica en base64.</param>
+        /// <param name="upgrade">Formato al que queremos mejorar la firma (puede ser <code>null</code>).</param>
+        /// <param name="providerName">Nombre del proveedor de firma en la nube.</param>
+        /// <returns>Firma realizada en servidor.</returns>
+        /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+        /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
+        /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
+        /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+        public static byte[] sign(
+                            string appId,
+                            string transactionId,
+							string op,
+			                string ft,
+			                string algth,
+			                string propB64,
+			                string cert,
+			                string dataB64,
+			                string tdB64,
+			                string upgrade,
+                            string providerName)
+        {
 
             if (string.IsNullOrEmpty(transactionId))
             {
@@ -129,11 +166,15 @@ namespace FIRe
 
             if (!string.IsNullOrEmpty(upgrade))
             {
-                urlParameters += "&upgrade=" + upgrade; //$NON-NLS-1$
+                urlParameters += "&upgrade=" + upgrade;
             }
             if (!string.IsNullOrEmpty(propB64))
             {
-                urlParameters += "&properties=" + propB64.Replace('+', '-').Replace('/', '_'); //$NON-NLS-1$
+                urlParameters += "&properties=" + propB64.Replace('+', '-').Replace('/', '_');
+            }
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                urlParameters += "&certorigin=" + providerName;
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
