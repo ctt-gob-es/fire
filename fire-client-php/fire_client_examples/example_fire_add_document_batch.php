@@ -5,7 +5,7 @@
  <body>
  <?php 
 	// Cargamos el componente distribuido de FIRe
-	include 'fire_client.php';
+	include '../fire_client.php';
 	
 	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
 	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL

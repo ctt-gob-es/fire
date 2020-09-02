@@ -5,7 +5,7 @@
  <body>
  <?php 
 	// Cargamos el componente distribuido de FIRe
-	include 'fire_client.php';
+	include '../fire_client.php';
 
 	$transactionId = "598fb669-71cb-4436-b217-a0c0f55666bc";	// Identificador de la transaccion	
 	

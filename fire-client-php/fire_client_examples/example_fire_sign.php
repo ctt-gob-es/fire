@@ -5,7 +5,7 @@
  <body>
  <?php 
 	// Cargamos el componente distribuido de FIRe
-	include 'fire_client.php';
+	include '../fire_client.php';
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
 	

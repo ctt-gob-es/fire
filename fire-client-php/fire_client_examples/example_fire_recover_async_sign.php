@@ -5,7 +5,7 @@
  <body>
  <?php 
 	// Cargamos el componente distribuido de FIRe
-	include 'fire_client.php';
+	include '../fire_client.php';
 
 	$docId = "1573733664278249577";	// Identificador del documento asincrono que queremos recuperar
 	
