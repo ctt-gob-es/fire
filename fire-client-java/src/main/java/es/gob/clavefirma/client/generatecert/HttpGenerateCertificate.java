@@ -20,13 +20,13 @@ import java.util.logging.Logger;
 
 import es.gob.clavefirma.client.ClientConfigFilesNotFoundException;
 import es.gob.clavefirma.client.ConnectionManager;
+import es.gob.clavefirma.client.ConnectionManager.Method;
 import es.gob.clavefirma.client.HttpForbiddenException;
 import es.gob.clavefirma.client.HttpNetworkException;
 import es.gob.clavefirma.client.HttpNoUserException;
 import es.gob.clavefirma.client.HttpOperationException;
 import es.gob.clavefirma.client.HttpWeakRegistryException;
 import es.gob.clavefirma.client.InvalidTransactionException;
-import es.gob.clavefirma.client.ConnectionManager.Method;
 import es.gob.fire.client.ConfigManager;
 import es.gob.fire.client.HttpCustomErrors;
 import es.gob.fire.client.HttpError;
@@ -43,8 +43,9 @@ public class HttpGenerateCertificate {
 
     private static final String PARAMETER_NAME_APPID = "appId"; //$NON-NLS-1$
 	private static final String PARAMETER_NAME_CONFIG = "config"; //$NON-NLS-1$
-    private static final String PARAMETER_NAME_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
-    private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionId"; //$NON-NLS-1$
+    private static final String PARAMETER_NAME_SUBJECT_ID = "subjectid"; //$NON-NLS-1$
+    private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
+    private static final String PARAMETER_NAME_CERT_ORIGIN = "certorigin"; //$NON-NLS-1$
 
     private static final String TAG_NAME_CONFIG = "$$CONFIG$$"; //$NON-NLS-1$
     private static final String TAG_NAME_APP_ID = "$$APPID$$"; //$NON-NLS-1$
@@ -66,7 +67,6 @@ public class HttpGenerateCertificate {
             + PARAMETER_NAME_TRANSACTION_ID + EQ + TAG_NAME_TRANSACTION_ID;
 
     private static String URL_RECOVER_SERVICE;
-
 
     /**
      * Constructor vac&iacute;o no instanciable
@@ -148,6 +148,38 @@ public class HttpGenerateCertificate {
             		throws HttpForbiddenException, HttpNetworkException, HttpOperationException,
             		ClientConfigFilesNotFoundException, HttpCertificateAvailableException, HttpNoUserException,
             		HttpWeakRegistryException {
+    	return generateCertificate(appId, subjectId, null, configB64);
+    }
+
+    /**
+     * Realiza una solicitud para la generaci&oacute;n de un nuevo certificado de firma para el usuario.
+     * @param appId
+     *            Identificador de la aplicaci&oacute;n que realiza la
+     *            petici&oacute;n.
+     * @param subjectId
+     *            Identificador del usuario que solicita el certificado.
+     * @param providerName Nombre del proveedor de firma en la nube que se desee utilizar.
+     * @param configB64
+     * 			  Configuraci&oacute;n a indicar al servicio remoto para ejecutar la operaci&oacute;n.
+     * 			  Este ser&aacute; el resultado de codificar en base 64 una cadena compuesta por tuplas
+     * 			  "clave=valor" separadas por "\n".
+     * @return Informaci&oacute;n resultante de la operaci&oacute;n de generaci&oacute;n del certificado.
+     * @throws HttpForbiddenException Cuando no se tiene acceso al servicio remoto.
+     * @throws HttpNetworkException Cuando ocurre un error de red.
+     * @throws HttpOperationException Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
+     * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero de configuraci&oacute;n.
+     * @throws HttpCertificateAvailableException Cuando se solicita crear una certificado para un usuario que ya tiene.
+     * @throws HttpNoUserException Cuando el usuario indicado no existe.
+     * @throws HttpWeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma.
+     */
+    public static GenerateCertificateResult generateCertificate(
+    		final String appId,
+    		final String subjectId,
+    		final String providerName,
+            final String configB64)
+            		throws HttpForbiddenException, HttpNetworkException, HttpOperationException,
+            		ClientConfigFilesNotFoundException, HttpCertificateAvailableException, HttpNoUserException,
+            		HttpWeakRegistryException {
 
     	initialize();
 
@@ -164,10 +196,15 @@ public class HttpGenerateCertificate {
     	}
 
     	// Realizamos la peticion y cargamos el JSON de respuesta
-   		final String urlParameters = URL_REQUEST_SUFIX
+   		String urlParameters = URL_REQUEST_SUFIX
 				.replace(TAG_NAME_APP_ID, appId)
 				.replace(TAG_NAME_SUBJECT_ID, subjectId)
 				.replace(TAG_NAME_CONFIG, configB64 != null ? Utils.doBase64UrlSafe(configB64) : ""); //$NON-NLS-1$
+
+   		if (providerName != null) {
+   			urlParameters += AM + PARAMETER_NAME_CERT_ORIGIN + EQ + providerName;
+   		}
+
     	final byte[] responseJSON;
         try {
         	responseJSON = ConnectionManager.readUrl(URL_REQUEST_SERVICE, urlParameters, Method.POST);
@@ -226,6 +263,27 @@ public class HttpGenerateCertificate {
     public static X509Certificate recoverCertificate(
     		final String appId,
     		final String transactionId) throws HttpForbiddenException, HttpNetworkException, HttpOperationException, ClientConfigFilesNotFoundException, InvalidTransactionException {
+    	return recoverCertificate(appId, transactionId, null);
+    }
+
+    /**
+     * Realiza una solicitud para la generaci&oacute;n de un nuevo certificado para el usuario.
+     * @param appId Identificador de la aplicaci&oacute;n que realiza la petici&oacute;n.
+     * @param transactionId Identificador del usuario que solicita el certificado.
+     * @param providerName Nombre del proveedor de firma en la nube deseado. Si se indica
+     * {@code null}, se usar&aacute; el por defecto.
+     * @return Certificado reci&eacute;n generado.
+     * @throws HttpForbiddenException Cuando no se tiene acceso al servicio remoto.
+     * @throws HttpNetworkException Cuando ocurre un error de red.
+     * @throws HttpOperationException Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
+     * @throws ClientConfigFilesNotFoundException Cuando no se encuentra el fichero de configuraci&oacute;n.
+     * @throws InvalidTransactionException Cuando la transacci&oacute;n no existe o
+     * est&aacute; caducada.
+     */
+    public static X509Certificate recoverCertificate(
+    		final String appId,
+    		final String transactionId,
+    		final String providerName) throws HttpForbiddenException, HttpNetworkException, HttpOperationException, ClientConfigFilesNotFoundException, InvalidTransactionException {
 
     	initialize();
 
@@ -242,9 +300,14 @@ public class HttpGenerateCertificate {
          }
 
     	// Realizamos la peticion y cargamos el JSON de respuesta
-    	final String url = URL_RECOVER_SERVICE + URL_RECOVER_SUFIX
+    	String url = URL_RECOVER_SERVICE + URL_RECOVER_SUFIX
 				.replace(TAG_NAME_APP_ID, appId)
 				.replace(TAG_NAME_TRANSACTION_ID, transactionId);
+
+    	if (providerName != null) {
+    		url += AM + PARAMETER_NAME_CERT_ORIGIN + EQ + providerName;
+    	}
+
     	final byte[] certEncoded;
         try {
         	certEncoded = ConnectionManager.readUrlByGet(url);

@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.slf4j.LoggerFactory;
+
 /**
  * M&eacute;todos de utilidad para la conversi&oacute;n de datos.
  */
@@ -30,15 +32,19 @@ public class Utils {
      * 			  Indica si el base 64 debe ser URL Safe o no.
      * @return Base64 que descodificado es un fichero de propiedades en texto
      *         plano o cadena vac&iacute;a si el objeto era {@code null}.
-     * @throws IOException
-     *             Si hay problemas en la conversi&oacute;n a Base64.
      */
-    public static String properties2Base64(final Properties p, final boolean urlSafe) throws IOException {
+    public static String properties2Base64(final Properties p, final boolean urlSafe) {
         if (p == null) {
             return ""; //$NON-NLS-1$
         }
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        p.store(baos, ""); //$NON-NLS-1$
+        try {
+        	p.store(baos, ""); //$NON-NLS-1$
+        }
+        catch (final Exception e) {
+        	LoggerFactory.getLogger(Utils.class).error(
+        			"No se ha podido generar el base 64 de un objeto de propiedades. No deberia ocurrir nunca", e); //$NON-NLS-1$
+		}
         return Base64.encode(baos.toByteArray(), urlSafe);
     }
 

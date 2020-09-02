@@ -156,6 +156,64 @@ public final class HttpSignProcess {
     		final HttpSignProcessConstants.SignatureUpgrade upgrade)
     				throws IOException, CertificateEncodingException, HttpForbiddenException,
     				HttpNetworkException, HttpOperationException, ClientConfigFilesNotFoundException {
+    	return sign(appId, transactionId, op, ft, algth, prop, cert, data, td, upgrade, null);
+    }
+
+    /**
+     * Firma unos datos haciendo uso del servicio de red de firma en la nube.
+     *
+     * @param appId
+     *            Identificador de la aplicaci&oacute;n que realiza la
+     *            petici&oacute;n.
+     * @param transactionId
+     *            Identificador de la transacci&oacute;n.
+     * @param op
+     *            Tipo de operaci&acute;n a realizar.
+     * @param ft
+     *            Formato de la operaci&oacute;n.
+     * @param algth
+     *            Algoritmo de firma.
+     * @param prop
+     *            Propiedades extra a a&ntilde;adir a la firma (puede ser
+     *            <code>null</code>).
+     * @param cert
+     *            Certificado de usuario para realizar la firma.
+     * @param data
+     *            Datos a firmar.
+     * @param td
+     *            Informaci&oacute;n de la operaci&oacute;n trif&aacute;sica.
+     * @param upgrade
+     *            Formato al que queremos mejorar la firma (puede ser
+     *            <code>null</code>).
+     * @param config
+     * 			  	Configuraci&oacute;n adicional del proveedor (propiedad
+     * 				"certorigin" con el nombre del proveedor, etc.). Puede ser
+     * 				{@code null}.
+     * @return Firma realizada en servidor.
+     * @throws IOException
+     *             Cuando no se pueden codificar en base 64 los objetos de propiedades.
+     * @throws CertificateEncodingException
+     * 				Si el certificado proporcionado no es v&aacute;lido.
+     * @throws HttpForbiddenException
+     * 				Cuando no se tiene acceso al servicio remoto.
+     * @throws HttpNetworkException
+     * 				Si hay problemas en la llamada al servicio de red.
+     * @throws HttpOperationException
+     * 				Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
+     * @throws ClientConfigFilesNotFoundException
+     * 				Cuando no se encuentra el fichero de configuraci&oacute;n.
+     */
+    public static byte[] sign(final String appId,
+    		final String transactionId,
+    		final HttpSignProcessConstants.SignatureOperation op,
+    		final HttpSignProcessConstants.SignatureFormat ft,
+    		final HttpSignProcessConstants.SignatureAlgorithm algth,
+    		final Properties prop, final X509Certificate cert,
+    		final byte[] data, final TriphaseData td,
+    		final HttpSignProcessConstants.SignatureUpgrade upgrade,
+    		final String providerName)
+    				throws IOException, CertificateEncodingException, HttpForbiddenException,
+    				HttpNetworkException, HttpOperationException, ClientConfigFilesNotFoundException {
 
         if (op == null) {
             throw new IllegalArgumentException(
@@ -203,10 +261,12 @@ public final class HttpSignProcess {
                 Base64.encode(cert.getEncoded(), true),
                 Base64.encode(data, true),
                 Base64.encode(td.toString().getBytes(), true),
-                upgrade != null ? upgrade.toString() : null
+                upgrade != null ? upgrade.toString() : null,
+                providerName
         );
 
     }
+
 
     /**
      * Firma unos datos haciendo uso del servicio de red de firma en la nube.
@@ -249,6 +309,57 @@ public final class HttpSignProcess {
     		final String op, final String ft, final String algth,
     		final String prop, final String cert, final String dataB64,
     		final String tdB64, final String upgrade)
+    				throws HttpForbiddenException, HttpNetworkException,
+    				HttpOperationException, ClientConfigFilesNotFoundException {
+
+    	return sign(appId, transactionId, op, ft, algth, prop, cert, dataB64, tdB64, upgrade, null);
+    }
+
+    /**
+     * Firma unos datos haciendo uso del servicio de red de firma en la nube.
+     *
+     * @param appId
+     *            Identificador de la aplicaci&oacute;n que realiza la
+     *            petici&oacute;n.
+     * @param transactionId
+     *            Identificador de la transacci&oacute;n.
+     * @param op
+     *            Tipo de operaci&oacute;n a realizar: "sign", "cosign" o
+     *            "countersign".
+     * @param ft
+     *            Formato de la operaci&oacute;n.
+     * @param algth
+     *            Algoritmo de firma.
+     * @param propB64
+     *            Propiedades extra de configuraci&oacute;n de la firma en Base64 URL SAFE (puede ser
+     *            <code>null</code>).
+     * @param cert
+     *            Certificado de usuario en Base64 para realizar la firma.
+     * @param dataB64
+     *            Datos a firmar en Base64.
+     * @param tdB64
+     *            Datos de la operaci&oacute;n trif&aacute;sica en Base64.
+     * @param upgrade
+     *            Formato al que queremos mejorar la firma (puede ser
+     *            <code>null</code>).
+     * @param configB64
+     * 			  	Configuraci&oacute;n adicional del proveedor (propiedad
+     * 				"certorigin" con el nombre del proveedor, etc.). Puede ser
+     * 				{@code null}.
+     * @return Firma realizada en servidor.
+     * @throws HttpForbiddenException
+     * 				Cuando no se tiene acceso al servicio remoto.
+     * @throws HttpNetworkException
+     * 				Si hay problemas en la llamada al servicio de red.
+     * @throws HttpOperationException
+     * 				Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
+     * @throws ClientConfigFilesNotFoundException
+     * 				Cuando no se encuentra el fichero de configuraci&oacute;n.
+     */
+    public static byte[] sign(final String appId, final String transactionId,
+    		final String op, final String ft, final String algth,
+    		final String propB64, final String cert, final String dataB64,
+    		final String tdB64, final String upgrade, final String providerName)
     				throws HttpForbiddenException, HttpNetworkException,
     				HttpOperationException, ClientConfigFilesNotFoundException {
 
@@ -303,8 +414,11 @@ public final class HttpSignProcess {
         if (upgrade != null && !upgrade.isEmpty()) {
         	urlParameters += "&upgrade=" + upgrade; //$NON-NLS-1$
         }
-        if (prop != null && !prop.isEmpty()) {
-        	urlParameters += "&properties=" + prop.replace('+', '-').replace('/', '_'); //$NON-NLS-1$
+        if (propB64 != null && !propB64.isEmpty()) {
+        	urlParameters += "&properties=" + propB64.replace('+', '-').replace('/', '_'); //$NON-NLS-1$
+        }
+        if (providerName != null && !providerName.isEmpty()) {
+        	urlParameters += "&certorigin=" + providerName; //$NON-NLS-1$
         }
 
         try {

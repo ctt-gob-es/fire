@@ -24,7 +24,6 @@ public class ConfigManager {
 
 	private static final String PROPERTY_FILE = "client_config.properties";//$NON-NLS-1$
 
-
 	/** Variable de entorno que determina el directorio en el que buscar el fichero
 	 * de configuraci&oacute;n. */
 	private static final String ENVIRONMENT_VAR_CONFIG_DIR = "fire.config.path"; //$NON-NLS-1$

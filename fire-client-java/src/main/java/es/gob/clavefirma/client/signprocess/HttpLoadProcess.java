@@ -19,11 +19,11 @@ import java.util.logging.Logger;
 
 import es.gob.clavefirma.client.ClientConfigFilesNotFoundException;
 import es.gob.clavefirma.client.ConnectionManager;
+import es.gob.clavefirma.client.ConnectionManager.Method;
 import es.gob.clavefirma.client.HttpForbiddenException;
 import es.gob.clavefirma.client.HttpNetworkException;
 import es.gob.clavefirma.client.HttpNoUserException;
 import es.gob.clavefirma.client.HttpOperationException;
-import es.gob.clavefirma.client.ConnectionManager.Method;
 import es.gob.fire.client.Base64;
 import es.gob.fire.client.ConfigManager;
 import es.gob.fire.client.HttpCustomErrors;
@@ -59,6 +59,7 @@ public final class HttpLoadProcess {
     private static final String PARAMETER_NAME_OPERATION = "operation"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_FORMAT = "format"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_DATA = "dat"; //$NON-NLS-1$
+    private static final String PARAMETER_NAME_CERT_ORIGIN = "certorigin"; //$NON-NLS-1$
     private static final String LOAD_URL = "loadUrl"; //$NON-NLS-1$
 
 
@@ -188,6 +189,62 @@ public final class HttpLoadProcess {
             HttpForbiddenException, HttpNetworkException,
             HttpOperationException, ClientConfigFilesNotFoundException,
             HttpNoUserException {
+    	return loadData(appId, subjectId, op, ft, algth, prop, cert, d, conf, null);
+    }
+
+    /**
+     * Carga datos para ser posteriormente firmados.
+     * @param appId
+     *            Identificador de la aplicaci&oacute;n que realiza la
+     *            petici&oacute;n.
+     * @param subjectId
+     *            Identificador del titular de la clave de firma.
+     * @param op
+     *            Tipo de operaci&oacute;n a realizar.
+     * @param ft
+     *            Formato de la operaci&oacute;n.
+     * @param algth
+     *            Algoritmo de firma.
+     * @param prop
+     *            Propiedades extra a a&ntilde;adir a la firma (puede ser
+     *            <code>null</code>).
+     * @param cert
+     *            Certificado de usuario para realizar la firma.
+     * @param d
+     *            Datos a firmar.
+     * @param conf
+     *            Configuraci&oacute;n a indicar al servicio remoto (dependiente
+     *            de la implementaci&oacute;n).
+     * @param providerName
+     * 			  Nombre del proveedor de firma en la nube.
+     * @return Resultado de la carga.
+     * @throws IOException
+     *             Cuando no se pueden codificar en base 64 los objetos de propiedades.
+     * @throws CertificateEncodingException
+     * 				Si el certificado proporcionado no es v&aacute;lido.
+     * @throws HttpForbiddenException
+     * 				Cuando no se tiene acceso al servicio remoto.
+     * @throws HttpNetworkException
+     * 				Si hay problemas en la llamada al servicio de red.
+     * @throws HttpOperationException
+     * 				Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
+     * @throws ClientConfigFilesNotFoundException
+     * 				Cuando no se encuentra el fichero de configuraci&oacute;n.
+     * @throws HttpNoUserException
+     * 				Cuando el usuario no est&eacute; dado de alta en el sistema.
+     */
+    public static LoadResult loadData(final String appId,
+    		final String subjectId,
+            final HttpSignProcessConstants.SignatureOperation op,
+            final HttpSignProcessConstants.SignatureFormat ft,
+            final HttpSignProcessConstants.SignatureAlgorithm algth,
+            final Properties prop, final X509Certificate cert, final byte[] d,
+            final Properties conf,
+            final String providerName)
+            throws IOException, CertificateEncodingException,
+            HttpForbiddenException, HttpNetworkException,
+            HttpOperationException, ClientConfigFilesNotFoundException,
+            HttpNoUserException {
 
         if (op == null) {
             throw new IllegalArgumentException(
@@ -226,7 +283,8 @@ public final class HttpLoadProcess {
         final String configB64 = Utils.properties2Base64(conf, true);
 
         return loadData(appId, subjectId, op.toString(), ft.toString(),
-                algth.toString(), extraParamsB64, certB64, dataB64, configB64);
+                algth.toString(), extraParamsB64, certB64, dataB64, configB64,
+                providerName);
     }
 
     /**
@@ -272,6 +330,52 @@ public final class HttpLoadProcess {
     				throws HttpForbiddenException, HttpNetworkException,
     				HttpOperationException, ClientConfigFilesNotFoundException,
     				HttpNoUserException {
+    	return loadData(appId, subjectId, op, ft, algth, propB64, certB64, dataB64, confB64, null);
+    }
+
+    /**
+     * Carga datos para ser posteriormente firmados.
+     * @param appId
+     *            Identificador de la aplicaci&oacute;n que realiza la
+     *            petici&oacute;n.
+     * @param subjectId
+     *            Identificador del titular de la clave de firma.
+     * @param op
+     *            Tipo de operaci&oacute;n a realizar: sign, cosign o
+     *            countersign.
+     * @param ft
+     *            Formato de la operaci&oacute;n.
+     * @param algth
+     *            Algoritmo de firma.
+     * @param propB64
+     *            Propiedades extra a a&ntilde;adir a la firma  en Base64 (puede ser
+     *            <code>null</code>).
+     * @param certB64
+     *            Certificado de usuario para realizar la firma en Base64.
+     * @param dataB64
+     *            Datos a firmar en Base64.
+     * @param confB64
+     *            Configuraci&oacute;n a indicar al servicio remoto (dependiente
+     *            de la implementaci&oacute;n).
+     * @return Resultado de la carga.
+     * @throws HttpForbiddenException
+     * 				Cuando no se tiene acceso al servicio remoto.
+     * @throws HttpNetworkException
+     * 				Si hay problemas en la llamada al servicio de red.
+     * @throws HttpOperationException
+     * 				Cuando ocurre un error durante la ejecuci&oacute;n de la operaci&oacute;n.
+     * @throws ClientConfigFilesNotFoundException
+     * 				Cuando no se encuentra el fichero de configuraci&oacute;n.
+     * @throws HttpNoUserException
+     * 				Cuando el usuario no est&eacute; dado de alta en el sistema.
+     */
+    public static LoadResult loadData(final String appId,
+    		final String subjectId, final String op, final String ft,
+    		final String algth, final String propB64, final String certB64,
+    		final String dataB64, final String confB64, final String providerName)
+    				throws HttpForbiddenException, HttpNetworkException,
+    				HttpOperationException, ClientConfigFilesNotFoundException,
+    				HttpNoUserException {
 
     	initialize();
 
@@ -306,7 +410,7 @@ public final class HttpLoadProcess {
             );
         }
 
-        final String urlParameters =
+        String urlParameters =
         		URL_SUFIX
         		.replace(TAG_NAME_APP_ID, appId)
                 .replace(TAG_NAME_SUBJECT_ID, subjectId)
@@ -321,6 +425,10 @@ public final class HttpLoadProcess {
                 .replace(
                         TAG_NAME_CONFIG,
                         confB64 != null ? Utils.doBase64UrlSafe(confB64) : ""); //$NON-NLS-1$
+
+        if (providerName != null && !providerName.isEmpty()) {
+        	urlParameters += AM + PARAMETER_NAME_CERT_ORIGIN + EQ + providerName;
+        }
 
         final byte[] responseJSON;
         try {
