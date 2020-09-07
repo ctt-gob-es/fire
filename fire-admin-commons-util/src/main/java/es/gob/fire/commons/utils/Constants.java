@@ -138,10 +138,48 @@ public final class Constants {
 	 */
 	public static final String MAIL_FOOTER = "El administrador.";
 	
+	public static final String CORRECTAS = "correctas";
+	
+	public static final String INCORRECTAS = "incorrectas";
+	
+	public static final String CORRECTAS_SIMPLE = "correctassimple";
+	
+	public static final String INCORRECTAS_SIMPLE = "incorrectassimple";
+	
+	public static final String CORRECTAS_LOTE = "correctaslote";
+	
+	public static final String INCORRECTAS_LOTE = "incorrectaslote";
+	
+	public static final String SIZE = "tamaño";
+	
+	public static final String MB = "Megabyte";
+	
+	public static final String TRANS_CORRECTAS = "Transacciones";
+	
+	public static final String TRANS_INCORRECTAS = "Transacciones";
+	
+	public static final String TRANS_SIMPLES = "simples";
+	
+	public static final String TRANS_LOTE = "lote";
+	
+	public static final String FIRMAS_CORRECTAS = "Firmas correctas por";
+	
+	public static final String FIRMAS_INCORRECTAS = "Firmas incorrectas por";
+	
+	public static final String QUERYBYTYPE_PROVEEDOR = "por proveedor";
+	
+	public static final String QUERYBYTYPE_APP = "por aplicación";
+	
+	public static final String QUERYBYTYPE_FORMATO = "por formato";
+	
+	public static final String QUERYBYTYPE_FORMATO_LONG = "por formato longevo";
+	
+	public static final String OTRAS = "Otras";
+		
 	/**
 	 * Constructor method for the class Constants.java.
 	 */
-	private Constants() {
+	public Constants() {
 	}
 	
 }

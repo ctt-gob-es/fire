@@ -136,7 +136,6 @@ public class MailPasswordRestorationController {
 				// Construimos la URL para restaurar la contraseña
 				// Para evitar errores recuperando el parámetro code,
 				// parseamos los símbolos más antes de enviar la URL al usuario
-				//String renovationCodeURL = renovationCode.replace("+", "%2B");
 				String renovationCodeURL = URLEncoder.encode(renovationCode, StandardCharsets.UTF_8.toString());
 				
 				final String restorationUrl = getRestorationPageUrl(request, renovationCodeURL);

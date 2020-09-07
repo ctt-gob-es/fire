@@ -24,27 +24,46 @@
  */
 package es.gob.fire.web.controller;
 
+import java.awt.Color;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.MultiplePiePlot;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.util.TableOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.lowagie.text.DocumentException;
+
+import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.commons.utils.QueryEnum;
+import es.gob.fire.commons.utils.UtilsStringChar;
+import es.gob.fire.i18n.IWebViewMessages;
+import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.dto.TransactionDTO;
-import es.gob.fire.commons.utils.QueryEnum;
 import es.gob.fire.persistence.service.ISignatureService;
 import es.gob.fire.persistence.service.ITransactionService;
+import es.gob.fire.service.IStatisticsService;
 
 /** 
  * <p>Class that manages the requests related to the statistics administration.</p>
@@ -59,6 +78,7 @@ public class StatisticsController {
 	 */
 	private static final Logger LOGGER = Logger.getLogger(StatisticsController.class);
 	
+		
 	/**
 	 * Attribute that represents the transaction service.
 	 */
@@ -70,6 +90,12 @@ public class StatisticsController {
 	 */
 	@Autowired
 	private ISignatureService signatureService;
+	
+	/**
+	 * Attribute that represents the statistics service.
+	 */
+	@Autowired
+	private IStatisticsService statService;
 	
 	/**
 	 * Method that maps the list users web requests to the controller and forwards the list of platforms
@@ -102,6 +128,7 @@ public class StatisticsController {
 		List<TransactionDTO> transactions = null;
 		List<SignatureDTO> signatures = null;
 		
+		
 		if (!StringUtils.isEmpty(query) && !StringUtils.isEmpty(monthDate)) {
 			final Integer month = Integer.valueOf(monthDate.substring(0, NumberConstants.NUM2));
 			final Integer year = Integer.valueOf(monthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
@@ -110,44 +137,56 @@ public class StatisticsController {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByApplication(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
+				model.addAttribute("textGood", Constants.TRANS_CORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_APP));
+				model.addAttribute("textBad", Constants.TRANS_INCORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_APP));
+				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_ENDED_BY_APP.getId());
 			}
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByProvider(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
+				model.addAttribute("textGood", Constants.TRANS_CORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_PROVEEDOR));
+				model.addAttribute("textBad", Constants.TRANS_INCORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_PROVEEDOR));
+				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getId());
 			}
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByDatesSizeApp(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByDatesSize", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
+				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getId());
 			}
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByOperation(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByOperation", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
+				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getId());
 			}
 			// Consulta de firmas
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_APP.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByApplication(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
+				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_APP.getId());
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByProvider(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
+				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getId());
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByFormat(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
+				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getId());
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByImprovedFormat(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
+				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getId());
 			}
-			model.addAttribute("tableStatisticsTitle", query + " para el Mes " + monthDate);
+			model.addAttribute("tableStatisticsTitle", query + " para el mes " + monthDate);
 			
 			/*Map<String, Integer> data = new LinkedHashMap<String, Integer>();
 	        data.put("Prueba", 3);
@@ -158,4 +197,206 @@ public class StatisticsController {
 		}
         return "fragments/querystatisticstable.html";
     }
+	
+	
+	/**
+	 * Method that maps the queries for service status between a time range.
+	 * @param model Holder object for model attributes.
+	 * @param query query
+	 * @param month month
+	 * @return String that represents the name of the view to forward.
+	 */
+	@RequestMapping(value = "exportPDF", method = RequestMethod.POST)
+    public @ResponseBody byte[] exportPDF(final Model model, final @RequestParam("query") String query, final @RequestParam("monthDate") String monthDate, HttpServletResponse response) throws IOException {
+		
+		List<TransactionDTO> transactions = null;	
+		List<SignatureDTO> signatures = null;
+		
+		byte[] data = null;
+				
+		if (!StringUtils.isEmpty(query) && !StringUtils.isEmpty(monthDate)) {
+			final Integer month = Integer.valueOf(monthDate.substring(0, NumberConstants.NUM2));
+			final Integer year = Integer.valueOf(monthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
+			// Consultas de transacciones
+			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_APP.getName())) {
+				
+				transactions = StreamSupport.stream(this.transactionService.getTransactionsByApplication(month, year).spliterator(), false).collect(Collectors.toList());
+				JFreeChart correctas = statService.getChartTransactions(transactions, Constants.CORRECTAS);
+				JFreeChart incorrectas = statService.getChartTransactions(transactions, Constants.INCORRECTAS);
+				
+				correctas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_APP_CORRECT)));
+				incorrectas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_APP_INCORRECT)));
+								
+				List<JFreeChart> chartList = new ArrayList<JFreeChart>();
+				chartList.add(correctas);
+				chartList.add(incorrectas);
+							
+				try {
+					data = statService.writeTransStatAsPDF(250, 195, chartList, transactions, NumberConstants.NUM1, Language.getResWebFire(IWebViewMessages.STAT_TITLE_TRANS_ENDED_BY_APP) + monthDate);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getName())) {
+				
+				transactions = StreamSupport.stream(this.transactionService.getTransactionsByProvider(month, year).spliterator(), false).collect(Collectors.toList());
+				JFreeChart correctas = statService.getChartTransactions(transactions, Constants.CORRECTAS);
+				JFreeChart incorrectas = statService.getChartTransactions(transactions, Constants.INCORRECTAS);
+				
+				correctas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_PROV_CORRECT)));
+				incorrectas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_PROV_INCORRECT)));
+								
+				List<JFreeChart> chartList = new ArrayList<JFreeChart>();
+				chartList.add(correctas);
+				chartList.add(incorrectas);
+							
+				try {
+					data = statService.writeTransStatAsPDF(250, 195, chartList, transactions, NumberConstants.NUM1, Language.getResWebFire(IWebViewMessages.STAT_TITLE_TRANS_ENDED_BY_PROV) + monthDate);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			} else if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getName())) {
+				transactions = StreamSupport.stream(this.transactionService.getTransactionsByDatesSizeApp(month, year).spliterator(), false).collect(Collectors.toList());
+				JFreeChart size = statService.getChartTransactions(transactions, Constants.SIZE);
+				
+				size.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_SIZE)));
+				
+				List<JFreeChart> chartList = new ArrayList<JFreeChart>();
+				chartList.add(size);
+								
+				try {
+					data = statService.writeTransStatAsPDF(375, 293, chartList, transactions, NumberConstants.NUM3, Language.getResWebFire(IWebViewMessages.STAT_TITLE_TRANS_ENDED_BY_SIZE) + monthDate);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			} else if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getName())) {
+				
+				transactions = StreamSupport.stream(this.transactionService.getTransactionsByOperation(month, year).spliterator(), false).collect(Collectors.toList());
+				
+				JFreeChart correctsimple = statService.getChartTransactions(transactions, Constants.CORRECTAS_SIMPLE);
+				JFreeChart incorrectsimple = statService.getChartTransactions(transactions, Constants.INCORRECTAS_SIMPLE);
+				JFreeChart correctlote = statService.getChartTransactions(transactions, Constants.CORRECTAS_LOTE);
+				JFreeChart incorrectlote = statService.getChartTransactions(transactions, Constants.INCORRECTAS_LOTE);
+								
+				correctsimple.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_TYPE_CORRECT_SIMPLE)));
+				incorrectsimple.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_TYPE_INCORRECT_SIMPLE)));
+				correctlote.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_TYPE_CORRECT_BATCH)));
+				incorrectlote.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_TRANS_ENDED_BY_TYPE_INCORRECT_BATCH)));
+				
+				List<JFreeChart> chartList = new ArrayList<JFreeChart>();
+				
+				chartList.add(correctsimple);
+				chartList.add(incorrectsimple);
+				chartList.add(correctlote);
+				chartList.add(incorrectlote);
+				
+				List<String> titles = new ArrayList<String>();
+				titles.add(Language.getResWebFire(IWebViewMessages.STAT_TITLE_TRANS_ENDED_BY_TYPE_SIMPLE) + monthDate);
+				titles.add(Language.getResWebFire(IWebViewMessages.STAT_TITLE_TRANS_ENDED_BY_TYPE_BATCH) + monthDate);
+				
+				try {
+					data = statService.writeTransStatCompositeAsPDF(250, 195, chartList, transactions, NumberConstants.NUM2, titles);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} 
+			// Consulta de firmas
+			else if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_APP.getName())) {
+				signatures = StreamSupport.stream(this.signatureService.getSignaturesByApplication(month, year).spliterator(), false).collect(Collectors.toList());
+				
+				JFreeChart correctas = statService.getChartSignatures(signatures, Constants.CORRECTAS);
+				JFreeChart incorrectas = statService.getChartSignatures(signatures, Constants.INCORRECTAS);
+				
+				correctas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_SIG_ENDED_BY_APP_CORRECT)));
+				incorrectas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_SIG_ENDED_BY_APP_INCORRECT)));
+				
+				List<JFreeChart> chartList = new ArrayList<JFreeChart>();
+				chartList.add(correctas);
+				chartList.add(incorrectas);
+				
+				try {
+					data = statService.writeSigStatAsPDF(250, 195, chartList, signatures, Language.getResWebFire(IWebViewMessages.STAT_TITLE_SIG_ENDED_BY_APP) + monthDate);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			} else if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getName())) {
+				signatures = StreamSupport.stream(this.signatureService.getSignaturesByProvider(month, year).spliterator(), false).collect(Collectors.toList());
+				
+				JFreeChart correctas = statService.getChartSignatures(signatures, Constants.CORRECTAS);
+				JFreeChart incorrectas = statService.getChartSignatures(signatures, Constants.INCORRECTAS);
+				
+				correctas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_SIG_ENDED_BY_PROV_CORRECT)));
+				incorrectas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_SIG_ENDED_BY_PROV_INCORRECT)));
+				
+				List<JFreeChart> chartList = new ArrayList<JFreeChart>();
+				chartList.add(correctas);
+				chartList.add(incorrectas);
+				
+				try {
+					data = statService.writeSigStatAsPDF(250, 195, chartList, signatures, Language.getResWebFire(IWebViewMessages.STAT_TITLE_SIG_ENDED_BY_PROV) + monthDate);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			} else if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getName())) {
+				signatures = StreamSupport.stream(this.signatureService.getSignaturesByFormat(month, year).spliterator(), false).collect(Collectors.toList());
+				
+				JFreeChart correctas = statService.getChartSignatures(signatures, Constants.CORRECTAS);
+				JFreeChart incorrectas = statService.getChartSignatures(signatures, Constants.INCORRECTAS);
+				
+				correctas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_SIG_ENDED_BY_FORMAT_CORRECT)));
+				incorrectas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_SIG_ENDED_BY_FORMAT_INCORRECT)));
+				
+				List<JFreeChart> chartList = new ArrayList<JFreeChart>();
+				chartList.add(correctas);
+				chartList.add(incorrectas);
+				
+				try {
+					data = statService.writeSigStatAsPDF(250, 195, chartList, signatures, Language.getResWebFire(IWebViewMessages.STAT_TITLE_SIG_ENDED_BY_FORMAT) + monthDate);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			} else if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getName())) {
+				signatures = StreamSupport.stream(this.signatureService.getSignaturesByImprovedFormat(month, year).spliterator(), false).collect(Collectors.toList());
+				
+				JFreeChart correctas = statService.getChartSignatures(signatures, Constants.CORRECTAS);
+				JFreeChart incorrectas = statService.getChartSignatures(signatures, Constants.INCORRECTAS);
+				
+				correctas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_SIG_ENDED_BY_FORMAT_LONG_CORRECT)));
+				incorrectas.addSubtitle(new TextTitle(Language.getResWebFire(IWebViewMessages.STAT_SUBTITLE_SIG_ENDED_BY_FORMAT_LONG_INCORRECT)));
+				
+				List<JFreeChart> chartList = new ArrayList<JFreeChart>();
+				chartList.add(correctas);
+				chartList.add(incorrectas);
+				
+				try {
+					data = statService.writeSigStatAsPDF(250, 195, chartList, signatures, Language.getResWebFire(IWebViewMessages.STAT_TITLE_SIG_ENDED_BY_FORMAT_LONG) + monthDate);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		}
+		
+		response.setContentType("application/pdf"); 
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=firereport.pdf");     
+        
+        data.toString();
+		
+		return data;
+		
+	}
+	
+	
 }

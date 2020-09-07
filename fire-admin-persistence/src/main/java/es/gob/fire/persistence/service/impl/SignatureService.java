@@ -195,7 +195,7 @@ public class SignatureService implements ISignatureService {
 						+ " sum(case when f.correcta = '1' then total else 0 end) as corrects, "
 						+ " sum(case when f.correcta = '0' then total else 0 end) as incorrects "
 						+ " from tb_firmas f"
-						+ " where extract(month from f.fecha) = ? and extract(year from f.fecha) = ? "
+						+ " where extract(month from f.fecha) = ? and extract(year from f.fecha) = ? and f.formato_mejorado is not null"
 						+ " group by f.formato_mejorado ");
 
 		nativeQuery.setParameter(1, month);

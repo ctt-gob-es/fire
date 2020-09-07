@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>08/10/2018.</p>
  * @author Gobierno de España.
- * @version 1.3, 14/03/2019.
+ * @version 1.0, 10/07/2020.
  */
 package es.gob.fire.i18n;
 
@@ -28,7 +28,7 @@ package es.gob.fire.i18n;
 /**
  * <p>Interface that contains the keys to the log messages for the web module.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.3, 14/03/2019.
+ * @version 1.0, 10/07/2020.
  */
 public interface IWebLogMessages {
 

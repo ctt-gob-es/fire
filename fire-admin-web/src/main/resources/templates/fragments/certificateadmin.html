@@ -16,8 +16,18 @@
 							<th th:text="#{table.valid.service.issuer}"></th>
 							<th th:text="#{table.valid.service.subject}"></th>
 							<th th:text="#{table.valid.service.fecha_alta}"></th>
+							</tr>
+							</thead>
+							<body>
+							<tr th:each="certificado : ${listaCertificados}">
+								<td th:text="${certificado.idCertificate}"></td>
+								<td th:text="${certificado.alias}"></td>
+								<td th:text="${certificado.certPrincipal}"></td>
+								<td th:text="${certificado.certBackup}"></td>
+								<td th:text="${certificado.fechaAlta}"></td>
+							</body>
 						</tr>
-					</thead>
+					
 				</table>
 			</div>
 		</div>
@@ -26,303 +36,41 @@
 <div id="modalEditUser"></div>
 
 <script th:inline="javascript">
-$(document).ready(function() {
-	var actionSave = /*[[@{/savevalidservicekeystore}]]*/;
-	var actionUpdate = /*[[@{/updatevalidservicekeystore}]]*/;
-	//var actionDownload = /*[[@{/downloadCertificate}]]*/;
-	var getcertificate = /*[[@{/certificatedatatable}]]*/;
-	var actionDelete = /*[[@{/deletevalidservicekeystore}]]*/;
-	var actionLoad = /*[[@{/loadvalidservicekeystore}]]*/;
-	var editTemplate = /*[[@{/editcert}]]*/;
-	var addTemplate = /*[[@{/addvalidservicekeystore}]]*/;
-	
-	var tbl = $('#certServiceTable').DataTable({
-		dom: 'Bfrtip',
-	    select: 'single',
-	    responsive: true,
-	    
-	    altEditor: true,
-	    buttons: [{text: 'Agregar', name: 'add'},
-	    	{extend: 'selected',text: 'Editar',name: 'edit'},
-	    	{extend: 'selected',text: 'Eliminar',name: 'delete'},
-	    	],
-	
-	    "iTotalRecords": "totalElements",
-        "iTotalDisplayRecords": "numberOfElements",
-	    
-		"processing": true,
-	    "serverSide": true,
-		"ajax": {
-	        "url": getcertificate,
-	        "dataSrc" : "data",
-	        "data": function (data) {
-	        	// Datos a pasar al modal
-	            data.formId = "validServForm";
-	            data.editTemplate = editTemplate;
-	            data.addTemplate = addTemplate;
-	        	}
-	        },
-	    "language": {
-	        "url": "js/datatables/i18n/spanish.json",
-	        select: {
-	            rows: {
-	                _: "%d filas seleccionadas",
-	                1: "1 fila seleccionada"
-	            }
-	          }
-	        },
-		"columns": [
-	        { "data": "idCertificado",
-	          "visible": false},
-	        { "data": "certificateName" },
-	        { "data": "certPrincipal" },
-	        { "data": "certBackup" },
-	        { "data": "fechaAlta" }
-	        
-	        ]
-		}).on('crudaction', function(e, accion, idCertificado, data, rowindex){
-		   
-		    
-		    $('#altEditor-modal .modal-body .alert').remove();
-		    // Se muestra la capa 'cargando...'
-		    loading();
-		    
-		    switch(accion){
-		    
-		 		// Se abre el modal para cargar el almacén de certificados desde el sistema de archivos local del cliente.
-		        case 'add':
-		        	
-		        	// Error de validación al introducir el fichero de almacén.
-		        	if ($('#validServForm')[0].checkValidity() === false) {
-		        		hide();
-		        		// Se oculta la capa 'cargando...'
-		                event.stopPropagation();
-		                
-		                $('#validServForm *').filter(':input').each(function(){
-		            	    		            	    
-		            	    if(!$(this).checkValidity())
-		            	    {
-		            	  	 $("#invalid-" + $(this).attr('id')).html();
-		            	  	 $("#" + $(this).attr('id')).addClass("is-invalid");
-		            	    } else {
-		            	  	 $("#" + $(this).attr('id')).removeClass("is-invalid");
-		            	    }
-		            	    
-		            	});
-		                
-		                // Esto es necesario para forzar que se muestren mensajes de validación de cliente
-		                $('<input type="submit">').hide().appendTo($('#validServForm')).click().remove();
-		            // No se ha producido error, voy al diálogo de selección de certificados.   
-		            } else {
-		            	var formData = new FormData(document.forms["validServForm"]);
-		            	
-		            	$.ajax(actionLoad, {
-		            		data : formData,
-			            	contentType: false,
-			                processData : false,
-			                type:'POST',
-			                success: function(data){
-			                  
-			            		// Se oculta la capa 'cargando...'
-			            		hide();
-			                    			                    
-			            		$('#altEditor-modal .modal-body .alert').remove();
-								
-			            		// Ha ocurrido un error con la contraseña introducida
-								if (data.error != null && data.error != '' && data.error != 'undefined') {
-									
-									$('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + data.error + '</strong></div>');
-									
-									if (data.error.toLowerCase().indexOf("contraseña") >= 0) {
-										$('#validservicekeystorepass').addClass('is-invalid');
-									}
 
-								// No hay error, se muestra la selección de certificados.	
-								} else {
-									$(".modal-body").html('');
-									
-									var pick = $(".modal-body").pickList({data: data.lista});
-									
-									// Se repiten los pickList dentro de modal-body y borramos
-									if (pick.length > 1) {
-										pick.splice(1, pick.length - 1);
-									}
-									
-									$("#addRowBtn").on("click", function (event) {
-										if (pick.getValues() == "") {
-											event.stopPropagation();
-											event.preventDefault();
-											$('#altEditor-modal .modal-body .alert').remove();
-								            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + [[#{auth.admin.error.oneMinimum}]] + '</strong></div>');
-										} else {
-											// Se envían los alias de los certificados a añadir al
-											// almacén para autenticación servicio validación
-											$.ajax(actionSave, {
-												contentType:'application/json',
-												data : JSON.stringify(pick.getValues()),
-												type:'POST',
-												success: function(data){
-													// Se oculta la capa 'cargando...'
-													hide();
-													tbl.row.add($(data.data)).draw(false);
-																				
-													$('#altEditor-modal .modal-body .alert').remove();
-													$('#altEditor-modal').modal('hide');
-																				
-												},
-												error:function(xhr,status,error) {
-								                	hide();
-								                	var responseText = jQuery.parseJSON(xhr.responseText);
-								                	var messageException = responseText.message;
-								                	var messageError = "";
-								                	
-								                	if (messageException.includes("CertificateStored")) {
-								                		messageError = [[#{auth.admin.error.certUnique}]];
-								                	} else if (messageException.includes("CertificateNotValid")) {
-								                		messageError = [[#{auth.admin.error.notValid}]];
-								                	} else if (messageException.includes("ValidServiceNotConfigured")) {
-								                		messageError = [[#{auth.admin.error.notConfigServiceVal}]];
-								                	} else {
-								                		messageError = [[#{auth.admin.error.globalError}]];
-								                	}
-								                	
-								                	$('#altEditor-modal .modal-body .alert').remove();
-										            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + messageError + '</strong></div>');
-								                }
-											});
-										}
-									});
-								}
-			                    		                    
-			                },
-			                error:function(data){
-			                	
-			                	// Se oculta la capa 'cargando...'
-			                	hide();
-			                	// Se eliminan los posibles errores anteriores...
-			                	clearValidationResult('validServForm');
-			                	// Se obtiene el JSON de los campos con errores de validación
-			                	// y se modifican los estilos/añaden mensajes
-			                	var validation = $(data)["0"].responseJSON;
-			                	drawValidationResult(validation.fieldErrors);
-			              
-			                }
-			            });
-		            }
-		        	
-		        	$('#validServForm').addClass('was-validated');
-		            break;
-		        case 'edit':
-		        	if ($('#certForm')[0].checkValidity() === false) {
-		        		// Se oculta la capa 'cargando...'
-		        		hide();
-		                event.stopPropagation();
-		                
-		                $('#certForm *').filter(':input').each(function(){
-		            	    		            	    
-		            	    if(!$(this).checkValidity())
-		            	    {
-		            	  	 $("#invalid-" + $(this).attr('id')).html();
-		            	  	 $("#" + $(this).attr('id')).addClass("is-invalid");
-		            	    } else {
-		            	  	 $("#" + $(this).attr('id')).removeClass("is-invalid");
-		            	    }
-		            	    
-		            	});
-		                
-		                // Esto es necesario para forzar que se muestren mensajes de validación de cliente
-		                $('<input type="submit">').hide().appendTo($('#certForm')).click().remove();
-		            } else {
-		            	$.ajax(actionUpdate, {
-			            	dataType : 'json',
-			            	contentType:'application/json',
-			                data : JSON.stringify(data),
-			                type:'POST',
-			                success: function(data){
-			                  
-			            		// Se oculta la capa 'cargando...'
-			            		hide();
-			                    tbl.row.add($(data.data)).draw(false);
-			                    		                    
-			                    $('#altEditor-modal .modal-body .alert').remove();
-			                    $('#altEditor-modal').modal('hide');
-			                    		                    
-			                },
-			                error:function(data) {
-			                	// Se oculta la capa 'cargando...'
-			                	hide();
-			                	// Se eliminan los posibles errores anteriores...
-			                	clearValidationResult('certForm');
-			                	// Se obtiene el JSON de los campos con errores de validación
-			                	// y se modifican los estilos/añaden mensajes
-			                	var validation = $(data)["0"].responseJSON;
-			                	drawValidationResult(validation.fieldErrors);
-			              
-			                }
-			            });
-		            }
-		        	$('#validServForm').addClass('was-validated');
-	            	break;
-		        case 'delete':
-		            $.ajax(actionDelete,{
-		            	data:$.param({'id':idSystemCertificate, 'index':rowindex}),
-		                type:'POST',
-		                success: function(data){
-		                    
-		                	// Se oculta la capa 'cargando...'
-		                	hide();
-		                    tbl.row(data.index).remove().draw();
-		                    
-		                    $('#altEditor-modal .modal-body .alert').remove();
-		                    $('#altEditor-modal').modal('hide');
-		                },
-		                error:function(data){
-		                	// Se oculta la capa 'cargando...'
-		                	hide();
-		                	$('#altEditor-modal .modal-body .alert').remove();
-		                	$('#altEditor-modal #deleteRowBtn').remove();
-				            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + data.responseJSON.message + '</strong></div>');
-		                }
-		            });
-		            break;
-		        default:
-		            $('#altEditor-modal .modal-body .alert').remove();
-		            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + [[#{alarm.admin.error.NotAuthorized}]] + '</strong></div>');
-		            break;
-		    }
-		});
-});	
+var tableVipInterval = $('#certServiceTable').DataTable({
+	"pagingType" : "full_numbers",
+	"initComplete" : function(settings, json) {
+		//eliminamos el scroll inferior
+		$('#certServiceTable_wrapper .dataTables_scrollBody').css("overflow-x", "hidden");
+		
+	},
 
-function str2bytes (str) {
-    var bytes = new Uint8Array(str.length);
-    for (var i=0; i<str.length; i++) {
-       bytes[i] = str.charCodeAt(i);
-     }
-     return bytes;
- } 
-function downloadFile(idSystemCertificate , fileName) {
- loading();
- 
- var downloadFile =/*[[@{/downloadFile}]]*/;
- 
- $.ajax({
-       type: "POST",
-       data:$.param({'idSystemCertificate':idSystemCertificate}),
-       url: downloadFile,
-       success: function(data) {
-             hide();
-             var blob = new Blob([str2bytes(data)], {type: "application/x-x509-ca-cert"});
-                               
-             var link=document.createElement('a');
-             link.href=window.URL.createObjectURL(blob);
-             link.download=fileName;
-             link.target="_blank";
-             link.click();
+	"language": {
+        "url": "js/datatables/i18n/spanish.json",
+        select: {
+            rows: {
+                _: "%d filas seleccionadas",
+                1: "1 fila seleccionada"
+            }
+          }
+        },
+	"columnDefs" : [ 
+		{
+			"targets" : [ 0 ],
+			"visible" : false,
+			"searchable" : false
+		}
+		
+	],
+	"order" : [ 1, 'desc' ],
+	responsive : {
+		details : {
+			type : 'column',
+			target : -1
+		}
+	}
 
-}
-})
- 
-} 
+}); 
 
 
 </script>
