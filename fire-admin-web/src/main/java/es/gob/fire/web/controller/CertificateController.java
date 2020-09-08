@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.gob.fire.commons.utils.Base64;
+import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.dto.CertificateEditDTO;
@@ -56,8 +57,15 @@ import es.gob.fire.persistence.service.ICertificateService;
 import es.gob.fire.persistence.service.impl.CertificateService;
 
 /**
- * <p>Class that manages the requests related to the Keystore administration.</p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
+ * <p>
+ * Class that manages the requests related to the Keystore administration.
+ * </p>
+ * <b>Project:</b>
+ * <p>
+ * Platform for detection and validation of certificates recognized in European
+ * TSL.
+ * </p>
+ * 
  * @version 1.3, 06/11/2018.
  */
 @Controller
@@ -66,18 +74,17 @@ public class CertificateController {
 	/**
 	 * Constant that represents the parameter 'idKeystore'.
 	 */
-	//private static final String FIELD_ID_KEYSTORE = "idKeystore";
+	// private static final String FIELD_ID_KEYSTORE = "idKeystore";
 
 	/**
 	 * Constant that represents the parameter 'idCertificate'.
 	 */
 	private static final String FIELD_ID_CERTIFICATE = "idCertificate";
-	
+
 	/**
 	 * Constant that represents the parameter log.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(CertificateController.class);
-	
 
 	/**
 	 * Attribute that represents the service object for accessing the
@@ -89,36 +96,41 @@ public class CertificateController {
 	/**
 	 * Method that load the list of certificates .
 	 *
-	 * @param idCertificate Parameter that represents ID .
-	 * @param model Holder object form model attributes.
+	 * @param idCertificate
+	 *            Parameter that represents ID .
+	 * @param model
+	 *            Holder object form model attributes.
 	 * @return String that represents the name of the view to forward.
 	 */
-//	@RequestMapping(value = "certificateadmin")
-//	public String index(final Model model, final HttpServletRequest request) {
-//		model.addAttribute("certificateformEdit", new CertificateEditDTO());
-//		return "fragments/certificateadmin.html";
-//	}
-	
+	// @RequestMapping(value = "certificateadmin")
+	// public String index(final Model model, final HttpServletRequest request)
+	// {
+	// model.addAttribute("certificateformEdit", new CertificateEditDTO());
+	// return "fragments/certificateadmin.html";
+	// }
+
 	@RequestMapping(value = "certificateadmin")
 	public String index(final Model model, final String nombre_cert) {
-		
-		
+
 		List<Certificate> certificates = certificateService.getAllCertificate();
 		List<CertificateDTO> listaCertificados = new ArrayList<CertificateDTO>();
-		
-		//recorrer lista certificados
+
+		// recorrer lista certificados
 		CertificateDTO certificateDTO = null;
 		Certificate cert = null;
-		
-	    X509Certificate x509CertPrincipal = null;		    
+
+		X509Certificate x509CertPrincipal = null;
 		X509Certificate x509CertBackup = null;
 
-		
-		
 		for (int i = 0; i < certificates.size(); i++) {
 			cert = certificates.get(i);
 			try {
-				x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert.getCertPrincipal())));
+				
+				if (cert.getCertPrincipal() != null) {
+				
+					x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert.getCertPrincipal())));
+				} 
+				
 			} catch (CertificateException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -127,7 +139,12 @@ public class CertificateController {
 				e.printStackTrace();
 			}
 			try {
-				x509CertBackup = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert.getCertBackup())));
+				
+				if (cert.getCertBackup() != null) {
+					x509CertBackup = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(cert.getCertBackup())));
+				}
+				
+				
 			} catch (CertificateException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -136,55 +153,59 @@ public class CertificateController {
 				e.printStackTrace();
 			}
 
-				  
-			//resto de valores 	
+			// resto de valores
 			certificateDTO = new CertificateDTO();
 			certificateDTO.setIdCertificate(cert.getIdCertificado());
 			certificateDTO.setAlias(cert.getCertificateName());
 			certificateDTO.setCertPrincipal(cert.getCertPrincipal());
 			certificateDTO.setCertBackup(cert.getCertBackup());
 			certificateDTO.setfechaAlta(cert.getfechaAlta());
-			//subject		
-			
+			// subject
 
 			java.util.Date expDatePrincipal = new java.util.Date();
-			expDatePrincipal = x509CertPrincipal.getNotAfter();
-			certificateDTO.setCertPrincipal(x509CertPrincipal.getSubjectX500Principal().getName() + "<br>Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
-			certificateDTO.setCertBackup(x509CertBackup.getSubjectX500Principal().getName()+ "<br>Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
+			
+			if (x509CertPrincipal != null) {
+				expDatePrincipal = x509CertPrincipal.getNotAfter();
+				certificateDTO.setCertPrincipal(x509CertPrincipal.getSubjectX500Principal().getName() + " Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
+			} else {
+				certificateDTO.setCertPrincipal("");
+			}
+			
+			if (x509CertBackup != null) {
+				
+				expDatePrincipal = x509CertBackup.getNotAfter();
+				certificateDTO.setCertBackup(x509CertBackup.getSubjectX500Principal().getName() + " Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));				
+			} else {
+				certificateDTO.setCertBackup("");
+			}
 			
 			listaCertificados.add(certificateDTO);
-			
-		    LOGGER.info(certificateDTO.getCertPrincipal());
-		    
-		    LOGGER.info(certificateDTO.getCertBackup());
 
-			
-			}
-		model.addAttribute("listaCertificados", listaCertificados );
+			LOGGER.info(certificateDTO.getCertPrincipal());
+
+			LOGGER.info(certificateDTO.getCertBackup());
+
+		}
+		model.addAttribute("listaCertificados", listaCertificados);
 		return "fragments/certificateadmin.html";
 	}
-	
 
 	/**
 	 * Method that maps the add TSL web request to the controller and sets the
-	 * backing form.                   
-	 * @param model Holder object for model attributes.
+	 * backing form.
+	 * 
+	 * @param model
+	 *            Holder object for model attributes.
 	 * @return String that represents the name of the view to forward.
-	 * @throws IOException If the method fails.
+	 * @throws IOException
+	 *             If the method fails.
 	 */
 
-//	@RequestMapping(value = "/addcertificate")
-//	public String addCertificate(Model model) throws IOException {
-//		CertificateForm CertificateForm = new CertificateForm();
-//		model.addAttribute("addcertificateform", CertificateForm);
-//		return "modal/keystore/CertificateForm.html";
-//	}
-
-	
-		
-		
-	
-
-
+	// @RequestMapping(value = "/addcertificate")
+	// public String addCertificate(Model model) throws IOException {
+	// CertificateForm CertificateForm = new CertificateForm();
+	// model.addAttribute("addcertificateform", CertificateForm);
+	// return "modal/keystore/CertificateForm.html";
+	// }
 
 }

@@ -38,6 +38,7 @@
 <script th:inline="javascript">
 
 var tableVipInterval = $('#certServiceTable').DataTable({
+	"autoWidth" : false,
 	"pagingType" : "full_numbers",
 	"initComplete" : function(settings, json) {
 		//eliminamos el scroll inferior
@@ -53,22 +54,47 @@ var tableVipInterval = $('#certServiceTable').DataTable({
                 1: "1 fila seleccionada"
             }
           }
-        },
+        },        
 	"columnDefs" : [ 
 		{
 			"targets" : [ 0 ],
 			"visible" : false,
-			"searchable" : false
+			"searchable" : false,
+			"width": "0%"
+		},
+		{
+			"targets" : [ 1 ],
+			"visible" : true,
+			"searchable" : false,
+			"width": "15%"
+		},
+		{
+			"targets" : [ 2 ],
+			"visible" : true,
+			"searchable" : false,
+			"width": "30%"
+		},
+		{
+			"targets" : [ 3 ],
+			"visible" : true,
+			"searchable" : false,
+			"width": "30%"
+		},
+		{
+			"targets" : [ 4 ],
+			"visible" : true,
+			"searchable" : false,
+			"width": "15%"
 		}
 		
 	],
 	"order" : [ 1, 'desc' ],
-	responsive : {
-		details : {
+	responsive :  true/* {
+		 details : {
 			type : 'column',
 			target : -1
-		}
-	}
+		} 
+	}  */
 
 }); 
 
