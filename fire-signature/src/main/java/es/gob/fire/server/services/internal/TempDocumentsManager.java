@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.services.internal.sessions.FileSystemTempDocumentsDAO;
 import es.gob.fire.server.services.internal.sessions.TempDocumentsDAO;
 import es.gob.fire.signature.ConfigManager;
@@ -27,7 +28,8 @@ public class TempDocumentsManager {
 			try {
 				associatedDao = (TempDocumentsDAO) Class.forName(documentsDaoClassname.trim()).getConstructor().newInstance();
 			} catch (final Exception e) {
-				LOGGER.severe("Error al cargar del gestor para la comparticion de sesiones entre nodos: " + e); //$NON-NLS-1$
+				LOGGER.severe("Error al cargar del gestor para la comparticion de temporales entre nodos: " + e); //$NON-NLS-1$
+				AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, documentsDaoClassname);
 				associatedDao = null;
 			}
 		}

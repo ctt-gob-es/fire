@@ -26,8 +26,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.document.FIReDocumentManager;
@@ -43,6 +45,7 @@ import es.gob.fire.server.services.crypto.CryptoHelper;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.GracePeriodInfo;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;
@@ -231,9 +234,20 @@ public class RecoverSignManager {
     					"Parametro no valido: " + e.getMessage()); //$NON-NLS-1$
     			return;
 			}
+    		catch(final FIReConnectorFactoryException e) {
+    			LOGGER.log(Level.WARNING, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+    			sendError(response, session, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    			return;
+    		}
     		catch(final FIReConnectorUnknownUserException e) {
-    			LOGGER.log(Level.WARNING,logF.f("El usuario no esta dado de alta en el sistema"), e); //$NON-NLS-1$
+    			LOGGER.log(Level.WARNING, logF.f("El usuario no esta dado de alta en el sistema"), e); //$NON-NLS-1$
     			sendError(response, session, HttpCustomErrors.NO_USER.getErrorCode());
+    			return;
+    		}
+    		catch(final FIReConnectorNetworkException e) {
+    			LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+                sendError(response, session, HttpCustomErrors.SIGN_ERROR.getErrorCode());
     			return;
     		}
     		catch(final FIReSignatureException e) {
@@ -278,6 +292,12 @@ public class RecoverSignManager {
     			sendError(response, session, HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode());
     			return;
     		}
+    		catch (final ConnectionException e) {
+    			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas")); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.CONNECTION_VALIDATION_PLATFORM);
+    			sendError(response, session, HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
+    			return;
+    		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error al validar o actualizar la firma"), e); //$NON-NLS-1$
     			sendError(response, session, HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
@@ -303,7 +323,8 @@ public class RecoverSignManager {
     				}
     				catch (final Exception e) {
     					LOGGER.log(Level.WARNING, logF.f("Error al registrar la operacion asincrona en el DocumentManager"), e); //$NON-NLS-1$
-    					sendError(response, session, HttpCustomErrors.SAVING_ERROR.getErrorCode());
+    					AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
+    		    		sendError(response, session, HttpCustomErrors.SAVING_ERROR.getErrorCode());
     					return;
 					}
     			}
@@ -329,7 +350,8 @@ public class RecoverSignManager {
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error en el guardado de la firma del documento " + docId), e); //$NON-NLS-1$
-        	sendError(response, session, HttpCustomErrors.SAVING_ERROR.getErrorCode());
+        	AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
+    		sendError(response, session, HttpCustomErrors.SAVING_ERROR.getErrorCode());
 			return;
 		}
 
@@ -366,6 +388,8 @@ public class RecoverSignManager {
 	 * la firma no tiene que ser validada en ning&uacute;n caso.
 	 * @return La propia firma o la versi&oacute;n actualizada de la misma si aplica.
 	 * @throws InvalidSignatureException Cuando se detecta que la firma no es v&aacute;lida.
+	 * @throws ConnectionException Cuando no se puede conectar con la plataforma de validaci&oacute;n
+	 * y actualizaci&oacute;n de firmas.
 	 * @throws UpgradeException Cuando ocurre un error durante la actualizaci&oacute;n de firmas.
 	 * @throws VerifyException  Cuando ocurre un error durante la validaci&oacute;n de firmas.
 	 * @throws ValidatorException Cuando no ha sido posible cargar el conector para la
@@ -374,7 +398,7 @@ public class RecoverSignManager {
 	private static PostProcessResult postProcessSignature(final byte[] signature, final String upgradeLevel,
 			final Properties upgraderConfig, final boolean needValidation,
 			final LogTransactionFormatter logF)
-					throws InvalidSignatureException, UpgradeException,
+					throws InvalidSignatureException, ConnectionException, UpgradeException,
 					VerifyException, ValidatorException {
 
 		PostProcessResult result;
@@ -474,13 +498,16 @@ public class RecoverSignManager {
 	 * @return informaci&oacute;n de firma trif&aacute;sica con el PKCS#1.
 	 * @throws IllegalArgumentException Cuando falta un par&aacute;metro o se ha proporcionado uno no v&aacute;lido.
 	 * @throws FIReConnectorUnknownUserException Cuando el usuario no est&aacute; registrado.
+	 * @throws FIReConnectorNetworkException Cuando no se puede conectar con el proveedor de firma en la nube.
 	 * @throws FIReSignatureException Cuando falla la petici&oacute;n de firma al proveedor.
+	 * @throws FIReConnectorFactoryException Cuando falla la carga del conector del proveedor de firma en la nube.
 	 * @throws FireInternalException Cuando se produce cualquier otro error.
 	 */
 	private static TriphaseData triphaseSign(final String providerName, final String remoteTrId,
 			final TransactionConfig trConfig, final TriphaseData td, final Certificate signingCert)
 					throws IllegalArgumentException, FIReConnectorUnknownUserException,
-					FIReSignatureException, FireInternalException {
+					FIReConnectorNetworkException, FIReSignatureException, FIReConnectorFactoryException,
+					FireInternalException {
 
 		if (trConfig == null) {
 			throw new IllegalArgumentException(
@@ -488,13 +515,7 @@ public class RecoverSignManager {
 		}
 
 		// Obtenemos el conector con el backend ya configurado
-		final FIReConnector connector;
-		try {
-			connector = ProviderManager.getProviderConnector(providerName, trConfig.getProperties());
-		}
-		catch (final FIReConnectorFactoryException e) {
-			throw new FireInternalException("Error al configurar el conector del proveedor de firma", e); //$NON-NLS-1$
-		}
+		final FIReConnector connector = ProviderManager.getProviderConnector(providerName, trConfig.getProperties());
 
 		final Map<String, byte[]> ret;
 		ret = connector.sign(remoteTrId);

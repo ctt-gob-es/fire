@@ -4,6 +4,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.SignatureValidator;
@@ -26,13 +27,14 @@ public class SignatureValidatorBuilder {
 	public synchronized static SignatureValidator getSignatureValidator() throws ValidatorException {
 
 		if (validator == null) {
+			final String validatorClassName = ConfigManager.getValidatorClass();
 			try {
-				final String validatorClassName = ConfigManager.getValidatorClass();
 				final Class<?> validatorClass = Class.forName(validatorClassName);
 				validator = (SignatureValidator) validatorClass.getConstructor().newInstance();
 			}
 			catch (final Exception e) {
 				validator = null;
+				AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, validatorClassName);
 				throw new ValidatorException("No se pudo crear el conector con la plataforma de " //$NON-NLS-1$
 						+ "validacion y actualizacion de firmas", e); //$NON-NLS-1$
 			}
@@ -46,8 +48,9 @@ public class SignatureValidatorBuilder {
 						+ " con la configuracion de la plataforma de validacion y actualizacion de firmas. " //$NON-NLS-1$
 						+ "Debe agregar al directorio de ficheros de configuracion el fichero " //$NON-NLS-1$
 						+ DEFAULT_PLATFORM_FILENAME, e);
+				AlarmsManager.notify(Alarm.RESOURCE_CONFIG, DEFAULT_PLATFORM_FILENAME);
 				validator = null;
-				throw new  ValidatorException("No se pudo cargar el fichero ed configuracion para " //$NON-NLS-1$
+				throw new  ValidatorException("No se pudo cargar el fichero de configuracion para " //$NON-NLS-1$
 						+ "la plataforma de validacion y actualizacion de firmas", e); //$NON-NLS-1$
 			}
 
@@ -68,7 +71,7 @@ public class SignatureValidatorBuilder {
 			catch (final Exception e) {
 				LOGGER.log(Level.WARNING, "Error en la configuracion de la plataforma de validacion", e); //$NON-NLS-1$
 				validator = null;
-				throw new  ValidatorException("No se pudo cargar el fichero de configuracion de " //$NON-NLS-1$
+				throw new  ValidatorException("No se pudo inicializar el conector con " //$NON-NLS-1$
 						+ "la plataforma de validacion y actualizacion de firmas", e); //$NON-NLS-1$
 			}
 		}

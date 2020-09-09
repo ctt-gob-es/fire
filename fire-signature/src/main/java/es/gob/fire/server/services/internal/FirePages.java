@@ -11,8 +11,6 @@ public class FirePages {
 	public static final String PG_CHOOSE_CERTIFICATE_NOCERT="ChooseCertificateNoCerts.jsp"; //$NON-NLS-1$
 	 /** P&aacute;gina JSP "ChooseCertificateOrigin.jsp"*/
 	public static final String PG_CHOOSE_CERTIFICATE_ORIGIN="ChooseCertificateOrigin.jsp";	 //$NON-NLS-1$
-	 /** P&aacute;gina JSP "ChooseNewCertificate.jsp"*/
-	public static final String PG_CHOOSE_NEW_CERTIFICATE="ChooseNewCertificate.jsp"; //$NON-NLS-1$
 	 /** P&aacute;gina JSP "MiniApplet.jsp"*/
 	public static final String PG_CLIENTE_AFIRMA="MiniApplet.jsp"; //$NON-NLS-1$
 	 /** P&aacute;gina JSP "SignatureErrorPage.jsp"*/

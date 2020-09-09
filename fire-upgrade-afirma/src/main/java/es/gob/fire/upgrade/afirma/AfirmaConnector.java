@@ -10,16 +10,20 @@
 package es.gob.fire.upgrade.afirma;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.xml.rpc.ServiceException;
+import javax.xml.rpc.soap.SOAPFaultException;
 
 import org.apache.axis.AxisFault;
 import org.apache.axis.Handler;
 import org.apache.axis.client.Call;
 import org.apache.axis.client.Service;
+
+import es.gob.fire.upgrade.ConnectionException;
 
 /**
  * Clase para la conexi&oacute;n con la Plataforma @firma.
@@ -69,7 +73,7 @@ public final class AfirmaConnector {
                     ));
         } catch (final AxisFault e) {
             throw new IllegalStateException(
-                    "Error estableciendo la configuracion del cliente del Servicio Web: " + e, e //$NON-NLS-1$
+                    "Error estableciendo la configuracion del cliente del Servicio Web", e //$NON-NLS-1$
             );
         }
 
@@ -82,8 +86,18 @@ public final class AfirmaConnector {
         this.AFIRMA_ENDPOINT = config.getProperty("webservices.endpoint"); //$NON-NLS-1$
     }
 
+    /**
+     * Realiza una llamada a la Plataforma @firma.
+     * @param inputDss Mensaje a enviar.
+     * @param serviceName Nombre del servicio.
+     * @param operation M&eacute;todo del servicio.
+     * @return Respuesta del servicio.
+     * @throws ConnectionException Cuando ocurre un error en la llamada al servicio.
+     * @throws PlatformWsException Cuando ocurre un error la procesar la petici&oacute;n.
+     * @throws IOException Cuando el endpoint o el nombre del servicio no tienen un formato v&aacute;lido.
+     */
     byte[] doPlatformCall(final String inputDss, final String serviceName, final String operation)
-            throws IOException, PlatformWsException {
+            throws IOException, PlatformWsException, ConnectionException {
 
         final Service service = new Service();
         final Call call;
@@ -91,8 +105,8 @@ public final class AfirmaConnector {
             call = (Call) service.createCall();
         }
         catch (final ServiceException e) {
-            throw new PlatformWsException(
-                "Error al crear la llamada al servicio de actualizacion de firma de la Plataforma @firma: " + e, e //$NON-NLS-1$
+            throw new ConnectionException(
+                "Error al crear la llamada al servicio de actualizacion de firma de la Plataforma @firma", e //$NON-NLS-1$
             );
         }
 
@@ -109,12 +123,16 @@ public final class AfirmaConnector {
         try {
             ret = (String) call.invoke(new Object[] { inputDss });
         } catch (final RemoteException e) {
+            throw new ConnectionException(
+                    "No se pudo conectar con la Plataforma @firma", e //$NON-NLS-1$
+            );
+        } catch (final SOAPFaultException e) {
             throw new PlatformWsException(
-                    "Error en la invocacion al servicio de actualizacion de firma de la Plataforma @firma: " + e, e //$NON-NLS-1$
+                    "Error en la invocacion al servicio de actualizacion de firma de la Plataforma @firma", e //$NON-NLS-1$
             );
         }
 
-        return ret.getBytes("UTF-8"); //$NON-NLS-1$
+        return ret.getBytes(StandardCharsets.UTF_8);
     }
 
     private static void setSystemParameters(final String tsPath, final String tsPass, final String tsType) {

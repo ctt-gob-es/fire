@@ -11,6 +11,7 @@ package es.gob.fire.upgrade.afirma;
 
 import java.io.IOException;
 
+import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.VerifyResult;
 
 /**
@@ -35,16 +36,18 @@ public final class Verify {
 	 * @param afirmaAppName
 	 *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
 	 * @return Respuesta del servicio de validaci&oacute;n.
-	 * @throws IOException
+	 * @throws ConnectionException
+     *             Si falla la llamada al servicio de validaci&oacute;n..
+     * @throws IOException
 	 *             Si hay problemas en los tratamientos de datos o lectura de
 	 *             opciones de configuraci&oacute;n.
 	 * @throws PlatformWsException
-	 *             Si hay problemas con los servicios Web de la plataforma
-	 *             Afirma.
+	 *             Si ocurre un error al procesar la petici&oacute;n o la
+	 *             respuesta del servicio.
 	 */
 	public static VerifyResult verifySignature(final AfirmaConnector conn,
-			final byte[] signature, final String afirmaAppName) throws IOException,
-				PlatformWsException {
+			final byte[] signature, final String afirmaAppName) throws ConnectionException,
+				IOException, PlatformWsException {
 
 		final String inputDss = DssServicesUtils.createSignVerifyDss(signature, afirmaAppName);
 		final byte[] responseBytes = conn.doPlatformCall(

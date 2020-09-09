@@ -19,7 +19,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.services.internal.AddDocumentBatchManager;
+import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.CreateBatchManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.RecoverBatchResultManager;
@@ -36,6 +38,7 @@ import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.DBConnectionException;
 import es.gob.fire.statistics.FireStatistics;
 
 /**
@@ -57,7 +60,10 @@ public class FIReService extends HttpServlet {
 	    	ConfigManager.checkConfiguration();
 		}
     	catch (final Exception e) {
-    		LOGGER.severe("No se pudo cargar la configuracion del componente central de FIRe: " + e); //$NON-NLS-1$
+    		LOGGER.log(Level.SEVERE, "No se pudo cargar la configuracion del componente central de FIRe", e); //$NON-NLS-1$
+    		final String configFile = e instanceof ConfigFilesException ?
+    				((ConfigFilesException) e).getFileName() : "Fichero de configuracion principal del componente central"; //$NON-NLS-1$
+    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, configFile);
     		return;
     	}
 
@@ -66,12 +72,15 @@ public class FIReService extends HttpServlet {
     		FireLogManager.configureLogs();
     	}
 		catch(final Throwable e) {
-			LOGGER.warning(
-				"No se pudo configurar la salida de los logs de FIRe a un fichero externo: " + e //$NON-NLS-1$
+			LOGGER.log(Level.WARNING,
+				"No se pudo configurar la salida de los logs de FIRe a un fichero externo", e //$NON-NLS-1$
 			);
 		}
 
-    	// Configuramos la utenticacion del proxy
+    	// Configuramos el modulo de alarmas
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+
+    	// Configuramos la autenticacion del proxy de red
     	try {
     		NetworkAuthenticator.configure();
     	}
@@ -111,12 +120,21 @@ public class FIReService extends HttpServlet {
 			}
 			catch (final ConfigFilesException e) {
 				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
+	    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getFileName());
 				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
 				return;
 			}
 		}
 
-		final RequestParameters params = RequestParameters.extractParameters(request);
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final IOException e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error en la lectura de los parametros de entrada"); //$NON-NLS-1$
+			return;
+		}
 
     	final String appId     = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
         final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
@@ -151,8 +169,14 @@ public class FIReService extends HttpServlet {
 	        	}
 	        	appName = appCheck.getName();
 	        }
+	        catch (final DBConnectionException e) {
+	        	LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos para validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
+	        	AlarmsManager.notify(Alarm.CONNECTION_DB);
+	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        	return;
+	        }
 	        catch (final Exception e) {
-	        	LOGGER.log(Level.SEVERE, logF.f("Ocurrio un error grave al validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
+	        	LOGGER.log(Level.SEVERE, logF.f("Error grave al validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        	return;
 	        }
@@ -167,7 +191,14 @@ public class FIReService extends HttpServlet {
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
-			} catch (final CertificateValidationException e) {
+			}
+	    	catch (final DBConnectionException e) {
+				LOGGER.log(Level.SEVERE, "No se pudo conectar con la base de datos", e); //$NON-NLS-1$
+				AlarmsManager.notify(Alarm.CONNECTION_DB);
+	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+				return;
+			}
+	    	catch (final CertificateValidationException e) {
 				LOGGER.severe(logF.f("Error en la validacion del certificado: " + e)); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;

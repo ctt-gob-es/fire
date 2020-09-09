@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
@@ -329,8 +330,8 @@ public final class PreSignService extends HttpServlet {
             connector = ProviderManager.getProviderConnector(providerName, connConfig.getProperties());
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
-            ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
             response.sendRedirect(redirectErrorUrl);
             return;
         }
@@ -358,8 +359,9 @@ public final class PreSignService extends HttpServlet {
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el sistema: ") + e, e); //$NON-NLS-1$
-        	ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_NETWORK, originForced);
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+            ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_NETWORK, originForced);
         	if (originForced) {
         		response.sendRedirect(redirectErrorUrl);
         	}

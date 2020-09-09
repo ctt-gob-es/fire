@@ -1,3 +1,4 @@
+<%@page import="java.net.URLDecoder"%>
 <%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
@@ -27,10 +28,11 @@
 	final FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, false);
 	if (fireSession == null) {
 		if (errorUrl != null) {
-	response.sendRedirect(errorUrl);	
+			errorUrl = URLDecoder.decode(errorUrl, "utf-8"); //$NON-NLS-1$
+			response.sendRedirect(errorUrl);	
 		}
 		else {
-	response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		}
 		return;
 	}
@@ -40,8 +42,6 @@
 	(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 		errorUrl = connConfig.getRedirectErrorUrl();
-	} else {
-		errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 	}
 
 	// En caso de que accedamos desde un dispositivo movil y la operacion sea de lote,
@@ -69,8 +69,8 @@
 	}
 
 	final String cancelUrlParams = ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId + "&" + //$NON-NLS-1$ //$NON-NLS-2$ 
-	ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-	(errorUrl != null ? ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$
+	ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$
+	(errorUrl != null ? "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 %>
 
 <!DOCTYPE html>
@@ -114,8 +114,7 @@
 
 	<!-- contenido -->
 	<main class="main">
-	
-			
+
 		<section class="contenido">		
 		<div class="container-title">
 			<div class="title-head">

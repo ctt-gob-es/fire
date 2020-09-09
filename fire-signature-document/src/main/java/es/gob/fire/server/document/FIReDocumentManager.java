@@ -24,6 +24,17 @@ import java.util.Properties;
 public interface FIReDocumentManager {
 
 	/**
+	 * Indica si el gestor necesita que se cargue su configuraci&oacute;n de un fichero
+	 * de propiedades externo o no. Si se indica {@code true}, se cargaran las propiedades
+	 * del fichero y se proporcionaran a la clase a trav&eacute;s del m&eacute;todo {@link
+	 * #init(Properties)}. Si no, se llamar&aacute; a ese m&eacute;todo pas&aacute;dole un
+	 * valor nulo.
+	 * @return {@code true} si se necesita configuraci&oacute;n externa, {@code false} en
+	 * caso contrario.
+	 */
+	boolean needConfiguration();
+
+	/**
 	 * Inicializa el objeto con las propiedades de un fichero de configuraci&oacute;n.
 	 * @param config Configuraci&oacute;n que aplicar a todas las operaciones del
 	 * DocumentManager o {@code null} si no se pudo cargar la configuraci&oacute;n.

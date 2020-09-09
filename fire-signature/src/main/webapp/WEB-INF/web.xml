@@ -69,6 +69,12 @@
   	<servlet-class>es.gob.fire.server.services.internal.RequestNewCertificateService</servlet-class>
   </servlet>
   <servlet>
+  	<description>Servicio para la recuperacion del nuevo certificado de firma en la nube</description>
+  	<display-name>recoverNewCertificateService</display-name>
+  	<servlet-name>recoverNewCertificateService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.RecoverNewCertificateService</servlet-class>
+  </servlet>
+  <servlet>
   	<description>Servicio para el guardado de datos en un directorio temporal</description>
   	<display-name>storageService</display-name>
   	<servlet-name>storageService</servlet-name>
@@ -144,6 +150,10 @@
   <servlet-mapping>
   	<servlet-name>requestCertificateService</servlet-name>
   	<url-pattern>/public/requestCertificateService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>recoverNewCertificateService</servlet-name>
+  	<url-pattern>/public/recoverNewCertificateService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>cancelOperationService</servlet-name>

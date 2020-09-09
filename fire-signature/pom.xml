@@ -59,7 +59,17 @@
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-log-handlers</artifactId>
 				</dependency>
+
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-alarms</artifactId>
+				</dependency>
 		
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-alarms-graylog</artifactId>
+				</dependency>
+				
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-signature-document</artifactId>

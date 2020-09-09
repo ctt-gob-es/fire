@@ -9,8 +9,6 @@
  */
 package es.gob.fire.server.connector;
 
-import java.util.logging.Logger;
-
 /** Factor&iacute;a para la obtenci&oacute;n de las clases conectoras de los distintos
  * proveedores de firma en la nube. */
 public final class FIReConnectorFactory {

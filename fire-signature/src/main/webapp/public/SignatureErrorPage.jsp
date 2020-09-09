@@ -37,7 +37,7 @@
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 		errorUrl = connConfig.getRedirectErrorUrl();
 		if (errorUrl != null) {
-	errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
+			errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 		}
 	}
 	
@@ -52,15 +52,15 @@
 	ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 	if (originForced) {
 		if (errorUrl != null) {
-	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	else {
 		if (op != null) {
-	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (errorUrl != null) {
-	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactory;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
@@ -65,7 +66,15 @@ public class ProviderManager {
 		}
 
 		// Inicializamos el proveedor
-		final FIReConnector connector = FIReConnectorFactory.getConnector(providerClass);
+		FIReConnector connector;
+		try {
+			connector = FIReConnectorFactory.getConnector(providerClass);
+		}
+		catch (final FIReConnectorFactoryException e) {
+			AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, providerClass);
+			throw e;
+	    }
+
 		connector.init(providerConfig);
 
 		// Inicializamos la transaccion
@@ -132,6 +141,7 @@ public class ProviderManager {
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
 					LogUtils.cleanText(providerConfigFilename), LogUtils.cleanText(providerName)
 			));
+			AlarmsManager.notify(Alarm.RESOURCE_CONFIG, providerConfigFilename);
 			providerConfig = new Properties();
 		} catch (final IOException e) {
 			LOGGER.log(
@@ -159,13 +169,16 @@ public class ProviderManager {
 	}
 
 	/**
-	 * Carga el fichero interno de propiedades del proveedor en el que se encuentra
-	 * la informaci&oacute;n gen&eacute;rica que debe proporcionar. El fichero debe tener
-	 * el nombre determinado por {@link #PROVIDER_INFO_FILE} y encontrarse en el
-	 * mismo paquete que la clase conectora.
+	 * Carga el fichero de propiedades del proveedor en el que se encuentra
+	 * la informaci&oacute;n de configuraci&oacute;n interna. Este fichero
+	 * puede indicarse externamente o, si no, se cargar&aacute; el fichero
+	 * interno. El fichero interno debe tener el nombre determinado por
+	 * {@link #PROVIDER_INFO_FILE} y encontrarse en el mismo paquete que la
+	 * clase conectora.
 	 * @param classname Clase conectora del proveedor.
-	 * @param infoFilename Nombre del fichero con las propiedades visuales y comprobaciones del
-	 * proveedor.
+	 * @param infoFilename Nombre del fichero externo con las propiedades visuales
+	 * y comprobaciones del proveedor. Debe encontrarse con el resto de ficheros de
+	 * configuraci&oacute;n.
 	 * @return Propiedades de visualizaci&oacute;n.
 	 */
 	private static Properties loadProviderInfoProperties(final String classname, final String infoFilename) {

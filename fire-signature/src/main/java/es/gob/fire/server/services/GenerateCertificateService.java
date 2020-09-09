@@ -19,12 +19,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
+import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.GenerateCertificateManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.DBConnectionException;
 
 /** Servicio para la solicitud de un nuevo certificado de firma. */
 public final class GenerateCertificateService extends HttpServlet {
@@ -40,8 +43,6 @@ public final class GenerateCertificateService extends HttpServlet {
     private static final String PARAMETER_NAME_SUBJECT_ID = "subjectid"; //$NON-NLS-1$
     private static final String OLD_PARAMETER_NAME_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
 
-    private static final String PARAMETER_NAME_CERT_ORIGIN = "certorigin"; //$NON-NLS-1$
-
     @Override
     public void init() throws ServletException {
     	super.init();
@@ -50,9 +51,15 @@ public final class GenerateCertificateService extends HttpServlet {
 	    	ConfigManager.checkConfiguration();
 		}
     	catch (final Exception e) {
-    		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
+    		LOGGER.log(Level.SEVERE, "Error al cargar la configuracion", e); //$NON-NLS-1$
+    		final String configFile = e instanceof ConfigFilesException ?
+    				((ConfigFilesException) e).getFileName() : "Fichero de configuracion principal del componente central"; //$NON-NLS-1$
+    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, configFile);
     		return;
     	}
+
+    	// Configuramos el modulo de alarmas
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
     }
 
     /** Solicitud de un nuevo certificado de firma. */
@@ -68,6 +75,7 @@ public final class GenerateCertificateService extends HttpServlet {
 			}
 			catch (final ConfigFilesException e) {
 				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
+				AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getFileName());
 				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
 				return;
 			}
@@ -100,7 +108,8 @@ public final class GenerateCertificateService extends HttpServlet {
 	        	}
 	        }
 	        catch (final Exception e) {
-	        	LOGGER.log(Level.SEVERE, "Ocurrio un error grave al validar el identificador de la aplicacion", e); //$NON-NLS-1$
+	        	LOGGER.log(Level.SEVERE, "Error grave al validar el identificador de la aplicacion", e); //$NON-NLS-1$
+	        	AlarmsManager.notify(Alarm.CONNECTION_DB);
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        	return;
 	        }
@@ -114,7 +123,14 @@ public final class GenerateCertificateService extends HttpServlet {
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
-			} catch (final CertificateValidationException e) {
+			}
+	    	catch (final DBConnectionException e) {
+				LOGGER.log(Level.SEVERE, "No se pudo conectar con la base de datos", e); //$NON-NLS-1$
+				AlarmsManager.notify(Alarm.CONNECTION_DB);
+	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+				return;
+			}
+	    	catch (final CertificateValidationException e) {
 				LOGGER.severe("Error en la validacion del certificado: " + e); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;

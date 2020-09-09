@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.CertificateBlockedException;
 import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.FIReConnector;
@@ -29,12 +30,14 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.WeakRegistryException;
+import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.DBConnectionException;
 
 /** Servlet para la obtenci&oacute;n de certificados de un usuario. */
 public final class CertificateService extends HttpServlet {
@@ -54,9 +57,15 @@ public final class CertificateService extends HttpServlet {
 	    	ConfigManager.checkConfiguration();
 		}
     	catch (final Exception e) {
-    		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
+    		LOGGER.log(Level.SEVERE, "Error al cargar la configuracion", e); //$NON-NLS-1$
+    		final String configFile = e instanceof ConfigFilesException ?
+    				((ConfigFilesException) e).getFileName() : "Fichero de configuracion principal del componente central"; //$NON-NLS-1$
+    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, configFile);
     		return;
     	}
+
+    	// Configuramos el modulo de alarmas
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
     }
 
     @Override
@@ -72,7 +81,8 @@ public final class CertificateService extends HttpServlet {
 			}
 			catch (final ConfigFilesException e) {
 				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
+	    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getFileName());
+	    		response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
 				return;
 			}
 		}
@@ -106,6 +116,7 @@ public final class CertificateService extends HttpServlet {
 	    			Level.SEVERE,
 	    			"Ocurrio un error grave al validar el identificador de la aplicacion", e //$NON-NLS-1$
 				);
+	        	AlarmsManager.notify(Alarm.CONNECTION_DB);
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        	return;
 	        }
@@ -119,6 +130,12 @@ public final class CertificateService extends HttpServlet {
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 	    		ServiceUtil.checkValidCertificate(appId, certificates);
+			}
+	    	catch (final DBConnectionException e) {
+				LOGGER.log(Level.SEVERE, "No se pudo conectar con la base de datos", e); //$NON-NLS-1$
+				AlarmsManager.notify(Alarm.CONNECTION_DB);
+	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+				return;
 			}
 			catch (final CertificateValidationException e) {
 				LOGGER.log(Level.SEVERE, "Error en la validacion del certificado", e); //$NON-NLS-1$
@@ -141,17 +158,18 @@ public final class CertificateService extends HttpServlet {
         }
 
         // Obtenemos el conector con el backend ya configurado
+        String providerName = null;
         final FIReConnector connector;
         try {
-        	String providerName = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
+        	providerName = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
         	if (providerName == null) {
         		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
         	}
             connector = ProviderManager.getProviderConnector(providerName, null);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, "Error en la configuracion del conector del proveedor de firma", e); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        	LOGGER.log(Level.SEVERE, String.format("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
             );
             return;
@@ -187,7 +205,8 @@ public final class CertificateService extends HttpServlet {
             return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el sistema: " + e, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el proveedor de firma en la nube: " + e, e); //$NON-NLS-1$
+        	AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
             response.sendError(
         		HttpServletResponse.SC_REQUEST_TIMEOUT,
                 "No se ha podido conectar con el sistema: " + e //$NON-NLS-1$

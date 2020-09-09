@@ -71,8 +71,11 @@ public abstract class FIReConnector {
      * @param transactionId Identificador de la transacci&oacute;n.
      * @return Resultados de las firmas, indexados por su identificador.
      * @throws FIReSignatureException Si hay problemas en el proceso.
-     * @throws FIReConnectorUnknownUserException Si el usuario no est&aacute; dado de alta en el sistema. */
-	public abstract Map<String, byte[]> sign(String transactionId) throws FIReSignatureException, FIReConnectorUnknownUserException;
+     * @throws FIReConnectorUnknownUserException Si el usuario no est&aacute; dado de alta en el sistema.
+     * @throws FIReConnectorNetworkException Si ocurre un error al conectar con el proveedor de firma. */
+	public abstract Map<String, byte[]> sign(String transactionId) throws	FIReSignatureException,
+																			FIReConnectorUnknownUserException,
+																			FIReConnectorNetworkException;
 
     /**
      * Informa del fin de la operaci&oacute;n de firma.
@@ -93,20 +96,24 @@ public abstract class FIReConnector {
      * @return Resultado de la generacion con el ID de transacci&oacute;n y la URL para la redirecci&oacute;n en caso de &eacute;xito.
      * @throws FIReCertificateAvailableException Si no se puede generar un certificado para ese usuario porque ha alcanzado el l&iacute;mite.
      * @throws FIReCertificateException Si ocurre un error durante la generaci&oacute;n del certificado.
-     * @throws FIReConnectorNetworkException Si ocurre un error en la comunicaci&oacute;n con el backend.
      * @throws FIReConnectorUnknownUserException Si el usuario no est&aacute; dado de alta en el sistema.
+     * @throws FIReConnectorNetworkException Si ocurre un error en la comunicaci&oacute;n con el backend.
      * @throws WeakRegistryException Si el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma. */
-	public GenerateCertificateResult generateCertificate(final String subjectId) throws FIReCertificateAvailableException, FIReCertificateException, FIReConnectorNetworkException, FIReConnectorUnknownUserException, WeakRegistryException {
+	public GenerateCertificateResult generateCertificate(final String subjectId) throws FIReCertificateAvailableException,
+																						FIReCertificateException,
+																						FIReConnectorUnknownUserException,
+																						FIReConnectorNetworkException,
+																						WeakRegistryException {
 		throw new UnsupportedOperationException("El proveedor no soporta la generacion de nuevos certificados al vuelo"); //$NON-NLS-1$
 	}
-
 
     /** Recupera un certificado de firma reci&eacute;n generado.
      * @param transactionId Identificador de la transacci&oacute;n.
      * @return Certificado reci&eacute;n generado.
      * @throws FIReCertificateException Si ocurre un error durante la generaci&oacute;n del certificado.
      * @throws FIReConnectorNetworkException Si ocurre un error en la comunicaci&oacute;n con el backend. */
-	public byte[] recoverCertificate(final String transactionId) throws FIReCertificateException, FIReConnectorNetworkException {
+	public byte[] recoverCertificate(final String transactionId) throws FIReCertificateException,
+																		FIReConnectorNetworkException {
 		throw new UnsupportedOperationException("El proveedor no soporta la generacion de nuevos certificados al vuelo"); //$NON-NLS-1$
 	}
 }

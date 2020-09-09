@@ -19,12 +19,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
+import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.RecoverCertificateManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.DBConnectionException;
 
 /** Servlet que recupera un certificado recien creado. */
 public final class RecoverCertificateService extends HttpServlet {
@@ -50,9 +53,15 @@ public final class RecoverCertificateService extends HttpServlet {
 	    	ConfigManager.checkConfiguration();
 		}
     	catch (final Exception e) {
-    		LOGGER.severe("Error al cargar la configuracion: " + e); //$NON-NLS-1$
+    		LOGGER.log(Level.SEVERE, "Error al cargar la configuracion", e); //$NON-NLS-1$
+    		final String configFile = e instanceof ConfigFilesException ?
+    				((ConfigFilesException) e).getFileName() : "Fichero de configuracion principal del componente central"; //$NON-NLS-1$
+    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, configFile);
     		return;
     	}
+
+    	// Configuramos el modulo de alarmas
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
     }
 
     /** Recepci&oacute;n de la petici&oacute;n GET y realizaci&oacute;n de la
@@ -69,6 +78,7 @@ public final class RecoverCertificateService extends HttpServlet {
 			}
 			catch (final ConfigFilesException e) {
 				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
+				AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getFileName());
 				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
 				return;
 			}
@@ -98,8 +108,9 @@ public final class RecoverCertificateService extends HttpServlet {
     			}
     		}
     		catch (final Exception e) {
-    			LOGGER.log(Level.SEVERE, "Ocurrio un error grave al validar el identificador de la aplicacion", e); //$NON-NLS-1$
-    			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    			LOGGER.log(Level.SEVERE, "Error grave al validar el identificador de la aplicacion", e); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.CONNECTION_DB);
+	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     			return;
     		}
     	}
@@ -112,7 +123,14 @@ public final class RecoverCertificateService extends HttpServlet {
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
-			} catch (final CertificateValidationException e) {
+			}
+	    	catch (final DBConnectionException e) {
+				LOGGER.log(Level.SEVERE, "No se pudo conectar con la base de datos", e); //$NON-NLS-1$
+				AlarmsManager.notify(Alarm.CONNECTION_DB);
+	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+				return;
+			}
+	    	catch (final CertificateValidationException e) {
 				LOGGER.severe("Error en la validacion del certificado: " + e); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;

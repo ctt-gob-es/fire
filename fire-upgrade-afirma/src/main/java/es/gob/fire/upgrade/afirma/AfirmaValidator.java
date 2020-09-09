@@ -12,6 +12,7 @@ package es.gob.fire.upgrade.afirma;
 import java.io.IOException;
 import java.util.Properties;
 
+import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;
 import es.gob.fire.upgrade.UpgradeResult;
@@ -60,11 +61,12 @@ public class AfirmaValidator implements SignatureValidator {
 	 * @return Firma actualizada o, si no se indica un formato de actualizacion, la propia firma.
 	 * @throws UpgradeException Cuando ocurre cualquier problema que impida la
 	 * actualizaci&oacute;n de la firma.
+	 * @throws ConnectionException Cuando falla la conexi&oacute;n con la Plataforma @firma.
 	 * @throws VerifyException Cuando no se puede actualizar la firma porque esta es inv&aacute;lida.
 	 */
 	@Override
 	public UpgradeResult upgradeSignature(final byte[] signature, final String upgradeFormat,
-			final Properties config) throws UpgradeException, VerifyException {
+			final Properties config) throws UpgradeException, ConnectionException, VerifyException {
 
 		if (upgradeFormat == null || upgradeFormat.isEmpty()) {
 			return new UpgradeResult(signature, null);
@@ -99,8 +101,8 @@ public class AfirmaValidator implements SignatureValidator {
 			}
 			throw new UpgradeException("Error durante la actualizacion de la firma. MajorCode: " + e.getMajorCode() + //$NON-NLS-1$
 					". MinorCode: " + e.getMinorCode(), e); //$NON-NLS-1$
-		} catch (final IOException e) {
-			throw new UpgradeException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
+		} catch (final ConnectionException e) {
+			throw new ConnectionException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
 		} catch (final Exception e) {
 			throw new UpgradeException("Error no identificado durante el proceso de actualizacion de la firma", e); //$NON-NLS-1$
 		}
@@ -110,7 +112,7 @@ public class AfirmaValidator implements SignatureValidator {
 
 	@Override
 	public UpgradeResult recoverUpgradedSignature(final String docId, final String upgradeFormat,
-			final Properties config) throws UpgradeException, IOException {
+			final Properties config) throws UpgradeException, ConnectionException, IOException {
 
 		if (this.conn == null) {
 			throw new UpgradeException("No se ha inicializado el validador. Llame al metodo " //$NON-NLS-1$
@@ -134,8 +136,8 @@ public class AfirmaValidator implements SignatureValidator {
 		} catch (final AfirmaResponseException e) {
 			throw new UpgradeException("Error durante la recuperacion asincrona de la firma. MajorCode: " + e.getMajorCode() + //$NON-NLS-1$
 					". MinorCode: " + e.getMinorCode() + ". Description: " + e.getMessage(), e); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (final IOException e) {
-			throw new IOException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
+		} catch (final ConnectionException e) {
+			throw new ConnectionException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
 		} catch (final Exception e) {
 			throw new IOException("Error no identificado durante el proceso de recuperacion asincrona de la firma", e); //$NON-NLS-1$
 		}
@@ -148,11 +150,13 @@ public class AfirmaValidator implements SignatureValidator {
 	 * @param signature Firma que se desea validar.
 	 * @param config Configuraci&oacute;n adicional para la operaci&oacute;n.
 	 * @return Resultado de la validaci&oacute;n.
+	 * @throws ConnectionException Cuando no se puede conectar con la Plataforma @firma.
 	 * @throws VerifyException Cuando ocurre cualquier problema que impida la
 	 * validaci&oacute;n de la firma.
 	 */
 	@Override
-	public VerifyResult validateSignature(final byte[] signature, final Properties config) throws VerifyException {
+	public VerifyResult validateSignature(final byte[] signature, final Properties config)
+			throws ConnectionException, VerifyException {
 
 		if (this.conn == null || this.appId == null) {
 			throw new VerifyException("No se ha inicializado el validador. Llame al metodo " //$NON-NLS-1$
@@ -172,8 +176,8 @@ public class AfirmaValidator implements SignatureValidator {
 					this.appId);
 		} catch (final PlatformWsException e) {
 			throw new VerifyException("Error en la respuesta de la Plataforma @firma", e); //$NON-NLS-1$
-		} catch (final IOException e) {
-			throw new VerifyException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
+		} catch (final ConnectionException e) {
+			throw new ConnectionException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
 		} catch (final Exception e) {
 			throw new VerifyException("Error no identificado durante el proceso de validacion de la firma", e); //$NON-NLS-1$
 		}

@@ -202,7 +202,8 @@ public final class ServiceUtil {
 	 * @param certificates Listado de certificados
 	 * @throws CertificateValidationException En caso de ocurrir alg&uacute;n error o si el certificado
 	 *                                        no tiene acceso. */
-	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates) throws CertificateValidationException {
+	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates)
+			throws CertificateValidationException, DBConnectionException {
 
 		if (certificates == null || certificates.length == 0 || certificates[0] == null) {
 			throw new CertificateValidationException (HttpServletResponse.SC_UNAUTHORIZED, "No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$
@@ -213,7 +214,7 @@ public final class ServiceUtil {
 			ServiceUtil.checkValideThumbPrint(appId, thumbPrint);
 		}
 		catch (final NoSuchAlgorithmException e) {
-			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "El algoritmo SHA-1 no se ha encontrado en el sistema", e);//$NON-NLS-1$
+			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "El algoritmo de huella no se ha encontrado en el sistema", e);//$NON-NLS-1$
 		}
 		catch (final IllegalArgumentException e){
 			throw new CertificateValidationException (HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado", e); //$NON-NLS-1$
@@ -225,7 +226,7 @@ public final class ServiceUtil {
 			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
 		}
 		catch (final DBConnectionException e) {
-			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ha ocurrido un error al conectar con la base de datos", e); //$NON-NLS-1$
+			throw new DBConnectionException ("Ha ocurrido un error al conectar con la base de datos", e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			throw new CertificateValidationException(HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error al decodificar el certificado", e); //$NON-NLS-1$

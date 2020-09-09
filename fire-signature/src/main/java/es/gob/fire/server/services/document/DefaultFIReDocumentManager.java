@@ -27,6 +27,11 @@ public class DefaultFIReDocumentManager extends FireDocumentManagerBase
 	private static final long serialVersionUID = 4608510893704491372L;
 
 	@Override
+	public boolean needConfiguration() {
+		return false;
+	}
+
+	@Override
 	public byte[] getDocument(final byte[] docId, final String appId, final String format,
 			final Properties extraParams) throws IOException {
 		return docId;

@@ -20,6 +20,7 @@
 		<fnmt.version>0.2</fnmt.version>
 		<log-consumer.version>1.2</log-consumer.version>
 		
+		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
 		<javax.json-api.version>1.0</javax.json-api.version>
 		<org.glassfish-javax.json.version>1.0.4</org.glassfish-javax.json.version>
 		<junit.version>4.8.2</junit.version>
@@ -78,6 +79,8 @@
 				<module>fire-test-jsp</module>
 				<module>fire-statistics-common</module>
 				<module>fire-statistics-cmd</module>
+				<module>fire-alarms</module>
+				<module>fire-alarms-graylog</module>
 				<module>fire-upgrade</module>
 				<module>fire-upgrade-afirma</module>
 				<module>fire-log-handlers</module>
@@ -155,6 +158,18 @@
 		
 		<dependency>
 		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-alarms</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
+		  <artifactId>fire-alarms-graylog</artifactId>
+		  <version>${fire.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>es.gob.fire</groupId>
 		  <artifactId>fire-upgrade</artifactId>
 		  <version>${fire.version}</version>
 		</dependency>
@@ -201,6 +216,12 @@
   			<version>${log-consumer.version}</version>
   		</dependency>
 	  
+	  	<dependency>
+			<groupId>biz.paluch.logging</groupId>
+			<artifactId>logstash-gelf</artifactId>
+			<version>${biz.paluch.logging.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>

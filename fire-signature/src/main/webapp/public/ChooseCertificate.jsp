@@ -26,6 +26,7 @@
 		return;
 	}
 	
+	// Cargamos la sesion que deberia estar en memoria, pero permitimos su carga de otras fuentes
 	FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, true, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -44,42 +45,39 @@
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 	
 	String errorUrl = null;
-	TransactionConfig connConfig =
-	(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	TransactionConfig connConfig = (TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 		errorUrl = connConfig.getRedirectErrorUrl();
 		if (errorUrl != null) {
-	errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
+			errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 		}
 	}
-	
+
 	// Preparamos el boton para cancelar o volver a atras. Se define el comportamiento
 	// de este boton en base a si se forzo el origen (se muestra el boton Cancelar) o
 	// no (boton Volver) 
-	boolean originForced = Boolean.parseBoolean(
-	fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED)
-	);
-	
+	boolean originForced = Boolean
+			.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
+
 	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-	ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
+			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 	if (originForced) {
 		if (errorUrl != null) {
-	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	}
-	else {
+	} else {
 		if (op != null) {
-	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (errorUrl != null) {
-	buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
-	
+
 	// Extraemos de la sesion los certificados y los eliminamos de la misma
 	final X509Certificate[] certificates = (X509Certificate[]) fireSession.getObject(trId + "-certs"); //$NON-NLS-1$
 	fireSession.removeAttribute(trId + "-certs"); //$NON-NLS-1$
-	
+
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
 	if (logoUrl == null || logoUrl.isEmpty()) {

@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
@@ -27,6 +28,7 @@ import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
+import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.signature.ConfigManager;
 
@@ -38,6 +40,7 @@ public class SignOperationManager {
 
 	private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 
 	/**
 	 * Inicia la operaci&oacute;n de firma asociada al componente central.
@@ -170,7 +173,7 @@ public class SignOperationManager {
         	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, docManagerName);
         }
         catch (final IllegalAccessException | IllegalArgumentException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.WARNING, logF.f("No existe o no se tiene permisos para acceder al gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, OperationError.INVALID_DOCUMENT_MANAGER);
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
@@ -185,14 +188,15 @@ public class SignOperationManager {
         LOGGER.info(logF.f("La transaccion usara el DocumentManager " + docManager.getClass().getName())); //$NON-NLS-1$
 
         // Obtenemos el identificador del documento (que puede ser el propio documento)
-        byte[] docId;
+        final byte[] docId;
         try {
         	docId = Base64.decode(dataB64, true);
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("El documento enviado a firmar no esta bien codificado"), e); //$NON-NLS-1$
 			SIGNLOGGER.register(session, false, null);
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+			TRANSLOGGER.register(session, false);
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
         			"El documento enviado a firmar no esta bien codificado"); //$NON-NLS-1$
         	return;
         }
@@ -216,13 +220,15 @@ public class SignOperationManager {
 
         // Obtenemos los datos a firmar a partir de los datos proporcionados
         // mediante del DocumentManager que corresponda
-        byte[] data;
+        final byte[] data;
         try {
         	data = docManager.getDocument(docId, appId, format, extraParams);
         }
         catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al obtener los datos a firmar del servidor remoto"), e); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
+    		TRANSLOGGER.register(session, false);
+    		AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
     		response.sendError(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode(), e.toString());
     		return;
         }
@@ -230,6 +236,7 @@ public class SignOperationManager {
     	if (data == null) {
     		LOGGER.severe(logF.f("No se han obtenido los datos a firmar")); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
+    		TRANSLOGGER.register(session, false);
     		response.sendError(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode());
     		return;
     	}
@@ -256,7 +263,7 @@ public class SignOperationManager {
 
         // Si hay proveedor disponible, se selecciona automaticamente;
         // si no, se envia a la pagina de seleccion de proveedor
-		String redirectUrl;
+		final String redirectUrl;
         if (provs.length == 1) {
         	redirectUrl = "chooseCertificateOriginService?" + //$NON-NLS-1$
         			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] + "&" + //$NON-NLS-1$ //$NON-NLS-2$

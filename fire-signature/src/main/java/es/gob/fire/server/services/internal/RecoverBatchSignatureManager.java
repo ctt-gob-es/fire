@@ -100,12 +100,12 @@ public class RecoverBatchSignatureManager {
         	return;
         }
 
-		LOGGER.info(logF.f("Comprobamos el estado de la firma")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Comprobamos el estado de la firma")); //$NON-NLS-1$
 
         // Obtenemos el resultado de firma del lote
         final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         if (batchResult == null || batchResult.documentsCount() == 0) {
-            LOGGER.severe(logF.f("No se han encontrado registrados los documentos del lote")); //$NON-NLS-1$
+            LOGGER.severe(logF.f("No se han encontrado documentos registrados en el lote")); //$NON-NLS-1$
         	SessionCollector.removeSession(session);
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			buildErrorMessage(OperationError.INVALID_STATE));
@@ -123,7 +123,7 @@ public class RecoverBatchSignatureManager {
 
         // Si para recuperar la firma hay que esperar un periodo de gracia, se notifica un error en la operacion
         if (batchResult.needWaitGracePeriod(docId)) {
-            LOGGER.severe(logF.f("El documento solicitado no estara disponible hasta esperar un periodo de gracia")); //$NON-NLS-1$
+            LOGGER.info(logF.f("El documento solicitado no estara disponible hasta esperar un periodo de gracia")); //$NON-NLS-1$
         	response.sendError(HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorCode(),
         			HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorDescription());
         	return;
@@ -169,7 +169,7 @@ public class RecoverBatchSignatureManager {
         	SessionCollector.commit(session);
         }
 
-        LOGGER.info(logF.f("Se devuelve el resultado de la firma")); //$NON-NLS-1$
+        LOGGER.fine(logF.f("Se devuelve el resultado de la firma")); //$NON-NLS-1$
 
         sendResult(response, signature);
 	}

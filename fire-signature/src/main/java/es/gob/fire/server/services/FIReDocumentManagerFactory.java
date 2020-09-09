@@ -14,10 +14,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.document.DefaultFIReDocumentManager;
+import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
 
@@ -88,42 +91,47 @@ public class FIReDocumentManagerFactory {
 						getConstructor().newInstance();
 			}
 			catch (final ClassNotFoundException e) {
+				AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, docManagerClassName);
 				throw new IOException("No se encontro la clase gestora de documentos " + docManagerClassName, e); //$NON-NLS-1$
 			}
 			catch (final NoSuchMethodException | IllegalAccessException e) {
-				throw new IOException("La clase gestora de documento no tiene definido el constructor por defecto o este no es publico", e); //$NON-NLS-1$
+				throw new IOException("La clase gestora de documentos no tiene definido el constructor por defecto o este no es publico", e); //$NON-NLS-1$
 			}
 			catch (final Exception e) {
 				throw new IOException("La clase gestora de documentos genero un error durante la construccion", e); //$NON-NLS-1$
 			}
 
-			// Se busca un fichero de configuracion para la inicializacion del gestor
+			// Si el gestor de documentos indica que requiere configuracion externa,
+			// intentamos cargarla para inicializarlo
 			Properties config = null;
-			try {
-				config = ConfigFileLoader.loadConfigFile(getDocManagerConfigFilename(managerName));
-			}
-			catch (final FileNotFoundException e) {
-				LOGGER.warning("No se encontro el fichero de configuracion '" + getDocManagerConfigFilename(managerName) + //$NON-NLS-1$
-						"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
-			}
-			catch (final Exception e) {
-				LOGGER.warning("No se pudo cargar el fichero de configuracion '" + getDocManagerConfigFilename(managerName) + //$NON-NLS-1$
-						"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
-			}
+			if (docManager.needConfiguration()) {
+				final String configFilename = getDocManagerConfigFilename(managerName);
+				try {
+					config = ConfigFileLoader.loadConfigFile(configFilename);
+				}
+				catch (final FileNotFoundException e) {
+					AlarmsManager.notify(Alarm.RESOURCE_CONFIG, configFilename);
+					LOGGER.warning("No se encontro el fichero de configuracion '" + configFilename + //$NON-NLS-1$
+							"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
+				}
+				catch (final Exception e) {
+					LOGGER.warning("No se pudo cargar el fichero de configuracion '" + configFilename + //$NON-NLS-1$
+							"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
+				}
 
-			try {
-				config = ConfigManager.mapEnvironmentVariables(config);
-			} catch (final Exception e) {
-				LOGGER.warning(
-						"No se pudieron mapear las variables de entorno en el fichero de configuracion: " + //$NON-NLS-1$
-								getDocManagerConfigFilename(managerName) +
-								e);
-			}
+				try {
+					config = ConfigManager.mapEnvironmentVariables(config);
+				} catch (final Exception e) {
+					LOGGER.log(Level.WARNING,
+							"No se pudieron mapear las variables de entorno en el fichero de configuracion: " + configFilename, //$NON-NLS-1$
+							e);
+				}
 
-			// Desciframos las claves del fichero de configuracion si es necesario
-			if (config != null && ConfigManager.hasDecipher()) {
-				for (final String key : config.keySet().toArray(new String[config.size()])) {
-					config.setProperty(key, ConfigManager.getDecipheredProperty(config, key, null));
+				// Desciframos las claves del fichero de configuracion si es necesario
+				if (config != null && ConfigManager.hasDecipher()) {
+					for (final String key : config.keySet().toArray(new String[config.size()])) {
+						config.setProperty(key, ConfigManager.getDecipheredProperty(config, key, null));
+					}
 				}
 			}
 

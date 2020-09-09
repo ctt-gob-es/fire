@@ -28,8 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.HttpCustomErrors;
@@ -212,7 +214,7 @@ public class RecoverBatchResultManager {
         		connector = ProviderManager.getProviderConnector(origin, connConfig.getProperties());
         	}
         	catch (final FIReConnectorFactoryException e) {
-        		LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
+        		LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", origin), e); //$NON-NLS-1$
         		TRANSLOGGER.register(session, false);
         		SessionCollector.removeSession(session);
         		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -236,6 +238,14 @@ public class RecoverBatchResultManager {
     			TRANSLOGGER.register(session, false);
                 SessionCollector.removeSession(session);
     			response.sendError(HttpCustomErrors.NO_USER.getErrorCode());
+        		return;
+        	}
+        	catch(final FIReConnectorNetworkException e) {
+    			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+    			TRANSLOGGER.register(session, false);
+    			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, origin);
+                SessionCollector.removeSession(session);
+    			response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
         		return;
         	}
         	catch(final Exception e) {

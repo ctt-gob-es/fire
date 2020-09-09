@@ -15,8 +15,9 @@ public final class ConfigFilesException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 
-	private static String fileName;
 	private static final int HTTP_INTERNAL_SERVER_ERROR = 500;
+
+	private String fileName;
 
 	protected ConfigFilesException() {
         super();
@@ -29,7 +30,7 @@ public final class ConfigFilesException extends Exception{
 	 */
 	public ConfigFilesException(final String msg, final String filename) {
 		super(msg);
-		fileName = filename;
+		this.fileName = filename;
     }
 
 	/**
@@ -40,14 +41,14 @@ public final class ConfigFilesException extends Exception{
 	 */
 	public ConfigFilesException(final String msg, final String filename, final Throwable cause) {
 		super(msg, cause);
-		fileName = filename;
+		this.fileName = filename;
     }
 
 	/**
 	 * @return El nombre del fichero que no se ha encontrado en el sistema.
 	 */
-	public static String getFileName(){
-		return ConfigFilesException.fileName;
+	public String getFileName(){
+		return this.fileName;
 	}
 
 	/**

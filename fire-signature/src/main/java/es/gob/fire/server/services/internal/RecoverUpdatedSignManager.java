@@ -18,12 +18,14 @@ import java.util.logging.Logger;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.document.FireAsyncDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;
 import es.gob.fire.upgrade.UpgradeResult;
@@ -99,7 +101,12 @@ public class RecoverUpdatedSignManager {
         try {
         	final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator();
         	upgradeResult = validator.recoverUpgradedSignature(asyncId, upgrade, upgraterConfig);
-        } catch (final ValidatorException e) {
+        } catch (final ConnectionException e) {
+			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$
+			AlarmsManager.notify(Alarm.CONNECTION_VALIDATION_PLATFORM);
+        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	return;
+		} catch (final ValidatorException e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error interno al cargar el conector con el sistema de actualizacion de firmas"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         	return;

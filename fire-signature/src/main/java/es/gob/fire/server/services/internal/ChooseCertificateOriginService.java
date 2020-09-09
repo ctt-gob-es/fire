@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.CertificateBlockedException;
 import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.FIReConnector;
@@ -31,7 +32,8 @@ import es.gob.fire.statistics.entity.Browser;
 
 
 /**
- * Servlet implementation class ChooseCertificateOriginService
+ * Servlet para la selecci&oacute;n del proveedor local o en la nube con el
+ * que se desea firmar.
  */
 public class ChooseCertificateOriginService extends HttpServlet {
 
@@ -207,7 +209,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			}
 		}
 		catch (final FIReConnectorFactoryException e) {
-			LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR);
 			response.sendRedirect(redirectErrorUrl);
 			return;
@@ -224,8 +226,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			return;
 		}
 		catch (final FIReConnectorNetworkException e) {
-			LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE_NETWORK, originForced);
+			LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+            ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE_NETWORK, originForced);
 			if (originForced) {
 				response.sendRedirect(redirectErrorUrl);
 			}
@@ -299,11 +302,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			return;
 		}
 		catch (final ServletException e) {
-			LOGGER.warning(logF.f("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a la misma pagina")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a esa pagina")); //$NON-NLS-1$
 			response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE + "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
 		}
 	}
-
-
 }

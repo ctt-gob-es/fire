@@ -47,6 +47,11 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	final static Logger LOGGER = Logger.getLogger(FileSystemFIReDocumentManager.class.getName());
 
 	@Override
+	public boolean needConfiguration() {
+		return true;
+	}
+
+	@Override
 	public void init(final Properties config) throws IOException {
 
 		if (config == null) {
@@ -107,22 +112,11 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 		}
 
 		final byte[] data;
-		InputStream fis = null;
-		try {
-			fis = new FileInputStream(file);
+		try (InputStream fis = new FileInputStream(file)) {
 			data = AOUtil.getDataFromInputStream(fis);
-			fis.close();
 		}
 		catch (final IOException e) {
 			LOGGER.warning("Error en la lectura del fichero '" + printShortPath(file) + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
-			if (fis != null) {
-				try {
-					fis.close();
-				}
-				catch (final IOException e2) {
-					LOGGER.warning("El fichero queda sin cerrar: " + printShortPath(file)); //$NON-NLS-1$
-				}
-			}
 			throw e;
 		}
 
@@ -167,22 +161,11 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 			throw new IOException("Se ha obtenido un nombre de documento existente en el sistema de ficheros."); //$NON-NLS-1$
 		}
 
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(file);
+		try ( FileOutputStream fos = new FileOutputStream(file) ) {
 			fos.write(data);
-			fos.close();
 		}
 		catch (final IOException e) {
 			LOGGER.severe("Error al almacenar los datos en el fichero '" + file.getAbsolutePath() + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
-			if (fos != null) {
-				try {
-					fos.close();
-				}
-				catch (final IOException e2) {
-					LOGGER.warning("El fichero queda sin cerrar: " + file.getAbsolutePath()); //$NON-NLS-1$
-				}
-			}
 			throw e;
 		}
 
@@ -217,5 +200,4 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	    }
 	    return false;
 	}
-
 }

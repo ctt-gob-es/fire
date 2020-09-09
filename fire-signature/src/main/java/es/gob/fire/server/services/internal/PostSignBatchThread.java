@@ -14,7 +14,9 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
+import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeParams;
 import es.gob.fire.upgrade.UpgradeResult;
@@ -176,6 +178,14 @@ class PostSignBatchThread extends ConcurrentProcessThread {
     				}
     			}
     		}
+    		catch (final ConnectionException e) {
+    			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.CONNECTION_VALIDATION_PLATFORM);
+    			this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
+    			setFailed(true);
+    			interrupt();
+    			return;
+    		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error al validar/actualizar la firma con docId: " + this.docId), e); //$NON-NLS-1$
     			this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
@@ -211,7 +221,8 @@ class PostSignBatchThread extends ConcurrentProcessThread {
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.WARNING, logF.f("Error al postprocesar con el DocumentManager la firma del documento: " + this.docId), e); //$NON-NLS-1$
-    			this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
+    			AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, this.docManager.getClass().getCanonicalName());
+        		this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
     			setFailed(true);
     			interrupt();
     			return;

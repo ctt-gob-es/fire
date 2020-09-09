@@ -640,10 +640,10 @@ public final class FIReTriHelper {
 	 * certificado indicado o cuando no se pudiese comprobar.
 	 * @throws IOException Cuando falla la decodificaci&oacute;n Base 64 de los datos.
 	 */
-	// TODO: Esto podr&iacute;a ser mas robusto en las firmas XAdES, en la que no se utiliza la
-	// prefirma (par&aacute;metro PRE) para completar la firma, sino el parametro BASE. Habr&iacute;a
-	// que extraer la prefirma del BASE en lugar de coger la que se pasa como par&aacute;metro (que
-	// ya podr&iacute;a dejar de pasarse).
+	// TODO: Esto podria ser mas robusto en las firmas XAdES, en la que no se utiliza la
+	// prefirma (parametro PRE) para completar la firma, sino el parametro BASE. Habr&iacute;a
+	// que extraer la prefirma del BASE en lugar de coger la que se pasa como parametro (que
+	// ya podria dejar de pasarse).
 	public static void checkSignaturesIntegrity(final TriphaseData triphaseData, final X509Certificate cert)
 			throws SecurityException, IOException {
 

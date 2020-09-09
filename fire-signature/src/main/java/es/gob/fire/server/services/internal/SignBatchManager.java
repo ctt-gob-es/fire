@@ -57,18 +57,14 @@ public class SignBatchManager {
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
+		// Recuperamos los datos de sesion de la transaccion, lo que tambien comprueba que
+		// esa sesion corresponda a ese usuario
     	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
     	if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(), "La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
     		return;
     	}
-
-    	// TODO: Borrar esto cuando se terminen los cambios en el componente distribuido PHP
-    	// en el que, por ahora, no se envia el subjectId por parametro, asi que hemos de usar
-    	// el de sesion. Esto impide realizar la comprobacion de seguridad adicional de que sea
-    	// el mismo usuario el que crease la transaccion y el que ahora dice ser
-    	final String currentUserId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
@@ -97,7 +93,6 @@ public class SignBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         SessionCollector.commit(session);
 
-
         LOGGER.info(logF.f("Generamos la URL de redireccion")); //$NON-NLS-1$
 
 		// Recuperamos los proveedores cargados para la aplicacion
@@ -125,7 +120,7 @@ public class SignBatchManager {
         		transactionId,
         		redirectUrlBase + redirectUrl +
         			"&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$ //$NON-NLS-2$
-        			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + currentUserId + //$NON-NLS-1$ //$NON-NLS-2$
+        			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
         LOGGER.info(logF.f("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$

@@ -91,6 +91,8 @@ public class ConfigManager {
 
 	private static final String PROP_FIRE_PUBLIC_URL = "pages.public.url"; //$NON-NLS-1$
 
+	private static final String PROP_ALARMS_NOTIFIER = "alarms.notifier"; //$NON-NLS-1$
+
 	private static final String PROP_DOCUMENT_MANAGER_PREFIX = "docmanager."; //$NON-NLS-1$
 
 	private static final String PROP_DOCMANAGER_REQUESTOR_PARTICLE = ".requestor"; //$NON-NLS-1$
@@ -644,6 +646,25 @@ public class ConfigManager {
 		}
 
 		return getProperty(PROP_FIRE_PAGES_LOGO_URL);
+	}
+
+	/**
+	 * Recupera la clase {@link es.gob.fire.server.services.internal.alarms.AlarmNotifier AlarmNotifier}
+	 * con la que notificar las alarmas identificadas.
+	 * @return Nombre cualificado de la clase.
+	 */
+	public static String getAlarmsNotifierClassName() {
+
+		if (config == null) {
+			try {
+				loadConfig();
+			} catch (final ConfigFilesException e) {
+				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				return ""; //$NON-NLS-1$
+			}
+		}
+
+		return getProperty(PROP_ALARMS_NOTIFIER);
 	}
 
 	/**

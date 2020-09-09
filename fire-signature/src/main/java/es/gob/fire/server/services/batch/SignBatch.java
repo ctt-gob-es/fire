@@ -16,6 +16,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -113,18 +114,19 @@ public abstract class SignBatch {
 
 		// ****************************************************
 		// *********** Carga del XML **************************
-		final InputStream is = new ByteArrayInputStream(xml);
 		final Document doc;
-		try {
-			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+		try (InputStream is = new ByteArrayInputStream(xml)) {
+			try {
+				doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+			}
+			catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "Error al cargar el fichero XML de definicion de lote", e); //$NON-NLS-1$
+				if (LOGGER.isLoggable(Level.FINE)) {
+					LOGGER.fine("XML del lote:\n" + new String(xml)); //$NON-NLS-1$
+				}
+				throw new IOException("Error al cargar el fichero XML de definicion de lote", e); //$NON-NLS-1$
+			}
 		}
-		catch (final Exception e) {
-			LOGGER.severe(
-				"Error al cargar el fichero XML de definicion de lote: " + e + "\n" + new String(xml) //$NON-NLS-1$ //$NON-NLS-2$
-			);
-			throw new IOException("Error al cargar el fichero XML de definicion de lote: " + e, e); //$NON-NLS-1$
-		}
-		is.close();
 		// *********** Fin carga del XML **********************
 		// ****************************************************
 

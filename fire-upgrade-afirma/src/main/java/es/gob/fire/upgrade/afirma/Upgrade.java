@@ -12,6 +12,7 @@ package es.gob.fire.upgrade.afirma;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
+import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.UpgradeResult;
 import es.gob.fire.upgrade.UpgradeResult.State;
 
@@ -48,18 +49,20 @@ public final class Upgrade {
      * @param ignoreGracePeriod
      * 			  Indica que debe ignorase el periodo de gracia de la actualizaci&oacute;n de firma.
      * @return Resultado de la actualizaci&oacute;n de la firma.
+     * @throws ConnectionException
+     *             Si falla la llamada al servicio de actualizaci&oacute;n.
      * @throws IOException
      *             Si hay problemas en los tratamientos de datos o lectura de
      *             opciones de configuraci&oacute;n.
      * @throws PlatformWsException
-     *             Si hay problemas con los servicios Web de mejora de firmas.
+     *             Si ocurre un error al procesar la petici&oacute;n o la respuesta del servicio.
      * @throws AfirmaResponseException
      *             Si el servicio Web de mejora de firmas env&iacute;a una
      *             respuesta de error.
      */
     public static UpgradeResult upgradeSignature(final AfirmaConnector conn, final byte[] data,
             final UpgradeTarget format, final String afirmaAppName, final boolean ignoreGracePeriod)
-            throws IOException, PlatformWsException, AfirmaResponseException {
+            throws ConnectionException, IOException, PlatformWsException, AfirmaResponseException {
 
         final String inputDss = DssServicesUtils.createSignUpgradeDss(
         		data,
@@ -78,7 +81,7 @@ public final class Upgrade {
             vr = new UpgradeAfirmaResponse(response);
         } catch (final Exception e) {
             throw new PlatformWsException(
-                    "Error analizando la respuesta de la Plataforma @firma: " + e, e); //$NON-NLS-1$
+                    "Error analizando la respuesta de la Plataforma @firma", e); //$NON-NLS-1$
         }
 
         // Comprobamos si la operacion termino indicando que requiere periodo de gracia
@@ -129,18 +132,20 @@ public final class Upgrade {
      * @param afirmaAppName
      *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
      * @return Resultado de la actualizaci&oacute;n de la firma.
+     * @throws ConnectionException
+     *             Si falla la llamada al servicio de recuperaci&oacute;n de firma.
      * @throws IOException
      *             Si hay problemas en los tratamientos de datos o lectura de
      *             opciones de configuraci&oacute;n.
      * @throws PlatformWsException
-     *             Si hay problemas con los servicios Web de mejora de firmas.
+     *             Si ocurre un error al procesar la petici&oacute;n o la respuesta del servicio.
      * @throws AfirmaResponseException
      *             Si el servicio Web de mejora de firmas env&iacute;a una
      *             respuesta de error.
      */
     public static UpgradeResult recoverUpgradedSignature(final AfirmaConnector conn,
     		final String docId, final UpgradeTarget format, final String afirmaAppName)
-            throws IOException, PlatformWsException, AfirmaResponseException {
+            throws ConnectionException, IOException, PlatformWsException, AfirmaResponseException {
 
         final String inputDss = DssServicesUtils.createRecoverSignatureDss(
         		docId,

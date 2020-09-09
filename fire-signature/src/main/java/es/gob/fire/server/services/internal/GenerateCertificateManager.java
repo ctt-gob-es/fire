@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReCertificateAvailableException;
 import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.FIReConnector;
@@ -76,15 +77,16 @@ public class GenerateCertificateManager {
         	gcr = generateCertificate(providerName, subjectId, config);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
         			);
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+            response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
         			"No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
         	return;
         }
@@ -141,7 +143,7 @@ public class GenerateCertificateManager {
 	 * @throws WeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil.
 	 * y no se pueda crear otro.
 	 */
-	public static GenerateCertificateResult generateCertificate(final String providerName, final String subjectId, final Properties config) throws IOException, FIReConnectorFactoryException, FIReCertificateAvailableException, FIReCertificateException, FIReConnectorNetworkException, FIReConnectorUnknownUserException, WeakRegistryException {
+	public static GenerateCertificateResult generateCertificate(final String providerName, final String subjectId, final Properties config) throws IOException, FIReConnectorFactoryException, FIReCertificateAvailableException, FIReCertificateException, FIReConnectorUnknownUserException, FIReConnectorNetworkException, WeakRegistryException {
 
     	// Obtenemos el conector con el backend ya configurado
     	final FIReConnector connector = ProviderManager.getProviderConnector(providerName, config);

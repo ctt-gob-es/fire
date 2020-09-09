@@ -9,7 +9,11 @@
  */
 package es.gob.fire.server.services.internal.sessions;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import es.gob.fire.alarms.Alarm;
+import es.gob.fire.server.services.internal.AlarmsManager;
 
 /**
  * Factor&iacute;a para la obtenci&oacute;n de gestores de sesiones que
@@ -35,17 +39,19 @@ public class SessionsDAOFactory {
 
 		SessionsDAO daoInstance = null;
 
-		// Se mantiene por retrocompatibilidad el que se pueda configurar la
-		// propiedad mediante el nombre "filesystem"
+		// Se mantiene por retrocompatibilidad el que se pueda usar el nombre
+		// "filesystem" para configurar el gestor para la comparticion a traves
+		// de un directorio temporal comun
+		final String daoClassname = DAO_FILESYSTEM.equalsIgnoreCase(classname) ?
+				DAO_FILESYSTEM_CLASSNAME :
+					classname;
+
+		// Cargamos la clase
 		try {
-			if (DAO_FILESYSTEM.equalsIgnoreCase(classname)) {
-				daoInstance = (SessionsDAO) Class.forName(DAO_FILESYSTEM_CLASSNAME).getConstructor().newInstance();
-			}
-			else {
-				daoInstance = (SessionsDAO) Class.forName(classname).getConstructor().newInstance();
-			}
+			daoInstance = (SessionsDAO) Class.forName(daoClassname).getConstructor().newInstance();
 		} catch (final Exception e) {
-			LOGGER.severe("Error al cargar del gestor para la comparticion de sesiones entre nodos: " + e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error al cargar del estor para la comparticion de sesiones entre nodos", e); //$NON-NLS-1$
+			AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, daoClassname);
 		}
 		return daoInstance;
 	}

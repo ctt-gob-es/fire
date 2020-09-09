@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
@@ -70,24 +71,25 @@ public class RecoverCertificateManager {
     		config = ServiceUtil.base642Properties(configB64);
     	}
 
-    	String provider = configuredProvider;
-    	if (provider == null) {
-    		provider = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
+    	String providerName = configuredProvider;
+    	if (providerName == null) {
+    		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
     	}
 
     	LOGGER.info(logF.f("Recuperamos el certificado de usuario")); //$NON-NLS-1$
 
     	byte[] newCertEncoded;
         try {
-        	newCertEncoded = recoverCertificate(provider, transactionId, config);
+        	newCertEncoded = recoverCertificate(providerName, transactionId, config);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+        	AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
             response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
                     "No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
             return;

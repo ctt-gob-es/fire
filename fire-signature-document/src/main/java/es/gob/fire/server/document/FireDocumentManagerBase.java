@@ -12,6 +12,12 @@ import java.util.Properties;
 public abstract class FireDocumentManagerBase implements FireAsyncDocumentManager {
 
 	@Override
+	public boolean needConfiguration() {
+		// Por defecto, los gestores necesitaran configuracion externa
+		return true;
+	}
+
+	@Override
 	public void init(final Properties config) throws IOException {
 		// No hace nada
 	}

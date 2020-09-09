@@ -295,7 +295,8 @@ public class TestConnector extends FIReConnector {
 	}
 
 	@Override
-	public Map<String, byte[]> sign(final String transactionId) throws FIReSignatureException {
+	public Map<String, byte[]> sign(final String transactionId)
+			throws FIReSignatureException, FIReConnectorNetworkException {
 
 		final StringBuilder testUrl = new StringBuilder()
 		.append(this.testUrlBase).append("TestSignService") //$NON-NLS-1$
@@ -306,7 +307,7 @@ public class TestConnector extends FIReConnector {
 			response = ConnectionManager.readUrlByGet(testUrl.toString());
 		} catch (final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de prueba de firma", e); //$NON-NLS-1$
-			throw new FIReSignatureException("Error en la llamada al servicio de prueba de firma", e); //$NON-NLS-1$
+			throw new FIReConnectorNetworkException("Error en la llamada al servicio de prueba de firma", e); //$NON-NLS-1$
 		}
 
 		final Map<String, byte[]> result = new HashMap<>();

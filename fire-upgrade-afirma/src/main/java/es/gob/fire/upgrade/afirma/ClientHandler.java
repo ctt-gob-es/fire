@@ -89,7 +89,7 @@ public final class ClientHandler extends BasicHandler {
                             SOAPPart.FORM_SOAPENVELOPE);
 
         } catch (final Exception e) {
-            LOGGER.log(Level.SEVERE, "Error en la preparacion del mensaje para la invocacion SOAP: " + e, e); //$NON-NLS-1$
+            LOGGER.log(Level.SEVERE, "Error en la preparacion del mensaje para la invocacion SOAP", e); //$NON-NLS-1$
             AxisFault.makeFault(e);
         }
     }

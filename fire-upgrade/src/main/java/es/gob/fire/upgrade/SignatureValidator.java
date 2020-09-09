@@ -24,9 +24,10 @@ public interface SignatureValidator {
 	 * @return Resultado de la operaci&oacute;n de actualizaci&oacute;n.
 	 * @throws UpgradeException Cuando ocurre un error durante la actualizaci&oacute;n de la firma.
 	 * @throws VerifyException Cuando la firma que se desea actualizar no es v&aacute;lida.
+	 * @throws ConnectionException Cuando se produce un error de conexi&oacute;n con el servicio.
 	 */
 	UpgradeResult upgradeSignature(byte[] signature, String upgradeFormat, Properties config)
-			throws UpgradeException, VerifyException;
+			throws UpgradeException, VerifyException, ConnectionException;
 
 	/**
 	 * Recupera una firma enviada a actualizar previamente y para la que se solicit&oacute; un
@@ -36,11 +37,12 @@ public interface SignatureValidator {
 	 * @param config Opciones de configuraci&oacute;n adicionales para la operaci&oacute;n.
 	 * @return Resultado de la operaci&oacute;n de actualizaci&oacute;n.
 	 * @throws UpgradeException Cuando ocurre un error al recuperar la firma.
-	 * @throws IOException Cuando ocurre un error al conectar con la plataforma de
-	 * actualizaci&oacute;n.
+	 * @throws ConnectionException Cuando se produce un error de conexi&oacute;n con el servicio.
+	 * @throws IOException Cuando se identifica un error en los datos de conexi&oacute;n
+	 * o se encuentra un problema al procesar la respuesta.
 	 */
 	UpgradeResult recoverUpgradedSignature(String docId, String upgradeFormat, Properties config)
-			throws UpgradeException, IOException;
+			throws UpgradeException, ConnectionException, IOException;
 
 	/**
 	 * Valida una firma electr&oacute;nica.
@@ -48,6 +50,8 @@ public interface SignatureValidator {
 	 * @param config Opciones de configuraci&oacute;n adicionales para la operaci&oacute;n.
 	 * @return Resultado de la operaci&oacute;n de actualizaci&oacute;n.
 	 * @throws VerifyException Cuando ocurre un error durante la validaci&oacute;n de la firma.
+	 * @throws ConnectionException Cuando se produce un error de conexi&oacute;n con el servicio.
 	 */
-	VerifyResult validateSignature(byte[] signature, Properties config) throws VerifyException;
+	VerifyResult validateSignature(byte[] signature, Properties config) throws VerifyException,
+		ConnectionException;
 }

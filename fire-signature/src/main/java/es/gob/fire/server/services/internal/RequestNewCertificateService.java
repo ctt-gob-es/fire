@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReCertificateAvailableException;
 import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
@@ -30,7 +31,7 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.signature.ConfigManager;
 
 /**
- * Servlet implementation class RequestNewCertificateService
+ * Servlet para la solicitud de expedici&oacute;n de un nuevo certificado.
  */
 public final class RequestNewCertificateService extends HttpServlet {
 
@@ -79,7 +80,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         	session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
         }
 
-        final String origin	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+        final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
 		TransactionConfig connConfig =
 				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null) {
@@ -94,7 +95,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
         final TransactionConfig requestCertConfig = (TransactionConfig) connConfig.clone();
         requestCertConfig.setRedirectSuccessUrl(
-        		redirectUrlBase + "ChooseNewCertificate.jsp?" + //$NON-NLS-1$
+        		redirectUrlBase + "recoverNewCertificateService?" + //$NON-NLS-1$
         				ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
         				ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId); //$NON-NLS-1$
 
@@ -102,7 +103,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
         final GenerateCertificateResult gcr;
         try {
-        	gcr = GenerateCertificateManager.generateCertificate(origin, subjectId, requestCertConfig.getProperties());
+        	gcr = GenerateCertificateManager.generateCertificate(providerName, subjectId, requestCertConfig.getProperties());
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
@@ -111,15 +112,16 @@ public final class RequestNewCertificateService extends HttpServlet {
         	return;
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("Error en la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error en la carga o configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         			"Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
         			);
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el sistema"), e); //$NON-NLS-1$
-        	response.sendError(
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+            response.sendError(
         			HttpServletResponse.SC_REQUEST_TIMEOUT,
         			"No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
         	return;
