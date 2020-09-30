@@ -37,16 +37,25 @@
 
 <script th:inline="javascript">
 
-var tableVipInterval = $('#certServiceTable').DataTable({
-	"autoWidth" : false,
-	"pagingType" : "full_numbers",
-	"initComplete" : function(settings, json) {
-		//eliminamos el scroll inferior
-		$('#certServiceTable_wrapper .dataTables_scrollBody').css("overflow-x", "hidden");
-		
-	},
+var getcertificates = /*[[@{/certificatedatatable}]]*/;
+var addTemplate = /*[[@{/addCertificate}]]*/;
+var actionSave = /*[[@{/savecertificate}]]*/;
+var actionDelete = /*[[@{/deletecertificate}]]*/;
 
-	"language": {
+var tableCertFire = $('#certServiceTable').DataTable({
+    "autoWidth" : false,
+    "pagingType" : "full_numbers",
+    "initComplete" : function(settings, json) {
+        //eliminamos el scroll inferior
+        $('#certServiceTable_wrapper .dataTables_scrollBody').css("overflow-x", "hidden");
+       
+    },
+    "iTotalRecords": "totalElements",
+    "iTotalDisplayRecords": "numberOfElements",
+    
+	"processing": true,
+    "serverSide": true,
+    "language": {
         "url": "js/datatables/i18n/spanish.json",
         select: {
             rows: {
@@ -54,49 +63,135 @@ var tableVipInterval = $('#certServiceTable').DataTable({
                 1: "1 fila seleccionada"
             }
           }
-        },        
-	"columnDefs" : [ 
-		{
-			"targets" : [ 0 ],
-			"visible" : false,
-			"searchable" : false,
-			"width": "0%"
-		},
-		{
-			"targets" : [ 1 ],
-			"visible" : true,
-			"searchable" : false,
-			"width": "15%"
-		},
-		{
-			"targets" : [ 2 ],
-			"visible" : true,
-			"searchable" : false,
-			"width": "30%"
-		},
-		{
-			"targets" : [ 3 ],
-			"visible" : true,
-			"searchable" : false,
-			"width": "30%"
-		},
-		{
-			"targets" : [ 4 ],
-			"visible" : true,
-			"searchable" : false,
-			"width": "15%"
-		}
-		
-	],
-	"order" : [ 1, 'desc' ],
-	responsive :  true/* {
-		 details : {
-			type : 'column',
-			target : -1
-		} 
-	}  */
+        },       
+    "columnDefs" : [
+        {
+            "targets" : [ 0 ],
+            "visible" : false,
+            "searchable" : false,
+            "width": "0%"
+        },
+        {
+            "targets" : [ 1 ],
+            "visible" : true,
+            "searchable" : true,
+            "width": "15%"
+        },
+        {
+            "targets" : [ 2 ],
+            "visible" : true,
+            "searchable" : true,
+            "width": "30%"
+        },
+        {
+            "targets" : [ 3 ],
+            "visible" : true,
+            "searchable" : true,
+            "width": "30%"
+        },
+        {
+            "targets" : [ 4 ],
+            "visible" : true,
+            "searchable" : true,
+            "width": "15%"
+        }
+       
+    ],
+    "order" : [ 1, 'desc' ],
+    responsive :  true,/* {
+         details : {
+            type : 'column',
+            target : -1
+        }
+    }  */
+    dom: 'Bfrtip',
+    buttons: [{text: 'Agregar', name: 'add'},
+    	{extend: 'selected',text: 'Editar',name: 'editt',
+   		action: function ( e, dt, node, config ) {	    				  
+			  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+				id: o.context[0].aoColumns[e].mData,
+				title: o.context[0].aoColumns[e].sTitle                
+			  });
+			  hide();
+			  var d = dt.rows({
+                  selected: !0
+				  });
+					
+				  var certificateName = d.data()[0][a[1].id];
+				  var menuEdit = /*[[@{/menuedit}]]*/;
+				  $.ajax({
+ 						url : menuEdit,
+ 						type : 'GET',
+ 						data : $.param({'certificateName':name}),
+ 						cache : false,
+ 						success : function(data) {
+ 							hide();
+ 							$('#modal').html(data);
+ 							$('#certForm').modal('show');																
+ 						},
+ 						error : function() {}
+ 					});
+   		}
+    },
+			  {extend: 'selected',text: 'Eliminar',name: 'delete'}
+    ]
+    
+    
+    
+   
+});
 
-}); 
+//Función para cargar los datos del par identificador/valor seleccionado.
+function editCertificate(idCertificate) {
+	var loadEditCertificate = /*[[@{/loadeditcertificate}]]*/
+	var idCertificate= idCertificate;
+	$.ajax(loadEditCertificate,{
+		data:$.param({'id':idCertificate}),
+        type:'GET',
+        success: function(data){
+        	hide();
+    		// Se oculta la capa 'cargando...'
+    		$('#modal').html(data);
+			$('#modalEditCertificate').modal('show');
+    		
+        },
+        error:function(data){
+        	// Se oculta la capa 'cargando...'
+        	hide();       
+}
+	});
+}
 
+//Función para descargar el certificado 
+function downloadCertificate(idCertificate) {
+	var downloadCertificate = /*[[@{/downloadcertificate?idCertificate=}]]*/;
+	var idCertificate= idSystemCertificate;
+	
+	var urlDownload = downloadCertificate+idCertificate;
+	document.location.href= urlDownload;
+	
+}
+
+//Función mostrar el modal de confirmación antes de  eliminar un certificado
+function deleteConfirmCertificate(idCertificate,  element) {
+	var loadConfirmDelete = /*[[@{/loadconfirmdeletecertificate}]]*/
+	var idSC= idCertificate;
+	var rowIndex = element.parentNode.parentNode.rowIndex;
+	$.ajax(loadConfirmDelete,{
+			data:$.param({'idCertificate':idSC, 'rowindex':rowIndex}),
+	        type:'GET',
+	        success: function(data){
+	    		// Se oculta la capa 'cargando...'
+	    		hide();
+	    		$('#modal').html(data);
+				$('#modalDeleteCertificate').modal('show');
+	        },
+	        error:function(data){
+	        	// Se oculta la capa 'cargando...'
+	        	hide();
+	        
+	}
+		});
+}
 
 </script>

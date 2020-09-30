@@ -51,6 +51,8 @@ import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.dto.CertificateEditDTO;
+import es.gob.fire.persistence.dto.UserDTO;
+import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.ICertificateService;
@@ -207,5 +209,42 @@ public class CertificateController {
 	// model.addAttribute("addcertificateform", CertificateForm);
 	// return "modal/keystore/CertificateForm.html";
 	// }
+	/**
+	 * Method that maps the add user web request to the controller and sets the
+	 * backing form.
+	 *
+	 * @param model
+	 *            Holder object for model attributes.
+	 * @return String that represents the name of the view to forward.
+	 */
+	@RequestMapping(value = "addCertificate", method = RequestMethod.POST)
+	public String addUser(final Model model) {
+		
+		model.addAttribute("userform", new CertificateDTO());
+		model.addAttribute("accion", "add");
+		return "modal/certificateForm.html";
+	}
+	
+	/**
+	 * Method that opens the modal form user edit.
+	 * @param username String that represents the user's name
+	 * @param model view Model object
+	 * @return String that represents the navigation HTML fragment
+	 */
+	@RequestMapping(value = "menucertedit")
+	public String menuEdit(@RequestParam("idCertificado") final Long idCertificado, final Model model) {
+		 Certificate cert = certificateService.getCertificateByCertificateId(idCertificado);
+		 CertificateEditDTO certformedit = new CertificateEditDTO();
 
+//		 	certificateEditDTO = new CertificateDTO();
+//		 	certificateEditDTO.setIdCertificate(cert.getIdCertificado());
+//		 	certificateEditDTO.setAlias(cert.getCertificateName());
+//		 	certificateEditDTO.setCertPrincipal(cert.getCertPrincipal());
+//		 	certificateEditDTO.setCertBackup(cert.getCertBackup());
+//		 	certificateEditDTO.setfechaAlta(cert.getfechaAlta());
+
+		
+		model.addAttribute("certformedit", certformedit);
+		return "modal/certFormEdit.html";
+	}
 }
