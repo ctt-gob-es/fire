@@ -53,8 +53,8 @@ var tableCertFire = $('#certServiceTable').DataTable({
     "iTotalRecords": "totalElements",
     "iTotalDisplayRecords": "numberOfElements",
     
-	"processing": true,
-    "serverSide": true,
+	/* "processing": true,
+    "serverSide": true, */
     "language": {
         "url": "js/datatables/i18n/spanish.json",
         select: {
@@ -105,24 +105,26 @@ var tableCertFire = $('#certServiceTable').DataTable({
         }
     }  */
     dom: 'Bfrtip',
+    select: 'single',
     buttons: [{text: 'Agregar', name: 'add'},
     	{extend: 'selected',text: 'Editar',name: 'editt',
-   		action: function ( e, dt, node, config ) {	    				  
+   		action: function ( e, dt, node, config ) {	
+   		 	
 			  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
 				id: o.context[0].aoColumns[e].mData,
 				title: o.context[0].aoColumns[e].sTitle                
 			  });
-			  hide();
+			 
 			  var d = dt.rows({
                   selected: !0
 				  });
 					
-				  var certificateName = d.data()[0][a[1].id];
-				  var menuEdit = /*[[@{/menuedit}]]*/;
+				  var idCertificado = d.data()[0][a[0].id];
+				  var certEdit = /*[[@{/certEdit}]]*/;
 				  $.ajax({
- 						url : menuEdit,
+ 						url : certEdit,
  						type : 'GET',
- 						data : $.param({'certificateName':name}),
+ 						data : $.param({'idCertificado':idCertificado}),
  						cache : false,
  						success : function(data) {
  							hide();

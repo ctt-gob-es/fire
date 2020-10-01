@@ -231,8 +231,8 @@ public class CertificateController {
 	 * @param model view Model object
 	 * @return String that represents the navigation HTML fragment
 	 */
-	@RequestMapping(value = "menucertedit")
-	public String menuEdit(@RequestParam("idCertificado") final Long idCertificado, final Model model) {
+	@RequestMapping(value = "certEdit")
+	public String certEdit(@RequestParam("idCertificado") final Long idCertificado, final Model model) {
 		 Certificate cert = certificateService.getCertificateByCertificateId(idCertificado);
 		 CertificateEditDTO certformedit = new CertificateEditDTO();
 
@@ -245,6 +245,6 @@ public class CertificateController {
 
 		
 		model.addAttribute("certformedit", certformedit);
-		return "modal/certFormEdit.html";
+		return "modal/certificateEditForm.html";
 	}
 }
