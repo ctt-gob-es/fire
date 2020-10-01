@@ -53,8 +53,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
     "iTotalRecords": "totalElements",
     "iTotalDisplayRecords": "numberOfElements",
     
-	"processing": true,
-    "serverSide": true,
+	
     "language": {
         "url": "js/datatables/i18n/spanish.json",
         select: {
@@ -105,6 +104,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
         }
     }  */
     dom: 'Bfrtip',
+    
     buttons: [{text: 'Agregar', name: 'add'},
     	{extend: 'selected',text: 'Editar',name: 'editt',
    		action: function ( e, dt, node, config ) {	    				  
