@@ -1,40 +1,67 @@
-<form name="altEditor-form" role="form" id="certUserForm" th:object="${certUserForm}" action="@{/savecertuser}" method="post">
-
-
-<div class="form-group">
-				
-					<label for="alias" class="col-form-label" th:text="#{form.ssl.alias}"></label>
-					<script th:inline="javascript">
-						/*<![CDATA[*/
-						    var messageName = /*[[#{form.valid.keystore.alias.pattern}]]*/ 'default';
-						/*]]>*/
-					</script>
-					<input onblur="validate(this,messageName);" type="text" id="alias" th:field="*{alias}" style="overflow:hidden" class="form-control" required pattern=".{3,50}" />
-					<div id="invalid-alias" class="invalid-feedback"></div>
-				
-				<div style="clear:both;"/>
+<div class="modal" tabindex="-1" role="dialog" id="certForm">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">
+					Alta de certificados
+					<button type="button" class="close"
+						onclick="closeButton('modalAdd')" aria-label="Cerrar">
+						<span aria-hidden="true">&times;</span>
+					</button>
 			</div>
-							
-	<div class="form-group">
-			<div class="custom-file" id="customFile" lang="es">
-				<input type="file" class="custom-file-input" id="file" name="file" th:field="*{file}"  aria-describedby="fileHelp"> 
-					<label class="custom-file-label" for="file" th:text="#{form.ssl.file.choose}"></label>
+			<div class="modal-body">
+				<form name="altEditor-form" role="form" id="certForm"
+					th:object="${certform}" action="@{/savecert}" method="post">
+					<div class="form-group">
+
+						<label for="alias" class="col-form-label"
+							th:text="#{form.ssl.alias}"></label>
+						<script th:inline="javascript">
+							/*<![CDATA[*/
+							var messageName = /*[[#{form.valid.keystore.alias.pattern}]]*/'default';
+							/*]]>*/
+						</script>
+						<input onblur="validate(this,messageName);" type="text" id="alias"
+							th:field="*{alias}" style="overflow: hidden" class="form-control"
+							required pattern=".{3,50}" />
+						<div id="invalid-alias" class="invalid-feedback"></div>
+
+						<div style="clear: both;" />
+					</div>
+
+					<div class="form-group">
+						<div class="custom-file" id="customFile" lang="es">
+							<input type="file" class="custom-file-input" id="file"
+								name="file" th:field="*{file}" aria-describedby="fileHelp">
+							<label class="custom-file-label" for="file"
+								th:text="#{form.ssl.file.choose}"></label>
+						</div>
+						<div style="clear: both;" />
+					</div>
+
+				</form>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default"
+						onclick="closeButton('modalAdd')">Cerrar</button>
+					<button type="submit" id="editBtnModal" class="btn btn-primary">Guardar
+						cambios</button>
+				</div>
 			</div>
-		<div style="clear:both;"/>
+		</div>
 	</div>
-							
-</form>
-<script>
-$("input[type=file]").change(function () {
-  var fieldVal = $(this).val();
+	<script>
+		$("input[type=file]").change(
+				function() {
+					var fieldVal = $(this).val();
 
-  // Change the node's value by removing the fake path (Chrome)
-  fieldVal = fieldVal.replace("C:\\fakepath\\", "");
+					// Change the node's value by removing the fake path (Chrome)
+					fieldVal = fieldVal.replace("C:\\fakepath\\", "");
 
-  if (fieldVal != undefined || fieldVal != "") {
-	    $(this).next(".custom-file-label").attr('data-content', fieldVal);
-	    $(this).next(".custom-file-label").text(fieldVal);
-	  }
+					if (fieldVal != undefined || fieldVal != "") {
+						$(this).next(".custom-file-label").attr('data-content',
+								fieldVal);
+						$(this).next(".custom-file-label").text(fieldVal);
+					}
 
-});
-</script>
+				});
+	</script>

@@ -12,8 +12,9 @@
 				<form name="altEditor-form" role="form" id="certForm"
 					th:object="${certformedit}" th:action="@{/updatessl}" method="post">
 
-					<input type='hidden' class='primarykey' id="idSystemCertificate"
-						th:field="*{idSystemCertificate}"> <input type='hidden'
+					<input type='hidden' class='primarykey' id="idCertificate"
+						th:field="idCertificate"> 
+					<input type='hidden'
 						class='primarykey' id="idStatusCertificate"
 						th:field="*{idStatusCertificate}">
 
