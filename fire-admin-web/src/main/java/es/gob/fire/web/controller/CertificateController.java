@@ -27,16 +27,11 @@ package es.gob.fire.web.controller;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,16 +42,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.gob.fire.commons.utils.Base64;
-import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.dto.CertificateEditDTO;
-import es.gob.fire.persistence.dto.UserDTO;
-import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.entity.Certificate;
-import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.ICertificateService;
-import es.gob.fire.persistence.service.impl.CertificateService;
 
 /**
  * <p>
@@ -220,7 +210,7 @@ public class CertificateController {
 	@RequestMapping(value = "addCertificate", method = RequestMethod.POST)
 	public String addUser(final Model model) {
 		
-		model.addAttribute("userform", new CertificateDTO());
+		model.addAttribute("certform", new CertificateDTO());
 		model.addAttribute("accion", "add");
 		return "modal/certificateForm.html";
 	}
@@ -231,19 +221,17 @@ public class CertificateController {
 	 * @param model view Model object
 	 * @return String that represents the navigation HTML fragment
 	 */
-	@RequestMapping(value = "certEdit")
+	@RequestMapping(value = "certEdit", method = RequestMethod.POST)
 	public String certEdit(@RequestParam("idCertificado") final Long idCertificado, final Model model) {
-		 Certificate cert = certificateService.getCertificateByCertificateId(idCertificado);
-		 CertificateEditDTO certformedit = new CertificateEditDTO();
+		Certificate cert = certificateService.getCertificateByCertificateId(idCertificado);
+		CertificateDTO certformedit = new CertificateDTO();
 
-//		 	certificateEditDTO = new CertificateDTO();
-//		 	certificateEditDTO.setIdCertificate(cert.getIdCertificado());
-//		 	certificateEditDTO.setAlias(cert.getCertificateName());
-//		 	certificateEditDTO.setCertPrincipal(cert.getCertPrincipal());
-//		 	certificateEditDTO.setCertBackup(cert.getCertBackup());
-//		 	certificateEditDTO.setfechaAlta(cert.getfechaAlta());
+		certformedit.setIdCertificate(cert.getIdCertificado());
+		certformedit.setAlias(cert.getCertificateName());
+		certformedit.setCertPrincipal(cert.getCertPrincipal());
+		certformedit.setCertBackup(cert.getCertBackup());
+		certformedit.setfechaAlta(cert.getfechaAlta());
 
-		
 		model.addAttribute("certformedit", certformedit);
 		return "modal/certificateEditForm.html";
 	}

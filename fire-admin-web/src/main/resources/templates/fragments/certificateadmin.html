@@ -106,7 +106,22 @@ var tableCertFire = $('#certServiceTable').DataTable({
     }  */
     dom: 'Bfrtip',
     select: 'single',
-    buttons: [{text: 'Agregar', name: 'add'},
+    buttons: [{text: 'Agregar', name: 'add',
+    	action: function ( e, dt, node, config ) {	
+    			 
+			  var addCertificate = /*[[@{/addCertificate}]]*/;
+			  $.ajax({
+					url : addCertificate,
+					type : 'POST',
+					cache : false,
+					success : function(data) {
+						hide();
+						$('#modal').html(data);
+						$('#certForm').modal('show');																
+					},
+					error : function() {}
+				});
+		}},
     	{extend: 'selected',text: 'Editar',name: 'editt',
    		action: function ( e, dt, node, config ) {	
    		 	
@@ -123,7 +138,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
 				  var certEdit = /*[[@{/certEdit}]]*/;
 				  $.ajax({
  						url : certEdit,
- 						type : 'GET',
+ 						type : 'POST',
  						data : $.param({'idCertificado':idCertificado}),
  						cache : false,
  						success : function(data) {
