@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<div class="container-fluid">
+	<h4 class="c-grey-900 mT-10 mB-30" th:text="#{app.admin.title}"></h4>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="bgc-white bd bdrs-3 p-20 mB-20">
+				<h4 class="c-grey-900 mB-20" th:text="#{table.app.title}"></h4>
+				<table id="appTable" class="table table-striped table-bordered" 
+					cellspacing="0" width="100%">
+					<thead>
+						<tr>
+							<!-- Columna oculta para el identificador de las aplicaciones -->
+							
+							<th th:text="#{table.app.name}"></th>
+							<th th:text="#{table.app.id}"></th>
+							<th th:text="#{table.app.responsable}">
+							<th th:text="#{table.app.fec_alt}"></th>
+							<th th:text="#{table.app.estado}"></th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script th:inline="javascript">
+$(document).ready(function() {
+    
+    var getapps = /*[[@{/applicationdatatable}]]*/;
+    var addTemplate = /*[[@{/addapp}]]*/;
+    var tblapp = $('#appTable').DataTable({
+        dom: 'Bfrtip',
+        select: 'single',
+        responsive: true,
+        altEditor: true,
+        buttons: [{text: 'Agregar',name: 'add'}, 
+                  {extend: 'selected',text: 'Editar',name: 'editt',
+                    action: function ( e, dt, node, config ) {                          
+                      for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+                        id: o.context[0].aoColumns[e].mData,
+                        title: o.context[0].aoColumns[e].sTitle                
+                      });
+                  
+                  var d = dt.rows({
+                   selected: !0
+                  });
+                  var name = d.data()[0][a[1].id];
+                  var menuEdit = /*[[@{/menuedit}]]*/;
+                  $.ajax({
+                         url : menuEdit,
+                         type : 'GET',
+                         data : $.param({'appName':name}),
+                         cache : false,
+                         success : function(data) {
+                             hide();
+                             $('#modal').html(data);
+                             $('#modalEdit').modal('show');                                                                
+                         },
+                         error : function() {}
+                     });
+                   }
+                  },
+                  {extend: 'selected',text: 'Eliminar',name: 'delete'}
+                ],
+        "iTotalRecords": "totalElements",
+        "iTotalDisplayRecords": "numberOfElements",        
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            "url": getapps,
+            "dataSrc" : "data",
+            "data": function (data) {
+                // Datos a pasar al modal
+                data.formId = "appForm";
+                data.addTemplate = addTemplate;
+            }
+        },
+        "language": {
+            "url": "js/datatables/i18n/spanish.json",
+            select: {
+                rows: {
+                    _: "%d filas seleccionadas",
+                    1: "1 fila seleccionada"
+                }
+              }
+            },
+           
+        "columns": [
+            { "data": "appId"},
+              { "data": "appName" },
+              { "data": "responsable" },
+            { "data": "fechaAltaApp" },
+            { "data": "habilitado" }
+            ]
+        }).on('crudaction', function(e, accion, idUserFire, data, rowindex){
+            // e          Evento Jquery
+            // accion     [add|edit|delete]
+            // pkid       Primer campo en la data [id]                ... en add,    retorna null
+            // data       Los campos adicionales  [campo_1, campo_n]  ... en delete, retorna null
+            // rowindex   El index de la fila para el dataTable       ... en add,    retorna null
+            
+            $('#altEditor-modal .modal-body .alert').remove();
+            // Se muestra la capa 'cargando...'
+            loading();
+            
+            
+        });
+
+ 
+
+ 
+
+ 
+
+});
+</script>
