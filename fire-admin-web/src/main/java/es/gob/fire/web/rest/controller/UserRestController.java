@@ -123,7 +123,6 @@ public class UserRestController {
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/usersdatatable", method = RequestMethod.GET)
 	public DataTablesOutput<User> users(@NotEmpty final DataTablesInput input) {
-		//input.getColumn(COLUMN_CERT_NOT_VALID).setSearchable(Boolean.FALSE);
 		return (DataTablesOutput<User>) userService.getAllUser(input);
 	}
 

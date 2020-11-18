@@ -141,5 +141,20 @@ public interface IWebViewMessages {
 	 */
 	String STAT_TITLE_SIG_ENDED_BY_FORMAT_LONG = "stat.title.sig.ended.by.format.long";
 	
+	/***********************/
+	/** Mensajes de error **/ 
+	/***********************/
+		
+	/**
+	 * Constant attribute that represents the name of the property <code>error.auth.delete.used</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_AUTH_DELETE_USED = "error.auth.delete.used";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>error.auth.delete.crypto</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_AUTH_DELETE_CRYPTO = "error.auth.delete.crypto";
+
+	
 	
 }

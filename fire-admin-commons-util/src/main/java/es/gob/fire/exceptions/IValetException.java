@@ -16,7 +16,7 @@
 
 /**
  * <b>File:</b><p>es.gob.valet.exceptions.IValetException.java.</p>
- * <b>Description:</b><p> Interface defining constants codes accepted for
+ * <b>Description:</b><p> Interface defining es.gob.fire.constants codes accepted for
  * the exceptions on the platform.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>20/09/2018.</p>
@@ -26,7 +26,7 @@
 package es.gob.fire.exceptions;
 
 /**
- * <p>Interface defining constants codes accepted for
+ * <p>Interface defining es.gob.fire.constants codes accepted for
  * the exceptions on the platform.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * @version 1.5, 18/02/2019.

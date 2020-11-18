@@ -74,11 +74,15 @@ public class CertificateDTO {
 	/**
 	 * Attribute that represents the subject of the   certificate principal.  
 	 */
+	@NotBlank(groups=CheckItFirst.class, message="{form.valid.keystore.certPrincipal.notempty}")
+    @Size(min=NumberConstants.NUM1, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
 	private String certPrincipal;
 	
 	/**
 	 * Attribute that represents the subject of the  certificate backup. 
 	 */
+	@NotBlank(groups=CheckItFirst.class, message="{form.valid.keystore.certBackup.notempty}")
+    @Size(min=NumberConstants.NUM1, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
 	private String	certBackup;
 	
 	
@@ -89,6 +93,14 @@ public class CertificateDTO {
 	
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.keystore.file.notnull}")
 	private MultipartFile file;
+	
+	/**
+	 * Attribute that represents the uploaded file of the system certificate. 
+	 */
+	
+	
+	@NotNull(groups=CheckItFirst.class, message="{form.valid.keystore.file.notnull}")
+	private MultipartFile file2;
 	
 	/**
 	 * Attribute that represents byte array of the system certificate. 
@@ -251,6 +263,38 @@ public class CertificateDTO {
 
 	public void setIssuer(String issuer) {
 		this.issuer = issuer;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #file}.
+	 * @return the value of the attribute {@link #file}.
+	 */	
+	public MultipartFile getFile() {
+		return file;
+	}
+	
+	/**
+	 * Sets the value of the attribute {@link #file}.
+	 * @param sslCertificate the value for the attribute {@link #file} to set.
+	 */
+	public void setFile(final MultipartFile sslCertificate) {
+		this.file = sslCertificate;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #file}.
+	 * @return the value of the attribute {@link #file}.
+	 */	
+	public MultipartFile getFile2() {
+		return file2;
+	}
+	
+	/**
+	 * Sets the value of the attribute {@link #file}.
+	 * @param sslCertificate the value for the attribute {@link #file} to set.
+	 */
+	public void setFile2(final MultipartFile sslCertificate) {
+		this.file2 = sslCertificate;
 	}
 	
 }

@@ -63,8 +63,8 @@
 	                </span>
 	                <span class="title" th:text="#{menu.admin.service}"></span>
 	                 <script th:inline="javascript">
-	                 	var actionService = /*[[@{/serviceadmin}]]*/;
-	                 	$('#aServiceAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionService, 'optionReplacement', 'GET', null, true); return false;});
+	                 	var applicationadmin = /*[[@{/applicationadmin}]]*/;
+	                 	$('#aServiceAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', applicationadmin, 'optionReplacement', 'GET', null, true); return false;});
 	                </script>
 	              </a>
 	            </li>

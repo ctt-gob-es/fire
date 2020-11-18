@@ -111,6 +111,12 @@ public final class Language {
 	 * Attribute that represents the properties for the locale for the core bundle messages.
 	 */
 	private static ResourceBundle resWebAdminBundle = null;
+	
+	/**
+	 * Attribute that represents the properties for the locale for the core bundle messages.
+	 */
+	private static ResourceBundle resCommonsUtilsBundle = null;
+	
 
 	static {
 		// Preparamos el URLClassLoader que hará referencia
@@ -185,6 +191,16 @@ public final class Language {
 	 */
 	public static String getResWebFire(String key) {
 		return resWebAdminBundle.getString(key);
+	}
+	
+	/**
+	 * Gets the message with the key and values indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @param values Values for insert in the message.
+	 * @return String with the message well-formed.
+	 */
+	public static String getFormatResCommonsUtilsFire(String key, Object[ ] values) {
+		return new MessageFormat(resCommonsUtilsBundle.getString(key), currentLocale).format(values);
 	}
 	
 }

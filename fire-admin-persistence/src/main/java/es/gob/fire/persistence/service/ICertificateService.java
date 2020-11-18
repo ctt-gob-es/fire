@@ -49,7 +49,7 @@ public interface ICertificateService {
 	 * Method that deletes a certificate in the persistence.
 	 * @param userId {@link Integer} that represents the certificate identifier to delete.
 	 */
-	void deleteCertificate(Long userId);
+	void deleteCertificate(Long idCertificado);
 	
 	/**
 	 * Method that gets all the certificate from the persistence.

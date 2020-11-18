@@ -1,7 +1,7 @@
 
 /** 
  * <b>File:</b><p>es.juntadeandalucia.justicia.biosign.integrationserver.core.util.NumberConstants.java.</p>
- * <b>Description:</b><p>Interface that defines numeric constants for generalized usage.</p>
+ * <b>Description:</b><p>Interface that defines numeric es.gob.fire.constants for generalized usage.</p>
  * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
  * <b>Date:</b><p>21 oct. 2019.</p>
  * @author Consejería de Turismo, Regeneración, Justicia y Administración Local de la Junta de Andalucía.
@@ -11,7 +11,7 @@ package es.gob.fire.commons.utils;
 
 
 /** 
- * <p>Interface that defines numeric constants for generalized usage.</p>
+ * <p>Interface that defines numeric es.gob.fire.constants for generalized usage.</p>
  * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
  * @version 1.0, 21 oct. 2019.
  */

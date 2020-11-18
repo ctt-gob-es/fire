@@ -236,7 +236,7 @@ public final class UtilsStringChar {
 	public static final String SYMBOL_ASTERISK_STRING = String.valueOf(SYMBOL_ASTERISK);
 
 	/**
-	 * Constant attribute that represents the array with all the characters defined as constants in this class.
+	 * Constant attribute that represents the array with all the characters defined as es.gob.fire.constants in this class.
 	 */
 	public static final char[ ] CHARACTERS_SET_TO_VALIDATORS = new char[ ] { UtilsStringChar.SPECIAL_LINE_BREAK, UtilsStringChar.SPECIAL_LINE_START, UtilsStringChar.SPECIAL_TABULATION, UtilsStringChar.SYMBOL_PAD, UtilsStringChar.SYMBOL_COLON, UtilsStringChar.SYMBOL_SEMICOLON, UtilsStringChar.SYMBOL_EQUAL };
 

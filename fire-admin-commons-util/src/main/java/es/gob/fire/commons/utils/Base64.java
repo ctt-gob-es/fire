@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  * to do so. I've got Base64 set to this behavior now, although earlier versions
  * broke lines by default.</p>
  *
- * <p>The constants defined in Base64 can be OR-ed together to combine options, so you
+ * <p>The es.gob.fire.constants defined in Base64 can be OR-ed together to combine options, so you
  * might make a call like this:</p>
  *
  * <code>String encoded = Base64.encodeBytes( mybytes, Base64.DO_BREAK_LINES );</code>

@@ -30,7 +30,7 @@ import es.gob.fire.persistence.service.ManagerPersistenceServices;
  * Application for monitoring services of @firma suite systems.
  * </p>
  *
- * @version 1.2, 28/10/2018.
+ * @version 1.2, 28/05/2020.
  */
 @Controller
 public class UserController {
@@ -133,7 +133,7 @@ public class UserController {
 
 	/**
 	 * Method that loads association types.
-	 * @return List of constants that represents the different association types.
+	 * @return List of es.gob.fire.constants that represents the different association types.
 	 */
 	private List<RolDTO> loadRoles() {
 		List<RolDTO> listRoles = new ArrayList<RolDTO>();

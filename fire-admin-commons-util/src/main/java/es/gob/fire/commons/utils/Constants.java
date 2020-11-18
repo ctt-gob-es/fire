@@ -1,6 +1,6 @@
 /** 
  * <b>File:</b><p>es.juntadeandalucia.justicia.biosign.integrationserver.core.constant.Constants.java.</p>
- * <b>Description:</b><p>Class that contains constants to use in the project.</p>
+ * <b>Description:</b><p>Class that contains es.gob.fire.constants to use in the project.</p>
  * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
  * <b>Date:</b><p>14 oct. 2019.</p>
  * @author Consejería de Turismo, Regeneración, Justicia y Administración Local de la Junta de Andalucía.
@@ -11,7 +11,7 @@ package es.gob.fire.commons.utils;
 import es.gob.fire.commons.utils.UtilsStringChar;
 
 /** 
- * <p>Class that contains constants to use in the project.</p>
+ * <p>Class that contains es.gob.fire.constants to use in the project.</p>
  * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
  * @version 1.0, 14 oct. 2019.
  */

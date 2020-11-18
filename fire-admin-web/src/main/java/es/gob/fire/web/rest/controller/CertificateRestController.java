@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -34,6 +35,7 @@ import es.gob.fire.persistence.dto.validation.OrderedValidation;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.persistence.service.ManagerPersistenceServices;
 
 @RestController
 public class CertificateRestController {
@@ -49,6 +51,15 @@ public class CertificateRestController {
 	 * Constant that represents the key Json 'errorSaveCertificate'.
 	 */
 	private static final String KEY_JS_ERROR_SAVE_CERT = "errorSaveCertificate";
+	/**
+	 * Constant that represents the parameter 'idSystemCertificate'.
+	 */
+	private static final String FIELD_ID_CERTIFICATE = "idCertificate";
+	
+	/**
+	 * Constant that represents the parameter 'certificateFile'.
+	 */
+	private static final String FIELD_ROW_INDEX_CERTIFICATE = "rowIndexCertificate";
 	
 	/**
 	 * Attribute that represents the span text.
@@ -137,5 +148,13 @@ public class CertificateRestController {
 		return dtOutput;
 
 	}
+	
+	
+	/**
+	 * Method to remove a certificate.
+	 * @param idSystemCertificate Parameter that represents ID of system certificate.
+	 * @param index Parameter that represents the index of the row of the selected certificate.
+	 * @return String that represents the index of the deleted row.
+	 */
 
 }
