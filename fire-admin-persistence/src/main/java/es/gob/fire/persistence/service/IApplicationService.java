@@ -24,7 +24,7 @@ public interface IApplicationService {
 	 * @param appId The user identifier.
 	 * @return {@link Application}
 	 */
-	Application getAppByAppId(Long appId);
+	Application getAppByAppId(String appId);
 	
 	/**
 	 * Method that obtains an user by its app name.
@@ -55,17 +55,19 @@ public interface IApplicationService {
 //	 */
 //	Application updateApplication(ApplicationEditDTO appEditDto);
 //			
-//	/**
-//	 * Method that deletes a user in the persistence.
-//	 * @param appId {@link Integer} that represents the user identifier to delete.
-//	 */
-//	void deleteApplication(Long appId);
-//	
+	/**
+	 * Method that deletes a application in the persistence.
+	 * @param appId {@link Integer} that represents the application identifier to delete.
+	 */
+	void deleteApplication(String appId);
+	
 	/**
 	 * Method that gets all the app from the persistence.
      * @return a {@link Iterable<Application>} with the information of all application.
 	 */
 	Iterable<Application> getAllApplication();
+	
+	
 //	
 //	/**
 //	 * Method that gets all the app certificates from the persistence.

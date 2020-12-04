@@ -10,10 +10,8 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
 import es.gob.fire.persistence.entity.Application;
-import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.repository.ApplicationRepository;
 import es.gob.fire.persistence.repository.CertificateRepository;
-import es.gob.fire.persistence.repository.UserRepository;
 import es.gob.fire.persistence.repository.datatable.ApplicationDataTablesRepository;
 import es.gob.fire.persistence.service.IApplicationService;
 
@@ -54,9 +52,8 @@ public class ApplicationService implements IApplicationService{
 	private ApplicationDataTablesRepository appdtRepository;
 
 	@Override
-	public Application getAppByAppId(Long appId) {
-		// TODO Auto-generated method stub
-		return null;
+	public Application getAppByAppId(String appId) {
+		return repository.findByAppId(appId);
 	}
 
 	@Override
@@ -71,6 +68,14 @@ public class ApplicationService implements IApplicationService{
 		return null;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IApplicationService#deleteAplication(java.lang.String)
+	 */
+	@Override
+	public void deleteApplication(String appId) {
+		repository.deleteById(appId);
+	}
 	
 	@Override
 	public List<Application> getAllApplication() {
@@ -83,6 +88,6 @@ public class ApplicationService implements IApplicationService{
 	@Override
 	public DataTablesOutput<Application> getAllApplication(DataTablesInput input) {
 		return appdtRepository.findAll(input);
-	}
+	}      
 
 }

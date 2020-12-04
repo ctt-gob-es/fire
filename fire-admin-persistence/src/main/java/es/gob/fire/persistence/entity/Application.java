@@ -42,7 +42,7 @@ public class Application implements Serializable{
 	/**
 	 * Attribute that represents the app id.
 	 */
-	private Long appId;
+	private String appId;
 	
 	/**
 	 * Attribute that represents the app name.
@@ -75,7 +75,7 @@ public class Application implements Serializable{
 	@GeneratedValue(generator = "tb_aplicaciones_seq")
 	@GenericGenerator(name = "tb_aplicaciones_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_APLICACIONES_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
 	@JsonView(DataTablesOutput.View.class)
-	public Long getAppId() {
+	public String getAppId() {
 		return this.appId;
 	}
 
@@ -83,7 +83,7 @@ public class Application implements Serializable{
 	 * Sets the value of the attribute {@link #appId}.
 	 * @param appIdP The value for the attribute {@link #appId}.
 	 */
-	public void setAppId(final Long appIdP) {
+	public void setAppId(final String appIdP) {
 		this.appId = appIdP;
 	}
 	

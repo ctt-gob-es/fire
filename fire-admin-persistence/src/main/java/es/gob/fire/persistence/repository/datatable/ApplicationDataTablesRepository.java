@@ -11,6 +11,6 @@ import es.gob.fire.persistence.entity.Application;
  * @version 1.0, 15 oct. 2020.
  */
 
-public interface ApplicationDataTablesRepository extends DataTablesRepository<Application, Long>{
+public interface ApplicationDataTablesRepository extends DataTablesRepository<Application, String>{
 
 }

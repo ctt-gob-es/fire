@@ -13,7 +13,7 @@
 							
 							<th th:text="#{table.app.name}"></th>
 							<th th:text="#{table.app.id}"></th>
-							<th th:text="#{table.app.responsable}">
+							
 							<th th:text="#{table.app.fec_alt}"></th>
 							<th th:text="#{table.app.estado}"></th>
 						</tr>
@@ -29,6 +29,7 @@
 $(document).ready(function() {
     
     var getapps = /*[[@{/applicationdatatable}]]*/;
+    var actionDelete = /*[[@{/deleteapp}]]*/;
     var addTemplate = /*[[@{/addapp}]]*/;
     var tblapp = $('#appTable').DataTable({
         dom: 'Bfrtip',
@@ -88,9 +89,9 @@ $(document).ready(function() {
             },
            
         "columns": [
-            { "data": "appId"},
               { "data": "appName" },
-              { "data": "responsable" },
+              { "data": "appId"},
+              
             { "data": "fechaAltaApp" },
             { "data": "habilitado" }
             ]
@@ -106,9 +107,73 @@ $(document).ready(function() {
             loading();
             
             
+            switch(accion){
+	        case 'add':
+	        	if ($('#appForm')[0].checkValidity() === false) {
+	        		// Se oculta la capa 'cargando...'
+	        		hide();
+	                event.stopPropagation();
+	                
+	                $('#appForm *').filter(':input').each(function(){
+	            	    		            	    
+	                	if(!$(this)[0].checkValidity())
+	            	    {
+	            	  	 $("#invalid-" + $(this).attr('id')).html();
+	            	  	 $("#" + $(this).attr('id')).addClass("is-invalid");
+	            	    } else {
+	            	  	 $("#" + $(this).attr('id')).removeClass("is-invalid");
+	            	    }
+	            	    
+	            	});
+	                
+	                // Esto es necesario para forzar que se muestren mensajes de validaciĂ³n de cliente
+	                $('<input type="submit">').hide().appendTo($('#appForm')).click().remove();
+	            }
+	            break;
+	        case 'delete':
+	            $.ajax(actionDelete,{
+	            	data:$.param({'id':data.appId, 'index':rowindex}),
+	                type:'POST',
+	                success: function(data){
+	                    
+	                	// Se oculta la capa 'cargando...'
+	                	hide();
+	                    tbl.row(data.index).remove().draw();
+	                    
+	                    $('#altEditor-modal .modal-body .alert').remove();
+	                    $('#altEditor-modal').modal('hide');
+	                },
+	                error:function(){}
+	            });
+	            break;
+	        default:
+	            $('#altEditor-modal .modal-body .alert').remove();
+	            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + [[#{alarm.admin.error.NotAuthorized}]] + '</strong></div>');
+	            break;
+	    }
+            
         });
+    
+//     var newAppList = [];
+//     var responsablesText = "";
+// 	for (j = 0; j < newAppList[i].nombre_responsable.length; j++){
+		
+// 		responsablesText = responsablesText + dataUndefined(newAppList[i].nombre_responsable[j]);
+// 		if (j < newAppList[i].nombre_responsable.length - 1) {
+// 			responsablesText = responsablesText + "</br>";
+// 		}
+// 	}
+	
+//     var htmlTableBody = "";
+    
+//     htmlTableBody = htmlTableBody + responsablesText + "</td>";
+// 	htmlTableBody = htmlTableBody + "<td>" + newAppList[i].alta + "</td>";
+// 	if (newAppList[i].habilitado){  
+// 		htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(newAppList[i].habilitado) + '"><img  class = "habilitado" src="../resources/static/images/comprobado_icon.png"/></td>'
+// 	} else {
+// 		htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(newAppList[i].habilitado) + '"><img  class = "deshabilitado" src="../resources/static/images/sin_entrada_icon.png"/></td>'
+// 	}
 
- 
 
  
 
