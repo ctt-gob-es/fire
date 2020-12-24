@@ -330,6 +330,13 @@ function closeButton(btnId){
 	$('.modal-backdrop').remove();
 }
 
+function closeModal(modalIn) {
+	$('#' + modalIn).modal('hide');
+	$('#' + modalIn).remove();
+	$('.modal-backdrop').remove();
+
+}
+
 function getBase64FromImageUrl(url) {
     var img = new Image();
 
@@ -381,3 +388,10 @@ function clearForm(form) {
       this.selectedIndex = -1;
   });
 };
+
+function cleanSpan(idForm){
+	  $('#'+ idForm + ' *').filter('span.badge').each(function(){
+							$(this).text("");
+							$(this).removeClass('badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill');
+							});
+}	

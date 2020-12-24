@@ -154,7 +154,30 @@ public interface IWebViewMessages {
 	 * Constant attribute that represents the name of the property <code>error.auth.delete.crypto</code> belonging to the file messages_xx_YY.properties.
 	 */
 	String ERROR_AUTH_DELETE_CRYPTO = "error.auth.delete.crypto";
-
+	
+	/***********************/
+	/** Mensajes de validacion **/ 
+	/***********************/
+	/**
+	 * Constant attribute that represents the name of the property <code>message.validation.certificate.required</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_VAL_CERT_REQUIRED = "message.validation.certificate.required";
+	
+	/***********************/
+	/** Mensajes de validacion **/ 
+	/***********************/
+	/**
+	 * Constant attribute that represents the name of the property <code>message.validation.alias.required</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_VAL_ALIAS_REQUIRED = "message.validation.alias.required";
+	
+	/***********************/
+	/** Mensajes de validacion **/ 
+	/***********************/
+	/**
+	 * Constant attribute that represents the name of the property <code>message.validation.alias.required</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_VAL_ALIAS_SIZE = "message.validation.alias.size";
 	
 	
 }

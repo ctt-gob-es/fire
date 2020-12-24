@@ -15,4 +15,13 @@
             </id>
         </attributes>
     </entity>
+    <entity class="Certificate" access="PROPERTY">
+    	<table name="tb_certificados" />
+        <attributes>
+            <id name="idCertificado">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id_certificado"/>
+            </id>
+        </attributes>
+    </entity>
 </entity-mappings>

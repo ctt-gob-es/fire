@@ -1,45 +1,12 @@
 package es.gob.fire.persistence.dto;
 
-/* 
-/*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
- * This program is licensed and may be used, modified and redistributed under the  terms
- * of the European Public License (EUPL), either version 1.1 or (at your option)
- * any later version as soon as they are approved by the European Commission.
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and
- * more details.
- * You should have received a copy of the EUPL1.1 license
- * along with this program; if not, you may find it at
- * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
- ******************************************************************************/
-
-/** 
- * <b>File:</b><p>es.gob.fire.persistence.configuration.dto.CertificateDTO.java.</p>
- * <b>Description:</b><p> .</p>
-  * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
- * <b>Date:</b><p>17/05/2018.</p>
- * @author Gobierno de España.
- * @version 1.2, 25/01/2019.
- */
-
-
-import java.math.BigInteger;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import javax.swing.text.View;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.annotation.JsonView;
 
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.persistence.dto.validation.CheckItFirst;
@@ -60,11 +27,7 @@ public class CertificateDTO {
 	/**
 	 * Attribute that represents the value of the input alias of the system certificate in the form. 
 	 */
-	@NotBlank(groups=CheckItFirst.class, message="{form.valid.keystore.alias.notempty}")
-    @Size(min=NumberConstants.NUM1, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
-	private String alias;
-	
-	
+	private String alias;	
 	
 	/**
 	 * Attribute that represents the subject of the system certificate. 
@@ -72,56 +35,41 @@ public class CertificateDTO {
 	private String subject;
 	
 	/**
-	 * Attribute that represents the subject of the   certificate principal.  
+	 * Attribute that represents the subject of the certificate principal.  
 	 */
-	@NotBlank(groups=CheckItFirst.class, message="{form.valid.keystore.certPrincipal.notempty}")
-    @Size(min=NumberConstants.NUM1, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
 	private String certPrincipal;
 	
 	/**
-	 * Attribute that represents the subject of the  certificate backup. 
+	 * Attribute that represents the subject of the certificate backup. 
 	 */
-	@NotBlank(groups=CheckItFirst.class, message="{form.valid.keystore.certBackup.notempty}")
-    @Size(min=NumberConstants.NUM1, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
-	private String	certBackup;
-	
+	private String	certBackup;	
 	
 	/**
 	 * Attribute that represents the uploaded file of the system certificate. 
 	 */
-	
-	
-	@NotNull(groups=CheckItFirst.class, message="{form.valid.keystore.file.notnull}")
-	private MultipartFile file;
+	private MultipartFile certFile1;
 	
 	/**
 	 * Attribute that represents the uploaded file of the system certificate. 
 	 */
-	
-	
-	@NotNull(groups=CheckItFirst.class, message="{form.valid.keystore.file.notnull}")
-	private MultipartFile file2;
+	private MultipartFile certFile2;
 	
 	/**
 	 * Attribute that represents byte array of the system certificate. 
 	 */
-	private byte[] certBytes;
+	private byte[] certBytes1;
+	
+	/**
+	 * Attribute that represents byte array of the system certificate. 
+	 */
+	private byte[] certBytes2;
 	
 	/**
 	 * Attribute that represents the subject of the system certificate. 
 	 */
 	
 	private String	issuer;
-	/**
-	 * Attribute that represents the user of the system certificate. 
-	 */
-	private Long idUser;
-	
-	/**
-	 * Attribute that represents the status of the system certificate. 
-	 */
-	private Long idStatusCertificate;
-	
+		
 	/**
 	 * Attribute that represents the data.
 	 */
@@ -138,7 +86,31 @@ public class CertificateDTO {
 	 */
 
 	private X509Certificate x509Backup;
-
+	
+	/**
+	 * Attribute that represents the huellaPrincipal.
+	 */
+	private String huellaPrincipal;
+	
+	/**
+	 * Attribute that represents the huellaBackup.
+	 */
+	private String huellaBackup;
+	
+	/**
+	 * Attribute that represents index of the row of the selected certificate.
+	 */
+	private String rowIndexCert;
+	
+	/**
+	 * Attribute that represents the data of the principal certificate in base64.  
+	 */
+	private String certPrincipalB64;
+	
+	/**
+	 * Attribute that represents the data of the backup certificate in base64. 
+	 */
+	private String	certBackupB64;	
 	
 	
 	/**
@@ -171,27 +143,8 @@ public class CertificateDTO {
 	 */
 	public void setAlias(final String aliasParam) {
 		this.alias = aliasParam;
-	}
-		
+	}		
 	
-	
-
-	/**
-	 * Sets the value of the attribute {@link #fechaAlta}.
-	 * @param fechaAltaParam The value for the attribute {@link #fechaAlta}.
-	 */
-	
-	public Date getfechaAlta() {
-		return fechaAlta;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #fechaAlta}.
-	 * @param fechaAltaParam The value for the attribute {@link #fechaAlta}.
-	 */
-	public void setfechaAlta(Date fechaAltaParam) {
-		this.fechaAlta = fechaAltaParam;
-	}
 	/**
 	 * Gets the value of the attribute {@link #subject}.
 	 * @return the value of the attribute {@link #subject}.
@@ -199,7 +152,6 @@ public class CertificateDTO {
 	public String getSubject() {
 		return subject;
 	}
-
 	
 	/**
 	 * Sets the value of the attribute {@link #subject}.
@@ -209,18 +161,18 @@ public class CertificateDTO {
 		this.subject = subjectParam;
 	}
 	
-	
-
-	
-	
-	
-	
-	
-	
+	/**
+	 * Gets the value of the attribute {@link #fechaAlta}.
+	 * @return the value of the attribute {@link #fechaAlta}.
+	 */	
 	public Date getFechaAlta() {
 		return fechaAlta;
 	}
 
+	/**
+	 * Sets the value of the attribute {@link #fechaAlta}.
+	 * @param fechaAlta the value for the attribute {@link #fechaAlta} to set.
+	 */
 	public void setFechaAlta(Date fechaAlta) {
 		this.fechaAlta = fechaAlta;
 	}
@@ -266,37 +218,118 @@ public class CertificateDTO {
 	}
 	
 	/**
-	 * Gets the value of the attribute {@link #file}.
-	 * @return the value of the attribute {@link #file}.
+	 * Gets the value of the attribute {@link #certFile1}.
+	 * @return the value of the attribute {@link #certFile1}.
 	 */	
-	public MultipartFile getFile() {
-		return file;
+	public MultipartFile getCertFile1() {
+		return certFile1;
 	}
 	
 	/**
 	 * Sets the value of the attribute {@link #file}.
-	 * @param sslCertificate the value for the attribute {@link #file} to set.
+	 * @param certFile1 the value for the attribute {@link #certFile1} to set.
 	 */
-	public void setFile(final MultipartFile sslCertificate) {
-		this.file = sslCertificate;
+	public void setCertFile1(final MultipartFile certFile1) {
+		this.certFile1 = certFile1;
 	}
 	
 	/**
-	 * Gets the value of the attribute {@link #file}.
-	 * @return the value of the attribute {@link #file}.
+	 * Gets the value of the attribute {@link #certFile2}.
+	 * @return the value of the attribute {@link #certFile2}.
 	 */	
-	public MultipartFile getFile2() {
-		return file2;
+	public MultipartFile getCertFile2() {
+		return certFile2;
 	}
 	
 	/**
-	 * Sets the value of the attribute {@link #file}.
-	 * @param sslCertificate the value for the attribute {@link #file} to set.
+	 * Sets the value of the attribute {@link #certFile2}.
+	 * @param certFile2 the value for the attribute {@link #certFile2} to set.
 	 */
-	public void setFile2(final MultipartFile sslCertificate) {
-		this.file2 = sslCertificate;
+	public void setCertFile2(final MultipartFile certFile2) {
+		this.certFile2 = certFile2;
 	}
+
+	/**
+	 * Gets the value of the attribute {@link #huellaPrincipal}.
+	 * @return the value of the attribute {@link #huellaPrincipal}.
+	 */	
+	public String getHuellaPrincipal() {
+		return huellaPrincipal;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #certFile2}.
+	 * @param huellaPrincipal the value for the attribute {@link #certFile2} to set.
+	 */
+	public void setHuellaPrincipal(String huellaPrincipal) {
+		this.huellaPrincipal = huellaPrincipal;
+	}
+
+	/**
+	 * Gets the value of the attribute {@link #huellaBackup}.
+	 * @return the value of the attribute {@link #huellaBackup}.
+	 */	
+	public String getHuellaBackup() {
+		return huellaBackup;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #certFile2}.
+	 * @param huellaBackup the value for the attribute {@link #huellaBackup} to set.
+	 */
+	public void setHuellaBackup(String huellaBackup) {
+		this.huellaBackup = huellaBackup;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #rowIndexCert}.
+	 * @return the value of the attribute {@link #rowIndexCert}.
+	 */
+	public String getRowIndexCert() {
+		return rowIndexCert;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #rowIndexCert}.
+	 * @param rowIndexCert The value for the attribute {@link #rowIndexCert}.
+	 */
+	public void setRowIndexCert(String rowIndexCert) {
+		this.rowIndexCert = rowIndexCert;
+	}
+
+	public String getCertPrincipalB64() {
+		return certPrincipalB64;
+	}
+
+	public void setCertPrincipalB64(String certPrincipalB64) {
+		this.certPrincipalB64 = certPrincipalB64;
+	}
+
+	public String getCertBackupB64() {
+		return certBackupB64;
+	}
+
+	public void setCertBackupB64(String certBackupB64) {
+		this.certBackupB64 = certBackupB64;
+	}
+
+	public byte[] getCertBytes1() {
+		return certBytes1;
+	}
+
+	public void setCertBytes1(byte[] certBytes1) {
+		this.certBytes1 = certBytes1;
+	}
+
+	public byte[] getCertBytes2() {
+		return certBytes2;
+	}
+
+	public void setCertBytes2(byte[] certBytes2) {
+		this.certBytes2 = certBytes2;
+	}
+	
+	
+		
 	
 }
-
-

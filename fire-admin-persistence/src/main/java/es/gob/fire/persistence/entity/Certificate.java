@@ -33,11 +33,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
@@ -106,6 +109,8 @@ public class Certificate implements Serializable {
 	 */
 	@Id
 	@Column(name = "ID_CERTIFICADO", unique = true, nullable = false, precision = NumberConstants.NUM19)
+	@GeneratedValue(generator = "tb_certificados_seq")
+	@GenericGenerator(name = "tb_certificados_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_CERTIFICADOS_SEQ"), @Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
 	@JsonView(DataTablesOutput.View.class)
 	public Long getIdCertificado() {
 		return idCertificado;
@@ -123,7 +128,7 @@ public class Certificate implements Serializable {
 	 * Gets the value of the attribute {@link #name}.
 	 * @return the value of the attribute {@link #name}.
 	 */
-	@Column(name = "NOMBRE_CERT", nullable = false, length = NumberConstants.NUM150)
+	@Column(name = "NOMBRE_CERT", nullable = false, length = NumberConstants.NUM45)
 	@JsonView(DataTablesOutput.View.class)
 	public String getCertificateName() {
 		return certificateName;
@@ -140,7 +145,7 @@ public class Certificate implements Serializable {
 	 * Gets the value of the attribute {@link #fecha_alta}.
 	 * @return the value of the attribute {@link #fecha_alta}.
 	 */
-	@Column(name = "FEC_ALTA", nullable = false, length = NumberConstants.NUM150)
+	@Column(name = "FEC_ALTA", nullable = false, length = NumberConstants.NUM19)
 	@JsonView(DataTablesOutput.View.class)
 	public Date getfechaAlta() {
 		return fechaAlta;
@@ -160,7 +165,7 @@ public class Certificate implements Serializable {
 	 * Gets the value of the attribute {@link #certPrincipal}.
 	 * @return the value of the attribute {@link #certPrincipal}.
 	 */
-	@Column(name = "CERT_PRINCIPAL", nullable = false, length = NumberConstants.NUM50)
+	@Column(name = "CERT_PRINCIPAL", nullable = false, length = NumberConstants.NUM5000)
 	@JsonView(DataTablesOutput.View.class)
 	public String getCertPrincipal() {
 		return certPrincipal;
@@ -179,7 +184,7 @@ public class Certificate implements Serializable {
 	 * Gets the value of the attribute {@link #certBackup}.
 	 * @return the value of the attribute {@link #certBackup}.
 	 */
-	@Column(name = "CERT_BACKUP", nullable = false, precision = NumberConstants.NUM19)
+	@Column(name = "CERT_BACKUP", nullable = false, precision = NumberConstants.NUM5000)
 	@JsonView(DataTablesOutput.View.class)
 	public String getCertBackup() {
 		return certBackup;

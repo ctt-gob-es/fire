@@ -1,33 +1,23 @@
 <div class="container-fluid">
 	<h4 class="c-grey-900 mT-10 mB-30"
-		th:text="#{valid.service.admin.title}"></h4>
+		th:text="#{certificate.admin.title}"></h4>
 	<div class="row">
 		<div class="col-md-12">
 			<div class="bgc-white bd bdrs-3 p-20 mB-20">
-				<h4 class="c-grey-900 mB-20" th:text="#{table.valid.service.title}"></h4>
+				<h4 class="c-grey-900 mB-20" th:text="#{table.certificate.title}"></h4>
 				<table id="certServiceTable"
-					class="table table-striped table-bordered" cellspacing="0"
+					class="table table-striped table-bordered wrap" cellspacing="0"
 					width="100%">
 					<thead>
 						<tr>
-							<!-- Columna oculta para el identificador de usuario -->
+							<!-- Columna oculta para el identificador de certificado -->
 							<th></th>
-							<th th:text="#{table.valid.service.alias}"></th>
-							<th th:text="#{table.valid.service.issuer}"></th>
-							<th th:text="#{table.valid.service.subject}"></th>
-							<th th:text="#{table.valid.service.fecha_alta}"></th>
-							</tr>
-							</thead>
-							<body>
-							<tr th:each="certificado : ${listaCertificados}">
-								<td th:text="${certificado.idCertificate}"></td>
-								<td th:text="${certificado.alias}"></td>
-								<td th:text="${certificado.certPrincipal}"></td>
-								<td th:text="${certificado.certBackup}"></td>
-								<td th:text="${certificado.fechaAlta}"></td>
-							</body>
+							<th th:text="#{table.certificate.alias}"></th>
+							<th th:text="#{table.certificate.cert1}"></th>
+							<th th:text="#{table.certificate.cert2}"></th>
+							<th th:text="#{table.certificate.fecha_alta}"></th>
 						</tr>
-					
+					</thead>
 				</table>
 			</div>
 		</div>
@@ -38,9 +28,8 @@
 
 <script th:inline="javascript">
 
-var getcertificates = /*[[@{/certificatedatatable}]]*/;
+var loadCertificates = /*[[@{/certificatedatatable}]]*/;
 var addTemplate = /*[[@{/addCertificate}]]*/;
-var actionSave = /*[[@{/savecert}]]*/;
 var actionDelete = /*[[@{/deletecertificate}]]*/;
 
 var tableCertFire = $('#certServiceTable').DataTable({
@@ -54,8 +43,16 @@ var tableCertFire = $('#certServiceTable').DataTable({
     "iTotalRecords": "totalElements",
     "iTotalDisplayRecords": "numberOfElements",
     
-	/* "processing": true,
-    "serverSide": true, */
+	"processing": true,
+    "serverSide": true,
+    "ajax":{
+		"url": loadCertificates, 
+		"dataSrc": "data",
+		"data": function (data){
+			//datos a pasar al modal
+			data.formId = "certAddForm";
+		}
+	},
     "language": {
         "url": "js/datatables/i18n/spanish.json",
         select: {
@@ -64,47 +61,16 @@ var tableCertFire = $('#certServiceTable').DataTable({
                 1: "1 fila seleccionada"
             }
           }
-        },       
-    "columnDefs" : [
-        {
-            "targets" : [ 0 ],
-            "visible" : false,
-            "searchable" : false,
-            "width": "0%"
         },
-        {
-            "targets" : [ 1 ],
-            "visible" : true,
-            "searchable" : true,
-            "width": "15%"
-        },
-        {
-            "targets" : [ 2 ],
-            "visible" : true,
-            "searchable" : true,
-            "width": "30%"
-        },
-        {
-            "targets" : [ 3 ],
-            "visible" : true,
-            "searchable" : true,
-            "width": "30%"
-        },
-        {
-            "targets" : [ 4 ],
-            "visible" : true,
-            "searchable" : true,
-            "width": "15%"
-        }
-       
-    ],
+        "columns" : [
+        	 { data: 'idCertificado',"visible": false},
+        	 { data: 'certificateName' },
+        	 { data: 'certPrincipal' },
+        	 { data: 'certBackup' },
+        	 { data: 'fechaAlta'}
+        	],
     "order" : [ 1, 'desc' ],
-    responsive :  true,/* {
-         details : {
-            type : 'column',
-            target : -1
-        }
-    }  */
+    responsive :  true,
     dom: 'Bfrtip',
     select: 'single',
     buttons: [{text: 'Agregar', name: 'add',
@@ -118,13 +84,13 @@ var tableCertFire = $('#certServiceTable').DataTable({
 					success : function(data) {
 						hide();
 						$('#modal').html(data);
-						$('#certForm').modal('show');																
+						$('#certAddModal').modal('show');																
 					},
 					error : function() {}
 				});
 		}},
     	{extend: 'selected',text: 'Editar',name: 'editt',
-   		action: function ( e, dt, node, config ) {	
+   			action: function ( e, dt, node, config ) {	
    		 	
 			  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
 				id: o.context[0].aoColumns[e].mData,
@@ -145,18 +111,56 @@ var tableCertFire = $('#certServiceTable').DataTable({
  						success : function(data) {
  							hide();
  							$('#modal').html(data);
- 							$('#certForm').modal('show');																
+ 							$('#certEditModal').modal('show');																
  						},
  						error : function() {}
  					});
    		}
     },
-			  {extend: 'selected',text: 'Eliminar',name: 'delete'}
+			  {extend: 'selected',text: 'Eliminar',name: 'delete',
+    		
+    			action: function ( e, dt, node, config ) {
+			  
+				  	for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+						id: o.context[0].aoColumns[e].mData,
+						title: o.context[0].aoColumns[e].sTitle                
+					  });
+				  	
+				  	 var d = dt.rows({
+		                selected: !0
+					 });
+				  	 
+				  	 var index = dt.row({
+		                selected: !0
+		             }).index();
+				  	 
+				  	  hide();
+				  	 
+					  var idCertificate = d.data()[0][a[0].id];
+					  //var index = dt.row({selected: !0}).index();
+					  //var indexRow = index-1;
+					  var loadConfirmDelete = /*[[@{/loadconfirmdeletecertificate}]]*/
+					  $.ajax(loadConfirmDelete,{
+									data:$.param({'idCertificate':idCertificate, 'rowIndexCert':index}),
+							        type:'GET',
+							        success: function(data){
+							    		// Se oculta la capa 'cargando...'
+							    		hide();
+							    		$('#modal').html(data);
+										$('#modalDeleteCert').modal('show');
+							        },
+							        error:function(data){
+							        	// Se oculta la capa 'cargando...'
+							        	hide();
+							        
+									}
+					});
+		 	 	}
+			  
+			  
+			  }
     ]
-    
-    
-    
-   
+
 });
 
 //Función para cargar los datos del par identificador/valor seleccionado.

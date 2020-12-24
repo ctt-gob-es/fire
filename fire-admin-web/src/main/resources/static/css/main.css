@@ -556,3 +556,15 @@ iframe {
   justify-content:center;
   flex-flow: column wrap;
 }
+
+.lg-900{
+	width: 900px!important;
+  margin: auto;
+}
+
+.btn_align {
+   
+    justify-content: center;
+    padding: 1rem;
+    margin-top: 20px;
+}

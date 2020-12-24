@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 /** 
- * <b>File:</b><p>es.gob.monitoriza.rest.exception.OrderedValidation.java.</p>
+ * <b>File:</b><p>es.gob.fire.persistence.dto.validation.OrderedValidation.java.</p>
  * <b>Description:</b><p> .</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>4 abr. 2018.</p>

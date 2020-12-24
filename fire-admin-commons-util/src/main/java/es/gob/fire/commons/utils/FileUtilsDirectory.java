@@ -10,6 +10,7 @@
 package es.gob.fire.commons.utils;
 
 import java.io.File;
+import java.io.IOException;
 
 /** 
  * <p>Utility class to manage files.</p>
@@ -34,4 +35,5 @@ public final class FileUtilsDirectory {
 	public static String createAbsolutePath(String pathDir, String filename) {
 		return pathDir + File.separator + filename;
 	}
+	
 }

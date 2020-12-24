@@ -1,0 +1,79 @@
+<!-- Modal para eliminar aplicaciones de responsable -->
+<div class="modal fade" tabindex="-1" role="dialog" id="modalDeleteCert">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" th:text="#{form.certificate.delete.title}"></h4>
+				<button type="button" class="close"
+					onclick="closeModalButton('modalAppResp', 'idCertificateForm')"
+					aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form name="altEditor-form" role="form" id="idCertificateForm"
+					th:object="${certificateform}" th:action="@{/}"
+					method="post" enctype="multipart/form-data">
+					<div id="errorDeleteCertificate" role="alert" />
+					<input type='hidden' id="idCertificate"
+						th:field="*{idCertificate}"></input>
+					<input type='hidden' id="rowIndexValmetDel"
+						th:field="*{rowIndexCert}"></input>	
+					<div class="form-group col-md-12">
+						<h5 class="c-grey-900" th:text="#{form.certificate.delete.message}"></h5>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default"
+					onclick="closeModalButton('modalDeleteCert', 'idCertificateForm')"
+					th:text="#{form.certificate.app.btn.cancel}"></button>
+				<button type="button" id="idDeleteResponsibleBtn" class="btn btn-danger"
+					th:text="#{form.certificate.btn.delete}" onclick="deleteCertificate();"></button>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:inline="javascript">
+function deleteCertificate(){
+	var msgErrorDelete =  /*[[#{message.delete.certificate.error}]]*/;
+	var formDataCertificate = new FormData(document.forms["idCertificateForm"]);	
+	var deleteCertificate = /*[[@{/deletecertificate}]]*/;
+	tableCertFire = $("#certServiceTable").DataTable();
+	$.ajax(deleteCertificate, {
+		data: formDataCertificate,
+	    type:'POST',
+	    contentType: false,
+		processData : false,
+	    success: function(data){
+	        
+	    	// Se oculta la capa 'cargando...'
+	    	hide();
+	    	tableCertFire.row(data.index).remove().draw();
+			closeModalButton('modalDeleteCert', 'idCertificateForm');
+			
+		},
+		error:function(){
+			hide();
+	  		$('#errorDeleteCertificate').html(msgErrorDelete);
+			$('#errorDeleteCertificate').addClass('alert alert-danger');
+		}
+	});
+}
+
+//función cerrar modales
+function closeModalButton(btnId, nameForm){
+	//se limpia posibles mensajes error de span
+	$('#'+nameForm+' *').filter('span').each(function(){
+		cleanSpan($(this).attr('idCertificate'));
+	});
+		
+	//se limpia valores del formulario
+	
+	$('#' + btnId).modal('hide');	
+}
+</script>
+
+
+
+
