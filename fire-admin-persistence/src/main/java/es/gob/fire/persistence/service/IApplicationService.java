@@ -1,13 +1,17 @@
 package es.gob.fire.persistence.service;
 
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
 import es.gob.fire.persistence.dto.ApplicationEditDTO;
+import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Application;
+import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Certificate;
 
 /** 
@@ -40,7 +44,7 @@ public interface IApplicationService {
 	 * @param user a {@link User} with the information of the user.
 	 * @return {@link User} The user.
 	 */
-	Application saveApplication(Application app);
+	Application saveApplication(ApplicationDTO app, List<Long> idsUsers) throws GeneralSecurityException;
 	
 //	/** Method that stores a user in the persistence from User DTO object.
 //	 * @param userDto a {@link UserDTO} with the information of the user.
@@ -82,5 +86,30 @@ public interface IApplicationService {
 	 */
 	DataTablesOutput<Application> getAllApplication(DataTablesInput input);
 	
-
+	/**
+	 * Method that maos the values of ApplicationDTO to Certificate.
+	 * @param applicationDto Object that represents the values of a certificate taken from the view.
+	 * @return Object thtat represetns a Application entity with the values of the ApplicationDTO.
+	 */
+	Application applicationDtoToEntity(ApplicationDTO applicationDto);
+	
+	/**
+	 * Method that maos the values of ApplicationDTO to Application.
+	 * @param certificat Object that represents the mapping entity for Application.
+	 * @return Object that represents a ApplicationDTO.
+	 */
+	ApplicationDTO applicationEntityToDto(Application application);
+	
+	/**
+	 * @param userId
+	 * @return
+	 */
+	List<ApplicationResponsible> getApplicationResponsibleByUserId(Long userId);
+	
+	/**
+	 * @param input
+	 * @param idCertificate
+	 * @return
+	 */
+	DataTablesOutput<ApplicationCertDTO> getApplicationsCert(DataTablesInput input, Long idCertificate);
 }

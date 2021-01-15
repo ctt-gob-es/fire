@@ -24,27 +24,31 @@ public class ApplicationDTO {
 	private String appId;
 	
 	/**
-	 * Attribute that represents the value of the input name of the application in the form. 
+	 * Attribute that represents the value of the input appName of the application in the form. 
 	 */
-	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.name.notempty}")
-    @Size(min=1, max=NumberConstants.NUM15, groups=ThenCheckIt.class)
-    private String appName = UtilsStringChar.EMPTY_STRING;
+	private String appName = UtilsStringChar.EMPTY_STRING;
 	
 	
 	/**
-	 * Attribute that represents the value of the input name of the application in the form. 
+	 * Attribute that represents the value of the input fechaAltaApp of the application in the form. 
 	 */
-	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.name.notempty}")
-    @Size(min=1, max=NumberConstants.NUM15, groups=ThenCheckIt.class)
-    private Date fechaAltaApp;
+	private Date fechaAltaApp;
 	
 	
 	/**
-	 * Attribute that represents the value of the input name of the application in the form. 
+	 * Attribute that represents the value of the input habilitado of the application in the form. 
 	 */
-	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.name.notempty}")
-    @Size(min=1, max=NumberConstants.NUM15, groups=ThenCheckIt.class)
-    private boolean habilitado;
+	private boolean habilitado;
+	
+	/**
+	 * Attribute that represents the value of the input idCertificado of the application in the form. 
+	 */
+	private Long idCertificado;
+	
+	/**
+	 * Attribute that represents index of the row of the selected application.
+	 */
+	private String rowIndexApp;
 	
 	/**
 	 * Gets the value of the attribute {@link #appId}.
@@ -104,7 +108,6 @@ public class ApplicationDTO {
 	 * Gets the value of the attribute {@link #habilitado}.
 	 * @return the value of the attribute {@link #habilitado}.
 	 */
-	
 	public boolean isHabilitado() {
 		return habilitado;
 	}
@@ -112,9 +115,43 @@ public class ApplicationDTO {
 	
 	/**
 	 * Sets the value of the attribute {@link #habilitado}.
-	 * @param rolP The value for the attribute {@link #habilitado}.
+	 * @param habilitado The value for the attribute {@link #habilitado}.
 	 */
 	public void setHabilitado(boolean habilitado) {
 		this.habilitado = habilitado;
 	}
+
+	/**
+	 * Gets the value of the attribute {@link #idCertificado}.
+	 * @return the value of the attribute {@link #idCertificado}.
+	 */
+	public Long getIdCertificado() {
+		return idCertificado;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #idCertificado}.
+	 * @param idCertificado The value for the attribute {@link #idCertificado}.
+	 */
+	public void setIdCertificado(Long idCertificado) {
+		this.idCertificado = idCertificado;
+	}
+
+	/**
+	 * Gets the value of the attribute {@link #rowIndexApp}.
+	 * @return the value of the attribute {@link #rowIndexApp}.
+	 */
+	public String getRowIndexApp() {
+		return rowIndexApp;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #rowIndexApp}.
+	 * @param idCertificado The value for the attribute {@link #rowIndexApp}.
+	 */
+	public void setRowIndexApp(String rowIndexApp) {
+		this.rowIndexApp = rowIndexApp;
+	}
+	
+	
 }

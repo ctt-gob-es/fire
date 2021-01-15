@@ -48,8 +48,8 @@ import es.gob.fire.persistence.service.IUserService;
 
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.0, 15/06/2018.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.0, 01/06/2020.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -156,6 +156,7 @@ public class UserService implements IUserService {
 	 * @see es.gob.fire.persistence.services.IUserService#deleteUser(java.lang.Long)
 	 */
 	@Override
+	@Transactional
 	public void deleteUser(Long userId) {
 		repository.deleteById(userId);
 	}

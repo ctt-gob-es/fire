@@ -185,7 +185,50 @@ public class CertificateController {
 
 		model.addAttribute("certEditForm", certEditForm);
 		return "modal/certificateEditForm.html";
-	}	
+	}
+	
+	@RequestMapping(value = "/viewcertificate", method = RequestMethod.POST)
+	public String certView(@RequestParam("idCertificado") final Long idCertificado, final Model model) {
+		Certificate cert = certificateService.getCertificateByCertificateId(idCertificado);
+		
+		CertificateDTO certViewForm = certificateService.certificateEntityToDto(cert);	
+		String certData = "";
+		
+		if (cert.getCertPrincipal() != null && !cert.getCertPrincipal().isEmpty()) {
+			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertPrincipal()));) {
+							
+				certData = certificateService.getFormatCertText(certIs);
+				certViewForm.setCertPrincipal(certData);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CertificateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		if (cert.getCertBackup() != null && !cert.getCertBackup().isEmpty()) {
+			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertBackup()));) {
+							
+				certData = certificateService.getFormatCertText(certIs);
+				certViewForm.setCertBackup(certData);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CertificateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}			
+
+		model.addAttribute("certBackup", certViewForm.getCertBackup());
+		model.addAttribute("certPrincipal", certViewForm.getCertPrincipal());
+		model.addAttribute("certViewForm", certViewForm);
+		return "modal/certificateViewForm.html";
+	}
 	
 	/**
 	 *  Method that loads the necessary information to show the confirmation modal to remove a selected responsible.

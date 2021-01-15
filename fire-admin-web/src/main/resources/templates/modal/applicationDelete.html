@@ -1,0 +1,79 @@
+<!-- Modal para eliminar aplicaciones de responsable -->
+<div class="modal fade" tabindex="-1" role="dialog" id="modalDeleteApp">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" th:text="#{form.application.delete.title}"></h4>
+				<button type="button" class="close"
+					onclick="closeModalButton('modalAppResp', 'idApplicationForm')"
+					aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form name="altEditor-form" role="form" id="idApplicationForm"
+					th:object="${applicationForm}" th:action="@{/}"
+					method="post" enctype="multipart/form-data">
+					<div id="errordeleteApplication" role="alert" />
+					<input type='hidden' id="idApplication"
+						th:field="*{appId}"></input>
+					<input type='hidden' id="rowIndexAppDel"
+						th:field="*{rowIndexApp}"></input>	
+					<div class="form-group col-md-12">
+						<h5 class="c-grey-900" th:text="#{form.application.delete.message}"></h5>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default"
+					onclick="closeModalButton('modalDeleteApp', 'idApplicationForm')"
+					th:text="#{form.application.app.btn.cancel}"></button>
+				<button type="button" id="idDeleteResponsibleBtn" class="btn btn-danger"
+					th:text="#{form.application.btn.delete}" onclick="deleteApplication();"></button>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:inline="javascript">
+function deleteApplication(){
+	var msgErrorDelete =  /*[[#{message.delete.application.error}]]*/;
+	var formDataApplication = new FormData(document.forms["idApplicationForm"]);	
+	var deleteApplication = /*[[@{/deleteapplication}]]*/;
+	tableApp = $("#appTable").DataTable();
+	$.ajax(deleteApplication, {
+		data: formDataApplication,
+	    type:'POST',
+	    contentType: false,
+		processData : false,
+	    success: function(data){
+	        
+	    	// Se oculta la capa 'cargando...'
+	    	hide();
+	    	tableApp.row(data.index).remove().draw();
+			closeModalButton('modalDeleteApp', 'idApplicationForm');
+			
+		},
+		error:function(){
+			hide();
+	  		$('#errordeleteApplication').html(msgErrorDelete);
+			$('#errordeleteApplication').addClass('alert alert-danger');
+		}
+	});
+}
+
+//función cerrar modales
+function closeModalButton(btnId, nameForm){
+	//se limpia posibles mensajes error de span
+	$('#'+nameForm+' *').filter('span').each(function(){
+		cleanSpan($(this).attr('idApplication'));
+	});
+		
+	//se limpia valores del formulario
+	
+	$('#' + btnId).modal('hide');	
+}
+</script>
+
+
+
+

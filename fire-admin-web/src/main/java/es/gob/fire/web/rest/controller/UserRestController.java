@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.http.MediaType;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
@@ -51,14 +50,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.persistence.dto.UserDTO;
-import es.gob.fire.persistence.dto.UserEditDTO;
-import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.UserDTO;
+import es.gob.fire.persistence.dto.UserEditDTO;
+import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.dto.validation.OrderedValidation;
+import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.IUserService;
 
 /**
@@ -107,6 +108,13 @@ public class UserRestController {
 	private IUserService userService;
 	
 	/**
+	 * Attribute that represents the service object for accessing the
+	 * repository.
+	 */
+	@Autowired
+	private IApplicationService appService;
+	
+	/**
 	 * Attribute that represents the context object.
 	 */
 	@Autowired
@@ -136,12 +144,19 @@ public class UserRestController {
 	 *            Row index of the datatable.
 	 * @return String that represents the name of the view to redirect.
 	 */
-	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/deleteuser", method = RequestMethod.POST)
-	@Transactional
 	public String deleteUser(@RequestParam("id") final Long userId, @RequestParam("index") final String index) {
+			
+		String result = index;
+		
+		List<ApplicationResponsible> responsables = appService.getApplicationResponsibleByUserId(userId);
+		
+		if (responsables != null || responsables.size() > 0) {
+			result = "error.No se ha podido borrar el usuario, tiene aplicaciones asociadas.";
+		}
+		
 		userService.deleteUser(userId);
-		return index;
+		return result;
 	}
 
 	/**

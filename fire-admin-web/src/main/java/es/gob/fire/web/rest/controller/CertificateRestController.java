@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 
 import org.apache.log4j.Logger;
@@ -19,9 +20,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.http.MediaType;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,11 +35,17 @@ import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.IWebViewMessages;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.CertificateDTO;
-import es.gob.fire.persistence.dto.validation.OrderedValidation;
 import es.gob.fire.persistence.entity.Certificate;
+import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.ICertificateService;
 
+/**
+ * <p>Class that manages the REST requests related to the Users administration and JSON communication.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.0, 24/12/2020.
+ */
 @RestController
 public class CertificateRestController {
 	
@@ -51,6 +55,13 @@ public class CertificateRestController {
 	 */
 	@Autowired
 	private ICertificateService certificateService;
+	
+	/**
+	 * Attribute that represents the service object for accessing the
+	 * repository.
+	 */
+	@Autowired
+	private IApplicationService appService;
 	
 	/**
 	 * Constant that represents the key Json 'errorSaveCertificate'.
@@ -421,5 +432,31 @@ public class CertificateRestController {
 		return certData;		
 	}
 	
+	/**
+	 * @param input
+	 * @param idCertificate
+	 * @return
+	 */
+	@JsonView(DataTablesOutput.View.class)
+	@RequestMapping(path = "/certappdatatable", method = RequestMethod.POST)
+	public DataTablesOutput<ApplicationCertDTO> certApplications(@NotEmpty final DataTablesInput input, @RequestParam(FIELD_ID_CERTIFICATE) final Long idCertificate) {
+		
+		DataTablesOutput<ApplicationCertDTO> certApplications = (DataTablesOutput<ApplicationCertDTO>) appService.getApplicationsCert(input, idCertificate);
+				
+		return certApplications;
+	} 
+	
+	/**
+	 * Method that download the PSC certificate.
+	 *
+	 * @param response Parameter that represents the response with information about file to download.
+	 * @param idCertPsc Parameter that represents the identifier of the PSC certificate.
+	 * @throws IOException If the method fails.
+	 */
+	@RequestMapping(value = "/downloadcert", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public void downloadCert(HttpServletResponse response, @RequestParam(FIELD_ID_CERTIFICATE) Long idCertificate) throws IOException {
+		
+	}
 	
 }

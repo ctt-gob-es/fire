@@ -115,11 +115,10 @@ var tableCertFire = $('#certServiceTable').DataTable({
  						},
  						error : function() {}
  					});
-   		}
-    },
-			  {extend: 'selected',text: 'Eliminar',name: 'delete',
-    		
-    			action: function ( e, dt, node, config ) {
+   			}
+    	},
+		{extend: 'selected',text: 'Eliminar',name: 'delete',
+    		action: function ( e, dt, node, config ) {
 			  
 				  	for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
 						id: o.context[0].aoColumns[e].mData,
@@ -132,9 +131,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
 				  	 
 				  	 var index = dt.row({
 		                selected: !0
-		             }).index();
-				  	 
-				  	  hide();
+		             }).index();			  	 
 				  	 
 					  var idCertificate = d.data()[0][a[0].id];
 					  //var index = dt.row({selected: !0}).index();
@@ -158,7 +155,40 @@ var tableCertFire = $('#certServiceTable').DataTable({
 		 	 	}
 			  
 			  
-			  }
+		},
+		{extend: 'selected', text: 'Visualizar', name: 'view',
+	    	action: function ( e, dt, node, config ) {   		
+	    	
+	    		for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+					id: o.context[0].aoColumns[e].mData,
+					title: o.context[0].aoColumns[e].sTitle                
+				  });
+			  	
+			  	 var d = dt.rows({
+	                selected: !0
+				 });
+			  	 
+			  	 var index = dt.row({
+	                selected: !0
+	             }).index();
+			  	 			  	 
+				  var idCertificado = d.data()[0][a[0].id];
+				  
+				  var viewCertificate = /*[[@{/viewcertificate}]]*/;
+				  $.ajax({
+						url : viewCertificate,
+						type : 'POST',
+						cache : false,
+						data: $.param({'idCertificado':idCertificado}),
+						success : function(data) {
+							hide();
+							$('#modal').html(data);
+							$('#certViewModal').modal('show');																
+						},
+						error : function() {}
+					});
+			}
+		}
     ]
 
 });

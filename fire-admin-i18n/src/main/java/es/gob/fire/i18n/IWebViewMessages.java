@@ -179,5 +179,26 @@ public interface IWebViewMessages {
 	 */
 	String ERROR_VAL_ALIAS_SIZE = "message.validation.alias.size";
 	
+	/**
+	 * Constant attribute that represents the name of the property <code>message.validation.appname.required</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_VAL_APPNAME_REQUIRED = "message.validation.appname.required";
+	
+	/***********************/
+	/** Mensajes de validacion **/ 
+	/***********************/
+	/**
+	 * Constant attribute that represents the name of the property <code>message.validation.appname.required</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_VAL_APPNAME_SIZE = "message.validation.appname.size";
+	
+	/***********************/
+	/** Mensajes de validacion **/ 
+	/***********************/
+	/**
+	 * Constant attribute that represents the name of the property <code>message.validation.app.user.selected</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_VAL_APP_USER_SELECTED = "message.validation.app.user.selected";
+	
 	
 }

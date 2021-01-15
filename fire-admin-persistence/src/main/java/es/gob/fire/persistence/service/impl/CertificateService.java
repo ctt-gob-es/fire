@@ -301,5 +301,27 @@ public class CertificateService implements ICertificateService{
 		return certData;
 	}
 
+	@Override
+	public String getCertificateText(String certificate) {
+
+		String certText = "";
+
+		if (certificate != null && !certificate.isEmpty()) {
+			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(certificate));) {
+
+				certText = getFormatCertText(certIs);
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CertificateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return certText;
+
+	}
 	
 }

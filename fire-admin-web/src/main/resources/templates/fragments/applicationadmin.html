@@ -13,7 +13,6 @@
 							
 							<th th:text="#{table.app.name}"></th>
 							<th th:text="#{table.app.id}"></th>
-							
 							<th th:text="#{table.app.fec_alt}"></th>
 							<th th:text="#{table.app.estado}"></th>
 						</tr>
@@ -30,41 +29,7 @@ $(document).ready(function() {
     
     var getapps = /*[[@{/applicationdatatable}]]*/;
     var actionDelete = /*[[@{/deleteapp}]]*/;
-    var addTemplate = /*[[@{/addapp}]]*/;
     var tblapp = $('#appTable').DataTable({
-        dom: 'Bfrtip',
-        select: 'single',
-        responsive: true,
-        altEditor: true,
-        buttons: [{text: 'Agregar',name: 'add'}, 
-                  {extend: 'selected',text: 'Editar',name: 'editt',
-                    action: function ( e, dt, node, config ) {                          
-                      for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
-                        id: o.context[0].aoColumns[e].mData,
-                        title: o.context[0].aoColumns[e].sTitle                
-                      });
-                  
-                  var d = dt.rows({
-                   selected: !0
-                  });
-                  var name = d.data()[0][a[1].id];
-                  var menuEdit = /*[[@{/menuedit}]]*/;
-                  $.ajax({
-                         url : menuEdit,
-                         type : 'GET',
-                         data : $.param({'appName':name}),
-                         cache : false,
-                         success : function(data) {
-                             hide();
-                             $('#modal').html(data);
-                             $('#modalEdit').modal('show');                                                                
-                         },
-                         error : function() {}
-                     });
-                   }
-                  },
-                  {extend: 'selected',text: 'Eliminar',name: 'delete'}
-                ],
         "iTotalRecords": "totalElements",
         "iTotalDisplayRecords": "numberOfElements",        
         "processing": true,
@@ -74,8 +39,7 @@ $(document).ready(function() {
             "dataSrc" : "data",
             "data": function (data) {
                 // Datos a pasar al modal
-                data.formId = "appForm";
-                data.addTemplate = addTemplate;
+                data.formId = "appAddModal";
             }
         },
         "language": {
@@ -91,93 +55,103 @@ $(document).ready(function() {
         "columns": [
               { "data": "appName" },
               { "data": "appId"},
-              
-            { "data": "fechaAltaApp" },
-            { "data": "habilitado" }
-            ]
-        }).on('crudaction', function(e, accion, idUserFire, data, rowindex){
-            // e          Evento Jquery
-            // accion     [add|edit|delete]
-            // pkid       Primer campo en la data [id]                ... en add,    retorna null
-            // data       Los campos adicionales  [campo_1, campo_n]  ... en delete, retorna null
-            // rowindex   El index de la fila para el dataTable       ... en add,    retorna null
-            
-            $('#altEditor-modal .modal-body .alert').remove();
-            // Se muestra la capa 'cargando...'
-            loading();
-            
-            
-            switch(accion){
-	        case 'add':
-	        	if ($('#appForm')[0].checkValidity() === false) {
-	        		// Se oculta la capa 'cargando...'
-	        		hide();
-	                event.stopPropagation();
-	                
-	                $('#appForm *').filter(':input').each(function(){
-	            	    		            	    
-	                	if(!$(this)[0].checkValidity())
-	            	    {
-	            	  	 $("#invalid-" + $(this).attr('id')).html();
-	            	  	 $("#" + $(this).attr('id')).addClass("is-invalid");
-	            	    } else {
-	            	  	 $("#" + $(this).attr('id')).removeClass("is-invalid");
-	            	    }
-	            	    
-	            	});
-	                
-	                // Esto es necesario para forzar que se muestren mensajes de validaciĂ³n de cliente
-	                $('<input type="submit">').hide().appendTo($('#appForm')).click().remove();
-	            }
-	            break;
-	        case 'delete':
-	            $.ajax(actionDelete,{
-	            	data:$.param({'id':data.appId, 'index':rowindex}),
-	                type:'POST',
-	                success: function(data){
-	                    
-	                	// Se oculta la capa 'cargando...'
-	                	hide();
-	                    tbl.row(data.index).remove().draw();
-	                    
-	                    $('#altEditor-modal .modal-body .alert').remove();
-	                    $('#altEditor-modal').modal('hide');
-	                },
-	                error:function(){}
-	            });
-	            break;
-	        default:
-	            $('#altEditor-modal .modal-body .alert').remove();
-	            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + [[#{alarm.admin.error.NotAuthorized}]] + '</strong></div>');
-	            break;
-	    }
-            
-        });
-    
-//     var newAppList = [];
-//     var responsablesText = "";
-// 	for (j = 0; j < newAppList[i].nombre_responsable.length; j++){
-		
-// 		responsablesText = responsablesText + dataUndefined(newAppList[i].nombre_responsable[j]);
-// 		if (j < newAppList[i].nombre_responsable.length - 1) {
-// 			responsablesText = responsablesText + "</br>";
-// 		}
-// 	}
-	
-//     var htmlTableBody = "";
-    
-//     htmlTableBody = htmlTableBody + responsablesText + "</td>";
-// 	htmlTableBody = htmlTableBody + "<td>" + newAppList[i].alta + "</td>";
-// 	if (newAppList[i].habilitado){  
-// 		htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(newAppList[i].habilitado) + '"><img  class = "habilitado" src="../resources/static/images/comprobado_icon.png"/></td>'
-// 	} else {
-// 		htmlTableBody = htmlTableBody + '<td title="' + dataUndefined(newAppList[i].habilitado) + '"><img  class = "deshabilitado" src="../resources/static/images/sin_entrada_icon.png"/></td>'
-// 	}
-
-
- 
-
- 
+	          { "data": "fechaAltaApp" },
+              { "data": "habilitado",
+	        	"render": function (data, type, row) {
+		        	  
+	  	        	var is_checked = data == true ? "checked" : "";
+	  	        	  
+	  	        	return '<div class="checkbox checkbox-circle checkbox-info peers ai-c"><input disabled type="checkbox" id="tableAppDB" class="peer"'+ is_checked + '><label for="tableAppDB" class="peers peer-greed js-sb ai-c"><span class="peer peer-greed" ></span></label></div>';
+              	}
+              }
+            ],
+            dom: 'Bfrtip',
+            select: 'single',
+            responsive: true,
+            buttons: [{text: 'Agregar',name: 'add', action: function ( e, dt, node, config ) {	
+    			 			  hide();
+    					  	  var addApp = /*[[@{/addapp}]]*/;
+    						  $.ajax({
+    								url : addApp,
+    								type : 'POST',
+    								cache : false,
+    								success : function(data) {
+    									hide();
+    									$('#modal').html(data);
+    									$('#appAddModal').modal('show');																
+    								},
+    								error : function() {}
+    							});
+    						}
+    		        	}, 
+    		            {extend: 'selected',text: 'Editar',name: 'editt',
+    		                    action: function ( e, dt, node, config ) {                          
+    		                      for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+    		                        id: o.context[0].aoColumns[e].mData,
+    		                        title: o.context[0].aoColumns[e].sTitle                
+    		                      });
+    		                  
+    		                  var d = dt.rows({
+    		                   selected: !0
+    		                  });
+    		                  var name = d.data()[0][a[1].id];
+    		                  var menuEdit = /*[[@{/menuedit}]]*/;
+    		                  $.ajax({
+    		                         url : menuEdit,
+    		                         type : 'GET',
+    		                         data : $.param({'appName':name}),
+    		                         cache : false,
+    		                         success : function(data) {
+    		                             hide();
+    		                             $('#modal').html(data);
+    		                             $('#modalEdit').modal('show');                                                                
+    		                         },
+    		                         error : function() {}
+    		                     });
+    		                   }
+                      	},
+                      {extend: 'selected',text: 'Eliminar',name: 'delete',
+                    		
+                			action: function ( e, dt, node, config ) {
+            			  
+            				  	for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+            						id: o.context[0].aoColumns[e].mData,
+            						title: o.context[0].aoColumns[e].sTitle                
+            					  });
+            				  	
+            				  	 var d = dt.rows({
+            		                selected: !0
+            					 });
+            				  	 
+            				  	 var index = dt.row({
+            		                selected: !0
+            		             }).index();
+            				  	 
+            				  	  hide();
+            				  	 
+            					  var idApplication = d.data()[0][a[1].id];
+            					  //var index = dt.row({selected: !0}).index();
+            					  //var indexRow = index-1;
+            					  var loadConfirmDelete = /*[[@{/loadconfirmdeleteapplication}]]*/
+            					  $.ajax(loadConfirmDelete,{
+            									data:$.param({'appId':idApplication, 'rowIndexApp':index}),
+            							        type:'GET',
+            							        success: function(data){
+            							    		// Se oculta la capa 'cargando...'
+            							    		hide();
+            							    		$('#modal').html(data);
+            										$('#modalDeleteApp').modal('show');
+            							        },
+            							        error:function(data){
+            							        	// Se oculta la capa 'cargando...'
+            							        	hide();
+            							        
+            									}
+            					});
+            		 	 	}
+                      	}
+                    ]
+        })
 
 });
 </script>

@@ -1,8 +1,13 @@
 package es.gob.fire.persistence.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.entity.Application;
 
 @Repository
@@ -24,7 +29,12 @@ public interface ApplicationRepository extends JpaRepository<Application, String
 	Application findByAppName(String appName);
 
 	
-	
+	/**
+	 * Method that gets the applications associated to the Certificate identified by idCertificate.
+	 * @return List<ApplicationCertDTO>
+	 */
+	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, ap.fechaAltaApp) FROM Application ap, Certificate cer WHERE ap.certificate.idCertificado = cer.idCertificado AND ap.certificate.idCertificado = :idCertificado order by ap.appName")
+	List<ApplicationCertDTO> findApplicationCert(@Param("idCertificado") Long idCertificado);
 	
 
 }

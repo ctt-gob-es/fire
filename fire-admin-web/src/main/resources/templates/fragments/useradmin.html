@@ -250,13 +250,22 @@ $(document).ready(function() {
 		            	data:$.param({'id':data.userId, 'index':rowindex}),
 		                type:'POST',
 		                success: function(data){
-		                    
+		                	
 		                	// Se oculta la capa 'cargando...'
 		                	hide();
-		                    tbl.row(data.index).remove().draw();
-		                    
-		                    $('#altEditor-modal .modal-body .alert').remove();
-		                    $('#altEditor-modal').modal('hide');
+		                	
+		                	if (data.indexOf("error") != -1) {
+		                		
+		                		var msgError = data.replace('error.','');
+		                		$('#altEditor-modal .modal-body .alert').remove();
+		    		            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + msgError + '</strong></div>');
+		                	} else {                    
+		                	
+			                    tbl.row(data.index).remove().draw();
+			                    
+			                    $('#altEditor-modal .modal-body .alert').remove();
+			                    $('#altEditor-modal').modal('hide');
+		                	}
 		                },
 		                error:function(){}
 		            });

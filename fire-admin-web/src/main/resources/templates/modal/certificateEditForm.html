@@ -92,6 +92,14 @@
 	</div>
 
 <script th:inline="javascript">
+
+$(document)
+.ready(
+		function() {
+			
+			cleanSpan('certEditForm');
+			
+		});
 	
 	
 	$('#certEditModal').on('shown.bs.modal', function (e) {

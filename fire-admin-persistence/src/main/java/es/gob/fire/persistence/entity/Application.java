@@ -2,32 +2,32 @@ package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import es.gob.fire.commons.utils.NumberConstants;
 
 /**
  * <p>Class that maps the <i>APPLICATION</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.2, 25/01/2019.
+ * @version 1.0, 24/12/2020.
  */
 @Entity
 @Table(name = "TB_APLICACIONES")
@@ -58,13 +58,18 @@ public class Application implements Serializable{
 	/**
 	 * Attribute that represents the data.
 	 */
-	 @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm")
 	private Date fechaAltaApp;
 	 
 	 /**
-		 * Attribute that represents the habilitado.
-		 */
-	 private boolean habilitado;
+	  * Attribute that represents the habilitado.
+	 */
+	private boolean habilitado;
+	 
+	 /**
+	  * Attribute that represents the header list for the validation method.
+	  */
+	private List<ApplicationResponsible> listApplicationResponsible;
 
 	/**
 	 * Gets the value of the attribute {@link #appId}.
@@ -72,8 +77,6 @@ public class Application implements Serializable{
 	 */
 	@Id
 	@Column(name = "ID", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(generator = "tb_aplicaciones_seq")
-	@GenericGenerator(name = "tb_aplicaciones_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_APLICACIONES_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
 	@JsonView(DataTablesOutput.View.class)
 	public String getAppId() {
 		return this.appId;
@@ -163,5 +166,28 @@ public class Application implements Serializable{
 	 */
 	public void setHabilitado(boolean habilitado) {
 		this.habilitado = habilitado;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #listApplicationResponsible}.
+	 * @return the value of the attribute {@link #listApplicationResponsible}.
+	 */
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	@OneToMany(mappedBy = "application", cascade = { CascadeType.REMOVE, CascadeType.MERGE }, fetch = FetchType.LAZY)
+	public List<ApplicationResponsible> getListApplicationResponsible() {
+		// CHECKSTYLE:ON
+		return listApplicationResponsible;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #listApplicationResponsible}.
+	 * @param listXValidationMethodHeaderParam The value for the attribute {@link #listApplicationResponsible}.
+	 */
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	public void setListApplicationResponsible(List<ApplicationResponsible> listApplicationResponsibleParam) {
+		// CHECKSTYLE:ON
+		this.listApplicationResponsible = listApplicationResponsibleParam;
 	}
 }

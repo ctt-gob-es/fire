@@ -100,4 +100,10 @@ public interface ICertificateService {
 	 * @return
 	 */
 	String getFormatCertText(InputStream certIs) throws CertificateException;
+	
+	/**
+	 * @param certificate
+	 * @return
+	 */
+	String getCertificateText(String certificate);
 }
