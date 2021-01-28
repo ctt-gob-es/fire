@@ -49,9 +49,20 @@ function deleteCertificate(){
 	        
 	    	// Se oculta la capa 'cargando...'
 	    	hide();
-	    	tableCertFire.row(data.index).remove().draw();
-			closeModalButton('modalDeleteCert', 'idCertificateForm');
-			
+	    	
+	    	if (data.indexOf("error") != -1) {
+        		
+        		var msgError = data.replace('error.','');
+        		$('#modalDeleteCert .modal-body .alert').remove();
+	            $('#modalDeleteCert .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + msgError + '</strong></div>');
+        	} else {                    
+        	
+        		tableCertFire.row(data.index).remove().draw();
+                
+                $('#modalDeleteCert .modal-body .alert').remove();
+                closeModalButton('modalDeleteCert', 'idCertificateForm');
+        	}
+	    			
 		},
 		error:function(){
 			hide();

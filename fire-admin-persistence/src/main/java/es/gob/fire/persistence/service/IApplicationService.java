@@ -35,8 +35,7 @@ public interface IApplicationService {
 	 * @param appName The app name.
 	 * @return {@link app}
 	 */
-	Application getAppByAppName(String appName);
-	
+	Application getAppByAppName(String appName);	
 	
 	
 	/**
@@ -101,15 +100,38 @@ public interface IApplicationService {
 	ApplicationDTO applicationEntityToDto(Application application);
 	
 	/**
-	 * @param userId
-	 * @return
+	 * Method that gets the list of applications-users relations by userId.
+	 * @param userId Long that represents the User identifier
+	 * @return List<ApplicationResponsible>
 	 */
 	List<ApplicationResponsible> getApplicationResponsibleByUserId(Long userId);
 	
 	/**
+	 * Method that gets the list of applications-users relations by appId.
+	 * @param appId String that represents the Application identifier.
+	 * @return List<ApplicationResponsible>
+	 */
+	List<ApplicationResponsible> getApplicationResponsibleByApprId(String appId);
+	
+	/**
+	 * Method that gets the applications associated to the Certificate identified by idCertificate.
 	 * @param input
 	 * @param idCertificate
 	 * @return
 	 */
 	DataTablesOutput<ApplicationCertDTO> getApplicationsCert(DataTablesInput input, Long idCertificate);
+	
+	/**
+	 * Method that gets the application information to be visualized.
+	 * @param appId String that represents the Application identifier
+	 * @return ApplicationCertDTO
+	 */
+	ApplicationCertDTO getViewApplication(String appId);
+	
+	/**
+	 * Method that obtains from the persistence a List of Application 
+	 * @param idCertificado Long that represents the Certificate identifier.
+	 * @return Object that represents a user from the persistence.
+	 */
+	List<Application> getByIdCertificado(Long idCertificado);
 }

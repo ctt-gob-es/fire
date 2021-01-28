@@ -125,6 +125,31 @@
 </div>
 
 <script th:inline="javascript">
+$(document).ready(function() {
+
+	$('#rolId').change(function() {
+	       
+		hide();
+		
+		var rolSelected = $("#rolId option:selected").text();
+			
+		if (rolSelected != 'Administrador') {
+					
+			$('#passwordEdit').prop("disabled", true);
+			$('#passwordEdit').val('');
+			$('#confirmPasswordEdit').prop("disabled", true);
+			$('#confirmPasswordEdit').val('');
+					
+		} else {
+			$('#passwordEdit').prop("disabled", false);
+			$('#confirmPasswordEdit').prop("disabled", false);
+		}
+	           
+	}); 
+	
+});
+
+
 	$( "#editBtnModal" ).click(function( event ) {
 		  event.preventDefault();
 			

@@ -94,17 +94,17 @@ $(document).ready(function() {
     		                  var d = dt.rows({
     		                   selected: !0
     		                  });
-    		                  var name = d.data()[0][a[1].id];
-    		                  var menuEdit = /*[[@{/menuedit}]]*/;
+    		                  var appId = d.data()[0][a[1].id];
+    		                  var editApp = /*[[@{/appedit}]]*/;
     		                  $.ajax({
-    		                         url : menuEdit,
-    		                         type : 'GET',
-    		                         data : $.param({'appName':name}),
+    		                         url : editApp,
+    		                         type : 'POST',
+    		                         data : $.param({'appId':appId}),
     		                         cache : false,
     		                         success : function(data) {
     		                             hide();
     		                             $('#modal').html(data);
-    		                             $('#modalEdit').modal('show');                                                                
+    		                             $('#appEditModal').modal('show');                                                                
     		                         },
     		                         error : function() {}
     		                     });
@@ -149,7 +149,40 @@ $(document).ready(function() {
             									}
             					});
             		 	 	}
-                      	}
+                      	},
+                		{extend: 'selected', text: 'Visualizar', name: 'view',
+                	    	action: function ( e, dt, node, config ) {   		
+                	    	
+                	    		for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+                					id: o.context[0].aoColumns[e].mData,
+                					title: o.context[0].aoColumns[e].sTitle                
+                				  });
+                			  	
+                			  	 var d = dt.rows({
+                	                selected: !0
+                				 });
+                			  	 
+                			  	 var index = dt.row({
+                	                selected: !0
+                	             }).index();
+                			  	 			  	 
+                				  var idApplication = d.data()[0][a[1].id];
+                				  
+                				  var viewApplication = /*[[@{/viewapplication}]]*/;
+                				  $.ajax({
+                						url : viewApplication,
+                						type : 'POST',
+                						cache : false,
+                						data: $.param({'appId':idApplication}),
+                						success : function(data) {
+                							hide();
+                							$('#modal').html(data);
+                							$('#appViewModal').modal('show');																
+                						},
+                						error : function() {}
+                					});
+                			}
+                		}
                     ]
         })
 

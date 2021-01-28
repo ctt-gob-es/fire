@@ -20,8 +20,14 @@ public interface ApplicationResponsibleRepository extends JpaRepository<Applicat
 	
 	/**
 	 * Method that gets from persistence all ApplicationResponsible whose User identifier matches with appId.
-	 * @param appId USer identifier
+	 * @param appId Application identifier
 	 * @return List<ApplicationResponsible>
 	 */
 	List<ApplicationResponsible> findByApplicationAppId(String appId);
+	
+	/**
+	 * Method that removes from persistence all ApplicationResponsible whose User identifier matches with appId.
+	 * @param appId Application identifier
+	 */
+	void deleteByApplicationAppId(String appId);
 }

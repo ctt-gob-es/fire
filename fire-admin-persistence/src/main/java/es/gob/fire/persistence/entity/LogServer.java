@@ -36,6 +36,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
@@ -52,7 +54,6 @@ import es.gob.fire.commons.utils.NumberConstants;
  */
 @Entity
 @Table(name = "TB_SERVIDORES_LOG")
-@SequenceGenerator(name = "TB_SERVIDORES_LOG_SEQ", sequenceName = "TB_SERVIDORES_LOG_SEQ", initialValue = 1, allocationSize = 1)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class LogServer implements Serializable {
 
@@ -97,13 +98,9 @@ public class LogServer implements Serializable {
 	 */
 	@Id
 	@Column(name = "ID_SERVIDOR", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TB_SERVIDORES_LOG_SEQ")
+	@GeneratedValue(generator = "tb_servidores_log_seq")
+	@GenericGenerator(name = "tb_servidores_log_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_SERVIDORES_LOG_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
 	@JsonView(DataTablesOutput.View.class)
-	
-	/*@Id
-	@Column(name = "ID_SERVIDOR", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@JsonView(DataTablesOutput.View.class)*/
 	public Long getLogServerId() {
 		return this.logServerId;
 	}

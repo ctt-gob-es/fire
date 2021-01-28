@@ -15,15 +15,18 @@
  ******************************************************************************/
 
 /**
- * <b>File:</b><p>es.gob.fire.persistence.service.impl.UserService.java.</p> * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
+ * <b>File:</b><p>es.gob.fire.persistence.service.impl.UserService.java.</p> *
+ * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>15/06/2018.</p>
  * @author Gobierno de España.
  * @version 1.0, 15/06/2018.
  */
 package es.gob.fire.persistence.service.impl;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -36,6 +39,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
@@ -56,6 +60,11 @@ import es.gob.fire.persistence.service.IUserService;
 public class UserService implements IUserService {
 
 	/**
+	 * Constant attribute that represents the value of the administrator permission.
+	 */
+	private static final String ROLE_ADMIN_PERMISSON = "1";
+	
+	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
 	@Autowired
@@ -72,6 +81,7 @@ public class UserService implements IUserService {
 	 */
 	@Autowired
 	private UserDataTablesRepository dtRepository;
+	
 
 	/**
 	 * {@inheritDoc}
@@ -234,10 +244,28 @@ public class UserService implements IUserService {
 		return result;	
 	}
 
+	/* (non-Javadoc)
+	 * @see es.gob.fire.persistence.service.IUserService#getAllRol()
+	 */
 	@Override
 	public List<Rol> getAllRol() {
 		
 		return rolRepository.findAll();
+	}
+
+	/* (non-Javadoc)
+	 * @see es.gob.fire.persistence.service.IUserService#isAdminRol(java.lang.Long)
+	 */
+	@Override
+	public boolean isAdminRol(Long idRol) {
+		
+		// Preguntar si permisos de administrador
+		Rol rol = rolRepository.findByRolId(idRol);
+		String[] permissions = rol.getPermissions()==null?new String[]{}:rol.getPermissions().split(UtilsStringChar.SYMBOL_COMMA_STRING);
+		Optional<String> optional = Arrays.stream(permissions).filter(x -> ROLE_ADMIN_PERMISSON.equals(x))
+							.findFirst();
+		
+		return optional.isPresent();
 	}
 
 }

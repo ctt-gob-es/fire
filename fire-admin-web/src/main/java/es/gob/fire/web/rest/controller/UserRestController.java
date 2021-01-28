@@ -58,6 +58,7 @@ import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.dto.validation.OrderedValidation;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
+import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.IUserService;
@@ -113,7 +114,7 @@ public class UserRestController {
 	 */
 	@Autowired
 	private IApplicationService appService;
-	
+			
 	/**
 	 * Attribute that represents the context object.
 	 */
@@ -182,6 +183,16 @@ public class UserRestController {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 			dtOutput.setError(json.toString());
+			
+		} else if (userService.isAdminRol(userForm.getRolId()) && emptyAdminPassword(userForm)) { 	
+			
+			json.put("passwordAdd" + SPAN, "El campo contraseña es obligatorio.");
+			
+		} else if (userService.isAdminRol(userForm.getRolId()) && notMatchingConfirmPassword(userForm.getPassword(), userForm.getConfirmPassword())) {
+			
+			json.put("passwordAdd" + SPAN, "Los campos de contraseña deben coincidir.");
+			json.put("confirmPasswordAdd" + SPAN, "Los campos de contraseña deben coincidir.");
+			
 		} else {
 			try {
 				
@@ -200,6 +211,17 @@ public class UserRestController {
 
 		return dtOutput;
 
+	}
+
+
+	/**
+	 * Method that checks if the password field is empty
+	 * @param userForm
+	 * @return
+	 */
+	private boolean emptyAdminPassword(UserDTO userForm) {
+		
+		return (userForm.getPassword() == null || userForm.getPassword().isEmpty());
 	}
 
 	/**
@@ -255,12 +277,30 @@ public class UserRestController {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 			result = json.toString();
+			
+		} else if (notMatchingConfirmPassword(userFormPassword.getPassword(), userFormPassword.getConfirmPassword())) { 
+			
+			JSONObject json = new JSONObject();
+			json.put("password" + SPAN, "Los campos de contraseña deben coincidir.");
+			json.put("confirmPassword" + SPAN, "Los campos de contraseña deben coincidir.");
+			result = json.toString();
+			
 		} else {
 			
 			result = userService.changeUserPassword(userFormPassword);
 		}
 
 		return result;
+	}
+
+	/**
+	 * @param password
+	 * @param confirmPassword
+	 * @return
+	 */
+	private boolean notMatchingConfirmPassword(String password, String confirmPassword) {
+		
+		return !(password.equals(confirmPassword));		
 	}
 
 	/**

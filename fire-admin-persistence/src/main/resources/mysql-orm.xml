@@ -24,4 +24,22 @@
             </id>
         </attributes>
     </entity>
+    <entity class="Application" access="PROPERTY">
+    	<table name="tb_aplicaciones" />
+        <attributes>
+            <id name="appId">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id"/>
+            </id>
+        </attributes>
+    </entity>
+    <entity class="LogServer" access="PROPERTY">
+    	<table name="tb_servidores_log" />
+        <attributes>
+            <id name="logServerId">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id_servidor"/>
+            </id>
+        </attributes>
+    </entity>
 </entity-mappings>

@@ -22,6 +22,7 @@ package es.gob.fire.persistence.entity;
 import java.io.Serializable;
 
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,7 +36,6 @@ import javax.persistence.Table;
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
  * @version 1.0, 12/01/2021.
  */
-@Cacheable
 @Entity
 @Table(name = "TB_RESPONSABLE_DE_APLICACIONES")
 public class ApplicationResponsible implements Serializable {
@@ -115,7 +115,7 @@ public class ApplicationResponsible implements Serializable {
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
 	@MapsId("idResponsible")
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_responsables", nullable = false, insertable = false, updatable = false)
 	public User getResponsible() {
 		// CHECKSTYLE:ON

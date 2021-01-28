@@ -187,6 +187,12 @@ public class CertificateController {
 		return "modal/certificateEditForm.html";
 	}
 	
+	/**
+	 * Method that maps the request for opening the view certificate modal
+	 * @param idCertificado Long that represents the certificate identifier
+	 * @param model view Model object
+	 * @return String that represents the navigation HTML modal
+	 */
 	@RequestMapping(value = "/viewcertificate", method = RequestMethod.POST)
 	public String certView(@RequestParam("idCertificado") final Long idCertificado, final Model model) {
 		Certificate cert = certificateService.getCertificateByCertificateId(idCertificado);

@@ -27,6 +27,13 @@ public interface ApplicationRepository extends JpaRepository<Application, String
 	 * @return Object that represents a user from the persistence.
 	 */
 	Application findByAppName(String appName);
+	
+	/**
+	 * Method that obtains from the persistence a List of Application 
+	 * @param idCertificado Long that represents the Certificate identifier.
+	 * @return Object that represents a user from the persistence.
+	 */
+	List<Application> findByCertificateIdCertificado(Long idCertificado);
 
 	
 	/**
@@ -36,5 +43,11 @@ public interface ApplicationRepository extends JpaRepository<Application, String
 	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, ap.fechaAltaApp) FROM Application ap, Certificate cer WHERE ap.certificate.idCertificado = cer.idCertificado AND ap.certificate.idCertificado = :idCertificado order by ap.appName")
 	List<ApplicationCertDTO> findApplicationCert(@Param("idCertificado") Long idCertificado);
 	
-
+	/**
+	 * Method that gets the applications associated to the Certificate identified by idCertificate.
+	 * @return ApplicationCertDTO
+	 */
+	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, cer.idCertificado, cer.certificateName) FROM Application ap, Certificate cer WHERE ap.certificate.idCertificado = cer.idCertificado AND ap.appId = :appId")
+	ApplicationCertDTO findViewApplication(@Param("appId") String appId);
+	
 }

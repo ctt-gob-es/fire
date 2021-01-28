@@ -1,3 +1,27 @@
+/* 
+/*******************************************************************************
+ * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * This program is licensed and may be used, modified and redistributed under the  terms
+ * of the European Public License (EUPL), either version 1.1 or (at your option)
+ * any later version as soon as they are approved by the European Commission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and
+ * more details.
+ * You should have received a copy of the EUPL1.1 license
+ * along with this program; if not, you may find it at
+ * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
+ ******************************************************************************/
+
+/** 
+ * <b>File:</b><p>es.gob.fire.persistence.service.ICertificateService.java.</p>
+ * <b>Description:</b><p> .</p>
+  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <b>Date:</b><p>15/06/2018.</p>
+ * @author Gobierno de España.
+ * @version 1.0, 15/06/2018.
+ */
 package es.gob.fire.persistence.service;
 
 import java.io.IOException;
@@ -7,12 +31,10 @@ import java.util.List;
 
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
 import es.gob.fire.persistence.dto.CertificateDTO;
-import es.gob.fire.persistence.dto.CertificateEditDTO;
 import es.gob.fire.persistence.entity.Certificate;
+import es.gob.fire.persistence.entity.User;
 
 public interface ICertificateService {
 	/**
@@ -42,14 +64,7 @@ public interface ICertificateService {
 	 * @return {@link Certificate} The Certificate.
 	 */
 	Certificate saveCertificate(CertificateDTO certificateDto) throws IOException;
-	
-	/**
-	 * Method that updates a certificate in the persistence.
-	 * @param userEditDto a {@link UserEditDTO} with the information of the certificate.
-	 * @return {@link User} The certificate.
-	 */
-	Certificate updateCertificate(CertificateEditDTO certificateEditDto);
-			
+					
 	/**
 	 * Method that deletes a certificate in the persistence.
 	 * @param userId {@link Integer} that represents the certificate identifier to delete.

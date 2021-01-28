@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 /**
- * <b>File:</b><p>es.gob.monitoriza.spring.config.WebLocalizedConfig.java.</p>
+ * <b>File:</b><p>es.gob.monitoriza.spring.config.LogConsumerConfig.java.</p>
  * <b>Description:</b><p>Class that enables and configures Localization for the Monitoriz@ application.</p>
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
- * <b>Date:</b><p>14 mar. 2018.</p>
+ * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de España.
- * @version 1.0, 14 mar. 2018.
+ * @version 1.0, 22/01/2021.
  */
 package es.gob.fire.web.config;
 
@@ -34,9 +34,9 @@ import es.gob.fire.persistence.dto.LogConsumerConnectionDTO;
 import es.gob.log.consumer.client.LogConsumerClient;
 
 /**
- * <p>Class that enables and configures Localization for the Monitoriz@ application.</p>
+ * <p>Class that configures Localization for the Monitoriz@ application.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 14 mar. 2018.
+ * @version 1.0, 22/01/2021.
  */
 @Configuration
 public class LogConsumerConfig {

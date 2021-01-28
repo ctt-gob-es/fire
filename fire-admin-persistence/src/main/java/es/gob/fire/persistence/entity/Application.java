@@ -8,6 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -15,7 +16,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -58,7 +62,6 @@ public class Application implements Serializable{
 	/**
 	 * Attribute that represents the data.
 	 */
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm")
 	private Date fechaAltaApp;
 	 
 	 /**
@@ -77,6 +80,8 @@ public class Application implements Serializable{
 	 */
 	@Id
 	@Column(name = "ID", unique = true, nullable = false, precision = NumberConstants.NUM11)
+	@GeneratedValue(generator = "tb_aplicaciones_seq")
+	@GenericGenerator(name = "tb_aplicaciones_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_APLICACIONES_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
 	@JsonView(DataTablesOutput.View.class)
 	public String getAppId() {
 		return this.appId;
@@ -116,7 +121,9 @@ public class Application implements Serializable{
 	 * Gets the value of the attribute {@link #fechaAltaApp}.
 	 * @return the value of the attribute {@link #fechaAltaApp}.
 	 */
-	@Column(name = "FECHA_ALTA", nullable = false, length = NumberConstants.NUM150)
+	@Column(name = "FECHA_ALTA", nullable = false, length = NumberConstants.NUM19)
+	@DateTimeFormat (pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+	@JsonFormat (pattern = "yyyy-MM-dd HH:mm:ss.SSS")
 	@JsonView(DataTablesOutput.View.class)
 	public Date getFechaAltaApp() {
 		return fechaAltaApp;
@@ -174,7 +181,7 @@ public class Application implements Serializable{
 	 */
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
-	@OneToMany(mappedBy = "application", cascade = { CascadeType.REMOVE, CascadeType.MERGE }, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "application", cascade = {CascadeType.ALL }, orphanRemoval = true, fetch = FetchType.LAZY)
 	public List<ApplicationResponsible> getListApplicationResponsible() {
 		// CHECKSTYLE:ON
 		return listApplicationResponsible;

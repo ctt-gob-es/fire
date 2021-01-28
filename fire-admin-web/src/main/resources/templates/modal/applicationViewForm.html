@@ -1,42 +1,48 @@
-<div class="modal" tabindex="-1" role="dialog" id="certViewModal">
+<div class="modal" tabindex="-1" role="dialog" id="appViewModal">
 	<div class="modal-dialog-centered">
 		<div class="modal-content lg-900">
 			<div class="modal-header">
 				<div id="titleAdd">
-					<h4 class="modal-title" th:text="#{form.certificate.view.title}"/>
+					<h4 class="modal-title" th:text="#{form.application.view.title}"/>
 				</div>
 				<button type="button" class="close"
-					onclick="closeModal('certViewModal')" aria-label="Cerrar">
+					onclick="closeModal('appViewModal')" aria-label="Cerrar">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
-				<form name="certViewForm" role="form" id="certViewForm"
-					th:object="${certViewForm}" action="#" method="post" enctype="multipart/form-data">
+				<form name="appViewForm" role="form" id="appViewForm"
+					th:object="${appViewForm}" action="#" method="post" enctype="multipart/form-data">
 										
-					<input type="hidden" id="idCertificate" th:field="*{idCertificate}"/>
+					<input type="hidden" id="appId" th:field="*{appId}"/>
 					<input type="hidden" id="certPrincipal" th:field="*{certPrincipal}"/>
 					<input type="hidden" id="certBackup" th:field="*{certBackup}"/>
 					<input type="hidden" id="certPrincipalB64" th:field="*{certPrincipalB64}"/>
 					<input type="hidden" id="certBackupB64" th:field="*{certBackupB64}"/>
+					
+					<div class="form-group">
+						<label for="appName" class="col-form-label"
+							th:text="#{form.application.view.name}"></label>
+						<input type="text" id="appName" th:field="*{appName}" class="form-control" readonly="readonly"/>
+						
+						<div style="clear: both;" />
+					</div>
 												
 					<div class="form-group">
 						<label for="alias" class="col-form-label"
-							th:text="#{form.certificate.alias}"></label>
+							th:text="#{form.application.view.alias}"></label>
 						<input type="text" id="alias" th:field="*{alias}" class="form-control" readonly="readonly"/>
 						
 						<div style="clear: both;" />
 					</div>
 					<div class="form-row">
 						<div class="form-group col-md-10">
-								<div th:if= "${certPrincipal != ''}" class="btn_align">
+								<div th:if= "${certPrincipal != null && certPrincipal != ''}" class="btn_align">
 									<button type="button" class="btn btn-primary" onclick="downLoadCert('certPrincipalB64','1')">Descargar certificado 1</button>
 								</div>
 						</div>
-						
-
 					</div>
-					<div th:if= "${certPrincipal != ''}" id="cert-prin" name="cert-prin" class="edit-txt" 
+					<div th:if= "${certPrincipal != null && certPrincipal != ''}" id="cert-prin" name="cert-prin" class="edit-txt" 
 						style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
 					 	resize: none; background: rgb(245, 245, 245);">
 					</div>	
@@ -46,13 +52,13 @@
 					<td></td>
 					<div class="form-row">
 						<div class="form-group col-md-10">
-							<div th:if= "${certBackup != ''}" class="btn_align">
+							<div th:if= "${certBackup != null && certBackup != ''}" class="btn_align">
 								<button type="button" class="btn btn-primary" onclick="downLoadCert('certBackupB64','1')">Descargar certificado 2</button>
 							</div>
 						</div>
 						
 					</div>
-					<div th:if= "${certBackup != ''}" id="cert-resp" name="cert-resp" class="edit-txt" 
+					<div th:if= "${certBackup != null && certBackup != ''}" id="cert-resp" name="cert-resp" class="edit-txt" 
 						style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
 					 	resize: none; background: rgb(245, 245, 245);">
 					</div>
@@ -60,19 +66,19 @@
 					<td></td>
 					<td></td>
 					<td></td>
-					<!--  Tabla de aplicaciones asociadas -->
+					<!--  Tabla de usuarios responsables -->
 					<div class="row">
 						<div class="col-md-12">
 							<div class="bgc-white bd bdrs-3 p-20 mB-20">
-								<h6 class="c-grey-900 mB-20" th:text="#{table.certificate.app.title}"></h6>
-								<table id="appCertTable" class="table table-striped table-bordered" 
+								<h6 class="c-grey-900 mB-20" th:text="#{table.application.responsibles.title}"></h6>
+								<table id="appRespTable" class="table table-striped table-bordered" 
 									cellspacing="0" width="100%">
 									<thead>
 										<tr>
-											<th th:text="#{table.app.name}"></th>
-											<th th:text="#{table.app.id}"></th>
-											<th th:text="#{table.app.responsable}"></th>
-											<th th:text="#{table.app.fec_alt}"></th>
+											<th th:text="#{table.app.user.name}"></th>
+											<th th:text="#{table.app.user.surname}"></th>
+											<th th:text="#{table.app.user.email}"></th>
+											<th th:text="#{table.app.tlf}"></th>
 										</tr>
 									</thead>
 								</table>
@@ -83,48 +89,42 @@
 				</form>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default"
-						onclick="closeModal('certViewModal')">Cerrar</button>
+						onclick="closeModal('appViewModal')">Cerrar</button>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 <script th:inline="javascript">
-$('#certViewModal').on('shown.bs.modal', function (e) {
+$('#appViewModal').on('shown.bs.modal', function (e) {
 	
 	hide();
 	$("#cert-prin").html($("#certPrincipal").val());
 	$("#cert-resp").html($("#certBackup").val());
 	
-	var idCertificado = $("#idCertificate").val();
-	var getCertApps = /*[[@{/certappdatatable}]]*/;
-	tblCertApp = $('#appCertTable').DataTable({
+	var appId = $("#appId").val();
+	var getRespApp = /*[[@{/respappdatatable}]]*/;
+	tblRespApp = $('#appRespTable').DataTable({
 	    "iTotalRecords": "totalElements",
 	    "iTotalDisplayRecords": "numberOfElements",        
 	    "processing": true,
 	    "serverSide": true,
 	    "ajax": {
-	        "url": getCertApps,
+	        "url": getRespApp,
 	        "data": {
-	            "idCertificate": idCertificado
+	            "appId": appId
 	        },
 	        "type": "POST"
 	    },
 	    "language": {
-	        "url": "js/datatables/i18n/spanish.json",
-	        select: {
-	            rows: {
-	                _: "%d filas seleccionadas",
-	                1: "1 fila seleccionada"
-	            }
-	          }
+	        "url": "js/datatables/i18n/spanish.json"
 	        },
 	       
 	    "columns": [
-	          { "data": "appName" },
-	          { "data": "appId"},
-	          { "data": "responsables"},
-	          { "data": "fechaAltaApp" }
+	          { "data": "name" },
+	          { "data": "surnames"},
+	          { "data": "email"},
+	          { "data": "phone" }
 	        ],
 	        responsive: true
 	});
@@ -153,7 +153,7 @@ $('#certViewModal').on('shown.bs.modal', function (e) {
 	 	formData.append("certFile2", file2);
 	 	formData.append("idField",id)
 	 	
-		//var data = new FormData($("#certViewForm")[0]);
+		//var data = new FormData($("#appViewForm")[0]);
 		var idResult;
 		if (id == "certFile1") {
 			idResult = "cert-prin";

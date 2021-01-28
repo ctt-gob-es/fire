@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 /** 
- * <b>File:</b><p>es.gob.fire.core.dto.UserDTOPassword.java.</p>
+ * <b>File:</b><p>es.gob.fire.persistence.dto.UserDTOPassword.java.</p>
  * <b>Description:</b><p> .</p>
-  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * <b>Date:</b><p>19/06/2018.</p>
+  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <b>Date:</b><p>22/01/2020.</p>
  * @author Gobierno de España.
- * @version 1.2, 26/121/2018
+ * @version 1.2, 22/01/2020.
  */
 package es.gob.fire.persistence.dto;
 
@@ -36,8 +36,8 @@ import es.gob.fire.persistence.dto.validation.ThenCheckIt;
  * <p>
  * Class that represents the backing form for adding/editing a user.
  * </p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.2, 26/12/2018.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.0, 22/01/2020.
  */
 public class UserPasswordDTO {
 
@@ -58,8 +58,8 @@ public class UserPasswordDTO {
 	 * the form.
 	 */
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.password.notempty}")
-	@Size(min = NumberConstants.NUM7, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
-	@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "{form.valid.user.password.noPattern}", groups = ThenCheckIt.class)
+	@Size(min = NumberConstants.NUM4, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	//@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "{form.valid.user.password.noPattern}", groups = ThenCheckIt.class)
 	private String password = UtilsStringChar.EMPTY_STRING;
 
 	/**
@@ -67,7 +67,7 @@ public class UserPasswordDTO {
 	 * the form.
 	 */
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.confirmPassword.notempty}")
-	@Size(min = NumberConstants.NUM7, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	@Size(min = NumberConstants.NUM4, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String confirmPassword = UtilsStringChar.EMPTY_STRING;
 
 	

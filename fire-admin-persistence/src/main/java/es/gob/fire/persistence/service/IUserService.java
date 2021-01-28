@@ -17,7 +17,7 @@
 /** 
  * <b>File:</b><p>es.gob.fire.persistence.service.IUserService.java.</p>
  * <b>Description:</b><p> .</p>
-  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
+  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>15/06/2018.</p>
  * @author Gobierno de España.
  * @version 1.0, 15/06/2018.
@@ -105,7 +105,14 @@ public interface IUserService {
 	 * Method that gets all the user roles from the persistence.
 	 * @return a {@link Iterable<Rol>} with the information of all roles.
 	 */
-	List<Rol> getAllRol();
+	List<Rol> getAllRol();	
+		
+	/**
+	 * Method that checks if the Rol identified by idRol is Adminstrador
+	 * @param idRol Long that represents the Rol identifier.
+	 * @return true if the Rol is Administrador
+	 */
+	boolean isAdminRol(Long idRol);
 		
 	/**
 	 * Method that gets the list for the given {@link DataTablesInput}.

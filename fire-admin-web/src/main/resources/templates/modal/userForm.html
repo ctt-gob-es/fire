@@ -46,7 +46,7 @@
 			
 			<div class="form-group">
 			
-				<label for="idRol" th:text="#{form.user.rol}"></label>
+				<label for="rolId" th:text="#{form.user.rol}"></label>
 					<select id="rolId" name="rolId" class="form-control" th:field="*{rolId}">
 					<option selected="selected" value="" th:disabled="disabled"
 							th:text="#{form.user.Editrol.pattern}"></option>
@@ -72,7 +72,7 @@
 			<div class="form-group">
 				
 					<label for="confirmPassword" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
-					<input onblur="validateConfirmPassword();" type="password" name="confirmPassword" id="confirmPasswordAdd" th:field="*{confirmPassword}" class="form-control"  required />
+					<input onblur="validateConfirmPassword();" type="password" name="confirmPasswordAdd" id="confirmPasswordAdd" th:field="*{confirmPassword}" class="form-control"  required />
 					<div id="invalid-confirmPassword" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -113,6 +113,30 @@
 
 <script th:inline="javascript">
 
+$(document).ready(function() {
+
+	$('#rolId').change(function() {
+	       
+		hide();
+		
+		var rolSelected = $("#rolId option:selected").text();
+			
+		if (rolSelected != 'Administrador') {
+					
+			$('#passwordAdd').prop("disabled", true);
+			$('#passwordAdd').val('');
+			$('#confirmPasswordAdd').prop("disabled", true);
+			$('#confirmPasswordAdd').val('');
+					
+		} else {
+			$('#passwordAdd').prop("disabled", false);
+			$('#confirmPasswordAdd').prop("disabled", false);
+		}
+	           
+	}); 
+	
+});
+
 function validateConfirmPassword(){
 	
 	var pass = $('#passwordAdd').val();
@@ -130,7 +154,6 @@ function validateConfirmPassword(){
     }
 	
 }
-
-
+   
 
 </script>

@@ -1,4 +1,4 @@
-<div class="modal" tabindex="-1" role="dialog" id="appAddModal">
+<div class="modal" tabindex="-1" role="dialog" id="appEditModal">
 	<div class="modal-dialog-centered">
 		<div class="modal-content lg-900">
 			<div class="modal-header">
@@ -6,19 +6,27 @@
 					<h4 class="modal-title" th:text="#{form.application.add.title}">
 				</div>
 				<button type="button" class="close"
-					onclick="closeModal('appAddModal')" aria-label="Cerrar">
+					onclick="closeModal('appEditModal')" aria-label="Cerrar">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
-				<form name="appAddForm" role="form" id="appAddForm"
-					th:object="${appAddForm}" action="@{/saveaddapp}" method="post" enctype="multipart/form-data">
+				<form name="appEditForm" role="form" id="appEditForm"
+					th:object="${appEditForm}" action="@{/saveeditapp}" method="post" enctype="multipart/form-data">
 										
 					<input type="hidden" id="appId" th:field="*{appId}"/>
+					<input type="hidden" id="fechaAltaApp" th:field="*{fechaAltaApp}"/>
 					<input type="hidden" id="certPrincipal" th:value="${certPrincipal}" />
 					<input type="hidden" id="certBackup" th:value="${certBackup}"/>					
 					
-					<div id="resultAddApp" data-dismiss="alert"></div>					
+					<div id="resultAddApp" data-dismiss="alert"></div>		
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label for="habilitado" th:text="#{form.application.enabled}"></label>
+							<input type="checkbox" id="habilitado" th:field="*{habilitado}"/>
+						</div>
+					</div>
+								
 					<div class="form-group">
 						<label for="appName" class="col-form-label"
 							th:text="#{form.application.name}"></label>
@@ -85,8 +93,8 @@
 				</form>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default"
-						onclick="closeModal('appAddModal')">Cerrar</button>
-					<button type="button" id="editBtnModal" onclick="saveNewApp();" class="btn btn-primary">Guardar
+						onclick="closeModal('appEditModal')">Cerrar</button>
+					<button type="button" id="editBtnModal" onclick="saveEditApp();" class="btn btn-primary">Guardar
 						cambios</button>
 				</div>
 			</div>
@@ -98,7 +106,7 @@
 $(document)
 .ready(function() {
 			
-			cleanSpan('appAddForm');
+			cleanSpan('appEditForm');
 			$('#multiselectUser').multiselect();
 			$("#cert-prin").html($("#certPrincipal").val());
 			$("#cert-resp").html($("#certBackup").val());
@@ -138,9 +146,9 @@ $(document)
   			
 	});
 		
-function saveNewApp() {
+function saveEditApp() {
 	
-	var saveNewApp = /*[[@{/saveapp}]]*/;
+	var saveEditApp = /*[[@{/saveapp}]]*/;
 	var formData = new FormData();
 	
 	var idUsersSelected = '';
@@ -154,16 +162,16 @@ function saveNewApp() {
 		idUsersSelected = "-1";
 	}
     
-	var blob = new Blob([JSON.stringify($("#appAddForm").serializeJSON())], {type: "application/json"});
+	var blob = new Blob([JSON.stringify($("#appEditForm").serializeJSON())], {type: "application/json"});
     formData.append('appForm', blob);
     formData.append("idUsersSelected", idUsersSelected);
 	
  	loading();
  	
- 	if ($('#appAddForm')[0].checkValidity() === false) {
+ 	if ($('#appEditForm')[0].checkValidity() === false) {
  		  hide();
  		  
- 		  $('#appAddForm *').filter(':input').each(function(){
+ 		  $('#appEditForm *').filter(':input').each(function(){
  	  	    
  	      	if(!$(this)[0].checkValidity()){
  	  	  	 	$("#" + $(this).attr('id')).addClass("has-error");
@@ -176,19 +184,19 @@ function saveNewApp() {
  	  } else{
  		  
  		 $.ajax({
- 		 	  url: saveNewApp,
- 			  type: "POST",
- 			  data: formData,
- 			  processData: false,
- 			  contentType: false,
- 			  success: function(data){
+ 		 	  url: saveEditApp,
+ 		 	  type: "POST",
+			  data: formData,
+			  processData: false,
+			  contentType: false,
+			  success: function(data){
  				  
  				  hide();		 
  				  
  				  if (data.error != null){
  					  var errores = JSON.parse(data.error);
  					  jQuery.each(errores, function(i, val) {
- 					  	$('#appAddForm *').filter('span').each(function(){
+ 					  	$('#appEditForm *').filter('span').each(function(){
  							if (i == $(this).attr('id')){
  								$("#" + i).text(val);
  							}
@@ -199,13 +207,13 @@ function saveNewApp() {
  					 hide();
  					$('#appTable').DataTable().row.add(data.data[0]).draw(false);
  				  
- 					 $("#appAddForm")[0].reset();
- 					 $('#appAddForm *').filter('span').each(function(){
+ 					 $("#appEditForm")[0].reset();
+ 					 $('#appEditForm *').filter('span').each(function(){
  							$(this).text('');
  						});
  					  
  					  
- 					var messageResponse = /*[[#{message.success.application.add}]]*/;
+ 					var messageResponse = /*[[#{message.success.application.edit}]]*/;
  					
  								  
  					//se muestra un mensaje
@@ -216,18 +224,18 @@ function saveNewApp() {
  					$("#resultAddApp").slideUp(500);
  					
  					//se cierra modal
- 					closeModal('appAddModal');
+ 					closeModal('appEditModal');
  					});	 	
  				 	
  				  }
  				  
- 				 $('#appAddForm *').filter(':input').each(function(){
+ 				 $('#appEditForm *').filter(':input').each(function(){
 					  $("#" + $(this).attr('id')).removeClass("has-error");
 				  });
  			  },
  			  error:function(){
  				  hide();
- 				  var messageResponse = /*[[#{message.error.application.add}]]*/;
+ 				  var messageResponse = /*[[#{message.error.application.edit}]]*/;
  				  $('#resultAddApp').removeClass('alert-success')	
  				  $('#resultAddApp').addClass('alert alert-danger');
  				  $("#resultAddApp").html(messageResponse);

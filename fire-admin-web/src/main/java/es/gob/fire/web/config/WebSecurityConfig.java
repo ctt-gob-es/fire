@@ -17,7 +17,7 @@
 /** 
  * <b>File:</b><p>es.gob.valet.spring.config.WebSecurityConfig.java.</p>
  * <b>Description:</b><p> Class that enables and configures the security of the Valet application.</p>
-  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
+  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>13 jun. 2018.</p>
  * @author Gobierno de España.
  * @version 1.0, 13 jun. 2018.
@@ -38,7 +38,7 @@ import es.gob.fire.web.authentication.CustomUserAuthentication;
 
 /** 
  * <p>Class that enables and configures the security of the Valet application. </p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.0, 13 jun. 2018.
  */
 @Configuration
@@ -76,6 +76,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
         .loginPage("/")
         .defaultSuccessUrl("/inicio")
         .permitAll()
+        .failureUrl("/login-error")
         .and()
 		.logout().invalidateHttpSession(true).deleteCookies(SESSION_TRACKING_COOKIE_NAME).clearAuthentication(true).logoutSuccessUrl("/?logout")
 		.permitAll()

@@ -1,7 +1,32 @@
+/* 
+/*******************************************************************************
+ * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * This program is licensed and may be used, modified and redistributed under the  terms
+ * of the European Public License (EUPL), either version 1.1 or (at your option)
+ * any later version as soon as they are approved by the European Commission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and
+ * more details.
+ * You should have received a copy of the EUPL1.1 license
+ * along with this program; if not, you may find it at
+ * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
+ ******************************************************************************/
+
+/** 
+ * <b>File:</b><p>es.gob.fire.persistence.entity.User.java.</p>
+ * <b>Description:</b><p>Class that maps the <i>TB_USUARIOS</i> database table as a Plain Old Java Object.</p>
+  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
+ * <b>Date:</b><p>07/07/2020.</p>
+ * @author Gobierno de España.
+ * @version 1.0, 07/07/2020.
+ */
 package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,9 +52,9 @@ import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.persistence.validatordni.Nif;
 
 /**
- * <p>Class that maps the <i>USER_MONITORIZA</i> database table as a Plain Old Java Object.</p>
+ * <p>Class that maps the <i>TB_USUARIOS</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.2, 25/01/2019.
+ * @version 1.0, 07/07/2020.
  */
 @Entity
 @Table(name = "TB_USUARIOS")
@@ -110,8 +135,8 @@ public class User implements Serializable {
 	 * Attribute that represents the DNI.
 	 */
 	
-	private String nif;	
-
+	private String nif;		
+	
 	/**
 	 * Gets the value of the attribute {@link #userId}.
 	 * @return the value of the attribute {@link #userId}.
@@ -213,7 +238,7 @@ public class User implements Serializable {
 	 * Gets the value of the attribute {@link #password}.
 	 * @return the value of the attribute {@link #password}.
 	 */
-	@Column(name = "CLAVE", nullable = false, length = NumberConstants.NUM2000)
+	@Column(name = "CLAVE", nullable = true, length = NumberConstants.NUM100)
 	@Size(max = NumberConstants.NUM2000)
 	@JsonView(DataTablesOutput.View.class)
 	public String getPassword() {
