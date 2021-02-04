@@ -340,7 +340,7 @@ public class LogServerRestController {
 			try {
 				startDate = formatter.parse(requestForm.getStartDate()).getTime();
 			} catch (final ParseException e) {
-				LOGGER.warn("Se ha enviado una fecha de fin con formato invalido: " + e);
+				LOGGER.warn("Se ha enviado una fecha de fin con formato inv&aacute;lido: " + e);
 				startDate = 0;
 			}
 		}
