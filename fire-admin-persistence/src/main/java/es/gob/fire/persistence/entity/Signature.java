@@ -265,7 +265,7 @@ public class Signature implements Serializable {
 	 * Gets the value of the attribute {@link #browser}.
 	 * @return the value of the attribute {@link #browser}.
 	 */
-	@Column(name = "NAVEGADOR", nullable = false, length = NumberConstants.NUM45)
+	@Column(name = "NAVEGADOR", nullable = false, length = NumberConstants.NUM20)
 	@Size(max = NumberConstants.NUM45)
 	@NotNull
 	public String getBrowser() {
