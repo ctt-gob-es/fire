@@ -39,10 +39,18 @@ public final class TestServiceAuthServlet extends HttpServlet {
 	protected void service(final HttpServletRequest request,
 			               final HttpServletResponse response) throws ServletException,
 			                                                          IOException {
+
+		final String redirectKo = request.getParameter("redirectko"); //$NON-NLS-1$
+		if (redirectKo == null || "".equals(redirectKo.trim())) { //$NON-NLS-1$
+			LOGGER.warning("No se ha obtenido la pagina de error a la que redirigir"); //$NON-NLS-1$
+			response.sendRedirect(ERROR_PAGE);
+			return;
+		}
+
 		final String transaction = request.getParameter("transactionid"); //$NON-NLS-1$
 		if (transaction == null || "".equals(transaction.trim())) { //$NON-NLS-1$
 			LOGGER.warning("No se ha proporcionado id de transaccion"); //$NON-NLS-1$
-			response.sendRedirect(ERROR_PAGE);
+			response.sendRedirect(redirectKo);
 			return;
 		}
 		final File transactionFile = new File(
@@ -51,13 +59,13 @@ public final class TestServiceAuthServlet extends HttpServlet {
 		);
 		if (!transactionFile.exists() || !transactionFile.canRead()) {
 			LOGGER.warning("La transaccion '" + transaction + "' no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendRedirect(ERROR_PAGE);
+			response.sendRedirect(redirectKo);
 			return;
 		}
 		final Properties transactionProps = new Properties();
-		final InputStream fis = new FileInputStream(transactionFile);
-		transactionProps.load(fis);
-		fis.close();
+		try (final InputStream fis = new FileInputStream(transactionFile);) {
+			transactionProps.load(fis);
+		}
 
 		final String subjectId = transactionProps.getProperty("subjectid"); //$NON-NLS-1$
 		if (subjectId == null || "".equals(subjectId.trim())) { //$NON-NLS-1$
@@ -81,13 +89,6 @@ public final class TestServiceAuthServlet extends HttpServlet {
 		}
 
 		final String password = request.getParameter("password"); //$NON-NLS-1$
-
-		final String redirectKo = request.getParameter("redirectko"); //$NON-NLS-1$
-		if (redirectKo == null || "".equals(redirectKo.trim())) { //$NON-NLS-1$
-			LOGGER.warning("No se ha obtenido la pagina de error a la que redirigir"); //$NON-NLS-1$
-			response.sendRedirect(ERROR_PAGE);
-			return;
-		}
 
 		final String redirectOk = request.getParameter("redirectok"); //$NON-NLS-1$
 		if (redirectOk == null || "".equals(redirectOk.trim())) { //$NON-NLS-1$

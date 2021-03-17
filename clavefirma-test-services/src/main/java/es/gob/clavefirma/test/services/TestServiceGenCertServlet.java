@@ -37,6 +37,8 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 
 	private static final String KEY_CERTIFICATE = "certificate"; //$NON-NLS-1$
 
+	private static final String ERROR_PAGE = "test_pages/ErrorTransaction.html"; //$NON-NLS-1$
+
 	private static final Logger LOGGER = Logger.getLogger(TestServiceGenCertServlet.class.getName());
 
 	/** @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
@@ -47,10 +49,24 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 
 		LOGGER.info("Solicitud de recuperacion de certificado desde la web de prueba"); //$NON-NLS-1$
 
+		final String redirectKo = request.getParameter("redirectko"); //$NON-NLS-1$
+		if (redirectKo == null || "".equals(redirectKo.trim())) { //$NON-NLS-1$
+			LOGGER.severe("No se ha proporcionado URL de retorno de error"); //$NON-NLS-1$
+			response.sendRedirect(ERROR_PAGE);
+			return;
+		}
+
+		final String redirectOk = request.getParameter("redirectko"); //$NON-NLS-1$
+		if (redirectOk == null || "".equals(redirectOk.trim())) { //$NON-NLS-1$
+			LOGGER.severe("No se ha proporcionado URL de retorno de exito"); //$NON-NLS-1$
+			response.sendRedirect(redirectKo);
+			return;
+		}
+
 		final String transaction = request.getParameter("transactionid"); //$NON-NLS-1$
 		if (transaction == null || "".equals(transaction.trim())) { //$NON-NLS-1$
 			LOGGER.warning("No se ha recibido el identificador de transaccion: " + "' no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendRedirect("test_pages/ErrorTransaction.html"); //$NON-NLS-1$
+			response.sendRedirect(redirectKo);
 			return;
 		}
 		final File transactionFile = new File(
@@ -59,7 +75,7 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 		);
 		if (!transactionFile.exists() || !transactionFile.canRead()) {
 			LOGGER.warning("La transaccion '" + transaction + "' no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendRedirect("test_pages/ErrorTransaction.html"); //$NON-NLS-1$
+			response.sendRedirect(redirectKo);
 			return;
 		}
 
@@ -67,13 +83,6 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 		// que hara las veces de nuevo certificado
 		final Properties transactionProps = new Properties();
 		transactionProps.setProperty("subjectid", NEW_CERT_SUBJECT_ID); //$NON-NLS-1$
-
-		final String redirectKo = request.getParameter("redirectko"); //$NON-NLS-1$
-		if (redirectKo == null || "".equals(redirectKo.trim())) { //$NON-NLS-1$
-			LOGGER.severe("No se ha encontrado la transaccion " + transaction); //$NON-NLS-1$
-			response.sendRedirect("test_pages/ErrorTransaction.html"); //$NON-NLS-1$
-			return;
-		}
 
 		// Extraemos el certificado
 		byte[] certEncoded;
@@ -83,7 +92,7 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.severe("No se pudo extraer el certificado del almacen de prueba de nuevo certificado: " + e); //$NON-NLS-1$
-			response.sendRedirect("test_pages/ErrorTransaction.html"); //$NON-NLS-1$
+			response.sendRedirect(redirectKo);
 			return;
 		}
 
@@ -94,7 +103,7 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 		transactionProps.store(fos, null);
 		fos.close();
 
-		response.sendRedirect(request.getParameter("redirectok")); //$NON-NLS-1$
+		response.sendRedirect(redirectOk);
 	}
 
 }
