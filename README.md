@@ -11,11 +11,15 @@ FIRe es software libre y se publica con licencia [GPL 2+](https://www.gnu.org/li
 
 * Aunque FIRe es un proyecto de fuentes abiertas, algunos de los conectores para la conexión con los servicios de firma en la nube pueden requerir bibliotecas propietarias que no se encuentran en los repositorios públicos de Maven. Los conectores conocidos que requieren bibliotecas privadas son:
 
-	* Cl@ve Firma: Las bibliotecas de conexión con el sistema de custodia de Cl@ve Firma no se encuentran en repositorios públicos ni se atienen a la licencia de este producto. Para poder realizar un despliegue de FIRe que tenga acceso a Cl@ve Firma será necesario ponerse en contacto con los responsables del proyecto para dar autorización a su aplicación y obtener las bibliotecas necesarias. La dependencia Maven necesaria para poder compilar y empaquetar el conector con Cl@ve Firma es:
-		* `com.openlandsw.rss:gateway-api`
-		
-	* FNMT: El conector para el acceso al servicio de firma de la FNMT ha sido desarrollado por la propia entidad y se requiere autorización de esta para su uso. La dependencia Maven del conector al servicio de la FNMT es:
-		* `es.gob.fnmt:fnmt-fire-connector`
+	* Cl@ve Firma: Las bibliotecas de conexión con el sistema de custodia de Cl@ve Firma no se encuentran en repositorios públicos ni se atienen a la licencia de este producto. Los organismos públicos que requieran la compilación de este conector pueden solicitar las dependencias necesarias a los responsables del proyecto o tomar las bibliotecas del empaquetado que ellos proporcionan.
+		* La dependencia Maven del conector al servicio de Cl@ve Firma es:
+			* `es.gob.fnmt:fnmt-fire-connector`
+		* La dependencia Maven necesaria para poder compilar y empaquetar el conector con Cl@ve Firma es:
+			* `com.openlandsw.rss:gateway-api`
+
+	* FNMT: El conector para el acceso al servicio de firma de la FNMT ha sido desarrollado por la propia entidad y se requiere autorización de esta para su uso.
+		* La dependencia Maven del conector al servicio de la FNMT es:
+			* `es.gob.fnmt:fnmt-fire-connector`
 
 * Para construir los artefactos de FIRe mediante Maven deberá usarse el comando:
 
@@ -60,19 +64,88 @@ Principales cambios en la historia de versiones:
 
  - [RFE] Se integra un nuevo sistema de gestión de logs que permite la salida de los logs a un fichero independiente.
  - [RFE] Cambios en los logs del sistema para un mejor seguimiento de las transacciones.
+ - [RFE] Como resultado de las operaciones de firma simple y firma de lote, también se envía a las aplicaciones el certificado utilizado para firmar.
  - [RFE] Se sustituye el envío de estadísticas a Google Analytics por el guardado de datos para su explotación desde el módulo de administración.
  - [RFE] Se permite configurar si no se quieren generar los datos de estadísticas, si sólo se desean almacenar los datos en disco o si se desean guardar en disco y realizar un volcado diario a base de datos.
+ - [RFE] El conector de Cl@ve Firma convierte los Id de usuario a mayúsculas para facilitar su reconocimiento por el proveedor.
+ - [RFE] Se permite configurar múltiples veces un mismo conector para poder acceder con él a distintos proveedores de firma en la nube.
+ - [RFE] Se deniegan los accesos de las aplicaciones desactivadas desde la interfaz de administración.
+ - [RFE] Se permite utilizar un fichero de configuracion para el gestor de documentos por defecto.
+ - [RFE] Se restaura la conexión con la BD cuando está disponible aún a pesar de haberse producido errores durante el arranque del componente.
+ - [RFE] Se permite configurar plataformas de actualización y validación de firmas distintas a la Plataforma @firma (la lógica de conexión debe implementarla el organismo interesado).
+ - [RFE] Se introduce la operación de validación de las firmas generadas como alternativa a la actualización de las firmas a formatos longevos (la actualización ya implica la validación).
+ - [RFE] Se permite que las aplicaciones configuren que se obvie el periodo de gracia de las firmas.
+ - [RFE] Se integra el soporte de actualización asíncrona de firmas (aquellas que requieren la espera de un periodo de gracia para actualizar).
+ - [RFE] Se permite configurar la recuperación de las firmas parcialmente actualizadas.
+ - [RFE] Se permite restringir el acceso a gestores de documentos por parte de aplicaciones.
+ - [RFE] Se incluyen nuevas interfaces y clases para la creación de gestores de documentos compatibles con la generación de firmas asíncronas y firmas parcialmente actualizadas.
+ - [RFE] Se permite limitar qué aplicaciones pueden hacer uso de un gestor de documentos o cualquier no pueden usarlo.
+ - [RFE] Se actualiza al Cliente @firma 1.7 (con lo que se elimina el soporte del MiniApplet y AutoFirma WebStart).
+ - [RFE] Se corrige la carga del Cliente @firma cuando se configura expresamente la URL pública de acceso.
+ - [RFE] Se muestra el número de versión de FIRe en el pie de las página web accesibles por los usuarios.
+ - [RFE] Se permite configurar un usuario/contraseña para la autenticación frente a un proxy de red a través de las variables de entorno de Java.
  - [BUG] Se corrige el conector con el servicio de pruebas, para que no sea necesario que se le configure un almacén para la autenticación SSL cliente, aun cuando puede ser no necesaria esta autenticación.
  - [BUG] Se permite el uso del parámetro "headless" para la selección automática de un certificado local durante la operación de firma de lotes.
+ - [BUG] Se corrige el que se estableciese la política de firma de la AGE cuando se indicaba el parámetro "expPolicy" y un formato de firma que no la soportase (FacturaE, NONE, CAdES-ASiC o XAdES-ASiC).
+ - [BUG] Se mejora de la compatibilidad con los clientes móviles que no devuelven el certificado de firma. Ahora no da error al recuperar las firmas, pero aún pueden fallar si el DocumentManager lo exije.
+ - [BUG] Corrección de la compatibilidad para la actualización a formatos T-Level, LT-Level y LTA-Level.
+ - [BUG] Se corrige el error en los parámetros de configuración (extraParams) utilizados cuando se ejecutaban firmas con certificado local.
+ - [BUG] Se corrige error al notificar el fin de la transacción a Cl@ve Firma.
+ - [BUG] Se corrige el que se redirigiese a la página de error de FIRe cuando fallaba la operación de firma en la nube y se hubiese establecido el uso de un proveedor de firma concreto.
+
 
 #### Módulo de administración.
 
+ - [RFE] Nuevo diseño de la interfaz gráfica.
  - [RFE] Se integra un nuevo apartado para la consulta de logs del componente central.
  - [RFE] Se integra un nuevo apartado para la visualización de informes predefinidos sobre los datos estadísticos almacenados.
+ - [RFE] Se introduce un mecanismo para la recuperación de contraseña de los administradores.
+ - [RFE] Se introducen los roles de usuario.
+ - [RFE] Mejoras genéricas en la asociación y presentación de la información de aplicaciones, certificados y usuarios.
+
 
 #### Aplicación de carga de estadísticas
 
  - [RFE] Se agrega una aplicación independiente para la carga en base de datos de las estadísticas generadas por el componente central.
+ 
+ #### Clientes distribuidos (General)
+ - [RFE] Se obtiene más información de las firmas recuperadas: certificado utilizado para firmar, formato longevo al que se actualizaron y periodo de gracia que hay que esperar.
+ - [RFE] Se permite establecer configuración adicional para la configuración de la Plataforma de validación y actualización de firmas.
+ - [RFE] Se incluye un método para la recuperación asíncrona de firmas (firmas para las que se ha pedido esperar un periodo de gracia).
+ - [RFE] Se identifica cuando el error en la firma se originó en el gestor de documentos del servidor.
+ - [RFE] Se incluye en el antiguo API para la operación directa con el proveedor de firma en la nube un parámetro para la selección del proveedor.
+ - [BUG] Se recupera el funcionamiento del antiguo API para la operación directa con el proveedor de firma en la nube.
+
+
+#### Cliente distribuido Java
+
+ - [RFE] Se permite indicar el alias del certificado del almacén de certificados cliente para la conexión con el componente central.
+
+
+#### Cliente distribuido .NET
+
+ - [RFE] Se permite indicar el alias del certificado del almacén de certificados cliente para la conexión con el componente central.
+ - [RFE] Se actualizan las páginas de prueba .NET y se incluye una página de prueba para la recuperación asíncrona de una firma.
+
+
+#### Cliente distribuido PHP
+
+ - [RFE] Se actualiza al modelo de PHP 5 y superiores
+ - [RFE] Se agrega el cliente "fire_client.php" con el mismo modelo de cliente que ya existía en los componentes Java y .NET.
+ - [RFE] Se crean páginas de prueba PHP con el nuevo "fire_client.php" y se incluye una página de prueba para la recuperación asíncrona de una firma.
+ - [BUG] Se actualiza el cliente "fire_api.php" para corregir los problemas de compatibilidad con los despliegues de alta compatibilidad (requiere cambios en la aplicación que integra el cliente).
+ - [BUG] Se actualizan las páginas de prueba PHP con los cambios del API.
+ - [BUG] Se corrige que no se aplicase el formato de actualización configurado.
+
+
+#### Servicio simulador de Cl@ve Firma
+
+ - [RFE] Se incluyen certificados de prueba para los usuarios de prueba de Cl@ve.
+
+#### Aplicación de pruebas
+
+ - [RFE] Se simplifica a los desarrolladores la configuración de los parametros de firma (extraParms) en la página de firma simple.
+ - [RFE] Se incluye el soporte de firmas con periodo de gracia.
 
 ----------
 
