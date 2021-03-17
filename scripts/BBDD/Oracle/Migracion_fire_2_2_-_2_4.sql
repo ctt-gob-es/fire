@@ -118,5 +118,5 @@ DROP  (responsable,  resp_correo, resp_telefono);
 
 -- Agregamos el campo de 'habilitado' dejando las aplicaciones habilitadas por defecto
 ALTER TABLE "TB_APLICACIONES"
-ADD "habilitado" NUMBER(1,0) DEFAULT 1;
+ADD HABILITADO NUMBER(1,0) DEFAULT 1;
  
