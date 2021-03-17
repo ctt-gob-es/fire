@@ -25,7 +25,7 @@
 			<id>main</id>	 <!-- Este perfil contiene todas las dependencias obligatorias -->
 			<activation>
 				<property>
-					<name>!false</name> <!-- Se activa siempre que no se indique esta propiedad -->
+					<name>!only</name> <!-- Se activa siempre que no se indique esta propiedad -->
 				</property>
 			</activation>
 	
@@ -64,12 +64,7 @@
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-alarms</artifactId>
 				</dependency>
-		
-				<dependency>
-					<groupId>es.gob.fire</groupId>
-					<artifactId>fire-alarms-graylog</artifactId>
-				</dependency>
-				
+
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-signature-document</artifactId>
@@ -114,12 +109,13 @@
 		
 			</dependencies>
 		</profile>
-		
+
+		<!-- Perfil que agrega el conector de Cl@ve Firma -->
 		<profile>
-			<id>clavefirma</id>	<!-- Perfil que agrega el conector de Cl@ve Firma -->
+			<id>clavefirma</id>
 			<activation>
 				<property>
-					<name>compile</name> <!-- Se activa siempre que se indique esta propiedad -->
+					<name>all</name> <!-- Se activa siempre que se indique esta propiedad -->
 				</property>
 			</activation>
 			<dependencies>
@@ -130,11 +126,12 @@
 			</dependencies>
 		</profile>
 		
+		<!-- Perfil que agrega el conector de la FNMT -->
 		<profile>
-			<id>fnmt</id>	<!-- Perfil que agrega el conector de la FNMT -->
+			<id>fnmt</id>	
 			<activation>
 				<property>
-					<name>compile</name> <!-- Se activa siempre que se indique esta propiedad -->
+					<name>all</name> <!-- Se activa siempre que se indique esta propiedad -->
 				</property>
 			</activation>
 			<dependencies>
@@ -143,19 +140,47 @@
 					<artifactId>fnmt-fire-connector</artifactId>
 				</dependency>
 			</dependencies>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources/</directory>
+						<includes>
+							<include>asyncnotifier.properties</include>
+						</includes>
+						<filtering>false</filtering>
+					</resource>
+				</resources>
+			</build>
 		</profile>
 		
+		<!-- Perfil que agrega la actualizacion/validacion con @firma -->
 		<profile>
-			<id>afirma</id>	<!-- Perfil que agrega la actualizacion/validacion con @firma -->
+			<id>afirma</id>	
 			<activation>
 				<property>
-					<name>compile</name> <!-- Se activa siempre que se indique esta propiedad -->
+					<name>all</name> <!-- Se activa siempre que se indique esta propiedad -->
 				</property>
 			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-upgrade-afirma</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+		
+		<!-- Perfil que agregar el modulo para el envio de notificaciones a GrayLog -->
+		<profile>
+			<id>graylog</id>	
+			<activation>
+				<property>
+					<name>all</name> <!-- Se activa siempre que se indique esta propiedad -->
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-alarms-graylog</artifactId>
 				</dependency>
 			</dependencies>
 		</profile>

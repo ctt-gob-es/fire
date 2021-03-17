@@ -16,8 +16,8 @@
 		<jdk.version>1.7</jdk.version>
 		
 		<fire.version>2.4-SNAPSHOT</fire.version>
-		<clienteafirma.version>1.7-SNAPSHOT</clienteafirma.version>
-		<fnmt.version>0.2</fnmt.version>
+		<clienteafirma.version>1.7</clienteafirma.version>
+		<fnmt.version>2.0</fnmt.version>
 		<log-consumer.version>1.2</log-consumer.version>
 		
 		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
