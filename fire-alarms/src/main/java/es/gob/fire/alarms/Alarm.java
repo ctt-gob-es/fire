@@ -17,7 +17,7 @@ public enum Alarm {
 	/** No se ha podido conectar con un proveedor de firma en la nube. */
 	CONNECTION_SIGNATURE_PROVIDER("004", AlarmLevel.ERROR, "No se puede conectar con un proveedor de firma en la nube: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con el gestor de documentos. */
-	CONNECTION_DOCUMENT_MANAGER("005", AlarmLevel.ERROR, "No se puede conectar con un gestor de documentos"); //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_DOCUMENT_MANAGER("005", AlarmLevel.ERROR, "No se puede conectar con un gestor de documentos: %1s"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	private String eventCode;
 	private AlarmLevel defaultLevel;

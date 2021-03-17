@@ -17,13 +17,14 @@ import biz.paluch.logging.gelf.intern.sender.GelfUDPSender;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.alarms.AlarmLevel;
 import es.gob.fire.alarms.AlarmNotifier;
+import es.gob.fire.alarms.InitializationException;
 
 /**
  * Notificador para el env&iacute;o de alarmas a GrayLog.
  */
 public class GrayLogAlarmNotifier implements AlarmNotifier {
 
-	private static final Logger LOGGER = Logger.getLogger(GrayLogAlarmNotifier.class.getName());
+	static final Logger LOGGER = Logger.getLogger(GrayLogAlarmNotifier.class.getName());
 
 	/**
 	 * Constant attribute that represents the token key 'cod_err' for a Gray Log Message Field.
@@ -63,6 +64,13 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	 * configuraci&oacute;n de las alertas a GrayLog.
 	 */
 	public static final String PROP_EXTRA_FIELDS_PREFIX = "field."; //$NON-NLS-1$
+
+	/**
+	 * Campo declarado con el nombre del modulo de FIRe. Este campo no se toma del
+	 * fichero de propiedades, ya que este fichero pueden usarlo varios modulos. El
+	 * valor se indica en la solicitud de notificaci&oacute;n.
+	 */
+	public static final String PROP_EXTRA_FIELD_MODULE = "module"; //$NON-NLS-1$
 
 	/** Nombre asignado cuando no se conoce el nombre del host. */
 	private static final String HOSTNAME_UNDEFINED = "UNDEFINED"; //$NON-NLS-1$
@@ -108,11 +116,14 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	 */
 	private GelfSender grayLogMessageSender = null;
 
-
 	@Override
-	public void configure(final Properties config) {
+	public void init(final Properties config) throws InitializationException {
 
 		if (!this.initialized) {
+
+			if (config == null) {
+				throw new InitializationException("No se ha proporcionado la configuracion del notificador"); //$NON-NLS-1$
+			}
 
 			this.initializationError = false;
 			loadIfGrayLogIsEnabled(config);
@@ -138,7 +149,7 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	 * Load if the GrayLog is enabled in the 'StaticMonitorizaConfig.properties' configuration file.
 	 */
 	private void loadIfGrayLogIsEnabled(final Properties config) {
-		final String isGrayLogEnabled = config.getProperty(PROP_ENABLED);
+		final String isGrayLogEnabled = config.getProperty(PROP_ENABLED, Boolean.FALSE.toString());
 		this.grayLogEnabled = Boolean.parseBoolean(isGrayLogEnabled);
 	}
 
@@ -193,7 +204,6 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 		}
 
 		if (this.grayLogHost != null && this.grayLogPort > 0) {
-
 			try {
 				this.grayLogMessageSender = new GelfUDPSender(this.grayLogHost, this.grayLogPort, null);
 			} catch (final IOException e) {
@@ -201,9 +211,7 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 				this.initializationError = true;
 				LOGGER.log(Level.SEVERE, "No se ha podido cargar el objeto para el envio de mensajes a GrayLog", e); //$NON-NLS-1$
 			}
-
 		}
-
 	}
 
 	/**
@@ -224,13 +232,20 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	}
 
 	@Override
-	public void notify(final String module, final AlarmLevel level, final Alarm alarm, final String source) {
+	public void setModule(final String module) {
+		this.grayLogDeclaredFields.put(PROP_EXTRA_FIELD_MODULE, module);
+	}
+
+	@Override
+	public void notify(final AlarmLevel level, final Alarm alarm, final String source)
+			throws IOException {
 
 		// Si GrayLog esta habilitado en el sistema...
 		if (this.grayLogEnabled) {
 
 			// Si ni el codigo de evento ni el mensaje son cadenas nulas o
 			// vacias...
+			boolean sended = false;
 			if (alarm != null) {
 
 				final GelfMessage gm = new GelfMessage();
@@ -242,8 +257,12 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 				gm.addField(TOKEN_KEY_SOURCE, this.hostname);
 				gm.addField(TOKEN_KEY_MESSAGE, message);
 				gm.addFields(this.grayLogDeclaredFields);
-				this.grayLogMessageSender.sendMessage(gm);
 
+				sended = this.grayLogMessageSender.sendMessage(gm);
+
+				if (!sended) {
+					throw new IOException("No se ha podido enviar el mensaje a GrayLog"); //$NON-NLS-1$
+				}
 			}
 		}
 	}
