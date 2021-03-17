@@ -11,7 +11,6 @@ package es.gob.fire.signature;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,17 +27,8 @@ public class DbManager {
 
 	private static String dbConnString = null;
 
-	private static Connection conn = null;
 	static {
-		conn = initialize();
-		if (conn != null) {
-			try {
-				conn.setAutoCommit(true);
-			}
-			catch (final Exception e) {
-				LOGGER.warning("No se pudo activar la funcion de AutoCommit en la conexion de BD"); //$NON-NLS-1$
-			}
-		}
+		initialize();
 	}
 
 	/**
@@ -46,125 +36,40 @@ public class DbManager {
 	 * de configuraci&oacute;n y recuperando la conexi&oacute;n.
 	 * @return Conexi&oacute;n de base de datos o null si se produce un error.
 	 */
-	private static Connection initialize() {
-		// Cargamos el driver JDBC
-		try {
-			dbConnDriver = ConfigManager.getJdbcDriverString();
-			if (dbConnDriver == null) {
-				LOGGER.log(
-						Level.WARNING,
-						"No se ha podido recuperar la clase del driver JDBC a la BD. No se realizara la conexion"); //$NON-NLS-1$
-				return null;
-			}
+	private static void initialize() {
 
-			dbConnString = ConfigManager.getDataBaseConnectionString();
-			if (dbConnString == null) {
-				LOGGER.log(
-						Level.WARNING,
-						"No se ha podido recuperar la cadena de conexion a la BD. No se realizara la conexion"); //$NON-NLS-1$
-				return null;
-			}
-
-		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error al crear la conexion con la base de datos", e); //$NON-NLS-1$
-			return null;
+		// Cargamos la cadena del driver JDBC
+		dbConnDriver = ConfigManager.getJdbcDriverString();
+		if (dbConnDriver == null) {
+			LOGGER.log(
+					Level.WARNING,
+					"No se ha podido recuperar la clase del driver JDBC a la BD. No se realizara la conexion"); //$NON-NLS-1$
 		}
 
-		return initConnection();
-	}
-
-	/**
-	 * Inicializa la conexi&oacute;n de base de datos para la configuraci&oacute;n de base de datos
-	 * previamente cargada.
-	 * @return Conexi&oacute;n de base de datos o null si se produce un error.
-	 */
-	private static Connection initConnection() {
-
+		// Instanciamos el driver JDBC
 		try {
-			Class.forName(dbConnDriver).newInstance();
-
-			return DriverManager.getConnection(dbConnString);
+			Class.forName(dbConnDriver).getConstructor().newInstance();
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error al crear la conexion con la base de datos", e); //$NON-NLS-1$
-			return null;
+			LOGGER.log(Level.SEVERE, "Error al instanciar el driver de base de datos", e); //$NON-NLS-1$
+		}
+
+		// Cargamos la cadena de conexion a base de datos
+		dbConnString = ConfigManager.getDataBaseConnectionString();
+		if (dbConnString == null) {
+			LOGGER.log(
+					Level.WARNING,
+					"No se ha podido recuperar la cadena de conexion a la BD. No se realizara la conexion"); //$NON-NLS-1$
 		}
 	}
 
 	/**
 	 * Obtiene la conexi&oacute;n de base de datos.
 	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo conectar.
+	 * @throws SQLException Cuando no se puede crear la conexi&oacute;n.
 	 */
-	private static Connection getConnection() {
-
-		try {
-			if (conn != null && !conn.isValid(2)) {
-				LOGGER.warning("La conexion con base de datos ha dejado de ser valida"); //$NON-NLS-1$
-				conn = null;
-			}
-		} catch (final SQLException e) {
-			LOGGER.warning("La conexion con base de datos no es valida: " + e); //$NON-NLS-1$
-			conn = null;
-		}
-
-		if (conn == null) {
-			LOGGER.info("Se reinicia la conexion con base de datos, volviendo a cargar el fichero de configuracion"); //$NON-NLS-1$
-			conn = initialize();
-		}
-
-		return conn;
-	}
-
-	/**
-	 * Establece si debe realizarse commit despu&eacute;s de cada sentencia de modificaci&oacute;n
-	 * de la base de datos.
-	 * @param autoCommit {@code true} para indicar que debe hacerse commit autom&aacute;ticamente,
-	 * {@code false} en caso contrario.
-	 * @throws SQLException Cuando no se puede modificar la opci&oacute;n de AutoCommit.
-	 */
-	public static void setAutoCommit(final boolean autoCommit) throws SQLException {
-		getConnection().setAutoCommit(autoCommit);
-	}
-
-	/**
-	 * Realiza a acci&oacute;n de commit desde la &uacute;ltima acci&oacute;n de commit o rollback anterior
-	 * @throws SQLException Cuando fall&oacute; la ejecuci&oacute;n del commit.
-	 */
-	public static void runCommit() throws SQLException {
-		getConnection().commit();
-	}
-	/**
-	 * Deshace todos los cambios de la actual transacci&oacute;n
-	 * @throws SQLException Cuando fall&oacute; la ejecuci&oacute;n del rollback.
-	 */
-	public static void runRollBack() throws SQLException {
-		getConnection().rollback();
-	}
-
-	/**
-	 * Cierra la conexi&oacute;n con la base de datos.
-	 * @throws SQLException Cuando ocurre un error al cerrar la conexi&oacute;n.
-	 */
-	public static void close() throws SQLException {
-		if (conn != null && !conn.isClosed()) {
-			conn.close();
-		}
-	}
-
-	/**
-	 * Prepara una sentencia SQL para ser ejecutada.
-	 * @param statement Sentencia SQL.
-	 * @return Sentencia SQL.
-	 * @throws SQLException Cuando se produce un error al preparar la sentencia.
-	 * @throws DBConnectionException Cuando no se ha podido inicializar la conexion con base de datos.
-	 */
-	public static PreparedStatement prepareStatement(final String statement) throws SQLException, DBConnectionException {
-		final Connection c = getConnection();
-		if (c == null)  {
-			throw new DBConnectionException("No se ha encontrado una conexion abierta contra la base de datos"); //$NON-NLS-1$
-		}
-
-		return c.prepareStatement(statement);
+	public static Connection getConnection() throws SQLException {
+		return DriverManager.getConnection(dbConnString);
 	}
 
 	/**
@@ -173,6 +78,6 @@ public class DbManager {
 	 * {@code false} en caso contrario.
 	 */
 	public static boolean isConfigured() {
-		return conn != null;
+		return dbConnDriver != null && dbConnString != null;
 	}
 }

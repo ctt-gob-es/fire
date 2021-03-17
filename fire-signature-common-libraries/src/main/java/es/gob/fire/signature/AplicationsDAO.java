@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,7 +44,7 @@ public class AplicationsDAO {
 	 * @throws SQLException Cuando no se puede realizar la comprobaci&oacute;n.
 	 * @throws DBConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
 	 */
-	public static ApplicationChecking checkApplicationId(final String appId) throws SQLException, DBConnectionException {
+	public static ApplicationChecking checkApplicationId(final String appId) throws SQLException {
 
 		// Si no hay conexion con la BD y si esta la aplicacion en el fichero de configuracion, la comprobamos
 		if (!DbManager.isConfigured() && ConfigManager.getAppId() != null) {
@@ -51,31 +52,31 @@ public class AplicationsDAO {
 			return new ApplicationChecking(appId, appId, valid, true);
 		}
 
-		// Comprobamos en BD
-		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_APP_NAME);
-
-		st.setString(1, appId);
-
-		if (!st.execute()) {
-			st.close();
-			LOGGER.fine("Error al buscar la aplicacion con el ID: " + appId); //$NON-NLS-1$
-			return new ApplicationChecking(appId, null, false, false);
-		}
-
-		final ResultSet rs = st.getResultSet();
-
 		ApplicationChecking result;
-		if (rs.next()) {
-			LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + appId); //$NON-NLS-1$
-			result = new ApplicationChecking(appId, rs.getString(1), true, rs.getBoolean(2));
-		}
-		else {
-			LOGGER.fine("No se ha encontrado en el sistema la aplicacion con el ID: " + appId); //$NON-NLS-1$
-			result =  new ApplicationChecking(appId, null, false, false);
-		}
 
-		rs.close();
-		st.close();
+		// Comprobamos en BD
+		try (Connection conn = DbManager.getConnection();
+				PreparedStatement st = conn.prepareStatement(STATEMENT_SELECT_APP_NAME);) {
+
+
+			st.setString(1, appId);
+
+			if (!st.execute()) {
+				LOGGER.fine("Error al buscar la aplicacion con el ID: " + appId); //$NON-NLS-1$
+				return new ApplicationChecking(appId, null, false, false);
+			}
+
+			try (ResultSet rs = st.getResultSet();) {
+				if (rs.next()) {
+					LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + appId); //$NON-NLS-1$
+					result = new ApplicationChecking(appId, rs.getString(1), true, rs.getBoolean(2));
+				}
+				else {
+					LOGGER.fine("No se ha encontrado en el sistema la aplicacion con el ID: " + appId); //$NON-NLS-1$
+					result =  new ApplicationChecking(appId, null, false, false);
+				}
+			}
+		}
 
 		return result;
 	}
@@ -89,9 +90,8 @@ public class AplicationsDAO {
 	 * @throws IOException Si hay un error de entrada o salida.
 	 * @throws CertificateException Si hay un problema al decodificar el certificado.
 	 * @throws NoSuchAlgorithmException No se encuentra el algoritmo en el sistema.
-	 * @throws DBConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
 	 */
-	public static boolean checkThumbPrint(final String appId, final String thumb) throws SQLException, CertificateException, IOException, NoSuchAlgorithmException, DBConnectionException {
+	public static boolean checkThumbPrint(final String appId, final String thumb) throws SQLException, CertificateException, IOException, NoSuchAlgorithmException {
 
 		// Si no hay conexion con la BD y si esta el certificado en el fichero de configuracion, lo comprobamos
 		if (!DbManager.isConfigured() && ConfigManager.getCert() != null) {
@@ -106,35 +106,33 @@ public class AplicationsDAO {
 			return propertyThumb.equals(thumb);
 		}
 
+		boolean result;
+
 		/*SELECT COUNT(*) FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?
 		 * AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado
 		 * AND (tb_certificados.huella_principal = ? OR tb_certificados.huella_backup=?)*/
-		final PreparedStatement st = DbManager.prepareStatement(STATEMENT_SELECT_CERT);
-		st.setString(1, appId);
-		st.setString(2, thumb);
-		st.setString(3, thumb);
+		try (Connection conn = DbManager.getConnection();
+				PreparedStatement st = conn.prepareStatement(STATEMENT_SELECT_CERT);) {
+			st.setString(1, appId);
+			st.setString(2, thumb);
+			st.setString(3, thumb);
 
-		if (!st.execute()) {
-			st.close();
-			LOGGER.fine("No existe ningun certificado con la huella: " + thumb); //$NON-NLS-1$
-			return false;
+			if (!st.execute()) {
+				LOGGER.fine("No existe ningun certificado con la huella: " + thumb); //$NON-NLS-1$
+				return false;
+			}
+
+			try (ResultSet rs = st.getResultSet();) {
+				if (!rs.next()) {
+					LOGGER.fine("No se ha podido leer la huella del certificado: " + thumb); //$NON-NLS-1$
+					result = false;
+				}
+				else {
+					LOGGER.fine("La huella del certificado se encuentra registrada en el sistema: " + thumb); //$NON-NLS-1$
+					result = rs.getInt(1) > 0;
+				}
+			}
 		}
-
-		final ResultSet rs = st.getResultSet();
-
-		boolean result;
-		if (!rs.next()) {
-			LOGGER.fine("No se ha podido leer la huella del certificado: " + thumb); //$NON-NLS-1$
-			result = false;
-		}
-		else {
-			LOGGER.fine("La huella del certificado se encuentra registrada en el sistema: " + thumb); //$NON-NLS-1$
-			result = rs.getInt(1) > 0;
-		}
-
-		rs.close();
-		st.close();
-
 		return result;
 	}
 }
