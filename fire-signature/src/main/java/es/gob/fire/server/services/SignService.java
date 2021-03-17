@@ -182,7 +182,7 @@ public final class SignService extends HttpServlet {
     	}
 
     	// Obtenemos el conector con el backend ya configurado
-        final Properties config = null;
+        final Properties config = extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null;
         final FIReConnector connector;
         try {
         	if (providerName == null) {
@@ -247,7 +247,7 @@ public final class SignService extends HttpServlet {
                     op,
                     format,
                     algorithm,
-                    extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null,
+                    config,
                     signerCert,
                     Base64.decode(dataB64, true),
                     td

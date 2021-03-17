@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 public class RecoverNewCertificateService extends HttpServlet {
 
 	/** Serial Id. */
+	private static final long serialVersionUID = 4541230456038147211L;
+	
 	private static final Logger LOGGER = Logger.getLogger(RecoverNewCertificateService.class.getName());
 
 	@Override

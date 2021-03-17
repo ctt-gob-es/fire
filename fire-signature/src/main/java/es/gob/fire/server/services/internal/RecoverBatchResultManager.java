@@ -120,7 +120,7 @@ public class RecoverBatchResultManager {
         // Decodificamos el certificado en caso de que se nos indique (en las firmas de
         // lote con certificado local podria no indicarse).
         X509Certificate signingCert = null;
-        if (certB64 != null) {
+        if (certB64 != null && !certB64.isEmpty()) {
         	try {
         		signingCert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate( //$NON-NLS-1$
         				new ByteArrayInputStream(Base64.decode(certB64, true))

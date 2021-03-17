@@ -207,7 +207,7 @@ public class ConfigManager {
 				if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
 					try {
 						final Class<?> decipherClass = Class.forName(decipherClassname);
-						final Object decipher = decipherClass.newInstance();
+						final Object decipher = decipherClass.getConstructor().newInstance();
 						if (PropertyDecipher.class.isInstance(decipher)) {
 							decipherImpl = (PropertyDecipher) decipher;
 						}
@@ -500,32 +500,6 @@ public class ConfigManager {
 	 */
 	public static String getStatisticsDir() {
 		 return getProperty(PROP_STATISTICS_DIR);
-	}
-
-
-	/**
-	 * Obtiene el directorio temporal para el almacenamiento de temporales del Cliente @firma.
-	 * Este ser&aacute; un subdirectorio dentro del directorio temporal configurado o, en su defecto,
-	 * del firectorio temporal del sistema.
-	 * @return Directorio temporal.
-	 * @throws IllegalStateException Cuando no se encuentra o no se tiene permisos sobre el directorio temporal.
-	 */
-	public static File getAfirmaTempDir() {
-
-		final File baseTmpDir = new File(getTempDir());
-		if (!baseTmpDir.exists() || !baseTmpDir.canRead() || !baseTmpDir.canWrite()) {
-			LOGGER.warning("El directorio temporal base no existe o no tiene permisos de lectura/escritura"); //$NON-NLS-1$
-			throw new IllegalStateException("No se ha podido definir un directorio temporal"); //$NON-NLS-1$
-		}
-
-		final File tmpDir = new File(baseTmpDir, "afirma"); //$NON-NLS-1$
-		if (!tmpDir.exists()) {
-			tmpDir.mkdir();
-		}
-		if (!tmpDir.exists() || !tmpDir.canRead() || !tmpDir.canWrite()) {
-			throw new IllegalStateException("No se ha podido definir un directorio temporal para el intercambio del Cliente @firma"); //$NON-NLS-1$
-		}
-		return tmpDir;
 	}
 
 	/**

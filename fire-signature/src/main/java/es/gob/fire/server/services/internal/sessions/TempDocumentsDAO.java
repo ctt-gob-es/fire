@@ -18,10 +18,11 @@ public interface TempDocumentsDAO {
 
 	/**
 	 * Almacena un documento.
-	 * @param id Identificador del documento o {@code null} si el propio DAO debe asignarselo.
+	 * @param id Identificador del documento o {@code null} si el propio DAO debe
+	 * asign&aacute;rselo.
 	 * @param data Contenido del documento.
 	 * @param newDocument {@code true} si el documento no exist&iacute;a previamente,
-	 * {@code false} si s&ntilde; exist&iacute;a.
+	 * {@code false} si s&iacute; exist&iacute;a.
 	 * @return Identificador del documento almacenado.
 	 * @throws IOException Cuando ocurre un error que hace fallar la operaci&oacute;n.
 	 */
@@ -52,7 +53,7 @@ public interface TempDocumentsDAO {
 
 	/**
 	 * Elimina todos los documentos caducados.
-	 * @param expirationTime &Uacute;ltimo momento del tiempo en el que se deb&iacute;o
+	 * @param expirationTime &Uacute;ltimo momento del tiempo en el que se debi&oacute;
 	 * modificar el documento para no considerarse caducado.
 	 * @throws IOException Cuando ocurre un error que hace fallar la operaci&oacute;n.
 	 */

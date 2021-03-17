@@ -247,7 +247,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			}
 			catch (final Throwable e) {
 				LOGGER.warning("Error al recuperar el documento: " + e); //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(14) + ": " + e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(14));
 				return;
 			}
 		}
