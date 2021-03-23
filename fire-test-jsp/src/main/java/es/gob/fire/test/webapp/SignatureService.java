@@ -84,6 +84,10 @@ public class SignatureService extends HttpServlet {
 			return;
 		}
 
+		// Guardamos en sesion el formato de firma para despues permitir descargar la firma con la
+		// extension adecuada
+		session.setAttribute("format", format); //$NON-NLS-1$
+
 		// Guardamos en la sesion el formato de actualizacion porque no se
 		// usara hasta despues de completar la firma
 		session.setAttribute("upgrade", upgrade); //$NON-NLS-1$

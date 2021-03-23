@@ -118,6 +118,9 @@ public class CreateBatchService extends HttpServlet {
 		// Guardamos el ID de transaccion en la sesion para despues poder recuperar la firma
 		session.setAttribute("transactionId", transactionId); //$NON-NLS-1$
 
+		// Guardamos el formato de firma por defecto para poder identificar luego la extension de los ficheros de firma
+		session.setAttribute("format", format); //$NON-NLS-1$
+
 		// Redirigimos al usuario a la pagina para agregar ficheros al lote
 		response.sendRedirect("AddDocumentToBatch.jsp"); //$NON-NLS-1$
 	}

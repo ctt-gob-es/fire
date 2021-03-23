@@ -45,6 +45,7 @@ public class TestConsumerClient {
 	}
 
 	@Test
+	@Ignore
 	public void testSearhText() {
 
 		final LogConsumerClient client = new LogConsumerClient();

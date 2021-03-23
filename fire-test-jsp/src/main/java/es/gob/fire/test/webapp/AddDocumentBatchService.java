@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -90,6 +92,13 @@ public class AddDocumentBatchService extends HttpServlet {
 			return;
 		}
 
+		// Mantendremos un mapa de los formatos de firma empleados para permitir despues identificar
+		// la extension que debemos asignar a los ficheros de firma
+		Map<String, String> signatureFormats = (Map<String, String>) session.getAttribute("formats");
+		if (signatureFormats == null) {
+			signatureFormats = new HashMap<>();
+		}
+
 		final Properties config = new Properties();
 		config.setProperty("docTitle", "T\u00EDtulo " + doc.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 		config.setProperty("docName", "Nombre " + doc.getId()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -99,11 +108,13 @@ public class AddDocumentBatchService extends HttpServlet {
 		try {
 			final FireClient fireClient = ConfigManager.getInstance().getFireClient(appId);
 			if (doc.isCustomConfig()) {
+				signatureFormats.put(doc.getId(), doc.getFormat());
 				fireClient.addDocumentToBatch(transactionId, userId, doc.getId(), doc.getData(),
 						config, doc.getCryptoOperation(), doc.getFormat(),
 						doc.getExtraParamsB64(), doc.getUpgrade());
 			}
 			else {
+				signatureFormats.put(doc.getId(), (String) session.getAttribute("format")); //$NON-NLS-1$
 				fireClient.addDocumentToBatch(transactionId, userId, doc.getId(), doc.getData(), config);
 			}
 		} catch (final DuplicateDocumentException e) {
@@ -127,10 +138,13 @@ public class AddDocumentBatchService extends HttpServlet {
 		// Guardamos los nombres de fichero cargados
 		List<String> docNames = (List<String>) session.getAttribute("docNames"); //$NON-NLS-1$
 		if (docNames == null) {
-			docNames = new ArrayList<String>();
+			docNames = new ArrayList<>();
 		}
 		docNames.add(doc.getName());
 		session.setAttribute("docNames", docNames); //$NON-NLS-1$
+
+		// Guardamos el formato de firma de cada fichero para poder identificar luego la extension de los ficheros de firma
+		session.setAttribute("formats", signatureFormats); //$NON-NLS-1$
 
 		// Redirigimos la usuario a la misma pagina
 		request.getRequestDispatcher("AddDocumentToBatch.jsp?attributes=success").forward(request, response); //$NON-NLS-1$
@@ -163,10 +177,10 @@ public class AddDocumentBatchService extends HttpServlet {
 	        	} else if (item.isFormField() && "upgrade".equals(item.getFieldName())) { //$NON-NLS-1$
 	        		doc.setUpgrade(item.getString());
 	        	} else if (!item.isFormField() && "batch-file".equals(item.getFieldName())) { //$NON-NLS-1$
-	        		final InputStream fileContent = item.getInputStream();
-	        		doc.setName(item.getName());
-	        		doc.setData(Utils.getDataFromInputStream(fileContent));
-	        		fileContent.close();
+	        		try (InputStream fileContent = item.getInputStream();) {
+	        			doc.setName(item.getName());
+	        			doc.setData(Utils.getDataFromInputStream(fileContent));
+	        		}
 	        	}
 	        }
 	    } catch (final FileUploadException e) {

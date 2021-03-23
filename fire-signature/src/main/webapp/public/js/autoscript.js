@@ -3358,7 +3358,7 @@ var AutoScript = ( function ( window, undefined ) {
 					else {
 						if (cipherKey != undefined && cipherKey != null) {
 							result = decipher(html.substring(0, sepPos), cipherKey, true);
-							certificate = decipher(html.substring(sepPos + 1), cipherKey);
+							certificate = decipher(html.substring(sepPos + 1), cipherKey, true);
 						}
 						else {
 							result = fromBase64UrlSaveToBase64(html.substring(0, sepPos));
@@ -3567,13 +3567,13 @@ var AutoScript = ( function ( window, undefined ) {
 							}
 						}
 						else {
-							errorResponseFunction(null, httpRequest.responseText, errorCallback);
+							errorResponseFunction("java.lang.Exception", "No se pudo conectar con el servidor intermedio para la recuperacion del resultado de la operacion (Status: " + httpRequest.status + ")", errorCallback);
 						}
 					}					
 				}
 				try {
 					httpRequest.onerror = function() {
-						errorResponseFunction("java.lang.Exception", "No se pudo conectar con el servidor intermedio para la recuperacion del resultado de la operacion", errorCallback);
+						errorResponseFunction("java.lang.Exception", "No se pudo conectar con el servidor intermedio para la recuperacion del resultado de la operacion (Status: " + httpRequest.status + ")", errorCallback);
 					}
 				}
 				catch (e) {

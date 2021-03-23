@@ -38,7 +38,6 @@ import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DBConnectionException;
 
 /** Servicio de carga de datos para su posterior firma en servidor.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */

@@ -73,6 +73,17 @@ public class DbManager {
 	}
 
 	/**
+	 * Obtiene la conexi&oacute;n de base de datos.
+	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo conectar.
+	 * @throws SQLException Cuando no se puede crear la conexi&oacute;n.
+	 */
+	public static Connection getConnection(final boolean autocommit) throws SQLException {
+		final Connection conn = DriverManager.getConnection(dbConnString);
+		conn.setAutoCommit(autocommit);
+		return conn;
+	}
+
+	/**
 	 * Indica si la conexi&oacute;n a base de datos esta conigurada y puede usarse.
 	 * @return {@code true} si la conexi&oacute;n a base de datos puede usarse.
 	 * {@code false} en caso contrario.

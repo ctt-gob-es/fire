@@ -27,7 +27,6 @@ import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DBConnectionException;
 
 /** Servicio para la solicitud de un nuevo certificado de firma. */
 public final class GenerateCertificateService extends HttpServlet {

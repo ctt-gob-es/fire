@@ -11,6 +11,7 @@ package es.gob.fire.server.services;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +39,6 @@ import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DBConnectionException;
 import es.gob.fire.statistics.FireStatistics;
 
 /**
@@ -169,7 +169,7 @@ public class FIReService extends HttpServlet {
 	        	}
 	        	appName = appCheck.getName();
 	        }
-	        catch (final DBConnectionException e) {
+	        catch (final SQLException e) {
 	        	LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos para validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
 	        	AlarmsManager.notify(Alarm.CONNECTION_DB);
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

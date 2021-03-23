@@ -42,7 +42,6 @@ public class AplicationsDAO {
 	 * @param appId Identificador de la aplicaci&oacute;n.
 	 * @return Resultado de la comprobaci&oacute;n.
 	 * @throws SQLException Cuando no se puede realizar la comprobaci&oacute;n.
-	 * @throws DBConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
 	 */
 	public static ApplicationChecking checkApplicationId(final String appId) throws SQLException {
 

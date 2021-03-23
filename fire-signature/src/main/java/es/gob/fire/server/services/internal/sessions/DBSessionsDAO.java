@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
@@ -52,9 +53,12 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 	public boolean existsSession(final String id) throws SessionException {
 
 		boolean exists;
-		try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_CHECK_SESSION)) {
+		try (Connection conn = DbManager.getConnection();
+				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_CHECK_SESSION)) {
 			st.setString(1, id);
-			exists = st.executeQuery().next();
+			try (ResultSet result = st.executeQuery()) {
+				exists = result.next();
+			}
 		}
 		catch (final Exception e) {
 			throw new SessionException("Error al buscar la session con ID: " + id, e); //$NON-NLS-1$
@@ -81,7 +85,8 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 
 		// Creamos o actualizamos la sesion segun se indique
 		if (created) {
-			try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_INSERT_SESSION)) {
+			try (Connection conn = DbManager.getConnection(true);
+					PreparedStatement st = conn.prepareStatement(DB_STATEMENT_INSERT_SESSION)) {
 				st.setString(1, sessionId);
 				st.setBlob(2, new ByteArrayInputStream(serializedSession));
 				st.setLong(3, new Date().getTime());
@@ -92,7 +97,8 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 			}
 		}
 		else {
-			try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_UPDATE_SESSION)) {
+			try (Connection conn = DbManager.getConnection(true);
+					PreparedStatement st = conn.prepareStatement(DB_STATEMENT_UPDATE_SESSION)) {
 				st.setBlob(1, new ByteArrayInputStream(serializedSession));
 				st.setLong(2, new Date().getTime());
 				st.setString(3, sessionId);
@@ -110,7 +116,8 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 		// Cargamos los datos de sesion
 		InputStream sessionIs = null;
 		long lastModification = 0;
-		try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_RECOVER_SESSION)) {
+		try (Connection conn = DbManager.getConnection();
+				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_RECOVER_SESSION)) {
 			st.setString(1, id);
 			try (final ResultSet dbResult = st.executeQuery()) {
 				if (dbResult.next()) {
@@ -147,7 +154,8 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 	@Override
 	public void deleteSession(final String id) {
 
-		try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_REMOVE_SESSION)) {
+		try (Connection conn = DbManager.getConnection(true);
+				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_REMOVE_SESSION)) {
 			st.setString(1, id);
 			st.execute();
 		}
@@ -161,7 +169,8 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 
 		final long maxTime = new Date().getTime() - expirationTime;
 
-		try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_REMOVE_EXPIRED_SESSIONS)) {
+		try (Connection conn = DbManager.getConnection(true);
+				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_REMOVE_EXPIRED_SESSIONS)) {
 			st.setLong(1, maxTime);
 			st.execute();
 		}

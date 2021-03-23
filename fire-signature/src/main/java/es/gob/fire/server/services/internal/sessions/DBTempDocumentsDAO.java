@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
@@ -36,7 +37,8 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	@Override
 	public boolean existDocument(final String id) throws IOException {
 		boolean exists;
-		try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_CHECK_DOCUMENT)) {
+		try (Connection conn = DbManager.getConnection();
+				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_CHECK_DOCUMENT)) {
 			st.setString(1, id);
 			exists = st.executeQuery().next();
 		}
@@ -59,7 +61,8 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 				} while (existDocument(docId));
 			}
 
-			try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_INSERT_DOCUMENT)) {
+			try (Connection conn = DbManager.getConnection(true);
+					PreparedStatement st = conn.prepareStatement(DB_STATEMENT_INSERT_DOCUMENT)) {
 				st.setString(1, docId);
 				st.setBlob(2, new ByteArrayInputStream(data));
 				st.setLong(3, new Date().getTime());
@@ -70,7 +73,8 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 			}
 		}
 		else {
-			try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_UPDATE_DOCUMENT)) {
+			try (Connection conn = DbManager.getConnection(true);
+					PreparedStatement st = conn.prepareStatement(DB_STATEMENT_UPDATE_DOCUMENT)) {
 				st.setBlob(1, new ByteArrayInputStream(data));
 				st.setLong(2, new Date().getTime());
 				st.setString(3, docId);
@@ -87,7 +91,8 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	public byte[] retrieveDocument(final String id) throws IOException {
 
 		Blob dataBlob = null;
-		try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_RECOVER_DOCUMENT)) {
+		try (Connection conn = DbManager.getConnection();
+				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_RECOVER_DOCUMENT)) {
 			st.setString(1, id);
 			try (final ResultSet dbResult = st.executeQuery()) {
 				if (dbResult.next()) {
@@ -118,7 +123,8 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	@Override
 	public void deleteDocument(final String id) throws IOException {
 
-		try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_REMOVE_DOCUMENT)) {
+		try (Connection conn = DbManager.getConnection(true);
+				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_REMOVE_DOCUMENT)) {
 			st.setString(1, id);
 			st.execute();
 		}
@@ -140,7 +146,8 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 
 		final long maxTime = new Date().getTime() - expirationTime;
 
-		try (PreparedStatement st = DbManager.prepareStatement(DB_STATEMENT_REMOVE_EXPIRED_DOCUMENTS)) {
+		try (Connection conn = DbManager.getConnection(true);
+				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_REMOVE_EXPIRED_DOCUMENTS)) {
 			st.setLong(1, maxTime);
 			st.execute();
 		}

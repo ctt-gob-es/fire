@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DBConnectionException;
 
 /**
  *  Conjunto de funciones est&aacute;ticas de car&aacute;cter general.
@@ -186,11 +185,12 @@ public final class ServiceUtil {
 	 * @throws IOException Si hay un error de entrada o salida.
 	 * @throws CertificateException Si hay un problema al decodificar el certificado.
 	 * @throws NoSuchAlgorithmException No se encuentra el algoritmo en el sistema.
-	 * @throws DataBaseConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
+	 * @throws DBConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
 	 */
 	private static void checkValideThumbPrint(final String appId, final String thumbPrint) throws SQLException,
 	                                                                          IllegalAccessException, CertificateException,
-	                                                                          NoSuchAlgorithmException, IOException, DBConnectionException {
+	                                                                          NoSuchAlgorithmException, IOException,
+	                                                                          DBConnectionException {
 		if (!AplicationsDAO.checkThumbPrint(appId, thumbPrint)) {
     		throw new IllegalAccessException("El certificado utilizado no tiene permiso para acceder"); //$NON-NLS-1$
     	}
@@ -214,16 +214,16 @@ public final class ServiceUtil {
 			ServiceUtil.checkValideThumbPrint(appId, thumbPrint);
 		}
 		catch (final NoSuchAlgorithmException e) {
-			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "El algoritmo de huella no se ha encontrado en el sistema", e);//$NON-NLS-1$
+			throw new CertificateValidationException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "El algoritmo de huella no se ha encontrado en el sistema", e);//$NON-NLS-1$
 		}
 		catch (final IllegalArgumentException e){
-			throw new CertificateValidationException (HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado", e); //$NON-NLS-1$
+			throw new CertificateValidationException(HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado", e); //$NON-NLS-1$
 		}
 		catch (final IllegalAccessException e) {
-			throw new CertificateValidationException (HttpServletResponse.SC_UNAUTHORIZED, "Acceso no permitido. El certificado utilizado no tiene permiso para acceder", e); //$NON-NLS-1$
+			throw new CertificateValidationException(HttpServletResponse.SC_UNAUTHORIZED, "Acceso no permitido. El certificado utilizado no tiene permiso para acceder", e); //$NON-NLS-1$
 		}
 		catch (final SQLException e) {
-			throw new CertificateValidationException (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
+			throw new DBConnectionException ("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
 		}
 		catch (final DBConnectionException e) {
 			throw new DBConnectionException ("Ha ocurrido un error al conectar con la base de datos", e); //$NON-NLS-1$
