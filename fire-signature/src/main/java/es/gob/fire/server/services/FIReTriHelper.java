@@ -72,8 +72,6 @@ public final class FIReTriHelper {
 	/** Juego de caracteres usado internamente para la codificaci&oacute;n de textos. */
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private static final boolean INSTALL_XMLDSIG_PROVIDER = ConfigManager.isAlternativeXmlDSigActive();
-
 	private static final Logger LOGGER = Logger.getLogger(FIReTriHelper.class.getName());
 
     private FIReTriHelper() {
@@ -524,15 +522,15 @@ public final class FIReTriHelper {
     	}
     	else if (AOSignConstants.SIGN_FORMAT_XADES.equalsIgnoreCase(format)
     			|| AOSignConstants.SIGN_FORMAT_XADES_TRI.equalsIgnoreCase(format)) {
-    		prep = new XAdESTriPhasePreProcessor(INSTALL_XMLDSIG_PROVIDER);
+    		prep = new XAdESTriPhasePreProcessor();
     	}
     	else if (AOSignConstants.SIGN_FORMAT_FACTURAE.equalsIgnoreCase(format)
     			|| AOSignConstants.SIGN_FORMAT_FACTURAE_TRI.equalsIgnoreCase(format)) {
-    		prep = new FacturaETriPhasePreProcessor(INSTALL_XMLDSIG_PROVIDER);
+    		prep = new FacturaETriPhasePreProcessor();
     	}
     	else if (AOSignConstants.SIGN_FORMAT_XADES_ASIC_S.equalsIgnoreCase(format)
     			|| AOSignConstants.SIGN_FORMAT_XADES_ASIC_S_TRI.equalsIgnoreCase(format)) {
-    		prep = new XAdESASiCSTriPhasePreProcessor(INSTALL_XMLDSIG_PROVIDER);
+    		prep = new XAdESASiCSTriPhasePreProcessor();
     	}
     	else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format) ||
     			AOSignConstants.SIGN_FORMAT_PKCS1_TRI.equalsIgnoreCase(format)) {

@@ -272,7 +272,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 		else if (AOSignConstants.SIGN_FORMAT_XADES.equalsIgnoreCase(format) ||
 				 AOSignConstants.SIGN_FORMAT_XADES_TRI.equalsIgnoreCase(format)) {
-					prep = new XAdESTriPhasePreProcessor(ConfigManager.isAlternativeXmlDSigActive());
+					prep = new XAdESTriPhasePreProcessor();
 		}
 		else if (AOSignConstants.SIGN_FORMAT_CADES_ASIC_S.equalsIgnoreCase(format) ||
 				 AOSignConstants.SIGN_FORMAT_CADES_ASIC_S_TRI.equalsIgnoreCase(format)) {
@@ -280,19 +280,19 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 		else if (AOSignConstants.SIGN_FORMAT_XADES_ASIC_S.equalsIgnoreCase(format) ||
 				 AOSignConstants.SIGN_FORMAT_XADES_ASIC_S_TRI.equalsIgnoreCase(format)) {
-					prep = new XAdESASiCSTriPhasePreProcessor(ConfigManager.isAlternativeXmlDSigActive());
+					prep = new XAdESASiCSTriPhasePreProcessor();
 		}
 		else if (AOSignConstants.SIGN_FORMAT_FACTURAE.equalsIgnoreCase(format) ||
 				 AOSignConstants.SIGN_FORMAT_FACTURAE_TRI.equalsIgnoreCase(format) ||
 				 AOSignConstants.SIGN_FORMAT_FACTURAE_ALT1.equalsIgnoreCase(format)) {
-					prep = new FacturaETriPhasePreProcessor(ConfigManager.isAlternativeXmlDSigActive());
+					prep = new FacturaETriPhasePreProcessor();
 		}
 		else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format) ||
 				 AOSignConstants.SIGN_FORMAT_PKCS1_TRI.equalsIgnoreCase(format)) {
 					prep = new Pkcs1TriPhasePreProcessor();
 		}
 		else if (AOSignConstants.SIGN_FORMAT_AUTO.equalsIgnoreCase(format)) {
-			prep = new AutoTriPhasePreProcessor(ConfigManager.isAlternativeXmlDSigActive());
+			prep = new AutoTriPhasePreProcessor();
 		}
 		else {
 			LOGGER.severe("Formato de firma no soportado: " + format); //$NON-NLS-1$

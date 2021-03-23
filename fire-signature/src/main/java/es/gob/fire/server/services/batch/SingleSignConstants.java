@@ -33,8 +33,6 @@ public final class SingleSignConstants {
 	/** Nombre del fichero de configuraci&oacute;n. */
 	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
 
-	private static final String CONFIG_PARAM_INSTALL_XMLDSIG = "alternative.xmldsig"; //$NON-NLS-1$
-
 	private static final Logger LOGGER = Logger.getLogger(SingleSignConstants.class.getName());
 
 	private static Properties config;
@@ -204,14 +202,11 @@ public final class SingleSignConstants {
 			case CADES_ASIC:
 				return new CAdESASiCSTriPhasePreProcessor();
 			case XADES:
-				final boolean installXmlDSig1 = Boolean.parseBoolean(config.getProperty(CONFIG_PARAM_INSTALL_XMLDSIG, Boolean.FALSE.toString()));
-				return new XAdESTriPhasePreProcessor(installXmlDSig1);
+				return new XAdESTriPhasePreProcessor();
 			case XADES_ASIC:
-				final boolean installXmlDSig2 = Boolean.parseBoolean(config.getProperty(CONFIG_PARAM_INSTALL_XMLDSIG, Boolean.FALSE.toString()));
-				return new XAdESASiCSTriPhasePreProcessor(installXmlDSig2);
+				return new XAdESASiCSTriPhasePreProcessor();
 			case FACTURAE:
-				final boolean installXmlDSig3 = Boolean.parseBoolean(config.getProperty(CONFIG_PARAM_INSTALL_XMLDSIG, Boolean.FALSE.toString()));
-				return new FacturaETriPhasePreProcessor(installXmlDSig3);
+				return new FacturaETriPhasePreProcessor();
 			case PKCS1:
 				return new Pkcs1TriPhasePreProcessor();
 			default:
