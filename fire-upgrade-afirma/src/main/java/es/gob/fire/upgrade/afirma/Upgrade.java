@@ -9,12 +9,11 @@
  */
 package es.gob.fire.upgrade.afirma;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.UpgradeResult;
 import es.gob.fire.upgrade.UpgradeResult.State;
+import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 /**
  * Actualizador de firmas AdES contra la Plataforma Afirma.
@@ -49,20 +48,17 @@ public final class Upgrade {
      * @param ignoreGracePeriod
      * 			  Indica que debe ignorase el periodo de gracia de la actualizaci&oacute;n de firma.
      * @return Resultado de la actualizaci&oacute;n de la firma.
-     * @throws ConnectionException
-     *             Si falla la llamada al servicio de actualizaci&oacute;n.
-     * @throws IOException
-     *             Si hay problemas en los tratamientos de datos o lectura de
-     *             opciones de configuraci&oacute;n.
      * @throws PlatformWsException
      *             Si ocurre un error al procesar la petici&oacute;n o la respuesta del servicio.
      * @throws AfirmaResponseException
      *             Si el servicio Web de mejora de firmas env&iacute;a una
      *             respuesta de error.
+     * @throws WSServiceInvokerException Si falla la conexi&oacute;n con la plataforma.
+     *
      */
     public static UpgradeResult upgradeSignature(final AfirmaConnector conn, final byte[] data,
             final UpgradeTarget format, final String afirmaAppName, final boolean ignoreGracePeriod)
-            throws ConnectionException, IOException, PlatformWsException, AfirmaResponseException {
+            throws PlatformWsException, AfirmaResponseException, WSServiceInvokerException {
 
         final String inputDss = DssServicesUtils.createSignUpgradeDss(
         		data,
@@ -70,10 +66,7 @@ public final class Upgrade {
         		afirmaAppName,
         		ignoreGracePeriod);
 
-        final byte[] response = conn.doPlatformCall(
-        		inputDss,
-                AfirmaConnector.SERVICE_SIGNUPGRADE,
-                AfirmaConnector.SIGNUPGRADE_OPERATION_UPGRADE);
+        final byte[] response = conn.upgradeSignature(inputDss);
 
         // Analisis de la respuesta
         final UpgradeAfirmaResponse vr;
@@ -132,29 +125,22 @@ public final class Upgrade {
      * @param afirmaAppName
      *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
      * @return Resultado de la actualizaci&oacute;n de la firma.
-     * @throws ConnectionException
-     *             Si falla la llamada al servicio de recuperaci&oacute;n de firma.
-     * @throws IOException
-     *             Si hay problemas en los tratamientos de datos o lectura de
-     *             opciones de configuraci&oacute;n.
      * @throws PlatformWsException
      *             Si ocurre un error al procesar la petici&oacute;n o la respuesta del servicio.
      * @throws AfirmaResponseException
      *             Si el servicio Web de mejora de firmas env&iacute;a una
      *             respuesta de error.
+     * @throws WSServiceInvokerException Si falla la conexi&oacute;n con la plataforma.
      */
     public static UpgradeResult recoverUpgradedSignature(final AfirmaConnector conn,
     		final String docId, final UpgradeTarget format, final String afirmaAppName)
-            throws ConnectionException, IOException, PlatformWsException, AfirmaResponseException {
+            throws PlatformWsException, AfirmaResponseException, WSServiceInvokerException {
 
         final String inputDss = DssServicesUtils.createRecoverSignatureDss(
         		docId,
         		afirmaAppName);
 
-        final byte[] response = conn.doPlatformCall(
-        		inputDss,
-                AfirmaConnector.SERVICE_RECOVERSIGNATURE,
-                AfirmaConnector.RECOVERSIGN_OPERATION_ASYNC_RECOVER);
+        final byte[] response = conn.recoverSignatureAsync(inputDss);
 
         // Analisis de la respuesta
         final UpgradeAfirmaResponse vr;

@@ -18,6 +18,7 @@ import es.gob.fire.upgrade.UpgradeException;
 import es.gob.fire.upgrade.UpgradeResult;
 import es.gob.fire.upgrade.VerifyException;
 import es.gob.fire.upgrade.VerifyResult;
+import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 /**
  * Clase para la actualizaci&oacute;n de firmas mediante una conexi&oacute;n
@@ -101,7 +102,7 @@ public class AfirmaValidator implements SignatureValidator {
 			}
 			throw new UpgradeException("Error durante la actualizacion de la firma. MajorCode: " + e.getMajorCode() + //$NON-NLS-1$
 					". MinorCode: " + e.getMinorCode(), e); //$NON-NLS-1$
-		} catch (final ConnectionException e) {
+		} catch (final WSServiceInvokerException e) {
 			throw new ConnectionException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
 		} catch (final Exception e) {
 			throw new UpgradeException("Error no identificado durante el proceso de actualizacion de la firma", e); //$NON-NLS-1$
@@ -136,7 +137,7 @@ public class AfirmaValidator implements SignatureValidator {
 		} catch (final AfirmaResponseException e) {
 			throw new UpgradeException("Error durante la recuperacion asincrona de la firma. MajorCode: " + e.getMajorCode() + //$NON-NLS-1$
 					". MinorCode: " + e.getMinorCode() + ". Description: " + e.getMessage(), e); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (final ConnectionException e) {
+		} catch (final WSServiceInvokerException e) {
 			throw new ConnectionException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
 		} catch (final Exception e) {
 			throw new IOException("Error no identificado durante el proceso de recuperacion asincrona de la firma", e); //$NON-NLS-1$
@@ -176,7 +177,7 @@ public class AfirmaValidator implements SignatureValidator {
 					this.appId);
 		} catch (final PlatformWsException e) {
 			throw new VerifyException("Error en la respuesta de la Plataforma @firma", e); //$NON-NLS-1$
-		} catch (final ConnectionException e) {
+		} catch (final WSServiceInvokerException e) {
 			throw new ConnectionException("Error en la comunicacion con la Plataforma @firma", e); //$NON-NLS-1$
 		} catch (final Exception e) {
 			throw new VerifyException("Error no identificado durante el proceso de validacion de la firma", e); //$NON-NLS-1$

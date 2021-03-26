@@ -21,15 +21,39 @@
 		</dependency>
 
 		<dependency>
-			<groupId>axis</groupId>
-			<artifactId>axis</artifactId>
-			<version>1.4</version>
+			<groupId>org.apache.axis2</groupId>
+			<artifactId>axis2-kernel</artifactId>
+			<version>1.7.9</version>
 		</dependency>
- 
+		
 		<dependency>
-    		<groupId>wss4j</groupId>
+			<groupId>org.apache.axis2</groupId>
+			<artifactId>axis2-saaj</artifactId>
+			<version>1.7.9</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.axis2</groupId>
+			<artifactId>axis2-adb</artifactId>
+			<version>1.7.9</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.axis2</groupId>
+			<artifactId>axis2-transport-http</artifactId>
+			<version>1.7.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.axis2</groupId>
+			<artifactId>axis2-transport-local</artifactId>
+			<version>1.7.9</version>
+		</dependency>
+
+		<dependency>
+    		<groupId>org.apache.ws.security</groupId>
     		<artifactId>wss4j</artifactId>
-    		<version>1.5.1</version>
+    		<version>1.6.14</version>
 		</dependency>
 
 		<dependency>

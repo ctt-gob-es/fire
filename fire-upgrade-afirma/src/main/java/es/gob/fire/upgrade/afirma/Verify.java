@@ -9,10 +9,8 @@
  */
 package es.gob.fire.upgrade.afirma;
 
-import java.io.IOException;
-
-import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.VerifyResult;
+import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 /**
  * Verificador de certificados contra la Plataforma Afirma.
@@ -36,24 +34,17 @@ public final class Verify {
 	 * @param afirmaAppName
 	 *            Nombre de aplicaci&oacute;n en la Plataforma Afirma.
 	 * @return Respuesta del servicio de validaci&oacute;n.
-	 * @throws ConnectionException
-     *             Si falla la llamada al servicio de validaci&oacute;n..
-     * @throws IOException
-	 *             Si hay problemas en los tratamientos de datos o lectura de
-	 *             opciones de configuraci&oacute;n.
 	 * @throws PlatformWsException
 	 *             Si ocurre un error al procesar la petici&oacute;n o la
 	 *             respuesta del servicio.
+	 * @throws WSServiceInvokerException Si falla la conexi&oacute;n con la plataforma.
 	 */
 	public static VerifyResult verifySignature(final AfirmaConnector conn,
-			final byte[] signature, final String afirmaAppName) throws ConnectionException,
-				IOException, PlatformWsException {
+			final byte[] signature, final String afirmaAppName)
+					throws PlatformWsException, WSServiceInvokerException {
 
 		final String inputDss = DssServicesUtils.createSignVerifyDss(signature, afirmaAppName);
-		final byte[] responseBytes = conn.doPlatformCall(
-				inputDss,
-				AfirmaConnector.SERVICE_SIGNUPGRADE,
-				AfirmaConnector.SIGNUPGRADE_OPERATION_VERIFY);
+		final byte[] responseBytes = conn.verifySignature(inputDss);
 
 		VerifyAfirmaResponse response;
 		try {

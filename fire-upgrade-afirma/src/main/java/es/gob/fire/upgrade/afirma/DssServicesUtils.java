@@ -25,7 +25,7 @@ final class DssServicesUtils {
     private static final Logger LOGGER = Logger.getLogger(DssServicesUtils.class.getName());
 
     /** Etiqueta de los nodos firma de los XML firmados. */
-    private static final String XML_SIGNATURE_TAG = "Signature"; //$NON-NLS-1$
+    static final String XML_SIGNATURE_TAG = "Signature"; //$NON-NLS-1$
 
     private static final String AFIRMA_TAG = "AFIRMA"; //$NON-NLS-1$
 

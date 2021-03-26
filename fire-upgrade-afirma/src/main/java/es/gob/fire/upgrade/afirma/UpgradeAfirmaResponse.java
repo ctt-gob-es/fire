@@ -16,6 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.Base64;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -64,7 +65,7 @@ class UpgradeAfirmaResponse {
                     inXml.indexOf(SIGNATURE_OBJECT_END, signaturePos));
 
             // Condicion especifica para firmas XAdES Enveloping/Detached
-            if (updatedSigNode.endsWith("Signature>")) { //$NON-NLS-1$
+            if (updatedSigNode.endsWith(DssServicesUtils.XML_SIGNATURE_TAG + ">")) { //$NON-NLS-1$
                 setSignature(Base64.encode(updatedSigNode.getBytes()));
             }
         }
@@ -106,7 +107,11 @@ class UpgradeAfirmaResponse {
      *             plataforma.
      */
     byte[] getUpgradedSignature() throws IOException {
-        return Base64.decode(this.signature);
+        try {
+			return Base64.decode(this.signature);
+		} catch (final WSSecurityException e) {
+			throw new IOException(e);
+		}
     }
 
     void setSignature(final String s) {
