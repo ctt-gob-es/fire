@@ -87,13 +87,42 @@ public class AbstractCommonHandler extends AbstractHandler {
 	final Crypto getCryptoInstance() throws WSSecurityException {
 
 		final Properties properties = new Properties();
+
+		// Configuracion del certificado SSL Cliente para el acceso al servidor
 		properties.setProperty("org.apache.ws.security.crypto.provider", "org.apache.ws.security.components.crypto.Merlin"); //$NON-NLS-1$ //$NON-NLS-2$
-		properties.setProperty("org.apache.ws.security.crypto.merlin.keystore.type", this.keystoreType); //$NON-NLS-1$
-		properties.setProperty("org.apache.ws.security.crypto.merlin.keystore.password", this.keystorePass); //$NON-NLS-1$
-		properties.setProperty("org.apache.ws.security.crypto.merlin.keystore.alias", this.userAlias); //$NON-NLS-1$
-		properties.setProperty("org.apache.ws.security.crypto.merlin.alias.password", this.password); //$NON-NLS-1$
-		properties.setProperty("org.apache.ws.security.crypto.merlin.file", this.keystore); //$NON-NLS-1$
-		return CryptoFactory.getInstance(properties);
+		if (this.keystore != null) {
+			properties.setProperty("org.apache.ws.security.crypto.merlin.file", this.keystore); //$NON-NLS-1$
+		}
+		if (this.keystoreType != null) {
+			properties.setProperty("org.apache.ws.security.crypto.merlin.keystore.type", this.keystoreType); //$NON-NLS-1$
+		}
+		if (this.keystorePass != null) {
+			properties.setProperty("org.apache.ws.security.crypto.merlin.keystore.password", this.keystorePass); //$NON-NLS-1$
+		}
+		if (this.userAlias != null) {
+			properties.setProperty("org.apache.ws.security.crypto.merlin.keystore.alias", this.userAlias); //$NON-NLS-1$
+		}
+		if (this.password != null) {
+			properties.setProperty("org.apache.ws.security.crypto.merlin.alias.password", this.password); //$NON-NLS-1$
+		}
+
+		// Nota: Existen tambien las propiedades:
+		//  - org.apache.ws.security.crypto.merlin.truststore.file
+		//  - org.apache.ws.security.crypto.merlin.truststore.type
+		//  - org.apache.ws.security.crypto.merlin.truststore.password
+		// Sin embargo, estas propiedades no permiten establecer el almacen de confianza en el que
+		// consultar si es seguro el certificado SSL del servidor, sino un almacen independiente en
+		// el que se encuentren los certificados emisores del certificado cliente usado para establecer
+		// la conexion en caso de que estos no estuviesen en el mismo almacen del certificado cliente.
+
+		Crypto crypto;
+		try {
+			crypto = CryptoFactory.getInstance(properties);
+		}
+		catch (final Exception e) {
+			throw new WSSecurityException("Error al configurar el certificado cliente SSL o el almacen de confianza", e); //$NON-NLS-1$
+		}
+		return crypto;
 	}
 
 	/**
@@ -195,5 +224,4 @@ public class AbstractCommonHandler extends AbstractHandler {
 	public final void setUserAlias(final String userAliasParam) {
 		this.userAlias = userAliasParam;
 	}
-
 }

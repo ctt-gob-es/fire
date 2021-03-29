@@ -120,6 +120,18 @@ public class WebServiceInvoker {
 			// Desactivamos el chunked.
 			options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE.toString().toLowerCase());
 
+			//TODO: Buscar un modo de poder asignar el almacen de confianza exclusivamente para esta conexion
+			// y no como configuracion generar de la JVM
+			if (this.config.getTruststorePath() != null) {
+				System.setProperty("javax.net.ssl.trustStore", this.config.getTruststorePath()); //$NON-NLS-1$
+			}
+			if (this.config.getTruststorePass() != null) {
+				System.setProperty("javax.net.ssl.trustStorePassword", this.config.getTruststorePass()); //$NON-NLS-1$
+			}
+			if (this.config.getTruststoreType() != null) {
+				System.setProperty("javax.net.ssl.trustStoreType", this.config.getTruststoreType()); //$NON-NLS-1$
+			}
+
 			// Creamos el cliente y le anadimos la configuracion anterior.
 			client = new ServiceClient();
 			client.setOptions(options);
@@ -275,6 +287,7 @@ public class WebServiceInvoker {
 		else {
 			sender = new ClientHandler(ClientHandler.NONEOPTION);
 		}
+
 		return sender;
 	}
 
@@ -283,10 +296,10 @@ public class WebServiceInvoker {
 	 * @return the created instance of {@link ResponseHandler}.
 	 */
 	private ResponseHandler newResponseHandler() {
-		final String tsPath = this.config.getTruststorePath();
-		final String tsPass = this.config.getTruststorePass();
-		final String tsType = this.config.getTruststoreType();
-		final String tsAlias = this.config.getTruststoreCertAlias();
+		final String tsPath = this.config.getSigningCertStorePath();
+		final String tsPass = this.config.getSigningCertStorePass();
+		final String tsType = this.config.getSigningCertStoreType();
+		final String tsAlias = this.config.getSigningCertAlias();
 		if (tsPath == null || tsPass == null || tsType == null || tsAlias == null) {
 			LOGGER.fine("No se creara manejador para las respuestas firmadas."); //$NON-NLS-1$
 			return null;

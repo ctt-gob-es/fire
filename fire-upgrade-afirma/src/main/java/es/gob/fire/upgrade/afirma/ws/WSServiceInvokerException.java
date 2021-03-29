@@ -28,42 +28,42 @@ package es.gob.fire.upgrade.afirma.ws;
  */
 public class WSServiceInvokerException extends Exception {
 
-    /**
-     * Class serial version.
-     */
-    private static final long serialVersionUID = 8961721799813576882L;
+	/**
+	 * Class serial version.
+	 */
+	private static final long serialVersionUID = 8961721799813576882L;
 
-    /**
-     * Constructor method for the class Afirma5ServiceInvokerException.java.
-     */
-    public WSServiceInvokerException() {
-	super();
-    }
+	/**
+	 * Constructor method for the class Afirma5ServiceInvokerException.java.
+	 */
+	public WSServiceInvokerException() {
+		super();
+	}
 
-    /**
-     * Constructor method for the class Afirma5ServiceInvokerException.java.
-     * @param message Error message.
-     */
-    public WSServiceInvokerException(final String message) {
-	super(message);
-    }
+	/**
+	 * Constructor method for the class Afirma5ServiceInvokerException.java.
+	 * @param message Error message.
+	 */
+	public WSServiceInvokerException(final String message) {
+		super(message);
+	}
 
-    /**
-     * Constructor method for the class Afirma5ServiceInvokerException.java.
-     * @param cause Error cause.
-     */
-    public WSServiceInvokerException(final Throwable cause) {
-	super(cause);
+	/**
+	 * Constructor method for the class Afirma5ServiceInvokerException.java.
+	 * @param cause Error cause.
+	 */
+	public WSServiceInvokerException(final Throwable cause) {
+		super(cause);
 
-    }
+	}
 
-    /**
-     * Constructor method for the class Afirma5ServiceInvokerException.java.
-     * @param message Error message.
-     * @param cause Error cause.
-     */
-    public WSServiceInvokerException(final String message, final Throwable cause) {
-	super(message, cause);
-    }
+	/**
+	 * Constructor method for the class Afirma5ServiceInvokerException.java.
+	 * @param message Error message.
+	 * @param cause Error cause.
+	 */
+	public WSServiceInvokerException(final String message, final Throwable cause) {
+		super(message, cause);
+	}
 
 }

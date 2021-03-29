@@ -260,16 +260,8 @@ class ClientHandler extends AbstractCommonHandler {
 	 * @throws WSSecurityException If the method fails.
 	 */
 	private SOAPMessage createBinarySecurityToken(final Document soapEnvelopeRequest) throws TransformerException, IOException, SOAPException, WSSecurityException {
-		ByteArrayOutputStream baos;
-		Crypto crypto;
-		Document secSOAPReqDoc;
-		DOMSource source;
-		Element element;
-		StreamResult streamResult;
-		String secSOAPReq;
+
 		SOAPMessage res;
-		WSSecSignature wsSecSignature;
-		WSSecHeader wsSecHeader;
 
 		// Eliminamos el provider ApacheXMLDSig de la lista de provider para que
 		// no haya conflictos con el nuestro.
@@ -277,13 +269,11 @@ class ClientHandler extends AbstractCommonHandler {
 		Security.removeProvider("ApacheXMLDSig"); //$NON-NLS-1$
 
 		try {
-			crypto = null;
-			wsSecHeader = null;
-			wsSecSignature = null;
 			// Insercion del tag wsse:Security y BinarySecurityToken
-			wsSecHeader = new WSSecHeader(null, false);
-			wsSecSignature = new WSSecSignature();
-			crypto = getCryptoInstance();
+			final WSSecHeader wsSecHeader = new WSSecHeader(null, false);
+			final WSSecSignature wsSecSignature = new WSSecSignature();
+			final Crypto crypto = getCryptoInstance();
+
 			// Indicacion para que inserte el tag BinarySecurityToken
 			wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
 			wsSecSignature.setUserInfo(getUserAlias(), getPassword());
@@ -291,14 +281,15 @@ class ClientHandler extends AbstractCommonHandler {
 			wsSecSignature.prepare(soapEnvelopeRequest, crypto, wsSecHeader);
 
 			// Modificacion y firma de la peticion
-			secSOAPReqDoc = wsSecSignature.build(soapEnvelopeRequest, crypto, wsSecHeader);
-			element = secSOAPReqDoc.getDocumentElement();
+			final Document secSOAPReqDoc = wsSecSignature.build(soapEnvelopeRequest, crypto, wsSecHeader);
+			final Element element = secSOAPReqDoc.getDocumentElement();
+
 			// Transformacion del elemento DOM a String
-			source = new DOMSource(element);
-			baos = new ByteArrayOutputStream();
-			streamResult = new StreamResult(baos);
+			final DOMSource source = new DOMSource(element);
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			final StreamResult streamResult = new StreamResult(baos);
 			TransformerFactory.newInstance().newTransformer().transform(source, streamResult);
-			secSOAPReq = new String(baos.toByteArray());
+			final String secSOAPReq = new String(baos.toByteArray());
 
 			// Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP
 			// securizado formado

@@ -14,13 +14,19 @@ public class WebServiceInvokerConfig {
 
 	private static final String PROPERTY_TIMEOUT = "webservices.timeout"; //$NON-NLS-1$
 
+	private static final String PROPERTY_SIGNING_CERTSTORE_PATH = "webservices.authentication.ts.path"; //$NON-NLS-1$
+
+	private static final String PROPERTY_SIGNING_CERTSTORE_PASS = "webservices.authentication.ts.password"; //$NON-NLS-1$
+
+	private static final String PROPERTY_SIGNING_CERTSTORE_TYPE = "webservices.authentication.ts.type"; //$NON-NLS-1$
+
+	private static final String PROPERTY_SIGNING_CERT_ALIAS = "webservices.authentication.cert.alias"; //$NON-NLS-1$
+
 	private static final String PROPERTY_TRUSTSTORE_PATH = "com.trustedstore.path"; //$NON-NLS-1$
 
 	private static final String PROPERTY_TRUSTSTORE_PASS = "com.trustedstore.password"; //$NON-NLS-1$
 
 	private static final String PROPERTY_TRUSTSTORE_TYPE = "com.trustedstore.type"; //$NON-NLS-1$
-
-	private static final String PROPERTY_TRUSTSTORE_CERT_ALIAS = "com.trustedstore.cert.alias"; //$NON-NLS-1$
 
 	private static final String PROPERTY_AUTH_METHOD = "webservices.authorization.method"; //$NON-NLS-1$
 
@@ -78,21 +84,39 @@ public class WebServiceInvokerConfig {
 		return timeout;
 	}
 
+	public String getSigningCertStorePath() {
+		final String value = this.config.getProperty(PROPERTY_SIGNING_CERTSTORE_PATH);
+		return value == null || value.length() == 0 ? null : value;
+	}
+
+	public String getSigningCertStorePass() {
+		final String value = this.config.getProperty(PROPERTY_SIGNING_CERTSTORE_PASS);
+		return value == null || value.length() == 0 ? null : value;
+	}
+
+	public String getSigningCertStoreType() {
+		final String value = this.config.getProperty(PROPERTY_SIGNING_CERTSTORE_TYPE);
+		return value == null || value.length() == 0 ? null : value;
+	}
+
+	public String getSigningCertAlias() {
+		final String value = this.config.getProperty(PROPERTY_SIGNING_CERT_ALIAS);
+		return value == null || value.length() == 0 ? null : value;
+	}
+
 	public String getTruststorePath() {
-		return this.config.getProperty(PROPERTY_TRUSTSTORE_PATH);
+		final String value = this.config.getProperty(PROPERTY_TRUSTSTORE_PATH);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getTruststorePass() {
-		return this.config.getProperty(PROPERTY_TRUSTSTORE_PASS);
+		final String value = this.config.getProperty(PROPERTY_TRUSTSTORE_PASS);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getTruststoreType() {
-		return this.config.getProperty(PROPERTY_TRUSTSTORE_TYPE);
-	}
-
-
-	public String getTruststoreCertAlias() {
-		return this.config.getProperty(PROPERTY_TRUSTSTORE_CERT_ALIAS);
+		final String value = this.config.getProperty(PROPERTY_TRUSTSTORE_TYPE);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getAuthMethod() {
@@ -100,34 +124,42 @@ public class WebServiceInvokerConfig {
 	}
 
 	public String getKeystorePath() {
-		return this.config.getProperty(PROPERTY_KEYSTORE_PATH);
+		final String value = this.config.getProperty(PROPERTY_KEYSTORE_PATH);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getKeystorePass() {
-		return this.config.getProperty(PROPERTY_KEYSTORE_PASS);
+		final String value = this.config.getProperty(PROPERTY_KEYSTORE_PASS);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getKeystoreType() {
-		return this.config.getProperty(PROPERTY_KEYTSTORE_TYPE);
+		final String value = this.config.getProperty(PROPERTY_KEYTSTORE_TYPE);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getKeystoreCertAlias() {
-		return this.config.getProperty(PROPERTY_KEYSTORE_CERT_ALIAS);
+		final String value = this.config.getProperty(PROPERTY_KEYSTORE_CERT_ALIAS);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getKeystoreCertPass() {
-		return this.config.getProperty(PROPERTY_KEYSTORE_CERT_PASS);
+		final String value = this.config.getProperty(PROPERTY_KEYSTORE_CERT_PASS);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getUserName() {
-		return this.config.getProperty(PROPERTY_USER_NAME);
+		final String value = this.config.getProperty(PROPERTY_USER_NAME);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getUserPass() {
-		return this.config.getProperty(PROPERTY_USER_PASS);
+		final String value = this.config.getProperty(PROPERTY_USER_PASS);
+		return value == null || value.length() == 0 ? null : value;
 	}
 
 	public String getUserPassType() {
-		return this.config.getProperty(PROPERTY_USER_PASS_TYPE);
+		final String value = this.config.getProperty(PROPERTY_USER_PASS_TYPE);
+		return value == null || value.length() == 0 ? null : value;
 	}
 }

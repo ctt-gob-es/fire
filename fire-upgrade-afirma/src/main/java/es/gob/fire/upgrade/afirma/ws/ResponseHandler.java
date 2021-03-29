@@ -20,6 +20,7 @@ package es.gob.fire.upgrade.afirma.ws;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Logger;
 
@@ -60,18 +61,18 @@ public class ResponseHandler extends AbstractCommonHandler {
 
 	/**
 	 * Constructor method for the class ResponseHandler.java.
-	 * @param truststorePath Ruta del almac&eacute;n de confianza.
-	 * @param truststorePass Contrase&ntilde;a del almac&eacute;n de confianza.
-	 * @param truststoreType Tipo de almac&eacute;n de confianza.
-	 * @param alias Alias del certificado con el que debe estar firmada la respuesta.
+	 * @param signingCertStorePath Ruta del almac&eacute;n de confianza.
+	 * @param signingCertStorePass Contrase&ntilde;a del almac&eacute;n de confianza.
+	 * @param signingCertStoreType Tipo de almac&eacute;n de confianza.
+	 * @param signingCertAlias Alias del certificado con el que debe estar firmada la respuesta.
 	 */
-	public ResponseHandler(final String truststorePath, final String truststorePass, final String truststoreType, final String alias) {
+	public ResponseHandler(final String signingCertStorePath, final String signingCertStorePass, final String signingCertStoreType, final String signingCertAlias) {
 		this.handlerDesc.setName(HANDLER_NAME);
 		this.handlerDesc.getRules().setPhaseLast(true);
-		setKeystore(truststorePath);
-		setKeystorePass(truststorePass);
-		setKeystoreType(truststoreType);
-		setUserAlias(alias);
+		setKeystore(signingCertStorePath);
+		setKeystorePass(signingCertStorePass);
+		setKeystoreType(signingCertStoreType);
+		setUserAlias(signingCertAlias);
 	}
 
 	/**
@@ -101,13 +102,13 @@ public class ResponseHandler extends AbstractCommonHandler {
 				IdRegister.registerElements(doc.getDocumentElement());
 
 				// Obtenemos el certificado con el que debe haberse firmado la respuesta
-				final X509Certificate trustedCert = loadTrustedCert();
-				if (trustedCert != null) {
-					if (signature.checkSignatureValue(trustedCert)) {
+				final X509Certificate signingCert = loadSigningCert();
+				if (signingCert != null) {
+					if (signature.checkSignatureValue(signingCert)) {
 						LOGGER.fine("La firma de la respuesta es valida"); //$NON-NLS-1$
 					} else {
 						throw new AxisFault("La firma de la respuesta del servicio web de @Firma no es valida segun certificado: " //$NON-NLS-1$
-								+ trustedCert.getSubjectDN() + "  - Numero de serie: " + trustedCert.getSerialNumber()); //$NON-NLS-1$
+								+ signingCert.getSubjectDN() + "  - Numero de serie: " + signingCert.getSerialNumber()); //$NON-NLS-1$
 					}
 				}
 			} else {
@@ -119,16 +120,19 @@ public class ResponseHandler extends AbstractCommonHandler {
 		return InvocationResponse.CONTINUE;
 	}
 
-	private X509Certificate loadTrustedCert() throws AxisFault {
+	private X509Certificate loadSigningCert() throws AxisFault {
 
 		X509Certificate cert;
 		try (InputStream is = new FileInputStream(getKeystore());) {
 			final KeyStore ks = KeyStore.getInstance(getKeystoreType());
 			ks.load(is, getKeystorePass().toCharArray());
 			cert = (X509Certificate) ks.getCertificate(getUserAlias());
+			if (cert == null) {
+				throw new KeyStoreException("No se ha encontrado en el almacen el certificado con el que debia firmarse la respuesta"); //$NON-NLS-1$
+			}
 		}
 		catch (final Exception e) {
-			throw new AxisFault("Error al recuperar del almacen el certificado con el que debia firmarse la respuesta", e); //$NON-NLS-1$
+			throw new AxisFault("Error al recuperar el certificado con el que debia firmarse la respuesta", e); //$NON-NLS-1$
 		}
 		return cert;
 	}
