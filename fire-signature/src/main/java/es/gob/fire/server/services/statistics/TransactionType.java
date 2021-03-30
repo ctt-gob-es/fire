@@ -23,10 +23,18 @@ public enum TransactionType {
 	}
 
 	public static TransactionType getOperation(final String idString) {
-		final int result = Integer.parseInt(idString);
-		for (final TransactionType value : values()) {
-			if (value.id == result) {
-				return value;
+		if (idString != null) {
+			int result;
+			try {
+				result = Integer.parseInt(idString);
+			}
+			catch (final NumberFormatException e) {
+				return OTHER;
+			}
+			for (final TransactionType value : values()) {
+				if (value.id == result) {
+					return value;
+				}
 			}
 		}
 		return OTHER;

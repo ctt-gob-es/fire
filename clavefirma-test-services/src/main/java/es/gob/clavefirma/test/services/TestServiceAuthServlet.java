@@ -53,10 +53,7 @@ public final class TestServiceAuthServlet extends HttpServlet {
 			response.sendRedirect(redirectKo);
 			return;
 		}
-		final File transactionFile = new File(
-			TestHelper.getDataFolder(),
-			transaction.trim()
-		);
+		final File transactionFile = TestHelper.getCanonicalFile(TestHelper.getDataFolder(), transaction.trim());
 		if (!transactionFile.exists() || !transactionFile.canRead()) {
 			LOGGER.warning("La transaccion '" + transaction + "' no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
 			response.sendRedirect(redirectKo);

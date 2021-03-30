@@ -157,12 +157,11 @@ class TestHelper {
 				configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
 			}
 			if (configDirPath != null) {
-				final File configDir = new File(configDirPath).getCanonicalFile();
-				final File configFile = new File(configDir, CONFIG_FILE).getCanonicalFile();
+				final File configFile = new File(configDirPath, CONFIG_FILE).getCanonicalFile();
 				if (!configFile.isFile() || !configFile.canRead()) {
 					LOGGER.warning(
 							"No se encontro el fichero " + CONFIG_FILE + " en el directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configDir.getAbsolutePath() + //$NON-NLS-1$
+									ENVIRONMENT_VAR_CONFIG_DIR + ": " + configDirPath + //$NON-NLS-1$
 									"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
 				}
 				else {
@@ -472,5 +471,38 @@ class TestHelper {
 			}
 		}
 		return mappedText;
+	}
+
+	/**
+	 * Carga un fichero dentro de un directorio, asegur&aacute;ndose de que no se intenta
+	 * ning&uacute;n ataque de tipo PathTransversal.
+	 * @param path Ruta base segura desde la que cargar el fichero.
+	 * @param name Ruta relativa desde el directorio base.
+	 * @return Fichero al que dirig&iacute;a la ruta.
+	 * @throws IOException Cuando se ha intentado acceder a un fichero fuera del directorio
+	 * base o cuando no se puede asegurar que est&eacute; en el mismo.
+	 */
+	public static File getCanonicalFile(final String path, final String name) throws IOException {
+		return getCanonicalFile(new File(path), name);
+	}
+
+	/**
+	 * Carga un fichero dentro de un directorio, asegur&aacute;ndose de que no se intenta
+	 * ning&uacute;n ataque de tipo PathTransversal.
+	 * @param dirFile Directorio suguro desde la que cargar el fichero.
+	 * @param name Ruta relativa desde el directorio base.
+	 * @return Fichero al que dirig&iacute;a la ruta.
+	 * @throws IOException Cuando se ha intentado acceder a un fichero fuera del directorio
+	 * base o cuando no se puede asegurar que est&eacute; en el mismo.
+	 */
+	public static File getCanonicalFile(final File dirFile, final String name) throws IOException {
+
+		final String dirPath = dirFile.getCanonicalPath();
+		final File canonicalFile = new File(dirPath, name).getCanonicalFile();
+
+		if (!canonicalFile.getAbsolutePath().startsWith(dirPath)) {
+			throw new IOException("Se ha intentado acceder a un fichero fuera de un directorio seguro"); //$NON-NLS-1$
+		}
+		return canonicalFile;
 	}
 }

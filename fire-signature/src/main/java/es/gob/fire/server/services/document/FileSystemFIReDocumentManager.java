@@ -157,6 +157,9 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 		}
 
 		final File file = new File(this.outDir, newId);
+		if (!isRootParent(new File(this.outDir), file)) {
+			throw new IOException("Se ha ha intentado almacenar un fichero fuera del directorio de salida"); //$NON-NLS-1$
+		}
 		if (file.exists() && !this.overwrite) {
 			throw new IOException("Se ha obtenido un nombre de documento existente en el sistema de ficheros."); //$NON-NLS-1$
 		}

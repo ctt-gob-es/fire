@@ -50,7 +50,7 @@ public class TestRecoverCertificateService extends HttpServlet {
 
 		final String transactionId = request.getParameter(KEY_TRANSACTIONID);
 
-		final File transactionFile = new File(TestHelper.getDataFolder(), transactionId);
+		final File transactionFile = TestHelper.getCanonicalFile(TestHelper.getDataFolder(), transactionId);
 		if (!transactionFile.isFile() || !transactionFile.canRead()) {
 			LOGGER.log(Level.WARNING, "La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
 			final Exception e = new FIReSignatureException("La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
