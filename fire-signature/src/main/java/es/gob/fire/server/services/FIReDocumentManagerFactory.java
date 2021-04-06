@@ -21,6 +21,7 @@ import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.document.DefaultFIReDocumentManager;
 import es.gob.fire.server.services.internal.AlarmsManager;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
 
@@ -55,7 +56,8 @@ public class FIReDocumentManagerFactory {
 	 * @throws IllegalAccessException Cuando no se tenga permisos para acceder al gestor de
 	 * documentos indicado.
 	 */
-	public static FIReDocumentManager newDocumentManager(final String appId, final String docManagerName)
+	public static FIReDocumentManager newDocumentManager(final String appId, final String trId,
+			final String docManagerName)
 			throws IllegalArgumentException, IOException, IllegalAccessException {
 
 		String managerName = docManagerName;
@@ -69,6 +71,8 @@ public class FIReDocumentManagerFactory {
 			throw new IllegalAccessException("La aplicacion no tiene habilitado el acceso al gestor de documentos: " + managerName); //$NON-NLS-1$
 		}
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, trId);
+
 		// Si no se tiene cargada ya la clase gestora, se carga ahora
 		if (!docManagers.containsKey(managerName)) {
 
@@ -79,7 +83,7 @@ public class FIReDocumentManagerFactory {
 				// Si no hay definida en el fichero de configuracion una clase especifica en el fichero
 				// de configuracion, cargamos la clase gestora original
 				if (DEFAULT_DOCUMENT_MANAGER.equals(managerName)) {
-					LOGGER.warning("No se ha encontrado la clase gestora por defecto en el fichero de configuracion. Se establecera la clase original."); //$NON-NLS-1$
+					LOGGER.warning(logF.f("No se ha encontrado la clase gestora por defecto en el fichero de configuracion. Se establecera la clase original.")); //$NON-NLS-1$
 					return registryDefaultDocumentManager();
 				}
 				throw new IllegalArgumentException("No hay definida una clase gestora de documentos con el nombre " + managerName); //$NON-NLS-1$
@@ -110,12 +114,12 @@ public class FIReDocumentManagerFactory {
 					config = ConfigFileLoader.loadConfigFile(configFilename);
 				}
 				catch (final FileNotFoundException e) {
-					AlarmsManager.notify(Alarm.RESOURCE_CONFIG, configFilename);
-					LOGGER.warning("No se encontro el fichero de configuracion '" + configFilename + //$NON-NLS-1$
+					AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, configFilename);
+					LOGGER.warning(logF.f("No se encontro el fichero de configuracion '") + configFilename + //$NON-NLS-1$
 							"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
 				}
 				catch (final Exception e) {
-					LOGGER.warning("No se pudo cargar el fichero de configuracion '" + configFilename + //$NON-NLS-1$
+					LOGGER.warning(logF.f("No se pudo cargar el fichero de configuracion '") + configFilename + //$NON-NLS-1$
 							"'. Se cargara el gestor de documentos sin esta configuracion: " + e); //$NON-NLS-1$
 				}
 
@@ -123,8 +127,8 @@ public class FIReDocumentManagerFactory {
 					config = ConfigManager.mapEnvironmentVariables(config);
 				} catch (final Exception e) {
 					LOGGER.log(Level.WARNING,
-							"No se pudieron mapear las variables de entorno en el fichero de configuracion: " + configFilename, //$NON-NLS-1$
-							e);
+							logF.f("No se pudieron mapear las variables de entorno en el fichero de configuracion: ") //$NON-NLS-1$
+							+ configFilename, e);
 				}
 
 				// Desciframos las claves del fichero de configuracion si es necesario

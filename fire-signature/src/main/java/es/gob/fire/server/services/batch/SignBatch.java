@@ -84,22 +84,6 @@ public abstract class SignBatch {
 
 	protected boolean stopOnError = false;
 
-	/** Ejecuta el preproceso de firma por lote.
-	 * @param certChain Cadena de certificados del firmante.
-	 * @return Datos trif&aacute;sicos de pre-firma del lote.
-	 * @throws BatchException Si hay errores irrecuperables en el proceso. */
-	public abstract String doPreBatch(final X509Certificate[] certChain) throws BatchException;
-
-	/** Ejecuta el postproceso de firma por lote.
-	 * @param certChain Cadena de certificados del firmante.
-	 * @param td Datos trif&aacute;sicos del preproceso.
-	 *           Debe contener los datos de todas y cada una de las firmas del lote.
-	 * @return Registro del resultado general del proceso por lote, en un XML (<a href="../doc-files/resultlog-scheme.html">descripci&oacute;n
-	 *         del formato</a>).
-	 * @throws BatchException Si hay errores irrecuperables en el postproceso. */
-	public abstract String doPostBatch(final X509Certificate[] certChain,
-                                       final TriphaseData td) throws BatchException;
-
 	/** Crea un lote de firmas a partir de su definici&oacute;n XML.
 	 * @param xml XML de definici&oacute;n de lote de firmas (<a href="./doc-files/batch-scheme.html">descripci&oacute;n
 	 *            del formato</a>).
@@ -206,6 +190,25 @@ public abstract class SignBatch {
 		this.algorithm = algo;
 		this.id = UUID.randomUUID().toString();
 	}
+
+
+	/** Ejecuta el preproceso de firma por lote.
+	 * @param certChain Cadena de certificados del firmante.
+	 * @param logF Formateador de trazas de log.
+	 * @return Datos trif&aacute;sicos de pre-firma del lote.
+	 * @throws BatchException Si hay errores irrecuperables en el proceso. */
+	public abstract String doPreBatch(final X509Certificate[] certChain) throws BatchException;
+
+	/** Ejecuta el postproceso de firma por lote.
+	 * @param certChain Cadena de certificados del firmante.
+	 * @param td Datos trif&aacute;sicos del preproceso.
+	 *           Debe contener los datos de todas y cada una de las firmas del lote.
+	 * @param logF Formateador de trazas de log.
+	 * @return Registro del resultado general del proceso por lote, en un XML (<a href="../doc-files/resultlog-scheme.html">descripci&oacute;n
+	 *         del formato</a>).
+	 * @throws BatchException Si hay errores irrecuperables en el postproceso. */
+	public abstract String doPostBatch(final X509Certificate[] certChain,
+                                       final TriphaseData td) throws BatchException;
 
 	private static List<SingleSign> parseSignBatchNode(final Node n) throws DOMException, IOException {
 		final NodeList childNodes = n.getChildNodes();

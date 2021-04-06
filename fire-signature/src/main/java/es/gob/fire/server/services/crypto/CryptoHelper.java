@@ -5,6 +5,8 @@ import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
+
 public class CryptoHelper {
 
 	private static final Logger LOGGER = Logger.getLogger(CryptoHelper.class.getName());
@@ -15,16 +17,20 @@ public class CryptoHelper {
      * privada con la que en .
      * @param signatureValue PKCS#1 de la firma.
      * @param publicKey Clave p&uacute;blica con la que validar la firma.
-     * @param signatureAlgoritm Algoritmo de firma.
+     * @param logF Formateador de trazas de log.
      * @throws InvalidVerificationCodeException Cuando no se proporciona un par&aacute;metro v&aacute;lido o
      * el PKCS#1 se gener&oacute; con una clave privada distinta a la esperada.
      */
-    public static void verifyPkcs1(final byte[] signatureValue, final PublicKey publicKey) throws SecurityException {
+    public static void verifyPkcs1(final byte[] signatureValue, final PublicKey publicKey, final LogTransactionFormatter logF) throws SecurityException {
     	try {
 
     		//TODO: Probar y soportar algoritmos de cifrado de curva eliptica
     		if (!"RSA".equalsIgnoreCase(publicKey.getAlgorithm())) { //$NON-NLS-1$
-    			LOGGER.warning("No se soporta la validacion del PKCS#1 con el algoritmo de cifrado asociado a la clave de firma utilizada"); //$NON-NLS-1$
+    			String msg = "No se soporta la validacion del PKCS#1 con el algoritmo de cifrado asociado a la clave de firma utilizada"; //$NON-NLS-1$
+    			if (logF != null) {
+    				msg = logF.f(msg);
+    			}
+    			LOGGER.warning(msg);
     			return;
     		}
 

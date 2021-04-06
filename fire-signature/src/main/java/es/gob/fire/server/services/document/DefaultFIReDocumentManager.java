@@ -32,15 +32,15 @@ public class DefaultFIReDocumentManager extends FireDocumentManagerBase
 	}
 
 	@Override
-	public byte[] getDocument(final byte[] docId, final String appId, final String format,
-			final Properties extraParams) throws IOException {
+	public byte[] getDocument(final byte[] docId, final String trId, final String appId,
+			final String format, final Properties extraParams) throws IOException {
 		return docId;
 	}
 
 	@Override
-	public byte[] storeDocument(final byte[] docId, final String appId, final byte[] data,
-			final X509Certificate cert, final String format, final String upgradeFormat,
-			final Properties extraParams) throws IOException {
+	public byte[] storeDocument(final byte[] docId, final String trId, final String appId,
+			final byte[] data, final X509Certificate cert, final String format,
+			final String upgradeFormat, final Properties extraParams) throws IOException {
 		return data;
 	}
 }

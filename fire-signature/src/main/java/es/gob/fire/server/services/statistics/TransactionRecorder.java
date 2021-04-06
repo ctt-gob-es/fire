@@ -180,7 +180,4 @@ public class TransactionRecorder {
 	private final void setTransactCube(final TransactionCube transactCube) {
 		this.transactCube = transactCube;
 	}
-
-
-
 }

@@ -23,20 +23,38 @@ public abstract class FireDocumentManagerBase implements FireAsyncDocumentManage
 	}
 
 	@Override
-	public abstract byte[] getDocument(byte[] docId, String appId, String format,
+	public byte[] getDocument(final byte[] docId, final String appId, final String format,
+			final Properties extraParams) throws IOException {
+		return getDocument(docId, null, appId, format, extraParams);
+	}
+
+	/** Obtiene un documento para firmarlo.
+	 * Si no es posible recuperar el fichero se debe lanzar una excepci&oacute;n. El mensaje se
+	 * recibir&aacute; como parte del mensaje de error en el cliente de firma.
+	 * @param docId Identificador del documento original no firmado.
+	 * @param trId Identificador de transacci&ooacute;n.
+	 * @param appId Identificador de la aplicaci&oacute;n que solicita la firma.
+	 * @param format Formato de firma.
+	 * @param extraParams Par&aacute;metros para la configuraci&oacute;n de la firma. Podr&iacute;a
+	 * ser {@code null}.
+	 * @return Documento (en binario)
+	 * @throws IOException Cuando ocurre alg&uacute;n problema con la recuperaci&oacute;n. */
+	public abstract byte[] getDocument(byte[] docId, String trId, String appId, String format,
 			Properties extraParams) throws IOException;
+
 
 	@Override
 	public byte[] storeDocument(final byte[] docId, final String appId, final byte[] data,
 			final X509Certificate cert, final String format, final Properties extraParams)
 					throws IOException {
-		return storeDocument(docId, appId, data, cert, format, null, extraParams);
+		return storeDocument(docId, null, appId, data, cert, format, null, extraParams);
 	}
 
 	/** Almacena un documento firmado.
 	 * Si no es posible almacenar el fichero se lanza una excepci&oacute;n. El valor devuelto se
 	 * recibir&aacute; como resultado de la operaci&oacute; de firma.
 	 * @param docId Identificador del documento original no firmado.
+	 * @param trId Identificador de transacci&oacute;n.
 	 * @param appId Identificador de la aplicaci&oacute;n que solicita la firma.
 	 * @param data Datos firmados.
 	 * @param cert Certificado de firma. <b>IMPORTANTE:</b> El Cliente @firma 1.5 y anteriores no
@@ -48,7 +66,7 @@ public abstract class FireDocumentManagerBase implements FireAsyncDocumentManage
 	 * @return Resultado que obtendr&aacute; la aplicaci&oacute;n cliente. En caso de usarse
 	 * cadenas de texto, se deben codificar en UTF-8.
 	 * @throws IOException Cuando ocurre alg&uacute;n problema con el guardado. */
-	public abstract byte[] storeDocument(byte[] docId, String appId, byte[] data,
+	public abstract byte[] storeDocument(byte[] docId, String trId, String appId, byte[] data,
 			X509Certificate cert, String format, String upgradeFormat, Properties extraParams)
 					throws IOException;
 

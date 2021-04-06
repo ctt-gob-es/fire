@@ -45,6 +45,7 @@ public final class ConfigFilesException extends Exception{
     }
 
 	/**
+	 * Devuelve el nombre del fichero de configuraci&oacute;n que no se encuentra.
 	 * @return El nombre del fichero que no se ha encontrado en el sistema.
 	 */
 	public String getFileName(){
@@ -53,7 +54,7 @@ public final class ConfigFilesException extends Exception{
 
 	/**
 	 * Devuelve el error HTTP de la excepci&oacute;n.
-	 * @return El httpError.
+	 * @return Status code de error HTTP.
 	 */
 	public static int getHttpError(){
 		return HTTP_INTERNAL_SERVER_ERROR;

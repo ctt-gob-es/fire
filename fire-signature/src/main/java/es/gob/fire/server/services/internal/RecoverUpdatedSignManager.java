@@ -99,7 +99,7 @@ public class RecoverUpdatedSignManager {
 
         UpgradeResult upgradeResult;
         try {
-        	final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator();
+        	final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator(logF);
         	upgradeResult = validator.recoverUpgradedSignature(asyncId, upgrade, upgraterConfig);
         } catch (final ConnectionException e) {
 			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$
@@ -265,7 +265,7 @@ public class RecoverUpdatedSignManager {
 			final String docManagerName) throws IOException {
         FIReDocumentManager docManager;
         try {
-        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, docManagerName);
+        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, null, docManagerName);
         }
         catch (final IllegalAccessException | IllegalArgumentException e) {
         	throw new IOException("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName, e); //$NON-NLS-1$

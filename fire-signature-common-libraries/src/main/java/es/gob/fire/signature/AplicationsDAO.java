@@ -45,7 +45,8 @@ public class AplicationsDAO {
 	 */
 	public static ApplicationChecking checkApplicationId(final String appId) throws SQLException {
 
-		// Si no hay conexion con la BD y si esta la aplicacion en el fichero de configuracion, la comprobamos
+		// Si no hay conexion con la BD y si esta la aplicacion en el fichero de configuracion,
+		// comprobamos el identificador proporcionado contra el declarado en el fichero
 		if (!DbManager.isConfigured() && ConfigManager.getAppId() != null) {
 			final boolean valid = ConfigManager.getAppId().equals(appId);
 			return new ApplicationChecking(appId, appId, valid, true);

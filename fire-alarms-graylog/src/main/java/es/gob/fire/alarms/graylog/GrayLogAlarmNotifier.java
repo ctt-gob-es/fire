@@ -237,7 +237,7 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	}
 
 	@Override
-	public void notify(final AlarmLevel level, final Alarm alarm, final String source)
+	public void notify(final AlarmLevel level, final Alarm alarm, final String... source)
 			throws IOException {
 
 		// Si GrayLog esta habilitado en el sistema...
@@ -248,8 +248,14 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 			boolean sended = false;
 			if (alarm != null) {
 
+				String message;
+				if (source == null) {
+					message = alarm.getDescription();
+				} else {
+					message = alarm.formatDescription((Object[]) source);
+				}
+
 				final GelfMessage gm = new GelfMessage();
-				final String message = alarm.formatDescription(source);
 				gm.setShortMessage(message);
 				gm.setJavaTimestamp(Calendar.getInstance().getTimeInMillis());
 				gm.setLevel(translateLevel(level));

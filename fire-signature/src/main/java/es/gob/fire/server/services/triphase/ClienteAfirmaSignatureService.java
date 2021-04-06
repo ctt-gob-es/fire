@@ -13,13 +13,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +41,7 @@ import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESASiCSTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
 import es.gob.fire.server.services.FIReTriHelper;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.internal.Pkcs1TriPhasePreProcessor;
 import es.gob.fire.server.services.triphase.document.DocumentManager;
@@ -102,10 +100,9 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 		LOGGER.fine("== INICIO FIRMA TRIFASICA =="); //$NON-NLS-1$
 
-		final Map<String, String> parameters = new HashMap<>();
-		final String[] params;
+		RequestParameters parameters;
 		try {
-			params = new String(AOUtil.getDataFromInputStream(request.getInputStream()), DEFAULT_CHARSET).split("&"); //$NON-NLS-1$
+			parameters = RequestParameters.extractParameters(request);
 		}
 		catch (final Throwable e) {
 			LOGGER.severe("No se pudieron leer los parametros de la peticion: " + e); //$NON-NLS-1$
@@ -117,17 +114,6 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			return;
 		}
 
-		for (final String param : params) {
-			if (param.indexOf('=') != -1) {
-				try {
-					parameters.put(param.substring(0, param.indexOf('=')), URLDecoder.decode(param.substring(param.indexOf('=') + 1), DEFAULT_CHARSET.name()));
-				}
-				catch (final Exception e) {
-					LOGGER.warning("Error al decodificar un parametro de la peticion: " + e); //$NON-NLS-1$
-				}
-			}
-		}
-
 		response.setHeader("Access-Control-Allow-Origin", ALL_ORIGINS_ALLOWED); //$NON-NLS-1$
 		response.setContentType("text/plain"); //$NON-NLS-1$
 		response.setCharacterEncoding("utf-8"); //$NON-NLS-1$
@@ -136,14 +122,14 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		final String operation = parameters.get(PARAM_NAME_OPERATION);
 		if (operation == null) {
 			LOGGER.severe("No se ha indicado la operacion trifasica a realizar"); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(1));
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_OPERATION));
 			return;
 		}
 
 		// Obtenemos el codigo de operacion
 		final SignOperation subOperation = SignOperation.parse(parameters.get(PARAM_NAME_SUB_OPERATION));
 		if (subOperation == null) {
-			sendResponse(response, ErrorManager.getErrorMessage(13));
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_CRYPTO_OPERATION));
 			return;
 		}
 
@@ -152,7 +138,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		LOGGER.fine("Formato de firma seleccionado: " + format); //$NON-NLS-1$
 		if (format == null) {
 			LOGGER.warning("No se ha indicado formato de firma"); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(4));
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_FORMAT));
 			return;
 		}
 
@@ -165,7 +151,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.severe("El formato de los parametros adicionales suministrado es erroneo: " +  e); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(6) + ": " + e); //$NON-NLS-1$);
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.INVALID_FORMAT_EXTRAPARAMS) + ": " + e); //$NON-NLS-1$);
 			return;
 		}
 
@@ -198,7 +184,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.severe("El formato de los datos de sesion suministrados es erroneo: "  + e); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(6) + ": " + e); //$NON-NLS-1$
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.INVALID_SESSION_DATA) + ": " + e); //$NON-NLS-1$
 			return;
 		}
 
@@ -211,7 +197,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		final String cert = parameters.get(PARAM_NAME_CERT);
 		if (cert == null) {
 			LOGGER.warning("No se ha indicado certificado de firma"); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(5));
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_CERTIFICATE));
 			return;
 		}
 
@@ -228,9 +214,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 				;
 			}
 			catch(final Exception e) {
-
 				LOGGER.log(Level.SEVERE, "Error al decodificar el certificado: " + receivedCerts[i], e);  //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(7));
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.INVALID_FORMAT_CERTIFICATE));
 				return;
 			}
 		}
@@ -247,7 +232,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			}
 			catch (final Throwable e) {
 				LOGGER.warning("Error al recuperar el documento: " + e); //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(14));
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_RETRIEVING_DOCUMENT));
 				return;
 			}
 		}
@@ -256,7 +241,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		final String algorithm = parameters.get(PARAM_NAME_ALGORITHM);
 		if (algorithm == null) {
 			LOGGER.warning("No se ha indicado algoritmo de firma"); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(3));
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_ALGORITHM));
 			return;
 		}
 
@@ -296,7 +281,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 		else {
 			LOGGER.severe("Formato de firma no soportado: " + format); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(8));
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.UNSUPPORTED_SIGNATURE_FORMAT));
 			return;
 		}
 
@@ -354,7 +339,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la prefirma: " + e, e); //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(9) + ": " + e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_PRESIGNING) + ": " + e); //$NON-NLS-1$
 				return;
 			}
 
@@ -367,7 +352,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 				}
 				catch (final Exception e) {
 					LOGGER.log(Level.SEVERE, "Error al generar los codigos de verificacion de las firmas: " + e, e); //$NON-NLS-1$
-					sendResponse(response, ErrorManager.getErrorMessage(16) + ": " + e); //$NON-NLS-1$
+					sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_GENERATING_PKCS1_HMAC) + ": " + e); //$NON-NLS-1$
 					return;
 				}
 			}
@@ -386,7 +371,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "El formato de los parametros de operacion requeridos incorrecto", e); //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(19) + ": " + e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.INVALID_SESSION_DATA) + ": " + e); //$NON-NLS-1$
 				return;
 			}
 
@@ -397,16 +382,16 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			// esten realizados con ese certificado
 			if (ConfigManager.getHMacKey() != null) {
 				try {
-					FIReTriHelper.checkSignaturesIntegrity(triphaseData, signerCertChain[0]);
+					FIReTriHelper.checkSignaturesIntegrity(triphaseData, signerCertChain[0], null);
 				}
 				catch (final SecurityException e) {
 					LOGGER.log(Level.SEVERE, "Las prefirmas y/o el certificado obtenido no se corresponden con los generados en la prefirma", e); //$NON-NLS-1$
-					sendResponse(response, ErrorManager.getErrorMessage(17) + ": " + e); //$NON-NLS-1$
+					sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_CHECKING_PKCS1_HMAC) + ": " + e); //$NON-NLS-1$
 					return;
 				}
 				catch (final Exception e) {
 					LOGGER.log(Level.SEVERE, "Error al comprobar los codigos de verificacion de las firmas", e); //$NON-NLS-1$
-					sendResponse(response, ErrorManager.getErrorMessage(17) + ": " + e); //$NON-NLS-1$
+					sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_CHECKING_PKCS1_HMAC) + ": " + e); //$NON-NLS-1$
 					return;
 				}
 			}
@@ -455,7 +440,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la postfirma: " + e, e); //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(12) + ": " + e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_POSTSIGNING) + ": " + e); //$NON-NLS-1$
 				return;
 			}
 
@@ -473,8 +458,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 				newDocId = DOC_MANAGER.storeDocument(docId, signerCertChain, signedDoc, extraParams);
 			}
 			catch(final Throwable e) {
-				LOGGER.severe("Error al almacenar el documento: " + e); //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(10) + ": " + e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "Error al almacenar el documento", e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_STORAGING_SIGNATURE) + ": " + e); //$NON-NLS-1$
 				return;
 			}
 			LOGGER.fine("Documento almacenado"); //$NON-NLS-1$
@@ -484,7 +469,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			LOGGER.fine("== FIN POSTFIRMA ****"); //$NON-NLS-1$
 		}
 		else {
-			sendResponse(response, ErrorManager.getErrorMessage(11));
+			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.UNSUPPORTED_TRIPHASE_OPERATION));
 		}
 	}
 

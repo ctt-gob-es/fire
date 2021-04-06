@@ -299,11 +299,22 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera el nombre de la clase para la validaci&oacute;n y mejora de firmas..
+	 * Recupera el nombre de la clase para la validaci&oacute;n y mejora de firmas.
 	 * @return Clase de conexi&oacute;n del proveedor.
 	 */
 	public static String getValidatorClass() {
 		return getProperty(PROP_VALIDATOR_CLASS);
+	}
+
+	/**
+	 * Recupera el nombre de la clase para la validaci&oacute;n y mejora de firmas.
+	 * @param required Establece si es obligatorio que haya un valor definido.
+	 * @return Clase de conexi&oacute;n del proveedor.
+	 * @throws InvalidConfigurationException Cuando sea obligatorio qe haya un valor definido
+	 * y no se encuentre.
+	 */
+	public static String getValidatorClass(final boolean required) throws InvalidConfigurationException {
+		return getProperty(PROP_VALIDATOR_CLASS, required);
 	}
 
 	/**
@@ -349,7 +360,7 @@ public class ConfigManager {
 	 * @return
 	 */
 	public static String getHMacKey() {
-		final String verificationKey = config.getProperty(PROP_LOCAL_VERIFICATION_KEY);
+		final String verificationKey = getProperty(PROP_LOCAL_VERIFICATION_KEY);
 		return verificationKey != null && verificationKey.length() > 0 ? verificationKey : null;
 	}
 
@@ -375,8 +386,9 @@ public class ConfigManager {
 	/**
 	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
 	 * @throws ConfigFilesException Si no encuentra el fichero config.properties.
+	 * @throws InvalidConfigurationException Si hay una propiedad mal configurada.
 	 */
-	public static void checkConfiguration() throws ConfigFilesException {
+	public static void checkConfiguration() throws ConfigFilesException, InvalidConfigurationException {
 
 		initialized = false;
 
@@ -390,27 +402,25 @@ public class ConfigManager {
 		final ProviderElement[] providers = getProviders();
 		if (providers == null) {
 			LOGGER.severe("Debe declararse al menos un proveedor mediante la propiedad " + PROP_PROVIDERS_LIST); //$NON-NLS-1$
-			throw new ConfigFilesException("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST, CONFIG_FILE); //$NON-NLS-1$
+			throw new InvalidConfigurationException("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST, PROP_PROVIDERS_LIST, CONFIG_FILE); //$NON-NLS-1$
 		}
 
-		try {
-			checkProviders(providers);
-		}
-		catch (final Exception e) {
-			LOGGER.severe("Error en la configuracion de los proveedores: " + e.getMessage()); //$NON-NLS-1$
-			throw new ConfigFilesException("Error en la configuracion de los proveedores: " + e.getMessage(), CONFIG_FILE, e); //$NON-NLS-1$
-		}
+		checkProviders(providers);
 
 		if (isCheckApplicationNeeded()) {
 			if (getDataBaseConnectionString() == null && getAppId() == null) {
-				LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_APP_ID + " para la verificacion del identificador de aplicacion"); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new ConfigFilesException("No se ha configurado el acceso a la base de datos ni el campo " + PROP_APP_ID + " para la verificacion del identificador de aplicacion", CONFIG_FILE); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_APP_ID //$NON-NLS-1$
+						+ " para la verificacion del identificador de aplicacion"); //$NON-NLS-1$
+				throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " //$NON-NLS-1$
+						+ PROP_APP_ID + " para la verificacion del identificador de aplicacion", PROP_DB_CONNECTION, CONFIG_FILE); //$NON-NLS-1$
 			}
 		}
 		if (isCheckCertificateNeeded()) {
 			if (getDataBaseConnectionString() == null && getCert() == null) {
-				LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE + " para la verificacion del certificado de auteticacion"); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new ConfigFilesException("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE + " para la verificacion del certificado de auteticacion", CONFIG_FILE); //$NON-NLS-1$ //$NON-NLS-2$
+				LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
+						+ " para la verificacion del certificado de auteticacion"); //$NON-NLS-1$
+				throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
+						+ " para la verificacion del certificado de auteticacion", PROP_DB_CONNECTION, CONFIG_FILE); //$NON-NLS-1$
 			}
 		}
 
@@ -518,7 +528,7 @@ public class ConfigManager {
 		return 	Boolean.parseBoolean(getProperty(PROP_CHECK_APPLICATION, Boolean.TRUE.toString()));
 	}
 
-	private static void checkProviders(final ProviderElement[] providers) {
+	private static void checkProviders(final ProviderElement[] providers) throws InvalidConfigurationException {
 		final List<String> wrongProviders = new ArrayList<>(providers.length);
 		for (final ProviderElement provider : providers) {
 			final String providerName = provider.getName();
@@ -535,7 +545,7 @@ public class ConfigManager {
 				}
 				errorMsg.append(providerName);
 			}
-			throw new NullPointerException("No se ha definido la clase conectora de los proveedores: " + errorMsg.toString()); //$NON-NLS-1$
+			throw new InvalidConfigurationException("No se ha definido la clase conectora de los proveedores: " + errorMsg.toString(), errorMsg.toString(), CONFIG_FILE); //$NON-NLS-1$
 		}
 	}
 
@@ -837,12 +847,48 @@ public class ConfigManager {
 	 * Recupera una propiedad del fichero de configuraci&oacute;n y devuelve su
 	 * valor habi&eacute;ndolo descifrado si era necesario.
 	 * @param key Clave de la propiedad.
+	 * @return Valor descifrado de la propiedad o {@code null} si la propiedad no estaba definida.
+	 * @throws InvalidConfigurationException Cuando la propiedad era obligatoria y no se
+	 * indic&oacute; encontr&oacute;.
+	 */
+	private static String getProperty(final String key, final boolean required) throws InvalidConfigurationException {
+		return getProperty(key, null, required);
+	}
+
+	/**
+	 * Recupera una propiedad del fichero de configuraci&oacute;n y devuelve su
+	 * valor habi&eacute;ndolo descifrado si era necesario.
+	 * @param key Clave de la propiedad.
 	 * @param defaultValue Valor por defecto que devolver en caso de que la propiedad no exista
 	 * o que se produzca un error al extraerla.
 	 * @return Valor descifrado de la propiedad o {@code null} si la propiedad no estaba definida.
 	 */
 	private static String getProperty(final String key, final String defaultValue) {
-		return getDecipheredProperty(config, key, defaultValue);
+		try {
+			return getProperty(key, defaultValue, false);
+		} catch (final InvalidConfigurationException e) {
+			// No puede producirse nunca
+			return null;
+		}
+	}
+
+	/**
+	 * Recupera una propiedad del fichero de configuraci&oacute;n y devuelve su
+	 * valor habi&eacute;ndolo descifrado si era necesario.
+	 * @param key Clave de la propiedad.
+	 * @param defaultValue Valor por defecto que devolver en caso de que la propiedad no exista
+	 * o que se produzca un error al extraerla.
+	 * @param required Establece si es obligatoria la existencia de la propiedad.
+	 * @return Valor descifrado de la propiedad o {@code null} si la propiedad no estaba definida.
+	 * @throws InvalidConfigurationException Cuando la propiedad era obligatoria y no se
+	 * indic&oacute; encontr&oacute;.
+	 */
+	private static String getProperty(final String key, final String defaultValue, final boolean required) throws InvalidConfigurationException {
+		final String value = getDecipheredProperty(config, key, defaultValue);
+		if (required && (value == null || value.isEmpty())) {
+			throw new InvalidConfigurationException(key, CONFIG_FILE);
+		}
+		return value;
 	}
 
 	/**

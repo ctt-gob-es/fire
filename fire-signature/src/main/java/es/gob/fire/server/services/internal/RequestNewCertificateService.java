@@ -52,6 +52,8 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
 
+		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de solicitud de certificado")); //$NON-NLS-1$
+
 		// Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
@@ -177,6 +179,8 @@ public final class RequestNewCertificateService extends HttpServlet {
         LOGGER.info(logF.f("Redirigimos a la URL de emision del certificado")); //$NON-NLS-1$
 
         response.sendRedirect(redirectUrl);
+
+        LOGGER.fine(logF.f("Fin de la llamada al servicio publico de solicitud de certificado")); //$NON-NLS-1$
 	}
 
 

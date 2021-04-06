@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
+import es.gob.fire.server.document.FireDocumentManagerBase;
 import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeParams;
@@ -121,7 +122,7 @@ class PostSignBatchThread extends ConcurrentProcessThread {
 			// La configuracion de mejora/validacion de firma
 			final Properties upgradeConfig = this.signConfig.getUpgradeConfig();
     		try {
-    			final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator();
+    			final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator(logF);
     			if (ServiceParams.UPGRADE_VERIFY.equalsIgnoreCase(upgradeLevel)) {
     				if (this.needValidation) {
     					LOGGER.info(logF.f("Validamos la firma: " + this.docId)); //$NON-NLS-1$
@@ -215,9 +216,18 @@ class PostSignBatchThread extends ConcurrentProcessThread {
     	byte[] result;
     	if (this.docManager != null) {
     		try {
-    			result = this.docManager.storeDocument(this.docId.getBytes(StandardCharsets.UTF_8),
-    					this.appId, processResult.getResult(), this.batchResult.getSigningCertificate(),
-    					this.signConfig.getFormat(), this.signConfig.getExtraParams());
+    			if (this.docManager instanceof FireDocumentManagerBase) {
+    				result = ((FireDocumentManagerBase) this.docManager).storeDocument(
+    						this.docId.getBytes(StandardCharsets.UTF_8), this.trId,
+    						this.appId, processResult.getResult(), this.batchResult.getSigningCertificate(),
+    						this.signConfig.getFormat(), this.signConfig.getUpgrade(),
+    						this.signConfig.getExtraParams());
+    			}
+    			else {
+    				result = this.docManager.storeDocument(this.docId.getBytes(StandardCharsets.UTF_8),
+    						this.appId, processResult.getResult(), this.batchResult.getSigningCertificate(),
+    						this.signConfig.getFormat(), this.signConfig.getExtraParams());
+    			}
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.WARNING, logF.f("Error al postprocesar con el DocumentManager la firma del documento: " + this.docId), e); //$NON-NLS-1$

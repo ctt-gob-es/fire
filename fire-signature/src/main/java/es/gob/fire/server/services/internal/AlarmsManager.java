@@ -77,7 +77,7 @@ public class AlarmsManager {
 	 * @param alarm Tipo de alarma que se desea notificar.
 	 */
 	public static void notify(final Alarm alarm) {
-		notify(alarm, alarm.getDefaultLevel(), null);
+		notify(alarm, alarm.getDefaultLevel(), (String[]) null);
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class AlarmsManager {
 	 * @param alarm Tipo de alarma que se desea notificar.
 	 * @param resource Recurso al que se refiere la alarma. Puede ser nulo.
 	 */
-	public static void notify(final Alarm alarm, final String resource) {
+	public static void notify(final Alarm alarm, final String... resource) {
 		notify(alarm, alarm.getDefaultLevel(), resource);
 	}
 
@@ -96,16 +96,16 @@ public class AlarmsManager {
 	 * @param level Nivel de alarma.
 	 */
 	public static void notify(final Alarm alarm, final AlarmLevel level) {
-		notify(alarm, level, null);
+		notify(alarm, level, (String[]) null);
 	}
 
 	/**
 	 * Notifica una alarma.
 	 * @param alarm Tipo de alarma que se desea notificar.
 	 * @param level Nivel de alarma.
-	 * @param resource Recurso al que se refiere la alarma. Puede ser nulo.
+	 * @param resource Recursos a los que se refiere la alarma. Puede ser nulo.
 	 */
-	public static void notify(final Alarm alarm, final AlarmLevel level, final String resource) {
+	public static void notify(final Alarm alarm, final AlarmLevel level, final String... resource) {
 		if (notifier != null) {
 			try {
 				notifier.notify(level, alarm, resource);

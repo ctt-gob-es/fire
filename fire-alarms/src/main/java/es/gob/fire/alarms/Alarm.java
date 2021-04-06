@@ -5,19 +5,21 @@ package es.gob.fire.alarms;
  */
 public enum Alarm {
 	/** No se ha encontrado o no se ha podido cargar un fichero de configuraci&oacute;n. */
-	RESOURCE_CONFIG("000", AlarmLevel.CRITICAL, "No se encuentra un fichero de configuracion: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
+	RESOURCE_NOT_FOUND("000", AlarmLevel.CRITICAL, "No se encuentra un fichero de configuracion: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Se ha detectado un error en uno de los ficheros de configuraci&oacute;n. */
+	RESOURCE_CONFIG("001", AlarmLevel.ERROR, "Valor nulo o no valido en propiedad/es de un fichero de configuracion: %1s (%2s)"), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido cargar o se ha encontrado un defecto de implementaci&oacute;n en una biblioteca externa
 	 * agregada al componente central: conector para el acceso a un proveedor de firma en la nube, gestor de documentos,
 	 * gestor de compartici&oacute;n de sesiones, conector con una plataforma de validaci&oacute;n de firmas... */
-	LIBRARY_NOT_FOUND("001", AlarmLevel.CRITICAL, "Biblioteca o dependencia no encontrada: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
+	LIBRARY_NOT_FOUND("002", AlarmLevel.CRITICAL, "Biblioteca o dependencia no encontrada: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con la base de datos. */
-	CONNECTION_DB("002", AlarmLevel.CRITICAL, "No se puede conectar con la base de datos"), //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_DB("003", AlarmLevel.CRITICAL, "No se puede conectar con la base de datos"), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con la plataforma de validacion de firmas. */
-	CONNECTION_VALIDATION_PLATFORM("003", AlarmLevel.ERROR, "No se puede conectar con la plataforma de validacion de firmas"), //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_VALIDATION_PLATFORM("004", AlarmLevel.ERROR, "No se puede conectar con la plataforma de validacion de firmas"), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con un proveedor de firma en la nube. */
-	CONNECTION_SIGNATURE_PROVIDER("004", AlarmLevel.ERROR, "No se puede conectar con un proveedor de firma en la nube: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_SIGNATURE_PROVIDER("005", AlarmLevel.ERROR, "No se puede conectar con un proveedor de firma en la nube: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con el gestor de documentos. */
-	CONNECTION_DOCUMENT_MANAGER("005", AlarmLevel.ERROR, "No se puede conectar con un gestor de documentos: %1s"); //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_DOCUMENT_MANAGER("006", AlarmLevel.ERROR, "No se puede conectar con un gestor de documentos: %1s"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	private String eventCode;
 	private AlarmLevel defaultLevel;

@@ -12,6 +12,7 @@ package es.gob.fire.server.services.storage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -50,6 +51,7 @@ public final class RetrieveService extends HttpServlet {
 
 		final String operation = request.getParameter(PARAMETER_NAME_OPERATION);
 		final String syntaxVersion = request.getParameter(PARAMETER_NAME_SYNTAX_VERSION);
+		final String id = request.getParameter(PARAMETER_NAME_ID);
 		response.setHeader("Access-Control-Allow-Origin", "*"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		if (operation == null) {
@@ -62,15 +64,18 @@ public final class RetrieveService extends HttpServlet {
 			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
 			return;
 		}
-
-		if (OPERATION_RETRIEVE.equalsIgnoreCase(operation)) {
-			retrieveSign(response, request);
+		if (id == null) {
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
+			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
+			return;
 		}
-		else {
+		if (!OPERATION_RETRIEVE.equalsIgnoreCase(operation)) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_UNSUPPORTED_OPERATION_NAME));
 			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_UNSUPPORTED_OPERATION_NAME));
 			return;
 		}
+
+		retrieveSign(response, request, id);
 
 		LOGGER.fine("== FIN DE LA RECUPERACION =="); //$NON-NLS-1$
 	}
@@ -78,39 +83,30 @@ public final class RetrieveService extends HttpServlet {
 	/** Recupera la firma del servidor.
 	 * @param response Respuesta a la petici&oacute;n.
 	 * @param request Petici&oacute;n.
+	 * @param id Identificador del documento a recuperar.
 	 * @throws IOException Cuando ocurre un error al general la respuesta. */
 	private static void retrieveSign(final HttpServletResponse response,
-			final HttpServletRequest request) throws IOException {
-
-		final String id = request.getParameter(PARAMETER_NAME_ID);
-		if (id == null) {
-			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
-			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
-			return;
-		}
+			final HttpServletRequest request, final String id) throws IOException {
 
 		LOGGER.fine("Se solicita el documento con el identificador: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
-		// Si el documento existe, lo recuperamos y eliminamos; si no, indicamos que
-		// no existe
-		if (TempDocumentsManager.existDocument(id)) {
+		// Si el documento no existe, lo indicamos asi
+		if (!TempDocumentsManager.existDocument(id)) {
+			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + id + "')"); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
+		}
 
-			byte[] data;
-			try {
-				data = TempDocumentsManager.retrieveAndDeleteDocument(id);
-			}
-			catch (final Exception e) {
-				LOGGER.severe(ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
-				sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
-				return;
-			}
-			sendResult(response, data);
+		// Recuperamos y eliminamos el documento
+		byte[] data;
+		try {
+			data = TempDocumentsManager.retrieveAndDeleteDocument(id);
 		}
-		else {
-			sendResult(response,
-					ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + id + "')" //$NON-NLS-1$ //$NON-NLS-2$
-				);
+		catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA), e);
+			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
+			return;
 		}
+		sendResult(response, data);
 	}
 
     private static void sendResult(final HttpServletResponse response, final String text)

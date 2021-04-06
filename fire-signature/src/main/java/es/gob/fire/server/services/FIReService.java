@@ -39,6 +39,7 @@ import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.InvalidConfigurationException;
 import es.gob.fire.statistics.FireStatistics;
 
 /**
@@ -59,11 +60,16 @@ public class FIReService extends HttpServlet {
     	try {
 	    	ConfigManager.checkConfiguration();
 		}
+    	catch (final InvalidConfigurationException e) {
+    		LOGGER.log(Level.SEVERE, "Error en la configuracion de la/s propiedad/es " + e.getProperty() + " (" + e.getFileName() + ")", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getProperty(), e.getFileName());
+    		return;
+    	}
     	catch (final Exception e) {
-    		LOGGER.log(Level.SEVERE, "No se pudo cargar la configuracion del componente central de FIRe", e); //$NON-NLS-1$
+    		LOGGER.log(Level.SEVERE, "Error al cargar la configuracion del componente central", e); //$NON-NLS-1$
     		final String configFile = e instanceof ConfigFilesException ?
     				((ConfigFilesException) e).getFileName() : "Fichero de configuracion principal del componente central"; //$NON-NLS-1$
-    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, configFile);
+    		AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, configFile);
     		return;
     	}
 
@@ -90,7 +96,7 @@ public class FIReService extends HttpServlet {
 
     	// Codigo para programar el volcado de estadisticas a BD si procede
 		try {
-			final int configStatistic = Integer.valueOf(ConfigManager.getStatisticsPolicy()).intValue() ;
+			final int configStatistic = ConfigManager.getStatisticsPolicy();
 			final String statisticsDirPath = ConfigManager.getStatisticsDir();
 			final String jdbcDriver = ConfigManager.getJdbcDriverString();
 			final String dbConnectionString = ConfigManager.getDataBaseConnectionString();
@@ -118,12 +124,18 @@ public class FIReService extends HttpServlet {
 			try {
 				ConfigManager.checkConfiguration();
 			}
-			catch (final ConfigFilesException e) {
-				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-	    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getFileName());
-				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
-				return;
-			}
+	    	catch (final ConfigFilesException e) {
+	    		LOGGER.log(Level.SEVERE, "No se encontro el fichero de configuracion del componente central: " + e.getFileName(), e); //$NON-NLS-1$
+	    		AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, e.getMessage());
+	    		response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
+	    		return;
+	    	}
+	    	catch (final InvalidConfigurationException e) {
+	    		LOGGER.log(Level.SEVERE, "Error en la configuracion de la/s propiedad/es " + e.getProperty() + " (" + e.getFileName() + ")", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getProperty(), e.getFileName());
+	    		response.sendError(InvalidConfigurationException.getHttpError(), e.getMessage());
+	    		return;
+	    	}
 		}
 
 		RequestParameters params;
@@ -149,9 +161,7 @@ public class FIReService extends HttpServlet {
         	if (appId == null || appId.isEmpty()) {
         		LOGGER.warning(logF.f("No se ha proporcionado el identificador de la aplicacion en una peticion entrante")); //$NON-NLS-1$
                 response.sendError(
-            		HttpServletResponse.SC_BAD_REQUEST,
-                    "No se ha proporcionado el identificador de la aplicacion" //$NON-NLS-1$
-        		);
+            		HttpServletResponse.SC_BAD_REQUEST, "No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
                 return;
             }
 

@@ -100,7 +100,7 @@ public class CreateBatchManager {
 			extraParams = ServiceUtil.base642Properties(extraParamsB64);
 		}
 		catch (final Exception e) {
-			LOGGER.warning("Se ha proporcionado extraParams mal formados: " + e); //$NON-NLS-1$
+			LOGGER.warning(logF.f("Se ha proporcionado un extraParam mal formados: ") + e); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
 					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
 			return;
@@ -175,7 +175,7 @@ public class CreateBatchManager {
         // cargamos el por defecto
         FIReDocumentManager docManager;
         try {
-        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, docManagerName);
+        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, transactionId, docManagerName);
         }
         catch (final IllegalAccessException | IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$

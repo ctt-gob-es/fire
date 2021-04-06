@@ -28,7 +28,6 @@ public class MiniAppletErrorService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletErrorService.class.getName());
 
-
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
@@ -40,44 +39,44 @@ public class MiniAppletErrorService extends HttpServlet {
             return;
         }
 
+        final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
+
+		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de error de firma con certificado local")); //$NON-NLS-1$
+
         final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+
+        String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+        if (redirectErrorUrl != null && !redirectErrorUrl.isEmpty()) {
+        	LOGGER.warning(logF.f("No se ha proporcionado la URL de redireccion de error")); //$NON-NLS-1$
+            SessionCollector.removeSession(transactionId);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
         // Se recibe el tipo de error pero por ahora no hacemos nada con el
 		//final String errorType = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_TYPE);
 		final String errorMessage = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_MESSAGE);
-		String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
 		final FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), true, false);
 		if (session == null) {
-        	LOGGER.warning("La sesion no existe"); //$NON-NLS-1$
+			LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);
-        	response.sendRedirect(errorUrl);
+   			response.sendRedirect(redirectErrorUrl);
     		return;
         }
 
         // Obtenenmos la configuracion del conector
-        final TransactionConfig connConfig	=
-        		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+        final TransactionConfig connConfig	= (TransactionConfig) session
+        		.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+        if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
+			redirectErrorUrl = connConfig.getRedirectErrorUrl();
+		}
 
-        // Si no se encuentra en la sesion la URL de redireccion de error, redirigimos al usuario
-        // a la pagina de error indicada por parametro
-    	if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-    		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
-    	}
-    	// Si la URL de redireccion de error estaba en la sesion, redirigimos al usuario a esa pagina
-    	else {
-        	ErrorManager.setErrorToSession(session, OperationError.SIGN_MINIAPPLET, true, errorMessage);
-        	errorUrl = connConfig.getRedirectErrorUrl();
-    	}
+        ErrorManager.setErrorToSession(session, OperationError.SIGN_LOCAL, true, errorMessage);
 
-    	// Si se ha definido la URL de error de una forma u otra, se redirige a ella. Si no, se
-    	// devuelve un error
-    	if (errorUrl != null) {
-    		response.sendRedirect(errorUrl);
-    	}
-    	else {
-    		LOGGER.warning("No se proporciono la URL de redireccion de error y se devuelve BAD_REQUEST"); //$NON-NLS-1$
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-    	}
+    	// Redirigimos a la pagina de error
+   		response.sendRedirect(redirectErrorUrl);
+
+		LOGGER.fine(logF.f("Fin de la llamada al servicio publico de error de firma con certificado local")); //$NON-NLS-1$
 	}
 }

@@ -37,12 +37,23 @@ public class CancelOperationService extends HttpServlet {
 		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(null, trId);
+
+		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
+
 		final FireSession session = SessionCollector.getFireSession(trId, userId, request.getSession(false), true, false);
     	if (session == null) {
-    		LOGGER.warning("La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
-    		final String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+    		LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", trId)); //$NON-NLS-1$
+
+    		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
     		if (redirectErrorUrl != null) {
-    			response.sendRedirect(URLDecoder.decode(redirectErrorUrl, URL_ENCODING));
+    			try {
+                	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
+                }
+                catch (final Exception e) {
+                	LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: %1s", e)); //$NON-NLS-1$
+        		}
+    			response.sendRedirect(redirectErrorUrl);
     		}
     		else {
     			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
@@ -50,17 +61,21 @@ public class CancelOperationService extends HttpServlet {
     		return;
     	}
 
+    	final String appId = session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+    	logF.setAppId(appId);
+
 		final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			SessionCollector.removeSession(session);
-			LOGGER.warning("No se proporcionaron datos para la conexion con el proveedor de firma"); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se pudo obtener la configuracion de la transaccion")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
 			return;
 		}
 
 		ErrorManager.setErrorToSession(session, OperationError.OPERATION_CANCELED);
 
-		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
-		response.sendRedirect(redirectErrorUrl);
+		response.sendRedirect(connConfig.getRedirectErrorUrl());
+
+		LOGGER.fine(logF.f("Fin de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
 	}
 }

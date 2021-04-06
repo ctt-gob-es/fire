@@ -21,6 +21,7 @@ import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
+import es.gob.fire.server.document.FireDocumentManagerBase;
 import es.gob.fire.server.services.DocInfo;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
@@ -123,7 +124,16 @@ public class AddDocumentBatchManager {
 
     	byte[] data;
     	try {
-    		data = documentManager.getDocument(docReferenceId, appId, format, extraParams);
+    		// Por motivos de compatibilidad, mantenemos el uso de las funciones de la interfaz en
+    		// base a la que se construyen los DocumentManager, pero, si es posible, se utilizara
+    		// la funcion equivalente de la implementacion de FireDocumentManagerBase, que recibe
+    		// mas parametros
+    		if (documentManager instanceof FireDocumentManagerBase) {
+    			data = ((FireDocumentManagerBase) documentManager).getDocument(docReferenceId, transactionId, appId, format, extraParams);
+    		}
+    		else {
+    			data = documentManager.getDocument(docReferenceId, appId, format, extraParams);
+    		}
     	}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error en la carga de los datos a agregar al lote"), e); //$NON-NLS-1$

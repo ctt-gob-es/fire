@@ -27,6 +27,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReConnector;
@@ -37,7 +38,6 @@ import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.SignOperation;
-import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
 import es.gob.fire.server.services.crypto.CryptoHelper;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
@@ -262,7 +262,7 @@ public class RecoverBatchResultManager {
 
     			final byte[] pkcs1 = ret.get(key);
     			try {
-    				CryptoHelper.verifyPkcs1(pkcs1, signingCert.getPublicKey());
+    				CryptoHelper.verifyPkcs1(pkcs1, signingCert.getPublicKey(), logF);
     			}
     			catch (final Exception e) {
             		LOGGER.log(Level.SEVERE, logF.f("Error de integridad. Uno de los PKCS#1 recibido no se genero con el certificado indicado"), e); //$NON-NLS-1$
@@ -503,7 +503,7 @@ public class RecoverBatchResultManager {
 		try {
 			return !secureProvider ||
 					SignOperation.parse(signOperation) != SignOperation.SIGN ||
-					SignFormat.getFormat(signFormat) == SignFormat.PADES;
+					AOSignConstants.SIGN_FORMAT_PADES.equals(signFormat);
 		}
 		catch (final Exception e) {
 			LOGGER.warning("No se pudo comprobar si la firma era apta para validacion: " + e); //$NON-NLS-1$

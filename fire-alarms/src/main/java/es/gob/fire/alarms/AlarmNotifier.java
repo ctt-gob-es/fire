@@ -37,6 +37,6 @@ public interface AlarmNotifier {
 	 * conexi&oacute;n, ser&iacute;a el destino al que no se ha podido conectar.
 	 * @throws IOException Cuando no se puede enviar la notificaci&oacute;n.
 	 */
-	void notify(AlarmLevel level, Alarm alarm, String source)
+	void notify(AlarmLevel level, Alarm alarm, String... source)
 			throws IOException;
 }

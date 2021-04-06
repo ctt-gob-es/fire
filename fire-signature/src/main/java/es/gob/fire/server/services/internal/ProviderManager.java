@@ -141,7 +141,7 @@ public class ProviderManager {
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
 					LogUtils.cleanText(providerConfigFilename), LogUtils.cleanText(providerName)
 			));
-			AlarmsManager.notify(Alarm.RESOURCE_CONFIG, providerConfigFilename);
+			AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, providerConfigFilename);
 			providerConfig = new Properties();
 		} catch (final IOException e) {
 			LOGGER.log(

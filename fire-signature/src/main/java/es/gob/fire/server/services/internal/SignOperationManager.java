@@ -23,6 +23,7 @@ import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.document.FIReDocumentManager;
+import es.gob.fire.server.document.FireDocumentManagerBase;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.HttpCustomErrors;
@@ -170,7 +171,7 @@ public class SignOperationManager {
         // cargamos el por defecto
         FIReDocumentManager docManager;
         try {
-        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, docManagerName);
+        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, transactionId, docManagerName);
         }
         catch (final IllegalAccessException | IllegalArgumentException e) {
         	LOGGER.log(Level.WARNING, logF.f("No existe o no se tiene permisos para acceder al gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
@@ -222,7 +223,16 @@ public class SignOperationManager {
         // mediante del DocumentManager que corresponda
         final byte[] data;
         try {
-        	data = docManager.getDocument(docId, appId, format, extraParams);
+        	// Por motivos de compatibilidad, mantenemos el uso de las funciones de la interfaz en
+        	// base a la que se construyen los DocumentManager, pero, si es posible, se utilizara
+        	// la funcion equivalente de la implementacion de FireDocumentManagerBase, que recibe
+        	// mas parametros
+        	if (docManager instanceof FireDocumentManagerBase) {
+        		data = ((FireDocumentManagerBase) docManager).getDocument(docId, transactionId, appId, format, extraParams);
+        	}
+        	else {
+        		data = docManager.getDocument(docId, appId, format, extraParams);
+        	}
         }
         catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al obtener los datos a firmar del servidor remoto"), e); //$NON-NLS-1$

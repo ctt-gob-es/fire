@@ -14,28 +14,47 @@ import java.util.Hashtable;
 
 final class ErrorManager {
 
+	public static final int MISSING_PARAM_OPERATION = 1;
+	public static final int MISSING_PARAM_ID = 2;
+	public static final int MISSING_PARAM_ALGORITHM = 3;
+	public static final int MISSING_PARAM_FORMAT = 4;
+	public static final int MISSING_PARAM_CERTIFICATE = 5;
+	public static final int INVALID_FORMAT_EXTRAPARAMS = 6;
+	public static final int INVALID_FORMAT_CERTIFICATE = 7;
+	public static final int UNSUPPORTED_SIGNATURE_FORMAT = 8;
+	public static final int ERROR_PRESIGNING = 9;
+	public static final int ERROR_STORAGING_SIGNATURE = 10;
+	public static final int UNSUPPORTED_TRIPHASE_OPERATION = 11;
+	public static final int ERROR_POSTSIGNING = 12;
+	public static final int MISSING_PARAM_CRYPTO_OPERATION = 13;
+	public static final int ERROR_RETRIEVING_DOCUMENT = 14;
+	public static final int INVALID_SESSION_DATA = 15;
+	public static final int ERROR_GENERATING_PKCS1_HMAC = 16;
+	public static final int ERROR_CHECKING_PKCS1_HMAC = 17;
+
 	private static final Dictionary<Integer, String> errorMessages = new Hashtable<>();
 	static {
-		errorMessages.put(Integer.valueOf(1), "No se ha indicado la operacion a realizar"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(2), "No se ha indicado el identificador del documento"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(3), "No se ha indicado el algoritmo de firma"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(4), "No se ha indicado el formato de firma"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(5), "No se ha indicado el certificado de usuario"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(6), "El formato de los parametros adicionales suministrados es erroneo"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(7), "El certificado de usuario no esta en formato X.509"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(8), "Formato de firma no soportado"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(9), "Error realizando la prefirma"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(10), "Error en el almacen final del documento"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(11), "Operacion desconocida"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(12), "Error realizando la postfirma"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(13), "No se indicado una sub-operacion valida a realizar (firma, cofirma,...)"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(14), "Error al recuperar el documento"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(15), "El formato de los datos de sesion suministrados es erroneo"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(16), "Error al actualizar la firma a formato longevo"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(MISSING_PARAM_OPERATION), "No se ha indicado la operacion a realizar"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(MISSING_PARAM_ID), "No se ha indicado el identificador del documento"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(MISSING_PARAM_ALGORITHM), "No se ha indicado el algoritmo de firma"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(MISSING_PARAM_FORMAT), "No se ha indicado el formato de firma"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(MISSING_PARAM_CERTIFICATE), "No se ha indicado el certificado de usuario"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(INVALID_FORMAT_EXTRAPARAMS), "El formato de los parametros adicionales suministrados es erroneo"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(INVALID_FORMAT_CERTIFICATE), "El certificado de usuario no esta en formato X.509"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(UNSUPPORTED_SIGNATURE_FORMAT), "Formato de firma no soportado"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(ERROR_PRESIGNING), "Error realizando la prefirma"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(ERROR_STORAGING_SIGNATURE), "Error en el almacen final del documento"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(UNSUPPORTED_TRIPHASE_OPERATION), "Operacion desconocida"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(ERROR_POSTSIGNING), "Error realizando la postfirma"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(MISSING_PARAM_CRYPTO_OPERATION), "No se indicado una sub-operacion valida a realizar (firma, cofirma,...)"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(ERROR_RETRIEVING_DOCUMENT), "Error al recuperar el documento"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(INVALID_SESSION_DATA), "El formato de los datos de sesion suministrados es erroneo"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(ERROR_GENERATING_PKCS1_HMAC), "No se ha podido generar el codigo de verificacion del PKCS#1 generado"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(ERROR_CHECKING_PKCS1_HMAC), "El PKCS#1 se ha generado con un certficado distinto al esperado"); //$NON-NLS-1$
 	}
 
 	static String getErrorMessage(final int errNo) {
-		return "ERR-" + Integer.toString(errNo) + ": " + errorMessages.get(Integer.valueOf(errNo)); //$NON-NLS-1$ //$NON-NLS-2$
+		return "ERR-" + errNo + ": " + errorMessages.get(Integer.valueOf(errNo)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }

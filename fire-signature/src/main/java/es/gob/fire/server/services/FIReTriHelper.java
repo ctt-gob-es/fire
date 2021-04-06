@@ -41,6 +41,7 @@ import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.crypto.CryptoHelper;
 import es.gob.fire.server.services.internal.BatchDocument;
 import es.gob.fire.server.services.internal.BatchResult;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.Pkcs1TriPhasePreProcessor;
 import es.gob.fire.server.services.internal.SignBatchConfig;
 import es.gob.fire.signature.ConfigManager;
@@ -634,6 +635,7 @@ public final class FIReTriHelper {
 	 * ese PKCS#1.
 	 * @param triphaseData Informaci&oacute;n de la firma.
 	 * @param cert Certificado que se declara haber usado en la prefirma.
+	 * @param logF Formateador de trazas de log.
 	 * @throws SecurityException Cuando el PKCS#1 de la firma no se generase con el
 	 * certificado indicado o cuando no se pudiese comprobar.
 	 * @throws IOException Cuando falla la decodificaci&oacute;n Base 64 de los datos.
@@ -642,7 +644,8 @@ public final class FIReTriHelper {
 	// prefirma (parametro PRE) para completar la firma, sino el parametro BASE. Habr&iacute;a
 	// que extraer la prefirma del BASE en lugar de coger la que se pasa como parametro (que
 	// ya podria dejar de pasarse).
-	public static void checkSignaturesIntegrity(final TriphaseData triphaseData, final X509Certificate cert)
+	public static void checkSignaturesIntegrity(final TriphaseData triphaseData, final X509Certificate cert,
+			final LogTransactionFormatter logF)
 			throws SecurityException, IOException {
 
 		final String hmacSeed = ConfigManager.getHMacKey();
@@ -682,7 +685,7 @@ public final class FIReTriHelper {
 				throw new SecurityException("No se ha proporcionado el PKCS#1 de la firma"); //$NON-NLS-1$
 			}
 
-			CryptoHelper.verifyPkcs1(Base64.decode(signatureValue), cert.getPublicKey());
+			CryptoHelper.verifyPkcs1(Base64.decode(signatureValue), cert.getPublicKey(), logF);
 		}
 	}
 }

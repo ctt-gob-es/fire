@@ -73,7 +73,7 @@ final class SingleSignPostProcessor {
 		final TriphaseData td = cleanTriphaseData(tdata, sSign.getId());
 
 		try {
-			FIReTriHelper.checkSignaturesIntegrity(td, certChain[0]);
+			FIReTriHelper.checkSignaturesIntegrity(td, certChain[0], null);
 		}
 		catch (final Exception e) {
 			throw new AOException("Error en la verificacion de los PKCS#1 de las firmas recibidas", e); //$NON-NLS-1$

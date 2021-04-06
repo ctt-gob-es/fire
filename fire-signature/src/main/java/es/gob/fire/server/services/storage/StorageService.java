@@ -9,20 +9,19 @@
  */
 package es.gob.fire.server.services.storage;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 
@@ -60,75 +59,59 @@ public final class StorageService extends HttpServlet {
 		LOGGER.fine(" == INICIO GUARDADO == "); //$NON-NLS-1$
 
 		// Leemos la entrada
-		int n;
-		final byte[] buffer = new byte[1024];
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final ServletInputStream sis = request.getInputStream();
-		while ((n = sis.read(buffer)) > 0) {
-			baos.write(buffer, 0, n);
-		}
-		baos.close();
-		sis.close();
-
-		// Separamos los parametros y sus valores
-		final Hashtable<String, String> params = new Hashtable<>();
-		final String[] urlParams = new String(baos.toByteArray()).split("&"); //$NON-NLS-1$
-		for (final String param : urlParams) {
-			final int equalsPos = param.indexOf('=');
-			if (equalsPos != -1) {
-				params.put(param.substring(0, equalsPos), param.substring(equalsPos + 1));
-			}
-		}
+		final RequestParameters params = RequestParameters.extractParameters(request);
 
 		final String operation = params.get(PARAMETER_NAME_OPERATION);
 		final String syntaxVersion = params.get(PARAMETER_NAME_SYNTAX_VERSION);
+		final String id = params.get(PARAMETER_NAME_ID);
 		response.setHeader("Access-Control-Allow-Origin", "*"); //$NON-NLS-1$ //$NON-NLS-2$
 		response.setContentType("text/plain"); //$NON-NLS-1$
 		response.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
 		final PrintWriter out = response.getWriter();
 		if (operation == null) {
-			LOGGER.warning("No se ha indicado codigo de operacion"); //$NON-NLS-1$
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_OPERATION_NAME));
 			out.println(ErrorManager.genError(ErrorManager.ERROR_MISSING_OPERATION_NAME));
 			out.flush();
 			return;
 		}
 		if (syntaxVersion == null) {
-			LOGGER.warning("No se ha indicado la version del formato de llamada"); //$NON-NLS-1$
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
 			out.println(ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
 			out.flush();
 			return;
 		}
-
-		if (OPERATION_STORE.equalsIgnoreCase(operation)) {
-			storeSign(out, params);
-		} else {
-			out.println(ErrorManager.genError(ErrorManager.ERROR_UNSUPPORTED_OPERATION_NAME));
+		if (id == null) {
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
+			out.println(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
+			out.flush();
+			return;
 		}
-		out.flush();
+
+		storeSign(out, id, operation, params);
+
 		LOGGER.fine("== FIN DEL GUARDADO =="); //$NON-NLS-1$
 	}
 
 	/** Almacena una firma en servidor.
 	 * @param out Flujo de datos para la respuesta a la petici&oacute;n.
+	 * @param id Identificador de los datos a guardar.
+	 * @param operation Operacion solicitada. Debe ser #StorageService.OPERATION_STORE.
 	 * @param params Par&aacute;metros de la petici&oacute;n.
 	 * @throws IOException Cuando ocurre un error al general la respuesta. */
-	private static void storeSign(final PrintWriter out, final Hashtable<String, String> params) throws IOException {
-
-		final String id = params.get(PARAMETER_NAME_ID);
-		if (id == null) {
-			LOGGER.severe(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
-			out.println(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
-			return;
-		}
+	private static void storeSign(final PrintWriter out, final String id, final String operation, final Map<String, String> params) throws IOException {
 
 		LOGGER.fine("Se solicita guardar un fichero con el identificador: " + id); //$NON-NLS-1$
 
 		// Si no se indican los datos, se transmite el error en texto plano a traves del fichero generado
 		String dataText = URLDecoder.decode(params.get(PARAMETER_NAME_DATA), DEFAULT_ENCODING);
 		if (dataText == null) {
-			LOGGER.severe(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA));
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA));
 			dataText = ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA);
+		}
+		if (!StorageService.OPERATION_STORE.equalsIgnoreCase(operation)) {
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_UNSUPPORTED_OPERATION_NAME));
+			dataText = ErrorManager.genError(ErrorManager.ERROR_UNSUPPORTED_OPERATION_NAME);
 		}
 
 		try {

@@ -19,17 +19,19 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.signers.AOSignConstants;
-import es.gob.fire.server.document.FIReDocumentManager;
+import es.gob.fire.server.document.FireDocumentManagerBase;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 
 /**
  * Gestor de documentos para la carga de datos desde sistema de ficheros para su
  * uso en FIRe y guardado de las firmas generadas por el propio FIRe.
  */
-public class FileSystemFIReDocumentManager implements FIReDocumentManager, Serializable {
+public class FileSystemFIReDocumentManager extends FireDocumentManagerBase implements Serializable {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = -5810048749537708465L;
@@ -68,7 +70,8 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	}
 
 	@Override
-	public byte[] getDocument(final byte[] docId, final String appId, final String format, final Properties extraParams) throws IOException {
+	public byte[] getDocument(final byte[] docId, final String trId, final String appId,
+			final String format, final Properties extraParams) throws IOException {
 
 		if (docId.length > 255) {
 			throw new IOException(
@@ -76,8 +79,10 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 				);
 		}
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, trId);
+
 		final String id = new String(docId, DEFAULT_CHARSET);
-		LOGGER.fine("Recuperamos el documento con identificador: " + (id.length() > 20 ? id.substring(0, 20) + "..." : id)); //$NON-NLS-1$ //$NON-NLS-2$
+		LOGGER.fine(logF.f("Recuperamos el documento con identificador: ") + (id.length() > 20 ? id.substring(0, 20) + "..." : id)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		final File file = new File(this.inDir, id);
 
@@ -87,13 +92,13 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 			);
 		}
 
-		if( !isRootParent(new File(this.inDir), file ) ) {
+		if (!isRootParent(new File(this.inDir), file )) {
 		    throw new IOException(
 	    		"Se ha pedido un fichero fuera del directorio configurado: " + printShortPath(file) //$NON-NLS-1$
     		);
 		}
 
-		LOGGER.fine("Buscamos el fichero: " + printShortPath(file)); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Buscamos el fichero: ") + printShortPath(file)); //$NON-NLS-1$
 
 		if (!file.exists()) {
 			throw new IOException("No se puede cargar el documento, no existe"); //$NON-NLS-1$
@@ -116,7 +121,7 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 			data = AOUtil.getDataFromInputStream(fis);
 		}
 		catch (final IOException e) {
-			LOGGER.warning("Error en la lectura del fichero '" + printShortPath(file) + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.log(Level.WARNING, logF.f("Error en la lectura del fichero '" + printShortPath(file)), e); //$NON-NLS-1$
 			throw e;
 		}
 
@@ -136,8 +141,9 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 	}
 
 	@Override
-	public byte[] storeDocument(final byte[] docId, final String appId, final byte[] data, final X509Certificate cert, final String format, final Properties extraParams)
-			throws IOException {
+	public byte[] storeDocument(final byte[] docId, final String trId, final String appId,
+			final byte[] data, final X509Certificate cert, final String format,
+			final String upgrade, final Properties extraParams) throws IOException {
 
 		final String initialId = docId != null ? new String(docId, DEFAULT_CHARSET) : "signature"; //$NON-NLS-1$
 		String newId = initialId;
@@ -156,6 +162,8 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 			newId += initialId.substring(lastDotPos);
 		}
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, trId);
+
 		final File file = new File(this.outDir, newId);
 		if (!isRootParent(new File(this.outDir), file)) {
 			throw new IOException("Se ha ha intentado almacenar un fichero fuera del directorio de salida"); //$NON-NLS-1$
@@ -168,11 +176,11 @@ public class FileSystemFIReDocumentManager implements FIReDocumentManager, Seria
 			fos.write(data);
 		}
 		catch (final IOException e) {
-			LOGGER.severe("Error al almacenar los datos en el fichero '" + file.getAbsolutePath() + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.log(Level.SEVERE, logF.f("Error al almacenar los datos en el fichero '" + file.getAbsolutePath()), e); //$NON-NLS-1$
 			throw e;
 		}
 
-		LOGGER.fine("Escribiendo el fichero: " + file.getAbsolutePath()); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Escribiendo el fichero: " + file.getAbsolutePath())); //$NON-NLS-1$
 		return newId.getBytes(StandardCharsets.UTF_8);
 	}
 

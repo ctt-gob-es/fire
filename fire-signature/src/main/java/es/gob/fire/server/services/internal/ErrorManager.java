@@ -44,7 +44,9 @@ public class ErrorManager {
 
 	/**
 	 * Establece un error en sesi&oacute;n interpretando que se va a redirigir
-	 * al usuario a la aplicaci&oacute;n.
+	 * al usuario a la aplicaci&oacute;n que llamo al servicio. Se limpiar&aacute;
+	 * la sesi&oacute;n para s&oacute;lo conservar los mensajes de error y
+	 * cualquier otro dato imprescindible.
 	 * @param session Sesi&oacute;n en la que se produce y se debe almacenar el error.
 	 * @param error Error producido.
 	 */
@@ -54,13 +56,13 @@ public class ErrorManager {
 
 	/**
 	 * Establece un error en sesi&oacute;n. Si se solicita volver a la
-	 * aplicaci&oacute;n ser&aacute; porque se ha abortado la operaci&oacute;n, en
-	 * cuyo caso limpiamos la sesi&oacute;n para s&oacute;lo conservar los mensajes
-	 * de error y cualquier otro dato imprescindible.
+	 * aplicaci&oacute;n, ser&aacute; porque se ha abortado la operaci&oacute;n, en
+	 * cuyo caso se limpiar&aacute; la sesi&oacute;n para s&oacute;lo conservar los
+	 * mensajes de error y cualquier otro dato imprescindible.
 	 * @param session Sesi&oacute;n en la que se produce y se debe almacenar el error.
 	 * @param error Error producido.
 	 * @param returnToApp Indica si debe prepararse la sesi&oacute;n para volver a la
-	 * aplicaci&oacute;n.
+	 * aplicaci&oacute;n y borrarse cualquier dato de sesion ajeno a este error.
 	 */
 	public static void setErrorToSession(final FireSession session, final OperationError error,
 			final boolean returnToApp) {
@@ -68,14 +70,14 @@ public class ErrorManager {
 	}
 
 	/**
-	 * Establece un error en sesi&oacute;n. Si se solicita volver a la
-	 * aplicaci&oacute;n ser&aacute; porque se ha abortado la operaci&oacute;n, en
-	 * cuyo caso limpiamos la sesi&oacute;n para s&oacute;lo conservar los mensajes
-	 * de error y cualquier otro dato imprescindible.
+	 * Establece un error en sesi&oacute;n.  Si se solicita volver a la
+	 * aplicaci&oacute;n, ser&aacute; porque se ha abortado la operaci&oacute;n, en
+	 * cuyo caso se limpiar&aacute; la sesi&oacute;n para s&oacute;lo conservar los
+	 * mensajes de error y cualquier otro dato imprescindible.
 	 * @param session Sesi&oacute;n en la que se produce y se debe almacenar el error.
 	 * @param error Error producido.
 	 * @param returnToApp Indica si debe prepararse la sesi&oacute;n para volver a la
-	 * aplicaci&oacute;n.
+	 * aplicaci&oacute;n y borrarse cualquier dato de sesion ajeno a este error.
 	 * @param messageError Mensaje de error a almacenar. Si no se indica, se
 	 * usar&aacute; el por defecto del tipo de error.
 	 */

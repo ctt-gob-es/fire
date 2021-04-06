@@ -25,6 +25,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReConnector;
@@ -40,7 +41,6 @@ import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.SignOperation;
-import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
 import es.gob.fire.server.services.crypto.CryptoHelper;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
@@ -226,7 +226,7 @@ public class RecoverSignManager {
     		// Realizamos la segunda fase de la firma trifasica
     		LOGGER.info(logF.f("Se solicita el PKCS#1 al proveedor " + providerName)); //$NON-NLS-1$
     		try {
-    			td = triphaseSign(providerName, remoteTrId, connConfig, td, signingCert);
+    			td = triphaseSign(providerName, remoteTrId, connConfig, td, signingCert, logF);
     		}
     		catch (final IllegalArgumentException e) {
     			LOGGER.log(Level.SEVERE, logF.f("Parametro no valido"), e); //$NON-NLS-1$
@@ -342,7 +342,8 @@ public class RecoverSignManager {
         try {
         	if (docManager instanceof FireDocumentManagerBase) {
         		partialResult = ((FireDocumentManagerBase) docManager).storeDocument(
-        				docId, appId, partialResult, signingCert, format, upgrade, extraParams);
+        				docId, transactionId, appId, partialResult, signingCert, format,
+        				upgrade, extraParams);
         	} else {
         		partialResult = docManager.storeDocument(docId, appId, partialResult,
         				signingCert, format, extraParams);
@@ -402,7 +403,7 @@ public class RecoverSignManager {
 					VerifyException, ValidatorException {
 
 		PostProcessResult result;
-		final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator();
+		final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator(logF);
 		if (ServiceParams.UPGRADE_VERIFY.equalsIgnoreCase(upgradeLevel)) {
 			if (needValidation) {
 				LOGGER.info(logF.f("Validamos la firma")); //$NON-NLS-1$
@@ -504,7 +505,8 @@ public class RecoverSignManager {
 	 * @throws FireInternalException Cuando se produce cualquier otro error.
 	 */
 	private static TriphaseData triphaseSign(final String providerName, final String remoteTrId,
-			final TransactionConfig trConfig, final TriphaseData td, final Certificate signingCert)
+			final TransactionConfig trConfig, final TriphaseData td, final Certificate signingCert,
+			final LogTransactionFormatter logF)
 					throws IllegalArgumentException, FIReConnectorUnknownUserException,
 					FIReConnectorNetworkException, FIReSignatureException, FIReConnectorFactoryException,
 					FireInternalException {
@@ -531,7 +533,7 @@ public class RecoverSignManager {
 			final byte[] pkcs1 = ret.get(key);
 
 			try {
-				CryptoHelper.verifyPkcs1(pkcs1, signingCert.getPublicKey());
+				CryptoHelper.verifyPkcs1(pkcs1, signingCert.getPublicKey(), logF);
 			}
 			catch (final Exception e) {
 				throw new FIReSignatureException("Error de integridad. El PKCS#1 recibido no se genero con el certificado indicado", e); //$NON-NLS-1$
@@ -587,7 +589,7 @@ public class RecoverSignManager {
 		try {
 			return !secureProvider ||
 					SignOperation.parse(signOperation) != SignOperation.SIGN ||
-					SignFormat.getFormat(signFormat) == SignFormat.PADES;
+					AOSignConstants.SIGN_FORMAT_PADES.equals(signFormat);
 		}
 		catch (final Exception e) {
 			LOGGER.warning("No se pudo comprobar si la firma era apta para validacion: " + e); //$NON-NLS-1$

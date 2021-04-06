@@ -32,12 +32,14 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.internal.AlarmsManager;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.InvalidConfigurationException;
 
 /** Servicio de carga de datos para su posterior firma en servidor.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -64,11 +66,16 @@ public final class LoadService extends HttpServlet {
     	try {
 	    	ConfigManager.checkConfiguration();
 		}
+    	catch (final InvalidConfigurationException e) {
+    		LOGGER.log(Level.SEVERE, "Error en la configuracion de la/s propiedad/es " + e.getProperty() + " (" + e.getFileName() + ")", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getProperty(), e.getFileName());
+    		return;
+    	}
     	catch (final Exception e) {
-    		LOGGER.log(Level.SEVERE, "Error al cargar la configuracion", e); //$NON-NLS-1$
+    		LOGGER.log(Level.SEVERE, "Error al cargar la configuracion del componente central", e); //$NON-NLS-1$
     		final String configFile = e instanceof ConfigFilesException ?
     				((ConfigFilesException) e).getFileName() : "Fichero de configuracion principal del componente central"; //$NON-NLS-1$
-    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, configFile);
+    		AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, configFile);
     		return;
     	}
 
@@ -88,12 +95,18 @@ public final class LoadService extends HttpServlet {
 			try {
 				ConfigManager.checkConfiguration();
 			}
-			catch (final ConfigFilesException e) {
-				LOGGER.severe("Error en la configuracion del servidor: " + e); //$NON-NLS-1$
-				AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getFileName());
-				response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
-				return;
-			}
+	    	catch (final ConfigFilesException e) {
+	    		LOGGER.log(Level.SEVERE, "No se encontro el fichero de configuracion del componente central: " + e.getFileName(), e); //$NON-NLS-1$
+	    		AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, e.getMessage());
+	    		response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
+	    		return;
+	    	}
+	    	catch (final InvalidConfigurationException e) {
+	    		LOGGER.log(Level.SEVERE, "Error en la configuracion de la/s propiedad/es " + e.getProperty() + " (" + e.getFileName() + ")", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getProperty(), e.getFileName());
+	    		response.sendError(InvalidConfigurationException.getHttpError(), e.getMessage());
+	    		return;
+	    	}
 		}
 
     	final RequestParameters params = RequestParameters.extractParameters(request);
@@ -109,10 +122,12 @@ public final class LoadService extends HttpServlet {
         final String dataB64        = params.getParameter(PARAMETER_NAME_DATA);
         String providerName  	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 
-    	if (ConfigManager.isCheckApplicationNeeded()) {
-        	LOGGER.fine("Se realizara la validacion del Id de aplicacion"); //$NON-NLS-1$
+        final LogTransactionFormatter logF = new LogTransactionFormatter(appId, null);
+
+        if (ConfigManager.isCheckApplicationNeeded()) {
+        	LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
         	if (appId == null || appId.isEmpty()) {
-        		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
+        		LOGGER.warning(logF.f("No se ha proporcionado el identificador de la aplicacion")); //$NON-NLS-1$
                 response.sendError(
             		HttpServletResponse.SC_BAD_REQUEST,
                     "No se ha proporcionado el identificador de la aplicacion" //$NON-NLS-1$
@@ -123,13 +138,13 @@ public final class LoadService extends HttpServlet {
 	        try {
 	        	final ApplicationChecking appCheck = AplicationsDAO.checkApplicationId(appId);
 	        	if (!appCheck.isValid()) {
-	        		LOGGER.warning("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion"); //$NON-NLS-1$
+	        		LOGGER.warning(logF.f("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion")); //$NON-NLS-1$
 	        		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 	        		return;
 	        	}
 	        }
 	        catch (final Exception e) {
-	        	LOGGER.severe("Error grave al validar el identificador de la aplicaci&oacute;n :" +e); //$NON-NLS-1$
+	        	LOGGER.log(Level.SEVERE, logF.f("Error grave al validar el identificador de la aplicacion: ") + e, e); //$NON-NLS-1$
 	        	AlarmsManager.notify(Alarm.CONNECTION_DB);
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        	return;
@@ -140,63 +155,64 @@ public final class LoadService extends HttpServlet {
         }
 
     	if (ConfigManager.isCheckCertificateNeeded()){
-    		LOGGER.fine("Se realizara la validacion del certificado"); //$NON-NLS-1$
+    		LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
     		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
 	    	try {
 				ServiceUtil.checkValidCertificate(appId, certificates);
 			}
 	    	catch (final DBConnectionException e) {
-				LOGGER.log(Level.SEVERE, "No se pudo conectar con la base de datos", e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
 				AlarmsManager.notify(Alarm.CONNECTION_DB);
 	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 				return;
 			}
 	    	catch (final CertificateValidationException e) {
-				LOGGER.severe("Error en la validacion del certificado: " + e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("Error en la validacion del certificado: ") + e, e); //$NON-NLS-1$
 				response.sendError(e.getHttpError(), e.getMessage());
 				return;
 			}
     	}
     	else {
-    		LOGGER.fine("No se validara el certificado");//$NON-NLS-1$
+    		LOGGER.fine(logF.f("No se validara el certificado"));//$NON-NLS-1$
     	}
 
         if (subjectId == null || subjectId.isEmpty()) {
-            LOGGER.warning("No se ha proporcionado el identificador del titular de la clave de firma"); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se ha proporcionado el identificador del titular de la clave de firma")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha proporcionado el identificador del titular de la clave de firma"); //$NON-NLS-1$
             return;
         }
 
         if (algorithm == null || algorithm.isEmpty()) {
-            LOGGER.warning("No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se ha proporcionado el algoritmo de firma")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
             return;
         }
 
         if (certB64 == null || certB64.isEmpty()) {
-            LOGGER.warning("No se ha proporcionado el certificado del firmante"); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se ha proporcionado el certificado del firmante")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha proporcionado el certificado del firmante"); //$NON-NLS-1$
             return;
         }
 
         if (subOperation == null || subOperation.isEmpty()) {
-            LOGGER.warning("No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se ha indicado la operacion de firma a realizar")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
             return;
         }
 
         if (format == null || format.isEmpty()) {
-            LOGGER.warning("No se ha indicado el formato de firma"); //$NON-NLS-1$
+            LOGGER.warning(logF.f("No se ha indicado el formato de firma")); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "No se ha indicado el formato de firma"); //$NON-NLS-1$
             return;
         }
 
         if (dataB64 == null || dataB64.isEmpty()) {
+        	LOGGER.warning(logF.f("No se han proporcionado los datos a firmar")); //$NON-NLS-1$
             response.sendError(
         		HttpServletResponse.SC_BAD_REQUEST,
                 "No se han proporcionado los datos a firmar"); //$NON-NLS-1$
@@ -210,7 +226,7 @@ public final class LoadService extends HttpServlet {
             );
         }
         catch (final Exception e) {
-        	LOGGER.severe("No se ha podido decodificar el certificado del firmante: " + e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido decodificar el certificado del firmante: ") + e, e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         	return;
         }
@@ -227,7 +243,7 @@ public final class LoadService extends HttpServlet {
     		);
         }
         catch (final Exception e) {
-            LOGGER.log(Level.SEVERE, "No se ha podido obtener la prefirma", e); //$NON-NLS-1$
+            LOGGER.log(Level.SEVERE, logF.f("No se ha podido obtener la prefirma"), e); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "No se ha podido obtener la prefirma: " + e); //$NON-NLS-1$
             return;
@@ -246,7 +262,7 @@ public final class LoadService extends HttpServlet {
             connector = ProviderManager.getProviderConnector(providerName, config);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, String.format("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
         	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error en la configuracion del conector con el servicio de custodia: " + e); //$NON-NLS-1$
             return;
@@ -264,20 +280,20 @@ public final class LoadService extends HttpServlet {
             );
         }
         catch (final FIReConnectorUnknownUserException e) {
-            LOGGER.severe("El usuario " + subjectId + " no tiene certificados en el sistema: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+            LOGGER.severe(logF.f("El usuario " + subjectId + " no tiene certificados en el sistema: ") + e); //$NON-NLS-1$ //$NON-NLS-2$
             response.sendError(HttpCustomErrors.NO_USER.getErrorCode(),
                 "El usuario " + subjectId + " no tiene certificados en el sistema: " + e); //$NON-NLS-1$//$NON-NLS-2$
             return;
         }
         catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido conectar con el proveedor de firma en la nube: " + e, e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube: ") + e, e); //$NON-NLS-1$
         	AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
             response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
                     "No se ha podido conectar con el sistema: " + e); //$NON-NLS-1$
             return;
         }
         catch (final Exception e) {
-            LOGGER.log(Level.SEVERE, "Error en la carga de datos: " + e, e); //$NON-NLS-1$
+            LOGGER.log(Level.SEVERE, logF.f("Error en la carga de datos: ") + e, e); //$NON-NLS-1$
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error en la carga de datos: " + e); //$NON-NLS-1$
             return;
