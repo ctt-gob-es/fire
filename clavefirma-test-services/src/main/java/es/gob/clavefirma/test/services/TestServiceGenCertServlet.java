@@ -56,7 +56,7 @@ public final class TestServiceGenCertServlet extends HttpServlet {
 			return;
 		}
 
-		final String redirectOk = request.getParameter("redirectko"); //$NON-NLS-1$
+		final String redirectOk = request.getParameter("redirectok"); //$NON-NLS-1$
 		if (redirectOk == null || "".equals(redirectOk.trim())) { //$NON-NLS-1$
 			LOGGER.severe("No se ha proporcionado URL de retorno de exito"); //$NON-NLS-1$
 			response.sendRedirect(redirectKo);
