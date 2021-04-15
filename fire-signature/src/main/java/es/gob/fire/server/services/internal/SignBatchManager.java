@@ -115,12 +115,15 @@ public class SignBatchManager {
 		// se calcula en base a la URL actual
 		final String redirectUrlBase = getPublicContext(request);
 
+		// Obtenemos la referencia al usuario de la sesion
+        final String subjectRef = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF);
+
         // Devolvemos la pagina a la que debe dirigir al usuario
         final SignOperationResult result = new SignOperationResult(
         		transactionId,
         		redirectUrlBase + redirectUrl +
         			"&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$ //$NON-NLS-2$
-        			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$ //$NON-NLS-2$
+        			"&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
         LOGGER.info(logF.f("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$

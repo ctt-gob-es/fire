@@ -23,6 +23,8 @@ public class ServiceParams {
 	public static final String HTTP_PARAM_APPLICATION_ID = "appid"; //$NON-NLS-1$
 	/** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el ID del usuario. */
 	public static final String HTTP_PARAM_SUBJECT_ID = "subjectid"; //$NON-NLS-1$
+	/** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el ID del usuario. */
+	public static final String HTTP_PARAM_SUBJECT_REF = "subjectref"; //$NON-NLS-1$
 	/** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el ID de la transacci&oacute;n. */
     public static final String HTTP_PARAM_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el ID del documento. */
@@ -36,7 +38,7 @@ public class ServiceParams {
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP que indica si se configur&oacute; el origen del certificado desde la aplicaci&oacute;n cliente. */
     public static final String HTTP_PARAM_CERT_ORIGIN_FORCED = "origforced"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP indicando si se ha comprobado
-     * que el usuario no esta registrado en el servicio de cuestodia en la nube. */
+     * que el usuario no esta registrado en el servicio de custodia en la nube. */
     public static final String HTTP_PARAM_USER_NOT_REGISTERED = "reg"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con la operacion de firma (firma, cofirma,...) */
     public static final String HTTP_PARAM_CRYPTO_OPERATION = "cop"; //$NON-NLS-1$
@@ -44,13 +46,13 @@ public class ServiceParams {
     public static final String HTTP_PARAM_ALGORITHM = "algorithm"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el formato de firma. */
     public static final String HTTP_PARAM_FORMAT = "format"; //$NON-NLS-1$
-    /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con la configuracion adicional de la firma. */
+    /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con la configuraci&oacute;n adicional de la firma. */
     public static final String HTTP_PARAM_EXTRA_PARAM = "properties"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el documento de propiedades para la redirecci&oacute;n del usuario. */
     public static final String HTTP_PARAM_CONFIG = "config"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el formato al que actualizar la firma. */
     public static final String HTTP_PARAM_UPGRADE = "upgrade"; //$NON-NLS-1$
-    /** Par&aacute;metro usado en el env&iacute;o de datos HTTP para indicar si se pertite una actualizacion parcial de la firma. */
+    /** Par&aacute;metro usado en el env&iacute;o de datos HTTP para indicar si se pertite una actualizaci&oacute;n parcial de la firma. */
     public static final String HTTP_PARAM_ALLOW_PARTIAL_UPGRADE = "partialupgrade"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP que indica que se detenga la firma batch en caso de error. */
     public static final String HTTP_PARAM_BATCH_STOP_ON_ERROR = "stoponerror"; //$NON-NLS-1$
@@ -78,6 +80,8 @@ public class ServiceParams {
     public static final String SESSION_PARAM_APPLICATION_TITLE = "appname"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de usuario. */
     public static final String SESSION_PARAM_SUBJECT_ID = "subjectid"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con la referencia del usuario (utilizada en lugar del ID en las URL). */
+    public static final String SESSION_PARAM_SUBJECT_REF = "subjectref"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de transacci&oacute;n. */
     public static final String SESSION_PARAM_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID del tipo de operaci&oacute;n. */

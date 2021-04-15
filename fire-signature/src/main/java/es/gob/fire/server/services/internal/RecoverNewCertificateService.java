@@ -14,12 +14,17 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import es.gob.fire.alarms.Alarm;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
 
 
 /**
@@ -29,14 +34,14 @@ public class RecoverNewCertificateService extends HttpServlet {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 4541230456038147211L;
-	
+
 	private static final Logger LOGGER = Logger.getLogger(RecoverNewCertificateService.class.getName());
 
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String subjectId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		final String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
@@ -47,13 +52,13 @@ public class RecoverNewCertificateService extends HttpServlet {
 			return;
 		}
 
-		if (subjectId == null || subjectId.isEmpty()) {
+		if (subjectRef == null || subjectRef.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado el identificador de usuario")); //$NON-NLS-1$
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 
-		FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(), false, false);
+		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(), false, false);
 		if (session == null) {
 			LOGGER.severe(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
 			if (redirectErrorUrl != null) {
@@ -66,7 +71,7 @@ public class RecoverNewCertificateService extends HttpServlet {
 
 		// Si la operacion anterior no fue la solicitud de generacion de un certificado, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_GEN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
+			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
 		}
 
 		final String generateTrId = session.getString(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID);
@@ -87,14 +92,37 @@ public class RecoverNewCertificateService extends HttpServlet {
 	    			connConfig.getProperties()
 	    	);
 	    }
-	    catch (final Exception e) {
-	    	if (errorUrl != null) {
-	    		response.sendRedirect(errorUrl);
-	    	} else {
-	    		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-	    	}
-	    	return;
-	    }
+        catch (final FIReConnectorFactoryException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	if (errorUrl != null) {
+            	response.sendRedirect(errorUrl);
+            } else {
+            	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        	return;
+        }
+        catch (final FIReConnectorNetworkException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+        	AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+        	if (errorUrl != null) {
+            	response.sendRedirect(errorUrl);
+            } else {
+	            response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
+	                    "No se ha podido conectar con el sistema"); //$NON-NLS-1$
+            }
+	         return;
+        }
+        catch (final Exception e) {
+            LOGGER.log(Level.WARNING, logF.f("Error al recuperar el nuevo certificado"), e); //$NON-NLS-1$
+            if (errorUrl != null) {
+            	response.sendRedirect(errorUrl);
+            } else {
+            	response.sendError(
+            			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            			"No se ha podido obtener el certificado generado"); //$NON-NLS-1$
+            }
+            return;
+        }
 
 	    // Componemos el certificado y lo almacenamos en la sesion
 	    final CertificateFactory cf;

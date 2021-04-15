@@ -25,12 +25,12 @@
 	// Recogemos de la peticion todos los parametros y con el identificador de transaccion
 	// recuperamos la configuracion de la operacion y la referencia a los datos sobre los
 	// que operar
-	String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
 	String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	
-	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, true, false);
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
@@ -124,7 +124,7 @@
 	// Parametros para el enlace del boton Volver (solo si se selecciono la operacion desde la pagina anterior)
 	String buttonBackUrlParams = null;
 	if (!originForced) {
-		buttonBackUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
+		buttonBackUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
 		ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 		if (unregistered != null) {
 	buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
@@ -138,7 +138,7 @@
 	}
 
 	// Parametros para el enlace del boton Cancelar
-	String buttonCancelUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
+	String buttonCancelUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
 	ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 	if (errorUrl != null) {
 		buttonCancelUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
@@ -402,7 +402,7 @@
 				<form name="formSign" id="formSign" method="POST" action="miniappletSuccessService">
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_IS_BATCH_OPERATION %>" value="<%= isBatchOperation %>" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 					<input id="inputerrortype" type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_TYPE %>" />

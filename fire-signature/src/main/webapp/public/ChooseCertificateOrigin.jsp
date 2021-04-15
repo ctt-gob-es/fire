@@ -14,18 +14,18 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <%
-	String subjectId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
 	boolean userRegistered = !Boolean.parseBoolean(unregistered);
 	String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 	
-	if (subjectId == null || trId == null) {
+	if (subjectRef == null || trId == null) {
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return;
 	}
 
-	final FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, false);
+	final FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
 	if (fireSession == null) {
 		if (errorUrl != null) {
 			errorUrl = URLDecoder.decode(errorUrl, "utf-8"); //$NON-NLS-1$
@@ -68,7 +68,7 @@
 	}
 
 	final String cancelUrlParams = ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId + "&" + //$NON-NLS-1$ //$NON-NLS-2$ 
-			ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$
+			ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + //$NON-NLS-1$
 			(errorUrl != null ? "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 %>
 
@@ -151,7 +151,7 @@
 					</div>
 					<form method="POST" action="chooseCertificateOriginService" id="form<%= info.getName() %>" class="formProvider">
 						<div style="display: none"><!-- type="hidden" -->
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= subjectId %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= info.getName() %>" />

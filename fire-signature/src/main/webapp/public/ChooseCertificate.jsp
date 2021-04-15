@@ -17,17 +17,17 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	String subjectId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	
-	if (subjectId == null || trId == null) {
+	if (subjectRef == null || trId == null) {
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return;
 	}
 	
 	// Cargamos la sesion que deberia estar en memoria, pero permitimos su carga de otras fuentes
-	FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, true, false);
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
@@ -35,11 +35,8 @@
 	
 	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-		fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, true);
+		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true);
 	}
-	
-	// Identificador del usuario
-	String userId = fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 	
 	// Nombre de la aplicacion
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
@@ -59,7 +56,7 @@
 	boolean originForced = Boolean
 			.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 
-	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
+	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
 			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 	if (originForced) {
 		if (errorUrl != null) {
@@ -163,7 +160,7 @@
 						<div class="cert-box-right">
 							<form method="POST" action="presignService" id="certForm<%= i %>">
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 							<input  type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT %>" value="<%= cert %>">
 							<a class="button" title="Firmar con el certificado de <%= subject %>" onclick="document.getElementById('certForm<%= i %>').submit()" href="javascript:{}">

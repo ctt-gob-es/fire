@@ -14,10 +14,10 @@
 
 <%
 	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-	final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+	final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String providerName = null;
 	
-	FireSession fireSession = SessionCollector.getFireSession(trId, userId, session, false, false);
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
@@ -29,7 +29,7 @@
 	}
 	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-		fireSession = SessionCollector.getFireSession(trId, userId, session, false, true);
+		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true);
 	}
 
 	// Leemos los valores necesarios de la configuracion
@@ -39,7 +39,7 @@
 	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 	
 	final boolean originForced = Boolean.parseBoolean(
-	fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
+		fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 	
 	String errorUrl = null;
 	TransactionConfig connConfig =
@@ -53,23 +53,23 @@
 
 	// Se define el comportamiento del boton en base a si se forzo el origen
 	// (se muestra el boton Cancelar) o no (boton Volver) 
-	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-	ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
-	if (originForced) {
-		if (errorUrl != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
-	else {
+	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
+		+ "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$ //$NON-NLS-2$
+		
+	// Si no se forzo el uso de este proveedor concreto, agregamos los parametros necesario
+	// para permitir seleccionar otro
+	if (!originForced) {
 		if (unregistered != null) {
 			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (op != null) {
 			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		if (errorUrl != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-		}
+	}
+	
+	// Agregamos la URL de error si la hay
+	if (errorUrl != null) {
+		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// Preparamos el logo de la pantalla
@@ -137,9 +137,11 @@
 					<div class="error-box">
 						<form method="POST" action="requestCertificateService">
 		  					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-		  					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>">
-			  				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_APPLICATION_ID %>" value="<%= appId %>">
-							<input type="submit" class="button_firmar" value="Emitir certificado" />
+		  					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>">
+			  				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_APPLICATION_ID %>" value="<%= appId %>">
+			  				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED %>" value="<%= originForced %>">
+			  				<input type="submit" class="button_firmar" value="Emitir certificado" />
 						</form>
 					</div>
 				</div>
@@ -152,7 +154,7 @@
 						<div  id="certLocalcontainer" class="error-box hide">
 							<form id="certLocal" action="chooseCertificateOriginService" class="hide">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_ID %>" value="<%= userId %>">
+						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
 								<input type="submit" class="button_firmar" value="Usar certificado local" />

@@ -32,6 +32,7 @@ import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.afirma.signers.xml.Utils;
 import es.gob.afirma.triphase.signer.processors.AutoTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.CAdESASiCSTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor;
@@ -92,6 +93,12 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	static {
+
+		LOGGER.info("Estatico");
+
+		// Indicamos si se debe instalar el proveedor de firma XML de Apache
+		Utils.installXmlDSigProvider(ConfigManager.isAlternativeXmlDSigActive());
+
 		DOC_MANAGER = new FIReLocalDocumentManager();
 	}
 

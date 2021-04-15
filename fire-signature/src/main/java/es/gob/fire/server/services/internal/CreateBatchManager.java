@@ -146,7 +146,7 @@ public class CreateBatchManager {
 		final Properties upgradeConfig = UpgraderUtils.extractUpdaterProperties(connConfig.getProperties());
 
         // Creamos la transaccion
-        final FireSession session = SessionCollector.createFireSession(request.getSession());
+        final FireSession session = SessionCollector.createFireSession(subjectId, request.getSession());
         final String transactionId = session.getTransactionId();
 
         logF.setTransactionId(transactionId);
@@ -158,7 +158,6 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appName);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_TITLE, appTitle);
         session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig.cleanConfig());
-        session.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
         session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParams);
         session.setAttribute(ServiceParams.SESSION_PARAM_FILTERS, filters != null ? filters.toString() : null);

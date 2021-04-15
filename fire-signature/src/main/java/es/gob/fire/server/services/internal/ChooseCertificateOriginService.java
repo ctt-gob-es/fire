@@ -49,7 +49,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		// Obtenemos los datos proporcionados por parametro
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String subjectId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		final String origin = request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 		final boolean originForced = Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
 		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
@@ -79,14 +79,14 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 
 		// Comprobamos que se haya indicado el identificador de usuario
-		if (subjectId == null || subjectId.isEmpty()) {
-			LOGGER.warning(logF.f("No se ha proporcionado el identificador de usuario")); //$NON-NLS-1$
+		if (subjectRef == null || subjectRef.isEmpty()) {
+			LOGGER.warning(logF.f("No se ha proporcionado la referencia del usuario")); //$NON-NLS-1$
 			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
 
 		// Cargamos los datos de sesion
-		FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, false);
+		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, false);
 		if (session == null) {
 			LOGGER.severe(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
 			response.sendRedirect(redirectErrorUrl);
@@ -95,7 +95,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
+			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
 		}
 
 		// Terminamos de configurar el formateador para los logs
@@ -129,6 +129,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		// Si no se selecciono firma local, se firmara con un proveedor de firma en la nube
 		else {
 
+			final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 			final TransactionConfig connConfig =
 					(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 			if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {

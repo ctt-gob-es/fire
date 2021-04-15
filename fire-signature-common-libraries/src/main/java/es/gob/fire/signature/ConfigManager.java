@@ -357,7 +357,7 @@ public class ConfigManager {
 	/**
 	 * Recupera el texto para la composici&oacute;n de la clave HMac para la
 	 * verificaci&oacute;n de del PKCS#1 de la firma.
-	 * @return
+	 * @return Cadena a partir de la que componer la clave HMac.
 	 */
 	public static String getHMacKey() {
 		final String verificationKey = getProperty(PROP_LOCAL_VERIFICATION_KEY);

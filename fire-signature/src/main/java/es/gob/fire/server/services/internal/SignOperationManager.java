@@ -145,7 +145,7 @@ public class SignOperationManager {
 		final DocInfo docInfo = DocInfo.extractDocInfo(connConfig.getProperties());
 		DocInfo.addDocInfoToSign(extraParams, docInfo);
 
-		final FireSession session = SessionCollector.createFireSession(request.getSession());
+		final FireSession session = SessionCollector.createFireSession(subjectId, request.getSession());
 		final String transactionId = session.getTransactionId();
 
 		logF.setTransactionId(transactionId);
@@ -158,7 +158,6 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appName);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_TITLE, appTitle);
         session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig.cleanConfig());
-        session.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
         session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParams);
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
@@ -282,13 +281,16 @@ public class SignOperationManager {
         	redirectUrl = "ChooseCertificateOrigin.jsp"; //$NON-NLS-1$
         }
 
+        // Obtenemos la referencia al usuario de la sesion
+        final String subjectRef = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF);
+
         // Devolvemos al usuario el ID de la transaccion y la pagina a la que debe dirigir al usuario
         final SignOperationResult result = new SignOperationResult(
         		transactionId,
         		redirectUrlBase + redirectUrl +
         			(redirectUrl.indexOf('?') == -1 ? "?" : "&") + //$NON-NLS-1$ //$NON-NLS-2$
         			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$
-        			"&" + ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + subjectId + //$NON-NLS-1$ //$NON-NLS-2$
+        			"&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + //$NON-NLS-1$ //$NON-NLS-2$
         			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
 
         LOGGER.info(logF.f("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$

@@ -325,7 +325,7 @@ class ClientHandler extends AbstractCommonHandler {
 		// Creamos el elemento principal.
 		final OMElement mainElem = fac.createOMElement(sh.getElementQName().getLocalPart(), nsMain);
 
-		// Añadimos los atributos.
+		// Anadimos los atributos.
 		final NamedNodeMap attrs = sh.getAttributes();
 		for (int i = 0; i < attrs.getLength(); i++) {
 			OMAttribute attr = null;

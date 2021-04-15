@@ -35,7 +35,6 @@ import es.gob.afirma.core.misc.Base64;
  */
 public class MiniAppletSuccessService extends HttpServlet {
 
-
 	/** Serial Id. */
 	private static final long serialVersionUID = 2487217258327717181L;
 
@@ -56,17 +55,17 @@ public class MiniAppletSuccessService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de exito de firma con certificado local")); //$NON-NLS-1$
 
-		final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 
         String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-        if (redirectErrorUrl != null && !redirectErrorUrl.isEmpty()) {
+        if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado la URL de redireccion de error")); //$NON-NLS-1$
             SessionCollector.removeSession(transactionId);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), true, false);
+        FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), true, false);
         if (session == null) {
         	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);
@@ -76,7 +75,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 
 		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), false, true);
+			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
 		}
 
     	// Comprobamos que haya URL de redireccion
@@ -186,21 +185,36 @@ public class MiniAppletSuccessService extends HttpServlet {
 		}
 	}
 
-
-
 	/**
 	 * Posibles resultados que puede asignar el Cliente Afirma a las firmas
-	 * de un lote.
+	 * de un lote. Estos resultados se asignan a medida que avanza el proceso
+	 * de firma, por lo que el resultado va cambiando seg&uacute;n avanza.
 	 */
 	private enum AfirmaResult {
+		/** A&uacute;n no se ha iniciado el proceso de firma. */
 		NOT_STARTED,
+		/** Proceso finalizado correctamente (se ha generado y guardado la firma). */
 		DONE_AND_SAVED,
+		/** Se ha generado la firma pero todav&iacute;a est&aacute; pendiente de guardarse. */
 		DONE_BUT_NOT_SAVED_YET,
+		/** Se ha generado la firma y no se guardar&aacute;, posiblemente porque se abort&oacute; el proceso. */
 		DONE_BUT_SAVED_SKIPPED,
+		/** Se ha generado la firma, pero no se pudo guardar. */
 		DONE_BUT_ERROR_SAVING,
+		/** Fall&oacute; el proceso de firma durante la prefirma. */
 		ERROR_PRE,
+		/** Fall&oacute; el proceso de firma durante la postfirma. */
 		ERROR_POST,
+		/**
+		 * No se firmar&aacute;n los datos, posiblemente porque fall&oacute; una operaci&oacute;n de
+		 * firma anterior cuando no se admit&iacute;an errores o porque se abord&oacute; el proceso.
+		 */
 		SKIPPED,
+		/**
+		 * Despu&eacute;s de finalizar la firma y guardarla, se ha deshecho el guardado, posiblemente
+		 * porque fall&oacute; una firma posterior y se estableci&oacute; que se anulasen las firmas
+		 * anteriores.
+		 */
 		SAVE_ROLLBACKED;
 	}
 

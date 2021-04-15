@@ -34,6 +34,8 @@ enum OperationError {
 	CERTIFICATES_BLOCKED(103, "Los certificados del usuario estan bloqueados"), //$NON-NLS-1$
 	CERTIFICATES_WEAK_REGISTRY(104, "El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente"), //$NON-NLS-1$
 	CERTIFICATES_NO_CERTS(105, "El usuario no dispone de certificados de firma ni puede generarlos desde FIRe"), //$NON-NLS-1$
+	CERTIFICATES_DUPLICATED(106, "El usuario ya dispone de un certificado del tipo que se esta solicitando generar"), //$NON-NLS-1$
+	CERTIFICATES_GENERATION_SERVICE(107, "Error en la generacion de un nuevo certificado"), //$NON-NLS-1$
 
 	// Errores propios de la operacion de firma
 	SIGN_SERVICE(201, "Error en la obtencion de la firma de los datos"), //$NON-NLS-1$

@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.afirma.signers.xml.Utils;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.connector.FIReConnector;
@@ -54,6 +55,15 @@ public final class PreSignService extends HttpServlet {
 
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
+    static {
+
+    	LOGGER.info(" =========== INSTALAMOS EL PROVEEDOR 3");
+
+		// Indicamos si se debe instalar el proveedor de firma XML de Apache
+		//Utils.installXmlDSigProvider(ConfigManager.isAlternativeXmlDSigActive());
+    	Utils.installXmlDSigProvider(true);
+    }
+
     /** Carga los datos para su posterior firma en servidor.
      * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
     @Override
@@ -61,7 +71,7 @@ public final class PreSignService extends HttpServlet {
     		               final HttpServletResponse response) throws ServletException, IOException {
 
     	final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-    	final String userId  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+    	final String userRef  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
     	final String certB64        = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
     	String redirectErrorUrl 	= request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
@@ -97,14 +107,14 @@ public final class PreSignService extends HttpServlet {
             return;
         }
 
-        if (userId == null || userId.isEmpty()) {
-            LOGGER.warning(logF.f("No se ha proporcionado el identificador del firmante")); //$NON-NLS-1$
+        if (userRef == null || userRef.isEmpty()) {
+            LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
             SessionCollector.removeSession(transactionId);
             response.sendRedirect(redirectErrorUrl);
             return;
         }
 
-        FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), false, false);
+        FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), false, false);
         if (session == null) {
         	LOGGER.warning(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);
@@ -114,11 +124,12 @@ public final class PreSignService extends HttpServlet {
 
 		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), false, true);
+			session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), false, true);
 		}
 
     	// Leemos los valores necesarios de la configuracion
 		final String appId         	= session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+		final String userId         = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
         final String op          	= session.getString(ServiceParams.SESSION_PARAM_OPERATION);
         final String algorithm      = session.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
         final Properties extraParams = (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);

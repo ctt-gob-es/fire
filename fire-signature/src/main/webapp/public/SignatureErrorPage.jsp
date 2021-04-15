@@ -10,24 +10,21 @@
 <%@page import="java.util.Properties"%>
 
 <%
-	String subjectId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	
-	if (subjectId == null || trId == null) {
+	if (subjectRef == null || trId == null) {
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return;
 	}
 	
 	// Nos aseguramos de tener cargada la ultima version de la sesion
-	FireSession fireSession = SessionCollector.getFireSession(trId, subjectId, session, false, true);
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
 	}
-
-	// Identificador del usuario
-	String userId = fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 	
 	// Nombre de la aplicacion
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
@@ -45,10 +42,10 @@
 	// de este boton en base a si se forzo el origen (se muestra el boton Cancelar) o
 	// no (boton Volver) 
 	boolean originForced = Boolean.parseBoolean(
-	fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED)
+		fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED)
 	);
 	
-	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_ID + "=" + userId + "&" + //$NON-NLS-1$ //$NON-NLS-2$
+	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
 	ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
 	if (originForced) {
 		if (errorUrl != null) {

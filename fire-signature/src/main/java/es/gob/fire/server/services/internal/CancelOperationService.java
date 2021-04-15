@@ -35,13 +35,13 @@ public class CancelOperationService extends HttpServlet {
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
 		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(null, trId);
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
 
-		final FireSession session = SessionCollector.getFireSession(trId, userId, request.getSession(false), true, false);
+		final FireSession session = SessionCollector.getFireSessionOfuscated(trId, userRef, request.getSession(false), true, false);
     	if (session == null) {
     		LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", trId)); //$NON-NLS-1$
 

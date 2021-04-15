@@ -10,11 +10,15 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
@@ -43,13 +47,20 @@ public final class SessionCollector {
 
 	private static final Map<String, FireSession> sessions = new HashMap<>();
 
-	/** N&uacute;mero de veces que se puden guardar sesiones antes ejecutar el proceso para
-	 * eliminar aquellas que estan caducadas. */
+	/**
+	 * N&uacute;mero de veces que se puden guardar sesiones antes ejecutar el proceso para
+	 * eliminar aquellas que estan caducadas.
+	 */
 	private static final int MAX_USE_TO_CLEANING = 250;
+
+	/** Cadena de caracteres usados en la codificaci&oacute;n hexadecimal. */
+	private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray(); //$NON-NLS-1$
 
 	private static int uses = 0;
 
     private static SessionsDAO dao;
+
+    private static SecureRandom random;
 
     static {
 
@@ -73,34 +84,43 @@ public final class SessionCollector {
     	// Ejecutamos el proceso de borrado de sesiones caducadas (que no habra ninguna)
     	// y temporales
     	deleteExpiredSessions();
+
+    	// Inicializamos el generador de aleatorios
+    	random = new SecureRandom();
     }
 
 
     /**
      * Crea un nuevo objeto de sesi&oacute;n en el que almacenar los datos de
-     * una transacci&oacute;n.
+     * una transacci&oacute;n y almacena ya el identificador y la referencia
+     * del usuario.
+     * @param subjectId Identificador del usuario que crea la sesi&oacute;n.
      * @param httpSession Sesi&oacute;n web.
      * @return Datos de sesi&oacute;n.
      */
-    public static FireSession createFireSession(final HttpSession httpSession) {
+    public static FireSession createFireSession(final String subjectId, final HttpSession httpSession) {
 
     	final String transactionId = generateTransactionId();
+    	final String subjectRef = generateSubjectRef(transactionId, subjectId);
+
     	final FireSession fireSession = FireSession.newSession(transactionId, httpSession);
-
+    	fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
+    	fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_REF, subjectRef);
     	fireSession.updateExpirationTime(ConfigManager.getTempsTimeout());
-
-    	sessions.put(transactionId, fireSession);
+		sessions.put(transactionId, fireSession);
 
     	if (dao != null) {
 			dao.saveSession(fireSession, true);
 		}
 
-    	LOGGER.fine("Se crea la transaccion " + transactionId); //$NON-NLS-1$
+    	if (LOGGER.isLoggable(Level.FINE)) {
+    		LOGGER.fine(LogTransactionFormatter.format(transactionId, "Se crea la transaccion " + transactionId)); //$NON-NLS-1$
+    	}
 
     	return fireSession;
     }
 
-    /**
+	/**
 	 * Recupera una sesi&oacute;n activa con el identificador indicado de un usuario concreto.<br>
 	 * La sesi&oacute;n se carga de las distintas fuentes disponibles, a menos que se indique
 	 * que s&oacute;lo se obtenga si ya est&aacute; cargada en memoria. Este es un mecanismo
@@ -129,7 +149,74 @@ public final class SessionCollector {
 	 * @return Datos de sesi&oacute;n con la transacci&oacute;n deseada o {@code null} si no se encontr&oacute;
 	 * o establa caducada.
 	 */
-	public static FireSession getFireSession(final String trId, final String userId, final HttpSession session, final boolean onlyLoaded, final boolean forceLoad) {
+    public static FireSession getFireSession(final String trId, final String userId, final HttpSession session, final boolean onlyLoaded, final boolean forceLoad) {
+    	return getSession(trId, userId, session, onlyLoaded, forceLoad, false);
+    }
+
+    /**
+	 * Recupera una sesi&oacute;n activa con el identificador indicado de un usuario concreto,
+	 * del que, en lugar de su identificador, se pasa un c&oacute;digo asociado al mismo.<br>
+	 * La sesi&oacute;n se carga de las distintas fuentes disponibles, a menos que se indique
+	 * que s&oacute;lo se obtenga si ya est&aacute; cargada en memoria. Este es un mecanismo
+	 * de seguridad con el que poder evitar que un usuario logueado empiece a reclamar transacciones
+	 * de otros usuarios.<br>
+	 * Por orden de prioridad, los datos de sesi&oacute;n se recuperan de:
+	 * <ol>
+	 * <li>La propia sesi&oacute;n HTTP.</li>
+	 * <li>La colecci&oacute;n de sesiones en memoria.</li>
+	 * <li>El gestor de sesiones entre m&uacute;ltiples nodos.</li>
+	 * </ol>
+	 * Mediante el par&aacute;metro {@code onlyLoaded} se puede indicar que s&oacute;lo se recupere
+	 * la sesi&oacute;n si ya estaba cargada. Esto es &uacute;til cuando sabemos que la sesi&oacute;n
+	 * ya est&aacute; cargada (posiblemente, porque se recuper&oacute; anteriormente dentro de la
+	 * misma operaci&oacute;n) y no queremos abrir la puerta al resto de comprobaciones por seguridad.
+	 * Mediante el par&aacute;metro {@code forceLoad} se puede forzar a que se carguen los datos de
+	 * sesi&oacute;n del gestor de sesiones si se defini&oacute; este. Esto se puede utilizar para
+	 * asegurarnos de que disponemos de los &uacute;ltimos datos de la transacci&oacute;n.
+	 * Si tanto el par&aacute;metro {@code onlyLoaded} como {@code forceLoad} est&aacute;n activos,
+	 * no se podr&aacute; recuperar la sesi&oacute;n.
+	 * @param trId Identificador de transacci&oacute;n a recuperar.
+	 * @param userRef C&oacute;digo asociado al usuario propietario de la transacci&oacute;n.
+	 * @param session Sesi&oacute; actual.
+	 * @param onlyLoaded Indica si solo se debe recuperar la transacci&oacute;n si ya estaba cargado en memoria.
+	 * @param forceLoad Fuerza que, en caso de haberse definido un gestor de sesiones, se recargue la sesi&oacute;n de &eacute;l.
+	 * @return Datos de sesi&oacute;n con la transacci&oacute;n deseada o {@code null} si no se encontr&oacute;
+	 * o establa caducada.
+	 */
+    public static FireSession getFireSessionOfuscated(final String trId, final String userRef, final HttpSession session, final boolean onlyLoaded, final boolean forceLoad) {
+    	return getSession(trId, userRef, session, onlyLoaded, forceLoad, true);
+    }
+
+    /**
+	 * Recupera una sesi&oacute;n activa con el identificador indicado de un usuario concreto.<br>
+	 * La sesi&oacute;n se carga de las distintas fuentes disponibles, a menos que se indique
+	 * que s&oacute;lo se obtenga si ya est&aacute; cargada en memoria. Este es un mecanismo
+	 * de seguridad con el que poder evitar que un usuario logueado empiece a reclamar transacciones
+	 * de otros usuarios.<br>
+	 * Por orden de prioridad, los datos de sesi&oacute;n se recuperan de:
+	 * <ol>
+	 * <li>La propia sesi&oacute;n HTTP.</li>
+	 * <li>La colecci&oacute;n de sesiones en memoria.</li>
+	 * <li>El gestor de sesiones entre m&uacute;ltiples nodos.</li>
+	 * </ol>
+	 * Mediante el par&aacute;metro {@code onlyLoaded} se puede indicar que s&oacute;lo se recupere
+	 * la sesi&oacute;n si ya estaba cargada. Esto es &uacute;til cuando sabemos que la sesi&oacute;n
+	 * ya est&aacute; cargada (posiblemente, porque se recuper&oacute; anteriormente dentro de la
+	 * misma operaci&oacute;n) y no queremos abrir la puerta al resto de comprobaciones por seguridad.
+	 * Mediante el par&aacute;metro {@code forceLoad} se puede forzar a que se carguen los datos de
+	 * sesi&oacute;n del gestor de sesiones si se defini&oacute; este. Esto se puede utilizar para
+	 * asegurarnos de que disponemos de los &uacute;ltimos datos de la transacci&oacute;n.
+	 * Si tanto el par&aacute;metro {@code onlyLoaded} como {@code forceLoad} est&aacute;n activos,
+	 * no se podr&aacute; recuperar la sesi&oacute;n.
+	 * @param trId Identificador de transacci&oacute;n a recuperar.
+	 * @param userRef Identificador o c&oacute;digo asociado al usuario propietario de la transacci&oacute;n.
+	 * @param session Sesi&oacute; actual.
+	 * @param onlyLoaded Indica si solo se debe recuperar la transacci&oacute;n si ya estaba cargado en memoria.
+	 * @param forceLoad Fuerza que, en caso de haberse definido un gestor de sesiones, se recargue la sesi&oacute;n de &eacute;l.
+	 * @return Datos de sesi&oacute;n con la transacci&oacute;n deseada o {@code null} si no se encontr&oacute;
+	 * o establa caducada.
+	 */
+	private static FireSession getSession(final String trId, final String userRef, final HttpSession session, final boolean onlyLoaded, final boolean forceLoad, final boolean ofuscated) {
 
 		if (trId == null) {
 			return null;
@@ -146,7 +233,9 @@ public final class SessionCollector {
 			fireSession = findSessionFromCurrentSession(trId, session);
 
 			if (fireSession != null) {
-				LOGGER.fine("Sesion ya cargada"); //$NON-NLS-1$
+				if (LOGGER.isLoggable(Level.FINE)) {
+			    	LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion ya cargada")); //$NON-NLS-1$
+				}
 			}
 		}
 
@@ -159,7 +248,9 @@ public final class SessionCollector {
 					fireSession.copySessionAttributes(session);
 				}
 				if (fireSession != null) {
-					LOGGER.fine("Sesion cargada de memoria"); //$NON-NLS-1$
+					if (LOGGER.isLoggable(Level.FINE)) {
+						LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion cargada de memoria")); //$NON-NLS-1$
+					}
 				}
 			}
 
@@ -170,28 +261,37 @@ public final class SessionCollector {
 					fireSession.copySessionAttributes(session);
 				}
 				if (fireSession != null) {
-					LOGGER.fine("Sesion cargada de almacenamiento persistente"); //$NON-NLS-1$
+					if (LOGGER.isLoggable(Level.FINE)) {
+				    	LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion cargada de almacenamiento persistente")); //$NON-NLS-1$
+					}
 				}
 			}
 		}
 
 		if (onlyLoaded && fireSession == null) {
-			LOGGER.fine("Se esperaba que la sesion estuviese en memoria y no fue asi"); //$NON-NLS-1$
+			if (LOGGER.isLoggable(Level.FINE)) {
+		    	LOGGER.fine(LogTransactionFormatter.format(trId, "Se esperaba que la sesion estuviese en memoria y no fue asi")); //$NON-NLS-1$
+			}
 		}
 
 		// Comprobamos que los datos de la sesion se correspondan con los del usuario indicado
 		if (fireSession != null) {
-			if (userId != null) {
-				if (!userId.equals(fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID))) {
-					LOGGER.warning(
-							String.format(
-									"El usuario %s esta solicitando una transaccion que no le pertenece. Quizas alguien este intentando suplantar su identidad", //$NON-NLS-1$
-									LogUtils.cleanText(userId)));
+			if (userRef != null) {
+				final String savedRef = ofuscated
+						? fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF)
+						: fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
+
+				if (!userRef.equals(savedRef)) {
+					LOGGER.warning(LogTransactionFormatter.format(
+							trId,
+							"Se esta intentando reclamar la transaccion para un usuario al que no le pertenece. Quizas alguien este intentando suplantar su identidad de " //$NON-NLS-1$
+									+ LogUtils.cleanText(userRef)));
 					return null;
 				}
 			}
 			else if (dao != null) {
-				LOGGER.warning("Es obligatorio indicar un identificador de usuario cuando se configura un gestor de sesiones"); //$NON-NLS-1$
+				LOGGER.warning(LogTransactionFormatter
+						.format(trId, "Es obligatorio indicar un identificador de usuario cuando se configura un gestor de sesiones")); //$NON-NLS-1$
 				return null;
 			}
 		}
@@ -295,7 +395,7 @@ public final class SessionCollector {
     	try {
 			TempDocumentsManager.deleteDocument(id);
 		} catch (final IOException e) {
-			LOGGER.warning(String.format("No se pudo eliminar el documento de la transaccion %1s: ", id) + e); //$NON-NLS-1$
+			LOGGER.warning(LogTransactionFormatter.format(id, "No se pudo eliminar el documento de la transaccion: " + e)); //$NON-NLS-1$
 		}
 
     	// Eliminamos la sesion del espacio compartido con el resto de nodos
@@ -303,7 +403,9 @@ public final class SessionCollector {
 			dao.deleteSession(id);
 		}
 
-		LOGGER.fine("Se elimina la transaccion " + LogUtils.cleanText(id)); //$NON-NLS-1$
+		if (LOGGER.isLoggable(Level.FINE)) {
+	    	LOGGER.fine(LogTransactionFormatter.format(id, "Se elimina la transaccion " + LogUtils.cleanText(id))); //$NON-NLS-1$
+		}
     }
 
     /**
@@ -320,9 +422,8 @@ public final class SessionCollector {
    		try {
 			TempDocumentsManager.deleteDocument(fireSession.getTransactionId());
 		} catch (final IOException e) {
-			LOGGER.warning(String.format(
-					"No se pudo eliminar el documento de la transaccion %1s: ", //$NON-NLS-1$
-					fireSession.getTransactionId()) + e);
+			LOGGER.warning(LogTransactionFormatter.format(
+					null, fireSession.getTransactionId(), "No se pudo eliminar el documento de la transaccion: " + e)); //$NON-NLS-1$
 		}
 
    		// Eliminamos la sesion de la memoria
@@ -335,7 +436,9 @@ public final class SessionCollector {
 
 		fireSession.invalidate();
 
-		LOGGER.fine("Se elimina la transaccion " + fireSession.getTransactionId()); //$NON-NLS-1$
+		if (LOGGER.isLoggable(Level.FINE)) {
+	    	LOGGER.fine(LogTransactionFormatter.format(fireSession.getTransactionId(), "Se elimina la transaccion")); //$NON-NLS-1$
+		}
     }
 
     /**
@@ -353,9 +456,9 @@ public final class SessionCollector {
     				try {
 						TempDocumentsManager.deleteDocument(batchResult.getDocumentReference(docId));
 					} catch (final IOException e) {
-						LOGGER.warning(String.format(
-								"No se pudo eliminar el documento %1s de la transaccion %2s: ", //$NON-NLS-1$
-								docId, session.getTransactionId()) + e);
+						LOGGER.warning(LogTransactionFormatter.format(
+								session.getTransactionId(),
+								"No se pudo eliminar de la transaccion el documento " + docId + ": " + e)); //$NON-NLS-1$ //$NON-NLS-2$
 					}
     			}
     		}
@@ -379,9 +482,9 @@ public final class SessionCollector {
     	try {
 			TempDocumentsManager.deleteDocument(fireSession.getTransactionId());
 		} catch (final IOException e) {
-			LOGGER.warning(String.format(
-					"No se pudo eliminar el documento de la transaccion %1s: ", //$NON-NLS-1$
-					fireSession.getTransactionId()) + e);
+			LOGGER.warning(LogTransactionFormatter.format(
+					fireSession.getTransactionId(),
+					"No se pudo eliminar el documento de la transaccion: " + e)); //$NON-NLS-1$
 		}
 
     	// Eliminamos todos los datos de sesion menos los que indican errores
@@ -417,6 +520,56 @@ public final class SessionCollector {
 
 		return transactionId;
 	}
+
+
+	/**
+	 * Genera un c&oacute;digo de referencia al usuario. Este codigo se utilizar&aacute;
+	 * para referirnos al usuario sin necesidad de hacer uso de su identificador. El
+	 * c&oacute;digo sirve para una transacci&oacute;n concreta.
+	 * @param transactionId Identificador de transacci&oacute;n.
+	 * @param subjectId Identificador de usuario.
+	 * @return C&oacute;digo de referncia del usuario para esta transacci&oacute;n.
+	 */
+    private static String generateSubjectRef(final String transactionId, final String subjectId) {
+
+    	MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("MD2"); //$NON-NLS-1$
+		} catch (final NoSuchAlgorithmException e) {
+			LOGGER.warning("No se puede iniciar el generador de hashes para la creacion de referencias de usuario: " + e); //$NON-NLS-1$
+			return bytesToHex(subjectId.getBytes());
+		}
+    	md.update(transactionId.getBytes());
+    	md.update(generateRandomBytes());
+    	md.update(subjectId.getBytes());
+
+    	return bytesToHex(md.digest());
+	}
+
+    /**
+     * Genera un array con 8 bytes aleatorios.
+     * @return
+     */
+    private static byte[] generateRandomBytes() {
+    	final byte[] randomBytes = new byte[16];
+    	random.nextBytes(randomBytes);
+    	return randomBytes;
+    }
+
+    /**
+     * Codifica un binario a hexadecimal.
+     * @param bytes Binario a codificar.
+     * @return Cadena hexadecimal.
+     */
+    private static String bytesToHex(final byte[] bytes) {
+        final char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            final int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
 
 	/**
 	 * Indica si existe una transacci&oacute;n con un identificador concreto.
