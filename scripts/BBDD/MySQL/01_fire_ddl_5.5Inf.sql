@@ -28,7 +28,7 @@ CREATE TABLE `tb_aplicaciones` (
 CREATE TABLE `tb_usuarios` (
   `id_usuario` int(11) NOT NULL AUTO_INCREMENT COMMENT 'auto-numérico identificativo único',
   `nombre_usuario` varchar(30) NOT NULL COMMENT 'Nombre con el que se identifica en la aplicación',
-  `clave` varchar(45) DEFAULT NULL COMMENT 'clave condificada con SHA256, con la que se registra el usuario',
+  `clave` varchar(2000) DEFAULT NULL COMMENT 'clave condificada con SHA256, con la que se registra el usuario',
   `nombre` varchar(45) NOT NULL COMMENT 'Nombre completo del usuario',
   `apellidos` varchar(120) NOT NULL COMMENT 'Apellidos del usuario',
   `correo_elec` varchar(45) DEFAULT NULL COMMENT 'Correo electrónico',

@@ -33,8 +33,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.persistence.configuration.model.entity.User;
-import es.gob.fire.persistence.configuration.model.repository.UserRepository;
+import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.repository.UserRepository;
 
 /**
  * <p>Service for retrieving the user's authentication and authorization information from a registered user.</p>
@@ -64,14 +64,14 @@ public class UserDetailsServiceImpl implements UserDetailsService  {
      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
      */
     @Override
-    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException
+    public UserDetails loadUserByUsername(final String userName) throws UsernameNotFoundException
     {
-    	final User curruser = this.repository.findByUsername(username);
+    	final User curruser = this.repository.findByUserName(userName);
 
         UserDetails user = null;
 
         if (curruser != null) {
-        	user = new org.springframework.security.core.userdetails.User(username, curruser.getPassword(), true,
+        	user = new org.springframework.security.core.userdetails.User(userName, curruser.getPassword(), true,
         	                                                      		true, true, true, AuthorityUtils.createAuthorityList("USER"));
         } else {
 

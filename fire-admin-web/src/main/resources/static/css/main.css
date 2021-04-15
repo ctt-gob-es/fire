@@ -126,6 +126,16 @@ button:hover {
 	cursor: pointer;
 }
 
+a {
+	outline: none !important;
+	border: none;
+	background: transparent;
+}
+
+a:hover {
+	cursor: pointer;
+}
+
 iframe {
 	border: none !important;
 }
@@ -528,6 +538,8 @@ iframe {
 	width: 100%;
 	width:300%;
 	height:300%;
+	top: 9px;
+	position: relative;
 	
 }
 
@@ -543,4 +555,16 @@ iframe {
   display: flex;
   justify-content:center;
   flex-flow: column wrap;
+}
+
+.lg-900{
+	width: 900px!important;
+  margin: auto;
+}
+
+.btn_align {
+   
+    justify-content: center;
+    padding: 1rem;
+    margin-top: 20px;
 }

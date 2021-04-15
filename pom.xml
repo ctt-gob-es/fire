@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
@@ -10,10 +9,17 @@
 	<name>fire-artifacts</name>
 	<description>Proyectos que componen FIRe</description>
 	
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.6.RELEASE</version>
+	</parent>
+	
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-		
-		<jdk.version>1.7</jdk.version>
+
+		<!-- <jdk.version>1.7</jdk.version> -->
+		<jdk.version>1.8</jdk.version>
 		
 		<fire.version>2.4-SNAPSHOT</fire.version>
 		<clienteafirma.version>1.7</clienteafirma.version>
@@ -21,11 +27,11 @@
 		<log-consumer.version>1.2</log-consumer.version>
 		
 		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
-		<javax.json-api.version>1.0</javax.json-api.version>
-		<org.glassfish-javax.json.version>1.0.4</org.glassfish-javax.json.version>
-		<junit.version>4.8.2</junit.version>
-		
+		<javax.json-api.version>1.1.3</javax.json-api.version>
+		<org.glassfish-javax.json.version>1.1.3</org.glassfish-javax.json.version>
+		<junit.version>4.13.1</junit.version>
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+		<hibernate.version>5.2.13.Final</hibernate.version>
 	</properties>
 
 	<url>https://administracionelectronica.gob.es/ctt/fire</url>
@@ -67,6 +73,11 @@
 			</activation>
 	
 			<modules>
+				<module>fire-admin-persistence</module>
+				<module>fire-admin-core</module>
+				<module>fire-admin-web</module>
+				<module>fire-admin-i18n</module>
+				<module>fire-admin-commons-util</module>
 				<module>clavefirma-test-services</module>
 				<module>fire-admin-jsp</module>
 				<module>fire-client-java</module>
@@ -100,149 +111,273 @@
 	</profiles>
 
 	<dependencyManagement>
-	  <dependencies>
-	  
-	  	<dependency>
-		  <groupId>es.gob.afirma</groupId>
-		  <artifactId>afirma-core</artifactId>
-		  <version>${clienteafirma.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.afirma</groupId>
-		  <artifactId>afirma-server-triphase-signer-core</artifactId>
-		  <version>${clienteafirma.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-client</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-common-libraries</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-connector</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-connector-clavefirma</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-connector-clavefirma-test</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-document</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-signature-decipher</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-alarms</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-alarms-graylog</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-upgrade</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-upgrade-afirma</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-statistics-common</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-		
-		<dependency>
-		  <groupId>es.gob.fire</groupId>
-		  <artifactId>fire-log-handlers</artifactId>
-		  <version>${fire.version}</version>
-		</dependency>
-	  
-		<dependency>
-			<groupId>es.fnmt.fire</groupId>
-			<artifactId>fnmt-fire-connector</artifactId>
-			<version>${fnmt.version}</version>
-		</dependency>
-	  
-	  	<dependency>
-			<groupId>es.gob.logconsumer</groupId>
-  			<artifactId>log-consumer-api</artifactId>
-  			<version>${log-consumer.version}</version>
-  		</dependency>
-	  
-		<dependency>
-			<groupId>es.gob.logconsumer</groupId>
-  			<artifactId>log-consumer-service</artifactId>
-  			<version>${log-consumer.version}</version>
-  		</dependency>
-		
-		<dependency>
-			<groupId>es.gob.logconsumer</groupId>
-  			<artifactId>log-consumer-register</artifactId>
-  			<version>${log-consumer.version}</version>
-  		</dependency>
-	  
-	  	<dependency>
-			<groupId>biz.paluch.logging</groupId>
-			<artifactId>logstash-gelf</artifactId>
-			<version>${biz.paluch.logging.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<version>${javax.json-api.version}</version>
-		</dependency>
+		<dependencies>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-persistence</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-core</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-web</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-i18n</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-admin-commons-util</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.afirma</groupId>
+				<artifactId>afirma-core</artifactId>
+				<version>${clienteafirma.version}</version>
+			</dependency>
 
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>${org.glassfish-javax.json.version}</version>
-		</dependency>
+			<dependency>
+				<groupId>es.gob.afirma</groupId>
+				<artifactId>afirma-server-triphase-signer-core</artifactId>
+				<version>${clienteafirma.version}</version>
+			</dependency>
 
-		<dependency>
-		  <groupId>junit</groupId>
-		  <artifactId>junit</artifactId>
-		  <version>${junit.version}</version>
-		  <scope>test</scope>
-		</dependency>
-	  </dependencies>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-client</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-common-libraries</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-connector</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-connector-clavefirma</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-connector-clavefirma-test</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-document</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-decipher</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-upgrade</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-upgrade-afirma</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-alarms</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			
+			<!-- Hibernate 5 -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-infinispan</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<!-- Core -->
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-statistics-common</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-log-handlers</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.fnmt.fire</groupId>
+				<artifactId>fnmt-fire-connector</artifactId>
+				<version>${fnmt.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.logconsumer</groupId>
+				<artifactId>log-consumer-api</artifactId>
+				<version>${log-consumer.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.logconsumer</groupId>
+				<artifactId>log-consumer-service</artifactId>
+				<version>${log-consumer.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>es.gob.logconsumer</groupId>
+				<artifactId>log-consumer-register</artifactId>
+				<version>${log-consumer.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.json</groupId>
+				<artifactId>javax.json-api</artifactId>
+				<version>${javax.json-api.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.json</artifactId>
+				<version>${org.glassfish-javax.json.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>biz.paluch.logging</groupId>
+				<artifactId>logstash-gelf</artifactId>
+				<version>${biz.paluch.logging.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<version>2.5</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>2.0.1.Final</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.16</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.2</version>
+			</dependency>
+			<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>1.4</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.14</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk16</artifactId>
+				<version>1.46</version>
+			</dependency>
+			
+			<!-- Jackson -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.jaxrs</groupId>
+				<artifactId>jackson-jaxrs-json-provider</artifactId>
+				<version>2.9.4</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>2.9.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse</groupId>
+				<artifactId>yasson</artifactId>
+				<version>1.0.2</version>
+			</dependency>
+
+			<!-- Rest -->
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-client</artifactId>
+				<version>3.5.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxrs</artifactId>
+				<version>3.5.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jackson2-provider</artifactId>
+				<version>3.5.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.spec.javax.ws.rs</groupId>
+				<artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+				<version>1.0.0.Final</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.7.30</version>
+			</dependency> 
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
 	</dependencyManagement>
-	
+
+
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -250,6 +385,39 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven-compiler-plugin.version}</version>
+				</plugin>
+				
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.2,)
+										</versionRange>
+										<goals>
+											<goal>copy</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore/>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -280,7 +448,129 @@
 					<tagNameFormat>${project.name}_@{project.version}</tagNameFormat>
 				</configuration>
 			</plugin>
+		
+	
+	<!-- Definición de los plugins genéricos -->
+		
+			<!-- Plugin para generar la fecha de empaquetado que se incluirá en el 
+				manifest. -->
+<!--
+			<plugin>
+				<groupId>com.keyboardsamurais.maven</groupId>
+				<artifactId>maven-timestamp-plugin</artifactId>
+				<version>1.0</version>
+				<configuration>
+					<propertyName>timestamp</propertyName>
+					<timestampPattern>dd/MM/yyyy HH:mm</timestampPattern>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>clean</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+-->
+			<!-- Plugin para generar las fuentes -->
+<!--			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<skipSource>${plugin.source.skip}</skipSource>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+-->
+			<!-- Plugin para generar el javadoc -->
+<!--
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<skip>${plugin.javadoc.skip}</skip>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.6</version>
+				<configuration>
+					<locales>es,en</locales>
+				</configuration>
+			</plugin>
+-->
 		</plugins>
 	</build>
+	
+	<!-- CONFIGURACIÓN REPOSITORIOS MAVEN: JBOSS Y MAVEN CENTRAL -->
+	<repositories>
+		
+		<repository>
+			<id>Maven-Central-Repository</id>
+			<name>Maven Central Repository</name>
+			<url>http://central.maven.org/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</repository>
+		
+	<!--	<repository>
+			<id>jboss-public-repository-group</id>
+			<name>JBoss Public Maven Repository Group</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</repository>-->
+		
+	</repositories>
+	<!-- <pluginRepositories>
+		<pluginRepository>
+			<id>jboss-public-repository-group</id>
+			<name>JBoss Public Maven Repository Group</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories> -->
 
+  <modules>
+    <module>fire-admin-commons-util</module>
+  </modules>
 </project>

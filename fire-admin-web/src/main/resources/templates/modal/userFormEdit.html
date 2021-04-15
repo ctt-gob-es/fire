@@ -8,8 +8,8 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<form name="altEditor-form" role="form" id="userFormEdit" th:object="${userformEdit}" th:action="@{/menueditsave}" method="post">
-					<input type='hidden' class='primarykey' id="idUserMonitorizaEdit" th:field="*{idUserMonitorizaEdit}">
+				<form name="altEditor-form" role="form" id="userFormEdit" th:object="${userformedit}" th:action="@{/saveuseredit}" method="post">
+					<input type='hidden' class='primarykey' id="idUserFireEdit" th:field="*{idUserFireEdit}">
 					
 					<div class="form-group">
 						
@@ -19,7 +19,7 @@
 								    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,15}" />
+							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{3,15}" />
 							<div id="invalid-name" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -33,7 +33,7 @@
 								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" class="form-control" required pattern=".{3,30}"/>
+							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{3,30}"/>
 							<div id="invalid-surnames" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -47,10 +47,20 @@
 								    var messageLogin = /*[[#{form.user.login.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageLogin);" type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" class="form-control" required pattern=".{5,30}"/>
+							<input onblur="validate(this,messageLogin);" type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{5,30}"/>
 							<div id="invalid-login" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group">
+			
+						<label for="idRol" th:text="#{form.user.rol}"></label>
+							<select id="rolId" name="rolId" class="form-control" th:field="*{rolId}">
+								<option selected="selected" value="" th:disabled="disabled"
+										th:text="#{form.user.Editrol.pattern}"></option>
+									<option th:each="rol: ${listRoles}" th:value="${rol.rolId}" th:text="${rol.rolName}" th:selected="${userformedit.rolId == rol.rolId}"></option>
+							</select>
 					</div>
 					
 					<div class="form-group">
@@ -61,11 +71,49 @@
 								    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
 								/*]]>*/
 							</script>
-							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" style="overflow:hidden" class="form-control" required/>
+							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" autocomplete="nope" style="overflow:hidden" class="form-control" required/>
 							<div id="invalid-email" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
 					</div>
+					
+						<div class="form-group">
+						
+							<label for="telfEdit" class="col-form-label" th:text="#{form.user.telf}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input onblur="validate(this,messageName);" type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="nope" style="overflow:hidden" class="form-control"  />
+							<div id="invalid-telf" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					
+					<!-- <div class="form-group-modal">
+						
+							<label for="rolEdit" class="col-form-label" th:text="#{form.user.rol}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messageRol = /*[[#{form.user.surnames.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<select
+								id="query" name="query" class="form-control">
+								<option selected="selected" value=""
+									th:text="#{form.user.Editrol.pattern}"></option>
+								<option selected="selected" value="" th:disabled="disabled"
+							th:text="#{form.user.Editrol.pattern}"></option>
+						<option  th:value="'1'" th:text="#{form.user.rol.administrador}"></option>
+   						<option  th:value="'2'" th:text="#{form.user.rol.responsable}"></option>
+   						<option  th:value="'3'" th:text="#{form.user.rol.contacto}"></option>
+							</select>
+							<div id="invalid-rol" class="invalid-feedback" ></div>
+						
+						<div style="clear:both;"/>
+					</div> -->
 				</form>
 			</div>
 			<div class="modal-footer">
@@ -77,11 +125,37 @@
 </div>
 
 <script th:inline="javascript">
+$(document).ready(function() {
+
+	$('#rolId').change(function() {
+	       
+		hide();
+		
+		var rolSelected = $("#rolId option:selected").text();
+			
+		if (rolSelected != 'Administrador') {
+					
+			$('#passwordEdit').prop("disabled", true);
+			$('#passwordEdit').val('');
+			$('#confirmPasswordEdit').prop("disabled", true);
+			$('#confirmPasswordEdit').val('');
+					
+		} else {
+			$('#passwordEdit').prop("disabled", false);
+			$('#confirmPasswordEdit').prop("disabled", false);
+		}
+	           
+	}); 
+	
+});
+
+
 	$( "#editBtnModal" ).click(function( event ) {
 		  event.preventDefault();
 			
 		  var formData = JSON.stringify($("#userFormEdit").serializeJSON());
-		  var url = /*[[@{/menueditsave}]]*/;
+		  var tbl = $('#userTable').DataTable();
+		  var url = /*[[@{/saveuseredit}]]*/;
 		  
 		  loading();
 		  
@@ -97,7 +171,7 @@
 				}
 				
 				$('#modalEdit').modal('hide');
-				$('#modalEdit').remove();
+				tbl.row.add($(data.data)).draw(false);
 				
 			  },
 			  error:function(){
@@ -110,4 +184,6 @@
 			  contentType : "application/json"
 		});
 	});
+	
+	
 </script>

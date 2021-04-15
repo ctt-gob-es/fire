@@ -835,6 +835,11 @@ pre {
     flex: 0 0 100%;
     max-width: 100%; }
 
+  .col-md-statistics-month {
+	margin-left: 50px; 
+	flex: 0 0 7.6333333333%; 
+	max-width: 7.6333333333%; }
+  
   .order-md-first {
     order: -1; }
 

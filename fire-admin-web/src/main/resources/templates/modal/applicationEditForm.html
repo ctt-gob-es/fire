@@ -1,0 +1,291 @@
+<div class="modal" tabindex="-1" role="dialog" id="appEditModal">
+	<div class="modal-dialog-centered">
+		<div class="modal-content lg-900">
+			<div class="modal-header">
+				<div id="titleAdd">
+					<h4 class="modal-title" th:text="#{form.application.add.title}">
+				</div>
+				<button type="button" class="close"
+					onclick="closeModal('appEditModal')" aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form name="appEditForm" role="form" id="appEditForm"
+					th:object="${appEditForm}" action="@{/saveeditapp}" method="post" enctype="multipart/form-data">
+										
+					<input type="hidden" id="appId" th:field="*{appId}"/>
+					<input type="hidden" id="fechaAltaApp" th:field="*{fechaAltaApp}"/>
+					<input type="hidden" id="certPrincipal" th:value="${certPrincipal}" />
+					<input type="hidden" id="certBackup" th:value="${certBackup}"/>					
+					
+					<div id="resultAddApp" data-dismiss="alert"></div>		
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label for="habilitado" th:text="#{form.application.enabled}"></label>
+							<input type="checkbox" id="habilitado" th:field="*{habilitado}"/>
+						</div>
+					</div>
+								
+					<div class="form-group">
+						<label for="appName" class="col-form-label"
+							th:text="#{form.application.name}"></label>
+						<input type="text" id="appName" th:field="*{appName}" class="form-control" />
+						<span id="appName_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 		
+						<div style="clear: both;" />
+					</div>
+					<div class="form-group row">
+					        <div class="col-5">
+					        	<label for="multiselectUser" class="col-form-label" th:text="#{form.application.responsibles.system}"></label>
+					            <select name="from[]" id="multiselectUser" class="form-control" size="9" multiple="multiple">
+					                <option th:each="au: ${availableUsers}"
+										th:value="${au.userId}" th:text="${au.userName}"/>
+					            </select>
+					            
+					        </div>
+					        
+					        <div class="col-2">
+					            <button type="button" id="multiselectUser_rightAll" class="btn btn-block"><i class="c-blue ti-angle-double-right"></i></button>
+					            <button type="button" id="multiselectUser_rightSelected" class="btn btn-block"><i class="c-blue ti-angle-right"></i></button>
+					            <button type="button" id="multiselectUser_leftSelected" class="btn btn-block"><i class="c-blue ti-angle-left"></i></button>
+					            <button type="button" id="multiselectUser_leftAll" class="btn btn-block"><i class="c-blue ti-angle-double-left"></i></button>
+					        </div>
+					        
+					        <div class="col-5">
+					        	<label for="multiselectUser_to" class="col-form-label" th:text="#{form.application.responsibles.app}"></label>
+					            <select name="to[]" id="multiselectUser_to" class="form-control" size="9" multiple="multiple">
+					            	<option th:each="su: ${selectedUsers}"
+										th:value="${su.userId}" th:text="${su.userName}"/>
+					            </select>
+					        </div>
+					        
+					        <div class="m-l-10">
+					        	<span id="user_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+					        </div>
+					    </div>
+					
+					<!-- Campo certificado asociado -->
+						<div class="form-group row">
+							<label for="idCertificado" th:text="#{form.application.cert.choose}"
+								class="col-sm-3" />
+							<div class="col-sm-3">
+								<select id="idCertificado" class="form-control"
+									th:field="*{idCertificado}">
+									<option th:each="cer: ${certificados}"
+										th:value="${cer.idCertificado}" th:text="${cer.certificateName}" />
+								</select>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-6">
+								<label for="cert-prin" class="col-form-label"
+									th:text="#{form.application.certificado1}"></label>
+								<div id="cert-prin" name="cert-prin" class="edit-txt" style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px; resize: none; background: rgb(245, 245, 245);">
+								</div>	
+							</div>
+							<div class="col-6">
+								<label for="cert-resp" class="col-form-label"
+									th:text="#{form.application.certificado2}"></label>
+								<div id="cert-resp" name="cert-resp" class="edit-txt" style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px; resize: none; background: rgb(245, 245, 245);">
+								</div>	
+							</div>
+						</div>
+				</form>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default"
+						onclick="closeModal('appEditModal')">Cerrar</button>
+					<button type="button" id="editBtnModal" onclick="saveEditApp();" class="btn btn-primary">Guardar
+						cambios</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<script th:inline="javascript">
+
+$(document)
+.ready(function() {
+			
+			cleanSpan('appEditForm');
+			$('#multiselectUser').multiselect();
+			$("#cert-prin").html($("#certPrincipal").val());
+			$("#cert-resp").html($("#certBackup").val());
+
+});
+		
+	$('#idCertificado').on('change', function (e) {
+	
+		/* hide();
+		$("#cert-prin").html($("#certPrincipal").val());
+		$("#cert-resp").html($("#certBackup").val()); */
+		
+		$("#cert-prin").empty();
+  		$("#cert-resp").empty();
+  		
+  		$("select option:selected").each(function(){
+      		opSel=$(this).val();
+      	});
+  		
+  		var previewCertAppUrl = /*[[@{/previewCertApp}]]*/;
+  		$.ajax(previewCertAppUrl,{
+			type : "GET",
+			data : $.param({'idCertificate':opSel}),
+			success : function(data) {
+				var certificados=data.split("$*$");		      		
+	      		if(certificados[0] != null && typeof certificados[0] != "undefined" && certificados[0].trim() != "--"){		      			
+	      			$("#cert-prin").html(certificados[0]);
+	      		}
+	      		if(certificados[1] != null && typeof certificados[1] != "undefined" && certificados[1].trim() != "--"){		      			
+	      			$("#cert-resp").html(certificados[1]);
+	      		}
+			},
+			error : function(e) {
+				//alert("Error al cargar el certificado");
+			}
+		});
+  			
+	});
+		
+function saveEditApp() {
+	
+	var saveEditApp = /*[[@{/saveapp}]]*/;
+	var formData = new FormData();
+	
+	var idUsersSelected = '';
+	$("#multiselectUser_to option").each(function(){
+		if ($(this).val() != "" ){        
+	      	idUsersSelected += $(this).val()+',';
+	    }
+	});
+	
+	if (idUsersSelected == '') {
+		idUsersSelected = "-1";
+	}
+    
+	var blob = new Blob([JSON.stringify($("#appEditForm").serializeJSON())], {type: "application/json"});
+    formData.append('appForm', blob);
+    formData.append("idUsersSelected", idUsersSelected);
+	
+ 	loading();
+ 	
+ 	if ($('#appEditForm')[0].checkValidity() === false) {
+ 		  hide();
+ 		  
+ 		  $('#appEditForm *').filter(':input').each(function(){
+ 	  	    
+ 	      	if(!$(this)[0].checkValidity()){
+ 	  	  	 	$("#" + $(this).attr('id')).addClass("has-error");
+ 	  	    } else {
+ 	  	  	 	$("#" + $(this).attr('id')).removeClass("has-error");
+ 	  	    }
+ 	  	    
+ 	  	  });
+ 		  
+ 	  } else{
+ 		  
+ 		 $.ajax({
+ 		 	  url: saveEditApp,
+ 		 	  type: "POST",
+			  data: formData,
+			  processData: false,
+			  contentType: false,
+			  success: function(data){
+ 				  
+ 				  hide();		 
+ 				  
+ 				  if (data.error != null){
+ 					  var errores = JSON.parse(data.error);
+ 					  jQuery.each(errores, function(i, val) {
+ 					  	$('#appEditForm *').filter('span').each(function(){
+ 							if (i == $(this).attr('id')){
+ 								$("#" + i).text(val);
+ 							}
+ 						});
+ 					  });
+ 				  }else{
+ 					  
+ 					 hide();
+ 					$('#appTable').DataTable().row.add(data.data[0]).draw(false);
+ 				  
+ 					 $("#appEditForm")[0].reset();
+ 					 $('#appEditForm *').filter('span').each(function(){
+ 							$(this).text('');
+ 						});
+ 					  
+ 					  
+ 					var messageResponse = /*[[#{message.success.application.edit}]]*/;
+ 					
+ 								  
+ 					//se muestra un mensaje
+ 					$('#resultAddApp').html(messageResponse);
+ 					$('#resultAddApp').removeClass('alert-error')	
+ 					$('#resultAddApp').addClass('alert alert-success');
+ 				 	$("#resultAddApp").fadeTo(2000, 500).slideUp(500, function() {
+ 					$("#resultAddApp").slideUp(500);
+ 					
+ 					//se cierra modal
+ 					closeModal('appEditModal');
+ 					});	 	
+ 				 	
+ 				  }
+ 				  
+ 				 $('#appEditForm *').filter(':input').each(function(){
+					  $("#" + $(this).attr('id')).removeClass("has-error");
+				  });
+ 			  },
+ 			  error:function(){
+ 				  hide();
+ 				  var messageResponse = /*[[#{message.error.application.edit}]]*/;
+ 				  $('#resultAddApp').removeClass('alert-success')	
+ 				  $('#resultAddApp').addClass('alert alert-danger');
+ 				  $("#resultAddApp").html(messageResponse);
+ 			  }
+ 			});
+ 	  }
+ }
+ 
+ function deleteCert(id) {
+	 
+	 hide();
+	 
+	 var idResult;
+	 var hiddenField;
+	 var hiddenField64;
+	 var fileField;
+	 
+	 if (id == "certFile1") {
+			idResult = "cert-prin";
+			hiddenField = "certPrincipal";
+			hiddenField64 = "certPrincipalB64";
+			fileField = "certFile1";
+			
+	 } else if (id == "certFile2") {
+			idResult = "cert-resp";
+			hiddenField = "certBackup";
+			hiddenField64 = "certBackupB64";
+			fileField = "certFile2";
+			
+	 }
+	 	 
+	 $("#" + hiddenField).val(null);
+	 $("#" + hiddenField64).val(null);
+	 $("#" + idResult).html('');
+	 $("#" + fileField).val(null);
+}
+ 
+ function dataURLtoFile(dataurl, filename) {
+	 
+     var arr = dataurl.split(','),
+         mime = arr[0].match(/:(.*?);/)[1],
+         bstr = atob(arr[1]), 
+         n = bstr.length, 
+         u8arr = new Uint8Array(n);
+         
+     while(n--){
+         u8arr[n] = bstr.charCodeAt(n);
+     }
+     
+     return new File([u8arr], filename, {type:mime});
+ }
+
+</script>

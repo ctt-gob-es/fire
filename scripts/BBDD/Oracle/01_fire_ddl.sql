@@ -28,6 +28,8 @@ begin
 end;
 /
 
+ALTER TRIGGER "BI_TB_CERTIFICADOS" ENABLE;
+
 
 CREATE TABLE "TB_APLICACIONES" (
   "ID" VARCHAR2(48) NOT NULL,
@@ -44,11 +46,25 @@ ALTER TABLE  "TB_APLICACIONES" modify
 ALTER TABLE "TB_APLICACIONES" add constraint
 "TB_APLICACIONES_FK" foreign key ("FK_CERTIFICADO") references "TB_CERTIFICADOS" ("ID_CERTIFICADO");
 
+CREATE SEQUENCE "TB_APLICACIONES_SEQ"; 
+
+CREATE OR REPLACE TRIGGER "BI_TB_APLICACIONES"  
+  before insert on "TB_APLICACIONES"              
+  for each row 
+begin  
+  if :NEW."ID" is null then
+    select "TB_APLICACIONES_SEQ".nextval into :NEW."ID" from dual;
+  end if;
+end;
+/
+
+ALTER TRIGGER "BI_TB_APLICACIONES" ENABLE;
+
 
 CREATE TABLE  "TB_USUARIOS" 
    ("ID_USUARIO" NUMBER NOT NULL, 
 	"NOMBRE_USUARIO" VARCHAR2(30) NOT NULL, 
-	"CLAVE" VARCHAR2(45) NOT NULL, 
+	"CLAVE" VARCHAR2(2000) NOT NULL, 
 	"NOMBRE" VARCHAR2(45) NOT NULL, 
 	"APELLIDOS" VARCHAR2(120) NOT NULL, 
 	"CORREO_ELEC" VARCHAR2(45), 
@@ -121,6 +137,20 @@ CREATE TABLE "TB_SERVIDORES_LOG" (
   CONSTRAINT "TB_SERVIDORES_LOG_UK2" UNIQUE ("URL_SERVICIO_LOG")
 );
 
+CREATE SEQUENCE "TB_SERVIDORES_LOG_SEQ"; 
+
+CREATE OR REPLACE TRIGGER "BI_TB_SERVIDORES_LOG"  
+  before insert on "TB_SERVIDORES_LOG"              
+  for each row 
+begin  
+  if :NEW."ID_SERVIDOR" is null then
+    select "TB_SERVIDORES_LOG_SEQ".nextval into :NEW."ID_SERVIDOR" from dual;
+  end if;
+end;
+/
+
+ALTER TRIGGER "BI_TB_SERVIDORES_LOG" ENABLE;
+
 -- Tabla de las estadisticas de las firmas
 
 CREATE TABLE "TB_FIRMAS" (
@@ -137,6 +167,20 @@ CREATE TABLE "TB_FIRMAS" (
   CONSTRAINT "TB_FIRMAS_PK" PRIMARY KEY ("ID")
 );
 
+CREATE SEQUENCE "TB_FIRMAS_SEQ"; 
+
+CREATE OR REPLACE TRIGGER "BI_TB_FIRMAS"  
+  before insert on "TB_FIRMAS"              
+  for each row 
+begin  
+  if :NEW."ID" is null then
+    select "TB_FIRMAS_SEQ".nextval into :NEW."ID" from dual;
+  end if;
+end;
+/
+
+ALTER TRIGGER "BI_TB_FIRMAS" ENABLE;
+
 -- Tabla de las estadisticas de las transacciones
 
 CREATE TABLE "TB_TRANSACCIONES" (
@@ -151,3 +195,17 @@ CREATE TABLE "TB_TRANSACCIONES" (
   "TOTAL" NUMBER DEFAULT 0 NOT NULL,
   CONSTRAINT "TB_TRANSACCIONES_PK" PRIMARY KEY ("ID")
 );
+
+CREATE SEQUENCE "TB_TRANSACCIONES_SEQ"; 
+
+CREATE OR REPLACE TRIGGER "BI_TB_TRANSACCIONES"  
+  before insert on "TB_TRANSACCIONES"              
+  for each row 
+begin  
+  if :NEW."ID" is null then
+    select "TB_TRANSACCIONES_SEQ".nextval into :NEW."ID" from dual;
+  end if;
+end;
+/
+
+ALTER TRIGGER "BI_TB_TRANSACCIONES" ENABLE;

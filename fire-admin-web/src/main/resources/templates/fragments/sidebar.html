@@ -8,7 +8,7 @@
                   <div id="aStatus" class="peers ai-c fxw-nw">
                     <div class="peer">
                       <div class="logo">
-                         <img class="fire-admin-front-img3" th:src="@{images/Logo_FIRe_02.jpg}"
+                         <img class="fire-admin-front-img3" id="fireImageLogo" th:src="@{images/Logo_FIRe_02.jpg}"
 						alt="FIRe"   sizes="(min-width: 600px) 200px, 50vw"/>
                       </div>
                     </div>
@@ -63,8 +63,8 @@
 	                </span>
 	                <span class="title" th:text="#{menu.admin.service}"></span>
 	                 <script th:inline="javascript">
-	                 	var actionService = /*[[@{/serviceadmin}]]*/;
-	                 	$('#aServiceAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionService, 'optionReplacement', 'GET', null, true); return false;});
+	                 	var applicationadmin = /*[[@{/applicationadmin}]]*/;
+	                 	$('#aServiceAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', applicationadmin, 'optionReplacement', 'GET', null, true); return false;});
 	                </script>
 	              </a>
 	            </li>
@@ -86,9 +86,8 @@
 	              </a>
 	            </li>
 	           
-				
-	            
-	            <!--  Certificados -->
+	           
+				 <!--  Certificados -->
 	                 <li class="nav-item dropdown">
 	              <a id="aKeystoreAdmin" class="dropdown-toggle" href="javascript:void(0);">
 	                <span class="icon-holder">
@@ -96,8 +95,8 @@
 	                </span>
 	                <span class="title" th:text="#{menu.admin.keystore}"></span>
 	                <script th:inline="javascript">
-		                 			var actionSsl = /*[[@{/ssladmin}]]*/;
-		                 			$('#aSslAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionSsl, 'optionReplacement', 'GET', null, true); return false;});
+		                 			var certificateAdmin = /*[[@{/certificateadmin}]]*/;
+		                 			$('#aKeystoreAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', certificateAdmin, 'optionReplacement', 'GET', null, true); return false;});
 		               			</script>
 	              </a> 
 				   
@@ -108,45 +107,36 @@
 				  <!-- Logs -->
 				  
 	            <li class="nav-item">
-	              <a id="aSplAdmin" class='sidebar-link' href="#">
+	              <a id="alogServerAdmin" class='sidebar-link' href="#">
 	                <span class="icon-holder">
 	                  <i class="c-brown-500 ti-receipt"></i>
 	                </span>
-	                <span class="title" th:text="#{menu.admin.spl}"></span>
+	                <span class="title" th:text="#{menu.admin.log.server}"></span>
 	                 <script th:inline="javascript">
-	                 	var actionSpl = /*[[@{/spl}]]*/;
-	                 	$('#aSplAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionSpl, 'optionReplacement', 'GET', null, true); return false;});
+	                 	var actionLogServer = /*[[@{/logserver}]]*/;
+	                 	$('#alogServerAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionLogServer, 'optionReplacement', 'GET', null, true); return false;});
 	                </script>
 	              </a>
 	            </li>
-	       
-				
-                
+	            
                 <!-- Fin Logs -->
-                
+	            
+	            
                 
                  <!-- Estadisticas -->
                 
-                 <li class="nav-item dropdown">
-	              <a id="aStatsAdmin" class="dropdown-toggle" href="javascript:void(0);">
-	                <span class="icon-holder">
-	                  <i class="c-black-500 ti-stats-up"></i>
-	                </span>
-	                <span class="title" th:text="#{menu.admin.stats}"></span>
-	              </a> 
-				   <ul class="dropdown-menu">
-						<li>
-							<a id="aStatsVipAdmin" class='sidebar-link' href="#">
-							    <span class="title" th:text="#{menu.admin.stats.vip}"></span>
-								<script th:inline="javascript">
-		                 			var actionStatsVip = /*[[@{/statsvip}]]*/;
-		                 			$('#aStatsVipAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatsVip, 'optionReplacement', 'GET', null, true); return false;});
-		               			</script>
-	               			</a>
-	               		</li>
-	               		
-				   </ul>
-				</li>
+                  <li class="nav-item">
+	             	<a id="aStatsAdmin" class='sidebar-link' href="#">
+	              		<span class="icon-holder">
+	                		<i class="c-black-500 ti-receipt"></i>
+	                	</span>
+	                	<span class="title" th:text="#{menu.admin.stats}"></span>
+						<script th:inline="javascript">
+               				var actionStatistics = /*[[@{/statistics}]]*/;
+               				$('#aStatsAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatistics, 'optionReplacement', 'GET', null, true); return false;});
+             			</script>
+            		</a>
+            	</li>
                 
                 <!-- Fin estadisticas -->
                

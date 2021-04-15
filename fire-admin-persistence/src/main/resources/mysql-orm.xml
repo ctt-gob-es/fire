@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<entity-mappings
+    xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm orm_2_1.xsd"
+    version="2.1">
+    <package>es.gob.fire.persistence.entity</package>
+    <entity class="User" access="PROPERTY">
+    	<table name="tb_usuarios" />
+        <attributes>
+            <id name="userId">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id_usuario"/>
+            </id>
+        </attributes>
+    </entity>
+    <entity class="Certificate" access="PROPERTY">
+    	<table name="tb_certificados" />
+        <attributes>
+            <id name="idCertificado">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id_certificado"/>
+            </id>
+        </attributes>
+    </entity>
+    <entity class="Application" access="PROPERTY">
+    	<table name="tb_aplicaciones" />
+        <attributes>
+            <id name="appId">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id"/>
+            </id>
+        </attributes>
+    </entity>
+    <entity class="LogServer" access="PROPERTY">
+    	<table name="tb_servidores_log" />
+        <attributes>
+            <id name="logServerId">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id_servidor"/>
+            </id>
+        </attributes>
+    </entity>
+</entity-mappings>

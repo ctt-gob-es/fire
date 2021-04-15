@@ -1,0 +1,341 @@
+<div class="modal" tabindex="-1" role="dialog" id="certEditModal">
+	<div class="modal-dialog-centered">
+		<div class="modal-content lg-900">
+			<div class="modal-header">
+				<div id="titleAdd">
+					<h4 class="modal-title" th:text="#{form.certificate.edit.title}">
+				</div>
+				<button type="button" class="close"
+					onclick="closeModal('certEditModal')" aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form name="certEditForm" role="form" id="certEditForm"
+					th:object="${certEditForm}" action="@{/saveeditcert}" method="post" enctype="multipart/form-data">
+										
+					<input type="hidden" id="idCertificate" th:field="*{idCertificate}"/>
+					<input type="hidden" id="certPrincipal" th:field="*{certPrincipal}"/>
+					<input type="hidden" id="certBackup" th:field="*{certBackup}"/>
+					<input type="hidden" id="certPrincipalB64" th:field="*{certPrincipalB64}"/>
+					<input type="hidden" id="certBackupB64" th:field="*{certBackupB64}"/>
+					
+					<div id="resultEditCert" data-dismiss="alert"></div>					
+					<div class="form-group">
+						<label for="alias" class="col-form-label"
+							th:text="#{form.certificate.alias}"></label>
+						<input type="text" id="alias" th:field="*{alias}" class="form-control" />
+						<span id="alias_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 						
+						<div style="clear: both;" />
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-8">
+							<label for="certFile1" class="col-form-label"
+									th:text="#{form.certificate.certificado1}"></label>
+								<div class="custom-file" id="customFile1" lang="es"> 
+									<input type="file" class="custom-file-input" id="certFile1"
+										name="certFile1" th:field="*{certFile1}" aria-describedby="fileHelp">
+									<label class="custom-file-label" for="file"
+										th:text="#{form.certificate.file.choose}"></label>
+									<span id="certFile1_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 			
+								</div>
+								<div style="clear: both;" />
+						</div>
+						<div class="form-group col-md-4">
+							<div class="btn_align">
+								<button type="button" class="btn btn-primary" onclick="deleteCert('certFile1')">Eliminar certificado 1</button>
+							</div>
+						</div>
+					</div>
+					<div id="cert-prin" name="cert-prin" class="edit-txt" 
+					style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
+					 resize: none; background: rgb(245, 245, 245);">
+					</div>	
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<div class="form-row">
+						<div class="form-group col-md-8">
+							<label for="certFile2" class="col-form-label"
+									th:text="#{form.certificate.certificado2}"></label>
+								<div class="custom-file" id="customFile" lang="es">
+									<input type="file" class="custom-file-input" id="certFile2"
+										name="certFile2" th:field="*{certFile2}" aria-describedby="fileHelp">
+									<label class="custom-file-label" for="file"
+										th:text="#{form.certificate.file.choose}"></label>
+									<span id="certFile2_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 		
+								</div>
+								<div style="clear: both;" />
+						</div>
+						<div class="form-group col-md-4">
+							<div class="btn_align">
+								<button type="button" class="btn btn-primary" onclick="deleteCert('certFile2')">Eliminar certificado 2</button>
+							</div>
+						</div>
+					</div>
+					<div id="cert-resp" name="cert-resp" class="edit-txt" 
+					style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
+					 resize: none; background: rgb(245, 245, 245);">
+						
+					</div>	
+
+				</form>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default"
+						onclick="closeModal('certEditModal')">Cerrar</button>
+					<button type="button" id="editBtnModal" onclick="saveEditCert();" class="btn btn-primary">Guardar
+						cambios</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<script th:inline="javascript">
+
+$(document)
+.ready(
+		function() {
+			
+			cleanSpan('certEditForm');
+			
+		});
+	
+	
+	$('#certEditModal').on('shown.bs.modal', function (e) {
+	
+		hide();
+		$("#cert-prin").html($("#certPrincipal").val());
+		$("#cert-resp").html($("#certBackup").val());
+		
+		/* var urlDataPart = 'data:text/plain;base64,';
+		
+		if ($("#certPrincipalB64").val() != null && $("#certPrincipalB64").val() != '' && $("#certPrincipalB64").val() != undefined) {
+			var urlDataFile = urlDataPart + $("#certPrincipalB64").val();
+			var alias =  $("#alias").val();
+			$("#certFile1").prop('files').push(dataURLtoFile(urlDataFile, alias + '_1.cer'));
+		}
+		
+		if ($("#certBackupB64").val() != null && $("#certBackupB64").val() != '' && $("#certBackupB64").val() != undefined) {
+			var urlDataFile = urlDataPart + $("#certBackupB64").val();
+			var alias =  $("#alias").val();
+			$("#certFile2").prop('files').push(dataURLtoFile(urlDataFile, alias + '_2.cer'));
+		} */
+		
+		});
+	
+	var previewCertUrl = /*[[@{/previewCert}]]*/;
+	function previewCert(event) {
+		
+		hide();
+		var formData = new FormData();
+	 	var file1 =  $('#certFile1').prop('files')[0];
+	 	
+	 	if (file1 == undefined) {
+	 		file1 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
+	 	}
+	 	
+	 	var file2 =  $('#certFile2').prop('files')[0];
+	 	
+	 	if (file2 == undefined) {
+			file2 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
+		}
+	 	
+	 	var id = event.target.id;
+	 	
+	 	formData.append("certFile1", file1);
+	 	formData.append("certFile2", file2);
+	 	formData.append("idField",id)
+	 	
+		//var data = new FormData($("#certEditForm")[0]);
+		var idResult;
+		if (id == "certFile1") {
+			idResult = "cert-prin";
+			
+		} else if (id == "certFile2") {
+			idResult = "cert-resp";
+			
+		}
+		$.ajax(previewCertUrl,{
+			type : "POST",
+			data : formData,
+			processData : false,
+			contentType : false,
+			success : function(responseText) {
+				//document.getElementById(idResult).innerHTML = responseText;
+				hide();
+				$("#" + idResult).html(responseText);
+			},
+			error : function(e) {
+				alert("Error al cargar el certificado");
+			}
+		});
+
+	}
+	
+	$("input:file").change(function(event) {
+		
+		previewCert(event);
+	});
+
+		$("input[type=file]").change(
+				function() {
+					var fieldVal = $(this).val();
+
+					// Change the node's value by removing the fake path (Chrome)
+					fieldVal = fieldVal.replace("C:\\fakepath\\", "");
+
+					if (fieldVal != undefined || fieldVal != "") {
+						$(this).next(".custom-file-label").attr('data-content',	fieldVal);
+						$(this).next(".custom-file-label").text(fieldVal);
+					}
+
+				});
+		
+
+		
+function saveEditCert() {
+	
+	var saveeditcert = /*[[@{/saveeditcert}]]*/;
+	var formData = new FormData();
+	
+ 	var file1 =  $('#certFile1').prop('files')[0];
+ 	
+ 	if (file1 == undefined) {
+ 		file1 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
+ 	}
+ 	
+ 	var file2 =  $('#certFile2').prop('files')[0];
+ 	
+ 	if (file2 == undefined) {
+		file2 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
+	}
+ 	
+    var blob = new Blob([JSON.stringify($("#certEditForm").serializeJSON())], {type: "application/json"});
+    
+    formData.append('certEditForm', blob);
+    formData.append("certFile1", file1);
+ 	formData.append("certFile2", file2);
+ 	
+ 	loading();
+ 	
+ 	if ($('#certEditForm')[0].checkValidity() === false) {
+ 		  hide();
+ 		  
+ 		  $('#certEditForm *').filter(':input').each(function(){
+ 	  	    
+ 	      	if(!$(this)[0].checkValidity()){
+ 	  	  	 	$("#" + $(this).attr('id')).addClass("has-error");
+ 	  	    } else {
+ 	  	  	 	$("#" + $(this).attr('id')).removeClass("has-error");
+ 	  	    }
+ 	  	    
+ 	  	  });
+ 		  
+ 	  } else{
+ 		  
+ 		 $.ajax({
+ 		 	  url: saveeditcert,
+ 			  type: "POST",
+ 			  data: formData,
+ 			  processData: false,
+ 			  contentType: false,
+ 			  success: function(data){
+ 				  
+ 				  hide();		 
+ 				  
+ 				  if (data.error != null){
+ 					  var errores = JSON.parse(data.error);
+ 					  jQuery.each(errores, function(i, val) {
+ 					  	$('#certEditForm *').filter('span').each(function(){
+ 							if (i == $(this).attr('id')){
+ 								$("#" + i).text(val);
+ 							}
+ 						});
+ 					  });
+ 				  }else{
+ 					  
+ 					 hide();
+ 					 tableCertFire.row.add($(data.data)).draw(false);
+ 				  
+ 					 $("#certEditForm")[0].reset();
+ 					 $('#certEditForm *').filter('span').each(function(){
+ 							$(this).text('');
+ 						});
+ 					  
+ 					  
+ 					var messageResponse = /*[[#{message.success.certificate.edit}]]*/;
+ 					  //se cierra modal
+ 					closeModal('certEditModal');
+ 								  
+ 					//se muestra un mensaje
+ 					$('#resultEditCert').html(messageResponse);
+ 					$('#resultEditCert').removeClass('alert-error')	
+ 					$('#resultEditCert').addClass('alert alert-danger');
+ 				 	$("#resultEditCert").fadeTo(2000, 500).slideUp(500, function() {
+ 					$("#resultEditCert").slideUp(500);
+ 					});	 	
+ 				 	
+ 				  } 				 
+ 				  			  
+ 				  $('#certEditForm *').filter(':input').each(function(){
+ 					  $("#" + $(this).attr('id')).removeClass("has-error");
+ 				  });
+ 				  		  
+ 			  },
+ 			  error:function(){
+ 				  hide();
+ 				 var messageResponse = /*[[#{message.error.certificate.edit}]]*/;
+ 				  $('#resultEditCert').removeClass('alert-success')	
+ 				  $('#resultEditCert').addClass('alert alert-danger');
+ 				  $("#resultEditCert").html(messageResponse);
+ 			  }
+ 			});
+ 	  }
+ }
+ 
+ function deleteCert(id) {
+	 
+	 hide();
+	 
+	 var idResult;
+	 var hiddenField;
+	 var hiddenField64;
+	 var fileField;
+	 
+	 if (id == "certFile1") {
+			idResult = "cert-prin";
+			hiddenField = "certPrincipal";
+			hiddenField64 = "certPrincipalB64";
+			fileField = "certFile1";
+			
+	 } else if (id == "certFile2") {
+			idResult = "cert-resp";
+			hiddenField = "certBackup";
+			hiddenField64 = "certBackupB64";
+			fileField = "certFile2";
+			
+	 }
+	 	 
+	 $("#" + hiddenField).val(null);
+	 $("#" + hiddenField64).val(null);
+	 $("#" + idResult).html('');
+	 $("#" + fileField).val(null);
+}
+ 
+ function dataURLtoFile(dataurl, filename) {
+	 
+     var arr = dataurl.split(','),
+         mime = arr[0].match(/:(.*?);/)[1],
+         bstr = atob(arr[1]), 
+         n = bstr.length, 
+         u8arr = new Uint8Array(n);
+         
+     while(n--){
+         u8arr[n] = bstr.charCodeAt(n);
+     }
+     
+     return new File([u8arr], filename, {type:mime});
+ }
+
+</script>

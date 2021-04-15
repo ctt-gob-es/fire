@@ -26,10 +26,8 @@
 
         for(var i=0; i<input.length; i++) {
             if(validate(input[i]) == false){
-                if ($('#signatureBase64').val().trim() == '') {
-                	showValidate(input[i]);
-                    check=false;
-                }
+                showValidate(input[i]);
+                check=false;
             }
         }
 
@@ -170,6 +168,9 @@ function loadIntoAjax(formTarget, url, idTarget, type, funcion, doLoad) {
 		success : function(data) {
 			$("#" + idTarget).html(data);
 			hide();
+			if ($("#" + idTarget).css('display') == 'none') {
+				$("#" + idTarget).css('display', 'block');
+			}
 			if (funcion) {
 				funcion();
 			}
@@ -329,6 +330,13 @@ function closeButton(btnId){
 	$('.modal-backdrop').remove();
 }
 
+function closeModal(modalIn) {
+	$('#' + modalIn).modal('hide');
+	$('#' + modalIn).remove();
+	$('.modal-backdrop').remove();
+
+}
+
 function getBase64FromImageUrl(url) {
     var img = new Image();
 
@@ -359,3 +367,52 @@ function closeModalButton(modalId, nameForm){
 		//se limpia valores del formulario
 	$('#' + modalId).modal('hide');	
 }
+
+function clearForm(form) {
+  // iterate over all of the inputs for the form
+  // element that was passed in
+  $(':input', form).each(function() {
+    var type = this.type;
+    var tag = this.tagName.toLowerCase(); // normalize case
+    // it's ok to reset the value attr of text inputs,
+    // password inputs, and textareas
+    if (type == 'text' || type == 'password' || tag == 'textarea')
+      this.value = "";
+    // checkboxes and radios need to have their checked state cleared
+    // but should *not* have their 'value' changed
+    else if (type == 'checkbox' || type == 'radio')
+      this.checked = false;
+    // select elements need to have their 'selectedIndex' property set to -1
+    // (this works for both single and multiple select elements)
+    else if (tag == 'select')
+      this.selectedIndex = -1;
+  });
+};
+
+function cleanSpan(idForm){
+	  $('#'+ idForm + ' *').filter('span.badge').each(function(){
+							$(this).text("");
+							//$(this).removeClass('badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill');
+							});
+}	
+
+// Obtiene un objeto BLOB a partir de una cadena base64 y el tipo de contenido resultante
+const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
+	  const byteCharacters = atob(b64Data);
+	  const byteArrays = [];
+
+	  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+	    const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+	    const byteNumbers = new Array(slice.length);
+	    for (let i = 0; i < slice.length; i++) {
+	      byteNumbers[i] = slice.charCodeAt(i);
+	    }
+
+	    const byteArray = new Uint8Array(byteNumbers);
+	    byteArrays.push(byteArray);
+	  }
+
+	  const blob = new Blob(byteArrays, {type: contentType});
+	  return blob;
+	}	
