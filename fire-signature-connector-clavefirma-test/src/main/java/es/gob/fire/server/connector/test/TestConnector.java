@@ -149,7 +149,6 @@ public class TestConnector extends FIReConnector {
         		this.redirectErrorUrl = URLEncoder.encode(config.getProperty("redirectErrorUrl"), DEFAULT_ENCODING.name()); //$NON-NLS-1$
         	}
         	catch (final Exception e) {
-        		LOGGER.severe("No se han podido configurar las URL de redireccion de exito y error: " + e); //$NON-NLS-1$
         		throw new RuntimeException("No se han podido configurar las URL de redireccion de exito y error", e); //$NON-NLS-1$
         	}
         }
@@ -187,7 +186,6 @@ public class TestConnector extends FIReConnector {
 				}
 			}
 
-			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de prueba de recuperacion de certificados", e); //$NON-NLS-1$
 			throw new FIReConnectorNetworkException("Error en la llamada al servicio de prueba de recuperacion de certificados", e); //$NON-NLS-1$
 		}
 
@@ -201,7 +199,6 @@ public class TestConnector extends FIReConnector {
         	certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
         }
         catch (final CertificateException e) {
-        	LOGGER.severe("Error al generar la factoria de certificados: " + e); //$NON-NLS-1$
         	throw new FIReCertificateException("Error al generar la factoria de certificados", e); //$NON-NLS-1$
         }
 
@@ -247,7 +244,6 @@ public class TestConnector extends FIReConnector {
 		try {
 			certEncoded = signCert.getEncoded();
 		} catch (final CertificateEncodingException e) {
-			LOGGER.severe("Error en la codificacion del certificado: " + e); //$NON-NLS-1$
 			throw new FIReCertificateException("Error en la codificacion del certificado", e); //$NON-NLS-1$
 		}
 
@@ -282,7 +278,6 @@ public class TestConnector extends FIReConnector {
 		try {
 			response = ConnectionManager.readUrlByPost(urlBase, urlParameters.toString());
 		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de prueba de carga de datos", e); //$NON-NLS-1$
 			if (e instanceof HttpError) {
 				if (((HttpError) e).getResponseCode() == HTTP_ERROR_UNKNOWN_USER) {
 					throw new FIReConnectorUnknownUserException("El usuario no esta dado de alta en el sistema", e); //$NON-NLS-1$
@@ -306,7 +301,14 @@ public class TestConnector extends FIReConnector {
 		try {
 			response = ConnectionManager.readUrlByGet(testUrl.toString());
 		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de prueba de firma", e); //$NON-NLS-1$
+			if (e instanceof HttpError) {
+				final int responseCode = ((HttpError) e).getResponseCode();
+				// Si se ha producido un error 500, devolvemos un error de firma
+				if (responseCode % 500 < 100) {
+					throw new FIReSignatureException("Ocurrio un error durante la operacion de firma", e); //$NON-NLS-1$
+				}
+			}
+			// Con cualquier otro error, informamos de un problema en la conexion
 			throw new FIReConnectorNetworkException("Error en la llamada al servicio de prueba de firma", e); //$NON-NLS-1$
 		}
 
@@ -320,7 +322,6 @@ public class TestConnector extends FIReConnector {
 			}
 		} catch (final IOException e) {
 			reader.close();
-			LOGGER.log(Level.SEVERE, "Error al decodificar una de las firmas resultantes", e); //$NON-NLS-1$
 			throw new FIReSignatureException("Error al decodificar una de las firmas resultantes", e); //$NON-NLS-1$
 		}
 		reader.close();
@@ -359,7 +360,6 @@ public class TestConnector extends FIReConnector {
 				}
 			}
 
-			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de prueba de generacion de certificados", e); //$NON-NLS-1$
 			throw new FIReConnectorNetworkException("Error en la llamada al servicio de generacion de certificados", e); //$NON-NLS-1$
 		}
 
@@ -382,7 +382,13 @@ public class TestConnector extends FIReConnector {
 		try {
 			response = ConnectionManager.readUrlByGet(url.toString());
 		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Error en la llamada al servicio de recuperacion de certificado generado", e); //$NON-NLS-1$
+			if (e instanceof HttpError) {
+				final int responseCode = ((HttpError) e).getResponseCode();
+				// Si se ha producido un error 500, devolvemos un error en la obtencion del certificado
+				if (responseCode % 500 < 100) {
+					throw new FIReCertificateException("Ocurrio un error durante la obtencion del certificado", e); //$NON-NLS-1$
+				}
+			}
 			throw new FIReConnectorNetworkException("Error en la llamada al servicio de recuperacion de certificado generado", e); //$NON-NLS-1$
 		}
 
@@ -402,7 +408,6 @@ public class TestConnector extends FIReConnector {
 		try {
 			return Base64.decode(certEncoded);
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error al decodificar el certificado de firma", e); //$NON-NLS-1$
 			throw new FIReCertificateException("Error al decodificar el certificado de firma", e); //$NON-NLS-1$
 		}
 	}
