@@ -44,12 +44,12 @@
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-upgrade</artifactId>
 				</dependency>
-				
+ 				
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-upgrade-afirma</artifactId>
 				</dependency>
-		
+ 	
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-signature-common-libraries</artifactId>
@@ -95,6 +95,14 @@
 		    		<artifactId>javax.json</artifactId>
 				</dependency>
 		
+				<!-- Dependencia para la compatibilidad con firmas XML -->
+				<dependency>
+					<groupId>org.apache.santuario</groupId>
+					<artifactId>xmlsec</artifactId>
+					<version>2.2.1</version>
+				</dependency>
+				
+				<!--  Dependencia servlets -->
 				<dependency>
 					<groupId>javax.servlet</groupId>
 					<artifactId>javax.servlet-api</artifactId>
@@ -102,6 +110,7 @@
 					<scope>provided</scope>
 				</dependency>
 		
+				<!-- Dependencia de pruebas -->
 				<dependency>
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>

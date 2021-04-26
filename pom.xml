@@ -209,6 +209,12 @@
 				<version>${fire.version}</version>
 			</dependency>
 			
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-alarms-graylog</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			
 			<!-- Hibernate 5 -->
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -305,7 +311,7 @@
 			<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.3</version>
+			<version>1.9.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
