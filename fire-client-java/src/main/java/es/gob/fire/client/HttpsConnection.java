@@ -307,13 +307,6 @@ public class HttpsConnection {
 
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		if (con instanceof HttpsURLConnection && this.ctx != null) {
-			HttpsURLConnection.setDefaultSSLSocketFactory(this.ctx.getSocketFactory());
-			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			});
 			((HttpsURLConnection) con).setSSLSocketFactory(this.ctx.getSocketFactory());
 			((HttpsURLConnection) con).setHostnameVerifier(new HostnameVerifier() {
 				@Override
