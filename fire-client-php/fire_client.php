@@ -302,7 +302,10 @@
 			if (empty($documentId)) {
 				throw new InvalidArgumentException("El identificador del documento no puede ser nulo");
 			}
-			
+			if (empty($documentB64)) {
+				throw new InvalidArgumentException("El documento no puede ser nulo");
+			}
+
 			// Recodificamos los parametros que lo necesiten para asegurar la correcta transmision por URL
 			$b64SpC = array("+", "/"); 
 			$b64UrlSafeSpC = array("-", "_");
@@ -473,10 +476,10 @@
 
 			// Llamamos al servicio remoto
 			$response = $this->connect($URL_SERVICE, $URL_SERVICE_PARAMS);
-			
+
 			// Parseamos el json recibido
 			$jsonResponse = json_decode($response);
-			
+						
 			$batchDocuments = $jsonResponse->batch;
 			$providerName = $jsonResponse->prov;
 			$signingCert = $jsonResponse->cert;
@@ -858,7 +861,7 @@
 	 */
 	class BatchSignResult{
 		var $id;
-		var $ok;
+		var $ok = false;
 		var $dt;
 		var $gracePeriod;
 		
@@ -878,14 +881,11 @@
 			if (isset($response->grace)) {
 				$this->gracePeriod = new GracePeriod($response->grace->id, "@".($response->grace->date/1000));
 			}
-		
+
 			if (empty($this->id)){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el identificador de cada documento batch");
 			}
-			if (empty($this->ok)){
-				throw new InvalidArgumentException("Es obligatorio que el JSON defina si la firma se ha realizado con exito");
-			}
-			else if (empty($this->dt) && !$this->ok){
+			if (empty($this->dt) && !$this->ok){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el codigo de error si la firma no se llevo a cabo correctamente");
 			}			
 		}
