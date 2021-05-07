@@ -1,6 +1,50 @@
 -- Script de migracion desde FIRe 2.2/2.3 a 2.4
 
 
+-- TABLA USUARIOS
+
+-- Agregamos un campo FK_ROL con un valor preestablecido para las entradas existentes
+ALTER TABLE "TB_USUARIOS" ADD "FK_ROL" NUMBER;
+UPDATE "TB_USUARIOS" SET "FK_ROL" = 1;
+ALTER TABLE  "TB_USUARIOS" MODIFY ("FK_ROL" NUMBER NOT NULL);
+
+-- Agregamos el campo CODIGO_RENOVACION unico
+ALTER TABLE "TB_USUARIOS" ADD "CODIGO_RENOVACION" VARCHAR2(100) DEFAULT NULL;
+ALTER TABLE "TB_USUARIOS"
+ADD CONSTRAINT  "TB_USUARIOS_UK2" UNIQUE("CODIGO_RENOVACION");
+
+-- Agregamos el campo FEC_RENOVACION 
+ALTER TABLE "TB_USUARIOS" ADD "FEC_RENOVACION" TIMESTAMP DEFAULT NULL;
+
+-- Agregamos el campo REST_CLAVE
+ALTER TABLE "TB_USUARIOS" ADD "REST_CLAVE" NUMBER(1,0) DEFAULT 0;
+
+-- Eliminamos el campo ROL
+ALTER TABLE "TB_USUARIOS" DROP COLUMN "ROL";
+
+-- Incrementamos el tamano del campo CLAVE
+ALTER TABLE  "TB_USUARIOS" MODIFY ("CLAVE" VARCHAR2(2000));
+
+-- Ajustamos las restricciones del resto de campos
+ALTER TABLE  "TB_USUARIOS" MODIFY ("USU_DEFECTO" NUMBER(1) DEFAULT 0);
+ALTER TABLE  "TB_USUARIOS" MODIFY ("FEC_ALTA" TIMESTAMP(6) DEFAULT SYSDATE);
+
+-- Insertamos como usuarios a los responsables declarados en las aplicaciones
+INSERT INTO "TB_USUARIOS" ("NOMBRE_USUARIO", "NOMBRE", "APELLIDOS", "CORREO_ELEC", "TELF_CONTACTO", "FEC_ALTA", "FK_ROL")
+SELECT SUBSTR("ID", 1, 30), "RESPONSABLE", "RESPONSABLE", "RESP_CORREO", "RESP_TELEFONO", "FECHA_ALTA", 2
+FROM "TB_APLICACIONES";
+
+-- Tabla para el guardado de los roles
+
+CREATE TABLE "TB_ROLES" (
+  "ID" NUMBER NOT NULL,
+  "NOMBRE_ROL" VARCHAR2(45) NOT NULL,
+  "PERMISOS"   VARCHAR2(45),
+  CONSTRAINT "TB_ROLES_PK" PRIMARY KEY ("ID"),
+  CONSTRAINT "TB_ROLES_UK" UNIQUE ("NOMBRE_ROL")
+);
+
+
 -- Tabla para el guardado de las referencias a los servidores de log
 
 CREATE TABLE "TB_SERVIDORES_LOG" (
@@ -14,7 +58,21 @@ CREATE TABLE "TB_SERVIDORES_LOG" (
   CONSTRAINT "TB_SERVIDORES_LOG_UK2" UNIQUE ("URL_SERVICIO_LOG")
 );
 
--- Tabla de las estadisticas de las firmas
+CREATE SEQUENCE "TB_SERVIDORES_LOG_SEQ"; 
+
+CREATE OR REPLACE TRIGGER "BI_TB_SERVIDORES_LOG"  
+  before insert on "TB_SERVIDORES_LOG"              
+  for each row 
+begin  
+  if :NEW."ID_SERVIDOR" is null then
+    select "TB_SERVIDORES_LOG_SEQ".nextval into :NEW."ID_SERVIDOR" from dual;
+  end if;
+end;
+/
+
+ALTER TRIGGER "BI_TB_SERVIDORES_LOG" ENABLE;
+
+-- Tabla de estadisticas de las firmas
 
 CREATE TABLE "TB_FIRMAS" (
   "ID" NUMBER NOT NULL,
@@ -29,6 +87,20 @@ CREATE TABLE "TB_FIRMAS" (
   "TOTAL" NUMBER DEFAULT 0 NOT NULL,
   CONSTRAINT "TB_FIRMAS_PK" PRIMARY KEY ("ID")
 );
+
+CREATE SEQUENCE "TB_FIRMAS_SEQ"; 
+
+CREATE OR REPLACE TRIGGER "BI_TB_FIRMAS"  
+  before insert on "TB_FIRMAS"              
+  for each row 
+begin  
+  if :NEW."ID" is null then
+    select "TB_FIRMAS_SEQ".nextval into :NEW."ID" from dual;
+  end if;
+end;
+/
+
+ALTER TRIGGER "BI_TB_FIRMAS" ENABLE;
 
 -- Tabla de estadisticas de las transacciones
 
@@ -45,15 +117,19 @@ CREATE TABLE "TB_TRANSACCIONES" (
   CONSTRAINT "TB_TRANSACCIONES_PK" PRIMARY KEY ("ID")
 );
 
--- Tabla de roles
+CREATE SEQUENCE "TB_TRANSACCIONES_SEQ"; 
 
-CREATE TABLE "TB_ROLES" (
-  "ID" NUMBER NOT NULL,
-  "NOMBRE_ROL" VARCHAR2(45) NOT NULL,
-  "PERMISOS"   VARCHAR2(45),
-  CONSTRAINT "TB_ROLES_PK" PRIMARY KEY ("ID"),
-  CONSTRAINT "TB_ROLES_UK" UNIQUE ("NOMBRE_ROL")
-);
+CREATE OR REPLACE TRIGGER "BI_TB_TRANSACCIONES"  
+  before insert on "TB_TRANSACCIONES"              
+  for each row 
+begin  
+  if :NEW."ID" is null then
+    select "TB_TRANSACCIONES_SEQ".nextval into :NEW."ID" from dual;
+  end if;
+end;
+/
+
+ALTER TRIGGER "BI_TB_TRANSACCIONES" ENABLE;
 
 --   Insertamos los permisos de los roles
 INSERT INTO TB_ROLES ("ID","NOMBRE_ROL","PERMISOS") 
@@ -65,32 +141,9 @@ VALUES(2,'responsible','2');
 INSERT INTO TB_ROLES ("ID","NOMBRE_ROL","PERMISOS") 
 VALUES(3,'contact',NULL);
 
-
--- TABLA USUARIOS
-
-ALTER TABLE "TB_USUARIOS" ADD "FK_ROL" NUMBER  default 1;
-ALTER TABLE "TB_USUARIOS" ADD "CODIGO_RENOVACION" VARCHAR2(90) DEFAULT NULL;
-ALTER TABLE "TB_USUARIOS" ADD "FEC_RENOVACION" TIMESTAMP DEFAULT NULL;
-ALTER TABLE "TB_USUARIOS" ADD "REST_CLAVE" NUMBER(4,0) DEFAULT 0;
-
-ALTER TABLE "TB_USUARIOS" DROP COLUMN "ROL";
-
-ALTER TABLE  "TB_USUARIOS" MODIFY (clave VARCHAR2(45) NULL);    
-
-ALTER TABLE "TB_USUARIOS"
-ADD CONSTRAINT  "CODIGO_RENOVACION_UNQ" UNIQUE("CODIGO_RENOVACION");
-
--- Asignamos el rol administrador a todos los usuarios actuales, ya que hasta ahora todos los usuarios eran administradores
-UPDATE "TB_USUARIOS" SET "FK_ROL" = 1;
-
+-- Establecemos la relacion entre la tabla de usuarios y la tabla de roles
 ALTER TABLE "TB_USUARIOS" ADD CONSTRAINT
 "TB_USUARIOS_FK" FOREIGN KEY ("FK_ROL") REFERENCES "TB_ROLES" ("ID");
-
-
--- Insertamos como usuarios a los responsables declarados en las aplicaciones
-INSERT INTO "TB_USUARIOS" ("NOMBRE_USUARIO", "NOMBRE", "APELLIDOS", "CORREO_ELEC", "TELF_CONTACTO", "FEC_ALTA", "FK_ROL")
-SELECT SUBSTR("ID", 1, 30), "RESPONSABLE", "RESPONSABLE", "RESP_CORREO", "RESP_TELEFONO", "FECHA_ALTA", 2
-FROM "TB_APLICACIONES";
 
 
 -- Tabla de relacion de responsables y aplicaciones
@@ -98,9 +151,8 @@ FROM "TB_APLICACIONES";
 CREATE TABLE "TB_RESPONSABLE_DE_APLICACIONES" (
   "ID_RESPONSABLES" NUMBER NOT NULL,
   "ID_APLICACIONES" VARCHAR2(48) NOT NULL,
-  PRIMARY KEY ("ID_RESPONSABLES","ID_APLICACIONES")
+  CONSTRAINT TB_RESPONSABLES_PK PRIMARY KEY ("ID_RESPONSABLES","ID_APLICACIONES")
 );
-
 
 -- Agregamos la relacion entre las aplicaciones y los usuarios responsables de ellas
 INSERT INTO "TB_RESPONSABLE_DE_APLICACIONES" ("ID_RESPONSABLES", "ID_APLICACIONES")
@@ -119,4 +171,6 @@ DROP  (responsable,  resp_correo, resp_telefono);
 -- Agregamos el campo de 'habilitado' dejando las aplicaciones habilitadas por defecto
 ALTER TABLE "TB_APLICACIONES"
 ADD HABILITADO NUMBER(1,0) DEFAULT 1;
- 
+
+ALTER TABLE "TB_APLICACIONES"
+MODIFY ("FK_CERTIFICADO" NUMBER NOT NULL);

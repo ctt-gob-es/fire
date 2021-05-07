@@ -2,20 +2,19 @@
 -- **************** Insercion datos ********************
 -- ********************************************************
 
--- ROLES --------
-INSERT INTO TB_ROLES ("id","nombre_rol","permisos") 
+--   Insertamos los permisos de los roles
+INSERT INTO TB_ROLES ("ID","NOMBRE_ROL","PERMISOS") 
 VALUES(1,'admin','1,2');
 
-INSERT INTO TB_ROLES ("id","nombre_rol","permisos") 
+INSERT INTO TB_ROLES ("ID","NOMBRE_ROL","PERMISOS") 
 VALUES(2,'responsible','2');
 
-INSERT INTO TB_ROLES ("id","nombre_rol") 
-VALUES(3,'contact');
+INSERT INTO TB_ROLES ("ID","NOMBRE_ROL","PERMISOS") 
+VALUES(3,'contact',NULL);
 
 -- USUARIO POR DEFECTO --------
-INSERT INTO TB_USUARIOS ("nombre_usuario","clave","nombre","apellidos","usu_defecto","fk_rol") 
+INSERT INTO TB_USUARIOS ("NOMBRE_USUARIO", "CLAVE", "NOMBRE", "APELLIDOS", "USU_DEFECTO", "FK_ROL")
 VALUES('admin','$2y$12$JfP4bTV0i29Mnb3XBPOQl.L8JdbTrpn4fQljv8EEJKIp6NRZLB5TC','default name','default surnames',1,1);
--- VALUES('admin','D/4avRoIIVNTwjPW4AlhPpXuxCU4Mqdhryj/N6xaFQw=','default name','default surnames',1,1);
 
 
 COMMIT;
