@@ -19,7 +19,7 @@ CREATE TABLE `tb_aplicaciones` (
   `nombre` varchar(45) NOT NULL,
   `fecha_alta` TIMESTAMP NOT NULL,
   `fk_certificado` int(11) NOT NULL,
-  `habilitado` tinyint(4) DEFAULT '0',
+  `habilitado` tinyint(4) DEFAULT '1',
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_certificado` FOREIGN KEY (`fk_certificado`) REFERENCES `tb_certificados` (`id_certificado`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -34,10 +34,10 @@ CREATE TABLE `tb_usuarios` (
   `correo_elec` varchar(45) DEFAULT NULL COMMENT 'Correo electrónico',
   `telf_contacto` varchar(45) DEFAULT NULL COMMENT 'Teléfono de contacto',
   `fk_rol` int(11) NOT NULL,
-  `fec_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de alta del usuario.',
+  `fec_alta` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de alta del usuario.',
   `usu_defecto` tinyint(4) NOT NULL DEFAULT '0',
-  `codigo_renovacion` varchar(90) DEFAULT NULL,
-  `fec_renovacion` datetime DEFAULT NULL,
+  `codigo_renovacion` varchar(100) DEFAULT NULL,
+  `fec_renovacion` TIMESTAMP DEFAULT NULL,
   `rest_clave` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `nombre_usuario_UNIQUE` (`nombre_usuario`),
@@ -92,12 +92,13 @@ CREATE TABLE `tb_roles` (
   `permisos` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre_UNIQUE` (`nombre_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE `tb_responsable_de_aplicaciones` (
   `id_responsables` int(11) NOT NULL,
-  `id_aplicaciones` varchar(48) NOT NULL  
+  `id_aplicaciones` varchar(48) NOT NULL,
+  PRIMARY KEY (`id_responsables`,`id_aplicaciones`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

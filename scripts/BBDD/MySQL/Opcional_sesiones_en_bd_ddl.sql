@@ -11,7 +11,7 @@ CREATE TABLE `tb_sesiones` (
   `f_modificacion` bigint(10) NOT NULL,
   `sesion` blob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Tabla para el guardado temporal de documentos en BD
 CREATE TABLE `tb_documentos` (
@@ -19,4 +19,4 @@ CREATE TABLE `tb_documentos` (
   `f_modificacion` bigint(10) NOT NULL,
   `datos` longblob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;

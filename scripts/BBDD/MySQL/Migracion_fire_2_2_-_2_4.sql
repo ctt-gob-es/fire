@@ -2,7 +2,7 @@
 
 
 -- Tabla para el guardado de las referencias a los servidores de log
-SET character_set_client = utf8mb4 ;
+SET character_set_client = UTF8MB4 ;
 CREATE TABLE `tb_servidores_log` (
   `id_servidor` int(11) NOT NULL AUTO_INCREMENT,
   `nombre` varchar(45) NOT NULL,
@@ -12,11 +12,10 @@ CREATE TABLE `tb_servidores_log` (
   PRIMARY KEY (`id_servidor`),
   UNIQUE KEY `nombre_UNIQUE` (`nombre`),
   UNIQUE KEY `url_servicio_log_UNIQUE` (`url_servicio_log`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 -- Tabla de las estadisticas de las firmas
 
-SET character_set_client = utf8mb4 ;
 CREATE TABLE `tb_firmas` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fecha` datetime DEFAULT NULL COMMENT 'Fecha de la operacion',
@@ -28,12 +27,11 @@ CREATE TABLE `tb_firmas` (
   `navegador` varchar(20) NOT NULL COMMENT 'Navegador web',
   `correcta` tinyint(1) DEFAULT NULL COMMENT 'Si la firma es correcta o no',
   `total` int(11) DEFAULT NULL COMMENT 'Numero de operaciones con la esta configuracion',
-  PRIMARY KEY (`id`,`navegador`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 -- Tabla de estadisticas de las transacciones
 
-SET character_set_client = utf8mb4 ;
 CREATE TABLE `tb_transacciones` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fecha` datetime DEFAULT NULL COMMENT 'Fecha de la operacion',
@@ -45,19 +43,18 @@ CREATE TABLE `tb_transacciones` (
   `tamanno` int(11) DEFAULT '0' COMMENT 'Tamano total de los datos procesados',
   `total` int(11) DEFAULT '1' COMMENT 'Numero de transacciones con esta configuracion',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 
 -- Tabla de roles
 
-SET character_set_client = utf8mb4 ;
 CREATE TABLE `tb_roles` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `nombre_rol` varchar(45) NOT NULL,
   `permisos` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre_UNIQUE` (`nombre_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 
 --   Insertamos los permisos de los roles
@@ -72,10 +69,16 @@ VALUES (1,'admin','1,2'),
 
 -- Agregamos los campos necesarios
 ALTER TABLE `tb_usuarios`
-ADD `fk_rol` int(11) NOT NULL DEFAULT 1 AFTER `telf_contacto`,
-ADD `codigo_renovacion` VARCHAR(90) UNIQUE DEFAULT NULL,
+ADD `fk_rol` int(11) AFTER `telf_contacto`,
+ADD `codigo_renovacion` VARCHAR(100) UNIQUE DEFAULT NULL,
 ADD `fec_renovacion` datetime DEFAULT NULL,
 ADD `rest_clave` tinyint(4) DEFAULT 0;
+ 
+UPDATE `tb_usuarios`
+SET `fk_rol` = 1;
+
+ALTER TABLE `tb_usuarios`
+MODIFY `fk_rol` int(11) NOT NULL;
  
 -- Eliminamos los campos sobrantes
 ALTER TABLE `tb_usuarios`
@@ -83,7 +86,7 @@ DROP rol;
 
 -- Modificamos la columna de clave para que pueda ser nula (los usuarios que no tengan permisos de acceso)
 ALTER TABLE `tb_usuarios`
-MODIFY `clave` VARCHAR (45) NULL;
+MODIFY `clave` VARCHAR (2000) NULL COMMENT 'clave condificada con SHA256, con la que se registra el usuario';
 
 -- Creamos la clave foranea con la tabla de roles
 ALTER TABLE `tb_usuarios` 
@@ -104,11 +107,9 @@ FROM `tb_aplicaciones`;
 SET character_set_client = utf8mb4 ;
 CREATE TABLE `tb_responsable_de_aplicaciones` (
   `id_responsables` int(11) NOT NULL ,
-  `id_aplicaciones` varchar(48) NOT NULL
-  
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-ALTER TABLE tb_responsable_de_aplicaciones ADD PRIMARY KEY ( id_responsables , id_aplicaciones );
+  `id_aplicaciones` varchar(48) NOT NULL,
+  PRIMARY KEY (`id_responsables`,`id_aplicaciones`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 -- Agregamos la relacion entre las aplicaciones y los usuarios responsables de ellas
 INSERT INTO `tb_responsable_de_aplicaciones` (`id_responsables`, `id_aplicaciones`)
@@ -129,6 +130,9 @@ DROP resp_telefono;
 -- Agregamos el campo de 'habilitado' dejando las aplicaciones habilitadas por defecto
 ALTER TABLE `tb_aplicaciones`
 ADD `habilitado` tinyint(4) DEFAULT 1;
+
+ALTER TABLE `tb_aplicaciones`
+ADD PRIMARY KEY (`id`);
 
 
 
