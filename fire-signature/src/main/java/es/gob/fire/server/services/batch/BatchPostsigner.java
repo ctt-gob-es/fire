@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.afirma.signers.xml.XmlDSigProviderHelper;
 
 /** Realiza la tercera (y &uacute;ltima) fase de un proceso de firma por lote.
  * Servlet implementation class BatchPostsigner
@@ -30,7 +31,6 @@ public final class BatchPostsigner extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(BatchPostsigner.class.getName());
 
-
 	private static final String BATCH_XML_PARAM = "xml"; //$NON-NLS-1$
 	private static final String BATCH_CRT_PARAM = "certs"; //$NON-NLS-1$
 	private static final String BATCH_TRI_PARAM = "tridata"; //$NON-NLS-1$
@@ -39,6 +39,11 @@ public final class BatchPostsigner extends HttpServlet {
 
 	/** Or&iacute;genes permitidos por defecto desde los que se pueden realizar peticiones al servicio. */
 	private static final String ALL_ORIGINS_ALLOWED = "*"; //$NON-NLS-1$
+
+	static {
+		// Configuramos el proveedor de firma XML
+    	XmlDSigProviderHelper.configureXmlDSigProvider();
+	}
 
 	/** Realiza la tercera y &uacute;ltima fase de un proceso de firma por lote.
 	 * Debe recibir la definici&oacute;n XML (<a href="../doc-files/batch-scheme.html">descripci&oacute;n

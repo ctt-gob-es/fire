@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.afirma.signers.xml.XmlDSigProviderHelper;
+
 
 /** Realiza la primera fase de un proceso de firma por lote.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -36,6 +38,11 @@ public final class BatchPresigner extends HttpServlet {
 
 	/** Or&iacute;genes permitidos por defecto desde los que se pueden realizar peticiones al servicio. */
 	private static final String ALL_ORIGINS_ALLOWED = "*"; //$NON-NLS-1$
+
+	static {
+		// Configuramos el proveedor de firma XML
+    	XmlDSigProviderHelper.configureXmlDSigProvider();
+	}
 
 	/** Realiza la primera fase de un proceso de firma por lote.
 	 * Debe recibir la definici&oacute;n del lote en un XML (<a href="../doc-files/batch-scheme.html">descripci&oacute;n

@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.afirma.signers.xml.Utils;
+import es.gob.afirma.signers.xml.XmlDSigProviderHelper;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.DocInfo;
 import es.gob.fire.server.connector.FIReConnector;
@@ -56,12 +56,8 @@ public final class PreSignService extends HttpServlet {
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
     static {
-
-    	LOGGER.info(" =========== INSTALAMOS EL PROVEEDOR 3");
-
-		// Indicamos si se debe instalar el proveedor de firma XML de Apache
-		//Utils.installXmlDSigProvider(ConfigManager.isAlternativeXmlDSigActive());
-    	Utils.installXmlDSigProvider(true);
+		// Configuramos el proveedor de firma XML
+    	XmlDSigProviderHelper.configureXmlDSigProvider();
     }
 
     /** Carga los datos para su posterior firma en servidor.
