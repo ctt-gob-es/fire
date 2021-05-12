@@ -202,6 +202,7 @@ public class ConfigManager {
 				LOGGER.severe("No se pudieron mapear las variables de entorno del fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
 			}
 
+			// Comprobamos el valor establecido para la clase de cifrado
 			if (config.containsKey(PARAM_CIPHER_CLASS)) {
 				final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
 				if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
@@ -216,6 +217,14 @@ public class ConfigManager {
 						LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
 					}
 				}
+			}
+
+			// Comprobamos si se establecieron las propiedades para la conexion con la base de
+			// datos y advertimos de las consecuencias en caso contrario
+			if (getProperty(PROP_DB_DRIVER) == null || getProperty(PROP_DB_CONNECTION) == null) {
+				LOGGER.warning("No se ha declarado la clase del driver JDBC y/o la cadena de conexion a la BD en el fichero de configuracion. " //$NON-NLS-1$
+						+ String.format("Asegurese de habilitar las propiedades %1s y %2s como alternativa", //$NON-NLS-1$
+								PROP_APP_ID, PROP_CERTIFICATE));
 			}
 		}
 	}
@@ -253,9 +262,7 @@ public class ConfigManager {
 	 */
 	public static String getProviderClass(final String name) {
 		return getProperty(PREFIX_PROP_PROVIDER + name);
-
 	}
-
 
 	/**
 	 * Recupera el fichero externo de la conexi&oacute;n de un proveedor.
@@ -269,7 +276,6 @@ public class ConfigManager {
 		}
 		return getProperty(PREFIX_PROP_PROVIDER + name + SUFIX_PROP_INFO_FILE_PROVIDER);
 	}
-
 
 	/**
 	 * Identifica si se ha configurado un proveedor como seguro y, por lo tanto, no es
@@ -322,13 +328,7 @@ public class ConfigManager {
 	 * @return Clase de conexi&oacute;n.
 	 */
 	public static String getJdbcDriverString() {
-		final String driver = getProperty(PROP_DB_DRIVER);
-		if (driver == null) {
-			LOGGER.warning(
-					String.format("No se ha declarado la clase del driver JDBC de la BD en el fichero de configuracion. " //$NON-NLS-1$
-							+ "Asegurese de habilitar las propiedades %1s y %2s como alternativa", PROP_APP_ID, PROP_CERTIFICATE)); //$NON-NLS-1$
-		}
-		return driver;
+		return getProperty(PROP_DB_DRIVER);
 	}
 
 	/**
@@ -336,13 +336,7 @@ public class ConfigManager {
 	 * @return Cadena de conexi&oacute;n con la base de datos.
 	 */
 	public static String getDataBaseConnectionString() {
-		final String dbConnection = getProperty(PROP_DB_CONNECTION);
-		if (dbConnection == null) {
-			LOGGER.warning(
-					String.format("No se ha declarado la cadena de conexion a la BD en el fichero de configuracion. " //$NON-NLS-1$
-							+ "Asegurese de habilitar las propiedades %1s y %2s como alternativa", PROP_APP_ID, PROP_CERTIFICATE)); //$NON-NLS-1$
-		}
-		return dbConnection;
+		return getProperty(PROP_DB_CONNECTION);
 	}
 
 	/**

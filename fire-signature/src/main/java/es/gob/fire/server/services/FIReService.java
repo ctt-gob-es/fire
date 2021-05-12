@@ -240,7 +240,7 @@ public class FIReService extends HttpServlet {
             return;
 		}
 
-    	LOGGER.info(logF.f("Peticion de tipo " + op.toString())); //$NON-NLS-1$
+    	LOGGER.info(logF.f("Peticion de tipo " + op)); //$NON-NLS-1$
 
     	try {
     		switch (op) {

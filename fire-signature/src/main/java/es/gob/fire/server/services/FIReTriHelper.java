@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 [Gobierno de Espana]
+ /* Copyright (C) 2017 [Gobierno de Espana]
  * This file is part of FIRe.
  * FIRe is free software; you can redistribute it and/or modify it under the terms of:
  *   - the GNU General Public License as published by the Free Software Foundation;
@@ -663,21 +663,24 @@ public final class FIReTriHelper {
 
 			final String preSign = triSign.getProperty(PROPERTY_NAME_PRESIGN);
 
-			byte[] hmac;
-			try {
-				final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-				mac.init(key);
-				mac.update(preSign.getBytes(DEFAULT_CHARSET));
-				mac.update(hmacSeed.getBytes(DEFAULT_CHARSET));
-				mac.update(cert.getEncoded());
-				hmac = mac.doFinal();
-			}
-			catch (final Exception e) {
-				throw new SecurityException("No se pudo completar la verificacion de integridad de la firma", e); //$NON-NLS-1$
-			}
+			// No se puede hacer esta comprobacion sin la prefirma (hay que revisar si en XAdES se pudiese con el BASE)
+			if (preSign != null) {
+				byte[] hmac;
+				try {
+					final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+					mac.init(key);
+					mac.update(preSign.getBytes(DEFAULT_CHARSET));
+					mac.update(hmacSeed.getBytes(DEFAULT_CHARSET));
+					mac.update(cert.getEncoded());
+					hmac = mac.doFinal();
+				}
+				catch (final Exception e) {
+					throw new SecurityException("No se pudo completar la verificacion de integridad de la firma", e); //$NON-NLS-1$
+				}
 
-			if (!Arrays.equals(hmac, Base64.decode(verificationHMac))) {
-				throw new SecurityException("Se ha detectado un error de integridad en los datos de firma"); //$NON-NLS-1$
+				if (!Arrays.equals(hmac, Base64.decode(verificationHMac))) {
+					throw new SecurityException("Se ha detectado un error de integridad en los datos de firma"); //$NON-NLS-1$
+				}
 			}
 
 			final String signatureValue = triSign.getProperty(PROPERTY_NAME_PKCS1_SIGN);

@@ -43,7 +43,17 @@ public class DbManager {
 		if (dbConnDriver == null) {
 			LOGGER.log(
 					Level.WARNING,
-					"No se ha podido recuperar la clase del driver JDBC a la BD. No se realizara la conexion"); //$NON-NLS-1$
+					"No se ha declarado la clase del driver JDBC. No se realizara la conexion con la base de datos"); //$NON-NLS-1$
+			return;
+		}
+
+		// Cargamos la cadena de conexion a base de datos
+		dbConnString = ConfigManager.getDataBaseConnectionString();
+		if (dbConnString == null) {
+			LOGGER.log(
+					Level.WARNING,
+					"No se ha podido recuperar la cadena de conexion a la BD. No se realizara la conexion con la base de datos"); //$NON-NLS-1$
+			return;
 		}
 
 		// Instanciamos el driver JDBC
@@ -52,14 +62,6 @@ public class DbManager {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error al instanciar el driver de base de datos", e); //$NON-NLS-1$
-		}
-
-		// Cargamos la cadena de conexion a base de datos
-		dbConnString = ConfigManager.getDataBaseConnectionString();
-		if (dbConnString == null) {
-			LOGGER.log(
-					Level.WARNING,
-					"No se ha podido recuperar la cadena de conexion a la BD. No se realizara la conexion"); //$NON-NLS-1$
 		}
 	}
 
