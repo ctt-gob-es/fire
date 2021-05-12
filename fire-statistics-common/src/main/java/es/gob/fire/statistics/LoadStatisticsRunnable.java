@@ -139,6 +139,17 @@ public class LoadStatisticsRunnable implements Runnable {
 		}
 	}
 
+//	public static enum Result {
+//		/** La operacion no se ha inicializado o no ha finalizado. */
+//		NONE,
+//		/** La operacion finalizo correctamente. */
+//		OK,
+//		/** La operacion termino sin procesar todos los datos. */
+//		WARNING,
+//		/** La operacion termino con errores. */
+//		ERROR
+//	}
+
 	/**
 	 * Obtiene cual es la fecha m&aacute;s reciente de datos cargados.
 	 * @return Fecha de los &uacute;ltimos datos cargados o {@code null}
@@ -225,14 +236,16 @@ public class LoadStatisticsRunnable implements Runnable {
 			final int c = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length()).compareTo(
 					transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length()));
 			if (c != 0) {
+				String errorMsg;
 				if (c < 0) {
-					LOGGER.severe("No se ha encontrado el fichero con los datos de las transacciones correspondiente a la fecha " + //$NON-NLS-1$
-							parseDateStringFromFilename(signatureFiles[i], FILE_SIGN_PREFIX));
+					errorMsg = "No se ha encontrado el fichero con los datos de las transacciones correspondiente a la fecha " + //$NON-NLS-1$
+							parseDateStringFromFilename(signatureFiles[i], FILE_SIGN_PREFIX);
 				} else {
-					LOGGER.severe("No se ha encontrado el fichero con los datos de las firmas correspondiente a la fecha " + //$NON-NLS-1$
-							parseDateStringFromFilename(transactionFiles[i], FILE_TRANS_PREFIX));
+					errorMsg = "No se ha encontrado el fichero con los datos de las firmas correspondiente a la fecha " + //$NON-NLS-1$
+							parseDateStringFromFilename(transactionFiles[i], FILE_TRANS_PREFIX);
 				}
-				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText);
+				LOGGER.severe(errorMsg);
+				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 
 			// Identificamos la fecha de los ficheros que estamos procesando
@@ -241,8 +254,9 @@ public class LoadStatisticsRunnable implements Runnable {
 			try {
 				date = formatter.parse(dateText);
 			} catch (final Exception e) {
-				LOGGER.severe("Se encontro un fichero con una fecha no valida: " + signatureFiles[i]); //$NON-NLS-1$
-				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText);
+				final String errorMsg = "Se encontro un fichero con una fecha no valida: " + signatureFiles[i]; //$NON-NLS-1$
+				LOGGER.severe(errorMsg);
+				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 
 			// Extraemos la informacion de los ficheros
@@ -251,8 +265,9 @@ public class LoadStatisticsRunnable implements Runnable {
 				compactedData = extractData(signatureFiles[i], transactionFiles[i]);
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Ocurrio un error al extraer los datos de los ficheros del dia " + dateText, e); //$NON-NLS-1$
-				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText);
+				final String errorMsg = "Ocurrio un error al extraer los datos de los ficheros del dia " + dateText; //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, errorMsg, e);
+				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 
 			// Insertamos los datos en base de datos
@@ -261,17 +276,19 @@ public class LoadStatisticsRunnable implements Runnable {
 				DbManager.runCommit();
 			}
 			catch (final DBConnectionException e) {
-				LOGGER.log(Level.SEVERE, "No se pudo conectar con la base de datos. Se aborta el proceso de carga de los datos del dia " + dateText, e); //$NON-NLS-1$
-				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText);
+				final String errorMsg = "No se pudo conectar con la base de datos. Se aborta el proceso de carga de los datos del dia " + dateText; //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, errorMsg, e);
+				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Ocurrio un error al guardar los datos del dia " + dateText, e); //$NON-NLS-1$
+				final String errorMsg = "Ocurrio un error al guardar los datos del dia " + dateText; //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, errorMsg, e);
 				try {
 					DbManager.runRollBack();
 				} catch (final Exception e1) {
 					LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas del dia " + dateText, e1); //$NON-NLS-1$
 				}
-				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText);
+				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 
 			// Actualizamos la fecha de los ultimos datos procesados

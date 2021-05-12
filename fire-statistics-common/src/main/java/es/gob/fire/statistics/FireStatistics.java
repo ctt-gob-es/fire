@@ -28,8 +28,9 @@ public class FireStatistics {
 	 * @param jdbcDriver Clase controladora JDBC para la conexi&oacute;n con la base de datos.
 	 * @param dbConnectionString Cadena de conexi&oacute;on a la base de datos.
 	 * @param processCurrentDay Indica si se deben procesar tambi&eacute;n los datos del d&iacute;a actual.
+	 * @return Si la operaci&oacute;n se ejecuta de inmediato, el resultado de la operaci&oacute;n. Si no, {@code null}.
 	 */
-	public static final void init(final String path, final String time, final String jdbcDriver,
+	public static final LoadStatisticsResult init(final String path, final String time, final String jdbcDriver,
 			final String dbConnectionString, final boolean processCurrentDay) {
 
 		dataPath = path;
@@ -44,18 +45,20 @@ public class FireStatistics {
 		}
 
 		// Se crea una tarea para la carga de los datos de estadistica
-		final Runnable loadStatisticsDataTask = new LoadStatisticsRunnable(dataPath, jdbcDriver, dbConnectionString, processCurrentDay);
+		final LoadStatisticsRunnable loadStatisticsDataTask = new LoadStatisticsRunnable(dataPath, jdbcDriver, dbConnectionString, processCurrentDay);
 
 		// Si se ha indicado una hora, se crea un hilo que se ejecutara cada dia a dicha hora.
-		// Si no, se ejecuta de inmediato la tarea en el hilo principal
+		// Si no (caso de uso por consola), se ejecuta de inmediato la tarea en el hilo principal y se devuelve el resultado
 
 		if (startTime != null) {
 			final ScheduledThreadPoolExecutor sch = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
 			sch.scheduleAtFixedRate(loadStatisticsDataTask, getSecondsInitialDelay(startTime), SECONDS_OF_A_DAY, TimeUnit.SECONDS);
+			return null;
 		}
-		else {
-			loadStatisticsDataTask.run();
-		}
+
+		loadStatisticsDataTask.run();
+		return loadStatisticsDataTask.getResult();
+
 	}
 
 	/**

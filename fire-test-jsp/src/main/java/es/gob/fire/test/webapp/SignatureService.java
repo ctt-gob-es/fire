@@ -189,9 +189,9 @@ public class SignatureService extends HttpServlet {
 	        	} else if (item.isFormField() && "upgrade".equals(item.getFieldName())) { //$NON-NLS-1$
 	        		config.setUpgrade(item.getString());
 	        	} else if (!item.isFormField() && "sign-file".equals(item.getFieldName())) { //$NON-NLS-1$
-	        		final InputStream fileContent = item.getInputStream();
-	        		config.setData(Utils.getDataFromInputStream(fileContent));
-	        		fileContent.close();
+	        		try (final InputStream fileContent = item.getInputStream()) {
+	        			config.setData(Utils.getDataFromInputStream(fileContent));
+	        		}
 	        	}
 	        }
 	    } catch (final Exception e) {

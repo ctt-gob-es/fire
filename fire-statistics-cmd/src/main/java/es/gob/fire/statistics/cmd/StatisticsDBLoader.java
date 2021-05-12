@@ -1,14 +1,17 @@
 package es.gob.fire.statistics.cmd;
 
+import java.io.Console;
+import java.io.File;
+import java.net.URL;
+
 import es.gob.fire.statistics.FireStatistics;
+import es.gob.fire.statistics.LoadStatisticsResult;
 import es.gob.fire.statistics.cmd.config.ConfigManager;
 
 /**
  * Clase para la carga de estad&iacute;sticas de FIRe en base de datos.
  */
 public class StatisticsDBLoader {
-
-	private static final String JAR_NAME = "FireStatictDbLoader.jar"; //$NON-NLS-1$
 
 	private static final String PARAM_USE_CONFIG = "-useConfigFile"; //$NON-NLS-1$
 
@@ -19,6 +22,21 @@ public class StatisticsDBLoader {
 	private static final String PARAM_DB_DRIVER = "-driver"; //$NON-NLS-1$
 
 	private static final String PARAM_DB_CONNECTION = "-conn"; //$NON-NLS-1$
+
+	private static final String DEFAULT_JAR_NAME = "FireStatisticsDbLoader.jar"; //$NON-NLS-1$
+
+	private static String JAR_NAME;
+
+	static {
+		try {
+		final Class<?> clazz = StatisticsDBLoader.class;
+		final URL location = clazz.getProtectionDomain().getCodeSource().getLocation();
+		JAR_NAME = new File(location.toURI()).getName();
+		}
+		catch (final Exception e) {
+			JAR_NAME = DEFAULT_JAR_NAME;
+		}
+	}
 
 	public static void main(final String[] args) {
 
@@ -49,55 +67,77 @@ public class StatisticsDBLoader {
 			case PARAM_DATA_DIR:
 				if (i < args.length - 1) {
 					dataDir = args[++i];
-					break;
+				} else {
+					System.out.println("No se ha indicado el directorio con los ficheros de estadisticas"); //$NON-NLS-1$
+					showHelp();
 				}
+				break;
 
 			case PARAM_DB_DRIVER:
 				if (i < args.length - 1) {
 					dbDriver = args[++i];
-					break;
+				} else {
+					System.out.println("No se ha indicado el el driver para la conexion con la base de datos"); //$NON-NLS-1$
+					showHelp();
 				}
+				break;
 
 			case PARAM_DB_CONNECTION:
 				if (i < args.length - 1) {
 					dbConnection = args[++i];
-					break;
+				} else {
+					System.out.println("No se ha indicado la cadena de conexion con la base de datos"); //$NON-NLS-1$
+					showHelp();
 				}
+				break;
 
 			default:
-				showHelp();
-				return;
+				System.out.println("Se ha indicado un parametro no soportado: " + args[i].substring(0, Math.min(args[i].length(), 30))); //$NON-NLS-1$
+//				showHelp();
+//				return;
 			}
 		}
 
 		// Si no se ha indicado configuracion ni se ha petido usar el fichero del componente central,
 		// entonces preguntamos por consola
 		if (!useFileConfig && dataDir == null && dbDriver == null && dbConnection == null) {
-			System.out.println("Desea utilizar el fichero de configuracion de FIRe para cargar los datos? [s/N]"); //$NON-NLS-1$
-			final String r = System.console().readLine();
-			if (!r.equalsIgnoreCase("s")) { //$NON-NLS-1$
-				System.out.println("Se cancela la carga de datos.\n"); //$NON-NLS-1$
-				showHelp();
-				return;
+			final Console console = System.console();
+			if (console != null) {
+				System.out.println("Desea utilizar el fichero de configuracion de FIRe para cargar los datos? [s/N]"); //$NON-NLS-1$
+				final String r = console.readLine();
+				if (!"s".equalsIgnoreCase(r)) { //$NON-NLS-1$
+					System.out.println("Se cancela la carga de datos.\n"); //$NON-NLS-1$
+					showHelp();
+					return;
+				}
+				useFileConfig = true;
 			}
-			useFileConfig = true;
 		}
 
-		//
 
 		// Comprobamos si se indica usar expresamente el fichero de configuracion
+		LoadStatisticsResult result = null;
 		if (useFileConfig) {
-			init(processCurrentDay);
-			return;
+			result = init(processCurrentDay);
 		}
-
 		// Comprobamos si se nos pasa la configuracion especifica para ejecutar el proceso
-		if (dataDir != null && dbDriver != null && dbConnection != null ) {
-			init(dataDir, dbDriver, dbConnection, processCurrentDay);
+		else if (dataDir != null && dbDriver != null && dbConnection != null ) {
+			result = init(dataDir, dbDriver, dbConnection, processCurrentDay);
+		}
+
+		if (result != null) {
+			if (result.isCorrect()) {
+				System.out.println("Se han cargado los datos estadisticos en base de datos"); //$NON-NLS-1$
+			}
+			else {
+				System.err.println(result.getErrorMsg());
+				System.err.println("Fecha de los ultimos datos cargados: " + result.getLastDateProcessedText()); //$NON-NLS-1$
+			}
 			return;
 		}
 
-		// En caso contrario, mostramos el mensaje de error
+		// Si no se ha mostrado ninguna convinacion valida de parametros para ejecutar
+		// la operacion, mostramos el mensaje de ayuda
 		showHelp();
 	}
 
@@ -105,21 +145,21 @@ public class StatisticsDBLoader {
 	 * Iniciamos la carga de datos utilizando la informaci&oacute;n del fichero de configuraci&oacute;n.
 	 * @param processCurrentDay Indica si se deben procesar los datos del d&iacute;a actual.
 	 */
-	private static void init(final boolean processCurrentDay) {
+	private static LoadStatisticsResult init(final boolean processCurrentDay) {
 
 		try {
 			ConfigManager.checkConfiguration("config.properties"); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			System.err.println("Error al cargar la configuracion"); //$NON-NLS-1$
-			return;
+			return null;
 		}
 
 		final String dataDir = ConfigManager.getStatisticsDir();
 		final String dbDriver = ConfigManager.getJdbcDriverString();
 		final String dbConn = ConfigManager.getDataBaseConnectionString();
 
-		init(dataDir, dbDriver, dbConn, processCurrentDay);
+		return init(dataDir, dbDriver, dbConn, processCurrentDay);
 	}
 
 	/**
@@ -129,9 +169,9 @@ public class StatisticsDBLoader {
 	 * @param dbConn Cadena de conexi&oacute;n con la base de datos.
 	 * @param processCurrentDay Indica si se deben procesar los datos del d&iacute;a actual.
 	 */
-	private static void init(final String dataDir, final String dbDriver, final String dbConn,
+	private static LoadStatisticsResult init(final String dataDir, final String dbDriver, final String dbConn,
 			final boolean processCurrentDay) {
-		FireStatistics.init(dataDir, null, dbDriver, dbConn, processCurrentDay);
+		return FireStatistics.init(dataDir, null, dbDriver, dbConn, processCurrentDay);
 	}
 
 	/**
@@ -139,7 +179,6 @@ public class StatisticsDBLoader {
 	 */
 	private static void showHelp() {
 		System.out.println("Aplicacion para la carga inmediata de estadisticas de FIRe en base de datos.\n"); //$NON-NLS-1$
-
 		System.out.println("Dependencias:"); //$NON-NLS-1$
 		System.out.println("\tEsta aplicacion requiere de un controlador JDBC para conectar con su base de datos. Configure su \n" //$NON-NLS-1$
 				+ "\tClassPath para tener acceso al controlador desde esta aplicacion o copielo al mismo directorio que \n" //$NON-NLS-1$
@@ -148,13 +187,12 @@ public class StatisticsDBLoader {
 		System.out.println("Uso:"); //$NON-NLS-1$
 		System.out.println(String.format("\tjava -jar %1s [Opciones]\n", JAR_NAME)); //$NON-NLS-1$
 		System.out.println("\t\tCarga los datos usando las opciones proporcionadas.\n"); //$NON-NLS-1$
-		System.out.println(String.format("\tjava -Dfire.config.path=\"DIRECTORIO_CONFIGURACION\" -jar %1s\n", JAR_NAME)); //$NON-NLS-1$
-		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero config.properties que se encuentra en el \n" //$NON-NLS-1$
-				+ "\t\tdirectorio configurado.\n"); //$NON-NLS-1$
-		System.out.println(String.format("\tjava -cp \"Ruta_JDBC;%1s\" es.gob.fire.statistics.cmd.StatisticsDBLoader [Opciones]\n", JAR_NAME)); //$NON-NLS-1$
-		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero config.propeties que se encuentra \n" //$NON-NLS-1$
-				+ "\t\ten el directorio configurado y agregando al classpath ficheros JAR adicionales, entre los que se puede \n" //$NON-NLS-1$
-				+ "\t\tencontrar el del controlador de base de datos.\n"); //$NON-NLS-1$
+		System.out.println(String.format("\tjava -Dfire.config.path=\"DIRECTORIO_CONFIGURACION\" -jar %1s %2s\n", JAR_NAME, PARAM_USE_CONFIG)); //$NON-NLS-1$
+		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero config.properties que se\n" //$NON-NLS-1$
+				+ "\t\tencuentra en el directorio que establecemos en la propia llamada.\n"); //$NON-NLS-1$
+		System.out.println(String.format("\tjava -cp \"Ruta_JDBC%1s%2s\" es.gob.fire.statistics.cmd.StatisticsDBLoader [Opciones]\n", File.pathSeparator, JAR_NAME)); //$NON-NLS-1$
+		System.out.println("\t\tCarga los datos usando las opciones proporcionadas y agregando al classpath ficheros JAR\n" //$NON-NLS-1$
+				+ "\t\tadicionales, entre los que se puede encontrar el del controlador de base de datos.\n"); //$NON-NLS-1$
 
 		System.out.println("Ruta_JDBC:"); //$NON-NLS-1$
 
@@ -163,8 +201,8 @@ public class StatisticsDBLoader {
 		System.out.println("Opciones:"); //$NON-NLS-1$
 
 		System.out.println("\t" + PARAM_USE_CONFIG); //$NON-NLS-1$
-		System.out.println("\t\tCarga los datos en BD usando el fichero de configuracion de FIRe. Si no se usa, se deben usar las \n" //$NON-NLS-1$
-				+ String.format("\t\topciones %1s, %2s y %3s.\n", PARAM_DATA_DIR, PARAM_DB_DRIVER, PARAM_DB_CONNECTION)); //$NON-NLS-1$
+		System.out.println("\t\tCarga los datos en BD usando el fichero de configuracion de FIRe. Si no se usa, se deben\n" //$NON-NLS-1$
+				+ String.format("\t\tusar las opciones %1s, %2s y %3s.\n", PARAM_DATA_DIR, PARAM_DB_DRIVER, PARAM_DB_CONNECTION)); //$NON-NLS-1$
 
 		System.out.println("\t" + PARAM_DATA_DIR); //$NON-NLS-1$
 		System.out.println("\t\tRuta absoluta del directorio con los ficheros de datos estadisticos.\n"); //$NON-NLS-1$

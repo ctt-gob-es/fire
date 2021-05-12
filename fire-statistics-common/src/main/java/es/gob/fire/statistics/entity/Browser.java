@@ -27,7 +27,7 @@ public class Browser {
 	private static String CHROME = "Chrome"; //$NON-NLS-1$
 	private static String SAFARI = "Safari"; //$NON-NLS-1$
 	private static String OPERA = "Opera"; //$NON-NLS-1$
-	private static String OTRO = "OTRO"; //$NON-NLS-1$
+	private static String OTRO = "Otro"; //$NON-NLS-1$
 
 	public Browser() {
 	}

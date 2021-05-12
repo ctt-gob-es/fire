@@ -51,10 +51,10 @@ public class ConfigFileLoader {
 				// Comprobamos que se trate de un fichero sobre el que tengamos permisos y que no
 				// nos hayamos salido del directorio de configuracion indicado
 				if (configFile.isFile() && configFile.canRead() && configDir.equals(configFile.getParentFile())) {
-					final InputStream is = new FileInputStream(configFile);
-					config.load(is);
-					loaded = true;
-					is.close();
+					try (final InputStream is = new FileInputStream(configFile)) {
+						config.load(is);
+						loaded = true;
+					}
 				}
 				else {
 					LOGGER.warn(
@@ -67,12 +67,12 @@ public class ConfigFileLoader {
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio
 			if (!loaded) {
 				LOGGER.info("Se busca en el classpath el fichero de configuracion {}", configFilename); //$NON-NLS-1$
-				final InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilename);
-				if (is == null) {
-					throw new FileNotFoundException("No se encuentra el fichero de configuracion de la aplicacion de pruebas"); //$NON-NLS-1$
+				try (final InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilename)) {
+					if (is == null) {
+						throw new FileNotFoundException("No se encuentra el fichero de configuracion de la aplicacion de pruebas"); //$NON-NLS-1$
+					}
+					config.load(is);
 				}
-				config.load(is);
-				is.close();
 			}
 
 		}

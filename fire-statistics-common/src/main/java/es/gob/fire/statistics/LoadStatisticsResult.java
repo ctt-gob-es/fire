@@ -13,6 +13,8 @@ public class LoadStatisticsResult {
 
 	private final String lastDateProcessedText;
 
+	private final String errorMsg;
+
 	/**
 	 * Construye el resultado de la operaci&oacute;n de carga de estad&iacute;sticas en base de datos.
 	 * @param correct {@code true} si se cargaron todos los datos estad&iacute;sticos disponibles,
@@ -25,6 +27,23 @@ public class LoadStatisticsResult {
 		this.correct = correct;
 		this.lastDateProcessed = lastDateProcessed;
 		this.lastDateProcessedText = lastDateProcessedText;
+		this.errorMsg = null;
+	}
+
+	/**
+	 * Construye el resultado de la operaci&oacute;n de carga de estad&iacute;sticas en base de datos.
+	 * @param correct {@code true} si se cargaron todos los datos estad&iacute;sticos disponibles,
+	 * {@code false} si no se pudieron cargar todos ellos.
+	 * @param lastDateProcessed Fecha de los &uacute;ltimos datos que se pudieron procesar con &eacute;xito.
+	 * @param lastDateProcessedText Fecha en formato texto de los &uacute;ltimos datos que se pudieron
+	 * procesar con &eacute;xito.
+	 * @param errorMsg Mensaje de error que describe porque no finalizo correctamente la carga.
+	 */
+	public LoadStatisticsResult(final boolean correct, final Date lastDateProcessed, final String lastDateProcessedText, final String errorMsg) {
+		this.correct = correct;
+		this.lastDateProcessed = lastDateProcessed;
+		this.lastDateProcessedText = lastDateProcessedText;
+		this.errorMsg = errorMsg;
 	}
 
 	/**
@@ -51,5 +70,13 @@ public class LoadStatisticsResult {
 	 */
 	public String getLastDateProcessedText() {
 		return this.lastDateProcessedText;
+	}
+
+	/**
+	 * Recupera el mensaje de error establecido.
+	 * @return Mensaje de error o {@code null} si no se estableci&oacute;.
+	 */
+	public String getErrorMsg() {
+		return this.errorMsg;
 	}
 }
