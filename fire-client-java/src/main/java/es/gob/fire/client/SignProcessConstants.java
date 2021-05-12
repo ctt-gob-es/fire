@@ -84,7 +84,7 @@ public final class SignProcessConstants {
         XADES("XAdES"), //$NON-NLS-1$
 
         /** XAdES-ASiC-S. */
-        XADES_ASIC_S("CAdES-ASiC-S-tri"), //$NON-NLS-1$
+        XADES_ASIC_S("XAdES-ASiC-S-tri"), //$NON-NLS-1$
 
         /** FacturaE. */
         FACTURAE("FacturaE"), //$NON-NLS-1$
