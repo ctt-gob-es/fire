@@ -71,7 +71,7 @@
 					<name>!false</name> <!-- Se activa siempre que no se indique esta propiedad -->
 				</property>
 			</activation>
-	
+
 			<modules>
 				<module>fire-admin-persistence</module>
 				<module>fire-admin-core</module>
@@ -576,7 +576,4 @@
 		</pluginRepository>
 	</pluginRepositories> -->
 
-  <modules>
-    <module>fire-admin-commons-util</module>
-  </modules>
 </project>

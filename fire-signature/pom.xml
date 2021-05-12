@@ -48,6 +48,12 @@
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-upgrade-afirma</artifactId>
+					<exclusions>
+						<exclusion>
+							<groupId>javax.servlet</groupId>
+							<artifactId>servlet-api</artifactId>
+						</exclusion>
+					</exclusions>
 				</dependency>
  	
 				<dependency>
@@ -106,7 +112,7 @@
 				<dependency>
 					<groupId>javax.servlet</groupId>
 					<artifactId>javax.servlet-api</artifactId>
-					<version>3.0.1</version>
+					<version>3.1.0</version>
 					<scope>provided</scope>
 				</dependency>
 		
@@ -174,6 +180,12 @@
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-upgrade-afirma</artifactId>
+					<exclusions>
+						<exclusion>
+							<groupId>javax.servlet</groupId>
+							<artifactId>servlet-api</artifactId>
+						</exclusion>
+					</exclusions>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -246,18 +258,18 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources/</directory>
-				<excludes>
-					<exclude>*.properties</exclude>
-					<exclude>SafeCert_GateWay_@Firma_Desarrollo.p12</exclude>
-				</excludes>
-				<filtering>false</filtering>
-			</resource>
-			<resource>
-				<directory>src/main/resources/</directory>
 				<includes>
 					<include>version.info</include>
 				</includes>
 				<filtering>true</filtering>
+			</resource>
+
+			<resource>
+				<directory>src/main/resources/</directory>
+				<excludes>
+					<exclude>*.properties</exclude>
+					<exclude>SafeCert_GateWay_@Firma_Desarrollo.p12</exclude>
+				</excludes>
 			</resource>
 		</resources>
 	</build>
