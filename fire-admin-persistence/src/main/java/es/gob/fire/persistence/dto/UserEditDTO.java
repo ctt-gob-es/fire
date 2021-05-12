@@ -29,8 +29,14 @@ import javax.validation.constraints.Size;
 
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
+import es.gob.fire.persistence.constraint.FieldMatch;
 import es.gob.fire.persistence.dto.validation.CheckItFirst;
 import es.gob.fire.persistence.dto.validation.ThenCheckIt;
+
+/**
+ * Validation annotation to validate that 2 fields have the same value.
+ */
+@FieldMatch(first = "password", second = "confirmPassword", message = "{form.valid.user.password.confirm}")
 
 /**
  * <p>
@@ -50,21 +56,21 @@ public class UserEditDTO {
 	 * Attribute that represents the value of the input name of the user in the
 	 * form.
 	 */
-	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.name.notempty}")
-	//@Size(min = 1, max = NumberConstants.NUM15, groups = ThenCheckIt.class)
+	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.name.notempty}")
+	@Size(min = 1, max = NumberConstants.NUM45, groups = ThenCheckIt.class)
 	private String nameEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input surnames of the user in
 	 * the form.
 	 */
-	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.surnames.notempty}")
-	//@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.surnames.notempty}")
+	@Size(min = 1, max = NumberConstants.NUM100, groups = ThenCheckIt.class)
 	private String surnamesEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input username of the user in
-	 * the form.
+	 * the form. It can be empty if the user is root.
 	 */
 	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.login.notempty}")
 	//@Size(min = NumberConstants.NUM5, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
@@ -74,16 +80,31 @@ public class UserEditDTO {
 	 * Attribute that represents the value of the input email of the user in the
 	 * form.
 	 */
-	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.email.notempty}")
-	//@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM255, groups = ThenCheckIt.class)
+	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.email.notempty}")
+	@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM255, groups = ThenCheckIt.class)
 	private String emailEdit = UtilsStringChar.EMPTY_STRING;
-	
+
+	/**
+	 * Attribute that represents the value of the input password of the user in the form.
+	 * It can be empty if the user isn't change its role to admin.
+	 */
+	//@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
+	//@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message="{form.valid.user.password.noPattern}", groups=ThenCheckIt.class)
+    private String password = UtilsStringChar.EMPTY_STRING;
+
+	/**
+	 * Attribute that represents the value of the input password of the user in the form.
+	 * It can be empty if the user isn't change its role to admin.
+	 */
+	//@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
+    private String confirmPassword = UtilsStringChar.EMPTY_STRING;
+
 	/**
 	 * Attribute that represents the identifier for the use role selected in the user form.
 	 */
 	private Long rolId;
 
-	
+
 	/**
 	 * Attribute that represents the value of the input telf of the user in
 	 * the form.
@@ -91,8 +112,8 @@ public class UserEditDTO {
 	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.telf.notempty}")
 	//@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String telfEdit = UtilsStringChar.EMPTY_STRING;
-	
-	
+
+
 	/**
 	 * Attribute that represents the value of the input rol of the user in
 	 * the form.
@@ -100,129 +121,129 @@ public class UserEditDTO {
 	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.rol.notempty}")
 	//@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String rolEdit = UtilsStringChar.EMPTY_STRING;
-	
-	
+
+
 	/**
 	 * Gets the value of the attribute {@link #idUserFireEdit}.
 	 * @return the value of the attribute {@link #idUserFireEdit}.
 	 */
 	public Long getIdUserFireEdit() {
-		return idUserFireEdit;
+		return this.idUserFireEdit;
 	}
 
-	
+
 	/**
 	 * Sets the value of the attribute {@link #idUserFireEdit}.
 	 * @param idUserFireEditParam The value for the attribute {@link #idUserFireEdit}.
 	 */
-	public void setIdUserFireEdit(Long idUserFireEditParam) {
+	public void setIdUserFireEdit(final Long idUserFireEditParam) {
 		this.idUserFireEdit = idUserFireEditParam;
 	}
 
-	
+
 	/**
 	 * Gets the value of the attribute {@link #nameEdit}.
 	 * @return the value of the attribute {@link #nameEdit}.
 	 */
 	public String getNameEdit() {
-		return nameEdit;
+		return this.nameEdit;
 	}
 
-	
+
 	/**
 	 * Sets the value of the attribute {@link #nameEdit}.
 	 * @param nameEditParam The value for the attribute {@link #nameEdit}.
 	 */
-	public void setNameEdit(String nameEditParam) {
+	public void setNameEdit(final String nameEditParam) {
 		this.nameEdit = nameEditParam;
 	}
 
-	
+
 	/**
 	 * Gets the value of the attribute {@link #surnamesEdit}.
 	 * @return the value of the attribute {@link #surnamesEdit}.
 	 */
 	public String getSurnamesEdit() {
-		return surnamesEdit;
+		return this.surnamesEdit;
 	}
 
-	
+
 	/**
 	 * Sets the value of the attribute {@link #surnamesEdit}.
 	 * @param surnamesEditParam The value for the attribute {@link #surnamesEdit}.
 	 */
-	public void setSurnamesEdit(String surnamesEditParam) {
+	public void setSurnamesEdit(final String surnamesEditParam) {
 		this.surnamesEdit = surnamesEditParam;
 	}
 
-	
+
 	/**
 	 * Gets the value of the attribute {@link #usernameEdit}.
 	 * @return the value of the attribute {@link #usernameEdit}.
 	 */
 	public String getUsernameEdit() {
-		return usernameEdit;
+		return this.usernameEdit;
 	}
-	
 
-	
+
+
 	/**
 	 * Sets the value of the attribute {@link #usernameEdit}.
 	 * @param usernameEditParam The value for the attribute {@link #usernameEdit}.
 	 */
-	public void setUsernameEdit(String usernameEditParam) {
+	public void setUsernameEdit(final String usernameEditParam) {
 		this.usernameEdit = usernameEditParam;
 	}
 
-	
+
 	/**
 	 * Gets the value of the attribute {@link #emailEdit}.
 	 * @return the value of the attribute {@link #emailEdit}.
 	 */
 	public String getEmailEdit() {
-		return emailEdit;
+		return this.emailEdit;
 	}
 
-	
+
 	/**
 	 * Sets the value of the attribute {@link #emailEdit}.
 	 * @param emailEditParam The value for the attribute {@link #emailEdit}.
 	 */
-	public void setEmailEdit(String emailEditParam) {
+	public void setEmailEdit(final String emailEditParam) {
 		this.emailEdit = emailEditParam;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #telfEdit}.
 	 * @return the value of the attribute {@link #telfEdit}.
 	 */
 	public String getTelfEdit() {
-		return telfEdit;
+		return this.telfEdit;
 	}
 
-	
+
 	/**
 	 * Sets the value of the attribute {@link #telfEdit}.
 	 * @param surnamesEditParam The value for the attribute {@link #telfEdit}.
 	 */
-	public void setTelfEdit(String telfEditParam) {
+	public void setTelfEdit(final String telfEditParam) {
 		this.telfEdit = telfEditParam;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #rolEdit}.
 	 * @return the value of the attribute {@link #rolEdit}.
 	 */
 	public String getRolEdit() {
-		return rolEdit;
+		return this.rolEdit;
 	}
 
-	
+
 	/**
 	 * Sets the value of the attribute {@link #rolEdit}.
 	 * @param surnamesEditParam The value for the attribute {@link #rolfEdit}.
 	 */
-	public void setRolEdit(String rolEditParam) {
+	public void setRolEdit(final String rolEditParam) {
 		this.rolEdit = rolEditParam;
 	}
 
@@ -231,19 +252,47 @@ public class UserEditDTO {
 	 * @return the value of the attribute {@link #rolId}.
 	 */
 	public Long getRolId() {
-		return rolId;
+		return this.rolId;
 	}
 
-	
+
 	/**
 	 * Sets the value of the attribute {@link #rolId}.
 	 * @param rolIdParam The value for the attribute {@link #rolId}.
 	 */
-	public void setRolId(Long rolIdParam) {
+	public void setRolId(final Long rolIdParam) {
 		this.rolId = rolIdParam;
 	}
 
+	/**
+	 * Gets the value of the attribute {@link #password}.
+	 * @return the value of the attribute {@link #password}.
+	 */
+	public String getPassword() {
+		return this.password;
+	}
 
-	
+	/**
+	 * Sets the value of the attribute {@link #password}.
+	 * @param passwordParam The value for the attribute {@link #password}.
+	 */
+	public void setPassword(final String passwordParam) {
+		this.password = passwordParam;
+	}
 
+	/**
+	 * Gets the value of the attribute {@link #confirmPassword}.
+	 * @return the value of the attribute {@link #confirmPassword}.
+	 */
+	public String getConfirmPassword() {
+		return this.confirmPassword;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #confirmPassword}.
+	 * @param confirmPasswordParam The value for the attribute {@link #confirmPassword}.
+	 */
+	public void setConfirmPassword(final String confirmPasswordParam) {
+		this.confirmPassword = confirmPasswordParam;
+	}
 }

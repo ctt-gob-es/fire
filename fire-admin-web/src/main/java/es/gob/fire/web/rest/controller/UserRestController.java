@@ -58,7 +58,6 @@ import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.dto.validation.OrderedValidation;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
-import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.IUserService;
@@ -70,32 +69,17 @@ import es.gob.fire.persistence.service.IUserService;
  */
 @RestController
 public class UserRestController {
-	
+
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(UserRestController.class);
 
 	/**
-	 * Attribute that represents the identifier of the html input file field for the keystore file.
-	 */
-	private static final String FIELD_FILE = "file";
-
-	/**
-	 * Attribute that represents the identifier of the html input id field for the user.
-	 */
-	private static final String FIELD_ID_USER = "idUser";
-
-	/**
 	 * Attribute that represents the span text.
 	 */
 	private static final String SPAN = "_span";
 
-	/**
-	 * Attribute that represents the user column someCertNotValid. 
-	 */
-	private static final String COLUMN_CERT_NOT_VALID = "someCertNotValid";
-	
 	/**
 	 * Constant that represents the key Json 'errorSaveUser'.
 	 */
@@ -107,20 +91,20 @@ public class UserRestController {
 	 */
 	@Autowired
 	private IUserService userService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the
 	 * repository.
 	 */
 	@Autowired
 	private IApplicationService appService;
-			
+
 	/**
 	 * Attribute that represents the context object.
 	 */
 	@Autowired
 	private ServletContext context;
-	
+
 	/**
 	 * Method that maps the list users web requests to the controller and
 	 * forwards the list of users to the view.
@@ -132,7 +116,7 @@ public class UserRestController {
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/usersdatatable", method = RequestMethod.GET)
 	public DataTablesOutput<User> users(@NotEmpty final DataTablesInput input) {
-		return (DataTablesOutput<User>) userService.getAllUser(input);
+		return this.userService.getAllUser(input);
 	}
 
 	/**
@@ -147,16 +131,24 @@ public class UserRestController {
 	 */
 	@RequestMapping(path = "/deleteuser", method = RequestMethod.POST)
 	public String deleteUser(@RequestParam("id") final Long userId, @RequestParam("index") final String index) {
-			
+
 		String result = index;
-		
-		List<ApplicationResponsible> responsables = appService.getApplicationResponsibleByUserId(userId);
-		
-		if (responsables != null || responsables.size() > 0) {
-			result = "error.No se ha podido borrar el usuario, tiene aplicaciones asociadas.";
+
+		final User user = this.userService.getUserByUserId(userId);
+
+		if (user.getRoot() == Boolean.TRUE) {
+			result = "error.No se puede eliminar al administrador principal.";
 		}
-		
-		userService.deleteUser(userId);
+		else {
+			final List<ApplicationResponsible> responsables = this.appService.getApplicationResponsibleByUserId(userId);
+
+			if (responsables == null || responsables.size() > 0) {
+				result = "error.No se ha podido borrar el usuario, tiene aplicaciones asociadas.";
+			}
+			else {
+				this.userService.deleteUser(userId);
+			}
+		}
 		return result;
 	}
 
@@ -173,35 +165,43 @@ public class UserRestController {
 	@RequestMapping(value = "/saveuser", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
 	public @ResponseBody DataTablesOutput<User> save(@Validated(OrderedValidation.class) @RequestBody final UserDTO userForm, final BindingResult bindingResult) {
-		DataTablesOutput<User> dtOutput = new DataTablesOutput<User>();
-		List<User> listNewUser = new ArrayList<User>();
-		JSONObject json = new JSONObject();
-		
+		final DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
+		List<User> listNewUser = new ArrayList<>();
+		final JSONObject json = new JSONObject();
+
+		boolean adminRol;
 		if (bindingResult.hasErrors()) {
-			listNewUser = StreamSupport.stream(userService.getAllUser().spliterator(), false).collect(Collectors.toList());
-			for (FieldError o: bindingResult.getFieldErrors()) {
+			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 			dtOutput.setError(json.toString());
-			
-		} else if (userService.isAdminRol(userForm.getRolId()) && emptyAdminPassword(userForm)) { 	
-			
-			json.put("passwordAdd" + SPAN, "El campo contraseña es obligatorio.");
-			
-		} else if (userService.isAdminRol(userForm.getRolId()) && notMatchingConfirmPassword(userForm.getPassword(), userForm.getConfirmPassword())) {
-			
-			json.put("passwordAdd" + SPAN, "Los campos de contraseña deben coincidir.");
-			json.put("confirmPasswordAdd" + SPAN, "Los campos de contraseña deben coincidir.");
-			
+
+		} else if ((adminRol = this.userService.isAdminRol(userForm.getRolId())) && emptyAdminPassword(userForm)) {
+
+			json.put("passwordAdd" + SPAN, "El campo contrase\u00F1a es obligatorio.");
+			dtOutput.setError(json.toString());
+
+		} else if (adminRol && notMatchingConfirmPassword(userForm.getPassword(), userForm.getConfirmPassword())) {
+
+			json.put("passwordAdd" + SPAN, "Los campos de contrase\\u00F1a deben coincidir.");
+			json.put("confirmPasswordAdd" + SPAN, "Los campos de contrase\\u00F1a deben coincidir.");
+			dtOutput.setError(json.toString());
+
+		} else if (this.userService.getUserByUserName(userForm.getLogin()) != null) {
+
+			json.put("loginAdd" + SPAN, "Ya existe un usuario con el login seleccionado.");
+			dtOutput.setError(json.toString());
+
 		} else {
 			try {
-				
-				User user = userService.saveUser(userForm);
+
+				final User user = this.userService.saveUser(userForm);
 
 				listNewUser.add(user);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
-				listNewUser = StreamSupport.stream(userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+				listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_USER, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
 				dtOutput.setError(json.toString());
 			}
@@ -219,9 +219,9 @@ public class UserRestController {
 	 * @param userForm
 	 * @return
 	 */
-	private boolean emptyAdminPassword(UserDTO userForm) {
-		
-		return (userForm.getPassword() == null || userForm.getPassword().isEmpty());
+	private boolean emptyAdminPassword(final UserDTO userForm) {
+
+		return userForm.getPassword() == null || userForm.getPassword().isEmpty();
 	}
 
 	/**
@@ -233,24 +233,24 @@ public class UserRestController {
 	@RequestMapping(value = "/saveuseredit", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
 	public @ResponseBody DataTablesOutput<User> saveEdit(@Validated(OrderedValidation.class) @RequestBody final UserEditDTO userForm, final BindingResult bindingResult) {
-		DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
-		List<User> listNewUser = new ArrayList<User>();
+		final DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
+		List<User> listNewUser = new ArrayList<>();
 
 		if (bindingResult.hasErrors()) {
-			listNewUser = StreamSupport.stream(userService.getAllUser().spliterator(), false).collect(Collectors.toList());
-			JSONObject json = new JSONObject();
-			for (FieldError o: bindingResult.getFieldErrors()) {
+			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+			final JSONObject json = new JSONObject();
+			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 			dtOutput.setError(json.toString());
 		} else {
 			try {
-				
-				User user = userService.updateUser(userForm);
-				
+
+				final User user = this.userService.updateUser(userForm);
+
 				listNewUser.add(user);
-			} catch (Exception e) {
-				listNewUser = StreamSupport.stream(userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+			} catch (final Exception e) {
+				listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
 				throw e;
 			}
 		}
@@ -270,24 +270,24 @@ public class UserRestController {
 	@RequestMapping(value = "/saveuserpassword", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public String savePassword(@Validated(OrderedValidation.class) @RequestBody final UserPasswordDTO userFormPassword, final BindingResult bindingResult) {
 		String result = UtilsStringChar.EMPTY_STRING;
-		
+
 		if (bindingResult.hasErrors()) {
-			JSONObject json = new JSONObject();
-			for (FieldError o: bindingResult.getFieldErrors()) {
+			final JSONObject json = new JSONObject();
+			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 			result = json.toString();
-			
-		} else if (notMatchingConfirmPassword(userFormPassword.getPassword(), userFormPassword.getConfirmPassword())) { 
-			
-			JSONObject json = new JSONObject();
+
+		} else if (notMatchingConfirmPassword(userFormPassword.getPassword(), userFormPassword.getConfirmPassword())) {
+
+			final JSONObject json = new JSONObject();
 			json.put("password" + SPAN, "Los campos de contraseña deben coincidir.");
 			json.put("confirmPassword" + SPAN, "Los campos de contraseña deben coincidir.");
 			result = json.toString();
-			
+
 		} else {
-			
-			result = userService.changeUserPassword(userFormPassword);
+
+			result = this.userService.changeUserPassword(userFormPassword);
 		}
 
 		return result;
@@ -298,9 +298,9 @@ public class UserRestController {
 	 * @param confirmPassword
 	 * @return
 	 */
-	private boolean notMatchingConfirmPassword(String password, String confirmPassword) {
-		
-		return !(password.equals(confirmPassword));		
+	private boolean notMatchingConfirmPassword(final String password, final String confirmPassword) {
+
+		return !password.equals(confirmPassword);
 	}
 
 	/**
@@ -311,22 +311,22 @@ public class UserRestController {
 	 */
 	@RequestMapping(value = "/menueditsave", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public String saveEditMenu(@Validated(OrderedValidation.class) @RequestBody final UserEditDTO userForm, final BindingResult bindingResult) {
-		
+
 		String result = UtilsStringChar.EMPTY_STRING;
 
 		if (bindingResult.hasErrors()) {
-			JSONObject json = new JSONObject();
-			for (FieldError o: bindingResult.getFieldErrors()) {
+			final JSONObject json = new JSONObject();
+			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 			result = json.toString();
 		} else {
 			try {
-				
-				userService.updateUser(userForm);
+
+				this.userService.updateUser(userForm);
 
 				result = "0";
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				result = "-1";
 				throw e;
 			}
@@ -340,7 +340,7 @@ public class UserRestController {
 	 * @return userService
 	 */
 	public IUserService getUserService() {
-		return userService;
+		return this.userService;
 	}
 
 	/**
@@ -350,20 +350,20 @@ public class UserRestController {
 	public void setUserService(final IUserService userServiceP) {
 		this.userService = userServiceP;
 	}
-	
+
 	/**
 	 * Get context.
 	 * @return context
 	 */
 	public ServletContext getContext() {
-		return context;
+		return this.context;
 	}
 
 	/**
 	 * Set context.
 	 * @param contextP set context
 	 */
-	public void setContext(ServletContext contextP) {
+	public void setContext(final ServletContext contextP) {
 		this.context = contextP;
 	}
 

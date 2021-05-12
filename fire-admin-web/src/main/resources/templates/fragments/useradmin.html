@@ -210,10 +210,19 @@ $(document).ready(function() {
 				                data : JSON.stringify($("#userForm").serializeJSON()),
 				                type:'POST',
 				                success: function(data){
+				                	console.log("Success");
 				                	var errores = JSON.parse(data.error);
 				  				  	
 				  				  	if (data.error != null){
-										$('#userForm').append('<div id="errorModalUser2" class="alert alert-danger" role="alert"><strong>'+ errores["password_span"] +'</strong></div>');
+				  				  		var errorMsg;
+				  				  		if (errores["password_span"]) {
+				  				  			errorMsg = errores["password_span"];
+				  				  		} else if (errores["passwordAdd_span"]) {
+				  				  			errorMsg = errores["passwordAdd_span"];
+				  				  		} else if (errores["loginAdd_span"]) {
+				  				  			errorMsg = errores["loginAdd_span"];
+				  				  		}
+										$('#userForm').append('<div id="errorModalUser2" class="alert alert-danger" role="alert"><strong>'+ errorMsg +'</strong></div>');
 				  				  	}else{
 					  				  	tbl.row.add($(data.data)).draw(false);
 		    		                    
@@ -236,6 +245,8 @@ $(document).ready(function() {
 				                    
 				                },
 				                error:function(data){
+				                	console.log("Error: " + data.error);
+
 				                	hide();
 				                	$('#errorModalUser').remove();
 				                	$('#userForm').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>' + [[#{user.admin.error.sameName}]] + '</strong></div>');

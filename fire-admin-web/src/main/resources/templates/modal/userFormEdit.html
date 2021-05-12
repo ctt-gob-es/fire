@@ -63,6 +63,31 @@
 							</select>
 					</div>
 					
+					
+					<div class="form-group">
+						
+							<label for="passwordEdit" class="col-form-label" th:text="#{form.user.password}"></label>
+							<script th:inline="javascript">
+								/*<![CDATA[*/
+								    var messagePassword = /*[[#{form.user.password.pattern}]]*/ 'default';
+								/*]]>*/
+							</script>
+							<input type="password" style="display:none">
+							<input onblur="validate(this,messagePassword);" type="password" name="passwordEdit" id="passwordEdit" th:field="*{password}" class="form-control"  required />
+							<div id="invalid-passwordAdd" class="invalid-modal" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
+					<div class="form-group">
+						
+							<label for="confirmPasswordEdit" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
+							<input onblur="validateConfirmPassword();" type="password" name="confirmPasswordEdit" id="confirmPasswordEdit" th:field="*{confirmPassword}" class="form-control"  required />
+							<div id="invalid-confirmPassword" class="invalid-modal" ></div>
+						
+						<div style="clear:both;"/>
+					</div>
+					
 					<div class="form-group">
 						
 							<label for="emailEdit" class="col-form-label" th:text="#{form.user.email}"></label>
@@ -90,30 +115,6 @@
 						
 						<div style="clear:both;"/>
 					</div>
-					
-					
-					<!-- <div class="form-group-modal">
-						
-							<label for="rolEdit" class="col-form-label" th:text="#{form.user.rol}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageRol = /*[[#{form.user.surnames.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<select
-								id="query" name="query" class="form-control">
-								<option selected="selected" value=""
-									th:text="#{form.user.Editrol.pattern}"></option>
-								<option selected="selected" value="" th:disabled="disabled"
-							th:text="#{form.user.Editrol.pattern}"></option>
-						<option  th:value="'1'" th:text="#{form.user.rol.administrador}"></option>
-   						<option  th:value="'2'" th:text="#{form.user.rol.responsable}"></option>
-   						<option  th:value="'3'" th:text="#{form.user.rol.contacto}"></option>
-							</select>
-							<div id="invalid-rol" class="invalid-feedback" ></div>
-						
-						<div style="clear:both;"/>
-					</div> -->
 				</form>
 			</div>
 			<div class="modal-footer">
@@ -125,31 +126,66 @@
 </div>
 
 <script th:inline="javascript">
-$(document).ready(function() {
 
-	$('#rolId').change(function() {
-	       
+	var currentRol = -1;
+
+	$(document).ready(function() {
+		
+		// El administrador principal (admin) no puede modificar su nombre de usuario ni su rol
+		if ($('#usernameEdit').val() == "admin") {
+			$('#usernameEdit').prop("disabled", true);
+			$('#rolId').prop("disabled", true);
+		}
+		
+		// Las contrasenas no pueden modificarse desde este formulario. Los campos estaran deshabilitados por defecto
+		// y se activaran solo cuando se le cambie el rol de un usuario a administradorcuando
+ 		$('#passwordEdit').prop("disabled", true);
+		$('#confirmPasswordEdit').prop("disabled", true);
+		
+		// El indice del rol inicial para identificar si era adminis
+		currentRol = $("#rolId option:selected").val();
+	});
+
+	// Evento de cambio de valor del listado de roles
+	$( "#rolId" ).change(function() {
+	    
 		hide();
 		
-		var rolSelected = $("#rolId option:selected").text();
+		var rolSelected = $("#rolId option:selected").val();
 			
-		if (rolSelected != 'Administrador') {
-					
+		// Si eramos administrador, nunca activaremos los campos de contrasena.
+		// Tampoco se activaran cuando se asigne un rol distinto de administrador 
+		if (currentRol == 1 || rolSelected != 1) {
+
 			$('#passwordEdit').prop("disabled", true);
 			$('#passwordEdit').val('');
 			$('#confirmPasswordEdit').prop("disabled", true);
 			$('#confirmPasswordEdit').val('');
-					
+
 		} else {
 			$('#passwordEdit').prop("disabled", false);
 			$('#confirmPasswordEdit').prop("disabled", false);
 		}
-	           
-	}); 
+
+	});
 	
-});
-
-
+	function validateConfirmPassword(){
+		
+		var pass = $('#passwordEdit').val();
+	    var repass = $('#confirmPasswordEdit').val();
+		var messageConfirmPassword = /*[[#{form.user.confirmPassword.pattern}]]*/ 'default';
+		
+	    if (pass != repass) {
+	    	$('#invalid-confirmPassword').html(messageConfirmPassword);
+			$('#invalid-confirmPassword').addClass("invalid-modal");
+	    }
+	    else {
+	    	$('#invalid-confirmPassword').html('');
+			$('#invalid-confirmPassword').removeClass("invalid-modal");
+	    }
+		
+	}
+	
 	$( "#editBtnModal" ).click(function( event ) {
 		  event.preventDefault();
 			

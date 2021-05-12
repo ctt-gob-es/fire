@@ -113,28 +113,25 @@
 
 <script th:inline="javascript">
 
-$(document).ready(function() {
-
-	$('#rolId').change(function() {
-	       
-		hide();
-		
-		var rolSelected = $("#rolId option:selected").text();
-			
-		if (rolSelected != 'Administrador') {
-					
-			$('#passwordAdd').prop("disabled", true);
-			$('#passwordAdd').val('');
-			$('#confirmPasswordAdd').prop("disabled", true);
-			$('#confirmPasswordAdd').val('');
-					
-		} else {
-			$('#passwordAdd').prop("disabled", false);
-			$('#confirmPasswordAdd').prop("disabled", false);
-		}
-	           
-	}); 
+//Evento de cambio de valor del listado de roles
+$('#rolId').change(function() {
+    
+	hide();
 	
+	var rolSelected = $("#rolId option:selected").val();
+		
+	if (rolSelected != 1) {
+				
+		$('#passwordAdd').prop("disabled", true);
+		$('#passwordAdd').val('');
+		$('#confirmPasswordAdd').prop("disabled", true);
+		$('#confirmPasswordAdd').val('');
+				
+	} else {
+		$('#passwordAdd').prop("disabled", false);
+		$('#confirmPasswordAdd').prop("disabled", false);
+	}
+           
 });
 
 function validateConfirmPassword(){

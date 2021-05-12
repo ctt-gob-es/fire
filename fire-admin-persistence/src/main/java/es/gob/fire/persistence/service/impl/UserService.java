@@ -62,14 +62,14 @@ public class UserService implements IUserService {
 	/**
 	 * Constant attribute that represents the value of the administrator permission.
 	 */
-	private static final String ROLE_ADMIN_PERMISSON = "1";
-	
+	private static final String ROLE_ADMIN_PERMISSON = "1"; //$NON-NLS-1$
+
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
 	@Autowired
 	private UserRepository repository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
@@ -81,15 +81,15 @@ public class UserService implements IUserService {
 	 */
 	@Autowired
 	private UserDataTablesRepository dtRepository;
-	
+
 
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IUserService#getUsertByUserId(java.lang.Long)
 	 */
 	@Override
-	public User getUserByUserId(Long userId) {
-		return repository.findByUserId(userId);
+	public User getUserByUserId(final Long userId) {
+		return this.repository.findByUserId(userId);
 	}
 
 	/**
@@ -97,68 +97,96 @@ public class UserService implements IUserService {
 	 * @see es.gob.fire.persistence.services.IUserService#saveUser(es.gob.fire.persistence.entity.User)
 	 */
 	@Override
-	public User saveUser(User user) {
-		return repository.save(user);
+	public User saveUser(final User user) {
+		return this.repository.save(user);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.service.IUserService#saveUser(es.gob.fire.persistence.configuration.dto.UserDTO)
 	 */
 	@Override
 	@Transactional
-	public User saveUser(UserDTO userDto) {
+	public User saveUser(final UserDTO userDto) {
 		User user = null;
 		if (userDto.getUserId() != null) {
-			user = repository.findByUserId(userDto.getUserId());
+			user = this.repository.findByUserId(userDto.getUserId());
 		} else {
 			user = new User();
+			user.setRoot(Boolean.FALSE);
 		}
+
+		// Actualizaremos la contrasena solo si se establece
 		if (!StringUtils.isEmpty(userDto.getPassword())) {
-			String pwd = userDto.getPassword();
-			BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
-			String hashPwd = bcpe.encode(pwd);
+			final String pwd = userDto.getPassword();
+			final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
+			final String hashPwd = bcpe.encode(pwd);
 
 			user.setPassword(hashPwd);
 		}
-		
-		user.setUserName(userDto.getLogin());
+
+		// Al usuario root nunca le cambiaremos el nombre de usuario ni el rol
+		if (user.getRoot() != Boolean.TRUE) {
+			user.setUserName(userDto.getLogin());
+			user.setRol(this.rolRepository.findByRolId(userDto.getRolId()));
+		}
 		user.setName(userDto.getName());
 		user.setSurnames(userDto.getSurnames());
 		user.setEmail(userDto.getEmail());
-		user.setStartDate(new Date());
-		user.setRol(rolRepository.findByRolId(userDto.getRolId()));
-		user.setRenovationDate(new Date());
-		user.setRoot(Boolean.FALSE);
 		user.setPhone(userDto.getTelf());
+		user.setStartDate(new Date());
+		user.setRenovationDate(new Date());
+
 		//TODO Rellenar los campos que faltan
-		return repository.save(user);
+		return this.repository.save(user);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.service.IUserService#updateUser(es.gob.fire.persistence.configuration.dto.UserDTO)
 	 */
 	@Override
 	@Transactional
-	public User updateUser(UserEditDTO userDto) {
-		
+	public User updateUser(final UserEditDTO userDto) {
+
 		User user = null;
-		
+
 		if (userDto.getIdUserFireEdit() != null) {
-			user = repository.findByUserId(userDto.getIdUserFireEdit());
+			user = this.repository.findByUserId(userDto.getIdUserFireEdit());
 		} else {
 			user = new User();
+			user.setRoot(Boolean.FALSE);
 		}
+
+		// Al usuario root nunca le cambiaremos el nombre de usuario ni el rol
+		if (user.getRoot() != Boolean.TRUE) {
+			user.setUserName(userDto.getUsernameEdit());
+			user.setRol(this.rolRepository.findByRolId(userDto.getRolId()));
+		}
+
+
+		// Eliminamos la contrasena, si el rol del usuario no tiene permisos de acceso
+		// Se da por hecho, que el permiso de acceso siempre se representara con un valor concreto
+		if (StringUtils.isEmpty(user.getRol().getPermissions())
+				|| !Arrays.asList(user.getRol().getPermissions().split(",")).contains(ROLE_ADMIN_PERMISSON)) { //$NON-NLS-1$
+			user.setPassword(null);
+		}
+		// Actualizaremos la contrasena si se establece y si el usuario
+		// no tenia ya una contrasena, ya que en ese caso la estariamos cambiando.
+		else if (!StringUtils.isEmpty(userDto.getPassword()) && StringUtils.isEmpty(user.getPassword())) {
+			final String pwd = userDto.getPassword();
+			final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
+			final String hashPwd = bcpe.encode(pwd);
+
+			user.setPassword(hashPwd);
+		}
+
 		user.setName(userDto.getNameEdit());
 		user.setSurnames(userDto.getSurnamesEdit());
-		user.setUserName(userDto.getUsernameEdit());
 		user.setEmail(userDto.getEmailEdit());
-		user.setRol(rolRepository.findByRolId(userDto.getRolId()));
 		user.setPhone(userDto.getTelfEdit());
-		//TODO Rellenar los campos que faltan
 
-		return repository.save(user);
+		return this.repository.save(user);
 	}
 
 	/**
@@ -167,17 +195,17 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	@Transactional
-	public void deleteUser(Long userId) {
-		repository.deleteById(userId);
+	public void deleteUser(final Long userId) {
+		this.repository.deleteById(userId);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IUserService#getAllUse()
 	 */
 	@Override
 	public List<User> getAllUser() {
-		return repository.findAll();
+		return this.repository.findAll();
 	}
 
 	/**
@@ -186,25 +214,25 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	public User getUserByUserName(final String userName) {
-		return repository.findByUserName(userName);
+		return this.repository.findByUserName(userName);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IUserService#getUserByRenovationCode(java.lang.String)
 	 */
 	@Override
 	public User getUserByRenovationCode(final String renovationCode) {
-		return repository.findByRenovationCode(renovationCode);
+		return this.repository.findByRenovationCode(renovationCode);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IUserService#getUserByUserNameOrEmail(java.lang.String,java.lang.String)
 	 */
 	@Override
 	public User getUserByUserNameOrEmail(final String userName, final String email) {
-		return repository.findByUserNameOrEmail(userName, email);
+		return this.repository.findByUserNameOrEmail(userName, email);
 	}
 
 	/**
@@ -212,36 +240,36 @@ public class UserService implements IUserService {
 	 * @see es.gob.fire.persistence.services.IUserService#findAll(org.springframework.data.jpa.datatables.mapping.DataTablesInput)
 	 */
 	@Override
-	public DataTablesOutput<User> getAllUser(DataTablesInput input) {
-		return dtRepository.findAll(input);
+	public DataTablesOutput<User> getAllUser(final DataTablesInput input) {
+		return this.dtRepository.findAll(input);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.service.IUserService#changeUserPassword(es.gob.fire.persistence.configuration.dto.UserPasswordDTO)
 	 */
 	@Override
 	@Transactional
-	public String changeUserPassword(UserPasswordDTO userPasswordDto) {
-		User user = repository.findByUserId(userPasswordDto.getIdUserFirePass());
+	public String changeUserPassword(final UserPasswordDTO userPasswordDto) {
+		final User user = this.repository.findByUserId(userPasswordDto.getIdUserFirePass());
 		String result = null;
-		String oldPwd = userPasswordDto.getOldPassword();
-		String pwd = userPasswordDto.getPassword();
-		BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
-		String hashPwd = bcpe.encode(pwd);
+		final String oldPwd = userPasswordDto.getOldPassword();
+		final String pwd = userPasswordDto.getPassword();
+		final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
+		final String hashPwd = bcpe.encode(pwd);
 		try {
 			if (bcpe.matches(oldPwd, user.getPassword())) {
 				user.setPassword(hashPwd);
-				repository.save(user);
+				this.repository.save(user);
 				result = "0";
 			} else {
 				result = "-1";
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			result = "-2";
 			throw e;
 		}
-		return result;	
+		return result;
 	}
 
 	/* (non-Javadoc)
@@ -249,22 +277,22 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	public List<Rol> getAllRol() {
-		
-		return rolRepository.findAll();
+
+		return this.rolRepository.findAll();
 	}
 
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IUserService#isAdminRol(java.lang.Long)
 	 */
 	@Override
-	public boolean isAdminRol(Long idRol) {
-		
+	public boolean isAdminRol(final Long idRol) {
+
 		// Preguntar si permisos de administrador
-		Rol rol = rolRepository.findByRolId(idRol);
-		String[] permissions = rol.getPermissions()==null?new String[]{}:rol.getPermissions().split(UtilsStringChar.SYMBOL_COMMA_STRING);
-		Optional<String> optional = Arrays.stream(permissions).filter(x -> ROLE_ADMIN_PERMISSON.equals(x))
+		final Rol rol = this.rolRepository.findByRolId(idRol);
+		final String[] permissions = rol.getPermissions()==null?new String[]{}:rol.getPermissions().split(UtilsStringChar.SYMBOL_COMMA_STRING);
+		final Optional<String> optional = Arrays.stream(permissions).filter(x -> ROLE_ADMIN_PERMISSON.equals(x))
 							.findFirst();
-		
+
 		return optional.isPresent();
 	}
 

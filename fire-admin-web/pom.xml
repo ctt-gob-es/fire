@@ -56,6 +56,14 @@
 		    <version>1.8</version>
 		</dependency>
 		
+		<!-- Driver de base de datos -->
+		<dependency>
+		    <groupId>mysql</groupId>
+		    <artifactId>mysql-connector-java</artifactId>
+		    <version>8.0.24</version>
+		    <scope>provided</scope>
+		</dependency>
+		
 	</dependencies>
 
 	<build>
