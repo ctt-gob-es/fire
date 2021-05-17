@@ -28,7 +28,8 @@
     	<table name="tb_aplicaciones" />
         <attributes>
             <id name="appId">
-                <generated-value strategy="IDENTITY"/>
+                <!--  <generated-value strategy="IDENTITY"/> -->
+                <generator class="es.gob.fire.persistence.generator.ApplicationIdGenerator"/>
                 <column name="id"/>
             </id>
         </attributes>

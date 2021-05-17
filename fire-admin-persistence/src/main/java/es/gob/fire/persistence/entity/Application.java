@@ -80,8 +80,10 @@ public class Application implements Serializable{
 	 */
 	@Id
 	@Column(name = "ID", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(generator = "tb_aplicaciones_seq")
-	@GenericGenerator(name = "tb_aplicaciones_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_APLICACIONES_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
+	//@GeneratedValue(generator = "tb_aplicaciones_seq")
+	//@GenericGenerator(name = "tb_aplicaciones_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_APLICACIONES_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
+	@GeneratedValue(generator = "app-generator")
+    @GenericGenerator(name = "app-generator", strategy = "es.gob.fire.persistence.generator.ApplicationIdGenerator")
 	@JsonView(DataTablesOutput.View.class)
 	public String getAppId() {
 		return this.appId;
