@@ -33,7 +33,7 @@
 							<label for="certFile1" class="col-form-label"
 									th:text="#{form.certificate.certificado1}"></label>
 								<div class="custom-file" id="customFile1" lang="es"> 
-									<input type="file" class="custom-file-input" id="certFile1"
+									<input type="file" class="custom-file-input" id="certFile1" accept=".cer,.crt"
 										name="certFile1" th:field="*{certFile1}" aria-describedby="fileHelp">
 									<label class="custom-file-label" for="file"
 										th:text="#{form.certificate.file.choose}"></label>
@@ -60,7 +60,7 @@
 							<label for="certFile2" class="col-form-label"
 									th:text="#{form.certificate.certificado2}"></label>
 								<div class="custom-file" id="customFile" lang="es">
-									<input type="file" class="custom-file-input" id="certFile2"
+									<input type="file" class="custom-file-input" id="certFile2" accept=".cer,.crt"
 										name="certFile2" th:field="*{certFile2}" aria-describedby="fileHelp">
 									<label class="custom-file-label" for="file"
 										th:text="#{form.certificate.file.choose}"></label>
