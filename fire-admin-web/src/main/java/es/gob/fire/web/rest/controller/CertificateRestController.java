@@ -186,7 +186,7 @@ public class CertificateRestController {
 
 		List<Application> aplicacionesCert = appService.getByIdCertificado(idCertificate);
 
-		if (aplicacionesCert != null || aplicacionesCert.size() > 0) {
+		if (aplicacionesCert != null && aplicacionesCert.size() > 0) {
 			result = "error.No se ha podido borrar el certificado, tiene aplicaciones asociadas.";
 		} else {
 
