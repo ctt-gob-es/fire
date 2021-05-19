@@ -46,20 +46,6 @@ ALTER TABLE  "TB_APLICACIONES" modify
 ALTER TABLE "TB_APLICACIONES" add constraint
 "TB_APLICACIONES_FK" foreign key ("FK_CERTIFICADO") references "TB_CERTIFICADOS" ("ID_CERTIFICADO");
 
-CREATE SEQUENCE "TB_APLICACIONES_SEQ";
-
-CREATE OR REPLACE TRIGGER "BI_TB_APLICACIONES"  
-  before insert on "TB_APLICACIONES"              
-  for each row 
-begin  
-  if :NEW."ID" is null then
-    select "TB_APLICACIONES_SEQ".nextval into :NEW."ID" from dual;
-  end if;
-end;
-/
-
-ALTER TRIGGER "BI_TB_APLICACIONES" ENABLE;
-
 
 CREATE TABLE  "TB_USUARIOS" 
    ("ID_USUARIO" NUMBER NOT NULL, 
