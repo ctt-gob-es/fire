@@ -20,13 +20,14 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de España.
- * @version 1.0, 22/01/2021.
+ * @version 1.1, 19/05/2021.
  */
 package es.gob.fire.web.rest.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ import es.gob.fire.persistence.service.ICertificateService;
 /**
  * <p>Class that manages the REST requests related to the Certificate administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 24/12/2020.
+ * @version 1.1, 19/05/2021.
  */
 @RestController
 public class CertificateRestController {
@@ -247,21 +248,49 @@ public class CertificateRestController {
 			dtOutput.setError(json.toString());
 			
 		} else {
+				
+			String msgerror = null;
 			try {
 				
+				msgerror = "Error al instanciar el proveedor X.509"; 
+				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
+				
+				X509Certificate cert1;
+				X509Certificate cert2;				
+				
+				if (!certFile1.isEmpty()) {
+	        		try (final InputStream certIs = certFile1.getInputStream();) {
+	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
+	        			certAddForm.setCertBytes1(cert1.getEncoded());
+	        		} catch (CertificateException e) {
+	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado válido";
+	        			throw e;
+	        		}
+				}
+        		
+				if (!certFile2.isEmpty()) {
+				
+					try (final InputStream certIs = certFile2.getInputStream();) {
+	        			cert2 = (X509Certificate) certFactory.generateCertificate(certIs);
+	        			certAddForm.setCertBytes2(cert2.getEncoded());
+	        		} catch (CertificateException e) {
+	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado válido";
+	        			throw e;
+	        		}
+				}
+				
 				certAddForm.setCertFile1(certFile1);
-				certAddForm.setCertFile2(certFile2);
-				certAddForm.setCertBytes1(certFile1.getBytes());
-				certAddForm.setCertBytes2(certFile2.getBytes());
+				certAddForm.setCertFile2(certFile2);				
+				
 				Certificate certificate = certificateService.saveCertificate(certAddForm);
 								
 				listNewCertificate.add(certificate);
 				certificateService.getSubjectValuesForView(listNewCertificate);
 				
-			} catch (Exception e) {
-				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
+			} catch (IOException | CertificateException e) {
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
 				listNewCertificate = StreamSupport.stream(certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
-				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
+				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{msgerror}));
 				dtOutput.setError(json.toString());
 			}
 		}
@@ -320,24 +349,46 @@ public class CertificateRestController {
 			dtOutput.setError(json.toString());
 			
 		} else {
+			
+			String msgerror = null;
 			try {
 				
+				msgerror = "Error al instanciar el proveedor X.509"; 
+				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
+				
+				X509Certificate cert1;
+				X509Certificate cert2;				
+					
+				// Si no se actualiza el certificado 1, dejamos el que estaba
 				if (certFile1.isEmpty() && certEditForm.getCertPrincipalB64() != null) {
 					
 					certEditForm.setCertBytes1(Base64.decode(certEditForm.getCertPrincipalB64()));
-					
+				// Si se actualiza el certificado 1, tenemos que comprobar que el archivo representa un certificado valido	
 				} else if (!certFile1.isEmpty()) {
 					
-					certEditForm.setCertBytes1(certFile1.getBytes());
+					try (final InputStream certIs = certFile1.getInputStream();) {
+	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
+	        			certEditForm.setCertBytes1(cert1.getEncoded());
+	        		} catch (CertificateException e) {
+	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado válido";
+	        			throw e;
+	        		}
 				}
 				
+				// Si no se actualiza el certificado 2, dejamos el que estaba
 				if (certFile2.isEmpty() && certEditForm.getCertBackupB64() != null) {
 					
 					certEditForm.setCertBytes2(Base64.decode(certEditForm.getCertBackupB64()));
-					
+				// Si se actualiza el certificado 2, tenemos que comprobar que el archivo representa un certificado valido		
 				} else if (!certFile2.isEmpty()) {
 					
-					certEditForm.setCertBytes2(certFile2.getBytes());
+					try (final InputStream certIs = certFile2.getInputStream();) {
+	        			cert2 = (X509Certificate) certFactory.generateCertificate(certIs);
+	        			certEditForm.setCertBytes2(cert2.getEncoded());
+	        		} catch (CertificateException e) {
+	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado válido";
+	        			throw e;
+	        		}
 				}
 				
 				Certificate certificate = certificateService.saveCertificate(certEditForm);
@@ -345,10 +396,10 @@ public class CertificateRestController {
 				listNewCertificate.add(certificate);
 				certificateService.getSubjectValuesForView(listNewCertificate);
 				
-			} catch (Exception e) {
-				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
+			} catch (IOException | CertificateException e) {
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
 				listNewCertificate = StreamSupport.stream(certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
-				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
+				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{msgerror}));
 				dtOutput.setError(json.toString());
 			}
 		}
@@ -438,10 +489,9 @@ public class CertificateRestController {
 				certData = certificateService.getFormatCertText(certIs);
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e.getCause());
 			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile1.getOriginalFilename() + " no representa un certificado válido"}));
 				e.printStackTrace();
 			}
 			
@@ -452,10 +502,9 @@ public class CertificateRestController {
 				certData = certificateService.getFormatCertText(certIs);
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e.getCause());
 			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
+				Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile2.getOriginalFilename() + " no representa un certificado válido"});
 				e.printStackTrace();
 			}
 			

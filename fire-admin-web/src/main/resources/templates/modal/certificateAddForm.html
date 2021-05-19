@@ -206,7 +206,15 @@ function addNewCert() {
  				  if (data.error != null){
  					  
  					  var errores = JSON.parse(data.error);
+ 					 					  
  					  jQuery.each(errores, function(i, val) {
+ 						  
+ 						 if(i == "errorSaveCertificate"){
+							var messageError = val;
+							$('#resultAddCert').html(messageError);
+							$('#resultAddCert').addClass('alert alert-danger');
+						}  						 
+ 						  
  					  	$('#certAddForm *').filter('span').each(function(){
  							if (i == $(this).attr('id')){
  								$("#" + i).text(val);
@@ -228,7 +236,7 @@ function addNewCert() {
  					 								  
  					//se muestra un mensaje
  					$('#resultAddCert').html(messageResponse);
- 					$('#resultAddCert').removeClass('alert-error')		
+ 					$('#resultAddCert').removeClass('alert-danger')		
  					$('#resultAddCert').addClass('alert alert-success');
  				 	$("#resultAddCert").fadeTo(2000, 500).slideUp(500, function() {
  					$("#resultAddCert").slideUp(500);
