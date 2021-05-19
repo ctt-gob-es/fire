@@ -221,9 +221,6 @@ public final class HttpCertificateList {
      * @throws CertificateException
      * 				Si ocurren errores en la extracci&oacute;n del certificado
      * 				recibido o si no se puede leer el certificado.
-     * @throws Ille
-     * 				Si hay errores en la llamada al servicio o la obtenci&oacute;n del resultado.
-     *
      * @throws HttpNetworkException
      * 				Si hay errores en la llamada al servicio o la obtenci&oacute;n del resultado.
      * @throws HttpForbiddenException

@@ -226,6 +226,12 @@ public class FireClient {
             );
         }
 
+    	if (config == null) {
+            throw new NullPointerException(
+                    "No se ha establecido el objeto de propiedades con la configuracion del cliente" //$NON-NLS-1$
+            );
+        }
+
     	this.serviceUrl = config.getProperty(PROPERTY_KEY_SERVICE_URL);
         if (this.serviceUrl == null) {
             throw new IllegalStateException(
@@ -272,15 +278,16 @@ public class FireClient {
      * 				Cuando se deniega el acceso al componente central.
      * @throws HttpOperationException Error gen&eacute;rico en la operaci&oacute;n de firma.
      */
-    public SignOperationResult sign(
-    		final String subjectId,
-            final SignProcessConstants.SignatureOperation op,
-            final SignProcessConstants.SignatureFormat ft,
-            final SignProcessConstants.SignatureAlgorithm algth,
-            final Properties prop, final byte[] d,
-            final Properties config)
-            throws IOException, HttpNetworkException, HttpForbiddenException,
-            HttpOperationException {
+	public SignOperationResult sign(
+			final String subjectId,
+			final SignProcessConstants.SignatureOperation op,
+			final SignProcessConstants.SignatureFormat ft,
+			final SignProcessConstants.SignatureAlgorithm algth,
+			final Properties prop,
+			final byte[] d,
+			final Properties config)
+					throws IOException, HttpNetworkException, HttpForbiddenException,
+					HttpOperationException {
 
     	if (op == null) {
             throw new IllegalArgumentException(
@@ -642,7 +649,7 @@ public class FireClient {
         else {
         	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        if (upgradeConfig != null && !upgrade.isEmpty()) {
+        if (upgradeConfig != null && upgrade != null && !upgrade.isEmpty()) {
         	urlParameters = urlParameters.replace(TAG_VALUE_CONFIG, Utils.properties2Base64(upgradeConfig, true));
         }
         else {

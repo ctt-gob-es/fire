@@ -130,7 +130,7 @@ public class AfirmaValidator implements SignatureValidator {
 			upgradeResult = Upgrade.recoverUpgradedSignature(
 					this.conn,
 					docId,
-					UpgradeTarget.getUpgradeTarget(upgradeFormat),
+					upgradeFormat != null ? UpgradeTarget.getUpgradeTarget(upgradeFormat) : null,
 					this.appId);
 		} catch (final PlatformWsException e) {
 			throw new IOException("Error de conexion con la Plataforma @firma para la recuperacion asincrona de una firma", e); //$NON-NLS-1$
