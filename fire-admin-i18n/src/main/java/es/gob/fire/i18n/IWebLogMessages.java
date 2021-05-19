@@ -184,4 +184,9 @@ public interface IWebLogMessages {
 	 * Constant attribute that represents the name of the property <code>errorweb029</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB029 = "errorweb029";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>errorweb030</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String ERRORWEB030 = "errorweb030";
 }

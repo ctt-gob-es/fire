@@ -245,8 +245,17 @@ function saveEditCert() {
  				  hide();		 
  				  
  				  if (data.error != null){
+ 					  
  					  var errores = JSON.parse(data.error);
+ 					  
  					  jQuery.each(errores, function(i, val) {
+ 						  
+ 						 if(i == "errorSaveCertificate"){
+ 							var messageError = val;
+ 							$('#resultEditCert').html(messageError);
+ 							$('#resultEditCert').addClass('alert alert-danger');
+ 						}  	
+ 						 
  					  	$('#certEditForm *').filter('span').each(function(){
  							if (i == $(this).attr('id')){
  								$("#" + i).text(val);
@@ -261,20 +270,22 @@ function saveEditCert() {
  					 $("#certEditForm")[0].reset();
  					 $('#certEditForm *').filter('span').each(function(){
  							$(this).text('');
- 						});
- 					  
+ 						}); 					  
  					  
  					var messageResponse = /*[[#{message.success.certificate.edit}]]*/;
- 					  //se cierra modal
- 					closeModal('certEditModal');
- 								  
+ 					 								  
  					//se muestra un mensaje
  					$('#resultEditCert').html(messageResponse);
- 					$('#resultEditCert').removeClass('alert-error')	
- 					$('#resultEditCert').addClass('alert alert-danger');
+ 					$('#resultEditCert').removeClass('alert-danger')	
+ 					$('#resultEditCert').addClass('alert alert-success');
  				 	$("#resultEditCert").fadeTo(2000, 500).slideUp(500, function() {
- 					$("#resultEditCert").slideUp(500);
- 					});	 	
+ 						$("#resultEditCert").slideUp(500);
+ 						
+ 						//se cierra modal
+ 	 				   closeModal('certEditModal');
+ 					});
+ 				 	
+ 				   
  				 	
  				  } 				 
  				  			  
