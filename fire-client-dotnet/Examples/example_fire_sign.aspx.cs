@@ -15,7 +15,7 @@ public partial class example_fire_sign : System.Web.UI.Page
         //serviceConfig.Add("ssl_client_pkcs12", "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new.p12");
         //serviceConfig.Add("ssl_client_pass", "12341234");
 
-        string extraParams = "filters=keyusage.nonrepudiation:true\nmode=implicit\nexpPolicy=FirmaAGE";
+        string extraParams = "mode=implicit\nfilters=keyusage.nonrepudiation:true;nonexpired:";
         string extraParamsB64 = Base64Encode(extraParams);
 
         string dataB64 = Base64Encode("Hola Mundo!!");
@@ -35,7 +35,7 @@ public partial class example_fire_sign : System.Web.UI.Page
                 "00001",        // Identificador del usuario
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
                 "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
-                "SHA1withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
+                "SHA512withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
                 extraParamsB64, // Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
                 dataB64,        // Datos a firmar
                 confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)

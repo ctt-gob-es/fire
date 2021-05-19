@@ -10,14 +10,14 @@ public partial class example_fire_add_document_batch : System.Web.UI.Page
                       "redirectErrorUrl=http://www.ibm.com";        // URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
         string confB64 = Base64Encode(conf);
         string dataB64 = Base64Encode("Hola Mundo!!");
-        string appId = "B244E473466F";
-        string transactionId = "5e06f0bb-b812-40fb-87af-76770feed597";
+        string appId = "B244E473466F"; // Identificador de la aplicacion (dada de alta previamente en el sistema)
+        string transactionId = "e839c903-0dae-4ff9-9b52-d90f70069ce9";
 
         FireClient client;
 
         try
         {
-            client = new FireClient(appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            client = new FireClient(appId);
         }
         catch (Exception ex)
         {
@@ -51,26 +51,31 @@ public partial class example_fire_add_document_batch : System.Web.UI.Page
             FileId1.Text = ex.Message;
         }
 
+        string extraParams = "mode=implicit\nfilters=keyusage.nonrepudiation:true;nonexpired:";
+        string extraParamsB64 = Base64Encode(extraParams);
+
         try
         {
-            //client.addDocumentToBatch(
-            //    transactionId,  // Identificador de transaccion
-            //    "00001",        // Identificador del usuario
-            //    "2",            // Identificador del documento
-            //    dataB64,        // Documento a incluir
-            //    "sign",         // Operacion criptografica (sign, cosign o countersign)
-            //    "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
-            //    null,           // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
-            //    null,
-            //    confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
-            //);
+            client.addDocumentToBatch(
+                transactionId,  // Identificador de transaccion
+                "00001",        // Identificador del usuario
+                "2",            // Identificador del documento
+                dataB64,        // Documento a incluir
+                "sign",         // Operacion criptografica (sign, cosign o countersign)
+                "XAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
+                extraParamsB64, // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
+                "ES-A",         // Formato longevo
+                confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
+            );
+/*
             FireApi.addDocumentToBatch(
-    appId,
-transactionId,  // Identificador de transaccion
-"2",            // Identificador del documento
-dataB64,        // Documento a incluir
-confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
-);
+                appId,
+                transactionId,  // Identificador de transaccion
+                "2",            // Identificador del documento
+                dataB64,        // Documento a incluir
+                confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
+            );
+*/
 
             FileId2.Text = "2";
         }

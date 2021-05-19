@@ -8,19 +8,26 @@ public partial class example_fire_recover_batch_sign : System.Web.UI.Page
         string dataB64 = Base64Encode("Hola Mundo!!");
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
-        string appId = "B244E473466F";
-        string transactionId = "94007e3e-0b93-4f76-bc83-17df398cda6e";
+        string appId = "B244E473466F"; // Identificador de la aplicacion (dada de alta previamente en el sistema)
+        string transactionId = "e839c903-0dae-4ff9-9b52-d90f70069ce9";
         FireClient fireClient = new FireClient(appId);
 
         FireTransactionResult signature1;
         try
         {
-            signature1 = fireClient.recoverBatchSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            signature1 = fireClient.recoverBatchSign(
                 transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
                 "00001",        // Identificador del usuario
                 "1"             // Identificador del documento del que se quiere obtener la firma
             );
 
+/*
+            signature1 = FireApi.recoverBatchSign(
+                appId,          // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
+                "1"             // Identificador del documento del que se quiere obtener la firma
+            );
+*/
             // Mostramos los datos obtenidos
             DocumentSignature1.Text = System.Convert.ToBase64String(signature1.Result);
         }
@@ -32,11 +39,18 @@ public partial class example_fire_recover_batch_sign : System.Web.UI.Page
         FireTransactionResult signature2;
         try
         {
-            signature2 = fireClient.recoverBatchSign( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            signature2 = fireClient.recoverBatchSign(
                 transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
                 "00001",        // Identificador del usuario
                 "2"             // Identificador del documento del que se quiere obtener la firma
             );
+/*
+            signature2 = FireApi.recoverBatchSign(
+                appId,          // Identificador de la aplicacion (dada de alta previamente en el sistema)
+                transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
+                "2"             // Identificador del documento del que se quiere obtener la firma
+            );
+*/
 
             // Mostramos los datos obtenidos
             DocumentSignature2.Text = System.Convert.ToBase64String(signature2.Result);

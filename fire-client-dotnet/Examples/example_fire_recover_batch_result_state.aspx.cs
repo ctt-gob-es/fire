@@ -5,15 +5,13 @@ public partial class example_fire_recover_batch_result_state : System.Web.UI.Pag
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        string dataB64 = Base64Encode("Hola Mundo!!");
-        
         // Funcion del API de Clave Firma para cargar los datos a firmar
         float batchResult;
-        string appId = "B244E473466F";
-        string transactionId = "5e06f0bb-b812-40fb-87af-76770feed597";
+        string appId = "B244E473466F"; // Identificador de la aplicacion (dada de alta previamente en el sistema)
+        string transactionId = "e839c903-0dae-4ff9-9b52-d90f70069ce9";
         try
         {
-            batchResult = new FireClient(appId).recoverBatchResultState( // Identificador de la aplicacion (dada de alta previamente en el sistema)
+            batchResult = new FireClient(appId).recoverBatchResultState(
                 transactionId,  // Identificador de transaccion recuperado en la operacion createBatch()
                 "00001"         // Identificador del usuario
             );
@@ -31,16 +29,7 @@ public partial class example_fire_recover_batch_result_state : System.Web.UI.Pag
         }
 
         // Mostramos los datos obtenidos
-        ProgressBatch.Text = batchResult + "";
+        ProgressBatch.Text = "" + batchResult;
 
-    }
-
-    /// <summary>Codifica en base64</summary>
-    /// <param name="plainText">string a codificar.</param>
-    /// <returns>string codificado en base 64 </returns>
-    private static string Base64Encode(string plainText)
-    {
-        var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-        return System.Convert.ToBase64String(plainTextBytes);
     }
 }

@@ -16,9 +16,9 @@ public partial class example_fire_recover_sign : System.Web.UI.Page
 
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionResult signature;
-        string transactionId = "386b4f9a-9e92-46f3-929f-14719d2916b7";
+        string transactionId = "b3d649fd-272e-4839-bdb8-c766e41d2f0d";
         string appId = "B244E473466F";
-        string upgradeFormat = "ES-T";
+        string upgradeFormat = null;
         string upgradeConfigB64 = Base64Encode("updater.ignoreGracePeriod=true");
         try
         {
