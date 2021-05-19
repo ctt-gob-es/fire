@@ -69,8 +69,6 @@ public class ConfigManager {
 
 	private static final String PROP_CERTIFICATE = "default.certificate"; //$NON-NLS-1$
 
-	private static final String PROP_ALTERNATIVE_XMLDSIG = "signature.alternativeXmldsig"; //$NON-NLS-1$
-
 	private static final String PROP_LOCAL_VERIFICATION_KEY = "local.verification.key"; //$NON-NLS-1$
 
 	private static final String PROP_BATCH_MAX_DOCUMENTS = "batch.maxDocuments"; //$NON-NLS-1$
@@ -79,11 +77,6 @@ public class ConfigManager {
 
 	/** Segundos que, por defecto, tardan los ficheros temporales del proceso de firma de lote en caducar. */
 	private static final int DEFAULT_FIRE_TEMP_TIMEOUT = 600; // 10 minutos
-
-	private static final String PROP_CLIENTEAFIRMA_TEMP_TIMEOUT =  "temp.afirma.timeout"; //$NON-NLS-1$
-
-	/** Segundos que, por defecto, tardan los ficheros temporales del cliente @firma en caducar. */
-	private static final int DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT = 600; // 10 minutos
 
 	private static final String PROP_FIRE_PAGES_TITLE = "pages.title"; //$NON-NLS-1$
 
@@ -340,15 +333,6 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Indica si la compatibilidad con XALAN/XERCES est&aacute; habilitada.
-	 * @return {@code true} si la compatibilidad con XALAN/XERCES est&aacute; habilitada,
-	 * {@code false} en caso contrario.
-	 */
-	public static boolean isAlternativeXmlDSigActive() {
-		return Boolean.parseBoolean(getProperty(PROP_ALTERNATIVE_XMLDSIG));
-	}
-
-	/**
 	 * Recupera el texto para la composici&oacute;n de la clave HMac para la
 	 * verificaci&oacute;n de del PKCS#1 de la firma.
 	 * @return Cadena a partir de la que componer la clave HMac.
@@ -568,25 +552,6 @@ public class ConfigManager {
 					"' del fichero de configuracion. Se usaran " + DEFAULT_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
 					" segundos"); //$NON-NLS-1$
 			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
-		}
-	}
-
-	/**
-	 * Recupera el tiempo en milisegundos que puede almacenarse un fichero de intercambio del Cliente Afirma
-	 * antes de considerarse caducado. El tipo se carga de la configuraci&oacute;n en donde se indica
-	 * en segundo.
-	 * @return Tiempo m&aacute;ximo en milisegundos que puede tardarse en recoger un fichero antes de que
-	 * caduque.
-	 */
-	public static long getAfirmaTempsTimeout() {
-		try {
-			return Long.parseLong(getProperty(PROP_CLIENTEAFIRMA_TEMP_TIMEOUT, Integer.toString(DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT)))
-					* 1000;
-		} catch (final Exception e) {
-			LOGGER.warning("Tiempo de expiracion invalido en la propiedad '" + PROP_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
-					"' del fichero de configuracion. Se usaran " + DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT + //$NON-NLS-1$
-					" segundos"); //$NON-NLS-1$
-			return DEFAULT_CLIENTEAFIRMA_TEMP_TIMEOUT * 1000;
 		}
 	}
 
