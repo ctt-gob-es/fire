@@ -9,18 +9,34 @@
  */
 package es.gob.fire.commons.utils;
 
+/** 
+ * <b>File:</b><p>es.gob.fire.commons.utils.Utils.java.</p>
+ * <b>Description:</b><p>Class with general utilities.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <b>Date:</b><p>21/06/2020.</p>
+ * @version 1.1, 21/05/2021.
+ */
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/**
- * Funciones de utilidad general.
+/** 
+ * <p>Class with general utilities.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.1, 21/05/2021.
  */
 public class Utils {
 
     private static final int BUFFER_SIZE = 4096;
+    
+    /**
+     * Simple regular expression for email validation.
+     */
+    private static final String regexValidEmail = "^(.+)@(.+)$"; 
 
 	/** Lee un flujo de datos de entrada y los recupera en forma de array de
      * bytes. Este m&eacute;todo consume pero no cierra el flujo de datos de
@@ -50,6 +66,21 @@ public class Utils {
      */
     public static String getStringDateFormat(final Date date) {
     	return DateFormat.getInstance().format(date);
+    }
+    
+    /**
+     * Method that validates if a String represents a valid email.
+     * @param email The String to check
+     * @return true if the String represents a valid email.
+     */
+    public static boolean isValidEmail(final String email) {    	
+    	    	
+    	Pattern pattern = Pattern.compile(regexValidEmail);
+    	
+    	Matcher matcher = pattern.matcher(email);
+    	
+    	return matcher.matches();
+    	 
     }
 
 }

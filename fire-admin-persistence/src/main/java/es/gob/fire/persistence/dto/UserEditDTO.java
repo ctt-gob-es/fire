@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 /**
- * <b>File:</b><p>es.gob.fire.core.dto.UserDTOEdit.java.</p>
+ * <b>File:</b><p>es.gob.fire.persistence.dto.UserEditDTO.java.</p>
  * <b>Description:</b><p> .</p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>19/06/2018.</p>
  * @author Gobierno de España.
- * @version 1.1, 02/11/2018.
+ * @version 1.2, 21/05/2021.
  */
 package es.gob.fire.persistence.dto;
 
@@ -37,13 +37,10 @@ import es.gob.fire.persistence.dto.validation.ThenCheckIt;
  * Validation annotation to validate that 2 fields have the same value.
  */
 @FieldMatch(first = "password", second = "confirmPassword", message = "{form.valid.user.password.confirm}")
-
 /**
- * <p>
- * Class that represents the backing form for adding/editing a user.
- * </p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.1, 02/11/2018.
+ * <p>Class that represents the backing form for editing an user.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.2, 21/05/2021.
  */
 public class UserEditDTO {
 	/**
@@ -72,8 +69,8 @@ public class UserEditDTO {
 	 * Attribute that represents the value of the input username of the user in
 	 * the form. It can be empty if the user is root.
 	 */
-	//@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.login.notempty}")
-	//@Size(min = NumberConstants.NUM5, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.login.notempty}")
+	@Size(min = NumberConstants.NUM1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String usernameEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
@@ -81,7 +78,7 @@ public class UserEditDTO {
 	 * form.
 	 */
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.email.notempty}")
-	@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM255, groups = ThenCheckIt.class)
+	@Size(min=NumberConstants.NUM3, max=NumberConstants.NUM45, groups=ThenCheckIt.class)
 	private String emailEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
@@ -90,14 +87,14 @@ public class UserEditDTO {
 	 */
 	//@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
 	//@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message="{form.valid.user.password.noPattern}", groups=ThenCheckIt.class)
-    private String password = UtilsStringChar.EMPTY_STRING;
+    private String passwordEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input password of the user in the form.
 	 * It can be empty if the user isn't change its role to admin.
 	 */
 	//@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
-    private String confirmPassword = UtilsStringChar.EMPTY_STRING;
+    private String confirmPasswordEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the identifier for the use role selected in the user form.
@@ -268,31 +265,31 @@ public class UserEditDTO {
 	 * Gets the value of the attribute {@link #password}.
 	 * @return the value of the attribute {@link #password}.
 	 */
-	public String getPassword() {
-		return this.password;
+	public String getPasswordEdit() {
+		return this.passwordEdit;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #password}.
 	 * @param passwordParam The value for the attribute {@link #password}.
 	 */
-	public void setPassword(final String passwordParam) {
-		this.password = passwordParam;
+	public void setPasswordEdit(final String passwordParam) {
+		this.passwordEdit = passwordParam;
 	}
 
 	/**
 	 * Gets the value of the attribute {@link #confirmPassword}.
 	 * @return the value of the attribute {@link #confirmPassword}.
 	 */
-	public String getConfirmPassword() {
-		return this.confirmPassword;
+	public String getConfirmPasswordEdit() {
+		return this.confirmPasswordEdit;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #confirmPassword}.
 	 * @param confirmPasswordParam The value for the attribute {@link #confirmPassword}.
 	 */
-	public void setConfirmPassword(final String confirmPasswordParam) {
-		this.confirmPassword = confirmPasswordParam;
+	public void setConfirmPasswordEdit(final String confirmPasswordParam) {
+		this.confirmPasswordEdit = confirmPasswordParam;
 	}
 }

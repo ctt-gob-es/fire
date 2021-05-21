@@ -1,19 +1,18 @@
 
 /** 
- * <b>File:</b><p>es.juntadeandalucia.justicia.biosign.integrationserver.core.util.NumberConstants.java.</p>
+ * <b>File:</b><p>es.gob.fire.commons.utils.NumberConstants.java.</p>
  * <b>Description:</b><p>Interface that defines numeric es.gob.fire.constants for generalized usage.</p>
- * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>21 oct. 2019.</p>
- * @author Consejería de Turismo, Regeneración, Justicia y Administración Local de la Junta de Andalucía.
- * @version 1.0, 21 oct. 2019.
+ * @version 1.1, 21/05/2021.
  */
 package es.gob.fire.commons.utils;
 
 
 /** 
  * <p>Interface that defines numeric es.gob.fire.constants for generalized usage.</p>
- * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
- * @version 1.0, 21 oct. 2019.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.1, 21/05/2021.
  */
 public interface NumberConstants {
 
@@ -531,6 +530,11 @@ public interface NumberConstants {
 	 * Constant attribute that represents the number 110.
 	 */
 	int NUM110 = 110;
+	
+	/**
+	 * Constant attribute that represents the number 120.
+	 */
+	int NUM120 = 120;
 
 	/**
 	 * Constant attribute that represents the number 127.

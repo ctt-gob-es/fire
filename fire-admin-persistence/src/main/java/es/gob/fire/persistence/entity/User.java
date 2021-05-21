@@ -17,16 +17,15 @@
 /** 
  * <b>File:</b><p>es.gob.fire.persistence.entity.User.java.</p>
  * <b>Description:</b><p>Class that maps the <i>TB_USUARIOS</i> database table as a Plain Old Java Object.</p>
-  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
+  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>07/07/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 07/07/2020.
+ * @version 1.1, 21/05/2021.
  */
 package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,7 +37,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -49,12 +47,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import es.gob.fire.commons.utils.NumberConstants;
-import es.gob.fire.persistence.validatordni.Nif;
 
 /**
  * <p>Class that maps the <i>TB_USUARIOS</i> database table as a Plain Old Java Object.</p>
- * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.0, 07/07/2020.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.
+ * @version 1.1, 21/05/2021.
  */
 @Entity
 @Table(name = "TB_USUARIOS")
@@ -129,14 +126,8 @@ public class User implements Serializable {
 	/**
 	 * Attribute that represents the rol.
 	 */
-	private Rol rol;
-	
-	/**
-	 * Attribute that represents the DNI.
-	 */
-	
-	private String nif;		
-	
+	private Rol rol;	
+		
 	/**
 	 * Gets the value of the attribute {@link #userId}.
 	 * @return the value of the attribute {@link #userId}.
@@ -164,8 +155,6 @@ public class User implements Serializable {
 	 */
 	
 	@Column(name = "NOMBRE_USUARIO", nullable = false, length = NumberConstants.NUM30, unique = true)
-	@Size(max = NumberConstants.NUM30)
-//	@Nif
 	@JsonView(DataTablesOutput.View.class)
 	public String getUserName() {
 		return this.userName;
@@ -184,7 +173,6 @@ public class User implements Serializable {
 	 * @return the value of the attribute {@link #email}.
 	 */
 	@Column(name = "CORREO_ELEC", nullable = true, length = NumberConstants.NUM45)
-	@Size(max = NumberConstants.NUM45)
 	@JsonView(DataTablesOutput.View.class)
 	public String getEmail() {
 		return this.email;
@@ -220,7 +208,6 @@ public class User implements Serializable {
 	 * @return the value of the attribute {@link #name}.
 	 */
 	@Column(name = "NOMBRE", nullable = false, length = NumberConstants.NUM45)
-	@Size(max = NumberConstants.NUM45)
 	@JsonView(DataTablesOutput.View.class)
 	public String getName() {
 		return this.name;
@@ -239,7 +226,6 @@ public class User implements Serializable {
 	 * @return the value of the attribute {@link #password}.
 	 */
 	@Column(name = "CLAVE", nullable = true, length = NumberConstants.NUM100)
-	@Size(max = NumberConstants.NUM2000)
 	@JsonView(DataTablesOutput.View.class)
 	public String getPassword() {
 		return this.password;
@@ -257,8 +243,7 @@ public class User implements Serializable {
 	 * Gets the value of the attribute {@link #surnames}.
 	 * @return the value of the attribute {@link #surnames}.
 	 */
-	@Column(name = "APELLIDOS", nullable = false, length = NumberConstants.NUM150)
-	@Size(max = NumberConstants.NUM150)
+	@Column(name = "APELLIDOS", nullable = false, length = NumberConstants.NUM120)
 	@JsonView(DataTablesOutput.View.class)
 	public String getSurnames() {
 		return this.surnames;
@@ -311,8 +296,7 @@ public class User implements Serializable {
 	 * Gets the value of the attribute {@link #renovationCode}.
 	 * @return the value of the attribute {@link #renovationCode}.
 	 */
-	@Column(name = "CODIGO_RENOVACION", nullable = true, unique = true, length = NumberConstants.NUM100)
-	@Size(max = NumberConstants.NUM100)
+	@Column(name = "CODIGO_RENOVACION", nullable = true, unique = true, length = NumberConstants.NUM90)
 	public String getRenovationCode() {
 		return renovationCode;
 	}

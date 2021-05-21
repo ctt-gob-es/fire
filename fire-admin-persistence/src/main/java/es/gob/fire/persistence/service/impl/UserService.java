@@ -18,9 +18,9 @@
  * <b>File:</b><p>es.gob.fire.persistence.service.impl.UserService.java.</p> *
  * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * <b>Date:</b><p>15/06/2018.</p>
+ * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 15/06/2018.
+ * @version 1.1, 21/05/2021.
  */
 package es.gob.fire.persistence.service.impl;
 import java.util.Arrays;
@@ -53,7 +53,7 @@ import es.gob.fire.persistence.service.IUserService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 01/06/2020.
+ * @version 1.1, 21/05/2021.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -117,8 +117,8 @@ public class UserService implements IUserService {
 		}
 
 		// Actualizaremos la contrasena solo si se establece
-		if (!StringUtils.isEmpty(userDto.getPassword())) {
-			final String pwd = userDto.getPassword();
+		if (!StringUtils.isEmpty(userDto.getPasswordAdd())) {
+			final String pwd = userDto.getPasswordAdd();
 			final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
 			final String hashPwd = bcpe.encode(pwd);
 
@@ -127,13 +127,13 @@ public class UserService implements IUserService {
 
 		// Al usuario root nunca le cambiaremos el nombre de usuario ni el rol
 		if (user.getRoot() != Boolean.TRUE) {
-			user.setUserName(userDto.getLogin());
+			user.setUserName(userDto.getLoginAdd());
 			user.setRol(this.rolRepository.findByRolId(userDto.getRolId()));
 		}
-		user.setName(userDto.getName());
-		user.setSurnames(userDto.getSurnames());
-		user.setEmail(userDto.getEmail());
-		user.setPhone(userDto.getTelf());
+		user.setName(userDto.getNameAdd());
+		user.setSurnames(userDto.getSurnamesAdd());
+		user.setEmail(userDto.getEmailAdd());
+		user.setPhone(userDto.getTelfAdd());
 		user.setStartDate(new Date());
 		user.setRenovationDate(new Date());
 
@@ -173,8 +173,8 @@ public class UserService implements IUserService {
 		}
 		// Actualizaremos la contrasena si se establece y si el usuario
 		// no tenia ya una contrasena, ya que en ese caso la estariamos cambiando.
-		else if (!StringUtils.isEmpty(userDto.getPassword()) && StringUtils.isEmpty(user.getPassword())) {
-			final String pwd = userDto.getPassword();
+		else if (!StringUtils.isEmpty(userDto.getPasswordEdit()) && StringUtils.isEmpty(user.getPassword())) {
+			final String pwd = userDto.getPasswordEdit();
 			final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
 			final String hashPwd = bcpe.encode(pwd);
 
