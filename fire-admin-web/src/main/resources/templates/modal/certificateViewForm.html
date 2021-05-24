@@ -29,14 +29,14 @@
 					</div>
 					<div class="form-row">
 						<div class="form-group col-md-10">
-								<div th:if= "${certPrincipal != ''}" class="btn_align">
+								<div th:if= "${certPrincipal != '' && certPrincipal != null}" class="btn_align">
 									<button type="button" class="btn btn-primary" onclick="downLoadCert('certPrincipalB64','1')">Descargar certificado 1</button>
 								</div>
 						</div>
 						
 
 					</div>
-					<div th:if= "${certPrincipal != ''}" id="cert-prin" name="cert-prin" class="edit-txt" 
+					<div th:if= "${certPrincipal != '' && certPrincipal != null}" id="cert-prin" name="cert-prin" class="edit-txt" 
 						style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
 					 	resize: none; background: rgb(245, 245, 245);">
 					</div>	
@@ -46,13 +46,13 @@
 					<td></td>
 					<div class="form-row">
 						<div class="form-group col-md-10">
-							<div th:if= "${certBackup != ''}" class="btn_align">
+							<div th:if= "${certBackup != '' && certBackup != null}" class="btn_align">
 								<button type="button" class="btn btn-primary" onclick="downLoadCert('certBackupB64','2')">Descargar certificado 2</button>
 							</div>
 						</div>
 						
 					</div>
-					<div th:if= "${certBackup != ''}" id="cert-resp" name="cert-resp" class="edit-txt" 
+					<div th:if= "${certBackup != '' && certBackup != null}" id="cert-resp" name="cert-resp" class="edit-txt" 
 						style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
 					 	resize: none; background: rgb(245, 245, 245);">
 					</div>
