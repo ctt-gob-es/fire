@@ -129,12 +129,19 @@ $(document).ready(function() {
 		dom: 'Bfrtip',
 		buttons: [
             $.extend( true, {}, buttonCommon, {
-                extend: 'csvHtml5'
+                extend: 'csvHtml5',
+                filename: function(){
+                	var query = $("#query option:selected").val();
+                    return query;
+                }
             } ),
             $.extend( true, {}, buttonCommon, {
                 extend: 'excelHtml5',
-                title: 'Informe de EstadÃ­sticas de Fire',
-                filename: 'statisticsquery'
+                title: 'Informe de Estadísticas de Fire',
+                filename: function(){
+                	var query = $("#query option:selected").val();
+                    return query;
+                }
             } ),
             /*$.extend( true, {}, buttonCommon, {
             	
