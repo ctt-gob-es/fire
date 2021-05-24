@@ -18,16 +18,16 @@
  * <b>File:</b><p>es.gob.fire.core.util.QueryEnum.java.</p>
  * <b>Description:</b><p>Enum that represents the query types.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
- * <b>Date:</b><p>31 jul. 2018.</p>
+ * <b>Date:</b><p>31/07/2018.</p>
  * @author Gobierno de España.
- * @version 1.0, 31 jul. 2018.
+ * @version 1.1, 24/05/2021.
  */
 package es.gob.fire.commons.utils;
 
 /** 
  * <p>Enum that represents the query types.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 31 jul. 2018.
+ * @version 1.1, 24/05/2021.
  */
 public enum QueryEnum {
 
@@ -38,7 +38,7 @@ public enum QueryEnum {
 	DOCUMENTS_SIGNED_BY_APP(5L, "Documentos firmados por cada aplicación"),
 	DOCUMENTS_SIGNED_BY_PROVIDER(6L, "Documentos firmados por cada origen de certificados/proveedor"),
 	DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT(7L, "Documentos firmados en cada formato de firma"),
-	DOCUMENTS_USED_IN_SIGNATURE_FORMAT(8L, "Documentos que utilizan cada formato de firma longevo");
+	DOCUMENTS_USED_IN_SIGNATURE_FORMAT(8L, "Documentos firmados que utilizan cada formato de firma longevo");
 
 	/**
 	 * Attribute that represents the enumerate id. 
