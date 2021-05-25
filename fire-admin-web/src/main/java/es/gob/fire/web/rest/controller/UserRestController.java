@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 /**
- * <b>File:</b><p>es.gob.monitoriza.controller.UserRestController.java.</p>
+ * <b>File:</b><p>es.gob.fire.web.rest.controller.UserRestController.java.</p>
  * <b>Description:</b><p> .</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
- * <b>Date:</b><p>21/03/2018.</p>
+ * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de España.
- * @version 1.7, 14/03/2019.
+ * @version 1.1, 21/05/2021.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -50,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.Language;
@@ -65,7 +66,7 @@ import es.gob.fire.persistence.service.IUserService;
 /**
  * <p>Class that manages the REST requests related to the Users administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.7, 14/03/2019.
+ * @version 1.1, 21/05/2021.
  */
 @RestController
 public class UserRestController {
@@ -84,6 +85,11 @@ public class UserRestController {
 	 * Constant that represents the key Json 'errorSaveUser'.
 	 */
 	private static final String KEY_JS_ERROR_SAVE_USER = "errorSaveUser";
+	
+	/**
+	 * Constant that represents the value of the main admin user. 
+	 */
+	private static final String LOGIN_ADMIN_USER = "admin";
 
 	/**
 	 * Attribute that represents the service object for accessing the
@@ -170,30 +176,34 @@ public class UserRestController {
 		final JSONObject json = new JSONObject();
 
 		boolean adminRol;
+		boolean error = false;
+		
 		if (bindingResult.hasErrors()) {
-			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+			error = true;
+			
 			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
-			}
-			dtOutput.setError(json.toString());
+			}			
 
-		} else if ((adminRol = this.userService.isAdminRol(userForm.getRolId())) && emptyAdminPassword(userForm)) {
+		} if ((adminRol = this.userService.isAdminRol(userForm.getRolId())) && emptyAdminPassword(userForm.getPasswordAdd())) {
+			error = true;
+			json.put("passwordAdd" + SPAN, "El campo contraseña es obligatorio.");			
 
-			json.put("passwordAdd" + SPAN, "El campo contrase\u00F1a es obligatorio.");
-			dtOutput.setError(json.toString());
+		} if (adminRol && notMatchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
+			error = true;
+			json.put("passwordAdd" + SPAN, "Los campos de contraseña deben coincidir.");
+			json.put("confirmPasswordAdd" + SPAN, "Los campos de contraseña deben coincidir.");			
 
-		} else if (adminRol && notMatchingConfirmPassword(userForm.getPassword(), userForm.getConfirmPassword())) {
+		} if (this.userService.getUserByUserName(userForm.getLoginAdd()) != null) {
+			error = true;
+			json.put("loginAdd" + SPAN, "Ya existe un usuario con el login seleccionado.");			
 
-			json.put("passwordAdd" + SPAN, "Los campos de contrase\\u00F1a deben coincidir.");
-			json.put("confirmPasswordAdd" + SPAN, "Los campos de contrase\\u00F1a deben coincidir.");
-			dtOutput.setError(json.toString());
-
-		} else if (this.userService.getUserByUserName(userForm.getLogin()) != null) {
-
-			json.put("loginAdd" + SPAN, "Ya existe un usuario con el login seleccionado.");
-			dtOutput.setError(json.toString());
-
-		} else {
+		} if (userForm.getEmailAdd() != null && !userForm.getEmailAdd().isEmpty() && !Utils.isValidEmail(userForm.getEmailAdd())) {
+			error = true;
+			json.put("emailAdd" + SPAN, "El campo email no es válido.");			
+		}
+		
+		if (!error) {
 			try {
 
 				final User user = this.userService.saveUser(userForm);
@@ -205,6 +215,9 @@ public class UserRestController {
 				json.put(KEY_JS_ERROR_SAVE_USER, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
 				dtOutput.setError(json.toString());
 			}
+		} else {
+			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+			dtOutput.setError(json.toString());
 		}
 
 		dtOutput.setData(listNewUser);
@@ -219,9 +232,21 @@ public class UserRestController {
 	 * @param userForm
 	 * @return
 	 */
-	private boolean emptyAdminPassword(final UserDTO userForm) {
+	private boolean emptyAdminPassword(final String password) {
 
-		return userForm.getPassword() == null || userForm.getPassword().isEmpty();
+		return password == null || password.isEmpty();
+	}
+	
+	/**
+	 * Method that checks if the identifier 'id' belongs to an user with admin role
+	 * @param id Long that represents the user id
+	 * @return
+	 */
+	private boolean wasAdminBeforeEdit(final Long id) {
+		
+		User user = userService.getUserByUserId(id);
+		
+		return userService.isAdminRol(user.getRol().getRolId());
 	}
 
 	/**
@@ -235,24 +260,48 @@ public class UserRestController {
 	public @ResponseBody DataTablesOutput<User> saveEdit(@Validated(OrderedValidation.class) @RequestBody final UserEditDTO userForm, final BindingResult bindingResult) {
 		final DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
 		List<User> listNewUser = new ArrayList<>();
+		final JSONObject json = new JSONObject();
 
+		boolean adminRol;
+		boolean error = false;
 		if (bindingResult.hasErrors()) {
-			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
-			final JSONObject json = new JSONObject();
+			error = true;
 			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
-			dtOutput.setError(json.toString());
-		} else {
+		} 
+		
+		if ((adminRol = this.userService.isAdminRol(userForm.getRolId())) && emptyAdminPassword(userForm.getPasswordEdit()) && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !wasAdminBeforeEdit(userForm.getIdUserFireEdit())) {
+			error = true;
+			json.put("passwordEdit" + SPAN, "El campo contraseña es obligatorio.");
+		} 
+		
+		if (adminRol && notMatchingConfirmPassword(userForm.getPasswordEdit(), userForm.getConfirmPasswordEdit()) && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !wasAdminBeforeEdit(userForm.getIdUserFireEdit())) {
+			error = true;
+			json.put("passwordEdit" + SPAN, "Los campos de contraseña deben coincidir.");
+			json.put("confirmPasswordEdit" + SPAN, "Los campos de contraseña deben coincidir.");
+		} 
+		
+		if (userForm.getEmailEdit() != null && !userForm.getEmailEdit().isEmpty() && !Utils.isValidEmail(userForm.getEmailEdit())) {
+			error = true;
+			json.put("emailEdit" + SPAN, "El campo email no es válido.");			
+		}
+				
+		if (!error) {
 			try {
 
 				final User user = this.userService.updateUser(userForm);
-
 				listNewUser.add(user);
+				
 			} catch (final Exception e) {
+				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
 				listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
-				throw e;
+				json.put(KEY_JS_ERROR_SAVE_USER, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
+				dtOutput.setError(json.toString());
 			}
+		} else {
+			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+			dtOutput.setError(json.toString());
 		}
 
 		dtOutput.setData(listNewUser);

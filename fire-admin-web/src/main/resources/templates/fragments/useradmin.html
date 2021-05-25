@@ -84,44 +84,58 @@ $(document).ready(function() {
 	    select: 'single',
 	    responsive: true,
 	    altEditor: true,
-	    buttons: [{text: 'Agregar',name: 'add'}, 
-	    		  {extend: 'selected',text: 'Editar',name: 'editt',
-	    	 action: function ( e, dt, node, config ) {	    				  
-				  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
-					id: o.context[0].aoColumns[e].mData,
-					title: o.context[0].aoColumns[e].sTitle                
-				  });
-				  
-				  var d = dt.rows({
-                   selected: !0
-				  });
-				  var name = d.data()[0][a[1].id];
-				  var menuEdit = /*[[@{/menuedit}]]*/;
-				  $.ajax({
- 						url : menuEdit,
- 						type : 'GET',
- 						data : $.param({'username':name}),
- 						cache : false,
- 						success : function(data) {
- 							hide();
- 							$('#modal').html(data);
- 							$('#modalEdit').modal('show');																
- 						},
- 						error : function() {}
- 					});
-			  }
-		  }, 
-// 		  var idUserFireEdit = d.data()[0][a[0].id];
-// 		  var name = d.data()[0][a[1].id];
-// 		  var surnames = d.data()[0][a[2].id];
-// 		  var login = d.data()[0][a[3].id];
-// 		  var email = d.data()[0][a[5].id];
-		  
-// 		  $("#idUserFireEdit").val(idUserFireEdit);
-// 		  $("#nameEdit").val(name);
-// 		  $("#surnamesEdit").val(surnames);
-// 		  $("#loginEdit").val(login);
-// 		  $("#emailEdit").val(email);
+	    buttons: [{text: 'Agregar',name: 'addd',
+		           action: function ( e, dt, node, config ) {	    				  
+					  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+						id: o.context[0].aoColumns[e].mData,
+						title: o.context[0].aoColumns[e].sTitle                
+					  });
+					  
+					  var d = dt.rows({
+	                   selected: !0
+					  });
+					   var menuAdd = /*[[@{/adduser}]]*/;
+					  $.ajax({
+	 						url : menuAdd,
+	 						type : 'GET',
+	 						cache : false,
+	 						success : function(data) {
+	 							hide();
+	 							$('#modal').html(data);
+	 							$('#modalUserAdd').modal('show');																
+	 						},
+	 						error : function() {}
+	 					});
+				  } // fin action
+	    
+	    		}, // fin add
+	       		  {extend: 'selected',text: 'Editar',name: 'editt',
+			       action: function ( e, dt, node, config ) {	    				  
+						  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+							id: o.context[0].aoColumns[e].mData,
+							title: o.context[0].aoColumns[e].sTitle                
+						  });
+						  
+						  var d = dt.rows({
+		                   selected: !0
+						  });
+						  var name = d.data()[0][a[1].id];
+						  var menuEdit = /*[[@{/menuedit}]]*/;
+						  $.ajax({
+		 						url : menuEdit,
+		 						type : 'GET',
+		 						data : $.param({'username':name}),
+		 						cache : false,
+		 						success : function(data) {
+		 							hide();
+		 							$('#modal').html(data);
+		 							$('#modalUserEdit').modal('show');																
+		 						},
+		 						error : function() {}
+		 					});
+					  } // fin action
+				  }, // fin edit
+
 	    		  {extend: 'selected',text: 'Eliminar',name: 'delete'}
 	    		  
 					
@@ -175,87 +189,7 @@ $(document).ready(function() {
 		    loading();
 		    
 		    switch(accion){
-		        case 'add':
-		        	if ($('#userForm')[0].checkValidity() === false) {
-		        		// Se oculta la capa 'cargando...'
-		        		hide();
-		                event.stopPropagation();
-		                
-		                $('#userForm *').filter(':input').each(function(){
-		            	    		            	    
-		                	if(!$(this)[0].checkValidity())
-		            	    {
-		            	  	 $("#invalid-" + $(this).attr('id')).html();
-		            	  	 $("#" + $(this).attr('id')).addClass("is-invalid");
-		            	    } else {
-		            	  	 $("#" + $(this).attr('id')).removeClass("is-invalid");
-		            	    }
-		            	    
-		            	});
-		                
-		                // Esto es necesario para forzar que se muestren mensajes de validaciĂ³n de cliente
-		                $('<input type="submit">').hide().appendTo($('#userForm')).click().remove();
-		            } else {
-		            	if ($('#passwordAdd').val() != $('#confirmPasswordAdd').val()){
-		            		$('#userForm').append('<div id="errorModalUser3" class="alert alert-danger" role="alert"><strong>' + [[#{user.admin.error.confPassword}]] + '</strong></div>');
-		            		hide();
-		            	}else{
-		            		
-		            		$("#userForm input")[4].value = $('#passwordAdd').val();
-		            		$("#userForm input")[5].value = $('#confirmPasswordAdd').val();
-		            		
-		            		$.ajax(actionSave, {
-				            	dataType : 'json',
-				            	contentType:'application/json',
-				                data : JSON.stringify($("#userForm").serializeJSON()),
-				                type:'POST',
-				                success: function(data){
-				                	console.log("Success");
-				                	var errores = JSON.parse(data.error);
-				  				  	
-				  				  	if (data.error != null){
-				  				  		var errorMsg;
-				  				  		if (errores["password_span"]) {
-				  				  			errorMsg = errores["password_span"];
-				  				  		} else if (errores["passwordAdd_span"]) {
-				  				  			errorMsg = errores["passwordAdd_span"];
-				  				  		} else if (errores["loginAdd_span"]) {
-				  				  			errorMsg = errores["loginAdd_span"];
-				  				  		}
-										$('#userForm').append('<div id="errorModalUser2" class="alert alert-danger" role="alert"><strong>'+ errorMsg +'</strong></div>');
-				  				  	}else{
-					  				  	tbl.row.add($(data.data)).draw(false);
-		    		                    
-					                    $('#altEditor-modal .modal-body .alert').remove();
-					                    $('#altEditor-modal').modal('hide');
-										
-										if ($('#errorModalUser').length > 0){
-											$('#errorModalUser').remove();
-										}
-										if ($('#errorModalUser2').length > 0){
-											$('#errorModalUser2').remove();
-										}
-										if ($('#errorModalUser3').length > 0){
-											$('#errorModalUser3').remove();
-										}
-				  				  	}
-									
-				            		// Se oculta la capa 'cargando...'
-				            		hide();
-				                    
-				                },
-				                error:function(data){
-				                	console.log("Error: " + data.error);
-
-				                	hide();
-				                	$('#errorModalUser').remove();
-				                	$('#userForm').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>' + [[#{user.admin.error.sameName}]] + '</strong></div>');
-				                }
-				            });
-		            	}
-		            }
-		        	$('#userForm').addClass('was-validated');
-		            break;
+		       // Eliminado case add
 		        case 'delete':
 		            $.ajax(actionDelete,{
 		            	data:$.param({'id':data.userId, 'index':rowindex}),
@@ -338,40 +272,7 @@ $(document).ready(function() {
 		});
 	});
 	
-	$( "#editBtn" ).click(function( event ) {
-		  event.preventDefault();
-			
-		  var formData = JSON.stringify($("#userFormEdit").serializeJSON());
-		  
-		  var url = /*[[@{/saveuseredit}]]*/;
-		  
-		  loading();
-		  
-		  $.ajax({
-			  type: "POST",
-			  url: url,
-			  data: formData,
-			  success: function(data){
-				hide();
-				
-				tbl.row.add($(data.data)).draw(false);
-				
-				if ($('#errorModalEdit').length > 0){
-					$('#errorModalEdit').remove();
-				}
-				
-				$('#modalEdit').modal('hide');
-				
-			  },
-			  error:function(){
-				  hide();
-				  $('#errorModalEdit').remove();
-				  $('#userFormEdit').append('<div id="errorModalEdit" class="alert alert-danger" role="alert"><strong>' + [[#{message.error}]] + '</strong></div>');
-			  },
-			  dataType: "json",
-			  contentType : "application/json"
-		});
-	});
+	
 });	
 
 </script>

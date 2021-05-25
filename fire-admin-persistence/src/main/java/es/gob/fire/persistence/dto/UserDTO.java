@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 /**
- * <b>File:</b><p>es.gob.fire.core.dto.UserDTO.java.</p>
- * <b>Description:</b><p> .</p>
-  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * <b>Date:</b><p>19/06/2018.</p>
+ * <b>File:</b><p>es.gob.fire.persistence.dto.UserDTO.java.</p>
+ * <b>Description:</b><p>Class that represents the backing form for adding a user.</p>
+  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de España.
- * @version 1.1, 02/11/2018.
+ * @version 1.2, 21/05/2021.
  */
 package es.gob.fire.persistence.dto;
 
@@ -37,9 +37,9 @@ import es.gob.fire.persistence.dto.validation.ThenCheckIt;
  */
 @FieldMatch(first = "password", second = "confirmPassword", message = "{form.valid.user.password.confirm}")
 /**
- * <p>Class that represents the backing form for adding/editing a user.</p>
- * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.1, 02/11/2018.
+ * <p>Class that represents the backing form for adding a user.</p>
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.2, 21/05/2021.
  */
 public class UserDTO {
 
@@ -53,21 +53,21 @@ public class UserDTO {
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.name.notempty}")
     @Size(min=1, max=NumberConstants.NUM45, groups=ThenCheckIt.class)
-    private String name = UtilsStringChar.EMPTY_STRING;
+    private String nameAdd = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input surnames of the user in the form.
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.surnames.notempty}")
     @Size(min=1, max=NumberConstants.NUM100, groups=ThenCheckIt.class)
-    private String surnames = UtilsStringChar.EMPTY_STRING;
+    private String surnamesAdd = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input username of the user in the form.
 	 */
-	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.login.notempty}")
-    //@Size(min=NumberConstants.NUM5, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
-    private String login = UtilsStringChar.EMPTY_STRING;
+	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.login.notempty}")
+	@Size(min = NumberConstants.NUM1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+    private String loginAdd = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input password of the user in the form.
@@ -75,21 +75,21 @@ public class UserDTO {
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.password.notempty}")
     //@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
 	//@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message="{form.valid.user.password.noPattern}", groups=ThenCheckIt.class)
-    private String password = UtilsStringChar.EMPTY_STRING;
+    private String passwordAdd = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input password of the user in the form.
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.confirmPassword.notempty}")
     //@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
-    private String confirmPassword = UtilsStringChar.EMPTY_STRING;
+    private String confirmPasswordAdd = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input email of the user in the form.
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.email.notempty}")
     @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM45, groups=ThenCheckIt.class)
-    private String email = UtilsStringChar.EMPTY_STRING;
+    private String emailAdd = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input telf of the user in the form.
@@ -125,8 +125,8 @@ public class UserDTO {
 	 * Gets the value of the attribute {@link #name}.
 	 * @return the value of the attribute {@link #name}.
 	 */
-	public String getName() {
-		return this.name;
+	public String getNameAdd() {
+		return this.nameAdd;
 	}
 
 
@@ -134,8 +134,8 @@ public class UserDTO {
 	 * Sets the value of the attribute {@link #name}.
 	 * @param nameParam The value for the attribute {@link #name}.
 	 */
-	public void setName(final String nameParam) {
-		this.name = nameParam;
+	public void setNameAdd(final String nameParam) {
+		this.nameAdd = nameParam;
 	}
 
 
@@ -143,8 +143,8 @@ public class UserDTO {
 	 * Gets the value of the attribute {@link #surnames}.
 	 * @return the value of the attribute {@link #surnames}.
 	 */
-	public String getSurnames() {
-		return this.surnames;
+	public String getSurnamesAdd() {
+		return this.surnamesAdd;
 	}
 
 
@@ -152,8 +152,8 @@ public class UserDTO {
 	 * Sets the value of the attribute {@link #surnames}.
 	 * @param surnamesParam The value for the attribute {@link #surnames}.
 	 */
-	public void setSurnames(final String surnamesParam) {
-		this.surnames = surnamesParam;
+	public void setSurnamesAdd(final String surnamesParam) {
+		this.surnamesAdd = surnamesParam;
 	}
 
 
@@ -161,8 +161,8 @@ public class UserDTO {
 	 * Gets the value of the attribute {@link #login}.
 	 * @return the value of the attribute {@link #login}.
 	 */
-	public String getLogin() {
-		return this.login;
+	public String getLoginAdd() {
+		return this.loginAdd;
 	}
 
 
@@ -170,8 +170,8 @@ public class UserDTO {
 	 * Sets the value of the attribute {@link #login}.
 	 * @param loginParam The value for the attribute {@link #login}.
 	 */
-	public void setLogin(final String loginParam) {
-		this.login = loginParam;
+	public void setLoginAdd(final String loginParam) {
+		this.loginAdd = loginParam;
 	}
 
 
@@ -179,8 +179,8 @@ public class UserDTO {
 	 * Gets the value of the attribute {@link #password}.
 	 * @return the value of the attribute {@link #password}.
 	 */
-	public String getPassword() {
-		return this.password;
+	public String getPasswordAdd() {
+		return this.passwordAdd;
 	}
 
 
@@ -188,8 +188,8 @@ public class UserDTO {
 	 * Sets the value of the attribute {@link #password}.
 	 * @param passwordParam The value for the attribute {@link #password}.
 	 */
-	public void setPassword(final String passwordParam) {
-		this.password = passwordParam;
+	public void setPasswordAdd(final String passwordParam) {
+		this.passwordAdd = passwordParam;
 	}
 
 
@@ -197,8 +197,8 @@ public class UserDTO {
 	 * Gets the value of the attribute {@link #confirmPassword}.
 	 * @return the value of the attribute {@link #confirmPassword}.
 	 */
-	public String getConfirmPassword() {
-		return this.confirmPassword;
+	public String getConfirmPasswordAdd() {
+		return this.confirmPasswordAdd;
 	}
 
 
@@ -206,8 +206,8 @@ public class UserDTO {
 	 * Sets the value of the attribute {@link #confirmPassword}.
 	 * @param confirmPasswordParam The value for the attribute {@link #confirmPassword}.
 	 */
-	public void setConfirmPassword(final String confirmPasswordParam) {
-		this.confirmPassword = confirmPasswordParam;
+	public void setConfirmPasswordAdd(final String confirmPasswordParam) {
+		this.confirmPasswordAdd = confirmPasswordParam;
 	}
 
 
@@ -215,8 +215,8 @@ public class UserDTO {
 	 * Gets the value of the attribute {@link #email}.
 	 * @return the value of the attribute {@link #email}.
 	 */
-	public String getEmail() {
-		return this.email;
+	public String getEmailAdd() {
+		return this.emailAdd;
 	}
 
 
@@ -224,15 +224,15 @@ public class UserDTO {
 	 * Sets the value of the attribute {@link #email}.
 	 * @param emailParam The value for the attribute {@link #email}.
 	 */
-	public void setEmail(final String emailParam) {
-		this.email = emailParam;
+	public void setEmailAdd(final String emailParam) {
+		this.emailAdd = emailParam;
 	}
 
 	/**
 	 * Gets the value of the attribute {@link #rol}.
 	 * @return the value of the attribute {@link #rol}.
 	 */
-	public String getTelf() {
+	public String getTelfAdd() {
 		return this.telfAdd;
 	}
 
@@ -240,7 +240,7 @@ public class UserDTO {
 	 * Sets the value of the attribute {@link #phone}.
 	 * @param phoneP The value for the attribute {@link #phone}.
 	 */
-	public void setTelf(final String telfP) {
+	public void setTelfAdd(final String telfP) {
 		this.telfAdd = telfP;
 	}
 

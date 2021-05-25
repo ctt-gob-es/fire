@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de España.
- * @version 1.0, 22/01/2021.
+ * @version 1.1, 24/05/2021.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -56,7 +56,7 @@ import es.gob.fire.persistence.service.ICertificateService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 22/01/2021.
+ * @version 1.1, 24/05/2021.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -269,9 +269,9 @@ public class CertificateService implements ICertificateService{
 			if (x509CertPrincipal != null) {
 				expDatePrincipal = x509CertPrincipal.getNotAfter();
 				String certSubject = x509CertPrincipal.getSubjectX500Principal().getName();
-				String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				String[] txtCert = cnFieldBegin.split(",");
-				certificate.setCertPrincipal(txtCert[0] + ", Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
+				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
+				String[] txtCert = certSubject.split(",");
+				certificate.setCertPrincipal(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
 			} else {
 				certificate.setCertPrincipal("");
 			}
@@ -280,9 +280,9 @@ public class CertificateService implements ICertificateService{
 				
 				expDatePrincipal = x509CertBackup.getNotAfter();
 				String certSubject = x509CertBackup.getSubjectX500Principal().getName();
-				String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				String[] txtCert = cnFieldBegin.split(",");
-				certificate.setCertBackup(txtCert[0] + ", Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));				
+				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
+				String[] txtCert = certSubject.split(",");
+				certificate.setCertBackup(txtCert[0] + "</br> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));				
 			} else {
 				certificate.setCertBackup("");
 			}

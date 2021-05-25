@@ -1,16 +1,23 @@
-<form name="altEditor-form" role="form" id="userForm" th:object="${userform}" th:action="@{/saveuser}" method="post">
-					
+<div class="modal" tabindex="-1" role="dialog" id="modalUserAdd">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Agregar usuario</h4>
+				<button type="button" class="close" onclick="closeButton('modalUserAdd')" aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+
+	<form name="altEditor-form" role="form" id="userForm" th:object="${userform}" th:action="@{/saveuser}" method="post">
+				
 			<input type='hidden' class='primarykey' id="userId" th:field="*{userId}">
-			
+			<div id="resultAddUser" data-dismiss="alert"></div>
 			<div class="form-group">
 				
-					<label for="name" class="col-form-label" th:text="#{form.user.name}"></label>
-					<script th:inline="javascript">
-						/*<![CDATA[*/
-						    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
-						/*]]>*/
-					</script>
-					<input onblur="validate(this,messageName);" type="text" name="nameAdd"  autocomplete="nope" id="nameAdd" th:field="*{name}" class="form-control"  pattern=".{3,15}" required />
+					<label for="nameAdd" class="col-form-label" th:text="#{form.user.name}"></label>
+					<span id="nameAdd_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+					<input type="text" name="nameAdd" autocomplete="nope" id="nameAdd" th:field="*{nameAdd}" class="form-control" maxlength="45" required />
 					<div id="invalid-nameAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -18,13 +25,9 @@
 			
 			<div class="form-group">
 				
-					<label for="surnames" class="col-form-label" th:text="#{form.user.surnames}"></label>
-					<script th:inline="javascript">
-						/*<![CDATA[*/
-						    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
-						/*]]>*/
-					</script>
-					<input onblur="validate(this,messageSurname);" type="text" name="surnamesAdd" autocomplete="nope" id="surnamesAdd" th:field="*{surnames}" class="form-control" required pattern=".{3,30}"/>
+					<label for="surnamesAdd" class="col-form-label" th:text="#{form.user.surnames}"></label>
+					<span id="surnamesAdd_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+					<input type="text" name="surnamesAdd" autocomplete="nope" id="surnamesAdd" th:field="*{surnamesAdd}" class="form-control" maxlength="120" required />
 					<div id="invalid-surnamesAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -32,13 +35,9 @@
 			
 			<div class="form-group">
 				
-					<label for="login" class="col-form-label" th:text="#{form.user.login}"></label>
-					<script th:inline="javascript">
-						/*<![CDATA[*/
-						    var messageLogin = /*[[#{form.user.login.pattern}]]*/ 'default';
-						/*]]>*/
-					</script>
-					<input onblur="validate(this,messageLogin);" type="text" name="loginAdd" autocomplete="nope" id="loginAdd"  th:field="*{login}" style="overflow:hidden" class="form-control"  required pattern=".{5,30}"/>
+					<label for="loginAdd" class="col-form-label" th:text="#{form.user.login}"></label>
+					<span id="loginAdd_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+					<input type="text" name="loginAdd" autocomplete="nope" id="loginAdd"  th:field="*{loginAdd}" style="overflow:hidden" class="form-control" maxlength="30" required />
 					<div id="invalid-loginAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -56,14 +55,10 @@
 			
 			<div class="form-group">
 				
-					<label for="password" class="col-form-label" th:text="#{form.user.password}"></label>
-					<script th:inline="javascript">
-						/*<![CDATA[*/
-						    var messagePassword = /*[[#{form.user.password.pattern}]]*/ 'default';
-						/*]]>*/
-					</script>
+					<label for="passwordAdd" class="col-form-label" th:text="#{form.user.password}"></label>
+					<span id="passwordAdd_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
 					<input type="password" style="display:none">
-					<input onblur="validate(this,messagePassword);" type="password" name="passwordAdd" id="passwordAdd" th:field="*{password}" class="form-control"  required />
+					<input type="password" name="passwordAdd" id="passwordAdd" th:field="*{passwordAdd}" class="form-control" maxlength="12" required />
 					<div id="invalid-passwordAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -71,8 +66,9 @@
 			
 			<div class="form-group">
 				
-					<label for="confirmPassword" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
-					<input onblur="validateConfirmPassword();" type="password" name="confirmPasswordAdd" id="confirmPasswordAdd" th:field="*{confirmPassword}" class="form-control"  required />
+					<label for="confirmPasswordAdd" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
+					<span id="confirmPasswordAdd_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+					<input type="password" name="confirmPasswordAdd" id="confirmPasswordAdd" th:field="*{confirmPasswordAdd}" class="form-control" maxlength="12" required />
 					<div id="invalid-confirmPassword" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
@@ -80,36 +76,31 @@
 			
 			<div class="form-group">
 				
-					<label for="email" class="col-form-label" th:text="#{form.user.email}"></label>
-					<script th:inline="javascript">
-						/*<![CDATA[*/
-						    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
-						/*]]>*/
-					</script>
-					<input onblur="validate(this,messageEmail);" type="email" name="emailAdd" autocomplete="nope" id="emailAdd" th:field="*{email}" style="overflow:hidden" class="form-control"   required/>
+					<label for="emailAdd" class="col-form-label" th:text="#{form.user.email}"></label>
+					<span id="emailAdd_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+					<input type="email" name="emailAdd" autocomplete="nope" id="emailAdd" th:field="*{emailAdd}" style="overflow:hidden" class="form-control" maxlength="45" required/>
 					<div id="invalid-emailAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
 			</div>
 			<div class="form-group">
 				
-					<label for="telf" class="col-form-label" th:text="#{form.user.telf}"></label>
-					<script th:inline="javascript">
-						/*<![CDATA[*/
-						    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
-						/*]]>*/
-					</script>
-					<input onblur="validate(this,messageTelf);" type="text" name="telfAdd" autocomplete="nope" id="telfAdd" th:field="*{telf}"  style="overflow:hidden" class="form-control" />
-					
+					<label for="telfAdd" class="col-form-label" th:text="#{form.user.telf}"></label>
+					<span id="telfAdd_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+					<input type="text" name="telfAdd" autocomplete="nope" id="telfAdd" th:field="*{telfAdd}"  style="overflow:hidden" maxlength="45" class="form-control" />
 					<div id="invalid-telfAdd" class="invalid-modal" ></div>
 				
 				<div style="clear:both;"/>
 			</div>
-			
-			
-							
 </form>
-
+</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" onclick="closeButton('modalUserAdd')">Cerrar</button>
+				<button type="submit" id="addBtnModal" class="btn btn-primary">Guardar cambios</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script th:inline="javascript">
 
@@ -152,5 +143,72 @@ function validateConfirmPassword(){
 	
 }
    
-
+$( "#addBtnModal" ).click(function( event ) {
+	  event.preventDefault();
+		
+	  var formData = JSON.stringify($("#userForm").serializeJSON());
+	  var tbl = $('#userTable').DataTable();
+	  var url = /*[[@{/saveuser}]]*/;
+	  
+	  loading();
+	  
+	  $.ajax({
+		  type: "POST",
+		  url: url,
+		  data: formData,
+		  success: function(data){
+			hide();
+						
+			if (data.error != null){
+			 	hide();
+			 	var errores = JSON.parse(data.error);
+				  jQuery.each(errores, function(i, val) {
+				  	$('#userForm *').filter('span').each(function(){
+						if (i == $(this).attr('id')){
+							$("#" + i).text(val);
+						}
+					});
+				  });
+				  
+	  		}else{
+						
+					tbl.row.add($(data.data)).draw(false);
+					
+					$("#userForm")[0].reset();
+					 $('#userForm *').filter('span').each(function(){
+							$(this).text('');
+						});
+					  	 					  
+					var messageResponse = /*[[#{message.success.user.edit}]]*/;
+						 								  
+					//se muestra un mensaje
+					$('#resultAddUser').html(messageResponse);
+					$('#resultAddUser').removeClass('alert-danger')	
+					$('#resultAddUser').addClass('alert alert-success');
+				 	$("#resultAddUser").fadeTo(2000, 500).slideUp(500, function() {
+					$("#resultAddUser").slideUp(500);
+					
+	 					//se cierra modal
+	 					closeModal('modalUserAdd');
+				 	});
+			}
+				 	
+			$('#userFormEdit *').filter(':input').each(function(){
+			  $("#" + $(this).attr('id')).removeClass("has-error");
+			});
+						
+		  },
+		  error:function(){
+			  hide();
+			  var messageResponse = /*[[#{message.error.user.edit}]]*/;
+			  $('#resultAddUser').removeClass('alert-success')	
+			  $('#resultAddUser').addClass('alert alert-danger');
+			  $("#resultAddUser").html(messageResponse);
+		  },
+		  dataType: "json",
+		  contentType : "application/json"
+	});
+				  
+	  
+});
 </script>

@@ -1,25 +1,21 @@
-<div class="modal" tabindex="-1" role="dialog" id="modalEdit">
+<div class="modal" tabindex="-1" role="dialog" id="modalUserEdit">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">Editar registro</h4>
-				<button type="button" class="close" onclick="closeButton('modalEdit')" aria-label="Cerrar">
+				<button type="button" class="close" onclick="closeButton('modalUserEdit')" aria-label="Cerrar">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
 				<form name="altEditor-form" role="form" id="userFormEdit" th:object="${userformedit}" th:action="@{/saveuseredit}" method="post">
 					<input type='hidden' class='primarykey' id="idUserFireEdit" th:field="*{idUserFireEdit}">
-					
+					<div id="resultEditUser" data-dismiss="alert"></div>
 					<div class="form-group">
 						
 							<label for="nameEdit" class="col-form-label" th:text="#{form.user.name}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageName = /*[[#{form.user.name.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageName);" type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{3,15}" />
+							<span id="nameEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+							<input type="text" id="nameEdit" th:field="*{nameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" maxlength="45" required />
 							<div id="invalid-name" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -28,12 +24,8 @@
 					<div class="form-group">
 						
 							<label for="surnamesEdit" class="col-form-label" th:text="#{form.user.surnames}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageSurname = /*[[#{form.user.surnames.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageSurname);" type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{3,30}"/>
+							<span id="surnamesEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+							<input type="text" id="surnamesEdit" th:field="*{surnamesEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" maxlength="120" required />
 							<div id="invalid-surnames" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -42,12 +34,8 @@
 					<div class="form-group">
 						
 							<label for="usernameEdit" class="col-form-label" th:text="#{form.user.login}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageLogin = /*[[#{form.user.login.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageLogin);" type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" required pattern=".{5,30}"/>
+							<span id="usernameEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+							<input type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" maxlength="30" required />
 							<div id="invalid-login" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -61,19 +49,16 @@
 										th:text="#{form.user.Editrol.pattern}"></option>
 									<option th:each="rol: ${listRoles}" th:value="${rol.rolId}" th:text="${rol.rolName}" th:selected="${userformedit.rolId == rol.rolId}"></option>
 							</select>
+							<input type="hidden" id="rolId_" name="rolId"/>
 					</div>
 					
 					
 					<div class="form-group">
 						
 							<label for="passwordEdit" class="col-form-label" th:text="#{form.user.password}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messagePassword = /*[[#{form.user.password.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
+							<span id="passwordEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
 							<input type="password" style="display:none">
-							<input onblur="validate(this,messagePassword);" type="password" name="passwordEdit" id="passwordEdit" th:field="*{password}" class="form-control"  required />
+							<input type="password" name="passwordEdit" id="passwordEdit" th:field="*{passwordEdit}" class="form-control" maxlength="12" required />
 							<div id="invalid-passwordAdd" class="invalid-modal" ></div>
 						
 						<div style="clear:both;"/>
@@ -82,7 +67,8 @@
 					<div class="form-group">
 						
 							<label for="confirmPasswordEdit" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
-							<input onblur="validateConfirmPassword();" type="password" name="confirmPasswordEdit" id="confirmPasswordEdit" th:field="*{confirmPassword}" class="form-control"  required />
+							<span id="confirmPasswordEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+							<input type="password" name="confirmPasswordEdit" id="confirmPasswordEdit" th:field="*{confirmPasswordEdit}" class="form-control" maxlength="12" required />
 							<div id="invalid-confirmPassword" class="invalid-modal" ></div>
 						
 						<div style="clear:both;"/>
@@ -91,12 +77,8 @@
 					<div class="form-group">
 						
 							<label for="emailEdit" class="col-form-label" th:text="#{form.user.email}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageEmail = /*[[#{form.user.email.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageEmail);" type="email" id="emailEdit" th:field="*{emailEdit}" autocomplete="nope" style="overflow:hidden" class="form-control" required/>
+							<span id="emailEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+							<input type="email" id="emailEdit" th:field="*{emailEdit}" autocomplete="nope" style="overflow:hidden" class="form-control" maxlength="45" required/>
 							<div id="invalid-email" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -105,12 +87,8 @@
 						<div class="form-group">
 						
 							<label for="telfEdit" class="col-form-label" th:text="#{form.user.telf}"></label>
-							<script th:inline="javascript">
-								/*<![CDATA[*/
-								    var messageTelf = /*[[#{form.user.telf.pattern}]]*/ 'default';
-								/*]]>*/
-							</script>
-							<input onblur="validate(this,messageName);" type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="nope" style="overflow:hidden" class="form-control"  />
+							<span id="telfEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+							<input type="text" id="telfEdit" th:field="*{telfEdit}" autocomplete="nope" style="overflow:hidden" maxlength="45" class="form-control"  />
 							<div id="invalid-telf" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -118,7 +96,7 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" onclick="closeButton('modalEdit')">Cerrar</button>
+				<button type="button" class="btn btn-default" onclick="closeButton('modalUserEdit')">Cerrar</button>
 				<button type="submit" id="editBtnModal" class="btn btn-primary">Guardar cambios</button>
 			</div>
 		</div>
@@ -131,10 +109,12 @@
 
 	$(document).ready(function() {
 		
+		$('#rolId_').val($('#rolId').val());
+		
 		// El administrador principal (admin) no puede modificar su nombre de usuario ni su rol
 		if ($('#usernameEdit').val() == "admin") {
-			$('#usernameEdit').prop("disabled", true);
-			$('#rolId').prop("disabled", true);
+			$('#usernameEdit').prop("readonly", true);
+			$('#rolId').prop("disabled", true);		
 		}
 		
 		// Las contrasenas no pueden modificarse desde este formulario. Los campos estaran deshabilitados por defecto
@@ -150,6 +130,7 @@
 	$( "#rolId" ).change(function() {
 	    
 		hide();
+		$('#rolId_').val($('#rolId').val());
 		
 		var rolSelected = $("#rolId option:selected").val();
 			
@@ -164,7 +145,9 @@
 
 		} else {
 			$('#passwordEdit').prop("disabled", false);
+			$("passwordEdit").prop('required',true);
 			$('#confirmPasswordEdit').prop("disabled", false);
+			$("confirmPasswordEdit").prop('required',true);
 		}
 
 	});
@@ -201,25 +184,64 @@
 			  data: formData,
 			  success: function(data){
 				hide();
-				
+					
 				if ($('#errorModalEdit').length > 0){
 					$('#errorModalEdit').remove();
-				}
+				}				
 				
-				$('#modalEdit').modal('hide');
-				tbl.row.add($(data.data)).draw(false);
-				
+				if (data.error != null){
+				 	hide();
+				 	var errores = JSON.parse(data.error);
+					  jQuery.each(errores, function(i, val) {
+					  	$('#userFormEdit *').filter('span').each(function(){
+							if (i == $(this).attr('id')){
+								$("#" + i).text(val);
+							}
+						});
+					  });
+					  
+		  		}else{
+							
+						tbl.row.add($(data.data)).draw(false);
+						
+						$("#userFormEdit")[0].reset();
+	 					 $('#userFormEdit *').filter('span').each(function(){
+	 							$(this).text('');
+	 						});
+	 					  	 					  
+	 					var messageResponse = /*[[#{message.success.user.edit}]]*/;
+	 						 								  
+	 					//se muestra un mensaje
+	 					$('#resultEditUser').html(messageResponse);
+	 					$('#resultEditUser').removeClass('alert-danger')	
+	 					$('#resultEditUser').addClass('alert alert-success');
+	 				 	$("#resultEditUser").fadeTo(2000, 500).slideUp(500, function() {
+	 					$("#resultEditUser").slideUp(500);
+	 					
+		 					//se cierra modal
+		 					closeModal('modalUserEdit');
+	 				 	});
+	 			}
+	 				 	
+	 			$('#userFormEdit *').filter(':input').each(function(){
+	 			  $("#" + $(this).attr('id')).removeClass("has-error");
+	 			});
+							
 			  },
 			  error:function(){
 				  hide();
-				  if (!$('#errorModalEdit').length > 0){
-				  	$('#userFormEdit').append('<div id="errorModalEdit" class="alert alert-danger" role="alert"><strong>Error inesperado, int\u00E9ntelo mas tarde!</strong></div>');
-				  }
+ 				  var messageResponse = /*[[#{message.error.user.edit}]]*/;
+ 				  $('#resultEditUser').removeClass('alert-success')	
+ 				  $('#resultEditUser').addClass('alert alert-danger');
+ 				  $("#resultEditUser").html(messageResponse);
 			  },
 			  dataType: "json",
 			  contentType : "application/json"
 		});
-	});
+					  
+	 	  
+});
+	
 	
 	
 </script>
