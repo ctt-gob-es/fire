@@ -189,7 +189,7 @@ public class UserRestController {
 			error = true;
 			json.put("passwordAdd" + SPAN, "El campo contraseña es obligatorio.");			
 
-		} if (adminRol && notMatchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
+		} if (adminRol && matchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
 			error = true;
 			json.put("passwordAdd" + SPAN, "Los campos de contraseña deben coincidir.");
 			json.put("confirmPasswordAdd" + SPAN, "Los campos de contraseña deben coincidir.");			
@@ -276,7 +276,7 @@ public class UserRestController {
 			json.put("passwordEdit" + SPAN, "El campo contraseña es obligatorio.");
 		} 
 		
-		if (adminRol && notMatchingConfirmPassword(userForm.getPasswordEdit(), userForm.getConfirmPasswordEdit()) && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !wasAdminBeforeEdit(userForm.getIdUserFireEdit())) {
+		if (adminRol && matchingConfirmPassword(userForm.getPasswordEdit(), userForm.getConfirmPasswordEdit()) && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !wasAdminBeforeEdit(userForm.getIdUserFireEdit())) {
 			error = true;
 			json.put("passwordEdit" + SPAN, "Los campos de contraseña deben coincidir.");
 			json.put("confirmPasswordEdit" + SPAN, "Los campos de contraseña deben coincidir.");
@@ -327,7 +327,7 @@ public class UserRestController {
 			}
 			result = json.toString();
 
-		} else if (notMatchingConfirmPassword(userFormPassword.getPassword(), userFormPassword.getConfirmPassword())) {
+		} else if (!matchingConfirmPassword(userFormPassword.getPassword(), userFormPassword.getConfirmPassword())) {
 
 			final JSONObject json = new JSONObject();
 			json.put("password" + SPAN, "Los campos de contraseña deben coincidir.");
@@ -347,9 +347,9 @@ public class UserRestController {
 	 * @param confirmPassword
 	 * @return
 	 */
-	private boolean notMatchingConfirmPassword(final String password, final String confirmPassword) {
+	private boolean matchingConfirmPassword(final String password, final String confirmPassword) {
 
-		return !password.equals(confirmPassword);
+		return password.equals(confirmPassword);
 	}
 
 	/**

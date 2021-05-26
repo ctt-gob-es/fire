@@ -58,7 +58,7 @@ public class UserPasswordDTO {
 	 * the form.
 	 */
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.password.notempty}")
-	@Size(min = NumberConstants.NUM4, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	@Size(min = NumberConstants.NUM1, max = NumberConstants.NUM30, message ="El campo '${validatedValue}' debe tener una longitud mínima de {min} y una longitud máxima de {max}", groups = ThenCheckIt.class)
 	//@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "{form.valid.user.password.noPattern}", groups = ThenCheckIt.class)
 	private String password = UtilsStringChar.EMPTY_STRING;
 
@@ -67,7 +67,7 @@ public class UserPasswordDTO {
 	 * the form.
 	 */
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.confirmPassword.notempty}")
-	@Size(min = NumberConstants.NUM4, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
+	@Size(min = NumberConstants.NUM1, max = NumberConstants.NUM30, message ="El campo '${validatedValue}' debe tener una longitud mínima de {min} y una longitud máxima de {max}", groups = ThenCheckIt.class)
 	private String confirmPassword = UtilsStringChar.EMPTY_STRING;
 
 	

@@ -23,7 +23,7 @@
 						<label for="appName" class="col-form-label"
 							th:text="#{form.application.name}"></label>
 						<input type="text" id="appName" th:field="*{appName}" class="form-control" />
-						<span id="appName_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 		
+						<span id="appName_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 		
 						<div style="clear: both;" />
 					</div>
 					<div class="form-group row">
@@ -52,7 +52,7 @@
 					        </div>
 					        
 					        <div class="m-l-10">
-					        	<span id="user_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+					        	<span id="user_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 					        </div>
 					    </div>
 					
@@ -196,7 +196,7 @@ function saveNewApp() {
  					  });
  				  }else{
  					  
- 					 hide();
+ 					hide();
  					$('#appTable').DataTable().row.add(data.data[0]).draw(false);
  				  
  					 $("#appAddForm")[0].reset();
@@ -210,7 +210,7 @@ function saveNewApp() {
  								  
  					//se muestra un mensaje
  					$('#resultAddApp').html(messageResponse);
- 					$('#resultAddApp').removeClass('alert-error')	
+ 					$('#resultAddApp').removeClass('alert-danger')	
  					$('#resultAddApp').addClass('alert alert-success');
  				 	$("#resultAddApp").fadeTo(2000, 500).slideUp(500, function() {
  					$("#resultAddApp").slideUp(500);

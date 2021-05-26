@@ -171,13 +171,13 @@ $(document).ready(function() {
 			                	var messageError = "";
 			                	
 			                	if (messageException.includes("SYSTEM_CERT_UNIQUE")) {
-			                		messageError = "El certificado ya se encuentra asociado al usuario!";
+			                		messageError = "El certificado ya se encuentra asociado al usuario";
 			                	} else if (messageException.includes("signed fields invalid")) {
-			                		messageError = "Debe seleccionar un archivo de certificado v\u00e1lido!";
+			                		messageError = "Debe seleccionar un archivo de certificado v\u00e1lido";
 			                	} else if (messageException.includes("Error al validar el certificado")) {
 			                		messageError = messageException;
 			                	} else {
-			                		messageError = "Error al agregar el certificado!";
+			                		messageError = "Error al agregar el certificado";
 			                	}
 			                	
 			                	$('#errorModalUser').remove();
@@ -205,7 +205,7 @@ $(document).ready(function() {
 		            break;
 		        default:
 		            $('#altEditor-modal .modal-body .alert').remove();
-		            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>Acción "'+accion+'" no autorizada!</strong></div>');
+		            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>Acci\u00f3n "'+accion+'" no autorizada</strong></div>');
 		            break;
 		    }
 		});

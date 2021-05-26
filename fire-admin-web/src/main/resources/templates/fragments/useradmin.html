@@ -43,20 +43,20 @@
 					
 					<div class="form-group-modal">
 						<label for="oldPassword" class="col-form-label" th:text="#{form.user.oldPassword}"></label>
-						<span id="oldPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+						<span id="oldPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						<input type="password" style="display:none">
 						<input type="password" id="oldPassword" th:field="*{oldPassword}" class="form-control" />
 					</div>
 					
 					<div class="form-group-modal">
 						<label for="password" class="col-form-label" th:text="#{form.user.password}"></label>
-						<span id="password_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+						<span id="password_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						<input type="password" id="password" th:field="*{password}" class="form-control" />
 					</div>
 					
 					<div class="form-group-modal">
 						<label for="confirmPassword" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
-						<span id="confirmPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+						<span id="confirmPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						<input onblur="validateConfirmPassword();" type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" />
 					</div>
 				</form>

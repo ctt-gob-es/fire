@@ -24,7 +24,7 @@
 							class="c-yellow-500 ti-control-record"></i></td>
 						<td th:if="${sum.status eq 0}"><i
 							class="c-green-500 ti-control-record"></i></td>
-						<td th:if="${sum.status eq null}" th:text="#{error.spie.connection}" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></td>
+						<td th:if="${sum.status eq null}" th:text="#{error.spie.connection}" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></td>
 						<td th:text="${sum.status}"></td>
 						<td th:text="${sum.type}"></td>
 						<td th:text="${sum.description}"></td>
@@ -106,7 +106,7 @@
 							class="c-green-500 ti-control-record"></i></td>
 						<td th:if="${stSpie.statusValue eq null}"
 							th:text="#{error.spie.connection}"
-							class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></td>
+							class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></td>
 						<td th:text="${stSpie.statusValue}"></td>
 						<td th:text="${stSpie.system}"></td>
 						<td th:text="${stSpie.nodeName}"></td>

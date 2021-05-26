@@ -3,7 +3,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">Cambiar contrase&ntilde;a</h4>
-				<button type="button" class="close" onclick="closeButton('modalEdit')" aria-label="Cerrar">
+				<button type="button" class="close" onclick="closeButton('modalPassword')" aria-label="Cerrar">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
@@ -14,19 +14,19 @@
 					
 					<div class="form-group">
 						<label for="oldPassword" class="col-form-label" th:text="#{form.user.oldPassword}"></label>
-						<span id="oldPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+						<span id="oldPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						<input type="password" id="oldPassword" th:field="*{oldPassword}" class="form-control" />
 					</div>
 					
 					<div class="form-group">
 						<label for="password" class="col-form-label" th:text="#{form.user.password}"></label>
-						<span id="password_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+						<span id="password_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						<input type="password" id="password" th:field="*{password}" class="form-control" />
 					</div>
 					
 					<div class="form-group">
 						<label for="confirmPassword" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
-						<span id="confirmPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+						<span id="confirmPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						<input onblur="validateConfirmPassword();" type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" />
 					</div>
 				</form>
@@ -80,15 +80,15 @@
 			switch(data){
 			case 0:
 				$('#errorModalUser').remove();
-				$('#modalPassword').modal('hide');
+				closeModal("modalPassword");
 				break;
 			case -1:
 				$('#errorModalUser').remove();
-				$('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>La contrase\u00F1a anterior debe de coincidir!</strong></div>');
+				$('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>La contrase\u00F1a anterior no es correcta</strong></div>');
 				break;
 			case -2:
 				$('#errorModalUser').remove();
-				$('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>Error inesperado, int\u00E9ntelo mas tarde!</strong></div>');
+				$('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>Error inesperado, int\u00E9ntelo mas tarde</strong></div>');
 				break;
 			default:
 				if (data != null){
@@ -105,7 +105,7 @@
 		  error:function(){
 			  hide();
 			  $('#errorModalUser').remove();
-			  $('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>Error inesperado, int\u00E9ntelo mas tarde!</strong></div>');
+			  $('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>Error inesperado, int\u00E9ntelo mas tarde</strong></div>');
 		  },
 		  dataType: "json",
 		  contentType : "application/json"

@@ -10,7 +10,7 @@
 					
 					<div class="form-row">
 						<div class="form-group col-md-6"><label for="nameService"
-							th:text="#{form.service.name}"></label> <span id="nameService_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> <input type="text"
+							th:text="#{form.service.name}"></label> <span id="nameService_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> <input type="text"
 							class="form-control" id="nameService" th:field="*{name}" max="100" required>
 					</div>
 						<div class="form-group col-md-6"><label for="platform" th:text="#{form.service.platform}"></label>
@@ -40,14 +40,14 @@
 							<input type="text" class="form-control" alt id="endpoint" readonly>
 						</div>
 						<div class="form-group col-md-3">
-							<span id="nameWsdl_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+							<span id="nameWsdl_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 							<input type="text" class="form-control" id="nameWsdl" th:field="*{nameWsdl}" required>
 						</div>
 					</div>
 					<div class="form-row">
 						<div class="form-group col-md-6">
 							<label for="timeout" th:text="#{form.service.timeout}"></label> 
-							<span id="timeout_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 
+							<span id="timeout_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 
 							<input type="text" class="form-control" id="timeout" th:field="*{timeout}"	required>
 						</div>
 						<div class="form-group col-md-6">
@@ -60,12 +60,12 @@
 					<div class="form-row">
 						<div class="form-group col-md-6">
 							<label for="uDegraded" th:text="#{form.service.udegraded}"></label> 
-							<span id="uDegraded_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 
+							<span id="uDegraded_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 
 							<input type="text" class="form-control" id="uDegraded" th:field="*{degradedThreshold}" required>
 						</div>
 						<div class="form-group col-md-6">
 							<label for="uLost" th:text="#{form.service.ulost}"></label> 
-							<span id="uLost_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 
+							<span id="uLost_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 
 							<input type="text" class="form-control" id="uLost" th:field="*{lostThreshold}" required>
 						</div>
 					</div>
@@ -90,7 +90,7 @@
 									<input type="file" class="custom-file-input" id="file" th:field="*{file}" aria-describedby="fileHelp">
 									<label class="custom-file-label" for="file" th:text="#{form.ssl.file.choose}"></label>
 								</div>
-								<span id="file_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span>
+								<span id="file_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 							<div style="clear: both;" />
 						</div>
 					</div>
@@ -116,12 +116,12 @@
 					<div class="form-row">
 						<div class="form-group col-md-6">
 							<label for="nameTimer" th:text="#{form.timer.name}"></label> 
-							<span id="nameTimer_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 
+							<span id="nameTimer_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 
 							<input type="text" class="form-control" id="nameTimer" th:field="*{name}" required>
 						</div>
 						<div class="form-group col-md-6">
 							<label for="frequencyTime" th:text="#{form.timer.frequency}"></label> 
-							<span id="frequency_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill"></span> 
+							<span id="frequency_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 
 							<input type="time" class="form-control" id="frequencyTime" th:field="*{frequencyTime}" step="1"	required>
 						</div>
 					</div>
