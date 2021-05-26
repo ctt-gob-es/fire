@@ -1,21 +1,18 @@
-
 /** 
- * <b>File:</b><p>es.juntadeandalucia.justicia.biosign.integrationserver.core.util.FileUtilsDirectory.java.</p>
+ * <b>File:</b><p>es.gob.fire.commons.utils.FileUtilsDirectory.java.</p>
  * <b>Description:</b><p>Utility class to manage files.</p>
- * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
- * <b>Date:</b><p>23 oct. 2019.</p>
- * @author Consejería de Turismo, Regeneración, Justicia y Administración Local de la Junta de Andalucía.
- * @version 1.0, 23 oct. 2019.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <b>Date:</b><p>23/05/2020.</p>
+ * @version 1.0, 23/05/2020.
  */
 package es.gob.fire.commons.utils;
 
 import java.io.File;
-import java.io.IOException;
 
 /** 
  * <p>Utility class to manage files.</p>
- * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
- * @version 1.0, 23 oct. 2019.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 23/05/2020.
  */
 public final class FileUtilsDirectory {
 	
