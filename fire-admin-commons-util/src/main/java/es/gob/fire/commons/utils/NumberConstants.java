@@ -1,4 +1,3 @@
-
 /** 
  * <b>File:</b><p>es.gob.fire.commons.utils.NumberConstants.java.</p>
  * <b>Description:</b><p>Interface that defines numeric es.gob.fire.constants for generalized usage.</p>

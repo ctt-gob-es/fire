@@ -1,11 +1,9 @@
-
 /** 
- * <b>File:</b><p>es.juntadeandalucia.justicia.biosign.integrationserver.war.config.WebServiceMvcConfig.java.</p>
+ * <b>File:</b><p>es.gob.fire.web.config.WebConfig.java.</p>
  * <b>Description:</b><p>Class that registers the different beans used in the application.</p>
- * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
- * <b>Date:</b><p>14 oct. 2019.</p>
- * @author Consejería de Turismo, Regeneración, Justicia y Administración Local de la Junta de Andalucía.
- * @version 1.0, 14 oct. 2019.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <b>Date:</b><p>14/05/2020.</p>
+ * @version 1.0, 14/05/2020
  */
 package es.gob.fire.web.config;
 
@@ -28,8 +26,8 @@ import es.gob.fire.commons.utils.UtilsServer;
 
 /** 
  * <p>Class that registers the different beans used in the application.</p>
- * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
- * @version 1.0, 14 oct. 2019.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.0, 14/05/2020
  */
 @Configuration
 @ComponentScan(basePackages = { Constants.MAIN_PERSISTENCE_PROJECT_PACKAGE, Constants.MAIN_WEB_PROJECT_PACKAGE }, useDefaultFilters = true)

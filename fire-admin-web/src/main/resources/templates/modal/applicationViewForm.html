@@ -107,9 +107,9 @@ $('#appViewModal').on('shown.bs.modal', function (e) {
 	tblRespApp = $('#appRespTable').DataTable({
 	    "iTotalRecords": "totalElements",
 	    "iTotalDisplayRecords": "numberOfElements",    
-	    "searching": false,
+	    "searching": true,
 	    "processing": true,
-	    "serverSide": true,
+	    "serverSide": false,
 	    "ajax": {
 	        "url": getRespApp,
 	        "data": {
@@ -122,14 +122,10 @@ $('#appViewModal').on('shown.bs.modal', function (e) {
 	        },
 	       
 	    "columns": [
-	          { "data": "name",
-	        	"orderable": false},
-	          { "data": "surnames",
-	        	"orderable": false},
-	          { "data": "email",
-		       	"orderable": false},
-	          { "data": "phone",
-			   	"orderable": false}
+	          { "data": "name"},
+	          { "data": "surnames"},
+	          { "data": "email"},
+	          { "data": "phone"}
 	        ],
 	    responsive: true
 	});
