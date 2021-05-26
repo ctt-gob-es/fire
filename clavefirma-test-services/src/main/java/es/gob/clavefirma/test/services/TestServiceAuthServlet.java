@@ -82,7 +82,14 @@ public final class TestServiceAuthServlet extends HttpServlet {
 		);
 
 		if (!TestHelper.subjectKeyStoreExist(subjectId)) {
-			subjectProps.setProperty("password", TestHelper.getNewSubjectPassword()); //$NON-NLS-1$
+			try {
+				subjectProps.setProperty("password", TestHelper.getSubjectPassword(subjectId)); //$NON-NLS-1$
+			}
+			catch (final Exception e) {
+				LOGGER.warning("No se ha encontrado la contraseña predefinida para el almacen del usuario: " + e); //$NON-NLS-1$
+				response.sendRedirect(redirectKo);
+				return;
+			}
 		}
 
 		final String password = request.getParameter("password"); //$NON-NLS-1$
@@ -107,9 +114,10 @@ public final class TestServiceAuthServlet extends HttpServlet {
 		}
 
 		transactionProps.put("auth", Boolean.TRUE.toString()); //$NON-NLS-1$
-		final OutputStream fos = new FileOutputStream(transactionFile);
-		transactionProps.store(fos, null);
-		fos.close();
+
+		try (final OutputStream fos = new FileOutputStream(transactionFile)) {
+			transactionProps.store(fos, null);
+		}
 
 		response.sendRedirect(redirectOk);
 	}

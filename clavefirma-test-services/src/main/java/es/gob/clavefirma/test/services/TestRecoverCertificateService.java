@@ -58,11 +58,9 @@ public class TestRecoverCertificateService extends HttpServlet {
 		}
 
 		final Properties p;
-		try {
-			final InputStream fis = new FileInputStream(transactionFile);
+		try (final InputStream fis = new FileInputStream(transactionFile)) {
 			p = new Properties();
 			p.load(fis);
-			fis.close();
 		}
 		catch(final IOException e) {
 			LOGGER.log(Level.WARNING, "Error cargando la transaccion: " + e, e); //$NON-NLS-1$

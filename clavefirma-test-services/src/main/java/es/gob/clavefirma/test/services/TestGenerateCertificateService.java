@@ -82,11 +82,11 @@ public class TestGenerateCertificateService extends HttpServlet {
 
 		final String transactionId = UUID.randomUUID().toString();
 
-		final OutputStream fos = new FileOutputStream(
-				new File(TestHelper.getDataFolder(), transactionId)
-				);
-		p.store(fos, ""); //$NON-NLS-1$
-		fos.close();
+
+		final File transactionFile = new File(TestHelper.getDataFolder(), transactionId);
+		try (final OutputStream fos = new FileOutputStream(transactionFile)) {
+			p.store(fos, ""); //$NON-NLS-1$
+		}
 
 		final String redirect = TestHelper.getCertificateRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe);
 

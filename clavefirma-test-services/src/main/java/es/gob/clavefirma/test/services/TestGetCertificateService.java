@@ -52,7 +52,7 @@ public class TestGetCertificateService extends HttpServlet {
 
 		final KeyStore ks;
 		try {
-			ks = TestHelper.getKeyStore(subjectId);
+			ks = TestHelper.getKeyStore(subjectId, true);
 		}
 		catch (final KeyStoreException e) {
 			LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore: " + e, e); //$NON-NLS-1$

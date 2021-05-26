@@ -149,13 +149,14 @@ class TestHelper {
 	 */
 	public static Properties loadConfig() throws  IOException {
 
-		InputStream is = null;
 		final Properties config = new Properties();
 		try {
 			String configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
 			if (configDirPath == null) {
 				configDirPath = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR_OLD);
 			}
+
+			boolean loaded = false;
 			if (configDirPath != null) {
 				final File configFile = new File(configDirPath, CONFIG_FILE).getCanonicalFile();
 				if (!configFile.isFile() || !configFile.canRead()) {
@@ -165,35 +166,26 @@ class TestHelper {
 									"\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
 				}
 				else {
-					is = new FileInputStream(configFile);
+					try (InputStream is = new FileInputStream(configFile)) {
+						config.load(is);
+					}
+					loaded = true;
 				}
 			}
 
-			if (is == null) {
-				is = TestHelper.class.getResourceAsStream('/' + CONFIG_FILE);
+			if (!loaded) {
+				try (InputStream is = TestHelper.class.getResourceAsStream('/' + CONFIG_FILE)) {
+					config.load(is);
+				}
 			}
-
-			config.load(is);
-			is.close();
 		}
 		catch(final NullPointerException e){
 			LOGGER.severe("No se ha encontrado el fichero de configuracion: " + e); //$NON-NLS-1$
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
 			throw new IOException("No se ha encontrado el fichero de propiedades " + CONFIG_FILE, e); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			LOGGER.severe("No se pudo cargar el fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
 			throw new IOException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, e); //$NON-NLS-1$
-		}
-		finally {
-			if (is != null) {
-				try { is.close(); } catch (final Exception ex) { /* No hacemos nada */ }
-			}
 		}
 
 		// Expandimos las propiedades configuradas con los parametros proporcionados
@@ -215,6 +207,7 @@ class TestHelper {
 	/**
 	 * Recupera el almacen de claves del usuario.
 	 * @param subjectId Identificador del usuario.
+	 * @param needCheck Indica si debe verificarse la disponibilidad del certificado del usuario.
 	 * @return Almac&eacute;n del usuario.
 	 * @throws FIReCertificateException Cuando el usuario no tiene certificados.
 	 * @throws KeyStoreException
@@ -225,7 +218,7 @@ class TestHelper {
 	 * @throws BlockedCertificateException Cuando el usuario no tenga certificados activos y s&iacute; bloqueados.
 	 * @throws WeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma.
 	 */
-	static KeyStore getKeyStore(final String subjectId) throws  FIReCertificateException,
+	static KeyStore getKeyStore(final String subjectId, final boolean needCheck) throws  FIReCertificateException,
 																		KeyStoreException,
 																		NoSuchAlgorithmException,
 																		CertificateException,
@@ -234,8 +227,9 @@ class TestHelper {
 																		BlockedCertificateException,
 																		WeakRegistryException {
 
-
-		checkSubject(subjectId);
+		if (needCheck) {
+			checkSubject(subjectId);
+		}
 
 		// Eliminamos el proveedor de BouncyCastle en caso de estar instaladas
 		Security.removeProvider("BC"); //$NON-NLS-1$
@@ -258,48 +252,12 @@ class TestHelper {
 	 */
 	static String getSubjectPassword(final String subjectId) throws IOException, InvalidUserException {
 
-		final InputStream is = doSubjectExist(subjectId);
-		final Properties tempProperties = new Properties();
-		tempProperties.load(is);
-		is.close();
+		Properties tempProperties;
+		try (final InputStream is = doSubjectExist(subjectId)) {
+			tempProperties = new Properties();
+			tempProperties.load(is);
+		}
 		return tempProperties.getProperty(TEST_USER_PROPERTY_PASSWORD);
-	}
-
-	/**
-	 * Recupera el almacen de claves del usuario.
-	 * @param subjectId Identificador del usuario.
-	 * @return Almac&eacute;n del usuario.
-	 * @throws FIReCertificateException Cuando el usuario no tiene certificados.
-	 * @throws KeyStoreException
-	 * @throws NoSuchAlgorithmException
-	 * @throws CertificateException
-	 * @throws IOException
-	 * @throws InvalidUserException Cuando el usuario no exista.
-	 */
-	static KeyStore getNewKeyStore() throws  FIReCertificateException,
-																		KeyStoreException,
-																		NoSuchAlgorithmException,
-																		CertificateException,
-																		IOException, InvalidUserException {
-
-		// Eliminamos el proveedor de BouncyCastle en caso de estar instaladas
-		Security.removeProvider("BC"); //$NON-NLS-1$
-
-		final KeyStore ks = KeyStore.getInstance("PKCS12"); //$NON-NLS-1$
-		ks.load(
-				TestGetCertificateService.class.getResourceAsStream("/testservice/new/new.p12"), //$NON-NLS-1$
-				getNewSubjectPassword().toCharArray()
-				);
-		return ks;
-	}
-
-	static String getNewSubjectPassword() throws IOException {
-
-		final InputStream fis = TestGetCertificateService.class.getResourceAsStream("/testservice/new/new.properties"); //$NON-NLS-1$
-		final Properties tempProperties = new Properties();
-		tempProperties.load(fis);
-		fis.close();
-		return tempProperties.getProperty(TEST_USER_PROPERTY_PASSWORD, ""); //$NON-NLS-1$
 	}
 
 	static InputStream doSubjectExist(final String subjectId) throws InvalidUserException {
@@ -317,9 +275,9 @@ class TestHelper {
 	}
 
 	/**
-	 * Comprueba que el usuario en cuestion este dado de alta en el sistema y disponga
-	 * de certificados. Si se ejecuta normalmente, sin lanzar excepciones, el usuario
-	 * ser&aacute; vg&aacute;lido y tendr&aacute;a certificados para usar.
+	 * Comprueba que el usuario en cuesti&oacute;n est&eacute; dado de alta en el sistema
+	 * y disponga de certificados. Si se ejecuta normalmente, sin lanzar excepciones, el
+	 * usuario ser&aacute; v&aacute;lido y tendr&aacute; certificados para usar.
 	 * @param subjectId Identificador del usuario
 	 * @throws IOException
 	 * @throws FileNotFoundException
@@ -332,10 +290,8 @@ class TestHelper {
 	private static void checkSubject(final String subjectId) throws InvalidUserException, FIReCertificateException, BlockedCertificateException, WeakRegistryException {
 
 		final Properties tempProperties = new Properties();
-		try {
-			final InputStream is = doSubjectExist(subjectId);
+		try (final InputStream is = doSubjectExist(subjectId)) {
 			tempProperties.load(is);
-			is.close();
 		}
 		catch(final IOException e) {
 			throw new InvalidUserException("No se ha podido cargar el fichero descriptor del usuario", e); //$NON-NLS-1$
@@ -425,10 +381,8 @@ class TestHelper {
 	static void checkCanGenerateCert(final String subjectId) throws InvalidUserException, FIReCertificateAvailableException, WeakRegistryException {
 
 		final Properties tempProperties = new Properties();
-		try {
-			final InputStream is = doSubjectExist(subjectId);
+		try (final InputStream is = doSubjectExist(subjectId)) {
 			tempProperties.load(is);
-			is.close();
 		}
 		catch(final IOException e) {
 			throw new InvalidUserException("No se ha podido cargar el fichero descriptor del usuario", e); //$NON-NLS-1$

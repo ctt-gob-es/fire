@@ -63,9 +63,6 @@ public class TestSignService extends HttpServlet {
 	/** Clave para la propiedad de identificador de la transaccion. */
 	private static final String KEY_TRANSACTIONID = "transactionid"; //$NON-NLS-1$
 
-	/** Clave para indicar que el certificado de usuario no existe y se debe cargar el "nuevo" certificado. */
-	private static final String KEY_NEWCERT = "newcert"; //$NON-NLS-1$
-
     /** Nombre de la propiedad para almac&eacute;n de prefirmas en la
      * sesi&oacute;n trif&aacute;sica. */
     private static final String PROPERTY_NAME_PRESIGN = "PRE"; //$NON-NLS-1$
@@ -85,12 +82,9 @@ public class TestSignService extends HttpServlet {
 			throw new ServletException(ex);
 		}
 
-		final Properties p;
-		try {
-			final InputStream fis = new FileInputStream(transactionFile);
-			p = new Properties();
+		final Properties p = new Properties();
+		try (final InputStream fis = new FileInputStream(transactionFile)) {
 			p.load(fis);
-			fis.close();
 		}
 		catch(final IOException e) {
 			LOGGER.warning("Error cargando la transaccion"); //$NON-NLS-1$
@@ -165,33 +159,18 @@ public class TestSignService extends HttpServlet {
 		final KeyStore ks;
 		final char[] pass;
 		final Enumeration<String> aliases;
-		if (Boolean.parseBoolean(p.getProperty(KEY_NEWCERT))) {
-			try {
-				ks = TestHelper.getNewKeyStore();
-				pass = TestHelper.getNewSubjectPassword().toCharArray();
-				aliases = ks.aliases();
-			}
-			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error accediendo al nuevo almacen de usuario: " + e, e); //$NON-NLS-1$
-				final Exception ex = new FIReSignatureException(
-						"Error accediendo al nuevo almacen de usuario: " + e, e //$NON-NLS-1$
-						);
-				throw new ServletException(ex);
-			}
+
+		try {
+			ks = TestHelper.getKeyStore(subjectid, false);
+			pass = TestHelper.getSubjectPassword(subjectid).toCharArray();
+			aliases = ks.aliases();
 		}
-		else {
-			try {
-				ks = TestHelper.getKeyStore(subjectid);
-				pass = TestHelper.getSubjectPassword(subjectid).toCharArray();
-				aliases = ks.aliases();
-			}
-			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error accediendo al nuevo almacen de usuario: " + e, e); //$NON-NLS-1$
-				final Exception ex = new FIReSignatureException(
-						"Error accediendo al nuevoalmacen de usuario '"  + subjectid + "': " + e, e //$NON-NLS-1$ //$NON-NLS-2$
-						);
-				throw new ServletException(ex);
-			}
+		catch (final Exception e) {
+			LOGGER.log(Level.SEVERE, "Error accediendo al nuevo almacen de usuario: " + e, e); //$NON-NLS-1$
+			final Exception ex = new FIReSignatureException(
+					"Error accediendo al nuevoalmacen de usuario '"  + subjectid + "': " + e, e //$NON-NLS-1$ //$NON-NLS-2$
+					);
+			throw new ServletException(ex);
 		}
 
 		PrivateKeyEntry pke = null;
