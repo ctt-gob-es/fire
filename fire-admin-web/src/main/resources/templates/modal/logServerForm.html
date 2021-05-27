@@ -60,7 +60,7 @@
 <script th:inline="javascript">
 $(document).ready(function () {
 	
-	// Inicialización con valor correcto del checkbox
+	// Inicializacion con valor correcto del checkbox
 	if ($("#verifySSL").val() == 'true') {
 		$("#logServerForm.verifySSL").prop('checked', true);
 		$("#logServerForm.verifySSL").attr('value', true);
@@ -84,7 +84,7 @@ $(document).ready(function () {
 
     	$.ajax("checklogserver", {
 	        type: 'POST',
-	        data: $.param({'urlTex': $('#urlService').val()}),
+	        data: $.param({'urlTex': $('#urlService').val(), 'verifySsl': $('#verifySSL').val()}),
 	        success: function(data, status, response) {
 
 				console.log("Conexion correcta");

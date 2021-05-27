@@ -43,10 +43,10 @@ public interface ILogConsumerService {
 	 * Method that connect to the log consumer service.
 	 * @param url The URL to the service.
 	 * @param key Authentication key.
-	 * @param isVerificarSsl to verify SSL connection.
+	 * @param verifySsl to verify SSL connection.
 	 * @throws IOException When it is no possible connect to service.
 	 */
-	void connect(String url, String key, Boolean isVerificarSsl) throws IOException;
+	void connect(String url, String key, boolean verifySsl) throws IOException;
 
 	/**
 	 * Method that close the connection to service.
@@ -120,9 +120,10 @@ public interface ILogConsumerService {
 	/**
 	 * Method to recover the connection.
 	 * @param connection requested.
+	 * @param verifySsl to verify SSL connection.
 	 * @return splUrl from the log.
 	 */
-	boolean echo(String splUrl);
+	boolean echo(String splUrl, boolean verifySsl);
 
 	/**
 	 * Establece el almac&eacute;n de confianza para la verificaci&oacute;n de los certificados SSL.

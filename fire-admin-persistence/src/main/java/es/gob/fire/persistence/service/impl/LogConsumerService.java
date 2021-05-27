@@ -36,14 +36,14 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import es.gob.fire.commons.log.LogErrors;
+import es.gob.fire.i18n.IWebLogMessages;
+import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.DownloadedLogFileDTO;
 import es.gob.fire.persistence.dto.LogDataDTO;
 import es.gob.fire.persistence.dto.LogFileInfoDTO;
 import es.gob.fire.persistence.dto.LogFilesDTO;
 import es.gob.fire.persistence.dto.RowLogFileErrorDTO;
-import es.gob.fire.commons.log.LogErrors;
-import es.gob.fire.i18n.IWebLogMessages;
-import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.service.ILogConsumerService;
 import es.gob.log.consumer.client.DownloadedLogFile;
 import es.gob.log.consumer.client.LogConsumerClient;
@@ -86,8 +86,8 @@ public class LogConsumerService implements ILogConsumerService {
 	 * @see es.gob.fire.persistence.service.ILogConsumerService#connect(java.lang.String, java.lang.String, java.lang.Boolean)
 	 */
 	@Override
-	public void connect(final String url, final String key, final Boolean isVerificarSsl) throws IOException {
-		this.logConsumerBean.setDisableSslChecks(!isVerificarSsl);
+	public void connect(final String url, final String key, final boolean verifySsl) throws IOException {
+		this.logConsumerBean.setDisableSslChecks(!verifySsl);
 		this.logConsumerBean.init(url, key);
 	}
 
@@ -105,8 +105,11 @@ public class LogConsumerService implements ILogConsumerService {
 	 * @see es.gob.fire.persistence.service.ILogConsumerService#echo(java.lang.String)
 	 */
 	@Override
-	public boolean echo(final String urlTex) {
+	public boolean echo(final String urlTex, final boolean verifySsl) {
+		this.logConsumerBean.setDisableSslChecks(!verifySsl);
 		final String result = this.logConsumerBean.echo(urlTex);
+		this.logConsumerBean.setDisableSslChecks(verifySsl);
+
 		final String ok = "\"Code\":200";
 		if (result.indexOf(ok) == -1) {
 			LOGGER.warn("No se pudo conectar con el servicio: " + result);

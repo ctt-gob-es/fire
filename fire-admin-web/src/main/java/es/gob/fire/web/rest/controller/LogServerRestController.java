@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de España
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.web.controller.LogServerRestController.java.</p>
  * <b>Description:</b><p>Class that manages the REST requests related to the log server administration and JSON communication.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
@@ -71,7 +71,7 @@ import es.gob.fire.persistence.entity.LogServer;
 import es.gob.fire.persistence.service.ILogConsumerService;
 import es.gob.fire.persistence.service.ILogServerService;
 
-/** 
+/**
  * <p>Class that manages the REST requests related to the log server administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.0, 14/04/2020.
@@ -83,12 +83,12 @@ public class LogServerRestController {
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(LogServerRestController.class);
-	
+
 	/**
 	 * Attribute that represents the date field format.
 	 */
 	private static final String DATE_FIELD_FORMAT = "dd/MM/yyyy HH:mm";
-	
+
 	/**
 	 * Attribute that represents the service object for managing the log server.
 	 */
@@ -138,7 +138,7 @@ public class LogServerRestController {
 	}
 
 	/**
-	 * Method that maps the save user web request to the controller and saves it
+	 * Method that maps the save log server info web request to the controller and saves it
 	 * in the persistence. It also updates the scheduled timers.
 	 * @param logServerForm Object that represents the backing SPL form.
 	 * @param bindingResult Object that represents the form validation result.
@@ -147,8 +147,8 @@ public class LogServerRestController {
 	@RequestMapping(value = "/savelogserver", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
 	public @ResponseBody DataTablesOutput<LogServer> saveLogServer(@RequestBody final LogServerDTO logServerForm, final BindingResult bindingResult) {
-		final DataTablesOutput<LogServer> dtOutput = new DataTablesOutput<LogServer>();
-		List<LogServer> listNewLogServer = new ArrayList<LogServer>();
+		final DataTablesOutput<LogServer> dtOutput = new DataTablesOutput<>();
+		List<LogServer> listNewLogServer = new ArrayList<>();
 		if (bindingResult.hasErrors()) {
 			listNewLogServer = StreamSupport.stream(this.logServerService.getAllLogServer().spliterator(), false).collect(Collectors.toList());
 			final JSONObject json = new JSONObject();
@@ -168,7 +168,7 @@ public class LogServerRestController {
 		dtOutput.setData(listNewLogServer);
 		return dtOutput;
 	}
-	
+
 	/**
 	 * Method that maps the delete user request from data table to the controller
 	 * and performs the delete of the log server identified by its id.
@@ -189,17 +189,16 @@ public class LogServerRestController {
 	}
 
 	/**
-	 * Method that maps the connection URL to the controller and loads.
-	 * * The log server to the backup form.
+	 * Method that maps the log server connection check.
 	 * @param logServerUrlTex Identifier of the SPL to be edited.
 	 * @return Boolean with the result of checking.
 	 */
 	@RequestMapping(value = "checklogserver", method = RequestMethod.POST)
-	public Boolean checkConnectionLogServer(@RequestParam("urlTex") final String logServerUrlTex) {
-		final boolean checked = this.logConsumerService.echo(logServerUrlTex);
+	public Boolean checkConnectionLogServer(@RequestParam("urlTex") final String logServerUrlTex, @RequestParam("verifySsl") final boolean verifySsl) {
+		final boolean checked = this.logConsumerService.echo(logServerUrlTex, verifySsl);
 		return new Boolean(checked);
 	}
-	
+
 	/**
 	 * Method that maps the last lines of a log file request and
 	 * forwards them to the view.
@@ -233,7 +232,7 @@ public class LogServerRestController {
 		}
 		response.flushBuffer();
 	}
-	
+
 	/**
      * Method that maps the openning file request to the controller, select the
      * file and show the log search screen.
@@ -268,7 +267,7 @@ public class LogServerRestController {
 		FileCopyUtils.copy(downloadResult.getData(), response.getOutputStream());
 		response.flushBuffer();
     }
-    
+
     /**
 	 * Method that maps the last lines of a log file request and
 	 * forwards them to the view.

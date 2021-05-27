@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espana
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.web.controller.MailPasswordRestorationController.java.</p>
  * <b>Description:</b><p>Class that manages the mail password restoration.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 14/04/2020.
  */
 package es.gob.fire.web.controller;
@@ -62,7 +62,7 @@ import es.gob.fire.web.mail.MailSenderService;
  * <p>
  * Application for signing documents of @firma suite systems.
  * </p>
- * 
+ *
  * @version 1.0, 14/04/2020.
  */
 @Controller
@@ -98,7 +98,7 @@ public class MailPasswordRestorationController {
 
 	/**
 	 * Method that restores password.
-	 * 
+	 *
 	 * @param userNameOrLogin
 	 *            user name or email of the user.
 	 * @param request
@@ -115,33 +115,33 @@ public class MailPasswordRestorationController {
 	 * @throws AddressException
 	 */
 	@RequestMapping(value = "mailpasswordrestoration", method = RequestMethod.POST)
-	public String mialRestorePassword(@RequestParam("userNameOrEmail") final String userNameOrEmail, 
+	public String mialRestorePassword(@RequestParam("userNameOrEmail") final String userNameOrEmail,
 			final HttpServletRequest request, final Model model) throws Exception {
 		String result = "login.html";
 		try {
-			User user = userService.getUserByUserNameOrEmail(userNameOrEmail, userNameOrEmail);
+			final User user = this.userService.getUserByUserNameOrEmail(userNameOrEmail, userNameOrEmail);
 			if (user != null /* && user.getEmail() != null */ /*
 																 * user tiene
 																 * permiso de
 																 * adminitrador
 																 */) {
-				// Generamos el código de restauracion
+				// Generamos el codigo de restauracion
 				final String id = new String();
 				final String renovationCode = buildRestorationCode(id);
-				// Asociamos el código al ususario y la fecha actual
+				// Asociamos el codigo al ususario y la fecha actual
 				user.setRenovationCode(renovationCode);
 				user.setRenovationDate(new Date());
-				userService.saveUser(user);
+				this.userService.saveUser(user);
 
-				// Construimos la URL para restaurar la contraseña
-				// Para evitar errores recuperando el parámetro code,
-				// parseamos los símbolos más antes de enviar la URL al usuario
-				String renovationCodeURL = URLEncoder.encode(renovationCode, StandardCharsets.UTF_8.toString());
-				
+				// Construimos la URL para restaurar la contrasena
+				// Para evitar errores recuperando el parametro code,
+				// parseamos los símbolos mas antes de enviar la URL al usuario
+				final String renovationCodeURL = URLEncoder.encode(renovationCode, StandardCharsets.UTF_8.toString());
+
 				final String restorationUrl = getRestorationPageUrl(request, renovationCodeURL);
 
 				// Enviamos el email
-                mailSenderService.sendEmail(user, restorationUrl);
+                this.mailSenderService.sendEmail(user, restorationUrl);
                 model.addAttribute("mailsuccess", Boolean.TRUE);
                 model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
 
@@ -165,21 +165,21 @@ public class MailPasswordRestorationController {
 	 * @return restoration page
 	 */
 	@GetMapping("/mailRestorePasswordUser")
-	public String mailRestorePasswordUser(@RequestParam("code") String code, Model model, HttpSession session) {
+	public String mailRestorePasswordUser(@RequestParam("code") final String code, final Model model, final HttpSession session) {
 		String result = "restorepassword.html";
 		boolean error = Boolean.FALSE;
 		User user = null;
 		try {
 			if (code == null) {
-				LOGGER.warn("El código no ha sido encontrado o es nulo");
+				LOGGER.warn("El codigo no ha sido encontrado o es nulo");
 				model.addAttribute("restoreerror", Boolean.TRUE);
-				model.addAttribute("restoreErrorMessage", "El código no ha sido encontrado o es nulo");
+				model.addAttribute("restoreErrorMessage", "El c\u00F3digo no ha sido encontrado o es nulo");
 				result = "login.html";
 			} else {
-				user = userService.getUserByRenovationCode(code);
+				user = this.userService.getUserByRenovationCode(code);
 				if (user == null) {
 					LOGGER.warn("El usuario no ha sido encontrado");
-					error = Boolean.TRUE;
+					error = true;
 					model.addAttribute("restoreerror", Boolean.TRUE);
 					model.addAttribute("restoreErrorMessage", "El usuario no ha sido encontrado");
 					result = "login.html";
@@ -187,11 +187,11 @@ public class MailPasswordRestorationController {
 
 				// Si el usuario tiene datos a nulo en base de datos se va fuera
 				if (user.getRenovationCode() == null || user.getRenovationDate() == null && !error) {
-					LOGGER.warn("El usuario no tenia registrada la informacion de restauración de contraseña");
-					error = Boolean.TRUE;
+					LOGGER.warn("El usuario no tenia registrada la informacion de restauraci\u00F3n de contrasena");
+					error = true;
 					model.addAttribute("restoreerror", Boolean.TRUE);
 					model.addAttribute("restoreErrorMessage",
-							"El usuario no tenia registrada la información de restauracion de contraseña");
+							"El usuario no tenia registrada la informaci\u00F3n de restauracion de contrase\u00F1a");
 					result = "login.html";
 				}
 
@@ -199,7 +199,7 @@ public class MailPasswordRestorationController {
 				if (!user.getRenovationCode().equals(code) && !error) {
 					LOGGER.warn(
 							"No se han proporcionado el identificador del usuario o no se han podido recuperar sus datos");
-					error = Boolean.TRUE;
+					error = true;
 					model.addAttribute("restoreerror", Boolean.TRUE);
 					model.addAttribute("restoreErrorMessage",
 							"No se han proporcionado el identificador del usuario o no se han podido recuperar sus datos");
@@ -211,16 +211,20 @@ public class MailPasswordRestorationController {
 				if (!error) {
 					final long currentTime = new Date().getTime();
 					final long renovationTime = user.getRenovationDate().getTime();
-					final int expirationTime = mailSenderService.getMailPasswordExpiration() != null
-							? Integer.parseInt(mailSenderService.getMailPasswordExpiration())
-							: MailSenderService.DEFAULT_EXPIRED_TIME;
+					long expirationTime;
+					try {
+						expirationTime = Long.parseLong(this.mailSenderService.getMailPasswordExpiration());
+					}
+					catch (final Exception e) {
+						expirationTime = MailSenderService.DEFAULT_EXPIRED_TIME;
+					}
 
 					if (currentTime > renovationTime + expirationTime) {
-						LOGGER.warn("Se ha excedido el tiempo máximo de espera hasta la renovación de la contraseña");
-						error = Boolean.TRUE;
+						LOGGER.warn("Se ha excedido el tiempo maximo de espera hasta la renovacion de la contrasena");
+						error = true;
 						model.addAttribute("restoreerror", Boolean.TRUE);
 						model.addAttribute("restoreErrorMessage",
-								"Se ha excedido el tiempo máximo de espera hasta la renovación de la contraseña");
+								"Se ha excedido el tiempo m\u00E1ximo de espera hasta la renovaci\u00F3n de la contrase\u00F1a");
 						result = "login.html";
 					}
 				}
@@ -228,18 +232,18 @@ public class MailPasswordRestorationController {
 				if (!error) {
 					// Actualizar verdadero el tiempo de la nueva url
 					user.setRestPassword(Boolean.TRUE);
-					userService.saveUser(user);
+					this.userService.saveUser(user);
 					session.setAttribute("restoreUserId", user.getUserId());
 					session.setAttribute("restoreUserCode", code);
 					model.addAttribute("username", user.getUserName());
 				}
 			}
 
-		} catch (Exception e) {
-			LOGGER.error("Se ha producido un error reestableciendo la contraseña de usuario", e);
+		} catch (final Exception e) {
+			LOGGER.error("Se ha producido un error reestableciendo la contrasena de usuario", e);
 			model.addAttribute("restoreerror", Boolean.TRUE);
 			model.addAttribute("restoreErrorMessage",
-					"Se ha producido un error reestableciendo la contraseña de usuario");
+					"Se ha producido un error reestableciendo la contrase\u00F1a de usuario");
 			result = "login.html";
 		}
 
@@ -264,47 +268,51 @@ public class MailPasswordRestorationController {
 			final Model model) throws Exception {
 		String result = "login.html";
 		try {
-			boolean error = Boolean.FALSE;
-			User user = userService.getUserByUserName(username);
+			boolean error = false;
+			final User user = this.userService.getUserByUserName(username);
 
 			// Comprobamos que el usuario es el que realmente nos ha realizado
 			// la peticion
 			if (user == null || !user.getUserId().equals(restoreUserId)) {
-				LOGGER.warn("El id de usuario es distinto al utilizado en la sesión");
-				error = Boolean.TRUE;
+				LOGGER.warn("El id de usuario es distinto al utilizado en la sesion");
+				error = true;
 				model.addAttribute("restorepassworderror", Boolean.TRUE);
 				model.addAttribute("restorePasswordErrorMessage",
-						"Se ha excedido el tiempo máximo de espera hasta la renovación de la contraseña");
+						"Se ha excedido el tiempo m\u00E1ximo de espera hasta la renovaci\u00F3n de la contrase\u00F1a");
 			}
 
-			// Comprobamos que el código del usuario es el que realmente nos ha
+			// Comprobamos que el codigo del usuario es el que realmente nos ha
 			// realizado la peticion
 			if (restoreUserCode == null || !user.getRenovationCode().equals(restoreUserCode) && !error) {
 				LOGGER.warn("El usuario no ha sido encontrado o es nulo");
-				error = Boolean.TRUE;
+				error = true;
 				model.addAttribute("restorepassworderror", Boolean.TRUE);
 				model.addAttribute("restorePasswordErrorMessage", "El usuario no ha sido encontrado o es nulo");
 			}
 
 			if (!error) {
 				// Comprobamos que el enlace no ha caducado
-				final int expirationTime = mailSenderService.getMailPasswordExpiration() != null
-						? Integer.parseInt(mailSenderService.getMailPasswordExpiration())
-						: MailSenderService.DEFAULT_EXPIRED_TIME;
+				long expirationTime;
+				try {
+					expirationTime = Long.parseLong(this.mailSenderService.getMailPasswordExpiration());
+				}
+				catch (final Exception e) {
+					expirationTime = MailSenderService.DEFAULT_EXPIRED_TIME;
+				}
 
 				if (new Date().getTime() > user.getRenovationDate().getTime() + expirationTime) {
-					LOGGER.warn("Se ha excedido el tiempo máximo de espera hasta la renovación de la contraseña");
-					error = Boolean.TRUE;
+					LOGGER.warn("Se ha excedido el tiempo maximo de espera hasta la renovacion de la contrase\u00F1a");
+					error = true;
 					model.addAttribute("restorepassworderror", Boolean.TRUE);
 					model.addAttribute("restorePasswordErrorMessage",
-							"Se ha excedido el tiempo máximo de espera hasta la renovación de la contraseña");
+							"Se ha excedido el tiempo m\u00E1ximo de espera hasta la renovaci\u00F3n de la contrase\u00F1a");
 				}
 			}
 
 			// Comprobamos que las passwords insertadas sean iguales
 			if (newPassword != null && repeatNewPassword != null && !newPassword.equals(repeatNewPassword) && !error) {
 				LOGGER.warn("Clave nueva y repetir clave nueva, deben ser iguales");
-				error = Boolean.TRUE;
+				error = true;
 				model.addAttribute("restorepassworderror", Boolean.TRUE);
 				model.addAttribute("restorePasswordErrorMessage",
 						"Clave nueva y repetir clave nueva, deben ser iguales");
@@ -313,16 +321,16 @@ public class MailPasswordRestorationController {
 
 			if (!error) {
 				// Codificamos la nueva clave y actualizamos el usuario
-				String passwordEnconde = customUserAuthentication.passwordEncoder().encode(newPassword);
+				final String passwordEnconde = this.customUserAuthentication.passwordEncoder().encode(newPassword);
 				user.setPassword(passwordEnconde);
-				userService.saveUser(user);
+				this.userService.saveUser(user);
 				// Todo OK
-				model.addAttribute("restorepasswordsuccess", Boolean.TRUE);
+				model.addAttribute("restorepasswordsuccess", true);
 			}
-			
-		} catch (Exception e) {
+
+		} catch (final Exception e) {
 			LOGGER.error("No ha sido posible restaurar la clave del usuario", e);
-			model.addAttribute("restorepassworderror", Boolean.TRUE);
+			model.addAttribute("restorepassworderror", true);
 			model.addAttribute("restorePasswordErrorMessage",
 					"No ha sido posible restaurar la clave del usuario");
 		}
@@ -331,7 +339,7 @@ public class MailPasswordRestorationController {
 
 	/**
 	 * Construye un codigo de restauracion de contrase&ntilde;a.
-	 * 
+	 *
 	 * @param id
 	 *            Identificador del usuario que solicita la restauraci&oacute;n.
 	 * @return C&oacute;digo de restauraci&oacute;n en base64.
@@ -360,7 +368,7 @@ public class MailPasswordRestorationController {
 
 	/**
 	 * Method that build the restoration URL.
-	 * 
+	 *
 	 * @param request
 	 *            request
 	 * @param renovationCode
