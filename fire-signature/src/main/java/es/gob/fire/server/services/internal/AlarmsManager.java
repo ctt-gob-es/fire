@@ -40,14 +40,12 @@ public class AlarmsManager {
 		if (notifierClassname != null && !notifierClassname.isEmpty()) {
 			// Inicializamos y configuramos el administrador
 			try {
-				if (notifierClassname != null && !notifierClassname.isEmpty()) {
-					final Class<?> notifierClass = Class.forName(notifierClassname);
-					notifier = (AlarmNotifier) notifierClass.getConstructor().newInstance();
+				final Class<?> notifierClass = Class.forName(notifierClassname);
+				notifier = (AlarmNotifier) notifierClass.getConstructor().newInstance();
 
-					final Properties config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
-					notifier.init(config);
-					notifier.setModule(moduleName);
-				}
+				final Properties config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
+				notifier.init(config);
+				notifier.setModule(moduleName);
 			}
 			catch (final IOException e) {
 				LOGGER.log(Level.WARNING, "No se pudo cargar el fichero " + CONFIG_FILE //$NON-NLS-1$

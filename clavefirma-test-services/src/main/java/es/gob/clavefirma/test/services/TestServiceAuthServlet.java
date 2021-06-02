@@ -86,7 +86,7 @@ public final class TestServiceAuthServlet extends HttpServlet {
 				subjectProps.setProperty("password", TestHelper.getSubjectPassword(subjectId)); //$NON-NLS-1$
 			}
 			catch (final Exception e) {
-				LOGGER.warning("No se ha encontrado la contraseña predefinida para el almacen del usuario: " + e); //$NON-NLS-1$
+				LOGGER.warning("No se ha encontrado la contrasena predefinida para el almacen del usuario: " + e); //$NON-NLS-1$
 				response.sendRedirect(redirectKo);
 				return;
 			}
