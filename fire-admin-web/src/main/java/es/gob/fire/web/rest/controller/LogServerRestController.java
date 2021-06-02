@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -49,6 +49,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,6 +60,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import es.gob.fire.commons.utils.Constants;
+import es.gob.fire.i18n.IWebLogMessages;
+import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.DownloadedLogFileDTO;
 import es.gob.fire.persistence.dto.LogDataDTO;
 import es.gob.fire.persistence.dto.LogFilesDTO;
@@ -67,6 +70,7 @@ import es.gob.fire.persistence.dto.LogLastLinesFormDTO;
 import es.gob.fire.persistence.dto.LogSearchTextFormDTO;
 import es.gob.fire.persistence.dto.LogServerDTO;
 import es.gob.fire.persistence.dto.RowLogFileDTO;
+import es.gob.fire.persistence.dto.validation.OrderedValidation;
 import es.gob.fire.persistence.entity.LogServer;
 import es.gob.fire.persistence.service.ILogConsumerService;
 import es.gob.fire.persistence.service.ILogServerService;
@@ -74,7 +78,7 @@ import es.gob.fire.persistence.service.ILogServerService;
 /**
  * <p>Class that manages the REST requests related to the log server administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 @RestController
 public class LogServerRestController {
@@ -83,6 +87,16 @@ public class LogServerRestController {
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(LogServerRestController.class);
+	
+	/**
+	 * Attribute that represents the span text.
+	 */
+	private static final String SPAN = "_span";
+	
+	/**
+	 * Constant that represents the key Json 'errorSaveLogServer'.
+	 */
+	private static final String KEY_JS_ERROR_SAVE_LOGSERVER = "errorSaveLogServer";
 
 	/**
 	 * Attribute that represents the date field format.
@@ -146,27 +160,72 @@ public class LogServerRestController {
 	 */
 	@RequestMapping(value = "/savelogserver", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<LogServer> saveLogServer(@RequestBody final LogServerDTO logServerForm, final BindingResult bindingResult) {
+	public @ResponseBody DataTablesOutput<LogServer> saveLogServer(@Validated(OrderedValidation.class) @RequestBody final LogServerDTO logServerForm, final BindingResult bindingResult) {
 		final DataTablesOutput<LogServer> dtOutput = new DataTablesOutput<>();
 		List<LogServer> listNewLogServer = new ArrayList<>();
+		final JSONObject json = new JSONObject();
+		boolean error = false;
+		
 		if (bindingResult.hasErrors()) {
-			listNewLogServer = StreamSupport.stream(this.logServerService.getAllLogServer().spliterator(), false).collect(Collectors.toList());
-			final JSONObject json = new JSONObject();
+			error = true;
+			
 			for (final FieldError o: bindingResult.getFieldErrors()) {
-				json.put("invalid-" + o.getField(), o.getDefaultMessage());
-			}
-			dtOutput.setError(json.toString());
-		} else {
+				json.put(o.getField() + SPAN, o.getDefaultMessage());
+			}			
+
+		}
+		
+		if (isDuplicateNombreServer(logServerForm.getName())) {
+			error = true;
+			json.put("name" + SPAN, "Ya existe un servicio de log con ese nombre.");			
+		}
+		
+		if (isDuplicateUrlServer(logServerForm.getUrlService())) {
+			error = true;
+			json.put("urlService" + SPAN, "Ya existe un servicio de log con esa URL.");			
+		}
+		
+		if (!error) {
 			try {
 				final LogServer logServer = this.logServerService.saveLogServer(logServerForm);
 				listNewLogServer.add(logServer);
 			} catch (final Exception e) {
 				listNewLogServer = StreamSupport.stream(this.logServerService.getAllLogServer().spliterator(), false).collect(Collectors.toList());
-				throw e;
+				json.put(KEY_JS_ERROR_SAVE_LOGSERVER, Language.getResWebFire(IWebLogMessages.ERRORWEB031));
+				dtOutput.setError(json.toString());
 			}
+		} else {
+			listNewLogServer = StreamSupport.stream(this.logServerService.getAllLogServer().spliterator(), false).collect(Collectors.toList());
+			dtOutput.setError(json.toString());
 		}
 		dtOutput.setData(listNewLogServer);
 		return dtOutput;
+	}
+	
+	/**
+	 * Method that checks if exists in persistence a LogServer with the name passed. 
+	 * @param name String that represents the value of a LogServer name.
+	 * @return true if exists.
+	 */
+	private boolean isDuplicateNombreServer(final String name) {
+		
+		final LogServer logServer = logServerService.getLogServerByName(name);
+		
+		return logServer != null;
+		
+	}
+	
+	/**
+	 * Method that checks if exists in persistence a LogServer with the urlService passed. 
+	 * @param urlService
+	 * @return true if exists
+	 */
+	private boolean isDuplicateUrlServer(final String urlService) {
+		
+		final LogServer logServer = logServerService.getLogServerByUrlService(urlService);
+		
+		return logServer != null;
+		
 	}
 
 	/**

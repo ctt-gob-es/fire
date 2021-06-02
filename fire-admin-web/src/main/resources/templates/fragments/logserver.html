@@ -39,8 +39,56 @@ $(document).ready(function() {
 	    altEditor: true,
 	    buttons: [
 	    	{text: 'Conectar', name: 'connect', extend: 'selected', action: connectToLogServer},
-	    	{text: 'Agregar', name: 'add'},
-	    	{text: 'Editar', name: 'edit', extend: 'selected'},
+	    	{text: 'Agregar', name: 'addd',
+		           action: function ( e, dt, node, config ) {	    				  
+						  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+							id: o.context[0].aoColumns[e].mData,
+							title: o.context[0].aoColumns[e].sTitle                
+						  });
+						  
+						  var d = dt.rows({
+		                   selected: !0
+						  });
+						   var menuAdd = /*[[@{/addlogserver}]]*/;
+						  $.ajax({
+		 						url : menuAdd,
+		 						type : 'GET',
+		 						cache : false,
+		 						success : function(data) {
+		 							hide();
+		 							$('#modal').html(data);
+		 							$('#modalLogForm').modal('show');																
+		 						},
+		 						error : function() {}
+		 					});
+					  } // fin action
+			}, // fin add
+	    	{text: 'Editar', name: 'editt', extend: 'selected',
+		           action: function ( e, dt, node, config ) {	    				  
+						  for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+							id: o.context[0].aoColumns[e].mData,
+							title: o.context[0].aoColumns[e].sTitle                
+						  });
+						  
+						  var d = dt.rows({
+		                   selected: !0
+						  });
+						   var menuEdit = /*[[@{/editlogserver}]]*/;
+						   var id = d.data()[0][a[0].id];
+						  $.ajax({
+		 						url : menuEdit,
+		 						type : 'POST',
+		 						data : $.param({'id':id}),
+		 						cache : false,
+		 						success : function(data) {
+		 							hide();
+		 							$('#modal').html(data);
+		 							$('#modalLogForm').modal('show');																
+		 						},
+		 						error : function() {}
+		 					});
+					  } // fin action
+			}, // fin edit
 	    	{text: 'Eliminar', name: 'delete', extend: 'selected'}
 	    ],
 

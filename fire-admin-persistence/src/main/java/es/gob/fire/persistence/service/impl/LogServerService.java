@@ -19,7 +19,7 @@
  * <b>Project:</b><p>Platform for signing documents.</p>
  * <b>Date:</b><p>15/06/2018.</p>
  * @author Gobierno de España.
- * @version 1.0, 15/06/2018.
+ * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.persistence.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ import es.gob.fire.persistence.service.ILogServerService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.0, 15/06/2018.
+ * @version 1.1, 02/06/2021.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -63,6 +63,14 @@ public class LogServerService implements ILogServerService {
 	@Override
 	public LogServer getLogServerByLogServerId(final Long logServerId) {
 		return this.repository.findByLogServerId(logServerId);
+	}
+	
+	/* (non-Javadoc)
+	 * @see es.gob.fire.persistence.service.ILogServerService#getLogServerByName(java.lang.String)
+	 */
+	@Override
+	public LogServer getLogServerByName(String name) {		
+		return this.repository.findByName(name);
 	}
 
 	/**

@@ -20,21 +20,21 @@
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.persistence.dto;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
+import es.gob.fire.persistence.dto.validation.ThenCheckIt;
 
 /** 
  * <p>Class that represents the transfer object and backing form for a log server.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 public class LogServerDTO {
 
@@ -46,22 +46,22 @@ public class LogServerDTO {
 	/**
 	 * Attribute that represents the value of the input name of the log server in the form.
 	 */
-	@NotBlank(message = "{form.log.server.name.pattern}")
-	@Size(min = 1, max = NumberConstants.NUM45)
+	@NotNull(message = "{form.log.server.name.pattern}")
+	@Size(min = 1, max = NumberConstants.NUM45, groups=ThenCheckIt.class)
 	private String name = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input urlService of the log server in the form.
 	 */
-	@NotBlank(message = "{form.log.server.url.service.pattern}")
-	@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM500)
+	@NotNull(message = "{form.log.server.url.service.pattern}")
+	@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM500, groups=ThenCheckIt.class)
 	private String urlService = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the value of the input key of the key in the form.
 	 */
-	@NotBlank(message = "{form.log.server.key.pattern}")
-	@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM45)
+	@NotNull(message = "{form.log.server.key.pattern}")
+	@Size(min = NumberConstants.NUM3, max = NumberConstants.NUM45, groups=ThenCheckIt.class)
 	private String key = UtilsStringChar.EMPTY_STRING;
 
 	/**

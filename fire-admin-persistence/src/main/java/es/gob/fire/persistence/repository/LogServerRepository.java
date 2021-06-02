@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>01/04/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 01/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.persistence.repository;
 
@@ -33,7 +33,7 @@ import es.gob.fire.persistence.entity.LogServer;
 /** 
  * <p>Class that represents the log server repository.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 @Repository
 public interface LogServerRepository extends JpaRepository<LogServer, Long>, JpaSpecificationExecutor<LogServer>  {
@@ -44,6 +44,13 @@ public interface LogServerRepository extends JpaRepository<LogServer, Long>, Jpa
 	 * @return Object that represents a log server from the persistence.
 	 */
 	LogServer findByLogServerId(Long logServerId);
+	
+	/**
+	 * Method that obtains from the persistence a log server identified by name.
+	 * @param name String that represents the value of the column 'name'.
+	 * @return Object that represents a log server from the persistence.
+	 */
+	LogServer findByName(String name);
 	
 	/**
 	 * Method that obtains from the persistence a log server identified by its url service.

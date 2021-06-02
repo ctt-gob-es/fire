@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.web.controller;
 
@@ -44,7 +44,7 @@ import es.gob.fire.persistence.service.ILogServerService;
 /** 
  * <p>Class that manages the requests related to the log servers administration.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 @Controller
 public class LogServerController {
@@ -90,7 +90,7 @@ public class LogServerController {
 	 * @param model Holder object for model attributes.
 	 * @return String that represents the name of the view to forward.
 	 */
-	@RequestMapping(value = "addlogserver", method = RequestMethod.POST)
+	@RequestMapping(value = "addlogserver", method = RequestMethod.GET)
 	public String addLogServer(final Model model) {
 		LogServerDTO logServerForm = new LogServerDTO();
 		logServerForm.setVerifySSL(Boolean.TRUE);
@@ -106,7 +106,7 @@ public class LogServerController {
 	 * @param model Holder object for model attributes.
 	 * @return String that represents the name of the view to forward.
 	 */
-	@RequestMapping(value = "editlogserver", method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = "editlogserver", method = RequestMethod.POST)
 	public String editLogServer(@RequestParam("id") final Long logServerId, final Model model) {
 		final LogServer logServer = this.logServerService.getLogServerByLogServerId(logServerId);
 
