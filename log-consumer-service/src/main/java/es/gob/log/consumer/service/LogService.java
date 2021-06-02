@@ -43,10 +43,20 @@ public class LogService extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 
-		LOGGER.debug("Se inicia el servicio de consulta de logs");
+
+		LOGGER.debug("Se inicia el servicio de consulta de logs"); //$NON-NLS-1$
 
 		// Cargamos el directorio de logs
-		this.pathLogs = ConfigManager.getInstance().getLogsDir();
+		final ConfigManager configManager;
+		try {
+			configManager = ConfigManager.getInstance();
+		}
+		catch (final Exception e) {
+			LOGGER.error("No se ha podido inicializar el servicio por no haber encontrado el fichero de configuracion", e); //$NON-NLS-1$
+			throw new ServletException("No se ha podido inicializar el servicio"); //$NON-NLS-1$
+		}
+
+		this.pathLogs = configManager.getLogsDir();
 		if (this.pathLogs == null || !this.pathLogs.isDirectory()) {
 			LOGGER.error("No se ha configurado un directorio de logs valido: " + this.pathLogs); //$NON-NLS-1$
 			throw new ServletException("No se ha configurado un directorio de logs valido: " + this.pathLogs); //$NON-NLS-1$

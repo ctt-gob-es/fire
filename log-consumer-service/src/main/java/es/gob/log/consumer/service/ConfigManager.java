@@ -38,18 +38,17 @@ public class ConfigManager {
 	/**
 	 * Obtiene una instancia de la clase que gestiona la configuraci&oacute;n.
 	 * @return Instancia de la clase que gestiona la configuraci&oacute;n.
+	 * @throws IOException Cuabdi bi se oyede cargar el fichero de configuraci&oacute;n.
 	 */
-	public static ConfigManager getInstance() {
+	public static ConfigManager getInstance() throws IOException {
 		if (instance == null) {
 			instance = new ConfigManager();
 			try {
 				instance.load();
 			}
 			catch (final Exception e) {
-				LOGGER.error(
-						"No se ha podido cargar el fichero de configuracion del servicio de consulta de logs", //$NON-NLS-1$
-						e);
 				instance = null;
+				throw new IOException("No se ha podido cargar el fichero de configuracion del servicio de consulta de logs", e); //$NON-NLS-1$
 			}
 		}
 		return instance;
@@ -74,21 +73,33 @@ public class ConfigManager {
 	private static Properties loadConfigFile(final String configFilename)
 			throws IOException, FileNotFoundException {
 
+		LOGGER.info("Cargamos fichero de configuracion");
+
 		boolean loaded = false;
 		final Properties config = new Properties();
 		try {
 			final String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
+
+
+			LOGGER.info("1: " + configDir);
+
 			if (configDir != null) {
 				final File configFile = new File(configDir, configFilename).getCanonicalFile();
 				// Comprobamos que se trate de un fichero sobre el que tengamos permisos y que no
 				// nos hayamos salido del directorio de configuracion indicado
+
+				LOGGER.info("2");
+
 				if (configFile.isFile() && configFile.canRead() &&
 						configFile.getCanonicalPath().startsWith(new File(configDir).getCanonicalPath())) {
+
+					LOGGER.info("3");
 					try (InputStream is = new FileInputStream(configFile);
 							InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);) {
 						config.load(isr);
 						loaded = true;
 					}
+					LOGGER.info("4");
 				}
 				else {
 					LOGGER.warn(
@@ -100,6 +111,9 @@ public class ConfigManager {
 
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio
 			if (!loaded) {
+
+				LOGGER.info("5");
+
 				try (InputStream is = ConfigManager.class.getResourceAsStream('/' + configFilename);
 						InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);) {
 					if (is == null) {
@@ -107,6 +121,8 @@ public class ConfigManager {
 					}
 					config.load(isr);
 				}
+
+				LOGGER.info("6");
 			}
 		}
 		catch(final FileNotFoundException e){
@@ -115,6 +131,8 @@ public class ConfigManager {
 		catch(final Exception e){
 			throw new IOException("No se ha podido cargar el fichero de configuracion: " + configFilename, e); //$NON-NLS-1$
 		}
+
+		LOGGER.info("7: " + config.size());
 
 		return config;
 	}
