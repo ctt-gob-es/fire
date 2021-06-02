@@ -15,7 +15,7 @@ CREATE TABLE `tb_sesiones` (
 
 -- Tabla para el guardado temporal de documentos en BD
 CREATE TABLE `tb_documentos` (
-  `id` varchar(100) NOT NULL,
+  `id` varchar(64) NOT NULL,
   `f_modificacion` bigint(10) NOT NULL,
   `datos` longblob,
   PRIMARY KEY (`id`)
