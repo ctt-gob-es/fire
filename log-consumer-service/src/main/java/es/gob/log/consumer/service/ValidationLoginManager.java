@@ -75,9 +75,16 @@ public class ValidationLoginManager {
 	}
 
 	private static byte[] decipherCryptoToken(final byte[] cipheredToken, final byte[] iv)
-			throws	GeneralSecurityException {
+			throws	GeneralSecurityException, IOException {
 
-		final byte[] cipherKey = ConfigManager.getInstance().getCipherKey();
+		byte[] cipherKey;
+		try {
+			cipherKey = ConfigManager.getInstance().getCipherKey();
+		}
+		catch (final IOException e) {
+			throw e;
+		}
+
 		if (cipherKey == null) {
 			throw new GeneralSecurityException("No se ha encontrado una clave con la que descifrar el token de conexion"); //$NON-NLS-1$
 		}

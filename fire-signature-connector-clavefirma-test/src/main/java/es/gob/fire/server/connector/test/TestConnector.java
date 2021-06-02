@@ -313,18 +313,16 @@ public class TestConnector extends FIReConnector {
 		}
 
 		final Map<String, byte[]> result = new HashMap<>();
-		final JsonReader reader = Json.createReader(new ByteArrayInputStream(response));
-		try {
+		try (final JsonReader reader = Json.createReader(new ByteArrayInputStream(response))) {
+
 			final JsonArray signatures = reader.readArray();
 			for (int i = 0; i < signatures.size(); i++) {
 				final JsonObject signature = (JsonObject) signatures.get(i);
 				result.put(signature.getString("id"), Base64.decode(signature.getString("pk1"))); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		} catch (final IOException e) {
-			reader.close();
 			throw new FIReSignatureException("Error al decodificar una de las firmas resultantes", e); //$NON-NLS-1$
 		}
-		reader.close();
 
 		return result;
 	}

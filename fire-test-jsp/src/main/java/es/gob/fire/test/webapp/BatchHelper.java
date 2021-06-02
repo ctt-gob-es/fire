@@ -111,6 +111,11 @@ public class BatchHelper {
         	throw new IOException("No se encontro el fichero de configuracion del componente cliente FIRe", e); //$NON-NLS-1$
 		}
 
+        if (result.getState() != TransactionResult.STATE_OK) {
+        	LOGGER.error("No se ha podido obtener la firma del lote (Estado " + result.getState() + "): " + result.getErrorMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+        	throw new IOException("No se ha podido obtener la firma del lote (Estado " + result.getState() + "): " + result.getErrorMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
         return result.getResult();
 	}
 }

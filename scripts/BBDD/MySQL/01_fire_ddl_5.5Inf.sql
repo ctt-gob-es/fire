@@ -74,14 +74,14 @@ CREATE TABLE `tb_firmas` (
 
 CREATE TABLE `tb_transacciones` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `fecha` TIMESTAMP DEFAULT NULL COMMENT 'Fecha de la operacion',
-  `aplicacion` varchar(45) DEFAULT NULL COMMENT 'Aplicacion que solicito la operacion',
+  `fecha` TIMESTAMP NOT NULL COMMENT 'Fecha de la operacion',
+  `aplicacion` varchar(45) NOT NULL COMMENT 'Aplicacion que solicito la operacion',
   `operacion` varchar(10) NOT NULL COMMENT 'Tipo de operacion',
-  `proveedor` varchar(45) DEFAULT NULL COMMENT 'Nombre del proveedor de firma',
+  `proveedor` varchar(45) NOT NULL COMMENT 'Nombre del proveedor de firma',
   `proveedor_forzado` tinyint(1) DEFAULT '0' COMMENT 'Si solo habia un proveedor o si la aplicacion forzo que se usase ese',
   `correcta` tinyint(1) DEFAULT '0' COMMENT 'Si termino correctamente o no',
   `tamanno` int(11) DEFAULT '0' COMMENT 'Tamano total de los datos procesados',
-  `total` int(11) DEFAULT '1' COMMENT 'Numero de transacciones con esta configuracion',
+  `total` int(11) DEFAULT '0' COMMENT 'Numero de transacciones con esta configuracion',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
