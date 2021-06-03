@@ -1,53 +1,50 @@
-<form name="altEditor-form" role="form" id="logServerForm" th:object="${logServerForm}" th:action="@{/savelogserver}" method="post">
+<div class="modal" tabindex="-1" role="dialog" id="modalLogForm">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Datos del servidor de logs</h4>
+				<button type="button" class="close" onclick="closeButton('modalLogForm')" aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+
+	<form name="altEditor-form" role="form" id="logServerForm" th:object="${logServerForm}" th:action="@{/savelogserver}" method="post">
 					
 	<input type='hidden' class='primarykey' id="logServerId" th:field="*{logServerId}">
+	<div id="resultSaveLog" data-dismiss="alert"></div>
 	
 	<div class="form-group">
 		
 			<label for="name" class="col-form-label" th:text="#{form.log.server.name}"></label>
-			<script th:inline="javascript">
-				/*<![CDATA[*/
-				    var messageName = /*[[#{form.log.server.name.pattern}]]*/ 'default';
-				/*]]>*/
-			</script>
-			<input onblur="validate(this, messageName);" type="text" id="name" th:field="*{name}" style="overflow:hidden" class="form-control" required pattern=".{1,45}" />
-			<div id="invalid-name" class="invalid-feedback" ></div>
-		
+			<span id="name_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
+			<input type="text" name="name" id="name" th:field="*{name}" style="overflow:hidden" class="form-control" required maxlength="45" />
+					
 		<div style="clear:both;"/>
 	</div>
 	
 	<div class="form-group">
 		
-		<label for="url" class="col-form-label" th:text="#{form.log.server.url.service}"></label>
-		<script th:inline="javascript">
-			/*<![CDATA[*/
-			    var messageUrl = /*[[#{form.log.server.url.service.pattern}]]*/ 'default';
-			/*]]>*/
-		</script>
-		<input onblur="validate(this, messageUrl);" type="text" id="urlService" th:field="*{urlService}" style="overflow:hidden" class="form-control" required pattern=".{3,500}"/>
-		<div id="invalid-url" class="invalid-feedback" ></div>
-	
+		<label for="urlService" class="col-form-label" th:text="#{form.log.server.url.service}"></label>
+		<span id="urlService_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
+		<input type="text" name="urlService" id="urlService" th:field="*{urlService}" style="overflow:hidden" class="form-control" required maxlength="500"/>
+		
 		<div style="clear:both;"/>
 	</div>
 		
 	<div class="form-group">
 		
 		<label for="key" class="col-form-label" th:text="#{form.log.server.key}"></label>
-		<script th:inline="javascript">
-			/*<![CDATA[*/
-			    var messageKey = /*[[#{form.log.server.key.pattern}]]*/ 'default';
-			/*]]>*/
-		</script>
-		<input onblur="validate(this, messageKey);" type="text" id="key" th:field="*{key}" style="overflow:hidden" class="form-control" required pattern=".{3,45}"/>
-		<div id="invalid-key" class="invalid-feedback" ></div>
-	
+		<span id="key_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
+		<input name="key" type="text" id="key" th:field="*{key}" style="overflow:hidden" class="form-control" required maxlength="45"/>
+			
 		<div style="clear:both;"/>
 	</div>
 	
 	<div class="form-row">
 		<div class="form-group col-md-6">
 			<label for="verifySSL" th:text="#{form.log.server.verify.ssl}"></label>
-			<input type="checkbox" id="verifySSL" th:checked="${logServerForm.verifySSL}" th:value="${logServerForm.verifySSL}">
+			<input name="verifySSL" type="checkbox" id="verifySSL" th:checked="${logServerForm.verifySSL}" th:value="${logServerForm.verifySSL}">
 		</div>
 	</div>
 	
@@ -56,6 +53,15 @@
 		<span id="connection-result" class="mon-alert-message" role="alert"></span>
 	</div>
 </form>
+
+</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" onclick="closeButton('modalLogForm')">Cerrar</button>
+				<button type="submit" id="saveBtnModal" class="btn btn-primary">Guardar cambios</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script th:inline="javascript">
 $(document).ready(function () {
@@ -110,5 +116,74 @@ $(document).ready(function () {
 			}
 		});
     });
+});
+
+$( "#saveBtnModal" ).click(function( event ) {
+	  event.preventDefault();
+		
+	  var formData = JSON.stringify($("#logServerForm").serializeJSON());
+	  var tbl = $('#logServerTable').DataTable();
+	  var url = /*[[@{/savelogserver}]]*/;
+	  
+	  loading();
+	  
+	  $.ajax({
+		  type: "POST",
+		  url: url,
+		  data: formData,
+		  success: function(data){
+			hide();
+						
+			if (data.error != null){
+			 	hide();
+			 	var errores = JSON.parse(data.error);
+				  jQuery.each(errores, function(i, val) {
+				  	$('#logServerForm *').filter('span').each(function(){
+						if (i == $(this).attr('id')){
+							$("#" + i).text(val);
+						}
+					});
+				  });
+				  
+	  		}else{
+						
+					tbl.row.add($(data.data)).draw(false);
+					
+					$("#logServerForm")[0].reset();
+					 $('#logServerForm *').filter('span').each(function(){
+							$(this).text('');
+						});
+					  	 					  
+					var messageResponse = /*[[#{message.success.user.edit}]]*/;
+						 								  
+					//se muestra un mensaje
+					$('#resultSaveLog').html(messageResponse);
+					$('#resultSaveLog').removeClass('alert-danger')	
+					$('#resultSaveLog').addClass('alert alert-success');
+				 	$("#resultSaveLog").fadeTo(2000, 500).slideUp(500, function() {
+					$("#resultSaveLog").slideUp(500);
+					
+	 					//se cierra modal
+	 					closeModal('modalLogForm');
+				 	});
+			}
+				 	
+			$('#logServerForm *').filter(':input').each(function(){
+			  $("#" + $(this).attr('id')).removeClass("has-error");
+			});
+						
+		  },
+		  error:function(){
+			  hide();
+			  var messageResponse = /*[[#{message.error.user.edit}]]*/;
+			  $('#resultSaveLog').removeClass('alert-success')	
+			  $('#resultSaveLog').addClass('alert alert-danger');
+			  $("#resultSaveLog").html(messageResponse);
+		  },
+		  dataType: "json",
+		  contentType : "application/json"
+	});
+				  
+	  
 });
 </script>

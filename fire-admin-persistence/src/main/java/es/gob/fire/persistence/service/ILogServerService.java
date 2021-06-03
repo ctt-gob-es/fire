@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.persistence.service;
 
@@ -33,7 +33,7 @@ import es.gob.fire.persistence.entity.LogServer;
 /** 
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/06/2021.
  */
 public interface ILogServerService {
 
@@ -43,6 +43,13 @@ public interface ILogServerService {
 	 * @return {@link LogServer}
 	 */
 	LogServer getLogServerByLogServerId(Long logServerId);
+	
+	/**
+	 * Method that obtains the information for a log server by its name.
+	 * @param name The log server name.
+	 * @return {@link LogServer}
+	 */
+	LogServer getLogServerByName(String name);
 
 	/**
 	 * Method that obtains the information for a log server by its URL.

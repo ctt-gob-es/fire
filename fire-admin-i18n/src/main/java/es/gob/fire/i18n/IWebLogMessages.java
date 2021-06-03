@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>08/10/2018.</p>
  * @author Gobierno de España.
- * @version 1.0, 10/07/2020.
+ * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.i18n;
 
@@ -28,7 +28,7 @@ package es.gob.fire.i18n;
 /**
  * <p>Interface that contains the keys to the log messages for the web module.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.0, 10/07/2020.
+ * @version 1.1, 02/06/2021.
  */
 public interface IWebLogMessages {
 
@@ -189,4 +189,9 @@ public interface IWebLogMessages {
 	 * Constant attribute that represents the name of the property <code>errorweb030</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB030 = "errorweb030";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>errorweb031</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String ERRORWEB031 = "errorweb031";
 }
