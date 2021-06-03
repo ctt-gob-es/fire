@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -124,15 +126,36 @@ public class ProviderManager {
 		return new ProviderInfo(providerName, infoProperties);
 	}
 
+	private static Map<String, Properties> providersConfig = new HashMap<>();
+
 	/**
-	 * Carga el fichero de configuraci&oacute;n de un proveedor.
+	 * Carga la configuraci&oacute;n de un proveedor, de cache si ya la hab&iacute;a
+	 * cargado anteriormente o de fichero si no.
 	 * @param providerName Nombre el proveedor.
 	 * @return Configuraci&oacute;n cargada.
 	 */
 	private static Properties loadProviderConfig(final String providerName) {
 
-		final String providerConfigFilename = String.format(PROVIDER_CONFIG_FILE_TEMPLATE, providerName);
 		Properties providerConfig;
+		if (providersConfig.containsKey(providerName)) {
+			providerConfig = providersConfig.get(providerName);
+		} else {
+			providerConfig = loadProviderConfigFromFile(providerName);
+			providersConfig.put(providerName, providerConfig);
+		}
+
+		return providerConfig;
+	}
+
+	/**
+	 * Carga el fichero de configuraci&oacute;n de un proveedor.
+	 * @param providerName Nombre el proveedor.
+	 * @return Configuraci&oacute;n cargada.
+	 */
+	private static Properties loadProviderConfigFromFile(final String providerName) {
+
+		Properties providerConfig;
+		final String providerConfigFilename = String.format(PROVIDER_CONFIG_FILE_TEMPLATE, providerName);
 		try {
 			providerConfig = ConfigFileLoader.loadConfigFile(providerConfigFilename);
 
@@ -140,7 +163,7 @@ public class ProviderManager {
 			LOGGER.warning(String.format(
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
 					LogUtils.cleanText(providerConfigFilename), LogUtils.cleanText(providerName)
-			));
+					));
 			AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, providerConfigFilename);
 			providerConfig = new Properties();
 		} catch (final IOException e) {
@@ -164,7 +187,6 @@ public class ProviderManager {
 							LogUtils.cleanText(providerName)),
 					e);
 		}
-
 		return providerConfig;
 	}
 
