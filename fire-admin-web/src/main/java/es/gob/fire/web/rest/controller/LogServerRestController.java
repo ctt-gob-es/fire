@@ -175,12 +175,12 @@ public class LogServerRestController {
 
 		}
 		
-		if (isDuplicateNombreServer(logServerForm.getName())) {
+		if (logServerForm.getLogServerId() == null && isDuplicateNombreServer(logServerForm.getName())) {
 			error = true;
 			json.put("name" + SPAN, "Ya existe un servicio de log con ese nombre.");			
 		}
 		
-		if (isDuplicateUrlServer(logServerForm.getUrlService())) {
+		if (logServerForm.getLogServerId() == null && isDuplicateUrlServer(logServerForm.getUrlService())) {
 			error = true;
 			json.put("urlService" + SPAN, "Ya existe un servicio de log con esa URL.");			
 		}

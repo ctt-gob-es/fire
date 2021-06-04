@@ -149,7 +149,10 @@ $( "#saveBtnModal" ).click(function( event ) {
 						
 					tbl.row.add($(data.data)).draw(false);
 					
-					$("#logServerForm")[0].reset();
+					if ($("#logServerId").val() == '' || $("#logServerId").val() == undefined) {
+						$("#logServerForm")[0].reset();
+					}					
+					
 					 $('#logServerForm *').filter('span').each(function(){
 							$(this).text('');
 						});
