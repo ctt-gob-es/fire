@@ -9,10 +9,6 @@
  */
 package es.gob.fire.server.services.batch;
 
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import es.gob.afirma.core.AOInvalidFormatException;
 import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.triphase.signer.processors.CAdESASiCSTriPhasePreProcessor;
@@ -23,30 +19,10 @@ import es.gob.afirma.triphase.signer.processors.Pkcs1TriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESASiCSTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
-import es.gob.fire.signature.ConfigFileLoader;
-import es.gob.fire.signature.ConfigManager;
 
 /** Constantes para la definici&oacute;n de una firma independiente.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class SingleSignConstants {
-
-	/** Nombre del fichero de configuraci&oacute;n. */
-	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
-
-	private static final Logger LOGGER = Logger.getLogger(SingleSignConstants.class.getName());
-
-	private static Properties config;
-
-	static {
-		try {
-			config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
-			config = ConfigManager.mapEnvironmentVariables(config);
-		}
-		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "No se pudo cargar el fichero de configuracion " + CONFIG_FILE, e); //$NON-NLS-1$
-			config = new Properties();
-		}
-	}
 
 	/** Tipo de operaci&oacute;n de firma. */
 	public enum SignSubOperation {
