@@ -108,6 +108,8 @@ public class ConfigManager {
 
 	private static final String PROP_LOGS_LEVEL_GENERAL = "logs.level"; //$NON-NLS-1$
 
+	private static final String PROP_SKIP_CERT_SELECTION = "skipcertselection"; //$NON-NLS-1$
+
 	private static final String DEFAULT_FIRE_LOGS_LEVEL = "INFO"; //$NON-NLS-1$
 	private static final String DEFAULT_AFIRMA_LOGS_LEVEL = "WARNING"; //$NON-NLS-1$
 	private static final String DEFAULT_GENERAL_LOGS_LEVEL = "OFF"; //$NON-NLS-1$
@@ -385,21 +387,17 @@ public class ConfigManager {
 
 		checkProviders(providers);
 
-		if (isCheckApplicationNeeded()) {
-			if (getDataBaseConnectionString() == null && getAppId() == null) {
-				LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_APP_ID //$NON-NLS-1$
-						+ " para la verificacion del identificador de aplicacion"); //$NON-NLS-1$
-				throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " //$NON-NLS-1$
-						+ PROP_APP_ID + " para la verificacion del identificador de aplicacion", PROP_DB_CONNECTION, CONFIG_FILE); //$NON-NLS-1$
-			}
+		if (isCheckApplicationNeeded() && getDataBaseConnectionString() == null && getAppId() == null) {
+			LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_APP_ID //$NON-NLS-1$
+					+ " para la verificacion del identificador de aplicacion"); //$NON-NLS-1$
+			throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " //$NON-NLS-1$
+					+ PROP_APP_ID + " para la verificacion del identificador de aplicacion", PROP_DB_CONNECTION, CONFIG_FILE); //$NON-NLS-1$
 		}
-		if (isCheckCertificateNeeded()) {
-			if (getDataBaseConnectionString() == null && getCert() == null) {
-				LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
-						+ " para la verificacion del certificado de auteticacion"); //$NON-NLS-1$
-				throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
-						+ " para la verificacion del certificado de auteticacion", PROP_DB_CONNECTION, CONFIG_FILE); //$NON-NLS-1$
-			}
+		if (isCheckCertificateNeeded() && getDataBaseConnectionString() == null && getCert() == null) {
+			LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
+					+ " para la verificacion del certificado de auteticacion"); //$NON-NLS-1$
+			throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
+					+ " para la verificacion del certificado de auteticacion", PROP_DB_CONNECTION, CONFIG_FILE); //$NON-NLS-1$
 		}
 
 		initialized = true;
@@ -979,5 +977,13 @@ public class ConfigManager {
 			}
 		}
 		return mappedText;
+	}
+
+	/**
+	 * Recupera valor del par&aacute;metro que indica si se debe omitir la pantalla de seleccion de certificados
+	 * @return El par&aacute;metro skipcertselection.
+	 */
+	public static boolean isSkipCertSelection(){
+		return 	Boolean.parseBoolean(getProperty(PROP_SKIP_CERT_SELECTION, Boolean.FALSE.toString()));
 	}
 }

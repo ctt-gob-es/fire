@@ -11,7 +11,9 @@ package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.CertificateBlockedException;
 import es.gob.fire.server.connector.FIReCertificateException;
@@ -28,6 +31,7 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.WeakRegistryException;
+import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.statistics.entity.Browser;
 
 
@@ -162,7 +166,11 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	private static void signWithClienteAfirma(final FireSession session, final HttpServletRequest request,
 			final HttpServletResponse response, final LogTransactionFormatter logF) throws IOException {
 
-		LOGGER.info(logF.f("Se ha seleccionado el proveedor local")); //$NON-NLS-1$
+		if (ConfigManager.isSkipCertSelection()) {
+			final Properties props = (Properties) session.getObject("properties"); //$NON-NLS-1$
+			props.put("headless", "true");  //$NON-NLS-1$//$NON-NLS-2$
+			session.setAttribute("properties", props); //$NON-NLS-1$
+		}
 
 		SessionCollector.commit(session);
 
@@ -275,14 +283,31 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		session.setAttribute(trId + "-certs", certificates); //$NON-NLS-1$
 		SessionCollector.commit(session);
 
-		try {
-			request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE).forward(request, response);
-			return;
-		}
-		catch (final ServletException e) {
-			LOGGER.warning(logF.f("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a esa pagina")); //$NON-NLS-1$
-			response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE + "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
-					"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
+		if (certificates.length == 1 && ConfigManager.isSkipCertSelection()) {
+			try {
+				try {
+				request.setAttribute("cert", Base64.encode(certificates[0].getEncoded(), true));//$NON-NLS-1$
+				request.getRequestDispatcher("presignService").forward(request, response); //$NON-NLS-1$
+			}
+			catch (final ServletException e) {
+				LOGGER.warning(logF.f("No se pudo continuar hasta la pagina del proveedor.")); //$NON-NLS-1$
+				redirectToErrorPage(originForced, connConfig, request, response);
+			}
+			} catch (final CertificateEncodingException e) {
+				LOGGER.log(Level.SEVERE, logF.f("Error al codificar el certificado en Base64"), e); //$NON-NLS-1$
+				ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
+				redirectToErrorPage(originForced, connConfig, request, response);
+				return;
+			}
+		}else {
+			try {
+				request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE).forward(request, response);
+			}
+			catch (final ServletException e) {
+				LOGGER.warning(logF.f("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a esa pagina")); //$NON-NLS-1$
+				response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE + "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
+						"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
+			}
 		}
 	}
 

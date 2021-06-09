@@ -68,7 +68,7 @@ public final class PreSignService extends HttpServlet {
 
     	final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
     	final String userRef  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-    	final String certB64        = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
+    	String certB64        = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
     	String redirectErrorUrl 	= request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
     	final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
@@ -96,12 +96,15 @@ public final class PreSignService extends HttpServlet {
             return;
         }
 
-        if (certB64 == null || certB64.isEmpty()) {
-            LOGGER.warning(logF.f("No se ha proporcionado el certificado del firmante")); //$NON-NLS-1$
-            SessionCollector.removeSession(transactionId);
-            response.sendRedirect(redirectErrorUrl);
-            return;
-        }
+    	if (certB64 == null || certB64.isEmpty()) {
+    		certB64 = (String) request.getAttribute(ServiceParams.HTTP_PARAM_CERT);
+    		if (certB64 == null || certB64.isEmpty()) {
+	    		LOGGER.warning(logF.f("No se ha proporcionado el certificado del firmante")); //$NON-NLS-1$
+	    		SessionCollector.removeSession(transactionId);
+	    		response.sendRedirect(redirectErrorUrl);
+	    		return;
+    		}
+    	}
 
         if (userRef == null || userRef.isEmpty()) {
             LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
