@@ -232,10 +232,8 @@ public final class SessionCollector {
 		if (!needForceLoad && session != null && session.getAttribute(trId) != null) {
 			fireSession = findSessionFromCurrentSession(trId, session);
 
-			if (fireSession != null) {
-				if (LOGGER.isLoggable(Level.FINE)) {
-			    	LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion ya cargada")); //$NON-NLS-1$
-				}
+			if ((fireSession != null) && LOGGER.isLoggable(Level.FINE)) {
+				LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion ya cargada")); //$NON-NLS-1$
 			}
 		}
 
@@ -247,10 +245,8 @@ public final class SessionCollector {
 				if (fireSession != null && session != null) {
 					fireSession.copySessionAttributes(session);
 				}
-				if (fireSession != null) {
-					if (LOGGER.isLoggable(Level.FINE)) {
-						LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion cargada de memoria")); //$NON-NLS-1$
-					}
+				if ((fireSession != null) && LOGGER.isLoggable(Level.FINE)) {
+					LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion cargada de memoria")); //$NON-NLS-1$
 				}
 			}
 
@@ -260,18 +256,14 @@ public final class SessionCollector {
 				if (fireSession != null && session != null) {
 					fireSession.copySessionAttributes(session);
 				}
-				if (fireSession != null) {
-					if (LOGGER.isLoggable(Level.FINE)) {
-				    	LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion cargada de almacenamiento persistente")); //$NON-NLS-1$
-					}
+				if ((fireSession != null) && LOGGER.isLoggable(Level.FINE)) {
+					LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion cargada de almacenamiento persistente")); //$NON-NLS-1$
 				}
 			}
 		}
 
-		if (onlyLoaded && fireSession == null) {
-			if (LOGGER.isLoggable(Level.FINE)) {
-		    	LOGGER.fine(LogTransactionFormatter.format(trId, "Se esperaba que la sesion estuviese en memoria y no fue asi")); //$NON-NLS-1$
-			}
+		if ((onlyLoaded && fireSession == null) && LOGGER.isLoggable(Level.FINE)) {
+			LOGGER.fine(LogTransactionFormatter.format(trId, "Se esperaba que la sesion estuviese en memoria y no fue asi")); //$NON-NLS-1$
 		}
 
 		// Comprobamos que los datos de la sesion se correspondan con los del usuario indicado
@@ -319,12 +311,10 @@ public final class SessionCollector {
     private static FireSession findSessionFromCurrentSession(final String id, final HttpSession httpSession) {
 
     	final FireSession fireSession = FireSession.loadFireSession(id, httpSession);
-		if (fireSession != null) {
-			if (fireSession.isExpired()) {
-				httpSession.removeAttribute(id);
-				removeSession(fireSession);
-				return null;
-			}
+		if ((fireSession != null) && fireSession.isExpired()) {
+			httpSession.removeAttribute(id);
+			removeSession(fireSession);
+			return null;
 		}
 
 		return fireSession;
@@ -339,12 +329,10 @@ public final class SessionCollector {
     private static FireSession findSessionFromServerMemory(final String id) {
 
     	final FireSession fireSession = sessions.get(id);
-    	if (fireSession != null) {
-    		if (fireSession.isExpired()) {
-    			removeSession(fireSession);
-    			return null;
-    		}
-    	}
+    	if ((fireSession != null) && fireSession.isExpired()) {
+			removeSession(fireSession);
+			return null;
+		}
 
     	return fireSession;
     }
@@ -362,12 +350,10 @@ public final class SessionCollector {
 		FireSession fireSession = null;
 		if (dao != null) {
 			fireSession = dao.recoverSession(id, session);
-			if (fireSession != null) {
-				if (fireSession.isExpired()) {
-					fireSession.invalidate();
-					dao.deleteSession(id);
-					return null;
-				}
+			if ((fireSession != null) && fireSession.isExpired()) {
+				fireSession.invalidate();
+				dao.deleteSession(id);
+				return null;
 			}
 		}
 		return fireSession;

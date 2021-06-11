@@ -8,6 +8,7 @@
 <%@page import="java.util.Properties"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
+<%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="java.util.Map"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderInfo"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderManager"%>
@@ -135,7 +136,7 @@
 						<p class="text-error-box">Si lo desea puede emitir un nuevo certificado en la nube para firmar</p>
 					</div>
 					<div class="error-box">
-						<form method="POST" action="requestCertificateService">
+						<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_REQ_CERT %>">
 		  					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 		  					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>">
 			  				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
@@ -152,7 +153,7 @@
 							<p class="text-error-box">Tambien puede firmar usando sus certificados locales (incluyendo DNIe).</p>
 						</div>								  				
 						<div  id="certLocalcontainer" class="error-box hide">
-							<form id="certLocal" action="chooseCertificateOriginService" class="hide">
+							<form id="certLocal" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>" class="hide">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />

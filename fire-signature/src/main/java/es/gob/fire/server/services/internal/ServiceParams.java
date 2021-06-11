@@ -68,6 +68,8 @@ public class ServiceParams {
     public static final String HTTP_PARAM_ERROR_TYPE = "errortype"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el mensaje de error obtenido. */
     public static final String HTTP_PARAM_ERROR_MESSAGE = "errormsg"; //$NON-NLS-1$
+    /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el mensaje de error obtenido. */
+    public static final String HTTP_ATTR_CERT = "cert"; //$NON-NLS-1$
 
 
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de operaci&oacute;n. */

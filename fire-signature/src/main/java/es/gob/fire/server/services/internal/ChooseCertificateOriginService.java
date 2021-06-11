@@ -167,9 +167,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			final HttpServletResponse response, final LogTransactionFormatter logF) throws IOException {
 
 		if (ConfigManager.isSkipCertSelection()) {
-			final Properties props = (Properties) session.getObject("properties"); //$NON-NLS-1$
-			props.put("headless", "true");  //$NON-NLS-1$//$NON-NLS-2$
-			session.setAttribute("properties", props); //$NON-NLS-1$
+			final Properties props = (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
+			props.put(MiniAppletHelper.AFIRMA_EXTRAPARAM_HEADLESS, "true");  //$NON-NLS-1$
+			session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, props);
 		}
 
 		SessionCollector.commit(session);
@@ -286,12 +286,13 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		if (certificates.length == 1 && ConfigManager.isSkipCertSelection()) {
 			try {
 				try {
-				request.setAttribute("cert", Base64.encode(certificates[0].getEncoded(), true));//$NON-NLS-1$
-				request.getRequestDispatcher("presignService").forward(request, response); //$NON-NLS-1$
+				request.setAttribute(ServiceParams.HTTP_ATTR_CERT, Base64.encode(certificates[0].getEncoded(), true));
+				request.getRequestDispatcher(ServiceNames.PUBLIC_SERVICE_PRESIGN).forward(request, response);
 			}
 			catch (final ServletException e) {
 				LOGGER.warning(logF.f("No se pudo continuar hasta la pagina del proveedor.")); //$NON-NLS-1$
 				redirectToErrorPage(originForced, connConfig, request, response);
+				return;
 			}
 			} catch (final CertificateEncodingException e) {
 				LOGGER.log(Level.SEVERE, logF.f("Error al codificar el certificado en Base64"), e); //$NON-NLS-1$
@@ -307,6 +308,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				LOGGER.warning(logF.f("No se pudo continuar hasta la pagina de seleccion de certificado. Se redirigira al usuario a esa pagina")); //$NON-NLS-1$
 				response.sendRedirect( FirePages.PG_CHOOSE_CERTIFICATE + "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + //$NON-NLS-1$
 						"=" + request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID)); //$NON-NLS-1$
+				return;
 			}
 		}
 	}

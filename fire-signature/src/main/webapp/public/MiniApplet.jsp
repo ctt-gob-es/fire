@@ -13,6 +13,7 @@
 <%@page import="es.gob.fire.server.services.internal.MiniAppletHelper"%>
 <%@page import="es.gob.fire.server.services.internal.BatchResult"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
+<%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="es.gob.fire.server.services.FIReServiceOperation"%>
 <%@page import="es.gob.fire.server.services.FIReTriHelper"%>
 <%@page import="es.gob.fire.server.services.ServiceUtil"%>
@@ -94,8 +95,8 @@
 		batchResult = (BatchResult) fireSession.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
 		final String stopOnError = fireSession.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR);
 		
-		preSignBatchUrl = baseUrl + "afirma/preSignBatchService"; //$NON-NLS-1$
-		postSignBatchUrl = baseUrl + "afirma/postSignBatchService"; //$NON-NLS-1$
+		preSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_PRESIGN_BATCH; //$NON-NLS-1$
+		postSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_POSTSIGN_BATCH; //$NON-NLS-1$
 		batchXmlB64 = MiniAppletHelper
 		.createBatchXml(Boolean.parseBoolean(stopOnError), algorithm, defaultConfig, batchResult);
 	}
@@ -217,6 +218,7 @@
 	
 				} catch (e) {
 					sendErrorCallback(AutoScript.getErrorType(), AutoScript.getErrorMessage());
+					return;
 				}
 			}
 			
@@ -274,11 +276,13 @@
 					else {
 						hideProgress();
 						sendErrorCallback("java.lang.UnsupportedOperationException", "Operacion de firma no soportada");
+						return;
 					}
 					
 				} catch(e) {
 					hideProgress();
 					sendErrorCallback(AutoScript.getErrorType(), AutoScript.getErrorMessage());
+					return;
 				}
 			}
 
@@ -319,7 +323,7 @@
 			 */
 			function doCancel() {
 				hideProgress();
-				document.getElementById("formSign").action = "miniappletErrorService";
+				document.getElementById("formSign").action = "<%= ServiceNames.PUBLIC_SERVICE_MINIAPPLET_ERROR %>";
 				document.getElementById("formSign").submit()
 			}
 			
@@ -399,7 +403,7 @@
 			</div>
 				
 			<div id="signButtonsPanel" Class="container-firmar "> 
-				<form name="formSign" id="formSign" method="POST" action="miniappletSuccessService">
+				<form name="formSign" id="formSign" method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_MINIAPPLET_SUCCESS %>">
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />

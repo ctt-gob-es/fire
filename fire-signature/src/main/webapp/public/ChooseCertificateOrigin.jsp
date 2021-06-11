@@ -11,6 +11,7 @@
 <%@page import="java.util.Properties"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
+<%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <%
@@ -149,7 +150,7 @@
 							<%= userRegistered ? info.getDescription() : info.getNoRegisteredMessage() %>													
 						</p>
 					</div>
-					<form method="POST" action="chooseCertificateOriginService" id="form<%= info.getName() %>" class="formProvider">
+					<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>" id="form<%= info.getName() %>" class="formProvider">
 						<div style="display: none"><!-- type="hidden" -->
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />

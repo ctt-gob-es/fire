@@ -96,7 +96,7 @@ public final class TestTestService {
 		extraParams.setProperty("mode", "implicit"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		final TriphaseData td = FIReTriHelper.getPreSign(
-			"sign", //$NON-NLS-1$
+			SignOperation.SIGN.toString(),
 			"XAdES", //$NON-NLS-1$
 			"SHA1withRSA", //$NON-NLS-1$
 			extraParams,
@@ -141,7 +141,7 @@ public final class TestTestService {
 
 		// Ya con el TriphaseData relleno, hacemos la postfirma
 		final byte[] signature = FIReTriHelper.getPostSign(
-				"sign", //$NON-NLS-1$
+				SignOperation.SIGN.toString(),
 				"CAdES", //$NON-NLS-1$
 				"SHA1withRSA", //$NON-NLS-1$
 				extraParams,

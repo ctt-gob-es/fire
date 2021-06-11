@@ -37,7 +37,7 @@ public class MiniAppletHelper {
 	private static final String AFIRMA_EXTRAPARAM_FILTER = "filter"; //$NON-NLS-1$
 	private static final String AFIRMA_EXTRAPARAM_FILTERS = "filters"; //$NON-NLS-1$
 	private static final String AFIRMA_EXTRAPARAM_ORDER_FILTERS_PREFIX = "filters."; //$NON-NLS-1$
-	private static final String AFIRMA_EXTRAPARAM_HEADLESS = "headless"; //$NON-NLS-1$
+	public static final String AFIRMA_EXTRAPARAM_HEADLESS = "headless"; //$NON-NLS-1$
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 

@@ -8,6 +8,7 @@
 <%@page import="java.util.Properties"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
+<%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="java.util.Map"%>
 <%@page import="es.gob.afirma.core.misc.AOUtil"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
@@ -158,7 +159,7 @@
 							<p class="text-cert-box">Fecha de caducidad: <%= date %></p>
 						</div>
 						<div class="cert-box-right">
-							<form method="POST" action="presignService" id="certForm<%= i %>">
+							<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_PRESIGN %>" id="certForm<%= i %>">
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
