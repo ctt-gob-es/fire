@@ -283,7 +283,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		session.setAttribute(trId + "-certs", certificates); //$NON-NLS-1$
 		SessionCollector.commit(session);
 
-		if (certificates.length == 1 && ConfigManager.isSkipCertSelection()) {
+		if (certificates.length == 1 && (ConfigManager.isSkipCertSelection() || connConfig.isAppSkipCertSelection())) {
 			try {
 				try {
 				request.setAttribute(ServiceParams.HTTP_ATTR_CERT, Base64.encode(certificates[0].getEncoded(), true));

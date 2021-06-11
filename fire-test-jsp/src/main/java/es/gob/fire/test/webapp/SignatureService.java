@@ -118,6 +118,11 @@ public class SignatureService extends HttpServlet {
         	confProperties.setProperty("appName", configManager.getAppName()); //$NON-NLS-1$
         }
 
+        // Configuramos la omision del certificado (opcional)
+        if (configManager.isAppSkipCertSelection()) {
+        	confProperties.setProperty("app.skipcertselection", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
         // Desactivacion del periodo de gracia (puede ser necesario si se configura politica de firma)
        	//confProperties.setProperty("updater.ignoreGracePeriod", Boolean.TRUE.toString()); //$NON-NLS-1$
 
