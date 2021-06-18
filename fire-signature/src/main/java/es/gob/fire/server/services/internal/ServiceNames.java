@@ -27,4 +27,10 @@ public class ServiceNames {
 	 /** Servicio para la prefirma*/
 	public static final String PUBLIC_SERVICE_PRESIGN = "presignService"; //$NON-NLS-1$
 
+	 /** Servicio para la prefirma de tipo batch*/
+	public static final String PUBLIC_SERVICE_PRESIGN_BATCH = "preSignBatchService"; //$NON-NLS-1$
+
+	 /** Servicio para la postfirma de tipo batch*/
+	public static final String PUBLIC_SERVICE_POSTSIGN_BATCH = "postSignBatchService"; //$NON-NLS-1$
+
 }
