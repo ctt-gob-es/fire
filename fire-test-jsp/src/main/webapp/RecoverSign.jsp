@@ -23,7 +23,9 @@
 		<link rel="shortcut icon" href="img/cert.png">
 		<link rel="stylesheet" href="styles/styles.css"/>
 		<script type="text/javascript">
-			function b64toBlob (b64Data, contentType='', sliceSize=512) {
+			function b64toBlob (b64Data) {
+			  let contentType='';
+			  let sliceSize=512
 			  const byteCharacters = atob(b64Data);
 			  const byteArrays = [];
 
@@ -126,11 +128,11 @@
 
 			<div style="margin-top: 10px; text-align: left; ">
 				<% if (!dataTooLarge) { %>
-					<label for="datos-firma">Resultado: </label><br><br>
-					<textarea id="datos-firma" rows="10" cols="150" name="sign-data"><%= resultMsg %></textarea><br>
+					<label for="datos_firma">Resultado: </label><br><br>
 				<% } else { %>
 					<span>La firma generada es demasiado grande para mostrarla. Pulse el siguiente enlace para descargar:</span>
 				<% } %>
+				<textarea id="datos_firma" rows="10" cols="150" name="sign-data" style="display: none"><%= resultMsg %></textarea><br>
 				<a id="download_link" download="firma<%= ext %>" href="" style="display: none">Descargar fichero</a>
 			</div>
 
@@ -142,20 +144,33 @@
 			</form>
 		</div>
 	
-	</body>
-	
-	<%    
-		if (signature != null) {
-	%>
-			<script type="text/javascript">
-				var blob = b64toBlob("<%= resultMsg %>");
+		<%    
+			if (signature != null) {
+		%>
+				<script type="text/javascript">
 				
-				var url = window.URL.createObjectURL(blob);
-		
-				document.getElementById('download_link').href = url;
-				document.getElementById('download_link').style = "display: block";
-			</script>
-	<%
-		}
-	%>
+					// Comprobamos si el navegador es Internet Explorer para mostrar o no
+					// la opcion de descargar los datos con un enlace
+					var ua = navigator.userAgent;
+					var isInternetExplorer = ua.indexOf("MSIE ") > -1 || ua.indexOf("Trident/") > -1;
+				
+					if (!isInternetExplorer) {
+						var blob = b64toBlob(document.getElementById('datos_firma').textContent);
+						
+						var url = window.URL.createObjectURL(blob);
+				
+						document.getElementById('download_link').href = url;
+						document.getElementById('download_link').style = "display: block";
+					}
+					
+					if (isInternetExplorer) {
+						document.getElementById('datos_firma').style.setAttribute("display", "block");
+					} else if (<%= !dataTooLarge %>) {
+						document.getElementById('datos_firma').style = "display: block";
+					}
+				</script>
+		<%
+			}
+		%>
+	</body>
 </html>
