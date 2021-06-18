@@ -33,4 +33,10 @@ public class ServiceNames {
 	 /** Servicio para la postfirma de tipo batch*/
 	public static final String PUBLIC_SERVICE_POSTSIGN_BATCH = "postSignBatchService"; //$NON-NLS-1$
 
+	 /** Servicio para errores del Miniapplet*/
+	public static final String PUBLIC_SERVICE_MINIAPPLET_ERROR = "miniappletErrorService";
+
+	/** Servicio para operaciones correctas del Miniapplet*/
+	public static final String PUBLIC_SERVICE_MINIAPPLET_SUCCESS = "miniappletSuccessService";
+
 }
