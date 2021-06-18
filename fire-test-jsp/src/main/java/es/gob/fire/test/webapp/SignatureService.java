@@ -103,7 +103,8 @@ public class SignatureService extends HttpServlet {
         confProperties.setProperty("redirectOkUrl", configManager.addUrlBase(REDIRECT_SUCCESS_PAGE)); //$NON-NLS-1$
         // Configuramos la URL de nuestra aplicacion a la que redirigir en caso de error en la firma (Obligatorio)
         confProperties.setProperty("redirectErrorUrl", configManager.addUrlBase(REDIRECT_ERROR_PAGE)); //$NON-NLS-1$
-        // Configuramos el nombre del procedimiento de cara a la GISS (Obligatorio)
+
+        // Configuramos el nombre del procedimiento de cara a la GISS (Obligatorio si se desea usar el proveedor de Cl@ve Firma)
         if (configManager.getProcedureName() != null) {
         	confProperties.setProperty("procedureName", configManager.getProcedureName()); //$NON-NLS-1$
         }
@@ -113,14 +114,14 @@ public class SignatureService extends HttpServlet {
         	confProperties.setProperty("certOrigin", configManager.getCertOrigin()); //$NON-NLS-1$
         }
 
-        // Configuramos el nombre de la aplicacion (opcional)
+        // Configuramos el nombre de la aplicacion (Opcional)
         if (configManager.getAppName() != null) {
         	confProperties.setProperty("appName", configManager.getAppName()); //$NON-NLS-1$
         }
 
-        // Configuramos la omision del certificado (opcional)
-        if (configManager.isAppSkipCertSelection()) {
-        	confProperties.setProperty("app.skipcertselection", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+        // Configuramos la omision del certificado (Opcional)
+        if (configManager.isSkipCertSelection()) {
+        	confProperties.setProperty("skipCertSelection", Boolean.TRUE.toString()); //$NON-NLS-1$
         }
 
         // Desactivacion del periodo de gracia (puede ser necesario si se configura politica de firma)

@@ -147,6 +147,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 				signWithProvider(origin, subjectId, transactionId, session, connConfig, request, response, originForced, logF);
 			} catch (final ServletException e) {
 				LOGGER.log(Level.SEVERE, logF.f("Error al redirigir al usuario a una de las pantallas de exito"), e); //$NON-NLS-1$
+				ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, originForced);
 				response.sendRedirect(redirectErrorUrl);
 				return;
 			}
@@ -283,24 +284,27 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		session.setAttribute(trId + "-certs", certificates); //$NON-NLS-1$
 		SessionCollector.commit(session);
 
-		if (certificates.length == 1 && (ConfigManager.isSkipCertSelection() || connConfig.isAppSkipCertSelection())) {
+		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null ?
+				connConfig.isAppSkipCertSelection().booleanValue() : ConfigManager.isSkipCertSelection();
+
+		if (certificates.length == 1 && skipSelection) {
 			try {
-				try {
 				request.setAttribute(ServiceParams.HTTP_ATTR_CERT, Base64.encode(certificates[0].getEncoded(), true));
 				request.getRequestDispatcher(ServiceNames.PUBLIC_SERVICE_PRESIGN).forward(request, response);
 			}
 			catch (final ServletException e) {
-				LOGGER.warning(logF.f("No se pudo continuar hasta la pagina del proveedor.")); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("Error al redirigir al usuario a la pagina del proveedor"), e); //$NON-NLS-1$
+				ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
 				redirectToErrorPage(originForced, connConfig, request, response);
 				return;
 			}
-			} catch (final CertificateEncodingException e) {
+			catch (final CertificateEncodingException e) {
 				LOGGER.log(Level.SEVERE, logF.f("Error al codificar el certificado en Base64"), e); //$NON-NLS-1$
 				ErrorManager.setErrorToSession(session, OperationError.CERTIFICATES_SERVICE, originForced);
 				redirectToErrorPage(originForced, connConfig, request, response);
 				return;
 			}
-		}else {
+		} else {
 			try {
 				request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE).forward(request, response);
 			}

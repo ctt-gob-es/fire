@@ -1,3 +1,5 @@
+<%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
+<%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -126,13 +128,13 @@
 				
 					<div id="containerError" class="botones">
 						<div class="containerbutton">
-						<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
+						<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonUrlParams %>" class="button-cancelar">
 								<span >Cancelar</span>
 							</a>
 						</div>
 						<div class="separatorbutton"></div>
 						<div class="containerbutton">
-							<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
+							<a href= "<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" + buttonUrlParams %>" class="button-volver">
 								<span class="arrow-left-white"></span>
 								<span >Volver</span>
 							</a>

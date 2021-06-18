@@ -81,9 +81,13 @@ public class CreateBatchService extends HttpServlet {
         	confProperties.setProperty("appName", configManager.getAppName()); //$NON-NLS-1$
         }
 
-        if (configManager.getAppName() != null) {
-        	confProperties.setProperty("updater.ignoreGracePeriod", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+        // Configuramos la omision del certificado (Opcional)
+        if (configManager.isSkipCertSelection()) {
+        	confProperties.setProperty("skipCertSelection", Boolean.TRUE.toString()); //$NON-NLS-1$
         }
+
+        // Configuramos que se ignore el periodo de gracia en el caso de actualizarse o validarse la firma
+        // confProperties.setProperty("updater.ignoreGracePeriod", Boolean.TRUE.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 
         // Podemos configurar un DocumentManager configurado en el componente central.
         // Con esto, en lugar de tomar los datos que le pasamos a la aplicacion, se cargaran

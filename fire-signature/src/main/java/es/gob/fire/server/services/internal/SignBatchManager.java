@@ -102,11 +102,12 @@ public class SignBatchManager {
         // redirigirlo. Si no, se envia la pagina de seleccion
         String redirectUrl;
         if (provs != null && provs.length == 1) {
-        	redirectUrl = "chooseCertificateOriginService?" + //$NON-NLS-1$
+        	redirectUrl = ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN + "?" + //$NON-NLS-1$
         			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] + "&" + //$NON-NLS-1$ //$NON-NLS-2$
         			ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$
         } else {
-        	redirectUrl = "ChooseCertificateOrigin.jsp?" + ServiceParams.HTTP_PARAM_OPERATION + "=" + ServiceParams.OPERATION_BATCH; //$NON-NLS-1$ //$NON-NLS-2$
+        	redirectUrl = FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" //$NON-NLS-1$
+        			+ ServiceParams.HTTP_PARAM_OPERATION + "=" + ServiceParams.OPERATION_BATCH; //$NON-NLS-1$
         }
 
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();

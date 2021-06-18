@@ -37,7 +37,7 @@ public class ConfigManager {
 
 	private static final String PROP_CERTIFICATE_ORIGIN = "certOrigin"; //$NON-NLS-1$
 
-	private static final String PROP_APP_SKIP_CERT_SELECTION = "app.skipcertselection"; //$NON-NLS-1$
+	private static final String PROP_SKIP_CERT_SELECTION = "skipCertSelection"; //$NON-NLS-1$
 
 	private static ConfigManager instance = null;
 
@@ -150,13 +150,14 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera valor del par&aacute;metro que indica si se debe omitir la pantalla de seleccion de certificados
-	 * @return El par&aacute;metro skipcertselection.
+	 * Recupera el valor del par&aacute;metro que indica si se debe omitir la pantalla de
+	 * selecci&oacute;n de certificados.
+	 * @return Si debe omitirse la pantalla de selecci&oacute;n de certificados o no.
 	 */
-	public boolean isAppSkipCertSelection() {
+	public boolean isSkipCertSelection() {
 		boolean skipCertSelection = false;
 		if (this.config != null) {
-			skipCertSelection = Boolean.parseBoolean(this.config.getProperty(PROP_APP_SKIP_CERT_SELECTION));
+			skipCertSelection = Boolean.parseBoolean(this.config.getProperty(PROP_SKIP_CERT_SELECTION));
 		}
 		return skipCertSelection;
 	}

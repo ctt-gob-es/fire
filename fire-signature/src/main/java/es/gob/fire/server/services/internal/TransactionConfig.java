@@ -22,21 +22,18 @@ public class TransactionConfig implements Serializable {
 	private static final String PARAM_CERT_ORIGIN = "certOrigin"; //$NON-NLS-1$
 	/** Par&aacute;metro usado para configurar el t&iacute;tulo de la aplicaci&oacute;n que solicita firmar. */
 	private static final String PARAM_APPLICATION_TITLE = "appName"; //$NON-NLS-1$
+
 	/**
 	 * Par&aacute;metro usado para configurar el gestor de documentos con el que obtener los datos
 	 * a firmar y guardar las firmas.
-	 * */
-	private static final String PARAM_DOCUMENT_MANAGER = "docManager"; //$NON-NLS-1$
-	/**
-	 * Par&aacute;metro usado para configurar si se desea que AutoFirma se ejecute como
-	 * aplicaci&oacute;n nativa o aplicaci&oacute;n WebStart.
-	 * */
-	private static final String PARAM_AUTOFIRMA_WS = "afirmaWS"; //$NON-NLS-1$
-	/**
-	 * Par&aacute;metro usado para indicar si se omite el certificado o no en caso de que solo
-	 * se encuentre uno
 	 */
-	private static final String PROP_APP_SKIP_CERT_SELECTION = "app.skipcertselection"; //$NON-NLS-1$
+	private static final String PARAM_DOCUMENT_MANAGER = "docManager"; //$NON-NLS-1$
+
+	/**
+	 * Par&aacute;metro usado para indicar si debe omitirse o no la selecci&oacute:n del certificado
+	 * en caso de que s&oacute;lo se encuentre uno.
+	 */
+	private static final String PARAM_SKIP_CERT_SELECTION = "skipCertSelection"; //$NON-NLS-1$
 
     /** Cadena utilizada para separar valores establecidos dentro de una misma propiedad. */
 	private static final String VALUES_SEPARATOR = ","; //$NON-NLS-1$
@@ -156,12 +153,9 @@ public class TransactionConfig implements Serializable {
 	 * Recupera valor del par&aacute;metro que indica si se debe omitir la pantalla de seleccion de certificados
 	 * @return El par&aacute;metro skipcertselection.
 	 */
-	public boolean isAppSkipCertSelection() {
-		boolean skipCertSelection = false;
-		if (this.config != null) {
-			skipCertSelection = Boolean.parseBoolean(this.config.getProperty(PROP_APP_SKIP_CERT_SELECTION));
-		}
-		return skipCertSelection;
+	public Boolean isAppSkipCertSelection() {
+		final String skipSelection = this.config.getProperty(PARAM_SKIP_CERT_SELECTION);
+		return skipSelection == null ? null : Boolean.valueOf(skipSelection);
 	}
 
 	@Override

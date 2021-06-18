@@ -108,7 +108,7 @@ public class ConfigManager {
 
 	private static final String PROP_LOGS_LEVEL_GENERAL = "logs.level"; //$NON-NLS-1$
 
-	private static final String PROP_SKIP_CERT_SELECTION = "skipcertselection"; //$NON-NLS-1$
+	private static final String PROP_SKIP_CERT_SELECTION = "skipCertSelection"; //$NON-NLS-1$
 
 	private static final String DEFAULT_FIRE_LOGS_LEVEL = "INFO"; //$NON-NLS-1$
 	private static final String DEFAULT_AFIRMA_LOGS_LEVEL = "WARNING"; //$NON-NLS-1$
@@ -364,7 +364,8 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
+	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n o
+	 * no se encuentren propiedades obligatorias.
 	 * @throws ConfigFilesException Si no encuentra el fichero config.properties.
 	 * @throws InvalidConfigurationException Si hay una propiedad mal configurada.
 	 */
@@ -980,8 +981,9 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera valor del par&aacute;metro que indica si se debe omitir la pantalla de seleccion de certificados
-	 * @return El par&aacute;metro skipcertselection.
+	 * Recupera valor del par&aacute;metro que indica si se debe omitir la
+	 * pantalla de selecci&oacute;n de certificados.
+	 * @return Indica si se debe omitir la pantalla de selecci&oacute;n de certificados.
 	 */
 	public static boolean isSkipCertSelection(){
 		return 	Boolean.parseBoolean(getProperty(PROP_SKIP_CERT_SELECTION, Boolean.FALSE.toString()));

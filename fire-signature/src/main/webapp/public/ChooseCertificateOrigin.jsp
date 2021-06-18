@@ -175,7 +175,7 @@
 			</div>
 			<div class="container-title">
 				<div class="title-button">				
-					<a href= "cancelOperationService?<%= cancelUrlParams %>" class="button-cancelar">
+					<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + cancelUrlParams %>" class="button-cancelar">
 						<span>Cancelar</span>
 					</a>
 				</div>

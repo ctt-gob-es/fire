@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.afirma.core.misc.AOUtil"%>
 <%@page import="java.nio.charset.StandardCharsets"%>
@@ -95,8 +96,8 @@
 		batchResult = (BatchResult) fireSession.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
 		final String stopOnError = fireSession.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR);
 		
-		preSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_PRESIGN_BATCH; //$NON-NLS-1$
-		postSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_POSTSIGN_BATCH; //$NON-NLS-1$
+		preSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_PRESIGN; //$NON-NLS-1$
+		postSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_POSTSIGN; //$NON-NLS-1$
 		batchXmlB64 = MiniAppletHelper
 		.createBatchXml(Boolean.parseBoolean(stopOnError), algorithm, defaultConfig, batchResult);
 	}
@@ -104,10 +105,9 @@
 		triphaseFormat = FIReTriHelper.getTriPhaseFormat(format);
 		
 		// Agregamos a los extraParams el parametro necesario para la generacion de una firma trifasica
-		extraParams.setProperty("serverUrl", baseUrl + "afirma/triphaseSignService"); //$NON-NLS-1$ //$NON-NLS-2$
+		extraParams.setProperty("serverUrl", baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_TRISIGN); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
-
+	
 	// Obtenemos las URL a las que hay que redirigir al usuario en caso de exito y error
 	final TransactionConfig connConfig =
 		(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
@@ -455,11 +455,11 @@
 		<% } %>
 		<div class="container_btn_operation">
 		<% if (originForced) { %>
-			<a href= "cancelOperationService?<%= buttonCancelUrlParams %>" class="button-cancelar">							
+			<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonCancelUrlParams %>" class="button-cancelar">							
 				<span >Cancelar</span>							
 			</a>
 			<% } else { %>
-			<a href= "ChooseCertificateOrigin.jsp?<%= buttonBackUrlParams %>" class="button-volver">							
+			<a href= "<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" + buttonBackUrlParams %>" class="button-volver">							
 				<span class="arrow-left-white"></span>
 				<span >Volver</span>							
 			</a>
@@ -488,7 +488,7 @@
 
 		AutoScript.setForceWSMode(true);
 		AutoScript.cargarAppAfirma("<%= baseUrl %>afirma");
-		AutoScript.setServlets("<%= baseUrl %>afirma/storage", "<%= baseUrl %>afirma/retrieve");
+		AutoScript.setServlets("<%= baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_STORAGE %>", "<%= baseUrl  + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_RETRIEVE %>");
 
 		// Actualizamos el texto de requisitos
 		updateRequirementsText();

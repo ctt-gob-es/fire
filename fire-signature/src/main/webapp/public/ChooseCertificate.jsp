@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
@@ -181,11 +182,11 @@
 			
 			<div class="container_btn_operation">
 				<% if (originForced) { %>
-					<a href= "cancelOperationService?<%= buttonUrlParams %>" class="button-cancelar">
+					<a href="<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonUrlParams %>" class="button-cancelar">
 					<span >Cancelar</span>
 					</a>
 				<% } else { %>
-					<a href= "ChooseCertificateOrigin.jsp?<%= buttonUrlParams %>" class="button-volver">
+					<a href= "<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" + buttonUrlParams %>" class="button-volver">
 						<span class="arrow-left-white"></span>
 						<span >Volver</span>
 					</a>

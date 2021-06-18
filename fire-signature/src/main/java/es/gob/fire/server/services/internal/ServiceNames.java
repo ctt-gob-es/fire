@@ -15,28 +15,39 @@ package es.gob.fire.server.services.internal;
  */
 public class ServiceNames {
 
-	/** Servicio para la petici&oacute;nn de certificado*/
+	/** Servicio para la petici&oacute;nn de certificado. */
 	public static final String PUBLIC_SERVICE_REQ_CERT = "requestCertificateService"; //$NON-NLS-1$
 
-	 /** Servicio para la recuperaci&oacute;nn del nuevo certificado de firma en la nube*/
+	 /** Servicio para la recuperaci&oacute;nn del nuevo certificado de firma en la nube. */
 	public static final String PUBLIC_SERVICE_RECOVER_NEW_CERT = "recoverNewCertificateService"; //$NON-NLS-1$
 
-	 /** Servicio interno para la seleccion del origen del certificado de firma (nube o local)*/
+	 /** Servicio interno para la seleccion del origen del certificado de firma (nube o local). */
 	public static final String PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN = "chooseCertificateOriginService"; //$NON-NLS-1$
 
 	 /** Servicio para la prefirma*/
 	public static final String PUBLIC_SERVICE_PRESIGN = "presignService"; //$NON-NLS-1$
 
-	 /** Servicio para la prefirma de tipo batch*/
-	public static final String PUBLIC_SERVICE_PRESIGN_BATCH = "preSignBatchService"; //$NON-NLS-1$
-
-	 /** Servicio para la postfirma de tipo batch*/
-	public static final String PUBLIC_SERVICE_POSTSIGN_BATCH = "postSignBatchService"; //$NON-NLS-1$
-
 	 /** Servicio para errores del Miniapplet*/
-	public static final String PUBLIC_SERVICE_MINIAPPLET_ERROR = "miniappletErrorService";
+	public static final String PUBLIC_SERVICE_MINIAPPLET_ERROR = "miniappletErrorService"; //$NON-NLS-1$
 
-	/** Servicio para operaciones correctas del Miniapplet*/
-	public static final String PUBLIC_SERVICE_MINIAPPLET_SUCCESS = "miniappletSuccessService";
+	/** Servicio para operaciones correctas del Miniapplet. */
+	public static final String PUBLIC_SERVICE_MINIAPPLET_SUCCESS = "miniappletSuccessService"; //$NON-NLS-1$
 
+	/** Servicio para la cancelacion de la operaci&oacute;n. */
+	public static final String PUBLIC_SERVICE_CANCEL_OPERATION = "cancelOperationService"; //$NON-NLS-1$
+
+	/** Servicio para el guardado de datos temporales del Cliente @firma. */
+	public static final String PUBLIC_SERVICE_AFIRMA_STORAGE = "storage"; //$NON-NLS-1$
+
+	/** Servicio para la recuperaci&oacute;n de datos temporales del Cliente @firma. */
+	public static final String PUBLIC_SERVICE_AFIRMA_RETRIEVE = "retrieve"; //$NON-NLS-1$
+
+	/** Servicio de firma trif&aacute;sica del Cliente @firma. */
+	public static final String PUBLIC_SERVICE_AFIRMA_TRISIGN = "triphaseSignService"; //$NON-NLS-1$
+
+	/** Servicio de prefirma de lotes del Cliente @firma. */
+	public static final String PUBLIC_SERVICE_AFIRMA_BATCH_PRESIGN = "preSignBatchService"; //$NON-NLS-1$
+
+	/** Servicio de postfirma de lotes del Cliente @firma. */
+	public static final String PUBLIC_SERVICE_AFIRMA_BATCH_POSTSIGN = "postSignBatchService"; //$NON-NLS-1$
 }

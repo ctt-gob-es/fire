@@ -274,11 +274,11 @@ public class SignOperationManager {
         // si no, se envia a la pagina de seleccion de proveedor
 		final String redirectUrl;
         if (provs.length == 1) {
-        	redirectUrl = "chooseCertificateOriginService?" + //$NON-NLS-1$
+        	redirectUrl = ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN + "?" + //$NON-NLS-1$
         			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] + "&" + //$NON-NLS-1$ //$NON-NLS-2$
  					ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$
         } else {
-        	redirectUrl = "ChooseCertificateOrigin.jsp"; //$NON-NLS-1$
+        	redirectUrl = FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN;
         }
 
         // Obtenemos la referencia al usuario de la sesion
