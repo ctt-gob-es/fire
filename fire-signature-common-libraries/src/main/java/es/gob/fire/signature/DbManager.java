@@ -76,6 +76,8 @@ public class DbManager {
 
 	/**
 	 * Obtiene la conexi&oacute;n de base de datos.
+	 * @param autocommit Indica si se debe hacer commit autom&aacute;tico tras cada
+	 * operaci&oacute;n de inserci&oacute;n y borrado de entradas en base de datos.
 	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo conectar.
 	 * @throws SQLException Cuando no se puede crear la conexi&oacute;n.
 	 */

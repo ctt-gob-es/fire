@@ -591,7 +591,7 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera la clase {@link es.gob.fire.server.services.internal.alarms.AlarmNotifier AlarmNotifier}
+	 * Recupera la clase {@code AlarmNotifier}
 	 * con la que notificar las alarmas identificadas.
 	 * @return Nombre cualificado de la clase.
 	 */

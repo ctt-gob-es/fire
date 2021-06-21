@@ -196,12 +196,15 @@ public final class ServiceUtil {
     	}
 	}
 
-	/** Valida si el certificado que se le pasa a la petici&oacute;n tiene permisos.
+	/**
+	 * Valida si el certificado que se le pasa a la petici&oacute;n tiene permisos.
 	 * Lee el certificado de la cabecera HTTP.
 	 * @param appId Identificador de la aplicaci&oacute;n.
 	 * @param certificates Listado de certificados
 	 * @throws CertificateValidationException En caso de ocurrir alg&uacute;n error o si el certificado
-	 *                                        no tiene acceso. */
+	 *                                        no tiene acceso.
+	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
+	 */
 	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates)
 			throws CertificateValidationException, DBConnectionException {
 

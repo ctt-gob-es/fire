@@ -194,7 +194,6 @@ public abstract class SignBatch {
 
 	/** Ejecuta el preproceso de firma por lote.
 	 * @param certChain Cadena de certificados del firmante.
-	 * @param logF Formateador de trazas de log.
 	 * @return Datos trif&aacute;sicos de pre-firma del lote.
 	 * @throws BatchException Si hay errores irrecuperables en el proceso. */
 	public abstract String doPreBatch(final X509Certificate[] certChain) throws BatchException;
@@ -203,7 +202,6 @@ public abstract class SignBatch {
 	 * @param certChain Cadena de certificados del firmante.
 	 * @param td Datos trif&aacute;sicos del preproceso.
 	 *           Debe contener los datos de todas y cada una de las firmas del lote.
-	 * @param logF Formateador de trazas de log.
 	 * @return Registro del resultado general del proceso por lote, en un XML (<a href="../doc-files/resultlog-scheme.html">descripci&oacute;n
 	 *         del formato</a>).
 	 * @throws BatchException Si hay errores irrecuperables en el postproceso. */

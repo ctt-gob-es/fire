@@ -46,8 +46,9 @@ public class FIReDocumentManagerFactory {
 
 	/**
 	 * Obtiene una instancia de la clase de gesti&oacute;n de documentos. Si no se
-	 * indica ninguno, se devuelve el por defecto.
+	 * indica ninguno, se devuelve una de la clase por defecto.
 	 * @param appId Identificador de la aplicaci&oacute;n que solicita el gestor.
+	 * @param trId Identificador de transacci&oacute;n (s&oacute;lo se usa para el log).
 	 * @param docManagerName Nombre del gestor que se desea recuperar o {@code null}
 	 * para obtener el por defecto.
 	 * @return Gestor de documentos.

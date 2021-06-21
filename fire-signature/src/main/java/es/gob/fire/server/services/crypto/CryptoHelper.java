@@ -18,8 +18,8 @@ public class CryptoHelper {
      * @param signatureValue PKCS#1 de la firma.
      * @param publicKey Clave p&uacute;blica con la que validar la firma.
      * @param logF Formateador de trazas de log.
-     * @throws InvalidVerificationCodeException Cuando no se proporciona un par&aacute;metro v&aacute;lido o
-     * el PKCS#1 se gener&oacute; con una clave privada distinta a la esperada.
+     * @throws SecurityException Cuando el PKCS#1 se gener&oacute; con una clave privada distinta a
+     * la esperada.
      */
     public static void verifyPkcs1(final byte[] signatureValue, final PublicKey publicKey, final LogTransactionFormatter logF) throws SecurityException {
     	try {
