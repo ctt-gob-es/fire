@@ -164,6 +164,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	 * @param request Petici&oacute;n HTTP realizada al servicio.
 	 * @param response Objeto HTTP de respuesta del servicio.
 	 * @param logF Objeto para el formateo de los logs.
+	 * @param connConfig Configuraci&oacute;n indicada por la llamada desde el cliente.
 	 * @throws IOException Cuando ocurre un error al redirigir al usuario.
 	 */
 	private static void signWithClienteAfirma(final FireSession session, final HttpServletRequest request,
