@@ -126,16 +126,18 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED, Boolean.TRUE.toString());
 		}
 
+		final TransactionConfig connConfig =
+				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+
 		// Se selecciono firmar con un certificado local
 		if (ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(origin)) {
-			signWithClienteAfirma(session, request, response, logF);
+			signWithClienteAfirma(session, request, response, logF, connConfig);
 		}
 		// Si no se selecciono firma local, se firmara con un proveedor de firma en la nube
 		else {
 
 			final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
-			final TransactionConfig connConfig =
-					(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+
 			if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 				LOGGER.warning(logF.f("No se encontro en la sesion la URL de redireccion de error para la operacion")); //$NON-NLS-1$
 				ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
@@ -165,9 +167,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	 * @throws IOException Cuando ocurre un error al redirigir al usuario.
 	 */
 	private static void signWithClienteAfirma(final FireSession session, final HttpServletRequest request,
-			final HttpServletResponse response, final LogTransactionFormatter logF) throws IOException {
+			final HttpServletResponse response, final LogTransactionFormatter logF, final TransactionConfig connConfig) throws IOException {
 
-		if (ConfigManager.isSkipCertSelection()) {
+		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null ?
+				connConfig.isAppSkipCertSelection().booleanValue() : ConfigManager.isSkipCertSelection();
+
+		if (skipSelection) {
 			final Properties props = (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
 			props.put(MiniAppletHelper.AFIRMA_EXTRAPARAM_HEADLESS, "true");  //$NON-NLS-1$
 			session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, props);
