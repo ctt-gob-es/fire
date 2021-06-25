@@ -283,6 +283,11 @@ public class FIReService extends HttpServlet {
     			break;
     		}
     	}
+    	catch (final UnsupportedOperationException uoe) {
+    		LOGGER.log(Level.WARNING, logF.f(uoe.getMessage()), uoe);
+    		response.sendError(HttpCustomErrors.UNSUPPORTED_OPERATION.getErrorCode(), uoe.getMessage());
+    		return;
+    	}
     	catch (final Exception e) {
     		// Las operaciones solo lanzan una excepcion al exterior si no queda mas remedio.
     		// De norma, deberian responder directamente con su propio mensaje de error.

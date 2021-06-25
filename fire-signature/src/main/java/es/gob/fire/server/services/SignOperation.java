@@ -14,7 +14,7 @@ public enum SignOperation {
 
 	private String op;
 
-	private SignOperation(final String op) {
+	SignOperation(final String op) {
 		this.op = op;
 	}
 

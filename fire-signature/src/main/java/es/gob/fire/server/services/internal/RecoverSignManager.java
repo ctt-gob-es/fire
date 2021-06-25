@@ -153,6 +153,9 @@ public class RecoverSignManager {
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
         final String remoteTrId		= session.getString(ServiceParams.SESSION_PARAM_REMOTE_TRANSACTION_ID); // 3
 
+		//Comprobamos que la operacion se permite y que sea soportada por el sistema
+		ServiceUtil.checkMultiSignatureCompatibility(format, cop);
+
         if (providerName == null) {
     		LOGGER.severe(logF.f("No se selecciono un proveedor de firma. Probablemente el usuario no fue redirigido a la URL indicada en la transaccion")); //$NON-NLS-1$
     		sendError(response, session, HttpServletResponse.SC_BAD_REQUEST,

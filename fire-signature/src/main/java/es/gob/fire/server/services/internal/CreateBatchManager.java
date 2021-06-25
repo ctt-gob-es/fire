@@ -58,6 +58,9 @@ public class CreateBatchManager {
 		final String upgrade	= params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
 		final String extraParamsB64	= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
+		//Comprobamos que la operacion se permite y que sea soportada por el sistema
+		ServiceUtil.checkMultiSignatureCompatibility(format, cop);
+
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId);
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables

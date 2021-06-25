@@ -290,7 +290,13 @@ public class HttpsConnection {
 
 		final int resCode = conn.getResponseCode();
 		final String statusCode = Integer.toString(resCode);
+
 		if (statusCode.startsWith("4") || statusCode.startsWith("5")) { //$NON-NLS-1$ //$NON-NLS-2$
+			if(String.valueOf(HttpCustomErrors.UNSUPPORTED_OPERATION.getErrorCode()).equals(statusCode)) {
+				throw new HttpError(HttpCustomErrors.UNSUPPORTED_OPERATION.getErrorCode(),
+						HttpCustomErrors.UNSUPPORTED_OPERATION.getErrorDescription() , uri.getHost());
+			}
+
 			throw new HttpError(resCode, conn.getResponseMessage() != null ?
 					conn.getResponseMessage() : "Error: StatusCode: " + statusCode, uri.getHost()); //$NON-NLS-1$
 		}
