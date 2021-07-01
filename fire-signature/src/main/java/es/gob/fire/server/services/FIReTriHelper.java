@@ -135,6 +135,10 @@ public final class FIReTriHelper {
         }
         else if (SignOperation.COSIGN.toString().equalsIgnoreCase(criptoOperation)) {
             try {
+            	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
+            	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
+            	ServiceUtil.checkMultiSignatureCompatibility(format, criptoOperation);
+
                 preRes = prep.preProcessPreCoSign(
             		docBytes,
             		algorithm,
@@ -143,6 +147,9 @@ public final class FIReTriHelper {
                     false
                 );
             }
+            catch (final UnsupportedOperationException uoe) {
+            	throw uoe;
+            }
             catch (final Throwable e) {
                 throw new FIReSignatureException(
                     "Error en la precofirma: " + e,  e //$NON-NLS-1$
@@ -150,6 +157,9 @@ public final class FIReTriHelper {
             }
         }
         else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(criptoOperation)) {
+        	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
+        	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
+        	ServiceUtil.checkMultiSignatureCompatibility(format, criptoOperation);
 
             CounterSignTarget target = CounterSignTarget.LEAFS;
             if (expandedParams != null && expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
@@ -168,6 +178,9 @@ public final class FIReTriHelper {
                     target,
                     false
                 );
+            }
+            catch (final UnsupportedOperationException uoe) {
+            	throw uoe;
             }
             catch (final Throwable e) {
                 throw new FIReSignatureException(
@@ -293,7 +306,12 @@ public final class FIReTriHelper {
         		}
         	}
         	else if (SignOperation.COSIGN.toString().equalsIgnoreCase(cop)) {
+
         		try {
+                	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
+                	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
+                	ServiceUtil.checkMultiSignatureCompatibility(frmt, cop);
+
         			preRes = prep.preProcessPreCoSign(
         					doc.getData(),
         					algorithm,
@@ -321,6 +339,10 @@ public final class FIReTriHelper {
         		}
 
         		try {
+                	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
+                	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
+                	ServiceUtil.checkMultiSignatureCompatibility(frmt, cop);
+
         			preRes = prep.preProcessPreCounterSign(
         					doc.getData(),
         					algorithm,

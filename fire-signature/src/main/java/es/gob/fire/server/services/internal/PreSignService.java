@@ -220,6 +220,13 @@ public final class PreSignService extends HttpServlet {
                     data
         		);
             }
+        	catch (final UnsupportedOperationException uoe) {
+                LOGGER.log(Level.SEVERE, logF.f("Operacion no soportada por el sistema"), uoe); //$NON-NLS-1$
+                ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_UNSUPPORTED_OPERATION,
+            			true, uoe.getMessage());
+                response.sendRedirect(redirectErrorUrl);
+                return;
+            }
             catch (final Exception e) {
                 LOGGER.log(Level.SEVERE, logF.f("No se ha podido obtener la prefirma"), e); //$NON-NLS-1$
                 ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_PRESIGN);
@@ -287,6 +294,13 @@ public final class PreSignService extends HttpServlet {
                     documents,
                     stopOnError
         		);
+            }
+        	catch (final UnsupportedOperationException uoe) {
+                LOGGER.log(Level.SEVERE, logF.f("Operacion no soportada por el sistema"), uoe); //$NON-NLS-1$
+                ErrorManager.setErrorToSession(session, OperationError.SIGN_SERVICE_UNSUPPORTED_OPERATION,
+            			true, uoe.getMessage());
+                response.sendRedirect(redirectErrorUrl);
+                return;
             }
             catch (final Throwable e) {
                 LOGGER.log(Level.SEVERE, logF.f("No se ha podido obtener la prefirma"), e); //$NON-NLS-1$

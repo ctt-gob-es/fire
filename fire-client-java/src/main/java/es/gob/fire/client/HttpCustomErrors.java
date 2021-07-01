@@ -71,10 +71,7 @@ public enum HttpCustomErrors {
 
 	/** Error devuelto cuando falla la obtenci&oacute;n de un documento a trav&eacute;s del FireDocumentManager
 	 * configurado. */
-	DOCUMENT_MANAGER_ERROR(540, "Error al obtener un documento a traves del gestor en el servidor"), //$NON-NLS-1$
-
-	/** Error devuelto cuando se intenta realizar una operaci&oacute;n no soportada por el sistema */
-	UNSUPPORTED_OPERATION(541, "Operacion no soportada para el formato seleccionado"); //$NON-NLS-1$
+	DOCUMENT_MANAGER_ERROR(540, "Error al obtener un documento a traves del gestor en el servidor"); //$NON-NLS-1$
 
 	private final int errorCode;
 	private final String errorDescription;

@@ -42,6 +42,7 @@ enum OperationError {
 	SIGN_SERVICE_PRESIGN(202, "Error al ejecutar la prefirma de los datos"), //$NON-NLS-1$
 	SIGN_SERVICE_POSTSIGN(203, "Error al ejecutar la postfirma de los datos"), //$NON-NLS-1$
 	SIGN_SERVICE_NETWORK(205, "Error al conectar con el servicio para la generacion de la firma con la clave remota"), //$NON-NLS-1$
+	SIGN_SERVICE_UNSUPPORTED_OPERATION(206, "Operacion no soportada para el formato seleccionado"), //$NON-NLS-1$
 
 	SIGN_LOCAL(250, "Error al generar la firma con certificado local"), //$NON-NLS-1$
 	SIGN_LOCAL_BATCH(251, "No se completo correctamente la firma del lote con certificado local"); //$NON-NLS-1$
@@ -50,7 +51,7 @@ enum OperationError {
 
 	private String message;
 
-	private OperationError(final int code, final String message) {
+	OperationError(final int code, final String message) {
 		this.code = code;
 		this.message = message;
 	}

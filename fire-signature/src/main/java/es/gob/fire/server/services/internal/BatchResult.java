@@ -31,7 +31,6 @@ import javax.json.JsonWriter;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.DocInfo;
-import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.upgrade.GracePeriodInfo;
 
 /**
@@ -137,11 +136,6 @@ public class BatchResult implements Serializable {
 	 */
 	public void addDocument(final String docId, final String dataReference, final SignBatchConfig config, final DocInfo docInfo) {
 		BatchDocumentReference docRef;
-
-		// Comprobamos que la operacion se permite y que sea soportada por el sistema
-        if(config != null ) {
-        	ServiceUtil.checkMultiSignatureCompatibility(config.getFormat(), config.getCryptoOperation());
-        }
 
 		if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null || docInfo.getSize() > 0)) {
 			docRef = new BatchDocumentReference(dataReference, config, docInfo);

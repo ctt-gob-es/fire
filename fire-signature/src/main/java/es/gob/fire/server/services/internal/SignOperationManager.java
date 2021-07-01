@@ -28,7 +28,6 @@ import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.HttpCustomErrors;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
@@ -67,9 +66,6 @@ public class SignOperationManager {
         final String extraParamsB64 = params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId);
-
-		//Comprobamos que la operacion se permite y que sea soportada por el sistema
-		ServiceUtil.checkMultiSignatureCompatibility(format, cop);
 
         if (subjectId == null || subjectId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que solicita la firma")); //$NON-NLS-1$
