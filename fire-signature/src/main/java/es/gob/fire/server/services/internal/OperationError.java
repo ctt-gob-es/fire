@@ -13,7 +13,7 @@ package es.gob.fire.server.services.internal;
  * Error de operacion identificado en servidor. Establece los codigos y mensajes de error
  * que se env&iacute;n a los clientes distribuidos como resultado de una operaci&oacute;n.
  */
-enum OperationError {
+public enum OperationError {
 
 	// Errores generales
 	UNKNOWN_USER(1, "El usuario no esta dado de alta en el sistema"), //$NON-NLS-1$

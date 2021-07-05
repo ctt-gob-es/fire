@@ -25,6 +25,7 @@ import es.gob.fire.server.services.internal.AddDocumentBatchManager;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.CreateBatchManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
+import es.gob.fire.server.services.internal.OperationError;
 import es.gob.fire.server.services.internal.RecoverBatchResultManager;
 import es.gob.fire.server.services.internal.RecoverBatchSignatureManager;
 import es.gob.fire.server.services.internal.RecoverBatchStateManager;
@@ -285,7 +286,7 @@ public class FIReService extends HttpServlet {
     	}
     	catch (final UnsupportedOperationException uoe) {
     		LOGGER.log(Level.WARNING, logF.f(uoe.getMessage()), uoe);
-    		response.sendError(HttpCustomErrors.UNSUPPORTED_OPERATION.getErrorCode(), uoe.getMessage());
+    		response.sendError(OperationError.SIGN_SERVICE_UNSUPPORTED_OPERATION.getCode(), uoe.getMessage());
     		return;
     	}
     	catch (final Exception e) {
