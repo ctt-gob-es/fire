@@ -264,7 +264,8 @@ public final class SignService extends HttpServlet {
                     config,
                     signerCert,
                     Base64.decode(dataB64, true),
-                    td
+                    td,
+                    logF
             );
         }
         catch (final FIReSignatureException e) {

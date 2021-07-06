@@ -217,7 +217,8 @@ public final class PreSignService extends HttpServlet {
                     algorithm,
                     extraParams,
         			signerCert,
-                    data
+                    data,
+                    logF
         		);
             }
         	catch (final UnsupportedOperationException uoe) {
@@ -292,7 +293,8 @@ public final class PreSignService extends HttpServlet {
                     extraParams,
         			signerCert,
                     documents,
-                    stopOnError
+                    stopOnError,
+                    logF
         		);
             }
         	catch (final UnsupportedOperationException uoe) {

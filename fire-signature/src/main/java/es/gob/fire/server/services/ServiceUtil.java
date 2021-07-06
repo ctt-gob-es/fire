@@ -240,8 +240,9 @@ public final class ServiceUtil {
 	 * Valida que la operaci&oacute;n de cofirma o contrafirma se permita y sea compatible con el formato.
 	 * @param format formato con el que cofirmar o contrafirmar
 	 * @param cop operacion a realizar
+	 * @throws UnsupportedOperationException Cuando se configur&oacute; una operaci&oacute;n no soportada.
 	 */
-	public static void checkMultiSignatureCompatibility(final String format, final String cop) {
+	public static void checkMultiSignatureCompatibility(final String format, final String cop) throws UnsupportedOperationException {
 		if(SignOperation.COSIGN.toString().equals(cop)
         		|| SignOperation.COUNTERSIGN.toString().equals(cop)) {
 	        if(SignatureFormat.FACTURAE.toString().equals(format)) {

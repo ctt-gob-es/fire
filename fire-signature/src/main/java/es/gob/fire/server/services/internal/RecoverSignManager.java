@@ -265,7 +265,7 @@ public class RecoverSignManager {
     		LOGGER.info(logF.f("Se completa el proceso de firma")); //$NON-NLS-1$
     		try {
     			partialResult = FIReTriHelper.getPostSign(cop, format, algorithm, extraParams,
-    					signingCert, partialResult, td);
+    					signingCert, partialResult, td, logF);
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error durante la postfirma"), e); //$NON-NLS-1$

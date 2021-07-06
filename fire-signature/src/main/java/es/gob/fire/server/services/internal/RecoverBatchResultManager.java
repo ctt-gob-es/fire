@@ -340,7 +340,7 @@ public class RecoverBatchResultManager {
         				secureProvider, signConfig.getCryptoOperation(), signConfig.getFormat());
         		// Configuramos el objeto para la composicion de las firmas
     			final PostSignBatchRecover signRecover = new CloudPostSignBatchRecover(
-    					docId, algorithm, signConfig, ret, td, batchResult);
+    					docId, algorithm, signConfig, ret, td, batchResult, logF);
     			// Ejecutamos un hilo encargado de componer las firmas y actualizarlas
     			final ConcurrentProcessThread t = new PostSignBatchThread(
     					appId, transactionId, docId, batchResult, signConfig,

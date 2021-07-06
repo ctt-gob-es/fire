@@ -25,6 +25,7 @@ import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.connector.test.TestConnector;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 
 /** Pruebas del servicio de pruebas.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -95,13 +96,16 @@ public final class TestTestService {
 		final Properties extraParams = new Properties();
 		extraParams.setProperty("mode", "implicit"); //$NON-NLS-1$ //$NON-NLS-2$
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter("Test"); //$NON-NLS-1$
+
 		final TriphaseData td = FIReTriHelper.getPreSign(
 			SignOperation.SIGN.toString(),
 			"XAdES", //$NON-NLS-1$
 			"SHA1withRSA", //$NON-NLS-1$
 			extraParams,
 			cert,
-			"Hola mundo!".getBytes() //$NON-NLS-1$
+			"Hola mundo!".getBytes(), //$NON-NLS-1$
+			logF
 		);
 
 		System.out.println();
@@ -147,7 +151,8 @@ public final class TestTestService {
 				extraParams,
 				cert,
 				"Hola mundo!".getBytes(), //$NON-NLS-1$
-				td
+				td,
+				logF
 			);
 
 		// El resultado obtenido es la firma completa

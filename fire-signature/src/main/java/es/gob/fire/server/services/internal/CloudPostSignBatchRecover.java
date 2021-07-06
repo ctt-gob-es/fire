@@ -20,16 +20,19 @@ public class CloudPostSignBatchRecover implements PostSignBatchRecover {
 	private final Map<String, byte[]> pkcs1s;
 	private final TriphaseData partialTd;
 	private final BatchResult batchResult;
+	private final LogTransactionFormatter logF;
 
 	public CloudPostSignBatchRecover(final String docId, final String algorithm,
 			final SignBatchConfig signConfig, final Map<String, byte[]> pkcs1s,
-			final TriphaseData partialTd, final BatchResult batchResult) {
+			final TriphaseData partialTd, final BatchResult batchResult,
+			final LogTransactionFormatter logF) {
 		this.docId = docId;
 		this.algorithm = algorithm;
 		this.signConfig = signConfig;
 		this.pkcs1s = pkcs1s;
 		this.partialTd = partialTd;
 		this.batchResult = batchResult;
+		this.logF = logF;
 	}
 
 	@Override
@@ -71,7 +74,8 @@ public class CloudPostSignBatchRecover implements PostSignBatchRecover {
     				this.signConfig.getExtraParams(),
     				this.batchResult.getSigningCertificate(),
     				data,
-    				currentTd);
+    				currentTd,
+    				this.logF);
     	}
     	catch (final FIReSignatureException e) {
     		throw new BatchRecoverException(String.format(

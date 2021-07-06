@@ -88,17 +88,23 @@ public final class FIReTriHelper {
      * @param extraParams Configuraci&oacute;n de firma.
      * @param signerCert Certificado con el que se debe firmar.
      * @param docBytes Datos que se firman/multifirman.
+     * @param logF Objeto para el formateo del log.
      * @return Informaci&oacute;n de prefirma generada.
      * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
      * @throws IOException Cuando ocurre un error al componer la estructura con la
      * informaci&oacute;n de la prefirma.
+     * @throws UnsupportedOperationException Cuando se configura una operaci&oacute;n no soportada.
      */
     public static TriphaseData getPreSign(final String criptoOperation,
                                          final String format,
                                          final String algorithm,
                                          final Properties extraParams,
                                          final X509Certificate signerCert,
-                                         final byte[] docBytes) throws FIReSignatureException, IOException {
+                                         final byte[] docBytes,
+                                         final LogTransactionFormatter logF)
+                                        		 throws FIReSignatureException,
+                                        		 	IOException,
+                                        		 	UnsupportedOperationException {
 
         // Instanciamos el preprocesador adecuado
         final TriPhasePreProcessor prep = getTriPhasePreProcessor(format);
@@ -112,7 +118,7 @@ public final class FIReTriHelper {
         	try {
         		expandedParams = ExtraParamsProcessor.expandProperties(expandedParams, docBytes, format);
         	} catch (final Exception e) {
-        		LOGGER.warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$
+        		LOGGER.warning(logF.f("No se ha podido expandir la politica de firma: ") + e); //$NON-NLS-1$
         	}
         }
 
@@ -134,11 +140,11 @@ public final class FIReTriHelper {
             }
         }
         else if (SignOperation.COSIGN.toString().equalsIgnoreCase(criptoOperation)) {
-            try {
-            	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
-            	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-            	ServiceUtil.checkMultiSignatureCompatibility(format, criptoOperation);
+        	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
+        	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
+        	ServiceUtil.checkMultiSignatureCompatibility(format, criptoOperation);
 
+            try {
                 preRes = prep.preProcessPreCoSign(
             		docBytes,
             		algorithm,
@@ -146,9 +152,6 @@ public final class FIReTriHelper {
                     expandedParams,
                     false
                 );
-            }
-            catch (final UnsupportedOperationException uoe) {
-            	throw uoe;
             }
             catch (final Throwable e) {
                 throw new FIReSignatureException(
@@ -207,8 +210,7 @@ public final class FIReTriHelper {
     }
 
     /**
-     * Ejecuta una operaci&oacute;n de prefirma dentro de un proceso de firma
-     * trif&aacute;sica.
+     * Ejecuta la prefirma de los documentos de un lote.
      * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign") por defecto.
      * @param format Formato de firma por defecto.
      * @param algorithm Algoritmo de firma por defecto.
@@ -217,10 +219,12 @@ public final class FIReTriHelper {
      * @param documents Datos que se firman/multifirman.
      * @param stopOnError Indica que se debe dejar de procesar las peticiones de firma en
      * 					  el momento de encontrar un error.
+     * @param logF Objeto para el formateo del log.
      * @return Informaci&oacute;n de prefirma generada.
      * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
      * @throws IOException Cuando ocurre un error al componer la estructura con la
      * informaci&oacute;n de la prefirma.
+     * @throws UnsupportedOperationException Cuando se configura una operaci&oacute;n no soportada.
      */
     public static TriphaseData getPreSign(final String criptoOperation,
                                          final String format,
@@ -228,7 +232,11 @@ public final class FIReTriHelper {
                                          final Properties extraParams,
                                          final X509Certificate signerCert,
                                          final List<BatchDocument> documents,
-                                         final boolean stopOnError) throws FIReSignatureException, IOException {
+                                         final boolean stopOnError,
+                                         final LogTransactionFormatter logF)
+                                        		 throws FIReSignatureException,
+                                        		 	IOException,
+                                        		 	UnsupportedOperationException {
 
         final TriphaseData batchTriPhaseData = new TriphaseData();
 
@@ -258,6 +266,7 @@ public final class FIReTriHelper {
             	prep = getTriPhasePreProcessor(frmt);
             }
             catch (final FIReSignatureException e) {
+            	LOGGER.warning(logF.f("Formato no soportado: ") + frmt); //$NON-NLS-1$
     			if (stopOnError) {
     				stopOperation = true;
 				}
@@ -272,7 +281,7 @@ public final class FIReTriHelper {
         		try {
         			expandedParams = ExtraParamsProcessor.expandProperties((Properties) params.clone(), doc.getData(), frmt);
         		} catch (final Exception e) {
-        			LOGGER.warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$
+        			LOGGER.warning(logF.f("No se ha podido expandir la politica de firma: ") + e); //$NON-NLS-1$
         			expandedParams = new Properties();
         		}
         	}
@@ -298,6 +307,7 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Exception e) {
+        			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
             		if (stopOnError) {
             			stopOperation = true;
 					}
@@ -321,6 +331,7 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Exception e) {
+        			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
 					}
@@ -353,6 +364,7 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Exception e) {
+        			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
 					}
@@ -367,6 +379,7 @@ public final class FIReTriHelper {
         		preRes = FIReTriSignIdProcessor.make(preRes);
         	}
         	else {
+        		LOGGER.warning(logF.f("Operacion no soportada")); //$NON-NLS-1$
         		if (stopOnError) {
         			stopOperation = true;
         		}
@@ -431,6 +444,7 @@ public final class FIReTriHelper {
      * @param docBytes Datos que se firman/multifirman.
      * @param triphaseData Conjunto de datos de la firma trif&aacute;sico obtenido de la
      * ejecuci&oacute;n de la prefirma y a&ntilde;adido de la firma.
+     * @param logF Objeto para el formateo del log.
      * @return Firma electr&oacute;nica resultante.
      * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
      */
@@ -440,7 +454,8 @@ public final class FIReTriHelper {
                                     final Properties extraParams,
                                     final X509Certificate signerCert,
                                     final byte[] docBytes,
-                                    final TriphaseData triphaseData) throws FIReSignatureException {
+                                    final TriphaseData triphaseData,
+                                    final LogTransactionFormatter logF) throws FIReSignatureException {
 
         // Instanciamos el preprocesador adecuado
         final TriPhasePreProcessor prep = getTriPhasePreProcessor(format);
@@ -450,7 +465,7 @@ public final class FIReTriHelper {
         	try {
         		expandedParams = ExtraParamsProcessor.expandProperties(expandedParams, docBytes, format);
         	} catch (final Exception e) {
-        		LOGGER.warning("No se ha podido expandir la politica de firma: " + e); //$NON-NLS-1$
+        		LOGGER.warning(logF.f("No se ha podido expandir la politica de firma: ") + e); //$NON-NLS-1$
         	}
         }
 
@@ -529,7 +544,7 @@ public final class FIReTriHelper {
      * @throws FIReSignatureException Cuando el formato indicado no est&aacute;
      * soportado.
      */
-    private static TriPhasePreProcessor getTriPhasePreProcessor(final String format) throws FIReSignatureException {
+    public static TriPhasePreProcessor getTriPhasePreProcessor(final String format) throws FIReSignatureException {
     	final TriPhasePreProcessor prep;
     	if (AOSignConstants.SIGN_FORMAT_PADES.equalsIgnoreCase(format)
     			|| AOSignConstants.SIGN_FORMAT_PADES_TRI.equalsIgnoreCase(format)) {

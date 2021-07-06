@@ -239,7 +239,8 @@ public final class LoadService extends HttpServlet {
                 algorithm,
                 extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null,
     			signerCert,
-                Base64.decode(dataB64, true)
+                Base64.decode(dataB64, true),
+                logF
     		);
         }
         catch (final Exception e) {
