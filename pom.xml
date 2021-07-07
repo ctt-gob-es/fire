@@ -67,24 +67,18 @@
 		<profile>
 			<id>main</id>	 <!-- Este perfil contiene los modulos basicos que usa FIRe -->
 			<activation>
-				<property>
-					<name>!false</name> <!-- Se activa siempre que no se indique esta propiedad -->
-				</property>
-			</activation>
+				<activeByDefault>true</activeByDefault> <!-- Se activa cuando no se indica un perfil concreto -->
+      		</activation>
 
 			<modules>
-				<module>clavefirma-test-services</module>
 				<module>fire-admin-commons-util</module>
 				<module>fire-admin-core</module>
 				<module>fire-admin-i18n</module>
-				<module>fire-admin-jsp</module>
 				<module>fire-admin-persistence</module>
-				<module>fire-admin-web</module>
 				<module>fire-alarms</module>
 				<module>fire-alarms-graylog</module>
 				<module>fire-client-java</module>
 				<module>fire-log-handlers</module>
-				<module>fire-signature</module>
 				<module>fire-signature-common-libraries</module>
 				<module>fire-signature-connector</module>
 				<module>fire-signature-connector-clavefirma-test</module>
@@ -92,18 +86,29 @@
 				<module>fire-signature-document</module>
 				<module>fire-statistics-cmd</module>
 				<module>fire-statistics-common</module>
-				<module>fire-test-jsp</module>
 				<module>fire-upgrade</module>
 				<module>fire-upgrade-afirma</module>
 				<module>log-consumer-api</module>
 				<module>log-consumer-register</module>
+			</modules>
+		</profile>
+
+		<profile>
+			<id>services</id>	 <!-- Este perfil contiene los servicios de FIRe -->
+	
+			<modules>
+				<module>fire-admin-web</module>
+				<module>clavefirma-test-services</module>
+				<module>fire-admin-jsp</module>
+				<module>fire-signature</module>
+				<module>fire-test-jsp</module>
 				<module>log-consumer-service</module>
 			</modules>
 		</profile>
-		
+
 		<profile>
 			<id>clavefirma</id>	<!-- Perfil que agrega el conector de Cl@ve Firma -->
-
+			
 			<modules>
 				<module>fire-signature-connector-clavefirma</module>
 			</modules>
