@@ -55,6 +55,7 @@ public class TestConnector extends FIReConnector {
 	private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
 	private static final String DEFAULT_TEST_URL_BASE = "https://127.0.0.1:8443/clavefirma-test-services/"; //$NON-NLS-1$
+	private static final String DEFAULT_TEST_SERVICE_URL_BASE = "https://servidorcentral:8443/fire-signature/public/"; //$NON-NLS-1$
 
 	private static final String PROP_TEST_ENDPOINT = "endpoint"; //$NON-NLS-1$
 	private static final String PROP_TEST_SSL_KS = "ssl.keystore"; //$NON-NLS-1$
@@ -67,6 +68,8 @@ public class TestConnector extends FIReConnector {
     /** Identificador del par&aacute;metro con el que indicar si el proveedor debe permitir
      * generar un nuevo certificado a sus usuarios cuando no tengan uno v&aacute;lido. */
     private static final String PROP_ALLOW_REQUEST_NEW_CERT = "allowRequestNewCert"; //$NON-NLS-1$
+
+    private static final String PROVIDER_CLAVEFIRMATEST2 = "clavefirmatest2"; //$NON-NLS-1$
 
 	private static final int HTTP_ERROR_NO_CERT = 522;
 	private static final int HTTP_ERROR_UNKNOWN_USER = 523;
@@ -278,10 +281,8 @@ public class TestConnector extends FIReConnector {
 		try {
 			response = ConnectionManager.readUrlByPost(urlBase, urlParameters.toString());
 		} catch (final IOException e) {
-			if (e instanceof HttpError) {
-				if (((HttpError) e).getResponseCode() == HTTP_ERROR_UNKNOWN_USER) {
-					throw new FIReConnectorUnknownUserException("El usuario no esta dado de alta en el sistema", e); //$NON-NLS-1$
-				}
+			if (e instanceof HttpError && ((HttpError) e).getResponseCode() == HTTP_ERROR_UNKNOWN_USER) {
+				throw new FIReConnectorUnknownUserException("El usuario no esta dado de alta en el sistema", e); //$NON-NLS-1$
 			}
 			throw new FIReConnectorNetworkException("Error en la llamada al servicio de prueba de carga de datos", e); //$NON-NLS-1$
 		}
@@ -413,5 +414,22 @@ public class TestConnector extends FIReConnector {
 	@Override
 	public boolean allowRequestNewCerts() {
 		return this.allowedNewCerts;
+	}
+
+	@Override
+	public String userAutentication(final String transactionId, final String subjectId, final String subjectRef,
+									final String okRedirectUrl, final String errorRedirectUrl, final String origin,
+									final boolean originForced) {
+		final StringBuilder url = new StringBuilder();
+		final String completeOkRedirectUrl = DEFAULT_TEST_SERVICE_URL_BASE + okRedirectUrl;
+		url.append(this.testUrlBase).append("test_pages/TestUserCertAuth.jsp?subjectid=").append(subjectId) //$NON-NLS-1$
+		.append("&redirectko=").append(Base64.encode(errorRedirectUrl.getBytes(), true)) //$NON-NLS-1$
+		.append("&redirectok=").append(Base64.encode(completeOkRedirectUrl.getBytes(), true)) //$NON-NLS-1$
+		.append("&id=").append(subjectId) //$NON-NLS-1$
+		.append("&subjectref=").append(subjectRef) //$NON-NLS-1$
+		.append("&origin=").append(origin) //$NON-NLS-1$
+		.append("&originforced=").append(String.valueOf(originForced)) //$NON-NLS-1$
+		.append("&transactionid=").append(transactionId);//$NON-NLS-1$ //;
+		return url.toString();
 	}
 }

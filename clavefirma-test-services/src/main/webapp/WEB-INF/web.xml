@@ -40,6 +40,12 @@
   	<servlet-name>TestServiceAuthServlet</servlet-name>
   	<servlet-class>es.gob.clavefirma.test.services.TestServiceAuthServlet</servlet-class>
   </servlet>
+    <servlet>
+  	<description>Servicio simulado de autenticacion para obtener certificados de la nube</description>
+  	<display-name>TestServiceUserCertAuthServlet</display-name>
+  	<servlet-name>TestServiceUserCertAuthServlet</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestServiceUserCertAuthServlet</servlet-class>
+  </servlet>
   <servlet>
   	<description>Servicio simulado de autorizaciones Clave</description>
   	<display-name>TestServiceGenCertServlet</display-name>
@@ -73,6 +79,10 @@
   <servlet-mapping>
   	<servlet-name>TestServiceAuthServlet</servlet-name>
   	<url-pattern>/TestServiceAuthServlet</url-pattern>
+  </servlet-mapping>
+    <servlet-mapping>
+  	<servlet-name>TestServiceUserCertAuthServlet</servlet-name>
+  	<url-pattern>/TestServiceUserCertAuthServlet</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>TestServiceGenCertServlet</servlet-name>
