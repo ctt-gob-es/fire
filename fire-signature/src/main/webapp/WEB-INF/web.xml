@@ -40,9 +40,9 @@
   </servlet>
     <servlet>
   	<description>Servicio interno para la autenticacion para la obtencion de certificados de la nube</description>
-  	<display-name>authCertificateOriginService</display-name>
-  	<servlet-name>authCertificateOriginService</servlet-name>
-  	<servlet-class>es.gob.fire.server.services.internal.AuthCertificateOriginService</servlet-class>
+  	<display-name>authenticationService</display-name>
+  	<servlet-name>authenticationService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.AuthenticationService</servlet-class>
   </servlet>
   <servlet>
   	<description>Servicio interno para la seleccion del origen del certificado de firma (nube o local)</description>
@@ -146,8 +146,8 @@
   	<url-pattern>/recoverCertificate</url-pattern>
   </servlet-mapping>
     <servlet-mapping>
-  	<servlet-name>authCertificateOriginService</servlet-name>
-  	<url-pattern>/public/authCertificateOriginService</url-pattern>
+  	<servlet-name>authenticationService</servlet-name>
+  	<url-pattern>/public/authenticationService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>chooseCertificateOriginService</servlet-name>

@@ -9,7 +9,6 @@
  */
 package es.gob.clavefirma.test.services;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Properties;
@@ -39,19 +38,6 @@ public final class TestServiceUserCertAuthServlet extends HttpServlet {
 		if (redirectKo == null || "".equals(redirectKo.trim())) { //$NON-NLS-1$
 			LOGGER.warning("No se ha obtenido la pagina de error a la que redirigir"); //$NON-NLS-1$
 			response.sendRedirect(ERROR_PAGE);
-			return;
-		}
-
-		final String transaction = request.getParameter("transactionid"); //$NON-NLS-1$
-		if (transaction == null || "".equals(transaction.trim())) { //$NON-NLS-1$
-			LOGGER.warning("No se ha proporcionado id de transaccion"); //$NON-NLS-1$
-			response.sendRedirect(redirectKo);
-			return;
-		}
-		final File transactionFile = TestHelper.getCanonicalFile(TestHelper.getDataFolder(), transaction.trim());
-		if (!transactionFile.exists() || !transactionFile.canRead()) {
-			LOGGER.warning("La transaccion '" + transaction + "' no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendRedirect(redirectKo);
 			return;
 		}
 
@@ -99,30 +85,28 @@ public final class TestServiceUserCertAuthServlet extends HttpServlet {
 		}
 
 		if (!password.equals(subjectProps.getProperty("password"))) { //$NON-NLS-1$
-			LOGGER.warning("La contrasena introducida no es valida para la transaccion " + transaction); //$NON-NLS-1$
+			LOGGER.warning("La contrasena introducida no es valida"); //$NON-NLS-1$
 			response.sendRedirect(redirectKo);
 			return;
 		}
 
 		final String subjectRef = request.getParameter(TestServiceParams.HTTP_PARAM_SUBJECT_REF);
-		final String origin = request.getParameter(TestServiceParams.HTTP_PARAM_CERT_ORIGIN);
-		final String originForced = request.getParameter(TestServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED);
 
-		final String redirectOkWithParams = completeRedirectOkUrl(redirectOk, transaction, subjectRef,
-																	origin, originForced, redirectKo);
+		final String redirectOkWithParams = completeRedirectOkUrl(redirectOk, redirectKo);
 
 		response.sendRedirect(redirectOkWithParams);
 	}
 
-	private static String completeRedirectOkUrl(final String redirectOkUrl, final String transactionId, final String subjectRef,
-			final String origin, final String originForced, final String errorUrl) {
+	/**
+	 * M&eacute;todo para completar la URL de redirecci&oacute;n en caso de &eacute;xito.
+	 * @param redirectOkUrl URL a completar.
+	 * @param errorUrl URL a unir para casos de error.
+	 * @return URL de redirecci&oacute;n en caso de &eacute;xito completa.
+	 */
+	private static String completeRedirectOkUrl(final String redirectOkUrl,
+			 final String errorUrl) {
 		final StringBuilder res = new StringBuilder(redirectOkUrl);
-		res.append("?transactionid=").append(transactionId) //$NON-NLS-1$
-		.append("&subjectref=").append(subjectRef) //$NON-NLS-1$
-		.append("&certorigin=").append(origin) //$NON-NLS-1$
-		.append("&originforced=").append(originForced) //$NON-NLS-1$
-		.append("&errorurl=").append(errorUrl); //$NON-NLS-1$
-
+		res.append("&errorurl=").append(errorUrl); //$NON-NLS-1$
 		return res.toString();
 	}
 

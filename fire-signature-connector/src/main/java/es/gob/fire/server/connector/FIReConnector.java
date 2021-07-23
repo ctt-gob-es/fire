@@ -119,16 +119,14 @@ public abstract class FIReConnector {
 
 	/**
 	 * Mecanismo de autenticaci&oacute;n para la obtenci&oacute;n de certificados de la nube.
-	 * @param transactionId Id de transacci&oacute;n.
+	 * Este metodo se sobrecargar&aacute; en los conectores que lo utilicen
 	 * @param subjectId Id de usuario.
-	 * @param subjectRef Referencia de usuario.
 	 * @param okRedirectUrl URL para operaciones correctas.
 	 * @param errorRedirectUrl URL para operaciones err&oacute;neas.
-	 * @param origin Proveedor de firma.
-	 * @param originForced Indica si el proveedor viene ya indicado.
 	 * @return URL que permite al usuario autenticarse.
 	 */
-	public abstract String userAutentication(String transactionId, String subjectId, String subjectRef,
-											String okRedirectUrl, String errorRedirectUrl,
-											String origin, boolean originForced);
+	public String userAutentication(final String subjectId, final String okRedirectUrl,
+									final String errorRedirectUrl) {
+		return null;
+	}
 }

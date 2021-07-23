@@ -137,8 +137,8 @@
 			
 			String serviceToRedirect = ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN;
 			
-			if(ProviderInfo.isUserRequiredAutentication()){
-				serviceToRedirect = ServiceNames.PUBLIC_SERVICE_AUTH_CERT_ORIGIN;
+			if(info.isUserRequiredAutentication()){
+				serviceToRedirect = ServiceNames.PUBLIC_SERVICE_AUTH_USER;
 			}
 		%>
 			<div name="provider-option" class="main-box-left <%= info.isNeedJavaScript() ? "need-javascript" : "" %> <%= enabled ? "" : "disabled" %>" id="option<%= info.getName() %>">

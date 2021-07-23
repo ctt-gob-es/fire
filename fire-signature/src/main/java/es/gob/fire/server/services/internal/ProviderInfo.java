@@ -42,9 +42,9 @@ public class ProviderInfo {
 
 	private static final String DEFAULT_REQUIRED_USER_AUTENTICATION = Boolean.FALSE.toString();
 
-	private static final String PROP_DEFAULT_CERT_SELECTED = "defaultcertselected"; //$NON-NLS-1$
+	private static final String PROP_CERT_SELECTION_IN_PROVIDER = "certselectioninprovider"; //$NON-NLS-1$
 
-	private static final String DEFAULT_CERT_SELECTED_VALUE = Boolean.FALSE.toString();
+	private static final String DEFAULT_CERT_SELECTION_IN_PROVIDER_VALUE = Boolean.FALSE.toString();
 
 	private static final String DATA_URI_SCHEME = "data:"; //$NON-NLS-1$
 	private static final String HTTP_URI_SCHEME = "http:"; //$NON-NLS-1$
@@ -55,7 +55,7 @@ public class ProviderInfo {
 	private static final Logger LOGGER = Logger.getLogger(ProviderInfo.class.getName());
 
 	private final String name;
-	private static Properties config = new Properties();
+	private Properties config = new Properties();
 
 	/**
 	 * Obtiene la informaci&oacute;n de un proveedor a partir de la configuraci&oacute;n
@@ -68,7 +68,7 @@ public class ProviderInfo {
 			throw new NullPointerException("La configuracion del proveedor no puede ser nula"); //$NON-NLS-1$
 		}
 		this.name = name;
-		ProviderInfo.config = (Properties) config.clone();
+		this.config = (Properties) config.clone();
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class ProviderInfo {
 	 * @return T&iacute;tulo del proveedor.
 	 */
 	public String getTitle() {
-		return ProviderInfo.config.getProperty(PROP_TITLE, DEFAULT_TITLE);
+		return this.config.getProperty(PROP_TITLE, DEFAULT_TITLE);
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class ProviderInfo {
 	 * @return Cabecera del proveedor.
 	 */
 	public String getHeader() {
-		return ProviderInfo.config.getProperty(PROP_HEADER, DEFAULT_HEADER);
+		return this.config.getProperty(PROP_HEADER, DEFAULT_HEADER);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public class ProviderInfo {
 	 * @return Descripci&oacute;n del proveedor.
 	 */
 	public String getDescription() {
-		return ProviderInfo.config.getProperty(PROP_DESCRIPTION, DEFAULT_DESCRIPTION);
+		return this.config.getProperty(PROP_DESCRIPTION, DEFAULT_DESCRIPTION);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class ProviderInfo {
 	 * @return Mensaje de error.
 	 */
 	public String getNoRegisteredMessage() {
-		return ProviderInfo.config.getProperty(PROP_NO_REGISTERED, DEFAULT_NO_REGISTERED);
+		return this.config.getProperty(PROP_NO_REGISTERED, DEFAULT_NO_REGISTERED);
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class ProviderInfo {
 	public String getLogoUri() {
 
 		// Si es una URI compatible, la usamos directamente
-		String uri = ProviderInfo.config.getProperty(PROP_LOGO_PATH, DEFAULT_LOGO_URI);
+		String uri = this.config.getProperty(PROP_LOGO_PATH, DEFAULT_LOGO_URI);
 		if (uri.isEmpty() ||
 				uri.startsWith(DATA_URI_SCHEME) ||
 				uri.startsWith(HTTP_URI_SCHEME) ||
@@ -153,7 +153,7 @@ public class ProviderInfo {
 	 */
 	public boolean isNeedJavaScript() {
 		return Boolean.parseBoolean(
-				ProviderInfo.config.getProperty(PROP_NEED_JAVASCRIPT,
+				this.config.getProperty(PROP_NEED_JAVASCRIPT,
 						DEFAULT_NEED_JAVASCRIPT));
 	}
 
@@ -163,21 +163,21 @@ public class ProviderInfo {
 	 * @return {@code true} si el proveedor requiere autenticaci&oacute;n, {@code false}
 	 * en caso contrario.
 	 */
-	public static boolean isUserRequiredAutentication() {
+	public boolean isUserRequiredAutentication() {
 		return Boolean.parseBoolean(
-				config.getProperty(PROP_REQUIRED_USER_AUTENTICATION,
+				this.config.getProperty(PROP_REQUIRED_USER_AUTENTICATION,
 						DEFAULT_REQUIRED_USER_AUTENTICATION));
 	}
 
 	/**
-	 * Indica si el proveedor tiene un certificado seleccionado por defecto.
-	 * @return {@code true} tiene configurado un certificado por defecto. {@code false}
+	 * Indica si la propiedad certselectioninprovider est&aacute; activa o no.
+	 * @return {@code true} est&iacute; activa. {@code false}
 	 * en caso contrario.
 	 */
-	public static boolean isDefaultCertSelected() {
+	public boolean isCertSelectionInProvider() {
 		return Boolean.parseBoolean(
-				config.getProperty(PROP_DEFAULT_CERT_SELECTED,
-						DEFAULT_CERT_SELECTED_VALUE));
+				this.config.getProperty(PROP_CERT_SELECTION_IN_PROVIDER,
+						DEFAULT_CERT_SELECTION_IN_PROVIDER_VALUE));
 	}
 
 	/**

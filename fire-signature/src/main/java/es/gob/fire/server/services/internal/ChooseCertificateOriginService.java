@@ -173,9 +173,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null ?
 				connConfig.isAppSkipCertSelection().booleanValue() : ConfigManager.isSkipCertSelection();
 
-		final boolean defaultCertSelected = ProviderInfo.isDefaultCertSelected();
+		// Creamos una nueva instancia del proveedor para obtener su informacion
+		final ProviderInfo providerInfo = ProviderManager.getProviderInfo(ProviderManager.PROVIDER_NAME_LOCAL);
 
-		if (skipSelection || defaultCertSelected) {
+		final boolean certSelectionInProvider = providerInfo.isCertSelectionInProvider();
+
+		if (skipSelection || certSelectionInProvider) {
 			final Properties props = (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
 			props.put(MiniAppletHelper.AFIRMA_EXTRAPARAM_HEADLESS, "true");  //$NON-NLS-1$
 			session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, props);
@@ -224,7 +227,6 @@ public class ChooseCertificateOriginService extends HttpServlet {
 					connConfig.getProperties()
 			);
 	        LOGGER.info(logF.f("Se ha cargado el conector " + connector.getClass().getName())); //$NON-NLS-1$
-	        ProviderManager.getProviderInfo(providerName);
 			certificates = connector.getCertificates(subjectId);
 			if (certificates == null || certificates.length == 0) {
 				if (connector.allowRequestNewCerts()) {
@@ -296,9 +298,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null ?
 				connConfig.isAppSkipCertSelection().booleanValue() : ConfigManager.isSkipCertSelection();
 
-		final boolean defaultCertSelected = ProviderInfo.isDefaultCertSelected();
+		// Creamos una nueva instancia del proveedor para obtener su informacion
+		final ProviderInfo providerInfo = ProviderManager.getProviderInfo(providerName);
 
-		if (certificates.length == 1 && (skipSelection || defaultCertSelected)) {
+		final boolean certSelectionInProvider = providerInfo.isCertSelectionInProvider();
+
+		if (certificates.length == 1 && (skipSelection || certSelectionInProvider)) {
 			try {
 				request.setAttribute(ServiceParams.HTTP_ATTR_CERT, Base64.encode(certificates[0].getEncoded(), true));
 				request.getRequestDispatcher(ServiceNames.PUBLIC_SERVICE_PRESIGN).forward(request, response);

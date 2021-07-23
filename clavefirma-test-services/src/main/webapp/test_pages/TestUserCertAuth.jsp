@@ -66,10 +66,6 @@
 	  <br>
 
 	  <input type="hidden" name="subjectid" value="<%= request.getParameter("subjectid") %>">
-	  <input type="hidden" name="transactionid" value="<%= request.getParameter("transactionid") %>">
-	  <input type="hidden" name="subjectref" value="<%= request.getParameter("subjectref") %>">
-	  <input type="hidden" name="certorigin" value="<%= request.getParameter("origin") %>">
-	  <input type="hidden" name="originforced" value="<%= request.getParameter("originforced") %>">
 	  <input type="hidden" name="redirectok" value="<%= URLDecoder.decode(new String(Base64.decode(request.getParameter("redirectok"), true))) %>">
 	  <input type="hidden" name="redirectko" value="<%= URLDecoder.decode(new String(Base64.decode(request.getParameter("redirectko"), true))) %>">
 

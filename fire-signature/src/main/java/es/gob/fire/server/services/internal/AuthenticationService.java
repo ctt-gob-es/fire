@@ -24,12 +24,12 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
  * Servlet que redirige a la autenticacion de usuarios para la obtenci&oacute;n
  * de certificados en la nube
  */
-public class AuthCertificateOriginService extends HttpServlet {
+public class AuthenticationService extends HttpServlet {
 
 	/** Serial ID. */
 	private static final long serialVersionUID = -1459483346687635386L;
 
-	private static final Logger LOGGER = Logger.getLogger(AuthCertificateOriginService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(AuthenticationService.class.getName());
 
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
@@ -91,9 +91,9 @@ public class AuthCertificateOriginService extends HttpServlet {
 		final String appId = session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 		logF.setAppId(appId);
 
-		// Comprobamos que se haya indicado el origen del certificado
+		// Comprobamos que se haya indicado el proveedor
 		if (origin == null || origin.isEmpty()) {
-			LOGGER.warning(logF.f("No se ha proporcionado el origen del certificado")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se ha proporcionado el proveedor")); //$NON-NLS-1$
 			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
@@ -117,11 +117,19 @@ public class AuthCertificateOriginService extends HttpServlet {
 
 		String authUrl = ""; //$NON-NLS-1$
 
-		if(connector != null) {
-    	authUrl = connector.userAutentication(transactionId, subjectId, subjectRef,
-    			ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN, connConfig.getRedirectErrorUrl(), origin,
-    			originForced);
-		}else {
+		if (connector != null) {
+
+			final String baseUrl = request.getRequestURL().substring(0, request.getRequestURL().lastIndexOf("/")) + "/"; //$NON-NLS-1$ //$NON-NLS-2$
+			final StringBuilder okRedirectUrl = new StringBuilder(baseUrl);
+			okRedirectUrl.append(ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN)
+			.append("?transactionid=" + transactionId) //$NON-NLS-1$
+			.append("&certorigin=" + origin) //$NON-NLS-1$
+			.append("&originforced=" + String.valueOf(originForced)) //$NON-NLS-1$
+			.append("&subjectref=" + subjectRef); //$NON-NLS-1$
+
+			authUrl = connector.userAutentication(subjectId,
+    			okRedirectUrl.toString(), connConfig.getRedirectErrorUrl());
+		} else {
 			LOGGER.warning(logF.f("El conector no puede ser nulo")); //$NON-NLS-1$
 			response.sendRedirect(redirectErrorUrl);
 		}
