@@ -108,6 +108,17 @@
 		
 	</dependencies>
 
+	<dependencyManagement>
+		<dependencies>
+			<!-- Forzamos la version de esta dependencia a una que se puede obtener de los repositorios maven -->
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<build>
 		<plugins>
 			<!-- Plugin para generar el jar referente a la parte de persistencia en 
