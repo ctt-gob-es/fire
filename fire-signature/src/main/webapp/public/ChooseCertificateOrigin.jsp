@@ -135,11 +135,9 @@
 				enabled = userRegistered && !info.isNeedJavaScript();
 			}
 			
-			String serviceToRedirect = ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN;
-			
-			if(info.isUserRequiredAutentication()){
-				serviceToRedirect = ServiceNames.PUBLIC_SERVICE_AUTH_USER;
-			}
+			String serviceToRedirect = info.isUserRequiredAutentication() ?
+					ServiceNames.PUBLIC_SERVICE_AUTH_USER :
+					ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN;
 		%>
 			<div name="provider-option" class="main-box-left <%= info.isNeedJavaScript() ? "need-javascript" : "" %> <%= enabled ? "" : "disabled" %>" id="option<%= info.getName() %>">
 					<div class="contain-box-top">

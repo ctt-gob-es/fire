@@ -28,7 +28,6 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.HttpCustomErrors;
-import es.gob.fire.signature.ConfigManager;
 
 /**
  * Servlet para la solicitud de expedici&oacute;n de un nuevo certificado.
@@ -107,7 +106,7 @@ public final class RequestNewCertificateService extends HttpServlet {
     	// Creamos una configuracion igual a la de firma para la generacion de certificado
     	// y establecemos que la URL de redireccion en caso de exito sea la de recuperacion
     	// del certificado generado
-    	final String redirectUrlBase = getPublicContext(request.getRequestURL().toString());
+    	final String redirectUrlBase = PublicContext.getPublicContext(request);
 
         final TransactionConfig requestCertConfig = (TransactionConfig) connConfig.clone();
         requestCertConfig.setRedirectSuccessUrl(
@@ -168,7 +167,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         final String redirectUrl = gcr.getRedirectUrl();
 
         session.setAttribute(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID, generateTransactionId);
-        session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED, Boolean.TRUE);
+        session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_SIGN, Boolean.TRUE);
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_GEN);
         SessionCollector.commit(session);
 
@@ -202,23 +201,5 @@ public final class RequestNewCertificateService extends HttpServlet {
     	else {
     		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
     	}
-	}
-
-
-	private static String getPublicContext(final String requestUrl) {
-		String redirectUrlBase = ConfigManager.getPublicContextUrl();
-		if ((redirectUrlBase == null || redirectUrlBase.isEmpty()) && requestUrl != null) {
-			redirectUrlBase = requestUrl.substring(0, requestUrl.lastIndexOf('/'));
-		}
-
-		if (redirectUrlBase != null && !redirectUrlBase.endsWith("/public/")) { //$NON-NLS-1$
-			if (redirectUrlBase.endsWith("/public")) { //$NON-NLS-1$
-				redirectUrlBase += "/"; //$NON-NLS-1$
-			}
-			else {
-				redirectUrlBase += "/public/"; //$NON-NLS-1$
-			}
-		}
-		return redirectUrlBase;
 	}
 }

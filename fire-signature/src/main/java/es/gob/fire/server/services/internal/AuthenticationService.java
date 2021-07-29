@@ -111,6 +111,7 @@ public class AuthenticationService extends HttpServlet {
 		} catch (final FIReConnectorFactoryException e) {
 			LOGGER.warning(logF.f("Error al obtener el conector")); //$NON-NLS-1$
 			response.sendRedirect(redirectErrorUrl);
+			return;
 		}
 
 		final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
@@ -119,20 +120,26 @@ public class AuthenticationService extends HttpServlet {
 
 		if (connector != null) {
 
-			final String baseUrl = request.getRequestURL().substring(0, request.getRequestURL().lastIndexOf("/")) + "/"; //$NON-NLS-1$ //$NON-NLS-2$
-			final StringBuilder okRedirectUrl = new StringBuilder(baseUrl);
-			okRedirectUrl.append(ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN)
-			.append("?transactionid=" + transactionId) //$NON-NLS-1$
-			.append("&certorigin=" + origin) //$NON-NLS-1$
-			.append("&originforced=" + String.valueOf(originForced)) //$NON-NLS-1$
-			.append("&subjectref=" + subjectRef); //$NON-NLS-1$
+			final String baseUrl = PublicContext.getPublicContext(request);
+			final String okRedirectUrl = baseUrl
+					+ ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN
+					+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
+					+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + origin //$NON-NLS-1$ //$NON-NLS-2$
+					+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=" + originForced //$NON-NLS-1$ //$NON-NLS-2$
+					+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
 
 			authUrl = connector.userAutentication(subjectId,
-    			okRedirectUrl.toString(), connConfig.getRedirectErrorUrl());
+    			okRedirectUrl, connConfig.getRedirectErrorUrl());
 		} else {
 			LOGGER.warning(logF.f("El conector no puede ser nulo")); //$NON-NLS-1$
 			response.sendRedirect(redirectErrorUrl);
+			return;
 		}
+
+		// Registramos que vamos a redirigir al proveedor externo para autenticar al usuario
+		session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_LOGIN, Boolean.TRUE);
+		SessionCollector.commit(session);
+
     	response.sendRedirect(authUrl);
 	}
 }

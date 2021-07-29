@@ -470,6 +470,8 @@ public final class ClaveFirmaConnector extends FIReConnector {
 	private static boolean isUserWeakRegistry(final GateWayAPI gatewayApi, final String ownerId)
 			throws FIReCertificateException {
 
+		// Construimos una peticion al servicio con unas URL falsas que nunca tendran efecto,
+		// ya que nunca redirigiremos a ellas
 		final StartOperationInfo opInfo = new StartOperationInfo();
 		opInfo.setRedirectError(FAKE_URL);
 		opInfo.setRedirectOK(FAKE_URL);

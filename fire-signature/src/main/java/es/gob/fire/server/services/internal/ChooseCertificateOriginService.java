@@ -102,6 +102,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
 		}
 
+    	// Si llegamos hasta aqui usando correctamente el API, es que no se produjo ningun
+    	// error al autenticar al usuario (si es que el conector requeria autenticacion),
+		// asi que podemos eliminar el valor bandera que nos indicaba que habiamos sido
+		// redirigidos para evitar confundir posibles errores futuros con esta misma transaccion
+    	session.removeAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_LOGIN);
+
 		// Terminamos de configurar el formateador para los logs
 		final String appId = session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 		logF.setAppId(appId);
@@ -173,12 +179,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null ?
 				connConfig.isAppSkipCertSelection().booleanValue() : ConfigManager.isSkipCertSelection();
 
-		// Creamos una nueva instancia del proveedor para obtener su informacion
-		final ProviderInfo providerInfo = ProviderManager.getProviderInfo(ProviderManager.PROVIDER_NAME_LOCAL);
-
-		final boolean certSelectionInProvider = providerInfo.isCertSelectionInProvider();
-
-		if (skipSelection || certSelectionInProvider) {
+		if (skipSelection) {
 			final Properties props = (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
 			props.put(MiniAppletHelper.AFIRMA_EXTRAPARAM_HEADLESS, "true");  //$NON-NLS-1$
 			session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, props);

@@ -14,6 +14,8 @@
 .no-float {float: none !important;}
 
 .contenido .title {color: #dd5a00; text-align: center; margin: 0 auto; font-weight: bold; font-size:1.8em; padding-top:1em; padding-bottom:1em;}
+.button-cancelar {width: 8em;height:2.2em; padding: 0.4em 1.5em 0.4em 1.5em;border-radius: 2em;background-color: #dd5a00;color: white;margin: 0 auto;font-size: 15px;text-align: center;box-sizing: border-box;font-weight: bold; cursor:pointer; text-decoration: none;}
+.button-cancelar:hover {text-decoration: underline;}
 
 .contenido .cert-box {border: 1px solid rgb(216, 212, 212); padding: 5px; margin-top: 5px; width: 100%; display: block; box-sizing: border-box;}
 
