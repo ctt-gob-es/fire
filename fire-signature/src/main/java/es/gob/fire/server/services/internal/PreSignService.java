@@ -388,7 +388,7 @@ public final class PreSignService extends HttpServlet {
         session.setAttribute(ServiceParams.SESSION_PARAM_REMOTE_TRANSACTION_ID, lr.getTransactionId());
         session.setAttribute(ServiceParams.SESSION_PARAM_CERT, certB64);
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_PRE);
-        session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED, Boolean.TRUE);
+        session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_SIGN, Boolean.TRUE);
 
         SessionCollector.commit(session);
 

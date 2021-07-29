@@ -127,7 +127,7 @@ public class TransactionConfig implements Serializable {
 	}
 
 	/**
-	 * Obtiene un nuevo obketo de configuraci&oacute;n con las propiedades
+	 * Obtiene un nuevo objeto de configuraci&oacute;n con las propiedades
 	 * innecesarias eliminadas.
 	 * @return Configuraci&oacute;n de la transacci&oacute;n.
 	 */

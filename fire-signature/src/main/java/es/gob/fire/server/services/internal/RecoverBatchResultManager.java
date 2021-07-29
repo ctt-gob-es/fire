@@ -225,7 +225,7 @@ public class RecoverBatchResultManager {
         	// error en la plataforma de autorizacion, asi que podemos eliminar el valor bandera
         	// que nos indicaba que habiamos sido redirigidos para evitar confundir posibles
         	// errores futuros con esta misma transaccion.
-        	session.removeAttribute(ServiceParams.SESSION_PARAM_REDIRECTED);
+        	session.removeAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_SIGN);
 
         	LOGGER.info(logF.f("Se solicita el PKCS#1 al proveedor " + origin)); //$NON-NLS-1$
 

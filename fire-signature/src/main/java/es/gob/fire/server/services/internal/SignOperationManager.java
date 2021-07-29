@@ -31,7 +31,6 @@ import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
-import es.gob.fire.signature.ConfigManager;
 
 /**
  * Manejador encargado de la gesti&oacute;n de las operaciones de firma ordenadas al
@@ -268,15 +267,18 @@ public class SignOperationManager {
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
-		final String redirectUrlBase = getPublicContext(request.getRequestURL().toString());
+		final String redirectUrlBase = PublicContext.getPublicContext(request);
 
         // Si hay proveedor disponible, se selecciona automaticamente;
         // si no, se envia a la pagina de seleccion de proveedor
 		final String redirectUrl;
         if (provs.length == 1) {
-        	redirectUrl = ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN + "?" + //$NON-NLS-1$
-        			ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] + "&" + //$NON-NLS-1$ //$NON-NLS-2$
- 					ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$
+        	// Si el unico proveedor que hay requiere que el usuario se autentique previamente, lo
+        	// redirigimos a la pagina de autenticacion. Si no, a la de seleccion de certificado
+        	final ProviderInfo info = ProviderManager.getProviderInfo(provs[0]);
+        	redirectUrl = (info.isUserRequiredAutentication() ? ServiceNames.PUBLIC_SERVICE_AUTH_USER : ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN)
+        			+ "?" + ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$ //$NON-NLS-2$
         } else {
         	redirectUrl = FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN;
         }
@@ -296,23 +298,6 @@ public class SignOperationManager {
         LOGGER.info(logF.f("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$
 
         sendResult(response, result);
-	}
-
-	private static String getPublicContext(final String requestUrl) {
-		String redirectUrlBase = ConfigManager.getPublicContextUrl();
-		if ((redirectUrlBase == null || redirectUrlBase.isEmpty()) && requestUrl != null) {
-			redirectUrlBase = requestUrl.substring(0, requestUrl.lastIndexOf('/'));
-		}
-
-		if (redirectUrlBase != null && !redirectUrlBase.endsWith("/public/")) { //$NON-NLS-1$
-			if (redirectUrlBase.endsWith("/public")) { //$NON-NLS-1$
-				redirectUrlBase += "/"; //$NON-NLS-1$
-			}
-			else {
-				redirectUrlBase += "/public/"; //$NON-NLS-1$
-			}
-		}
-		return redirectUrlBase;
 	}
 
 	private static void sendResult(final HttpServletResponse response, final SignOperationResult result) throws IOException {

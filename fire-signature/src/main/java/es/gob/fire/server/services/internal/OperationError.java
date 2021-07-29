@@ -24,7 +24,8 @@ public enum OperationError {
 	INVALID_SESSION(6, "La sesi&oacute;n no es v&aacute;lida o ha caducado"), //$NON-NLS-1$
 
 	INTERNAL_ERROR(7, "Error interno del servidor"), //$NON-NLS-1$
-	EXTERNAL_SERVICE_ERROR(8, "Error detectado despues de llamar a la pasarela externa"), //$NON-NLS-1$
+	EXTERNAL_SERVICE_ERROR_TO_SIGN(8, "Error detectado despues de llamar a la pasarela externa para firmar"), //$NON-NLS-1$
+	EXTERNAL_SERVICE_ERROR_TO_LOGIN(10, "Error detectado despues de llamar a la pasarela externa para autenticar al usuario"), //$NON-NLS-1$
 
 	INVALID_DOCUMENT_MANAGER(9, "El gestor de documentos indicado no es valido"), //$NON-NLS-1$
 

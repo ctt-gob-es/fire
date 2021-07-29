@@ -134,6 +134,10 @@
 			} else {
 				enabled = userRegistered && !info.isNeedJavaScript();
 			}
+			
+			String serviceToRedirect = info.isUserRequiredAutentication() ?
+					ServiceNames.PUBLIC_SERVICE_AUTH_USER :
+					ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN;
 		%>
 			<div name="provider-option" class="main-box-left <%= info.isNeedJavaScript() ? "need-javascript" : "" %> <%= enabled ? "" : "disabled" %>" id="option<%= info.getName() %>">
 					<div class="contain-box-top">
@@ -150,7 +154,7 @@
 							<%= userRegistered ? info.getDescription() : info.getNoRegisteredMessage() %>													
 						</p>
 					</div>
-					<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>" id="form<%= info.getName() %>" class="formProvider">
+					<form method="POST" action="<%= serviceToRedirect %>" id="form<%= info.getName() %>" class="formProvider">
 						<div style="display: none"><!-- type="hidden" -->
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />

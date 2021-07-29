@@ -38,6 +38,14 @@ public class ProviderInfo {
 
 	private static final String DEFAULT_NEED_JAVASCRIPT = Boolean.FALSE.toString();
 
+	private static final String PROP_REQUIRED_USER_AUTENTICATION = "requireduserautentication"; //$NON-NLS-1$
+
+	private static final String DEFAULT_REQUIRED_USER_AUTENTICATION = Boolean.FALSE.toString();
+
+	private static final String PROP_CERT_SELECTION_IN_PROVIDER = "certselectioninprovider"; //$NON-NLS-1$
+
+	private static final String DEFAULT_CERT_SELECTION_IN_PROVIDER_VALUE = Boolean.FALSE.toString();
+
 	private static final String DATA_URI_SCHEME = "data:"; //$NON-NLS-1$
 	private static final String HTTP_URI_SCHEME = "http:"; //$NON-NLS-1$
 	private static final String HTTPS_URI_SCHEME = "https:"; //$NON-NLS-1$
@@ -47,7 +55,7 @@ public class ProviderInfo {
 	private static final Logger LOGGER = Logger.getLogger(ProviderInfo.class.getName());
 
 	private final String name;
-	private final Properties config;
+	private Properties config = new Properties();
 
 	/**
 	 * Obtiene la informaci&oacute;n de un proveedor a partir de la configuraci&oacute;n
@@ -147,6 +155,29 @@ public class ProviderInfo {
 		return Boolean.parseBoolean(
 				this.config.getProperty(PROP_NEED_JAVASCRIPT,
 						DEFAULT_NEED_JAVASCRIPT));
+	}
+
+	/**
+	 * Indica si el proveedor requiere la autenticaci&oacute;n del usuario para obtener
+	 * los certificados en la nube.
+	 * @return {@code true} si el proveedor requiere autenticaci&oacute;n, {@code false}
+	 * en caso contrario.
+	 */
+	public boolean isUserRequiredAutentication() {
+		return Boolean.parseBoolean(
+				this.config.getProperty(PROP_REQUIRED_USER_AUTENTICATION,
+						DEFAULT_REQUIRED_USER_AUTENTICATION));
+	}
+
+	/**
+	 * Indica si la propiedad certselectioninprovider est&aacute; activa o no.
+	 * @return {@code true} est&iacute; activa. {@code false}
+	 * en caso contrario.
+	 */
+	public boolean isCertSelectionInProvider() {
+		return Boolean.parseBoolean(
+				this.config.getProperty(PROP_CERT_SELECTION_IN_PROVIDER,
+						DEFAULT_CERT_SELECTION_IN_PROVIDER_VALUE));
 	}
 
 	/**

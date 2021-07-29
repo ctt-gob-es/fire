@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.internal.PublicContext"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.afirma.core.misc.AOUtil"%>
@@ -66,22 +67,8 @@
 	String batchXmlB64 = null;
 	
 	// Para la carga de recursos y acceso a los servicios, obtenemos la URL publica
-	// configurada o, si no se establecio, se toma la URL base de la pagina actual
-	String baseUrl = ConfigManager.getPublicContextUrl();
-	if ((baseUrl == null || baseUrl.isEmpty()) && request.getRequestURL() != null) {
-		String requestUrl = request.getRequestURL().toString();
-		baseUrl = requestUrl.substring(0, requestUrl.lastIndexOf('/') + 1);
-	}
-
-	if (baseUrl != null && !baseUrl.endsWith("/public/")) { //$NON-NLS-1$
-		if (baseUrl.endsWith("/public")) { //$NON-NLS-1$
-			baseUrl += "/"; //$NON-NLS-1$
-		}
-		else {
-			baseUrl += "/public/"; //$NON-NLS-1$
-		}
-	}
-
+	String baseUrl = PublicContext.getPublicContext(request);
+	
 	// Obtenemos las propiedades extra de configuracion de las firmas
 	BatchResult batchResult = null;
 	if (isBatchOperation) {
@@ -190,7 +177,6 @@
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
 	<link rel="stylesheet" type="text/css" href="css/modMiniApplet.css">
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
-<!-- <script type="text/javascript" src="js/miniapplet_1_6_5.js"></script> -->
 	<script type="text/javascript" src="js/autoscript.js"></script>
 	<script type="text/javascript">
 		

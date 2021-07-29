@@ -116,4 +116,17 @@ public abstract class FIReConnector {
 																		FIReConnectorNetworkException {
 		throw new UnsupportedOperationException("El proveedor no soporta la generacion de nuevos certificados al vuelo"); //$NON-NLS-1$
 	}
+
+	/**
+	 * Mecanismo de autenticaci&oacute;n para la obtenci&oacute;n de certificados de la nube.
+	 * Este metodo se sobrecargar&aacute; en los conectores que lo utilicen
+	 * @param subjectId Id de usuario.
+	 * @param okRedirectUrl URL para operaciones correctas.
+	 * @param errorRedirectUrl URL para operaciones err&oacute;neas.
+	 * @return URL que permite al usuario autenticarse.
+	 */
+	public String userAutentication(final String subjectId, final String okRedirectUrl,
+									final String errorRedirectUrl) {
+		return null;
+	}
 }

@@ -64,10 +64,18 @@ public class RecoverErrorManager {
         if (!session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
 
         	// Si no se declaro un error, pero sabemos que lo ultimo que se hizo es
-        	// redirigir a la pasarela de autorizacion, se notifica como tal
-        	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED)) {
-            	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela de autorizacion de firma en la nube o a la de emision de certificados")); //$NON-NLS-1$
-            	final TransactionResult result = buildErrorResult(session, OperationError.EXTERNAL_SERVICE_ERROR);
+        	// redirigir a la pasarela externa para autenticar al usuario, autorizar
+        	// la firma o emitir nuevos certificados, se notifica como tal
+        	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_LOGIN)) {
+            	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autenticar al usuario")); //$NON-NLS-1$
+            	final TransactionResult result = buildErrorResult(session, OperationError.EXTERNAL_SERVICE_ERROR_TO_LOGIN);
+            	SessionCollector.removeSession(session);
+            	sendResult(response, result);
+        		return;
+        	}
+        	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_SIGN)) {
+            	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autorizar la firma en la nube o emitir certificados")); //$NON-NLS-1$
+            	final TransactionResult result = buildErrorResult(session, OperationError.EXTERNAL_SERVICE_ERROR_TO_SIGN);
             	SessionCollector.removeSession(session);
             	sendResult(response, result);
         		return;
