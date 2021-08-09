@@ -27,17 +27,17 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	static final Logger LOGGER = Logger.getLogger(GrayLogAlarmNotifier.class.getName());
 
 	/**
-	 * Constant attribute that represents the token key 'cod_err' for a Gray Log Message Field.
+	 * Constant attribute that represents the token key 'cod_err' for a GrayLog Message Field.
 	 */
 	private static final String TOKEN_KEY_ERROR_CODE = "cod_err"; //$NON-NLS-1$
 
 	/**
-	 * Constant attribute that represents the token key 'MESSAGE' for a Gray Log Message Field.
+	 * Constant attribute that represents the token key 'MESSAGE' for a GrayLog Message Field.
 	 */
 	private static final String TOKEN_KEY_MESSAGE = "message"; //$NON-NLS-1$
 
 	/**
-	 * Constant attribute that represents the token key 'source' for a Gray Log Message Field.
+	 * Constant attribute that represents the token key 'source' for a GrayLog Message Field.
 	 */
 	private static final String TOKEN_KEY_SOURCE = "source"; //$NON-NLS-1$
 
@@ -76,33 +76,33 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	private static final String HOSTNAME_UNDEFINED = "UNDEFINED"; //$NON-NLS-1$
 
 	/**
-	 * Flag that indicates if the configuration of Gray Log has been initialized (with or without errors).
+	 * Flag that indicates if the configuration of GrayLog has been initialized (with or without errors).
 	 */
 	private boolean initialized = false;
 
 	/**
-	 * Flag that indicates if there is some error in the initialization of Gray Log properties.
+	 * Flag that indicates if there is some error in the initialization of GrayLog properties.
 	 */
 	private boolean initializationError = false;
 
 	/**
-	 * Flag that indicates if Gray Log is enabled.
+	 * Flag that indicates if GrayLog is enabled.
 	 */
 	private boolean grayLogEnabled = false;
 
 	/**
-	 * Attribute that represents the destination host of the Gray Log Server.
+	 * Attribute that represents the destination host of the GrayLog Server.
 	 */
 	private String grayLogHost = null;
 
 	/**
-	 * Attribute that represents the destination port of the Gray Log Server.
+	 * Attribute that represents the destination port of the GrayLog Server.
 	 */
 	private int grayLogPort = -1;
 
 	/**
 	 * Attribute that represents the set of static declared fields to use in the
-	 * messages to Gray Log.
+	 * messages to GrayLog.
 	 */
 	private Map<String, String> grayLogDeclaredFields = null;
 
@@ -112,7 +112,7 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	private String hostname;
 
 	/**
-	 * Attribute that represents the Gray Log Messages Sender.
+	 * Attribute that represents the GrayLog Messages Sender.
 	 */
 	private GelfSender grayLogMessageSender = null;
 
@@ -146,7 +146,8 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	}
 
 	/**
-	 * Load if the GrayLog is enabled in the 'StaticMonitorizaConfig.properties' configuration file.
+	 * Load if the GrayLog is enabled in the configuration.
+	 * @param config Configuration.
 	 */
 	private void loadIfGrayLogIsEnabled(final Properties config) {
 		final String isGrayLogEnabled = config.getProperty(PROP_ENABLED, Boolean.FALSE.toString());
@@ -154,7 +155,8 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	}
 
 	/**
-	 * Load the host of the Gray Log destination server.
+	 * Load the host of the GrayLog destination server.
+	 * @param config Configuration.
 	 */
 	private void loadGrayLogServerHost(final Properties config) {
 		final String result = config.getProperty(PROP_DESTINATION_HOST);
@@ -162,7 +164,8 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	}
 
 	/**
-	 * Load the port of the Gray Log destination port.
+	 * Load the port of the GrayLog destination port.
+	 * @param config Configuration.
 	 */
 	private void loadGrayLogServerPort(final Properties config) {
 		int result = -1;
@@ -174,7 +177,8 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	}
 
 	/**
-	 * Load the declared fields to add in the messages to Gray Log.
+	 * Load the declared fields to add in the messages to GrayLog.
+	 * @param config Configuration.
 	 */
 	private void loadGrayLogDeclaredFields(final Properties config) {
 
@@ -194,7 +198,7 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 
 
 	/**
-	 * Load the Gray Log message sender manager.
+	 * Load the GrayLog message sender manager.
 	 */
 	private void loadGrayLogMessagesSender() {
 
