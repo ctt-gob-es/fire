@@ -46,6 +46,10 @@ public class ProviderInfo {
 
 	private static final String DEFAULT_CERT_SELECTION_IN_PROVIDER_VALUE = Boolean.FALSE.toString();
 
+	private static final String PROP_ALLOW_EXTERNAL_PROVIDER_INFO = "allowexternalproviderinfo"; //$NON-NLS-1$
+
+	private static final String DEFAULT_ALLOW_EXTERNAL_PROVIDER_INFO = Boolean.TRUE.toString();
+
 	private static final String DATA_URI_SCHEME = "data:"; //$NON-NLS-1$
 	private static final String HTTP_URI_SCHEME = "http:"; //$NON-NLS-1$
 	private static final String HTTPS_URI_SCHEME = "https:"; //$NON-NLS-1$
@@ -178,6 +182,18 @@ public class ProviderInfo {
 		return Boolean.parseBoolean(
 				this.config.getProperty(PROP_CERT_SELECTION_IN_PROVIDER,
 						DEFAULT_CERT_SELECTION_IN_PROVIDER_VALUE));
+	}
+
+	/**
+	 * Indica si la propiedad allowexternalproviderinfo est&aacute; activa o no.
+	 * @param infoProperties propiedades del conector
+	 * @return {@code true} est&iacute; activa. {@code false}
+	 * en caso contrario.
+	 */
+	public static boolean isAllowExternalProviderInfo(final Properties infoProperties) {
+		return Boolean.parseBoolean(
+				infoProperties.getProperty(PROP_ALLOW_EXTERNAL_PROVIDER_INFO,
+						DEFAULT_ALLOW_EXTERNAL_PROVIDER_INFO));
 	}
 
 	/**
