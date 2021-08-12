@@ -121,7 +121,19 @@ public class ProviderManager {
 		else {
 			final String classname = ConfigManager.getProviderClass(providerName);
 			final String infoFilename = ConfigManager.getProviderInfoFile(providerName);
-			infoProperties = loadProviderInfoProperties(classname, infoFilename);
+
+			infoProperties = loadProviderInfoProperties(classname, null);
+
+			// Si se detecta un fichero 'provider info' externo, miramos primero si el conector permite usarlo mediante la
+			// propiedad 'allowexternalproviderinfo', en caso de que no se permita se cargaran las propiedades del fichero
+			// 'provider info' interno.
+
+			final boolean allowExternalProviderInfo = ProviderInfo.isAllowExternalProviderInfo(infoProperties);
+
+			if (infoFilename != null && allowExternalProviderInfo) {
+				infoProperties = loadProviderInfoProperties(classname, infoFilename);
+			}
+
 		}
 		return new ProviderInfo(providerName, infoProperties);
 	}
