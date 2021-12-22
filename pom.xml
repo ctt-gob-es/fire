@@ -113,6 +113,14 @@
 				<module>fire-signature-connector-clavefirma</module>
 			</modules>
 		</profile>
+		
+		<profile>
+			<id>eventmanager</id>	<!-- Perfil que agrega el conector de Cl@ve Firma -->
+			
+			<modules>
+				<module>fire-alarms-eventmanager</module>
+			</modules>
+		</profile>
 	</profiles>
 
 	<dependencyManagement>
@@ -217,6 +225,11 @@
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-alarms-graylog</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-alarms-eventmanager</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
 			

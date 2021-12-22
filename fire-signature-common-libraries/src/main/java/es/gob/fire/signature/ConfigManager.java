@@ -31,7 +31,9 @@ public class ConfigManager {
 
 	private static final String SYS_PROP_PREFIX = "${"; //$NON-NLS-1$
 
-	private static final String SYS_PROP_SUFIX = "}"; //$NON-NLS-1$
+	private static final String ENV_PROP_PREFIX = "%{"; //$NON-NLS-1$
+
+	private static final String PROP_SUFIX = "}"; //$NON-NLS-1$
 
 	private static final String PROP_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
 
@@ -945,20 +947,19 @@ public class ConfigManager {
 
 		final Properties mappedProperties = new Properties();
 		for (final String k : prop.keySet().toArray(new String[0])) {
-			mappedProperties.setProperty(k, mapSystemProperties(prop.getProperty(k)));
+			mappedProperties.setProperty(k, mapProperties(prop.getProperty(k)));
 		}
 		return mappedProperties;
 	}
 
 	/**
 	 * Mapea las propiedades del sistema que haya en el texto que se referencien de
-	 * la forma: ${propiedad}
-	 * @param text Texto en el que se pueden encontrar las referencias a las propiedades
-	 * del sistema.
-	 * @return Cadena con las part&iacute;culas traducidas a los valores indicados como propiedades
-	 * del sistema. Si no se encuentra la propiedad definida, no se modificar&aacute;.
+	 * la forma ${propiedad} y las variables de entorno referenciadas como %{propiedad}.
+	 * @param text Texto en el que se pueden encontrar las referencias a las propiedades.
+	 * @return Text de entrada con las propiedades sustituidas por sus valores correspondientes.
+	 * Si no se encuentra la propiedad definida, no se modificar&aacute;.
 	 */
-	private static String mapSystemProperties(final String text) {
+	private static String mapProperties(final String text) {
 
 		if (text == null) {
 			return null;
@@ -967,16 +968,33 @@ public class ConfigManager {
 		int pos = -1;
 		int pos2 = 0;
 		String mappedText = text;
+
+		// Mapeamos las variables de sistema
 		while ((pos = mappedText.indexOf(SYS_PROP_PREFIX, pos + 1)) > -1 && pos2 > -1) {
-			pos2 = mappedText.indexOf(SYS_PROP_SUFIX, pos + SYS_PROP_PREFIX.length());
+			pos2 = mappedText.indexOf(PROP_SUFIX, pos + SYS_PROP_PREFIX.length());
 			if (pos2 > pos) {
 				final String prop = mappedText.substring(pos + SYS_PROP_PREFIX.length(), pos2);
 				final String value = System.getProperty(prop, null);
 				if (value != null) {
-					mappedText = mappedText.replace(SYS_PROP_PREFIX + prop + SYS_PROP_SUFIX, value);
+					mappedText = mappedText.replace(SYS_PROP_PREFIX + prop + PROP_SUFIX, value);
 				}
 			}
 		}
+
+		// Mapeamos las variables de entorno
+		pos = -1;
+		pos2 = 0;
+		while ((pos = mappedText.indexOf(ENV_PROP_PREFIX, pos + 1)) > -1 && pos2 > -1) {
+			pos2 = mappedText.indexOf(PROP_SUFIX, pos + ENV_PROP_PREFIX.length());
+			if (pos2 > pos) {
+				final String prop = mappedText.substring(pos + ENV_PROP_PREFIX.length(), pos2);
+				final String value = System.getenv(prop);
+				if (value != null) {
+					mappedText = mappedText.replace(ENV_PROP_PREFIX + prop + PROP_SUFIX, value);
+				}
+			}
+		}
+
 		return mappedText;
 	}
 

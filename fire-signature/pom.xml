@@ -205,6 +205,22 @@
 				</dependency>
 			</dependencies>
 		</profile>
+		
+		<!-- Perfil que agrega el modulo para el envio de notificaciones a EventManager -->
+		<profile>
+			<id>eventmanager</id>	
+			<activation>
+				<property>
+					<name>all</name> <!-- Se activa siempre que se indique esta propiedad -->
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-alarms-eventmanager</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
 	</profiles>
 	
 	

@@ -73,6 +73,7 @@ public final class TestUpgrade {
 	/** Prueba de mejora de firma.
 	 * @throws Exception en cualquier error. */
 	@Test
+	@Ignore
 	public void testSignUpgrade() throws Exception {
 
 		final UpgradeTarget format = UpgradeTarget.T_FORMAT;

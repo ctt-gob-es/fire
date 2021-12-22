@@ -21,7 +21,7 @@ public final class FIReConnectorFactoryException extends Exception {
      * @param msg Mensaje de error.
      * @param cause Causa del error.
      */
-    public FIReConnectorFactoryException(final String msg, final Exception cause) {
+    public FIReConnectorFactoryException(final String msg, final Throwable cause) {
         super(msg, cause);
     }
 
@@ -38,7 +38,7 @@ public final class FIReConnectorFactoryException extends Exception {
 
      * @param cause Causa del error.
      */
-    public FIReConnectorFactoryException(final Exception cause) {
+    public FIReConnectorFactoryException(final Throwable cause) {
         super(cause);
     }
 }

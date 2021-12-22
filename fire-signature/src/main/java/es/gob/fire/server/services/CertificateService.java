@@ -79,7 +79,7 @@ public final class CertificateService extends HttpServlet {
     		               final HttpServletResponse response) throws IOException {
 
 
-		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
+    	LOGGER.info("Peticion de tipo GET_CERTIFICATES"); //$NON-NLS-1$
 
 		if (!ConfigManager.isInitialized()) {
 			try {

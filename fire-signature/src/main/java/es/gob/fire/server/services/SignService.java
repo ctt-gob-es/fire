@@ -100,7 +100,7 @@ public final class SignService extends HttpServlet {
     @Override
     protected void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
-		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
+    	LOGGER.info("Peticion de tipo SIGN_DATA"); //$NON-NLS-1$
 
 		if (!ConfigManager.isInitialized()) {
 			try {

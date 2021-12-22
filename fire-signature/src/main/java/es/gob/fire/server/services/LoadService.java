@@ -89,7 +89,7 @@ public final class LoadService extends HttpServlet {
     protected void service(final HttpServletRequest request,
     		               final HttpServletResponse response) throws ServletException, IOException {
 
-		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
+		LOGGER.info("Peticion de tipo LOAD_DATA"); //$NON-NLS-1$
 
 		if (!ConfigManager.isInitialized()) {
 			try {

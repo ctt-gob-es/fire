@@ -47,7 +47,7 @@ public class ProviderManager {
 	 * @throws FIReConnectorFactoryException Cuando falla la inicializaci&oacute;n del conector.
 	 */
 	public static FIReConnector getProviderConnector(final String providerName, final Properties transactionConfig)
-			throws FIReConnectorFactoryException{
+			throws FIReConnectorFactoryException {
 
 		// Obtenemos la clase del connector
 		final String providerClass = ConfigManager.getProviderClass(providerName);
@@ -67,7 +67,7 @@ public class ProviderManager {
 			}
 		}
 
-		// Inicializamos el proveedor
+		// Cargamos el conector
 		FIReConnector connector;
 		try {
 			connector = FIReConnectorFactory.getConnector(providerClass);
@@ -76,11 +76,29 @@ public class ProviderManager {
 			AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, providerClass);
 			throw e;
 	    }
+		catch (final Throwable e) {
+			AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, providerClass);
+			throw new FIReConnectorFactoryException("Error grave al cargar el conector", e); //$NON-NLS-1$
+		}
 
-		connector.init(providerConfig);
+		// Inicializamos el conector
+		try {
+			connector.init(providerConfig);
+		}
+		catch (final Throwable e) {
+			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+			throw new FIReConnectorFactoryException("No se pudo inicializar el conector", e); //$NON-NLS-1$
+		}
+
 
 		// Inicializamos la transaccion
-		connector.initOperation(transactionConfig);
+		try {
+			connector.initOperation(transactionConfig);
+		}
+		catch (final Throwable e) {
+			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+			throw new FIReConnectorFactoryException("No se pudo inicializar la transaccion con el conector", e); //$NON-NLS-1$
+		}
 
 		return connector;
 	}
