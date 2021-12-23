@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,7 +19,7 @@
  * <b>Description:</b><p>Class that manages the REST requests related to the log server administration and JSON communication.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.web.rest.controller;
@@ -87,12 +87,12 @@ public class LogServerRestController {
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(LogServerRestController.class);
-	
+
 	/**
 	 * Attribute that represents the span text.
 	 */
 	private static final String SPAN = "_span";
-	
+
 	/**
 	 * Constant that represents the key Json 'errorSaveLogServer'.
 	 */
@@ -165,26 +165,26 @@ public class LogServerRestController {
 		List<LogServer> listNewLogServer = new ArrayList<>();
 		final JSONObject json = new JSONObject();
 		boolean error = false;
-		
+
 		if (bindingResult.hasErrors()) {
 			error = true;
-			
+
 			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
-			}			
+			}
 
 		}
-		
+
 		if (logServerForm.getLogServerId() == null && isDuplicateNombreServer(logServerForm.getName())) {
 			error = true;
-			json.put("name" + SPAN, "Ya existe un servicio de log con ese nombre.");			
+			json.put("name" + SPAN, "Ya existe un servicio de log con ese nombre.");
 		}
-		
+
 		if (logServerForm.getLogServerId() == null && isDuplicateUrlServer(logServerForm.getUrlService())) {
 			error = true;
-			json.put("urlService" + SPAN, "Ya existe un servicio de log con esa URL.");			
+			json.put("urlService" + SPAN, "Ya existe un servicio de log con esa URL.");
 		}
-		
+
 		if (!error) {
 			try {
 				final LogServer logServer = this.logServerService.saveLogServer(logServerForm);
@@ -201,31 +201,31 @@ public class LogServerRestController {
 		dtOutput.setData(listNewLogServer);
 		return dtOutput;
 	}
-	
+
 	/**
-	 * Method that checks if exists in persistence a LogServer with the name passed. 
+	 * Method that checks if exists in persistence a LogServer with the name passed.
 	 * @param name String that represents the value of a LogServer name.
 	 * @return true if exists.
 	 */
 	private boolean isDuplicateNombreServer(final String name) {
-		
-		final LogServer logServer = logServerService.getLogServerByName(name);
-		
+
+		final LogServer logServer = this.logServerService.getLogServerByName(name);
+
 		return logServer != null;
-		
+
 	}
-	
+
 	/**
-	 * Method that checks if exists in persistence a LogServer with the urlService passed. 
+	 * Method that checks if exists in persistence a LogServer with the urlService passed.
 	 * @param urlService
 	 * @return true if exists
 	 */
 	private boolean isDuplicateUrlServer(final String urlService) {
-		
-		final LogServer logServer = logServerService.getLogServerByUrlService(urlService);
-		
+
+		final LogServer logServer = this.logServerService.getLogServerByUrlService(urlService);
+
 		return logServer != null;
-		
+
 	}
 
 	/**

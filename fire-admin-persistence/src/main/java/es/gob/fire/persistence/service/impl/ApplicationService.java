@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.service.ApplicationService.java.</p>
  * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 22/01/2021.
  */
 package es.gob.fire.persistence.service.impl;
@@ -28,7 +28,6 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -67,35 +66,35 @@ import es.gob.fire.persistence.service.IApplicationService;
  */
 @Service
 public class ApplicationService implements IApplicationService{
-	
+
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(ApplicationService.class);
-	
+
 	/**
-	 * 
+	 *
 	 */
 	private static final String HMAC_ALGORITHM = "HmacMD5";
-	
+
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
 	@Autowired
 	private ApplicationRepository repository;
-		
+
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
 	@Autowired
 	private ApplicationResponsibleRepository appRespRepository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
 	@Autowired
 	private CertificateRepository certRepository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
@@ -112,15 +111,15 @@ public class ApplicationService implements IApplicationService{
 	 * @see es.gob.fire.persistence.service.IApplicationService#getAppByAppId(java.lang.String)
 	 */
 	@Override
-	public Application getAppByAppId(String appId) {
-		return repository.findByAppId(appId);
+	public Application getAppByAppId(final String appId) {
+		return this.repository.findByAppId(appId);
 	}
 
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#getAppByAppName(java.lang.String)
 	 */
 	@Override
-	public Application getAppByAppName(String appName) {
+	public Application getAppByAppName(final String appName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -130,10 +129,10 @@ public class ApplicationService implements IApplicationService{
 	 */
 	@Override
 	@Transactional
-	public Application saveApplication(ApplicationDTO appDto, List<Long> idsUsers) throws GeneralSecurityException{
+	public Application saveApplication(final ApplicationDTO appDto, final List<Long> idsUsers) throws GeneralSecurityException{
 
 		Application appToSave = null;
-		
+
 		// Nueva aplicacion
 		if (appDto.getAppId().isEmpty() || appDto.getAppId() == null) {
 			appToSave = applicationDtoToEntity(appDto);
@@ -141,59 +140,59 @@ public class ApplicationService implements IApplicationService{
 			appToSave.setFechaAltaApp(new Date());
 		// Aplicacion existente
 		} else {
-			appToSave = repository.findByAppId(appDto.getAppId());		
+			appToSave = this.repository.findByAppId(appDto.getAppId());
 			appToSave.setAppName(appDto.getAppName());
 			if (appDto.getIdCertificado() != null) {
-				Certificate cert = certRepository.findByIdCertificado(appDto.getIdCertificado());
+				final Certificate cert = this.certRepository.findByIdCertificado(appDto.getIdCertificado());
 				appToSave.setCertificate(cert);
 			}
 			appToSave.setHabilitado(appDto.getHabilitado());
-						
+
 		}
-		
+
 		ApplicationResponsiblePK appRespPk = null;
 		ApplicationResponsible appResp = null;
-		List<ApplicationResponsible> updated = new ArrayList<>();
-		for (Long idUser : idsUsers) {
-			
+		final List<ApplicationResponsible> updated = new ArrayList<>();
+		for (final Long idUser : idsUsers) {
+
 			appResp = new ApplicationResponsible();
-			appResp.setApplication(appToSave);						
-			appResp.setResponsible(userRepository.findByUserId(idUser));			
-			
+			appResp.setApplication(appToSave);
+			appResp.setResponsible(this.userRepository.findByUserId(idUser));
+
 			appRespPk = new ApplicationResponsiblePK();
 			appRespPk.setIdApplication(appToSave.getAppId());
 			appRespPk.setIdResponsible(idUser);
 			appResp.setIdApplicationResponsible(appRespPk);
-			
+
 			//(appRespRepository.saveAndFlush(appResp);
 			//listApplicationResponsible.add(appResp);
 			updated.add(appResp);
-						
+
 			//appToSave.getListApplicationResponsible().add(appResp);
 		}
-		
+
 		if (appToSave.getAppId() != null) {
 			final List<ApplicationResponsible> current = appToSave.getListApplicationResponsible();
-			
+
 			current.removeIf(x->!updated.contains(x));
-			
-			for (ApplicationResponsible ar : updated) {
+
+			for (final ApplicationResponsible ar : updated) {
 				if (!current.contains(ar)) {
 					current.add(ar);
 				}
 			}
-			
-			
+
+
 		} else {
 			appToSave.getListApplicationResponsible().addAll(updated);
 		}
-		
+
 		//app.setListApplicationResponsible(listApplicationResponsible);
-		Application savedApp = repository.saveAndFlush(appToSave);
-		
+		final Application savedApp = this.repository.saveAndFlush(appToSave);
+
 		return savedApp;
 	}
-	
+
 	/**
 	 * Genera un nuevo identificador de aplicaci&oacute;n.
 	 * @return Identificador de aplicaci&oacute;n.
@@ -216,62 +215,62 @@ public class ApplicationService implements IApplicationService{
 
 		return Hexify.hexify(mac.doFinal(), "").substring(0, 12); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IApplicationService#deleteAplication(java.lang.String)
 	 */
 	@Override
-	public void deleteApplication(String appId) {
-		repository.deleteById(appId);
+	public void deleteApplication(final String appId) {
+		this.repository.deleteById(appId);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#getAllApplication()
 	 */
 	@Override
 	public List<Application> getAllApplication() {
-		return repository.findAll();
+		return this.repository.findAll();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IApplicationService#findAll(org.springframework.data.jpa.datatables.mapping.DataTablesInput)
 	 */
 	@Override
-	public DataTablesOutput<Application> getAllApplication(DataTablesInput input) {
-		return appdtRepository.findAll(input);
+	public DataTablesOutput<Application> getAllApplication(final DataTablesInput input) {
+		return this.appdtRepository.findAll(input);
 	}
 
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#applicationDtoToEntity(es.gob.fire.persistence.dto.ApplicationDTO)
 	 */
 	@Override
-	public Application applicationDtoToEntity(ApplicationDTO applicationDto) {
-		
-		Application app = new Application();
-		
+	public Application applicationDtoToEntity(final ApplicationDTO applicationDto) {
+
+		final Application app = new Application();
+
 		app.setAppId(applicationDto.getAppId());
 		app.setAppName(applicationDto.getAppName());
-		
+
 		if (applicationDto.getIdCertificado() != null) {
-			Certificate cert = certRepository.findByIdCertificado(applicationDto.getIdCertificado());
+			final Certificate cert = this.certRepository.findByIdCertificado(applicationDto.getIdCertificado());
 			app.setCertificate(cert);
 		}
-		
+
 		if (applicationDto.getAppId() != null && !"".equals(applicationDto.getAppId())) {
-			
-			Application existingApp = repository.findByAppId(applicationDto.getAppId());
+
+			final Application existingApp = this.repository.findByAppId(applicationDto.getAppId());
 			// Se obtiene la lista de la aplicacion responsable
 			app.setListApplicationResponsible(existingApp.getListApplicationResponsible());
 		} else {
-			
+
 			app.setListApplicationResponsible(new ArrayList<ApplicationResponsible>());
 		}
-				
+
 		app.setFechaAltaApp(applicationDto.getFechaAltaApp());
 		app.setHabilitado(Boolean.TRUE);
-		
+
 		return app;
 	}
 
@@ -279,16 +278,16 @@ public class ApplicationService implements IApplicationService{
 	 * @see es.gob.fire.persistence.service.IApplicationService#applicationEntityToDto(es.gob.fire.persistence.entity.Application)
 	 */
 	@Override
-	public ApplicationDTO applicationEntityToDto(Application application) {
-		
-		ApplicationDTO appDto = new ApplicationDTO();
-		
+	public ApplicationDTO applicationEntityToDto(final Application application) {
+
+		final ApplicationDTO appDto = new ApplicationDTO();
+
 		appDto.setAppId(application.getAppId());
 		appDto.setAppName(application.getAppName());
 		appDto.setIdCertificado(application.getCertificate().getIdCertificado());
 		appDto.setFechaAltaApp(application.getFechaAltaApp());
 		appDto.setHabilitado(application.isHabilitado());
-		
+
 		return appDto;
 	}
 
@@ -296,9 +295,9 @@ public class ApplicationService implements IApplicationService{
 	 * @see es.gob.fire.persistence.service.IApplicationService#getApplicationResponsibleByUserId(java.lang.Long)
 	 */
 	@Override
-	public List<ApplicationResponsible> getApplicationResponsibleByUserId(Long userId) {
-		
-		return appRespRepository.findByResponsibleUserId(userId);
+	public List<ApplicationResponsible> getApplicationResponsibleByUserId(final Long userId) {
+
+		return this.appRespRepository.findByResponsibleUserId(userId);
 	}
 
 	/* (non-Javadoc)
@@ -306,39 +305,39 @@ public class ApplicationService implements IApplicationService{
 	 */
 	@Override
 	@JsonView(DataTablesOutput.View.class)
-	public DataTablesOutput<ApplicationCertDTO> getApplicationsCert(DataTablesInput input, Long idCertificate) {
-		
-		List<ApplicationCertDTO> appsCert = repository.findApplicationCert(idCertificate);
-		DataTablesOutput<ApplicationCertDTO> dtOutput = new DataTablesOutput<>();
-		
-		for (ApplicationCertDTO appCertDto : appsCert) {
-			
-			List<ApplicationResponsible> appRespList = appRespRepository.findByApplicationAppId(appCertDto.getAppId());
-						
+	public DataTablesOutput<ApplicationCertDTO> getApplicationsCert(final DataTablesInput input, final Long idCertificate) {
+
+		final List<ApplicationCertDTO> appsCert = this.repository.findApplicationCert(idCertificate);
+		final DataTablesOutput<ApplicationCertDTO> dtOutput = new DataTablesOutput<>();
+
+		for (final ApplicationCertDTO appCertDto : appsCert) {
+
+			final List<ApplicationResponsible> appRespList = this.appRespRepository.findByApplicationAppId(appCertDto.getAppId());
+
 			String responsiblesString = "";
 			String nombreCompleto = "";
-			for (ApplicationResponsible appresp : appRespList) {
-					
+			for (final ApplicationResponsible appresp : appRespList) {
+
 				if (!responsiblesString.isEmpty()) {
 					responsiblesString += "</br>";
 				}
-				
-				User user = userRepository.findByUserId(appresp.getResponsible().getUserId());
+
+				final User user = this.userRepository.findByUserId(appresp.getResponsible().getUserId());
 				nombreCompleto = user.getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(user.getSurnames());
 				responsiblesString += nombreCompleto;
-				
-				
+
+
 			}
-			
+
 			appCertDto.setResponsables(responsiblesString);
-		
-		}	
-		
+
+		}
+
 		dtOutput.setDraw(NumberConstants.NUM1);
 		dtOutput.setRecordsFiltered(new Long(appsCert.size()));
 		dtOutput.setRecordsTotal(new Long(appsCert.size()));
 		dtOutput.setData(appsCert);
-		
+
 		return dtOutput;
 	}
 
@@ -346,27 +345,27 @@ public class ApplicationService implements IApplicationService{
 	 * @see es.gob.fire.persistence.service.IApplicationService#getApplicationResponsibleByApprId(java.lang.String)
 	 */
 	@Override
-	public List<ApplicationResponsible> getApplicationResponsibleByApprId(String appId) {
-		// 
-		return appRespRepository.findByApplicationAppId(appId);
+	public List<ApplicationResponsible> getApplicationResponsibleByApprId(final String appId) {
+		//
+		return this.appRespRepository.findByApplicationAppId(appId);
 	}
 
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#getViewApplication(java.lang.String)
 	 */
 	@Override
-	public ApplicationCertDTO getViewApplication(String appId) {
-		// 
-		return repository.findViewApplication(appId);
+	public ApplicationCertDTO getViewApplication(final String appId) {
+		//
+		return this.repository.findViewApplication(appId);
 	}
 
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#getByIdCertificado(java.lang.Long)
 	 */
 	@Override
-	public List<Application> getByIdCertificado(Long idCertificado) {
+	public List<Application> getByIdCertificado(final Long idCertificado) {
 
-		return repository.findByCertificateIdCertificado(idCertificado);
-	}      
+		return this.repository.findByCertificateIdCertificado(idCertificado);
+	}
 
 }

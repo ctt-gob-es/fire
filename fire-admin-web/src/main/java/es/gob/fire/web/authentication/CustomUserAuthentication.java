@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.web.authentication.CustomUserAuthentication.java.</p>
  * <b>Description:</b><p>Class that manages authentication through a spring custom authentication provider.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 22/01/2021.
  */
 package es.gob.fire.web.authentication;
@@ -28,9 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +50,6 @@ import org.springframework.stereotype.Component;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.UtilsStringChar;
-import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 
@@ -76,7 +73,7 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 	 * Attribute that represents the md algorithm.
 	 */
 	private static final String MD_ALGORITHM = "SHA-256";
-	
+
 	/**
 	 * Constant attribute that represents the value of the administrator permission.
 	 */
@@ -91,30 +88,30 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 	/** The password encoder */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		PasswordEncoder encoder = new BCryptPasswordEncoder(4);
+		final PasswordEncoder encoder = new BCryptPasswordEncoder(4);
 		return encoder;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.springframework.security.authentication.AuthenticationProvider#
 	 * authenticate(org.springframework.security.core.Authentication)
 	 */
 	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
 
 		Authentication auth = null;
 
 		// Get credentials
-		String userName = authentication.getName();
-		String password = authentication.getCredentials().toString();
+		final String userName = authentication.getName();
+		final String password = authentication.getCredentials().toString();
 		// Search the user in database
-		User user = userService.getUserByUserName(userName);
+		final User user = this.userService.getUserByUserName(userName);
 
 		if (user != null) {
 
-			if (!userService.isAdminRol(user.getRol().getRolId())) {
+			if (!this.userService.isAdminRol(user.getRol().getRolId())) {
 				throw new InsufficientAuthenticationException("El usuario " + UtilsStringChar.removeBlanksFromString(userName)
 						+ " no tiene permisos de acceso");
 			}
@@ -122,7 +119,7 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 			// If password is OK
 			if (passwordEncoder().matches(password, user.getPassword())
 					|| checkAdminPassword(password, user.getPassword())) {
-				List<GrantedAuthority> grantedAuths = new ArrayList<>();
+				final List<GrantedAuthority> grantedAuths = new ArrayList<>();
 				// Asignamos los roles del usuario
 				// TODO Hacerlo mediante un bucle
 				grantedAuths.add(new SimpleGrantedAuthority(Constants.ROLE_ADMIN));
@@ -142,7 +139,7 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 
 	/**
 	 * Method that checks if the password belong to the user.
-	 * 
+	 *
 	 * @param password
 	 *            user password
 	 * @param keyAdminB64
@@ -150,7 +147,7 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 	 * @return {@code true} if the password is of the user, {@code false} an
 	 *         other case.
 	 */
-	public static boolean checkAdminPassword(final String password, final String keyAdminB64) {
+	private static boolean checkAdminPassword(final String password, final String keyAdminB64) {
 
 		boolean result = Boolean.FALSE;
 		final byte[] md;
@@ -174,13 +171,13 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.springframework.security.authentication.AuthenticationProvider#
 	 * supports(java.lang.Class)
 	 */
 	@Override
-	public boolean supports(Class<?> authentication) {
+	public boolean supports(final Class<?> authentication) {
 		return authentication.equals(UsernamePasswordAuthenticationToken.class);
 	}
-	
+
 }

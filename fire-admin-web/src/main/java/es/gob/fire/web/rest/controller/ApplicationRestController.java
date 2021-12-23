@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.web.rest.controller.ApplicationRestController.java.</p>
  * <b>Description:</b><p>Class that manages the REST requests related to the Applications administration and JSON communication.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite syste.</p>
  * <b>Date:</b><p>22/01/2021.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 22/01/2021.
  */
 package es.gob.fire.web.rest.controller;
@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -68,7 +69,7 @@ import es.gob.fire.persistence.service.ICertificateService;
  */
 @RestController
 public class ApplicationRestController {
-	
+
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
@@ -78,57 +79,61 @@ public class ApplicationRestController {
 	 * Attribute that represents the identifier of the selected alarms from the summary.
 	 */
 	private static final String FIELD_ID_USERS_SELECTED = "idUsersSelected";
-	
+
 	/**
 	 * Constant that represents the key Json 'errorSaveApplication'.
 	 */
 	private static final String KEY_JS_ERROR_SAVE_APP = "errorSaveApplication";
-	
+
 	/**
 	 * Constant that represents the parameter 'appId'.
 	 */
 	private static final String FIELD_ID_APPLICATION = "appId";
-	
+
 	/**
 	 * Constant that represents the field 'appName'.
 	 */
 	private static final String FIELD_APP_NAME = "appName";
-	
+
 	/**
 	 * Constant that represents the field 'user'.
 	 */
 	private static final String FIELD_RESPONSIBLE = "user";
-		
+
 	/**
 	 * Attribute that represents the span text.
 	 */
 	private static final String SPAN = "_span";
-	
+
 	/**
 	 * Constant that represents the parameter 'rowIndexApp'.
 	 */
 	private static final String FIELD_ROW_INDEX_APPLICATION = "rowIndexApp";
-		
+
 	/**
 	 * Attribute that represents the service object for accessing the
 	 * repository.
 	 */
 	@Autowired
 	private IApplicationService appService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the
 	 * repository.
 	 */
 	@Autowired
 	private ICertificateService certificateService;
-	
+
 	/**
-	 * Attribute that represents the view message wource. 
+	 * Attribute that represents the view message wource.
 	 */
 	@Autowired
 	private MessageSource messageSource;
-	
+
+	static {
+		PropertyConfigurator.configure("C:/Users/carlos.gamuci/Desktop/servidor/config/log4j.properties");
+	}
+
 	/**
 	 * Method that maps the list users web requests to the controller and
 	 * forwards the list of apps to the view.
@@ -140,9 +145,9 @@ public class ApplicationRestController {
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/applicationdatatable", method = RequestMethod.GET)
 	public DataTablesOutput<Application> apps(@NotEmpty final DataTablesInput input) {
-		return (DataTablesOutput<Application>) appService.getAllApplication(input);
+		return this.appService.getAllApplication(input);
 	}
-	
+
 	/**
 	 * Method that maps the list users web requests to the controller and
 	 * forwards the list of apps to the view.
@@ -152,30 +157,55 @@ public class ApplicationRestController {
 	 * @return String that represents the name of the view to forward.
 	 */
 	@RequestMapping(path = "/previewCertApp", method = RequestMethod.GET)
-	public String previewCertApp(@RequestParam("idCertificate") Long idCertificate) {
-		
+	public String previewCertApp(@RequestParam("idCertificate") final Long idCertificate) {
+
+		LOGGER.warn(" ======= /previewCertApp: Obtenemos los certificados asociados al ID: " + idCertificate);
+
+
 		String data = "";
-		Certificate cert = certificateService.getCertificateByCertificateId(idCertificate);
-				
+		final Certificate cert = this.certificateService.getCertificateByCertificateId(idCertificate);
+
+
+		LOGGER.warn(" ======= /previewCertApp: Hemos obtenido los certificados: " + cert);
+
+
+
+
 		if (cert != null) {
-			String certPrincipal = certificateService.getCertificateText(cert.getCertPrincipal());
+
+			LOGGER.warn(" ======= /previewCertApp: Certificado principal: " + cert.getCertPrincipal());
+
+
+
+			final String certPrincipal = this.certificateService.getCertificateText(cert.getCertPrincipal());
+
+
+			LOGGER.warn(" ======= /previewCertApp: Texto del certificado principal: " + certPrincipal);
+
 			if(certPrincipal.isEmpty()) {
 				data += "--"; //$NON-NLS-1$
 			} else {
 				data += certPrincipal;
 			}
 			data += "$*$"; //$NON-NLS-1$
-			String certBackup = certificateService.getCertificateText(cert.getCertBackup());
+
+
+			LOGGER.warn(" ======= /previewCertApp: Certificado secundario: " + cert.getCertBackup());
+
+			final String certBackup = this.certificateService.getCertificateText(cert.getCertBackup());
+
+			LOGGER.warn(" ======= /previewCertApp: Texto del certificado secundario: " + certBackup);
+
 			if(certBackup.isEmpty()) {
 				data += "--"; //$NON-NLS-1$
 			} else {
 				data += certBackup;
 			}
 		}
-		
+
 		return data;
 	}
-	
+
 	/**
 	 * Method that maps the request for saving a new aplication in the system.
 	 * @param appAddForm Object that represents the backing form.
@@ -185,114 +215,114 @@ public class ApplicationRestController {
 	 */
 	@RequestMapping(value = "/saveapp", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<Application> saveApplication(@RequestPart("appForm") final ApplicationDTO appForm, @RequestPart(FIELD_ID_USERS_SELECTED) final String idUsersSelected, HttpServletRequest request) {
-		DataTablesOutput<Application> dtOutput = new DataTablesOutput<Application>();
-		List<Application> listNewApplication = new ArrayList<Application>();
-		JSONObject json = new JSONObject();
-		List<Long> listUsers = new ArrayList<>();
-		
+	public @ResponseBody DataTablesOutput<Application> saveApplication(@RequestPart("appForm") final ApplicationDTO appForm, @RequestPart(FIELD_ID_USERS_SELECTED) final String idUsersSelected, final HttpServletRequest request) {
+		final DataTablesOutput<Application> dtOutput = new DataTablesOutput<>();
+		List<Application> listNewApplication = new ArrayList<>();
+		final JSONObject json = new JSONObject();
+		final List<Long> listUsers = new ArrayList<>();
+
 		if (!"-1".equals(idUsersSelected)) {
-			String[] arrayUsers = idUsersSelected.split(",");
-			
+			final String[] arrayUsers = idUsersSelected.split(",");
+
 			for(int i=0; i < arrayUsers.length;i++){
 				listUsers.add(new Long(arrayUsers[i]));
 			}
-		}			
-		
+		}
+
 		if (isAppNameBlank(appForm.getAppName()) || isAppNameSizeNotValid(appForm.getAppName()) || !isResponsibleSelected(listUsers)) {
-			
+
 			if (isAppNameBlank(appForm.getAppName())) {
-				
-				String errorValEmptyAppName = messageSource.getMessage(IWebViewMessages.ERROR_VAL_APPNAME_REQUIRED, null, request.getLocale());
-				
+
+				final String errorValEmptyAppName = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APPNAME_REQUIRED, null, request.getLocale());
+
 				json.put(FIELD_APP_NAME + SPAN, errorValEmptyAppName);
 			}
-			
+
 			if (isAppNameSizeNotValid(appForm.getAppName())) {
-				
-				String errorValSizeAppName = messageSource.getMessage(IWebViewMessages.ERROR_VAL_APPNAME_SIZE, null, request.getLocale());	
-				
+
+				final String errorValSizeAppName = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APPNAME_SIZE, null, request.getLocale());
+
 				json.put(FIELD_APP_NAME + SPAN, errorValSizeAppName);
 			}
-			
+
 			if (!isResponsibleSelected(listUsers)) {
-				
-				String errorValRespSelected = messageSource.getMessage(IWebViewMessages.ERROR_VAL_APP_USER_SELECTED, null, request.getLocale());	
-				
+
+				final String errorValRespSelected = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APP_USER_SELECTED, null, request.getLocale());
+
 				json.put(FIELD_RESPONSIBLE + SPAN, errorValRespSelected);
 			}
-			
-			dtOutput.setError(json.toString());			
-			
-		} else {			
-			
+
+			dtOutput.setError(json.toString());
+
+		} else {
+
 			try {
-				Application newApp = appService.saveApplication(appForm, listUsers);
-				
+				final Application newApp = this.appService.saveApplication(appForm, listUsers);
+
 				listNewApplication.add(newApp);
-				
-			} catch (GeneralSecurityException e) {
+
+			} catch (final GeneralSecurityException e) {
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
-				listNewApplication = StreamSupport.stream(appService.getAllApplication().spliterator(), false).collect(Collectors.toList());
+				listNewApplication = StreamSupport.stream(this.appService.getAllApplication().spliterator(), false).collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_APP, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
 				dtOutput.setError(json.toString());
 			}
 		}
-		
+
 		dtOutput.setData(listNewApplication);
-		
-		return dtOutput;				
+
+		return dtOutput;
 	}
-	
+
 	/**
 	 * Method that checks if the field 'Name' is empty
 	 * @param appName String that represents the value of the field 'Name' to check.
 	 * @return true if the value of the field 'Name' is null or empty.
 	 */
-	private boolean isAppNameBlank(String appName) {
-		
+	private boolean isAppNameBlank(final String appName) {
+
 		boolean result = false;
-		
+
 		if (appName == null) {
 			result = true;
 		} else {
-			
+
 			if (appName.isEmpty()) {
 				result = true;
 			}
-			
+
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * Method that checks if the field 'Name' has a invalid size
 	 * @param alias String that represents the value of the field 'Name' to check.
 	 * @return true if the length of the value of the field 'Name' is not valid.
 	 */
-	private boolean isAppNameSizeNotValid(String appName) {
-		
+	private boolean isAppNameSizeNotValid(final String appName) {
+
 		boolean result = false;
-		
+
 		if (appName != null && !appName.isEmpty()) {
-			
-			result = (appName.length() < NumberConstants.NUM1) || (appName.length() > NumberConstants.NUM45);
-			
-		} 
-		
+
+			result = appName.length() < NumberConstants.NUM1 || appName.length() > NumberConstants.NUM45;
+
+		}
+
 		return result;
 	}
-	
+
 	/**
 	 * @param listaResponsables
 	 * @return
 	 */
-	private boolean isResponsibleSelected(List<Long> listaResponsables) {
-		
-		return (listaResponsables!=null && listaResponsables.size()>0);
+	private boolean isResponsibleSelected(final List<Long> listaResponsables) {
+
+		return listaResponsables!=null && listaResponsables.size()>0;
 	}
-	
+
 	/**
 	 * Method that maps the delete user request from datatable to the controller
 	 * and performs the delete of the certificate identified by its id.
@@ -307,16 +337,16 @@ public class ApplicationRestController {
 	@RequestMapping(path = "/deleteapplication", method = RequestMethod.POST)
 	public String deleteApplication(@RequestParam(FIELD_ID_APPLICATION) final String appId, @RequestParam(FIELD_ROW_INDEX_APPLICATION) final String index) {
 		String result = index;
-		
+
 		try {
-			appService.deleteApplication(appId);
-		} catch (Exception e) {
+			this.appService.deleteApplication(appId);
+		} catch (final Exception e) {
 			result = "-1";
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * @param dtInput
 	 * @param appId
@@ -324,26 +354,26 @@ public class ApplicationRestController {
 	 */
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path ="/respappdatatable", method = RequestMethod.POST)
-	public DataTablesOutput<User> responsablesAplicacion(DataTablesInput dtInput, @RequestParam(FIELD_ID_APPLICATION) String appId) {
-		
-		DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
-		List<User> listaUser = new ArrayList<>();
-		
-		List<ApplicationResponsible> responsblesAplicacion = appService.getApplicationResponsibleByApprId(appId);
-		
-		for (ApplicationResponsible appResp : responsblesAplicacion) {
-			
+	public DataTablesOutput<User> responsablesAplicacion(final DataTablesInput dtInput, @RequestParam(FIELD_ID_APPLICATION) final String appId) {
+
+		final DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
+		final List<User> listaUser = new ArrayList<>();
+
+		final List<ApplicationResponsible> responsblesAplicacion = this.appService.getApplicationResponsibleByApprId(appId);
+
+		for (final ApplicationResponsible appResp : responsblesAplicacion) {
+
 			listaUser.add(appResp.getResponsible());
 		}
-		
+
 		dtOutput.setDraw(NumberConstants.NUM1);
 		dtOutput.setRecordsFiltered(new Long(listaUser.size()));
 		dtOutput.setRecordsTotal(new Long(listaUser.size()));
 		dtOutput.setData(listaUser);
-		
-		
+
+
 		return dtOutput;
 	}
-	
-	
+
+
 }

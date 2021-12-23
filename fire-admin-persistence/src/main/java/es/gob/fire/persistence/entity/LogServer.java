@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.entity.LogServer.java.</p>
  * <b>Description:</b><p>Class that maps the <i>TB_SERVIDORES_LOG</i> database table as a Plain Old Java Object.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 14/04/2020.
  */
 package es.gob.fire.persistence.entity;
@@ -44,7 +44,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import es.gob.fire.commons.utils.NumberConstants;
 
-/** 
+/**
  * <p>Class that maps the <i>TB_SERVIDORES_LOG</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.0, 14/04/2020.
@@ -58,37 +58,32 @@ public class LogServer implements Serializable {
 	 * Attribute that represents the serial version.
 	 */
 	private static final long serialVersionUID = 3103770202624207187L;
-	
-	/**
-	 * Constant attribute that represents the string <i>"yes_no"</i>.
-	 */
-	private static final String CONS_YES_NO = "yes_no";
-	
+
 	/**
 	 * Attribute that represents the log servers id.
 	 */
 	private Long logServerId;
-	
+
 	/**
 	 * Attribute that represents the log servers name.
 	 */
 	private String name;
-	
+
 	/**
 	 * Attribute that represents the URL service.
 	 */
 	private String urlService;
-	
+
 	/**
 	 * Attribute that represents the key for log servers.
 	 */
 	private String key;
-	
+
 	/**
 	 * Attribute that represents the verify SSL.
 	 */
 	private Boolean verifySSL;
-	
+
 	/**
 	 * Gets the value of the attribute {@link #logServerId}.
 	 * @return the value of the attribute {@link #logServerId}.
@@ -109,7 +104,7 @@ public class LogServer implements Serializable {
 	public void setLogServerId(final Long logServerIdP) {
 		this.logServerId = logServerIdP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #name}.
 	 * @return the value of the attribute {@link #name}.
@@ -129,7 +124,7 @@ public class LogServer implements Serializable {
 	public void setName(final String nameP) {
 		this.name = nameP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #urlService}.
 	 * @return the value of the attribute {@link #urlService}.
@@ -149,7 +144,7 @@ public class LogServer implements Serializable {
 	public void setUrlService(final String urlServiceP) {
 		this.urlService = urlServiceP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #key}.
 	 * @return the value of the attribute {@link #key}.
@@ -169,7 +164,7 @@ public class LogServer implements Serializable {
 	public void setKey(final String keyP) {
 		this.key = keyP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #verifySSL}.
 	 * @return the value of the attribute {@link #verifySSL}.
@@ -178,14 +173,14 @@ public class LogServer implements Serializable {
    @NotNull
    @JsonView(DataTablesOutput.View.class)
    public Boolean getVerifySSL() {
-	   return verifySSL;
+	   return this.verifySSL;
    }
 
    /**
 	 * Sets the value of the attribute {@link #verifySSL}.
 	 * @param verifySSLP The value for the attribute {@link #verifySSL}.
 	 */
-   public void setVerifySSL(Boolean verifySSLP) {
+   public void setVerifySSL(final Boolean verifySSLP) {
 	this.verifySSL = verifySSLP;
    }
 

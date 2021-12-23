@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espana
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -30,114 +30,84 @@
  * <p>
  * 21/12/2017.
  * </p>
- * 
- * @author Gobierno de España.
+ *
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 15/02/2019.
  */
 package es.gob.fire.i18n;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
-/** 
+/**
  * <p>Class responsible for managing the access to language resources.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.1, 15/02/2019.
  */
-/** 
+/**
  * <p>Class .</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
  * @version 1.0, 15/04/2020.
  */
 public final class Language {
-	
+
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(Language.class);
-			
+
 	/**
-	 * Constructor method for the class Language.java. 
+	 * Constructor method for the class Language.java.
 	 */
 	private Language() {
 		super();
 	}
-	
+
 	/**
 	 * Attribute that represents the locale specified in the configuration.
 	 */
 	private static Locale currentLocale;
-	
+
 	/**
 	 * Attribute that represents the url class loader for the messages files.
 	 */
-	private static URLClassLoader urlClassLoaderMessages = null;
-	
-	/**
-	 * Constant attribute that represents the property key server.config.dir. 
-	 */
-	public static final String PROP_SERVER_CONFIG_DIR = "server.config.dir";
-	
-	/**
-	 * Constant attribute that represents the name of messages directory inside configuration directory.
-	 */
-	private static final String MESSAGES_DIRECTORY = "messages";
+	private static ClassLoader classLoaderMessages = null;
 
 	/**
 	 * Constant attribute that represents the string to identify the the bundle name for the file with the application language.
 	 */
-	private static final String BUNDLENAME_LANGUAGE = "Language";
-	
+	private static final String BUNDLENAME_LANGUAGE = "messages.Language";
+
 	/**
 	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin logs.
 	 */
-	private static final String BUNDLENAME_WEBADMIN = "webAdmin.fire";
+	private static final String BUNDLENAME_WEBADMIN = "messages.webAdmin.fire";
 
 	/**
 	 * Constant attribute that represents the key for the configured locale for the platform.
 	 */
 	private static final String LANGUAGE = "LANGUAGE";
-	
+
 	/**
 	 * Attribute that represents the properties for the locale for the core bundle messages.
 	 */
 	private static ResourceBundle resWebAdminBundle = null;
-	
-	/**
-	 * Attribute that represents the properties for the locale for the core bundle messages.
-	 */
-	private static ResourceBundle resCommonsUtilsBundle = null;
-	
+
+
 
 	static {
-		// Preparamos el URLClassLoader que hará referencia
-		// al directorio de los mensajes de logs dentro de la configuración.
+		// Preparamos el URLClassLoader con el que se cargaran los mensajes de logs
 		try {
-			final File configDirFile = new File(System.getProperty(PROP_SERVER_CONFIG_DIR) + File.separator + MESSAGES_DIRECTORY);
-			urlClassLoaderMessages = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-				public URLClassLoader run() {
-					try {
-						return new URLClassLoader(new URL[ ] { configDirFile.toURI().toURL() });
-					} catch (MalformedURLException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			});
+			classLoaderMessages = Language.class.getClassLoader();
 			reloadMessagesConfiguration();
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			LOGGER.error(e);
-		}		
+		}
 	}
-	
+
 	/**
 	 * Method that loads the configured locale and reload the text messages.
 	 */
@@ -145,7 +115,7 @@ public final class Language {
 		boolean takeDefaultLocale = false;
 		String propLocale = null;
 		// Cargamos el recurso que determina el locale.
-		ResourceBundle resLocale = ResourceBundle.getBundle(BUNDLENAME_LANGUAGE, Locale.getDefault(), urlClassLoaderMessages);
+		final ResourceBundle resLocale = ResourceBundle.getBundle(BUNDLENAME_LANGUAGE, Locale.getDefault(), classLoaderMessages);
 		if (resLocale == null) {
 			takeDefaultLocale = true;
 		} else {
@@ -156,7 +126,7 @@ public final class Language {
 			takeDefaultLocale = true;
 		} else {
 			propLocale = propLocale.trim();
-			String[ ] localeSplit = propLocale.split("_");
+			final String[ ] localeSplit = propLocale.split("_");
 			if (localeSplit == null || localeSplit.length != 2) {
 				takeDefaultLocale = true;
 			} else {
@@ -170,17 +140,17 @@ public final class Language {
 		}
 		// Se informa en el log del Locale selecccionado.
 		LOGGER.info("Take the next locale for messages logs: " + currentLocale.toString());
-		// Se cargan los mensajes del módulo de administración web.
-		resWebAdminBundle = ResourceBundle.getBundle(BUNDLENAME_WEBADMIN, currentLocale, urlClassLoaderMessages);
+		// Se cargan los mensajes del modulo de administracion web.
+		resWebAdminBundle = ResourceBundle.getBundle(BUNDLENAME_WEBADMIN, currentLocale, classLoaderMessages);
 	}
-	
+
 	/**
 	 * Gets the message with the key and values indicated as input parameters.
 	 * @param key Key for obtain the message.
 	 * @param values Values for insert in the message.
 	 * @return String with the message well-formed.
 	 */
-	public static String getFormatResWebFire(String key, Object[ ] values) {
+	public static String getFormatResWebFire(final String key, final Object[ ] values) {
 		return new MessageFormat(resWebAdminBundle.getString(key), currentLocale).format(values);
 	}
 
@@ -189,18 +159,8 @@ public final class Language {
 	 * @param key Key for obtain the message.
 	 * @return String with the message.
 	 */
-	public static String getResWebFire(String key) {
+	public static String getResWebFire(final String key) {
 		return resWebAdminBundle.getString(key);
 	}
-	
-	/**
-	 * Gets the message with the key and values indicated as input parameters.
-	 * @param key Key for obtain the message.
-	 * @param values Values for insert in the message.
-	 * @return String with the message well-formed.
-	 */
-	public static String getFormatResCommonsUtilsFire(String key, Object[ ] values) {
-		return new MessageFormat(resCommonsUtilsBundle.getString(key), currentLocale).format(values);
-	}
-	
+
 }

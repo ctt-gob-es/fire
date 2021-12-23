@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.core.dto.RolDTO.java.</p>
  * <b>Description:</b><p> .</p>
   * <b>Project:</b><p>Signature Integral System FIRe.</p>
  * <b>Date:</b><p>28/05/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 28/05/2020.
  */
 package es.gob.fire.persistence.dto;
@@ -31,33 +31,33 @@ import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.persistence.dto.validation.CheckItFirst;
 import es.gob.fire.persistence.dto.validation.ThenCheckIt;
 
-/** 
+/**
  * <p>Class that represents the backing form for adding/editing an user Rol.</p>
  * <b>Project:</b><p>Signature Integral System FIRe.</p>
  * @version 1.0, 02/11/2018.
  */
 public class RolDTO {
-	
+
 	/**
 	 * Attribute that represents the rol id.
 	 */
 	private Long rolId = null;
-	
-	
+
+
 	/**
 	 * Constructor using arguments
 	 * @param rolId Long that represetns the rol identifier
 	 * @param rolName String that represents role name
 	 * @param permissions String that represents permissions
 	 */
-	public RolDTO(Long rolId,
-			@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.rol.notempty}") @Size(min = 1, max = 45, groups = ThenCheckIt.class) String rolName,
-			@Size(min = 1, max = 45, groups = ThenCheckIt.class) String permissions) {
+	public RolDTO(final Long rolId,
+			@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.rol.notempty}") @Size(min = 1, max = 45, groups = ThenCheckIt.class) final String rolName,
+			@Size(min = 1, max = 45, groups = ThenCheckIt.class) final String permissions) {
 		super();
 		this.rolId = rolId;
 		this.rolName = rolName;
 		this.permissions = permissions;
-		
+
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class RolDTO {
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.rol.notempty}")
     @Size(min=1, max=NumberConstants.NUM45, groups=ThenCheckIt.class)
 	private String rolName;
-	
+
 	/**
 	 * Attribute that represents the permissions.
 	 */
@@ -78,14 +78,14 @@ public class RolDTO {
 	 * @return the value of the attribute {@link #rolId}.
 	 */
 	public Long getRolId() {
-		return rolId;
+		return this.rolId;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #rolId}.
 	 * @param rolIdParam The value for the attribute {@link #rolId}.
 	 */
-	public void setRolId(Long rolIdParam) {
+	public void setRolId(final Long rolIdParam) {
 		this.rolId = rolIdParam;
 	}
 
@@ -94,14 +94,14 @@ public class RolDTO {
 	 * @return the value of the attribute {@link #rolName}.
 	 */
 	public String getRolName() {
-		return rolName;
+		return this.rolName;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #rolId}.
 	 * @param rolNameParam The value for the attribute {@link #rolId}.
 	 */
-	public void setRolName(String rolNameParam) {
+	public void setRolName(final String rolNameParam) {
 		this.rolName = rolNameParam;
 	}
 
@@ -110,15 +110,15 @@ public class RolDTO {
 	 * @return the value of the attribute {@link #permissions}.
 	 */
 	public String getPermissions() {
-		return permissions;
+		return this.permissions;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #permissions}.
 	 * @param permissionsParam The value for the attribute {@link #permissions}.
 	 */
-	public void setPermissions(String permissionsParam) {
+	public void setPermissions(final String permissionsParam) {
 		this.permissions = permissionsParam;
 	}
-	
+
 }

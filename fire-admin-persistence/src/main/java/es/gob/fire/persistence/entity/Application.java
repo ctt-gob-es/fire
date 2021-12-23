@@ -17,7 +17,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -37,7 +36,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 @Table(name = "TB_APLICACIONES")
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Application implements Serializable{
-	
+
 	/**
 	 * Class serial version.
 	 */
@@ -47,28 +46,28 @@ public class Application implements Serializable{
 	 * Attribute that represents the app id.
 	 */
 	private String appId;
-	
+
 	/**
 	 * Attribute that represents the app name.
 	 */
 	private String appName;
-	
+
 	/**
 	 * Attribute that represents the certificate.
 	 */
 	private Certificate certificate;
-	
-	
+
+
 	/**
 	 * Attribute that represents the data.
 	 */
 	private Date fechaAltaApp;
-	 
+
 	 /**
 	  * Attribute that represents the habilitado.
 	 */
 	private boolean habilitado;
-	 
+
 	 /**
 	  * Attribute that represents the header list for the validation method.
 	  */
@@ -96,16 +95,15 @@ public class Application implements Serializable{
 	public void setAppId(final String appIdP) {
 		this.appId = appIdP;
 	}
-	
-	
+
+
 	/**
 	 * Gets the value of the attribute {@link #userName}.
 	 * @return the value of the attribute {@link #userName}.
 	 */
-	
+
 	@Column(name = "NOMBRE", nullable = false, length = NumberConstants.NUM30, unique = true)
 	@Size(max = NumberConstants.NUM30)
-//	@Nif
 	@JsonView(DataTablesOutput.View.class)
 	public String getAppName() {
 		return this.appName;
@@ -118,7 +116,7 @@ public class Application implements Serializable{
 	public void setAppName(final String appNameP) {
 		this.appName = appNameP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #fechaAltaApp}.
 	 * @return the value of the attribute {@link #fechaAltaApp}.
@@ -128,17 +126,17 @@ public class Application implements Serializable{
 	@JsonFormat (pattern = "yyyy-MM-dd HH:mm:ss.SSS")
 	@JsonView(DataTablesOutput.View.class)
 	public Date getFechaAltaApp() {
-		return fechaAltaApp;
+		return this.fechaAltaApp;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #fechaAlta}.
 	 * @param fechaAltaParam The value for the attribute {@link #fechaAlta}.
 	 */
-	public void setFechaAltaApp(Date fechaAltaAppParam) {
+	public void setFechaAltaApp(final Date fechaAltaAppParam) {
 		this.fechaAltaApp = fechaAltaAppParam;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #certificate}.
 	 * @return the value of the attribute {@link #certificate}.
@@ -147,7 +145,7 @@ public class Application implements Serializable{
 	@JoinColumn(name = "FK_CERTIFICADO", nullable = false)
 	@JsonView(DataTablesOutput.View.class)
 	public Certificate getCertificate() {
-		return certificate;
+		return this.certificate;
 	}
 
 	/**
@@ -165,18 +163,18 @@ public class Application implements Serializable{
 	@JoinColumn(name = "HABILITADO", nullable = false)
 	@JsonView(DataTablesOutput.View.class)
 	public boolean isHabilitado() {
-		return habilitado;
+		return this.habilitado;
 	}
 
-	
+
 	/**
 	 * Sets the value of the attribute {@link #habilitado}.
 	 * @param rolP The value for the attribute {@link #habilitado}.
 	 */
-	public void setHabilitado(boolean habilitado) {
+	public void setHabilitado(final boolean habilitado) {
 		this.habilitado = habilitado;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #listApplicationResponsible}.
 	 * @return the value of the attribute {@link #listApplicationResponsible}.
@@ -186,7 +184,7 @@ public class Application implements Serializable{
 	@OneToMany(mappedBy = "application", cascade = {CascadeType.ALL }, orphanRemoval = true, fetch = FetchType.LAZY)
 	public List<ApplicationResponsible> getListApplicationResponsible() {
 		// CHECKSTYLE:ON
-		return listApplicationResponsible;
+		return this.listApplicationResponsible;
 	}
 
 	/**
@@ -195,7 +193,7 @@ public class Application implements Serializable{
 	 */
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
-	public void setListApplicationResponsible(List<ApplicationResponsible> listApplicationResponsibleParam) {
+	public void setListApplicationResponsible(final List<ApplicationResponsible> listApplicationResponsibleParam) {
 		// CHECKSTYLE:ON
 		this.listApplicationResponsible = listApplicationResponsibleParam;
 	}

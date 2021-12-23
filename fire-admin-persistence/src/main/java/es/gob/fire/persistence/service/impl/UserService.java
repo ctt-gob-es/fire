@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,10 +19,14 @@
  * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>21/06/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 21/05/2021.
  */
 package es.gob.fire.persistence.service.impl;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +34,7 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -39,6 +44,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
@@ -58,6 +64,19 @@ import es.gob.fire.persistence.service.IUserService;
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class UserService implements IUserService {
+
+	/** The Constant LOG. */
+	private static final Logger LOGGER = Logger.getLogger(UserService.class);
+
+	/**
+	 * Attribute that represents the default charset.
+	 */
+	private static final String DEFAULT_CHARSET = "utf-8";
+
+	/**
+	 * Attribute that represents the md algorithm.
+	 */
+	private static final String MD_ALGORITHM = "SHA-256";
 
 	/**
 	 * Constant attribute that represents the value of the administrator permission.
@@ -251,14 +270,24 @@ public class UserService implements IUserService {
 	@Override
 	@Transactional
 	public String changeUserPassword(final UserPasswordDTO userPasswordDto) {
-		final User user = this.repository.findByUserId(userPasswordDto.getIdUserFirePass());
+
+Logger.getLogger(UserService.class).warn(" ========== Buscamos al usuario con ID: " + userPasswordDto.getIdUser());
+
+		final User user = this.repository.findByUserId(userPasswordDto.getIdUser());
+
+Logger.getLogger(UserService.class).warn(" ========== Usuario: " + user);
+
+Logger.getLogger(UserService.class).warn(" ========== Password codificada del usuario: " + user.getPassword());
+
 		String result = null;
 		final String oldPwd = userPasswordDto.getOldPassword();
 		final String pwd = userPasswordDto.getPassword();
 		final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
+
+Logger.getLogger(UserService.class).warn(" ========== Password antigua para comprobacion: " + oldPwd);
 		final String hashPwd = bcpe.encode(pwd);
 		try {
-			if (bcpe.matches(oldPwd, user.getPassword())) {
+			if (bcpe.matches(oldPwd, user.getPassword()) || checkPasswordOldSystem(oldPwd, user.getPassword())) {
 				user.setPassword(hashPwd);
 				this.repository.save(user);
 				result = "0";
@@ -268,6 +297,37 @@ public class UserService implements IUserService {
 		} catch (final Exception e) {
 			result = "-2";
 			throw e;
+		}
+		return result;
+	}
+
+	/**
+	 * Method that checks if the password belong to the user and is
+	 * stored with the old format.
+	 * @param insertedPassword
+	 *            inserted password
+	 * @param expectedPassword
+	 *            configured password Base64 encoded
+	 * @return {@code true} if the password is of the user, {@code false} an
+	 *         other case.
+	 */
+	private static boolean checkPasswordOldSystem(final String insertedPassword, final String expectedPassword) {
+
+		final byte[] md;
+		boolean result = false;
+		try {
+			md = MessageDigest.getInstance(MD_ALGORITHM).digest(insertedPassword.getBytes(DEFAULT_CHARSET));
+			if (expectedPassword != null && expectedPassword.equals(Base64.encode(md))) {
+				result = true;
+			}
+			else {
+				LOGGER.warn("La contrasena insertada no es valida"); //$NON-NLS-1$
+			}
+		} catch (final NoSuchAlgorithmException nsae) {
+			LOGGER.error("Error de configuracion en el servicio de administracion. Algoritmo de huella incorrecto", //$NON-NLS-1$
+					nsae);
+		} catch (final UnsupportedEncodingException uee) {
+			LOGGER.error("Error de configuracion en el servicio de administracion. Codificacion incorrecta", uee); //$NON-NLS-1$
 		}
 		return result;
 	}

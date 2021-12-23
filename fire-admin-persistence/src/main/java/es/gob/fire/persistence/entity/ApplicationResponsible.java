@@ -1,12 +1,12 @@
 /*
  * Este fichero forma parte de la plataforma de @firma.
- * La plataforma de @firma es de libre distribución cuyo código fuente puede ser consultado
+ * La plataforma de @firma es de libre distribucion cuyo codigo fuente puede ser consultado
  * y descargado desde http://administracionelectronica.gob.es
  *
- * Copyright 2005-2019 Gobierno de España
- * Este fichero se distribuye bajo las licencias EUPL versión 1.1, según las
- * condiciones que figuran en el fichero 'LICENSE.txt' que se acompaña.  Si se   distribuyera este
- * fichero individualmente, deben incluirse aquí las condiciones expresadas allí.
+ * Copyright 2005-2019 Gobierno de Espana
+ * Este fichero se distribuye bajo las licencias EUPL version 1.1, segun las
+ * condiciones que figuran en el fichero 'LICENSE.txt' que se acompana.  Si se   distribuyera este
+ * fichero individualmente, deben incluirse aqui las condiciones expresadas alli.
  */
 
 /**
@@ -14,15 +14,13 @@
  * <b>Description:</b><p>Class that represents the representation of the <i>X_APPLICATION_RESPONSIBLE</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * <b>Date:</b><p>16/02/2017.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 16/02/2017.
  */
 package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
 
-import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,9 +37,9 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "TB_RESPONSABLE_DE_APLICACIONES")
 public class ApplicationResponsible implements Serializable {
-	
+
 	/**
-	 * Constant attribute that represents the serial version UID. 
+	 * Constant attribute that represents the serial version UID.
 	 */
 	private static final long serialVersionUID = -844662441561734046L;
 
@@ -69,7 +67,7 @@ public class ApplicationResponsible implements Serializable {
 	@EmbeddedId
 	public ApplicationResponsiblePK getIdApplicationResponsible() {
 		// CHECKSTYLE:ON
-		return idApplicationResponsible;
+		return this.idApplicationResponsible;
 	}
 
 	/**
@@ -78,7 +76,7 @@ public class ApplicationResponsible implements Serializable {
 	 */
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
-	public void setIdApplicationResponsible(ApplicationResponsiblePK idApplicationResponsibleParam) {
+	public void setIdApplicationResponsible(final ApplicationResponsiblePK idApplicationResponsibleParam) {
 		// CHECKSTYLE:ON
 		this.idApplicationResponsible = idApplicationResponsibleParam;
 	}
@@ -94,7 +92,7 @@ public class ApplicationResponsible implements Serializable {
 	@JoinColumn(name = "id_aplicaciones", nullable = false, insertable = false, updatable = false)
 	public Application getApplication() {
 		// CHECKSTYLE:ON
-		return application;
+		return this.application;
 	}
 
 	/**
@@ -103,7 +101,7 @@ public class ApplicationResponsible implements Serializable {
 	 */
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
-	public void setApplication(Application applicationParam) {
+	public void setApplication(final Application applicationParam) {
 		// CHECKSTYLE:ON
 		this.application = applicationParam;
 	}
@@ -119,7 +117,7 @@ public class ApplicationResponsible implements Serializable {
 	@JoinColumn(name = "id_responsables", nullable = false, insertable = false, updatable = false)
 	public User getResponsible() {
 		// CHECKSTYLE:ON
-		return responsible;
+		return this.responsible;
 	}
 
 	/**
@@ -128,7 +126,7 @@ public class ApplicationResponsible implements Serializable {
 	 */
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
-	public void setResponsible(User responsibleParam) {
+	public void setResponsible(final User responsibleParam) {
 		// CHECKSTYLE:ON
 		this.responsible = responsibleParam;
 	}

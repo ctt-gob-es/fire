@@ -101,10 +101,10 @@ $(document).ready(function() {
 		    
 		    switch(accion){
 		    
-		 		// Se abre el modal para cargar el almacén de certificados desde el sistema de archivos local del cliente.
+		 		// Se abre el modal para cargar el almacen de certificados desde el sistema de archivos local del cliente.
 		        case 'add':
 		        	
-		        	// Error de validación al introducir el fichero de almacén.
+		        	// Error de validacion al introducir el fichero de almacen.
 		        	if ($('#authForm')[0].checkValidity() === false) {
 		        		hide();
 		        		// Se oculta la capa 'cargando...'
@@ -122,9 +122,9 @@ $(document).ready(function() {
 		            	    
 		            	});
 		                
-		                // Esto es necesario para forzar que se muestren mensajes de validación de cliente
+		                // Esto es necesario para forzar que se muestren mensajes de validacion de cliente
 		                $('<input type="submit">').hide().appendTo($('#authForm')).click().remove();
-		            // No se ha producido error, voy al diálogo de selección de certificados.   
+		            // No se ha producido error, voy al dialogo de seleccion de certificados.   
 		            } else {
 		            	//var formData = new FormData($('#authForm')[0]);
 		            	var formData = new FormData(document.forms["authForm"]);
@@ -141,16 +141,16 @@ $(document).ready(function() {
 			                    			                    
 			            		$('#altEditor-modal .modal-body .alert').remove();
 								
-			            		// Ha ocurrido un error con la contraseña introducida
+			            		// Ha ocurrido un error con la contrasena introducida
 								if (data.error != null && data.error != '' && data.error != 'undefined') {
 									
 									$('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + data.error + '</strong></div>');
 									
-									if (data.error.toLowerCase().indexOf("contraseña") >= 0) {
+									if (data.error.toLowerCase().indexOf("contrase\u00F1a") >= 0) {
 										$('#authkeystorepass').addClass('is-invalid');
 									}
 
-								// No hay error, se muestra la selección de certificados.	
+								// No hay error, se muestra la seleccion de certificados.	
 								} else {
 									$(".modal-body").html('');
 									var pick = $(".modal-body").pickList({data: data.lista});
@@ -167,8 +167,8 @@ $(document).ready(function() {
 											$('#altEditor-modal .modal-body .alert').remove();
 								            $('#altEditor-modal .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + [[#{auth.admin.error.oneMinimum}]] + '</strong></div>');
 										} else {
-											// Se envían los alias de los certificados a añadir al
-											// almacén para autenticación RFC3161
+											// Se envian los alias de los certificados a anadir al
+											// almacen para autenticacion RFC3161
 											$.ajax(actionSave, {
 												contentType:'application/json',
 												data : JSON.stringify(pick.getValues()),
@@ -214,8 +214,8 @@ $(document).ready(function() {
 			                	hide();
 			                	// Se eliminan los posibles errores anteriores...
 			                	clearValidationResult('authForm');
-			                	// Se obtiene el JSON de los campos con errores de validación
-			                	// y se modifican los estilos/añaden mensajes
+			                	// Se obtiene el JSON de los campos con errores de validacion
+			                	// y se modifican los estilos/anaden mensajes
 			                	var validation = $(data)["0"].responseJSON;
 			                	drawValidationResult(validation.fieldErrors);
 			              
@@ -246,7 +246,7 @@ $(document).ready(function() {
 		            	    
 		            	});
 		                
-		                // Esto es necesario para forzar que se muestren mensajes de validación de cliente
+		                // Esto es necesario para forzar que se muestren mensajes de validacion de cliente
 		                $('<input type="submit">').hide().appendTo($('#certForm')).click().remove();
 		            } else {
 		            	$.ajax(actionUpdate, {
@@ -270,8 +270,8 @@ $(document).ready(function() {
 			                	hide();
 			                	// Se eliminan los posibles errores anteriores...
 			                	clearValidationResult('certForm');
-			                	// Se obtiene el JSON de los campos con errores de validación
-			                	// y se modifican los estilos/añaden mensajes
+			                	// Se obtiene el JSON de los campos con errores de validacion
+			                	// y se modifican los estilos/anaden mensajes
 			                	var validation = $(data)["0"].responseJSON;
 			                	drawValidationResult(validation.fieldErrors);
 			              

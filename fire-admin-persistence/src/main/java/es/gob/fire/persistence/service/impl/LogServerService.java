@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -18,7 +18,7 @@
  * <b>File:</b><p>es.gob.fire.persistence.service.impl.LogServerService.java.</p> * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for signing documents.</p>
  * <b>Date:</b><p>15/06/2018.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.persistence.service.impl;
@@ -64,12 +64,12 @@ public class LogServerService implements ILogServerService {
 	public LogServer getLogServerByLogServerId(final Long logServerId) {
 		return this.repository.findByLogServerId(logServerId);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.ILogServerService#getLogServerByName(java.lang.String)
 	 */
 	@Override
-	public LogServer getLogServerByName(String name) {		
+	public LogServer getLogServerByName(final String name) {
 		return this.repository.findByName(name);
 	}
 
@@ -88,9 +88,9 @@ public class LogServerService implements ILogServerService {
 	 */
 	@Override
 	public LogServer saveLogServer(final LogServer logServer) {
-		return repository.save(logServer);
+		return this.repository.save(logServer);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.service.ILogServerService#saveLogServer(es.gob.fire.core.dto.LogServerDTO)
@@ -98,18 +98,18 @@ public class LogServerService implements ILogServerService {
 	@Override
 	public LogServer saveLogServer(final LogServerDTO logServerDTO) {
 		LogServer logServer;
-		
+
 		if (logServerDTO.getLogServerId() != null) {
 			logServer = this.repository.findByLogServerId(logServerDTO.getLogServerId());
 		} else {
 			logServer = new LogServer();
 		}
-		
+
 		logServer.setName(logServerDTO.getName());
 		logServer.setUrlService(logServerDTO.getUrlService());
 		logServer.setKey(logServerDTO.getKey());
 		logServer.setVerifySSL(logServerDTO.getVerifySSL());
-		
+
 		return this.repository.save(logServer);
 	}
 
@@ -119,7 +119,7 @@ public class LogServerService implements ILogServerService {
 	 */
 	@Override
 	public void deleteLogServerById(final Long logServerId) {
-		repository.deleteById(logServerId);
+		this.repository.deleteById(logServerId);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class LogServerService implements ILogServerService {
 	 */
 	@Override
 	public Iterable<LogServer> getAllLogServer() {
-		return repository.findAll();
+		return this.repository.findAll();
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class LogServerService implements ILogServerService {
 	 */
 	@Override
 	public DataTablesOutput<LogServer> getAllLogServer(final DataTablesInput input) {
-		return dtRepository.findAll(input);
+		return this.dtRepository.findAll(input);
 	}
 
 }

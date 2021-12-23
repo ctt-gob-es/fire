@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -20,7 +20,7 @@
  * of the differents schemes.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>11/09/2018.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 11/04/2020.
  */
 package es.gob.fire.persistence.service;
@@ -33,7 +33,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.persistence.service.config.*;
+import es.gob.fire.persistence.service.config.ManagerPersistenceConfigurationServices;
 
 /**
  * <p>Manager singleton instance for the use of the persistence services

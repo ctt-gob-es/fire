@@ -21,7 +21,6 @@ import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
-import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Certificate;

@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,7 +19,7 @@
  * <b>Description:</b><p>Class that represents the backing form for adding a user.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>21/06/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.2, 21/05/2021.
  */
 package es.gob.fire.persistence.dto;
@@ -29,13 +29,9 @@ import javax.validation.constraints.Size;
 
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
-import es.gob.fire.persistence.constraint.FieldMatch;
 import es.gob.fire.persistence.dto.validation.CheckItFirst;
 import es.gob.fire.persistence.dto.validation.ThenCheckIt;
-/**
- * Validation annotation to validate that 2 fields have the same value.
- */
-@FieldMatch(first = "password", second = "confirmPassword", message = "{form.valid.user.password.confirm}")
+
 /**
  * <p>Class that represents the backing form for adding a user.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>

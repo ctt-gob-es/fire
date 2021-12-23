@@ -10,50 +10,50 @@ import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.dto.TransactionDTO;
 
 public interface IStatisticsService {
-	
+
 	/**
 	 * @param transactions
 	 * @param field
 	 * @return
 	 */
 	JFreeChart getChartTransactions(List<TransactionDTO> transactions, String field);
-	
-	
+
+
 	/**
 	 * @param signatures
 	 * @param field
 	 * @return
 	 */
-	JFreeChart getChartSignatures(List<SignatureDTO> signatures, String field);	
-	
+	JFreeChart getChartSignatures(List<SignatureDTO> signatures, String field);
+
 	/**
 	 * @param width
 	 * @param height
 	 * @param chartList
 	 * @param stats
-	 * @param tableType: 1 Tipo básico de correctas e incorrectas
+	 * @param tableType: 1 Tipo b&aacute;sico de correctas e incorrectas
 	 * 					 2 Tipo compuesto (simple o lote) de correctas e incorrectas
-	 * 				     3 Tipo tamaños	 
+	 * 				     3 Tipo tama&ntilde;os
 	 * @param title
 	 * @return
 	 * @throws DocumentException
 	 */
 	byte[] writeTransStatAsPDF(int width, int height, List<JFreeChart> chartList, List<TransactionDTO> stats, int tableType, String title) throws DocumentException;
-	
+
 	/**
 	 * @param width
 	 * @param height
 	 * @param chartList
 	 * @param stats
-	 * @param tableType: 1 Tipo básico de correctas e incorrectas
+	 * @param tableType: 1 Tipo b&aacute;sico de correctas e incorrectas
 	 * 					 2 Tipo compuesto (simple o lote) de correctas e incorrectas
-	 * 				     3 Tipo tamaños	 
+	 * 				     3 Tipo tama&ntilde;os
 	 * @param title
 	 * @return
 	 * @throws DocumentException
 	 */
 	byte[] writeTransStatCompositeAsPDF(int width, int height, List<JFreeChart> chartList, List<TransactionDTO> stats, int tableType, List<String> titles) throws DocumentException;
-	
+
 	/**
 	 * @param width
 	 * @param height

@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,17 +14,17 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.core.dto.SignatureDTO.java.</p>
  * <b>Description:</b><p>Class that represents the transfer object and backing form for a log server.</p>
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 14/04/2020.
  */
 package es.gob.fire.persistence.dto;
 
-/** 
+/**
  * <p>Class that represents the transfer object and backing form for a log server.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
  * @version 1.0, 14/04/2020.
@@ -35,17 +35,17 @@ public class SignatureDTO {
 	 * Attribute that represents the value of the application, provider, format or improved format signature.
 	 */
 	private String name;
-	
+
 	/**
 	 * Attribute that represents the value of the correct signatures.
 	 */
 	private Integer corrects;
-	
+
 	/**
 	 * Attribute that represents the value of the incorrect signatures.
 	 */
 	private Integer incorrects;
-	
+
 	/**
 	 * Attribute that represents the value of the total signatures.
 	 */
@@ -57,9 +57,9 @@ public class SignatureDTO {
 		this.incorrects = incorrects;
 		this.total = total;
 	}
-	
+
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(final String nameP) {
@@ -67,7 +67,7 @@ public class SignatureDTO {
 	}
 
 	public Integer getCorrects() {
-		return corrects;
+		return this.corrects;
 	}
 
 	public void setCorrects(final Integer correctsP) {
@@ -75,7 +75,7 @@ public class SignatureDTO {
 	}
 
 	public Integer getIncorrects() {
-		return incorrects;
+		return this.incorrects;
 	}
 
 	public void setIncorrects(final Integer incorrectsP) {
@@ -83,7 +83,7 @@ public class SignatureDTO {
 	}
 
 	public Integer getTotal() {
-		return total;
+		return this.total;
 	}
 
 	public void setTotal(final Integer totalP) {

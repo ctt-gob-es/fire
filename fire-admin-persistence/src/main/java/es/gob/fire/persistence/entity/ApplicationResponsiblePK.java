@@ -1,12 +1,12 @@
 /*
  * Este fichero forma parte de la plataforma de @firma.
- * La plataforma de @firma es de libre distribución cuyo código fuente puede ser consultado
+ * La plataforma de @firma es de libre distribucion cuyo codigo fuente puede ser consultado
  * y descargado desde http://administracionelectronica.gob.es
  *
- * Copyright 2005-2019 Gobierno de España
- * Este fichero se distribuye bajo las licencias EUPL versión 1.1, según las
- * condiciones que figuran en el fichero 'LICENSE.txt' que se acompaña.  Si se   distribuyera este
- * fichero individualmente, deben incluirse aquí las condiciones expresadas allí.
+ * Copyright 2005-2019 Gobierno de Espana
+ * Este fichero se distribuye bajo las licencias EUPL version 1.1, segun las
+ * condiciones que figuran en el fichero 'LICENSE.txt' que se acompana.  Si se   distribuyera este
+ * fichero individualmente, deben incluirse aqui las condiciones expresadas alli.
  */
 
 /**
@@ -14,7 +14,7 @@
  * <b>Description:</b><p>Class that represents the Primary Key for the <i>X_APPLICATION_RESOPNSIBLE</i> database table.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * <b>Date:</b><p>20/10/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 20/10/2020.
  */
 package es.gob.fire.persistence.entity;
@@ -35,7 +35,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 public class ApplicationResponsiblePK implements Serializable {
 
 	/**
-	 * Constant attribute that represents the serial version UID. 
+	 * Constant attribute that represents the serial version UID.
 	 */
 	private static final long serialVersionUID = 8005230868092969909L;
 
@@ -58,7 +58,7 @@ public class ApplicationResponsiblePK implements Serializable {
 	@Column(name = "id_aplicaciones", nullable = false, precision = NumberConstants.NUM19)
 	public String getIdApplication() {
 		// CHECKSTYLE:ON
-		return idApplication;
+		return this.idApplication;
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class ApplicationResponsiblePK implements Serializable {
 	 */
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
-	public void setIdApplication(String idApplicationParam) {
+	public void setIdApplication(final String idApplicationParam) {
 		// CHECKSTYLE:ON
 		this.idApplication = idApplicationParam;
 	}
@@ -81,7 +81,7 @@ public class ApplicationResponsiblePK implements Serializable {
 	@Column(name = "id_responsables", nullable = false, precision = NumberConstants.NUM19)
 	public Long getIdResponsible() {
 		// CHECKSTYLE:ON
-		return idResponsible;
+		return this.idResponsible;
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class ApplicationResponsiblePK implements Serializable {
 	 */
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
-	public void setIdResponsible(Long idResponsibleParam) {
+	public void setIdResponsible(final Long idResponsibleParam) {
 		// CHECKSTYLE:ON
 		this.idResponsible = idResponsibleParam;
 	}
@@ -106,8 +106,8 @@ public class ApplicationResponsiblePK implements Serializable {
 		// CHECKSTYLE:ON
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((idApplication == null) ? 0 : idApplication.hashCode());
-		result = prime * result + ((idResponsible == null) ? 0 : idResponsible.hashCode());
+		result = prime * result + (this.idApplication == null ? 0 : this.idApplication.hashCode());
+		result = prime * result + (this.idResponsible == null ? 0 : this.idResponsible.hashCode());
 		return result;
 	}
 
@@ -118,7 +118,7 @@ public class ApplicationResponsiblePK implements Serializable {
 	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
 	// because Hibernate JPA needs not final access methods.
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		// CHECKSTYLE:ON
 		if (this == obj) {
 			return true;
@@ -129,19 +129,19 @@ public class ApplicationResponsiblePK implements Serializable {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		ApplicationResponsiblePK other = (ApplicationResponsiblePK) obj;
-		if (idApplication == null) {
+		final ApplicationResponsiblePK other = (ApplicationResponsiblePK) obj;
+		if (this.idApplication == null) {
 			if (other.idApplication != null) {
 				return false;
 			}
-		} else if (!idApplication.equals(other.idApplication)) {
+		} else if (!this.idApplication.equals(other.idApplication)) {
 			return false;
 		}
-		if (idResponsible == null) {
+		if (this.idResponsible == null) {
 			if (other.idResponsible != null) {
 				return false;
 			}
-		} else if (!idResponsible.equals(other.idResponsible)) {
+		} else if (!this.idResponsible.equals(other.idResponsible)) {
 			return false;
 		}
 		return true;

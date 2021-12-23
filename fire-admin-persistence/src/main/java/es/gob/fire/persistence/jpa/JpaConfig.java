@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.jpa.JpaConfig.java.</p>
  * <b>Description:</b><p>Class that manages the data base configuration.</p>
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>01/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 01/04/2020.
  */
 package es.gob.fire.persistence.jpa;
@@ -31,6 +31,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.codec.binary.StringUtils;
+import org.hibernate.cfg.AvailableSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +51,7 @@ import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.FileUtilsDirectory;
 import es.gob.fire.commons.utils.UtilsServer;
 
-/** 
+/**
  * <p>Class that manages the data base configuration.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
  * @version 1.0, 01/04/2020.
@@ -112,44 +113,44 @@ public class JpaConfig {
 	 */
 	@Bean
 	public DataSource configureDataSource() {
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName(driver);
-		dataSource.setUrl(url);
-		dataSource.setUsername(user);
-		dataSource.setPassword(pass);
+		final DriverManagerDataSource dataSource = new DriverManagerDataSource();
+		dataSource.setDriverClassName(this.driver);
+		dataSource.setUrl(this.url);
+		dataSource.setUsername(this.user);
+		dataSource.setPassword(this.pass);
 		return dataSource;
 	}
 
 	/**
 	 * Method that configures the entity manager factory.
-	 * 
+	 *
 	 * @return EntityManagerFactory
 	 */
 	@Bean(name = "entityManagerFactory")
 	public EntityManagerFactory configureEntityManagerFactory() throws SQLException {
-		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+		final LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
 		entityManagerFactoryBean.setDataSource(configureDataSource());
 		entityManagerFactoryBean.setPackagesToScan(Constants.MAIN_PERSISTENCE_PROJECT_PACKAGE);
 		entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-		Properties jpaProperties = new Properties();
-		if (StringUtils.equals(dialect, MYSQL_DIALECT)) {
+		final Properties jpaProperties = new Properties();
+		if (StringUtils.equals(this.dialect, MYSQL_DIALECT)) {
 			entityManagerFactoryBean.setMappingResources("file:///"+FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), CONF_IDENTITY_MYSQL));
-			jpaProperties.put(org.hibernate.cfg.Environment.GLOBALLY_QUOTED_IDENTIFIERS, Boolean.TRUE);
+			jpaProperties.put(AvailableSettings.GLOBALLY_QUOTED_IDENTIFIERS, Boolean.TRUE);
 			//jpaProperties.put("spring.jpa.hibernate.naming.implicit-strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl");
 			//jpaProperties.put("spring.jpa.hibernate.naming.physical-strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
 		}
-		jpaProperties.put(org.hibernate.cfg.Environment.DIALECT, dialect);
-		jpaProperties.put(org.hibernate.cfg.Environment.SHOW_SQL, showSQL);
-		
+		jpaProperties.put(AvailableSettings.DIALECT, this.dialect);
+		jpaProperties.put(AvailableSettings.SHOW_SQL, this.showSQL);
+
 		entityManagerFactoryBean.setJpaProperties(jpaProperties);
 		entityManagerFactoryBean.afterPropertiesSet();
-		
+
 		return entityManagerFactoryBean.getObject();
 	}
 
 	/**
 	 * Method that registers a property.
-	 * 
+	 *
 	 * @return PlatformTransactionManager
 	 */
 	@Bean(name = "transactionManager")
@@ -159,7 +160,7 @@ public class JpaConfig {
 
 	/**
 	 * Method that registers a property.
-	 * 
+	 *
 	 * @return HibernateExceptionTranslator
 	 */
 	@Bean(name = "hibernateExceptionTranslator")
@@ -172,7 +173,7 @@ public class JpaConfig {
 	 * @return the value of the attribute {@link #driver}.
 	 */
 	public String getDriver() {
-		return driver;
+		return this.driver;
 	}
 
 	/**
@@ -188,7 +189,7 @@ public class JpaConfig {
 	 * @return the value of the attribute {@link #url}.
 	 */
 	public String getUrl() {
-		return url;
+		return this.url;
 	}
 
 	/**
@@ -204,7 +205,7 @@ public class JpaConfig {
 	 * @return the value of the attribute {@link #user}.
 	 */
 	public String getUser() {
-		return user;
+		return this.user;
 	}
 
 	/**
@@ -220,7 +221,7 @@ public class JpaConfig {
 	 * @return the value of the attribute {@link #pass}.
 	 */
 	public String getPass() {
-		return pass;
+		return this.pass;
 	}
 
 	/**
@@ -236,7 +237,7 @@ public class JpaConfig {
 	 * @return the value of the attribute {@link #dialect}.
 	 */
 	public String getDialect() {
-		return dialect;
+		return this.dialect;
 	}
 
 	/**
@@ -252,7 +253,7 @@ public class JpaConfig {
 	 * @return the value of the attribute {@link #showSQL}.
 	 */
 	public boolean isShowSQL() {
-		return showSQL;
+		return this.showSQL;
 	}
 
 	/**

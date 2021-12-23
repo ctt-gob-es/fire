@@ -1,4 +1,4 @@
-// Copyright (C) 2012-13 MINHAP, Gobierno de España
+// Copyright (C) 2012-13 MINHAP, Gobierno de Espa&ntilde;a
 // This program is licensed and may be used, modified and redistributed under the terms
 // of the European Public License (EUPL), either version 1.1 or (at your
 // option) any later version as soon as they are approved by the European Commission.
@@ -16,7 +16,7 @@
  * <b>Description:</b><p>Class that represents handlers used in the service invoker.</p>
  * <b>Project:</b><p>Library for the integration with the services of @Firma, eVisor and TS@.</p>
  * <b>Date:</b><p>03/10/2011.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 04/03/2020.
  */
 package es.gob.fire.upgrade.afirma.ws;

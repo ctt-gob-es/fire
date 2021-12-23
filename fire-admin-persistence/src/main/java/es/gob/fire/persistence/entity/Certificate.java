@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,29 +19,22 @@
  * <b>Description:</b><p>Class that maps the <i>CERTIFICATE</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>01/08/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 18/09/2018.
  */
 package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
-import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -79,8 +72,6 @@ public class Certificate implements Serializable {
 	 @JsonFormat(pattern="yyyy-MM-dd HH:mm")
 	private Date fechaAlta;
 
-
-	
 	/**
 	 * Attribute that represents the certPrincipal.
 	 */
@@ -90,19 +81,18 @@ public class Certificate implements Serializable {
 	 * Attribute that represents the certBackup.
 	 */
 	private String certBackup;
-	
+
 	/**
 	 * Attribute that represents the huellaPrincipal.
 	 */
 	private String huellaPrincipal;
-	
+
 	/**
 	 * Attribute that represents the huellaBackup.
 	 */
 	private String huellaBackup;
-	
-    
-	
+
+
 	/**
 	 * Gets the value of the attribute {@link #idKeystore}.
 	 * @return the value of the attribute {@link #idKeystore}.
@@ -113,14 +103,14 @@ public class Certificate implements Serializable {
 	@GenericGenerator(name = "tb_certificados_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_CERTIFICADOS_SEQ"), @Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
 	@JsonView(DataTablesOutput.View.class)
 	public Long getIdCertificado() {
-		return idCertificado;
+		return this.idCertificado;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #idCertificate}.
 	 * @param idKeystoreParam The value for the attribute {@link #idCertificate}.
 	 */
-	public void setIdCertificado(Long idCertParam) {
+	public void setIdCertificado(final Long idCertParam) {
 		this.idCertificado = idCertParam;
 	}
 
@@ -131,14 +121,14 @@ public class Certificate implements Serializable {
 	@Column(name = "NOMBRE_CERT", nullable = false, length = NumberConstants.NUM45)
 	@JsonView(DataTablesOutput.View.class)
 	public String getCertificateName() {
-		return certificateName;
+		return this.certificateName;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #name}.
 	 * @param nameParam The value for the attribute {@link #name}.
 	 */
-	public void setCertificateName(String nombreParam) {
+	public void setCertificateName(final String nombreParam) {
 		this.certificateName = nombreParam;
 	}
 	/**
@@ -148,18 +138,18 @@ public class Certificate implements Serializable {
 	@Column(name = "FEC_ALTA", nullable = false, length = NumberConstants.NUM19)
 	@JsonView(DataTablesOutput.View.class)
 	public Date getfechaAlta() {
-		return fechaAlta;
+		return this.fechaAlta;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #fechaAlta}.
 	 * @param fechaAltaParam The value for the attribute {@link #fechaAlta}.
 	 */
-	public void setfechaAlta(Date fechaAltaParam) {
+	public void setFechaAlta(final Date fechaAltaParam) {
 		this.fechaAlta = fechaAltaParam;
 	}
-	
-	
+
+
 
 	/**
 	 * Gets the value of the attribute {@link #certPrincipal}.
@@ -168,15 +158,15 @@ public class Certificate implements Serializable {
 	@Column(name = "CERT_PRINCIPAL", nullable = false, length = NumberConstants.NUM5000)
 	@JsonView(DataTablesOutput.View.class)
 	public String getCertPrincipal() {
-		return certPrincipal;
+		return this.certPrincipal;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #certPrincipal}.
 	 * @param keystoreTypeParam The value for the attribute {@link #certPrincipal}.
 	 */
-	
-	public void setCertPrincipal (String certPrincipalParam) {
+
+	public void setCertPrincipal (final String certPrincipalParam) {
 		this.certPrincipal = certPrincipalParam;
 	}
 
@@ -187,14 +177,14 @@ public class Certificate implements Serializable {
 	@Column(name = "CERT_BACKUP", nullable = false, precision = NumberConstants.NUM5000)
 	@JsonView(DataTablesOutput.View.class)
 	public String getCertBackup() {
-		return certBackup;
+		return this.certBackup;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #certBackup}.
 	 * @param versionParam The value for the attribute {@link #certBackup}.
 	 */
-	public void setCertBackup(String certBackupParam) {
+	public void setCertBackup(final String certBackupParam) {
 		this.certBackup = certBackupParam;
 	}
 
@@ -205,15 +195,15 @@ public class Certificate implements Serializable {
 	@Column(name = "HUELLA_PRINCIPAL", nullable = false, length = NumberConstants.NUM50)
 	@JsonView(DataTablesOutput.View.class)
 	public String getHuellaPrincipal() {
-		return huellaPrincipal;
+		return this.huellaPrincipal;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #huellaPrincipal}.
 	 * @param huellaPrincipalParam The value for the attribute {@link #huellaPrincipal}.
 	 */
-	
-	public void setHuellaPrincipal (String huellaPrincipalParam) {
+
+	public void setHuellaPrincipal (final String huellaPrincipalParam) {
 		this.huellaPrincipal = huellaPrincipalParam;
 	}
 
@@ -224,19 +214,19 @@ public class Certificate implements Serializable {
 	@Column(name = "HUELLA_BACKUP", nullable = false, precision = NumberConstants.NUM19)
 	@JsonView(DataTablesOutput.View.class)
 	public String getHuellaBackup() {
-		return huellaBackup;
+		return this.huellaBackup;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #huellaBackup}.
 	 * @param huellaBackupParam The value for the attribute {@link #huellaBackup}.
 	 */
-	public void setHuellaBackup(String huellaBackupParam) {
+	public void setHuellaBackup(final String huellaBackupParam) {
 		this.huellaBackup = huellaBackupParam;
 	}
 
 
-	
+
 
 
 }

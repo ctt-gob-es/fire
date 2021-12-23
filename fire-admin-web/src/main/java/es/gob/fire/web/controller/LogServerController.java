@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,19 +14,18 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.web.controller.LogServerController.java.</p>
  * <b>Description:</b><p>Class that manages the requests related to the log servers administration.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.web.controller;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,7 +40,7 @@ import es.gob.fire.persistence.entity.LogServer;
 import es.gob.fire.persistence.service.ILogConsumerService;
 import es.gob.fire.persistence.service.ILogServerService;
 
-/** 
+/**
  * <p>Class that manages the requests related to the log servers administration.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.1, 02/06/2021.
@@ -49,11 +48,6 @@ import es.gob.fire.persistence.service.ILogServerService;
 @Controller
 public class LogServerController {
 
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(LogServerController.class);
-	
 	/**
 	 * Attribute that represents the service object for managing the log server.
 	 */
@@ -92,7 +86,7 @@ public class LogServerController {
 	 */
 	@RequestMapping(value = "addlogserver", method = RequestMethod.GET)
 	public String addLogServer(final Model model) {
-		LogServerDTO logServerForm = new LogServerDTO();
+		final LogServerDTO logServerForm = new LogServerDTO();
 		logServerForm.setVerifySSL(Boolean.TRUE);
 		model.addAttribute("logServerForm", logServerForm);
 		//model.addAttribute("verifySSLCheckbox", Boolean.TRUE);
@@ -152,7 +146,7 @@ public class LogServerController {
 		this.logConsumerConnectionDTO.setServerInfo(null, null);
 		return "fragments/logserver.html";
 	}
-	
+
 	/**
 	 * Method that maps the openning file request to the controller, select the
 	 * file and show the log search screen.

@@ -1,4 +1,4 @@
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.web.config.WebConfig.java.</p>
  * <b>Description:</b><p>Class that registers the different beans used in the application.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
@@ -24,7 +24,7 @@ import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.FileUtilsDirectory;
 import es.gob.fire.commons.utils.UtilsServer;
 
-/** 
+/**
  * <p>Class that registers the different beans used in the application.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.0, 14/05/2020
@@ -35,16 +35,10 @@ public class WebConfig implements WebMvcConfigurer {
 
 	/**
 	 * Constant attribute that represents the file name of the configuration
-	 * properties for configure persistence.
+	 * properties for configure.
 	 */
-	private static final String PROPS_CONF_FILE_PERSISTENCE = "persistence.properties";
+	private static final String PROPS_CONF_FILE_GENERAL = "admin_config.properties";
 
-	/**
-	 * Constant attribute that represents the file name of the configuration
-	 * properties for configure the mail.
-	 */
-	private static final String PROPS_CONF_FILE_MAIL = "mail.properties";
-	
 	/**
 	 * Attribute that represents the messages path.
 	 */
@@ -52,15 +46,14 @@ public class WebConfig implements WebMvcConfigurer {
 
 	/**
 	 * Method that registers a property.
-	 * 
+	 *
 	 * @return PropertySourcesPlaceholderConfigurer
 	 */
-	
+
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-		propertySourcesPlaceholderConfigurer.setLocations(new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_PERSISTENCE)),
-														new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_MAIL)));
+		propertySourcesPlaceholderConfigurer.setLocations(new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_GENERAL)));
 		return propertySourcesPlaceholderConfigurer;
 	}
 

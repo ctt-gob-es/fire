@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.repository.datatable.TransactionDataTablesRepository.java.</p>
  * <b>Description:</b><p>Class that represents the transaction data table repository.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>01/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 01/04/2020.
  */
 package es.gob.fire.persistence.repository.datatable;
@@ -28,11 +28,11 @@ import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 
 import es.gob.fire.persistence.entity.Transaction;
 
-/** 
+/**
  * <p>Class that represents the transaction data table repository</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.0, 14/04/2020.
  */
 public interface TransactionDataTablesRepository extends DataTablesRepository<Transaction, Long> {
-
+	// Clase vacia
 }

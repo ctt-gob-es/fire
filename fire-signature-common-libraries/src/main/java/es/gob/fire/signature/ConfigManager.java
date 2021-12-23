@@ -264,7 +264,7 @@ public class ConfigManager {
 	/**
 	 * Recupera el fichero externo de la conexi&oacute;n de un proveedor.
 	 * @param name Nombre del proveedor.
-	 * @return fichero externo o null si no está definido
+	 * @return fichero externo o null si no est&aacute; definido
 	 */
 	public static String getProviderInfoFile(final String name) {
 		// El proveedor local no tiene configuracion externa

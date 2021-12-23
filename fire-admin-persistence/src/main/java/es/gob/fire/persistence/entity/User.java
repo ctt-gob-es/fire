@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.entity.User.java.</p>
  * <b>Description:</b><p>Class that maps the <i>TB_USUARIOS</i> database table as a Plain Old Java Object.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>07/07/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 21/05/2021.
  */
 package es.gob.fire.persistence.entity;
@@ -72,7 +72,7 @@ public class User implements Serializable {
 	 * Attribute that represents the user name.
 	 */
 	private String userName;
-	
+
 	/**
 	 * Attribute that represents the email.
 	 */
@@ -97,27 +97,27 @@ public class User implements Serializable {
 	 * Attribute that represents the phone.
 	 */
 	private String phone;
-	
+
 	/**
 	 * Attribute that represents the startDate.
 	 */
 	private Date startDate;
-	
+
 	/**
 	 * Attribute that represents the root.
 	 */
 	private Boolean root;
-	
+
 	/**
 	 * Attribute that represents the renovationCode.
 	 */
 	private String renovationCode;
-	
+
 	/**
 	 * Attribute that represents the renovationDate.
 	 */
 	private Date renovationDate;
-	
+
 	/**
 	 * Attribute that represents the restPassword.
 	 */
@@ -126,8 +126,8 @@ public class User implements Serializable {
 	/**
 	 * Attribute that represents the rol.
 	 */
-	private Rol rol;	
-		
+	private Rol rol;
+
 	/**
 	 * Gets the value of the attribute {@link #userId}.
 	 * @return the value of the attribute {@link #userId}.
@@ -153,7 +153,7 @@ public class User implements Serializable {
 	 * Gets the value of the attribute {@link #userName}.
 	 * @return the value of the attribute {@link #userName}.
 	 */
-	
+
 	@Column(name = "NOMBRE_USUARIO", nullable = false, length = NumberConstants.NUM30, unique = true)
 	@JsonView(DataTablesOutput.View.class)
 	public String getUserName() {
@@ -185,7 +185,7 @@ public class User implements Serializable {
 	public void setEmail(final String emailP) {
 		this.email = emailP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #phone}.
 	 * @return the value of the attribute {@link #phone}.
@@ -256,7 +256,7 @@ public class User implements Serializable {
 	public void setSurnames(final String surnamesP) {
 		this.surnames = surnamesP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #startDate}.
 	 * @return the value of the attribute {@link #startDate}.
@@ -264,7 +264,7 @@ public class User implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "FEC_ALTA", nullable = false, length = NumberConstants.NUM6)
 	public Date getStartDate() {
-		return startDate;
+		return this.startDate;
 	}
 
 	/**
@@ -281,14 +281,14 @@ public class User implements Serializable {
 	 */
    @Column(name = "USU_DEFECTO", nullable = false)
    public Boolean getRoot() {
-	return root;
+	return this.root;
    }
 
    /**
 	 * Sets the value of the attribute {@link #root}.
 	 * @param rootP The value for the attribute {@link #root}.
 	 */
-   public void setRoot(Boolean rootP) {
+   public void setRoot(final Boolean rootP) {
 	this.root = rootP;
    }
 
@@ -298,7 +298,7 @@ public class User implements Serializable {
 	 */
 	@Column(name = "CODIGO_RENOVACION", nullable = true, unique = true, length = NumberConstants.NUM90)
 	public String getRenovationCode() {
-		return renovationCode;
+		return this.renovationCode;
 	}
 
 	/**
@@ -316,7 +316,7 @@ public class User implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "FEC_RENOVACION", nullable = false, length = NumberConstants.NUM6)
 	public Date getRenovationDate() {
-		return renovationDate;
+		return this.renovationDate;
 	}
 
 	/**
@@ -326,24 +326,24 @@ public class User implements Serializable {
 	public void setRenovationDate(final Date renovationDateP) {
 		this.renovationDate = renovationDateP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #restPassword}.
 	 * @return the value of the attribute {@link #restPassword}.
 	 */
    @Column(name = "REST_CLAVE", nullable = false)
    public Boolean getRestPassword() {
-	return restPassword;
+	return this.restPassword;
    }
 
    /**
 	 * Sets the value of the attribute {@link #restPassword}.
 	 * @param restPasswordP The value for the attribute {@link #restPassword}.
 	 */
-   public void setRestPassword(Boolean restPasswordP) {
+   public void setRestPassword(final Boolean restPasswordP) {
 	this.restPassword = restPasswordP;
    }
-   
+
    /**
 	 * Gets the value of the attribute {@link #rol}.
 	 * @return the value of the attribute {@link #rol}.
@@ -352,7 +352,7 @@ public class User implements Serializable {
 	@JoinColumn(name = "FK_ROL", nullable = false)
 	@JsonView(DataTablesOutput.View.class)
 	public Rol getRol() {
-		return rol;
+		return this.rol;
 	}
 
 	/**
@@ -362,5 +362,5 @@ public class User implements Serializable {
 	public void setRol(final Rol rolP) {
 		this.rol = rolP;
 	}
-	
+
 }

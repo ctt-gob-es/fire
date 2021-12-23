@@ -1,7 +1,7 @@
 
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -20,7 +20,7 @@
  * <b>Description:</b><p>Class that manages the requests related to the Keystore administration.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>18/09/2018.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.3, 06/11/2018.
  */
 package es.gob.fire.web.controller;
@@ -29,10 +29,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.gob.fire.commons.utils.Base64;
-import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.service.ICertificateService;

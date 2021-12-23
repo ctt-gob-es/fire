@@ -34,7 +34,7 @@ public class DbManager {
 	/**
 	 * Inicializa al completo el manejador de base de datos, leyendo el fichero
 	 * de configuraci&oacute;n y recuperando la conexi&oacute;n.
-	 * @return Conexi&oacute;n de base de datos o null si se produce un error.
+	 * @return Conexi&oacute;n de base de datos o {@code null} si se produce un error.
 	 */
 	private static void initialize() {
 

@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.service.CertificateService.java.</p>
  * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 24/05/2021.
  */
 package es.gob.fire.persistence.service.impl;
@@ -61,24 +61,24 @@ import es.gob.fire.persistence.service.ICertificateService;
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class CertificateService implements ICertificateService{
-	
+
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(CertificateService.class);
-	
+
 	/**
 	 * Constant that represents the String X.509.
 	 */
 	private static final String X509 = "X.509";
-	
+
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
 	@Autowired
 	private CertificateRepository repository;
-	
-	
+
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
 	 */
@@ -90,8 +90,8 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.services.ICertificateService#getCertificatetByCertificateId(java.lang.Long)
 	 */
 	@Override
-	public Certificate getCertificateByCertificateId(Long idCertificado) {
-		return repository.findByIdCertificado(idCertificado);
+	public Certificate getCertificateByCertificateId(final Long idCertificado) {
+		return this.repository.findByIdCertificado(idCertificado);
 	}
 
 	/**
@@ -99,27 +99,27 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.services.ICertificateService#saveCertificate(es.gob.fire.persistence.entity.Certificate)
 	 */
 	@Override
-	public Certificate saveCertificate(Certificate certificate) {
-		return repository.save(certificate);
+	public Certificate saveCertificate(final Certificate certificate) {
+		return this.repository.save(certificate);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.ICertificateService#deleteCertificate(java.lang.Long)
 	 */
 	@Override
 	@Transactional
-	public void deleteCertificate(Long IdCertificate) {
-		repository.deleteById(IdCertificate);
+	public void deleteCertificate(final Long IdCertificate) {
+		this.repository.deleteById(IdCertificate);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.ICertificateService#getAllCertificate()
 	 */
 	@Override
 	public List<Certificate> getAllCertificate() {
-		return repository.findAll();
+		return this.repository.findAll();
 	}
 
 	/**
@@ -128,15 +128,15 @@ public class CertificateService implements ICertificateService{
 	 */
 	@Override
 	public Certificate getCertificateByCertificateName(final String nombre_cert) {
-		return repository.findByCertificateName(nombre_cert);
+		return this.repository.findByCertificateName(nombre_cert);
 	}
 
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.ICertificateService#saveCertificate(es.gob.fire.persistence.dto.CertificateDTO)
 	 */
 	@Override
-	public Certificate saveCertificate(CertificateDTO certificateDto) throws IOException {
-		
+	public Certificate saveCertificate(final CertificateDTO certificateDto) throws IOException {
+
 		Certificate newCertificate = null;
 
 		// Calculamos la huella de los certificados
@@ -156,45 +156,46 @@ public class CertificateService implements ICertificateService{
 				certificateDto.setHuellaBackup(Base64.encode(digest));
 				certificateDto.setCertBackup(Base64.encode(certificateDto.getCertBytes2()));
 			}
-			
-		} catch (NoSuchAlgorithmException e) {
+
+		} catch (final NoSuchAlgorithmException e) {
 			LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e);
 		}
-		
+
 		newCertificate = certificateDtoToEntity(certificateDto);
-		newCertificate.setfechaAlta(new Date());
-		
-		newCertificate = repository.save(newCertificate);
+		newCertificate.setFechaAlta(new Date());
+
+		newCertificate = this.repository.save(newCertificate);
 
 		return newCertificate;
 	}
-		
-	
+
+
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.ICertificateService#certificateDtoToEntity(es.gob.fire.persistence.dto.CertificateDTO)
 	 */
-	public Certificate certificateDtoToEntity(CertificateDTO certificateDto) {
-		
-		Certificate certificate = new Certificate();
-		
+	@Override
+	public Certificate certificateDtoToEntity(final CertificateDTO certificateDto) {
+
+		final Certificate certificate = new Certificate();
+
 		certificate.setIdCertificado(certificateDto.getIdCertificate());
 		certificate.setCertificateName(certificateDto.getAlias());
 		certificate.setCertPrincipal(certificateDto.getCertPrincipal());
 		certificate.setCertBackup(certificateDto.getCertBackup());
 		certificate.setHuellaPrincipal(certificateDto.getHuellaPrincipal());
 		certificate.setHuellaBackup(certificateDto.getHuellaBackup());
-			
+
 		return certificate;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.ICertificateService#certificateEntityToDtoTo(es.gob.fire.persistence.entity.Certificate)
 	 */
 	@Override
-	public CertificateDTO certificateEntityToDto(Certificate certificate) {
-		
-		CertificateDTO certificateDto = new CertificateDTO();
-		
+	public CertificateDTO certificateEntityToDto(final Certificate certificate) {
+
+		final CertificateDTO certificateDto = new CertificateDTO();
+
 		certificateDto.setIdCertificate(certificate.getIdCertificado());
 		certificateDto.setAlias(certificate.getCertificateName());
 		certificateDto.setCertPrincipal(certificate.getCertPrincipal());
@@ -203,20 +204,20 @@ public class CertificateService implements ICertificateService{
 		certificateDto.setHuellaBackup(certificate.getHuellaBackup());
 		certificateDto.setCertPrincipalB64(certificate.getCertPrincipal());
 		certificateDto.setCertBackupB64(certificate.getCertBackup());
-				
+
 		return certificateDto;
-	}	
+	}
 
 	@Override
-	public List<Certificate> getAllCertificate(List input) {
+	public List<Certificate> getAllCertificate(final List input) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public DataTablesOutput<Certificate> certificatesDataTable(DataTablesInput input) {
-		
-		return dtRepository.findAll(input);
+	public DataTablesOutput<Certificate> certificatesDataTable(final DataTablesInput input) {
+
+		return this.dtRepository.findAll(input);
 	}
 
 
@@ -224,65 +225,60 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.service.ICertificateService#getSubjectValuesForView(java.util.List)
 	 */
 	@Override
-	public void getSubjectValuesForView(List<Certificate> certificates) {
-		
+	public void getSubjectValuesForView(final List<Certificate> certificates) {
+
 		X509Certificate x509CertPrincipal = null;
 		X509Certificate x509CertBackup = null;
-		
-		
-		for (Certificate certificate : certificates) {
+
+		for (final Certificate certificate : certificates) {
 			try {
-				
+
 				if (certificate.getCertPrincipal() != null && !certificate.getCertPrincipal().isEmpty()) {
-				
+
 					x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertPrincipal())));
 				} else {
 					x509CertPrincipal = null;
 				}
-				
-			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+			} catch (final IOException e) {
+				LOGGER.error("No se ha podido leer el certificado: " + e);
+			} catch (final CertificateException e) {
+				LOGGER.error("Los datos proporcionados no se corresponden con un certificado: " + e);
 			}
+
 			try {
-				
+
 				if (certificate.getCertBackup() != null && !certificate.getCertBackup().isEmpty()) {
 					x509CertBackup = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertBackup())));
 				} else {
 					x509CertBackup = null;
 				}
-				
-				
-			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+			} catch (final IOException e) {
+				LOGGER.error("No se ha podido leer el certificado: " + e);
+			} catch (final CertificateException e) {
+				LOGGER.error("Los datos proporcionados no se corresponden con un certificado: " + e);
 			}
-			
+
 			java.util.Date expDatePrincipal = new java.util.Date();
-			
+
 			if (x509CertPrincipal != null) {
 				expDatePrincipal = x509CertPrincipal.getNotAfter();
-				String certSubject = x509CertPrincipal.getSubjectX500Principal().getName();
+				final String certSubject = x509CertPrincipal.getSubjectX500Principal().getName();
 				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				String[] txtCert = certSubject.split(",");
+				final String[] txtCert = certSubject.split(",");
 				certificate.setCertPrincipal(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
 			} else {
 				certificate.setCertPrincipal("");
 			}
-			
+
 			if (x509CertBackup != null) {
-				
+
 				expDatePrincipal = x509CertBackup.getNotAfter();
-				String certSubject = x509CertBackup.getSubjectX500Principal().getName();
+				final String certSubject = x509CertBackup.getSubjectX500Principal().getName();
 				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				String[] txtCert = certSubject.split(",");
-				certificate.setCertBackup(txtCert[0] + "</br> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));				
+				final String[] txtCert = certSubject.split(",");
+				certificate.setCertBackup(txtCert[0] + "</br> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
 			} else {
 				certificate.setCertBackup("");
 			}
@@ -293,12 +289,12 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.service.ICertificateService#getFormatCertText(java.io.InputStream)
 	 */
 	@Override
-	public String getFormatCertText(InputStream certIs) throws CertificateException {
-		
+	public String getFormatCertText(final InputStream certIs) throws CertificateException {
+
 		X509Certificate cert = null;
-		
+
 		cert = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(certIs);
-		
+
 		String txtCert = null;
 		if (cert != null) {
 			final Date expDate = cert.getNotAfter();
@@ -307,23 +303,23 @@ public class CertificateService implements ICertificateService{
 
 		String certData = "";
 		if (txtCert != null) {
-			
+
 			final String[] datCertificate=txtCert.split(",");
-			
+
 			for (int i = 0; i <= datCertificate.length-1; i++){
 				certData += datCertificate[i] + "</br>";
 			}
-			
+
 		}
 		else {
 			certData = "Error";
 		}
-		
+
 		return certData;
 	}
 
 	@Override
-	public String getCertificateText(String certificate) {
+	public String getCertificateText(final String certificate) {
 
 		String certText = "";
 
@@ -332,17 +328,15 @@ public class CertificateService implements ICertificateService{
 
 				certText = getFormatCertText(certIs);
 
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (final IOException e) {
+				LOGGER.error("No se ha podido leer el certificado: " + e);
+			} catch (final CertificateException e) {
+				LOGGER.error("Los datos proporcionados no se corresponden con un certificado: " + e);
 			}
 		}
 
 		return certText;
 
 	}
-	
+
 }

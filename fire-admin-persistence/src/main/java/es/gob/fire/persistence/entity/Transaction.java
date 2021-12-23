@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.entity.Transaction.java.</p>
  * <b>Description:</b><p>Class that maps the <i>TB_TRANSACCIONES</i> database table as a Plain Old Java Object.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 14/04/2020.
  */
 package es.gob.fire.persistence.entity;
@@ -57,7 +57,7 @@ import es.gob.fire.commons.utils.NumberConstants;
  * <p>
  * Application for signing documents of @firma suite systems.
  * </p>
- * 
+ *
  * @version 1.0, 14/04/2020.
  */
 @Entity
@@ -105,7 +105,7 @@ public class Transaction implements Serializable {
 	 * Attribute that represents the transaction correct.
 	 */
 	private Boolean correct;
-	
+
 	/**
 	 * Attribute that represents the transaction incorrect.
 	 */
@@ -149,7 +149,7 @@ public class Transaction implements Serializable {
 	@Column(name = "FECHA", nullable = false, length = NumberConstants.NUM6)
 	@NotNull
 	public Date getDate() {
-		return date;
+		return this.date;
 	}
 
 	/**
@@ -225,7 +225,7 @@ public class Transaction implements Serializable {
 	@Column(name = "PROVEEDOR_FORZADO", nullable = false, precision = 1)
 	@NotNull
 	public Boolean getForcedProvider() {
-		return forcedProvider;
+		return this.forcedProvider;
 	}
 
 	/**
@@ -244,7 +244,7 @@ public class Transaction implements Serializable {
 	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public Boolean getCorrect() {
-		return correct;
+		return this.correct;
 	}
 
 	/**
@@ -254,14 +254,14 @@ public class Transaction implements Serializable {
 	public void setCorrect(final Boolean correctP) {
 		this.correct = correctP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #incorrect}.
 	 * @return the value of the attribute {@link #incorrect}.
 	 */
 	@Transient
 	public Boolean getIncorrect() {
-		return incorrect;
+		return this.incorrect;
 	}
 
 	/**
@@ -280,7 +280,7 @@ public class Transaction implements Serializable {
 	@Size(max = NumberConstants.NUM11)
 	@NotNull
 	public Long getSize() {
-		return size;
+		return this.size;
 	}
 
 	/**
@@ -290,7 +290,7 @@ public class Transaction implements Serializable {
 	public void setSize(final Long sizeP) {
 		this.size = sizeP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #total}.
 	 * @return the value of the attribute {@link #total}.
@@ -299,7 +299,7 @@ public class Transaction implements Serializable {
 	@Size(max = NumberConstants.NUM11)
 	@NotNull
 	public Long getTotal() {
-		return total;
+		return this.total;
 	}
 
 	/**

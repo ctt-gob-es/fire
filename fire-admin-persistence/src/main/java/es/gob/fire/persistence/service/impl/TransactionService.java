@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,7 +19,7 @@
  * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for signing documents.</p>
  * <b>Date:</b><p>15/06/2018.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 15/06/2018.
  */
 package es.gob.fire.persistence.service.impl;
@@ -54,7 +54,7 @@ import es.gob.fire.persistence.service.ITransactionService;
  * Platform for detection and validation of certificates recognized in European
  * TSL.
  * </p>
- * 
+ *
  * @version 1.0, 15/06/2018.
  */
 @Service
@@ -83,7 +83,7 @@ public class TransactionService implements ITransactionService {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.service.ITransactionService#getTransactionByTransactionId(java.lang.Long)
 	 */
 	@Override
@@ -93,15 +93,16 @@ public class TransactionService implements ITransactionService {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.service.ITransactionService#getTransactionsByApplication(java.lang.Integer,
 	 *      java.lang.Integer)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<TransactionDTO> getTransactionsByApplication(final Integer month, final Integer year) {
 		List<TransactionDTO> transactions = null;
-		Query nativeQuery = entityManager.createNativeQuery(
-				"select  t.aplicacion, " 
+		final Query nativeQuery = this.entityManager.createNativeQuery(
+				"select  t.aplicacion, "
 						+ " sum(case when t.correcta = '1' then total else 0 end) as corrects, "
 						+ " sum(case when t.correcta = '0' then total else 0 end) as incorrects "
 						+ " from tb_transacciones t"
@@ -111,7 +112,7 @@ public class TransactionService implements ITransactionService {
 		nativeQuery.setParameter(1, month);
 		nativeQuery.setParameter(2, year);
 
-		List<Object[]> results = nativeQuery.getResultList();
+		final List<Object[]> results = nativeQuery.getResultList();
 
 		transactions = results.stream()
 				.map(result -> new TransactionDTO((String) result[0], ((BigDecimal) result[1]).intValue(),
@@ -123,15 +124,16 @@ public class TransactionService implements ITransactionService {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.service.ITransactionService#getTransactionsByProvider(java.lang.Integer,
 	 *      java.lang.Integer)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<TransactionDTO> getTransactionsByProvider(final Integer month, final Integer year) {
 		List<TransactionDTO> transactions = null;
-		Query nativeQuery = entityManager.createNativeQuery(
-				"select  t.proveedor, " 
+		final Query nativeQuery = this.entityManager.createNativeQuery(
+				"select  t.proveedor, "
 						+ " sum(case when t.correcta = '1' then total else 0 end) as corrects, "
 						+ " sum(case when t.correcta = '0' then total else 0 end) as incorrects "
 						+ " from tb_transacciones t"
@@ -141,7 +143,7 @@ public class TransactionService implements ITransactionService {
 		nativeQuery.setParameter(1, month);
 		nativeQuery.setParameter(2, year);
 
-		List<Object[]> results = nativeQuery.getResultList();
+		final List<Object[]> results = nativeQuery.getResultList();
 
 		transactions = results.stream()
 				.map(result -> new TransactionDTO((String) result[0], ((BigDecimal) result[1]).intValue(),
@@ -150,18 +152,19 @@ public class TransactionService implements ITransactionService {
 
 		return transactions;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.service.ITransactionService#getTransactionsByDatesSizeApp(java.lang.Integer,
 	 *      java.lang.Integer)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<TransactionDTO> getTransactionsByDatesSizeApp(final Integer month, final Integer year) {
 		List<TransactionDTO> transactions = null;
-		Query nativeQuery = entityManager.createNativeQuery(
-				"select t.aplicacion, " 
+		final Query nativeQuery = this.entityManager.createNativeQuery(
+				"select t.aplicacion, "
 						+ "sum(t.tamanno) as sizeBytes "
 						+ "from tb_transacciones t "
 						+ "where extract(month from t.fecha) = ? and extract(year from t.fecha) = ? "
@@ -170,26 +173,27 @@ public class TransactionService implements ITransactionService {
 		nativeQuery.setParameter(1, month);
 		nativeQuery.setParameter(2, year);
 
-		List<Object[]> results = nativeQuery.getResultList();
+		final List<Object[]> results = nativeQuery.getResultList();
 
 		transactions = results.stream()
 				.map(result -> new TransactionDTO((String) result[0], Math.floor(((BigDecimal) result[1]).intValue() / (1024 * 1024.0) * 100) / 100))
 				.collect(Collectors.toList());
-		
+
 		return transactions;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.service.ITransactionService#getTransactionsByOperation(java.lang.Integer,
 	 *      java.lang.Integer)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<TransactionDTO> getTransactionsByOperation(final Integer month, final Integer year) {
 		List<TransactionDTO> transactions = null;
-		Query nativeQuery = entityManager.createNativeQuery(
-				"select t.aplicacion, " 
+		final Query nativeQuery = this.entityManager.createNativeQuery(
+				"select t.aplicacion, "
 						+ "sum(case when t.operacion = 'SIGN' then (case when t.correcta = '1' then t.total else 0 end) else 0 end ) as correctSimpleSignatures, "
 						+ "sum(case when t.operacion = 'SIGN' then (case when t.correcta = '0' then t.total else 0 end) else 0 end ) as incorrectSimpleSignatures, "
 						+ "sum(case when t.operacion = 'BATCH' then (case when t.correcta = '1' then t.total else 0 end) else 0 end ) as correctBatchSignatures, "
@@ -201,55 +205,55 @@ public class TransactionService implements ITransactionService {
 		nativeQuery.setParameter(1, month);
 		nativeQuery.setParameter(2, year);
 
-		List<Object[]> results = nativeQuery.getResultList();
+		final List<Object[]> results = nativeQuery.getResultList();
 
 		transactions = results.stream()
-				.map(result -> new TransactionDTO((String) result[0], ((BigDecimal) result[1]).intValue(), 
+				.map(result -> new TransactionDTO((String) result[0], ((BigDecimal) result[1]).intValue(),
 						((BigDecimal) result[2]).intValue(), ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue(),
 						((BigDecimal) result[3]).intValue(), ((BigDecimal) result[4]).intValue(), ((BigDecimal) result[3]).intValue() + ((BigDecimal) result[4]).intValue()))
 				.collect(Collectors.toList());
 
 		return transactions;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.services.ITransactionService#saveTransaction(es.gob.fire.persistence.model.entity.Transaction)
 	 */
 	@Override
 	public Transaction saveTransaction(final Transaction transaction) {
-		return repository.save(transaction);
+		return this.repository.save(transaction);
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.services.ITransactionService#deleteTransaction(java.lang.Long)
 	 */
 	@Override
 	public void deleteTransactionById(final Long transactionId) {
-		repository.deleteById(transactionId);
+		this.repository.deleteById(transactionId);
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.services.ITransactionService#getAllTransaction()
 	 */
 	@Override
 	public Iterable<Transaction> getAllTransaction() {
-		return repository.findAll();
+		return this.repository.findAll();
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @see es.gob.fire.persistence.services.ITransactionService#findAll(org.springframework.data.jpa.datatables.mapping.DataTablesInput)
 	 */
 	@Override
 	public DataTablesOutput<Transaction> getAllTransaction(final DataTablesInput input) {
-		return dtRepository.findAll(input);
+		return this.dtRepository.findAll(input);
 	}
 
 }

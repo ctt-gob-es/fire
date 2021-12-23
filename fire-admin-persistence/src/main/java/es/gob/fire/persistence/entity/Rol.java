@@ -1,6 +1,6 @@
 /* 
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,7 +19,7 @@
  * <b>Description:</b><p>Class that maps the <i>TB_ROLES</i> database table as a Plain Old Java Object.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>07/07/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 07/07/2020.
  */
 package es.gob.fire.persistence.entity;
@@ -39,10 +39,9 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import es.gob.fire.commons.utils.NumberConstants;
-
-import com.fasterxml.jackson.annotation.JsonView;
 
 /**
  * <p>Class that maps the <i>TB_ROLES</i> database table as a Plain Old Java Object.</p>

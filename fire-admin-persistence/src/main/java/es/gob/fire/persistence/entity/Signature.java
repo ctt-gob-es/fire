@@ -1,6 +1,6 @@
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -14,12 +14,12 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.entity.Signature.java.</p>
  * <b>Description:</b><p>Class that maps the <i>TB_FIRMAS</i> database table as a Plain Old Java Object.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 14/04/2020.
  */
 package es.gob.fire.persistence.entity;
@@ -57,7 +57,7 @@ import es.gob.fire.commons.utils.NumberConstants;
  * <p>
  * Application for signing documents of @firma suite systems.
  * </p>
- * 
+ *
  * @version 1.0, 14/04/2020.
  */
 @Entity
@@ -90,7 +90,7 @@ public class Signature implements Serializable {
 	 * Attribute that represents the signature format.
 	 */
 	private String format;
-	
+
 	/**
 	 * Attribute that represents the signature improved format.
 	 */
@@ -100,12 +100,12 @@ public class Signature implements Serializable {
 	 * Attribute that represents the signature algorithm.
 	 */
 	private String algorithm;
-	
+
 	/**
 	 * Attribute that represents the signature provider.
 	 */
 	private String provider;
-	
+
 	/**
 	 * Attribute that represents the signature browser.
 	 */
@@ -115,7 +115,7 @@ public class Signature implements Serializable {
 	 * Attribute that represents the signature correct.
 	 */
 	private Boolean correct;
-	
+
 	/**
 	 * Attribute that represents the signature incorrect.
 	 */
@@ -154,7 +154,7 @@ public class Signature implements Serializable {
 	@Column(name = "FECHA", nullable = false, length = NumberConstants.NUM6)
 	@NotNull
 	public Date getDate() {
-		return date;
+		return this.date;
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class Signature implements Serializable {
 	public void setApplication(final String applicationP) {
 		this.application = applicationP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #format}.
 	 * @return the value of the attribute {@link #format}.
@@ -222,7 +222,7 @@ public class Signature implements Serializable {
 	public void setImprovedFormat(final String improvedFormatP) {
 		this.improvedFormat = improvedFormatP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #algorithm}.
 	 * @return the value of the attribute {@link #algorithm}.
@@ -241,7 +241,7 @@ public class Signature implements Serializable {
 	public void setAlgorithm(final String algorithmP) {
 		this.algorithm = algorithmP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #provider}.
 	 * @return the value of the attribute {@link #provider}.
@@ -260,7 +260,7 @@ public class Signature implements Serializable {
 	public void setProvider(final String providerP) {
 		this.provider = providerP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #browser}.
 	 * @return the value of the attribute {@link #browser}.
@@ -288,7 +288,7 @@ public class Signature implements Serializable {
 	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public Boolean getCorrect() {
-		return correct;
+		return this.correct;
 	}
 
 	/**
@@ -298,14 +298,14 @@ public class Signature implements Serializable {
 	public void setCorrect(final Boolean correctP) {
 		this.correct = correctP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #incorrect}.
 	 * @return the value of the attribute {@link #incorrect}.
 	 */
 	@Transient
 	public Boolean getIncorrect() {
-		return incorrect;
+		return this.incorrect;
 	}
 
 	/**
@@ -315,7 +315,7 @@ public class Signature implements Serializable {
 	public void setIncorrect(final Boolean incorrectP) {
 		this.incorrect = incorrectP;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #total}.
 	 * @return the value of the attribute {@link #total}.
@@ -324,7 +324,7 @@ public class Signature implements Serializable {
 	@Size(max = NumberConstants.NUM11)
 	@NotNull
 	public Long getTotal() {
-		return total;
+		return this.total;
 	}
 
 	/**

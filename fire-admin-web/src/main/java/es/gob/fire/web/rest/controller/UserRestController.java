@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,7 +19,7 @@
  * <b>Description:</b><p> .</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 21/05/2021.
  */
 package es.gob.fire.web.rest.controller;
@@ -85,9 +85,9 @@ public class UserRestController {
 	 * Constant that represents the key Json 'errorSaveUser'.
 	 */
 	private static final String KEY_JS_ERROR_SAVE_USER = "errorSaveUser";
-	
+
 	/**
-	 * Constant that represents the value of the main admin user. 
+	 * Constant that represents the value of the main admin user.
 	 */
 	private static final String LOGIN_ADMIN_USER = "admin";
 
@@ -177,32 +177,40 @@ public class UserRestController {
 
 		boolean adminRol;
 		boolean error = false;
-		
+
 		if (bindingResult.hasErrors()) {
 			error = true;
-			
+
 			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
-			}			
+			}
 
-		} if ((adminRol = this.userService.isAdminRol(userForm.getRolId())) && emptyAdminPassword(userForm.getPasswordAdd())) {
-			error = true;
-			json.put("passwordAdd" + SPAN, "El campo contraseña es obligatorio.");			
-
-		} if (adminRol && matchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
-			error = true;
-			json.put("passwordAdd" + SPAN, "Los campos de contraseña deben coincidir.");
-			json.put("confirmPasswordAdd" + SPAN, "Los campos de contraseña deben coincidir.");			
-
-		} if (this.userService.getUserByUserName(userForm.getLoginAdd()) != null) {
-			error = true;
-			json.put("loginAdd" + SPAN, "Ya existe un usuario con el login seleccionado.");			
-
-		} if (userForm.getEmailAdd() != null && !userForm.getEmailAdd().isEmpty() && !Utils.isValidEmail(userForm.getEmailAdd())) {
-			error = true;
-			json.put("emailAdd" + SPAN, "El campo email no es válido.");			
 		}
-		
+
+		if ((adminRol = this.userService.isAdminRol(userForm.getRolId())) && emptyAdminPassword(userForm.getPasswordAdd())) {
+			error = true;
+			json.put("passwordAdd" + SPAN, "El campo contrase\u00F1a es obligatorio.");
+
+		}
+
+		if (adminRol && !matchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
+			error = true;
+			json.put("passwordAdd" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
+			json.put("confirmPasswordAdd" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
+
+		}
+
+		if (this.userService.getUserByUserName(userForm.getLoginAdd()) != null) {
+			error = true;
+			json.put("loginAdd" + SPAN, "Ya existe un usuario con el login seleccionado.");
+
+		}
+
+		if (userForm.getEmailAdd() != null && !userForm.getEmailAdd().isEmpty() && !Utils.isValidEmail(userForm.getEmailAdd())) {
+			error = true;
+			json.put("emailAdd" + SPAN, "El campo email no es v\u00E1lido.");
+		}
+
 		if (!error) {
 			try {
 
@@ -232,21 +240,20 @@ public class UserRestController {
 	 * @param userForm
 	 * @return
 	 */
-	private boolean emptyAdminPassword(final String password) {
-
+	private static boolean emptyAdminPassword(final String password) {
 		return password == null || password.isEmpty();
 	}
-	
+
 	/**
 	 * Method that checks if the identifier 'id' belongs to an user with admin role
 	 * @param id Long that represents the user id
 	 * @return
 	 */
 	private boolean wasAdminBeforeEdit(final Long id) {
-		
-		User user = userService.getUserByUserId(id);
-		
-		return userService.isAdminRol(user.getRol().getRolId());
+
+		final User user = this.userService.getUserByUserId(id);
+
+		return this.userService.isAdminRol(user.getRol().getRolId());
 	}
 
 	/**
@@ -262,37 +269,39 @@ public class UserRestController {
 		List<User> listNewUser = new ArrayList<>();
 		final JSONObject json = new JSONObject();
 
-		boolean adminRol;
 		boolean error = false;
 		if (bindingResult.hasErrors()) {
 			error = true;
 			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
-		} 
-		
-		if ((adminRol = this.userService.isAdminRol(userForm.getRolId())) && emptyAdminPassword(userForm.getPasswordEdit()) && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !wasAdminBeforeEdit(userForm.getIdUserFireEdit())) {
-			error = true;
-			json.put("passwordEdit" + SPAN, "El campo contraseña es obligatorio.");
-		} 
-		
-		if (adminRol && matchingConfirmPassword(userForm.getPasswordEdit(), userForm.getConfirmPasswordEdit()) && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !wasAdminBeforeEdit(userForm.getIdUserFireEdit())) {
-			error = true;
-			json.put("passwordEdit" + SPAN, "Los campos de contraseña deben coincidir.");
-			json.put("confirmPasswordEdit" + SPAN, "Los campos de contraseña deben coincidir.");
-		} 
-		
+		}
+
+		// Si se esta estableciendo el rol administrador a un usuario distinto al original,
+		// comprobamos que se hayan establecido correctamente las contrasenas
+		if (this.userService.isAdminRol(userForm.getRolId()) && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !wasAdminBeforeEdit(userForm.getIdUserFireEdit())) {
+			if (emptyAdminPassword(userForm.getPasswordEdit())) {
+				error = true;
+				json.put("passwordEdit" + SPAN, "El campo contrase\u00F1a es obligatorio.");
+			}
+			else if (!matchingConfirmPassword(userForm.getPasswordEdit(), userForm.getConfirmPasswordEdit())) {
+				error = true;
+				json.put("passwordEdit" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
+				json.put("confirmPasswordEdit" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
+			}
+		}
+
 		if (userForm.getEmailEdit() != null && !userForm.getEmailEdit().isEmpty() && !Utils.isValidEmail(userForm.getEmailEdit())) {
 			error = true;
-			json.put("emailEdit" + SPAN, "El campo email no es válido.");			
+			json.put("emailEdit" + SPAN, "El campo email no es v\u00E1lido.");
 		}
-				
+
 		if (!error) {
 			try {
 
 				final User user = this.userService.updateUser(userForm);
 				listNewUser.add(user);
-				
+
 			} catch (final Exception e) {
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
 				listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
@@ -330,8 +339,8 @@ public class UserRestController {
 		} else if (!matchingConfirmPassword(userFormPassword.getPassword(), userFormPassword.getConfirmPassword())) {
 
 			final JSONObject json = new JSONObject();
-			json.put("password" + SPAN, "Los campos de contraseña deben coincidir.");
-			json.put("confirmPassword" + SPAN, "Los campos de contraseña deben coincidir.");
+			json.put("password" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
+			json.put("confirmPassword" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
 			result = json.toString();
 
 		} else {
@@ -347,8 +356,7 @@ public class UserRestController {
 	 * @param confirmPassword
 	 * @return
 	 */
-	private boolean matchingConfirmPassword(final String password, final String confirmPassword) {
-
+	private static boolean matchingConfirmPassword(final String password, final String confirmPassword) {
 		return password.equals(confirmPassword);
 	}
 

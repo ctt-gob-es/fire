@@ -1,7 +1,7 @@
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.core.util.MailSenderService.java.</p>
  * <b>Description:</b><p>Class that manages the emails.</p>
- * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
+ * <b>Project:</b><p>Servicios Integrales de Firma Electronica para el Ambito Judicial.</p>
  * <b>Date:</b><p>8 mar. 2019.</p>
  * @author Consejería de Justicia e Interior de la Junta de Andalucía.
  * @version 1.0, 8 mar. 2019.
@@ -25,7 +25,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -33,96 +32,91 @@ import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.entity.User;
 
-/** 
+/**
  * <p>Class that manages the emails.</p>
- * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
+ * <b>Project:</b><p>Servicios Integrales de Firma Electronica para el Ambito Judicial.</p>
  * @version 1.1, 7 oct. 2019.
  */
 @Component
 public class MailSenderService {
 
 	/**
-	 * Attribute that represents the logger file. 
-	 */
-	private static final Logger LOGGER = Logger.getLogger(MailSenderService.class);
-	
-	/**
-	 * Attribute that represents the default expired time. 
+	 * Attribute that represents the default expired time.
 	 */
 	public static final int DEFAULT_EXPIRED_TIME = 1800000;
 
 	/**
-	 * Attribute that represents file mail property. 
+	 * Attribute that represents file mail property.
 	 */
 	private static Properties properties = new Properties();
 
 	/**
-	 * Attribute that represents the session mail. 
+	 * Attribute that represents the session mail.
 	 */
 	private static Session sessionMail;
-	
+
 	/**
 	 * Attribute that represents the mail hot.
 	 */
 	@Value("${mail.smtp.host}")
 	private String mailSmtpHost;
-	
+
 	/**
 	 * Attribute that represents the mail port.
 	 */
 	@Value("${mail.smtp.port}")
 	private String mailSmtpPort;
-	
+
 	/**
 	 * Attribute that represents the mail protocol.
 	 */
 	@Value("${mail.protocol}")
 	private String mailProtocol;
-	
+
 	/**
 	 * Attribute that represents the mail sender.
 	 */
 	@Value("${mail.smtp.mail.sender}")
 	private String mailSmtpMailSender;
-	
+
 	/**
 	 * Attribute that represents the mail start TLS enable.
 	 */
 	@Value("${mail.smtp.starttls.enable}")
 	private String mailSmtpStarttlsEnable;
-	
+
 	/**
 	 * Attribute that represents the mail user.
 	 */
 	@Value("${mail.smtp.user}")
 	private String mailSmtpUser;
-	
+
 	/**
 	 * Attribute that represents the mail password.
 	 */
 	@Value("${mail.smtp.password}")
 	private String mailSmtpPassword;
-	
+
 	/**
 	 * Attribute that represents the mail authentication.
 	 */
 	@Value("${mail.smtp.auth}")
 	private String mailSmtpAuth;
-	
+
 	/**
 	 * Attribute that represents the mail authentication.
 	 */
 	@Value("${mail.from.name}")
 	private String mailFromName;
-	
+
 	/**
 	 * Attribute that represents the mail password expiration.
 	 */
 	@Value("${mail.password.expiration}")
 	private String mailPasswordExpiration;
-	
+
 	/**
-	 * Constructor method for the class EmailSenderService.java. 
+	 * Constructor method for the class EmailSenderService.java.
 	 */
 	private MailSenderService() {
 	}
@@ -133,22 +127,22 @@ public class MailSenderService {
 	 * @throws IOException error load file
 	 */
 	private void init() throws FileNotFoundException, IOException {
-		// Cargamos las propiedades de configuración del correo
-		properties.put(Constants.MAIL_SMTP_HOST, mailSmtpHost);
-		properties.put(Constants.MAIL_SMTP_PORT, mailSmtpPort);
-		properties.put(Constants.MAIL_SMTP_MAIL_SENDER, mailSmtpMailSender);
-		properties.put(Constants.MAIL_SMTP_STARTTLS_ENABLE, mailSmtpStarttlsEnable);
-		properties.put(Constants.MAIL_PROTOCOL, mailProtocol);
-		// Comprobamos si es necesario autenticación
-		if (mailSmtpAuth != null && mailSmtpAuth.equals(Boolean.TRUE.toString())) {
-			properties.put(Constants.MAIL_SMTP_AUTH, mailSmtpAuth);
-			properties.put(Constants.MAIL_SMTP_USER, mailSmtpUser);
-			properties.put(Constants.MAIL_SMTP_PASSWORD, mailSmtpPassword);
-			// Obtenemos la sesión con seguridad.
-			Authenticator smtpAuthenticator = new SmtpAuthenticator(properties.getProperty(Constants.MAIL_SMTP_USER), properties.getProperty(Constants.MAIL_SMTP_PASSWORD));
+		// Cargamos las propiedades de configuracion del correo
+		properties.put(Constants.MAIL_SMTP_HOST, this.mailSmtpHost);
+		properties.put(Constants.MAIL_SMTP_PORT, this.mailSmtpPort);
+		properties.put(Constants.MAIL_SMTP_MAIL_SENDER, this.mailSmtpMailSender);
+		properties.put(Constants.MAIL_SMTP_STARTTLS_ENABLE, this.mailSmtpStarttlsEnable);
+		properties.put(Constants.MAIL_PROTOCOL, this.mailProtocol);
+		// Comprobamos si es necesario autenticacion
+		if (this.mailSmtpAuth != null && this.mailSmtpAuth.equals(Boolean.TRUE.toString())) {
+			properties.put(Constants.MAIL_SMTP_AUTH, this.mailSmtpAuth);
+			properties.put(Constants.MAIL_SMTP_USER, this.mailSmtpUser);
+			properties.put(Constants.MAIL_SMTP_PASSWORD, this.mailSmtpPassword);
+			// Obtenemos la sesion con seguridad.
+			final Authenticator smtpAuthenticator = new SmtpAuthenticator(properties.getProperty(Constants.MAIL_SMTP_USER), properties.getProperty(Constants.MAIL_SMTP_PASSWORD));
 			sessionMail = Session.getInstance(properties, smtpAuthenticator);
 		} else {
-			// Obtenemos la sesión sin seguridad
+			// Obtenemos la sesion sin seguridad
 			sessionMail = Session.getDefaultInstance(properties);
 		}
 	}
@@ -159,8 +153,8 @@ public class MailSenderService {
 	 * @param URL to restore the user password
 	 * @throws FileNotFoundException file not found
 	 * @throws IOException error load file
-	 * @throws MessagingException 
-	 * @throws AddressException 
+	 * @throws MessagingException
+	 * @throws AddressException
 	 */
 	public void sendEmail(final User user, final String url) throws FileNotFoundException, IOException, AddressException, MessagingException {
 			init();
@@ -178,15 +172,15 @@ public class MailSenderService {
 
 			// Creamos el cuerpo del correo
 			final BodyPart bodyPart = new MimeBodyPart();
-			String bodyBase = Constants.MAIL_TEXT + "<br>" + "<br>" + Constants.MAIL_FOOTER;
-			
+			final String bodyBase = Constants.MAIL_TEXT + "<br><br>" + Constants.MAIL_FOOTER;
+
 			// Insertamos los datos del usuario
 			final String body = bodyBase
 					.replace("%%NAME%%", user.getName()) //$NON-NLS-1$
 					.replace("%%USERNAME%%", user.getUserName()) //$NON-NLS-1$
 					.replace("%%MAIL%%", user.getEmail()) //$NON-NLS-1$
 					.replace("%%URL%%", url); //$NON-NLS-1$
-			
+
 			bodyPart.setContent(body, Constants.MAIL_TEXT_HTML_CHARSET);
 
 
@@ -197,7 +191,7 @@ public class MailSenderService {
 			// Añadimos los datos al mensaje
 			// Establecemos el Asunto del correo
 			message.setSubject(Constants.MAIL_SUBJECT);
-			message.setFrom(new InternetAddress(mailSmtpMailSender, mailFromName));
+			message.setFrom(new InternetAddress(this.mailSmtpMailSender, this.mailFromName));
 			message.setContent(multiPart);
 
 			// Guardamos los cambios
@@ -209,9 +203,9 @@ public class MailSenderService {
 			transport.sendMessage(message, message.getAllRecipients());
 	}
 
-	/** 
+	/**
 	 * <p>Class that implements the java mail authentication.</p>
-	 * <b>Project:</b><p>Servicios Integrales de Firma Electrónica para el Ámbito Judicial.</p>
+	 * <b>Project:</b><p>Servicios Integrales de Firma Electronica para el Ambito Judicial.</p>
 	 * @version 1.0, 12 mar. 2019.
 	 */
 	static class SmtpAuthenticator extends Authenticator {
@@ -219,11 +213,11 @@ public class MailSenderService {
 		/**
 		 * Attribute that represents the user name authentication.
 		 */
-		private String username;
+		private final String username;
 		/**
 		 * Attribute that represents the password authentication.
 		 */
-		private String password;
+		private final String password;
 
 		/**
 		 * Constructor method for the class EmailSenderService.SmtpAuthenticator.java.
@@ -242,7 +236,7 @@ public class MailSenderService {
 		 */
 		@Override
 		protected PasswordAuthentication getPasswordAuthentication() {
-			return new PasswordAuthentication(username, password);
+			return new PasswordAuthentication(this.username, this.password);
 		}
 	}
 
@@ -251,7 +245,7 @@ public class MailSenderService {
 	 * @return mailPasswordExpiration
 	 */
 	public String getMailPasswordExpiration() {
-		return mailPasswordExpiration;
+		return this.mailPasswordExpiration;
 	}
 
 	/**

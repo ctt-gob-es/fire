@@ -1,7 +1,7 @@
 
-/* 
+/*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -15,26 +15,26 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.configuration.model.repository.datatable.CertificateDataTablesRepository.java.</p>
  * <b>Description:</b><p>Interface that provides CRUD functionality for the Certificate entity and DataTables.</p>
   * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>18 sept. 2018.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 18 sept. 2018.
  */
 package es.gob.fire.persistence.repository.datatable;
- 
+
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 
 import es.gob.fire.persistence.entity.Certificate;
 
 
-/** 
- * <p>Interface that provides CRUD functionality for the SystemCertificate entity and DataTables.</p>
+/**
+ * <p>Interface that provides CRUD functionality for the Certificate entity and DataTables.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * @version 1.0, 18 sept. 2018.
  */
 public interface CertificateDataTablesRepository extends DataTablesRepository<Certificate, Long> {
-
+	// Clase vacia
 }

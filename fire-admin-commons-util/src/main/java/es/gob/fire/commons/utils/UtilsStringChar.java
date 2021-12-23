@@ -1,12 +1,12 @@
 /*
  * Este fichero forma parte de la plataforma de @firma.
- * La plataforma de @firma es de libre distribución cuyo código fuente puede ser consultado
- * y descargado desde http://forja-ctt.administracionelectronica.gob.es
+ * La plataforma de @firma es de libre distribucion cuyo codigo fuente puede ser consultado
+ * y descargado desde http://administracionelectronica.gob.es
  *
- * Copyright 2016 Gobierno de España
- * Este fichero se distribuye bajo las licencias EUPL versión 1.1  y GPL versión 3, o superiores, según las
- * condiciones que figuran en el fichero 'LICENSE.txt' que se acompaña.  Si se   distribuyera este
- * fichero individualmente, deben incluirse aquí las condiciones expresadas allí.
+ * Copyright 2016 Gobierno de Espana
+ * Este fichero se distribuye bajo las licencias EUPL version 1.1, segun las
+ * condiciones que figuran en el fichero 'LICENSE.txt' que se acompana.  Si se   distribuyera este
+ * fichero individualmente, deben incluirse aqui las condiciones expresadas alli.
  */
 
 /**
@@ -14,7 +14,7 @@
  * <b>Description:</b><p>Class that provides functionality for managing strings and characters.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>10/09/2018.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.0, 14/04/2020.
  */
 package es.gob.fire.commons.utils;
@@ -144,7 +144,7 @@ public final class UtilsStringChar {
 	 * Constant attribute that represents the string to identify the symbol: <code>-</code>.
 	 */
 	public static final String SYMBOL_HYPHEN_STRING = String.valueOf(SYMBOL_HYPHEN);
-	
+
 	/**
 	 * Constant attribute that represents the char to identify the symbol: <code>_</code>.
 	 */
@@ -250,7 +250,7 @@ public final class UtilsStringChar {
 	 * @param str Parameter that represents the string to process.
 	 * @return a boolean with <code>true</code> value whether the string is null or empty, or <code>false</code> value in another case.
 	 */
-	public static boolean isNullOrEmpty(String str) {
+	public static boolean isNullOrEmpty(final String str) {
 		if (str == null || str.isEmpty()) {
 			return true;
 		}
@@ -262,7 +262,7 @@ public final class UtilsStringChar {
 	 * @param str Parameter that represents the string to process.
 	 * @return a boolean with <code>true</code> value whether the string is null or empty, or <code>false</code> value in another case.
 	 */
-	public static boolean isNullOrEmptyTrim(String str) {
+	public static boolean isNullOrEmptyTrim(final String str) {
 		if (str == null || str.trim().isEmpty()) {
 			return true;
 		}
@@ -275,7 +275,7 @@ public final class UtilsStringChar {
 	 * @return a boolean that indicates whether a string contains some of the characters contained in {@link #CHARACTERS_SET_TO_VALIDATORS}
 	 * (true) or not (false).
 	 */
-	public static boolean containsSomeOfTheCharacterSet(String str) {
+	public static boolean containsSomeOfTheCharacterSet(final String str) {
 		return containsSomeOfTheCharacterSetInTheSet(str, UtilsStringChar.CHARACTERS_SET_TO_VALIDATORS);
 	}
 
@@ -286,25 +286,25 @@ public final class UtilsStringChar {
 	 * @return a boolean that indicates whether a string contains some of the characters contained in certain characters array
 	 * (true) or not (false).
 	 */
-	public static boolean containsSomeOfTheCharacterSetInTheSet(String str, char[ ] characterSet) {
-		// Si la cadena de entrada es nula o vacía, devolvemos false.
+	public static boolean containsSomeOfTheCharacterSetInTheSet(final String str, final char[ ] characterSet) {
+		// Si la cadena de entrada es nula o vacia, devolvemos false.
 		if (UtilsStringChar.isNullOrEmpty(str)) {
 			return false;
 		}
-		// Si el conjunto de caracteres es nulo o vacío, devolvemos true.
+		// Si el conjunto de caracteres es nulo o vacio, devolvemos true.
 		if (characterSet == null || characterSet.length == 0) {
 			return true;
 		}
-		// Recorremos todos los caracteres y comprobamos si alguno está
+		// Recorremos todos los caracteres y comprobamos si alguno esta
 		// contenido
-		// en la cadena que se recibe como parámetro.
+		// en la cadena que se recibe como parametro.
 		for (int index = 0; index < characterSet.length; index++) {
-			char actualChar = characterSet[index];
+			final char actualChar = characterSet[index];
 			if (str.indexOf(actualChar) >= 0) {
 				return true;
 			}
 		}
-		// Si llegamos aquí, es que no contiene ninguno de los caracteres.
+		// Si llegamos aqui, es que no contiene ninguno de los caracteres.
 		return false;
 	}
 
@@ -314,12 +314,12 @@ public final class UtilsStringChar {
 	 * @param separate Parameter that indicates if to separate each two bytes with {@link #SYMBOL_HYPHEN} (true) or not (false).
 	 * @return an string with hexadecimal format.
 	 */
-	public static String convertByteArrayToHex(byte[ ] data, boolean separate) {
-		char[ ] c = Hex.encodeHex(data);
+	public static String convertByteArrayToHex(final byte[ ] data, final boolean separate) {
+		final char[ ] c = Hex.encodeHex(data);
 		if (c == null || c.length == 0) {
 			return null;
 		}
-		StringBuilder resultSB = new StringBuilder();
+		final StringBuilder resultSB = new StringBuilder();
 		byte numChars = 0;
 		if (c.length % 2 != 0) {
 			resultSB.append(TOKEN_ZERO);
@@ -334,7 +334,7 @@ public final class UtilsStringChar {
 				}
 			}
 		}
-		String result = resultSB.toString();
+		final String result = resultSB.toString();
 		cleanStringBuilder(resultSB);
 		return result;
 	}
@@ -344,7 +344,7 @@ public final class UtilsStringChar {
 	 * zero and then trim it.
 	 * @param sb String builder to clean. If it is <code>null</code>, this method do nothing.
 	 */
-	public static void cleanStringBuilder(StringBuilder sb) {
+	public static void cleanStringBuilder(final StringBuilder sb) {
 		if (sb != null) {
 			sb.setLength(0);
 			sb.trimToSize();
@@ -359,15 +359,15 @@ public final class UtilsStringChar {
 	 * @return a empty string if the input parameter is <code>null</code>, otherwise, the same input
 	 * string after removes the blanks.
 	 */
-	public static String removeBlanksFromString(String string) {
+	public static String removeBlanksFromString(final String string) {
 		String result = EMPTY_STRING;
 		// Si la cadena a tratar no es nula...
 		if (string != null) {
-			// Eliminamos los espacios por delante y detrás.
+			// Eliminamos los espacios por delante y detras.
 			result = string.trim();
-			// Eliminamos los saltos de línea.
+			// Eliminamos los saltos de linea.
 			result = result.replaceAll(SPECIAL_LINE_BREAK_STRING, EMPTY_STRING);
-			// Eliminamos los indicadores de nueva línea.
+			// Eliminamos los indicadores de nueva linea.
 			result = result.replaceAll(SPECIAL_LINE_START_STRING, EMPTY_STRING);
 			// Eliminamos las tabulaciones.
 			result = result.replaceAll(SPECIAL_TABULATION_STRING, EMPTY_STRING);

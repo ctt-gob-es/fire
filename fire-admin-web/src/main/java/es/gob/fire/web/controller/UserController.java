@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,7 +19,7 @@
  * <b>Description:</b><p> .</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 21/05/2021.
  */
 package es.gob.fire.web.controller;
@@ -84,7 +84,7 @@ public class UserController {
 	 */
 	@RequestMapping(value = "adduser", method = RequestMethod.GET)
 	public String addUser(final Model model) {
-		
+
 		model.addAttribute("listRoles", loadRoles());
 		model.addAttribute("userform", new UserDTO());
 		model.addAttribute("accion", "add");
@@ -102,7 +102,7 @@ public class UserController {
 		final User user = this.userService.getUserByUserName(username);
 		final UserPasswordDTO userFormPassword = new UserPasswordDTO();
 
-		userFormPassword.setIdUserFirePass(user.getUserId());
+		userFormPassword.setIdUser(user.getUserId());
 
 		model.addAttribute("userFormPassword", userFormPassword);
 		return "modal/userFormPass.html";
@@ -116,8 +116,8 @@ public class UserController {
 	 */
 	@RequestMapping(value = "menuedit")
 	public String menuEdit(@RequestParam("username") final String username, final Model model) {
-		 User user = userService.getUserByUserName(username);
-		 UserEditDTO userformedit = new UserEditDTO();
+		 final User user = this.userService.getUserByUserName(username);
+		 final UserEditDTO userformedit = new UserEditDTO();
 
 		userformedit.setIdUserFireEdit(user.getUserId());
 		userformedit.setNameEdit(user.getName());
@@ -131,9 +131,6 @@ public class UserController {
 		model.addAttribute("userformedit", userformedit);
 		return "modal/userFormEdit.html";
 	}
-	
-		
-
 
 	/**
 	 * Method that maps the add user certificate web requests to the controller and forwards to the form
@@ -153,22 +150,22 @@ public class UserController {
 	 * @return List of es.gob.fire.constants that represents the different association types.
 	 */
 	private List<RolDTO> loadRoles() {
-		List<RolDTO> listRoles = new ArrayList<RolDTO>();
+		final List<RolDTO> listRoles = new ArrayList<>();
 		// obtenemos los tipos de planificadores.
-		IUserService userService = ManagerPersistenceServices.getInstance().getManagerPersistenceConfigurationServices().getUserFireService();
-		List<Rol> listRol = userService.getAllRol();
-		for (Rol rol: listRol) {
-			RolDTO item = new RolDTO(rol.getRolId(), rol.getRolName(), rol.getPermissions());
+		final IUserService userService = ManagerPersistenceServices.getInstance().getManagerPersistenceConfigurationServices().getUserFireService();
+		final List<Rol> listRol = userService.getAllRol();
+		for (final Rol rol: listRol) {
+			final RolDTO item = new RolDTO(rol.getRolId(), rol.getRolName(), rol.getPermissions());
 			listRoles.add(item);
-			
+
 		}
 
 		return listRoles;
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Get userService.
 	 * @return userService

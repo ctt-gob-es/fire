@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espana
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -19,7 +19,7 @@
  * <b>Description:</b><p> .</p>
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>08/10/2018.</p>
- * @author Gobierno de España.
+ * @author Gobierno de Espa&ntilde;a.
  * @version 1.1, 02/06/2021.
  */
 package es.gob.fire.i18n;
@@ -149,12 +149,12 @@ public interface IWebLogMessages {
 	 * Constant attribute that represents the name of the property <code>errorutils020</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB020 = "errorweb020";
-	
+
 	/**
 	 * Constant attribute that represents the name of the property <code>errorutils021</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB021 = "errorweb021";
-	
+
 	/**
 	 * Constant attribute that represents the name of the property <code>errorutils022</code> belonging to the file fire_xx_YY.properties.
 	 */
@@ -179,17 +179,17 @@ public interface IWebLogMessages {
 	 * Constant attribute that represents the name of the property <code>errorweb028</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB028 = "errorweb028";
-	
+
 	/**
 	 * Constant attribute that represents the name of the property <code>errorweb029</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB029 = "errorweb029";
-	
+
 	/**
 	 * Constant attribute that represents the name of the property <code>errorweb030</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB030 = "errorweb030";
-	
+
 	/**
 	 * Constant attribute that represents the name of the property <code>errorweb031</code> belonging to the file fire_xx_YY.properties.
 	 */

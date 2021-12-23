@@ -39,7 +39,7 @@
 			<div class="modal-body">
 				<form role="form" id="userFormPassword" th:object="${userFormPassword}" th:action="@{/saveuserpassword}" method="post">
 					
-					<input type='hidden' class='primarykey' id="idUserFirePass" th:field="*{idUserFirePass}">
+					<input type='hidden' class='primarykey' id="idUser" th:field="*{idUser}">
 					
 					<div class="form-group-modal">
 						<label for="oldPassword" class="col-form-label" th:text="#{form.user.oldPassword}"></label>
