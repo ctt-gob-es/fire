@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    
+    <Appenders>
+        
+        <RollingFile name="FIRE-WEB" fileName="${sys:catalina.base}/logs/fire-web.log" filePattern="${sys:catalina.base}/logs/fire-web-%d{yyyy-MM-dd}.log">
+            <PatternLayout>
+                <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+        </RollingFile>
+		
+		<Console name="STDOUT">
+			<PatternLayout pattern="%m%n" />
+		</Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="es.gob.fire" level="debug" additivity="false">
+            <appender-ref ref="FIRE-WEB" level="debug" />
+        </Logger>
+		<Root level="error" additivity="false">
+            <appender-ref ref="STDOUT" />
+        </Root>
+    </Loggers>
+</Configuration>

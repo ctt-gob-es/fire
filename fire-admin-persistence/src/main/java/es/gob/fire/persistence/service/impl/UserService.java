@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 21/05/2021.
+ * @version 1.2, 02/02/2022.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -34,7 +34,7 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import org.apache.log4j.Logger;
+import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -59,7 +59,7 @@ import es.gob.fire.persistence.service.IUserService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.1, 21/05/2021.
+ * @version 1.2, 02/02/2022.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -260,6 +260,7 @@ public class UserService implements IUserService {
 	 */
 	@Override
 	public DataTablesOutput<User> getAllUser(final DataTablesInput input) {
+
 		return this.dtRepository.findAll(input);
 	}
 

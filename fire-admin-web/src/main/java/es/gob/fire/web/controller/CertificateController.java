@@ -21,7 +21,7 @@
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>18/09/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.3, 06/11/2018.
+ * @version 1.1, 02/02/2022.
  */
 package es.gob.fire.web.controller;
 
@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 
-import org.apache.log4j.Logger;
+import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -54,7 +54,7 @@ import es.gob.fire.persistence.service.ICertificateService;
  * TSL.
  * </p>
  * 
- * @version 1.3, 06/11/2018.
+ * @version 1.1, 02/02/2022.
  */
 @Controller
 public class CertificateController {

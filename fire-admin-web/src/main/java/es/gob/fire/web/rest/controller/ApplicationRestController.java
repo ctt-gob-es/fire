@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite syste.</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 22/01/2021.
+ * @version 1.1, 02/02/2022.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -33,8 +33,7 @@ import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import es.gob.fire.commons.log.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -65,7 +64,7 @@ import es.gob.fire.persistence.service.ICertificateService;
 /**
  * <p>Class that manages the REST requests related to the Applications administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 22/01/2021.
+ * @version 1.1, 02/02/2022.
  */
 @RestController
 public class ApplicationRestController {
@@ -130,10 +129,7 @@ public class ApplicationRestController {
 	@Autowired
 	private MessageSource messageSource;
 
-	static {
-		PropertyConfigurator.configure("C:/Users/carlos.gamuci/Desktop/servidor/config/log4j.properties");
-	}
-
+	
 	/**
 	 * Method that maps the list users web requests to the controller and
 	 * forwards the list of apps to the view.

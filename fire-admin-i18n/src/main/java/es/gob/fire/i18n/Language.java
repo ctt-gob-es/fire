@@ -32,7 +32,7 @@
  * </p>
  *
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 15/02/2019.
+ * @version 1.2, 02/02/2021.
  */
 package es.gob.fire.i18n;
 
@@ -40,17 +40,12 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.apache.log4j.Logger;
+import es.gob.fire.i18n.utils.Logger;
 
 /**
  * <p>Class responsible for managing the access to language resources.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.1, 15/02/2019.
- */
-/**
- * <p>Class .</p>
- * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.0, 15/04/2020.
+ * @version 1.2, 02/02/2021.
  */
 public final class Language {
 

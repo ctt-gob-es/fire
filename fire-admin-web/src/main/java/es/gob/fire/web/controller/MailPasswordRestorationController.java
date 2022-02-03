@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/02/2022.
  */
 package es.gob.fire.web.controller;
 
@@ -39,7 +39,7 @@ import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -63,7 +63,7 @@ import es.gob.fire.web.mail.MailSenderService;
  * Application for signing documents of @firma suite systems.
  * </p>
  *
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 02/02/2022.
  */
 @Controller
 public class MailPasswordRestorationController {

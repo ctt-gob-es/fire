@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 02/06/2021.
+ * @version 1.2, 02/02/2022.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotEmpty;
 
-import org.apache.log4j.Logger;
+import es.gob.fire.commons.log.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -78,7 +78,7 @@ import es.gob.fire.persistence.service.ILogServerService;
 /**
  * <p>Class that manages the REST requests related to the log server administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.1, 02/06/2021.
+ * @version 1.2, 02/02/2022.
  */
 @RestController
 public class LogServerRestController {

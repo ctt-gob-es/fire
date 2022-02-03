@@ -17,7 +17,7 @@
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.0, 15/06/2018.
+ * @version 1.1, 02/02/2022.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -28,7 +28,7 @@ import java.nio.file.Files;
 import java.security.KeyStore;
 import java.util.Collections;
 
-import org.apache.log4j.Logger;
+import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +57,7 @@ import es.gob.log.consumer.client.LogResult;
  * Class that implements the communication with the operations of the persistence layer
  * for LogConsumetClient.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
-  * @version 1.0, 20/03/2019.
+  * @version 1.1, 02/02/2022.
  */
 @Service
 public class LogConsumerService implements ILogConsumerService {

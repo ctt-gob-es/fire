@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>17/05/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 17/05/2021.
+ * @version 1.1, 02/02/2022.
  */
 package es.gob.fire.persistence.generator;
 
@@ -31,7 +31,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 
-import org.apache.log4j.Logger;
+import es.gob.fire.commons.log.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
@@ -41,7 +41,7 @@ import es.gob.fire.commons.utils.Hexify;
 /**
  * <p>Class that manages the generation of the identifier dor the table <i>TB_APLICACIONES</i>.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
- * @version 1.0, 17/05/2021.
+ * @version 1.1, 02/02/2022.
  */
 public class ApplicationIdGenerator implements IdentifierGenerator {
 	

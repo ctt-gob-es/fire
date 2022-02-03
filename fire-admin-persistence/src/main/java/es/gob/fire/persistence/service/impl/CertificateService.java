@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 24/05/2021.
+ * @version 1.2, 02/02/2022.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -36,7 +36,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -56,7 +56,7 @@ import es.gob.fire.persistence.service.ICertificateService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.1, 24/05/2021.
+ * @version 1.2, 02/02/2022.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
