@@ -29,9 +29,9 @@ import es.gob.afirma.core.misc.Base64;
 /**
  * DAO para la gesti&oacute;n de aplicaciones dadas de alta en el sistema.
  */
-public class AplicationsDAO {
+public class ApplicationsDAO {
 
-	private static final Logger LOGGER = Logger.getLogger(AplicationsDAO.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ApplicationsDAO.class.getName());
 
 	private static final String STATEMENT_SELECT_APP_NAME = "SELECT nombre, habilitado FROM tb_aplicaciones WHERE id = ?"; //$NON-NLS-1$
 

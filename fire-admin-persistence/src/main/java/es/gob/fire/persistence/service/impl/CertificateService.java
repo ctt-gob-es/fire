@@ -36,7 +36,6 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
-import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -45,6 +44,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.persistence.dto.CertificateDTO;
@@ -70,7 +70,7 @@ public class CertificateService implements ICertificateService{
 	/**
 	 * Constant that represents the String X.509.
 	 */
-	private static final String X509 = "X.509";
+	private static final String X509 = "X.509"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
@@ -158,7 +158,7 @@ public class CertificateService implements ICertificateService{
 			}
 
 		} catch (final NoSuchAlgorithmException e) {
-			LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e);
+			LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e); //$NON-NLS-1$
 		}
 
 		newCertificate = certificateDtoToEntity(certificateDto);
@@ -235,29 +235,29 @@ public class CertificateService implements ICertificateService{
 
 				if (certificate.getCertPrincipal() != null && !certificate.getCertPrincipal().isEmpty()) {
 
-					x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertPrincipal())));
+					x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertPrincipal()))); //$NON-NLS-1$
 				} else {
 					x509CertPrincipal = null;
 				}
 
 			} catch (final IOException e) {
-				LOGGER.error("No se ha podido leer el certificado: " + e);
+				LOGGER.error("No se ha podido leer el certificado", e); //$NON-NLS-1$
 			} catch (final CertificateException e) {
-				LOGGER.error("Los datos proporcionados no se corresponden con un certificado: " + e);
+				LOGGER.error("Los datos proporcionados no se corresponden con un certificado", e); //$NON-NLS-1$
 			}
 
 			try {
 
 				if (certificate.getCertBackup() != null && !certificate.getCertBackup().isEmpty()) {
-					x509CertBackup = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertBackup())));
+					x509CertBackup = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertBackup()))); //$NON-NLS-1$
 				} else {
 					x509CertBackup = null;
 				}
 
 			} catch (final IOException e) {
-				LOGGER.error("No se ha podido leer el certificado: " + e);
+				LOGGER.error("No se ha podido leer el certificado", e); //$NON-NLS-1$
 			} catch (final CertificateException e) {
-				LOGGER.error("Los datos proporcionados no se corresponden con un certificado: " + e);
+				LOGGER.error("Los datos proporcionados no se corresponden con un certificado", e); //$NON-NLS-1$
 			}
 
 			java.util.Date expDatePrincipal = new java.util.Date();
@@ -266,10 +266,10 @@ public class CertificateService implements ICertificateService{
 				expDatePrincipal = x509CertPrincipal.getNotAfter();
 				final String certSubject = x509CertPrincipal.getSubjectX500Principal().getName();
 				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				final String[] txtCert = certSubject.split(",");
-				certificate.setCertPrincipal(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
+				final String[] txtCert = certSubject.split(","); //$NON-NLS-1$
+				certificate.setCertPrincipal(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
 			} else {
-				certificate.setCertPrincipal("");
+				certificate.setCertPrincipal(""); //$NON-NLS-1$
 			}
 
 			if (x509CertBackup != null) {
@@ -277,10 +277,10 @@ public class CertificateService implements ICertificateService{
 				expDatePrincipal = x509CertBackup.getNotAfter();
 				final String certSubject = x509CertBackup.getSubjectX500Principal().getName();
 				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				final String[] txtCert = certSubject.split(",");
-				certificate.setCertBackup(txtCert[0] + "</br> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal));
+				final String[] txtCert = certSubject.split(","); //$NON-NLS-1$
+				certificate.setCertBackup(txtCert[0] + "</br> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
 			} else {
-				certificate.setCertBackup("");
+				certificate.setCertBackup(""); //$NON-NLS-1$
 			}
 		}
 	}
@@ -298,21 +298,21 @@ public class CertificateService implements ICertificateService{
 		String txtCert = null;
 		if (cert != null) {
 			final Date expDate = cert.getNotAfter();
-			txtCert = cert.getSubjectX500Principal().getName() + ", Fecha de Caducidad=" + DateFormat.getInstance().format(expDate);
+			txtCert = cert.getSubjectX500Principal().getName() + ", Fecha de Caducidad=" + DateFormat.getInstance().format(expDate); //$NON-NLS-1$
 		}
 
-		String certData = "";
+		String certData = ""; //$NON-NLS-1$
 		if (txtCert != null) {
 
-			final String[] datCertificate=txtCert.split(",");
+			final String[] datCertificate=txtCert.split(","); //$NON-NLS-1$
 
 			for (int i = 0; i <= datCertificate.length-1; i++){
-				certData += datCertificate[i] + "</br>";
+				certData += datCertificate[i] + "</br>"; //$NON-NLS-1$
 			}
 
 		}
 		else {
-			certData = "Error";
+			certData = "Error"; //$NON-NLS-1$
 		}
 
 		return certData;
@@ -321,7 +321,7 @@ public class CertificateService implements ICertificateService{
 	@Override
 	public String getCertificateText(final String certificate) {
 
-		String certText = "";
+		String certText = ""; //$NON-NLS-1$
 
 		if (certificate != null && !certificate.isEmpty()) {
 			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(certificate));) {
@@ -329,9 +329,9 @@ public class CertificateService implements ICertificateService{
 				certText = getFormatCertText(certIs);
 
 			} catch (final IOException e) {
-				LOGGER.error("No se ha podido leer el certificado: " + e);
+				LOGGER.error("No se ha podido leer el certificado", e); //$NON-NLS-1$
 			} catch (final CertificateException e) {
-				LOGGER.error("Los datos proporcionados no se corresponden con un certificado: " + e);
+				LOGGER.error("Los datos proporcionados no se corresponden con un certificado", e); //$NON-NLS-1$
 			}
 		}
 

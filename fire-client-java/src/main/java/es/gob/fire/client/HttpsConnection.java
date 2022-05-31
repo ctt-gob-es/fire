@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -35,6 +34,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Clase de conexi&oacute;n mediante SSL.
@@ -55,9 +57,14 @@ public class HttpsConnection {
 
     private static final String TRUSTSTORE_TYPE_PROPERTY = "javax.net.ssl.trustStoreType"; //$NON-NLS-1$
 
+    private static final String VERIFY_HOSTNAMES_PROPERTY = "verify.hostnames";  //$NON-NLS-1$
+
     private static final String ACCEPT_ALL_CERTS_VALUE = "all"; //$NON-NLS-1$
 
-    private static final Logger LOGGER = Logger.getLogger(HttpsConnection.class.getName());
+    private static final String ACCEPT_DEFAULT_CERTS_VALUE = "default"; //$NON-NLS-1$
+
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpsConnection.class);
 
 	/**
 	 * M&eacute;todo HTTP soportados.
@@ -84,7 +91,7 @@ public class HttpsConnection {
 	};
 
 	private SSLContext ctx;
-
+	private boolean verifyHostnames;
 
 	private HttpsConnection() {
 		// No hacemos nada
@@ -156,7 +163,7 @@ public class HttpsConnection {
         KeyStore ts = null;
         boolean acceptAllCert = false;
         final String trustStore = config.getProperty(TRUSTSTORE_PROPERTY);
-        if (trustStore != null) {
+        if (trustStore != null && !ACCEPT_DEFAULT_CERTS_VALUE.equalsIgnoreCase(trustStore)) {
         	if (ACCEPT_ALL_CERTS_VALUE.equalsIgnoreCase(trustStore)) {
         		acceptAllCert = true;
         	}
@@ -185,6 +192,9 @@ public class HttpsConnection {
         if (ks != null || ts != null || acceptAllCert) {
         	initContext(ks, ksPassword != null ? ksPassword.getPassword() : null, ksAlias, ts, acceptAllCert);
         }
+
+
+		this.verifyHostnames = Boolean.parseBoolean(config.getProperty(VERIFY_HOSTNAMES_PROPERTY));
 	}
 
 	/**
@@ -219,7 +229,7 @@ public class HttpsConnection {
 				try {
 					keyManagers = new KeyManager[]{ new MultiCertKeyManager(ks, ksPassword, ksAlias) };
 				} catch (final Exception e) {
-					LOGGER.warning("No se pudo inicializar el almacen con los datos proporcionados. Se usara el mecanismo por defecto"); //$NON-NLS-1$
+					LOGGER.warn("No se pudo inicializar el almacen con los datos proporcionados. Se usara el mecanismo por defecto"); //$NON-NLS-1$
 					keyManagers = null;
 				}
 			}
@@ -246,7 +256,7 @@ public class HttpsConnection {
 			tsManager = DUMMY_TRUST_MANAGER;
 		}
 
-		this.ctx = SSLContext.getInstance("TLS"); //$NON-NLS-1$
+		this.ctx = SSLContext.getInstance("TLSv1.2"); //$NON-NLS-1$
 		this.ctx.init(keyManagers, tsManager, null);
 	}
 
@@ -303,20 +313,45 @@ public class HttpsConnection {
 		return data;
 	}
 
-
 	private HttpURLConnection getConnection(final URL url) throws IOException {
 
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
 		if (con instanceof HttpsURLConnection && this.ctx != null) {
-			((HttpsURLConnection) con).setSSLSocketFactory(this.ctx.getSocketFactory());
-			((HttpsURLConnection) con).setHostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			});
+			final HttpsURLConnection cons = (HttpsURLConnection) con;
+			cons.setSSLSocketFactory(this.ctx.getSocketFactory());
+			cons.setHostnameVerifier(getHostnameVerifier(cons.getHostnameVerifier()));
 		}
 
 		return con;
+	}
+
+	private HostnameVerifier getHostnameVerifier(final HostnameVerifier verifier) {
+		return new FireHostnameVerifier(verifier, this.verifyHostnames);
+	}
+
+	/**
+	 * Verificador de nombre de host que utiliza el verificador por defecto o acepta
+	 * cualquier nombre de host seg&uacute;n la configuraci&oacute;n establecida.
+	 */
+	static class FireHostnameVerifier implements HostnameVerifier {
+
+		private final HostnameVerifier defaultVerifier;
+		private final boolean verifyHostnames;
+
+		public FireHostnameVerifier(final HostnameVerifier defaultVerifier, final boolean verifyHostnames) {
+			this.defaultVerifier = defaultVerifier;
+			this.verifyHostnames = verifyHostnames;
+		}
+
+		@Override
+		public boolean verify(final String hostname, final SSLSession session) {
+
+			if (this.verifyHostnames) {
+				return this.defaultVerifier.verify(hostname, session);
+			}
+
+			return true;
+		}
 	}
 }

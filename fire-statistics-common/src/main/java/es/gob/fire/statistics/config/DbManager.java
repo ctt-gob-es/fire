@@ -66,6 +66,10 @@ public class DbManager {
 
 		// Cargamos el driver JDBC
 		try {
+			final Class<?> driverClass = Class.forName(dbConnDriver, false, DbManager.class.getClassLoader());
+			if (!java.sql.Driver.class.isAssignableFrom(driverClass)) {
+				throw new IllegalArgumentException("La clase indicada como drive JDBC no es valida " + dbConnDriver); //$NON-NLS-1$
+			}
 			Class.forName(dbConnDriver).newInstance();
 
 			return DriverManager.getConnection(dbConnString);

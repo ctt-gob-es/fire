@@ -17,13 +17,14 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.clavefirma.client.ClientConfigFilesNotFoundException;
 import es.gob.clavefirma.client.ConnectionManager;
@@ -55,7 +56,7 @@ public final class HttpCertificateList {
 
     private static String URL;
 
-    private static final Logger LOGGER = Logger.getLogger(HttpCertificateList.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpCertificateList.class);
 
     private static boolean initialized = false;
 
@@ -96,13 +97,11 @@ public final class HttpCertificateList {
         try {
 			ConnectionManager.configureConnection(p);
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
+			LOGGER.error("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 		}
 
-        LOGGER.info(
-        		"Se usara el siguiente servicio de listado de certificados: " + URL //$NON-NLS-1$
-        );
+        LOGGER.info("Se usara el siguiente servicio de listado de certificados: {}", URL); //$NON-NLS-1$
     }
 
     /**
@@ -149,10 +148,7 @@ public final class HttpCertificateList {
         			.replace(SUBJECT_ID_TAG, subjectId));
         }
         catch (final HttpError e) {
-        	LOGGER.log(Level.SEVERE,
-            		"Error en la llamada al servicio de listado de certificados: " + e.getMessage(), //$NON-NLS-1$
-            		e
-            	);
+        	LOGGER.error("Error en la llamada al servicio de listado de certificados", e); //$NON-NLS-1$
 
         	// Aplicacion no permitida
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -178,10 +174,7 @@ public final class HttpCertificateList {
 			}
         }
         catch (final Exception e) {
-            LOGGER.log(
-            		Level.SEVERE,
-            		"Error en la llamada al servicio de obtencion de certificados", e //$NON-NLS-1$
-            );
+            LOGGER.error("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
             throw new HttpNetworkException("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
 		}
 
@@ -196,10 +189,10 @@ public final class HttpCertificateList {
             }
             jsonReader.close();
         } catch (final CertificateException e) {
-        	LOGGER.severe("Error en la composicion de uno de los certificados del usuario: " + e); //$NON-NLS-1$
+        	LOGGER.error("Error en la composicion de uno de los certificados del usuario", e); //$NON-NLS-1$
         	throw e;
         } catch (final Exception e) {
-            LOGGER.severe("Error en la lectura del JSON de certificados: " + e); //$NON-NLS-1$
+            LOGGER.error("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
             throw new HttpOperationException("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
         }
 
@@ -260,10 +253,7 @@ public final class HttpCertificateList {
         	responseJSON = ConnectionManager.readUrlByGet(urlString);
         }
         catch (final HttpError e) {
-        	LOGGER.log(Level.SEVERE,
-            		"Error en la llamada al servicio de listado de certificados: " + e.getMessage(), //$NON-NLS-1$
-            		e
-            	);
+        	LOGGER.error("Error en la llamada al servicio de listado de certificados", e); //$NON-NLS-1$
 
         	// Aplicacion no permitida
         	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -289,10 +279,7 @@ public final class HttpCertificateList {
 			}
         }
         catch (final Exception e) {
-            LOGGER.log(
-            		Level.SEVERE,
-            		"Error en la llamada al servicio de obtencion de certificados", e //$NON-NLS-1$
-            );
+            LOGGER.error("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
             throw new HttpNetworkException("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
 		}
 
@@ -307,10 +294,10 @@ public final class HttpCertificateList {
             }
             jsonReader.close();
         } catch (final CertificateException e) {
-        	LOGGER.severe("Error en la composicion de uno de los certificados del usuario: " + e); //$NON-NLS-1$
+        	LOGGER.error("Error en la composicion de uno de los certificados del usuario", e); //$NON-NLS-1$
         	throw e;
         } catch (final Exception e) {
-            LOGGER.severe("Error en la lectura del JSON de certificados: " + e); //$NON-NLS-1$
+            LOGGER.error("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
             throw new HttpOperationException("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
         }
 

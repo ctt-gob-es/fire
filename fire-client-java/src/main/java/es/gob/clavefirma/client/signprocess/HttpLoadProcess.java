@@ -14,8 +14,9 @@ import java.net.HttpURLConnection;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.clavefirma.client.ClientConfigFilesNotFoundException;
 import es.gob.clavefirma.client.ConnectionManager;
@@ -89,7 +90,7 @@ public final class HttpLoadProcess {
 
     private static String URL;
 
-    private static final Logger LOGGER = Logger.getLogger(HttpLoadProcess.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpLoadProcess.class);
 
     private static boolean initialized = false;
 
@@ -130,13 +131,11 @@ public final class HttpLoadProcess {
         try {
 			ConnectionManager.configureConnection(p);
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
+			LOGGER.error("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 		}
 
-        LOGGER.info(
-        		"Se usara el siguiente servicio de carga de datos: " + URL //$NON-NLS-1$
-        );
+        LOGGER.info("Se usara el siguiente servicio de carga de datos: {}", URL); //$NON-NLS-1$
     }
 
     /**
@@ -438,9 +437,7 @@ public final class HttpLoadProcess {
         catch (final IOException e) {
         	if (e instanceof HttpError) {
         		final HttpError he = (HttpError) e;
-        		LOGGER.severe(
-        				"Error en la llamada al servicio de carga de datos: " + he.getResponseDescription() //$NON-NLS-1$
-        				);
+        		LOGGER.error("Error en la llamada al servicio de carga de datos: {}", he.getResponseDescription()); //$NON-NLS-1$
         		if (he.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
         			throw new HttpForbiddenException(he.getResponseDescription(), he);
         		} else if (he.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
@@ -451,14 +448,11 @@ public final class HttpLoadProcess {
         			throw new HttpOperationException(he.getResponseDescription(), he);
         		}
         	}
-        	LOGGER.severe("Error en la llamada al servicio remoto de carga de datos: " + e); //$NON-NLS-1$
+        	LOGGER.error("Error en la llamada al servicio remoto de carga de datos", e); //$NON-NLS-1$
         	throw new HttpNetworkException("Error en la llamada al servicio remoto de carga de datos", e); //$NON-NLS-1$
         }
         catch (final Exception e) {
-        	LOGGER.log(
-        			Level.SEVERE,
-        			"Error en la invocacion al servicio de recuperacion de carga de datos", e //$NON-NLS-1$
-        			);
+        	LOGGER.error("Error en la invocacion al servicio de recuperacion de carga de datos", e); //$NON-NLS-1$
         	throw new HttpOperationException("Error en la invocacion al servicio de recuperacion de carga de datos", e); //$NON-NLS-1$
         }
 

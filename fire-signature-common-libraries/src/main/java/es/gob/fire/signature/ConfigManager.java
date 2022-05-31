@@ -141,15 +141,24 @@ public class ConfigManager {
 	private static final String PREFIX_CIPHERED_TEXT = "{@ciphered:"; //$NON-NLS-1$
 	private static final String SUFIX_CIPHERED_TEXT = "}"; //$NON-NLS-1$
 
-	/** N&uacute;mero que identifica cuando el valor de configuraci&oacute;n que indica que
-	 * el n&uacute;mero de documentos no est&aacute; limitado. */
+	/**
+	 * N&uacute;mero que identifica cuando el valor de configuraci&oacute;n que indica que
+	 * el n&uacute;mero de documentos no est&aacute; limitado.
+	 */
 	public static final int UNLIMITED_NUM_DOCUMENTS = 0;
 
 	/** Ruta del directorio por defecto para el guardado de temporales (directorio temporal del sistema). */
 	private static String DEFAULT_TMP_DIR;
 
 	/** Nombre del fichero de configuraci&oacute;n. */
-	private static final String CONFIG_FILE = "config.properties"; //$NON-NLS-1$
+	private static final String CONFIG_FILE = "fire_config.properties"; //$NON-NLS-1$
+
+	/**
+	 * Antiguo nombre del fichero de configuraci&oacute;n.
+	 * @deprecated Usar {@link #CONFIG_FILE}.
+	 */
+	@Deprecated
+	private static final String CONFIG_FILE_OLD = "config.properties"; //$NON-NLS-1$
 
 	private static final String PATTERN_TIME = "^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$"; //$NON-NLS-1$
 
@@ -183,20 +192,29 @@ public class ConfigManager {
 	 */
 	private static void loadConfig() throws  ConfigFilesException {
 
+		String configFilename;
 		if (config == null) {
 			try {
 				config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
+				configFilename = CONFIG_FILE;
 			}
 			catch (final Exception e) {
-				LOGGER.severe("No se pudo cargar el fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
-				throw new ConfigFilesException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
+				try {
+					config = ConfigFileLoader.loadConfigFile(CONFIG_FILE_OLD);
+					configFilename = CONFIG_FILE_OLD;
+				}
+				catch (final Exception e2) {
+					throw new ConfigFilesException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
+				}
 			}
+
+			LOGGER.info("Se carga la configuracion de FIRe a traves del fichero " + configFilename); //$NON-NLS-1$
 
 			try {
 				config = mapEnvironmentVariables(config);
 			}
 			catch (final Exception e) {
-				LOGGER.severe("No se pudieron mapear las variables de entorno del fichero de configuracion " + CONFIG_FILE); //$NON-NLS-1$
+				LOGGER.severe("No se pudieron mapear las variables de entorno del fichero de configuracion " + configFilename); //$NON-NLS-1$
 			}
 
 			// Comprobamos el valor establecido para la clase de cifrado

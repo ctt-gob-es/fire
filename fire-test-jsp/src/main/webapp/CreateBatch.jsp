@@ -23,11 +23,9 @@
 			// Eliminamos las propiedades innecesarias del paso anterior
 			session.removeAttribute("fileLoaded"); //$NON-NLS-1$
 		%>
-		<!-- Barra de navegacion -->
 		<div id="menubar">
 			<div id="bar-txt"><b>Prueba FIRe</b></div>
 		</div>
-		<!-- contenido -->
 		
 		<div id="sign-container">
 			<h1 style="color:#303030;">CONFIGURACI&Oacute;N DEL LOTE DE FIRMA</h1>
@@ -93,11 +91,11 @@
 							<label for="upgrade-verify">Validar</label><br>
 			   	</fieldset>
 
-				 <!-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
+				 <%-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
 				   - mode=implicit
 				   - filters=keyusage.nonrepudiation:true
 				  Con ellos se generan firmas que contienen los datos firmados, solo se permite el uso
-				  de certificados de firma y se aplica la politica de firma de la AGE. -->
+				  de certificados de firma y se aplica la politica de firma de la AGE. --%>
 				<input id="extraparams-conf" type="hidden" name="extraParams"
 				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true".getBytes()) %>"/>
 

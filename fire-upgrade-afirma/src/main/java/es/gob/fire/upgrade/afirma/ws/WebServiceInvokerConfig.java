@@ -53,7 +53,8 @@ public class WebServiceInvokerConfig {
 	private final Properties config;
 
 	public WebServiceInvokerConfig(final Properties config) {
-		this.config = config;
+		this.config = new Properties();
+		this.config.putAll(config);
 	}
 
 	public String getAppId() {

@@ -34,7 +34,6 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -44,6 +43,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.UserDTO;
@@ -272,20 +272,13 @@ public class UserService implements IUserService {
 	@Transactional
 	public String changeUserPassword(final UserPasswordDTO userPasswordDto) {
 
-Logger.getLogger(UserService.class).warn(" ========== Buscamos al usuario con ID: " + userPasswordDto.getIdUser());
-
 		final User user = this.repository.findByUserId(userPasswordDto.getIdUser());
-
-Logger.getLogger(UserService.class).warn(" ========== Usuario: " + user);
-
-Logger.getLogger(UserService.class).warn(" ========== Password codificada del usuario: " + user.getPassword());
 
 		String result = null;
 		final String oldPwd = userPasswordDto.getOldPassword();
 		final String pwd = userPasswordDto.getPassword();
 		final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
 
-Logger.getLogger(UserService.class).warn(" ========== Password antigua para comprobacion: " + oldPwd);
 		final String hashPwd = bcpe.encode(pwd);
 		try {
 			if (bcpe.matches(oldPwd, user.getPassword()) || checkPasswordOldSystem(oldPwd, user.getPassword())) {

@@ -345,7 +345,7 @@
 
 </head>
 <body>
-	<!-- Barra de navegacion -->
+	<%-- Barra de navegacion --%>
 	<header>
 		<div class="header_top wrapper">
 			<div class="mod_claim_izq">
@@ -365,7 +365,7 @@
 		</div>
 	</header>
 
-	<!-- contenido -->
+	<%-- contenido --%>
 	<main class="main">
 		
 		<section class="contenido contenido-firmar">
@@ -377,7 +377,7 @@
 					
 				</div>
 
-			<div class="contenido-opciones temp-hide" id="errorButtonsPanel"><!-- temp-hide -->
+			<div class="contenido-opciones temp-hide" id="errorButtonsPanel">
 				<div id="mensaje_error" class="mensaje-error" >
 				<h2 id="errorMsg">Ocurri&oacute; un error en la operaci&oacute;n de firma</h2>
 				</div>
@@ -426,7 +426,7 @@
 		<% if (docInfos != null && docInfos.length > 0) { %>
 		<section class="contenido-firmar-listadocs">
 			<div class="titulo-listaDocs" >Documentos a Firmar</div>
-			<div id="listDocs" class="container-box"><!-- no-float -->	
+			<div id="listDocs" class="container-box">
 					<div class="cabecera-listaDocs">Id. Documento</div>		
 					<div class="cabecera-listaDocs">Título</div>
 				<% int i=1;
@@ -455,7 +455,7 @@
 	</main>
 
 	
-	<!-- Pie de pagina -->
+	<%-- Pie de pagina --%>
 	<div class="clear" ></div>	
 	<footer class="mod_footer">
 		<div class="footer_top wrapper">

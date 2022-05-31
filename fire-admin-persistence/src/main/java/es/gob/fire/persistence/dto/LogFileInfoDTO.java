@@ -23,6 +23,8 @@
  */
 package es.gob.fire.persistence.dto;
 
+import java.util.Arrays;
+
 import com.fasterxml.jackson.annotation.JsonView;
 
 /**
@@ -115,12 +117,14 @@ public class LogFileInfoDTO {
 
 
 	public String[ ] getLevels() {
-		return this.levels;
+		return this.levels != null
+				? Arrays.copyOf(this.levels, this.levels.length) : null;
 	}
 
 
 	public void setLevels(final String[ ] levels) {
-		this.levels = levels;
+		this.levels = levels != null
+				? Arrays.copyOf(levels, levels.length) : null;
 	}
 
 	/**

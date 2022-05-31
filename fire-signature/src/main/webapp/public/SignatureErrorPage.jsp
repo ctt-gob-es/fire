@@ -96,7 +96,7 @@
 	<link rel="stylesheet" type="text/css" href="css/modSignatureErrorPage.css">
 </head>
 <body>
-	<!-- Barra de navegacion -->
+	<%-- Barra de navegacion --%>
 	<header>
 		<div class="header_top wrapper">
 			<div class="mod_claim_izq">
@@ -116,7 +116,7 @@
 		</div>
 	</header>
 
-	<!-- contenido -->
+	<%-- contenido --%>
 	<main class="main">		
 		<section class="contenido">
 			<div  class="container-box-title">
@@ -145,7 +145,7 @@
 		</section>
 	</main>		
 	
-	<!-- Pie de pagina -->
+	<%-- Pie de pagina --%>
 	<div class="clear" ></div>	
 	<footer class="mod_footer">
 		<div class="footer_top wrapper">

@@ -66,12 +66,9 @@
 				}
 			}
 		%>
-		<!-- Barra de navegacion -->
 		<div id="menubar">
 			<div id="bar-txt"><b>Prueba FIRe</b></div>
 		</div>
-		<!-- contenido -->
-		
 		<div id="sign-container">
 			<h1 style="color:#303030;">AGREGAR DOCUMENTOS AL LOTE</h1>
 			<% if (errorMsg != null) { %>
@@ -146,11 +143,11 @@
 								<label for="upgrade-verify">Validar</label><br>
 				   	</fieldset>
 
-					<!-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
+					<%-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
 					   - mode=implicit
 					   - filters=keyusage.nonrepudiation:true;nonexpired:
 					  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
-					  de certificados de firma no caducados. -->
+					  de certificados de firma no caducados. --%>
 					<input id="extraparams-conf" type="hidden" name="extraParams"
 						value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true;nonexpired:".getBytes()) %>"/>
 				</fieldset>

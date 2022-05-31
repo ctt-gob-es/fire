@@ -14,8 +14,9 @@ import java.net.HttpURLConnection;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.clavefirma.client.ClientConfigFilesNotFoundException;
 import es.gob.clavefirma.client.ConnectionManager;
@@ -36,7 +37,7 @@ public final class HttpSignProcess {
 
     private static String URL_BASE;
 
-    private static final Logger LOGGER = Logger.getLogger(HttpSignProcess.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpSignProcess.class);
 
     private static boolean initialized = false;
 
@@ -99,7 +100,7 @@ public final class HttpSignProcess {
         try {
 			ConnectionManager.configureConnection(p);
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
+			LOGGER.error("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 		}
 
@@ -427,9 +428,7 @@ public final class HttpSignProcess {
         catch (final IOException e) {
         	if (e instanceof HttpError) {
         		final HttpError he = (HttpError) e;
-        		LOGGER.severe(
-        				"Error en la consulta al servicio de recuperacion de firma: " + he.getResponseDescription() //$NON-NLS-1$
-        				);
+        		LOGGER.error("Error en la consulta al servicio de recuperacion de firma: {}" + he.getResponseDescription()); //$NON-NLS-1$
         		switch (he.getResponseCode()) {
         		case HttpURLConnection.HTTP_FORBIDDEN:
         			throw new HttpForbiddenException(he.getResponseDescription(), he);
@@ -440,14 +439,11 @@ public final class HttpSignProcess {
         					he.getResponseDescription(), he);
         		}
         	}
-        	LOGGER.severe("Error en la llamada al servicio remoto de recuperacion de firma: " + e); //$NON-NLS-1$
+        	LOGGER.error("Error en la llamada al servicio remoto de recuperacion de firma", e); //$NON-NLS-1$
         	throw new HttpNetworkException("Error en la llamada al servicio remoto de recuperacion de firma", e); //$NON-NLS-1$
         }
         catch (final Exception e) {
-        	LOGGER.log(
-        			Level.SEVERE,
-        			"Error en la invocacion al servicio de recuperacion de firma", e //$NON-NLS-1$
-        			);
+        	LOGGER.error("Error en la invocacion al servicio de recuperacion de firma", e); //$NON-NLS-1$
         	throw new HttpOperationException("Error en la invocacion al servicio de recuperacion de firma", e); //$NON-NLS-1$
         }
     }

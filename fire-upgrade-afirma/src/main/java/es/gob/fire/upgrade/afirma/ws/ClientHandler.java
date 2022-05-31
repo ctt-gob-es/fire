@@ -28,7 +28,6 @@ import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -228,7 +227,7 @@ class ClientHandler extends AbstractCommonHandler {
 			source = new DOMSource(element);
 			baos = new ByteArrayOutputStream();
 			streamResult = new StreamResult(baos);
-			TransformerFactory.newInstance().newTransformer().transform(source, streamResult);
+			SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
 			secSOAPReq = new String(baos.toByteArray());
 
 			// Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP
@@ -288,7 +287,7 @@ class ClientHandler extends AbstractCommonHandler {
 			final DOMSource source = new DOMSource(element);
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final StreamResult streamResult = new StreamResult(baos);
-			TransformerFactory.newInstance().newTransformer().transform(source, streamResult);
+			SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
 			final String secSOAPReq = new String(baos.toByteArray());
 
 			// Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP

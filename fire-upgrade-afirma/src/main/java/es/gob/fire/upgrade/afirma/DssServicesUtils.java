@@ -13,11 +13,11 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.ws.security.util.Base64;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import es.gob.fire.upgrade.afirma.ws.SecureXmlBuilder;
 
 /** Utilidades para actualizaci&oacute;n de firmas. */
 final class DssServicesUtils {
@@ -49,9 +49,7 @@ final class DssServicesUtils {
         boolean isBinary = false;
         Document firmaXml = null;
         try {
-            firmaXml = DocumentBuilderFactory.newInstance()
-                    .newDocumentBuilder()
-                    .parse(new ByteArrayInputStream(firma));
+            firmaXml = SecureXmlBuilder.getDocumentBuilder().parse(new ByteArrayInputStream(firma));
             LOGGER.fine("La firma es XML"); //$NON-NLS-1$
         } catch (final Exception e) {
             isBinary = true;
@@ -202,9 +200,7 @@ final class DssServicesUtils {
         boolean isBinary = false;
         Document firmaXml = null;
         try {
-            firmaXml = DocumentBuilderFactory.newInstance()
-                    .newDocumentBuilder()
-                    .parse(new ByteArrayInputStream(firma));
+            firmaXml = SecureXmlBuilder.getDocumentBuilder().parse(new ByteArrayInputStream(firma));
             LOGGER.fine("La firma es XML"); //$NON-NLS-1$
         } catch (final Exception e) {
             isBinary = true;

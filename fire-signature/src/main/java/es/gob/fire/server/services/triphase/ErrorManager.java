@@ -50,7 +50,7 @@ final class ErrorManager {
 		errorMessages.put(Integer.valueOf(ERROR_RETRIEVING_DOCUMENT), "Error al recuperar el documento"); //$NON-NLS-1$
 		errorMessages.put(Integer.valueOf(INVALID_SESSION_DATA), "El formato de los datos de sesion suministrados es erroneo"); //$NON-NLS-1$
 		errorMessages.put(Integer.valueOf(ERROR_GENERATING_PKCS1_HMAC), "No se ha podido generar el codigo de verificacion del PKCS#1 generado"); //$NON-NLS-1$
-		errorMessages.put(Integer.valueOf(ERROR_CHECKING_PKCS1_HMAC), "El PKCS#1 se ha generado con un certficado distinto al esperado"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(ERROR_CHECKING_PKCS1_HMAC), "El PKCS#1 se ha generado con un certificado distinto al esperado"); //$NON-NLS-1$
 	}
 
 	static String getErrorMessage(final int errNo) {

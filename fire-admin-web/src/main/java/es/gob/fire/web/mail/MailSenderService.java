@@ -28,6 +28,7 @@ import javax.mail.internet.MimeMultipart;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.entity.User;
@@ -86,6 +87,24 @@ public class MailSenderService {
 	private String mailSmtpStarttlsEnable;
 
 	/**
+	 * Attribute that represents the mail start TLS required.
+	 */
+	@Value("${mail.smtp.starttls.required:}")
+	private String mailSmtpStarttlsRequired;
+
+	/**
+	 * Attribute that represents the SSL protocols to use with SMTP.
+	 */
+	@Value("${mail.smtp.ssl.protocols:}")
+	private String mailSmtpSslProtocols;
+
+	/**
+	 * Attribute that represents the port to SocketFactory.
+	 */
+	@Value("${mail.smtp.socketFactory.port:}")
+	private String mailSmtpSocketFactoryPort;
+
+	/**
 	 * Attribute that represents the mail user.
 	 */
 	@Value("${mail.smtp.user}")
@@ -132,6 +151,19 @@ public class MailSenderService {
 		properties.put(Constants.MAIL_SMTP_PORT, this.mailSmtpPort);
 		properties.put(Constants.MAIL_SMTP_MAIL_SENDER, this.mailSmtpMailSender);
 		properties.put(Constants.MAIL_SMTP_STARTTLS_ENABLE, this.mailSmtpStarttlsEnable);
+		if (!this.mailSmtpStarttlsRequired.isEmpty()) {
+			properties.put(Constants.MAIL_SMTP_STARTTLS_REQUIRED, this.mailSmtpStarttlsRequired);
+		}
+
+		final Logger LOGGER = Logger.getLogger("es.gob.fire");
+		LOGGER.info("this.mailSmtpSslProtocols = " + this.mailSmtpSslProtocols);
+
+		if (!this.mailSmtpSslProtocols.isEmpty()) {
+			properties.put(Constants.MAIL_SMTP_SSL_PROTOCOLS, this.mailSmtpSslProtocols);
+		}
+		if (!this.mailSmtpSocketFactoryPort.isEmpty()) {
+			properties.put(Constants.MAIL_SMTP_SOCKETFACTORY_PORT, this.mailSmtpSocketFactoryPort);
+		}
 		properties.put(Constants.MAIL_PROTOCOL, this.mailProtocol);
 		// Comprobamos si es necesario autenticacion
 		if (this.mailSmtpAuth != null && this.mailSmtpAuth.equals(Boolean.TRUE.toString())) {

@@ -18,14 +18,15 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resultado de una transacci&oacute;n.
@@ -96,6 +97,8 @@ public class TransactionResult {
 	 * diferir de lo solicitado por la aplicaci&oacute;n. Por ejemplo, puede haberse
 	 * solicitado una firma ES-A y recibirse una ES-T. */
 	public static final int STATE_PARTIAL = 2;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResult.class);
 
 	private int state = STATE_ERROR;
 
@@ -310,10 +313,7 @@ public class TransactionResult {
 				resultBuilder.add(JSON_ATTR_SIGNING_CERT, encodeCertificate(this.signingCert));
 			} catch (final CertificateEncodingException e) {
 				// Error al codificar el certificado, no se devolvera certificado en ese caso
-				Logger.getLogger(BatchResult.class.getName()).log(
-						Level.WARNING,
-						"Error al codificar el certificado de firma", //$NON-NLS-1$
-						e);
+				LOGGER.warn("Error al codificar el certificado de firma", e); //$NON-NLS-1$
 			}
 		}
 		if (this.upgradeFormat != null) {
@@ -327,10 +327,7 @@ public class TransactionResult {
 				resultBuilder.add(JSON_ATTR_GRACE_PERIOD, gracePeriodBuilder);
 			} catch (final Exception e) {
 				// Error al codificar el certificado, no se devolvera certificado en ese caso
-				Logger.getLogger(BatchResult.class.getName()).log(
-						Level.WARNING,
-						"Error al codificar el certificado de firma", //$NON-NLS-1$
-						e);
+				LOGGER.warn("Error al codificar el certificado de firma", e); //$NON-NLS-1$
 			}
 		}
 
@@ -390,10 +387,7 @@ public class TransactionResult {
 					}
 					catch (final Exception e) {
 						// Error al codificar el certificado, no se devolvera certificado en ese caso
-						Logger.getLogger(TransactionResult.class.getName()).log(
-								Level.WARNING,
-								"Error al decodificar el certificado de firma", //$NON-NLS-1$
-								e);
+						LOGGER.warn("Error al decodificar el certificado de firma", e); //$NON-NLS-1$
 					}
 				}
 				if (resultObject.containsKey(JSON_ATTR_UPGRADE)) {

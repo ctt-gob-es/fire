@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- saved from url=(0164)https://clave-dninbrt.dev.seg-social.gob.es/rss-gateway/CertificateManagementServlet?id_transaction=8e6f5a59c6da85805ba534f596ed147baf371c52ec68f3b1d4c9d77df56a5720 -->
-<%@page import="es.gob.afirma.core.misc.Base64"%>
+<%-- saved from url=(0164)https://clave-dninbrt.dev.seg-social.gob.es/rss-gateway/CertificateManagementServlet?id_transaction=8e6f5a59c6da85805ba534f596ed147baf371c52ec68f3b1d4c9d77df56a5720 --%>
+<%@page import="es.gob.afirma.core.misc.Base64"--%>
 <html lang="es">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -9,7 +9,7 @@
 	<meta content="no-cache" http-equiv="cache-control">
 	<meta content="0" http-equiv="expires">
 	<meta content="no-cache" http-equiv="pragma">
-	<!--<base href="./">--><base href=".">
+	<base href=".">
 	<title>Tu Seguridad Social</title>
 	<link media="screen" rel="stylesheet" href="">
 	<link href="./TestCert_files/IdP.css" media="screen" rel="stylesheet">
@@ -72,7 +72,7 @@
 </p><div type="hidden" id="no_url_clave" style="display: none;">Vas a generar tu certificado de firma centralizado. Este certificado podr&aacute;s utilizarlo igual que el actual certificado digital, pero sin necesidad de tenerlo instalado en el dispositivo con el que est&aacute;s accediendo a internet. Para m&aacute;s informaci&oacute;n, puedes consultar en la web de#t#http://clave.gob.es/clave_Home/dnin.html#a#Cl@ve.gob.es#f#</div>
 <div style="display:inline" type="hidden" id="url_clave">
 <div style="display:inline" id="primera_frase">Vas a generar tu certificado de firma centralizado. Este certificado podr&aacute;s utilizarlo igual que el actual certificado digital, pero sin necesidad de tenerlo instalado en el dispositivo con el que est&aacute;s accediendo a internet. Para m&aacute;s informaci&oacute;n, puedes consultar en la web de</div>
-<a href="http://clave.gob.es/clave_Home/dnin.html" target="_blank" id="url_name" style="display:inline">Cl@ve.gob.es</a>
+<a href="http://clave.gob.es/clave_Home/dnin.html" target="_blank" id="url_name" style="display:inline" rel="noopener noreferrer">Cl@ve.gob.es</a>
 </div>
 <p></p>
 <p></p>

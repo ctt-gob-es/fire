@@ -22,9 +22,9 @@
 		<jdk.version>1.8</jdk.version>
 		
 		<fire.version>2.4-SNAPSHOT</fire.version>
-		<clienteafirma.version>1.7</clienteafirma.version>
+		<clienteafirma.version>1.8-SNAPSHOT</clienteafirma.version>
 		<fnmt.version>2.0</fnmt.version>
-		<log-consumer.version>1.2</log-consumer.version>
+		<log-consumer.version>1.3-SNAPSHOT</log-consumer.version>
 		
 		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
 		<javax.json-api.version>1.1.3</javax.json-api.version>
@@ -99,7 +99,6 @@
 			<modules>
 				<module>fire-admin-web</module>
 				<module>clavefirma-test-services</module>
-				<module>fire-admin-jsp</module>
 				<module>fire-signature</module>
 				<module>fire-test-jsp</module>
 				<module>log-consumer-service</module>

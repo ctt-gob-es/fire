@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -30,10 +31,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -119,6 +121,42 @@ public final class TriphaseData {
 
 	private final List<TriSign> signs;
 	private String format;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TriphaseData.class);
+
+    private static DocumentBuilderFactory SECURE_BUILDER_FACTORY;
+
+	static {
+		SECURE_BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
+		try {
+			SECURE_BUILDER_FACTORY.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE.booleanValue());
+		}
+		catch (final Exception e) {
+			LOGGER.warn("No se ha podido establecer el procesado seguro en la factoria XML", e); //$NON-NLS-1$
+		}
+
+		// Los siguientes atributos deberia establececerlos automaticamente la implementacion de
+		// la biblioteca al habilitar la caracteristica anterior. Por si acaso, los establecemos
+		// expresamente
+		final String[] securityProperties = new String[] {
+				javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD,
+				javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA,
+				javax.xml.XMLConstants.ACCESS_EXTERNAL_STYLESHEET
+		};
+		for (final String securityProperty : securityProperties) {
+			try {
+				SECURE_BUILDER_FACTORY.setAttribute(securityProperty, ""); //$NON-NLS-1$
+			}
+			catch (final Exception e) {
+				// Podemos las trazas en debug ya que estas propiedades son adicionales
+				// a la activacion de el procesado seguro
+				LOGGER.debug("No se ha podido establecer una propiedad de seguridad '{}' en la factoria XML", securityProperty); //$NON-NLS-1$
+			}
+		}
+
+		SECURE_BUILDER_FACTORY.setValidating(false);
+		SECURE_BUILDER_FACTORY.setNamespaceAware(false);
+	}
 
 	/** Obtiene el formato de las firmas.
 	 * @return Formato de la firma. */
@@ -249,10 +287,11 @@ public final class TriphaseData {
 		final InputStream is = new ByteArrayInputStream(xml);
 		Document doc;
 		try {
-			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+			doc = SECURE_BUILDER_FACTORY.newDocumentBuilder().parse(is);
 		}
 		catch (final Exception e) {
-			Logger.getLogger("es.gob.afirma").severe("Error al cargar el fichero XML: " + e + "\n" + new String(xml)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			LOGGER.error("Error al cargar el XML con los datos trifasicos. El fichero comenzaba por: {}", //$NON-NLS-1$
+					new String(Arrays.copyOf(xml, Math.min(256, xml.length))));
 			throw new IOException("Error al cargar el fichero XML: " + e, e); //$NON-NLS-1$
 		}
 		is.close();

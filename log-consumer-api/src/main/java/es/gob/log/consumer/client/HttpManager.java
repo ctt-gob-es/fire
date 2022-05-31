@@ -40,7 +40,6 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -57,14 +56,12 @@ class HttpManager {
 
 	private static final String HTTPS = "https"; //$NON-NLS-1$
 
-	private static final HostnameVerifier DEFAULT_HOSTNAME_VERIFIER = HttpsURLConnection.getDefaultHostnameVerifier();
-	private static final SSLSocketFactory DEFAULT_SSL_SOCKET_FACTORY = HttpsURLConnection.getDefaultSSLSocketFactory();
 	private static final String KEYSTORE = "javax.net.ssl.keyStore"; //$NON-NLS-1$
 	private static final String KEYSTORE_PASS = "javax.net.ssl.keyStorePassword"; //$NON-NLS-1$
 	private static final String KEYSTORE_TYPE = "javax.net.ssl.keyStoreType"; //$NON-NLS-1$
 	private static final String KEYSTORE_DEFAULT_TYPE = "JKS"; //$NON-NLS-1$
 	private static final String KEYMANAGER_INSTANCE = "SunX509";//$NON-NLS-1$
-	private static final String SSL_CONTEXT = "SSL";//$NON-NLS-1$
+	private static final String SSL_CONTEXT = "TLSv1.2";//$NON-NLS-1$
 
 	private static final int BUFFER_SIZE = 4096;
 
@@ -81,21 +78,45 @@ class HttpManager {
 
 		}
 	};
-	/** M&eacute;todo HTTP.
-	 * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
+	/**
+	 * M&eacute;todo HTTP.
+	 * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
+	 */
 	public static enum UrlHttpMethod {
 		/** GET. */
 		GET,
 		/** POST. */
-		POST,
-		/** PUT. */
-		PUT
+		POST
+	}
+
+	/**
+	 * Validador de nombres de dominio.
+	 */
+	private static class CustomHostnameVerifier implements HostnameVerifier {
+
+		private final HostnameVerifier defaultVerifier;
+		private final boolean verify;
+
+		public CustomHostnameVerifier(final HostnameVerifier defaultVerifier, final boolean verify) {
+			this.defaultVerifier = defaultVerifier;
+			this.verify = verify;
+		}
+
+		@Override
+		public boolean verify(final String hostname, final SSLSession session) {
+			if (!this.verify) {
+				return true;
+			}
+			return this.defaultVerifier.verify(hostname, session);
+		}
 	}
 
 	/** Tiempo de espera por defecto para descartar una conexi&oacute;n HTTP. */
 	public static final int DEFAULT_TIMEOUT = -1;
 
 	private boolean disabledSslChecks = false;
+
+	private boolean disabledHostnameVerifier = false;
 
 	private TrustManager[] trustStoreManagers = null;
 
@@ -107,18 +128,6 @@ class HttpManager {
 
 	protected HttpManager() {
 		// Vacio y "protected"
-	}
-
-	/**
-	 * Permite desactivar la comprobaci&oacute;n del servidor SSL servidor.
-	 * @param disable
-	 */
-	public void setDisabledSslChecks(final boolean disable) {
-		this.disabledSslChecks = disable;
-	}
-
-	public boolean isDisabledSslChecks() {
-		return this.disabledSslChecks;
 	}
 
 	/**
@@ -177,7 +186,7 @@ class HttpManager {
 
 		String urlParameters = null;
 		String request = null;
-		if (UrlHttpMethod.POST.equals(method) || UrlHttpMethod.PUT.equals(method)) {
+		if (UrlHttpMethod.POST.equals(method)) {
 			final StringTokenizer st = new StringTokenizer(url, "?"); //$NON-NLS-1$
 			request = st.nextToken();
 			if (url.contains("?")) { //$NON-NLS-1$
@@ -187,27 +196,7 @@ class HttpManager {
 
 		final URL uri = new URL(request != null ? request : url);
 
-		if (uri.getProtocol().equals(HTTPS)) {
-			try {
-				if (this.trustStoreManagers != null) {
-					configureCustomTrustManager();
-				}
-				else if (this.disabledSslChecks) {
-					disableSslChecks();
-				}
-			}
-			catch(final Exception e) {
-				LOGGER.warn("No se ha podido ajustar la confianza SSL, es posible que no se pueda completar la conexion: " + e); //$NON-NLS-1$
-			}
-		}
-
-		final HttpURLConnection conn;
-		if (isLocal(uri)) {
-			conn = (HttpURLConnection) uri.openConnection(Proxy.NO_PROXY);
-		}
-		else {
-			conn = (HttpURLConnection) uri.openConnection();
-		}
+		final HttpURLConnection conn = openConnection(uri);
 
 		conn.setRequestMethod(method.name());
 
@@ -275,24 +264,47 @@ class HttpManager {
 			}
 		}
 
-		if (uri.getProtocol().equals(HTTPS)) {
-			try {
-				if (this.trustStoreManagers != null) {
-					unconfigureCustomTrustManager();
-				}
-				else if (this.disabledSslChecks) {
-					enableSslChecks();
-				}
-			}
-			catch(final Exception e) {
-				LOGGER.warn("No se ha podido reestablecer la confianza SSL despues de realizar la conexion: " + e); //$NON-NLS-1$
-			}
-		}
-
 		response.setContent(content);
 
 		return response;
 
+	}
+
+	/**
+	 * Abre la conexi&oacute;n a la URL y establece la configuraci&oacute;n SSL
+	 * y de proxy necesaria.
+	 * @param url Direcci&oacute;n a la cual conectar.
+	 * @return Conex&iacute;n.
+	 * @throws IOException Cuando ocurre alg&uacute;n problema al abrir la
+	 * conexi&oacute;n.
+	 */
+	private HttpURLConnection openConnection(final URL url) throws IOException {
+
+		HttpURLConnection conn;
+
+		// Abrimos la conexion
+		if (isLocal(url)) {
+			conn = (HttpURLConnection) url.openConnection(Proxy.NO_PROXY);
+		}
+		else {
+			conn = (HttpURLConnection) url.openConnection();
+		}
+
+		// Establecemos la seguridad HTTPS si corresponde
+		if (url.getProtocol().equals(HTTPS)) {
+			// Configuramos la conexion SSL
+			try {
+				configureSSLSecurity((HttpsURLConnection) conn);
+			}
+			catch(final Exception e) {
+				LOGGER.warn("No se ha podido ajustar la confianza SSL, es posible que no se pueda completar la conexion: " + e); //$NON-NLS-1$
+			}
+
+			// Configuramos el verificador de nombre de dominio
+			configureHostNameVerifier((HttpsURLConnection) conn);
+		}
+
+		return conn;
 	}
 
 
@@ -309,26 +321,34 @@ class HttpManager {
 		}
 	}
 
-	/** Reconfigura el gestor de confianza por defecto para las conexi&oacute;nes. */
-	private static void unconfigureCustomTrustManager() {
-		HttpsURLConnection.setDefaultSSLSocketFactory(DEFAULT_SSL_SOCKET_FACTORY);
-		LOGGER.debug("Reabilitado el gestor de confianza SSL por defecto"); //$NON-NLS-1$
-	}
+	private SSLContext sslContext = null;
 
-	/** Deshabilita las comprobaciones de certificados en conexiones SSL, acept&aacute;dose entonces
-	 * cualquier certificado.
+	/** Configura el almac&eacute;n con el certificado SSL cliente de autenticaci&oacute;n y
+	 * los certificados de confianza. En caso de haberse configurado que se aceptan todos los
+	 * certificados, se deshabilitar&aacute; la comprobaci&oacute;n de confianza en el
+	 * certificado SSL.
 	 * @throws KeyManagementException Si hay problemas en la gesti&oacute;n de claves SSL.
 	 * @throws NoSuchAlgorithmException Si el JRE no soporta alg&uacute;n algoritmo necesario.
 	 * @throws KeyStoreException Si no se puede cargar el KeyStore SSL.
 	 * @throws IOException Si hay errores en la carga del fichero KeyStore SSL.
 	 * @throws CertificateException Si los certificados del KeyStore SSL son inv&aacute;lidos.
 	 * @throws UnrecoverableKeyException Si una clave del KeyStore SSL es inv&aacute;lida. */
-	private void configureCustomTrustManager() throws KeyManagementException,
+	private void configureSSLSecurity(final HttpsURLConnection conn) throws KeyManagementException,
 	                                             NoSuchAlgorithmException,
 	                                             KeyStoreException,
 	                                             UnrecoverableKeyException,
 	                                             CertificateException,
 	                                             IOException {
+
+		if (this.sslContext == null) {
+			this.sslContext = initializeSSLContext();
+		}
+
+		conn.setSSLSocketFactory(this.sslContext.getSocketFactory());
+		LOGGER.debug("Configurado el TrustManager a medida para las conexiones SSL"); //$NON-NLS-1$
+	}
+
+	private SSLContext initializeSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
 		final SSLContext sc = SSLContext.getInstance(SSL_CONTEXT);
 		KeyManager[] km;
 		try {
@@ -344,75 +364,26 @@ class HttpManager {
 			);
 			km = null;
 		}
-		sc.init(
-			km,
-			this.trustStoreManagers,
-			new java.security.SecureRandom()
-		);
-		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		HttpsURLConnection.setDefaultHostnameVerifier(
-			new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			}
-		);
-		LOGGER.debug("Configurado el TrustManager a medida para las conexiones SSL"); //$NON-NLS-1$
-	}
-
-	/** Habilita las comprobaciones de certificados en conexiones SSL dej&aacute;ndolas con su
-	 * comportamiento por defecto. */
-	public static void enableSslChecks() {
-		HttpsURLConnection.setDefaultSSLSocketFactory(DEFAULT_SSL_SOCKET_FACTORY);
-		HttpsURLConnection.setDefaultHostnameVerifier(DEFAULT_HOSTNAME_VERIFIER);
-		LOGGER.debug("Habilitadas comprobaciones SSL"); //$NON-NLS-1$
-	}
-
-	/** Deshabilita las comprobaciones de certificados en conexiones SSL, acept&aacute;dose entonces
-	 * cualquier certificado.
-	 * @throws KeyManagementException Si hay problemas en la gesti&oacute;n de claves SSL.
-	 * @throws NoSuchAlgorithmException Si el JRE no soporta alg&uacute;n algoritmo necesario.
-	 * @throws KeyStoreException Si no se puede cargar el KeyStore SSL.
-	 * @throws IOException Si hay errores en la carga del fichero KeyStore SSL.
-	 * @throws CertificateException Si los certificados del KeyStore SSL son inv&aacute;lidos.
-	 * @throws UnrecoverableKeyException Si una clave del KeyStore SSL es inv&aacute;lida. */
-	public static void disableSslChecks() throws KeyManagementException,
-	                                             NoSuchAlgorithmException,
-	                                             KeyStoreException,
-	                                             UnrecoverableKeyException,
-	                                             CertificateException,
-	                                             IOException {
-		final SSLContext sc = SSLContext.getInstance(SSL_CONTEXT);
-		KeyManager[] km;
-		try {
-			km = getKeyManager();
+		if (this.trustStoreManagers == null && this.disabledSslChecks) {
+			this.trustStoreManagers = DUMMY_TRUST_MANAGER;
 		}
-		catch(final Exception e) {
-			// En ocasiones, los servidores de aplicaciones establecen configuraciones de KeyStore
-			// que no se pueden cargar aqui, y no es algo controlable por las aplicaciones
-			LOGGER.error(
-					"No ha sido posible obtener el KeyManager con el KeyStore '" + //$NON-NLS-1$
-							System.getProperty(KEYSTORE) + "', se usara null: " + e, //$NON-NLS-1$
-							e
+
+		if (km != null || this.trustStoreManagers != null) {
+			sc.init(
+					km,
+					this.trustStoreManagers,
+					new java.security.SecureRandom()
 					);
-			km = null;
 		}
-		sc.init(
-			km,
-			DUMMY_TRUST_MANAGER,
-			new java.security.SecureRandom()
-		);
-		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		HttpsURLConnection.setDefaultHostnameVerifier(
-			new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			}
-		);
-		LOGGER.debug("Deshabilitadas comprobaciones SSL"); //$NON-NLS-1$
+
+		return sc;
+	}
+
+	private void configureHostNameVerifier(final HttpsURLConnection conn) {
+		conn.setHostnameVerifier(
+				new CustomHostnameVerifier(
+						conn.getHostnameVerifier(),
+						!this.disabledHostnameVerifier));
 	}
 
 	/** Devuelve un KeyManager a utilizar cuando se desea deshabilitar las comprobaciones de certificados en las conexiones SSL.
@@ -459,23 +430,6 @@ class HttpManager {
 		return keyFac.getKeyManagers();
 	}
 
-	/**
-	 * Establece cu&aacute;l es el almac&eacute;n de confianza para las conexiones SSL.
-	 * @param trustStore Almac&eacute;n de confianza ya inicializado.
-	 */
-	public void setTrustStore(final KeyStore trustStore) {
-
-		TrustManagerFactory trustManagerFactory;
-		try {
-			trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-			trustManagerFactory.init(trustStore);
-		} catch (final Exception e) {
-			LOGGER.warn("No se pudo inicializar el almacen de certificados de confianza para la conexiones SSL", e); //$NON-NLS-1$
-			return;
-		}
-		this.trustStoreManagers = trustManagerFactory.getTrustManagers();
-
-	}
 
     /** Lee un flujo de datos de entrada y los recupera en forma de array de
      * bytes. Este m&eacute;todo consume pero no cierra el flujo de datos de
@@ -497,4 +451,61 @@ class HttpManager {
         }
         return baos.toByteArray();
     }
+
+    /**
+	 * Establece cu&aacute;l es el almac&eacute;n de confianza para las conexiones SSL.
+	 * @param trustStore Almac&eacute;n de confianza ya inicializado.
+	 */
+	public void setTrustStore(final KeyStore trustStore) {
+
+		TrustManagerFactory trustManagerFactory;
+		try {
+			trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			trustManagerFactory.init(trustStore);
+		} catch (final Exception e) {
+			LOGGER.warn("No se pudo inicializar el almacen de certificados de confianza para la conexiones SSL", e); //$NON-NLS-1$
+			return;
+		}
+		this.trustStoreManagers = trustManagerFactory.getTrustManagers();
+	}
+
+	/**
+	 * Permite desactivar la comprobaci&oacute;n de la confianza del
+	 * certificado SSL servidor.
+	 * @param disable {@code true} para desactivar la comprobaci&oacute;n de
+	 * seguridad, {@code false} en caso contrario.
+	 */
+	public void setDisabledSslChecks(final boolean disable) {
+		this.disabledSslChecks = disable;
+	}
+
+	/**
+	 * Indica si est&aacute; desactivada la comprobaci&oacute;n de la confianza
+	 * del certificado SSL servidor.
+	 * @return {@code true} si se ha desactivado la comprobaci&oacute;n de
+	 * seguridad, {@code false} en caso contrario.
+	 */
+	public boolean isDisabledSslChecks() {
+		return this.disabledSslChecks;
+	}
+
+	/**
+	 * Permite desactivar la verificaci&oacute;n del nombre de host del
+	 * servidor SSL.
+	 * @param disable {@code true} para desactivar la comprobaci&oacute;n de
+	 * seguridad, {@code false} en caso contrario.
+	 */
+	public void setDisabledHostnameVerifier(final boolean disable) {
+		this.disabledHostnameVerifier = disable;
+	}
+
+	/**
+	 * Indica si est&aacute; desactivada la verificaci&oacute;n del nombre de
+	 * host del servidor SSL.
+	 * @param disable {@code true} para desactivar la comprobaci&oacute;n de
+	 * seguridad, {@code false} en caso contrario.
+	 */
+	public boolean isDisabledHostnameVerifier() {
+		return this.disabledHostnameVerifier;
+	}
 }

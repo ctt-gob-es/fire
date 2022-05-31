@@ -25,7 +25,7 @@
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return;
 	}
-
+	
 	final FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
 	if (fireSession == null) {
 		if (errorUrl != null) {
@@ -91,7 +91,7 @@
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 </head>
 <body>
-	<!-- Barra de navegacion -->
+	<%-- Barra de navegacion --%>
 	<header>
 		<div class="header_top wrapper">
 			<div class="mod_claim_izq">
@@ -112,7 +112,7 @@
 		</div>
 	</header>
 
-	<!-- contenido -->
+	<%-- contenido --%>
 	<main class="main">
 
 		<section class="contenido">		
@@ -155,7 +155,7 @@
 						</p>
 					</div>
 					<form method="POST" action="<%= serviceToRedirect %>" id="form<%= info.getName() %>" class="formProvider">
-						<div style="display: none"><!-- type="hidden" -->
+						<div style="display: none">
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
@@ -187,6 +187,7 @@
 		</section>
 	</main>
       
+    <%-- Pie de pagina --%>
 	<div class="clear" ></div>	
 	<footer class="mod_footer">
 		<div class="footer_top wrapper">

@@ -201,7 +201,7 @@ public class ConnectionManager {
 			tsManager = DUMMY_TRUST_MANAGER;
 		}
 
-		ctx = SSLContext.getInstance("TLS"); //$NON-NLS-1$
+		ctx = SSLContext.getInstance("TLSv1.2"); //$NON-NLS-1$
 		ctx.init(kms, tsManager, null);
 	}
 
@@ -209,16 +209,6 @@ public class ConnectionManager {
 
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		if (con instanceof HttpsURLConnection) {
-
-			if (ctx != null) {
-				HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
-			}
-			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(final String hostname, final SSLSession session) {
-					return true;
-				}
-			});
 			if (ctx != null) {
 				((HttpsURLConnection) con).setSSLSocketFactory(ctx.getSocketFactory());
 			}

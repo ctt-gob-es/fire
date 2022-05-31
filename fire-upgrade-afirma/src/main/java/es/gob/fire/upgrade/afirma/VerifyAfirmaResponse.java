@@ -5,13 +5,14 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
+
+import es.gob.fire.upgrade.afirma.ws.SecureXmlBuilder;
 
 /**
  * Respuesta del servicio de validaci&oacute;n de firma.
@@ -43,9 +44,7 @@ public class VerifyAfirmaResponse {
             );
         }
 
-        final SAXParserFactory spf = SAXParserFactory.newInstance();
-        spf.setNamespaceAware(true);
-        final SAXParser saxParser = spf.newSAXParser();
+        final SAXParser saxParser = SecureXmlBuilder.getSAXParser();
         final XMLReader xmlReader = saxParser.getXMLReader();
         xmlReader.setContentHandler(new CustomHandler(this));
         xmlReader.parse(new InputSource(new ByteArrayInputStream(xml)));

@@ -47,7 +47,7 @@
 
     function validate (input) {
         if($(input).attr('type') == 'email' || $(input).attr('name') == 'email') {
-            if($(input).val().trim().match(/^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/) == null) {
+            if($(input).val().trim().match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/) == null) {
                 return false;
             }
         }
@@ -337,6 +337,7 @@ function closeModal(modalIn) {
 
 }
 
+/*
 function getBase64FromImageUrl(url) {
     var img = new Image();
 
@@ -357,6 +358,7 @@ function getBase64FromImageUrl(url) {
 
     img.src = url;
 }
+*/
 
 ///funcion para cerrar los modales
 function closeModalButton(modalId, nameForm){

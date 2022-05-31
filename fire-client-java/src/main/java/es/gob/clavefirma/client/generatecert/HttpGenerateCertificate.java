@@ -15,8 +15,9 @@ import java.net.HttpURLConnection;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import es.gob.clavefirma.client.ClientConfigFilesNotFoundException;
 import es.gob.clavefirma.client.ConnectionManager;
@@ -37,7 +38,7 @@ import es.gob.fire.client.Utils;
  */
 public class HttpGenerateCertificate {
 
-    private static final Logger LOGGER = Logger.getLogger(HttpGenerateCertificate.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpGenerateCertificate.class);
 
     private static boolean initialized = false;
 
@@ -112,13 +113,11 @@ public class HttpGenerateCertificate {
         try {
 			ConnectionManager.configureConnection(p);
 		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "Error en la configuracion de la comunicacion con el componente centralizado: " + e, e); //$NON-NLS-1$
+			LOGGER.error("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 		}
 
-        LOGGER.info(
-        		"Se usara el siguiente servicio de listado de certificados: " + URL_REQUEST_SERVICE //$NON-NLS-1$
-        );
+        LOGGER.info("Se usara el siguiente servicio de listado de certificados: {}", URL_REQUEST_SERVICE); //$NON-NLS-1$
     }
 
     /**
@@ -211,9 +210,8 @@ public class HttpGenerateCertificate {
         } catch (final IOException e) {
         	if (e instanceof HttpError) {
         		final HttpError he = (HttpError) e;
-        		LOGGER.severe(
-        				"Error en la llamada al servicio de generacion de nuevo certificado: " + he.getResponseDescription() //$NON-NLS-1$
-        				);
+        		LOGGER.error( "Error en la llamada al servicio de generacion de nuevo certificado: {}", //$NON-NLS-1$
+        				he.getResponseDescription());
         		if (HttpURLConnection.HTTP_FORBIDDEN == he.getResponseCode()) {
         			throw new HttpForbiddenException(he.getResponseDescription(), e);
         		}
@@ -233,14 +231,14 @@ public class HttpGenerateCertificate {
         			throw new HttpOperationException(he.getResponseDescription(), e);
         		}
         	}
-        	LOGGER.severe("Error en la llamada al servicio remoto: " + e); //$NON-NLS-1$
+        	LOGGER.error("Error en la llamada al servicio remoto", e); //$NON-NLS-1$
         	throw new HttpNetworkException("Error en la llamada al servicio remoto", e); //$NON-NLS-1$
         }
 
         try {
 			return new GenerateCertificateResult(new String(responseJSON));
 		} catch (final IOException e) {
-			LOGGER.severe("El formato de la respuesta es incorrecto:\n" + responseJSON); //$NON-NLS-1$
+			LOGGER.error("El formato de la respuesta es incorrecto:\n{}", responseJSON); //$NON-NLS-1$
 			throw new HttpOperationException("El resultado obtenido no tiene el formato JSON esperado", e); //$NON-NLS-1$
 		}
     }
@@ -314,9 +312,8 @@ public class HttpGenerateCertificate {
         } catch (final IOException e) {
         	if (e instanceof HttpError) {
         		final HttpError he = (HttpError) e;
-        		LOGGER.severe(
-        				"Error en la llamada al servicio de recuperacion del nuevo certificado: " + he.getResponseDescription() //$NON-NLS-1$
-        				);
+        		LOGGER.error("Error en la llamada al servicio de recuperacion del nuevo certificado: {}", //$NON-NLS-1$
+        				he.getResponseDescription());
         		if (he.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
             		throw new HttpForbiddenException(e);
             	} else if (he.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
@@ -327,7 +324,7 @@ public class HttpGenerateCertificate {
             		throw new HttpOperationException(he.getResponseDescription(), e);
             	}
         	}
-        	LOGGER.severe("Error en la llamada al servicio remoto de recuperacion de certificado: " + e); //$NON-NLS-1$
+        	LOGGER.error("Error en la llamada al servicio remoto de recuperacion de certificado", e); //$NON-NLS-1$
         	throw new HttpNetworkException("Error en la llamada al servicio remoto de recuperacion de certificado", e); //$NON-NLS-1$
         }
 
@@ -336,7 +333,7 @@ public class HttpGenerateCertificate {
         			.generateCertificate(new ByteArrayInputStream(certEncoded));
         }
         catch (final Exception e) {
-        	LOGGER.severe("El servicio remoto no ha devuelto un certificado valido: " + e); //$NON-NLS-1$
+        	LOGGER.error("El servicio remoto no ha devuelto un certificado valido", e); //$NON-NLS-1$
         	throw new HttpOperationException("El servicio remoto no ha devuelto un certificado valido", e); //$NON-NLS-1$
         }
     }

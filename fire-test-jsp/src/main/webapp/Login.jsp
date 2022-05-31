@@ -20,11 +20,9 @@
 				}
 			}
 		%>
-		<!-- Barra de navegacion -->
 		<div id="menubar">
 			<div id="bar-txt"><b>Prueba FIRe</b></div>
 		</div>
-		<!-- Contenido -->
 		<div id="container" style="height: 450px !important;">
 			<div style="display: block-inline;text-align:center;">
 				<img src="img/dni_icon_login.png" alt="Imagen esquem&aacute;tica de un usuario" height="80" width="80" style="margin-top:-40px;">
@@ -38,18 +36,15 @@
 			<form method="POST" action="LoginService">
 				<div style="margin-top: 20px; margin-left: 120px;">
 					<div>
-						<!-- Label para la accesibilidad de la pagina -->
 						<label for="usuario" style="color: #404040">USUARIO</label>
 					</div>
 					<div>
-					<!--  TODO: Borrar valor por defecto -->
 						<input id="usuario" class="edit-txt" type="text" tabindex="1" name="user" style="width: 400px; ;margin-top:10px;" value="00001" spellcheck="false" autocomplete="off">
 					</div>
 				</div>
 				
 				<div style="margin-top: 20px; text-align: center;">
 					<div>
-						<!-- Label para la accesibilidad de la pagina -->
 						<label for="submit-btn" style=" color: #808080">Pulse el bot&oacute;n para acceder</label>
 					</div>
 					<div>

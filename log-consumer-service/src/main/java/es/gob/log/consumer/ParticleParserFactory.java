@@ -6,6 +6,7 @@ import java.nio.CharBuffer;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -33,7 +34,9 @@ public class ParticleParserFactory {
 	private ParticleParserFactory(final LogInfo logInfo) {
 		if (logInfo != null) {
 			this.dateFormat = logInfo.getDateFormat();
-			this.levels = logInfo.getLevels();
+			if (logInfo.getLevels() != null) {
+				this.levels = Arrays.copyOf(logInfo.getLevels(), logInfo.getLevels().length);
+			}
 		}
 	}
 

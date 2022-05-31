@@ -21,7 +21,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -141,7 +140,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 	private static void updateBatchResult(final BatchResult batchResult, final String afirmaBatchResultB64, final  FireSession session) throws Exception {
 
 		final byte[] afirmaResultXml = Base64.decode(afirmaBatchResultB64);
-		final Document afirmaResultDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
+		final Document afirmaResultDoc = SecurityUtils.getDocumentBuilder().parse(
 				new ByteArrayInputStream(afirmaResultXml));
 
 		final Map<String, AfirmaSingleResult> afirmaResults = new HashMap<>();

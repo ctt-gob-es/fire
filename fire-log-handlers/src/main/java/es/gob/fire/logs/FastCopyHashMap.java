@@ -532,44 +532,44 @@ public Collection<V> values()
       return this.values;
    }
 
-   @SuppressWarnings("unchecked")
-   private void readObject(final java.io.ObjectInputStream s) throws IOException, ClassNotFoundException
-   {
-      s.defaultReadObject();
-
-      final int size = s.readInt();
-
-      init(size, this.loadFactor);
-
-      for (int i = 0; i < size; i++)
-      {
-         final K key = (K) s.readObject();
-         final V value = (V) s.readObject();
-         putForCreate(key, value);
-      }
-
-      this.size = size;
-   }
-
-   @SuppressWarnings("unchecked")
-   private void putForCreate(K key, final V value)
-   {
-      key = maskNull(key);
-
-      final Entry<K, V>[] table = this.table;
-      final int hash = hash(key);
-      final int length = table.length;
-      int index = index(hash, length);
-
-      Entry<K, V> e = table[index];
-      while (e != null)
-      {
-         index = nextIndex(index, length);
-         e = table[index];
-      }
-
-      table[index] = new Entry<>(key, hash, value);
-   }
+//   @SuppressWarnings("unchecked")
+//   private void readObject(final java.io.ObjectInputStream s) throws IOException, ClassNotFoundException
+//   {
+//      s.defaultReadObject();
+//
+//      final int size = s.readInt();
+//
+//      init(size, this.loadFactor);
+//
+//      for (int i = 0; i < size; i++)
+//      {
+//         final K key = (K) s.readObject();
+//         final V value = (V) s.readObject();
+//         putForCreate(key, value);
+//      }
+//
+//      this.size = size;
+//   }
+//
+//   @SuppressWarnings("unchecked")
+//   private void putForCreate(K key, final V value)
+//   {
+//      key = maskNull(key);
+//
+//      final Entry<K, V>[] table = this.table;
+//      final int hash = hash(key);
+//      final int length = table.length;
+//      int index = index(hash, length);
+//
+//      Entry<K, V> e = table[index];
+//      while (e != null)
+//      {
+//         index = nextIndex(index, length);
+//         e = table[index];
+//      }
+//
+//      table[index] = new Entry<>(key, hash, value);
+//   }
 
    private void writeObject(final java.io.ObjectOutputStream s) throws IOException
    {

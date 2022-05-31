@@ -95,6 +95,21 @@ public final class Constants {
 	public static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
 
 	/**
+	 * Attribute that represents the mail.smtp.starttls.required property.
+	 */
+	public static final String MAIL_SMTP_STARTTLS_REQUIRED = "mail.smtp.starttls.required";
+
+	/**
+	 * Attribute that represents the mail.smtp.ssl.protocols property.
+	 */
+	public static final String MAIL_SMTP_SSL_PROTOCOLS = "mail.smtp.ssl.protocols";
+
+	/**
+	 * Attribute that represents the mail.smtp.socketFactory.port property.
+	 */
+	public static final String MAIL_SMTP_SOCKETFACTORY_PORT = "mail.smtp.socketFactory.port";
+
+	/**
 	 * Attribute that represents the mail.smtp.user property.
 	 */
 	public static final String MAIL_SMTP_USER = "mail.smtp.user";

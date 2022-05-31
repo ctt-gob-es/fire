@@ -95,12 +95,10 @@
 		    }
 		%>
 
-		<!-- Barra de navegacion -->
 		<div id="menubar">
 			<div id="bar-txt"><b>Prueba FIRe</b></div>
 		</div>
 
-		<!-- contenido -->
 		<div id="sign-container">
 			<h1 style="color:#303030;">OBTENCI&Oacute;N DE LA FIRMA</h1>
 

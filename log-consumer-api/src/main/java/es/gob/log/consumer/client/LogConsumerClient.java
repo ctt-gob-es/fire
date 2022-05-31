@@ -228,6 +228,16 @@ public class LogConsumerClient {
 	}
 
 	/**
+	 * Permite desactivar la comprobaci&oacute;n del nombre de host realizada sobre
+	 * el certificado SSL del servidor.
+	 * @param disable {@code true} para desactivar la verificaci&oacute;n,
+	 * {@code false} en caso contrario.
+	 */
+	public void setDisabledHostnameVerifier(final boolean disable) {
+		this.conn.setDisabledHostnameVerifier(disable);
+	}
+
+	/**
 	 * Indica si se encuentran deshabilitadas las comprobaciones autom&aacute;ticas
 	 * sobre los certificados SSL servidor.
 	 * @return {@code true} si las comprobaciones de seguridad se encuentran desactivadas,

@@ -213,6 +213,8 @@ public final class SessionCollector {
 	 * @param session Sesi&oacute; actual.
 	 * @param onlyLoaded Indica si solo se debe recuperar la transacci&oacute;n si ya estaba cargado en memoria.
 	 * @param forceLoad Fuerza que, en caso de haberse definido un gestor de sesiones, se recargue la sesi&oacute;n de &eacute;l.
+	 * @param ofuscated Indica si deber&aacute; trabajarse con el identificador ofuscado del usuario para evitar
+	 * que se tranmita en la medida de lo posible y almacene en los logs el identificador (DNI) del usuario.
 	 * @return Datos de sesi&oacute;n con la transacci&oacute;n deseada o {@code null} si no se encontr&oacute;
 	 * o establa caducada.
 	 */

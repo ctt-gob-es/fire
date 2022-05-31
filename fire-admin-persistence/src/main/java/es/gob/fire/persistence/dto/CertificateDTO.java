@@ -1,6 +1,7 @@
 package es.gob.fire.persistence.dto;
 
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -307,19 +308,23 @@ public class CertificateDTO {
 	}
 
 	public byte[] getCertBytes1() {
-		return this.certBytes1;
+		return this.certBytes1 != null
+				? Arrays.copyOf(this.certBytes1, this.certBytes1.length) : null;
 	}
 
 	public void setCertBytes1(final byte[] certBytes1) {
-		this.certBytes1 = certBytes1;
+		this.certBytes1 = certBytes1 != null
+				? Arrays.copyOf(certBytes1, certBytes1.length) : certBytes1;
 	}
 
 	public byte[] getCertBytes2() {
-		return this.certBytes2;
+		return this.certBytes2 != null
+				? Arrays.copyOf(this.certBytes2, this.certBytes2.length) : null;
 	}
 
 	public void setCertBytes2(final byte[] certBytes2) {
-		this.certBytes2 = certBytes2;
+		this.certBytes2 = certBytes2 != null
+				? Arrays.copyOf(certBytes2, certBytes2.length) : null;
 	}
 
 

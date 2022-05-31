@@ -1,4 +1,5 @@
 
+<%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
@@ -26,6 +27,13 @@
 	if (subjectRef == null || trId == null) {
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return;
+	}
+	
+	if (session != null) {
+		Logger.getLogger("es.gob.fire").info(" ========== Se ha encontrado la sesion local en ChooseCertificate.jsp: " + session.getId()); //$NON-NLS-1$
+	}
+	else {
+		Logger.getLogger("es.gob.fire").info(" ========== No se ha encontrado sesion local en ChooseCertificate.jsp"); //$NON-NLS-1$
 	}
 	
 	// Cargamos la sesion que deberia estar en memoria, pero permitimos su carga de otras fuentes
@@ -103,7 +111,7 @@
 
 </head>
 <body>
-	<!-- Barra de navegacion -->
+	<%-- Barra de navegacion --%>
 	<header>
 		<div class="header_top wrapper">
 			<div class="mod_claim_izq">
@@ -123,7 +131,7 @@
 		</div>
 	</header>
 
-	<!-- contenido -->
+	<%-- contenido --%>
 	<main class="main">
 		
 		
@@ -195,7 +203,7 @@
 		</section>
 	</main>
 	
-	<!-- Pie de pagina -->
+	<%-- Pie de pagina --%>
 	<div class="clear" ></div>	
 	<footer class="mod_footer">
 		<div class="footer_top wrapper">

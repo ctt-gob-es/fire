@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 
-import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -39,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
@@ -53,7 +53,7 @@ import es.gob.fire.persistence.service.ICertificateService;
  * Platform for detection and validation of certificates recognized in European
  * TSL.
  * </p>
- * 
+ *
  * @version 1.1, 02/02/2022.
  */
 @Controller
@@ -67,28 +67,28 @@ public class CertificateController {
 	/**
 	 * Constant that represents the parameter 'idCertificate'.
 	 */
-	private static final String FIELD_ID_CERTIFICATE = "idCertificate";
+	private static final String FIELD_ID_CERTIFICATE = "idCertificate"; //$NON-NLS-1$
 
 	/**
 	 * Constant that represents the parameter log.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(CertificateController.class);
-	
+
 	/**
-	 * Attribute that represents the identifier of the html input text field for the SSL alias certificate. 
+	 * Attribute that represents the identifier of the html input text field for the SSL alias certificate.
 	 */
-	private static final String FIELD_NAME_CERT = "NombreCert";
-	
+	private static final String FIELD_NAME_CERT = "NombreCert"; //$NON-NLS-1$
+
 	/**
-	 * Attribute that represents the service object for accessing the repository. 
+	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
 	private ICertificateService CertService;
-	
+
 	/**
-	 * Attribute that represents the identifier of the html input file field for the certificate file. 
+	 * Attribute that represents the identifier of the html input file field for the certificate file.
 	 */
-	private static final String FIELD_FILE = "file";
+	private static final String FIELD_FILE = "file"; //$NON-NLS-1$
 
 
 	/**
@@ -97,9 +97,9 @@ public class CertificateController {
 	 */
 	@Autowired
 	private ICertificateService certificateService;
-	
+
 	/**
-	 * Attribute that represents the view message wource. 
+	 * Attribute that represents the view message wource.
 	 */
 	@Autowired
 	private MessageSource messageSource;
@@ -116,9 +116,9 @@ public class CertificateController {
 	@RequestMapping(value = "certificateadmin")
 	public String index(final Model model, final String nombre_cert) {
 
-		return "fragments/certificateadmin.html";
+		return "fragments/certificateadmin.html"; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Method that maps the add user web request to the controller and sets the
 	 * backing form.
@@ -129,12 +129,12 @@ public class CertificateController {
 	 */
 	@RequestMapping(value = "addCertificate", method = RequestMethod.POST)
 	public String addUser(final Model model) {
-		
-		model.addAttribute("certAddForm", new CertificateDTO());
-		model.addAttribute("accion", "add");
-		return "modal/certificateAddForm.html";
+
+		model.addAttribute("certAddForm", new CertificateDTO()); //$NON-NLS-1$
+		model.addAttribute("accion", "add"); //$NON-NLS-1$ //$NON-NLS-2$
+		return "modal/certificateAddForm.html"; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Method that opens the modal form user edit.
 	 * @param username String that represents the user's name
@@ -143,45 +143,41 @@ public class CertificateController {
 	 */
 	@RequestMapping(value = "certEdit", method = RequestMethod.POST)
 	public String certEdit(@RequestParam("idCertificado") final Long idCertificado, final Model model) {
-		Certificate cert = certificateService.getCertificateByCertificateId(idCertificado);
-		
-		CertificateDTO certEditForm = certificateService.certificateEntityToDto(cert);	
-		String certData = "";
-		
+		final Certificate cert = this.certificateService.getCertificateByCertificateId(idCertificado);
+
+		final CertificateDTO certEditForm = this.certificateService.certificateEntityToDto(cert);
+		String certData = ""; //$NON-NLS-1$
+
 		if (cert.getCertPrincipal() != null && !cert.getCertPrincipal().isEmpty()) {
 			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertPrincipal()));) {
-							
-				certData = certificateService.getFormatCertText(certIs);
+
+				certData = this.certificateService.getFormatCertText(certIs);
 				certEditForm.setCertPrincipal(certData);
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+			} catch (final IOException e) {
+				LOGGER.error("No se ha podido cargar el certificado principal de la aplicacion", e); //$NON-NLS-1$
+			} catch (final CertificateException e) {
+				LOGGER.error("No se ha podido componer el certificado principal de la aplicacion", e); //$NON-NLS-1$
 			}
 		}
-		
+
 		if (cert.getCertBackup() != null && !cert.getCertBackup().isEmpty()) {
 			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertBackup()));) {
-							
-				certData = certificateService.getFormatCertText(certIs);
-				certEditForm.setCertBackup(certData);
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}			
 
-		model.addAttribute("certEditForm", certEditForm);
-		return "modal/certificateEditForm.html";
+				certData = this.certificateService.getFormatCertText(certIs);
+				certEditForm.setCertBackup(certData);
+
+			} catch (final IOException e) {
+				LOGGER.error("No se ha podido cargar el certificado secundario de la aplicacion", e); //$NON-NLS-1$
+			} catch (final CertificateException e) {
+				LOGGER.error("No se ha podido componer el certificado secundario de la aplicacion", e); //$NON-NLS-1$
+			}
+		}
+
+		model.addAttribute("certEditForm", certEditForm); //$NON-NLS-1$
+		return "modal/certificateEditForm.html"; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Method that maps the request for opening the view certificate modal
 	 * @param idCertificado Long that represents the certificate identifier
@@ -190,47 +186,43 @@ public class CertificateController {
 	 */
 	@RequestMapping(value = "/viewcertificate", method = RequestMethod.POST)
 	public String certView(@RequestParam("idCertificado") final Long idCertificado, final Model model) {
-		Certificate cert = certificateService.getCertificateByCertificateId(idCertificado);
-		
-		CertificateDTO certViewForm = certificateService.certificateEntityToDto(cert);	
-		String certData = "";
-		
+		final Certificate cert = this.certificateService.getCertificateByCertificateId(idCertificado);
+
+		final CertificateDTO certViewForm = this.certificateService.certificateEntityToDto(cert);
+		String certData = ""; //$NON-NLS-1$
+
 		if (cert.getCertPrincipal() != null && !cert.getCertPrincipal().isEmpty()) {
 			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertPrincipal()));) {
-							
-				certData = certificateService.getFormatCertText(certIs);
+
+				certData = this.certificateService.getFormatCertText(certIs);
 				certViewForm.setCertPrincipal(certData);
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+			} catch (final IOException e) {
+				LOGGER.error("No se ha podido cargar el certificado principal de la aplicacion", e);
+			} catch (final CertificateException e) {
+				LOGGER.error("No se ha podido componer el certificado principal de la aplicacion", e);
 			}
 		}
-		
+
 		if (cert.getCertBackup() != null && !cert.getCertBackup().isEmpty()) {
 			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertBackup()));) {
-							
-				certData = certificateService.getFormatCertText(certIs);
-				certViewForm.setCertBackup(certData);
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CertificateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}			
 
-		model.addAttribute("certBackup", certViewForm.getCertBackup());
-		model.addAttribute("certPrincipal", certViewForm.getCertPrincipal());
-		model.addAttribute("certViewForm", certViewForm);
-		return "modal/certificateViewForm.html";
+				certData = this.certificateService.getFormatCertText(certIs);
+				certViewForm.setCertBackup(certData);
+
+			} catch (final IOException e) {
+				LOGGER.error("No se ha podido cargar el certificado secundario de la aplicacion", e);
+			} catch (final CertificateException e) {
+				LOGGER.error("No se ha podido componer el certificado secundario de la aplicacion", e);
+			}
+		}
+
+		model.addAttribute("certBackup", certViewForm.getCertBackup()); //$NON-NLS-1$
+		model.addAttribute("certPrincipal", certViewForm.getCertPrincipal()); //$NON-NLS-1$
+		model.addAttribute("certViewForm", certViewForm); //$NON-NLS-1$
+		return "modal/certificateViewForm.html"; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 *  Method that loads the necessary information to show the confirmation modal to remove a selected responsible.
 	 * @param idResponsible Parameter that represetns ID of responsible.
@@ -238,13 +230,13 @@ public class CertificateController {
 	 * @return String that represents the name of the view to forward.
 	 */
 	@RequestMapping(value = "/loadconfirmdeletecertificate", method = RequestMethod.GET)
-	public String deleteConfirmCertificate(@RequestParam(FIELD_ID_CERTIFICATE) Long idCertificate, Model model) {
+	public String deleteConfirmCertificate(@RequestParam(FIELD_ID_CERTIFICATE) final Long idCertificate, final Model model) {
 		//Metemos los datos en el dto
-		CertificateDTO certificateDto = new CertificateDTO();
+		final CertificateDTO certificateDto = new CertificateDTO();
 		certificateDto.setIdCertificate(idCertificate);
-				
-		model.addAttribute("certificateform", certificateDto);
-		return "modal/certificateDelete.html";
+
+		model.addAttribute("certificateform", certificateDto); //$NON-NLS-1$
+		return "modal/certificateDelete.html"; //$NON-NLS-1$
 	}
 
 }

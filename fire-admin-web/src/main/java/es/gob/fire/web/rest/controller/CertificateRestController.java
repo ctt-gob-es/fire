@@ -37,7 +37,6 @@ import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 
-import es.gob.fire.commons.log.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -54,6 +53,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.i18n.IWebLogMessages;
@@ -487,10 +487,9 @@ public class CertificateRestController {
 				certData = this.certificateService.getFormatCertText(certIs);
 
 			} catch (final IOException e) {
-				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e.getCause());
+				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e);
 			} catch (final CertificateException e) {
-				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido"}));
-				e.printStackTrace();
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e);
 			}
 
 		} else if (certFile2 != null && !certFile2.isEmpty() && PARAM_CER_BKUP.equals(idField)) {
@@ -500,10 +499,9 @@ public class CertificateRestController {
 				certData = this.certificateService.getFormatCertText(certIs);
 
 			} catch (final IOException e) {
-				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e.getCause());
+				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e);
 			} catch (final CertificateException e) {
-				Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido"});
-				e.printStackTrace();
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e);
 			}
 
 		}

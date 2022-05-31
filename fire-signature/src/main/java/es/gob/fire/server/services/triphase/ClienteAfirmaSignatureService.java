@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.AOUtil;
@@ -116,6 +117,16 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			}
 			return;
 		}
+
+		final HttpSession localSession = request.getSession(false);
+		if (localSession != null) {
+			LOGGER.info(" ========== Se ha encontrado la sesion local en ClienteAfirmaSignatureService: " + localSession.getId()); //$NON-NLS-1$
+			localSession.invalidate();
+		}
+		else {
+			LOGGER.info(" ========== No se ha encontrado sesion local en ClienteAfirmaSignatureService"); //$NON-NLS-1$
+		}
+
 
 		response.setHeader("Access-Control-Allow-Origin", ALL_ORIGINS_ALLOWED); //$NON-NLS-1$
 		response.setContentType("text/plain"); //$NON-NLS-1$

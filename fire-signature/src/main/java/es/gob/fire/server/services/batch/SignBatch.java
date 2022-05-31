@@ -19,8 +19,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -28,6 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.server.services.internal.SecurityUtils;
 
 /** Lote de firmas electr&oacute;nicas.
  * Un ejemplo de representaci&oacute;n XML de un lote podr&iacute;a ser:
@@ -101,7 +100,7 @@ public abstract class SignBatch {
 		final Document doc;
 		try (InputStream is = new ByteArrayInputStream(xml)) {
 			try {
-				doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+				doc = SecurityUtils.getDocumentBuilder().parse(is);
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error al cargar el fichero XML de definicion de lote", e); //$NON-NLS-1$

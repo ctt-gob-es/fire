@@ -63,9 +63,10 @@ $(document).ready(function(){
 	var arrCharts = new Array();
 		
 	
-	/**Valida los campos del formulario y envia por POST
-	 * la consulta seleccionada, y añade el resultado
-	*/
+	/**
+	 * Valida los campos del formulario, envia por POST
+	 * la consulta seleccionada y añade el resultado
+	 */
 	$("#formStatictics").submit(function(e){
 		e.preventDefault();
 		$( "label" ).each(function( index ) {
@@ -96,7 +97,7 @@ $(document).ready(function(){
 														
 		if(!ok){
 			alert(msg);
-		}		
+		}
 		else
 		{
 			var $form = $( this ),

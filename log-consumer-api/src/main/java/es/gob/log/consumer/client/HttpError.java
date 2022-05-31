@@ -43,16 +43,18 @@ public final class HttpError extends IOException {
 	 * @param resDescription Descripci&oacute;n del error.
 	 * @param errorStreamContent Contenido del flujo de error.
 	 * @param url URL a la que se intent&oacute; conectar.  */
-	public HttpError(final int resCode, final String resDescription, final byte[] errorStreamContent, final String url) {
+	public HttpError(final int resCode, final String resDescription, final byte[] errorStreamBytes, final String url) {
 		super(
 			"Error HTTP con codigo  " + resCode + //$NON-NLS-1$
-				(errorStreamContent != null && errorStreamContent.length > 1  ? ", cuerpo '" + new String(errorStreamContent) + "'" : "") + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				(errorStreamBytes != null && errorStreamBytes.length > 1  ? ", cuerpo '" + new String(errorStreamBytes) + "'" : "") + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					" y descripcion '" + resDescription  + //$NON-NLS-1$
 						"' para la direccion: " + url //$NON-NLS-1$
 		);
 		this.responseCode = resCode;
 		this.responseDescription = resDescription;
-		this.errorStreamBytes = errorStreamContent;
+		this.errorStreamBytes = errorStreamBytes != null
+				? errorStreamBytes.clone()
+				: null;
 	}
 
 	/** Obtiene el contenido del flujo de error HTTP.
