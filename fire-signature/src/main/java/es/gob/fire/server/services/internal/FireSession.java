@@ -15,6 +15,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import es.gob.fire.signature.ConfigManager;
+
 /**
  * Sesi&oacute;n de FIRe en la que se almacenan los datos de una transacci&oacute;n.
  */
@@ -23,16 +25,17 @@ public class FireSession implements Serializable {
 	/** Serial Id. */
 	private static final long serialVersionUID = 2379947907716059060L;
 
+	/** Tiempo m&aacute;ximo de inactividad de una sesi&oacute;n. */
+	private static final long MAX_INACTIVE_INTERVAL = Math.max(10000, ConfigManager.getTempsTimeout());
+
 	private final String transactionId;
 	private final Map<String, Object> ssData;
-	private final HttpSession httpSession;
 	private long expirationTime;
 
-	private FireSession(final String trId, final Map<String, Object> fireSessionData, final HttpSession httpSession) {
+	private FireSession(final String trId, final Map<String, Object> fireSessionData) {
     	this.transactionId = trId;
 		this.ssData = fireSessionData;
-		this.httpSession = httpSession;
-		this.expirationTime = 0;
+		this.expirationTime = System.currentTimeMillis() + MAX_INACTIVE_INTERVAL;
 	}
 
 	/**
@@ -48,46 +51,32 @@ public class FireSession implements Serializable {
     		return null;
     	}
 
-    	final Map<String, Object> fireSessionData = (Map<String, Object>) httpSession.getAttribute(trId);
-    	if (fireSessionData == null) {
-    		return null;
-    	}
-
-    	final Long expirationTime = (Long) httpSession.getAttribute(ServiceParams.SESSION_PARAM_TIMEOUT);
-
-		final FireSession session = new FireSession(trId, fireSessionData, httpSession);
-		if (expirationTime != null) {
-			session.expirationTime = expirationTime.longValue();
-		}
-
-		return session;
+    	return (FireSession) httpSession.getAttribute(trId);
 	}
 
 	/**
 	 * Crea una nueva sesi&oacute;n de FIRe en la que se va a procesar una transacci&oacute;n.
 	 * @param trId Identificador de transacci&oacute;n.
-	 * @param httpSession Sesi&oacute;n web en la que se genera la nueva sesi&oacute;n.
 	 * @return Sesi&oacute;n de FIRe.
 	 */
-	public static FireSession newSession(final String trId, final HttpSession httpSession) {
+	public static FireSession newSession(final String trId) {
 
 		final Map<String, Object> sessionData = new HashMap<>();
 		sessionData.put(ServiceParams.SESSION_PARAM_TRANSACTION_ID, trId);
 
-		return new FireSession(trId, sessionData, httpSession);
+		return new FireSession(trId, sessionData);
 	}
 
 	/**
 	 * Crea una nueva sesi&oacute;n de FIRe en la que se va a procesar una transacci&oacute;n.
 	 * @param id Identificador de transacci&oacute;n.
 	 * @param sessionData Datos de la sesi&oacute;n.
-	 * @param httpSession Sesi&oacute;n web en la que se genera la nueva sesi&oacute;n.
 	 * @param expirationTime Momento del tiempo en el que expirara la sesi&oacute;n.
 	 * @return Sesi&oacute;n de FIRe.
 	 */
-	public static FireSession newSession(final String id, final Map<String, Object> sessionData, final HttpSession httpSession, final long expirationTime) {
+	public static FireSession newSession(final String trId, final Map<String, Object> sessionData, final long expirationTime) {
 
-		final FireSession session = new FireSession(id, sessionData, httpSession);
+		final FireSession session = new FireSession(trId, sessionData);
 		session.expirationTime = expirationTime;
 
 		return session;
@@ -154,18 +143,14 @@ public class FireSession implements Serializable {
 	 */
 	public void setAttribute(final String name, final Object value) {
 		this.ssData.put(name, value);
-		if (this.httpSession != null) {
-			copySessionAttributes(this.httpSession);
-		}
 	}
 
 	/**
-	 * Copia los datos de esta sesi&oacute;n a los de la sesi&oacute;n indicada.
-	 * @param targetSession Sesi&oacute;n a la que se copiaran los atributos.
+	 * Guarda la sesion de FIRe en la sesi&oacute;n HTTP indicada.
+	 * @param targetSession Sesi&oacute;n HTTP en la que guardarla.
 	 */
-	public void copySessionAttributes(final HttpSession targetSession) {
-		targetSession.setAttribute(this.transactionId, this.ssData);
-		targetSession.setAttribute(ServiceParams.SESSION_PARAM_TIMEOUT, new Long(this.expirationTime));
+	public void saveIntoHttpSession(final HttpSession targetSession) {
+		targetSession.setAttribute(this.transactionId, this);
 	}
 
 	/**
@@ -191,21 +176,14 @@ public class FireSession implements Serializable {
 	 */
 	public void removeAttribute(final String attr) {
 		this.ssData.remove(attr);
-		if (this.httpSession != null) {
-			copySessionAttributes(this.httpSession);
-		}
 	}
 
 	/**
-	 * Extiende la vigencia de la sesi&oacute;n una cantidad de milisegundos.
-	 * @param newExpirationPeriod N&uacute;mero de milisegundos que se extendara la
-	 * sesi&oacute;n a partir del momento actual.
+	 * Extiende la vigencia de la sesi&oacute;n el tiempo en milisegundos
+	 * establecida como periodo m&aacute;ximo de inactividad.
 	 */
-	public void updateExpirationTime(final long newExpirationPeriod) {
-		this.expirationTime = System.currentTimeMillis() + newExpirationPeriod;
-		if (this.httpSession != null) {
-			this.httpSession.setAttribute(ServiceParams.SESSION_PARAM_TIMEOUT, new Long(this.expirationTime));
-		}
+	public void updateExpirationTime() {
+		this.expirationTime = System.currentTimeMillis() + MAX_INACTIVE_INTERVAL;
 	}
 
 	/**
@@ -214,12 +192,6 @@ public class FireSession implements Serializable {
 	 * en caso contrario.
 	 */
 	public boolean isExpired() {
-		if (this.expirationTime == 0 && this.httpSession != null) {
-			final Long time = (Long) this.httpSession.getAttribute(ServiceParams.SESSION_PARAM_TIMEOUT);
-			if (time != null) {
-				this.expirationTime = time.longValue();
-			}
-		}
 		return System.currentTimeMillis() > this.expirationTime;
 	}
 
@@ -233,14 +205,6 @@ public class FireSession implements Serializable {
 			}
 			catch (final Exception e) {
 				// No hacemos nada
-			}
-		}
-		if (this.httpSession != null) {
-			try {
-				this.httpSession.removeAttribute(this.transactionId);
-			}
-			catch (final Exception e) {
-				// La sesion fue previamente invalidada. No hacemos nada
 			}
 		}
 	}

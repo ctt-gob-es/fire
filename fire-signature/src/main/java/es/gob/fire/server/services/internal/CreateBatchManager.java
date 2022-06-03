@@ -146,7 +146,7 @@ public class CreateBatchManager {
 		final Properties upgradeConfig = UpgraderUtils.extractUpdaterProperties(connConfig.getProperties());
 
         // Creamos la transaccion
-        final FireSession session = SessionCollector.createFireSession(subjectId, request.getSession());
+        final FireSession session = SessionCollector.createFireSession(subjectId);
         final String transactionId = session.getTransactionId();
 
         logF.setTransactionId(transactionId);

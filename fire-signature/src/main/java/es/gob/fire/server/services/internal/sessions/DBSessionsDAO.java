@@ -137,7 +137,7 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 			try (ObjectInputStream ois = new ObjectInputStream(sessionIs)) {
 				final Map<String, Object> sessionData = (Map<String, Object>) ois.readObject();
 				fireSession = FireSession.newSession(
-						id, sessionData, session, lastModification + ConfigManager.getTempsTimeout());
+						id, sessionData, lastModification + ConfigManager.getTempsTimeout());
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.WARNING, "Error al reconstruir los datos de la session con ID: " + id, e); //$NON-NLS-1$

@@ -91,27 +91,22 @@ public final class SessionCollector {
 
 
     /**
-     * Crea un nuevo objeto de sesi&oacute;n en el que almacenar los datos de
-     * una transacci&oacute;n y almacena ya el identificador y la referencia
-     * del usuario.
+     * Crea un nuevo objeto de sesi&oacute;n para los datos de una
+     * transacci&oacute;n. La sesi&oacute;n ya contar&aacute; con el
+     * identificador y la referencia del usuario, pero debe llamarse a
+     * {@link #commit(FireSession)} para guardar la sesi&oacute;n.
      * @param subjectId Identificador del usuario que crea la sesi&oacute;n.
      * @param httpSession Sesi&oacute;n web.
      * @return Datos de sesi&oacute;n.
      */
-    public static FireSession createFireSession(final String subjectId, final HttpSession httpSession) {
+    public static FireSession createFireSession(final String subjectId) {
 
     	final String transactionId = generateTransactionId();
     	final String subjectRef = generateSubjectRef(transactionId, subjectId);
 
-    	final FireSession fireSession = FireSession.newSession(transactionId, httpSession);
+    	final FireSession fireSession = FireSession.newSession(transactionId);
     	fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
     	fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_REF, subjectRef);
-    	fireSession.updateExpirationTime(ConfigManager.getTempsTimeout());
-		sessions.put(transactionId, fireSession);
-
-    	if (dao != null) {
-			dao.saveSession(fireSession, true);
-		}
 
     	if (LOGGER.isLoggable(Level.FINE)) {
     		LOGGER.fine(LogTransactionFormatter.format(transactionId, "Se crea la transaccion " + transactionId)); //$NON-NLS-1$
@@ -245,7 +240,7 @@ public final class SessionCollector {
 			if (fireSession == null && !needForceLoad) {
 				fireSession = findSessionFromServerMemory(trId);
 				if (fireSession != null && session != null) {
-					fireSession.copySessionAttributes(session);
+					fireSession.saveIntoHttpSession(session);
 				}
 				if (fireSession != null && LOGGER.isLoggable(Level.FINE)) {
 					LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion cargada de memoria")); //$NON-NLS-1$
@@ -256,7 +251,7 @@ public final class SessionCollector {
 			if (fireSession == null) {
 				fireSession = findSessionFromSharedMemory(trId, session);
 				if (fireSession != null && session != null) {
-					fireSession.copySessionAttributes(session);
+					fireSession.saveIntoHttpSession(session);
 				}
 				if (fireSession != null && LOGGER.isLoggable(Level.FINE)) {
 					LOGGER.fine(LogTransactionFormatter.format(trId, "Sesion cargada de almacenamiento persistente")); //$NON-NLS-1$
@@ -580,7 +575,7 @@ public final class SessionCollector {
 		// Cada vez que se actualiza la sesion, se actualiza su fecha de caducidad.
 		// Consideramos que una sesion sobre la que unicamente se hacen consultas, no
 		// deberia actualizarse indefinidamente
-		session.updateExpirationTime(ConfigManager.getTempsTimeout());
+		session.updateExpirationTime();
 
 		// Actualizamos la informacion de la sesion, que ya existira, de la relacion que se
 		// guarda en memoria

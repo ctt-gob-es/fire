@@ -144,7 +144,7 @@ public class SignOperationManager {
 		final DocInfo docInfo = DocInfo.extractDocInfo(connConfig.getProperties());
 		DocInfo.addDocInfoToSign(extraParams, docInfo);
 
-		final FireSession session = SessionCollector.createFireSession(subjectId, request.getSession());
+		final FireSession session = SessionCollector.createFireSession(subjectId);
 		final String transactionId = session.getTransactionId();
 
 		logF.setTransactionId(transactionId);
@@ -213,8 +213,6 @@ public class SignOperationManager {
 
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
 
-        SessionCollector.commit(session);
-
         LOGGER.info(logF.f("Se inicia la carga de los datos")); //$NON-NLS-1$
 
         // Obtenemos los datos a firmar a partir de los datos proporcionados
@@ -262,6 +260,11 @@ public class SignOperationManager {
         	sendResult(response, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
 		}
+
+        // Guardamos los datos de la transaccion en la sesion del servidor y en la coleccion de sesiones
+        SessionCollector.commit(session);
+        session.saveIntoHttpSession(request.getSession());
+
 
         LOGGER.info(logF.f("Generamos la URL de redireccion")); //$NON-NLS-1$
 

@@ -89,7 +89,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 		// Ya que la fecha del fichero es la fecha en la que se guardo y este tambien sera el momento
 		// en el que se actualizo la fecha de expiracion, podemos recoger esa fecha y sumarle el tiempo
 		// de vigencia para obtener la misma fecha de caducidad
-		return FireSession.newSession(id, sessionData, session,
+		return FireSession.newSession(id, sessionData,
 				sessionFile.lastModified() + ConfigManager.getTempsTimeout());
 	}
 
