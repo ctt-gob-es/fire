@@ -34,8 +34,8 @@ import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.server.services.internal.ServiceParams;
-import es.gob.fire.signature.AplicationsDAO;
 import es.gob.fire.signature.ApplicationChecking;
+import es.gob.fire.signature.ApplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
@@ -116,7 +116,7 @@ public final class CertificateService extends HttpServlet {
             }
 
         	try {
-        		final ApplicationChecking appCheck = AplicationsDAO.checkApplicationId(appId);
+        		final ApplicationChecking appCheck = ApplicationsDAO.checkApplicationId(appId);
 	        	if (!appCheck.isValid()) {
 	        		LOGGER.warning(logF.f(
 	    				"Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion" //$NON-NLS-1$

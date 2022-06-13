@@ -21,6 +21,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.signature.AplicationsDAO;
+import es.gob.fire.signature.ApplicationsDAO;
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -41,11 +42,18 @@ public final class ServiceUtil {
 
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+    private static final String[] CERT_REQUEST_ATTRS = {
+    		// Atributo usado por los clientes Apache Tomcat
+    		"javax.servlet.request.X509Certificate", //$NON-NLS-1$
+    		// Atributo usado por los clientes Oracle WebLogic
+    		"java.security.cert.X509Certificate", //$NON-NLS-1$
+    		// Atributo usado por los clientes antiguos
+    		"javax.net.ssl.peer_certificates" //$NON-NLS-1$
+    };
 
     private ServiceUtil() {
         // No instanciable
     }
-
 
     /**
      * Transforma un Base64 URL Safe en un Base64 corriente.
@@ -122,13 +130,24 @@ public final class ServiceUtil {
      * atributos de la petici&oacute;n.
      */
     private static X509Certificate[] getCertificatesFromAttribute(final HttpServletRequest request) {
-    	final Object[] cer = (Object[]) request.getAttribute("javax.servlet.request.X509Certificate"); //$NON-NLS-1$
-    	if (cer == null){
-    		return null;
-    	}
+
+    	// Revisamos los posibles atributos en los que se pueda encontrar el
+    	// certificado
+    	int i = 0;
+    	Object[] cer;
+    	do {
+    		cer = (Object[]) request.getAttribute(CERT_REQUEST_ATTRS[i++]);
+    	} while (cer == null && i < CERT_REQUEST_ATTRS.length);
+
+    	// Si no lo hemos encontrado, devolvemos null
+    	if (cer == null) {
+			return null;
+		}
+
+    	// Cargamos los certificados
     	final X509Certificate[] certificates = new X509Certificate[cer.length];
-    	for (int i = 0; i < cer.length; i++) {
-    		certificates[i] = (X509Certificate) cer[i];
+    	for (int j = 0; j < cer.length; j++) {
+    		certificates[j] = (X509Certificate) cer[j];
   	   	}
     	return certificates;
     }
@@ -141,8 +160,8 @@ public final class ServiceUtil {
      * @return Lista de los certificados X509 enviados o {@code null} se enviaron en la propiedad
      * de la cabecera.
      */
-    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName)
-    {
+    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName) {
+
         X509Certificate certificates[] = null;
         final String headerName = propName;
         String headerCert = request.getHeader(headerName);
@@ -191,7 +210,7 @@ public final class ServiceUtil {
 	                                                                          IllegalAccessException, CertificateException,
 	                                                                          NoSuchAlgorithmException, IOException,
 	                                                                          DBConnectionException {
-		if (!AplicationsDAO.checkThumbPrint(appId, thumbPrint)) {
+		if (!ApplicationsDAO.checkThumbPrint(appId, thumbPrint)) {
     		throw new IllegalAccessException("El certificado utilizado no tiene permiso para acceder"); //$NON-NLS-1$
     	}
 	}
