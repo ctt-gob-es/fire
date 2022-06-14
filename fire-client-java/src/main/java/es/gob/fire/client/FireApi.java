@@ -157,7 +157,7 @@ public final class FireApi {
         LOGGER.info("Se usara el siguiente servicio de acceso a FIRe: " + SERVICE_URL); //$NON-NLS-1$
 
         try {
-        	conn = HttpsConnection.getConnection(p, passwordDecipher);
+        	conn = HttpsConnectionFactory.getConnection(p, passwordDecipher);
 		} catch (final Exception e) {
 			LOGGER.error("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente centralizado", e); //$NON-NLS-1$

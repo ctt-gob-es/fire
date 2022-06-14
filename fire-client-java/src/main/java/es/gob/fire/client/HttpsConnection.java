@@ -14,8 +14,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLStreamHandler;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -59,9 +62,9 @@ public class HttpsConnection {
 
     private static final String VERIFY_HOSTNAMES_PROPERTY = "verify.hostnames";  //$NON-NLS-1$
 
-    private static final String ACCEPT_ALL_CERTS_VALUE = "all"; //$NON-NLS-1$
+    protected static final String ACCEPT_ALL_CERTS_VALUE = "all"; //$NON-NLS-1$
 
-    private static final String ACCEPT_DEFAULT_CERTS_VALUE = "default"; //$NON-NLS-1$
+    protected static final String ACCEPT_DEFAULT_CERTS_VALUE = "default"; //$NON-NLS-1$
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpsConnection.class);
@@ -90,36 +93,16 @@ public class HttpsConnection {
 		}
 	};
 
+	private static boolean urlHandlerLoaded = false;
+	private static Constructor<?> jsseUrlHandlerConstructor = null;
+
 	private SSLContext ctx;
-	private boolean verifyHostnames;
 
-	private HttpsConnection() {
-		// No hacemos nada
-	}
-
+	private Properties config = null;
+	private PasswordDecipher decipher = null;
 
 	/**
-	 * Obtiene una conexi&oacute;n Http/Https.
-	 * @param config Opciones de configuraci&oacute;n.
-	 * @param decipher Descifrador encargado de descifrar las contrase&ntilde;as de
-	 * los almacenes de claves y certificados de confianza.
-	 * @return Devuelve la conexi&oacute;n configurada.
-	 * @throws IllegalArgumentException Cuando se configura un fichero de almac&eacute;n que no existe.
-	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.
-	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto.
-	 */
-	public static HttpsConnection getConnection(final Properties config, final PasswordDecipher decipher) throws IllegalArgumentException,
-																		GeneralSecurityException,
-																		IOException {
-
-		final HttpsConnection conn = new HttpsConnection();
-		conn.configureConnection(config, decipher);
-
-		return conn;
-	}
-
-	/**
-	 * Configura la conexi&oacute;n con el componente central.
+	 * Inicializa el objeto para las conexiones SSL.
 	 * @param config Opciones de configuraci&oacute;n.
 	 * @param decipher Descifrador encargado de descifrar las contrase&ntilde;as de
 	 * los almacenes de claves y certificados de confianza.
@@ -127,13 +110,19 @@ public class HttpsConnection {
 	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.
 	 * @throws IOException Cuando se produce un error en la conexi&oacute;n con el servidor remoto.
 	 */
-	private void configureConnection(final Properties config, final PasswordDecipher decipher) throws IllegalArgumentException, GeneralSecurityException, IOException {
+	public void init(final Properties sslConfig, final PasswordDecipher passwordDecipher)
+			throws IllegalArgumentException, GeneralSecurityException, IOException {
+
+		this.config = new Properties();
+		this.config.putAll(sslConfig);
+		this.decipher = passwordDecipher;
 
 		// Inicializamos el KeyStore
 		KeyStore ks = null;
 		KeyStorePassword ksPassword = null;
 		String ksAlias = null;
-        final String keyStore = config.getProperty(KEYSTORE_PROPERTY);
+        final String keyStore = getKeyStorePath();
+
         if (keyStore != null) {
         	final File ksFile = new File(keyStore);
         	if (!ksFile.isFile() || !ksFile.canRead()) {
@@ -142,15 +131,15 @@ public class HttpsConnection {
         		);
         	}
 
-        	final String ksType = config.getProperty(KEYSTORE_TYPE_PROPERTY);
+        	final String ksType = getKeyStoreType();
 
-        	final String ksPasswordText = config.getProperty(KEYSTORE_PASS_PROPERTY);
+        	final String ksPasswordText = getKeyStorePass();
         	if (ksPasswordText == null) {
         		throw new IllegalArgumentException("No se ha indicado la clave del almacen SSL"); //$NON-NLS-1$
         	}
-        	ksPassword = new KeyStorePassword(ksPasswordText, decipher);
+        	ksPassword = new KeyStorePassword(ksPasswordText, this.decipher);
 
-        	ksAlias = config.getProperty(KEYSTORE_ALIAS_PROPERTY);
+        	ksAlias = getKeyStoreAlias();
 
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
 
@@ -162,7 +151,8 @@ public class HttpsConnection {
         // Inicializamos el TrustStore
         KeyStore ts = null;
         boolean acceptAllCert = false;
-        final String trustStore = config.getProperty(TRUSTSTORE_PROPERTY);
+        final String trustStore = getTrustStorePath();
+
         if (trustStore != null && !ACCEPT_DEFAULT_CERTS_VALUE.equalsIgnoreCase(trustStore)) {
         	if (ACCEPT_ALL_CERTS_VALUE.equalsIgnoreCase(trustStore)) {
         		acceptAllCert = true;
@@ -175,26 +165,24 @@ public class HttpsConnection {
             		);
             	}
 
-            	final String tsType = config.getProperty(TRUSTSTORE_TYPE_PROPERTY, KeyStore.getDefaultType());
+            	final String tsType = getTrustStoreType();
 
-                final String tsPasswordText = config.getProperty(TRUSTSTORE_PASS_PROPERTY);
+                final String tsPasswordText = getTrustStorePass();
                 if (tsPasswordText == null) {
                 	throw new IllegalArgumentException("No se ha indicado la clave del almacen de confianza SSL"); //$NON-NLS-1$
                 }
 
                 ts = KeyStore.getInstance(tsType);
                 final FileInputStream tsFis = new FileInputStream(new File(trustStore));
-                ts.load(tsFis, new KeyStorePassword(tsPasswordText, decipher).getPassword());
+                ts.load(tsFis, new KeyStorePassword(tsPasswordText, this.decipher).getPassword());
                 tsFis.close();
         	}
         }
 
+        // Inicializamos el contexto SSL
         if (ks != null || ts != null || acceptAllCert) {
         	initContext(ks, ksPassword != null ? ksPassword.getPassword() : null, ksAlias, ts, acceptAllCert);
         }
-
-
-		this.verifyHostnames = Boolean.parseBoolean(config.getProperty(VERIFY_HOSTNAMES_PROPERTY));
 	}
 
 	/**
@@ -211,7 +199,7 @@ public class HttpsConnection {
 	 * @throws KeyStoreException Cuando no se pueden inicializar el KeyStore o TrustStore.
 	 * @throws KeyManagementException Cuando no se puede inicializar el contexto SSL.
 	 */
-	private void initContext(
+	protected void initContext(
 			final KeyStore ks,
 			final char[] ksPassword,
 			final String ksAlias,
@@ -275,8 +263,7 @@ public class HttpsConnection {
 			throw new IllegalArgumentException("La URL a leer no puede ser nula"); //$NON-NLS-1$
 		}
 
-		final URL uri = new URL(url);
-
+		final URL uri = createURL(url);
 		final HttpURLConnection conn = getConnection(uri);
 
 		conn.setRequestMethod(method.toString());
@@ -310,24 +297,59 @@ public class HttpsConnection {
 		final byte[] data = Utils.getDataFromInputStream(is);
 		is.close();
 
+		conn.disconnect();
+
 		return data;
 	}
 
-	private HttpURLConnection getConnection(final URL url) throws IOException {
+	private static URL createURL(final String url) throws MalformedURLException {
 
+		// Intentamos forzar el Handler de URL de JSSE para mantener un comportamiento homogeneo.
+		// Si no, segun la configuracion del servidor de aplicaciones, puede que se utilice una
+		// configuracion para las conexiones SSL distinta a la establecida
+		if (!urlHandlerLoaded) {
+			urlHandlerLoaded = true;
+			try {
+				final Class<?> handlerClass = Class.forName("sun.net.www.protocol.https.Handler", false, HttpsConnection.class.getClassLoader()); //$NON-NLS-1$
+				jsseUrlHandlerConstructor = handlerClass.getDeclaredConstructor();
+				jsseUrlHandlerConstructor.setAccessible(true);
+			}
+			catch (final Exception e) {
+				jsseUrlHandlerConstructor = null;
+			}
+		}
+
+		// Utilizamos el manejador de JSSE si se pudo cargar o el por defecto si no
+		URL uri;
+		if (jsseUrlHandlerConstructor != null) {
+			try {
+				final Object handler = jsseUrlHandlerConstructor.newInstance();
+				uri = new URL(null, url, (URLStreamHandler) handler);
+			}
+			catch (final Exception e) {
+				uri = new URL(url);
+			}
+		}
+		else {
+			uri = new URL(url);
+		}
+
+		return uri;
+	}
+
+	protected HttpURLConnection getConnection(final URL url) throws IOException {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-		if (con instanceof HttpsURLConnection && this.ctx != null) {
+		if (this.ctx != null && con instanceof HttpsURLConnection) {
 			final HttpsURLConnection cons = (HttpsURLConnection) con;
 			cons.setSSLSocketFactory(this.ctx.getSocketFactory());
 			cons.setHostnameVerifier(getHostnameVerifier(cons.getHostnameVerifier()));
 		}
-
 		return con;
 	}
 
+
 	private HostnameVerifier getHostnameVerifier(final HostnameVerifier verifier) {
-		return new FireHostnameVerifier(verifier, this.verifyHostnames);
+		return new FireHostnameVerifier(verifier, isVerifyHostNames());
 	}
 
 	/**
@@ -353,5 +375,39 @@ public class HttpsConnection {
 
 			return true;
 		}
+	}
+
+	public String getKeyStorePath() {
+		return this.config.getProperty(KEYSTORE_PROPERTY);
+	}
+
+	public String getKeyStorePass() {
+		return this.config.getProperty(KEYSTORE_PASS_PROPERTY);
+	}
+
+	public String getKeyStoreType() {
+		return this.config.getProperty(KEYSTORE_TYPE_PROPERTY, KeyStore.getDefaultType());
+	}
+
+	public String getKeyStoreAlias() {
+		return this.config.getProperty(KEYSTORE_ALIAS_PROPERTY);
+	}
+
+	public String getTrustStorePath() {
+		return this.config.getProperty(TRUSTSTORE_PROPERTY);
+	}
+
+	public String getTrustStorePass() {
+		return this.config.getProperty(TRUSTSTORE_PASS_PROPERTY);
+	}
+
+	public String getTrustStoreType() {
+		return this.config.getProperty(TRUSTSTORE_TYPE_PROPERTY, KeyStore.getDefaultType());
+	}
+
+	public boolean isVerifyHostNames() {
+		// Se verificara el nombre de host salvo que se indique expresamente el valor "false"
+		final String verifiedValue = this.config.getProperty(VERIFY_HOSTNAMES_PROPERTY);
+		return !Boolean.FALSE.toString().equalsIgnoreCase(verifiedValue);
 	}
 }

@@ -28,14 +28,7 @@
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return;
 	}
-	
-	if (session != null) {
-		Logger.getLogger("es.gob.fire").info(" ========== Se ha encontrado la sesion local en ChooseCertificate.jsp: " + session.getId()); //$NON-NLS-1$
-	}
-	else {
-		Logger.getLogger("es.gob.fire").info(" ========== No se ha encontrado sesion local en ChooseCertificate.jsp"); //$NON-NLS-1$
-	}
-	
+
 	// Cargamos la sesion que deberia estar en memoria, pero permitimos su carga de otras fuentes
 	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false);
 	if (fireSession == null) {

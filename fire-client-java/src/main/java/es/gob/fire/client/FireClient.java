@@ -242,7 +242,7 @@ public class FireClient {
         LOGGER.info("Se usara el siguiente servicio de acceso a FIRe: " + this.serviceUrl); //$NON-NLS-1$
 
         try {
-			this.conn = HttpsConnection.getConnection(config, decipher);
+			this.conn = HttpsConnectionFactory.getConnection(config, decipher);
 		} catch (final Exception e) {
 			LOGGER.error("Error en la configuracion de la comunicacion con el componente central", e); //$NON-NLS-1$
 			throw new SecurityException("Error en la configuracion de la comunicacion con el componente central", e); //$NON-NLS-1$

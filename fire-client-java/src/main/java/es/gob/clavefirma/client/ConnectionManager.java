@@ -15,6 +15,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import es.gob.fire.client.HttpsConnection;
+import es.gob.fire.client.HttpsConnectionFactory;
 
 /**
  * Clase para la configuracion de la conexi&oacute;n con el componente central.
@@ -40,7 +41,7 @@ public class ConnectionManager {
 		if (conn != null) {
 			return;
 		}
-		conn = HttpsConnection.getConnection(config, null);
+		conn = HttpsConnectionFactory.getConnection(config, null);
 	}
 
 	/**
