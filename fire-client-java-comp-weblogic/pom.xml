@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>es.gob.fire</groupId>
+	<artifactId>fire-client-weblogic</artifactId>
+	<name>fire-client-weblogic</name>
+		
+	<parent>
+		<groupId>es.gob.fire</groupId>
+		<artifactId>fire-artifacts</artifactId>
+		<version>2.4-SNAPSHOT</version>
+	</parent>
+		
+	<properties>
+		<jdk.version>1.6</jdk.version>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+		    <groupId>es.gob.fire</groupId>
+		    <artifactId>fire-client</artifactId>
+		</dependency>
+
+		<!-- Esta dependencia no existe en ningun repositorio publico. Es el
+		JAR "wls-api.jar" que incluye WebLogic y hay que instalarla en el
+		repositorio local. Esta version concreta se ha extraido de WebLogic
+		14.1.1 y puede instalarse en el repositorio local con el comando:
+		mvn install:install-file -Dfile=RUTA/wls-api.jar -DgroupId=com.oracle.weblogic -DartifactId=wls-api -Dversion=14.1.1 -Dpackaging=jar	-->
+		<dependency>
+		    <groupId>com.oracle.weblogic</groupId>
+		    <artifactId>wls-api</artifactId>
+		    <version>14.1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+
+	</dependencies>
+
+</project>
