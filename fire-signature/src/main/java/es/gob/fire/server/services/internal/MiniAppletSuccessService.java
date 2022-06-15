@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -68,7 +69,7 @@ public class MiniAppletSuccessService extends HttpServlet {
         if (session == null) {
         	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);
-   			response.sendRedirect(redirectErrorUrl);
+        	redirectToExternalUrl(redirectErrorUrl, request, response);
     		return;
         }
 
@@ -80,17 +81,14 @@ public class MiniAppletSuccessService extends HttpServlet {
     	// Comprobamos que haya URL de redireccion
     	final TransactionConfig connConfig	= (TransactionConfig) session
     			.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-    	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
-			redirectErrorUrl = connConfig.getRedirectErrorUrl();
-		}
-
-    	if (connConfig == null || connConfig.getRedirectSuccessUrl() == null) {
+    	if (connConfig == null || connConfig.getRedirectSuccessUrl() == null || !connConfig.isDefinedRedirectErrorUrl()) {
     		LOGGER.warning(logF.f("No se encontraron en la sesion las URL de redireccion para la operacion")); //$NON-NLS-1$
     		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
-    		response.sendRedirect(redirectErrorUrl);
+    		redirectToExternalUrl(redirectErrorUrl, request, response);
     		return;
     	}
 		final String redirectUrl = connConfig.getRedirectSuccessUrl();
+		redirectErrorUrl = connConfig.getRedirectSuccessUrl();
 
 		// Agregamos el certificado en caso de haberlo recibido. Para el proceso de firma simple,
 		// sera obligatorio ya que se requerira para completar la firma
@@ -111,7 +109,7 @@ public class MiniAppletSuccessService extends HttpServlet {
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error al procesar el resultado de la firma de lote del Cliente @firma"), e); //$NON-NLS-1$
         		ErrorManager.setErrorToSession(session, OperationError.SIGN_LOCAL_BATCH, true, null);
-        		response.sendRedirect(redirectErrorUrl);
+        		redirectToExternalUrl(redirectErrorUrl, request, response);
         		return;
         	}
         }
@@ -122,10 +120,29 @@ public class MiniAppletSuccessService extends HttpServlet {
 
         SessionCollector.commit(session);
 
-        response.sendRedirect(redirectUrl);
+        redirectToExternalUrl(redirectUrl, request, response);
 
 		LOGGER.fine(logF.f("Fin de la llamada al servicio publico de exito de firma con certificado local")); //$NON-NLS-1$
 	}
+
+    /**
+     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
+     * tuviese, para borrar cualquier dato que hubiese en ella.
+     * @param url URL a la que redirigir al usuario.
+     * @param request Objeto de petici&oacute;n realizada al servlet.
+     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+     * @throws IOException Cuando no se puede redirigir al usuario.
+     */
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+
+        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
+    	final HttpSession httpSession = request.getSession(false);
+        if (httpSession != null) {
+        	httpSession.invalidate();
+        }
+
+    	response.sendRedirect(url);
+    }
 
 	/**
 	 * Actualiza el estado del lote con el resultado obtenido al firmarlo con el Cliente @firma.

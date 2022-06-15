@@ -25,8 +25,11 @@ public class FireSession implements Serializable {
 	/** Serial Id. */
 	private static final long serialVersionUID = 2379947907716059060L;
 
-	/** Tiempo m&aacute;ximo de inactividad de una sesi&oacute;n. */
-	private static final long MAX_INACTIVE_INTERVAL = Math.max(10000, ConfigManager.getTempsTimeout());
+	/**
+	 * Tiempo m&aacute;ximo de inactividad de una sesi&oacute;n. Si no
+	 * se configur&oacute; ser&aacute;n 10 minutos.
+	 */
+	public static final long MAX_INACTIVE_INTERVAL = Math.max(10 * 60 * 1000, ConfigManager.getTempsTimeout());
 
 	private final String transactionId;
 	private final Map<String, Object> ssData;

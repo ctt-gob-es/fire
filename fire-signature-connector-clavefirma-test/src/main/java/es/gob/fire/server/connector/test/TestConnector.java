@@ -190,9 +190,10 @@ public class TestConnector extends FIReConnector {
 		}
 
 		// Leemos el JSON con el listado de certificados
-		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(response));
-        final JsonArray certObjects = jsonReader.readArray();
-        jsonReader.close();
+		JsonArray certObjects;
+		try (final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(response));) {
+			certObjects = jsonReader.readArray();
+		}
 
         final CertificateFactory certFactory;
         try {
@@ -388,18 +389,18 @@ public class TestConnector extends FIReConnector {
 			throw new FIReConnectorNetworkException("Error en la llamada al servicio de recuperacion de certificado generado", e); //$NON-NLS-1$
 		}
 
-		final JsonReader reader = Json.createReader(new ByteArrayInputStream(response));
+		String certEncoded;
+		try (final JsonReader reader = Json.createReader(new ByteArrayInputStream(response));) {
 
-		final JsonObject jsonResult = reader.readObject();
-		final String result = jsonResult.getString("result"); //$NON-NLS-1$
-		if (!"OK".equalsIgnoreCase(result)) { //$NON-NLS-1$
-			LOGGER.log(Level.SEVERE, "El certificado de firma no se genero correctamente: " + result); //$NON-NLS-1$
-			reader.close();
-			throw new FIReCertificateException("El certificado de firma no se genero correctamente"); //$NON-NLS-1$
+			final JsonObject jsonResult = reader.readObject();
+			final String result = jsonResult.getString("result"); //$NON-NLS-1$
+			if (!"OK".equalsIgnoreCase(result)) { //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, "El certificado de firma no se genero correctamente: " + result); //$NON-NLS-1$
+				reader.close();
+				throw new FIReCertificateException("El certificado de firma no se genero correctamente"); //$NON-NLS-1$
+			}
+			certEncoded = jsonResult.getString("cert"); //$NON-NLS-1$
 		}
-		final String certEncoded = jsonResult.getString("cert"); //$NON-NLS-1$
-
-		reader.close();
 
 		try {
 			return Base64.decode(certEncoded);

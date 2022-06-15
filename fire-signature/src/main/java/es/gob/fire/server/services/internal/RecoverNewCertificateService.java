@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
@@ -42,7 +43,7 @@ public class RecoverNewCertificateService extends HttpServlet {
 
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		final String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+		String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
 		final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
 
@@ -61,8 +62,9 @@ public class RecoverNewCertificateService extends HttpServlet {
 		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(), false, false);
 		if (session == null) {
 			LOGGER.severe(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
-			if (redirectErrorUrl != null) {
-				response.sendRedirect(redirectErrorUrl);
+			if (errorUrl != null) {
+				response.sendRedirect(errorUrl);
+				redirectToExternalUrl(errorUrl, request, response);
 			} else {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			}
@@ -79,7 +81,6 @@ public class RecoverNewCertificateService extends HttpServlet {
 	    final TransactionConfig connConfig =
 	    		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
-		String errorUrl = null;
 		if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 			errorUrl = connConfig.getRedirectErrorUrl();
 		}
@@ -89,13 +90,13 @@ public class RecoverNewCertificateService extends HttpServlet {
 	    	certEncoded = RecoverCertificateManager.recoverCertificate(
 	    			providerName,
 	    			generateTrId,
-	    			connConfig.getProperties()
+	    			connConfig != null ? connConfig.getProperties() : null
 	    	);
 	    }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
         	if (errorUrl != null) {
-            	response.sendRedirect(errorUrl);
+        		redirectToExternalUrl(errorUrl, request, response);
             } else {
             	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
@@ -105,7 +106,7 @@ public class RecoverNewCertificateService extends HttpServlet {
         	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
         	AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
         	if (errorUrl != null) {
-            	response.sendRedirect(errorUrl);
+        		redirectToExternalUrl(errorUrl, request, response);
             } else {
 	            response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
 	                    "No se ha podido conectar con el sistema"); //$NON-NLS-1$
@@ -115,7 +116,7 @@ public class RecoverNewCertificateService extends HttpServlet {
         catch (final Exception e) {
             LOGGER.log(Level.WARNING, logF.f("Error al recuperar el nuevo certificado"), e); //$NON-NLS-1$
             if (errorUrl != null) {
-            	response.sendRedirect(errorUrl);
+            	redirectToExternalUrl(errorUrl, request, response);
             } else {
             	response.sendError(
             			HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -132,7 +133,7 @@ public class RecoverNewCertificateService extends HttpServlet {
         catch (final Exception e) {
             LOGGER.severe(logF.f("No se pudo cargar la factoria de certificados")); //$NON-NLS-1$
             if (errorUrl != null) {
-	    		response.sendRedirect(errorUrl);
+            	redirectToExternalUrl(errorUrl, request, response);
 	    	} else {
 	    		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	    	}
@@ -147,7 +148,7 @@ public class RecoverNewCertificateService extends HttpServlet {
         catch (final CertificateException e) {
             LOGGER.severe(logF.f("Error cargando el certificado del usuario")); //$NON-NLS-1$
             if (errorUrl != null) {
-	    		response.sendRedirect(errorUrl);
+	    		redirectToExternalUrl(errorUrl, request, response);
 	    	} else {
 	    		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	    	}
@@ -172,4 +173,23 @@ public class RecoverNewCertificateService extends HttpServlet {
 			return;
 		}
 	}
+
+    /**
+     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
+     * tuviese, para borrar cualquier dato que hubiese en ella.
+     * @param url URL a la que redirigir al usuario.
+     * @param request Objeto de petici&oacute;n realizada al servlet.
+     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+     * @throws IOException Cuando no se puede redirigir al usuario.
+     */
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+
+        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
+    	final HttpSession httpSession = request.getSession(false);
+        if (httpSession != null) {
+        	httpSession.invalidate();
+        }
+
+    	response.sendRedirect(url);
+    }
 }

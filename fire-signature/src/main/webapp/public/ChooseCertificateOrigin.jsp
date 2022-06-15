@@ -26,6 +26,10 @@
 		return;
 	}
 	
+	// Ya que este es uno de los puntos de entrada del usuario a la operativa de FIRe, se establece aqui
+	// el tiempo maximo de sesion 
+	session.setMaxInactiveInterval((int) (FireSession.MAX_INACTIVE_INTERVAL / 1000));
+	
 	final FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
 	if (fireSession == null) {
 		if (errorUrl != null) {

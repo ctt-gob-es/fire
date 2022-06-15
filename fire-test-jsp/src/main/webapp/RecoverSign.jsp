@@ -9,7 +9,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-	if (session.getAttribute("user") == null) { //$NON-NLS-1$
+
+	String user = (String) session.getAttribute("user"); //$NON-NLS-1$
+	String signFormat = (String) session.getAttribute("format"); //$NON-NLS-1$
+
+	session.invalidate();
+	
+	if (user == null) {
 		response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 		return;
 	}
@@ -90,7 +96,6 @@
 			
 			// Definimos la extension para la descarga de la firma segun el formato
 			String ext = null;
-			String signFormat = (String) session.getAttribute("format"); //$NON-NLS-1$
 			if (signFormat != null) {
 				switch (signFormat) {
 					case "CAdES":

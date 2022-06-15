@@ -16,13 +16,14 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 
 /**
  * Servlet que redirige a la autenticacion de usuarios para la obtenci&oacute;n
- * de certificados en la nube
+ * de certificados en la nube.
  */
 public class AuthenticationService extends HttpServlet {
 
@@ -63,14 +64,21 @@ public class AuthenticationService extends HttpServlet {
 		// Comprobamos que se haya indicado el identificador de transaccion
 		if (transactionId == null || transactionId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
 		// Comprobamos que se haya indicado el identificador de usuario
 		if (subjectRef == null || subjectRef.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la referencia del usuario")); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
+			return;
+		}
+
+		// Comprobamos que se haya indicado el proveedor
+		if (origin == null || origin.isEmpty()) {
+			LOGGER.warning(logF.f("No se ha proporcionado el proveedor")); //$NON-NLS-1$
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
@@ -78,7 +86,7 @@ public class AuthenticationService extends HttpServlet {
 		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, false);
 		if (session == null) {
 			LOGGER.severe(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
@@ -91,15 +99,18 @@ public class AuthenticationService extends HttpServlet {
 		final String appId = session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 		logF.setAppId(appId);
 
-		// Comprobamos que se haya indicado el proveedor
-		if (origin == null || origin.isEmpty()) {
-			LOGGER.warning(logF.f("No se ha proporcionado el proveedor")); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
-			return;
-		}
-
 		final TransactionConfig connConfig =
 				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+
+		// Usamos la URL de error indicada en la transaccion
+		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
+			LOGGER.warning(logF.f("No se encontro en la sesion la URL de redireccion de error para la operacion")); //$NON-NLS-1$
+			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
+			return;
+		}
+		redirectErrorUrl = connConfig.getRedirectErrorUrl();
+
 
 		FIReConnector connector = null;
 
@@ -110,9 +121,12 @@ public class AuthenticationService extends HttpServlet {
 			);
 		} catch (final FIReConnectorFactoryException e) {
 			LOGGER.warning(logF.f("Error al obtener el conector")); //$NON-NLS-1$
+			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
 			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
+
+
 
 		final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 
@@ -124,15 +138,16 @@ public class AuthenticationService extends HttpServlet {
 			final String okRedirectUrl = baseUrl
 					+ ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN
 					+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
+					+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$
 					+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + origin //$NON-NLS-1$ //$NON-NLS-2$
 					+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=" + originForced //$NON-NLS-1$ //$NON-NLS-2$
-					+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
+					+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 
 			authUrl = connector.userAutentication(subjectId,
     			okRedirectUrl, connConfig.getRedirectErrorUrl());
 		} else {
 			LOGGER.warning(logF.f("El conector no puede ser nulo")); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
@@ -140,6 +155,25 @@ public class AuthenticationService extends HttpServlet {
 		session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_LOGIN, Boolean.TRUE);
 		SessionCollector.commit(session);
 
-    	response.sendRedirect(authUrl);
+    	redirectToExternalUrl(authUrl, request, response);
 	}
+
+    /**
+     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
+     * tuviese, para borrar cualquier dato que hubiese en ella.
+     * @param url URL a la que redirigir al usuario.
+     * @param request Objeto de petici&oacute;n realizada al servlet.
+     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+     * @throws IOException Cuando no se puede redirigir al usuario.
+     */
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+
+        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
+    	final HttpSession httpSession = request.getSession(false);
+        if (httpSession != null) {
+        	httpSession.invalidate();
+        }
+
+    	response.sendRedirect(url);
+    }
 }

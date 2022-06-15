@@ -8,6 +8,10 @@
  </head>
  <body>
   <%
+  	if (session != null) {
+  		session.invalidate();
+  	}
+  
   	String message = request.getParameter("msg"); //$NON-NLS-1$
   	if (message != null) {
   		message = message.toUpperCase();

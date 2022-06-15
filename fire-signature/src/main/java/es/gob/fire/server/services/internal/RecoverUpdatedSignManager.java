@@ -43,6 +43,8 @@ public class RecoverUpdatedSignManager {
 
 	private static final Logger LOGGER = Logger.getLogger(RecoverUpdatedSignManager.class.getName());
 
+	private static final String CONFIG_PARAM_ALLOW_PARTIAL_UPGRADE = "allowPartialUpgrade"; //$NON-NLS-1$
+
 	/**
 	 * Obtiene de la plataforma de actualizaci&oacute;n la firma actualizada.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
@@ -122,7 +124,7 @@ public class RecoverUpdatedSignManager {
 
         boolean allowPartialUpgrade = false;
 		if (config != null) {
-			allowPartialUpgrade = Boolean.parseBoolean(config.getProperty("allowPartialUpgrade"));
+			allowPartialUpgrade = Boolean.parseBoolean(config.getProperty(CONFIG_PARAM_ALLOW_PARTIAL_UPGRADE));
 		}
 
         // Comprobamos si era necesario recuperar la firma totalmente actualizada y si se ha hecho asi

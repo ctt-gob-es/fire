@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.alarms.Alarm;
@@ -51,6 +52,10 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
+		// Ya que este es uno de los puntos de entrada del usuario a la operativa de FIRe, se establece aqui
+		// el tiempo maximo de sesion
+		setSessionMaxAge(request);
+
 		// Obtenemos los datos proporcionados por parametro
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
@@ -78,14 +83,14 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		// Comprobamos que se haya indicado el identificador de transaccion
 		if (transactionId == null || transactionId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
 		// Comprobamos que se haya indicado el identificador de usuario
 		if (subjectRef == null || subjectRef.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la referencia del usuario")); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
@@ -93,7 +98,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, false);
 		if (session == null) {
 			LOGGER.severe(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
@@ -115,7 +120,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		// Comprobamos que se haya indicado el origen del certificado
 		if (origin == null || origin.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado el origen del certificado")); //$NON-NLS-1$
-			response.sendRedirect(redirectErrorUrl);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
@@ -134,6 +139,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		final TransactionConfig connConfig =
 				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+		if (connConfig == null) {
+			LOGGER.warning(logF.f("No se encontro la configuracion de la operacion en la sesion")); //$NON-NLS-1$
+			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
+			return;
+		}
 
 		// Se selecciono firmar con un certificado local
 		if (ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(origin)) {
@@ -144,10 +155,10 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 			final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 
-			if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
+			if (!connConfig.isDefinedRedirectErrorUrl()) {
 				LOGGER.warning(logF.f("No se encontro en la sesion la URL de redireccion de error para la operacion")); //$NON-NLS-1$
 				ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
-	        	response.sendRedirect(redirectErrorUrl);
+				redirectToExternalUrl(redirectErrorUrl, request, response);
 				return;
 			}
 
@@ -156,12 +167,23 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			} catch (final ServletException e) {
 				LOGGER.log(Level.SEVERE, logF.f("Error al redirigir al usuario a una de las pantallas de exito"), e); //$NON-NLS-1$
 				ErrorManager.setErrorToSession(session, OperationError.INTERNAL_ERROR, originForced);
-				response.sendRedirect(redirectErrorUrl);
+				redirectToExternalUrl(redirectErrorUrl, request, response);
 				return;
 			}
 		}
 
 		LOGGER.fine(logF.f("Fin de la llamada al servicio publico de seleccion de origen")); //$NON-NLS-1$
+	}
+
+	/**
+	 * Establece el tiempo maximo de vida de la sesi&oacute;n del usuario.
+	 * @param request Petici&oacute;n realizada al servicio.
+	 */
+	private static void setSessionMaxAge(final HttpServletRequest request) {
+		final HttpSession httpSession = request.getSession(false);
+		if (httpSession != null) {
+			httpSession.setMaxInactiveInterval((int) (FireSession.MAX_INACTIVE_INTERVAL / 1000));
+		}
 	}
 
 	/**
@@ -334,6 +356,25 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 	}
 
+    /**
+     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
+     * tuviese, para borrar cualquier dato que hubiese en ella.
+     * @param url URL a la que redirigir al usuario.
+     * @param request Objeto de petici&oacute;n realizada al servlet.
+     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+     * @throws IOException Cuando no se puede redirigir al usuario.
+     */
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+
+        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
+    	final HttpSession httpSession = request.getSession(false);
+        if (httpSession != null) {
+        	httpSession.invalidate();
+        }
+
+    	response.sendRedirect(url);
+    }
+
 	/**
 	 * Redirige a una p&aacute;gina de error. La p&aacute;gina sera de de error de firma, si existe la posibilidad de
 	 * que se pueda reintentar la operaci&oacute;n, o la p&aacute;gina de error proporcionada por el usuario.
@@ -347,7 +388,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	private static void redirectToErrorPage(final boolean originForced, final TransactionConfig connConfig,
 			final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		if (originForced) {
-			response.sendRedirect(connConfig.getRedirectErrorUrl());
+			redirectToExternalUrl(connConfig.getRedirectErrorUrl(), request, response);
 		}
 		else {
 			request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);

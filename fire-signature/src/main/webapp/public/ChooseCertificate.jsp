@@ -29,8 +29,11 @@
 		return;
 	}
 
-	// Cargamos la sesion que deberia estar en memoria, pero permitimos su carga de otras fuentes
-	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false);
+	// Cargamos la sesion. Deberia estar en memoria, pero permitimos su carga de otras fuentes,
+	// ya que, por ejemplo, si el proveedor de firma en la nube requirio que se validase la
+	// identidad del usuario antes de acceder a sus certificados, habríamos borrado la sesion
+	// de memoria al saltar de FIRe a la web del proveedor.
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;

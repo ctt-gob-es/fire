@@ -17,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servicio interno para registrar el error de cancelaci&oacute;n de la operaci&oacute;n y
@@ -53,7 +54,7 @@ public class CancelOperationService extends HttpServlet {
                 catch (final Exception e) {
                 	LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: %1s", e)); //$NON-NLS-1$
         		}
-    			response.sendRedirect(redirectErrorUrl);
+				redirectToExternalUrl(redirectErrorUrl, request, response);
     		}
     		else {
     			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
@@ -74,8 +75,27 @@ public class CancelOperationService extends HttpServlet {
 
 		ErrorManager.setErrorToSession(session, OperationError.OPERATION_CANCELED);
 
-		response.sendRedirect(connConfig.getRedirectErrorUrl());
+		redirectToExternalUrl(connConfig.getRedirectErrorUrl(), request, response);
 
 		LOGGER.fine(logF.f("Fin de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
 	}
+
+    /**
+     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
+     * tuviese, para borrar cualquier dato que hubiese en ella.
+     * @param url URL a la que redirigir al usuario.
+     * @param request Objeto de petici&oacute;n realizada al servlet.
+     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+     * @throws IOException Cuando no se puede redirigir al usuario.
+     */
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+
+        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
+    	final HttpSession httpSession = request.getSession(false);
+        if (httpSession != null) {
+        	httpSession.invalidate();
+        }
+
+    	response.sendRedirect(url);
+    }
 }

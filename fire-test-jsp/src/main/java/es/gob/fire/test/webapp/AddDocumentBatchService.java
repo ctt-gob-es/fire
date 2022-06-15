@@ -9,6 +9,7 @@
  */
 package es.gob.fire.test.webapp;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -177,7 +178,7 @@ public class AddDocumentBatchService extends HttpServlet {
 	        	} else if (item.isFormField() && "upgrade".equals(item.getFieldName())) { //$NON-NLS-1$
 	        		doc.setUpgrade(item.getString());
 	        	} else if (!item.isFormField() && "batch-file".equals(item.getFieldName())) { //$NON-NLS-1$
-	        		try (InputStream fileContent = item.getInputStream();) {
+	        		try (InputStream fileContent = new BufferedInputStream(item.getInputStream());) {
 	        			doc.setName(item.getName());
 	        			doc.setData(Utils.getDataFromInputStream(fileContent));
 	        		}
