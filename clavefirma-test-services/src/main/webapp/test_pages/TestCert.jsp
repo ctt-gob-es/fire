@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <%-- saved from url=(0164)https://clave-dninbrt.dev.seg-social.gob.es/rss-gateway/CertificateManagementServlet?id_transaction=8e6f5a59c6da85805ba534f596ed147baf371c52ec68f3b1d4c9d77df56a5720 --%>
-<%@page import="es.gob.afirma.core.misc.Base64"--%>
+<%@page import="es.gob.afirma.core.misc.Base64"%>
+
 <html lang="es">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">

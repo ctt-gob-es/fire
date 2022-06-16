@@ -11,14 +11,27 @@
 <%
 
 	String user = (String) session.getAttribute("user"); //$NON-NLS-1$
-	String signFormat = (String) session.getAttribute("format"); //$NON-NLS-1$
-
-	session.invalidate();
-	
 	if (user == null) {
 		response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 		return;
 	}
+
+	String signFormat = (String) session.getAttribute("format"); //$NON-NLS-1$
+	
+	TransactionResult result;
+    try {
+    	result = SignHelper.recoverSignResult(request);
+    }
+    catch (Exception e) {
+		LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
+				"Error durante la operacion de recuperacion de firma: {}", e.toString()); //$NON-NLS-1$
+		String msg = e.getMessage();
+		String params = msg != null ? URLEncoder.encode(e.getMessage(), "utf-8") : ""; //$NON-NLS-1$ //$NON-NLS-2$
+    	response.sendRedirect("ErrorPage.jsp?msg=" + params); //$NON-NLS-1$
+    	return;
+    }
+    
+    session.invalidate();
 %>
 
 <!DOCTYPE html>
@@ -55,17 +68,7 @@
 	<body style=" font-weight: 300;">
 
 		<%
-		    TransactionResult result;
-		    try {
-		    	result = SignHelper.recoverSignResult(request);
-		    }
-		    catch (Exception e) {
-				LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
-						"Error durante la operacion de recuperacion de firma: {}", e.toString()); //$NON-NLS-1$
-		    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
-		    	return;
-		    }
-
+		
 		    final byte[] signature = result.getResult();
 		    final GracePeriodInfo gracePeriod = result.getGracePeriod();
 		    
