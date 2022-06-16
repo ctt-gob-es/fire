@@ -45,6 +45,9 @@ public class RecoverNewCertificateService extends HttpServlet {
 		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
+		// No se guardaran los resultados en cache
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
 
 		if (transactionId == null || transactionId.isEmpty()) {

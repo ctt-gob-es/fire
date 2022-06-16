@@ -72,6 +72,9 @@ public final class PreSignService extends HttpServlet {
     	String redirectErrorUrl 	= request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
     	String certB64        		= request.getParameter(ServiceParams.HTTP_PARAM_CERT);
 
+		// No se guardaran los resultados en cache
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
     	// Con la seleccion automatica de certificado, se recibe el certificado en un
     	// atributo en lugar de por parametro
     	if (certB64 == null || certB64.isEmpty()) {

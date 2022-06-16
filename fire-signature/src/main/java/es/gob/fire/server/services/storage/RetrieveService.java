@@ -53,6 +53,7 @@ public final class RetrieveService extends HttpServlet {
 		final String syntaxVersion = request.getParameter(PARAMETER_NAME_SYNTAX_VERSION);
 		final String id = request.getParameter(PARAMETER_NAME_ID);
 		response.setHeader("Access-Control-Allow-Origin", "*"); //$NON-NLS-1$ //$NON-NLS-2$
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		if (operation == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_OPERATION_NAME));

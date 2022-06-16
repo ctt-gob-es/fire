@@ -65,6 +65,7 @@ public final class StorageService extends HttpServlet {
 		final String syntaxVersion = params.get(PARAMETER_NAME_SYNTAX_VERSION);
 		final String id = params.get(PARAMETER_NAME_ID);
 		response.setHeader("Access-Control-Allow-Origin", "*"); //$NON-NLS-1$ //$NON-NLS-2$
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 		response.setContentType("text/plain"); //$NON-NLS-1$
 		response.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 

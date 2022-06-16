@@ -51,6 +51,9 @@ public final class RequestNewCertificateService extends HttpServlet {
 		final boolean originForced = Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
 		final String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
+		// No se guardaran los resultados en cache
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de solicitud de certificado")); //$NON-NLS-1$

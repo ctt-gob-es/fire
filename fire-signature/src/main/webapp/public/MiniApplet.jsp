@@ -25,6 +25,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
+	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
 	// Recogemos de la peticion todos los parametros y con el identificador de transaccion
 	// recuperamos la configuracion de la operacion y la referencia a los datos sobre los
 	// que operar
@@ -166,6 +168,10 @@
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Cache-Control" content="no-cache, must-revalidate" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Expires" content="0" />
+	<meta http-equiv="Content-Security-Policy" content="style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src *; connect-src 'self' afirma: 127.0.0.1">
 
 	<meta name="description" content="Firma con certificado local">
 	<meta name="author" content="Gobierno de España">

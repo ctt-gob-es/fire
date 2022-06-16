@@ -118,6 +118,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		response.setHeader("Access-Control-Allow-Origin", ALL_ORIGINS_ALLOWED); //$NON-NLS-1$
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 		response.setContentType("text/plain"); //$NON-NLS-1$
 		response.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 

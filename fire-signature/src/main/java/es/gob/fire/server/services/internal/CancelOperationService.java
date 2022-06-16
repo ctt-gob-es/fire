@@ -38,6 +38,9 @@ public class CancelOperationService extends HttpServlet {
 		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 
+		// No se guardaran los resultados en cache
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		final LogTransactionFormatter logF = new LogTransactionFormatter(null, trId);
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$

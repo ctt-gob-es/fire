@@ -65,6 +65,9 @@ public final class BatchPresigner extends HttpServlet {
 			return;
 		}
 
+		// No se guardaran los resultados en cache
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		final SignBatch batch;
 		try {
 			final byte[] batchConfig = BatchServerUtil.getSignBatchConfig(xml);

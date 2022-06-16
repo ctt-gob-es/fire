@@ -40,6 +40,9 @@ public class MiniAppletErrorService extends HttpServlet {
             return;
         }
 
+		// No se guardaran los resultados en cache
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
         final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de error de firma con certificado local")); //$NON-NLS-1$

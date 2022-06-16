@@ -15,6 +15,8 @@
 <%@page import="es.gob.fire.server.services.internal.ProviderManager"%>
 
 <%
+	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
 	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String providerName = null;
@@ -86,6 +88,10 @@
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Expires" content="0" />
+	<meta http-equiv="Content-Security-Policy" content="style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' *">
 
 	<meta name="description" content="El usuario no tiene certificados del proveedor en la nube">
 	<meta name="author" content="Gobierno de España">

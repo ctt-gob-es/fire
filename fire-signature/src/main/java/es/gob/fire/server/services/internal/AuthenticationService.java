@@ -44,6 +44,9 @@ public class AuthenticationService extends HttpServlet {
 		final boolean originForced = Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
 		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
+		// No se guardaran los resultados en cache
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de seleccion de origen")); //$NON-NLS-1$
@@ -125,8 +128,6 @@ public class AuthenticationService extends HttpServlet {
 			response.sendRedirect(redirectErrorUrl);
 			return;
 		}
-
-
 
 		final String subjectId = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 
