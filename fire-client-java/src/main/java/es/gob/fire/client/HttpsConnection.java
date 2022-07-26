@@ -143,7 +143,7 @@ public class HttpsConnection {
 
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
 
-        	final FileInputStream ksFis = new FileInputStream(new File(keyStore));
+        	final FileInputStream ksFis = new FileInputStream(ksFile);
         	ks.load(ksFis, ksPassword.getPassword());
         	ksFis.close();
         }
@@ -213,9 +213,18 @@ public class HttpsConnection {
 		KeyManager[] keyManagers = null;
 		if (ks != null) {
 
-			if (ksAlias != null && !ksAlias.isEmpty()) {
+			String selectedAlias;
+			if (ksAlias == null || ksAlias.isEmpty()) {
+				selectedAlias = ks.aliases().nextElement();
+			}
+			else {
+				selectedAlias = ksAlias;
+			}
+
+
+			if (selectedAlias != null && !selectedAlias.isEmpty()) {
 				try {
-					keyManagers = new KeyManager[]{ new MultiCertKeyManager(ks, ksPassword, ksAlias) };
+					keyManagers = new KeyManager[]{ new MultiCertKeyManager(ks, ksPassword, selectedAlias) };
 				} catch (final Exception e) {
 					LOGGER.warn("No se pudo inicializar el almacen con los datos proporcionados. Se usara el mecanismo por defecto"); //$NON-NLS-1$
 					keyManagers = null;
