@@ -98,7 +98,7 @@ public class AfirmaValidator implements SignatureValidator {
 		} catch (final AfirmaResponseException e) {
 			if (RMAJOR_RESPONDER_ERROR.equals(e.getMajorCode()) && e.getMessage() != null &&
 					e.getMessage().contains(VALIDATION_ERROR_FRAGMENT)) {
-				throw new VerifyException("La firma que se intenta actualizar no es valida", e); //$NON-NLS-1$
+				throw new VerifyException("La firma que se intenta actualizar no es valida: " + e.getMessage(), e); //$NON-NLS-1$
 			}
 			throw new UpgradeException("Error durante la actualizacion de la firma. MajorCode: " + e.getMajorCode() + //$NON-NLS-1$
 					". MinorCode: " + e.getMinorCode(), e); //$NON-NLS-1$

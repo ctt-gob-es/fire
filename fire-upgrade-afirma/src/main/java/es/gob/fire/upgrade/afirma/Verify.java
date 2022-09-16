@@ -55,7 +55,9 @@ public final class Verify {
 					e);
 		}
 
-		return new VerifyResult(response.isOk());
+		return response.isOk()
+				? new VerifyResult(true)
+						: new VerifyResult(false, response.getDescription());
 	}
 
 }

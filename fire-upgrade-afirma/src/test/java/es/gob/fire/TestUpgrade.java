@@ -73,10 +73,10 @@ public final class TestUpgrade {
 	/** Prueba de mejora de firma.
 	 * @throws Exception en cualquier error. */
 	@Test
-	@Ignore
+	//@Ignore
 	public void testSignUpgrade() throws Exception {
 
-		final UpgradeTarget format = UpgradeTarget.T_FORMAT;
+		final UpgradeTarget format = UpgradeTarget.T_LEVEL_FORMAT;
 
 		final UpgradeResult result = Upgrade.upgradeSignature(this.conn, this.testFile, format, this.config.getProperty(PROP_APPID), true);
 
@@ -94,10 +94,10 @@ public final class TestUpgrade {
 	 * en la plataforma respete los periodos de gracia para la actualizaci&oacute;n de la firma.
 	 * @throws Exception en cualquier error. */
 	@Test
-	@Ignore
+	//@Ignore
 	public void testSignUpgradeAsync() throws Exception {
 
-		final UpgradeTarget format = UpgradeTarget.T_FORMAT;
+		final UpgradeTarget format = UpgradeTarget.T_LEVEL_FORMAT;
 
 		final UpgradeResult result = Upgrade.upgradeSignature(this.conn, this.testFile, format, this.config.getProperty(PROP_APPID), false);
 
@@ -114,10 +114,10 @@ public final class TestUpgrade {
 	/** Prueba de recuperaci&oacute;n de firma enviada a actualizar anteriormente.
 	 * @throws Exception en cualquier error. */
 	@Test
-	@Ignore
+	//@Ignore
 	public void testRecoverSignatureAsync() throws Exception {
 
-		final UpgradeTarget format = UpgradeTarget.T_FORMAT;
+		final UpgradeTarget format = UpgradeTarget.T_LEVEL_FORMAT;
 
 		final UpgradeResult result = Upgrade.recoverUpgradedSignature(this.conn, DOCID, format, this.config.getProperty(PROP_APPID));
 
