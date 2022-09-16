@@ -53,7 +53,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de solicitud de certificado")); //$NON-NLS-1$
@@ -82,7 +82,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
-		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), true, false);
+		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		if (errorUrl != null) {
@@ -91,11 +91,6 @@ public final class RequestNewCertificateService extends HttpServlet {
         		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
         	}
     		return;
-        }
-
-        // Si la operacion anterior no fue la solicitud de una firma, forzamos a que se recargue por si faltan datos
-        if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-        	session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
         }
 
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);

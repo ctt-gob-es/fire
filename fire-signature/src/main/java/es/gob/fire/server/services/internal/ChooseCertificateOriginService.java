@@ -257,6 +257,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			if (certificates == null || certificates.length == 0) {
 				if (connector.allowRequestNewCerts()) {
 					LOGGER.info(logF.f("El usuario no dispone de certificados, pero el conector le permite generarlos")); //$NON-NLS-1$
+					// Guardamos en la sesion compartida los datos agregados hasta ahora
+					SessionCollector.commit(session);
 					request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE_NOCERT).forward(request, response);
 				}
 				else {

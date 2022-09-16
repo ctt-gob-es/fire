@@ -29,7 +29,7 @@
 
 	final ProviderInfo info = ProviderManager.getProviderInfo(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN));
 	if (info != null && info.getTitle() != null) {
-		 providerName=info.getTitle();
+		 providerName = info.getTitle();
 	}
 	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {

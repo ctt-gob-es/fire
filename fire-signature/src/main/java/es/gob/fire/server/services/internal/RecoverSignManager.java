@@ -288,12 +288,12 @@ public class RecoverSignManager {
     					upgraterConfig, signValidationNeeded, logF);
     		}
     		catch (final InvalidSignatureException e) {
-    			LOGGER.log(Level.WARNING, logF.f("La firma generada no es valida")); //$NON-NLS-1$
+    			LOGGER.log(Level.WARNING, logF.f("La firma generada no es valida: " + e.getMessage())); //$NON-NLS-1$
     			sendError(response, session, HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode());
     			return;
     		}
     		catch (final ConnectionException e) {
-    			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas")); //$NON-NLS-1$
+    			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$
     			AlarmsManager.notify(Alarm.CONNECTION_VALIDATION_PLATFORM);
     			sendError(response, session, HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
     			return;
@@ -409,7 +409,7 @@ public class RecoverSignManager {
 				LOGGER.info(logF.f("Validamos la firma")); //$NON-NLS-1$
 				final VerifyResult verifyResult = validator.validateSignature(signature, upgraderConfig);
 				if (!verifyResult.isOk()) {
-					throw new InvalidSignatureException("La firma generada no es valida"); //$NON-NLS-1$
+					throw new InvalidSignatureException("La firma generada no es valida: " + verifyResult.getDescription()); //$NON-NLS-1$
 				}
 			}
 			else {

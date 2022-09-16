@@ -128,7 +128,7 @@ class PostSignBatchThread extends ConcurrentProcessThread {
     					LOGGER.info(logF.f("Validamos la firma: " + this.docId)); //$NON-NLS-1$
     					final VerifyResult verifyResult = validator.validateSignature(signature, upgradeConfig);
     					if (!verifyResult.isOk()) {
-    		    			LOGGER.log(Level.WARNING, logF.f("La firma generada no es valida: " + this.docId)); //$NON-NLS-1$
+    		    			LOGGER.log(Level.WARNING, logF.f("La firma del document %1s no es valida: %2s", this.docId, verifyResult.getDescription())); //$NON-NLS-1$
     		    			this.batchResult.setErrorResult(this.docId, BatchResult.INVALID_SIGNATURE);
     		    			setFailed(true);
     		    			interrupt();
