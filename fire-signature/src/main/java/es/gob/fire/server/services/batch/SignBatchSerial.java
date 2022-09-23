@@ -11,77 +11,75 @@ package es.gob.fire.server.services.batch;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.logging.Level;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+
 import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.fire.server.services.batch.SingleSign.ProcessResult;
-import es.gob.fire.server.services.batch.SingleSign.ProcessResult.Result;
-import es.gob.fire.server.services.batch.SingleSignConstants.SignAlgorithm;
+import es.gob.fire.server.services.batch.ProcessResult.Result;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 
-/** Lote de firmas electr&oacute;nicas que se ejecuta secuencialmente.
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
+/**
+ * Lote de firmas electr&oacute;nicas que se ejecuta secuencialmente.
+ *
+ * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
+ */
 public final class SignBatchSerial extends SignBatch {
 
-	/** Crea un lote de firmas que se ejecuta secuencialmente.
-	 * @param xml XML de definici&oacute;n de lote.
-	 * @throws IOException Si hay problemas en la creaci&oacute;n del lote. */
-	public SignBatchSerial(final byte[] xml) throws IOException {
-		super(xml);
-	}
-
-	/** Crea un lote de firmas para ejecuci&oacute;n secuencial.
-	 * @param signs Firmas del lote.
-	 * @param algo ALgoritmo de firma para todo el lote.
-	 * @param soe <code>true</code> si se debe parar el proceso al encontrar un error,
-	 *            <code>false</code> si se deben intentar las firmas restantes del lote aun
-	 *            cuando una previa ha resultado en error. */
-	public SignBatchSerial(final List<SingleSign> signs,
-                           final SignAlgorithm algo,
-                           final boolean soe) {
-		super(signs, algo, soe);
+	/**
+	 * Crea un lote de firmas que se ejecuta secuencialmente.
+	 *
+	 * @param json JSON de definici&oacute;n de lote.
+	 * @throws IOException       Si hay problemas en la creaci&oacute;n del lote.
+	 * @throws SecurityException Si se sobrepasa alguna de las limitaciones
+	 *                           establecidas para el lote (n&ueacute;mero de
+	 *                           documentos, tama&ntilde;o de las referencias,
+	 *                           tama&ntilde;o de documento, etc.)
+	 */
+	public SignBatchSerial(final byte[] json) throws IOException, SecurityException {
+		super(json);
 	}
 
 	@Override
-	public String doPreBatch(final X509Certificate[] certChain) throws BatchException {
+	public JsonObject doPreBatch(final X509Certificate[] certChain) throws BatchException {
+
+		final JsonArrayBuilder errorsArrayBuilder = Json.createArrayBuilder();
+		final JsonArrayBuilder trisignsArrayBuilder = Json.createArrayBuilder();
 
 		boolean ignoreRemaining = false;
-		final StringBuilder sb = new StringBuilder("<xml>\n <firmas>"); //$NON-NLS-1$
-		for (final SingleSign ss : this.signs) {
+		for (int i = 0; i < this.signs.size(); i++) {
+			final SingleSign ss = this.signs.get(i);
 			if (ignoreRemaining) {
-				ss.setProcessResult(ProcessResult.PROCESS_RESULT_SKIPPED);
+				errorsArrayBuilder.add(buildSignResult(ss.getId(), Result.SKIPPED, null));
 				continue;
 			}
-			String tmp;
+
 			try {
-				tmp = ss.doPreProcess(certChain, this.algorithm);
-			}
-			catch(final Exception e) {
-				ss.setProcessResult(new ProcessResult(Result.ERROR_PRE, e.toString()));
+				final TriphaseData td = ss.doPreProcess(certChain, this.algorithm);
+				trisignsArrayBuilder.add(TriphaseDataParser.triphaseDataToJson(td));
+			} catch (final Exception e) {
+				errorsArrayBuilder.add(buildSignResult(ss.getId(), Result.ERROR_PRE, e));
+
 				if (this.stopOnError) {
 					ignoreRemaining = true;
-					LOGGER.log(Level.WARNING,
-							"Error en una de las firmas del lote (" + ss.getId() + "), se ignoraran el resto de elementos: " + e //$NON-NLS-1$ //$NON-NLS-2$
-							, e);
-				}
-				else {
-					LOGGER.log(Level.WARNING,
-							"Error en una de las firmas del lote (" + ss.getId() + "), se continua con el siguiente elemento: " + e //$NON-NLS-1$ //$NON-NLS-2$
-							, e);
+					LOGGER.log(Level.WARNING, "Error en una de las firmas del lote (" + ss.getId() //$NON-NLS-1$
+							+ "), se ignoraran el resto de elementos", e); //$NON-NLS-1$
+
+				} else {
+					LOGGER.log(Level.WARNING, "Error en una de las firmas del lote (" + ss.getId() //$NON-NLS-1$
+							+ "), se continua con el siguiente elemento", e); //$NON-NLS-1$
 				}
 				continue;
 			}
-			sb.append(tmp);
 		}
-		sb.append("</firmas>\n</xml>"); //$NON-NLS-1$
 
-		return sb.toString();
+		return buildPreBatch(this.format.toString(), trisignsArrayBuilder.build(), errorsArrayBuilder.build());
 	}
 
 	@Override
-	public String doPostBatch(final X509Certificate[] certChain,
-			                  final TriphaseData td) {
+	public String doPostBatch(final X509Certificate[] certChain, final TriphaseData td) {
 
 		if (td == null) {
 			throw new IllegalArgumentException("Los datos de sesion trifasica no pueden ser nulos"); //$NON-NLS-1$
@@ -92,51 +90,45 @@ public final class SignBatchSerial extends SignBatch {
 
 		for (final SingleSign ss : this.signs) {
 
-			// Si se ha detectado un error y no deben procesarse el resto de firmas, se marcan como tal
+			// Si se ha detectado un error y no deben procesarse el resto de firmas, se
+			// marcan como tal
 			if (ignoreRemaining) {
 				ss.setProcessResult(ProcessResult.PROCESS_RESULT_SKIPPED);
 				continue;
 			}
 
-			// Si no se encuentran firmas con ese identificador, es que fallaron en la prefirma
+			// Si no se encuentran firmas con ese identificador, es que fallaron en la
+			// prefirma
 			if (td.getTriSigns(ss.getId()) == null) {
 				error = true;
 				if (this.stopOnError) {
 					LOGGER.warning("Se detecto un error previo en la firma, se ignoraran el resto de elementos"); //$NON-NLS-1$
 					ignoreRemaining = true;
-				}
-				else {
+				} else {
 					LOGGER.warning("Se detecto un error previo en la firma, se continua con el resto de elementos"); //$NON-NLS-1$
 				}
 				ss.setProcessResult(new ProcessResult(Result.ERROR_PRE, "Error en la prefirma")); //$NON-NLS-1$
 				continue;
 			}
 
+			// Postfirmamos la firma
 			try {
-				ss.doPostProcess(
-						certChain,
-						td,
-						this.algorithm,
-						getId()
-						);
-			}
-			catch (final Exception e) {
+				ss.doPostProcess(certChain, td, this.algorithm, getId());
+			} catch (final Exception e) {
 
 				error = true;
 
 				ss.setProcessResult(new ProcessResult(Result.ERROR_POST, e.toString()));
 
 				if (this.stopOnError) {
-					LOGGER.log(
-							Level.SEVERE,
+					LOGGER.log(Level.SEVERE,
 							"Error en una de las firmas del lote (" + ss.getId() + "), se parara el proceso: " + e, //$NON-NLS-1$ //$NON-NLS-2$
-							e
-							);
+							e);
 					ignoreRemaining = true;
 				}
-				LOGGER.severe(
-						"Error en una de las firmas del lote (" + ss.getId() + "), se continua con el siguiente elemento: " + e //$NON-NLS-1$ //$NON-NLS-2$
-						);
+				LOGGER.severe("Error en una de las firmas del lote (" + ss.getId() //$NON-NLS-1$
+						+ "), se continua con el siguiente elemento: " + e //$NON-NLS-1$
+				);
 				continue;
 			}
 
@@ -145,7 +137,8 @@ public final class SignBatchSerial extends SignBatch {
 
 		// En este punto las firmas estan en almacenamiento temporal
 
-		// Si hubo errores y se indico parar en error no hacemos los guardados de datos, borramos los temporales
+		// Si hubo errores y se indico parar en error no hacemos los guardados de datos,
+		// borramos los temporales
 		// y enviamos el log
 		if (error && this.stopOnError) {
 			deleteAllTemps();
@@ -155,24 +148,17 @@ public final class SignBatchSerial extends SignBatch {
 		// En otro caso procedemos a la subida de datos
 		error = false;
 		for (final SingleSign ss : this.signs) {
-			if (ss.getProcessResult() != null &&
-					ss.getProcessResult().getResult() != Result.DONE_BUT_NOT_SAVED_YET) {
+			if (ss.getProcessResult() != null && ss.getProcessResult().getResult() != Result.DONE_BUT_NOT_SAVED_YET) {
 				continue;
 			}
 
 			try {
 				ss.save(TempDocumentsManager.retrieveDocument(ss.getName(getId())));
 				ss.setProcessResult(ProcessResult.PROCESS_RESULT_DONE_SAVED);
-			}
-			catch (final IOException e) {
+			} catch (final IOException e) {
 				LOGGER.warning("Error en el guardado de la firma: " + e); //$NON-NLS-1$
 				error = true;
-				ss.setProcessResult(
-					new ProcessResult(
-						ProcessResult.Result.DONE_BUT_ERROR_SAVING,
-						e.toString()
-					)
-				);
+				ss.setProcessResult(new ProcessResult(ProcessResult.Result.DONE_BUT_ERROR_SAVING, e.toString()));
 				if (this.stopOnError) {
 					break;
 				}
@@ -180,16 +166,6 @@ public final class SignBatchSerial extends SignBatch {
 		}
 
 		deleteAllTemps();
-
-		// Tenemos los datos subidos, ahora hay que, si hubo error, deshacer
-		// los que se subiesen antes del error si se indico parar en error
-		if (error && this.stopOnError) {
-			for (final SingleSign ss : this.signs) {
-				if (ss.getProcessResult().wasSaved()) {
-					ss.setProcessResult(ProcessResult.PROCESS_RESULT_ROLLBACKED);
-				}
-			}
-		}
 
 		return getResultLog();
 

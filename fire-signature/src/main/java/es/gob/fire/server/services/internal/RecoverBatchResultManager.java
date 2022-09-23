@@ -310,7 +310,7 @@ public class RecoverBatchResultManager {
 
         	// Para cada uno de los documentos del lote, cargamos el propio documento,
         	// obtenemos la informacion de firma trifasica y realizamos la postfirma.
-        	// La firma generada se almacena en lugar del documento y se compone un XML
+        	// La firma generada se almacena en lugar del documento y se compone un JSON
         	// con la informacion del resultado de cada firma.
         	final List<ConcurrentProcessThread> threads = new ArrayList<>();
         	final Iterator<String> it = batchResult.iterator();
@@ -377,7 +377,7 @@ public class RecoverBatchResultManager {
             SessionCollector.commit(session);
         }
 
-        // Enviamos el XML resultado de la firma del lote
+        // Enviamos el JSON resultado de la firma del lote
         sendResult(response, batchResult.encode());
 	}
 
@@ -463,7 +463,7 @@ public class RecoverBatchResultManager {
 	}
 
 	/**
-	 * Envia el XML resultado de la operaci&oacute;n como respuesta del servicio.
+	 * Envia el JSON resultado de la operaci&oacute;n como respuesta del servicio.
 	 * @param response Respuesta del servicio.
 	 * @param result Resultado de la operaci&oacute;n.
 	 * @throws IOException Cuando falla el env&iacute;o.

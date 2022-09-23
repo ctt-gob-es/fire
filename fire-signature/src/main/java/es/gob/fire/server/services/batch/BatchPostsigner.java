@@ -11,7 +11,11 @@ package es.gob.fire.server.services.batch;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -19,8 +23,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.afirma.signers.xml.XmlDSigProviderHelper;
+import es.gob.fire.server.services.RequestParameters;
 
 /** Realiza la tercera (y &uacute;ltima) fase de un proceso de firma por lote.
  * Servlet implementation class BatchPostsigner
@@ -31,7 +36,7 @@ public final class BatchPostsigner extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(BatchPostsigner.class.getName());
 
-	private static final String BATCH_XML_PARAM = "xml"; //$NON-NLS-1$
+	private static final String BATCH_JSON_PARAM = "json"; //$NON-NLS-1$
 	private static final String BATCH_CRT_PARAM = "certs"; //$NON-NLS-1$
 	private static final String BATCH_TRI_PARAM = "tridata"; //$NON-NLS-1$
 
@@ -40,41 +45,39 @@ public final class BatchPostsigner extends HttpServlet {
 	/** Or&iacute;genes permitidos por defecto desde los que se pueden realizar peticiones al servicio. */
 	private static final String ALL_ORIGINS_ALLOWED = "*"; //$NON-NLS-1$
 
-	static {
-		// Configuramos el proveedor de firma XML
-    	XmlDSigProviderHelper.configureXmlDSigProvider();
-	}
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	/** Realiza la tercera y &uacute;ltima fase de un proceso de firma por lote.
-	 * Debe recibir la definici&oacute;n XML (<a href="../doc-files/batch-scheme.html">descripci&oacute;n
+	/**
+	 * Realiza la tercera y &uacute;ltima fase de un proceso de firma por lote.
+	 * Debe recibir la definici&oacute;n JSON (<a href="../doc-files/batch-scheme.html">descripci&oacute;n
 	 * del formato</a>) del lote (exactamente la misma enviada para la primera fase)
-	 * en un XML pero convertido a Base64 (puede ser en formato <i>URL Safe</i>) y la cadena de
+	 * en un JSON pero convertido a Base64 (puede ser en formato <i>URL Safe</i>) y la cadena de
 	 * certificados del firmante (exactamente la misma que la enviada en la primera fase),
 	 * convertidos a Base64 (puede ser <i>URL Safe</i>) y separados por punto y coma (<code>;</code>).<br>
-	 * Devuelve un XML de resumen de resultado (<a href="../doc-files/resultlog-scheme.html">descripci&oacute;n
+	 * Devuelve un JSON de resumen de resultado (<a href="../doc-files/resultlog-scheme.html">descripci&oacute;n
 	 * del formato</a>)
-	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
+	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
+	 * */
 	@Override
 	protected void service(final HttpServletRequest request,
 			               final HttpServletResponse response) throws ServletException,
 			                                                          IOException {
-		final String xml = request.getParameter(BATCH_XML_PARAM);
-		if (xml == null) {
-			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_XML_PARAM); //$NON-NLS-1$
+		final Map<String, String> parameters = RequestParameters.extractParameters(request);
+
+		final String json = parameters.get(BATCH_JSON_PARAM);
+		if (json == null) {
+			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
 			response.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido una definicion de lote en el parametro " + BATCH_XML_PARAM //$NON-NLS-1$
+				"No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM //$NON-NLS-1$
 			);
 			return;
 		}
 
-		// No se guardaran los resultados en cache
-		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
-
 		final SignBatch batch;
 		try {
-			final byte[] batchConfig = BatchServerUtil.getSignBatchConfig(xml);
-			batch = new SignBatchSerial(batchConfig);
+			final byte[] jsonBatch = Base64.decode(json, true);
+			batch = new SignBatchSerial(jsonBatch);
 		}
 		catch(final Exception e) {
 			LOGGER.severe("La definicion de lote es invalida: " + e); //$NON-NLS-1$
@@ -85,7 +88,7 @@ public final class BatchPostsigner extends HttpServlet {
 			return;
 		}
 
-		final String certListUrlSafeBase64 = request.getParameter(BATCH_CRT_PARAM);
+		final String certListUrlSafeBase64 = parameters.get(BATCH_CRT_PARAM);
 		if (certListUrlSafeBase64 == null) {
 			LOGGER.severe("No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM); //$NON-NLS-1$
 			response.sendError(
@@ -108,7 +111,7 @@ public final class BatchPostsigner extends HttpServlet {
 			return;
 		}
 
-		final String triphaseDataAsUrlSafeBase64 = request.getParameter(BATCH_TRI_PARAM);
+		final String triphaseDataAsUrlSafeBase64 = parameters.get(BATCH_TRI_PARAM);
 		if (triphaseDataAsUrlSafeBase64 == null) {
 			LOGGER.severe("No se ha recibido el resultado de las firmas cliente en el parametro " + BATCH_TRI_PARAM); //$NON-NLS-1$
 			response.sendError(
@@ -120,13 +123,13 @@ public final class BatchPostsigner extends HttpServlet {
 
 		final TriphaseData td;
 		try {
-			td = BatchServerUtil.getTriphaseData(triphaseDataAsUrlSafeBase64);
+			td = BatchServerUtil.getTriphaseDataFromJSON(triphaseDataAsUrlSafeBase64.getBytes(DEFAULT_CHARSET));
 		}
 		catch(final Exception e) {
-			LOGGER.severe("El XML de firmas cliente es invalido: " + e); //$NON-NLS-1$
+			LOGGER.severe("El JSON de firmas cliente es invalido: " + e); //$NON-NLS-1$
 			response.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
-				"El XML de firmas cliente es invalido: " + e //$NON-NLS-1$
+				"El JSON de firmas cliente es invalido: " + e //$NON-NLS-1$
 			);
 			return;
 		}
@@ -136,7 +139,7 @@ public final class BatchPostsigner extends HttpServlet {
 			ret = batch.doPostBatch(certs, td);
 		}
 		catch (final Exception e) {
-			LOGGER.severe("Error en el postproceso del lote: " + e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "Error en el postproceso del lote", e); //$NON-NLS-1$
 			response.sendError(
 				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 				"Error en el postproceso del lote: " + e //$NON-NLS-1$
@@ -145,10 +148,11 @@ public final class BatchPostsigner extends HttpServlet {
 		}
 
 		response.setHeader(CONFIG_PARAM_ALLOW_ORIGIN, ALL_ORIGINS_ALLOWED);
-		response.setContentType("text/xml;charset=UTF-8"); //$NON-NLS-1$
-		final PrintWriter writer = response.getWriter();
-		writer.write(ret);
-		writer.flush();
+		response.setContentType("application/json"); //$NON-NLS-1$
+		try (final PrintWriter writer = response.getWriter()) {
+			writer.write(ret);
+			writer.flush();
+		}
 	}
 
 }

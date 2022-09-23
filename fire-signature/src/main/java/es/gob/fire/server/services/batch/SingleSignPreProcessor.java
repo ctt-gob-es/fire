@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.AOException;
+import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
 import es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyException;
@@ -24,6 +25,8 @@ import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.fire.server.services.FIReTriHelper;
 
 final class SingleSignPreProcessor {
+
+	private static final String EXTRA_PARAM_CHECK_SIGNATURES = "checkSignatures"; //$NON-NLS-1$
 
 	private static final Logger LOGGER = Logger.getLogger(SingleSignPreProcessor.class.getName());
 
@@ -35,26 +38,17 @@ final class SingleSignPreProcessor {
 	 * @param sSign Firma sobre la que hay que hacer el preproceso.
 	 * @param certChain Cadena de certificados del firmante.
 	 * @param algorithm Algoritmo de firma.
-	 * @return Nodo <code>firma</code> del XML de datos trif&aacute;sicos (sin ninguna etiqueta
+	 * @param docManager Gestor de documentos con el que procesar el lote.
+	 * @param docCacheManager Gestor para el guardado de datos en cach&eacute;.
+	 * @return Nodo <code>firma</code> del JSON de datos trif&aacute;sicos (sin ninguna etiqueta
 	 *         antes ni despu&eacute;s).
 	 * @throws AOException Si hay problemas en la propia firma electr&oacute;nica.
 	 * @throws IOException Si hay problemas en la obtenci&oacute;n, tratamiento o gradado de datos. */
-	static String doPreProcess(final SingleSign sSign,
+	static TriphaseData doPreProcess(final SingleSign sSign,
 			                   final X509Certificate[] certChain,
 			                   final SingleSignConstants.SignAlgorithm algorithm) throws IOException,
 			                                                                             AOException {
-		final TriphaseData td = getPreSign(sSign, certChain, algorithm);
-		final String tmp = td.toString();
-		return tmp.substring(
-			tmp.indexOf("<firmas>") + "<firmas>".length(), //$NON-NLS-1$ //$NON-NLS-2$
-			tmp.indexOf("</firmas>") //$NON-NLS-1$
-		);
-	}
 
-	private static TriphaseData getPreSign(final SingleSign sSign,
-			                               final X509Certificate[] certChain,
-			                               final SingleSignConstants.SignAlgorithm algorithm) throws IOException,
-			                                                                                         AOException {
 		if (certChain == null || certChain.length < 1) {
 			throw new IllegalArgumentException(
 				"La cadena de certificados del firmante no puede ser nula ni vacia" //$NON-NLS-1$
@@ -63,20 +57,39 @@ final class SingleSignPreProcessor {
 
 		// Instanciamos el preprocesador adecuado
 		final TriPhasePreProcessor prep = SingleSignConstants.getTriPhasePreProcessor(sSign);
-
-		final byte[] docBytes = sSign.getData();
+		byte[] docBytes;
+		try {
+			docBytes = sSign.getData();
+		}
+		catch (final IOException e) {
+			LOGGER.log(Level.WARNING,
+					"No se ha podido recuperar el documento a firmar: " + LoggerUtil.getTrimStr(sSign.getDataRef()), e); //$NON-NLS-1$
+			throw new IOException("No se ha podido recuperar el documento a firmar", e); //$NON-NLS-1$
+		}
+		catch (final SecurityException e) {
+			LOGGER.log(Level.WARNING,
+					"Se excedio el limite establecido de tamano de documento: " + sSign.getDataRef().length(), e); //$NON-NLS-1$
+			throw new IOException("Se excedio el limite establecido de tamano de documento", e); //$NON-NLS-1$
+		}
 
 		Properties extraParams;
 		try {
-			extraParams = ExtraParamsProcessor.expandProperties(sSign.getExtraParams(), null, sSign.getSignFormat().name());
+			extraParams = ExtraParamsProcessor.expandProperties(sSign.getExtraParams(), null, sSign.getFormat().name());
 		}
 		catch (final IncompatiblePolicyException e) {
 			LOGGER.log(
-					Level.WARNING, "No se ha podido expandir la politica de firma. Se realizara una firma basica: " + e, e); //$NON-NLS-1$
+					Level.WARNING, "No se ha podido expandir la politica de firma. Se realizara una firma basica", e); //$NON-NLS-1$
 			extraParams = sSign.getExtraParams();
 		}
 
-		TriphaseData td;
+		// Eliminamos configuraciones que no deseemos que se utilicen externamente
+		extraParams.remove("profile"); //$NON-NLS-1$
+
+		// Comprobamos si se ha pedido validar las firmas antes de agregarles una nueva
+        final boolean checkSignatures = Boolean.parseBoolean(extraParams.getProperty(EXTRA_PARAM_CHECK_SIGNATURES));
+
+        TriphaseData td;
+
 		switch(sSign.getSubOperation()) {
 			case SIGN:
 				td = prep.preProcessPreSign(
@@ -84,7 +97,7 @@ final class SingleSignPreProcessor {
 						algorithm.toString(),
 						certChain,
 						extraParams,
-    					false
+						checkSignatures
 					);
 				break;
 			case COSIGN:
@@ -93,7 +106,7 @@ final class SingleSignPreProcessor {
 						algorithm.toString(),
 						certChain,
 						extraParams,
-    					false
+						checkSignatures
 					);
 				break;
 			case COUNTERSIGN:
@@ -111,7 +124,7 @@ final class SingleSignPreProcessor {
 						certChain,
 						extraParams,
 						target,
-    					false
+						checkSignatures
 					);
 				break;
 			default:
@@ -130,4 +143,5 @@ final class SingleSignPreProcessor {
 
 		return td;
 	}
+
 }

@@ -14,9 +14,10 @@ var originalXMLHttpRequest = window.XMLHttpRequest;
 
 var AutoScript = ( function ( window, undefined ) {
 
-		var VERSION = "1.7.0";
+		var VERSION = "1.8.0";
+		var VERSION_CODE = 2;
 
-		/* ========== DEPRECADO: Se mantiene por compatibilidad con los despliegues del MiniApplet. */
+		/* ========== DEPRECADO: No se utiliza, pero se mantiene por compatibilidad con los despliegues del MiniApplet. */
 		var JAVA_ARGUMENTS = null;
 		var SYSTEM_PROPERTIES = null;
 		/* ========== */
@@ -98,6 +99,21 @@ var AutoScript = ( function ( window, undefined ) {
 		// Variable que se puede configurar para forzar el uso del modo de comunicacion por servidor intermedio
 		// entre la pagina web y AutoFirma
 		var forceWSMode = false;
+		
+		// Puerto menor del rango de puertos seleccionable
+		var minPort;
+		
+		// Puerto mayor del rango de puertos seleccionable
+		var maxPort;
+		
+		// Version minima del Cliente que se requiere
+		var minimumClientVersion;
+		
+		// Peticion JSON
+		var jsonRequest = null;
+		
+		// Variable que configura la firma de lotes monofasica si se pone a true
+		var localBatchProcess = false;
         
         /**
          * Indica si el navegador soporta WebSockets.
@@ -230,6 +246,13 @@ var AutoScript = ( function ( window, undefined ) {
 		 * del servidor intermedio. */
 		var setForceWSMode = function (force) {
 			forceWSMode = force;
+		}
+		
+		/**
+		 * Establece la version minima del Cliente @firma que se debe ejecutar.
+		 */
+		var setMinimumClientVersion = function (version) {
+			minimumClientVersion = version;
 		}
 		
         /**
@@ -381,11 +404,71 @@ var AutoScript = ( function ( window, undefined ) {
 			resetStickySignatory = false;
 		}
 
-		var signBatch = function (batchB64, batchPreSignerUrl, batchPostSignerUrl, params, successCallback, errorCallback) {
-			clienteFirma.signBatch(batchB64, batchPreSignerUrl, batchPostSignerUrl, params, successCallback, errorCallback);
+		var signBatchXML = function (batchB64, batchPreSignerUrl, batchPostSignerUrl, params, successCallback, errorCallback) {
+			clienteFirma.signBatchXML(batchB64, batchPreSignerUrl, batchPostSignerUrl, params, successCallback, errorCallback);
 			resetStickySignatory = false;
 		}
 		
+		var createBatch = function (algorithm, format, suboperation, extraparams) { 
+			var batchConfig = new Object();
+			batchConfig.algorithm = algorithm; 
+			batchConfig.format = format;
+			batchConfig.suboperation = suboperation;
+			if (!!extraparams) { 
+				batchConfig.extraparams = Base64.encode(extraparams);
+			}
+
+			batchConfig.singlesigns = new Array(); 
+			
+			jsonRequest = batchConfig;
+		}
+		
+		var addDocumentToBatch = function (id, datareference, format, suboperation, extraparams) {
+			
+			if (!id || datareference == null) { 
+				throw new Error("No se ha indicado el id o datareference de la firma");
+			} else if (!jsonRequest) {
+				throw new Error("No hay ningun lote creado. Es necesario crear uno antes de agregar firmas");
+			}
+			
+			//Se comprueba de que no existan IDs repetidos dentro del lote.
+			AfirmaUtils.checkExistingId(jsonRequest.singlesigns, id);
+			
+			var singleSign = new Object();
+			
+			singleSign.id = id;
+			singleSign.datareference = datareference;
+			if (!!format) { 
+				singleSign.format = format; 
+			}
+			if (!!suboperation) { 
+				singleSign.suboperation = suboperation; 
+			}
+			if (!!extraparams) { 
+				singleSign.extraparams = Base64.encode(extraparams); 
+			}
+			jsonRequest.singlesigns.push(singleSign);
+		}
+		
+		var setLocalBatchProcess = function (isLocalBatchProcess) {
+			localBatchProcess = isLocalBatchProcess;
+		}
+		
+		var signBatchJSON = function (stopOnError, batchPreSignerUrl, batchPostSignerUrl, certFilters, successCallback, errorCallback) {
+			
+			if (!jsonRequest) {
+				throw new Error("No hay ningun lote creado. Es necesario crear uno antes de firmar.");
+			}
+			
+			jsonRequest.stoponerror = stopOnError;
+			
+			var jsonRequestB64 = Base64.encode(JSON.stringify(jsonRequest), true);
+			
+			clienteFirma.signBatchJSON(jsonRequestB64, batchPreSignerUrl, batchPostSignerUrl, certFilters, successCallback, errorCallback);
+			jsonRequest = null;
+			resetStickySignatory = false;
+		}
+				
 		var getBase64FromText = function (plainText) {
 			return plainText != null ? Base64.encode(plainText) : null;
 		}
@@ -452,6 +535,30 @@ var AutoScript = ( function ( window, undefined ) {
 
 			if (clienteFirma && clienteFirma.setServlets) {
 				clienteFirma.setServlets(storageServlet,  retrieverServlet);
+			}
+		}
+
+		/**
+		 * Establece el rango del que se obtendran los puertos aleatorios.
+		 * Los valores fuera de rango se ajustaran al rango maximo y si solo
+		 * se indica un valor se solo ese o el valor mas cercano del rango
+		 * valido si ese no lo fuera.
+		 */
+		var setPortRange = function (minRangeLimit,  maxRangeLimit) {
+			
+			var MIN_PORT = 1024;
+			var MAX_PORT = 65535;
+			
+			// Establecemos los limites del rango
+			minPort = !!minRangeLimit && minRangeLimit >= MIN_PORT && minRangeLimit <= MAX_PORT
+				? minRangeLimit
+				: MIN_PORT;
+			maxPort = !!maxRangeLimit 
+				? (maxRangeLimit <= MAX_PORT && maxRangeLimit >= minPort ? maxRangeLimit : MAX_PORT) 
+				: (!!minRangeLimit && minRangeLimit == minPort ? minPort : MAX_PORT);
+			
+			if (clienteFirma && clienteFirma.setPortRange) {
+				clienteFirma.setPortRange(minPort, maxPort);
 			}
 		}
 
@@ -563,16 +670,27 @@ var AutoScript = ( function ( window, undefined ) {
 			// usamos servidor intermedio
 			if (forceWSMode || Platform.isIOS() || Platform.isAndroid()) {
 				clienteFirma = new AppAfirmaJSWebService(clientAddress, window, undefined);
+				if (!!storageServletAddress || !!retrieverServletAddress) {
+					clienteFirma.setServlets(storageServletAddress, retrieverServletAddress);
+				}
 			}
 			// Si podemos utilizar un WebSocket local y no estamos en Internet Explorer
 			// (en el que no podemos asegurar el funcionamiento si se encuentra habilitada
 			// una opcion de red concreta), usamos WebSockets 
 			else if (isWebSocketsSupported() && !Platform.isInternetExplorer()) {
 				clienteFirma = new AppAfirmaWebSocketClient(window, undefined);
+				// Si se establecio un rango de puertos, lo trasladamos al cliente
+				if (!!minPort) {
+					clienteFirma.setPortRange(minPort, maxPort);
+				}
 			}
 			// Si no se esta en una version antigua de Internet Explorer o Safari
 			else if (!Platform.isInternetExplorer10orLower() && !Platform.isSafari10()) {
 				clienteFirma = new AppAfirmaJSSocket(clientAddress, window, undefined);
+				// Si se establecio un rango de puertos, lo trasladamos al cliente
+				if (!!minPort) {
+					clienteFirma.setPortRange(minPort, maxPort);
+				}
 			}
 			// En cualquier otro caso, usaremos servidor intermedio
 			else {
@@ -678,6 +796,7 @@ var AutoScript = ( function ( window, undefined ) {
 			};
 		})(window, undefined);
 		
+		
 		/**
 		 * Funciones de utilidad.
 		 */
@@ -689,6 +808,15 @@ var AutoScript = ( function ( window, undefined ) {
 				/* Caracteres validos para los ID de sesion */
 				var VALID_CHARS_TO_ID = "1234567890abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+				/* Numero de puerto minimo seleccionable. */
+				var MIN_PORT = 1024;
+				
+				/* Puerto minimo del rango de puertos aleatorios. */
+				var DEFAULT_MIN_PORT = 49152;
+				
+				/* Numero de puerto maximo seleccionable. */
+				var MAX_PORT = 65535;
+				
 				/** Genera un nuevo identificador de sesion aleatorio. */
 				function generateNewIdSession () {
 					var ID_LENGTH = 20;
@@ -701,7 +829,7 @@ var AutoScript = ( function ( window, undefined ) {
 					else {
 						randomInts = new Array(ID_LENGTH);
 						for (var i = 0; i < ID_LENGTH; i++) {
-							randomInts[i] = rnd() * MAX_NUMBER;
+							randomInts[i] = getRandom();
 						}
 					}
 
@@ -710,6 +838,10 @@ var AutoScript = ( function ( window, undefined ) {
 					}
 
 					return random;
+				}
+				
+				function getRandom() {
+					return rnd() * MAX_NUMBER;
 				}
 
 				/** Genera numeros aleatorios con una distribucion homogenea. */
@@ -722,10 +854,97 @@ var AutoScript = ( function ( window, undefined ) {
 				    return seed / 233280;
 				}
 				
+				/**
+				 * Obtiene 3 puertos aleatorios dentro del rango indicado, sin salirse del rango valido.
+				 * Si no se indican limites, se consideraran el rango minimo y el maximo de puertos aleatorios.
+				 * Si se indica un rango de 
+				 */
+				function getRandomPorts (port1, port2) {
+					
+					// Definimos el rango de aleatorios. Si no se define el puerto minimo,
+					// tomaremos el minimo del ranfo de puertos aleatorios. Si se definen
+					// minimo y/o maximo, deberan estar dentro del rango valido
+					var minPort = !!port1 ? Math.max(port1, MIN_PORT) : DEFAULT_MIN_PORT;
+					var maxPort = !!port2 ? Math.min(port2, MAX_PORT) : MAX_PORT;
+
+					// Obtenemos 3 aleatorios unicos de ese rango, menos si el rango es menor 
+					var ports = new Array();
+					switch (maxPort - minPort) {
+					case 0:
+						ports[0] = minPort;
+						break;
+					case 1:
+						ports[0] = getUniqueRandom(minPort, maxPort, ports);
+						ports[1] = getUniqueRandom(minPort, maxPort, ports);
+						break;
+					default:
+						ports[0] = getUniqueRandom(minPort, maxPort, ports);
+						ports[1] = getUniqueRandom(minPort, maxPort, ports);
+						ports[2] = getUniqueRandom(minPort, maxPort, ports);
+					}
+					return ports;
+				}
+				
+				/**
+				 * Obtiene aleatoriamente un entero de entre un rango indicado
+				 * teniendo en cuenta de que no puede ser  un numero aleatorio
+				 */
+				function getUniqueRandom(startLimit, endLimit, currentRandoms) {
+					
+					// Si no hay mas aleatorios en el rango, devolvemos un
+					// valor para evitar el bucle infinito
+					if (currentRandoms.length > endLimit - startLimit) {
+						return 0; 
+					}
+					
+					var contained;
+					do {
+						var rand = Math.floor((Math.random() * (endLimit + 1 - startLimit))) + startLimit;
+						contained = isContained(rand, currentRandoms);
+					} while (contained);
+					
+					return rand;
+				}
+				
+				/**
+				 * Comprueba si un valor es uno de los valores contenidos en un array.
+				 */
+				function isContained(value, ar) {
+					for (var i = 0; i < ar.length; i++) {
+						if (ar[i] === value) {
+							return true;
+						}
+					}
+					return false;
+				}
+				
+				/**
+				 * Decodifica y parsea los datos como JSON. Si no eran un JSON,
+				 * devuelve una excepcion.
+				 */
+				function parseJSONData(dataB64) {
+					var dataDecoded = Base64.decode(dataB64);
+					return JSON.parse(dataDecoded);
+				}
+				
+				/** Comprueba que no haya identificadores repetidos */
+				function checkExistingId(singleSigns, newId){
+					
+					for (var i = 0 ; i < singleSigns.length ; i++) {
+						if (singleSigns[i].id == newId){
+							throw new Error("El id de la firma a agregar = \"" + singleSigns[i].id + "\" ya existe en el lote");
+						}
+					}
+				}
+				
 				/* Metodos que publicamos del objeto */
 				return {
 					/** Genera un nuevo identificador de sesion aleatorio. */
-					generateNewIdSession : generateNewIdSession				
+					generateNewIdSession : generateNewIdSession,
+					getRandomPorts : getRandomPorts,
+					parseJSONData : parseJSONData,
+					checkExistingId : checkExistingId,
+					getRandom : getRandom
 				};
 		})(window, undefined);
 
@@ -734,13 +953,13 @@ var AutoScript = ( function ( window, undefined ) {
 		 */
 		var AppAfirmaWebSocketClient = ( function (window, undefined) {
 			
-			var PROTOCOL_VERSION = 3;
+			var PROTOCOL_VERSION = 4;
 			
 			var SERVER_HOST = "127.0.0.1";
 
-			var SERVER_PORT = "63117";
-			
-			var URL_REQUEST = "wss://" + SERVER_HOST + ":" + SERVER_PORT;
+			var URL_REQUEST_PREFIX = "wss://" + SERVER_HOST + ":";
+
+			var DEFAULT_PORT = 63117;
 			
 			var OPERATION_LOAD = "load";
 			
@@ -757,11 +976,10 @@ var AutoScript = ( function ( window, undefined ) {
 			/** Informacion de error. */
 			var errorMessage = '';
 			var errorType = '';
-
-			var idSession;
+		
 			
 			/** WebSocket para la comunicacion con la aplicacion. Antes de crearlo
-			 * (new WebSocket(URL_REQUEST)) es necesario arrancar la aplicacion.  */
+			 * (new WebSocket(urlRequest)) es necesario arrancar la aplicacion.  */
 			var ws = "";
 			
 			/** Operacion que se manda a ejecutar. */
@@ -770,9 +988,15 @@ var AutoScript = ( function ( window, undefined ) {
 			/** URL de la peticion enviada. */
 			var currentOperationUrl = "";
 			
+			/** Puerto actualmente configurado. */
+			var port = '';
+			
 			/** Indica si se ha establecido la conexion o no */
 			var connected = false;
-		
+
+			/** Id de la sesion establecida. */
+			var idSession = AfirmaUtils.generateNewIdSession();
+			
 			/** Almacen de claves cargado por defecto */
 			var defaultKeyStore = null;
 
@@ -781,6 +1005,21 @@ var AutoScript = ( function ( window, undefined ) {
 			
 			/** Funcion error callback */
 			var errorCallback = null;
+			
+			/** Limite inferior del rango donde buscar el puerto a abrir. */ 
+			var minPort = null;
+			
+			/** Limite superior del rango donde buscar el puerto a abrir. */ 
+			var maxPort = null;
+						
+			/**
+			 * Establece el rango del que se obtendran los puertos aleatorios.
+			 * Si solo se indica un valor, siempre se usara ese puerto.
+			 */
+			var setPortRange = function (minRangeLimit,  maxRangeLimit) {
+				minPort = minRangeLimit;
+				maxPort = maxRangeLimit;
+			}
 			
 			/** Establece el almacen de certificados de que se debe utilizar por defecto. */
 			var setKeyStore = function (keystore) {
@@ -848,11 +1087,22 @@ var AutoScript = ( function ( window, undefined ) {
 			/**
 			 * Inicia el proceso de firma por lotes.
 			 */
-			var signBatch = function (batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams, successCallbackFunction, errorCallbackFunction) {
+			var signBatchXML = function (batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams, successCallbackFunction, errorCallbackFunction) {
 				setCallbacks(successCallbackFunction, errorCallbackFunction);
 				currentOperation = OPERATION_BATCH;
 				var requestData = createBatchRequest(batchPreSignerUrl, batchPostSignerUrl,
-						extraParams, normalizeBase64Data(batchB64));
+						extraParams, normalizeBase64Data(batchB64), false);
+				execAppIntent(buildUrl(requestData));
+			};
+			
+			/**
+			 * Inicia el proceso de firma por lotes con JSON
+			 */
+			var signBatchJSON = function (jsonRequestB64, batchPreSignerUrl, batchPostSignerUrl, certFilters, successCallbackFunction, errorCallbackFunction) {
+				setCallbacks(successCallbackFunction, errorCallbackFunction);
+				currentOperation = OPERATION_BATCH;
+				var requestData = createBatchRequest(batchPreSignerUrl, batchPostSignerUrl,
+						certFilters, jsonRequestB64, true);
 				execAppIntent(buildUrl(requestData));
 			};
 
@@ -925,6 +1175,7 @@ var AutoScript = ( function ( window, undefined ) {
 			function createSelectCertificateRequest(extraParams) {
 				var data = new Object();
 				data.op = createKeyValuePair ("op", "selectcert");
+				data.idsession = createKeyValuePair ("idsession", idSession);
 				data.properties = createKeyValuePair ("properties", extraParams != null ? Base64.encode(extraParams, true) : null, true);
 				data.ksb64 = createKeyValuePair ("ksb64", defaultKeyStore != null ? Base64.encode(defaultKeyStore, true) : null, true);
 				data.sticky = createKeyValuePair ("sticky", stickySignatory);
@@ -939,6 +1190,7 @@ var AutoScript = ( function ( window, undefined ) {
 			function createSignRequest(signId, algorithm, format, extraParams, dataB64) {
 				var data = new Object();
 				data.op = createKeyValuePair("op", signId);
+				data.idsession = createKeyValuePair ("idsession", idSession);
 				data.algorithm = createKeyValuePair ("algorithm", algorithm);
 				data.format = createKeyValuePair ("format", format); 
 				data.properties = createKeyValuePair ("properties", extraParams != null ? Base64.encode(extraParams, true) : null, true);
@@ -965,6 +1217,7 @@ var AutoScript = ( function ( window, undefined ) {
 
 				var data = new Object();
 				data.op = createKeyValuePair("op", "signandsave");
+				data.idsession = createKeyValuePair ("idsession", idSession);
 				data.cryptoOp = createKeyValuePair("cop", signId);
 				data.algorithm = createKeyValuePair ("algorithm", algorithm);
 				data.format = createKeyValuePair ("format", format);
@@ -983,12 +1236,13 @@ var AutoScript = ( function ( window, undefined ) {
 			/**
 			 * Genera el objeto con los datos de la transaccion para la firma
 			 */
-			function createBatchRequest(batchPreSignerUrl, batchPostSignerUrl, extraParams, batchB64) {
+			function createBatchRequest(batchPreSignerUrl, batchPostSignerUrl, certFilters, batchB64, isJson) {
 				var data = new Object();
 				data.op = createKeyValuePair("op","batch");
+				data.idsession = createKeyValuePair ("idsession", idSession);
 				data.batchpresignerurl = createKeyValuePair("batchpresignerurl", batchPreSignerUrl);
 				data.batchpostsignerurl = createKeyValuePair("batchpostsignerurl", batchPostSignerUrl);
-				data.properties = createKeyValuePair ("properties", extraParams != null ? Base64.encode(extraParams, true) : null, true);
+				data.properties = createKeyValuePair ("properties", certFilters != null ? Base64.encode(certFilters, true) : null, true);
 				data.ksb64 = createKeyValuePair ("ksb64", defaultKeyStore != null ? Base64.encode(defaultKeyStore, true) : null, true);
 				data.sticky = createKeyValuePair ("sticky", stickySignatory);
 				if (resetStickySignatory) {
@@ -996,6 +1250,12 @@ var AutoScript = ( function ( window, undefined ) {
 				}
 				data.needcert = createKeyValuePair ("needcert", true);
 				data.dat = createKeyValuePair ("dat",  batchB64 == "" ? null : batchB64, true);
+				if (isJson){
+					data.jsonbatch = createKeyValuePair ("jsonbatch", true);	
+					if (localBatchProcess) {
+						data.localBatchProcess = createKeyValuePair ("localBatchProcess", true);
+					}
+				}
 				
 				return data;
 			}
@@ -1006,6 +1266,7 @@ var AutoScript = ( function ( window, undefined ) {
 			function createLoadDataRequest(loadId, title, extensions, description, filePath, multiload) {
 				var data = new Object();
 				data.op = createKeyValuePair("op", loadId);
+				data.idsession = createKeyValuePair ("idsession", idSession);
 				data.title = createKeyValuePair("title", title);
 				data.extensions = createKeyValuePair("exts", extensions);
 				data.description = createKeyValuePair("desc", description);
@@ -1021,6 +1282,7 @@ var AutoScript = ( function ( window, undefined ) {
 			function createSaveDataRequest(dataB64, title, filename, extension, description) {
 				var data = new Object();
 				data.op = createKeyValuePair ("op", "save");
+				data.idsession = createKeyValuePair ("idsession", idSession);
 				data.title = createKeyValuePair ("title", title);
 				data.filename = createKeyValuePair ("filename", filename);
 				data.extension = createKeyValuePair ("exts", extension);
@@ -1031,17 +1293,23 @@ var AutoScript = ( function ( window, undefined ) {
 			}
 
 			/** Construye una URL que configura la operacion a realizar. */
-			function buildUrl (arr) {
+			function buildUrl (paramsObject) {
 
-				// Operacion seleccionada
+				// Array con los parametros de llamada
 				var params = [];
-				// Convertimos el objeto con los datos en un array del tipo key value
-				for (var x in arr){
-				  params.push(arr[x]);
+				
+				// Si se establecio una version minima del cliente de firma, se notifica
+				if (minimumClientVersion) {
+					params.push(createKeyValuePair("mcv", minimumClientVersion));
+				}
+				
+				// Convertimos el objeto con los parametros en un array del tipo key value
+				for (var x in paramsObject){
+				  params.push(paramsObject[x]);
 				}
 
 				// Las URL seran del estilo "afirma://" + Id del tipo de operacion
-				var intentURL = 'afirma://' + encodeURIComponent(arr.op.value) + '?';	
+				var intentURL = 'afirma://' + encodeURIComponent(paramsObject.op.value) + '?';
 				for (var i = 0; i < params.length; i++) {
 					if (params[i].value != null && params[i].value != "null") {
 						intentURL += (i != 0 ? '&' : '') + params[i].key + '=' +
@@ -1056,20 +1324,23 @@ var AutoScript = ( function ( window, undefined ) {
 			/** Envia una peticion a la aplicacion de firma. Si no la encuentra abierta, la arranca. */
 			function execAppIntent (url) {
 				
-				// Almacenamos la URL en una propiedad global que se mantendra siempre actualizada porque
-				// al invocar muchas peticiones consecutivas, en caso de introducir un retardo con setTimeout,
-				// queremos que las peticiones se realicen siempre para la ultima operacion establecida y no
-				// la que hubiese antes de empezar la espera (lo que ocurriria si le pasasemos la URL como
-				// parametro).
+				// Almacenamos la URL en una propiedad global que se mantendra siempre actualizada
+				// porque al invocar muchas peticiones consecutivas, en caso de introducir un
+				// retardo con setTimeout, queremos que las peticiones se realicen siempre para la
+				// ultima operacion establecida y no la que hubiese antes de empezar la espera (lo
+				// que ocurriria si le pasasemos la URL como parametro).
 				currentOperationUrl = url;
 				
-				// Si la aplicacion no esta abierta (primera ejecucion o se ejecuta despues del cierre de la aplicacion)
-				// es necesario abrirla y esperar a que este lista
+				// Si la aplicacion no esta abierta (primera ejecucion o se ejecuta despues del
+				// cierre de la aplicacion) es necesario abrirla y esperar a que este lista
 				if (!isAppOpened()) {
+					// Definimos los puertos en los que intentar la conexion
+					var ports = AfirmaUtils.getRandomPorts(minPort, maxPort);
 					// Invocamos a la aplicacion cliente
-					openNativeApp();
-					// Enviamos la peticion a la app despues de esperar un tiempo prudencial
-					setTimeout(waitAppAndProcessRequest, 3000, AutoScript.AUTOFIRMA_CONNECTION_RETRIES);
+					openNativeApp(ports);
+					// Intentamos conectar con la app despues de esperar un tiempo prudencial
+					console.log("Tratamos de conectar con el cliente a traves de WebSockets en los puertos " + ports);
+					setTimeout(waitAppAndProcessRequest, 3000, ports, AutoScript.AUTOFIRMA_CONNECTION_RETRIES);
 				}
 				// Si la aplicacion esta abierta, se envia de inmediato la peticion
 				else {
@@ -1084,69 +1355,88 @@ var AutoScript = ( function ( window, undefined ) {
 			}
 		
 			/** Abre la aplicacion para que empiece a escuchar en el puerto por defecto. */
-			function openNativeApp () {
-				idSession = AfirmaUtils.generateNewIdSession();
-				openUrl("afirma://websocket?v=" + PROTOCOL_VERSION + "&idsession=" + idSession);
-			}
-			
+			function openNativeApp (ports) {
 
-			/**
-			 * Crea el websocket con el comportamiento basico.
-			 */
-			function createWebSocket(url) {
-				var webSocket;
-				
-				try {
-					webSocket = new WebSocket(url);
-				}
-				catch (e) {
-					console.log("Error estableciendo el WebSocket: " + e);
+				// Construimos el parametro de puertos
+				var portsLine = "";
+				for (var i = 0; i < ports.length; i++) {
+					portsLine += ports[i];
+					if (i < (ports.length - 1)) {
+						portsLine += ",";
+					}
 				}
 				
-				webSocket.onopen = function() {
-					connected = true;
-					console.log("Se abre el socket");
-				};
-				
-				webSocket.onclose = function() {
-					connected = false;
-					console.log("Se cierra el socket");
-				};
-
-				ws.onmessage = function(evt) {
-					console.log("Procesado por defecto del mensaje");
-				}
-				
-				ws.onerror = function(evt) {
-					console.log("Procesado por defecto del error");
-				}
-				
-				return webSocket;
+				// Lanzamos la aplicacion nativa
+				var url = "afirma://websocket?ports=" + portsLine
+					+ "&v=" + PROTOCOL_VERSION
+					+ "&jvc=" + VERSION_CODE
+					+ "&idsession=" + idSession;
+				openUrl(url);
 			}
-			
-			/** Comprobacion recursiva de la disponibilidad de la aplicacion hasta un maximo del
-			 * numero de intentos indicados. */ 
-			function waitAppAndProcessRequest (retries) {
-				
+
+			/** Comprobacion recursiva de la disponibilidad de la aplicacion en los distintos
+			 * puertos hasta un maximo del numero de intentos indicados. */ 
+			function waitAppAndProcessRequest (ports, retries) {
+								
 				if (!connected) {
 				
 					if (retries > 0) {
-						console.log("Creamos el cliente para el socket");
+						// Tratamos de conectar al websocket a traves de cualquiera de los posibles puertos
+						for (var i = 0; !connected && i < ports.length; i++) {
+							createWebSocket(ports[i]);
+						}
 
-						// Abrimos el websocket
-						ws = createWebSocket(URL_REQUEST);
-
-						setTimeout(waitAppAndProcessRequest, AutoScript.AUTOFIRMA_LAUNCHING_TIME, retries - 1);
+						setTimeout(waitAppAndProcessRequest, AutoScript.AUTOFIRMA_LAUNCHING_TIME, ports, retries - 1);
 					}
 					else {
 						processErrorResponse("java.util.concurrent.TimeoutException", "No se pudo contactar con AutoFirma");
 					}
 				}
 				else {
+					
 					// Enviamos la peticion
 					console.log("Enviamos el mensaje al socket");
 					processRequest (AutoScript.AUTOFIRMA_CONNECTION_RETRIES);
 				}
+			}
+			
+			/**
+			 * Crea el websocket con el comportamiento basico.
+			 */
+			function createWebSocket(port) {
+				var webSocket;
+				
+				try {
+					webSocket = new WebSocket(URL_REQUEST_PREFIX  + port);
+				}
+				catch (e) {
+					console.log("Error estableciendo el WebSocket: " + e);
+				}
+				
+				webSocket.onopen = function() {
+					// Indicamos que la conexion esta activa y que el WebSocket activo es el actual 
+					connected = true;
+					ws = this;
+					console.log("Se abre el socket");
+				};
+				
+				webSocket.onclose = function(e) {
+					if (ws != null && ws === this) {
+						connected = false;
+						ws = null;
+						console.log("Se cierra el socket. Codigo WebSocket de cierre: " + (e ? e.code : null));
+					}
+				};
+
+				webSocket.onmessage = function(evt) {
+					console.log("Procesado por defecto del mensaje");
+				}
+				
+				webSocket.onerror = function(evt) {
+					console.log("Procesado por defecto del error");
+				}
+				
+				return webSocket;
 			}
 			
 			/**
@@ -1165,16 +1455,16 @@ var AutoScript = ( function ( window, undefined ) {
 					console.log("Error en la comunicacion por websocket: " + evt);
 					sendEcho(ws, idSession, retries - 1);
 				}
-
+				
 				// Enviamos una peticion de eco para comprobar que esta operativo, lo que despues hara que
 				// se lance la operacion real como se establece en la sentencia anterior
 				sendEcho(ws, idSession, retries);
 			}
 
 			/** Funcion que identifica la respuesta de una peticion de echo y envia a la aplicacion la operacion real. */
-			var onMessageEchoFunction = function() {
+			var onMessageEchoFunction = function(echoEvt) {
 				console.log("Respuesta de la peticion de eco");
-				
+			
 				ws.onmessage = function (evt) {
 					console.log("Respuesta obtenida de la operacion enviada");
 					processResponse(evt.data);
@@ -1192,11 +1482,17 @@ var AutoScript = ( function ( window, undefined ) {
 					return;
 				}
 				
-				try {
-					ws.send("echo=-idsession=" + idSession + "@EOF");
+				if (ws.readyState === 1) {
+					try {						
+						ws.send("echo=-idsession=" + idSession + "@EOF");
+					}
+					catch (ex) {
+						console.log("Error en echo: " + ex);
+						setTimeout(sendEcho, AutoScript.AUTOFIRMA_LAUNCHING_TIME, ws, idSession, retries - 1);
+					}
 				}
-				catch (ex) {
-					console.log("Error en echo: " + ex);
+				else {
+					console.log("El socket aun no esta preparado");
 					setTimeout(sendEcho, AutoScript.AUTOFIRMA_LAUNCHING_TIME, ws, idSession, retries - 1);
 				}
 			}
@@ -1371,6 +1667,12 @@ var AutoScript = ( function ( window, undefined ) {
 						result = data.substring(0, sepPos).replace(/\-/g, "+").replace(/\_/g, "/");
 						certificate = data.substring(sepPos + 1).replace(/\-/g, "+").replace(/\_/g, "/");
 					}
+					
+					try {
+						result = AfirmaUtils.parseJSONData(result);
+					}
+					catch (e) {}
+					
 					successCallback(result, certificate);
 				}
 				else {
@@ -1480,10 +1782,12 @@ var AutoScript = ( function ( window, undefined ) {
 			return {
 				echo : echo,
 				setKeyStore : setKeyStore,
+				setPortRange : setPortRange,
 				sign : sign,
 				coSign : coSign,
 				counterSign : counterSign,
-				signBatch : signBatch,
+				signBatchJSON : signBatchJSON,
+				signBatchXML : signBatchXML,
 				selectCertificate : selectCertificate,
 				saveDataToFile : saveDataToFile,
 				signAndSaveToFile : signAndSaveToFile,
@@ -1519,7 +1823,7 @@ var AutoScript = ( function ( window, undefined ) {
 			/* Tiempo de retardo para peticiones */
 			var WAITING_TIME = 500;
 			
-			var URL_REQUEST = "https://127.0.0.1:";
+			var URL_REQUEST_PREFIX = "https://127.0.0.1:";
 			
 			/* Respuesta del socket a la peticion realizada */
 			var totalResponseRequest = "";
@@ -1565,6 +1869,19 @@ var AutoScript = ( function ( window, undefined ) {
 
 			/* URL de la operacion que se solicita actualmente. */
 			var currentOperationUrl = null;
+			
+			/* Limite inferior del rango donde buscar el puerto a abrir. */ 
+			var minPort = null;
+			
+			/* Limite superior del rango donde buscar el puerto a abrir. */ 
+			var maxPort = null;
+						
+			/* Establece el rango del que se obtendran los puertos aleatorios.
+			 * Si solo se indica un valor, siempre se usara ese puerto. */
+			var setPortRange = function (minRangeLimit,  maxRangeLimit) {
+				minPort = minRangeLimit;
+				maxPort = maxRangeLimit;
+			}
 			
 			/**
 			 * Establece el almacen de certificados de que se debe utilizar por defecto.
@@ -1686,13 +2003,22 @@ var AutoScript = ( function ( window, undefined ) {
 			/**
 			 * Inicia el proceso de firma por lotes.
 			 */
-			function signBatch (batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams, successCallbackFunction, errorCallbackFunction) {
+			function signBatchXML (batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams, successCallbackFunction, errorCallbackFunction) {
 				successCallback = successCallbackFunction;
 				errorCallback = errorCallbackFunction;
-				signBatchByService(batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams);
+				signBatchByService(batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams, false);
 			}
 			
-			function signBatchByService (batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams) {
+			/**
+			 * Inicia el proceso de firma por lotes con JSON.
+			 */	
+			function signBatchJSON (jsonRequestB64, batchPreSignerUrl, batchPostSignerUrl, certFilters, successCallbackFunction, errorCallbackFunction) {
+				successCallback = successCallbackFunction;
+				errorCallback = errorCallbackFunction;
+				signBatchByService(jsonRequestB64, batchPreSignerUrl, batchPostSignerUrl, certFilters, true);
+			}
+			
+			function signBatchByService (batchB64, batchPreSignerUrl, batchPostSignerUrl, certFilters, isJson) {
 				
 				if (batchB64 == undefined || batchB64 == "") {
 					batchB64 = null;
@@ -1702,25 +2028,34 @@ var AutoScript = ( function ( window, undefined ) {
 					batchB64 = batchB64.replace(/\+/g, "-").replace(/\//g, "_");
 				}
 				
-				var data = generateDataToBatch(defaultKeyStore, batchPreSignerUrl, batchPostSignerUrl, extraParams, batchB64);
+				var data = generateDataToBatch(defaultKeyStore, batchPreSignerUrl, batchPostSignerUrl, certFilters, batchB64, isJson);
 				execAppIntent(buildUrl(data));
 			}
 			
 			/**
 			 * Genera el objeto con los datos de la transaccion para la firma
 			 */
-			function generateDataToBatch(keystore, batchPreSignerUrl, batchPostSignerUrl, extraParams, batchB64) {
+			function generateDataToBatch(keystore, batchPreSignerUrl, batchPostSignerUrl, certFilters, batchB64, isJson) {
 				var data = new Object();
 				data.op = generateDataKeyValue("op","batch");
 				data.keystore = generateDataKeyValue("keystore", keystore != null ? keystore : null);
 				data.ksb64 = generateDataKeyValue ("ksb64", keystore != null ? Base64.encode(keystore) : null);
 				data.batchpresignerurl = generateDataKeyValue("batchpresignerurl", batchPreSignerUrl);
 				data.batchpostsignerurl = generateDataKeyValue("batchpostsignerurl", batchPostSignerUrl);
-				data.properties = generateDataKeyValue ("properties", extraParams != null ? Base64.encode(extraParams) : null);
+				data.properties = generateDataKeyValue ("properties", certFilters != null ? Base64.encode(certFilters) : null);
 				data.dat = generateDataKeyValue ("dat",  batchB64 == "" ? null : batchB64);
+				data.needcert = generateDataKeyValue ("needcert",  true);
 				data.sticky = generateDataKeyValue ("sticky", stickySignatory);
 				if (resetStickySignatory) {
 					data.resetSticky = generateDataKeyValue ("resetsticky", resetStickySignatory);
+				}
+				
+				if (isJson) {
+					data.jsonbatch = generateDataKeyValue ("jsonbatch", true);	
+				}
+				
+				if (localBatchProcess) {
+					data.localBatchProcess = generateDataKeyValue ("localBatchProcess",  true);
 				}
 
 				return data;
@@ -1728,24 +2063,27 @@ var AutoScript = ( function ( window, undefined ) {
 
 			/**
 			 * Construye una URL para la invocaci&oacute;n del Cliente @firma nativo.
-			 * params: Par\u00E1metros para la configuraci\u00F3n de la operaci\u00F3n.
+			 * paramsObject: Par\u00E1metros para la configuraci\u00F3n de la operaci\u00F3n.
 			 */
-			function buildUrl (arr) {
+			function buildUrl (paramsObject) {
 
-				// Operacion seleccionada
-				var intentURL;
+				// Array con los parametros de llamada
 				var params = [];
-				// Convertimos el objeto con los datos en un array del tipo key value
-				for(var x in arr){
-				  params.push(arr[x]);
+				
+				// Si se establecio una version minima del cliente de firma, se notifica
+				if (minimumClientVersion) {
+					params.push(generateDataKeyValue("mcv", minimumClientVersion));
+				}
+				
+				// Convertimos el objeto con los parametros en un array del tipo key value
+				for (var x in paramsObject){
+				  params.push(paramsObject[x]);
 				}
 
-				if (params != null && params != undefined && params.length > 0) {
-					intentURL = 'afirma://' + encodeURIComponent(arr.op.value) + '?';	// Agregamos como dominio el identificador del tipo de operacion
-					for (var i = 0; i < params.length; i++) {
-						if (params[i].value != null && params[i].value != "null") {
-							intentURL += (i != 0 ? '&' : '') + params[i].key + '=' + encodeURIComponent(params[i].value); 
-						}
+				var intentURL = 'afirma://' + encodeURIComponent(paramsObject.op.value) + '?';	// Agregamos como dominio el identificador del tipo de operacion
+				for (var i = 0; i < params.length; i++) {
+					if (params[i].value != null && params[i].value != "null") {
+						intentURL += (i != 0 ? '&' : '') + params[i].key + '=' + encodeURIComponent(params[i].value); 
 					}
 				}
 				return intentURL;
@@ -1756,7 +2094,7 @@ var AutoScript = ( function ( window, undefined ) {
 				// Primera ejecucion, no hay puerto definido
 				if (port == "") {
 					// Calculamos los puertos
-					var ports = getRandomPorts();
+					var ports = AfirmaUtils.getRandomPorts(minPort, maxPort);
 					// Invocamos a la aplicacion nativa
 					openNativeApp(ports);
 					// Enviamos la peticion a la app despues de esperar un tiempo prudencial
@@ -1768,20 +2106,7 @@ var AutoScript = ( function ( window, undefined ) {
 					executeEchoByService (port, url, AutoScript.AUTOFIRMA_CONNECTION_RETRIES)
 				}
 			}
-			
-			/**
-			 * Obtiene un puerto aleatorio para la comunicaci\u00F3n con la aplicaci\u00F3n nativa.
-			 */
-			function getRandomPorts () {
-				var MIN_PORT = 49152;
-				var MAX_PORT = 65535;
-				var ports = new Array();
-				ports[0] = Math.floor((Math.random() * (MAX_PORT - MIN_PORT))) + MIN_PORT;
-				ports[1] = Math.floor((Math.random() * (MAX_PORT - MIN_PORT))) + MIN_PORT;
-				ports[2] = Math.floor((Math.random() * (MAX_PORT - MIN_PORT))) + MIN_PORT;
-				return ports;
-			}
-		
+
 		
 			function openNativeApp (ports) {
 			
@@ -1795,7 +2120,12 @@ var AutoScript = ( function ( window, undefined ) {
 				idSession = AfirmaUtils.generateNewIdSession();
 				
 				// Lanzamos la aplicacion nativa
-				openUrl("afirma://service?ports=" + portsLine + "&v=" + PROTOCOL_VERSION + "&idsession=" + idSession);
+				var url = "afirma://service?ports=" + portsLine
+					+ "&v=" + PROTOCOL_VERSION
+					+ "&jvc=" + VERSION_CODE
+					+ "&idsession=" + idSession;
+				
+				openUrl(url);
 			}
 
 			/**
@@ -1861,9 +2191,9 @@ var AutoScript = ( function ( window, undefined ) {
 				connection = false;
 				var semaphore = new Object();
 				semaphore.locked = false;
-				executeEchoByService (ports[0], url, AutoScript.AUTOFIRMA_CONNECTION_RETRIES, semaphore);
-				executeEchoByService (ports[1], url, AutoScript.AUTOFIRMA_CONNECTION_RETRIES, semaphore);
-				executeEchoByService (ports[2], url, AutoScript.AUTOFIRMA_CONNECTION_RETRIES, semaphore);
+				for (var i = 0; !connection && i < ports.length; i++) {
+					executeEchoByService (ports[i], url, AutoScript.AUTOFIRMA_CONNECTION_RETRIES, semaphore);
+				}
 			}
 
 			/**
@@ -1873,7 +2203,6 @@ var AutoScript = ( function ( window, undefined ) {
 			* peticion sea aceptada.
 			*/
 			function executeEchoByService (currentPort, url, timeoutResetCounter, semaphore) {
-
 				
 				// Almacenamos la URL en una propiedad global que se mantendra siempre actualizada porque
 				// al invocar muchas peticiones consecutivas, en caso de introducir un retardo con setTimeout,
@@ -1883,12 +2212,12 @@ var AutoScript = ( function ( window, undefined ) {
 				currentOperationUrl = url;
 				
 				var httpRequest = getHttpRequest();
-				httpRequest.open("POST", URL_REQUEST + currentPort + "/afirma", true);
+				httpRequest.open("POST", URL_REQUEST_PREFIX + currentPort + "/afirma", true);
 				httpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				httpRequest.onreadystatechange = function() {
 					if (httpRequest.readyState == 4 && httpRequest.status == 200 && Base64.decode(httpRequest.responseText, true) == "OK" && !connection) {
 						port = currentPort;
-						urlHttpRequest = URL_REQUEST + port + "/afirma";
+						urlHttpRequest = URL_REQUEST_PREFIX + port + "/afirma";
 						connection = true;
 						if (semaphore) {
 							semaphore.locked = true;
@@ -2247,10 +2576,15 @@ var AutoScript = ( function ( window, undefined ) {
 				
 				// Termina bien y no devuelve ningun resultado o es una operacion guardado
 				if (data == "OK") {
+					try {
+						data = AfirmaUtils.parseJSONData(data);
+					}
+					catch (e) {}
+
 					successCallback(data, null);
 					return;
 				}
-				
+
 				// Error de memoria
 				if (data == "MEMORY_ERROR") {
 					errorCallback("es.gob.afirma.core.OutOfMemoryError", "El fichero que se pretende firmar o guardar excede de la memoria disponible para aplicacion");
@@ -2340,7 +2674,7 @@ var AutoScript = ( function ( window, undefined ) {
 										
 					}
 					
-					successCallback(fileNameArray,dataB64Array);
+					successCallback(fileNameArray, dataB64Array);
 					
 					return;
 				}
@@ -2357,6 +2691,7 @@ var AutoScript = ( function ( window, undefined ) {
 					certificate = data.substring(0, sepPos).replace(/\-/g, "+").replace(/\_/g, "/");
 					signature = data.substring(sepPos + 1).replace(/\-/g, "+").replace(/\_/g, "/");
 				}
+				
 				successCallback(signature, certificate);
 			}
 			
@@ -2384,7 +2719,26 @@ var AutoScript = ( function ( window, undefined ) {
 					errorCallback("java.lang.Exception", "Error desconocido");
 					return;
 				}
-				successCallback(data);
+				
+				// Si se nos ha devuelto el resultado y el certificado, se separan para
+				// pasarselos a la funcion callback
+				var result;
+				var certificate = null;
+				var sepPos = data.indexOf("|");
+				if (sepPos == -1) {
+					result = data;
+				}
+				else {
+					result = data.substring(0, sepPos).replace(/\-/g, "+").replace(/\_/g, "/");
+					certificate = data.substring(sepPos + 1).replace(/\-/g, "+").replace(/\_/g, "/");
+				}
+				
+				try {
+					result = AfirmaUtils.parseJSONData(result);
+				}
+				catch (e) {}
+				
+				successCallback(result, certificate);
 			}
 			
 			/**
@@ -2562,15 +2916,17 @@ var AutoScript = ( function ( window, undefined ) {
 				throw new Error();
 			}
 
-			/* Metodos que publicamos del objeto AppAfirmaJS */
+			/* Metodos que publicamos del objeto AppAfirmaJSSocket */
 			return {
 				echo : echo,
 				checkTime : checkTime,
 				setKeyStore : setKeyStore,
+				setPortRange : setPortRange,
 				sign : sign,
 				coSign : coSign,
 				counterSign : counterSign,
-				signBatch : signBatch,
+				signBatchJSON : signBatchJSON,
+				signBatchXML : signBatchXML,
 				selectCertificate : selectCertificate,
 				saveDataToFile : saveDataToFile,
 				signAndSaveToFile : signAndSaveToFile,
@@ -2745,7 +3101,7 @@ var AutoScript = ( function ( window, undefined ) {
 					extraParams = addSignatoryCertificateToExtraParams(stickyCertificate, extraParams);
 				}
 				
-				var idSession = generateNewIdSession();
+				var idSession = AfirmaUtils.generateNewIdSession();
 				var cipherKey = generateCipherKey();
 
 				var i = 0;
@@ -2811,7 +3167,7 @@ var AutoScript = ( function ( window, undefined ) {
 					extraParams = addSignatoryCertificateToExtraParams(stickyCertificate, extraParams);
 				}
 				
-				var idSession = generateNewIdSession();
+				var idSession = AfirmaUtils.generateNewIdSession();
 				var cipherKey = generateCipherKey();
 
 				var i = 0;
@@ -2854,9 +3210,9 @@ var AutoScript = ( function ( window, undefined ) {
 			}
 			
 			/**
-			 * Ejecuta una operacion de firma de lote.
+			 * Ejecuta una operacion de firma de lote con XML.
 			 */
-			function signBatch (batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams, successCallback, errorCallback) {
+			function signBatchXML (batchB64, batchPreSignerUrl, batchPostSignerUrl, extraParams, successCallback, errorCallback) {
 				
 				currentOperation = OPERATION_BATCH;
 				
@@ -2874,7 +3230,7 @@ var AutoScript = ( function ( window, undefined ) {
 					extraParams = addSignatoryCertificateToExtraParams(stickyCertificate, extraParams);
 				}
 				
-				var idSession = generateNewIdSession();
+				var idSession = AfirmaUtils.generateNewIdSession();
 				var cipherKey = generateCipherKey();
 				
 				var opId = "batch";
@@ -2896,9 +3252,66 @@ var AutoScript = ( function ( window, undefined ) {
 						batchPostSignerUrl != undefined) {				params[i++] = {key:"batchpostsignerurl", value:batchPostSignerUrl}; }
 				if (extraParams != null && extraParams != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(extraParams)}; }
 				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"aw", value:"true"}; } // Espera activa
-				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"needcert", value:"true"}; } // Espera activa
+				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"needcert", value:"true"}; } 
 				if (batchB64 != null) {									params[i++] = {key:"dat", value:batchB64}; }
 
+				var url = buildUrl(opId, params);
+
+				// Si la URL es muy larga, realizamos un preproceso para que los datos se suban al
+				// servidor y la aplicacion nativa los descargue, en lugar de pasarlos directamente 
+				if (isURLTooLong(url)) {
+					if (storageServletAddress == null || storageServletAddress == undefined) {
+						throwException("java.lang.IllegalArgumentException", "No se ha indicado la direccion del servlet para el guardado de datos");
+						return;
+					}
+
+					sendDataAndExecAppIntent(idSession, cipherKey, storageServletAddress, retrieverServletAddress, opId, params, successCallback, errorCallback)
+				}
+				else {
+					execAppIntent(url, idSession, cipherKey, successCallback, errorCallback);
+				}
+			}
+			
+			/**
+			 * Ejecuta una operacion de firma de lote JSON.
+			 */
+			function signBatchJSON (jsonRequestB64, batchPreSignerUrl, batchPostSignerUrl, certFilters, successCallback, errorCallback) {
+				
+				currentOperation = OPERATION_BATCH;
+
+				// Si hay un certificado prefijado, lo agregamos a los filtros de certificado
+				if (stickySignatory && !resetStickySignatory && !!stickyCertificate) {
+					certFilters = addSignatoryCertificateToExtraParams(stickyCertificate, certFilters);
+				}
+				
+				var idSession = AfirmaUtils.generateNewIdSession();
+				var cipherKey = generateCipherKey();
+				
+				var opId = "batch";
+				
+				var i = 0;
+				var params = new Array();
+				params[i++] = {key:"ver", value:PROTOCOL_VERSION};
+				params[i++] = {key:"op", value:opId};
+				if (idSession != null && idSession != undefined) {		params[i++] = {key:"id", value:idSession}; }
+				if (cipherKey != null && cipherKey != undefined) {		params[i++] = {key:"key", value:cipherKey}; }
+				if (defaultKeyStore != null &&
+						defaultKeyStore != undefined) {					params[i++] = {key:"keystore", value:defaultKeyStore};
+																		params[i++] = {key:"ksb64", value:Base64.encode(defaultKeyStore)}; }
+				if (storageServletAddress != null &&
+						storageServletAddress != undefined) {			params[i++] = {key:"stservlet", value:storageServletAddress}; }
+				if (batchPreSignerUrl != null &&
+						batchPreSignerUrl != undefined) {				params[i++] = {key:"batchpresignerurl", value:batchPreSignerUrl}; }				
+				if (batchPostSignerUrl != null &&
+						batchPostSignerUrl != undefined) {				params[i++] = {key:"batchpostsignerurl", value:batchPostSignerUrl}; }
+				if (certFilters != null && certFilters != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(certFilters)}; }
+				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"aw", value:true}; } // Espera activa
+				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"needcert", value:true}; } 
+				if (localBatchProcess) {								params[i++] = {key:"localBatchProcess", value:true}; }
+				
+				params[i++] = {key:"jsonbatch", value:true}; 
+				params[i++] = {key:"dat", value:jsonRequestB64}; 
+				 
 				var url = buildUrl(opId, params);
 
 				// Si la URL es muy larga, realizamos un preproceso para que los datos se suban al
@@ -2925,7 +3338,7 @@ var AutoScript = ( function ( window, undefined ) {
 					dataB64 = dataB64.replace(/\+/g, "-").replace(/\//g, "_");
 				}
 
-				var idSession = generateNewIdSession();
+				var idSession = AfirmaUtils.generateNewIdSession();
 				var cipherKey = generateCipherKey();
 
 				var i = 0;
@@ -2975,11 +3388,11 @@ var AutoScript = ( function ( window, undefined ) {
 					errorCallback(errorType, errorMessage);
 				}
 			}
-			
+
 			/**
 			 * Carga de multiples ficheros de datos. Se realiza mediante la invocacion de una app nativa. 
 			 */
-			function getMultiFileNameContentBase64  (title, extensions, description, filePath, successCallbackFunction, errorCallbackFunction) {
+			function getMultiFileNameContentBase64  (title, extensions, description, filePath, successCallback, errorCallback) {
 				var errorType = "java.lang.UnsupportedOperationException";
 				var errorMessage = "La operacion de carga de multiples ficheros no esta disponible por servidor intermedio";
 				if (!errorCallback) {
@@ -2989,7 +3402,7 @@ var AutoScript = ( function ( window, undefined ) {
 					errorCallback(errorType, errorMessage);
 				}
 			}
-						
+
 			/** 
 			 * Funcion para la comprobacion de existencia del objeto. No hace nada.
 			 */
@@ -3014,8 +3427,15 @@ var AutoScript = ( function ( window, undefined ) {
 			/**
 			 * Recupera la cadena "Applet no cargado".
 			 */
-			function getCurrentLog () {
-				return "Applet no cargado";
+			function getCurrentLog (successCallbackFunction, errorCallbackFunction) {
+				var errorType = "java.lang.UnsupportedOperationException";
+				var errorMessage = "La operacion de obtencion del log no esta disponible por servidor intermedio";
+				if (!errorCallbackFunction) {
+					throwException(errorType, errorMessage);
+				}
+				else {
+					errorCallbackFunction(errorType, errorMessage);
+				}
 			}
 
 			/**
@@ -3051,35 +3471,6 @@ var AutoScript = ( function ( window, undefined ) {
 				return url.length > MAX_LONG_GENERAL_URL;
 			}
 			
-			/* Mayor entero. */
-			var MAX_NUMBER = 2147483648;
-
-			/* Caracteres validos para los ID de sesion */
-			var VALID_CHARS_TO_ID = "1234567890abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-			/* Genera un identificador de sesion. */
-			function generateNewIdSession () {
-				var ID_LENGTH = 20;
-				var random = "";
-				var randomInts;
-				if (typeof window.crypto != "undefined" && typeof window.crypto.getRandomValues != "undefined") {
-					randomInts = new Uint32Array(ID_LENGTH);
-					window.crypto.getRandomValues(randomInts);
-				}
-				else {
-					randomInts = new Array(ID_LENGTH);
-					for (var i = 0; i < ID_LENGTH; i++) {
-						randomInts[i] = rnd() * MAX_NUMBER;
-					}
-				}
-
-				for (var i = 0; i < ID_LENGTH; i++) {
-					random += VALID_CHARS_TO_ID.charAt(Math.floor(randomInts[i] % VALID_CHARS_TO_ID.length));
-				}
-
-				return random;
-			}
-
 			/* Genera un numero aleatorio para utilizar como clave de cifrado. */
 			function generateCipherKey() {
 				var random;
@@ -3089,7 +3480,7 @@ var AutoScript = ( function ( window, undefined ) {
 					random = zeroFill(randomInts[0] % 100000000, 8);
 				}
 				else {
-					random = zeroFill(Math.floor(((rnd() * MAX_NUMBER) + 1) % 100000000), 8);
+					random = zeroFill(Math.floor((AfirmaUtils.getRandom() + 1) % 100000000), 8);
 				}
 
 				return random;
@@ -3103,18 +3494,6 @@ var AutoScript = ( function ( window, undefined ) {
 					+ number;
 				}
 				return number + "";
-			}
-
-			/**
-			 * Genera numeros aleatorios con una distribucion homogenea
-			 */
-			var seed;
-			function rnd () {
-				if (seed == undefined) {
-					seed = new Date().getMilliseconds() * 1000 * Math.random();
-				}
-			    seed = (seed * 9301 + 49297) % 233280;
-			    return seed / 233280;
 			}
 
 			/**
@@ -3132,7 +3511,7 @@ var AutoScript = ( function ( window, undefined ) {
 			function sendDataAndExecAppIntent(idSession, cipherKey, storageServletAddress, retrieverServletAddress, op, params, successCallback, errorCallback) {
 
 				// Identificador del fichero (equivalente a un id de sesion) del que deben recuperarse los datos
-				var fileId = generateNewIdSession(); 
+				var fileId = AfirmaUtils.generateNewIdSession(); 
 
 				// Subimos los datos al servidor intermedio
 				var httpRequest = getHttpRequest();
@@ -3169,6 +3548,11 @@ var AutoScript = ( function ( window, undefined ) {
 					// Vacio
 				}
 
+				// Agregamos el indicador de version minima si es necesario
+				if (minimumClientVersion) {
+					params[params.length] = { key:"mcv", value:minimumClientVersion};
+				}
+				
 				var requestData =
 					"op=put&v=1_0&id=" + fileId + "&dat=" + 
 					cipher(buildXML(op, params), cipherKey);
@@ -3213,11 +3597,15 @@ var AutoScript = ( function ( window, undefined ) {
 			 */
 			function buildUrl (op, params) {
 
-				var urlParams = "";
+				var urlParams = "jvc=" + VERSION_CODE;
+				if (minimumClientVersion) {
+					urlParams += "&mcv=" + encodeURIComponent(minimumClientVersion);
+				}
+				
 				if (params != null && params != undefined) {
 					for (var i = 0; i < params.length; i++) {
 						if (params[i].value != null && params[i].value != "null") {
-							urlParams += (i != 0 ? '&' : '') + params[i].key + '=' + encodeURIComponent(params[i].value); 
+							urlParams += '&' + params[i].key + '=' + encodeURIComponent(params[i].value); 
 						}
 					}
 				}
@@ -3374,6 +3762,11 @@ var AutoScript = ( function ( window, undefined ) {
 							stickyCertificate = null;
 						}
 					}
+					
+					try {
+						result = AfirmaUtils.parseJSONData(result);
+					}
+					catch (e) {}
 
 					successCallback(result, certificate);
 					return false;
@@ -3569,7 +3962,7 @@ var AutoScript = ( function ( window, undefined ) {
 						else {
 							errorResponseFunction("java.lang.Exception", "No se pudo conectar con el servidor intermedio para la recuperacion del resultado de la operacion (Status: " + httpRequest.status + ")", errorCallback);
 						}
-					}					
+					}
 				}
 				try {
 					httpRequest.onerror = function() {
@@ -3644,7 +4037,8 @@ var AutoScript = ( function ( window, undefined ) {
 				sign : sign,
 				coSign : coSign,
 				counterSign : counterSign,
-				signBatch : signBatch,
+				signBatchJSON : signBatchJSON,
+				signBatchXML : signBatchXML,
 				selectCertificate : selectCertificate,
 				saveDataToFile : saveDataToFile,
 				signAndSaveToFile : signAndSaveToFile,
@@ -3661,14 +4055,14 @@ var AutoScript = ( function ( window, undefined ) {
 		
 		/* Metodos que publicamos del objeto cliente. */
 		return {
-			
+
 			VERSION : VERSION,
-			
-			/* Publicamos las variables para la comprobacion de hora. */		
+
+			/* Variables para la comprobacion de hora. */		
 			CHECKTIME_NO : CHECKTIME_NO,
 			CHECKTIME_RECOMMENDED : CHECKTIME_RECOMMENDED,
 			CHECKTIME_OBLIGATORY : CHECKTIME_OBLIGATORY,
-			
+
 			/* Parametros y metodos deprecados */
 			JAVA_ARGUMENTS : JAVA_ARGUMENTS,
 			SYSTEM_PROPERTIES : SYSTEM_PROPERTIES,
@@ -3678,8 +4072,8 @@ var AutoScript = ( function ( window, undefined ) {
 			setJnlpService: setJnlpService,
 			isJNLP : isJNLP,
 			needNativeAppInstalled : needNativeAppInstalled,
-			
-			/* Variables para configurar un almacen de certificados concreto. */		
+
+			/* Constantes para configurar un almacen de certificados concreto. */		
 			KEYSTORE_WINDOWS : KEYSTORE_WINDOWS,
 			KEYSTORE_APPLE : KEYSTORE_APPLE,
 			KEYSTORE_PKCS12 : KEYSTORE_PKCS12,
@@ -3694,19 +4088,22 @@ var AutoScript = ( function ( window, undefined ) {
 			/* Constantes para la configuracion de reintentos de conexion */
 			AUTOFIRMA_LAUNCHING_TIME : AUTOFIRMA_LAUNCHING_TIME,
 			AUTOFIRMA_CONNECTION_RETRIES : AUTOFIRMA_CONNECTION_RETRIES,
-			
+
 			/* Metodos de conexion con la aplicacion nativa. */
 			cargarAppAfirma : cargarAppAfirma,
 			sign : sign,
 			coSign : coSign,
 			cosign : cosign,
 			counterSign : counterSign,
-			countersign : counterSign,
-			signBatch : signBatch,
+			createBatch : createBatch,
+			addDocumentToBatch : addDocumentToBatch,
+			setLocalBatchProcess : setLocalBatchProcess,
+			signBatchProcess : signBatchJSON,
+			signBatch : signBatchXML,
 			selectCertificate : selectCertificate,
 			signAndSaveToFile : signAndSaveToFile,
 			getCurrentLog : getCurrentLog,
-			
+
 			/* Gestion de ficheros. */
 			saveDataToFile : saveDataToFile,
 			getFileNameContentBase64: getFileNameContentBase64,
@@ -3717,13 +4114,15 @@ var AutoScript = ( function ( window, undefined ) {
 			setKeyStore : setKeyStore,
 			setForceWSMode : setForceWSMode,
 			setServlets : setServlets,
+			setPortRange : setPortRange,
 			setStickySignatory : setStickySignatory,
 			setLocale : setLocale,
-			
+			setMinimumClientVersion : setMinimumClientVersion,
+
 			/* Gestion de errores */
 			getErrorMessage : getErrorMessage,
 			getErrorType : getErrorType,
-			
+
 			/* Utilidad JavaScript*/
 			getBase64FromText : getBase64FromText,
 			getTextFromBase64 : getTextFromBase64,

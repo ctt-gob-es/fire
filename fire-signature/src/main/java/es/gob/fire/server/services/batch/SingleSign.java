@@ -9,9 +9,7 @@
  */
 package es.gob.fire.server.services.batch;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -19,17 +17,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.concurrent.Callable;
-
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.AOUtil;
-import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.fire.server.services.batch.SingleSign.ProcessResult.Result;
+import es.gob.fire.server.services.batch.ProcessResult.Result;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignSubOperation;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
@@ -38,29 +32,30 @@ import es.gob.fire.server.services.internal.TempDocumentsManager;
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class SingleSign {
 
+	protected Properties extraParams;
+
+	protected String dataRef;
+
+	protected SignFormat format;
+
+	protected String id;
+
+	protected SignSubOperation subOperation;
+
+	private ProcessResult processResult = new ProcessResult(ProcessResult.Result.NOT_STARTED, null, false);
+
 	private static final String PROP_ID = "SignatureId"; //$NON-NLS-1$
 
-	private static final String XML_ATTRIBUTE_ID = "Id"; //$NON-NLS-1$
+	private static final String JSON_ATTRIBUTE_ID = "Id"; //$NON-NLS-1$
 
-	private static final String XML_ELEMENT_DATASOURCE = "datasource"; //$NON-NLS-1$
-	private static final String XML_ELEMENT_FORMAT = "format"; //$NON-NLS-1$
-	private static final String XML_ELEMENT_SUBOPERATION = "suboperation"; //$NON-NLS-1$
-	private static final String XML_ELEMENT_EXTRAPARAMS = "extraparams"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_DATAREFERENCE = "datareference"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_FORMAT = "format"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_SUBOPERATION = "suboperation"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_EXTRAPARAMS = "extraparams"; //$NON-NLS-1$
+
+	static final Logger LOGGER = Logger.getLogger(SingleSign.class.getName());
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
-	private final Properties extraParams;
-
-	private final String dataSource;
-
-	private final SignFormat format;
-
-
-	private final String id;
-
-	private final SignSubOperation subOperation;
-
-	private ProcessResult processResult = new ProcessResult(Result.NOT_STARTED, null);
 
 	private static final MessageDigest MD;
 	static {
@@ -74,35 +69,94 @@ public final class SingleSign {
 		}
 	}
 
-
-	/**
-	 * Recupera el formato de firma.
-	 * @return Formato de firma.
-	 */
-	public SignFormat getSignFormat() {
-		return this.format;
+	/** Crea una definici&oacute;n de tarea de firma electr&oacute;nica &uacute;nica.
+	 * @param id Identificador de la firma. */
+	SingleSign(final String id) {
+		this.id = id;
 	}
 
-	/**
-	 * Recupera los par&aacute;metros de configuraci&oacute;n del formato de firma.
-	 * @return Configuraci&oacute;n del formato de firma.
-	 */
-	public Properties getExtraParams() {
-		return this.extraParams;
+	/** Crea una definici&oacute;n de tarea de firma electr&oacute;nica &uacute;nica.
+	 * @param id Identificador de la firma.
+	 * @param dataSrc Datos a firmar.
+	 * @param fmt Formato de firma.
+	 * @param subOp Tipo de firma a realizar.
+	 * @param xParams Opciones adicionales de la firma.
+	 * @param ss Objeto para guardar la firma una vez completada. */
+	public SingleSign(final String id,
+			          final String dataSrc,
+			          final SignFormat fmt,
+			          final SignSubOperation subOp,
+			          final Properties xParams) {
+
+		if (dataSrc == null) {
+			throw new IllegalArgumentException(
+				"El origen de los datos a firmar no puede ser nulo" //$NON-NLS-1$
+			);
+		}
+
+		if (fmt == null) {
+			throw new IllegalArgumentException(
+				"El formato de firma no puede ser nulo" //$NON-NLS-1$
+			);
+		}
+
+		this.dataRef = dataSrc;
+		this.format = fmt;
+
+		this.id = id;
+
+		this.subOperation = subOp;
 	}
 
-	SignSubOperation getSubOperation() {
-		return this.subOperation;
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("{\n"); //$NON-NLS-1$
+		sb.append(":\""); //$NON-NLS-1$
+		sb.append(JSON_ATTRIBUTE_ID);
+		sb.append(":\""); //$NON-NLS-1$
+		sb.append(this.id);
+		sb.append("\" , \n\""); //$NON-NLS-1$
+		sb.append(JSON_ELEMENT_DATAREFERENCE);
+		sb.append("\":\""); //$NON-NLS-1$
+		sb.append(this.dataRef);
+		sb.append("\",\n"); //$NON-NLS-1$
+		sb.append("\""); //$NON-NLS-1$
+		sb.append(JSON_ELEMENT_FORMAT);
+		sb.append("\":\""); //$NON-NLS-1$
+		sb.append(this.format);
+		sb.append("\",\n"); //$NON-NLS-1$
+		sb.append("\""); //$NON-NLS-1$
+		sb.append(JSON_ELEMENT_SUBOPERATION);
+		sb.append("\":\""); //$NON-NLS-1$
+		sb.append(this.subOperation);
+		sb.append("\",\n"); //$NON-NLS-1$
+		sb.append("\""); //$NON-NLS-1$
+		sb.append(JSON_ELEMENT_EXTRAPARAMS);
+		sb.append("\":\""); //$NON-NLS-1$
+		try {
+			sb.append(AOUtil.properties2Base64(this.extraParams));
+		}
+		catch (final IOException e) {
+			LOGGER.severe(
+				"Error convirtiendo los parametros adicionales de la firma '" + this.id + "' a Base64: " + e //$NON-NLS-1$ //$NON-NLS-2$
+			);
+		}
+		sb.append("\",\n"); //$NON-NLS-1$
+		sb.append("\""); //$NON-NLS-1$
+		sb.append("\n}\n"); //$NON-NLS-1$
+
+		return sb.toString();
 	}
 
 	/** Realiza el proceso de prefirma, incluyendo la descarga u obtenci&oacute;n de datos.
 	 * @param certChain Cadena de certificados del firmante.
 	 * @param algorithm Algoritmo de firma.
-	 * @return Nodo <code>firma</code> del XML de datos trif&aacute;sicos (sin ninguna etiqueta
-	 *         antes ni despu&eacute;s).
+	 * @param docManager Gestor de documentos con el que procesar el lote.
+	 * @param docCacheManager Gestor para el guardado de datos en cach&eacute;.
+	 * @return Objeto JSON con los datos trif&aacute;sicos.
 	 * @throws AOException Si hay problemas en la propia firma electr&oacute;nica.
 	 * @throws IOException Si hay problemas en la obtenci&oacute;n, tratamiento o gradado de datos. */
-	String doPreProcess(final X509Certificate[] certChain,
+	TriphaseData doPreProcess(final X509Certificate[] certChain,
 			            final SingleSignConstants.SignAlgorithm algorithm) throws IOException,
 			                                                                      AOException {
 		return SingleSignPreProcessor.doPreProcess(this, certChain, algorithm);
@@ -111,34 +165,46 @@ public final class SingleSign {
 	/** Obtiene la tarea de preproceso de firma para ser ejecutada en paralelo.
 	 * @param certChain Cadena de certificados del firmante.
 	 * @param algorithm Algoritmo de firma.
+	 * @param docManager Gestor de documentos con el que procesar el lote.
+	 * @param docCacheManager Gestor para el guardado de datos en cach&eacute;.
 	 * @return Tarea de preproceso de firma para ser ejecutada en paralelo. */
-	Callable<String> getPreProcessCallable(final X509Certificate[] certChain,
+	Callable<PreProcessResult> getPreProcessCallable(final X509Certificate[] certChain,
                                                   final SingleSignConstants.SignAlgorithm algorithm) {
-		return new Callable<String>() {
-			@Override
-			public String call() throws IOException, AOException {
-				return doPreProcess(certChain, algorithm);
-			}
-		};
+		return new PreProcessCallable(this, certChain, algorithm);
 	}
 
 	/** Realiza el proceso de postfirma, incluyendo la subida o guardado de datos.
 	 * @param certChain Cadena de certificados del firmante.
 	 * @param td Datos trif&aacute;sicos relativos <b>&uacute;nicamente</b> a esta firma.
-	 *           Debe serializarse como un XML con esta forma (ejemplo):
-	 *           <pre>
-	 *            &lt;xml&gt;
-	 *             &lt;firmas&gt;
-	 *              &lt;firma Id="53820fb4-336a-47ee-b7ba-f32f58e5cfd6"&gt;
-	 *               &lt;param n="PRE"&gt;MYICXDAYBgk[...]GvykA=&lt;/param&gt;
-	 *               &lt;param n="PK1"&gt;dC2dIILB9HV[...]xT1bY=&lt;/param&gt;
-	 *               &lt;param n="NEED_PRE"&gt;true&lt;/param&gt;
-	 *              &lt;/firma&gt;
-	 *             &lt;/firmas&gt;
-	 *            &lt;/xml&gt;
-	 *           </pre>
+	 *           Debe serializarse como un JSON con esta forma (ejemplo):
+	 *<pre>
+	 * {
+	 * "format":"PAdES",
+	 * "signs":
+	 * [{
+	 *	"signinfo":[{
+ 	 *		"Id":"7725374e-728d-4a33-9db9-3a4efea4cead",
+	 *		"params":
+	 *			[{
+	 *			"PRE":"PGGYzMC1iOTub3JnL1RSLzIwMDEvUkVDLXh",
+	 *			"ENCODING":"UTF-8",
+	 *			"NEED_PRE":"true",
+	 *			"BASE":"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGl"}]}]},
+	 *{
+	 *	"signinfo":[{
+ 	 *		"Id":"93d1531c-cd32-4c8e-8cc8-1f1cfe66f64a",
+	 *		"params":
+	 *			[{
+	 *			"PRE":"MYIBAzAYBgkqhkiG9w0BCQMxCwYJKoZIhv",
+	 *			"NEED_PRE":"true",
+	 *			"TIME":"1621423575727",
+	 *			"PID":"Wzw5MjBjODdmYmE4ZTEyZTM0YjU2OWUzOW"}]}]}]
+	 * }
+	 * </pre>
 	 * @param algorithm Algoritmo de firma.
 	 * @param batchId Identificador del lote de firma.
+	 * @param docManager Gestor de documentos con el que procesar el lote.
+	 * @param docCacheManager Gestor para la carga de datos desde cach&eacute;.
 	 * @throws AOException Si hay problemas en la propia firma electr&oacute;nica.
 	 * @throws IOException Si hay problemas en la obtenci&oacute;n, tratamiento o gradado de datos.
 	 * @throws NoSuchAlgorithmException Si no se soporta alg&uacute;n algoritmo necesario. */
@@ -150,110 +216,100 @@ public final class SingleSign {
 			                                               NoSuchAlgorithmException {
 		SingleSignPostProcessor.doPostProcess(
 			this, certChain, td, algorithm, batchId
-		);
-	}
-
-	static class CallableResult {
-
-		private final String signId;
-		private final Exception exception;
-
-		CallableResult(final String id) {
-			this.signId = id;
-			this.exception = null;
-		}
-
-		CallableResult(final String id, final Exception e) {
-			this.signId = id;
-			this.exception = e;
-		}
-
-		boolean isOk() {
-			return this.exception == null;
-		}
-
-		Exception getError() {
-			return this.exception;
-		}
-
-		String getSignatureId() {
-			return this.signId;
-		}
+			);
 	}
 
 	/** Obtiene la tarea de postproceso de firma para ser ejecutada en paralelo.
 	 * @param certChain Cadena de certificados del firmante.
 	 * @param td Datos trif&aacute;sicos relativos <b>&uacute;nicamente</b> a esta firma.
-	 *           Debe serializarse como un XML con esta forma (ejemplo):
+	 *           Debe serializarse como un JSON con esta forma (ejemplo):
 	 *           <pre>
-	 *            &lt;xml&gt;
-	 *             &lt;firmas&gt;
-	 *              &lt;firma Id="53820fb4-336a-47ee-b7ba-f32f58e5cfd6"&gt;
-	 *               &lt;param n="PRE"&gt;MYICXDAYBgk[...]GvykA=&lt;/param&gt;
-	 *               &lt;param n="PK1"&gt;dC2dIILB9HV[...]xT1bY=&lt;/param&gt;
-	 *               &lt;param n="NEED_PRE"&gt;true&lt;/param&gt;
-	 *              &lt;/firma&gt;
-	 *             &lt;/firmas&gt;
-	 *            &lt;/xml&gt;
+	 *	{
+ 	 *	"signs":[
+	 *		{	"id":"CADES-001",
+ 	 *			"result":"DONE_AND_SAVED",
+ 	 *			"description":""
+	 *		},
+	 *		{	"id":"XADES-002",
+ 	 *			"result":"DONE_AND_SAVED",
+ 	 *			"description":""
+	 *		},
+	 *		{	"id":"PADES-003",
+ 	 *			"result":"DONE_AND_SAVED",
+ 	 *			"description":""
+	 *		}
+	 *	]
+	 * }
 	 *           </pre>
 	 * @param algorithm Algoritmo de firma.
 	 * @param batchId Identificador del lote de firma.
+	 * @param docManager Gestor de documentos con el que procesar el lote.
+	 * @param docCacheManager Gestor para la carga de datos desde cach&eacute;.
 	 * @return Tarea de postproceso de firma para ser ejecutada en paralelo. */
-	Callable<CallableResult> getPostProcessCallable(final X509Certificate[] certChain,
+	Callable<ResultSingleSign> getPostProcessCallable(final X509Certificate[] certChain,
 			                                                          final TriphaseData td,
 			                                                          final SingleSignConstants.SignAlgorithm algorithm,
 			                                                          final String batchId) {
-		return new Callable<CallableResult>() {
-			@Override
-			public CallableResult call() {
-				try {
-					doPostProcess(certChain, td, algorithm, batchId);
-				}
-				catch(final Exception e) {
-					return new CallableResult(getId(), e);
-				}
-				return new CallableResult(getId());
-			}
-		};
-
+		return new PostProcessCallable(this, certChain, td, algorithm, batchId);
 	}
 
-	SingleSign(final Node singleSignNode) throws DOMException, IOException {
-		if (!(singleSignNode instanceof Element)) {
-			throw new IllegalArgumentException(
-				"El nodo de definicion de la firma debe ser un Elemento DOM" //$NON-NLS-1$
-			);
-		}
-		final Element el = (Element)singleSignNode;
+	Callable<ResultSingleSign> getSaveCallableJSON(final String batchId) {
 
-		this.dataSource = el.getElementsByTagName(XML_ELEMENT_DATASOURCE).item(0).getTextContent();
+		return new JSONSaveCallable(this, batchId);
+	}
 
-		this.extraParams = new Properties();
-		final NodeList tmpNl = el.getElementsByTagName(XML_ELEMENT_EXTRAPARAMS);
-		if (tmpNl != null && tmpNl.getLength() > 0) {
-			final String extraParamsText = new String(
-						Base64.decode(tmpNl.item(0).getTextContent()),
-						DEFAULT_CHARSET).replace("\\n", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			this.extraParams.load(new InputStreamReader(
-					new ByteArrayInputStream(extraParamsText.getBytes(DEFAULT_CHARSET)),
-					DEFAULT_CHARSET));
-		}
+	public Properties getExtraParams() {
+		return this.extraParams;
+	}
 
-		this.format = SignFormat.getFormat(
-			el.getElementsByTagName(XML_ELEMENT_FORMAT).item(0).getTextContent()
-		);
 
-		this.id = el.getAttribute(XML_ATTRIBUTE_ID);
-		if (this.id == null || this.id.isEmpty()) {
-			throw new IllegalArgumentException(
-				"Es obligatorio establecer identificadores unicos de firma" //$NON-NLS-1$
-			);
-		}
+	public void setExtraParams(final Properties extraParams) {
+		// El identificador de la firma debe transmitirse al firmador trifasico a traves
+		// de los extraParams para que este lo utilice y asi podamos luego asociar la
+		// firma con los datos a los que corresponden
+		this.extraParams = extraParams != null ? extraParams : new Properties();
 		this.extraParams.put(PROP_ID, getId());
+	}
 
-		this.subOperation = SignSubOperation.getSubOperation(
-			el.getElementsByTagName(XML_ELEMENT_SUBOPERATION).item(0).getTextContent()
-		);
+	public String getDataRef() {
+		return this.dataRef;
+	}
+
+	public void setDataRef(final String dataRef) {
+		this.dataRef = dataRef;
+	}
+
+	public String getId() {
+		return this.id;
+	}
+
+	public SignSubOperation getSubOperation() {
+		return this.subOperation;
+	}
+
+	public void setSubOperation(final SignSubOperation subOperation) {
+		this.subOperation = subOperation;
+	}
+
+	public ProcessResult getProcessResult() {
+		this.processResult.setId(getId());
+		return this.processResult;
+	}
+
+	public void setProcessResult(final ProcessResult processResult) {
+		this.processResult = processResult;
+	}
+
+	public SignFormat getFormat() {
+		return this.format;
+	}
+
+	public void setFormat(final SignFormat format) {
+		this.format = format;
+	}
+
+	public String getName(final String batchId) {
+		return AOUtil.hexify(MD.digest(this.id.getBytes(DEFAULT_CHARSET)), false) + "." + batchId; //$NON-NLS-1$
 	}
 
 	/**
@@ -262,7 +318,7 @@ public final class SingleSign {
 	 * @throws IOException Cuando no se encuentran los datos o no pueden leerse.
 	 */
 	public byte[] getData() throws IOException {
-		return TempDocumentsManager.retrieveDocument(this.dataSource);
+		return TempDocumentsManager.retrieveDocument(this.dataRef);
 	}
 
 	/**
@@ -271,22 +327,7 @@ public final class SingleSign {
 	 * @throws IOException Cuando no pueden guardarse los datos.
 	 */
 	void save(final byte[] dataToSave) throws IOException {
-		TempDocumentsManager.storeDocument(this.dataSource, dataToSave, false);
-	}
-
-	Callable<CallableResult> getSaveCallable(final String batchId) {
-		return new Callable<CallableResult>() {
-			@Override
-			public CallableResult call() {
-				try {
-					save(TempDocumentsManager.retrieveDocument(SingleSign.this.getName(batchId)));
-				}
-				catch(final Exception e) {
-					return new CallableResult(getId(), e);
-				}
-				return new CallableResult(getId());
-			}
-		};
+		TempDocumentsManager.storeDocument(this.dataRef, dataToSave, false);
 	}
 
 	/**
@@ -295,75 +336,98 @@ public final class SingleSign {
 	 * @param batchId Identificador de lote.
 	 * @return Nombre que asignar a la firma.
 	 */
-	String getName(final String batchId) {
-		return AOUtil.hexify(MD.digest(this.id.getBytes(DEFAULT_CHARSET)), false) + "." + batchId; //$NON-NLS-1$
-	}
 
-	/**
-	 * Recupera el identificador asignado en el lote a la firma.
-	 * @return Identificador.
-	 */
-	public String getId() {
-		return this.id;
-	}
 
-	static final class ProcessResult {
+	static class PreProcessCallable implements Callable<PreProcessResult> {
+		private final SingleSign ss;
+		private final X509Certificate[] certChain;
+		private final SingleSignConstants.SignAlgorithm algorithm;
 
-		enum Result {
-			NOT_STARTED,
-			DONE_AND_SAVED,
-			DONE_BUT_NOT_SAVED_YET,
-			DONE_BUT_SAVED_SKIPPED,
-			DONE_BUT_ERROR_SAVING,
-			ERROR_PRE,
-			ERROR_POST,
-			SKIPPED,
-			SAVE_ROLLBACKED;
-		}
-
-		private final Result result;
-		private final String description;
-		private String signId;
-
-		boolean wasSaved() {
-			return Result.DONE_AND_SAVED.equals(this.result);
-		}
-
-		static final ProcessResult PROCESS_RESULT_OK_UNSAVED = new ProcessResult(Result.DONE_BUT_NOT_SAVED_YET, null);
-		static final ProcessResult PROCESS_RESULT_SKIPPED    = new ProcessResult(Result.SKIPPED,                null);
-		static final ProcessResult PROCESS_RESULT_DONE_SAVED = new ProcessResult(Result.DONE_AND_SAVED,         null);
-		static final ProcessResult PROCESS_RESULT_ROLLBACKED = new ProcessResult(Result.SAVE_ROLLBACKED,        null);
-
-		ProcessResult(final Result r, final String d) {
-			if (r == null) {
-				throw new IllegalArgumentException(
-					"El resultado no puede ser nulo" //$NON-NLS-1$
-				);
-			}
-			this.result = r;
-			this.description = d != null ? d : ""; //$NON-NLS-1$
+		public PreProcessCallable(final SingleSign ss, final X509Certificate[] certChain,
+                final SingleSignConstants.SignAlgorithm algorithm) {
+			this.ss = ss;
+			this.certChain = certChain;
+			this.algorithm = algorithm;
 		}
 
 		@Override
-		public String toString() {
-			return "<signresult id=\"" + this.signId + "\" result=\"" + this.result + "\" description=\"" + this.description + "\"/>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		}
+		public PreProcessResult call() throws Exception {
 
-		void setId(final String id) {
-			this.signId = id;
-		}
+			PreProcessResult result;
+			try {
+				final TriphaseData presignature = SingleSignPreProcessor.doPreProcess(this.ss, this.certChain,
+					this.algorithm);
+				result = new PreProcessResult(presignature);
+			}
+			catch (final Exception e) {
+				LOGGER.log(Level.WARNING, "Error en la pretfirma del documento: " + this.ss.getId(), e); //$NON-NLS-1$
+				final ProcessResult errorResult = new ProcessResult(Result.ERROR_PRE, e.getMessage());
+				errorResult.setId(this.ss.getId());
+				final ResultSingleSign singleResult = new ResultSingleSign(this.ss.getId(), false, errorResult);
+				result = new PreProcessResult(singleResult);
 
-		public Result getResult() {
-			return this.result;
+			}
+
+			return result;
 		}
 	}
 
-	void setProcessResult(final ProcessResult pResult) {
-		this.processResult = pResult;
+	static class PostProcessCallable implements Callable<ResultSingleSign> {
+
+		private final SingleSign ss;
+		private final X509Certificate[] certChain;
+		private final TriphaseData td;
+		private final SingleSignConstants.SignAlgorithm algorithm;
+		private final String batchId;
+
+		public PostProcessCallable(final SingleSign ss, final X509Certificate[] certChain,
+                final TriphaseData td, final SingleSignConstants.SignAlgorithm algorithm,
+                final String batchId) {
+			this.ss = ss;
+			this.certChain = certChain;
+			this.td = td;
+			this.algorithm = algorithm;
+			this.batchId = batchId;
+		}
+
+		@Override
+		public ResultSingleSign call() {
+			try {
+				SingleSignPostProcessor.doPostProcess(this.ss, this.certChain, this.td,
+														this.algorithm, this.batchId);
+			}
+			catch(final Exception e) {
+				LOGGER.log(Level.WARNING, "Error en la postfirma del documento: " + this.ss.getId(), e); //$NON-NLS-1$
+				final ProcessResult result = new ProcessResult(Result.ERROR_POST, e.getMessage());
+				return new ResultSingleSign(this.ss.getId(), false, result);
+			}
+			return new ResultSingleSign(this.ss.getId(), true, ProcessResult.PROCESS_RESULT_OK_UNSAVED);
+		}
 	}
 
-	ProcessResult getProcessResult() {
-		this.processResult.setId(getId());
-		return this.processResult;
+	static class JSONSaveCallable implements Callable<ResultSingleSign> {
+
+		private final SingleSign ss;
+		private final String batchId;
+
+		public JSONSaveCallable(final SingleSign ss, final String batchId) {
+			this.ss = ss;
+			this.batchId = batchId;
+		}
+
+		@Override
+		public ResultSingleSign call() {
+			try {
+				final byte[] dataToSave = TempDocumentsManager.retrieveDocument(this.ss.getName(this.batchId));
+				TempDocumentsManager.storeDocument(this.ss.dataRef, dataToSave, false);
+			}
+			catch(final Exception e) {
+				LOGGER.log(Level.WARNING, "No se puede almacenar la firma del documento: " + this.ss.getId(), e); //$NON-NLS-1$
+				final ProcessResult result = new ProcessResult(Result.DONE_BUT_ERROR_SAVING, "Error al almacenar la firma del documento"); //$NON-NLS-1$
+				return new ResultSingleSign(this.ss.getId(), false, result);
+			}
+			return new ResultSingleSign(this.ss.getId(), true, ProcessResult.PROCESS_RESULT_DONE_SAVED);
+		}
+
 	}
 }

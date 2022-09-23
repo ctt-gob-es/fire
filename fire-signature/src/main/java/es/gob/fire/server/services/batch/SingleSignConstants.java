@@ -38,7 +38,7 @@ public final class SingleSignConstants {
 
 		private final String name;
 
-		private SignSubOperation(final String n) {
+		SignSubOperation(final String n) {
 			this.name = n;
 		}
 
@@ -92,7 +92,7 @@ public final class SingleSignConstants {
 
 		private final String name;
 
-		private SignFormat(final String n) {
+		SignFormat(final String n) {
 			this.name = n;
 		}
 
@@ -135,7 +135,7 @@ public final class SingleSignConstants {
 
 		private final String name;
 
-		private SignAlgorithm(final String n) {
+		SignAlgorithm(final String n) {
 			this.name = n;
 		}
 
@@ -170,7 +170,7 @@ public final class SingleSignConstants {
 		if (sSign == null) {
 			throw new IllegalArgumentException("La firma no puede ser nula"); //$NON-NLS-1$
 		}
-		switch(sSign.getSignFormat()) {
+		switch(sSign.getFormat()) {
 			case PADES:
 				return new PAdESTriPhasePreProcessor();
 			case CADES:
@@ -186,7 +186,7 @@ public final class SingleSignConstants {
 			case PKCS1:
 				return new Pkcs1TriPhasePreProcessor();
 			default:
-				throw new AOInvalidFormatException("Formato de firma no soportado: " + sSign.getSignFormat()); //$NON-NLS-1$
+				throw new AOInvalidFormatException("Formato de firma no soportado: " + sSign.getFormat()); //$NON-NLS-1$
 		}
 	}
 

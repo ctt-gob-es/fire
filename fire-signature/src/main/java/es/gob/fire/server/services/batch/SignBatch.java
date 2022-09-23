@@ -11,249 +11,336 @@ package es.gob.fire.server.services.batch;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 
+import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.signers.TriphaseData;
-import es.gob.fire.server.services.internal.SecurityUtils;
+import es.gob.fire.server.services.batch.ProcessResult.Result;
 
-/** Lote de firmas electr&oacute;nicas.
- * Un ejemplo de representaci&oacute;n XML de un lote podr&iacute;a ser:
- * <pre>
- * &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
- * &lt;signbatch stoponerror="false" algorithm="SHA256withRSA" concurrenttimeout="9223372036854775807" Id="LOTE001"&gt;
- *  &lt;singlesign Id="7725374e-728d-4a33-9db9-3a4efea4cead"&gt;
- *   &lt;datasource&gt;http://google.com&lt;/datasource&gt;
- *   &lt;format&gt;XAdES&lt;/format&gt;
- *   &lt;suboperation&gt;sign&lt;/suboperation&gt;
- *   &lt;extraparams&gt;Iw0KI1RodSBKYW4gMTQgMTU6Mzc6MTcgQ0VUIDIwMTYNClNpZ25hdHVyZUlkPTc3MjUzNzRlLTcyOGQtNGEzMy05ZGI5LTNhNGVmZWE0Y2VhZA0K&lt;/extraparams&gt;
- *   &lt;signsaver&gt;
- *    &lt;class&gt;es.gob.afirma.signers.batch.SignSaverFile&lt;/class&gt;
- *    &lt;config&gt;Iw0KI1RodSBKYW4gMTQgMTU6Mzc6MTcgQ0VUIDIwMTYNCkZpbGVOYW1lPUNcOlxcVXNlcnNcXHRvbWFzXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRklSTUExLnhtbA0K&lt;/config&gt;
- *   &lt;/signsaver&gt;
- *  &lt;/singlesign&gt;
- *  &lt;singlesign Id="93d1531c-cd32-4c8e-8cc8-1f1cfe66f64a"&gt;
- *   &lt;datasource&gt;SG9sYSBNdW5kbw==&lt;/datasource&gt;
- *   &lt;format&gt;CAdES&lt;/format&gt;
- *   &lt;suboperation&gt;sign&lt;/suboperation&gt;
- *   &lt;extraparams&gt;Iw0KI1RodSBKYW4gMTQgMTU6Mzc6MTcgQ0VUIDIwMTYNClNpZ25hdHVyZUlkPTkzZDE1MzFjLWNkMzItNGM4ZS04Y2M4LTFmMWNmZTY2ZjY0YQ0K&lt;/extraparams&gt;
- *   &lt;signsaver&gt;
- *    &lt;class&gt;es.gob.afirma.signers.batch.SignSaverFile&lt;/class&gt;
- *    &lt;config&gt;Iw0KI1RodSBKYW4gMTQgMTU6Mzc6MTcgQ0VUIDIwMTYNCkZpbGVOYW1lPUNcOlxcVXNlcnNcXHRvbWFzXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRklSTUEyLnhtbA0K&lt;/config&gt;
- *   &lt;/signsaver&gt;
- *  &lt;/singlesign&gt;
- * &lt;/signbatch&gt;
- * </pre>
- * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
+/** Lote de firmas electr&oacute;nicas */
 public abstract class SignBatch {
+
+	private static final String JSON_ELEMENT_ID = "id"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_DATAREFERENCE = "datareference"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_FORMAT = "format"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_ALGORITHM = "algorithm"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_SINGLESIGNS = "singlesigns"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_SUBOPERATION = "suboperation"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_STOPONERROR = "stoponerror"; //$NON-NLS-1$
+	private static final String JSON_ELEMENT_EXTRAPARAMS = "extraparams"; //$NON-NLS-1$
+
+	private static final String JSELEM_TD = "td"; //$NON-NLS-1$
+	private static final String JSELEM_RESULTS = "results"; //$NON-NLS-1$
+	private static final String JSELEM_ID = "id"; //$NON-NLS-1$
+	private static final String JSELEM_RESULT = "result"; //$NON-NLS-1$
+	private static final String JSELEM_DESCRIPTION = "description"; //$NON-NLS-1$
+	private static final String JSELEM_FORMAT = "format"; //$NON-NLS-1$
+	private static final String JSELEM_SIGNS = "signs"; //$NON-NLS-1$
 
 	protected static final Logger LOGGER = Logger.getLogger(SignBatch.class.getName());
 
+	/** Lista de firmas a procesar. */
 	protected final List<SingleSign> signs;
-	protected final SingleSignConstants.SignAlgorithm algorithm;
 
-	private String id;
+	protected SingleSignConstants.SignAlgorithm algorithm = null;
+
+	protected String id;
+
+	protected String extraParams;
+
+	protected SingleSignConstants.SignSubOperation subOperation = null;
+
+	protected SingleSignConstants.SignFormat format = null;
+
+
+	/** Indica si se debe parar al encontrar un error o por el contrario se debe continuar con el proceso. */
+	protected boolean stopOnError = false;
+
+	/**
+	 * Ejecuta el preproceso de firma por lote.
+	 * @param certChain Cadena de certificados del firmante.
+	 * @return Resultados parciales y datos trif&aacute;sicos de pre-firma del lote.
+	 * @throws BatchException Cuando hay errores irrecuperables en el preproceso.
+	 */
+	public abstract JsonObject doPreBatch(final X509Certificate[] certChain) throws BatchException;
+
+	/**
+	 * Ejecuta el postproceso de firma por lote.
+	 * @param certChain Cadena de certificados del firmante.
+	 * @param td Datos trif&aacute;sicos del preproceso.
+	 *           Debe contener los datos de todas y cada una de las firmas del lote.
+	 * @return Registro del resultado general del proceso por lote, en un JSON (<a href="../doc-files/resultlog-scheme.html">descripci&oacute;n
+	 *         del formato</a>).
+	 * @throws BatchException Cuando hay errores irrecuperables en el postproceso.
+	 */
+	public abstract String doPostBatch(final X509Certificate[] certChain,
+                                       final TriphaseData td) throws BatchException;
+
+	/**
+	 * Crea un lote de firmas a partir de su definici&oacute;n JSON.
+	 * @param json JSON de definici&oacute;n de lote de firmas (<a href="./doc-files/batch-scheme.html">descripci&oacute;n
+	 *            del formato</a>).
+	 * @throws IOException Si hay problemas en el tratamiento de datos en el an&aacute;lisis del JSON.
+	 * @throws SecurityException Si se sobrepasa alguna de las limitaciones establecidas para el lote
+	 * (n&ueacute;mero de documentos, tama&ntilde;o de las referencias, tama&ntilde;o de documento, etc.)
+	 */
+	protected SignBatch(final byte[] json) throws IOException, SecurityException {
+
+		if (json == null || json.length < 1) {
+			throw new IllegalArgumentException(
+				"El JSON de definicion de lote de firmas no puede ser nulo ni vacio" //$NON-NLS-1$
+			);
+		}
+
+		JsonObject jsonObject = null;
+		try {
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(json);
+				JsonReader reader = Json.createReader(bais)) {
+				jsonObject = reader.readObject();
+			}
+		} catch (final JsonException e){
+			LOGGER.severe("Error al parsear JSON: " + e); //$NON-NLS-1$
+			throw new JsonException(
+					"El JSON de definicion de lote de firmas no esta formado correctamente", e //$NON-NLS-1$
+				);
+		}
+
+		this.id = UUID.randomUUID().toString();
+
+		this.stopOnError = jsonObject.containsKey(JSON_ELEMENT_STOPONERROR) ?
+				jsonObject.getBoolean(JSON_ELEMENT_STOPONERROR) : false;
+
+		if (jsonObject.containsKey(JSON_ELEMENT_ALGORITHM)) {
+			this.algorithm = SingleSignConstants.SignAlgorithm.getAlgorithm(
+								jsonObject.getString(JSON_ELEMENT_ALGORITHM)
+								);
+		} else {
+			this.algorithm = null;
+		}
+
+		if (jsonObject.containsKey(JSON_ELEMENT_FORMAT)) {
+			this.format = SingleSignConstants.SignFormat.getFormat(
+							jsonObject.getString(JSON_ELEMENT_FORMAT)
+							);
+		} else {
+			this.format = null;
+		}
+
+		if (jsonObject.containsKey(JSON_ELEMENT_SUBOPERATION)) {
+			this.subOperation = SingleSignConstants.SignSubOperation.getSubOperation(
+									jsonObject.getString(JSON_ELEMENT_SUBOPERATION)
+								);
+		} else {
+			this.subOperation = null;
+		}
+
+		if (jsonObject.containsKey(JSON_ELEMENT_EXTRAPARAMS)) {
+			this.extraParams = jsonObject.getString(JSON_ELEMENT_EXTRAPARAMS);
+		} else {
+			this.extraParams = null;
+		}
+
+		this.signs = fillSingleSigns(jsonObject);
+	}
+
+
+	private List<SingleSign> fillSingleSigns(final JsonObject jsonObject) throws SecurityException {
+		final ArrayList<SingleSign> singleSignsList = new ArrayList<>();
+		final JsonArray singleSignsArray = jsonObject.getJsonArray(JSON_ELEMENT_SINGLESIGNS);
+
+		if (singleSignsArray != null) {
+
+			for (int i = 0 ; i < singleSignsArray.size() ; i++){
+
+				final JsonObject jsonSingleSign = singleSignsArray.getJsonObject(i);
+				final SingleSign singleSign = new SingleSign(jsonSingleSign.getString(JSON_ELEMENT_ID));
+
+				// Cada nodo debe terner una referencia a los datos o el resultado de la operacion
+				if (!jsonSingleSign.containsKey(JSON_ELEMENT_DATAREFERENCE) && !jsonSingleSign.containsKey(JSELEM_RESULT)) {
+					throw new JsonException("La declaracion del lote no es valida. Todas las firmas deben declarar el atributo " //$NON-NLS-1$
+							+ JSON_ELEMENT_DATAREFERENCE + " o " + JSELEM_RESULT); //$NON-NLS-1$
+				}
+
+				// Si tiene la referencia a los datos es que la firma aun no se ha completado
+				// y tomamos los datos necesarios para hacerlo
+				if (jsonSingleSign.containsKey(JSON_ELEMENT_DATAREFERENCE)) {
+
+					final String dataReference = jsonSingleSign.getString(JSON_ELEMENT_DATAREFERENCE);
+
+					singleSign.setDataRef(dataReference);
+
+					singleSign.setProcessResult(null);
+
+					singleSign.setFormat(jsonSingleSign.containsKey(JSON_ELEMENT_FORMAT)
+							? SingleSignConstants.SignFormat.getFormat(jsonSingleSign.getString(JSON_ELEMENT_FORMAT))
+									: this.format);
+
+					singleSign.setSubOperation(jsonSingleSign.containsKey(JSON_ELEMENT_SUBOPERATION)
+							? SingleSignConstants.SignSubOperation.getSubOperation(jsonSingleSign.getString(JSON_ELEMENT_SUBOPERATION))
+									: this.subOperation);
+
+					try {
+						Properties signExtraParams;
+						if (jsonSingleSign.containsKey(JSON_ELEMENT_EXTRAPARAMS)) {
+							signExtraParams = AOUtil.base642Properties(jsonSingleSign.getString(JSON_ELEMENT_EXTRAPARAMS));
+						} else {
+							signExtraParams = AOUtil.base642Properties(this.extraParams);
+						}
+						singleSign.setExtraParams(signExtraParams);
+					} catch (final Exception e) {
+						throw new JsonException(
+								"El objeto JSON no esta correctamente formado"); //$NON-NLS-1$
+					}
+				}
+				// Si no esta la referencia a los datos, es que ya se ha obtenido un resultado
+				else {
+					final String result = jsonSingleSign.getString(JSELEM_RESULT);
+					String description = null;
+					if (jsonSingleSign.containsKey(JSELEM_DESCRIPTION)) {
+						description = jsonSingleSign.getString(JSELEM_DESCRIPTION);
+					}
+					final ProcessResult processResult = new ProcessResult(Result.valueOf(result), description);
+					singleSign.setProcessResult(processResult);
+				}
+
+				singleSignsList.add(singleSign);
+			}
+		}
+
+		return singleSignsList;
+	}
+
+
+	protected static JsonObject buildSignResult(final String id, final Result result, final Throwable error) {
+		final JsonObjectBuilder jsonResultBuilder = Json.createObjectBuilder();
+
+		jsonResultBuilder.add(JSELEM_ID, id);
+		jsonResultBuilder.add(JSELEM_RESULT, result.name());
+
+		if (error != null) {
+			jsonResultBuilder.add(JSELEM_DESCRIPTION, error.getMessage());
+		}
+
+		return jsonResultBuilder.build();
+	}
+
+	protected static JsonObject buildPreBatch(final String format, final JsonArray trisigns, final JsonArray errors) {
+		final JsonObjectBuilder preBatch = Json.createObjectBuilder();
+		if (trisigns != null && !trisigns.isEmpty()) {
+			final JsonObjectBuilder triphaseInfoBuilder = Json.createObjectBuilder();
+			triphaseInfoBuilder.add(JSELEM_FORMAT, format);
+			triphaseInfoBuilder.add(JSELEM_SIGNS, trisigns);
+			preBatch.add(JSELEM_TD, triphaseInfoBuilder.build());
+		}
+		if (errors != null && !errors.isEmpty()) {
+			preBatch.add(JSELEM_RESULTS, errors);
+		}
+
+		return preBatch.build();
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder(
+			"{\n\"stoponerror\":\"" //$NON-NLS-1$
+		);
+		sb.append(Boolean.toString(this.stopOnError));
+		sb.append("\",\n\"format\":\""); //$NON-NLS-1$
+		sb.append(this.format);
+		sb.append("\",\n\"algorithm\":\""); //$NON-NLS-1$
+		sb.append(this.algorithm);
+		sb.append(",\n\"Id\":\""); //$NON-NLS-1$
+		sb.append(this.id);
+		sb.append("\",\n"); //$NON-NLS-1$
+		sb.append("\n\"singlesigns\":[\n"); //$NON-NLS-1$
+		for (int i = 0 ; i < this.signs.size() ; i++) {
+			sb.append(this.signs.get(i).toString());
+			if (this.signs.size()-1 != i) {
+				sb.append(',');
+			}
+			sb.append('\n');
+		}
+		sb.append("]\n"); //$NON-NLS-1$
+		sb.append("}\n"); //$NON-NLS-1$
+		return sb.toString();
+	}
+
+	/**
+	 * Indica si el proceso por lote debe detenerse cuando se encuentre un error.
+	 * @param soe <code>true</code> si el proceso por lote debe detenerse cuando se encuentre un error,
+	 *            <code>false</code> si se debe continuar con el siguiente elemento del lote cuando se
+	 *            produzca un error.
+	 */
+	public void setStopOnError(final boolean soe) {
+		this.stopOnError = soe;
+	}
+
+	/**
+	 * Obtiene el <i>log</i> con el resultado del proceso del lote.
+	 * @return <i>Log</i> en formato JSON con el resultado del proceso del lote.
+	 * */
+	protected String getResultLog() {
+		// Iniciamos el log de retorno
+		final StringBuilder ret = new StringBuilder("{\"signs\":["); //$NON-NLS-1$
+		for (int i = 0; i < this.signs.size() ; i++) {
+			ret.append(printProcessResult(this.signs.get(i).getProcessResult()));
+			if (this.signs.size() - 1 != i) {
+				ret.append(","); //$NON-NLS-1$
+			}
+		}
+		ret.append("]}"); //$NON-NLS-1$
+		return ret.toString();
+	}
+
+	public static String printProcessResult(final ProcessResult result) {
+		String jsonText = "{\"id\":\"" + scapeText(result.getId()) + "\", \"result\":\"" + result.getResult() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (result.getDescription() != null) {
+			jsonText += ", \"description\":\"" + scapeText(result.getDescription()) + "\"";	 //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		jsonText += "}"; //$NON-NLS-1$
+		return jsonText;
+	}
+
+	private static String scapeText(final String text) {
+		return text == null ? null :
+			text.replace("\\", "\\\\").replace("\"", "\\\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	}
+
+	public String getExtraParams() {
+		return this.extraParams;
+	}
+
+	public void setExtraParams(final String extraParams) {
+		this.extraParams = extraParams;
+	}
+
 	String getId() {
 		return this.id;
 	}
+
 	void setId(final String i) {
 		if (i != null) {
 			this.id = i;
 		}
 	}
 
-	protected long concurrentTimeout = Long.MAX_VALUE;
-
-	/** Obtiene el algoritmo de firma.
-	 * @return Algoritmo de firma. */
+	/**
+	 * Obtiene el algoritmo de firma.
+	 * @return Algoritmo de firma.
+	 * */
 	public SingleSignConstants.SignAlgorithm getSignAlgorithm() {
 		return this.algorithm;
-	}
-
-	protected boolean stopOnError = false;
-
-	/** Crea un lote de firmas a partir de su definici&oacute;n XML.
-	 * @param xml XML de definici&oacute;n de lote de firmas (<a href="./doc-files/batch-scheme.html">descripci&oacute;n
-	 *            del formato</a>).
-	 * @throws IOException Si hay problemas en el tratamiento de datoso en el an&aacute;lisis del XML. */
-	protected SignBatch(final byte[] xml) throws IOException {
-
-		if (xml == null || xml.length < 1) {
-			throw new IllegalArgumentException(
-				"El XML de definicion de lote de firmas no puede ser nulo ni vacio" //$NON-NLS-1$
-			);
-		}
-
-		// ****************************************************
-		// *********** Carga del XML **************************
-		final Document doc;
-		try (InputStream is = new ByteArrayInputStream(xml)) {
-			try {
-				doc = SecurityUtils.getDocumentBuilder().parse(is);
-			}
-			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error al cargar el fichero XML de definicion de lote", e); //$NON-NLS-1$
-				if (LOGGER.isLoggable(Level.FINE)) {
-					LOGGER.fine("XML del lote:\n" + new String(xml)); //$NON-NLS-1$
-				}
-				throw new IOException("Error al cargar el fichero XML de definicion de lote", e); //$NON-NLS-1$
-			}
-		}
-		// *********** Fin carga del XML **********************
-		// ****************************************************
-
-		final Node signBatchNode = doc.getDocumentElement();
-		if (!"signbatch".equalsIgnoreCase(signBatchNode.getNodeName())) { //$NON-NLS-1$
-			throw new IllegalArgumentException("No se encontro el nodo 'signbatch' en el XML proporcionado"); //$NON-NLS-1$
-		}
-
-		// ****************************************************
-		// ****** Analisis opciones generales del XML *********
-		this.stopOnError = true;
-		final NamedNodeMap nnm = signBatchNode.getAttributes();
-		if (nnm != null) {
-			Node tmpNode = nnm.getNamedItem("stoponerror"); //$NON-NLS-1$
-			if (tmpNode != null) {
-				this.stopOnError = !"false".equalsIgnoreCase(tmpNode.getNodeValue()); //$NON-NLS-1$
-			}
-			tmpNode = nnm.getNamedItem("algorithm"); //$NON-NLS-1$
-			if (tmpNode != null) {
-				this.algorithm = SingleSignConstants.SignAlgorithm.getAlgorithm(tmpNode.getNodeValue());
-			}
-			else {
-				throw new IllegalArgumentException(
-					"El nodo 'signbatch' debe contener al manos el atributo de algoritmo" //$NON-NLS-1$
-				);
-			}
-			tmpNode = nnm.getNamedItem("concurrenttimeout"); //$NON-NLS-1$
-			if (tmpNode != null) {
-				try {
-					this.concurrentTimeout = Long.parseLong(tmpNode.getNodeValue());
-				}
-				catch(final Exception e) {
-					LOGGER.severe(
-						"Se ha especificado un valor invalido para la espera maxima (" + tmpNode.getNodeValue() + "), se usara el valor por defecto (" + Long.MAX_VALUE + "): " + e //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					);
-				}
-			}
-
-			this.id = UUID.randomUUID().toString();
-			tmpNode = nnm.getNamedItem("Id"); //$NON-NLS-1$
-			if (tmpNode != null) {
-				this.id = tmpNode.getNodeValue();
-			}
-		}
-		else {
-			throw new IllegalArgumentException(
-				"El nodo 'signbatch' debe contener al manos el atributo de algoritmo" //$NON-NLS-1$
-			);
-		}
-		// ****** Fin analisis opciones generales del XML *****
-		// ****************************************************
-
-		// ****************************************************
-		// ****** Analisis firmas individuales del XML ********
-		this.signs = parseSignBatchNode(signBatchNode);
-		// ****** Fin analisis firmas individuales del XML ****
-		// ****************************************************
-
-	}
-
-	protected SignBatch(final List<SingleSign> signatures,
-			            final SingleSignConstants.SignAlgorithm algo,
-			            final boolean soe) {
-
-		if (signatures == null) {
-			throw new IllegalArgumentException(
-				"La lista de firmas del lote no puede ser nula" //$NON-NLS-1$
-			);
-		}
-		if (algo == null) {
-			throw new IllegalArgumentException(
-				"El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
-			);
-		}
-		this.signs = signatures;
-		this.stopOnError = soe;
-		this.algorithm = algo;
-		this.id = UUID.randomUUID().toString();
-	}
-
-
-	/** Ejecuta el preproceso de firma por lote.
-	 * @param certChain Cadena de certificados del firmante.
-	 * @return Datos trif&aacute;sicos de pre-firma del lote.
-	 * @throws BatchException Si hay errores irrecuperables en el proceso. */
-	public abstract String doPreBatch(final X509Certificate[] certChain) throws BatchException;
-
-	/** Ejecuta el postproceso de firma por lote.
-	 * @param certChain Cadena de certificados del firmante.
-	 * @param td Datos trif&aacute;sicos del preproceso.
-	 *           Debe contener los datos de todas y cada una de las firmas del lote.
-	 * @return Registro del resultado general del proceso por lote, en un XML (<a href="../doc-files/resultlog-scheme.html">descripci&oacute;n
-	 *         del formato</a>).
-	 * @throws BatchException Si hay errores irrecuperables en el postproceso. */
-	public abstract String doPostBatch(final X509Certificate[] certChain,
-                                       final TriphaseData td) throws BatchException;
-
-	private static List<SingleSign> parseSignBatchNode(final Node n) throws DOMException, IOException {
-		final NodeList childNodes = n.getChildNodes();
-		final List<SingleSign> ret = new ArrayList<>();
-		int idx = nextNodeElementIndex(childNodes, 0);
-		while (idx != -1) {
-			ret.add(new SingleSign(childNodes.item(idx)));
-			idx = nextNodeElementIndex(childNodes, idx + 1);
-		}
-		return ret;
-	}
-
-	/** Recupera el &iacute;ndice del siguiente nodo de la lista de tipo <code>Element</code>.
-	 * Empieza a comprobar los nodos a partir del &iacute;ndice marcado. Si no encuentra un
-	 * nodo de tipo <i>elemento</i> devuelve -1.
-	 * @param nodes Listado de nodos.
-	 * @param currentIndex &Iacute;ndice del listado a partir del cual se empieza la comprobaci&oacute;n.
-	 * @return &Iacute;ndice del siguiente node de tipo Element o -1 si no se encontr&oacute;. */
-	private static int nextNodeElementIndex(final NodeList nodes, final int currentIndex) {
-		Node node;
-		int i = currentIndex;
-		while (i < nodes.getLength()) {
-			node = nodes.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				return i;
-			}
-			i++;
-		}
-		return -1;
-	}
-
-	/** Indica si el proceso por lote debe detenerse cuando se encuentre un error.
-	 * @param soe <code>true</code> si el proceso por lote debe detenerse cuando se encuentre un error,
-	 *            <code>false</code> si se debe continuar con el siguiente elemento del lote cuando se
-	 *            produzca un error. */
-	public void setStopOnError(final boolean soe) {
-		this.stopOnError = soe;
-	}
-
-	protected String getResultLog() {
-		// Iniciamos el log de retorno
-		final StringBuilder ret = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<signs>\n"); //$NON-NLS-1$
-		for (final SingleSign ss : this.signs) {
-			ret.append(" "); //$NON-NLS-1$
-			ret.append(ss.getProcessResult().toString());
-			ret.append("\n"); //$NON-NLS-1$
-		}
-		ret.append("</signs>"); //$NON-NLS-1$
-		return ret.toString();
 	}
 }

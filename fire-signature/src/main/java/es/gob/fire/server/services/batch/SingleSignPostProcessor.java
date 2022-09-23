@@ -10,7 +10,6 @@
 package es.gob.fire.server.services.batch;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -84,7 +83,7 @@ final class SingleSignPostProcessor {
 
 		Properties extraParams;
 		try {
-			extraParams = ExtraParamsProcessor.expandProperties(sSign.getExtraParams(), null, sSign.getSignFormat().name());
+			extraParams = ExtraParamsProcessor.expandProperties(sSign.getExtraParams(), null, sSign.getFormat().name());
 		}
 		catch (final IncompatiblePolicyException e) {
 			LOGGER.log(
@@ -102,7 +101,7 @@ final class SingleSignPostProcessor {
 					algorithm.toString(),
 					certChain,
 					extraParams,
-					td.toString().getBytes(StandardCharsets.UTF_8)
+					td
 				);
 				break;
 			case COSIGN:
@@ -111,7 +110,7 @@ final class SingleSignPostProcessor {
 					algorithm.toString(),
 					certChain,
 					extraParams,
-					td.toString().getBytes(StandardCharsets.UTF_8)
+					td
 				);
 				break;
 			case COUNTERSIGN:

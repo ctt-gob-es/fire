@@ -17,16 +17,15 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import es.gob.afirma.core.misc.Base64;
 
@@ -37,6 +36,11 @@ public class MiniAppletSuccessService extends HttpServlet {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 2487217258327717181L;
+
+	private static final String JSON_PARAM_ID = "id"; //$NON-NLS-1$
+	private static final String JSON_PARAM_RESULT = "result"; //$NON-NLS-1$
+	private static final String JSON_PARAM_DESCRIPTION = "description"; //$NON-NLS-1$
+	private static final String JSON_PARAM_SIGNS = "signs"; //$NON-NLS-1$
 
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletSuccessService.class.getName());
 
@@ -159,12 +163,16 @@ public class MiniAppletSuccessService extends HttpServlet {
 	 */
 	private static void updateBatchResult(final BatchResult batchResult, final String afirmaBatchResultB64, final  FireSession session) throws Exception {
 
-		final byte[] afirmaResultXml = Base64.decode(afirmaBatchResultB64);
-		final Document afirmaResultDoc = SecurityUtils.getDocumentBuilder().parse(
-				new ByteArrayInputStream(afirmaResultXml));
+		final byte[] afirmaResultJSON = Base64.decode(afirmaBatchResultB64);
+
+		JsonObject jsonObject = null;
+		try (ByteArrayInputStream bais = new ByteArrayInputStream(afirmaResultJSON);
+				JsonReader reader = Json.createReader(bais)) {
+				jsonObject = reader.readObject();
+		}
 
 		final Map<String, AfirmaSingleResult> afirmaResults = new HashMap<>();
-		parseAfirmaResult(afirmaResultDoc, afirmaResults);
+		parseAfirmaResult(jsonObject, afirmaResults);
 
 		final Iterator<String> it = batchResult.iterator();
 		while (it.hasNext()) {
@@ -182,23 +190,20 @@ public class MiniAppletSuccessService extends HttpServlet {
 	}
 
 	/**
-	 * Extrae de un XML resultado de la firma de un lote con el Cliente @firma el estado
+	 * Extrae de un JSON resultado de la firma de un lote con el Cliente @firma el estado
 	 * de cada una de las firmas del lote.
-	 * @param afirmaResultDoc &Aacute;rbol DOM con el resultado de las firmas.
+	 * @param jsonObjectResult JSON con el resultado de las firmas.
 	 * @param afirmaResults Mapa con los resultados de las firmas registrados por su ID de documento.
 	 */
-	private static void parseAfirmaResult(final Document afirmaResultDoc, final Map<String, AfirmaSingleResult> afirmaResults) {
-		final Element rootElement = afirmaResultDoc.getDocumentElement();
-		final NodeList signNodes = rootElement.getChildNodes();
-		for (int i = 0; i < signNodes.getLength(); i++) {
-			final Node signNode = signNodes.item(i);
-			if (signNode.getNodeType() == Node.ELEMENT_NODE && signNode.getNodeName().equals("signresult") && signNode.getAttributes().getNamedItem("id") != null) { //$NON-NLS-1$ //$NON-NLS-2$
-				final Node docIdNode = signNode.getAttributes().getNamedItem("id"); //$NON-NLS-1$
-				final Node resultNode = signNode.getAttributes().getNamedItem("result"); //$NON-NLS-1$
-				if (AfirmaResult.DONE_AND_SAVED.name().equals(resultNode.getNodeValue())) {
-					afirmaResults.put(docIdNode.getNodeValue(), AfirmaSingleResult.getAfirmaOkResult());
+	private static void parseAfirmaResult(final JsonObject jsonObjectResult, final Map<String, AfirmaSingleResult> afirmaResults) {
+		final JsonArray singleSignsArray = jsonObjectResult.getJsonArray(JSON_PARAM_SIGNS);
+		for (int i = 0; i < singleSignsArray.size(); i++) {
+			if (singleSignsArray.getJsonObject(i).containsKey(JSON_PARAM_ID)) {
+				if (AfirmaResult.DONE_AND_SAVED.name().equals(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_RESULT))) {
+					afirmaResults.put(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_ID), AfirmaSingleResult.getAfirmaOkResult());
 				} else {
-					afirmaResults.put(docIdNode.getNodeValue(), AfirmaSingleResult.getAfirmaErrorResult(resultNode.getNodeValue()));
+					afirmaResults.put(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_ID),
+										AfirmaSingleResult.getAfirmaErrorResult(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_DESCRIPTION)));
 				}
 			}
 		}

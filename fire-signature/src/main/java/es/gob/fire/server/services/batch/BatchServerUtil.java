@@ -32,17 +32,17 @@ final class BatchServerUtil {
 		);
 	}
 
-	static byte[] getSignBatchConfig(final String xmlAsUrlSafeBase64) throws IOException {
-		if (xmlAsUrlSafeBase64 == null) {
+	static byte[] getSignBatchConfig(final String jsonAsUrlSafeBase64) throws IOException {
+		if (jsonAsUrlSafeBase64 == null) {
 			throw new IllegalArgumentException(
 				"La definicion de lote no puede ser nula" //$NON-NLS-1$
 			);
 		}
-		final byte[] xml = Base64.isBase64(xmlAsUrlSafeBase64.getBytes()) ?
-			Base64.decode(unDoUrlSafe(xmlAsUrlSafeBase64)) :
-				xmlAsUrlSafeBase64.getBytes();
+		final byte[] json = Base64.isBase64(jsonAsUrlSafeBase64.getBytes()) ?
+			Base64.decode(unDoUrlSafe(jsonAsUrlSafeBase64)) :
+				jsonAsUrlSafeBase64.getBytes();
 
-		return xml;
+		return json;
 	}
 
 	static X509Certificate[] getCertificates(final String certListUrlSafeBase64) throws CertificateException,
@@ -72,5 +72,11 @@ final class BatchServerUtil {
 
 	private static String unDoUrlSafe(final String b64) {
 		return b64.replace("-", "+").replace("_", "/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	}
+
+	static TriphaseData getTriphaseDataFromJSON(final byte[] triphaseDataAsUrlSafeBase64) throws IOException {
+		return TriphaseDataParser.parseFromJSON(
+			Base64.decode(triphaseDataAsUrlSafeBase64, 0, triphaseDataAsUrlSafeBase64.length, true)
+		);
 	}
 }

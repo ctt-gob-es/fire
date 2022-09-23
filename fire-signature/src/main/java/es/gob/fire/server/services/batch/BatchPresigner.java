@@ -15,12 +15,11 @@ import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import es.gob.afirma.signers.xml.XmlDSigProviderHelper;
 
 
 /** Realiza la primera fase de un proceso de firma por lote.
@@ -31,7 +30,7 @@ public final class BatchPresigner extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(BatchPresigner.class.getName());
 
-	private static final String BATCH_XML_PARAM = "xml"; //$NON-NLS-1$
+	private static final String BATCH_JSON_PARAM = "json"; //$NON-NLS-1$
 	private static final String BATCH_CRT_PARAM = "certs"; //$NON-NLS-1$
 
 	private static final String CONFIG_PARAM_ALLOW_ORIGIN = "Access-Control-Allow-Origin"; //$NON-NLS-1$
@@ -39,28 +38,24 @@ public final class BatchPresigner extends HttpServlet {
 	/** Or&iacute;genes permitidos por defecto desde los que se pueden realizar peticiones al servicio. */
 	private static final String ALL_ORIGINS_ALLOWED = "*"; //$NON-NLS-1$
 
-	static {
-		// Configuramos el proveedor de firma XML
-    	XmlDSigProviderHelper.configureXmlDSigProvider();
-	}
 
 	/** Realiza la primera fase de un proceso de firma por lote.
-	 * Debe recibir la definici&oacute;n del lote en un XML (<a href="../doc-files/batch-scheme.html">descripci&oacute;n
+	 * Debe recibir la definici&oacute;n del lote en un JSON (<a href="../doc-files/batch-scheme.html">descripci&oacute;n
 	 * del formato</a>) convertido completamente
 	 * en Base64 y la cadena de certificados del firmante, convertidos a Base64 (puede ser
 	 * <i>URL Safe</i>) y separados por punto y coma (<code>;</code>).
-	 * Devuelve un XML de sesi&oacute;n trif&aacute;sica.
+	 * Devuelve un JSON de sesi&oacute;n trif&aacute;sica.
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
 	@Override
 	protected void service(final HttpServletRequest request,
 			               final HttpServletResponse response) throws ServletException,
 			                                                          IOException {
-		final String xml = request.getParameter(BATCH_XML_PARAM);
-		if (xml == null) {
-			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_XML_PARAM); //$NON-NLS-1$
+		final String json = request.getParameter(BATCH_JSON_PARAM);
+		if (json == null) {
+			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
 			response.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido una definicion de lote en el parametro " + BATCH_XML_PARAM //$NON-NLS-1$
+				"No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM //$NON-NLS-1$
 			);
 			return;
 		}
@@ -70,7 +65,7 @@ public final class BatchPresigner extends HttpServlet {
 
 		final SignBatch batch;
 		try {
-			final byte[] batchConfig = BatchServerUtil.getSignBatchConfig(xml);
+			final byte[] batchConfig = BatchServerUtil.getSignBatchConfig(json);
 			batch = new SignBatchSerial(batchConfig);
 		}
 		catch(final Exception e) {
@@ -105,7 +100,7 @@ public final class BatchPresigner extends HttpServlet {
 			return;
 		}
 
-		final String pre;
+		final JsonObject pre;
 		try {
 			pre = batch.doPreBatch(certs);
 		}
@@ -119,10 +114,11 @@ public final class BatchPresigner extends HttpServlet {
 		}
 
 		response.setHeader(CONFIG_PARAM_ALLOW_ORIGIN, ALL_ORIGINS_ALLOWED);
-		response.setContentType("text/xml;charset=UTF-8"); //$NON-NLS-1$
-		final PrintWriter writer = response.getWriter();
-		writer.write(pre);
-		writer.flush();
+		response.setContentType("application/json"); //$NON-NLS-1$
+		try (final PrintWriter writer = response.getWriter()) {
+			writer.write(pre.toString());
+			writer.flush();
+		}
 	}
 
 }
