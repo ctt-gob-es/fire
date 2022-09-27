@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.AOException;
+import es.gob.afirma.core.RuntimeConfigNeededException;
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.AOSignConstants;
@@ -341,6 +342,11 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 				LOGGER.fine("Se ha calculado el resultado de la prefirma y se devuelve"); //$NON-NLS-1$
 			}
+			catch (final RuntimeConfigNeededException e) {
+				LOGGER.log(Level.SEVERE, "Se requiere intervencion del usuario para la prefirma de los datos", e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.CONFIGURATION_NEEDED) + ": " + e); //$NON-NLS-1$
+				return;
+			}
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la prefirma: " + e, e); //$NON-NLS-1$
 				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_PRESIGNING) + ": " + e); //$NON-NLS-1$
@@ -441,6 +447,11 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 				default:
 					throw new AOException("No se reconoce el codigo de sub-operacion: " + subOperation); //$NON-NLS-1$
 				}
+			}
+			catch (final RuntimeConfigNeededException e) {
+				LOGGER.log(Level.SEVERE, "Se requiere intervencion del usuario para la postfirma de los datos", e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.CONFIGURATION_NEEDED) + ": " + e); //$NON-NLS-1$
+				return;
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error en la postfirma: " + e, e); //$NON-NLS-1$

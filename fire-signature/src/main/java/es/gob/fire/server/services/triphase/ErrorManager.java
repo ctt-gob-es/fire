@@ -31,6 +31,7 @@ final class ErrorManager {
 	public static final int INVALID_SESSION_DATA = 15;
 	public static final int ERROR_GENERATING_PKCS1_HMAC = 16;
 	public static final int ERROR_CHECKING_PKCS1_HMAC = 17;
+	public static final int CONFIGURATION_NEEDED = 18;
 
 	private static final Dictionary<Integer, String> errorMessages = new Hashtable<>();
 	static {
@@ -51,10 +52,19 @@ final class ErrorManager {
 		errorMessages.put(Integer.valueOf(INVALID_SESSION_DATA), "El formato de los datos de sesion suministrados es erroneo"); //$NON-NLS-1$
 		errorMessages.put(Integer.valueOf(ERROR_GENERATING_PKCS1_HMAC), "No se ha podido generar el codigo de verificacion del PKCS#1 generado"); //$NON-NLS-1$
 		errorMessages.put(Integer.valueOf(ERROR_CHECKING_PKCS1_HMAC), "El PKCS#1 se ha generado con un certificado distinto al esperado"); //$NON-NLS-1$
+		errorMessages.put(Integer.valueOf(CONFIGURATION_NEEDED), "Se requiere intervencion del usuario"); //$NON-NLS-1$
 	}
 
 	static String getErrorMessage(final int errNo) {
-		return "ERR-" + errNo + ": " + errorMessages.get(Integer.valueOf(errNo)); //$NON-NLS-1$ //$NON-NLS-2$
+		return getErrorPrefix(errNo) + ": " + errorMessages.get(Integer.valueOf(errNo)); //$NON-NLS-1$
+	}
+
+	static String getErrorMessage(final int errNo, final String code) {
+		return getErrorPrefix(errNo) + ":" + code + ": " + errorMessages.get(Integer.valueOf(errNo)); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	static String getErrorPrefix(final int errNo) {
+		return "ERR-" + Integer.toString(errNo); //$NON-NLS-1$
 	}
 
 }
