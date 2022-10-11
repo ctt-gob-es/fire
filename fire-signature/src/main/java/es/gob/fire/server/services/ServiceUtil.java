@@ -21,7 +21,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -262,13 +261,15 @@ public final class ServiceUtil {
 	 * @throws UnsupportedOperationException Cuando se configur&oacute; una operaci&oacute;n no soportada.
 	 */
 	public static void checkMultiSignatureCompatibility(final String format, final String cop) throws UnsupportedOperationException {
-		if(SignOperation.COSIGN.toString().equals(cop)
+		if (SignOperation.COSIGN.toString().equals(cop)
         		|| SignOperation.COUNTERSIGN.toString().equals(cop)) {
-	        if(SignatureFormat.FACTURAE.toString().equals(format)) {
+	        if (SignatureFormat.FACTURAE.toString().equals(format)) {
 	        	throw new UnsupportedOperationException("No se permiten multifirmas para el formato FacturaE"); //$NON-NLS-1$
-	        }else if (SignatureFormat.XADES_ASIC_S.toString().equals(format)
+	        } else if (SignatureFormat.XADES_ASIC_S.toString().equals(format)
 	        		|| SignatureFormat.CADES_ASIC_S.toString().equals(format)) {
 	        	throw new UnsupportedOperationException("Operacion no soportada para el formato seleccionado"); //$NON-NLS-1$
+	        } else if (SignOperation.COUNTERSIGN.toString().equals(cop) && SignatureFormat.PADES.toString().equals(format)) {
+	        	throw new UnsupportedOperationException("El formato PDF no permite contrafirmas"); //$NON-NLS-1$
 	        }
 		}
 	}

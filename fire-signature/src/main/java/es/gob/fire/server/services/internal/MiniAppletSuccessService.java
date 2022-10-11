@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.Base64;
 
 /**
@@ -95,7 +96,7 @@ public class MiniAppletSuccessService extends HttpServlet {
     		return;
     	}
 		final String redirectUrl = connConfig.getRedirectSuccessUrl();
-		redirectErrorUrl = connConfig.getRedirectSuccessUrl();
+		redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
 		// Agregamos el certificado en caso de haberlo recibido. Para el proceso de firma simple,
 		// sera obligatorio ya que se requerira para completar la firma
@@ -108,11 +109,17 @@ public class MiniAppletSuccessService extends HttpServlet {
     	// en la sesion
         if (Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_IS_BATCH_OPERATION))) {
         	final String afirmaBatchResultB64 = request.getParameter(ServiceParams.HTTP_PARAM_AFIRMA_BATCH_RESULT);
+        	final boolean stopOnError = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
         	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
 
         	// Actualizamos el resultado del lote con el resultado reportado por el Cliente @firma
         	try {
-        		updateBatchResult(batchResult, afirmaBatchResultB64, session);
+        		updateBatchResult(batchResult, afirmaBatchResultB64, stopOnError, session);
+        	} catch (final AOException e) {
+        		LOGGER.log(Level.WARNING, logF.f("Fallo alguna de las firmas del lote y se aborta la operacion como se habia solicitado"), e); //$NON-NLS-1$
+        		ErrorManager.setErrorToSession(session, OperationError.SIGN_LOCAL_BATCH, true, null);
+        		redirectToExternalUrl(redirectErrorUrl, request, response);
+        		return;
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error al procesar el resultado de la firma de lote del Cliente @firma"), e); //$NON-NLS-1$
         		ErrorManager.setErrorToSession(session, OperationError.SIGN_LOCAL_BATCH, true, null);
@@ -156,12 +163,17 @@ public class MiniAppletSuccessService extends HttpServlet {
 	 * @param batchResult Resultado parcial de la firma del lote.
 	 * @param afirmaBatchResultB64 Resultado obtenido del Cliente @firma al finalizar la firma
 	 * 		  del lote.
+	 * @param stopOnError {@code true} si se debe abortar la ejecuci&oacute;n en caso de error,
+	 * 		  {@code false} en caso contrario.
 	 * @param session Sesi&oacute;n de la transacci&oacute;n de firma para el registro de
 	 * 		  estad&iacute;sticas.
-	 * @throws Exception Cuando ocurre alg&uacute;n error al procesar el resultado devuelto por
+	 * @throws AOException Cuando se aborta la operaci&oacute;n al encontrar errores cuando estos
+	 * 		  no se permiten.
+	 * @throws IOException Cuando ocurre alg&uacute;n error al procesar el resultado devuelto por
 	 * 		   el Cliente @firma.
 	 */
-	private static void updateBatchResult(final BatchResult batchResult, final String afirmaBatchResultB64, final  FireSession session) throws Exception {
+	private static void updateBatchResult(final BatchResult batchResult, final String afirmaBatchResultB64, final boolean stopOnError,
+			final FireSession session) throws AOException, IOException {
 
 		final byte[] afirmaResultJSON = Base64.decode(afirmaBatchResultB64);
 
@@ -181,6 +193,9 @@ public class MiniAppletSuccessService extends HttpServlet {
 			if (asr != null) {
 				if (asr.isOk()) {
 					batchResult.setSuccessResult(docId);
+				}
+				else if (stopOnError) {
+					throw new AOException("Error en una de las operaciones del lote: " + asr.getError()); //$NON-NLS-1$
 				}
 				else {
 					batchResult.setErrorResult(docId, translateAfirmaError(asr.getError()));
@@ -202,8 +217,9 @@ public class MiniAppletSuccessService extends HttpServlet {
 				if (AfirmaResult.DONE_AND_SAVED.name().equals(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_RESULT))) {
 					afirmaResults.put(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_ID), AfirmaSingleResult.getAfirmaOkResult());
 				} else {
+					final String description = singleSignsArray.getJsonObject(i).getString(JSON_PARAM_DESCRIPTION, "Error desconocido"); //$NON-NLS-1$
 					afirmaResults.put(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_ID),
-										AfirmaSingleResult.getAfirmaErrorResult(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_DESCRIPTION)));
+							AfirmaSingleResult.getAfirmaErrorResult(description));
 				}
 			}
 		}

@@ -375,7 +375,7 @@
 				}
 				else {
 					app = "AutoFirma";
-					appVersion = "AutoFirma 1.6.5 o superior";
+					appVersion = "AutoFirma 1.8 o superior";
 					href = "http://firmaelectronica.gob.es/Home/Descargas";
 				}
 
