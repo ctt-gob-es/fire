@@ -17,14 +17,21 @@
  */
 package es.gob.fire.upgrade.afirma.ws;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -42,22 +49,27 @@ import org.apache.axis2.transport.http.HTTPConstants;
 public class WebServiceInvoker {
 
 	/**
-	 * Attribute that represents the object that manages the log of the class.
+	 * Object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(WebServiceInvoker.class.getName());
 
 	/**
-	 * Constant attribute that identifier the security Axis2 phase.
+	 * Security Axis2 phase name.
 	 */
 	private static final String PHASE_NAME_SECURITY = "Security"; //$NON-NLS-1$
 
 	/**
-	 * Attribute that represents the properties defined on the configuration file.
+	 * Properties defined on the configuration file.
 	 */
 	private final WebServiceInvokerConfig config;
 
 	/**
-	 * Attribute that represents the list of handlers added to the Axis engine.
+	 * Certificate used to sign the WebServices response.
+	 */
+	private X509Certificate signingCert;
+
+	/**
+	 * List of handlers added to the Axis engine.
 	 */
 	private static List<String> handlerAdded = new ArrayList<>();
 
@@ -67,6 +79,50 @@ public class WebServiceInvoker {
 	 */
 	public WebServiceInvoker(final WebServiceInvokerConfig config) {
 		this.config = config;
+
+		final String tsPath = this.config.getSigningCertStorePath();
+		final String tsPass = this.config.getSigningCertStorePass();
+		final String tsType = this.config.getSigningCertStoreType();
+		final String tsAlias = this.config.getSigningCertAlias();
+		if (tsPath == null || tsPass == null || tsType == null || tsAlias == null) {
+			LOGGER.fine("No se creara manejador para las respuestas firmadas."); //$NON-NLS-1$
+		}
+		else {
+			LOGGER.fine("Configurando el manejador para las respuestas firmadas.\nAlmac\u00E9n de certificados [" //$NON-NLS-1$
+				+ tsPath + "]. Tipo [" + tsType + "]. Alias de certificado [" + tsAlias + "]."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			try {
+				this.signingCert = loadCert(tsPath, tsPass, tsType, tsAlias);
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "No se ha podido cargar el certificado para la validacion de las respuestas del servicio @firma", e); //$NON-NLS-1$
+			}
+		}
+	}
+
+
+	/**
+	 * Cargar un certificado.
+	 * @param signingCertStorePath Ruta del almac&eacute;n de confianza.
+	 * @param signingCertStorePass Contrase&ntilde;a del almac&eacute;n de confianza.
+	 * @param signingCertStoreType Tipo de almac&eacute;n de confianza.
+	 * @param signingCertAlias Alias del certificado con el que debe estar firmada la respuesta.
+	 * @throws AxisFault Cuando no se puede cargar el certificado para la validaci&oacute;n de la
+	 * respuesta.
+	 */
+	private static X509Certificate loadCert(final String signingCertStorePath, final String signingCertStorePass, final String signingCertStoreType, final String signingCertAlias) throws AxisFault {
+
+		X509Certificate cert;
+		try (InputStream is = new FileInputStream(signingCertStorePath);) {
+			final KeyStore ks = KeyStore.getInstance(signingCertStoreType);
+			ks.load(is, signingCertStorePass.toCharArray());
+			cert = (X509Certificate) ks.getCertificate(signingCertAlias);
+			if (cert == null) {
+				throw new KeyStoreException("No se ha encontrado en el almacen de certificados"); //$NON-NLS-1$
+			}
+		}
+		catch (final Exception e) {
+			throw new AxisFault("Error al recuperar el certificado", e); //$NON-NLS-1$
+		}
+		return cert;
 	}
 
 	/**
@@ -90,7 +146,7 @@ public class WebServiceInvoker {
 
 			final String securityOption = this.config.getAuthMethod();
 			final ClientHandler requestHandler = newRequestHandler(securityOption);
-			final ResponseHandler responseHandler = newResponseHandler();
+			final ResponseHandler responseHandler = new ResponseHandler(this.signingCert);
 
 			LOGGER.fine("Metodo a invocar: " + method); //$NON-NLS-1$
 
@@ -289,24 +345,6 @@ public class WebServiceInvoker {
 		}
 
 		return sender;
-	}
-
-	/**
-	 * Method that creates a new instance of {@link ResponseHandler}.
-	 * @return the created instance of {@link ResponseHandler}.
-	 */
-	private ResponseHandler newResponseHandler() {
-		final String tsPath = this.config.getSigningCertStorePath();
-		final String tsPass = this.config.getSigningCertStorePass();
-		final String tsType = this.config.getSigningCertStoreType();
-		final String tsAlias = this.config.getSigningCertAlias();
-		if (tsPath == null || tsPass == null || tsType == null || tsAlias == null) {
-			LOGGER.fine("No se creara manejador para las respuestas firmadas."); //$NON-NLS-1$
-			return null;
-		}
-		LOGGER.fine("Configurando el manejador para las respuestas firmadas.\nAlmac\u00E9n de certificados [" //$NON-NLS-1$
-				+ tsPath + "]. Tipo [" + tsType + "]. Alias de certificado [" + tsAlias + "]."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		return new ResponseHandler(tsPath, tsPass, tsType, tsAlias);
 	}
 
 	/**

@@ -17,10 +17,6 @@
  */
 package es.gob.fire.upgrade.afirma.ws;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Logger;
 
@@ -28,6 +24,7 @@ import javax.xml.crypto.dsig.XMLSignature;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.saaj.util.SAAJUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,7 +33,7 @@ import org.w3c.dom.NodeList;
 /**
  * <p>Class that represents handler used to verify the signature response.</p>
  */
-public class ResponseHandler extends AbstractCommonHandler {
+public class ResponseHandler extends AbstractHandler {
 
 	/**
 	 * Attribute that represents the object that manages the log of the class.
@@ -51,28 +48,16 @@ public class ResponseHandler extends AbstractCommonHandler {
 	 */
 	private static final String HANDLER_NAME = "responseHandlerWs"; //$NON-NLS-1$
 
-	/**
-	 * Constructor method for the class.
-	 */
-	public ResponseHandler() {
-		this.handlerDesc.setName(HANDLER_NAME);
-		this.handlerDesc.getRules().setPhaseLast(true);
-	}
+	private final X509Certificate signingCert;
 
 	/**
 	 * Constructor method for the class ResponseHandler.java.
-	 * @param signingCertStorePath Ruta del almac&eacute;n de confianza.
-	 * @param signingCertStorePass Contrase&ntilde;a del almac&eacute;n de confianza.
-	 * @param signingCertStoreType Tipo de almac&eacute;n de confianza.
-	 * @param signingCertAlias Alias del certificado con el que debe estar firmada la respuesta.
+	 * @param signingCert Certificado para la validaci&oacute;n de la respuesta.
 	 */
-	public ResponseHandler(final String signingCertStorePath, final String signingCertStorePass, final String signingCertStoreType, final String signingCertAlias) {
+	public ResponseHandler(final X509Certificate signingCert) {
 		this.handlerDesc.setName(HANDLER_NAME);
 		this.handlerDesc.getRules().setPhaseLast(true);
-		setKeystore(signingCertStorePath);
-		setKeystorePass(signingCertStorePass);
-		setKeystoreType(signingCertStoreType);
-		setUserAlias(signingCertAlias);
+		this.signingCert = signingCert;
 	}
 
 	/**
@@ -101,14 +86,13 @@ public class ResponseHandler extends AbstractCommonHandler {
 				// para que durante la validacion se pueda identificar estos nodos
 				IdRegister.registerElements(doc.getDocumentElement());
 
-				// Obtenemos el certificado con el que debe haberse firmado la respuesta
-				final X509Certificate signingCert = loadSigningCert();
-				if (signingCert != null) {
-					if (signature.checkSignatureValue(signingCert)) {
+				// Comprobamos que la respuesta se haya firmado con el certificado necesario
+				if (this.signingCert != null) {
+					if (signature.checkSignatureValue(this.signingCert)) {
 						LOGGER.fine("La firma de la respuesta es valida"); //$NON-NLS-1$
 					} else {
 						throw new AxisFault("La firma de la respuesta del servicio web de @Firma no es valida segun certificado: " //$NON-NLS-1$
-								+ signingCert.getSubjectDN() + "  - Numero de serie: " + signingCert.getSerialNumber()); //$NON-NLS-1$
+								+ this.signingCert.getSubjectDN() + "  - Numero de serie: " + this.signingCert.getSerialNumber()); //$NON-NLS-1$
 					}
 				}
 			} else {
@@ -118,22 +102,5 @@ public class ResponseHandler extends AbstractCommonHandler {
 			throw AxisFault.makeFault(e);
 		}
 		return InvocationResponse.CONTINUE;
-	}
-
-	private X509Certificate loadSigningCert() throws AxisFault {
-
-		X509Certificate cert;
-		try (InputStream is = new FileInputStream(getKeystore());) {
-			final KeyStore ks = KeyStore.getInstance(getKeystoreType());
-			ks.load(is, getKeystorePass().toCharArray());
-			cert = (X509Certificate) ks.getCertificate(getUserAlias());
-			if (cert == null) {
-				throw new KeyStoreException("No se ha encontrado en el almacen el certificado con el que debia firmarse la respuesta"); //$NON-NLS-1$
-			}
-		}
-		catch (final Exception e) {
-			throw new AxisFault("Error al recuperar el certificado con el que debia firmarse la respuesta", e); //$NON-NLS-1$
-		}
-		return cert;
 	}
 }
