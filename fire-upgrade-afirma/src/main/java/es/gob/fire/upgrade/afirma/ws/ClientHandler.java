@@ -260,53 +260,32 @@ class ClientHandler extends AbstractCommonHandler {
 	 */
 	private SOAPMessage createBinarySecurityToken(final Document soapEnvelopeRequest) throws TransformerException, IOException, SOAPException, WSSecurityException {
 
-		SOAPMessage res;
+		// Insercion del tag wsse:Security y BinarySecurityToken
+		final WSSecHeader wsSecHeader = new WSSecHeader(null, false);
+		final WSSecSignature wsSecSignature = new WSSecSignature();
+		final Crypto crypto = getCryptoInstance();
 
-		// Eliminamos el provider ApacheXMLDSig de la lista de provider para que
-		// no haya conflictos con el nuestro.
-		final Provider apacheXMLDSigProvider = Security.getProvider("ApacheXMLDSig"); //$NON-NLS-1$
-		Security.removeProvider("ApacheXMLDSig"); //$NON-NLS-1$
+		// Indicacion para que inserte el tag BinarySecurityToken
+		wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
+		wsSecSignature.setUserInfo(getUserAlias(), getPassword());
+		wsSecHeader.insertSecurityHeader(soapEnvelopeRequest);
+		wsSecSignature.prepare(soapEnvelopeRequest, crypto, wsSecHeader);
 
-		try {
-			// Insercion del tag wsse:Security y BinarySecurityToken
-			final WSSecHeader wsSecHeader = new WSSecHeader(null, false);
-			final WSSecSignature wsSecSignature = new WSSecSignature();
-			final Crypto crypto = getCryptoInstance();
+		// Modificacion y firma de la peticion
+		final Document secSOAPReqDoc = wsSecSignature.build(soapEnvelopeRequest, crypto, wsSecHeader);
+		final Element element = secSOAPReqDoc.getDocumentElement();
 
-			// Indicacion para que inserte el tag BinarySecurityToken
-			wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
-			wsSecSignature.setUserInfo(getUserAlias(), getPassword());
-			wsSecHeader.insertSecurityHeader(soapEnvelopeRequest);
-			wsSecSignature.prepare(soapEnvelopeRequest, crypto, wsSecHeader);
+		// Transformacion del elemento DOM a String
+		final DOMSource source = new DOMSource(element);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final StreamResult streamResult = new StreamResult(baos);
+		SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
+		final String secSOAPReq = new String(baos.toByteArray());
 
-			// Modificacion y firma de la peticion
-			final Document secSOAPReqDoc = wsSecSignature.build(soapEnvelopeRequest, crypto, wsSecHeader);
-			final Element element = secSOAPReqDoc.getDocumentElement();
-
-			// Transformacion del elemento DOM a String
-			final DOMSource source = new DOMSource(element);
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			final StreamResult streamResult = new StreamResult(baos);
-			SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
-			final String secSOAPReq = new String(baos.toByteArray());
-
-			// Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP
-			// securizado formado
-			final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
-			res = mf.createMessage(null, new ByteArrayInputStream(secSOAPReq.getBytes()));
-
-		} finally {
-			// Eliminamos de nuevo el provider por si se ha anadido otra
-			// version durante la generacion de la peticion.
-			Security.removeProvider("ApacheXMLDSig"); //$NON-NLS-1$
-
-			// Restauramos el provider ApacheXMLDSig eliminado inicialmente.
-			if (apacheXMLDSigProvider != null) {
-				// Anadimos el provider.
-				Security.insertProviderAt(apacheXMLDSigProvider, 1);
-			}
-		}
-		return res;
+		// Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP
+		// securizado formado
+		final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
+		return mf.createMessage(null, new ByteArrayInputStream(secSOAPReq.getBytes()));
 	}
 
 	/**
