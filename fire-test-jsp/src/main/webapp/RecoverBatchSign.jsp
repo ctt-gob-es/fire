@@ -42,13 +42,6 @@
 				return;
 			}
 		
-		String var = System.getProperty("com.sun.org.apache.xml.internal.security.lineFeedOnly"); //$NON-NLS-1$
-		LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
-				"Variable 'com.sun.org.apache.xml.internal.security.lineFeedOnly': {}", var); //$NON-NLS-1$
-		var =  System.getProperty("org.apache.xml.security.ignoreLineBreaks"); //$NON-NLS-1$
-		LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
-				"Variable 'org.apache.xml.security.ignoreLineBreaks': {}",var); //$NON-NLS-1$
-		
 		    byte[] signature = null;
 		    try {
 		    	signature = BatchHelper.recoverBatchSign(request);

@@ -131,14 +131,12 @@
 						<legend>Post-proceso de la firma: </legend>
 							<input id="none-ft" type="radio" name="upgrade" value="" checked="checked" disabled='disabled'/>
 								<label for="none-ft" >Ninguno</label><br>
-							<input id="es-a-ft" type="radio" name="upgrade" value="ES-A" disabled='disabled'/>
-								<label for="es-a-ft" >Actualizar a ES-A</label><br>
-							<input id="es-t-ft" type="radio" name="upgrade" value="ES-T" disabled='disabled'/>
-								<label for="es-t-ft">Actualizar a ES-T</label><br>
 							<input id="t-level-ft" type="radio" name="upgrade" value="T-Level" disabled='disabled'/>
 								<label for="t-level-ft">Actualizar a T-Level</label><br>
-							<input id="es-ltv-ft" type="radio" name="upgrade" value="ES-LTV" disabled='disabled'/>
-								<label for="es-ltv-ft">Actualizar a ES-LTV</label><br>
+							<input id="t-level-ft" type="radio" name="upgrade" value="LT-Level" disabled='disabled'/>
+								<label for="t-level-ft">Actualizar a LT-Level</label><br>
+								<input id="t-level-ft" type="radio" name="upgrade" value="LTA-Level" disabled='disabled'/>
+								<label for="t-level-ft">Actualizar a LTA-Level</label><br>
 							<input id="upgrade-verify" type="radio" name="upgrade" value="verify" disabled='disabled'/>
 								<label for="upgrade-verify">Validar</label><br>
 				   	</fieldset>
