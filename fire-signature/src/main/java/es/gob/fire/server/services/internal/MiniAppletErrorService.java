@@ -47,10 +47,10 @@ public class MiniAppletErrorService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de error de firma con certificado local")); //$NON-NLS-1$
 
-        final String userId = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+        final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 
         String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-        if (redirectErrorUrl != null && !redirectErrorUrl.isEmpty()) {
+        if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado la URL de redireccion de error")); //$NON-NLS-1$
             SessionCollector.removeSession(transactionId);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -61,7 +61,7 @@ public class MiniAppletErrorService extends HttpServlet {
 		//final String errorType = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_TYPE);
 		final String errorMessage = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_MESSAGE);
 
-		final FireSession session = SessionCollector.getFireSession(transactionId, userId, request.getSession(false), true, false);
+		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), true, false);
 		if (session == null) {
 			LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId);
