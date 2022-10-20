@@ -60,11 +60,6 @@
 			<artifactId>json</artifactId>
 			<version>20180130</version>
 		</dependency>
-		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-text</artifactId>
-		    <version>1.8</version>
-		</dependency>
 		
 		<!-- Driver de base de datos -->
 		<dependency>
