@@ -18,7 +18,6 @@
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 
-		<!-- <jdk.version>1.7</jdk.version> -->
 		<jdk.version>1.8</jdk.version>
 		
 		<fire.version>2.4-SNAPSHOT</fire.version>
@@ -548,23 +547,10 @@
 	</build>
 	
 	<!-- CONFIGURACIÓN REPOSITORIOS MAVEN: JBOSS Y MAVEN CENTRAL -->
+<!--
 	<repositories>
-		
+	
 		<repository>
-			<id>Maven-Central-Repository</id>
-			<name>Maven Central Repository</name>
-			<url>http://central.maven.org/maven2/</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
-			</snapshots>
-		</repository>
-		
-	<!--	<repository>
 			<id>jboss-public-repository-group</id>
 			<name>JBoss Public Maven Repository Group</name>
 			<url>http://repository.jboss.org/nexus/content/groups/public</url>
@@ -576,9 +562,10 @@
 				<enabled>false</enabled>
 				<updatePolicy>never</updatePolicy>
 			</snapshots>
-		</repository>-->
-		
+		</repository>
+
 	</repositories>
+-->
 	<!-- <pluginRepositories>
 		<pluginRepository>
 			<id>jboss-public-repository-group</id>

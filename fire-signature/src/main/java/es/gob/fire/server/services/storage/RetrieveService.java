@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
+import es.gob.fire.signature.ConfigManager;
 
 /** Servicio de almacenamiento temporal de firmas. &Uacute;til para servir de intermediario en comunicaci&oacute;n
  * entre JavaScript y <i>Apps</i> m&oacute;viles nativas.
@@ -43,6 +44,13 @@ public final class RetrieveService extends HttpServlet {
 	private static final String PARAMETER_NAME_SYNTAX_VERSION = "v"; //$NON-NLS-1$
 
 	private static final String OPERATION_RETRIEVE = "get"; //$NON-NLS-1$
+
+	private static final boolean HIGH_AVAILABILITY_ENABLED;
+
+	static {
+		final String sessionsDao = ConfigManager.getSessionsDao();
+		HIGH_AVAILABILITY_ENABLED = sessionsDao != null && !sessionsDao.trim().isEmpty();
+	}
 
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
@@ -89,24 +97,64 @@ public final class RetrieveService extends HttpServlet {
 	private static void retrieveSign(final HttpServletResponse response,
 			final HttpServletRequest request, final String id) throws IOException {
 
-		LOGGER.fine("Se solicita el documento con el identificador: " + LogUtils.cleanText(id)); //$NON-NLS-1$
+		LOGGER.info("Se solicita cargar el documento con identificador " + LogUtils.cleanText(id));
 
-		// Si el documento no existe, lo indicamos asi
-		if (!TempDocumentsManager.existDocument(id)) {
-			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + id + "')"); //$NON-NLS-1$ //$NON-NLS-2$
-			return;
+		// Tratamos de cargar los datos de la cache en memoria
+		byte[] data = ClienteAfirmaCache.recoverData(id);
+
+
+
+
+		// XXX: Borrar - INICIO
+		if (data != null) {
+			LOGGER.info(" ==== Se cargo de memoria el documento con identificador " + LogUtils.cleanText(id));
+		} else {
+			LOGGER.info(" ==== No se encontro en memoria el documento con identificador " + LogUtils.cleanText(id));
+		}
+		// XXX: Borrar - FIN
+
+
+
+
+		// Si no se encuentran los datos, comprobamos si estamos en modo alta disponibilidad
+		// y se encuentran en el almacen comun. Si tampoco, se indica que no se
+		// encuentran
+		if (data == null) {
+
+			if (HIGH_AVAILABILITY_ENABLED && TempDocumentsManager.existDocument(id)) {
+				try {
+					data = TempDocumentsManager.retrieveAndDeleteDocument(id);
+				}
+				catch (final Exception e) {
+					LOGGER.log(Level.SEVERE, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA), e);
+					sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
+					return;
+				}
+
+
+
+				// XXX: Borrar - INICIO
+				if (data != null) {
+					LOGGER.info(" ==== Se cargo del almacenamiento compartido el documento con identificador " + LogUtils.cleanText(id));
+				} else {
+					LOGGER.info(" ==== No se cargo del almacenamiento compartido el documento con identificador " + LogUtils.cleanText(id));
+				}
+				// XXX: Borrar - FIN
+
+
+
+			}
+			else {
+				sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + id + "')"); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
+			}
+		}
+		// Si hemos recuperado los datos de memoria, pero estamos en modo alta disponibilidad,
+		// al menos eliminamos los datos del almacen comun
+		else if (HIGH_AVAILABILITY_ENABLED) {
+			new DeleteSharedFileThread(id).start();
 		}
 
-		// Recuperamos y eliminamos el documento
-		byte[] data;
-		try {
-			data = TempDocumentsManager.retrieveAndDeleteDocument(id);
-		}
-		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA), e);
-			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
-			return;
-		}
 		sendResult(response, data);
 	}
 
@@ -125,6 +173,33 @@ public final class RetrieveService extends HttpServlet {
     	try (OutputStream os = response.getOutputStream()) {
     		os.write(data);
     		os.flush();
+    	}
+    }
+
+    /**
+     * Hilo para la eliminaci&oacute;n de datos en el almacen com&uacute;n.
+     */
+    static class DeleteSharedFileThread extends Thread {
+
+    	private final String docId;
+
+    	/**
+    	 * Crea el objeto para la eliminaci&oacute;n de un documento del almac&eacute;n temporal.
+    	 * @param docId Identificador del documento a eliminar.
+    	 */
+    	public DeleteSharedFileThread(final String docId) {
+    		this.docId = docId;
+		}
+
+    	@Override
+    	public void run() {
+    		super.run();
+    		try {
+				TempDocumentsManager.deleteDocument(this.docId);
+			} catch (final IOException e) {
+				Logger.getLogger(RetrieveService.class.getName()).warning("No se pudo eliminar el fichero " //$NON-NLS-1$
+						+ this.docId + " de comunicacion con el Cliente Afirma del almacen comun: " + e); //$NON-NLS-1$
+			}
     	}
     }
 }

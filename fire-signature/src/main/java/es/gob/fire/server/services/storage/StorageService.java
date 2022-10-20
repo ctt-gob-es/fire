@@ -21,8 +21,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
+import es.gob.fire.signature.ConfigManager;
 
 
 /** Servicio de almacenamiento temporal de firmas. &Uacute;til para servir de intermediario en comunicaci&oacute;n
@@ -52,6 +54,13 @@ public final class StorageService extends HttpServlet {
 
 	private static final String OPERATION_STORE = "put"; //$NON-NLS-1$
 	private static final String SUCCESS = "OK"; //$NON-NLS-1$
+
+	private static final boolean HIGH_AVAILABILITY_ENABLED;
+
+	static {
+		final String sessionsDao = ConfigManager.getSessionsDao();
+		HIGH_AVAILABILITY_ENABLED = sessionsDao != null && !sessionsDao.trim().isEmpty();
+	}
 
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
@@ -102,7 +111,7 @@ public final class StorageService extends HttpServlet {
 	 * @throws IOException Cuando ocurre un error al general la respuesta. */
 	private static void storeSign(final PrintWriter out, final String id, final String operation, final Map<String, String> params) throws IOException {
 
-		LOGGER.fine("Se solicita guardar un fichero con el identificador: " + id); //$NON-NLS-1$
+		LOGGER.info("Se solicita guardar un documento con el identificador: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
 		// Si no se indican los datos, se transmite el error en texto plano a traves del fichero generado
 		String dataText = URLDecoder.decode(params.get(PARAMETER_NAME_DATA), DEFAULT_ENCODING);
@@ -115,12 +124,39 @@ public final class StorageService extends HttpServlet {
 			dataText = ErrorManager.genError(ErrorManager.ERROR_UNSUPPORTED_OPERATION_NAME);
 		}
 
-		try {
-			TempDocumentsManager.storeDocument(id, dataText.getBytes(), true);
-		} catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Error al guardar el temporal para la comunicacion con el Cliente @firma", e); //$NON-NLS-1$
-			out.println(ErrorManager.genError(ErrorManager.ERROR_COMMUNICATING_WITH_WEB));
-			return;
+		final byte[] data = dataText.getBytes();
+
+		// Tratamos de guardar los datos en la cache en memoria
+		ClienteAfirmaCache.saveData(id, data);
+
+
+
+
+		//XXX: Borrar - INICIO
+		LOGGER.info(" ==== Se guardo en memoria el documento con identificador: " + LogUtils.cleanText(id));
+		//XXX: Borrar - FIN
+
+
+
+
+		// Si estamos en modo alta disponibilidad, tambien almacenamos los datos en el almacen comun
+		if (HIGH_AVAILABILITY_ENABLED) {
+			try {
+				TempDocumentsManager.storeDocument(id, dataText.getBytes(), true);
+			} catch (final IOException e) {
+				LOGGER.log(Level.SEVERE, "Error al guardar el temporal para la comunicacion con el Cliente @firma", e); //$NON-NLS-1$
+				out.println(ErrorManager.genError(ErrorManager.ERROR_COMMUNICATING_WITH_WEB));
+				return;
+			}
+
+
+
+			//XXX: Borrar - INICIO
+			LOGGER.info(" ==== Se guardo en almacenamiento compartido el documento con identificador: " + LogUtils.cleanText(id));
+			//XXX: Borrar - FIN
+
+
+
 		}
 
 		out.print(SUCCESS);

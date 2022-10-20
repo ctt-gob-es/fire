@@ -39,6 +39,8 @@ public class ProviderManager {
 	/** Nombre del proveedor local. */
 	public static final String PROVIDER_NAME_LOCAL = "local"; //$NON-NLS-1$
 
+	private static Map<String, Properties> providersConfig = new HashMap<>();
+
 	/**
 	 * Obtenemos el conector necesario para operar con un proveedor de firma en la nube.
 	 * @param providerName Nombre del proveedor.
@@ -156,8 +158,6 @@ public class ProviderManager {
 		return new ProviderInfo(providerName, infoProperties);
 	}
 
-	private static Map<String, Properties> providersConfig = new HashMap<>();
-
 	/**
 	 * Carga la configuraci&oacute;n de un proveedor, de cache si ya la hab&iacute;a
 	 * cargado anteriormente o de fichero si no.
@@ -221,12 +221,10 @@ public class ProviderManager {
 	}
 
 	/**
-	 * Carga el fichero de propiedades del proveedor en el que se encuentra
-	 * la informaci&oacute;n de configuraci&oacute;n interna. Este fichero
-	 * puede indicarse externamente o, si no, se cargar&aacute; el fichero
-	 * interno. El fichero interno debe tener el nombre determinado por
-	 * {@link #PROVIDER_INFO_FILE} y encontrarse en el mismo paquete que la
-	 * clase conectora.
+	 * Carga el fichero de propiedades en el que se encuentra la configuraci&oacute;n interna del
+	 * conector. Este fichero puede indicarse externamente o, si no, se cargar&aacute; el fichero
+	 * interno. El fichero interno debe tener el nombre determinado por {@link #PROVIDER_INFO_FILE}
+	 * y encontrarse en el mismo paquete que la clase conectora.
 	 * @param classname Clase conectora del proveedor.
 	 * @param infoFilename Nombre del fichero externo con las propiedades visuales
 	 * y comprobaciones del proveedor. Debe encontrarse con el resto de ficheros de

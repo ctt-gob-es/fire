@@ -81,7 +81,6 @@ public class ResponseHandler extends AbstractHandler {
 				org.apache.xml.security.Init.init();
 				final org.apache.xml.security.signature.XMLSignature signature = new org.apache.xml.security.signature.XMLSignature(sigElement, ""); //$NON-NLS-1$
 
-
 				// Registramos cual debe ser el atributo ID de los nodos de este XML
 				// para que durante la validacion se pueda identificar estos nodos
 				IdRegister.registerElements(doc.getDocumentElement());

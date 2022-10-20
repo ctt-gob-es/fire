@@ -56,7 +56,7 @@ public class SecureXmlBuilder {
 					SECURE_BUILDER_FACTORY.setAttribute(securityProperty, ""); //$NON-NLS-1$
 				}
 				catch (final Exception e) {
-					// Podemos las trazas en debug ya que estas propiedades son adicionales
+					// Ponemos las trazas en debug ya que estas propiedades son adicionales
 					// a la activacion de el procesado seguro
 					LOGGER.log(Level.FINE, "No se ha podido establecer una propiedad de seguridad '" + securityProperty + "' en la factoria XML"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -92,7 +92,7 @@ public class SecureXmlBuilder {
 				SAX_FACTORY.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
 			}
 			catch (final Exception e) {
-				// Podemos las trazas en debug ya que estas propiedades son adicionales
+				// Ponemos las trazas en debug ya que estas propiedades son adicionales
 				// a la activacion de el procesado seguro
 				LOGGER.log(
 						Level.FINE,
