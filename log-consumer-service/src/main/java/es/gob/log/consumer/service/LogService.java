@@ -3,6 +3,7 @@ package es.gob.log.consumer.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
@@ -71,7 +72,7 @@ public class LogService extends HttpServlet {
 
 			// Se carga la configuracion del fichero referente al directorio
 			this.logDirInfo = new LogDirInfo();
-			try (FileInputStream fis = new FileInputStream(defaultLogInfoFile)) {
+			try (InputStream fis = new FileInputStream(defaultLogInfoFile)) {
 				this.logDirInfo.load(fis);
 			}
 			catch (final IOException e) {

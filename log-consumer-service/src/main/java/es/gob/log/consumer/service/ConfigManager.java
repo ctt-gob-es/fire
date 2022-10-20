@@ -73,8 +73,6 @@ public class ConfigManager {
 	private static Properties loadConfigFile(final String configFilename)
 			throws IOException, FileNotFoundException {
 
-		LOGGER.info("Cargamos fichero de configuracion");
-
 		boolean loaded = false;
 		final Properties config = new Properties();
 		try {

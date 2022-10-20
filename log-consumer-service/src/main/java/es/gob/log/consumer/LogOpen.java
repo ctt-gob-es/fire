@@ -3,6 +3,7 @@ package es.gob.log.consumer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.StandardOpenOption;
 
@@ -37,7 +38,7 @@ public class LogOpen {
 		// la configuracion por defecto.
 		this.logInfo = new LogInfo();
 		if (this.logInfoFile != null) {
-			try (FileInputStream fis = new FileInputStream(this.logInfoFile)) {
+			try (InputStream fis = new FileInputStream(this.logInfoFile)) {
 				this.logInfo.load(fis);
 			}
 			catch (final IOException e) {

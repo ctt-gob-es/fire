@@ -14,6 +14,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -54,8 +57,9 @@ public class ConfigFileLoader {
 				// Comprobamos que se trate de un fichero sobre el que tengamos permisos y que no
 				// nos hayamos salido del directorio de configuracion indicado
 				if (configFile.isFile() && configFile.canRead() && configDir.equals(configFile.getParentFile())) {
-					try (InputStream is = new FileInputStream(configFile);) {
-						config.load(is);
+					try (final InputStream is = new FileInputStream(configFile);
+						 final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+							config.load(reader);
 					}
 					loaded = true;
 					LOGGER.info("Se cargo el fichero de configuracion " + configFile.getAbsolutePath()); //$NON-NLS-1$
@@ -69,12 +73,14 @@ public class ConfigFileLoader {
 
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio
 			if (!loaded) {
-				try (InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilename);) {
+				try (final InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilename);) {
 					if (is == null) {
 						throw new FileNotFoundException("No se ha encontrado el fichero de configuracion " + configFilename); //$NON-NLS-1$
 					}
 					LOGGER.info("Se ha cargado desde el classpath el fichero de configuracion " + configFilename); //$NON-NLS-1$
-					config.load(is);
+					try (final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+						config.load(reader);
+					}
 				}
 			}
 		}

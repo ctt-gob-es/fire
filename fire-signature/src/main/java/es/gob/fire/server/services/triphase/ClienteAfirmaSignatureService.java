@@ -148,16 +148,19 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		// Obtenemos los parametros adicionales para la firma
-		Properties extraParams = new Properties();
-		try {
-			if (parameters.containsKey(PARAM_NAME_EXTRA_PARAM)) {
+		Properties extraParams;
+		if (parameters.containsKey(PARAM_NAME_EXTRA_PARAM)) {
+			try {
 				extraParams = AOUtil.base642Properties(parameters.get(PARAM_NAME_EXTRA_PARAM));
 			}
+			catch (final Exception e) {
+				LOGGER.severe("El formato de los parametros adicionales suministrado es erroneo: " +  e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.INVALID_FORMAT_EXTRAPARAMS) + ": " + e); //$NON-NLS-1$);
+				return;
+			}
 		}
-		catch (final Exception e) {
-			LOGGER.severe("El formato de los parametros adicionales suministrado es erroneo: " +  e); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.INVALID_FORMAT_EXTRAPARAMS) + ": " + e); //$NON-NLS-1$);
-			return;
+		else {
+			extraParams = new Properties();
 		}
 
 		// Eliminamos configuraciones que no deseemos que se utilicen extenamente

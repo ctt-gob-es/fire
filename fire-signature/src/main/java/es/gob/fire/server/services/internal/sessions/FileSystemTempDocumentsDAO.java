@@ -108,11 +108,11 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
 
     private static byte[] readFile(final File dataFile) throws IOException {
 
-    	final InputStream fis = new FileInputStream(dataFile);
-        final InputStream bis = new BufferedInputStream(fis);
-        final byte[] ret = AOUtil.getDataFromInputStream(bis);
-        bis.close();
-        fis.close();
+    	byte[] ret;
+    	try (final InputStream fis = new FileInputStream(dataFile);
+        	final InputStream bis = new BufferedInputStream(fis); ) {
+        	ret = AOUtil.getDataFromInputStream(bis);
+    	}
 
         return ret;
     }

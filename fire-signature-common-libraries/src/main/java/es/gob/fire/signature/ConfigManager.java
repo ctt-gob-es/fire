@@ -556,20 +556,30 @@ public class ConfigManager {
 
 	/**
 	 * Recupera el tiempo en milisegundos que debe transcurrir antes de considerar caducados los
-	 * ficheros temporales almacenados durante un proceso de firma de lote. Si no se encuentra
-	 * configurado un valor, se usara el valor por defecto.
+	 * ficheros temporales almacenados durante un proceso de firma. Si no se encuentra configurado
+	 * un valor, se usara el valor por defecto.
 	 * @return N&uacute;mero de milisegundos que como m&iacute;nimo se almacenar&aacute;n los
 	 * ficheros temporales.
 	 */
 	public static long getTempsTimeout() {
+
+		if (config == null) {
+			try {
+				loadConfig();
+			} catch (final ConfigFilesException e) {
+				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
+			}
+		}
+
 		try {
 			return Long.parseLong(getProperty(PROP_FIRE_TEMP_TIMEOUT, Integer.toString(DEFAULT_FIRE_TEMP_TIMEOUT)))
 					* 1000;
 		}
 		catch (final Exception e) {
-			LOGGER.warning("Tiempo de expiracion invalido en la propiedad '" + PROP_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "Tiempo de expiracion invalido en la propiedad '" + PROP_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
 					"' del fichero de configuracion. Se usaran " + DEFAULT_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
-					" segundos"); //$NON-NLS-1$
+					" segundos: " + e); //$NON-NLS-1$
 			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 		}
 	}
