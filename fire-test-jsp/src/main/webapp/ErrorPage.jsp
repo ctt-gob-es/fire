@@ -7,10 +7,16 @@
 	<link rel="stylesheet" href="styles/styles.css"/>
  </head>
  <body>
-  <%
-  	if (session != null) {
-  		session.invalidate();
-  	}
+  <% 
+  
+  	// Si no se indica nada, o el error se senala expresamente como fatal,
+  	// invalidamos la sesion
+	if (session != null) {
+		String fatalError = request.getParameter("fatal"); //$NON-NLS-1$
+		if (fatalError == null || Boolean.parseBoolean(fatalError)) {
+			session.invalidate();
+		}
+	}
   
   	String message = request.getParameter("msg"); //$NON-NLS-1$
   	if (message != null) {

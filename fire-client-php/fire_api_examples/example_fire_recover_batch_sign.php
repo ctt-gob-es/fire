@@ -1,55 +1,52 @@
 <html>
  <head>
-  <title>Ejemplo recoverBatchSign</title>
+  <title>Recuperar firma del lote de firmas</title>
  </head>
  <body>
  <?php 
-	// Cargamos el componente distribuido de Clave Firma
+	// Cargamos el componente distribuido de FIRe
 	include '../fire_api.php';
+	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
+	$subjectId = $_GET["sid"];		// DNI de la persona
+	$transactionId = $_GET["trid"];	// Identificador de la transaccion
 	
-	$dataB64 = base64_encode("Hola Mundo!!");
-	
-	$appId = "B244E473466F";	// Identificador de aplicacion
-	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "ba8ef7d0-c3ec-4e21-8f61-6d539da1c4b4";	// Identificador de la transaccion
-	
-	// Funcion del API de FIRe para cargar los datos a firmar
 	$transactionResult;
 	
+	// Resultado de la primera firma
 	$docId = "0001";
 	try {
+		// Funcion del API de FIRe para recuperar una firma de un lote
 		$transactionResult = recoverBatchSign(
-			$appId,			// Identificador de la aplicacion (dada de alta previamente en el sistema)
-			$subjectId,		// DNI de la persona
-			$transactionId,	// Identificador de transaccion recuperado en la operacion createBatch()
-			$docId			// Identificador del documento
+			$appId,				// Identificador de aplicacion																		   
+			$subjectId,			// DNI de la persona
+			$transactionId,		// Identificador de transaccion recuperado en la operacion createBatch()
+			$docId				// Identificador del documento
 		);
+		// Mostramos los datos obtenidos
+		echo "<b>Firma del documento ", $docId, ":</b><br>" , base64_encode($transactionResult->result), "<br>";
 	}
 	catch(Exception $e) {
-		echo 'Error: ',  $e->getMessage(), "\n";
-		return;
+		echo "<b>Error al recuperar el documento ", $docId, ":</b><br>" , $e->getMessage(), "<br>";
 	}
 
-	// Mostramos el resultado obtenido
-	echo "<br><b>Firma ".$docId.":</b><br>".(base64_encode($transactionResult->result));
-	
+	// Resultado de la segunda firma
 	$docId = "0002";
 	try {
 		$transactionResult = recoverBatchSign(
-			$appId,			// Identificador de la aplicacion (dada de alta previamente en el sistema)
-			$subjectId,		// DNI de la persona
-			$transactionId,	// Identificador de transaccion recuperado en la operacion createBatch()
-			$docId			// Identificador del documento
+			$appId,				// Identificador de aplicacion																		   
+			$subjectId,			// DNI de la persona
+			$transactionId,		// Identificador de transaccion recuperado en la operacion createBatch()
+			$docId				// Identificador del documento
 		);
+		// Mostramos los datos obtenidos
+		echo "<b>Firma del documento ", $docId, ":</b><br>" , base64_encode($transactionResult->result), "<br>";
 	}
 	catch(Exception $e) {
-		echo 'Error: ',  $e->getMessage(), "\n";
-		return;
+		echo "<b>Error al recuperar el documento ", $docId, ":</b><br>" , $e->getMessage(), "<br>";
+		 
 	}
-	
-	// Mostramos el resultado obtenido
-	echo "<br><b>Firma ".$docId.":</b><br>".(base64_encode($transactionResult->result));
-	
+
+	echo "<br><br><br><a href=\"example_fire_create_batch.php\">Volver >></a>";
  ?>
  </body>
 </html>

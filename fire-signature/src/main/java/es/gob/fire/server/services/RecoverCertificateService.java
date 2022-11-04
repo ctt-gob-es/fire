@@ -9,7 +9,6 @@
  */
 package es.gob.fire.server.services;
 
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,8 +23,6 @@ import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.RecoverCertificateManager;
 import es.gob.fire.server.services.internal.ServiceParams;
-import es.gob.fire.signature.ApplicationChecking;
-import es.gob.fire.signature.ApplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
@@ -74,7 +71,7 @@ public final class RecoverCertificateService extends HttpServlet {
      * firma. */
     @Override
     protected void service(final HttpServletRequest request,
-    					   final HttpServletResponse response) throws IOException {
+    					   final HttpServletResponse response) {
 
         if (!ConfigManager.isInitialized()) {
 			try {
@@ -83,13 +80,13 @@ public final class RecoverCertificateService extends HttpServlet {
 	    	catch (final ConfigFilesException e) {
 	    		LOGGER.log(Level.SEVERE, "No se encontro el fichero de configuracion del componente central: " + e.getFileName(), e); //$NON-NLS-1$
 	    		AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, e.getMessage());
-	    		response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
+	    		Responser.sendError(response, ConfigFilesException.getHttpError(), e.getMessage());
 	    		return;
 	    	}
 	    	catch (final InvalidConfigurationException e) {
 	    		LOGGER.log(Level.SEVERE, "Error en la configuracion de la/s propiedad/es " + e.getProperty() + " (" + e.getFileName() + ")", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getProperty(), e.getFileName());
-	    		response.sendError(InvalidConfigurationException.getHttpError(), e.getMessage());
+	    		Responser.sendError(response, InvalidConfigurationException.getHttpError(), e.getMessage());
 	    		return;
 	    	}
 		}
@@ -100,7 +97,7 @@ public final class RecoverCertificateService extends HttpServlet {
     	}
     	catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error en la lectura de los parametros de entrada"); //$NON-NLS-1$
+			Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST, "Error en la lectura de los parametros de entrada"); //$NON-NLS-1$
 			return;
 		}
 		updateLegacyKeys(params);
@@ -116,24 +113,24 @@ public final class RecoverCertificateService extends HttpServlet {
         	LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
         	if (appId == null || appId.isEmpty()) {
         		LOGGER.warning(logF.f("No se ha proporcionado el identificador de la aplicacion")); //$NON-NLS-1$
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        		Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
 
-    		try {
-    			final ApplicationChecking appCheck = ApplicationsDAO.checkApplicationId(appId);
-	        	if (!appCheck.isValid()) {
-    				LOGGER.warning(logF.f("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion")); //$NON-NLS-1$
-    				response.sendError(HttpServletResponse.SC_FORBIDDEN);
-    				return;
-    			}
-    		}
-    		catch (final Exception e) {
-    			LOGGER.log(Level.SEVERE, logF.f("Error grave al validar el identificador de la aplicacion"), e); //$NON-NLS-1$
-    			AlarmsManager.notify(Alarm.CONNECTION_DB);
-	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    			return;
-    		}
+        	try {
+        		ServiceUtil.checkValidApplication(appId);
+	        }
+	        catch (final DBConnectionException e) {
+	        	LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
+	        	AlarmsManager.notify(Alarm.CONNECTION_DB);
+	        	Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        	return;
+	        }
+        	catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, logF.f("La aplicacion que solicita la peticion no es valida o esta desactivada"), e); //$NON-NLS-1$
+				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return;
+			}
     	}
     	else {
     		LOGGER.fine(logF.f("No se realiza la validacion de aplicacion en la base de datos")); //$NON-NLS-1$
@@ -148,12 +145,12 @@ public final class RecoverCertificateService extends HttpServlet {
 	    	catch (final DBConnectionException e) {
 				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
 				AlarmsManager.notify(Alarm.CONNECTION_DB);
-	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 				return;
 			}
 	    	catch (final CertificateValidationException e) {
 				LOGGER.severe(logF.f("Error en la validacion del certificado: " + e)); //$NON-NLS-1$
-				response.sendError(e.getHttpError(), e.getMessage());
+				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 				return;
 			}
     	}

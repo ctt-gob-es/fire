@@ -285,7 +285,9 @@ public class TestConnector extends FIReConnector {
 			throw new FIReConnectorNetworkException("Error en la llamada al servicio de prueba de carga de datos", e); //$NON-NLS-1$
 		}
 
-		return new LoadResult(new String(response, StandardCharsets.UTF_8));
+		final String result = new String(response, StandardCharsets.UTF_8);
+
+		return new LoadResult(result);
 	}
 
 	@Override

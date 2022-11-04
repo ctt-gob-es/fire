@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -40,7 +42,7 @@ class TestHelper {
 
 	private static final String PROP_SUFIX = "}"; //$NON-NLS-1$
 
-		private static final String DEFAULT_ENCODING = "utf-8"; //$NON-NLS-1$
+	public static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
 	/** Nombre del fichero de configuraci&oacute;n. */
 	private static final String CONFIG_FILE = "test-backend.properties" ; //$NON-NLS-1$
@@ -342,7 +344,7 @@ class TestHelper {
 					.replace(REDIRECT_URL_ID_TAG, transactionId)
 					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
 					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
-					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING))
+					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING.displayName()))
 					.replace(REDIRECT_URL_INFODOCUMENTOS_TAG, infoDocsB64);
 		} catch (final UnsupportedEncodingException e) {
 			LOGGER.warning("No se soporta el encoding proporcionado para codificar la URL, se usara el por defecto: " + e); //$NON-NLS-1$
@@ -362,7 +364,7 @@ class TestHelper {
 					.replace(REDIRECT_URL_ID_TAG, transactionId)
 					.replace(REDIRECT_URL_OK_TAG, okUrlB64)
 					.replace(REDIRECT_URL_KO_TAG, errorUrlB64)
-					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING));
+					.replace(REDIRECT_ID, URLEncoder.encode(subjectId, DEFAULT_ENCODING.displayName()));
 		} catch (final UnsupportedEncodingException e) {
 			LOGGER.warning("No se soporta el encoding proporcionado para codificar la URL, se usara el por defecto: " + e); //$NON-NLS-1$
 			return urlTemplateCert

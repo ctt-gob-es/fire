@@ -6,14 +6,14 @@
  *   - the GNU General Public License as published by the Free Software Foundation;
  *     either version 2 of the License, or (at your option) any later version.
  *   - or The European Software License; either version 1.1 or (at your option) any later version.
- * Date: 08/09/2017
+ * Date: 29/11/2019
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 
  /* ================= Componente distribuido PHP de FIRe (Version 2.4) ================= */
  
 	// Definimos la url del servicio de FIRe
-	define ("SERVICEURL","https://127.0.0.1:8443/fire-signature/fireService");
+	define ("SERVICEURL", "https://127.0.0.1:8443/fire-signature/fireService");
 	
 	// Definimos los parametros de conexion SSL (https://curl.haxx.se/libcurl/c/easy_setopt_options.html)
 	$client_ssl_curl_options = array(
@@ -123,14 +123,13 @@
 		function recoverSign($subjectId, $transactionId, $upgrade=null, $upgradeConfigB64=null){
 			
 			// Comprobamos las variables de entrada
+			if (empty($subjectId)) {
+				throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
+			}																					  
 			if (empty($transactionId)) {
 				throw new InvalidArgumentException("El id de la transaccion no puede ser nulo");
 			}
 
-			if (empty($subjectId)) {
-				throw new InvalidArgumentException("El identificador de usuario no puede ser nulo");
-			}
-			
 			// Componemos la URL de llamada al servicio remoto
 			$URL_SERVICE = SERVICEURL;
 			$URL_SERVICE_PARAMS = array(
@@ -163,8 +162,8 @@
 			$URL_SERVICE_PARAMS = array(
 				"op" => 11, // El tipo de operacion solicitada es RECOVER_SIGN_RESULT (11)
 				"appid" => $this->appId,
-				"transactionid" => $transactionId,
-				"subjectid" => $subjectId
+				"subjectid" => $subjectId,
+				"transactionid" => $transactionId
 			);
 			
 			// Llamamos al servicio
@@ -479,7 +478,7 @@
 
 			// Parseamos el json recibido
 			$jsonResponse = json_decode($response);
-						
+
 			$batchDocuments = $jsonResponse->batch;
 			$providerName = $jsonResponse->prov;
 			$signingCert = $jsonResponse->cert;
@@ -543,6 +542,9 @@
 			}
 			if (empty($transactionId)) {
 				throw new InvalidArgumentException("El id de la transaccion no puede ser nulo");
+			}
+			if (empty($docId)) {
+				throw new InvalidArgumentException("El identificador de documento no puede ser nulo");
 			}
 			
 			// Componemos la URL de llamada al servicio remoto
@@ -642,7 +644,6 @@
 		 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 		 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 		 */
-		 
 		function connect($URL, $urlParams)
 		{
 			$ch = curl_init();
@@ -669,28 +670,22 @@
 			curl_setopt_array($ch, $curl_options);
 			
 			$response = curl_exec($ch);
-
-			$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			$httpResponse = new HttpResponse($response, $ch);
 
 			curl_close($ch);
-
-			if ($http_code != 200) {
-				$this->throwCustomException($http_code);
-			}
-
-			if (!$response) {
-				error_log("La llamada al servicio de FIRe no devolvio respuesta");
-				throw new HttpNetworkException("No se obtuvo respuesta del servidor. Error: '" . curl_error($ch) . "' - Codigo: " . curl_errno($ch));
+			
+			if (!$httpResponse->isOk()) {
+				$this->throwCustomException($httpResponse);
 			}
 			
-			return $response;
+			return $httpResponse->content;
 		}
 		
 		/**
 		 * Comprueba el status code devuelto por la llamada a la excepcion se corresponde con
 		 * alguno de los codigos de error conocidos. En caso afirmativo, lanza la excepcion
 		 * correspondiente. En caso contrario, no hace nada.
-		 * @param $http_code StatusCode de la respuesta del servidor.
+		 * @param $httpResponse StatusCode de la respuesta del servidor.
 		 * @throws HttpForbiddenException Cuando no se enviaron datos de autenticacion o estos no son correctos.
 		 * @throws HttpNetworkException Cuando ocurre un problema en la comunicacion.
 		 * @throws NumDocumentsExceededException Cuando se agregan mas documentos de los permitidos a un lote.
@@ -700,68 +695,194 @@
 		 * @throws InvalidTransactionException Cuando se solicita operar con una transaccion no valida o ya caducada.
 		 * @throws HttpOperationException Cuando se produce un error indeterminado en servidor durante la ejecucion de la operacion.
 		 */
-		function throwCustomException($http_code)
+		function throwCustomException($httpResponse)
 		{
-			error_log("Se obtuvo un error de la llamada al servicio de FIRe. StatusCode: ".$http_code);
+			// Los errores devueltos por el propio FIRe estaran siempre estructurados en JSON
+			if ($httpResponse->contentType == "application/json") {
+
+				// Resultado JSON con forma: {c=codigo_error, m=mensaje_error}
+				$errorResult = json_decode($httpResponse->content, false);
+				$errorCode = $errorResult->c;
+				$errorMessage = $errorResult->m;
+				
+				if (FIReErrors::FORBIDDEN == $errorCode || FIReErrors::UNAUTHORIZED == $errorCode) {
+					throw new HttpForbiddenException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::TIMEOUT == $errorCode) {
+					throw new HttpNetworkException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::UNKNOWN_USER == $errorCode) {
+					throw new HttpNoUserException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::INVALID_TRANSACTION == $errorCode) {
+					throw new InvalidTransactionException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::CERTIFICATE_BLOCKED == $errorCode) {
+					throw new HttpCertificateBlockedException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::CERTIFICATE_WEAK_REGISTRY == $errorCode) {
+					throw new HttpWeakRegistryException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::BATCH_DUPLICATE_DOCUMENT == $errorCode) {
+					throw new DuplicateDocumentException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::BATCH_INVALID_DOCUMENT == $errorCode) {
+					throw new InvalidBatchDocumentException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::BATCH_NUM_DOCUMENTS_EXCEEDED == $errorCode) {
+					throw new NumDocumentsExceededException($errorMessage, $errorCode);
+				}
+				else if (FIReErrors::BATCH_NO_SIGNED == $errorCode) {
+					throw new BatchNoSignedException($errorMessage, $errorCode);
+				}
+				else {
+					throw new HttpOperationException($errorMessage, $errorCode);
+				}
+			}
 			
-			if ($http_code == 403) {
-				throw new HttpForbiddenException("Acceso no autorizado");
-			}
-			else if ($http_code == 404 || $http_code == 408) {
-				throw new HttpNetworkException("No se pudo conectar con el servidor de destino");
-			}
-			else if ($http_code == 522) {
-				// El usuario no tiene certificados. No hacemos nada.
-				return;
-			}
-			else if ($http_code == 526) {
-				throw new NumDocumentsExceededException("Se excedido el numero maximo de documentos permitidos");
-			}
-			else if ($http_code == 527) {
-				throw new DuplicateDocumentException("El identificador de documento ya existe en el lote");
-			}
-			else if ($http_code == 528) {
-				throw new InvalidTransactionException("La transaccion no es valida o ha caducado");
-			}
-			else if ($http_code == 529) {
-				throw new HttpOperationException("El servicio de custodia devolvio un error durante la firma de los datos");
-			}
-			else if ($http_code == 530) {
-				throw new HttpOperationException("Error en la composicion de la firma");
-			}
-			else if ($http_code == 532) {
-				throw new HttpOperationException("Error durante la actualizacion de firma");
-			}
-			else if ($http_code == 533) {
-				throw new HttpOperationException("Error al guardar la firma en servidor");
-			}
-			else if ($http_code == 534) {
-				throw new BatchNoSignedException("El lote no se ha firmado");
-			}
-			else if ($http_code == 535) {
-				throw new InvalidBatchDocumentException("El documento no existe en el lote");
-			}
-			else if ($http_code == 536) {
-				throw new InvalidBatchDocumentException("La firma solicitada no se encuentra disponible");
-			}
-			else if ($http_code == 537) {
-				throw new HttpOperationException("Se intenta firmar un lote sin documentos");
-			}
-			else if ($http_code == 538) {
-				throw new HttpOperationException("La firma generada no es valida");
-			}
-			else if ($http_code == 539) {
-				throw new HttpOperationException("Gestor de documentos no valido");
-			}
-			else if ($http_code == 540) {
-				throw new HttpOperationException("Error al obtener un documento a traves del gestor en el servidor");
-			}
-			else if ($http_code / 100 >= 3) {
-				throw new HttpOperationException("Error indeterminado (".$http_code.")");
+			// Procesamos los errores devueltos por el servidor, probablemente por un error interno o de
+			// comunicacion
+			if ($httpResponse->statusCode == 403) {
+				throw new HttpForbiddenException("Error HTTP ".$httpResponse->statusCode);
+			} else if ($httpResponse->statusCode == 404 || $httpResponse->statusCode == 408) {
+				throw new HttpNetworkException("Error HTTP ".$httpResponse->statusCode);
+			} else {
+				throw new HttpOperationException("Error HTTP ".$httpResponse->statusCode);
 			}
 		}
 	}
 
+	class FIReErrors {
+		/** Error en la lectura de los parametros de entrada. */
+		const READING_PARAMETERS = 1;
+		/** No se ha indicado el identificador de la aplicacion. */
+		const PARAMETER_APP_ID_NEEDED = 2;
+		/** No se ha indicado la operacion a realizar. */
+		const PARAMETER_OPERATION_NEEDED = 3;
+		/** Se ha indicado un id de operacion incorrecto. */
+		const PARAMETER_OPERATION_INVALID = 4;
+		/** Se ha indicado un id de operacion no soportado. */
+		const PARAMETER_OPERATION_NOT_SUPPORTED = 5;
+		/** No se ha indicado el certificado de autenticacion. */
+		const PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED = 6;
+		/** Se ha indicado un certificado de autenticacion mal formado. */
+		const PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID = 7;
+		/** No se ha indicado el identificador de usuario. */
+		const PARAMETER_USER_ID_NEEDED = 8;
+		/** No se ha indicado el algoritmo de firma. */
+		const PARAMETER_SIGNATURE_ALGORITHM_NEEDED = 9;
+		/** No se ha indicado la operacion de firma. */
+		const PARAMETER_SIGNATURE_OPERATION_NEEDED = 10;
+		/** No se ha indicado el formato de firma. */
+		const PARAMETER_SIGNATURE_FORMAT_NEEDED = 11;
+		/** No se han indicado los datos que firmar. */
+		const PARAMETER_DATA_TO_SIGN_NEEDED = 12;
+		/** Se han indicado datos a firmar mal codificados. */
+		const PARAMETER_DATA_TO_SIGN_INVALID = 13;
+		/** No se han encontrado los datos a firmar. */
+		const PARAMETER_DATA_TO_SIGN_NOT_FOUND = 14;
+		/** No se ha indicado la configuracion de transaccion. */
+		const PARAMETER_CONFIG_TRANSACTION_NEEDED = 15;
+		/** Se ha indicado una configuracion de transaccion mal formada. */
+		const PARAMETER_CONFIG_TRANSACTION_INVALID = 16;
+		/** No se ha indicado la URL de redireccion en caso de error en la configuracion de transaccion. */
+		const PARAMETER_URL_ERROR_REDIRECION_NEEDED = 17;
+		/** No se ha indicado el identificador de transaccion. */
+		const PARAMETER_TRANSACTION_ID_NEEDED = 18;
+		/** No se ha indicado la referencia del usuario. */
+		const PARAMETER_USER_REF_NEEDED = 19;
+		/** Se han indicado propiedades de configuracion de fima mal formadas. */
+		const PARAMETER_SIGNATURE_PARAMS_INVALID = 20;
+		/** No se ha indicado el identificador del usuario que solicita el certificado. */
+		const UNKNOWN_USER = 21;
+		/** El usuario ya dispone de un certificado del tipo que se esta solicitando generar. */
+		const CERTIFICATE_DUPLICATED = 22;
+		/** Error en la generacion de un nuevo certificado. */
+		const CERTIFICATE_GENERATION = 23;
+		/** El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente. */
+		const CERTIFICATE_WEAK_REGISTRY = 24;
+		/** Error desconocido durante la operacion. */
+		const UNDEFINED_ERROR = 25;
+		/** Error durante la firma. */
+		const SIGNING = 26;
+		/** No se selecciono un proveedor de firma. */
+		const PROVIDER_NOT_SELECTED = 27;
+		/** El proveedor no proporciono el certificado para firmar. */
+		const PARAMETER_SIGNING_CERTIFICATE_NEEDED = 28;
+		/** El proveedor o cliente de firma proporciono un certificado mal formado. */
+		const PARAMETER_SIGNING_CERTIFICATE_INVALID = 29;
+		/** Error en la composicion de la firma. */
+		const POSTSIGNING = 30;
+		/** La firma generada no es valida. */
+		const INVALID_SIGNATURE = 31;
+		/** Error durante la actualizacion de firma. */
+		const UPGRADING_SIGNATURE = 32;
+		/** Error al guardar la firma en servidor. */
+		const SAVING_SIGNATURE = 33;
+		/** No se ha indicado el identificador de los datos asincronos. */
+		const PARAMETER_ASYNC_ID_NEEDED = 34;
+		/** Gestor de documentos no valido. */
+		const PARAMETER_DOCUMENT_MANAGER_INVALID = 35;
+		/** Error al conectar con el servicio de validacion y actualizacion de firmas. */
+		const UPGRADE_SERVICE_NETWORK = 36;
+		/** El usuario ya tiene un certificado del tipo indicado. */
+		const CERTIFICATE_AVAILABLE = 37;
+		/** Los certificados del usuario estan bloqueados. */
+		const CERTIFICATE_BLOCKED = 38;
+		/** El usuario no dispone de certificados y el proveedor no le permite generarlos en este momento. */
+		const CERTIFICATE_NO_CERTS = 39;
+
+		/** Se ha indicado una configuracion particular mal formada para el documento del lote. */
+		const PARAMETER_BATCH_CONFIG_INVALID = 41;
+		/** El identificador de documento ya existe en el lote. */
+		const BATCH_DUPLICATE_DOCUMENT = 42;
+		/** Se ha excedido el numero maximo de documentos permitidos en el lote. */
+		const BATCH_NUM_DOCUMENTS_EXCEEDED = 43;
+		/** Se intenta firmar un lote sin documentos. */
+		const BATCH_NO_DOCUMENTS = 44;
+		/** Error en la prefirma de los datos. Es posible que se haya establecido una configuracion no valida para los datos proporcionados. */
+		const PRESIGNING = 45;
+		/** Se produjo un error preparando los datos para firmar. */
+		const BATCH_PREPARING = 46;
+		/** Error en la prefirma de los datos de un lote. Es posible que se haya establecido una configuracion no valida para los datos proporcionados. */
+		const BATCH_PRESIGNING = 47;
+		/** No se ha indicado el identificador del documento del lote. */
+		const PARAMETER_DOCUMENT_ID_NEEDED = 48;
+		/** No se ha firmado previamente el lote. */
+		const BATCH_NO_SIGNED = 49;
+		/** Error al firmar el lote. */
+		const BATCH_SIGNING = 50;
+		/** La firma se recuperon anteriormente. */
+		const BATCH_RECOVERED = 51;
+		/** Se requiere esperar un periodo de gracia para recuperar el documento. */
+		const BATCH_DOCUMENT_GRACE_PERIOD = 52;
+		/** El documento no estaba en el lote. */
+		const BATCH_INVALID_DOCUMENT = 53;
+
+		/** Error interno del servidor. */
+		const INTERNAL_ERROR = 500;
+		/** Peticion rechazada. */
+		const FORBIDDEN = 501;
+		/** No se proporcionaron los parametros de autenticacion. */
+		const UNAUTHORIZED = 502;
+		/** La transaccion no se ha inicializado o ha caducado. */
+		const INVALID_TRANSACTION = 503;
+		/** Error detectado despues de llamar a la pasarela externa para autenticar al usuario. */
+		const EXTERNAL_SERVICE_ERROR_TO_LOGIN = 504;
+		/** Error detectado despues de llamar a la pasarela externa para firmar. */
+		const EXTERNAL_SERVICE_ERROR_TO_SIGN = 505;
+		/** Ha caducado la sesion. */
+		const TIMEOUT = 506;
+		/** Operacion cancelada. */
+		const OPERATION_CANCELED = 507;
+		/** El proveedor de firma devolvio un error. */
+		const PROVIDER_ERROR = 508;
+		/** Los datos proporcionados por el proveedor de firma son incorrectos. */
+		const PROVIDER_DATA_ERROR = 509;
+		/** No se pudo conectar con el proveedor de firma. */
+		const PROVIDER_INACCESIBLE_SERVICE = 510;
+	}
+	
 	class HttpOperationException extends Exception { }
 	
 	class HttpForbiddenException extends Exception { }
@@ -777,8 +898,7 @@
 	class BatchNoSignedException extends HttpOperationException { }
 	
 	class InvalidBatchDocumentException extends HttpOperationException { }
-	
-		
+
 	/* =================================================================== */
 	/* ====================== Funciones de utilidad ====================== */
 	/* =================================================================== */
@@ -805,6 +925,40 @@
 	}
 	
 	/**
+	 * Clase que guarda la respuesta de una conexion remota.
+	 */
+	class HttpResponse {
+	
+		var $statusCode;
+		var $contentType;
+		var $content;
+	
+		function __construct ($response, $ch) {
+			if ($response == null){
+				error_log("La llamada al servicio de FIRe no devolvio respuesta");
+				throw new HttpNetworkException("No se obtuvo respuesta del servidor. Error: '" . curl_error($ch) . "' - Codigo: " . curl_errno($ch));	
+			}
+			$this->statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			$this->contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+			if ($this->contentType != NULL) {
+				$idx = strpos($this->contentType, ';');
+				if ($idx > 0) {
+					$this->contentType = substr($this->contentType, 0, $idx);
+				}
+			}
+			$this->content = $response;
+		}
+
+		function HttpResponse ($response, $ch) {
+			__construct ($response, $ch);
+		}
+		
+		function isOk () {
+			return $this->statusCode == 200;
+		}
+	}
+	
+	/**
 	 * Clase que almacena la respuesta del servicio y obtiene el identificador de la transaccion.
 	 */
 	class TransactionIdResult {
@@ -818,7 +972,7 @@
 			}
 		}
 		
-		function TransactionIdResult ($response){
+		function TransactionIdResult ($response) {
 			__construct ($response);
 		}
 	}
@@ -826,12 +980,12 @@
 	/**
 	 * Clase que almacena el resultado de una firma de lote.
 	 */
-	class BatchResult{
+	class BatchResult {
 		var $providerName;
 		var $signingCert;
 		var $batch;
 		
-		function __construct ($batchDocuments, $provName, $cert){
+		function __construct ($batchDocuments, $provName, $cert) {
 
 			if (!isset($batchDocuments)) {
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el listado de resultados");
@@ -851,7 +1005,7 @@
 			}
 		}
 		
-		function BatchResult ($response, $provName, $cert){
+		function BatchResult ($response, $provName, $cert) {
 			__construct ($response, $provName, $cert);
 		}
 	};
@@ -859,13 +1013,13 @@
 	/**
 	 * Clase que almacena el resultado particular de haber firmado un documento de un lote.
 	 */
-	class BatchSignResult{
+	class BatchSignResult {
 		var $id;
 		var $ok = false;
 		var $dt;
 		var $gracePeriod;
 		
-		function __construct ($response){
+		function __construct ($response) {
 			if (isset($response->id)) {
 				$this->id = $response->id;
 			}
@@ -882,15 +1036,15 @@
 				$this->gracePeriod = new GracePeriod($response->grace->id, "@".($response->grace->date/1000));
 			}
 
-			if (empty($this->id)){
+			if (empty($this->id)) {
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el identificador de cada documento batch");
 			}
-			if (empty($this->dt) && !$this->ok){
+			if (empty($this->dt) && !$this->ok) {
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el codigo de error si la firma no se llevo a cabo correctamente");
 			}			
 		}
 		
-		function BatchSignResult ($response){
+		function BatchSignResult ($response) {
 			__construct ($response);
 		}
 	};
@@ -898,23 +1052,23 @@
 	/**
 	 * Clase que almacena la respuesta del servicio de solicitud de firma.
 	 */
-	 class SignOperationResult{
+	 class SignOperationResult {
 		var $transactionId;
 		var $redirectUrl;
 		
-		function __construct ($response){
+		function __construct ($response) {
 			$json = json_decode($response, true);
 			$this->transactionId = $json["transactionid"];
 			$this->redirectUrl = $json["redirecturl"];
-			if (empty($this->transactionId)){
+			if (empty($this->transactionId)) {
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el identificador de la transacción");
 			}
-			if (empty($this->redirectUrl)){
+			if (empty($this->redirectUrl)) {
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga la URL a redireccionar al usuario para que se autentique");
 			}
 		}
 		
-		function SignOperationResult ($response){
+		function SignOperationResult ($response) {
 			__construct($response);
 		}
 	};
@@ -922,23 +1076,23 @@
 	/**
 	 * Clase que almacena la respuesta de recuperacion de firma o de error.
 	 */
-	class TransactionResult{
+	class TransactionResult {
 		
 		// Especifica que la transaccion finalizo correctamente.
-		public static $STATE_OK = 0;
-		
+		const STATE_OK = 0;
+
 		// Especifica que la transaccion no pudo finalizar debido a un error.
-		public static $STATE_ERROR = -1;
-			
+		const STATE_ERROR = -1;
+
 		// Especifica que la transaccion aun no ha finalizado y se debera pedir el resultamos
 		// mas adelante.
-		public static $STATE_PENDING = 1;
-			
+		const STATE_PENDING = 1;
+
 		// Especifica que la transaccion ha finalizado pero que el resultado puede
 		// diferir de lo solicitado por la aplicacion. Por ejemplo, puede haberse
-		// solicitado una firma ES-A y recibirse una ES-T.
-		public static $STATE_PARTIAL = 2;
-		
+		// solicitado una firma LTA-Level y recibirse una T-Level.
+		const STATE_PARTIAL = 2;
+
 		var $resultType;
 		var $state;
 		var $providerName;
@@ -949,12 +1103,12 @@
 		var $errorMessage;
 		var $result;
 		
-		function __construct($result){
+		function __construct($result) {
 			
 			// Prefijo que antecede a los datos con la informacion de la firma
 			$RESULT_PREFIX = "{\"result\":";
 		
-			$this->state = TransactionResult::$STATE_OK;
+			$this->state = TransactionResult::STATE_OK;
 			
 			// Comprobamos si se ha recibido la informacion de la firma, en cuyo caso, la cargamos.
 			if (strlen($result) > strlen($RESULT_PREFIX) + 2 && $RESULT_PREFIX == substr($result, 0, strlen($RESULT_PREFIX))) {
@@ -981,7 +1135,7 @@
 					$this->errorMessage = $jsonResponse->result->ermsg;
 				}
 			}
-			// Si no, se considera quen lo recibido es el resultado de la firma.
+			// Si no, se considera que lo recibido es el resultado de la firma.
 			else {
 				$this->result = $result;
 			}

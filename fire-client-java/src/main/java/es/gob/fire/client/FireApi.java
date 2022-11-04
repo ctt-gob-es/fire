@@ -119,6 +119,13 @@ public final class FireApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FireApi.class);
 
+    private static final String HTTP_ERROR_PREFIX = "Error HTTP "; //$NON-NLS-1$
+
+	/** Codificaci&oacute;n de caracters por defecto. */
+	public static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
+
+	private static final String MIMETYPE_JSON = "application/json"; //$NON-NLS-1$
+
     private static boolean initialized = false;
 
     private static HttpsConnection conn = null;
@@ -338,26 +345,24 @@ public final class FireApi {
                 .replace(TAG_VALUE_DATA, doBase64UrlSafe(dataB64))
                 .replace(TAG_VALUE_CONFIG, Utils.properties2Base64(config, true));
 
-        final byte[] responseJSON;
+        final HttpResponse response;
         try {
-        	responseJSON = conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
-        } catch (final HttpError e) {
-            LOGGER.error("Error en la llamada al servicio de firma: {}", //$NON-NLS-1$
-            			e.getResponseDescription());
-            if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-                throw new HttpForbiddenException(e);
-            } else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-                throw new HttpNetworkException(e);
-            } else if (e.getResponseCode() == HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorDescription(), e);
-            } else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
-            } else {
-                throw new HttpOperationException(e.getResponseDescription(), e);
-            }
+        	response = conn.sendRequest(SERVICE_URL, urlParameters, Method.POST);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de firma al servidor", e); //$NON-NLS-1$
         }
 
-        return SignOperationResult.parse(responseJSON);
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de firma al servicio"); //$NON-NLS-1$
+        }
+
+        try {
+        	return SignOperationResult.parse(response.getContent());
+        }
+        catch (final Exception e) {
+        	throw new HttpOperationException("La respuesta recibida no esta bien formada", e); //$NON-NLS-1$
+        }
     }
 
     /**
@@ -412,37 +417,27 @@ public final class FireApi {
         	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        TransactionResult result;
+        HttpResponse response;
         try {
-        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, conn.readUrl(SERVICE_URL, urlParameters, Method.GET));
-        } catch (final HttpError e) {
-        	LOGGER.error("Error en la llamada al servicio de recuperacion de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.SIGN_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.SIGN_ERROR.getErrorDescription(), e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.POSTSIGN_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.POSTSIGN_ERROR.getErrorDescription(), e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.UPGRADING_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.UPGRADING_ERROR.getErrorDescription(), e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getMessage(), e);
-        	}
-        }
-        catch (final Exception e) {
-        	LOGGER.error(
-        			"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
-        			e);
-        	throw new IOException(e);
+        	response = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de recuperacion de estado de firma al servidor", e); //$NON-NLS-1$
         }
 
-     // Si el resultado es un error, lo devolvemos
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de estado de firma del servicio"); //$NON-NLS-1$
+        }
+
+        TransactionResult result;
+        try {
+        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, response.getContent());
+        }
+        catch (final Exception e) {
+        	throw new HttpOperationException("La respuesta recibida de la peticion de recuperacion de estado de firma no esta bien formada", e); //$NON-NLS-1$
+        }
+
+        // Si el resultado es un error, lo devolvemos
         if (result.getResultType() == TransactionResult.STATE_ERROR) {
         	return result;
         }
@@ -460,29 +455,19 @@ public final class FireApi {
         		URL_PARAMETERS_RECOVER_SIGNATURE_RESULT
                 .replace(TAG_VALUE_TRANSACTION, transactionId);
 
-        byte[] signature;
+        HttpResponse signatureResponse;
         try {
-        	 signature = conn.readUrl(SERVICE_URL, urlParameters, Method.GET);
-        } catch (final HttpError e) {
-        	LOGGER.error("Error en la llamada al servicio de recuperacion de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getMessage(), e);
-        	}
-        }
-        catch (final Exception e) {
-        	LOGGER.error(
-        			"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
-        			e);
-        	throw new IOException(e);
+        	 signatureResponse = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de recuperacion de firma", e); //$NON-NLS-1$
         }
 
-        result.setResult(signature);
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de firma"); //$NON-NLS-1$
+        }
+
+        result.setResult(signatureResponse.getContent());
 
         return result;
     }
@@ -547,37 +532,35 @@ public final class FireApi {
         else {
         	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        if (upgradeConfig != null && !upgrade.isEmpty()) {
+        if (upgradeConfig != null && upgrade != null && !upgrade.isEmpty()) {
         	urlParameters = urlParameters.replace(TAG_VALUE_CONFIG, Utils.properties2Base64(upgradeConfig, true));
         }
         else {
         	urlParameters = urlParameters.replace("&config=" + TAG_VALUE_CONFIG , ""); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
+        HttpResponse response;
+        try {
+        	response = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de recuperacion del estado de firma asincrona", e); //$NON-NLS-1$
+        }
+
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion del estado de firma asincrona"); //$NON-NLS-1$
+        }
+
         TransactionResult result;
         try {
-        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, conn.readUrl(SERVICE_URL, urlParameters, Method.GET));
-        } catch (final HttpError e) {
-        	LOGGER.error("Error en la llamada al servicio de recuperacion asincrona de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.UPGRADING_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.UPGRADING_ERROR.getErrorDescription(), e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.INVALID_SIGNATURE_ERROR.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getMessage(), e);
-        	}
+        	result = TransactionResult.parse(TransactionResult.RESULT_TYPE_SIGN, response.getContent());
         }
         catch (final Exception e) {
-        	LOGGER.error("Error en la comunicacion con el servicio de recuperacion asincrona de firma", e); //$NON-NLS-1$
-        	throw new IOException(e);
+        	throw new HttpOperationException("La respuesta recibida de la peticion de recuperacion del estado de firma asincrona no esta bien formada", e); //$NON-NLS-1$
         }
 
         // Si el resultado es un error, si tiene un periodo de gracia o si ya contiene la firma, lo devolvemos
-        if (result.getErrorCode() != 0 || result.getGracePeriod() != null || result.getResult() != null) {
+        if (result.getState() != TransactionResult.STATE_OK || result.getGracePeriod() != null || result.getResult() != null) {
         	return result;
         }
 
@@ -590,27 +573,19 @@ public final class FireApi {
         			URL_ASYNC_PARAMETERS_RECOVER_SIGNATURE_RESULT
         			.replace(TAG_VALUE_DOCUMENT_ID, docId);
 
-        byte[] signature;
+        HttpResponse signatureResponse;
         try {
-        	 signature = conn.readUrl(SERVICE_URL, urlParameters, Method.GET);
-        } catch (final HttpError e) {
-        	LOGGER.error("Error en la llamada al servicio de recuperacion de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getMessage(), e);
-        	}
-        }
-        catch (final Exception e) {
-        	LOGGER.error("Error en la comunicacion con el servicio de recuperacion de firma", e); //$NON-NLS-1$
-        	throw new IOException(e);
+        	 signatureResponse = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de recuperacion de firma asincrona", e); //$NON-NLS-1$
         }
 
-        result.setResult(signature);
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de firma asincrona"); //$NON-NLS-1$
+        }
+
+        result.setResult(signatureResponse.getContent());
 
         return result;
     }
@@ -700,23 +675,23 @@ public final class FireApi {
         	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        final byte[] responseJSON;
+        final HttpResponse response;
         try {
-        	responseJSON = conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
-        } catch (final HttpError e) {
-            LOGGER.error("Error en la llamada al servicio de firma: " + e.getResponseDescription()); //$NON-NLS-1$
-            if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-                throw new HttpForbiddenException(e);
-            } else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-                throw new HttpNetworkException(e);
-            } else if (e.getResponseCode() == HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorDescription(), e);
-            } else {
-                throw new HttpOperationException(e.getResponseDescription(), e);
-            }
+        	response = conn.sendRequest(SERVICE_URL, urlParameters, Method.POST);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de creacion de lote", e); //$NON-NLS-1$
         }
 
-        return CreateBatchResult.parse(responseJSON);
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de creacion de lote"); //$NON-NLS-1$
+        }
+
+        try {
+        	return CreateBatchResult.parse(response.getContent());
+        } catch (final Exception e) {
+        	throw new HttpOperationException("La respuesta de creacion de lote recibida no esta bien formada", e); //$NON-NLS-1$
+        }
     }
 
     /**
@@ -773,39 +748,16 @@ public final class FireApi {
         		.replace(TAG_VALUE_DATA, document != null ? Base64.encode(document, true) : "") //$NON-NLS-1$
                 .replace(TAG_VALUE_CONFIG, Utils.properties2Base64(config, true));
 
-        // Llamamos al servicio que, siempre que funcione, no hara nada. Si falla devolvera
-        // una excepcion
+        HttpResponse response;
         try {
-        	conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
-        } catch (final HttpError e) {
-        	LOGGER.error("Error en la llamada al servicio de carga de documentos en un lote con configuracion por defecto: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	// Aplicacion no permitida
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	// Problema de red
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	// Se excedio el numero maximo de documentos permitidos en un lote
-        	} else if (e.getResponseCode() == HttpCustomErrors.NUM_DOCUMENTS_EXCEEDED.getErrorCode()) {
-        		throw new NumDocumentsExceededException(HttpCustomErrors.NUM_DOCUMENTS_EXCEEDED.getErrorDescription(), e);
-        	// Se intento agregar un documento con un identificador que ya existe
-        	} else if (e.getResponseCode() == HttpCustomErrors.DUPLICATE_DOCUMENT.getErrorCode()) {
-        		throw new DuplicateDocumentException(HttpCustomErrors.DUPLICATE_DOCUMENT.getErrorDescription(), e);
-        	// La transaccion no es valida o ya a caducado
-    		} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-    			throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-    		// No se pudo recuperar el documento a traves del DocumentManager configurado
-    		} else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
-            } else {
-        		throw new HttpOperationException(e.getResponseDescription(), e);
-        	}
+        	response = conn.sendRequest(SERVICE_URL, urlParameters, Method.POST);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio la peticion de anadir documento a un lote", e); //$NON-NLS-1$
         }
-        catch (final Exception e) {
-        	LOGGER.error(
-        			"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
-        			e);
-        	throw new IOException(e);
+
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido en el envio la peticion de anadir documento a un lote"); //$NON-NLS-1$
         }
     }
 
@@ -884,39 +836,16 @@ public final class FireApi {
         	urlParameters = urlParameters.replace("&upgrade=" + TAG_VALUE_UPGRADE , ""); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        // Llamamos al servicio que, siempre que funcione, devolvera true. Si falla devolvera
-        // una excepcion de tipo HttpError
+        HttpResponse response;
         try {
-        	conn.readUrl(SERVICE_URL, urlParameters, Method.POST);
-        } catch (final HttpError e) {
-        	LOGGER.error("Error en la llamada al servicio de carga de documentos en un lote con configuracion propia: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	// Aplicacion no permitida
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	// Problema de red
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	// Se excedio el numero maximo de documentos permitidos en un lote
-        	} else if (e.getResponseCode() == HttpCustomErrors.NUM_DOCUMENTS_EXCEEDED.getErrorCode()) {
-        		throw new NumDocumentsExceededException(HttpCustomErrors.NUM_DOCUMENTS_EXCEEDED.getErrorDescription(), e);
-        	// Se intento agregar un documento con un identificador que ya existe
-        	} else if (e.getResponseCode() == HttpCustomErrors.DUPLICATE_DOCUMENT.getErrorCode()) {
-        		throw new DuplicateDocumentException(HttpCustomErrors.DUPLICATE_DOCUMENT.getErrorDescription(), e);
-        	// La transaccion no es valida o ya a caducado
-    		} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-    			throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-    		// No se pudo recuperar el documento a traves del DocumentManager configurado
-    		} else if (e.getResponseCode() == HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorDescription(), e);
-            } else {
-        		throw new HttpOperationException(e.getResponseDescription(), e);
-        	}
+        	response = conn.sendRequest(SERVICE_URL, urlParameters, Method.POST);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio la peticion de anadir documento a un lote con configuracion", e); //$NON-NLS-1$
         }
-        catch (final Exception e) {
-        	LOGGER.error(
-        			"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
-        			e);
-        	throw new IOException(e);
+
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de anadir documento a un lote con configuracion"); //$NON-NLS-1$
         }
     }
 
@@ -956,29 +885,25 @@ public final class FireApi {
                 .replace(TAG_VALUE_TRANSACTION, transactionId)
         		.replace(TAG_VALUE_STOP_ON_ERROR, Boolean.toString(stopOnError));
 
-        final byte[] responseJSON;
+        final HttpResponse response;
         try {
-        	responseJSON = conn.readUrl(SERVICE_URL, urlParameters, Method.GET);
-        } catch (final HttpError e) {
-        	LOGGER.error("Error en la llamada al servicio de firma de lote: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getResponseDescription(), e);
-        	}
-        }
-        catch (final Exception e) {
-        	LOGGER.error(
-        			"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
-        			e);
-        	throw new IOException(e);
+        	response = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de firma de lote", e); //$NON-NLS-1$
         }
 
-        return SignOperationResult.parse(responseJSON);
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de firma de lote"); //$NON-NLS-1$
+        }
+
+        try {
+        	return SignOperationResult.parse(response.getContent());
+        }
+        catch (final Exception e) {
+        	throw new HttpOperationException("La respuesta de firma de lote recibida no esta bien formada", e); //$NON-NLS-1$
+        }
+
     }
 
     /**
@@ -1016,38 +941,23 @@ public final class FireApi {
     			URL_PARAMETERS_RECOVER_BATCH
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
-    	byte[] batchResult = null;
+    	HttpResponse response = null;
     	try {
-    		batchResult = conn.readUrl(SERVICE_URL, urlParameters, Method.GET);
-    	} catch (final HttpError e) {
-    		LOGGER.error("Error en la llamada al servicio de recuperacion del resultado de firma de lote: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.SIGN_ERROR.getErrorCode()) {
-        		throw new HttpOperationException(HttpCustomErrors.SIGN_ERROR.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getResponseDescription(), e);
-        	}
-    	}
-    	catch (final Exception e) {
-    		LOGGER.error(
-    				"Error en la comunicacion con el servicio de recuperacion de firma", //$NON-NLS-1$
-    				e);
-    		throw new IOException("Error en la comunicacion con el servicio de recuperacion de firma", e); //$NON-NLS-1$
-    	}
+    		response = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de recuperacion de resultado de lote", e); //$NON-NLS-1$
+        }
+
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de resultado de lote"); //$NON-NLS-1$
+        }
 
     	try {
-    		return BatchResult.parse(batchResult);
+    		return BatchResult.parse(response.getContent());
     	}
     	catch (final Exception e) {
-    		LOGGER.error("La respuesta de la firma del lote no esta bien formada. Inicio del resultado: {}", //$NON-NLS-1$
-    						new String(batchResult, 0, batchResult.length < 50 ? batchResult.length : 50) +
-    						e);
-    		throw new IOException("La respuesta de la firma del lote no esta bien formada", e); //$NON-NLS-1$
+    		throw new IOException("La respuesta de recuperacion del resultado de lote no esta bien formada", e); //$NON-NLS-1$
     	}
     }
 
@@ -1086,25 +996,23 @@ public final class FireApi {
     			URL_PARAMETERS_RECOVER_BATCH_STATE
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
+    	HttpResponse response;
     	try {
-    		return Float.parseFloat(new String(conn.readUrl(SERVICE_URL, urlParameters, Method.GET)));
-    	} catch (final HttpError e) {
-    		LOGGER.error("Error en la consulta al servicio de recuperacion del progreso de un lote de firma: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getResponseDescription(), e);
-        	}
+    		response = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de recuperacion de estado de lote", e); //$NON-NLS-1$
+        }
+
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de estado de lote"); //$NON-NLS-1$
+        }
+
+    	try {
+    		return Float.parseFloat(new String(response.getContent()));
     	}
     	catch (final Exception e) {
-    		LOGGER.error(
-    				"Error en la comunicacion con el servicio de recuperacion del estado de un lote de firma", //$NON-NLS-1$
-    				e);
-    		throw new IOException(e);
+    		throw new IOException("La respuesta de recuperacion del estado de lote no esta bien formada", e); //$NON-NLS-1$
     	}
     }
 
@@ -1143,26 +1051,24 @@ public final class FireApi {
     			.replace(TAG_VALUE_TRANSACTION, transactionId)
     			.replace(TAG_VALUE_DOCUMENT_ID, docId);
 
+    	HttpResponse response;
     	try {
-    		return TransactionResult.parse(TransactionResult.RESULT_TYPE_BATCH_SIGN, conn.readUrl(SERVICE_URL, urlParameters, Method.GET));
-    	} catch (final HttpError e) {
-    		LOGGER.error("Error en la llamada al servicio de recuperacion de firma de lote: {}", e.getResponseDescription()); //$NON-NLS-1$
-        	if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getResponseDescription(), e);
-        	}
-    	}
-    	catch (final Exception e) {
-    		LOGGER.error(
-    				"Error en la comunicacion con el servicio de recuperacion de firma de lote", //$NON-NLS-1$
-    				e);
-    		throw new IOException(e);
-    	}
+    		response = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+        } catch (final IOException e) {
+        	throw new HttpOperationException("Error en el envio de la peticion de recuperacion de firma de lote", e); //$NON-NLS-1$
+        }
+
+        if (!response.isOk()) {
+        	launchException(response);
+        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de firma de lote"); //$NON-NLS-1$
+        }
+
+        try {
+        	return TransactionResult.parse(TransactionResult.RESULT_TYPE_BATCH_SIGN, response.getContent());
+        }
+        catch (final Exception e) {
+        	throw new IOException("La respuesta de recuperacion de firma de lote no esta bien formada", e); //$NON-NLS-1$
+        }
     }
 
     /**
@@ -1198,25 +1104,83 @@ public final class FireApi {
     			URL_PARAMETERS_RECOVER_ERROR
     			.replace(TAG_VALUE_TRANSACTION, transactionId);
 
+    	HttpResponse response;
     	try {
-    		return TransactionResult.parse(TransactionResult.RESULT_TYPE_ERROR, conn.readUrl(SERVICE_URL, urlParameters, Method.GET));
-    	} catch (final HttpError e) {
-    		LOGGER.error("Error en la llamada al servicio de recuperacion de error: {}", e.getResponseDescription()); //$NON-NLS-1$
-    		if (e.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-        		throw new HttpForbiddenException(e);
-        	} else if (e.getResponseCode() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-        		throw new HttpNetworkException(e);
-        	} else if (e.getResponseCode() == HttpCustomErrors.INVALID_TRANSACTION.getErrorCode()) {
-        		throw new InvalidTransactionException(HttpCustomErrors.INVALID_TRANSACTION.getErrorDescription(), e);
-        	} else {
-        		throw new HttpOperationException(e.getResponseDescription(), e);
-        	}
+    		response = conn.sendRequest(SERVICE_URL, urlParameters, Method.GET);
+    	} catch (final IOException e) {
+    		throw new HttpOperationException("Error en el envio de la peticion de recuperacion de error", e); //$NON-NLS-1$
+    	}
+
+    	if (!response.isOk()) {
+    		launchException(response);
+    		throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de error"); //$NON-NLS-1$
+    	}
+
+    	TransactionResult result;
+    	try {
+    		result = TransactionResult.parse(TransactionResult.RESULT_TYPE_ERROR, response.getContent());
     	}
     	catch (final Exception e) {
-    		LOGGER.error(
-    				"Error en la comunicacion con el servicio de recuperacion de error", //$NON-NLS-1$
-    				e);
-    		throw new IOException(e);
+    		throw new HttpOperationException("La respuesta recibida del servicio de recuperacion de error no esta bien formada", e); //$NON-NLS-1$
+    	}
+
+    	return result;
+    }
+
+    /**
+     * Interpreta y lanza la excepci&oacute;n que corresponde a un error concreto.
+     * @param errorResponse Respuesta de error.
+     * @throws HttpOperationException Excepci&oacute;n correspondiente al error recibido.
+     */
+    private static void launchException(final HttpResponse errorResponse) throws HttpOperationException {
+
+    	// Procesamos los errores devueltos por el propio FIRe, siempre estructurados en JSON
+    	if (MIMETYPE_JSON.equals(errorResponse.getMimeType())) {
+    		final ErrorResult errorResult = ErrorResult.parse(errorResponse.getContent());
+    		if (FIReErrors.FORBIDDEN == errorResult.getCode()
+    				|| FIReErrors.UNAUTHORIZED == errorResult.getCode()) {
+    			throw new HttpForbiddenException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.TIMEOUT == errorResult.getCode()) {
+    			throw new HttpNetworkException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.UNKNOWN_USER == errorResult.getCode()) {
+    			throw new HttpNoUserException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.INVALID_TRANSACTION == errorResult.getCode()) {
+    			throw new InvalidTransactionException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.CERTIFICATE_BLOCKED == errorResult.getCode()) {
+    			throw new HttpCertificateBlockedException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.CERTIFICATE_WEAK_REGISTRY == errorResult.getCode()) {
+    			throw new HttpWeakRegistryException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.BATCH_DUPLICATE_DOCUMENT == errorResult.getCode()) {
+    			throw new DuplicateDocumentException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.BATCH_INVALID_DOCUMENT == errorResult.getCode()) {
+    			throw new InvalidBatchDocumentException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.BATCH_NUM_DOCUMENTS_EXCEEDED == errorResult.getCode()) {
+    			throw new NumDocumentsExceededException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else if (FIReErrors.BATCH_NO_SIGNED == errorResult.getCode()) {
+    			throw new BatchNoSignedException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    		else {
+    			throw new HttpOperationException(errorResult.getCode(), errorResult.getMessage());
+    		}
+    	}
+
+    	// Procesamos los errores devueltos por el servidor, probablemente por un error interno o de
+    	// comunicacion
+    	if (errorResponse.getStatus() == HttpURLConnection.HTTP_FORBIDDEN) {
+    		throw new HttpForbiddenException(HTTP_ERROR_PREFIX + errorResponse.getStatus());
+    	} else if (errorResponse.getStatus() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+    		throw new HttpNetworkException(HTTP_ERROR_PREFIX + errorResponse.getStatus());
+    	} else {
+    		throw new HttpOperationException(HTTP_ERROR_PREFIX + errorResponse.getStatus());
     	}
     }
 }

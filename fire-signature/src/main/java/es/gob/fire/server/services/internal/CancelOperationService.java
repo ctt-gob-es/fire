@@ -9,15 +9,17 @@
  */
 package es.gob.fire.server.services.internal;
 
-import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import es.gob.fire.server.services.FIReError;
+import es.gob.fire.server.services.Responser;
 
 /**
  * Servicio interno para registrar el error de cancelaci&oacute;n de la operaci&oacute;n y
@@ -33,35 +35,48 @@ public class CancelOperationService extends HttpServlet {
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
 	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+
+		final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
+
+		// Comprobamos que se hayan prorcionado los parametros indispensables
+        if (transactionId == null || transactionId.isEmpty()) {
+        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.FORBIDDEN);
+            return;
+        }
+
+        if (userRef == null || userRef.isEmpty()) {
+        	LOGGER.warning(logF.f("No se ha proporcionado la referencia del usuario")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.FORBIDDEN);
+            return;
+        }
+
+        if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
+        	LOGGER.warning(logF.f("No se ha proporcionado URL de redireccion")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.FORBIDDEN);
+            return;
+        }
+		try {
+        	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
+        }
+        catch (final Exception e) {
+        	LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: %1s", e)); //$NON-NLS-1$
+		}
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(null, trId);
-
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
 
-		final FireSession session = SessionCollector.getFireSessionOfuscated(trId, userRef, request.getSession(false), true, false);
+		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), true, false);
     	if (session == null) {
-    		LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", trId)); //$NON-NLS-1$
-
-    		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-    		if (redirectErrorUrl != null) {
-    			try {
-                	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
-                }
-                catch (final Exception e) {
-                	LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: %1s", e)); //$NON-NLS-1$
-        		}
-				redirectToExternalUrl(redirectErrorUrl, request, response);
-    		}
-    		else {
-    			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
-    		}
+    		LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
+			redirectToExternalUrl(redirectErrorUrl, request, response);
     		return;
     	}
 
@@ -71,12 +86,12 @@ public class CancelOperationService extends HttpServlet {
 		final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			SessionCollector.removeSession(session);
-			LOGGER.warning(logF.f("No se pudo obtener la configuracion de la transaccion")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se proporcionaron datos para la conexion con el backend"); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se encontro en la sesion la URL de redireccion de la operacion")); //$NON-NLS-1$
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
-		ErrorManager.setErrorToSession(session, OperationError.OPERATION_CANCELED);
+		ErrorManager.setErrorToSession(session, FIReError.OPERATION_CANCELED);
 
 		redirectToExternalUrl(connConfig.getRedirectErrorUrl(), request, response);
 
@@ -89,9 +104,8 @@ public class CancelOperationService extends HttpServlet {
      * @param url URL a la que redirigir al usuario.
      * @param request Objeto de petici&oacute;n realizada al servlet.
      * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
-     * @throws IOException Cuando no se puede redirigir al usuario.
      */
-    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) {
 
         // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
     	final HttpSession httpSession = request.getSession(false);
@@ -99,6 +113,12 @@ public class CancelOperationService extends HttpServlet {
         	httpSession.invalidate();
         }
 
-    	response.sendRedirect(url);
+        try {
+        	response.sendRedirect(url);
+        }
+        catch (final Exception e) {
+        	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+		}
     }
 }

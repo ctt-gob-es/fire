@@ -10,17 +10,16 @@
 package es.gob.fire.server.services.storage;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.signature.ConfigManager;
 
@@ -53,7 +52,7 @@ public final class RetrieveService extends HttpServlet {
 	}
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		LOGGER.fine("== INICIO DE LA RECUPERACION =="); //$NON-NLS-1$
 
@@ -89,13 +88,14 @@ public final class RetrieveService extends HttpServlet {
 		LOGGER.fine("== FIN DE LA RECUPERACION =="); //$NON-NLS-1$
 	}
 
-	/** Recupera la firma del servidor.
+	/**
+	 * Recupera la firma del servidor.
 	 * @param response Respuesta a la petici&oacute;n.
 	 * @param request Petici&oacute;n.
 	 * @param id Identificador del documento a recuperar.
-	 * @throws IOException Cuando ocurre un error al general la respuesta. */
+	 */
 	private static void retrieveSign(final HttpServletResponse response,
-			final HttpServletRequest request, final String id) throws IOException {
+			final HttpServletRequest request, final String id) {
 
 		LOGGER.info("Se solicita cargar el documento con identificador " + LogUtils.cleanText(id));
 
@@ -121,7 +121,18 @@ public final class RetrieveService extends HttpServlet {
 		// encuentran
 		if (data == null) {
 
-			if (HIGH_AVAILABILITY_ENABLED && TempDocumentsManager.existDocument(id)) {
+			boolean existsDocument = false;
+			if (HIGH_AVAILABILITY_ENABLED) {
+				try {
+					existsDocument = TempDocumentsManager.existDocument(id);
+				}
+				catch (final Exception e) {
+					LOGGER.log(Level.SEVERE, "Error al comprobar la existencia del documento", e); //$NON-NLS-1$
+					existsDocument = false;
+				}
+			}
+
+			if (HIGH_AVAILABILITY_ENABLED && existsDocument) {
 				try {
 					data = TempDocumentsManager.retrieveAndDeleteDocument(id);
 				}
@@ -158,22 +169,14 @@ public final class RetrieveService extends HttpServlet {
 		sendResult(response, data);
 	}
 
-    private static void sendResult(final HttpServletResponse response, final String text)
-    		throws IOException {
+    private static void sendResult(final HttpServletResponse response, final String text) {
     	response.setContentType("text/plain"); //$NON-NLS-1$
 		response.setCharacterEncoding("utf-8"); //$NON-NLS-1$
-		try (PrintWriter writer = response.getWriter()) {
-			writer.print(text);
-			writer.flush();
-		}
+		Responser.sendResult(response, text.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static void sendResult(final HttpServletResponse response, final byte[] data)
-    		throws IOException {
-    	try (OutputStream os = response.getOutputStream()) {
-    		os.write(data);
-    		os.flush();
-    	}
+    private static void sendResult(final HttpServletResponse response, final byte[] data) {
+    	Responser.sendResult(response, data);
     }
 
     /**

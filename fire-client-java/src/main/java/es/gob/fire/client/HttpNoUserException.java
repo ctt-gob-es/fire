@@ -21,6 +21,15 @@ public final class HttpNoUserException extends HttpOperationException {
 
     /**
      * El usuario no est&aacute; dado de alta en el sistema.
+     * @param code C&oacute;digo de error.
+     * @param msg Mensaje de error.
+     */
+	public HttpNoUserException(final int code, final String msg) {
+		super(code, msg);
+	}
+
+    /**
+     * El usuario no est&aacute; dado de alta en el sistema.
      * @param e Motivo del error.
      */
     public HttpNoUserException(final Throwable e) {

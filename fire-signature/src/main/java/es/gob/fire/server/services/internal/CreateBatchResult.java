@@ -9,10 +9,14 @@
  */
 package es.gob.fire.server.services.internal;
 
+import java.nio.charset.Charset;
+
+import es.gob.fire.server.connector.OperationResult;
+
 /**
  * Resultado de la operaci&oacute;n de creaci&oacute;n de un lote.
  */
-public class CreateBatchResult {
+public class CreateBatchResult  extends OperationResult {
 
 	private final String transactionId;
 
@@ -43,9 +47,13 @@ public class CreateBatchResult {
 		return new CreateBatchResult(result);
 	}
 
-	/** Obtiene el resultado de la creaci&oacute;n del lote como documento JSON. */
+	/**
+	 * Obtiene el resultado de la creaci&oacute;n del lote como documento JSON.
+	 * @param charset Juego de caracteres.
+	 * @return Resultado codificado en forma de JSON.
+	 */
 	@Override
-	public String toString() {
-		return "{\"transactionid\": \"" + this.transactionId + "\"}"; //$NON-NLS-1$ //$NON-NLS-2$
+	public byte[] encodeResult(final Charset charset) {
+		return ("{\"transactionid\": \"" + this.transactionId + "\"}").getBytes(charset); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

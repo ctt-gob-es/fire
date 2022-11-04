@@ -49,7 +49,7 @@
 		    catch (Exception e) {
 				LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
 						"Error al recuperar una firma del lote: {}", e.toString()); //$NON-NLS-1$
-		    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
+		    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8") + "&fatal=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		    	return;
 		    }
 		    

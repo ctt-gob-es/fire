@@ -25,6 +25,16 @@ namespace FIRe
         /// </summary>
 	    public HttpCertificateBlockedException():base() {
         }
+
+        /// <summary>
+        /// Se crea la excepción.
+        /// </summary>
+        /// <param name="code">Código del error.</param>
+        /// <param name="msg">Descripcion del error.</param>
+        public HttpCertificateBlockedException(int code, string msg) : base(code, msg)
+        {
+        }
+
         /// <summary>
         /// Certificado bloqueado.
         /// </summary>

@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -110,7 +109,8 @@ public class TestLoadDataService extends HttpServlet {
 			TriphaseData.parser(Base64.decode(triDataB64UrlSafe, true))
 		);
 
-		response.getOutputStream().write(result.toString().getBytes(StandardCharsets.UTF_8));
+		response.setCharacterEncoding(TestHelper.DEFAULT_ENCODING.displayName());
+		response.getOutputStream().write(result.encodeResult(TestHelper.DEFAULT_ENCODING));
 		response.flushBuffer();
 	}
 

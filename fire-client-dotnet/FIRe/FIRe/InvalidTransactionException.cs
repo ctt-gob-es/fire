@@ -27,6 +27,15 @@ namespace FIRe
         /// <summary>
         /// Se crea la excepción.
         /// </summary>
+        /// <param name="code">Código del error.</param>
+        /// <param name="msg">Descripcion del error.</param>
+        public InvalidTransactionException(int code, string msg) : base(code, msg)
+        {
+        }
+
+        /// <summary>
+        /// Se crea la excepción.
+        /// </summary>
         /// <param name="msg">Descripcion del error.</param>
         /// <param name="e">Causa del error</param>
         public InvalidTransactionException(string msg, Exception e) : base(msg, e)

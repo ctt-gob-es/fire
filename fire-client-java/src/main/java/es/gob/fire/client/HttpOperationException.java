@@ -19,8 +19,19 @@ public class HttpOperationException extends Exception {
 
     private static final long serialVersionUID = -5667976435415689416L;
 
+    private int code = -1;
+
     /**
-     * /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
+     * Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
+     * @param msg Mensaje de error.
+     */
+    public HttpOperationException(final int code, final String msg) {
+        super(msg);
+        this.code = code;
+    }
+
+    /**
+     * Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
      * @param msg Mensaje de error.
      */
     public HttpOperationException(final String msg) {
@@ -28,7 +39,7 @@ public class HttpOperationException extends Exception {
     }
 
     /**
-     * /** Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
+     * Crea la excepci&oacute;n en la operaci&oacute;n del servidor central.
      * @param e Causa del error.
      */
     protected HttpOperationException(final Throwable e) {
@@ -42,5 +53,18 @@ public class HttpOperationException extends Exception {
      */
     public HttpOperationException(final String msg, final Throwable e) {
         super(msg, e);
+    }
+
+    /**
+     * Obtiene el c&oacute;digo de error.
+     * @return C&oacute;digo de error o {@code -1} si no se ha establecido.
+     */
+    public int getCode() {
+		return this.code;
+	}
+
+    @Override
+    public String toString() {
+    	return "Error " + this.code + ": " + this.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$
     }
 }

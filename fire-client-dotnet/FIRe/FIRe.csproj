@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Certificate\HttpCertificateBlockedException.cs" />
     <Compile Include="FIRe\BatchNoSignedException.cs" />
+    <Compile Include="FIRe\ErrorResultJson.cs" />
     <Compile Include="FIRe\BatchResultJson.cs" />
     <Compile Include="FIRe\TransactionResultJson.cs" />
     <Compile Include="FIRe\InvalidBatchDocumentException.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="FIRe\FireClient.cs" />
     <Compile Include="FIRe\DuplicateDocumentException.cs" />
     <Compile Include="FIRe\NumDocumentsExceededException.cs" />
+    <Compile Include="FIReErrors.cs" />
     <Compile Include="HttpCustomErrors.cs" />
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="Base64.cs" />

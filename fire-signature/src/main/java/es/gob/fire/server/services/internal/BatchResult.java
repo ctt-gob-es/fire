@@ -15,7 +15,6 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -30,6 +29,7 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.connector.OperationResult;
 import es.gob.fire.server.services.DocInfo;
 import es.gob.fire.upgrade.GracePeriodInfo;
 
@@ -37,7 +37,7 @@ import es.gob.fire.upgrade.GracePeriodInfo;
  * Resultado de un proceso de firma de lote.
  * @author Carlos Gamuci
  */
-public class BatchResult implements Serializable {
+public class BatchResult extends OperationResult implements Serializable {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 4852042946330169315L;
@@ -78,9 +78,6 @@ public class BatchResult implements Serializable {
 	private static final String JSON_ATTR_DOC_GRACE_PERIOD = "grace"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_GP_ID = "id"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_GP_DATE = "date"; //$NON-NLS-1$
-
-
-	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private final Map<String, BatchDocumentReference> results;
 
@@ -226,6 +223,22 @@ public class BatchResult implements Serializable {
 	}
 
 	/**
+	 * Indica si la firma correspondiente a un documento del lote se recuper&oacute;
+	 * anteriormente.
+	 * @param docId Identificador del documento.
+	 * @return {@code true} en caso de que la firma ya se recuperase, {@code false}
+	 * en caso contrario.
+	 */
+	public boolean isSignRecovered(final String docId) {
+		final BatchDocumentReference docRef = this.results.get(docId);
+		if (docRef == null) {
+			return false;
+		}
+		final String error = docRef.getDetails();
+		return RECOVERED.equals(error);
+	}
+
+	/**
 	 * Indica si la firma correspondiente a un documento del lote ha fallado.
 	 * @param docId Identificador del documento.
 	 * @return {@code true} en caso de que la firma fallase, {@code false} si
@@ -276,9 +289,11 @@ public class BatchResult implements Serializable {
 	/**
 	 * Compone un objeto JSON con la informaci&oacute;n y el resultado de
 	 * la operaci&oacute;n de firma de lote.
+	 * @param charset Juego de caracteres.
 	 * @return Resultado codificado en forma de JSON.
 	 */
-	public byte[] encode() {
+	@Override
+	public byte[] encodeResult(final Charset charset) {
 
 		// Si no tenemos resultado, devolvemos un JSON con la informacion que se
 		// dispone de la transaccion
@@ -308,7 +323,7 @@ public class BatchResult implements Serializable {
 		// Construimos la respuesta
 		byte[] result = null;
 		try (	final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				final Writer w = new OutputStreamWriter(baos, DEFAULT_CHARSET);
+				final Writer w = new OutputStreamWriter(baos, charset);
 				final JsonWriter json = Json.createWriter(w);) {
 
 			final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
@@ -339,12 +354,6 @@ public class BatchResult implements Serializable {
 					e);
 		}
 		return result;
-	}
-
-	@Override
-	public String toString() {
-		final byte[] encoded = encode();
-		return encoded != null ? new String(encoded, DEFAULT_CHARSET) : null;
 	}
 
 	private static class BatchDocumentReference implements Serializable {

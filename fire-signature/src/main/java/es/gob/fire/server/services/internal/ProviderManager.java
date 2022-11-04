@@ -39,7 +39,12 @@ public class ProviderManager {
 	/** Nombre del proveedor local. */
 	public static final String PROVIDER_NAME_LOCAL = "local"; //$NON-NLS-1$
 
+	/** Informaci&oacute;n para la presentaci&oacute;n y comportamiento del conector de un proveedor */
+	private static Map<String, ProviderInfo> providersInfo = new HashMap<>();
+
+	/** Configuraci&oacute;n de un conector para el acceso a su servicio. */
 	private static Map<String, Properties> providersConfig = new HashMap<>();
+
 
 	/**
 	 * Obtenemos el conector necesario para operar con un proveedor de firma en la nube.
@@ -134,6 +139,10 @@ public class ProviderManager {
 	 */
 	public static ProviderInfo getProviderInfo(final String providerName) {
 
+		if (providersInfo.containsKey(providerName)) {
+			return providersInfo.get(providerName);
+		}
+
 		Properties infoProperties;
 		if (PROVIDER_NAME_LOCAL.equalsIgnoreCase(providerName)) {
 			infoProperties = loadLocalProviderInfoProperties();
@@ -155,7 +164,13 @@ public class ProviderManager {
 			}
 
 		}
-		return new ProviderInfo(providerName, infoProperties);
+
+		// Contruimos la informacion del proveedor y la almacenamos en la coleccion
+		// para evitar su recarga
+		final ProviderInfo providerInfo = new ProviderInfo(providerName, infoProperties);
+		providersInfo.put(providerName, providerInfo);
+
+		return providerInfo;
 	}
 
 	/**

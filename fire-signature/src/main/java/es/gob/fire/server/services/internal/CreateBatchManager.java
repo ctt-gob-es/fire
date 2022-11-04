@@ -10,7 +10,6 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,9 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
-import es.gob.fire.server.services.FIReServiceOperation;
-import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.upgrade.UpgraderUtils;
@@ -48,7 +47,6 @@ public class CreateBatchManager {
 		throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
-		final String op			= params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 		final String appId		= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String subjectId	= params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String cop		= params.getParameter(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION);
@@ -63,29 +61,25 @@ public class CreateBatchManager {
 		// Comprobamos que se hayan prorcionado los parametros indispensables
 		if (subjectId == null || subjectId.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que crea el lote")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se ha proporcionado el identificador del usuario que crea el lote"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_USER_ID_NEEDED);
 			return;
 		}
 
 		if (algorithm == null || algorithm.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado el algoritmo de firma")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se ha proporcionado el algoritmo de firma"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_SIGNATURE_ALGORITHM_NEEDED);
 			return;
 		}
 
 		if (cop == null || cop.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha indicado la operacion de firma a realizar")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_SIGNATURE_OPERATION_NEEDED);
 			return;
 		}
 
 		if (format == null || format.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha indicado el formato de firma")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se ha indicado el formato de firma"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_SIGNATURE_FORMAT_NEEDED);
 			return;
 		}
 
@@ -100,13 +94,11 @@ public class CreateBatchManager {
 			extraParams = ServiceUtil.base642Properties(extraParamsB64);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(logF.f("Se ha proporcionado un extraParam mal formados: ") + e); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
+			LOGGER.warning(logF.f("Se ha proporcionado un extraParam mal formado: ") + e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_SIGNATURE_PARAMS_INVALID);
 			return;
 		}
 		final String filters = MiniAppletHelper.extractCertFiltersParams(extraParams);
-
 
 		TransactionConfig connConfig = null;
 		if (configB64 != null && configB64.length() > 0) {
@@ -115,16 +107,14 @@ public class CreateBatchManager {
 			}
 			catch(final Exception e) {
 				LOGGER.warning(logF.f("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma"); //$NON-NLS-1$
+				Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
 				return;
 			}
 		}
 
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning(logF.f("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_URL_ERROR_REDIRECION_NEEDED);
 			return;
 		}
 
@@ -153,7 +143,6 @@ public class CreateBatchManager {
 		LOGGER.info(logF.f("Iniciada transaccion de tipo LOTE")); //$NON-NLS-1$
 
         // Guardamos los datos recibidos en la sesion
-        session.setAttribute(ServiceParams.SESSION_PARAM_OPERATION, op);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ID, appId);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appName);
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_TITLE, appTitle);
@@ -167,7 +156,7 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_ID, transactionId);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
-        session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.valueOf(FIReServiceOperation.parse(op)).toString());
+        session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.BATCH);
 
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
@@ -179,13 +168,12 @@ public class CreateBatchManager {
         catch (final IllegalAccessException | IllegalArgumentException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$
         	// En el mensaje de error se indica que no existe para no revelar si no existe simplemente es un tema de permisos
-        	response.sendError(HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorCode(),
-        			HttpCustomErrors.INVALID_DOCUMENT_MANAGER.getErrorDescription());
+        	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_MANAGER_INVALID);
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No se ha podido cargar el gestor de documentos"); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
         	return;
         }
 
@@ -197,15 +185,6 @@ public class CreateBatchManager {
 
 		LOGGER.info(logF.f("Se devuelve el identificador de sesion a la aplicacion")); //$NON-NLS-1$
 
-        sendResult(response, new CreateBatchResult(transactionId));
-	}
-
-	/** Env&iacute;a el resultado al componente cliente. */
-	private static void sendResult(final HttpServletResponse response, final CreateBatchResult result) throws IOException {
-        response.setContentType("application/json"); //$NON-NLS-1$
-        final PrintWriter out = response.getWriter();
-        out.print(result.toString());
-        out.flush();
-        out.close();
+		Responser.sendResult(response, new CreateBatchResult(transactionId));
 	}
 }

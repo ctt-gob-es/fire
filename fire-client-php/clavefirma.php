@@ -8,9 +8,9 @@
 
 	// Definimos los parametros de conexion SSL (https://curl.haxx.se/libcurl/c/easy_setopt_options.html)
 	$client_ssl_curl_options = array(
-		CURLOPT_SSLCERT => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_public_cert.pem",
+		CURLOPT_SSLCERT => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_public_cert.pem",
 		CURLOPT_SSLCERTTYPE => "PEM",
-		CURLOPT_SSLKEY => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_private_key.pem",
+		CURLOPT_SSLKEY => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_private_key.pem",
 		CURLOPT_SSLKEYTYPE => "PEM",
 		CURLOPT_SSLKEYPASSWD => "12341234",
 		CURLOPT_SSL_VERIFYPEER => 0
@@ -452,7 +452,6 @@
 		curl_setopt_array($ch, $curl_options);
 		
 		$response = curl_exec($ch);
-
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 				
 		curl_close($ch);

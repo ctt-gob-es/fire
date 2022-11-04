@@ -10,9 +10,9 @@
 package es.gob.fire.server.connector;
 
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import javax.json.Json;
@@ -21,7 +21,7 @@ import javax.json.JsonReader;
 
 /** Resultado de una operaci&oacute;n de carga de datos a firmar.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
-public final class LoadResult {
+public final class LoadResult extends OperationResult {
 
     private final String transactionId;
     private final String redirectUrl;
@@ -40,9 +40,7 @@ public final class LoadResult {
             );
         }
 
-        final JsonReader jsonReader = Json.createReader(new InputStreamReader(
-        		new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)),
-        		StandardCharsets.UTF_8));
+        final JsonReader jsonReader = Json.createReader(new StringReader(json));
         final JsonObject jsonObject = jsonReader.readObject();
         final String id = jsonObject.getString("transacionid"); //$NON-NLS-1$
         final String redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
@@ -116,7 +114,7 @@ public final class LoadResult {
     }
 
     @Override
-    public String toString() {
+    public byte[] encodeResult(final Charset charset) {
         final StringBuilder sb = new StringBuilder("{\n  \"transacionid\":\""); //$NON-NLS-1$
         sb.append(getTransactionId());
         sb.append("\",\n  \"redirecturl\":\""); //$NON-NLS-1$
@@ -124,6 +122,6 @@ public final class LoadResult {
         sb.append("\",\n  \"triphasedata\":\""); //$NON-NLS-1$
         sb.append(Base64.encode(getTriphaseData().toString().getBytes(StandardCharsets.UTF_8)));
         sb.append("\"\n}"); //$NON-NLS-1$
-        return sb.toString();
+        return sb.toString().getBytes(charset);
     }
 }

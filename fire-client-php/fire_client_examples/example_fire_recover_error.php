@@ -7,14 +7,16 @@
 	// Cargamos el componente distribuido de FIRe
 	include '../fire_client.php';
 
-
-	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
-	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
-	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "e0000792-5e22-4bf6-b5de-04b3b5ce66b3";	// Identificador de la transaccion
+	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
+	$subjectId = $_GET["sid"];		// DNI de la persona
 	
-
+	session_start();
+	$transactionId = $_SESSION["trid"]; // Identificador de la transaccion
+	unset($_SESSION["trid"]);
+	
 	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+	
+	// Funcion del API de FIRe para recuperar informacion del error producido en la transaccion
 	$error;
 	try {
 		$error = $fireClient->recoverError(
@@ -23,7 +25,7 @@
 		);
 	}
 	catch(Exception $e) {
-		echo 'Error: ',  $e->getMessage(), "\n";
+		echo "Error ", $e->getCode(), ": ", $e->getMessage(), "\n";
 		return;
 	}
 
@@ -32,6 +34,9 @@
 	echo "<br><b>Codigo de error:</b><br>".$error->errorCode;
 	echo "<br><b>Mensaje de error:</b><br>".$error->errorMessage;
 
+	echo "<br><br><br>";
+	echo "<a href=\"example_fire_sign.php\">Nueva firma >></a><br>";
+	echo "<a href=\"example_fire_create_batch.php\">Nueva firma de lote >></a>";
  ?>
  </body>
 </html>

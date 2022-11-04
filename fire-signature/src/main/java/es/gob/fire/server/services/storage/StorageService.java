@@ -11,12 +11,12 @@ package es.gob.fire.server.services.storage;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,12 +63,22 @@ public final class StorageService extends HttpServlet {
 	}
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		LOGGER.fine(" == INICIO GUARDADO == "); //$NON-NLS-1$
 
+
+
 		// Leemos la entrada
-		final RequestParameters params = RequestParameters.extractParameters(request);
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));
+			sendError(response, ErrorManager.ERROR_EXTRACTING_PARAMETERS);
+			return;
+		}
 
 		final String operation = params.get(PARAMETER_NAME_OPERATION);
 		final String syntaxVersion = params.get(PARAMETER_NAME_SYNTAX_VERSION);
@@ -78,43 +88,67 @@ public final class StorageService extends HttpServlet {
 		response.setContentType("text/plain"); //$NON-NLS-1$
 		response.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
-		final PrintWriter out = response.getWriter();
 		if (operation == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_OPERATION_NAME));
-			out.println(ErrorManager.genError(ErrorManager.ERROR_MISSING_OPERATION_NAME));
-			out.flush();
+			sendError(response, ErrorManager.ERROR_MISSING_OPERATION_NAME);
+
 			return;
 		}
 		if (syntaxVersion == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
-			out.println(ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
-			out.flush();
+			sendError(response, ErrorManager.ERROR_MISSING_SYNTAX_VERSION);
 			return;
 		}
 		if (id == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
-			out.println(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA_ID));
-			out.flush();
+			sendError(response, ErrorManager.ERROR_MISSING_DATA_ID);
 			return;
 		}
 
-		storeSign(out, id, operation, params);
+		storeSign(response, id, operation, params);
 
 		LOGGER.fine("== FIN DEL GUARDADO =="); //$NON-NLS-1$
 	}
 
+	private static void sendError(final HttpServletResponse response, final String errorCode) {
+
+		try (final PrintWriter out = response.getWriter()) {
+			out.println(ErrorManager.genError(errorCode));
+			out.flush();
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "No se pudo devolver una respuesta por un error en el flujo de salida", e); //$NON-NLS-1$
+		}
+	}
+
+	private static void sendResult(final HttpServletResponse response, final String responseText) {
+
+		try (final PrintWriter out = response.getWriter()) {
+			out.println(responseText);
+			out.flush();
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "No se pudo devolver una respuesta por un error en el flujo de salida", e); //$NON-NLS-1$
+		}
+	}
+
 	/** Almacena una firma en servidor.
-	 * @param out Flujo de datos para la respuesta a la petici&oacute;n.
+	 * @param response Respuesta a la petici&oacute;n.
 	 * @param id Identificador de los datos a guardar.
 	 * @param operation Operacion solicitada. Debe ser #StorageService.OPERATION_STORE.
 	 * @param params Par&aacute;metros de la petici&oacute;n.
 	 * @throws IOException Cuando ocurre un error al general la respuesta. */
-	private static void storeSign(final PrintWriter out, final String id, final String operation, final Map<String, String> params) throws IOException {
+	private static void storeSign(final HttpServletResponse response, final String id, final String operation, final Map<String, String> params) {
 
 		LOGGER.info("Se solicita guardar un documento con el identificador: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
 		// Si no se indican los datos, se transmite el error en texto plano a traves del fichero generado
-		String dataText = URLDecoder.decode(params.get(PARAMETER_NAME_DATA), DEFAULT_ENCODING);
+		String dataText;
+		try {
+			dataText = URLDecoder.decode(params.get(PARAMETER_NAME_DATA), DEFAULT_ENCODING);
+		} catch (final UnsupportedEncodingException e1) {
+			dataText = params.get(PARAMETER_NAME_DATA);
+		}
 		if (dataText == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA));
 			dataText = ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA);
@@ -145,7 +179,7 @@ public final class StorageService extends HttpServlet {
 				TempDocumentsManager.storeDocument(id, dataText.getBytes(), true);
 			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE, "Error al guardar el temporal para la comunicacion con el Cliente @firma", e); //$NON-NLS-1$
-				out.println(ErrorManager.genError(ErrorManager.ERROR_COMMUNICATING_WITH_WEB));
+				sendError(response, ErrorManager.ERROR_COMMUNICATING_WITH_WEB);
 				return;
 			}
 
@@ -159,6 +193,6 @@ public final class StorageService extends HttpServlet {
 
 		}
 
-		out.print(SUCCESS);
+		sendResult(response, SUCCESS);
 	}
 }

@@ -71,9 +71,6 @@ public class ServiceParams {
     /** Atributo usado en el env&iacute;o de datos HTTP con el certificado de firma. */
     public static final String HTTP_ATTR_CERT = "cert"; //$NON-NLS-1$
 
-
-    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de operaci&oacute;n. */
-    public static final String SESSION_PARAM_OPERATION = "op"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de aplicaci&oacute;n. */
     public static final String SESSION_PARAM_APPLICATION_ID = "appid"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el nombre de aplicaci&oacute;n. */
@@ -155,9 +152,6 @@ public class ServiceParams {
 
     /** Valor del parametro de actualizacion que determina que la firma debe validarse. */
     public static final String UPGRADE_VERIFY = "verify"; //$NON-NLS-1$
-
-    /** Identificador de operaci&oacute;n de firma de lotes. */
-    public static final String OPERATION_BATCH = "batch"; //$NON-NLS-1$
 
     public static final String TRANSACTION_TYPE_SIGN = "1"; //$NON-NLS-1$
     public static final String TRANSACTION_TYPE_BATCH = "2"; //$NON-NLS-1$

@@ -10,16 +10,15 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 
 
@@ -52,13 +51,13 @@ public class RecoverBatchSignatureManager {
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        	Responser.sendError(response, FIReError.PARAMETER_TRANSACTION_ID_NEEDED);
             return;
         }
 
         if (docId == null || docId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID del documento")); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_ID_NEEDED);
             return;
         }
 
@@ -68,7 +67,7 @@ public class RecoverBatchSignatureManager {
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
+    		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
     		return;
         }
 
@@ -80,8 +79,7 @@ public class RecoverBatchSignatureManager {
         // Comprobamos que previamente se haya recuperado el resultado global del lote
         if (!Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_SIGNED))) {
         	LOGGER.severe(logF.f("Se ha solicitado recuperar una firma de un lote antes que el resultado de un lote")); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.BATCH_NO_SIGNED.getErrorCode(),
-        			HttpCustomErrors.BATCH_NO_SIGNED.getErrorDescription());
+        	Responser.sendError(response, FIReError.BATCH_NO_SIGNED);
         	return;
         }
 
@@ -91,12 +89,13 @@ public class RecoverBatchSignatureManager {
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
         	SessionCollector.removeSession(session);
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
-        	sendResult(
+        	Responser.sendError(
         			response,
+        			FIReError.BATCH_SIGNING,
         			new TransactionResult(
         					TransactionResult.RESULT_TYPE_BATCH_SIGN,
         					Integer.parseInt(errType),
-        					errMessage).encodeResult());
+        					errMessage));
         	return;
         }
 
@@ -107,33 +106,35 @@ public class RecoverBatchSignatureManager {
         if (batchResult == null || batchResult.documentsCount() == 0) {
             LOGGER.severe(logF.f("No se han encontrado documentos registrados en el lote")); //$NON-NLS-1$
         	SessionCollector.removeSession(session);
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-        			buildErrorMessage(OperationError.INVALID_STATE));
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
         	return;
         }
 
-        // Si fallo la operacion de firma o la firma ya se recupero (momento en el
-        // que se marca como erroneo el resultado), se notifica un error en la operacion
+        // Si la firma ya se recupero, se notifica un error en la operacion
+        if (batchResult.isSignRecovered(docId)) {
+            LOGGER.severe(logF.f("El documento solicitado del lote ya se recupero")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.BATCH_RECOVERED);
+        	return;
+        }
+
+        // Si fallo la operacion de firma, se notifica un error en la operacion
         if (batchResult.isSignFailed(docId)) {
-            LOGGER.severe(logF.f("El documento solicitado ya se recupero o no se firmo correctamente")); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorCode(),
-        			HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorDescription());
+            LOGGER.severe(logF.f("El documento solicitado del lote no se firmo correctamente")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.BATCH_SIGNING);
         	return;
         }
 
         // Si para recuperar la firma hay que esperar un periodo de gracia, se notifica un error en la operacion
         if (batchResult.needWaitGracePeriod(docId)) {
-            LOGGER.info(logF.f("El documento solicitado no estara disponible hasta esperar un periodo de gracia")); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorCode(),
-        			HttpCustomErrors.BATCH_DOCUMENT_FAILED.getErrorDescription());
+            LOGGER.info(logF.f("El documento solicitado del lote no estara disponible hasta esperar un periodo de gracia")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.BATCH_DOCUMENT_GRACE_PERIOD);
         	return;
         }
 
         final String docFilename = batchResult.getDocumentReference(docId);
         if (docFilename == null) {
             LOGGER.severe(logF.f("El documento solicitado no estaba en el lote de firma")); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.INVALID_BATCH_DOCUMENT.getErrorCode(),
-        			HttpCustomErrors.INVALID_BATCH_DOCUMENT.getErrorDescription());
+            Responser.sendError(response, FIReError.BATCH_INVALID_DOCUMENT);
         	return;
         }
 
@@ -149,8 +150,7 @@ public class RecoverBatchSignatureManager {
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SIGNLOGGER.register(session, false, docId);
         	SessionCollector.commit(session);
-        	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT,
-        			"No se encuentra el resultado de la firma del documento. Es posible que haya caducado o que ya se hubiese recuperado."); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.TIMEOUT);
         	return;
         }
 
@@ -171,22 +171,7 @@ public class RecoverBatchSignatureManager {
 
         LOGGER.fine(logF.f("Se devuelve el resultado de la firma")); //$NON-NLS-1$
 
-        sendResult(response, signature);
-	}
-
-	private static String buildErrorMessage(final OperationError error) {
-		return buildErrorMessage(Integer.toString(error.getCode()), error.getMessage());
-	}
-
-	private static String buildErrorMessage(final String code, final String message) {
-		return "ERR-" + code + ":" + message; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result);
-        output.flush();
-        output.close();
+        Responser.sendResult(response, signature);
 	}
 
 	/**

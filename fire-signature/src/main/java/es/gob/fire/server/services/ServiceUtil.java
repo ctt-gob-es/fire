@@ -26,9 +26,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.signature.ApplicationChecking;
 import es.gob.fire.signature.ApplicationsDAO;
 import es.gob.fire.signature.ConfigManager;
 
@@ -108,7 +108,7 @@ public final class ServiceUtil {
      * @return Lista de los certificados X509 contenidos en la cabecera HTTP o
      * {@code null} si no hay ninguno.
      */
-    static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request){
+    static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request) {
 
     	X509Certificate[] certificates = getCertificatesFromAttribute(request);
     	if (certificates == null) {
@@ -156,6 +156,7 @@ public final class ServiceUtil {
      * peticiones. Se deber&aacute; indicar el nombre de la propiedad de la cabecera en la que
      * se transmiten los certificados.
      * @param request Petici&oacute;n con los certificados.
+     * @param propName Nombre de la propiedad de la que extraer los certificados.
      * @return Lista de los certificados X509 enviados o {@code null} se enviaron en la propiedad
      * de la cabecera.
      */
@@ -184,6 +185,70 @@ public final class ServiceUtil {
         return certificates;
     }
 
+    /**
+	 * Valida si la aplicaci&oacute;n indicada existe y si se encuentra activada.
+	 * @param appId Identificador de la aplicaci&oacute;n.
+	 * @return Nombre de la aplicaci&oacute;n o {@code null} si no est&aacute; definido.
+	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
+     * @throws InvalidApplicationException Cuando la aplicaci&oacute;n no existe.
+	 * @throws InactiveApplicationException Cuando la aplicaci&oacute;n est&aacute; desactivada
+	 */
+	public static String checkValidApplication(final String appId)
+			throws DBConnectionException, InvalidApplicationException, InactiveApplicationException {
+
+		ApplicationChecking appCheck;
+		try {
+			appCheck = ApplicationsDAO.checkApplicationId(appId);
+		}
+		catch (final Exception e) {
+			throw new DBConnectionException("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
+		}
+    	if (!appCheck.isValid()) {
+    		throw new InvalidApplicationException("Se proporciono un identificador de aplicacion no valido"); //$NON-NLS-1$
+    	}
+    	if (!appCheck.isEnabled()) {
+    		throw new InactiveApplicationException("Se proporciono un identificador de aplicacion desactivada"); //$NON-NLS-1$
+    	}
+    	return appCheck.getName();
+	}
+
+	/**
+	 * Valida si el certificado que se le pasa a la petici&oacute;n tiene permisos.
+	 * Lee el certificado de la cabecera HTTP.
+	 * @param appId Identificador de la aplicaci&oacute;n.
+	 * @param certificates Listado de certificados
+	 * @throws CertificateValidationException En caso de ocurrir alg&uacute;n error o si el certificado
+	 *                                        no tiene acceso.
+	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
+	 */
+	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates)
+			throws CertificateValidationException, DBConnectionException {
+
+		if (certificates == null || certificates.length == 0 || certificates[0] == null) {
+			throw new CertificateValidationException(FIReError.UNAUTHORIZED, "No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$
+		}
+
+		try {
+			final String thumbPrint = ServiceUtil.getThumbPrint(certificates[0]);
+			ServiceUtil.checkValideThumbPrint(appId, thumbPrint);
+		}
+		catch (final NoSuchAlgorithmException e) {
+			throw new CertificateValidationException(FIReError.INTERNAL_ERROR, "El algoritmo de huella no se ha encontrado en el sistema", e);//$NON-NLS-1$
+		}
+		catch (final IllegalArgumentException e){
+			throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado", e); //$NON-NLS-1$
+		}
+		catch (final IllegalAccessException e) {
+			throw new CertificateValidationException(FIReError.UNAUTHORIZED, "Acceso no permitido. El certificado utilizado no tiene permiso para acceder", e); //$NON-NLS-1$
+		}
+		catch (final SQLException e) {
+			throw new DBConnectionException ("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
+		}
+		catch (final Exception e) {
+			throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID, "Ha ocurrido un error al decodificar el certificado", e); //$NON-NLS-1$
+		}
+	}
+
     /** Devuelve la huella del certificado en Base64.
      * @param cert Certificado del que extraer su huella.
      * @return Huella obtenida codificada en Base64.
@@ -203,74 +268,12 @@ public final class ServiceUtil {
 	 * @throws IOException Si hay un error de entrada o salida.
 	 * @throws CertificateException Si hay un problema al decodificar el certificado.
 	 * @throws NoSuchAlgorithmException No se encuentra el algoritmo en el sistema.
-	 * @throws DBConnectionException No se ha podido inicializar la conexi&oacute;n con la base de datos.
 	 */
 	private static void checkValideThumbPrint(final String appId, final String thumbPrint) throws SQLException,
 	                                                                          IllegalAccessException, CertificateException,
-	                                                                          NoSuchAlgorithmException, IOException,
-	                                                                          DBConnectionException {
+	                                                                          NoSuchAlgorithmException, IOException {
 		if (!ApplicationsDAO.checkThumbPrint(appId, thumbPrint)) {
     		throw new IllegalAccessException("El certificado utilizado no tiene permiso para acceder"); //$NON-NLS-1$
     	}
-	}
-
-	/**
-	 * Valida si el certificado que se le pasa a la petici&oacute;n tiene permisos.
-	 * Lee el certificado de la cabecera HTTP.
-	 * @param appId Identificador de la aplicaci&oacute;n.
-	 * @param certificates Listado de certificados
-	 * @throws CertificateValidationException En caso de ocurrir alg&uacute;n error o si el certificado
-	 *                                        no tiene acceso.
-	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
-	 */
-	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates)
-			throws CertificateValidationException, DBConnectionException {
-
-		if (certificates == null || certificates.length == 0 || certificates[0] == null) {
-			throw new CertificateValidationException (HttpServletResponse.SC_UNAUTHORIZED, "No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$
-		}
-
-		try {
-			final String thumbPrint = ServiceUtil.getThumbPrint(certificates[0]);
-			ServiceUtil.checkValideThumbPrint(appId, thumbPrint);
-		}
-		catch (final NoSuchAlgorithmException e) {
-			throw new CertificateValidationException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "El algoritmo de huella no se ha encontrado en el sistema", e);//$NON-NLS-1$
-		}
-		catch (final IllegalArgumentException e){
-			throw new CertificateValidationException(HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado", e); //$NON-NLS-1$
-		}
-		catch (final IllegalAccessException e) {
-			throw new CertificateValidationException(HttpServletResponse.SC_UNAUTHORIZED, "Acceso no permitido. El certificado utilizado no tiene permiso para acceder", e); //$NON-NLS-1$
-		}
-		catch (final SQLException e) {
-			throw new DBConnectionException ("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
-		}
-		catch (final DBConnectionException e) {
-			throw new DBConnectionException ("Ha ocurrido un error al conectar con la base de datos", e); //$NON-NLS-1$
-		}
-		catch (final Exception e) {
-			throw new CertificateValidationException(HttpServletResponse.SC_BAD_REQUEST, "Ha ocurrido un error al decodificar el certificado", e); //$NON-NLS-1$
-		}
-	}
-
-	/**
-	 * Valida que la operaci&oacute;n de cofirma o contrafirma se permita y sea compatible con el formato.
-	 * @param format formato con el que cofirmar o contrafirmar
-	 * @param cop operacion a realizar
-	 * @throws UnsupportedOperationException Cuando se configur&oacute; una operaci&oacute;n no soportada.
-	 */
-	public static void checkMultiSignatureCompatibility(final String format, final String cop) throws UnsupportedOperationException {
-		if (SignOperation.COSIGN.toString().equals(cop)
-        		|| SignOperation.COUNTERSIGN.toString().equals(cop)) {
-	        if (SignatureFormat.FACTURAE.toString().equals(format)) {
-	        	throw new UnsupportedOperationException("No se permiten multifirmas para el formato FacturaE"); //$NON-NLS-1$
-	        } else if (SignatureFormat.XADES_ASIC_S.toString().equals(format)
-	        		|| SignatureFormat.CADES_ASIC_S.toString().equals(format)) {
-	        	throw new UnsupportedOperationException("Operacion no soportada para el formato seleccionado"); //$NON-NLS-1$
-	        } else if (SignOperation.COUNTERSIGN.toString().equals(cop) && SignatureFormat.PADES.toString().equals(format)) {
-	        	throw new UnsupportedOperationException("El formato PDF no permite contrafirmas"); //$NON-NLS-1$
-	        }
-		}
 	}
 }

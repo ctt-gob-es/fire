@@ -11,17 +11,20 @@ package es.gob.fire.server.services.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+
+import es.gob.fire.server.connector.OperationResult;
 
 /**
  * Resultado de una operaci&oacute;n de carga de datos a firmar.
  *
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
  */
-public final class SignOperationResult {
+public final class SignOperationResult extends OperationResult {
 
     private final String transactionId;
     private final String redirectUrl;
@@ -108,15 +111,18 @@ public final class SignOperationResult {
         return this.redirectUrl;
     }
 
-
+	/**
+	 * Obtiene el resultado de la operaci&oacute;n de firma como documento JSON.
+	 * @param charset Juego de caracteres.
+	 * @return Resultado codificado en forma de JSON.
+	 */
     @Override
-    public String toString() {
+    public byte[] encodeResult(final Charset charset) {
         final StringBuilder sb = new StringBuilder("{\n  \"transactionid\":\""); //$NON-NLS-1$
         sb.append(getTransactionId());
         sb.append("\",\n  \"redirecturl\":\""); //$NON-NLS-1$
         sb.append(getRedirectUrl());
         sb.append("\"\n}"); //$NON-NLS-1$
-        return sb.toString();
+        return sb.toString().getBytes(charset);
     }
-
 }

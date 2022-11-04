@@ -13,7 +13,7 @@ package es.gob.fire.server.services;
  * Identificadores de errores HTTP que se pueden devolver a los componentes distribuidos
  * para se&ntilde;alar casos concretos de error.
  */
-public enum HttpCustomErrors {
+enum HttpCustomErrors {
 
 	/** Identifica los casos en los que un usuario no tiene certifciados del tipo indicado. */
 	NO_CERTS(522, "El usuario no tiene certificados"), //$NON-NLS-1$

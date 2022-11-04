@@ -10,20 +10,19 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.document.FireAsyncDocumentManager;
 import es.gob.fire.server.services.FIReDocumentManagerFactory;
-import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
@@ -64,7 +63,7 @@ public class RecoverUpdatedSignManager {
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (asyncId == null || asyncId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID devuelto por la plataforma para la recuperacion de la firma")); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        	Responser.sendError(response, FIReError.PARAMETER_ASYNC_ID_NEEDED);
             return;
         }
 
@@ -78,7 +77,7 @@ public class RecoverUpdatedSignManager {
     		}
     		catch (final Exception e) {
             	LOGGER.log(Level.SEVERE, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
                 return;
 			}
     	}
@@ -90,8 +89,7 @@ public class RecoverUpdatedSignManager {
 			}
 			catch(final Exception e) {
 				LOGGER.warning(logF.f("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-						"Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma"); //$NON-NLS-1$
+				Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
 				return;
 			}
 		}
@@ -103,22 +101,22 @@ public class RecoverUpdatedSignManager {
         try {
         	final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator(logF);
         	upgradeResult = validator.recoverUpgradedSignature(asyncId, upgrade, upgraterConfig);
+        } catch (final ValidatorException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("Error interno al cargar el conector con el sistema de actualizacion de firmas"), e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+        	return;
         } catch (final ConnectionException e) {
 			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$
 			AlarmsManager.notify(Alarm.CONNECTION_VALIDATION_PLATFORM);
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	Responser.sendError(response, FIReError.UPGRADING_SIGNATURE);
         	return;
-		} catch (final ValidatorException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("Error interno al cargar el conector con el sistema de actualizacion de firmas"), e); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        	return;
-        } catch (final UpgradeException e) {
+		} catch (final UpgradeException e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error devuelto por la plataforma de actualizacion"), e); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
+        	Responser.sendError(response, FIReError.UPGRADING_SIGNATURE);
         	return;
-        } catch (final IOException e) {
+        } catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error de conexion al recuperar la firma actualizada"), e); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	Responser.sendError(response, FIReError.UPGRADING_SIGNATURE);
         	return;
         }
 
@@ -130,7 +128,7 @@ public class RecoverUpdatedSignManager {
         // Comprobamos si era necesario recuperar la firma totalmente actualizada y si se ha hecho asi
         if (!allowPartialUpgrade && upgradeResult.getState() == State.PARTIAL) {
         	LOGGER.log(Level.SEVERE, logF.f("La aplicacion requiere una actualizacion completa y se obtuvo una actualizacion parcial")); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.UPGRADING_ERROR.getErrorCode());
+        	Responser.sendError(response, FIReError.UPGRADING_SIGNATURE);
         	return;
         }
 
@@ -149,7 +147,7 @@ public class RecoverUpdatedSignManager {
 			}
             final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN);
             result.setGracePeriod(upgradeResult.getGracePeriodInfo());
-            sendResult(response, result);
+            Responser.sendResult(response, result);
             return;
         }
 
@@ -161,7 +159,7 @@ public class RecoverUpdatedSignManager {
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se pudo almacenar la firma con el gestor de documentos indicado"), e); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.SAVING_ERROR.getErrorCode());
+        	Responser.sendError(response, FIReError.SAVING_SIGNATURE);
         	return;
 		}
 
@@ -173,7 +171,7 @@ public class RecoverUpdatedSignManager {
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("No se pudo almacenar la firma actualizada en el almacen temporal"), e); //$NON-NLS-1$
-            	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            	Responser.sendError(response, FIReError.INTERNAL_ERROR);
             	return;
 			}
         }
@@ -189,7 +187,7 @@ public class RecoverUpdatedSignManager {
         LOGGER.info(logF.f("Se devuelve el estado de la actualizacion asincrona")); //$NON-NLS-1$
 
         // Enviamos la firma electronica como resultado
-        sendResult(response, result);
+        Responser.sendResult(response, result);
 	}
 
 	/**
@@ -276,13 +274,5 @@ public class RecoverUpdatedSignManager {
         	throw new IOException("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
         }
         return docManager;
-	}
-
-	private static void sendResult(final HttpServletResponse response, final TransactionResult result) throws IOException {
-		// El servicio devuelve el resultado de la operacion
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result.encodeResult());
-        output.flush();
-        output.close();
 	}
 }

@@ -177,7 +177,7 @@ namespace FIRe
             try
             {
                 // Generamos la respuesta del servidor
-                HttpWebResponse response = ConnectionManager.connectByPost(url, urlParameters, null);
+                HttpWebResponse response = ConnectionManager.ConnectByPost(url, urlParameters, null);
                 // Recibimos el stream de la respuesta
                 Stream dataStream = response.GetResponseStream();
                 // Abrimos el stream

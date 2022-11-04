@@ -10,14 +10,13 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 
@@ -51,7 +50,7 @@ public class RecoverSignResultManager {
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        	Responser.sendError(response, FIReError.PARAMETER_TRANSACTION_ID_NEEDED);
             return;
         }
 
@@ -61,7 +60,7 @@ public class RecoverSignResultManager {
         FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
+        	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
     		return;
         }
 
@@ -75,16 +74,12 @@ public class RecoverSignResultManager {
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
         	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
-        	SIGNLOGGER.register(session, false, null);
-        	TRANSLOGGER.register(session, false);
-        	SessionCollector.removeSession(session);
-        	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
-        	sendResult(
-        			response,
-        			new TransactionResult(
-        					TransactionResult.RESULT_TYPE_SIGN,
-        					Integer.parseInt(errType),
-        					errMessage).encodeResult());
+        	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma: " + errMessage)); //$NON-NLS-1$
+    		SIGNLOGGER.register(session, false, null);
+    		TRANSLOGGER.register(session, false);
+    		SessionCollector.removeSession(session);
+        	final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, Integer.parseInt(errType), errMessage);
+        	Responser.sendError(response, FIReError.SIGNING, result);
         	return;
         }
 
@@ -96,10 +91,10 @@ public class RecoverSignResultManager {
         }
         catch (final Exception e) {
         	LOGGER.warning(logF.f("No se encuentra el resultado de la operacion: " + e)); //$NON-NLS-1$
-        	SIGNLOGGER.register(session, false, null);
-        	TRANSLOGGER.register(session, false);
-        	SessionCollector.removeSession(session);
-        	response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "Ha caducado la sesion"); //$NON-NLS-1$
+    		SIGNLOGGER.register(session, false, null);
+    		TRANSLOGGER.register(session, false);
+    		SessionCollector.removeSession(session);
+    		Responser.sendError(response, FIReError.TIMEOUT);
         	return;
         }
 
@@ -107,20 +102,12 @@ public class RecoverSignResultManager {
         SIGNLOGGER.register(session, true, null);
         TRANSLOGGER.register(session, true);
 
-        // Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
+        // Ya no necesitaremos la sesion, asi que la eliminamos del pool
         SessionCollector.removeSession(session);
 
         LOGGER.info(logF.f("Se devuelve el resultado de la operacion")); //$NON-NLS-1$
 
         // Enviamos la firma electronica como resultado
-        sendResult(response, signResult);
-	}
-
-	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
-		// El servicio devuelve el resultado de la operacion de firma.
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result);
-        output.flush();
-        output.close();
+        Responser.sendResult(response, signResult);
 	}
 }

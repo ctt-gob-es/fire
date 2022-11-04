@@ -56,42 +56,61 @@ public class TestGenerateCertificateService extends HttpServlet {
 		final String redirectErrorUrlB64UrlSafe = request.getParameter(KEY_REDIRECT_ERROR);
 
 		try {
-			TestHelper.checkCanGenerateCert(subjectId);
-		}
-		catch (final InvalidUserException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no existe", e); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendError(CustomHttpErrors.HTTP_ERROR_UNKNOWN_USER, "El usuario no existe"); //$NON-NLS-1$
+
+			try {
+				TestHelper.checkCanGenerateCert(subjectId);
+			}
+			catch (final InvalidUserException e) {
+				LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no existe", e); //$NON-NLS-1$ //$NON-NLS-2$
+				response.setStatus(CustomHttpErrors.HTTP_ERROR_UNKNOWN_USER);
+				response.getWriter().write("El usuario no existe"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+			catch (final FIReCertificateAvailableException e) {
+				LOGGER.log(Level.WARNING, "El usuario " + subjectId + " ya tiene certificado de firma", e); //$NON-NLS-1$ //$NON-NLS-2$
+				response.setStatus(CustomHttpErrors.HTTP_ERROR_EXISTING_CERTS);
+				response.getWriter().write("El usuario ya tiene certificado de firma"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+			catch (final WeakRegistryException e) {
+				LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no puede generar certificados por haber hecho un registro debil", e); //$NON-NLS-1$ //$NON-NLS-2$
+				response.setStatus(CustomHttpErrors.HTTP_ERROR_WEAK_REGISTRY);
+				response.getWriter().write("El usuario no puede generar certificados por haber hecho un registro debil"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+			catch (final Exception e) {
+				LOGGER.log(Level.WARNING, "Error en la peticion", e); //$NON-NLS-1$
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("Error en los parametros de la peticion"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+
+			final Properties p = new Properties();
+			p.put(KEY_SUBJECTID, subjectId);
+
+			final String transactionId = UUID.randomUUID().toString();
+
+
+			final File transactionFile = new File(TestHelper.getDataFolder(), transactionId);
+			try (final OutputStream fos = new FileOutputStream(transactionFile)) {
+				p.store(fos, ""); //$NON-NLS-1$
+			}
+
+			final String redirect = TestHelper.getCertificateRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe);
+
+			final GenerateCertificateResult result = new GenerateCertificateResult(transactionId, redirect);
+			response.getOutputStream().write(result.encodeResult(TestHelper.DEFAULT_ENCODING));
 			response.flushBuffer();
-			return;
 		}
-		catch (final FIReCertificateAvailableException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " ya tiene certificado de firma", e); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendError(CustomHttpErrors.HTTP_ERROR_EXISTING_CERTS, "El usuario ya tiene certificado de firma"); //$NON-NLS-1$
+		catch (final Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
 			response.flushBuffer();
-			return;
+
 		}
-		catch (final WeakRegistryException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no puede generar certificados por haber hecho un registro debil", e); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendError(CustomHttpErrors.HTTP_ERROR_WEAK_REGISTRY, "El usuario no puede generar certificados por haber hecho un registro debil"); //$NON-NLS-1$
-			response.flushBuffer();
-			return;
-		}
-
-		final Properties p = new Properties();
-		p.put(KEY_SUBJECTID, subjectId);
-
-		final String transactionId = UUID.randomUUID().toString();
-
-
-		final File transactionFile = new File(TestHelper.getDataFolder(), transactionId);
-		try (final OutputStream fos = new FileOutputStream(transactionFile)) {
-			p.store(fos, ""); //$NON-NLS-1$
-		}
-
-		final String redirect = TestHelper.getCertificateRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe);
-
-		final GenerateCertificateResult result = new GenerateCertificateResult(transactionId, redirect);
-		response.getWriter().write(result.toString());
-		response.getWriter().flush();
 	}
 }

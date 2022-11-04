@@ -9,7 +9,7 @@ public partial class example_fire_recover_batch_result : System.Web.UI.Page
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireBatchResult batchResult;
         string appId = "B244E473466F"; // Identificador de la aplicacion (dada de alta previamente en el sistema)
-        string transactionId = "e839c903-0dae-4ff9-9b52-d90f70069ce9";
+        string transactionId = "844b2698-6595-4698-a9c1-7682b7182fa7";
         try
         {
             batchResult = new FireClient(appId).recoverBatchResult(

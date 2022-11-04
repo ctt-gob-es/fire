@@ -1,19 +1,20 @@
 <html>
  <head>
-  <title>Ejemplo de recuperacion de error</title>
+  <title>Recuperar error</title>
  </head>
  <body>
  <?php 
-	// Cargamos el componente distribuido de Clave Firma
+	// Cargamos el componente distribuido de FIRe
 	include '../fire_api.php';
 	
-	$dataB64 = base64_encode("Hola Mundo!!");
+	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
+	$subjectId = $_GET["sid"];		// DNI de la persona
 	
-	$appId = "B244E473466F";	// Identificador de aplicacion
-	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "71a0077b-3869-4374-b8ce-f64244ce9c50";	// Identificador de la transaccion
+	session_start();
+	$transactionId = $_SESSION["trid"]; // Identificador de la transaccion
+	unset($_SESSION["trid"]);
 	
-	// Funcion del API de Clave Firma para cargar los datos a firmar
+	// Funcion del API de FIRe para recuperar informacion del error producido en la transaccion
 	$error;
 	try {
 		$error = recoverError(
@@ -23,7 +24,7 @@
 		);
 	}
 	catch(Exception $e) {
-		echo 'Error: ',  $e->getMessage(), "\n";
+		echo "Error ", $e->getCode(), ": ", $e->getMessage(), "\n";
 		return;
 	}
 
@@ -32,6 +33,9 @@
 	echo "<br><b>Codigo de error:</b><br>".$error->errorCode;
 	echo "<br><b>Mensaje de error:</b><br>".$error->errorMessage;
 
+	echo "<br><br><br>";
+	echo "<a href=\"example_fire_sign.php\">Nueva firma >></a><br>";
+	echo "<a href=\"example_fire_create_batch.php\">Nueva firma de lote >></a>";
  ?>
  </body>
 </html>

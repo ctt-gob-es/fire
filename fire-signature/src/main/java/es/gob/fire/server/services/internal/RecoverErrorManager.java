@@ -10,13 +10,13 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 
 
 /**
@@ -46,7 +46,7 @@ public class RecoverErrorManager {
         // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        	Responser.sendError(response, FIReError.PARAMETER_TRANSACTION_ID_NEEDED);
             return;
         }
 
@@ -56,7 +56,8 @@ public class RecoverErrorManager {
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		sendResult(response, buildErrorResult(session, OperationError.INVALID_SESSION));
+    		final TransactionResult result = buildErrorResult(session, FIReError.INVALID_TRANSACTION);
+    		Responser.sendError(response, FIReError.INVALID_TRANSACTION, result);
     		return;
         }
 
@@ -68,23 +69,23 @@ public class RecoverErrorManager {
         	// la firma o emitir nuevos certificados, se notifica como tal
         	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_LOGIN)) {
             	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autenticar al usuario")); //$NON-NLS-1$
-            	final TransactionResult result = buildErrorResult(session, OperationError.EXTERNAL_SERVICE_ERROR_TO_LOGIN);
+            	final TransactionResult result = buildErrorResult(session, FIReError.EXTERNAL_SERVICE_ERROR_TO_LOGIN);
             	SessionCollector.removeSession(session);
-            	sendResult(response, result);
+            	Responser.sendResult(response, result);
         		return;
         	}
         	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_SIGN)) {
             	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autorizar la firma en la nube o emitir certificados")); //$NON-NLS-1$
-            	final TransactionResult result = buildErrorResult(session, OperationError.EXTERNAL_SERVICE_ERROR_TO_SIGN);
+            	final TransactionResult result = buildErrorResult(session, FIReError.EXTERNAL_SERVICE_ERROR_TO_SIGN);
             	SessionCollector.removeSession(session);
-            	sendResult(response, result);
+            	Responser.sendResult(response, result);
         		return;
         	}
 
         	LOGGER.warning(logF.f("No se ha notificado el tipo de error de la transaccion")); //$NON-NLS-1$
-            final TransactionResult result = buildErrorResult(session, OperationError.UNDEFINED_ERROR);
+            final TransactionResult result = buildErrorResult(session, FIReError.UNDEFINED_ERROR);
         	SessionCollector.removeSession(session);
-        	sendResult(response, result);
+        	Responser.sendResult(response, result);
         	return;
         }
 
@@ -95,10 +96,10 @@ public class RecoverErrorManager {
 
 
         SessionCollector.removeSession(session);
-    	sendResult(response, result);
+    	Responser.sendResult(response, result);
 	}
 
-	private static TransactionResult buildErrorResult(final FireSession session, final OperationError error) {
+	private static TransactionResult buildErrorResult(final FireSession session, final FIReError error) {
 		return buildErrorResult(session, error.getCode(), error.getMessage());
 	}
 
@@ -122,13 +123,5 @@ public class RecoverErrorManager {
 		}
 
 		return tr;
-	}
-
-	private static void sendResult(final HttpServletResponse response, final TransactionResult result) throws IOException {
-		// El servicio devuelve el resultado de la operacion de firma.
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result.encodeResult());
-        output.flush();
-        output.close();
 	}
 }

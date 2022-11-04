@@ -8,7 +8,6 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import es.gob.fire.logs.handlers.DailyFileHandler;
-import es.gob.fire.server.services.FIReServiceOperation;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.statistics.entity.TransactionCube;
@@ -146,11 +145,11 @@ public class TransactionRecorder {
 		}
 
 		// Operacion
-		final String op = fireSession.getString(ServiceParams.SESSION_PARAM_OPERATION);
-		if (op != null && !op.isEmpty()) {
-			final FIReServiceOperation fsop = FIReServiceOperation.parse(op) ;
-			this.getTransactCube().setOperation(TransactionType.valueOf(fsop).name());
+		TransactionType type = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);
+		if (type == null) {
+			type = TransactionType.OTHER;
 		}
+		this.getTransactCube().setOperation(type.name());
 
 		// Almacenamos la informacion del proveedor
 		 final String[] provsSession = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);

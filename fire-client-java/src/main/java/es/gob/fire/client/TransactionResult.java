@@ -371,6 +371,7 @@ public class TransactionResult {
 				final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
 				if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {
 					opResult.errorCode = resultObject.getInt(JSON_ATTR_ERROR_CODE);
+					opResult.state = STATE_ERROR;
 				}
 				if (resultObject.containsKey(JSON_ATTR_STATE)) {
 					opResult.state = resultObject.getInt(JSON_ATTR_STATE);

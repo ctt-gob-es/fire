@@ -22,6 +22,11 @@
     try {
     	result = SignHelper.recoverSignResult(request);
     }
+/*     catch (final Exception e) {
+    	LoggerFactory.getLogger("es.gob.fire.test.webapp").error("Ocurrio un error al agregar el documento al lote", e); //$NON-NLS-1$
+		request.getRequestDispatcher("ErrorTransactionPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")).forward(request, response); //$NON-NLS-1$ //$NON-NLS-2$
+		return;
+	} */
     catch (Exception e) {
 		LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
 				"Error durante la operacion de recuperacion de firma: {}", e.toString()); //$NON-NLS-1$

@@ -6,15 +6,17 @@
  <?php 
 	// Cargamos el componente distribuido de FIRe
 	include '../fire_client.php';
+
+	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
+	$subjectId = $_GET["sid"];		// DNI de la persona
 	
+	session_start();
+	$transactionId = $_SESSION["trid"]; // Identificador de la transaccion
+	unset($_SESSION["trid"]);
 	
-	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
-	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
-	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "5051c8b1-a125-48e0-9e3e-1f36d1b71c23";	// Identificador de la transaccion
-	
-	
-	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+	$fireClient = new FireClient($appId);
+
+	// Funcion del API de FIRe para recuperar el resultado de un lote de firma
 	$batchResult;
 	try {
 		$batchResult = $fireClient->recoverBatchResult(
@@ -23,7 +25,7 @@
 		);
 	}
 	catch(Exception $e) {
-		echo 'Error: ',  $e->getMessage(), "\n";
+		echo "Error ", $e->getCode(), ": ", $e->getMessage(), "\n";
 		return;
 	}
 
@@ -41,7 +43,8 @@
 			echo "<br><b>Periodo de gracia:</b><br>ID: ".($batchDocument->gracePeriod->id)."<br>Fecha: ".($batchDocument->gracePeriod->date->format('Y-m-d H:i:sP'));
 		}
 	}
-	
+
+	echo "<br><br><br><a href=\"example_fire_recover_batch_sign.php?appid=", $appId, "&sid=", $subjectId, "&trid=", $transactionId, "\">Recuperar firmas >></a>";
  ?>
  </body>
 </html>

@@ -21,6 +21,15 @@ public final class HttpNetworkException extends HttpOperationException {
 
     /**
      * Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
+     * @param code C&oacute;digo de error.
+     * @param msg Mensaje de error.
+     */
+	public HttpNetworkException(final int code, final String msg) {
+		super(code, msg);
+	}
+
+    /**
+     * Excepci&oacute;n que identifica un error de conexi&oacute;n con el componente central.
      * @param e Causa del error.
      */
     public HttpNetworkException(final Throwable e) {
