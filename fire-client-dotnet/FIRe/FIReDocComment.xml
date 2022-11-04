@@ -14,6 +14,13 @@
             Certificado bloqueado.
             </summary>
         </member>
+        <member name="M:FIRe.HttpCertificateBlockedException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
+        </member>
         <member name="M:FIRe.HttpCertificateBlockedException.#ctor(System.String,System.Exception)">
             <summary>
             Certificado bloqueado.
@@ -31,12 +38,34 @@
             Se crea la excepción.
             </summary>
         </member>
+        <member name="M:FIRe.BatchNoSignedException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
+        </member>
         <member name="M:FIRe.BatchNoSignedException.#ctor(System.String,System.Exception)">
             <summary>
             Se crea la excepción.
             </summary>
             <param name="msg">Descripcion del error.</param>
             <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.ErrorResultJson">
+            <summary>
+            Clase para la serialización/deserialización de un error trasladado por el servicio.
+            </summary>
+        </member>
+        <member name="P:FIRe.ErrorResultJson.c">
+            <summary>
+            Código de error.
+            </summary>
+        </member>
+        <member name="P:FIRe.ErrorResultJson.m">
+            <summary>
+            Mensaje de error.
+            </summary>
         </member>
         <member name="T:FIRe.BatchResultJson">
             <summary>
@@ -151,6 +180,13 @@
             Se crea la excepción.
             </summary>
         </member>
+        <member name="M:FIRe.InvalidBatchDocumentException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
+        </member>
         <member name="M:FIRe.InvalidBatchDocumentException.#ctor(System.String,System.Exception)">
             <summary>
             Se crea la excepción.
@@ -167,6 +203,13 @@
             <summary>
             Se crea la excepción.
             </summary>
+        </member>
+        <member name="M:FIRe.InvalidTransactionException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
         </member>
         <member name="M:FIRe.InvalidTransactionException.#ctor(System.String,System.Exception)">
             <summary>
@@ -561,6 +604,9 @@
             <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
             <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
             <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+            <exception cref="T:FIRe.HttpNoUserException">Cuando el usuario no esta dado de alta en el proveedor indicado.</exception>
+            <exception cref="T:FIRe.HttpCertificateBlockedException">Cuando el certificado el usuario está caducado.</exception>
+            <exception cref="T:FIRe.HttpWeakRegistryException">Cuando el usuario realizó un registro no fehaciente en el proveedor.</exception>
             <exception cref="T:FIRe.NumDocumentsExceededException">Cuando se intentan agregar a un lote más documentos de los permitidos.</exception>
             <exception cref="T:FIRe.DuplicateDocumentException">Cuando se intenta agregar a un lote un documento con el mismo identificador que otro utilizado anteriormente.</exception>
             <exception cref="T:FIRe.BatchNoSignedException">Cuando se intenta recuperar la firma de un documento de un lote antes de firmar el propio lote.</exception>
@@ -585,6 +631,13 @@
             Se crea la excepción.
             </summary>
         </member>
+        <member name="M:FIRe.DuplicateDocumentException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
+        </member>
         <member name="M:FIRe.DuplicateDocumentException.#ctor(System.String,System.Exception)">
             <summary>
             Se crea la excepción.
@@ -602,12 +655,211 @@
             Se crea la excepción.
             </summary>
         </member>
+        <member name="M:FIRe.NumDocumentsExceededException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
+        </member>
         <member name="M:FIRe.NumDocumentsExceededException.#ctor(System.String,System.Exception)">
             <summary>
             Se crea la excepción.
             </summary>
             <param name="msg">Descripcion del error.</param>
             <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.FIReErrors">
+            <summary>Clase con los tipos de error HTTP propios de la aplicación.</summary>
+        </member>
+        <member name="F:FIRe.FIReErrors.READING_PARAMETERS">
+            Error en la lectura de los parámetros de entrada.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_APP_ID_NEEDED">
+            No se ha indicado el identificador de la aplicación.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_OPERATION_NEEDED">
+            No se ha indicado la operación a realizar.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_OPERATION_INVALID">
+            Se ha indicado un id de operación incorrecto.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_OPERATION_NOT_SUPPORTED">
+            Se ha indicado un id de operación no soportado.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED">
+            No se ha indicado el certificado de autenticación.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID">
+            Se ha indicado un certificado de autenticación mal formado.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_USER_ID_NEEDED">
+            No se ha indicado el identificador de usuario.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_SIGNATURE_ALGORITHM_NEEDED">
+            No se ha indicado el algoritmo de firma.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_SIGNATURE_OPERATION_NEEDED">
+            No se ha indicado la operación de firma.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_SIGNATURE_FORMAT_NEEDED">
+            No se ha indicado el formato de firma.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_DATA_TO_SIGN_NEEDED">
+            No se han indicado los datos que firmar.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_DATA_TO_SIGN_INVALID">
+            Se han indicado datos a firmar mal codificados.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_DATA_TO_SIGN_NOT_FOUND">
+            No se han encontrado los datos a firmar.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_CONFIG_TRANSACTION_NEEDED">
+            No se ha indicado la configuración de transacción.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_CONFIG_TRANSACTION_INVALID">
+            Se ha indicado una configuración de transacción mal formada.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_URL_ERROR_REDIRECION_NEEDED">
+            No se ha indicado la URL de redirección en caso de error en la configuración de transacción.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_TRANSACTION_ID_NEEDED">
+            No se ha indicado el identificador de transacción.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_USER_REF_NEEDED">
+            No se ha indicado la referencia del usuario.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_SIGNATURE_PARAMS_INVALID">
+            Se han indicado propiedades de configuración de fima mal formadas.
+        </member>
+        <member name="F:FIRe.FIReErrors.UNKNOWN_USER">
+            No se ha indicado el identificador del usuario que solicita el certificado.
+        </member>
+        <member name="F:FIRe.FIReErrors.CERTIFICATE_DUPLICATED">
+            El usuario ya dispone de un certificado del tipo que se está solicitando generar.
+        </member>
+        <member name="F:FIRe.FIReErrors.CERTIFICATE_GENERATION">
+            Error en la generación de un nuevo certificado.
+        </member>
+        <member name="F:FIRe.FIReErrors.CERTIFICATE_WEAK_REGISTRY">
+            El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente.
+        </member>
+        <member name="F:FIRe.FIReErrors.UNDEFINED_ERROR">
+            Error desconocido durante la operación.
+        </member>
+        <member name="F:FIRe.FIReErrors.SIGNING">
+            Error durante la firma.
+        </member>
+        <member name="F:FIRe.FIReErrors.PROVIDER_NOT_SELECTED">
+            No se seleccionó un proveedor de firma.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_SIGNING_CERTIFICATE_NEEDED">
+            El proveedor no proporcionó el certificado para firmar.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_SIGNING_CERTIFICATE_INVALID">
+            El proveedor o cliente de firma proporcionó un certificado mal formado.
+        </member>
+        <member name="F:FIRe.FIReErrors.POSTSIGNING">
+            Error en la composición de la firma.
+        </member>
+        <member name="F:FIRe.FIReErrors.INVALID_SIGNATURE">
+            La firma generada no es válida.
+        </member>
+        <member name="F:FIRe.FIReErrors.UPGRADING_SIGNATURE">
+            Error durante la actualización de firma.
+        </member>
+        <member name="F:FIRe.FIReErrors.SAVING_SIGNATURE">
+            Error al guardar la firma en servidor.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_ASYNC_ID_NEEDED">
+            No se ha indicado el identificador de los datos asíncronos.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_DOCUMENT_MANAGER_INVALID">
+            Gestor de documentos no válido.
+        </member>
+        <member name="F:FIRe.FIReErrors.UPGRADE_SERVICE_NETWORK">
+            Error al conectar con el servicio de validación y actualización de firmas.
+        </member>
+        <member name="F:FIRe.FIReErrors.CERTIFICATE_AVAILABLE">
+            El usuario ya tiene un certificado del tipo indicado.
+        </member>
+        <member name="F:FIRe.FIReErrors.CERTIFICATE_BLOCKED">
+            Los certificados del usuario están bloqueados.
+        </member>
+        <member name="F:FIRe.FIReErrors.CERTIFICATE_NO_CERTS">
+            El usuario no dispone de certificados y el proveedor no le permite generarlos en este momento.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_BATCH_CONFIG_INVALID">
+            Se ha indicado una configuración particular mal formada para el documento del lote.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_DUPLICATE_DOCUMENT">
+            El identificador de documento ya existe en el lote.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_NUM_DOCUMENTS_EXCEEDED">
+            Se ha excedido el número máximo de documentos permitidos en el lote.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_NO_DOCUMENTS">
+            Se intenta firmar un lote sin documentos.
+        </member>
+        <member name="F:FIRe.FIReErrors.PRESIGNING">
+            Error en la prefirma de los datos. Es posible que se haya establecido una configuración no válida para los datos proporcionados.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_PREPARING">
+            Se produjo un error preparando los datos para firmar.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_PRESIGNING">
+            Error en la prefirma de los datos de un lote. Es posible que se haya establecido una configuración no válida para los datos proporcionados.
+        </member>
+        <member name="F:FIRe.FIReErrors.PARAMETER_DOCUMENT_ID_NEEDED">
+            No se ha indicado el identificador del documento del lote.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_NO_SIGNED">
+            No se ha firmado previamente el lote.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_SIGNING">
+            Error al firmar el lote.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_RECOVERED">
+            La firma se recuperón anteriormente.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_DOCUMENT_GRACE_PERIOD">
+            Se requiere esperar un periodo de gracia para recuperar el documento.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_INVALID_DOCUMENT">
+            El documento no estaba en el lote.
+        </member>
+        <member name="F:FIRe.FIReErrors.INTERNAL_ERROR">
+            Error interno del servidor.
+        </member>
+        <member name="F:FIRe.FIReErrors.FORBIDDEN">
+            Petición rechazada.
+        </member>
+        <member name="F:FIRe.FIReErrors.UNAUTHORIZED">
+            No se proporcionaron los parámetros de autenticación.
+        </member>
+        <member name="F:FIRe.FIReErrors.INVALID_TRANSACTION">
+            La transacción no se ha inicializado o ha caducado.
+        </member>
+        <member name="F:FIRe.FIReErrors.EXTERNAL_SERVICE_ERROR_TO_LOGIN">
+            Error detectado después de llamar a la pasarela externa para autenticar al usuario.
+        </member>
+        <member name="F:FIRe.FIReErrors.EXTERNAL_SERVICE_ERROR_TO_SIGN">
+            Error detectado después de llamar a la pasarela externa para firmar.
+        </member>
+        <member name="F:FIRe.FIReErrors.TIMEOUT">
+            Ha caducado la sesión.
+        </member>
+        <member name="F:FIRe.FIReErrors.OPERATION_CANCELED">
+            Operación cancelada.
+        </member>
+        <member name="F:FIRe.FIReErrors.PROVIDER_ERROR">
+            El proveedor de firma devolvió un error.
+        </member>
+        <member name="F:FIRe.FIReErrors.PROVIDER_DATA_ERROR">
+            Los datos proporcionados por el proveedor de firma son incorrectos.
+        </member>
+        <member name="F:FIRe.FIReErrors.PROVIDER_INACCESIBLE_SERVICE">
+            No se pudo conectar con el proveedor de firma.
         </member>
         <member name="T:FIRe.HttpCustomErrors">
             <summary>Clase con los tipos de error HTTP propios de la aplicación.</summary>
@@ -679,7 +931,7 @@
             <param name="config">Configuración para la conexión de red.</param>
             <returns>Respuesta de la llamada.</returns>
         </member>
-        <member name="M:FIRe.ConnectionManager.connectByPost(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+        <member name="M:FIRe.ConnectionManager.ConnectByPost(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
             <summary>Realiza una llamada HTTP/HTTPS vía POST y devuelve el resultado.</summary>
             <param name="url">URL a la que realizar la petición.</param>
             <param name="urlParameters">Parámetros que se envían en la petición.</param>
@@ -859,6 +1111,13 @@
             Se crea la excepción.
             </summary>
         </member>
+        <member name="M:FIRe.HttpWeakRegistryException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
+        </member>
         <member name="M:FIRe.HttpWeakRegistryException.#ctor(System.String,System.Exception)">
             <summary>
             Se crea la excepción.
@@ -873,6 +1132,13 @@
             <summary>
             Se crea la excepción.
             </summary>
+        </member>
+        <member name="M:FIRe.HttpNoUserException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
         </member>
         <member name="M:FIRe.HttpNoUserException.#ctor(System.String,System.Exception)">
             <summary>
@@ -1135,6 +1401,11 @@
             Error durante la ejecución de la operación.
             </summary>
         </member>
+        <member name="P:FIRe.HttpOperationException.Code">
+            <summary>
+            Nombre del proveedor de firma utilizado.
+            </summary>
+        </member>
         <member name="M:FIRe.HttpOperationException.#ctor">
             <summary>
             Excepción sin parámetros que llama al constructor de la clase padre
@@ -1145,6 +1416,13 @@
             Excepción con un parámetros que llama al constructor de la clase padre
             </summary>
             <param name="msg">Mensaje de la excepción</param>
+        </member>
+        <member name="M:FIRe.HttpOperationException.#ctor(System.Int32,System.String)">
+            <summary>
+            Excepción con un parámetros que llama al constructor de la clase padre
+            </summary>
+            <param name="code">Código de error.</param>
+            <param name="msg">Mensaje de la excepción.</param>
         </member>
         <member name="M:FIRe.HttpOperationException.#ctor(System.String,System.Exception)">
             <summary>
@@ -1160,6 +1438,13 @@
             <summary>
             Se crea la excepción.
             </summary>
+        </member>
+        <member name="M:FIRe.HttpForbiddenException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
         </member>
         <member name="M:FIRe.HttpForbiddenException.#ctor(System.String,System.Exception)">
             <summary>
@@ -1177,6 +1462,13 @@
             <summary>
             
             </summary>
+        </member>
+        <member name="M:FIRe.HttpNetworkException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
         </member>
         <member name="M:FIRe.HttpNetworkException.#ctor(System.String,System.Exception)">
             <summary>
@@ -1494,20 +1786,28 @@
             <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
             <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error durante la operación.</exception>
         </member>
-        <member name="M:FIRe.FireApi.getResponseToPostPetition(System.String,System.String)">
+        <member name="M:FIRe.FireApi.GetResponseToPostPetition(System.String,System.String)">
             <summary>
             Realiza una peticion POST y devuelve un byte array con la respuesta.
             </summary>
             <param name="url">URL a la que realizar la petición.</param>
             <param name="urlParameters">Parámetros que se envían en la petición.</param>
+            <param name="config">Configuración para la conexión de red.</param>
             <returns>Respuesta de la llamada a la URL indicada.</returns>
             <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
             <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
             <exception cref="T:FIRe.HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
             <exception cref="T:FIRe.HttpOperationException">Cuando se produce un error interno del servidor.</exception>
-            <exception cref="T:FIRe.ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
+            <exception cref="T:FIRe.HttpNoUserException">Cuando el usuario no esta dado de alta en el proveedor indicado.</exception>
+            <exception cref="T:FIRe.HttpCertificateBlockedException">Cuando el certificado el usuario está caducado.</exception>
+            <exception cref="T:FIRe.HttpWeakRegistryException">Cuando el usuario realizó un registro no fehaciente en el proveedor.</exception>
+            <exception cref="T:FIRe.NumDocumentsExceededException">Cuando se intentan agregar a un lote más documentos de los permitidos.</exception>
+            <exception cref="T:FIRe.DuplicateDocumentException">Cuando se intenta agregar a un lote un documento con el mismo identificador que otro utilizado anteriormente.</exception>
+            <exception cref="T:FIRe.BatchNoSignedException">Cuando se intenta recuperar la firma de un documento de un lote antes de firmar el propio lote.</exception>
+            <exception cref="T:FIRe.InvalidBatchDocumentException">Cuando se solicita la firma de un documento de un lote que no existe o que no se firmó correctamente.</exception>
+            <exception cref="T:FIRe.InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
         </member>
-        <member name="M:FIRe.FireApi.getJson(System.String)">
+        <member name="M:FIRe.FireApi.DeserializedBatchResult(System.String)">
             <summary>
              Devuelve un conjunto de propiedades extraídas de un JSON.
             </summary>

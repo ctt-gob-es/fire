@@ -22,12 +22,11 @@ import javax.json.JsonReader;
  */
 public final class SignOperationResult {
 
-    private final String transactionId;
+	private final String transactionId;
     private final String redirectUrl;
 
     /**
      * Crea el resultado de una operaci&oacute;n de carga de datos a firmar.
-     *
      * @param id
      *            Identificador de la transacci&oacute;n de firma.
      * @param redirect
@@ -83,17 +82,18 @@ public final class SignOperationResult {
         }
         final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
         final JsonObject jsonObject = jsonReader.readObject();
+
         final String id = jsonObject.getString("transactionid"); //$NON-NLS-1$
         final String redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
         jsonReader.close();
 
-        if (id == null || "".equals(id)) { //$NON-NLS-1$
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException(
                     "Es obligatorio que el JSON contenga el identificador de la transacci&oacute;n" //$NON-NLS-1$
             );
         }
 
-        if (redirect == null || "".equals(redirect)) { //$NON-NLS-1$
+        if (redirect == null || redirect.isEmpty()) {
             throw new IllegalArgumentException(
                     "Es obligatorio que el JSON contenga la URL a redireccionar al usuario para que se autentique" //$NON-NLS-1$
             );

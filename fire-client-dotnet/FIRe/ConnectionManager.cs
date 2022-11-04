@@ -72,7 +72,7 @@ namespace FIRe
         /// <param name="urlParameters">Parámetros que se envían en la petición.</param>
         /// <param name="config">Configuración para la conexión de red.</param>
         /// <returns>Respuesta de la llamada.</returns>
-        public static HttpWebResponse connectByPost(string url, string urlParameters, Dictionary<String, String> config)
+        public static HttpWebResponse ConnectByPost(string url, string urlParameters, Dictionary<String, String> config)
         {
             init(config);
 

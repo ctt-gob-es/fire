@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.statistics.TransactionType"%>
 <%@page import="es.gob.fire.server.services.internal.PublicContext"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
@@ -71,8 +72,8 @@
 		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 		
 		// Identificamos si estamos ante una firma de lote o una firma normal
-		final String operation = fireSession.getString(ServiceParams.SESSION_PARAM_OPERATION);
-		boolean isBatchOperation = FIReServiceOperation.CREATE_BATCH.getId().equals(operation);
+		final TransactionType transactionType = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);
+		boolean isBatchOperation = TransactionType.BATCH == transactionType;
 	
 		// Valores genericos
 		final String stopOnError = fireSession.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR);

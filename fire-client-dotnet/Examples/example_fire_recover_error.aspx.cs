@@ -10,7 +10,7 @@ public partial class example_fire_recover_error : System.Web.UI.Page
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionResult signature;
         string appId = "B244E473466F";
-        string transactionId = "47bc7696-7199-4e46-86e9-0a23225262f3";
+        string transactionId = "2602747f-2dbc-466f-9815-3187a7fb1249";
         try
         {
             signature = new FireClient(appId).recoverError( // Identificador de la aplicacion (dada de alta previamente en el sistema)

@@ -10,13 +10,13 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 
 
 /**
@@ -44,35 +44,27 @@ public class RecoverUpdatedSignResultManager {
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (docId == null || docId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID devuelto por la plataforma para la recuperacion de la firma")); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_ID_NEEDED);
             return;
         }
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
 		// Recuperamos el resultado de la firma
-		LOGGER.info(logF.f("Se carga el resultado de la operacion del almacen temporal")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Se carga el resultado de la operacion del almacen temporal")); //$NON-NLS-1$
 		byte[] signResult;
 		try {
 			signResult = TempDocumentsManager.retrieveAndDeleteDocument(docId);
 		}
 		catch (final Exception e) {
 			LOGGER.warning(logF.f("No se encuentra la firma actualizada en el almacen temporal: " + e)); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "Ha caducado la transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.TIMEOUT);
 			return;
 		}
 
 		LOGGER.info(logF.f("Se devuelve la firma actualizada")); //$NON-NLS-1$
 
 		// Enviamos la firma electronica como resultado
-		sendResult(response, signResult);
-	}
-
-	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
-		// El servicio devuelve el resultado de la operacion
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(result);
-        output.flush();
-        output.close();
+		Responser.sendResult(response, signResult);
 	}
 }

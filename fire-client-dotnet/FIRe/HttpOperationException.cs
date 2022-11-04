@@ -18,15 +18,31 @@ namespace FIRe
     public class HttpOperationException : Exception
     {
         /// <summary>
+        /// Nombre del proveedor de firma utilizado.
+        /// </summary>
+        public int Code { get; set; }
+
+        /// <summary>
         /// Excepción sin parámetros que llama al constructor de la clase padre
         /// </summary>
-	    public HttpOperationException():base() {	    
+	    public HttpOperationException():base() {
+            this.Code = 0;
 	    }
         /// <summary>
         /// Excepción con un parámetros que llama al constructor de la clase padre
         /// </summary>
         /// <param name="msg">Mensaje de la excepción</param>
-        public HttpOperationException(String msg) : base(msg) {         
+        public HttpOperationException(String msg) : base(msg) {
+            this.Code = 0;
+        }
+        /// <summary>
+        /// Excepción con un parámetros que llama al constructor de la clase padre
+        /// </summary>
+        /// <param name="code">Código de error.</param>
+        /// <param name="msg">Mensaje de la excepción.</param>
+        public HttpOperationException(int code, String msg) : base(msg)
+        {
+            this.Code = code;
         }
         /// <summary>
         ///  Excepción con dos parámetros que llama al constructor de la clase padre
@@ -34,6 +50,7 @@ namespace FIRe
         /// <param name="responseDescription">Mensaje de la excepción</param>
         /// <param name="e">Exception</param>
         public HttpOperationException(String responseDescription, Exception e):base( responseDescription,  e) {
+            this.Code = 0;
 	    }
          
     }

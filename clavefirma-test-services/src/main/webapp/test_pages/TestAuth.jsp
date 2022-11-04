@@ -177,5 +177,8 @@
 </div>
 </footer>
  
+  <script>
+  	document.getElementById("pin").focus();
+  </script>
 </body>
 </html>

@@ -11,41 +11,41 @@ package es.gob.fire.server.services;
 
 /**
  * @author mario
- * Excepci&oacute;n para controlar los posibles errores en la autentificaci&oacute;n del cliente
- * mediante certificado.
+ * Excepci&oacute;n que identifica errores en la validaci&oacute;n del certificado de una petic&oacute;n.
  */
 public class CertificateValidationException extends Exception {
 
 	private static final long serialVersionUID = -7813116298451323222L;
 
-	private final int httpError;
+	private final FIReError error;
 
 	/**
-	 * Constructor con los siguientes par&acute;metros
-	 * @param typeHttpError Codigo del error HTTP que ser&aacute; devuelto.
-	 * @param msg Mensaje del error que ser&aacute; devuelto.
+	 * Construye la excepci&oacute;n.
+	 * @param error Error que notificar a los usuarios.
+	 * @param msg Mensaje descriptivo del error.
 	 */
-	CertificateValidationException(final int typeHttpError, final String msg) {
+	CertificateValidationException(final FIReError error, final String msg) {
 		super(msg);
-		this.httpError = typeHttpError;
+		this.error = error;
     }
 
 	/**
-	 * Constructor con los siguientes par&acute;metros
-	 * @param typeHttpError Codigo del error HTTP que ser&aacute; devuelto.
-	 * @param msg Mensaje del error que ser&aacute; devuelto.
+	 * Construye la excepci&oacute;n.
+	 * @param error Error que notificar a los usuarios.
+	 * @param msg Mensaje descriptivo del error.
 	 * @param cause Error que orig&oacute; la excepci&oacute;n.
 	 */
-	CertificateValidationException(final int typeHttpError, final String msg, final Throwable cause) {
+	CertificateValidationException(final FIReError error, final String msg, final Throwable cause) {
 		super(msg, cause);
-		this.httpError = typeHttpError;
+		this.error = error;
     }
 
 	/**
-	 * @return El tipo de error HTTP a lanzar.
+	 * Recupera el error a notificar a los usuarios.
+	 * @return Error.
 	 */
-	public int getHttpError() {
-		return this.httpError;
+	public FIReError getError() {
+		return this.error;
 	}
 
 

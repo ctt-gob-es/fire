@@ -21,6 +21,11 @@
 	final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String providerName = null;
 	
+	if (subjectRef == null || trId == null) {
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		return;
+	}
+	
 	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -38,7 +43,6 @@
 
 	// Leemos los valores necesarios de la configuracion
 	final String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
-	final String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 	
@@ -65,9 +69,6 @@
 	if (!originForced) {
 		if (unregistered != null) {
 			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		if (op != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	

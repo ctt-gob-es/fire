@@ -222,4 +222,7 @@
         
         <script src="./TestCert2_files/es_ES.js"></script>
         <script src="./TestCert2_files/en_EN.js"></script>
+        <script>
+  			document.getElementById("pass1").focus();
+  		</script>
 </body></html>

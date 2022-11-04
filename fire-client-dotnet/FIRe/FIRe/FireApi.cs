@@ -125,7 +125,7 @@ namespace FIRe
                 .Replace(DATA, dataB64.Replace('+', '-').Replace('/', '_'))
                 .Replace(CONF, confB64.Replace('+', '-').Replace('/', '_'));
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
             // Mostramos los datos obtenidos
             return new FireLoadResult(System.Text.Encoding.UTF8.GetString(bytes));
         }
@@ -183,7 +183,7 @@ namespace FIRe
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
 
             // Identificamos los datos obtenidos
             FireTransactionResult result;
@@ -209,7 +209,7 @@ namespace FIRe
                 .Replace(OP, "11"); // El tipo de operacion solicitada es RECOVER_SIGN_RESULT (11)
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            bytes = getResponseToPostPetition(url, urlParameters);
+            bytes = GetResponseToPostPetition(url, urlParameters);
             result.Result = bytes;
 
             return result;
@@ -245,7 +245,7 @@ namespace FIRe
                 .Replace(OP, "99"); // El tipo de operacion solicitada es RECOVER_ERROR (99)
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
             
             // Devolvemos la respuesta
             try {
@@ -348,7 +348,7 @@ namespace FIRe
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
             // Mostramos los datos obtenidos
             return new FireTransactionIdResult(System.Text.Encoding.UTF8.GetString(bytes));
         }
@@ -412,7 +412,7 @@ namespace FIRe
                 .Replace(CONF, string.IsNullOrEmpty(confB64) ? "" : confB64.Replace('+', '-').Replace('/', '_'));
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            getResponseToPostPetition(url, urlParameters);
+            GetResponseToPostPetition(url, urlParameters);
         }
 
         private static readonly String URL_PARAMETERS_ADD_CUSTOM_DOCUMENT_BATCH =
@@ -510,7 +510,7 @@ namespace FIRe
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            getResponseToPostPetition(url, urlParameters);
+            GetResponseToPostPetition(url, urlParameters);
         }
 
         private static readonly String URL_PARAMETERS_SIGN_BATCH =
@@ -553,7 +553,7 @@ namespace FIRe
                 .Replace(STOPONERROR, stopOnError.ToString());
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
             // Mostramos los datos obtenidos
             return new FireLoadResult(System.Text.Encoding.UTF8.GetString(bytes));
         }
@@ -594,8 +594,8 @@ namespace FIRe
                 .Replace(OP, "8"); // El tipo de operacion solicitada es RECOVER_BATCH (8)
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
-            BatchResultJson batchResult = getJson(System.Text.Encoding.UTF8.GetString(bytes));
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
+            BatchResultJson batchResult = DeserializedBatchResult(System.Text.Encoding.UTF8.GetString(bytes));
             
             return FireBatchResult.Parse(batchResult);
         }
@@ -631,7 +631,7 @@ namespace FIRe
                 .Replace(OP, "9"); // El tipo de operacion solicitada es RECOVER_BATCH_STATE (9)
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
             
             // Mostramos los datos obtenidos
             return float.Parse(System.Text.Encoding.UTF8.GetString(bytes), System.Globalization.CultureInfo.InvariantCulture);
@@ -682,7 +682,7 @@ namespace FIRe
                 .Replace(OP, "10"); // El tipo de operacion solicitada es RECOVER_BATCH_SIGN (10)
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
             
             // Devolvemos la respuesta
             try {
@@ -767,7 +767,7 @@ namespace FIRe
             }
 
             //  realizamos la peticion post al servicio y recibimos los datos de la peticion
-            byte[] bytes = getResponseToPostPetition(url, urlParameters);
+            byte[] bytes = GetResponseToPostPetition(url, urlParameters);
 
             // Identificamos los datos obtenidos
             FireTransactionResult result;
@@ -793,7 +793,7 @@ namespace FIRe
                 .Replace(OP, "71"); // El tipo de operacion solicitada es RECOVER_ASYNC_SIGN_RESULT
 
             //  Realizamos la peticion al servicio y recibimos los datos de la peticion
-            bytes = getResponseToPostPetition(url, urlParameters);
+            bytes = GetResponseToPostPetition(url, urlParameters);
             result.Result = bytes;
 
             return result;
@@ -804,57 +804,162 @@ namespace FIRe
         /// </summary>
         /// <param name="url">URL a la que realizar la petición.</param>
         /// <param name="urlParameters">Parámetros que se envían en la petición.</param>
+        /// <param name="config">Configuración para la conexión de red.</param>
         /// <returns>Respuesta de la llamada a la URL indicada.</returns>
-		/// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+        /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
         /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
         /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
         /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
-        /// <exception cref="ConfigureException">Cuando no se encuentra configurada la URL del servicio.</exception>
-        private static byte[] getResponseToPostPetition(string url, string urlParameters)
+        /// <exception cref="HttpNoUserException">Cuando el usuario no esta dado de alta en el proveedor indicado.</exception>
+        /// <exception cref="HttpCertificateBlockedException">Cuando el certificado el usuario está caducado.</exception>
+        /// <exception cref="HttpWeakRegistryException">Cuando el usuario realizó un registro no fehaciente en el proveedor.</exception>
+        /// <exception cref="NumDocumentsExceededException">Cuando se intentan agregar a un lote más documentos de los permitidos.</exception>
+        /// <exception cref="DuplicateDocumentException">Cuando se intenta agregar a un lote un documento con el mismo identificador que otro utilizado anteriormente.</exception>
+        /// <exception cref="BatchNoSignedException">Cuando se intenta recuperar la firma de un documento de un lote antes de firmar el propio lote.</exception>
+        /// <exception cref="InvalidBatchDocumentException">Cuando se solicita la firma de un documento de un lote que no existe o que no se firmó correctamente.</exception>
+        /// <exception cref="InvalidTransactionException">Cuando se intenta operar sobre una transaccion inexistente o ya caducada.</exception>
+        private static byte[] GetResponseToPostPetition(string url, string urlParameters)
         {
+            HttpWebResponse response = null;
+            Stream dataStream = null;
+            MemoryStream ms = null;
             try
             {
                 // generamos la respuesta del servidor
-                HttpWebResponse response = ConnectionManager.connectByPost(url, urlParameters, null);
+                response = ConnectionManager.ConnectByPost(url, urlParameters, null);
                 // recibimos el stream de la respuesta
-                Stream dataStream = response.GetResponseStream();
-                MemoryStream ms = new MemoryStream();
+                dataStream = response.GetResponseStream();
+                ms = new MemoryStream();
                 dataStream.CopyTo(ms);
                 byte[] bytes = ms.ToArray();
-                // Cerramos los streams
-                response.Close();
-                ms.Close();
-                dataStream.Close();
 
                 return bytes;
             }
             catch (WebException e)
             {
                 HttpWebResponse r = (HttpWebResponse)e.Response;
-                if ((r != null && r.StatusCode == HttpStatusCode.Forbidden) || e.GetBaseException() is AuthenticationException)
+
+                if (e.GetBaseException() is AuthenticationException)
                 {
                     throw new HttpForbiddenException("Error durante la autenticacion de la aplicacion", e);
                 }
-                else if (r != null && r.StatusCode == HttpStatusCode.InternalServerError)
+                if (r == null)
                 {
-                    throw new HttpForbiddenException("Error durante la operacion de firma", e);
+                    throw new HttpNetworkException("Error al realizar la conexion: " + e.Message, e);
                 }
-                throw new HttpNetworkException("Error al realizar la conexion: " + e.Message, e);
+
+                string contentType = r.ContentType;
+                if (!string.IsNullOrEmpty(contentType)
+                    && contentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+                {
+                    ErrorResultJson errorResult;
+                    try
+                    {
+                        dataStream = r.GetResponseStream();
+                        ms = new MemoryStream();
+                        dataStream.CopyTo(ms);
+                        byte[] bytes = ms.ToArray();
+
+                        System.Text.Encoding encoding = !string.IsNullOrEmpty(r.ContentEncoding)
+                            ? System.Text.Encoding.GetEncoding(r.ContentEncoding)
+                            : System.Text.Encoding.UTF8;
+
+                        string json = encoding.GetString(bytes);
+
+                        var json_serializer = new JavaScriptSerializer();
+                        errorResult = json_serializer.Deserialize<ErrorResultJson>(json);
+                    }
+                    catch (Exception e2)
+                    {
+
+                        throw new HttpOperationException("Error. ContenType: " + r.ContentType + ". Encoding: " + r.ContentEncoding + ". Length: " + r.ContentLength + ". Excepcion: " + e2.ToString(), e2);
+
+                        //throw new HttpOperationException("No se pudo decodificar la respuesta de error del servicio: " + e2.ToString(), e2);
+                    }
+
+                    int code = errorResult.c;
+                    string message = errorResult.m;
+                    if (FIReErrors.FORBIDDEN == code || FIReErrors.UNAUTHORIZED == code)
+                    {
+                        throw new HttpForbiddenException(code, message);
+                    }
+                    else if (FIReErrors.TIMEOUT == code)
+                    {
+                        throw new HttpNetworkException(code, message);
+                    }
+                    else if (FIReErrors.UNKNOWN_USER == code)
+                    {
+                        throw new HttpNoUserException(code, message);
+                    }
+                    else if (FIReErrors.INVALID_TRANSACTION == code)
+                    {
+                        throw new InvalidTransactionException(code, message);
+                    }
+                    else if (FIReErrors.CERTIFICATE_BLOCKED == code)
+                    {
+                        throw new HttpCertificateBlockedException(code, message);
+                    }
+                    else if (FIReErrors.CERTIFICATE_WEAK_REGISTRY == code)
+                    {
+                        throw new HttpWeakRegistryException(code, message);
+                    }
+                    else if (FIReErrors.BATCH_DUPLICATE_DOCUMENT == code)
+                    {
+                        throw new DuplicateDocumentException(code, message);
+                    }
+                    else if (FIReErrors.BATCH_INVALID_DOCUMENT == code)
+                    {
+                        throw new InvalidBatchDocumentException(code, message);
+                    }
+                    else if (FIReErrors.BATCH_NUM_DOCUMENTS_EXCEEDED == code)
+                    {
+                        throw new NumDocumentsExceededException(code, message);
+                    }
+                    else if (FIReErrors.BATCH_NO_SIGNED == code)
+                    {
+                        throw new BatchNoSignedException(code, message);
+                    }
+                    else
+                    {
+                        throw new HttpOperationException(code, message);
+                    }
+                }
+
+                if (r.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    throw new HttpForbiddenException("Error durante la autenticacion de la aplicacion", e);
+                }
+                if (r.StatusCode == HttpStatusCode.InternalServerError)
+                {
+                    throw new HttpForbiddenException("Error interno del servicio", e);
+                }
+                else
+                {
+                    throw new HttpOperationException("Error desconocido durante la operacion", e);
+                }
             }
             catch (ProtocolViolationException e)
             {
-                throw new HttpNetworkException("Ha ocurrido un problema con el protocolo :" + e.Message, e);
+                throw new HttpNetworkException("Ha ocurrido un problema con el protocolo:" + e.Message, e);
             }
             catch (InvalidOperationException e)
             {
-                throw new HttpNetworkException("Operacion no permitida :" + e.Message, e);
+                throw new HttpNetworkException("Operacion HTTP no permitida por el servicio:" + e.Message, e);
             }
             catch (IOException e)
             {
                 throw new HttpOperationException("Error al leer la respuesta del servidor: " + e.Message, e);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 throw new HttpOperationException(e.Message, e);
+            }
+            finally
+            {
+                // Cerramos los streams
+                if (ms != null) { ms.Close(); }
+                if (dataStream != null) { dataStream.Close(); }
+                if (response != null) response.Close();
             }
         }
 
@@ -863,7 +968,7 @@ namespace FIRe
         /// </summary>
         /// <param name="JSON">Cadena en formato JSON que se desea analizar.</param>
         /// <returns>Objeto con el resultado de la firma del lote.</returns>
-        private static BatchResultJson getJson(string JSON)
+        private static BatchResultJson DeserializedBatchResult(string JSON)
         {
             var json_serializer = new JavaScriptSerializer();
             return json_serializer.Deserialize<BatchResultJson>(JSON);

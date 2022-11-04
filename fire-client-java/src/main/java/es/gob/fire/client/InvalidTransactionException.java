@@ -14,14 +14,18 @@ package es.gob.fire.client;
  * inexistente o caducada.
  * @author Carlos Gamuci
  */
-public class InvalidTransactionException extends Exception {
+public class InvalidTransactionException extends HttpOperationException {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = -5149243097947860749L;
 
-	/** Construye la excepci&oacute;n. */
-	public InvalidTransactionException() {
-		super();
+	/**
+     * Cuando la transacci&oacute;n no existe o est&aacute; caducada.
+     * @param code C&oacute;digo de error.
+     * @param msg Mensaje de error.
+     */
+	public InvalidTransactionException(final int code, final String msg) {
+		super(code, msg);
 	}
 
 	/** Construye la excepci&oacute;n indicando un mensaje.

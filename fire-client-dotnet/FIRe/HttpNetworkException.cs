@@ -22,6 +22,16 @@ namespace FIRe
         /// </summary>
 	    public HttpNetworkException():base() {
 	    }
+
+        /// <summary>
+        /// Se crea la excepción.
+        /// </summary>
+        /// <param name="code">Código del error.</param>
+        /// <param name="msg">Descripcion del error.</param>
+        public HttpNetworkException(int code, string msg) : base(code, msg)
+        {
+        }
+
         /// <summary>
         /// 
         /// </summary>

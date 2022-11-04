@@ -19,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLStreamHandler;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -26,6 +27,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.net.ssl.HostnameVerifier;
@@ -66,6 +68,8 @@ public class HttpsConnection {
 
     protected static final String ACCEPT_DEFAULT_CERTS_VALUE = "default"; //$NON-NLS-1$
 
+	private static final String CONTENT_TYPE_SEPARATOR = ";"; //$NON-NLS-1$
+	private static final String CHARSET_PREFIX = "charset="; //$NON-NLS-1$
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpsConnection.class);
 
@@ -255,6 +259,110 @@ public class HttpsConnection {
 
 		this.ctx = SSLContext.getInstance("TLSv1.2"); //$NON-NLS-1$
 		this.ctx.init(keyManagers, tsManager, null);
+	}
+
+	/**
+	 * Realiza una peticion HTTP a una URL.
+	 * @param url URL a la que se realiza la petici&oacute;n.
+	 * @param urlParameters Par&aacute;metros transmitidos en la llamada.
+	 * @param method M&eacute;todo HTTP utilizado.
+	 * @return Respuesta con el resultado de la llamada.
+	 * @throws IOException Cuando ocurre un error durante la conexi&oacute;n/lectura.
+	 */
+	public HttpResponse sendRequest(final String url, final String urlParameters, final Method method) throws IOException {
+
+		if (url == null) {
+			throw new IllegalArgumentException("La URL a leer no puede ser nula"); //$NON-NLS-1$
+		}
+
+		final URL uri = createURL(url);
+		final HttpURLConnection conn = getConnection(uri);
+
+		conn.setRequestMethod(method.toString());
+
+		conn.addRequestProperty("Accept", "*/*"); //$NON-NLS-1$ //$NON-NLS-2$
+		conn.addRequestProperty("Connection", "keep-alive"); //$NON-NLS-1$ //$NON-NLS-2$
+		conn.addRequestProperty("Host", uri.getHost()); //$NON-NLS-1$
+		conn.addRequestProperty("Origin", uri.getProtocol() +  "://" + uri.getHost()); //$NON-NLS-1$ //$NON-NLS-2$
+
+		if (urlParameters != null) {
+			conn.setDoOutput(true);
+			final OutputStreamWriter writer = new OutputStreamWriter(
+					conn.getOutputStream()
+					);
+			writer.write(urlParameters);
+			writer.flush();
+			writer.close();
+		}
+
+		conn.connect();
+
+		final int statusCode = conn.getResponseCode();
+		final String mimeType = getMimeType(conn.getContentType());
+
+		final Charset charset = getCharset(conn);
+
+		final byte[] data;
+		if (statusCode == 200) {
+			final InputStream is = conn.getInputStream();
+			data = Utils.getDataFromInputStream(is);
+			is.close();
+		}
+		else {
+			final InputStream is = conn.getErrorStream();
+			data = Utils.getDataFromInputStream(is);
+			is.close();
+		}
+
+		conn.disconnect();
+
+		return new HttpResponse(statusCode, mimeType, charset, data);
+	}
+
+
+
+	private static String getMimeType(final String contentType) {
+
+		if (contentType == null) {
+			return null;
+		}
+
+		final int contentTypeLimit = contentType.indexOf(CONTENT_TYPE_SEPARATOR);
+		if (contentTypeLimit != -1) {
+			return contentType.substring(0, contentTypeLimit).trim();
+		}
+		return contentType.trim();
+	}
+
+
+	private static Charset getCharset(final HttpURLConnection connection) {
+
+		final String contentType = connection.getContentType();
+		final String contentEncoding = connection.getContentEncoding();
+		if (contentType == null && contentEncoding == null) {
+			return null;
+		}
+
+		Charset charset = null;
+		try {
+			if (contentType != null && contentType.toLowerCase(Locale.ENGLISH).contains(CHARSET_PREFIX)) {
+				final int charsetIdx = contentType.toLowerCase(Locale.ENGLISH).indexOf(CHARSET_PREFIX) + CHARSET_PREFIX.length();
+				final int limit = contentType.indexOf(CONTENT_TYPE_SEPARATOR, charsetIdx);
+				if (limit != -1) {
+					charset = Charset.forName(contentType.substring(charsetIdx, limit).trim());
+				} else {
+					charset = Charset.forName(contentType.substring(charsetIdx).trim());
+				}
+			}
+			else if (contentEncoding != null) {
+				charset = Charset.forName(contentEncoding.trim());
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			charset = null;
+		}
+
+		return charset;
 	}
 
 	/**

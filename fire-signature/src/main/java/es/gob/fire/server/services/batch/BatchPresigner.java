@@ -9,17 +9,17 @@
  */
 package es.gob.fire.server.services.batch;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.json.JsonObject;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import es.gob.fire.server.services.Responser;
 
 
 /** Realiza la primera fase de un proceso de firma por lote.
@@ -48,15 +48,13 @@ public final class BatchPresigner extends HttpServlet {
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
 	@Override
 	protected void service(final HttpServletRequest request,
-			               final HttpServletResponse response) throws ServletException,
-			                                                          IOException {
+			               final HttpServletResponse response) {
 		final String json = request.getParameter(BATCH_JSON_PARAM);
 		if (json == null) {
 			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
-			response.sendError(
+			Responser.sendError(response,
 				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM //$NON-NLS-1$
-			);
+				"No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
 			return;
 		}
 
@@ -70,20 +68,18 @@ public final class BatchPresigner extends HttpServlet {
 		}
 		catch(final Exception e) {
 			LOGGER.severe("La definicion de lote es invalida: " + e); //$NON-NLS-1$
-			response.sendError(
+			Responser.sendError(response,
 				HttpServletResponse.SC_BAD_REQUEST,
-				"La definicion de lote es invalida: " + e //$NON-NLS-1$
-			);
+				"La definicion de lote es invalida"); //$NON-NLS-1$
 			return;
 		}
 
 		final String certListUrlSafeBase64 = request.getParameter(BATCH_CRT_PARAM);
 		if (certListUrlSafeBase64 == null) {
 			LOGGER.severe("No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM); //$NON-NLS-1$
-			response.sendError(
+			Responser.sendError(response,
 				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM //$NON-NLS-1$
-			);
+				"No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM); //$NON-NLS-1$
 			return;
 		}
 
@@ -93,10 +89,9 @@ public final class BatchPresigner extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.severe("La cadena de certificados del firmante es invalida: " + e); //$NON-NLS-1$
-			response.sendError(
+			Responser.sendError(response,
 				HttpServletResponse.SC_BAD_REQUEST,
-				"La cadena de certificados del firmante es invalida: " + e //$NON-NLS-1$
-			);
+				"La cadena de certificados del firmante es invalida"); //$NON-NLS-1$
 			return;
 		}
 
@@ -106,19 +101,15 @@ public final class BatchPresigner extends HttpServlet {
 		}
 		catch(final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error en el preproceso del lote: " + e, e); //$NON-NLS-1$
-			response.sendError(
+			Responser.sendError(response,
 				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-				"Error en el preproceso del lote: " + e //$NON-NLS-1$
-			);
+				"Error en el preproceso del lote: " + e); //$NON-NLS-1$
 			return;
 		}
 
 		response.setHeader(CONFIG_PARAM_ALLOW_ORIGIN, ALL_ORIGINS_ALLOWED);
 		response.setContentType("application/json"); //$NON-NLS-1$
-		try (final PrintWriter writer = response.getWriter()) {
-			writer.write(pre.toString());
-			writer.flush();
-		}
+		Responser.sendResult(response, pre.toString().getBytes(StandardCharsets.UTF_8));
 	}
 
 }

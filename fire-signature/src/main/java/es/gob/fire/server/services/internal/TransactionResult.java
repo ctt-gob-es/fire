@@ -12,6 +12,7 @@ package es.gob.fire.server.services.internal;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
@@ -30,12 +31,13 @@ import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.connector.OperationResult;
 import es.gob.fire.upgrade.GracePeriodInfo;
 
 /**
  * Resultado de una transacci&oacute;n.
  */
-public class TransactionResult {
+public class TransactionResult extends OperationResult {
 
 	/** Codificaci&oacute;n de caracters por defecto. */
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
@@ -101,6 +103,8 @@ public class TransactionResult {
 	 * diferir de lo solicitado por la aplicaci&oacute;n. Por ejemplo, puede haberse
 	 * solicitado una firma ES-A y recibirse una ES-T. */
 	public static final int STATE_PARTIAL = 2;
+
+	private static final Logger LOGGER = Logger.getLogger(TransactionResult.class.getName());
 
 	private int state = STATE_ERROR;
 
@@ -290,9 +294,11 @@ public class TransactionResult {
 	 * Obtiene el resultado de la transacci&oacute;n, que puede ser los bytes del resultado
 	 * o un objeto JSON con la informaci&oacute;n del proceso si este no se obtuvo. Este
 	 * resultado es susceptible de parsearse mediante el m&eacute;todo {@link #parse(int, byte[])}.
+	 * @param charset Juego de caracteres a usar en caso de que el resultado sea un texto.
 	 * @return Resultado de la operaci&oacute;n.
 	 */
-	public byte[] encodeResult() {
+	@Override
+	public byte[] encodeResult(final Charset charset) {
 
 		// Si tenemos un resultado, lo devolvemos directamente
 		if (this.result != null) {
@@ -315,10 +321,7 @@ public class TransactionResult {
 				resultBuilder.add(JSON_ATTR_SIGNING_CERT, encodeCertificate(this.signingCert));
 			} catch (final CertificateEncodingException e) {
 				// Error al codificar el certificado, no se devolvera certificado en ese caso
-				Logger.getLogger(BatchResult.class.getName()).log(
-						Level.WARNING,
-						"Error al codificar el certificado de firma", //$NON-NLS-1$
-						e);
+				LOGGER.log(Level.WARNING, "Error al codificar el certificado de firma", e); //$NON-NLS-1$
 			}
 		}
 		if (this.upgradeFormat != null) {
@@ -332,23 +335,29 @@ public class TransactionResult {
 				resultBuilder.add(JSON_ATTR_GRACE_PERIOD, gracePeriodBuilder);
 			} catch (final Exception e) {
 				// Error al codificar el certificado, no se devolvera certificado en ese caso
-				Logger.getLogger(BatchResult.class.getName()).log(
-						Level.WARNING,
-						"Error al codificar el certificado de firma", //$NON-NLS-1$
-						e);
+				LOGGER.log(Level.WARNING, "Error al codificar el certificado de firma", e); //$NON-NLS-1$
 			}
 		}
 
 		// Construimos la respuesta
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (final JsonWriter json = Json.createWriter(baos);) {
-			final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-			jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
-
-			json.writeObject(jsonBuilder.build());
+		byte[] response = null;
+		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			 final OutputStreamWriter osw = new OutputStreamWriter(baos, charset);
+			 final JsonWriter json = Json.createWriter(osw);) {
+				final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+				jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
+				json.writeObject(jsonBuilder.build());
+				osw.flush();
+				response = baos.toByteArray();
+		}
+		catch (final Exception e) {
+			// Esta excepcion solo podria lanzarse durante el cierre de los flujos,
+			// luego no afecta a la operativa
+			LOGGER.log(Level.WARNING,
+				"Error al cerrar los flujos para la impresion del resultado de la transaccion", e); //$NON-NLS-1$
 		}
 
-		return baos.toByteArray();
+		return response;
 	}
 
 	/**
@@ -394,10 +403,7 @@ public class TransactionResult {
 					}
 					catch (final Exception e) {
 						// Error al codificar el certificado, no se devolvera certificado en ese caso
-						Logger.getLogger(TransactionResult.class.getName()).log(
-								Level.WARNING,
-								"Error al decodificar el certificado de firma", //$NON-NLS-1$
-								e);
+						LOGGER.log(Level.WARNING, "Error al decodificar el certificado de firma", e); //$NON-NLS-1$
 					}
 				}
 				if (resultObject.containsKey(JSON_ATTR_UPGRADE)) {

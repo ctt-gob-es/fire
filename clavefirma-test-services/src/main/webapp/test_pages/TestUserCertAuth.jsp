@@ -92,6 +92,8 @@
 <div class="clr"></div>
 </div>
 </footer>
- 
+         <script>
+  			document.getElementById("pin").focus();
+  		</script>
 </body>
 </html>

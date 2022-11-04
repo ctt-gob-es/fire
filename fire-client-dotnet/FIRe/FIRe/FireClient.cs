@@ -951,10 +951,13 @@ namespace FIRe
         /// <param name="urlParameters">Parámetros que se envían en la petición.</param>
         /// <param name="config">Configuración para la conexión de red.</param>
         /// <returns>Respuesta de la llamada a la URL indicada.</returns>
-		/// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
+        /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
         /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
         /// <exception cref="HttpNetworkException">Cuando se produce un error de conexión con el componente central.</exception>
         /// <exception cref="HttpOperationException">Cuando se produce un error interno del servidor.</exception>
+        /// <exception cref="HttpNoUserException">Cuando el usuario no esta dado de alta en el proveedor indicado.</exception>
+        /// <exception cref="HttpCertificateBlockedException">Cuando el certificado el usuario está caducado.</exception>
+        /// <exception cref="HttpWeakRegistryException">Cuando el usuario realizó un registro no fehaciente en el proveedor.</exception>
         /// <exception cref="NumDocumentsExceededException">Cuando se intentan agregar a un lote más documentos de los permitidos.</exception>
         /// <exception cref="DuplicateDocumentException">Cuando se intenta agregar a un lote un documento con el mismo identificador que otro utilizado anteriormente.</exception>
         /// <exception cref="BatchNoSignedException">Cuando se intenta recuperar la firma de un documento de un lote antes de firmar el propio lote.</exception>
@@ -968,7 +971,7 @@ namespace FIRe
             try
             {
                 // generamos la respuesta del servidor
-                response = ConnectionManager.connectByPost(url, urlParameters, config);
+                response = ConnectionManager.ConnectByPost(url, urlParameters, config);
                 // recibimos el stream de la respuesta
                 dataStream = response.GetResponseStream();
                 ms = new MemoryStream();
@@ -979,45 +982,105 @@ namespace FIRe
             }
             catch (WebException e)
             {
-                HttpWebResponse r = (HttpWebResponse)e.Response;
-
-                if ((r != null && r.StatusCode == HttpStatusCode.Forbidden) || e.GetBaseException() is AuthenticationException)
+                HttpWebResponse r = (HttpWebResponse) e.Response;
+                
+                if (e.GetBaseException() is AuthenticationException)
                 {
                     throw new HttpForbiddenException("Error durante la autenticacion de la aplicacion", e);
                 }
-                else if (r != null && r.StatusCode == HttpStatusCode.InternalServerError)
+                if (r == null)
                 {
-                    throw new HttpForbiddenException("Error durante la operacion de firma", e);
+                    throw new HttpNetworkException("Error al realizar la conexion: " + e.Message, e);
                 }
-                else if (r != null) {
-                    switch (r.StatusCode.ToString())
+
+                string contentType = r.ContentType;
+                if (!string.IsNullOrEmpty(contentType)
+                    && contentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+                {
+                    ErrorResultJson errorResult;
+                    try
                     {
-                        case (HttpCustomErrors.NUM_DOCUMENTS_EXCEEDED):
-                            throw new NumDocumentsExceededException("Se excedido el numero maximo de documentos permitidos", e);
-                        case (HttpCustomErrors.DUPLICATE_DOCUMENT):
-                            throw new DuplicateDocumentException("El identificador de documento ya existe en el lote", e);
-                        case (HttpCustomErrors.INVALID_TRANSACTION):
-                            throw new InvalidTransactionException("La transaccion no es valida o ha caducado", e);
-                        case (HttpCustomErrors.UPGRADING_ERROR):
-                            throw new HttpOperationException("Error durante la actualización de firma", e);
-                        case (HttpCustomErrors.INVALID_SIGNATURE_ERROR):
-                            throw new HttpOperationException("La firma generada no es válida", e);
-                        case (HttpCustomErrors.BATCH_NO_DOCUMENTS):
-                            throw new HttpOperationException("Se ha mandado a firmar un lote sin documentos", e);
-                        case (HttpCustomErrors.BATCH_NO_SIGNED):
-                            throw new BatchNoSignedException("El lote no se ha firmado", e);
-                        case (HttpCustomErrors.BATCH_DOCUMENT_FAILED):
-                            throw new InvalidBatchDocumentException("La firma solicitada no se encuentra disponible", e);
-                        case (HttpCustomErrors.INVALID_BATCH_DOCUMENT):
-                            throw new InvalidBatchDocumentException("El documento no existe en el lote", e);
-                        case (HttpCustomErrors.INVALID_DOCUMENT_MANAGER):
-                            throw new HttpOperationException("Gestor de documentos no valido", e);
-                        case (HttpCustomErrors.DOCUMENT_MANAGER_ERROR):
-                            throw new HttpOperationException("Error al obtener un documento a traves del gestor en el servidor", e);
+                        dataStream = r.GetResponseStream();
+                        ms = new MemoryStream();
+                        dataStream.CopyTo(ms);
+                        byte[] bytes = ms.ToArray();
+
+                        System.Text.Encoding encoding = !string.IsNullOrEmpty(r.ContentEncoding)
+                            ? System.Text.Encoding.GetEncoding(r.ContentEncoding)
+                            : System.Text.Encoding.UTF8;
+
+                        string json = encoding.GetString(bytes);
+
+                        var json_serializer = new JavaScriptSerializer();
+                        errorResult = json_serializer.Deserialize<ErrorResultJson>(json);
                     }
-                    throw new HttpOperationException("Error durante la operacion de firma", e);
+                    catch (Exception e2)
+                    {
+
+                        throw new HttpOperationException("Error. ContenType: " + r.ContentType + ". Encoding: " + r.ContentEncoding + ". Length: " + r.ContentLength + ". Excepcion: " + e2.ToString(), e2);
+
+                        //throw new HttpOperationException("No se pudo decodificar la respuesta de error del servicio: " + e2.ToString(), e2);
+                    }
+
+                    int code = errorResult.c;
+                    string message = errorResult.m;
+                    if (FIReErrors.FORBIDDEN == code || FIReErrors.UNAUTHORIZED == code)
+                    {
+                        throw new HttpForbiddenException(code, message);
+                    }
+                    else if (FIReErrors.TIMEOUT == code)
+                    {
+                        throw new HttpNetworkException(code, message);
+                    }
+                    else if (FIReErrors.UNKNOWN_USER == code)
+                    {
+                        throw new HttpNoUserException(code, message);
+                    }
+                    else if (FIReErrors.INVALID_TRANSACTION == code)
+                    {
+                        throw new InvalidTransactionException(code, message);
+                    }
+                    else if (FIReErrors.CERTIFICATE_BLOCKED == code)
+                    {
+                        throw new HttpCertificateBlockedException(code, message);
+                    }
+                    else if (FIReErrors.CERTIFICATE_WEAK_REGISTRY == code)
+                    {
+                        throw new HttpWeakRegistryException(code, message);
+                    }
+                    else if (FIReErrors.BATCH_DUPLICATE_DOCUMENT == code)
+                    {
+                        throw new DuplicateDocumentException(code, message);
+                    }
+                    else if (FIReErrors.BATCH_INVALID_DOCUMENT == code)
+                    {
+                        throw new InvalidBatchDocumentException(code, message);
+                    }
+                    else if (FIReErrors.BATCH_NUM_DOCUMENTS_EXCEEDED == code)
+                    {
+                        throw new NumDocumentsExceededException(code, message);
+                    }
+                    else if (FIReErrors.BATCH_NO_SIGNED == code)
+                    {
+                        throw new BatchNoSignedException(code, message);
+                    }
+                    else
+                    {
+                        throw new HttpOperationException(code, message);
+                    }
                 }
-                throw new HttpNetworkException("Error al realizar la conexion: " + e.Message, e);
+
+                if (r.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    throw new HttpForbiddenException("Error durante la autenticacion de la aplicacion", e);
+                }
+                if (r.StatusCode == HttpStatusCode.InternalServerError)
+                {
+                    throw new HttpForbiddenException("Error interno del servicio", e);
+                }
+                else {
+                    throw new HttpOperationException("Error desconocido durante la operacion", e);
+                }
             }
             catch (ProtocolViolationException e)
             {

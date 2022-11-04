@@ -50,24 +50,6 @@
 		errorUrl = connConfig.getRedirectErrorUrl();
 	}
 
-	// En caso de que accedamos desde un dispositivo movil y la operacion sea de lote,
-	// accedemos directamente al uso de certificados remotos
-	boolean isMobile = false;
-	String userAgent = request.getHeader("User-Agent"); //$NON-NLS-1$
-	if (userAgent != null) {
-		userAgent = userAgent.toUpperCase();
-		isMobile = userAgent.contains("ANDROID") || userAgent.contains("WEBOS") || //$NON-NLS-1$ //$NON-NLS-2$
-				userAgent.contains("IPHONE") || userAgent.contains("IPAD") || //$NON-NLS-1$ //$NON-NLS-2$
-				userAgent.contains("IPOD") || userAgent.contains("BLACKBERRY") || //$NON-NLS-1$ //$NON-NLS-2$
-				userAgent.contains("IEMOBILE") || userAgent.contains("OPERA MINI"); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	boolean localAllowed = true;
-	String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
-	if (op != null && op.equals(ServiceParams.OPERATION_BATCH) && isMobile) {
-		localAllowed = false;
-	}
-
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
 	if (logoUrl == null || logoUrl.isEmpty()) {
@@ -138,13 +120,9 @@
 		
 		for (String provider : providers) {
 			ProviderInfo info = ProviderManager.getProviderInfo(provider);
-			boolean enabled = true;
-			if (ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(provider)) {
-				enabled = localAllowed;
-			} else {
-				enabled = userRegistered && !info.isNeedJavaScript();
-			}
-			
+			boolean enabled = ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(provider) ||
+				(userRegistered && !info.isNeedJavaScript());
+
 			String serviceToRedirect = info.isUserRequiredAutentication() ?
 					ServiceNames.PUBLIC_SERVICE_AUTH_USER :
 					ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN;
@@ -155,7 +133,7 @@
 					</div>
 					<div class="contain-box-bottom">
 						<h2 class="title-box"><%= info.getHeader() %></h2>
-						<% if(info.isNeedJavaScript()) { %>
+						<% if (info.isNeedJavaScript()) { %>
 							<noscript>
 								<p class="text-box">Su navegador web tiene JavaScript desactivado. Habilite JavaScript para poder usar sus certificados.</p>
 							</noscript>
@@ -172,9 +150,6 @@
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= info.getName() %>" />
 							<% if (unregistered != null) { %>
 								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED %>" value="<%= unregistered %>" />
-							<% } %>
-							<% if (op != null) { %>
-								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_OPERATION %>" value="<%= op %>" />
 							<% } %>
 						</div>
 						<a class="button" title="<%= info.getHeader() %>" onclick="document.getElementById('form<%= info.getName() %>').submit();" href="javascript:{}">

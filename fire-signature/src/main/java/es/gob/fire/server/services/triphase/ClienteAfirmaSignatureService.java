@@ -180,7 +180,6 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.severe("Se han indicado una politica de firma y un formato incompatibles: "  + e); //$NON-NLS-1$
-
 		}
 
 		// Obtenemos los parametros adicionales para la firma

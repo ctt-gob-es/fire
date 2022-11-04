@@ -10,14 +10,13 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 
 
 /**
@@ -47,8 +46,8 @@ public class RecoverBatchStateManager {
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+        	Responser.sendError(response, FIReError.PARAMETER_TRANSACTION_ID_NEEDED);
+        	return;
         }
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
@@ -60,14 +59,14 @@ public class RecoverBatchStateManager {
         // interpreta que estaba caducada
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
+    		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
         }
 
     	// Comprobamos si habia firmas que procesar y, en caso negativo, indicamos que se han procesado todas
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
-    		sendResult(response, "1".getBytes()); //$NON-NLS-1$
+    		Responser.sendResult(response, "1".getBytes()); //$NON-NLS-1$
     		return;
 		}
 
@@ -83,19 +82,6 @@ public class RecoverBatchStateManager {
 		LOGGER.info(logF.f("Se devuelve el estado del lote")); //$NON-NLS-1$
 
     	final String progress = Float.toString(1 - (float) pending / numOperations);
-    	sendResult(response, progress.getBytes());
-	}
-
-	/**
-	 * Envia el XML resultado de la operaci&oacute;n como respuesta del servicio.
-	 * @param response Respuesta del servicio.
-	 * @param result Resultado de la operaci&oacute;n.
-	 * @throws IOException Cuando falla el env&iacute;o.
-	 */
-	private static void sendResult(final HttpServletResponse response, final byte[] result) throws IOException {
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(new TransactionResult(TransactionResult.RESULT_TYPE_BATCH, result).encodeResult());
-        output.flush();
-        output.close();
+    	Responser.sendResult(response, progress.getBytes());
 	}
 }

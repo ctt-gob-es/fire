@@ -126,7 +126,8 @@ public class AddDocumentBatchService extends HttpServlet {
 			LOGGER.error("Se excedio el numero maximo de documentos configurados para el lote", e); //$NON-NLS-1$
 			request.getRequestDispatcher("AddDocumentToBatch.jsp?error=maxdocs").forward(request, response); //$NON-NLS-1$
 			return;
-		} catch (final Exception e) {
+		}
+		catch (final Exception e) {
 			LOGGER.error("Ocurrio un error al agregar el documento al lote", e); //$NON-NLS-1$
 			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;

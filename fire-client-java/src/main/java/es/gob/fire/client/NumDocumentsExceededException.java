@@ -15,14 +15,18 @@ package es.gob.fire.client;
  * permitidos en un lote.
  * @author Carlos Gamuci
  */
-public class NumDocumentsExceededException extends Exception {
+public class NumDocumentsExceededException extends HttpOperationException {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 3410961465765079806L;
 
-	/** Construye la excepci&oacute;n. */
-	public NumDocumentsExceededException() {
-		super();
+	/**
+     * Se trat&oacute; de agregar a un lote m&aacute;s documentos de los permitidos.
+     * @param code C&oacute;digo de error.
+     * @param msg Mensaje de error.
+     */
+	public NumDocumentsExceededException(final int code, final String msg) {
+		super(code, msg);
 	}
 
 	/** Construye la excepci&oacute;n con su descripci&oacute;n y la causa.

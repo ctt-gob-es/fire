@@ -21,7 +21,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +28,8 @@ import javax.servlet.http.HttpSession;
 
 import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.server.services.FIReError;
+import es.gob.fire.server.services.Responser;
 
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
@@ -46,13 +47,13 @@ public class MiniAppletSuccessService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletSuccessService.class.getName());
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
         if (transactionId == null || transactionId.isEmpty()) {
         	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
-       		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        	Responser.sendError(response, FIReError.FORBIDDEN);
             return;
         }
 
@@ -69,7 +70,7 @@ public class MiniAppletSuccessService extends HttpServlet {
         if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado la URL de redireccion de error")); //$NON-NLS-1$
             SessionCollector.removeSession(transactionId);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            Responser.sendError(response, FIReError.FORBIDDEN);
             return;
         }
 
@@ -91,7 +92,7 @@ public class MiniAppletSuccessService extends HttpServlet {
     			.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
     	if (connConfig == null || connConfig.getRedirectSuccessUrl() == null || !connConfig.isDefinedRedirectErrorUrl()) {
     		LOGGER.warning(logF.f("No se encontraron en la sesion las URL de redireccion para la operacion")); //$NON-NLS-1$
-    		ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
+    		ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR);
     		redirectToExternalUrl(redirectErrorUrl, request, response);
     		return;
     	}
@@ -117,12 +118,12 @@ public class MiniAppletSuccessService extends HttpServlet {
         		updateBatchResult(batchResult, afirmaBatchResultB64, stopOnError, session);
         	} catch (final AOException e) {
         		LOGGER.log(Level.WARNING, logF.f("Fallo alguna de las firmas del lote y se aborta la operacion como se habia solicitado"), e); //$NON-NLS-1$
-        		ErrorManager.setErrorToSession(session, OperationError.SIGN_LOCAL_BATCH, true, null);
+        		ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, true, null);
         		redirectToExternalUrl(redirectErrorUrl, request, response);
         		return;
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error al procesar el resultado de la firma de lote del Cliente @firma"), e); //$NON-NLS-1$
-        		ErrorManager.setErrorToSession(session, OperationError.SIGN_LOCAL_BATCH, true, null);
+        		ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, true, null);
         		redirectToExternalUrl(redirectErrorUrl, request, response);
         		return;
         	}
@@ -147,7 +148,7 @@ public class MiniAppletSuccessService extends HttpServlet {
      * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
      * @throws IOException Cuando no se puede redirigir al usuario.
      */
-    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) {
 
         // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
     	final HttpSession httpSession = request.getSession(false);
@@ -155,7 +156,13 @@ public class MiniAppletSuccessService extends HttpServlet {
         	httpSession.invalidate();
         }
 
-    	response.sendRedirect(url);
+        try {
+        	response.sendRedirect(url);
+        }
+        catch (final Exception e) {
+        	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+		}
     }
 
 	/**
@@ -172,8 +179,8 @@ public class MiniAppletSuccessService extends HttpServlet {
 	 * @throws IOException Cuando ocurre alg&uacute;n error al procesar el resultado devuelto por
 	 * 		   el Cliente @firma.
 	 */
-	private static void updateBatchResult(final BatchResult batchResult, final String afirmaBatchResultB64, final boolean stopOnError,
-			final FireSession session) throws AOException, IOException {
+	private static void updateBatchResult(final BatchResult batchResult, final String afirmaBatchResultB64,
+			final boolean stopOnError, final FireSession session) throws AOException, IOException {
 
 		final byte[] afirmaResultJSON = Base64.decode(afirmaBatchResultB64);
 

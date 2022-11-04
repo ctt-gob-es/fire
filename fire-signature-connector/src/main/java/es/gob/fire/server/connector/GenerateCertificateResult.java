@@ -11,6 +11,7 @@ package es.gob.fire.server.connector;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import javax.json.Json;
@@ -20,7 +21,7 @@ import javax.json.JsonReader;
 
 
 /** Resultado de una operaci&oacute;n de generaci&oacute;n de un nuevo certificado de firma. */
-public final class GenerateCertificateResult {
+public final class GenerateCertificateResult extends OperationResult {
 
     private final String transactionId;
     private final String redirectUrl;
@@ -90,12 +91,12 @@ public final class GenerateCertificateResult {
     }
 
     @Override
-    public String toString() {
+    public byte[] encodeResult(final Charset charset) {
         final StringBuilder sb = new StringBuilder("{\n  \"transacionid\":\""); //$NON-NLS-1$
         sb.append(getTransactionId());
         sb.append("\",\n  \"redirecturl\":\""); //$NON-NLS-1$
         sb.append(getRedirectUrl());
         sb.append("\"\n}"); //$NON-NLS-1$
-        return sb.toString();
+        return sb.toString().getBytes(charset);
     }
 }

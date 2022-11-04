@@ -10,14 +10,14 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 
 /**
@@ -48,9 +48,8 @@ public class SignBatchManager {
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
     	if (transactionId == null || transactionId.isEmpty()) {
-    		LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"No se ha proporcionado el identificador de la transaccion"); //$NON-NLS-1$
+    		LOGGER.warning(logF.f("No se ha proporcionado el identificador de transaccion")); //$NON-NLS-1$
+    		Responser.sendError(response, FIReError.PARAMETER_TRANSACTION_ID_NEEDED);
     		return;
     	}
 
@@ -61,7 +60,7 @@ public class SignBatchManager {
     	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
     	if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode(), "La transaccion no se ha inicializado o ha caducado"); //$NON-NLS-1$
+    		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
     		return;
     	}
 
@@ -70,7 +69,7 @@ public class SignBatchManager {
     		LOGGER.warning(logF.f("Se ha pedido firmar un lote sin documentos. Se aborta la operacion.")); //$NON-NLS-1$
     		TRANSLOGGER.register(session, false);
         	SessionCollector.removeSession(session);
-    		response.sendError(HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorCode(), HttpCustomErrors.BATCH_NO_DOCUMENT.getErrorDescription());
+        	Responser.sendError(response, FIReError.BATCH_NO_DOCUMENTS);
     		return;
     	}
 
@@ -81,8 +80,7 @@ public class SignBatchManager {
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning(logF.f("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
 			TRANSLOGGER.register(session, false);
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"No se proporcionaron las URL de redireccion para la operacion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_URL_ERROR_REDIRECION_NEEDED);
 			return;
 		}
 
@@ -97,6 +95,12 @@ public class SignBatchManager {
 		// Recuperamos los proveedores cargados para la aplicacion
 		final String[] provs = (String[]) session.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
 
+		// Obtenemos la referencia al usuario de la sesion
+        final String subjectRef = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF);
+
+        // Cargamos el URL de error
+        final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
+
         // Si ya se definio el origen del certificado, se envia al servicio que se encarga de
         // redirigirlo. Si no, se envia la pagina de seleccion
         String redirectUrl;
@@ -106,39 +110,26 @@ public class SignBatchManager {
         	final ProviderInfo info = ProviderManager.getProviderInfo(provs[0]);
         	redirectUrl = (info.isUserRequiredAutentication() ? ServiceNames.PUBLIC_SERVICE_AUTH_USER : ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN)
         			+ "?" + ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true"; //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true" //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
         } else {
-        	redirectUrl = FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" //$NON-NLS-1$
-        			+ ServiceParams.HTTP_PARAM_OPERATION + "=" + ServiceParams.OPERATION_BATCH; //$NON-NLS-1$
+        	redirectUrl = FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN
+        			+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
         }
-
-		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		final String redirectUrlBase = PublicContext.getPublicContext(request);
 
-		// Obtenemos la referencia al usuario de la sesion
-        final String subjectRef = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF);
-
         // Devolvemos la pagina a la que debe dirigir al usuario
-        final SignOperationResult result = new SignOperationResult(
-        		transactionId,
-        		redirectUrlBase + redirectUrl +
-        			"&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId + //$NON-NLS-1$ //$NON-NLS-2$
-        			"&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + //$NON-NLS-1$ //$NON-NLS-2$
-        			"&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl); //$NON-NLS-1$ //$NON-NLS-2$
+        final SignOperationResult result = new SignOperationResult(transactionId, redirectUrlBase + redirectUrl);
 
         LOGGER.info(logF.f("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$
 
-        sendResult(response, result);
-	}
-
-	private static void sendResult(final HttpServletResponse response, final SignOperationResult result) throws IOException {
-        response.setContentType("application/json"); //$NON-NLS-1$
-        final PrintWriter out = response.getWriter();
-        out.print(result.toString());
-        out.flush();
-        out.close();
+        Responser.sendResult(response, result);
 	}
 }

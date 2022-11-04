@@ -15,55 +15,54 @@ package es.gob.fire.server.services.internal;
  */
 public enum OperationError {
 
-	// Errores generales
-	UNKNOWN_USER(1, "El usuario no esta dado de alta en el sistema"), //$NON-NLS-1$
-	INVALID_STATE(2, "Estado invalido"), //$NON-NLS-1$
-
-	UNDEFINED_ERROR(3, "Error desconocido durante la operaci&oacute;n"), //$NON-NLS-1$
-	OPERATION_CANCELED(4, "Operacion cancelada por el usuario"), //$NON-NLS-1$
-	INVALID_SESSION(6, "La sesi&oacute;n no es v&aacute;lida o ha caducado"), //$NON-NLS-1$
-
-	INTERNAL_ERROR(7, "Error interno del servidor"), //$NON-NLS-1$
-	EXTERNAL_SERVICE_ERROR_TO_SIGN(8, "Error detectado despues de llamar a la pasarela externa para firmar"), //$NON-NLS-1$
-	EXTERNAL_SERVICE_ERROR_TO_LOGIN(10, "Error detectado despues de llamar a la pasarela externa para autenticar al usuario"), //$NON-NLS-1$
-
-	INVALID_DOCUMENT_MANAGER(9, "El gestor de documentos indicado no es valido"), //$NON-NLS-1$
-
-	// Errores especificos del servicios de listado de certificados
-	CERTIFICATES_SERVICE(101, "Error en la obtencion de los certificados"), //$NON-NLS-1$
-	CERTIFICATES_SERVICE_NETWORK(102, "Error al conectar con el servicio para la recuperacion de certificados"), //$NON-NLS-1$
-	CERTIFICATES_BLOCKED(103, "Los certificados del usuario estan bloqueados"), //$NON-NLS-1$
-	CERTIFICATES_WEAK_REGISTRY(104, "El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente"), //$NON-NLS-1$
-	CERTIFICATES_NO_CERTS(105, "El usuario no dispone de certificados de firma ni puede generarlos desde FIRe"), //$NON-NLS-1$
-	CERTIFICATES_DUPLICATED(106, "El usuario ya dispone de un certificado del tipo que se esta solicitando generar"), //$NON-NLS-1$
-	CERTIFICATES_GENERATION_SERVICE(107, "Error en la generacion de un nuevo certificado"), //$NON-NLS-1$
-
-	// Errores propios de la operacion de firma
-	SIGN_SERVICE(201, "Error en la obtencion de la firma de los datos"), //$NON-NLS-1$
-	SIGN_SERVICE_PRESIGN(202, "Error al ejecutar la prefirma de los datos"), //$NON-NLS-1$
-	SIGN_SERVICE_POSTSIGN(203, "Error al ejecutar la postfirma de los datos"), //$NON-NLS-1$
-	SIGN_SERVICE_NETWORK(205, "Error al conectar con el servicio para la generacion de la firma con la clave remota"), //$NON-NLS-1$
-	SIGN_SERVICE_UNSUPPORTED_OPERATION(206, "Operacion no soportada para el formato seleccionado"), //$NON-NLS-1$
-	SIGN_BATCH_WITH_ERRORS(207, "Fallo alguna firma del lote"), //$NON-NLS-1$
-
-	SIGN_LOCAL(250, "Error al generar la firma con certificado local"), //$NON-NLS-1$
-	SIGN_LOCAL_BATCH(251, "No se completo correctamente la firma del lote con certificado local"); //$NON-NLS-1$
-
-	private int code;
-
-	private String message;
-
-	OperationError(final int code, final String message) {
-		this.code = code;
-		this.message = message;
-	}
-
-	public int getCode() {
-		return this.code;
-	}
-
-	public String getMessage() {
-		return this.message;
-	}
+//	// Errores generales
+//	UNKNOWN_USER(1, "El usuario no esta dado de alta en el sistema"), //$NON-NLS-1$
+//	INVALID_STATE(2, "Estado invalido"), //$NON-NLS-1$
+//
+//	UNDEFINED_ERROR(3, "Error desconocido durante la operaci&oacute;n"), //$NON-NLS-1$
+//	OPERATION_CANCELED(4, "Operacion cancelada por el usuario"), //$NON-NLS-1$
+//	INVALID_SESSION(6, "La sesi&oacute;n no es v&aacute;lida o ha caducado"), //$NON-NLS-1$
+//
+//	INTERNAL_ERROR(7, "Error interno del servidor"), //$NON-NLS-1$
+//	EXTERNAL_SERVICE_ERROR_TO_SIGN(8, "Error detectado despues de llamar a la pasarela externa para firmar"), //$NON-NLS-1$
+//	EXTERNAL_SERVICE_ERROR_TO_LOGIN(10, "Error detectado despues de llamar a la pasarela externa para autenticar al usuario"), //$NON-NLS-1$
+//
+//	INVALID_DOCUMENT_MANAGER(9, "El gestor de documentos indicado no es valido"), //$NON-NLS-1$
+//
+//	// Errores especificos del servicios de listado de certificados
+//	CERTIFICATES_SERVICE(101, "Error en la obtencion de los certificados"), //$NON-NLS-1$
+//	CERTIFICATES_SERVICE_NETWORK(102, "Error al conectar con el servicio para la recuperacion de certificados"), //$NON-NLS-1$
+//	CERTIFICATES_BLOCKED(103, "Los certificados del usuario estan bloqueados"), //$NON-NLS-1$
+//	CERTIFICATES_WEAK_REGISTRY(104, "El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente"), //$NON-NLS-1$
+//	CERTIFICATES_NO_CERTS(105, "El usuario no dispone de certificados de firma ni puede generarlos desde FIRe"), //$NON-NLS-1$
+//	CERTIFICATES_DUPLICATED(106, "El usuario ya dispone de un certificado del tipo que se esta solicitando generar"), //$NON-NLS-1$
+//	CERTIFICATES_GENERATION_SERVICE(107, "Error en la generacion de un nuevo certificado"), //$NON-NLS-1$
+//
+//	// Errores propios de la operacion de firma
+//	SIGN_SERVICE(201, "Error en la obtencion de la firma de los datos"), //$NON-NLS-1$
+//	SIGN_SERVICE_PRESIGN(202, "Error al ejecutar la prefirma de los datos"), //$NON-NLS-1$
+//	SIGN_SERVICE_POSTSIGN(203, "Error al ejecutar la postfirma de los datos"), //$NON-NLS-1$
+//	SIGN_SERVICE_NETWORK(205, "Error al conectar con el servicio para la generacion de la firma con la clave remota"), //$NON-NLS-1$
+//	SIGN_SERVICE_UNSUPPORTED_OPERATION(206, "Operacion no soportada para el formato seleccionado"), //$NON-NLS-1$
+//
+//	SIGN_LOCAL(250, "Error al generar la firma con certificado local"), //$NON-NLS-1$
+//	SIGN_LOCAL_BATCH(251, "No se completo correctamente la firma del lote con certificado local"); //$NON-NLS-1$
+//
+//	private int code;
+//
+//	private String message;
+//
+//	OperationError(final int code, final String message) {
+//		this.code = code;
+//		this.message = message;
+//	}
+//
+//	public int getCode() {
+//		return this.code;
+//	}
+//
+//	public String getMessage() {
+//		return this.message;
+//	}
 
 }

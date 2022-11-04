@@ -23,9 +23,10 @@ import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.document.FireDocumentManagerBase;
 import es.gob.fire.server.services.DocInfo;
-import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.FIReDocumentManagerFactory;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.document.DefaultFIReDocumentManager;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.UpgraderUtils;
 
@@ -57,8 +58,7 @@ public class AddDocumentBatchManager {
     	// Comprobamos que se hayan proporcionado los parametros indispensables
     	if (transactionId == null || transactionId.isEmpty()) {
     		LOGGER.warning(logF.f("No se ha proporcionado el identificado de la transaccion")); //$NON-NLS-1$
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"No se ha proporcionado el identificador de la transaccion"); //$NON-NLS-1$
+    		Responser.sendError(response, FIReError.PARAMETER_TRANSACTION_ID_NEEDED);
     		return;
     	}
 
@@ -75,8 +75,7 @@ public class AddDocumentBatchManager {
     	}
     	catch (final IOException e) {
     		LOGGER.warning(logF.f("Se han proporcionado parametros de configuracion de firma mal formados")); //$NON-NLS-1$
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"Se han proporcionado parametros de configuracion de firma mal formados"); //$NON-NLS-1$
+    		Responser.sendError(response, FIReError.PARAMETER_BATCH_CONFIG_INVALID);
     		return;
 		}
 
@@ -88,16 +87,15 @@ public class AddDocumentBatchManager {
     	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
     	if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
+    		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
     		return;
     	}
 
         // Si se definio un DocumentManager, lo usaremos
         final FIReDocumentManager documentManager = (FIReDocumentManager) session.getObject(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER);
-    	if (documentManager instanceof DefaultFIReDocumentManager && (dataB64 == null || dataB64.isEmpty())) {
+    	if (FIReDocumentManagerFactory.isDefaultDocumentManager(documentManager) && (dataB64 == null || dataB64.isEmpty())) {
     		LOGGER.warning(logF.f("No se ha proporcionado el documento a firmar ni un gestor de documentos del que recuperarlo")); //$NON-NLS-1$
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-    				"No se ha proporcionado el documento a firmar"); //$NON-NLS-1$
+    		Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_NEEDED);
     		return;
     	}
 
@@ -113,8 +111,7 @@ public class AddDocumentBatchManager {
         	}
         	catch (final Exception e) {
         		LOGGER.warning(logF.f("El documento enviado a firmar no esta bien codificado: " + e)); //$NON-NLS-1$
-        		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-        				"El documento enviado a firmar no esta bien codificado"); //$NON-NLS-1$
+        		Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_INVALID);
         		return;
         	}
         }
@@ -138,12 +135,12 @@ public class AddDocumentBatchManager {
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error en la carga de los datos a agregar al lote"), e); //$NON-NLS-1$
     		AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, documentManager.getClass().getCanonicalName());
-    		response.sendError(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode());
+    		Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND);
     		return;
     	}
     	if (data == null) {
     		LOGGER.warning(logF.f("No se han obtenido los datos para agregarlos al lote de firma")); //$NON-NLS-1$
-    		response.sendError(HttpCustomErrors.DOCUMENT_MANAGER_ERROR.getErrorCode());
+    		Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND);
     		return;
     	}
 
@@ -158,7 +155,7 @@ public class AddDocumentBatchManager {
 
         if (batchResult.hasDocument(docId)) {
         	LOGGER.warning(logF.f("El identificador de documento indicado ya existe en el lote")); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.DUPLICATE_DOCUMENT.getErrorCode());
+    		Responser.sendError(response, FIReError.BATCH_DUPLICATE_DOCUMENT);
         	return;
         }
 
@@ -167,7 +164,7 @@ public class AddDocumentBatchManager {
         final int maxDocuments = ConfigManager.getBatchMaxDocuments();
         if (maxDocuments != ConfigManager.UNLIMITED_NUM_DOCUMENTS && batchResult.documentsCount() >= maxDocuments) {
         	LOGGER.warning(logF.f("Se ha excedido el numero maximo de documentos permitido en el lote")); //$NON-NLS-1$
-        	response.sendError(HttpCustomErrors.NUM_DOCUMENTS_EXCEEDED.getErrorCode());
+        	Responser.sendError(response, FIReError.BATCH_NUM_DOCUMENTS_EXCEEDED);
         	return;
         }
 
@@ -178,7 +175,7 @@ public class AddDocumentBatchManager {
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.f("Error en el guardado temporal de los datos a firmar: " + e)); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
         	return;
         }
 
@@ -206,7 +203,7 @@ public class AddDocumentBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         SessionCollector.commit(session);
 
-        response.getWriter().print(Boolean.TRUE.toString());
+        Responser.sendResult(response, Boolean.TRUE.toString().getBytes(StandardCharsets.UTF_8));
     }
 
 	/**

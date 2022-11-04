@@ -215,7 +215,7 @@ public final class SessionCollector {
 	 */
 	private static FireSession getSession(final String trId, final String userRef, final HttpSession session, final boolean onlyLoaded, final boolean forceLoad, final boolean ofuscated) {
 
-		if (trId == null) {
+		if (trId == null || userRef == null) {
 			return null;
 		}
 
@@ -265,22 +265,15 @@ public final class SessionCollector {
 
 		// Comprobamos que los datos de la sesion se correspondan con los del usuario indicado
 		if (fireSession != null) {
-			if (userRef != null) {
-				final String savedRef = ofuscated
-						? fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF)
-						: fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
+			final String savedRef = ofuscated
+				? fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF)
+				: fireSession.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
 
-				if (!userRef.equals(savedRef)) {
-					LOGGER.warning(LogTransactionFormatter.format(
-							trId,
-							"Se esta intentando reclamar la transaccion para un usuario al que no le pertenece. Quizas alguien este intentando suplantar su identidad de " //$NON-NLS-1$
-									+ LogUtils.cleanText(userRef)));
-					return null;
-				}
-			}
-			else if (dao != null) {
-				LOGGER.warning(LogTransactionFormatter
-						.format(trId, "Es obligatorio indicar un identificador de usuario cuando se configura un gestor de sesiones")); //$NON-NLS-1$
+			if (!userRef.equals(savedRef)) {
+				LOGGER.warning(LogTransactionFormatter.format(
+					trId,
+					"Se esta intentando reclamar la transaccion para un usuario al que no le pertenece. Quizas alguien este intentando suplantar su identidad de " //$NON-NLS-1$
+					+ LogUtils.cleanText(userRef)));
 				return null;
 			}
 		}

@@ -19,6 +19,15 @@ public final class HttpCertificateBlockedException extends HttpOperationExceptio
     /** Serial Id. */
 	private static final long serialVersionUID = 4353657884161773302L;
 
+	/**
+     * Indica que los certificados de un usuario est&aacute;n bloqueados.
+     * @param code C&oacute;digo de error.
+     * @param msg Mensaje de error.
+     */
+	public HttpCertificateBlockedException(final int code, final String msg) {
+		super(code, msg);
+	}
+
     /**
 	 * Indica que los certificados de un usuario est&aacute;n bloqueados.
 	 * @param e Excepci&oacute;n que caus&oacute; el error.

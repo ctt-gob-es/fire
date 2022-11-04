@@ -53,5 +53,10 @@
 				</div>
 			</form>
 		</div>
+		<script>
+			var userIdField = document.getElementById("usuario");
+			userIdField.focus();
+			userIdField.select();
+		</script>
 	</body>
 </html>

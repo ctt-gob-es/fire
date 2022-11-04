@@ -11,7 +11,6 @@ package es.gob.fire.server.services;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -21,7 +20,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,8 +37,6 @@ import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignatureValidatorBuilder;
-import es.gob.fire.signature.ApplicationChecking;
-import es.gob.fire.signature.ApplicationsDAO;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
@@ -98,7 +94,7 @@ public final class SignService extends HttpServlet {
     /** Recepci&oacute;n de la petici&oacute;n POST y realizaci&oacute;n de la
      * firma. */
     @Override
-    protected void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
     	LOGGER.info("Peticion de tipo SIGN_DATA"); //$NON-NLS-1$
 
@@ -109,19 +105,27 @@ public final class SignService extends HttpServlet {
 	    	catch (final ConfigFilesException e) {
 	    		LOGGER.log(Level.SEVERE, "No se encontro el fichero de configuracion del componente central: " + e.getFileName(), e); //$NON-NLS-1$
 	    		AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, e.getMessage());
-	    		response.sendError(ConfigFilesException.getHttpError(), e.getMessage());
+	    		Responser.sendError(response, ConfigFilesException.getHttpError(), e.getMessage());
 	    		return;
 	    	}
 	    	catch (final InvalidConfigurationException e) {
 	    		LOGGER.log(Level.SEVERE, "Error en la configuracion de la/s propiedad/es " + e.getProperty() + " (" + e.getFileName() + ")", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	    		AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getProperty(), e.getFileName());
-	    		response.sendError(InvalidConfigurationException.getHttpError(), e.getMessage());
+	    		Responser.sendError(response, InvalidConfigurationException.getHttpError(), e.getMessage());
 	    		return;
 	    	}
 		}
 
         // Recepcion de los parametros.
-    	final RequestParameters params = RequestParameters.extractParameters(request);
+    	final RequestParameters params;
+    	try {
+    		params = RequestParameters.extractParameters(request);
+    	}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+		}
 
     	final String appId      = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
         final String op         = params.getParameter(PARAMETER_NAME_OPERATION).toLowerCase();
@@ -141,25 +145,25 @@ public final class SignService extends HttpServlet {
         	LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
         	if (appId == null || appId.isEmpty()) {
         		LOGGER.warning(logF.f("No se ha proporcionado el identificador de la aplicacion")); //$NON-NLS-1$
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+        		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
         				"No se ha proporcionado el identificador de la aplicacion"); //$NON-NLS-1$
         		return;
         	}
 
         	try {
-        		final ApplicationChecking appCheck = ApplicationsDAO.checkApplicationId(appId);
-	        	if (!appCheck.isValid()) {
-        			LOGGER.warning(logF.f("Se proporciono un identificador de aplicacion no valido. Se rechaza la peticion")); //$NON-NLS-1$
-        			response.sendError(HttpServletResponse.SC_FORBIDDEN);
-        			return;
-        		}
-        	}
+        		ServiceUtil.checkValidApplication(appId);
+	        }
+	        catch (final DBConnectionException e) {
+	        	LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
+	        	AlarmsManager.notify(Alarm.CONNECTION_DB);
+	        	Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        	return;
+	        }
         	catch (final Exception e) {
-        		LOGGER.log(Level.SEVERE, logF.f("Error grave al validar el identificador de la aplicacion"), e); //$NON-NLS-1$
-        		AlarmsManager.notify(Alarm.CONNECTION_DB);
-	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        		return;
-        	}
+				LOGGER.log(Level.SEVERE, logF.f("La aplicacion que solicita la peticion no es valida o esta desactivada"), e); //$NON-NLS-1$
+				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return;
+			}
         }
         else {
         	LOGGER.fine(logF.f("No se realiza la validacion de aplicacion")); //$NON-NLS-1$
@@ -174,12 +178,12 @@ public final class SignService extends HttpServlet {
 	    	catch (final DBConnectionException e) {
 				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
 				AlarmsManager.notify(Alarm.CONNECTION_DB);
-	        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 				return;
 			}
 	    	catch (final CertificateValidationException e) {
 				LOGGER.log(Level.SEVERE, logF.f("Error en la validacion del certificado: ") + e, e); //$NON-NLS-1$
-				response.sendError(e.getHttpError(), e.getMessage());
+				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 				return;
 			}
     	}
@@ -190,13 +194,45 @@ public final class SignService extends HttpServlet {
 
         if (dataB64 == null || dataB64.isEmpty()) {
         	LOGGER.warning(logF.f("No se han proporcionado los datos a firmar")); //$NON-NLS-1$
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+        	Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
     				"No se han proporcionado los datos a firmar"); //$NON-NLS-1$
     		return;
     	}
 
+        final Properties config;
+        try {
+        	config = extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null;
+        }
+        catch (final IOException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("El parametro de configuracion de la operacion estaba mal formado"), e); //$NON-NLS-1$
+        	Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+                "El parametro de configuracion de la operacion estaba mal formado"); //$NON-NLS-1$
+            return;
+        }
+
+        TriphaseData td;
+        try {
+        	td = TriphaseData.parser(Base64.decode(tdB64, true));
+        }
+        catch (final IOException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("Los datos de firma trifasica proporcionados estan mal codificados"), e); //$NON-NLS-1$
+        	Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+                "Los datos de firma trifasica proporcionados estan mal codificados"); //$NON-NLS-1$
+            return;
+        }
+
+        byte[] data;
+        try {
+        	data = Base64.decode(dataB64, true);
+        }
+        catch (final IOException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("Los datos proporcionados estan mal codificados"), e); //$NON-NLS-1$
+        	Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+                "Los datos proporcionados estan mal codificados"); //$NON-NLS-1$
+            return;
+        }
+
     	// Obtenemos el conector con el backend ya configurado
-        final Properties config = extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null;
         final FIReConnector connector;
         try {
         	if (providerName == null) {
@@ -206,8 +242,8 @@ public final class SignService extends HttpServlet {
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error en la configuracion del conector con el servicio de custodia: " + e); //$NON-NLS-1$
+        	Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Error en la configuracion del conector con el servicio de custodia"); //$NON-NLS-1$
             return;
         }
 
@@ -218,22 +254,18 @@ public final class SignService extends HttpServlet {
         catch (final FIReConnectorNetworkException e) {
             LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
             AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
-            response.sendError(
+            Responser.sendError(response,
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "No se ha podido conectar con el proveedor de firma en la nube: " + e //$NON-NLS-1$
-            );
+                "No se ha podido conectar con el proveedor de firma en la nube"); //$NON-NLS-1$
             return;
         }
         catch (final Exception e) {
             LOGGER.log(Level.SEVERE, logF.f("No se ha podido obtener el resultado de la transaccion de firma"), e); //$NON-NLS-1$
-            response.sendError(
+            Responser.sendError(response,
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "No se ha podido obtener el resultado de la transaccion de firma: " + e //$NON-NLS-1$
-            );
+                "No se ha podido obtener el resultado de la transaccion de firma"); //$NON-NLS-1$
             return;
         }
-
-        final TriphaseData td = TriphaseData.parser(Base64.decode(tdB64, true));
 
         // Insertamos los PKCS#1 en la sesion trifasica
         final Set<String> keys = ret.keySet();
@@ -250,8 +282,8 @@ public final class SignService extends HttpServlet {
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.f("No se ha podido decodificar el certificado del firmante: ") + e); //$NON-NLS-1$
-        	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "No se ha podido decodificar el certificado proporcionado: " + e); //$NON-NLS-1$
+        	Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "No se ha podido decodificar el certificado proporcionado"); //$NON-NLS-1$
         	return;
         }
 
@@ -263,7 +295,7 @@ public final class SignService extends HttpServlet {
                     algorithm,
                     config,
                     signerCert,
-                    Base64.decode(dataB64, true),
+                    data,
                     td,
                     logF
             );
@@ -272,8 +304,8 @@ public final class SignService extends HttpServlet {
             LOGGER.log(Level.WARNING,
             		logF.f("Error durante la operacion. Verifique el codigo de operacion (" + op + //$NON-NLS-1$
                     ") y el formato (" + format + ")"), e); //$NON-NLS-1$ //$NON-NLS-2$
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error durante la operacion. Verifique el codigo de operacion y el formato: " + e); //$NON-NLS-1$
+            Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Error durante la operacion. Verifique el codigo de operacion y el formato"); //$NON-NLS-1$
             return;
         }
 
@@ -290,22 +322,22 @@ public final class SignService extends HttpServlet {
         	} catch (final ConnectionException e) {
         		LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$
         		AlarmsManager.notify(Alarm.CONNECTION_VALIDATION_PLATFORM);
-        		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        		Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"No se pudo conectar con la plataforma de validacion"); //$NON-NLS-1$
         		return;
         	} catch (final ValidatorException e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error al cargar el conector con el sistema de validacion de firmas en la transaccion: " + transactId), e); //$NON-NLS-1$
-        		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        		Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"Error al actualizar la firma"); //$NON-NLS-1$
         		return;
         	} catch (final UpgradeException e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error al actualizar la firma de la transaccion: " + transactId), e); //$NON-NLS-1$
-        		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        		Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"Error al actualizar la firma"); //$NON-NLS-1$
         		return;
         	} catch (final VerifyException e) {
         		LOGGER.log(Level.SEVERE, logF.f("La firma que se desea actualizar no es valida: " + transactId), e); //$NON-NLS-1$
-        		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        		Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
         				"La firma que se intenta actualizar no es valida"); //$NON-NLS-1$
         		return;
         	}
@@ -314,9 +346,6 @@ public final class SignService extends HttpServlet {
         connector.endSign(transactId);
 
         // El servicio devuelve el resultado de la operacion de firma.
-        final OutputStream output = ((ServletResponse) response).getOutputStream();
-        output.write(signResult);
-        output.flush();
-        output.close();
+        Responser.sendResult(response, signResult);
     }
 }

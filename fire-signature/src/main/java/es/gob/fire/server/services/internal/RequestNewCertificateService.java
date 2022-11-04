@@ -14,7 +14,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +27,8 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.WeakRegistryException;
-import es.gob.fire.server.services.HttpCustomErrors;
+import es.gob.fire.server.services.FIReError;
+import es.gob.fire.server.services.Responser;
 
 /**
  * Servlet para la solicitud de expedici&oacute;n de un nuevo certificado.
@@ -43,7 +43,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
 	 */
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		final String appId  = request.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
@@ -60,23 +60,15 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		// Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-        	if (errorUrl != null) {
-        		redirectToExternalUrl(errorUrl, request, response);
-        	} else {
-        		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        	}
+        	LOGGER.warning(logF.f("No se ha proporcionado el identificador de transaccion")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.FORBIDDEN);
             return;
         }
 
 		// Comprobamos del usuario
     	if (subjectRef == null || subjectRef.isEmpty()) {
-            LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
-            if (errorUrl != null) {
-            	redirectToExternalUrl(errorUrl, request, response);
-        	} else {
-        		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        	}
+            LOGGER.warning(logF.f("No se ha proporcionado la referencia de usuario")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.FORBIDDEN);
             return;
         }
 
@@ -84,12 +76,8 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
         if (session == null) {
-    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		if (errorUrl != null) {
-        		redirectToExternalUrl(errorUrl, request, response);
-        	} else {
-        		response.sendError(HttpCustomErrors.INVALID_TRANSACTION.getErrorCode());
-        	}
+			LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+			processError(FIReError.FORBIDDEN, errorUrl, request, response);
     		return;
         }
 
@@ -122,43 +110,43 @@ public final class RequestNewCertificateService extends HttpServlet {
         }
         catch (final IllegalArgumentException e) {
         	LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
-        	redirectToErrorPage(request, response, session, OperationError.UNKNOWN_USER, errorUrlRedirection, originForced);
+        	redirectToErrorPage(request, response, session, FIReError.INTERNAL_ERROR, errorUrlRedirection, originForced);
         	return;
         }
         catch (final FIReConnectorFactoryException e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error en la carga o configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
-        	redirectToErrorPage(request, response, session, OperationError.INTERNAL_ERROR, errorUrlRedirection, originForced);
+        	redirectToErrorPage(request, response, session, FIReError.INTERNAL_ERROR, errorUrlRedirection, originForced);
         	return;
         }
         catch (final FIReConnectorNetworkException e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
 			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
-			redirectToErrorPage(request, response, session, OperationError.CERTIFICATES_SERVICE_NETWORK, errorUrlRedirection, originForced);
+			redirectToErrorPage(request, response, session, FIReError.PROVIDER_INACCESIBLE_SERVICE, errorUrlRedirection, originForced);
         	return;
         }
         catch (final FIReCertificateAvailableException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El usuario ya tiene un certificado del tipo indicado"), e); //$NON-NLS-1$
-        	redirectToErrorPage(request, response, session, OperationError.CERTIFICATES_DUPLICATED, errorUrlRedirection, originForced);
+        	redirectToErrorPage(request, response, session, FIReError.CERTIFICATE_DUPLICATED, errorUrlRedirection, originForced);
         	return;
         }
         catch (final FIReCertificateException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("Error en la generacion del certificado"), e); //$NON-NLS-1$
-        	redirectToErrorPage(request, response, session, OperationError.CERTIFICATES_GENERATION_SERVICE, errorUrlRedirection, originForced);
+        	LOGGER.log(Level.SEVERE, logF.f("El certificado obtenido no es valido"), e); //$NON-NLS-1$
+        	redirectToErrorPage(request, response, session, FIReError.CERTIFICATE_GENERATION, errorUrlRedirection, originForced);
         	return;
         }
         catch (final FIReConnectorUnknownUserException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El usuario no esta dado de alta en el sistema proveedor y no podra generarse un nuevo certificado"), e); //$NON-NLS-1$
-        	redirectToErrorPage(request, response, session, OperationError.UNKNOWN_USER, errorUrlRedirection, originForced);
+        	redirectToErrorPage(request, response, session, FIReError.UNKNOWN_USER, errorUrlRedirection, originForced);
         	return;
         }
         catch (final WeakRegistryException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El usuario realizo un registro debil y no puede tener certificados de firma"), e); //$NON-NLS-1$
-        	redirectToErrorPage(request, response, session, OperationError.CERTIFICATES_WEAK_REGISTRY, errorUrlRedirection, originForced);
+        	redirectToErrorPage(request, response, session, FIReError.CERTIFICATE_WEAK_REGISTRY, errorUrlRedirection, originForced);
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error desconocido en la generacion del certificado"), e); //$NON-NLS-1$
-        	redirectToErrorPage(request, response, session, OperationError.UNDEFINED_ERROR, errorUrlRedirection, originForced);
+        	redirectToErrorPage(request, response, session, FIReError.PROVIDER_ERROR, errorUrlRedirection, originForced);
         	return;
         }
 
@@ -183,9 +171,8 @@ public final class RequestNewCertificateService extends HttpServlet {
      * @param url URL a la que redirigir al usuario.
      * @param request Objeto de petici&oacute;n realizada al servlet.
      * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
-     * @throws IOException Cuando no se puede redirigir al usuario.
      */
-    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) {
 
         // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
     	final HttpSession httpSession = request.getSession(false);
@@ -193,7 +180,42 @@ public final class RequestNewCertificateService extends HttpServlet {
         	httpSession.invalidate();
         }
 
-    	response.sendRedirect(url);
+        try {
+        	response.sendRedirect(url);
+        }
+        catch (final Exception e) {
+        	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+		}
+    }
+
+    /**
+     * Invalida la sesion del usuario y, si se ha indicado una URL de error, lo redirige a ella o devuelve el error en caso contrario.
+     * @param error Tipo de error que se ha producido.
+     * @param url URL de error a la que redirigir al usuario.
+     * @param request Objeto de petici&oacute;n realizada al servlet.
+     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+     * @throws IOException Cuando no se puede redirigir al usuario.
+     */
+    private static void processError(final FIReError error, final String url, final HttpServletRequest request,
+    		final HttpServletResponse response) {
+
+		// Invalidamos la sesion por seguridad
+		final HttpSession httpSession = request.getSession(false);
+		if (httpSession != null) {
+			httpSession.invalidate();
+		}
+		if (url != null) {
+			try {
+				response.sendRedirect(url);
+			}
+			catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
+				Responser.sendError(response, FIReError.INTERNAL_ERROR);
+			}
+		} else {
+			Responser.sendError(response, error);
+		}
     }
 
 	/**
@@ -206,18 +228,22 @@ public final class RequestNewCertificateService extends HttpServlet {
 	 * @param operationError Error que debe declararse.
 	 * @param errorUrlRedirection URL externa de error indicada por la aplicaci&ooacute;n.
 	 * @param originForced {@code true} si se forz&oacute; al uso de un proveedor concreto.
-	 * @throws IOException Cuando no se redirigir a la pagina de error.
-	 * @throws ServletException Cuando no se puede redirigir a la pagina de error interna.
 	 */
 	private static void redirectToErrorPage(final HttpServletRequest request, final HttpServletResponse response,
-			final FireSession session, final OperationError operationError,
-			final String errorUrlRedirection, final boolean originForced) throws IOException, ServletException {
+			final FireSession session, final FIReError operationError,
+			final String errorUrlRedirection, final boolean originForced) {
 		ErrorManager.setErrorToSession(session, operationError, originForced);
     	if (originForced) {
     		redirectToExternalUrl(errorUrlRedirection, request, response);
     	}
     	else {
-    		request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
+    		try {
+    			request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
+    		}
+            catch (final Exception e) {
+            	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL interna", e); //$NON-NLS-1$
+            	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+    		}
     	}
 	}
 }

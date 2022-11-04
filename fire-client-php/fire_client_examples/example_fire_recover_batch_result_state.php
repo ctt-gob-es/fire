@@ -6,15 +6,14 @@
  <?php 
 	// Cargamos el componente distribuido de FIRe
 	include '../fire_client.php';
-	
-	
-	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
-	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
+
+	$appId = "B244E473466F";	// Identificador de la aplicacion
 	$subjectId = "00001";		// DNI de la persona
-	$transactionId = "b9550827-b8dd-4eed-ae17-f3d5d8a2a597";	// Identificador de la transaccion
-	
-	
+	$transactionId = "cebe6a97-be7d-4b4c-a069-321d798076b5";	// Identificador de la transaccion
+
 	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+
+	// Funcion del API de FIRe para recuperar el estado de la operacion de firma de lote
 	$signatureB64;
 	try {
 		$signatureB64 = $fireClient->recoverBatchResultState(
@@ -23,13 +22,12 @@
 		);
 	}
 	catch(Exception $e) {
-		echo 'Error: ',  $e->getMessage(), "\n";
+		echo "Error ", $e->getCode(), ": ", $e->getMessage(), "\n";
 		return;
 	}
 
 	// Mostramos los datos obtenidos
-	echo "<br><b>Firma:</b><br>".$signatureB64;
-
+	echo "<br><b>Firma:</b><br>", $signatureB64;
  ?>
  </body>
 </html>

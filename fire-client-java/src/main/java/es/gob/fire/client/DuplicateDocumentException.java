@@ -14,14 +14,18 @@ package es.gob.fire.client;
  * que ya se agreg&oacute; anteriormente.
  * @author Carlos Gamuci
  */
-public class DuplicateDocumentException extends Exception {
+public class DuplicateDocumentException extends HttpOperationException {
 
 	/** Serial Id. */
 	private static final long serialVersionUID = 3123749200845358933L;
 
-	/** Construye la excepci&oacute;n. */
-	public DuplicateDocumentException() {
-		super();
+	/**
+     * Indica que se ha intentado agregar a un lote un documento con un c&oacute;digo repetido.
+     * @param code C&oacute;digo de error.
+     * @param msg Mensaje de error.
+     */
+	public DuplicateDocumentException(final int code, final String msg) {
+		super(code, msg);
 	}
 
 	/** Construye la excepci&oacute;n con su descripci&oacute;n y la causa.

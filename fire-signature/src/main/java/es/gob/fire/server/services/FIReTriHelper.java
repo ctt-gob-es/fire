@@ -142,7 +142,7 @@ public final class FIReTriHelper {
         else if (SignOperation.COSIGN.toString().equalsIgnoreCase(criptoOperation)) {
         	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
         	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-        	ServiceUtil.checkMultiSignatureCompatibility(format, criptoOperation);
+        	checkMultiSignatureCompatibility(format, criptoOperation);
 
             try {
                 preRes = prep.preProcessPreCoSign(
@@ -162,7 +162,7 @@ public final class FIReTriHelper {
         else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(criptoOperation)) {
         	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
         	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-        	ServiceUtil.checkMultiSignatureCompatibility(format, criptoOperation);
+        	checkMultiSignatureCompatibility(format, criptoOperation);
 
             CounterSignTarget target = CounterSignTarget.LEAFS;
             if (expandedParams != null && expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
@@ -320,7 +320,7 @@ public final class FIReTriHelper {
         		try {
                 	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
                 	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-                	ServiceUtil.checkMultiSignatureCompatibility(frmt, cop);
+                	checkMultiSignatureCompatibility(frmt, cop);
 
         			preRes = prep.preProcessPreCoSign(
         					doc.getData(),
@@ -352,7 +352,7 @@ public final class FIReTriHelper {
         		try {
                 	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
                 	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-                	ServiceUtil.checkMultiSignatureCompatibility(frmt, cop);
+                	checkMultiSignatureCompatibility(frmt, cop);
 
         			preRes = prep.preProcessPreCounterSign(
         					doc.getData(),
@@ -402,6 +402,26 @@ public final class FIReTriHelper {
 
         return batchTriPhaseData;
     }
+
+	/**
+	 * Valida que la operaci&oacute;n de cofirma o contrafirma se permita y sea compatible con el formato.
+	 * @param format formato con el que cofirmar o contrafirmar
+	 * @param cop operacion a realizar
+	 * @throws UnsupportedOperationException Cuando se configur&oacute; una operaci&oacute;n no soportada.
+	 */
+	private static void checkMultiSignatureCompatibility(final String format, final String cop) throws UnsupportedOperationException {
+		if (SignOperation.COSIGN.toString().equals(cop)
+        		|| SignOperation.COUNTERSIGN.toString().equals(cop)) {
+	        if (SignatureFormat.FACTURAE.toString().equals(format)) {
+	        	throw new UnsupportedOperationException("No se permiten multifirmas para el formato FacturaE"); //$NON-NLS-1$
+	        } else if (SignatureFormat.XADES_ASIC_S.toString().equals(format)
+	        		|| SignatureFormat.CADES_ASIC_S.toString().equals(format)) {
+	        	throw new UnsupportedOperationException("Operacion no soportada para el formato seleccionado"); //$NON-NLS-1$
+	        } else if (SignOperation.COUNTERSIGN.toString().equals(cop) && SignatureFormat.PADES.toString().equals(format)) {
+	        	throw new UnsupportedOperationException("El formato PDF no permite contrafirmas"); //$NON-NLS-1$
+	        }
+		}
+	}
 
     /**
      * Agrega un PKCS#1 a la informaci&oacute;n ya disponible de una operaci&oacute;n

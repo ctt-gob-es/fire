@@ -9,8 +9,8 @@
  */
 package es.gob.fire.server.services.internal;
 
-import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -20,6 +20,8 @@ import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.services.FIReError;
+import es.gob.fire.server.services.Responser;
 
 /**
  * Servlet que redirige a la autenticacion de usuarios para la obtenci&oacute;n
@@ -35,7 +37,7 @@ public class AuthenticationService extends HttpServlet {
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// Obtenemos los datos proporcionados por parametro
 		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
@@ -54,7 +56,7 @@ public class AuthenticationService extends HttpServlet {
 		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 		try {
@@ -108,15 +110,13 @@ public class AuthenticationService extends HttpServlet {
 		// Usamos la URL de error indicada en la transaccion
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning(logF.f("No se encontro en la sesion la URL de redireccion de error para la operacion")); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
+			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR);
 			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 		redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
-
 		FIReConnector connector = null;
-
 		try {
 			connector = ProviderManager.getProviderConnector(
 					origin,
@@ -124,8 +124,8 @@ public class AuthenticationService extends HttpServlet {
 			);
 		} catch (final FIReConnectorFactoryException e) {
 			LOGGER.warning(logF.f("Error al obtener el conector")); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, OperationError.INVALID_STATE);
-			response.sendRedirect(redirectErrorUrl);
+			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR);
+			redirectToExternalUrl(redirectErrorUrl, request, response);
 			return;
 		}
 
@@ -144,8 +144,15 @@ public class AuthenticationService extends HttpServlet {
 					+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=" + originForced //$NON-NLS-1$ //$NON-NLS-2$
 					+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 
-			authUrl = connector.userAutentication(subjectId,
-    			okRedirectUrl, connConfig.getRedirectErrorUrl());
+			try {
+				authUrl = connector.userAutentication(subjectId, okRedirectUrl, connConfig.getRedirectErrorUrl());
+			}
+			catch (final Exception e) {
+	            LOGGER.log(Level.SEVERE, logF.f("Error en la autenticacion del usuario en el proveedor: ") + e, e); //$NON-NLS-1$
+	            ErrorManager.setErrorToSession(session, FIReError.PROVIDER_ERROR, originForced);
+	            redirectToExternalUrl(redirectErrorUrl, request, response);
+	        	return;
+			}
 		} else {
 			LOGGER.warning(logF.f("El conector no puede ser nulo")); //$NON-NLS-1$
 			redirectToExternalUrl(redirectErrorUrl, request, response);
@@ -165,9 +172,8 @@ public class AuthenticationService extends HttpServlet {
      * @param url URL a la que redirigir al usuario.
      * @param request Objeto de petici&oacute;n realizada al servlet.
      * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
-     * @throws IOException Cuando no se puede redirigir al usuario.
      */
-    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) {
 
         // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
     	final HttpSession httpSession = request.getSession(false);
@@ -175,6 +181,12 @@ public class AuthenticationService extends HttpServlet {
         	httpSession.invalidate();
         }
 
-    	response.sendRedirect(url);
+        try {
+        	response.sendRedirect(url);
+        }
+        catch (final Exception e) {
+        	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+		}
     }
 }

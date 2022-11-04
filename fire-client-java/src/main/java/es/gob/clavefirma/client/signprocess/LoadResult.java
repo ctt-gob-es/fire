@@ -47,7 +47,7 @@ public final class LoadResult {
             );
         }
         final JsonReader jsonReader = Json
-                .createReader(new ByteArrayInputStream(json.getBytes()));
+                .createReader(new ByteArrayInputStream(json.getBytes("utf-8"))); //$NON-NLS-1$
         final JsonObject jsonObject = jsonReader.readObject();
         final String id = jsonObject.getString("transacionid"); //$NON-NLS-1$
         final String redirect = jsonObject.getString("redirecturl"); //$NON-NLS-1$
