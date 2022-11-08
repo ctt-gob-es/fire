@@ -83,8 +83,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
         final String subjectId	= session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
-		TransactionConfig connConfig =
-				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+		TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null) {
 			connConfig = new TransactionConfig(new Properties());
 		}
@@ -114,7 +113,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         	return;
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("Error en la carga o configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("Error en la carga la configuracion del conector del proveedor de firma"), e); //$NON-NLS-1$
         	redirectToErrorPage(request, response, session, FIReError.INTERNAL_ERROR, errorUrlRedirection, originForced);
         	return;
         }
@@ -131,7 +130,7 @@ public final class RequestNewCertificateService extends HttpServlet {
         }
         catch (final FIReCertificateException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El certificado obtenido no es valido"), e); //$NON-NLS-1$
-        	redirectToErrorPage(request, response, session, FIReError.CERTIFICATE_GENERATION, errorUrlRedirection, originForced);
+        	redirectToErrorPage(request, response, session, FIReError.CERTIFICATE_ERROR, errorUrlRedirection, originForced);
         	return;
         }
         catch (final FIReConnectorUnknownUserException e) {

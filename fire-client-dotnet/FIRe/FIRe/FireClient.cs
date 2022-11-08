@@ -1028,10 +1028,6 @@ namespace FIRe
                     {
                         throw new HttpForbiddenException(code, message);
                     }
-                    else if (FIReErrors.TIMEOUT == code)
-                    {
-                        throw new HttpNetworkException(code, message);
-                    }
                     else if (FIReErrors.UNKNOWN_USER == code)
                     {
                         throw new HttpNoUserException(code, message);

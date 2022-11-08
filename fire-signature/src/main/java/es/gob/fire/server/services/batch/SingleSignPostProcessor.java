@@ -74,6 +74,9 @@ final class SingleSignPostProcessor {
 		try {
 			FIReTriHelper.checkSignaturesIntegrity(td, certChain[0], null);
 		}
+		catch (final SecurityException e) {
+			throw new AOException("Error de integridad al validar las firmas PKCS#1 recibidas", e); //$NON-NLS-1$
+		}
 		catch (final Exception e) {
 			throw new AOException("Error en la verificacion de los PKCS#1 de las firmas recibidas", e); //$NON-NLS-1$
 		}

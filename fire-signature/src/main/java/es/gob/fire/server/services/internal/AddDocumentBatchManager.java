@@ -62,10 +62,24 @@ public class AddDocumentBatchManager {
     		return;
     	}
 
+    	// Comprobamos que se hayan proporcionado los parametros indispensables
+    	if (docId == null || docId.isEmpty()) {
+    		LOGGER.warning(logF.f("No se ha proporcionado el ID del documento")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_ID_NEEDED);
+    		return;
+    	}
+
     	// Comprobamos si se ha establecido configuracion particular de fichero o para su postprocesado
     	Properties documentConfig = null;
     	if (params.containsKey(ServiceParams.HTTP_PARAM_CONFIG)) {
-    		documentConfig = AOUtil.base642Properties(params.getParameter(ServiceParams.HTTP_PARAM_CONFIG));
+    		try {
+    			documentConfig = AOUtil.base642Properties(params.getParameter(ServiceParams.HTTP_PARAM_CONFIG));
+    		}
+    		catch (final IOException e) {
+    			LOGGER.warning(logF.f("Se ha proporcionado una configuracion de la operacion mal formada: ") + e); //$NON-NLS-1$
+    			Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
+    			return;
+    		}
     	}
 
     	// Obtenemos la configuracion particular si existe
@@ -74,8 +88,8 @@ public class AddDocumentBatchManager {
     		config = getParticularConfig(params, documentConfig);
     	}
     	catch (final IOException e) {
-    		LOGGER.warning(logF.f("Se han proporcionado parametros de configuracion de firma mal formados")); //$NON-NLS-1$
-    		Responser.sendError(response, FIReError.PARAMETER_BATCH_CONFIG_INVALID);
+    		LOGGER.warning(logF.f("Se ha proporcionado un extraParam mal formado: ") + e); //$NON-NLS-1$
+    		Responser.sendError(response, FIReError.PARAMETER_SIGNATURE_PARAMS_INVALID);
     		return;
 		}
 

@@ -57,8 +57,8 @@ public class RecoverUpdatedSignResultManager {
 			signResult = TempDocumentsManager.retrieveAndDeleteDocument(docId);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(logF.f("No se encuentra la firma actualizada en el almacen temporal: " + e)); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.TIMEOUT);
+			LOGGER.warning(logF.f("No se encuentra la firma actualizada en el almacen temporal. Puede hacer caducado la sesion: " + e)); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.INVALID_TRANSACTION);
 			return;
 		}
 

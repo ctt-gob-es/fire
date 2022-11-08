@@ -77,7 +77,7 @@ public class RecoverBatchSignatureManager {
 		}
 
         // Comprobamos que previamente se haya recuperado el resultado global del lote
-        if (!Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_SIGNED))) {
+        if (!Boolean.TRUE.equals(session.getObject(ServiceParams.SESSION_PARAM_BATCH_RECOVERED))) {
         	LOGGER.severe(logF.f("Se ha solicitado recuperar una firma de un lote antes que el resultado de un lote")); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.BATCH_NO_SIGNED);
         	return;
@@ -145,12 +145,12 @@ public class RecoverBatchSignatureManager {
         	signature = TempDocumentsManager.retrieveAndDeleteDocument(docFilename);
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se encuentra el resultado de la firma del documento: " + docId), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se encuentra el resultado de la firma del documento: %1s. Puede haber caducado la sesion", docId), e); //$NON-NLS-1$
         	batchResult.setErrorResult(docId, BatchResult.ERROR_RECOVERING);
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SIGNLOGGER.register(session, false, docId);
         	SessionCollector.commit(session);
-        	Responser.sendError(response, FIReError.TIMEOUT);
+        	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
         }
 

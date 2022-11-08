@@ -75,13 +75,11 @@ public class DocInfo implements Serializable {
 	 */
 	public static DocInfo extractDocInfo(final Properties config) {
 
-		if (config == null) {
-			return null;
-		}
-
 		final DocInfo docInfo = new DocInfo();
-		docInfo.setTitle(extractProperty(config, PROPERTY_DOC_TITLE));
-		docInfo.setName(extractProperty(config, PROPERTY_DOC_NAME));
+		if (config != null) {
+			docInfo.setTitle(extractProperty(config, PROPERTY_DOC_TITLE));
+			docInfo.setName(extractProperty(config, PROPERTY_DOC_NAME));
+		}
 
 		return docInfo;
 	}

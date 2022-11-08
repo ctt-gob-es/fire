@@ -123,6 +123,8 @@ public class ServiceParams {
     public static final String SESSION_PARAM_BATCH_RESULT = "batchresult"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n que indica que ya se ha firmado el lote actual. */
     public static final String SESSION_PARAM_BATCH_SIGNED = "batchsigned"; //$NON-NLS-1$
+    /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n que indica que ya se ha recuperado el resultado del lote actual. */
+    public static final String SESSION_PARAM_BATCH_RECOVERED = "batchrecovered"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado del numero de firmas pendientes de un lote. */
     public static final String SESSION_PARAM_BATCH_PENDING_SIGNS = "batchpending"; //$NON-NLS-1$
     /** Par&aacute;metro usado para el guardado de datos en sesi&oacute;n con el ID de transacci&oacute;n del servicio de backend. */

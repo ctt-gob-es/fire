@@ -681,9 +681,6 @@
         <member name="F:FIRe.FIReErrors.PARAMETER_OPERATION_NEEDED">
             No se ha indicado la operación a realizar.
         </member>
-        <member name="F:FIRe.FIReErrors.PARAMETER_OPERATION_INVALID">
-            Se ha indicado un id de operación incorrecto.
-        </member>
         <member name="F:FIRe.FIReErrors.PARAMETER_OPERATION_NOT_SUPPORTED">
             Se ha indicado un id de operación no soportado.
         </member>
@@ -726,26 +723,20 @@
         <member name="F:FIRe.FIReErrors.PARAMETER_TRANSACTION_ID_NEEDED">
             No se ha indicado el identificador de transacción.
         </member>
-        <member name="F:FIRe.FIReErrors.PARAMETER_USER_REF_NEEDED">
-            No se ha indicado la referencia del usuario.
-        </member>
         <member name="F:FIRe.FIReErrors.PARAMETER_SIGNATURE_PARAMS_INVALID">
             Se han indicado propiedades de configuración de fima mal formadas.
         </member>
         <member name="F:FIRe.FIReErrors.UNKNOWN_USER">
-            No se ha indicado el identificador del usuario que solicita el certificado.
+            El proveedor no tiene dado de alta al usuario indicado
         </member>
         <member name="F:FIRe.FIReErrors.CERTIFICATE_DUPLICATED">
             El usuario ya dispone de un certificado del tipo que se está solicitando generar.
         </member>
-        <member name="F:FIRe.FIReErrors.CERTIFICATE_GENERATION">
-            Error en la generación de un nuevo certificado.
+        <member name="F:FIRe.FIReErrors.CERTIFICATE_ERROR">
+            Error al obtener los certificados del usuario o al generar uno nuevo.
         </member>
         <member name="F:FIRe.FIReErrors.CERTIFICATE_WEAK_REGISTRY">
             El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente.
-        </member>
-        <member name="F:FIRe.FIReErrors.UNDEFINED_ERROR">
-            Error desconocido durante la operación.
         </member>
         <member name="F:FIRe.FIReErrors.SIGNING">
             Error durante la firma.
@@ -753,23 +744,11 @@
         <member name="F:FIRe.FIReErrors.PROVIDER_NOT_SELECTED">
             No se seleccionó un proveedor de firma.
         </member>
-        <member name="F:FIRe.FIReErrors.PARAMETER_SIGNING_CERTIFICATE_NEEDED">
-            El proveedor no proporcionó el certificado para firmar.
-        </member>
-        <member name="F:FIRe.FIReErrors.PARAMETER_SIGNING_CERTIFICATE_INVALID">
-            El proveedor o cliente de firma proporcionó un certificado mal formado.
-        </member>
-        <member name="F:FIRe.FIReErrors.POSTSIGNING">
-            Error en la composición de la firma.
-        </member>
         <member name="F:FIRe.FIReErrors.INVALID_SIGNATURE">
             La firma generada no es válida.
         </member>
         <member name="F:FIRe.FIReErrors.UPGRADING_SIGNATURE">
             Error durante la actualización de firma.
-        </member>
-        <member name="F:FIRe.FIReErrors.SAVING_SIGNATURE">
-            Error al guardar la firma en servidor.
         </member>
         <member name="F:FIRe.FIReErrors.PARAMETER_ASYNC_ID_NEEDED">
             No se ha indicado el identificador de los datos asíncronos.
@@ -777,20 +756,11 @@
         <member name="F:FIRe.FIReErrors.PARAMETER_DOCUMENT_MANAGER_INVALID">
             Gestor de documentos no válido.
         </member>
-        <member name="F:FIRe.FIReErrors.UPGRADE_SERVICE_NETWORK">
-            Error al conectar con el servicio de validación y actualización de firmas.
-        </member>
-        <member name="F:FIRe.FIReErrors.CERTIFICATE_AVAILABLE">
-            El usuario ya tiene un certificado del tipo indicado.
-        </member>
         <member name="F:FIRe.FIReErrors.CERTIFICATE_BLOCKED">
             Los certificados del usuario están bloqueados.
         </member>
         <member name="F:FIRe.FIReErrors.CERTIFICATE_NO_CERTS">
             El usuario no dispone de certificados y el proveedor no le permite generarlos en este momento.
-        </member>
-        <member name="F:FIRe.FIReErrors.PARAMETER_BATCH_CONFIG_INVALID">
-            Se ha indicado una configuración particular mal formada para el documento del lote.
         </member>
         <member name="F:FIRe.FIReErrors.BATCH_DUPLICATE_DOCUMENT">
             El identificador de documento ya existe en el lote.
@@ -800,15 +770,6 @@
         </member>
         <member name="F:FIRe.FIReErrors.BATCH_NO_DOCUMENTS">
             Se intenta firmar un lote sin documentos.
-        </member>
-        <member name="F:FIRe.FIReErrors.PRESIGNING">
-            Error en la prefirma de los datos. Es posible que se haya establecido una configuración no válida para los datos proporcionados.
-        </member>
-        <member name="F:FIRe.FIReErrors.BATCH_PREPARING">
-            Se produjo un error preparando los datos para firmar.
-        </member>
-        <member name="F:FIRe.FIReErrors.BATCH_PRESIGNING">
-            Error en la prefirma de los datos de un lote. Es posible que se haya establecido una configuración no válida para los datos proporcionados.
         </member>
         <member name="F:FIRe.FIReErrors.PARAMETER_DOCUMENT_ID_NEEDED">
             No se ha indicado el identificador del documento del lote.
@@ -820,13 +781,16 @@
             Error al firmar el lote.
         </member>
         <member name="F:FIRe.FIReErrors.BATCH_RECOVERED">
-            La firma se recuperón anteriormente.
+            La firma se recuperó anteriormente.
         </member>
         <member name="F:FIRe.FIReErrors.BATCH_DOCUMENT_GRACE_PERIOD">
             Se requiere esperar un periodo de gracia para recuperar el documento.
         </member>
         <member name="F:FIRe.FIReErrors.BATCH_INVALID_DOCUMENT">
             El documento no estaba en el lote.
+        </member>
+        <member name="F:FIRe.FIReErrors.BATCH_RESULT_RECOVERED">
+            El resultado del lote se recuperó anteriormente.
         </member>
         <member name="F:FIRe.FIReErrors.INTERNAL_ERROR">
             Error interno del servidor.
@@ -846,17 +810,11 @@
         <member name="F:FIRe.FIReErrors.EXTERNAL_SERVICE_ERROR_TO_SIGN">
             Error detectado después de llamar a la pasarela externa para firmar.
         </member>
-        <member name="F:FIRe.FIReErrors.TIMEOUT">
-            Ha caducado la sesión.
-        </member>
         <member name="F:FIRe.FIReErrors.OPERATION_CANCELED">
             Operación cancelada.
         </member>
         <member name="F:FIRe.FIReErrors.PROVIDER_ERROR">
             El proveedor de firma devolvió un error.
-        </member>
-        <member name="F:FIRe.FIReErrors.PROVIDER_DATA_ERROR">
-            Los datos proporcionados por el proveedor de firma son incorrectos.
         </member>
         <member name="F:FIRe.FIReErrors.PROVIDER_INACCESIBLE_SERVICE">
             No se pudo conectar con el proveedor de firma.

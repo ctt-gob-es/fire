@@ -1141,9 +1141,6 @@ public final class FireApi {
     				|| FIReErrors.UNAUTHORIZED == errorResult.getCode()) {
     			throw new HttpForbiddenException(errorResult.getCode(), errorResult.getMessage());
     		}
-    		else if (FIReErrors.TIMEOUT == errorResult.getCode()) {
-    			throw new HttpNetworkException(errorResult.getCode(), errorResult.getMessage());
-    		}
     		else if (FIReErrors.UNKNOWN_USER == errorResult.getCode()) {
     			throw new HttpNoUserException(errorResult.getCode(), errorResult.getMessage());
     		}

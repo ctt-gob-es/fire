@@ -10,21 +10,11 @@
 package es.gob.fire.server.services.internal;
 
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.servlet.http.HttpServletResponse;
-
-import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
-import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.ProviderLegacy;
-import es.gob.fire.server.services.RequestParameters;
-import es.gob.fire.server.services.Responser;
-import es.gob.fire.server.services.ServiceUtil;
 
 /**
  * Manejador de la operaci&oacute;n de recuperaci&oacute;n de los certificados
@@ -33,85 +23,6 @@ import es.gob.fire.server.services.ServiceUtil;
  * Las comprobaciones de acceso deber&aacute;n haberse realizado previamente.
  */
 public class RecoverCertificateManager {
-
-	private static final Logger LOGGER = Logger.getLogger(RecoverCertificateManager.class.getName());
-
-	/**
-	 * Ejecuta una operacion de recuperaci&oacute;n del certificado generado
-	 * en servidor. Este metodo s&oacute;lo se utiliza desde el servicio Legacy
-	 * de Cl@ve Firma.
-	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
-	 * @param response Respuesta HTTP de generaci&oacute;n de certificado.
-	 */
-	public static void recoverCertificate(
-			final RequestParameters params,
-            final HttpServletResponse response) {
-
-		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
-        final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-        final String configB64  = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
-        final String configuredProvider  = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
-
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
-
-		// Comprobamos que se hayan proporcionado los parametros indispensables
-        if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.PARAMETER_TRANSACTION_ID_NEEDED);
-            return;
-        }
-
-		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
-
-    	Properties config = null;
-    	if (configB64 != null && configB64.length() > 0) {
-    		try {
-    			config = ServiceUtil.base642Properties(configB64);
-    		}
-    		catch (final Exception e) {
-    			LOGGER.log(Level.SEVERE, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$
-    			Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
-    			return;
-    		}
-    	}
-
-    	String providerName = configuredProvider;
-    	if (providerName == null) {
-    		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
-    	}
-
-    	LOGGER.info(logF.f("Recuperamos el certificado de usuario")); //$NON-NLS-1$
-
-    	byte[] newCertEncoded;
-        try {
-        	newCertEncoded = recoverCertificate(providerName, transactionId, config);
-        }
-        catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
-            return;
-        }
-        catch (final FIReConnectorNetworkException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
-        	AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
-        	Responser.sendError(response, FIReError.PROVIDER_INACCESIBLE_SERVICE);
-            return;
-        }
-        catch (final FIReCertificateException e) {
-            LOGGER.log(Level.SEVERE, logF.f("Error en la generacion del certificado"), e); //$NON-NLS-1$
-            Responser.sendError(response, FIReError.CERTIFICATE_GENERATION);
-            return;
-        }
-        catch (final Exception e) {
-            LOGGER.log(Level.SEVERE, logF.f("Error desconocido del proveedor de firma en la nube al recuperar un certificado"), e); //$NON-NLS-1$
-            Responser.sendError(response, FIReError.PROVIDER_ERROR);
-            return;
-        }
-
-        LOGGER.info(logF.f("Devolvemos el certificado generado")); //$NON-NLS-1$
-
-        Responser.sendResult(response, newCertEncoded);
-	}
 
 	/**
 	 * Ejecuta una operacion de recuperaci&oacute;n del certificado generado

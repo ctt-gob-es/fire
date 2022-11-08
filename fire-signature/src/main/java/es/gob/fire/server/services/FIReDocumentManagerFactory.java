@@ -72,10 +72,10 @@ public class FIReDocumentManagerFactory {
 			throw new IllegalAccessException("La aplicacion no tiene habilitado el acceso al gestor de documentos: " + managerName); //$NON-NLS-1$
 		}
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, trId);
-
 		// Si no se tiene cargada ya la clase gestora, se carga ahora
 		if (!docManagers.containsKey(managerName)) {
+
+			final LogTransactionFormatter logF = new LogTransactionFormatter(appId, trId);
 
 			final String docManagerClassName = ConfigManager.getDocumentManagerClassName(managerName);
 

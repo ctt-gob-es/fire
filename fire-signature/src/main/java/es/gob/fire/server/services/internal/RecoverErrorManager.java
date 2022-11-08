@@ -82,8 +82,8 @@ public class RecoverErrorManager {
         		return;
         	}
 
-        	LOGGER.warning(logF.f("No se ha notificado el tipo de error de la transaccion")); //$NON-NLS-1$
-            final TransactionResult result = buildErrorResult(session, FIReError.UNDEFINED_ERROR);
+        	LOGGER.severe(logF.f("Se ha producido un error del que no se ha establecido el tipo")); //$NON-NLS-1$
+            final TransactionResult result = buildErrorResult(session, FIReError.INTERNAL_ERROR);
         	SessionCollector.removeSession(session);
         	Responser.sendResult(response, result);
         	return;

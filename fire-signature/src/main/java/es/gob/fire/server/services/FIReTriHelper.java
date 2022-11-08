@@ -221,10 +221,6 @@ public final class FIReTriHelper {
      * 					  el momento de encontrar un error.
      * @param logF Objeto para el formateo del log.
      * @return Informaci&oacute;n de prefirma generada.
-     * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
-     * @throws IOException Cuando ocurre un error al componer la estructura con la
-     * informaci&oacute;n de la prefirma.
-     * @throws UnsupportedOperationException Cuando se configura una operaci&oacute;n no soportada.
      */
     public static TriphaseData getPreSign(final String criptoOperation,
                                          final String format,
@@ -233,10 +229,7 @@ public final class FIReTriHelper {
                                          final X509Certificate signerCert,
                                          final List<BatchDocument> documents,
                                          final boolean stopOnError,
-                                         final LogTransactionFormatter logF)
-                                        		 throws FIReSignatureException,
-                                        		 	IOException,
-                                        		 	UnsupportedOperationException {
+                                         final LogTransactionFormatter logF) {
 
         final TriphaseData batchTriPhaseData = new TriphaseData();
 

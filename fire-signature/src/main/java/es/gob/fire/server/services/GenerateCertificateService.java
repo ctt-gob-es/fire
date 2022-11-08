@@ -10,6 +10,7 @@
 package es.gob.fire.server.services;
 
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +20,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.alarms.Alarm;
+import es.gob.fire.server.connector.FIReCertificateAvailableException;
+import es.gob.fire.server.connector.FIReCertificateException;
+import es.gob.fire.server.connector.FIReConnectorFactoryException;
+import es.gob.fire.server.connector.FIReConnectorNetworkException;
+import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
+import es.gob.fire.server.connector.GenerateCertificateResult;
+import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.GenerateCertificateManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
@@ -169,11 +177,92 @@ public final class GenerateCertificateService extends HttpServlet {
 
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion
-    	GenerateCertificateManager.generateCertificate(params, response);
+    	generateCertificate(params, response);
     }
 
     private static void updateParamNames(final RequestParameters params) {
     	params.replaceParamKey(OLD_PARAMETER_NAME_APPLICATION_ID, PARAMETER_NAME_APPLICATION_ID);
     	params.replaceParamKey(OLD_PARAMETER_NAME_SUBJECT_ID, PARAMETER_NAME_SUBJECT_ID);
     }
+
+    /**
+	 * Ejecuta una operacion de generaci&oacute;n de certificado en servidor.
+	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param response Respuesta HTTP de generaci&oacute;n de certificado.
+	 */
+	private static void generateCertificate(
+			final RequestParameters params,
+            final HttpServletResponse response) {
+
+		final String appId 			= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
+        final String transactionId	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+        final String subjectId      = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
+		final String providerName	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
+		final String configB64      = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
+
+		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+
+		// Comprobamos del usuario
+    	if (subjectId == null || subjectId.isEmpty()) {
+        	LOGGER.warning(logF.f("No se ha proporcionado el identificador del usuario que solicita el certificado")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.PARAMETER_USER_ID_NEEDED);
+        	return;
+        }
+
+		Properties config = null;
+    	if (configB64 != null && !configB64.isEmpty()) {
+    		try {
+    			config = ServiceUtil.base642Properties(configB64);
+    		}
+    		catch (final Exception e) {
+    			LOGGER.log(Level.SEVERE, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$
+    			Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
+    			return;
+    		}
+    	}
+
+        final GenerateCertificateResult gcr;
+        try {
+        	gcr = GenerateCertificateManager.generateCertificate(providerName, subjectId, config);
+        }
+        catch (final FIReConnectorFactoryException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+        	return;
+        }
+        catch (final FIReConnectorUnknownUserException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("El usuario %1s no esta dado de alta en el proveedor de firma en la nube %2s", subjectId, providerName), e); //$NON-NLS-1$
+			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+        	Responser.sendError(response, HttpCustomErrors.NO_USER.getErrorCode(), HttpCustomErrors.NO_USER.getErrorDescription());
+        	return;
+        }
+        catch (final FIReConnectorNetworkException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
+			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
+        	Responser.sendError(response, FIReError.PROVIDER_INACCESIBLE_SERVICE);
+        	return;
+        }
+        catch (final WeakRegistryException e) {
+        	LOGGER.log(Level.WARNING, logF.f("El usuario realizo un registro debil y no puede tener certificados de firma"), e); //$NON-NLS-1$
+        	Responser.sendError(response, HttpCustomErrors.WEAK_REGISTRY.getErrorCode(), HttpCustomErrors.WEAK_REGISTRY.getErrorDescription());
+    		return;
+        }
+        catch (final FIReCertificateAvailableException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("El usuario ya dispone de todos los certificados posibles de ese tipo"), e); //$NON-NLS-1$
+       		Responser.sendError(response, HttpCustomErrors.CERTIFICATE_AVAILABLE.getErrorCode(), HttpCustomErrors.CERTIFICATE_AVAILABLE.getErrorDescription());
+       		return;
+        }
+        catch (final FIReCertificateException e) {
+        	LOGGER.log(Level.SEVERE, logF.f("El certificado obtenido no es valido"), e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.CERTIFICATE_ERROR);
+        	return;
+        }
+        catch (final Exception e) {
+        	LOGGER.log(Level.SEVERE, logF.f("Error desconocido en la generacion del certificado"), e);//$NON-NLS-1$
+        	Responser.sendError(response, FIReError.PROVIDER_ERROR);
+        	return;
+        }
+
+        Responser.sendResult(response, gcr);
+	}
 }

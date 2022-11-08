@@ -90,11 +90,11 @@ public class RecoverSignResultManager {
         	signResult = TempDocumentsManager.retrieveDocument(transactionId);
         }
         catch (final Exception e) {
-        	LOGGER.warning(logF.f("No se encuentra el resultado de la operacion: " + e)); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se encuentra el resultado de la operacion. Puede haber caducado la sesion: " + e)); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
     		SessionCollector.removeSession(session);
-    		Responser.sendError(response, FIReError.TIMEOUT);
+    		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
         }
 

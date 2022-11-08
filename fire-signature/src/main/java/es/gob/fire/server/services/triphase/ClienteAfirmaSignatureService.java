@@ -397,7 +397,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 					FIReTriHelper.checkSignaturesIntegrity(triphaseData, signerCertChain[0], null);
 				}
 				catch (final SecurityException e) {
-					LOGGER.log(Level.SEVERE, "Las prefirmas y/o el certificado obtenido no se corresponden con los generados en la prefirma", e); //$NON-NLS-1$
+					LOGGER.log(Level.SEVERE, "Error de integridad. Las prefirmas y/o el certificado obtenido no se corresponden con los generados en la prefirma", e); //$NON-NLS-1$
 					sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_CHECKING_PKCS1_HMAC) + ": " + e); //$NON-NLS-1$
 					return;
 				}

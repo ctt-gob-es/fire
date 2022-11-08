@@ -11,7 +11,6 @@ public enum FIReError {
 	READING_PARAMETERS(1, 400, "Error en la lectura de los par\u00E1metros de entrada."), //$NON-NLS-1$
 	PARAMETER_APP_ID_NEEDED(2, 400, "No se ha indicado el identificador de la aplicaci\u00F3n."), //$NON-NLS-1$
 	PARAMETER_OPERATION_NEEDED(3, 400, "No se ha indicado la operaci\u00F3n a realizar."), //$NON-NLS-1$
-	PARAMETER_OPERATION_INVALID(4, 400, "Se ha indicado un id de operaci\u00F3n incorrecto."), //$NON-NLS-1$
 	PARAMETER_OPERATION_NOT_SUPPORTED(5, 400, "Se ha indicado un id de operaci\u00F3n no soportado."), //$NON-NLS-1$
 	PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED(6, 400, "No se ha indicado el certificado de autenticaci\u00F3n."), //$NON-NLS-1$
 	PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID(7, 400, "Se ha indicado un certificado de autenticaci\u00F3n mal formado."), //$NON-NLS-1$
@@ -26,35 +25,23 @@ public enum FIReError {
 	PARAMETER_CONFIG_TRANSACTION_INVALID(16, 400, "Se ha indicado una configuraci\u00F3n de transacci\u00F3n mal formada."), //$NON-NLS-1$
 	PARAMETER_URL_ERROR_REDIRECION_NEEDED(17, 400, "No se ha indicado en la configuraci\u00F3n de la transacci\u00F3n la URL de redirecci\u00F3n en caso de error."), //$NON-NLS-1$
 	PARAMETER_TRANSACTION_ID_NEEDED(18, 400, "No se ha indicado el identificador de transacci\u00F3n"), //$NON-NLS-1$
-	PARAMETER_USER_REF_NEEDED(19, 400, "No se ha indicado la referencia del usuario."), //$NON-NLS-1$
 	PARAMETER_SIGNATURE_PARAMS_INVALID(20, 400, "Se han indicado propiedades de configuraci\u00F3n de fima mal formadas."), //$NON-NLS-1$
-	UNKNOWN_USER(21, 400, "No se ha indicado el identificador del usuario que solicita el certificado."), //$NON-NLS-1$
+	UNKNOWN_USER(21, 400, "El proveedor no tiene dado de alta al usuario indicado."), //$NON-NLS-1$
 	CERTIFICATE_DUPLICATED(22, 500, "El usuario ya dispone de un certificado del tipo que se est\u00E1 solicitando generar."), //$NON-NLS-1$
-	CERTIFICATE_GENERATION(23, 500, "Error en la generaci\u00F3n de un nuevo certificado."), //$NON-NLS-1$
+	CERTIFICATE_ERROR(23, 500, "Error al obtener los certificados del usuario o al generar uno nuevo."), //$NON-NLS-1$
 	CERTIFICATE_WEAK_REGISTRY(24, 500, "El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente."), //$NON-NLS-1$
 	UNDEFINED_ERROR(25, 500, "Error desconocido durante la operaci\u00F3n."), //$NON-NLS-1$
 	SIGNING(26, 500, "Error durante la firma."), //$NON-NLS-1$
 	PROVIDER_NOT_SELECTED(27, 400, "No se seleccion\u00F3 un proveedor de firma."), //$NON-NLS-1$
-	PARAMETER_SIGNING_CERTIFICATE_NEEDED(28, 400, "El proveedor no proporcion\u00F3 el certificado para firmar."), //$NON-NLS-1$
-	PARAMETER_SIGNING_CERTIFICATE_INVALID(29, 400, "El proveedor o cliente de firma proporcion\u00F3 un certificado mal formado."), //$NON-NLS-1$
-	POSTSIGNING(30, 500, "Error en la composici\u00F3n de la firma."), //$NON-NLS-1$
 	INVALID_SIGNATURE(31, 500, "La firma generada no es v\u00E1lida."), //$NON-NLS-1$
 	UPGRADING_SIGNATURE(32, 500, "Error durante la actualizaci\u00F3n de firma."), //$NON-NLS-1$
-	SAVING_SIGNATURE(33, 500, "Error al guardar la firma en servidor."), //$NON-NLS-1$
 	PARAMETER_ASYNC_ID_NEEDED(34, 400, "No se ha indicado el identificador de los datos as\u00EDncronos."), //$NON-NLS-1$
 	PARAMETER_DOCUMENT_MANAGER_INVALID(35, 400, "Gestor de documentos no v\u00E1lido."), //$NON-NLS-1$
-	UPGRADE_SERVICE_NETWORK(36, 500, "Error al conectar con el servicio de validaci\u00F3n y actualizaci\u00F3n de firmas."), //$NON-NLS-1$
-	CERTIFICATE_AVAILABLE(37, 500, "El usuario ya tiene un certificado del tipo indicado."), //$NON-NLS-1$
 	CERTIFICATE_BLOCKED(38, 500, "Los certificados del usuario est\u00E1n bloqueados."), //$NON-NLS-1$
 	CERTIFICATE_NO_CERTS(39, 500, "El usuario no dispone de certificados y el proveedor no le permite generarlos en este momento."), //$NON-NLS-1$
-
-	PARAMETER_BATCH_CONFIG_INVALID(41, 400, "Se ha indicado una configuraci\u00F3n particular mal formada para el documento del lote."), //$NON-NLS-1$
 	BATCH_DUPLICATE_DOCUMENT(42, 400, "El identificador de documento ya existe en el lote."), //$NON-NLS-1$
 	BATCH_NUM_DOCUMENTS_EXCEEDED(43, 400, "Se ha excedido el n\u00FAmero m\u00E1ximo de documentos permitidos en el lote."), //$NON-NLS-1$
 	BATCH_NO_DOCUMENTS(44, 400, "Se intenta firmar un lote sin documentos"), //$NON-NLS-1$
-	PRESIGNING(45, 500, "Error en la prefirma de los datos. Es posible que se haya establecido una configuraci\u00F3n no v\u00E1lida para los datos proporcionados."), //$NON-NLS-1$
-	BATCH_PREPARING(46, 500, "Se produjo un error preparando los datos para firmar."), //$NON-NLS-1$
-	BATCH_PRESIGNING(47, 500, "Error en la prefirma de los datos de un lote. Es posible que se haya establecido una configuraci\u00F3n no v\u00E1lida para los datos proporcionados."), //$NON-NLS-1$
 	PARAMETER_DOCUMENT_ID_NEEDED(48, 400, "No se ha indicado el identificador del documento del lote."), //$NON-NLS-1$
 	BATCH_NO_SIGNED(49, 500, "No se ha firmado previamente el lote."), //$NON-NLS-1$
 	BATCH_SIGNING(50, 500, "Error al firmar el lote."), //$NON-NLS-1$
@@ -70,10 +57,8 @@ public enum FIReError {
 	INVALID_TRANSACTION(503, 403, "La transacci\u00F3n no se ha inicializado o ha caducado."), //$NON-NLS-1$
 	EXTERNAL_SERVICE_ERROR_TO_LOGIN(504, 500, "Error detectado despues de llamar a la pasarela externa para autenticar al usuario."), //$NON-NLS-1$
 	EXTERNAL_SERVICE_ERROR_TO_SIGN(505, 500, "Error detectado despues de llamar a la pasarela externa para firmar."), //$NON-NLS-1$
-	TIMEOUT(506, 408, "Ha caducado la sesi\u00F3n."), //$NON-NLS-1$
 	OPERATION_CANCELED(507, 400, "Operaci\u00F3n cancelada."), //$NON-NLS-1$
 	PROVIDER_ERROR(508, 500, "El proveedor de firma devolvi\u00F3 un error."), //$NON-NLS-1$
-	PROVIDER_DATA_ERROR(509, 500, "Los datos proporcionados por el proveedor de firma son incorrectos."), //$NON-NLS-1$
 	PROVIDER_INACCESIBLE_SERVICE(510, 500, "No se pudo conectar con el proveedor de firma."), //$NON-NLS-1$
 	;
 

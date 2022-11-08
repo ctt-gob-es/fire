@@ -71,11 +71,15 @@ public class MiniAppletErrorService extends HttpServlet {
         }
 
         // Obtenenmos la configuracion del conector
-        final TransactionConfig connConfig	= (TransactionConfig) session
-        		.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-        if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
-			redirectErrorUrl = connConfig.getRedirectErrorUrl();
-		}
+        final TransactionConfig connConfig	= (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+        if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
+        	LOGGER.severe(logF.f("No se encontro en la sesion la URL de redireccion de error para la operacion")); //$NON-NLS-1$
+        	ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR);
+        	redirectToExternalUrl(redirectErrorUrl, request, response);
+        	return;
+        }
+
+        redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
         // Establecemos el mensaje de error y redirigimos a la pagina de error
         ErrorManager.setErrorToSession(session, FIReError.SIGNING, true, errorMessage);

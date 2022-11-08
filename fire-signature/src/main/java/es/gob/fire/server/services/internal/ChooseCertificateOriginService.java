@@ -263,7 +263,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch (final FIReCertificateException e) {
 			LOGGER.log(Level.SEVERE, logF.f("No se han podido recuperar los certificados del usuario " + subjectId), e); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, FIReError.CERTIFICATE_GENERATION, originForced);
+			ErrorManager.setErrorToSession(session, FIReError.CERTIFICATE_ERROR, originForced);
 			redirectToErrorPage(originForced, connConfig, request, response);
 			return;
 		}
@@ -333,7 +333,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		catch (final CertificateEncodingException e) {
 			LOGGER.log(Level.SEVERE, logF.f("Error al codificar el certificado en Base64"), e); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, FIReError.PARAMETER_SIGNING_CERTIFICATE_INVALID, originForced);
+			ErrorManager.setErrorToSession(session, FIReError.SIGNING, originForced);
 			redirectToErrorPage(originForced, connConfig, request, response);
 			return;
 		}

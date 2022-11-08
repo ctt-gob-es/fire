@@ -161,6 +161,12 @@ public class RecoverSignManager {
 
         final TransactionConfig connConfig	=
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+        if (connConfig == null) {
+			LOGGER.warning(logF.f("No se encontro en la sesion la configuracion de la transaccion")); //$NON-NLS-1$
+    		sendError(response, session, FIReError.INTERNAL_ERROR);
+			return;
+        }
+
 
         // En caso de haberse indicado un DocumentManager, lo recogemos
         final FIReDocumentManager docManager = (FIReDocumentManager) session.getObject(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER);
@@ -176,7 +182,7 @@ public class RecoverSignManager {
         	}
         	catch (final Exception e) {
         		LOGGER.severe(logF.f("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
-        		sendError(response, session, FIReError.PARAMETER_SIGNING_CERTIFICATE_INVALID);
+        		sendError(response, session, FIReError.SIGNING);
         		return;
         	}
         }
@@ -189,7 +195,7 @@ public class RecoverSignManager {
     	}
     	catch (final Exception e) {
     		LOGGER.warning(logF.f("No se encuentra la firma parcial generada. Puede haber caducado la sesion: " + e)); //$NON-NLS-1$
-			sendError(response, session, FIReError.TIMEOUT);
+			sendError(response, session, FIReError.INVALID_TRANSACTION);
     		return;
     	}
 
@@ -204,7 +210,7 @@ public class RecoverSignManager {
     		// Comprobamos el certificado
     		if (signingCert == null) {
     			LOGGER.severe(logF.f("El certificado firmante es obligatorio para componer la firma con proveedores en la nube y no se devolvio")); //$NON-NLS-1$
-    			sendError(response, session, FIReError.PARAMETER_SIGNING_CERTIFICATE_NEEDED);
+    			sendError(response, session, FIReError.PROVIDER_ERROR);
     			return;
     		}
 
@@ -246,8 +252,8 @@ public class RecoverSignManager {
     			return;
     		}
     		catch(final FIReSignatureException e) {
-    			LOGGER.log(Level.WARNING, logF.f("Error durante el proceso de firma"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.SIGNING);
+    			LOGGER.log(Level.WARNING, logF.f("Error de integridad. El PKCS#1 recibido no se genero con el certificado indicado"), e); //$NON-NLS-1$
+    			sendError(response, session, FIReError.PROVIDER_ERROR);
     			return;
     		}
     		catch (final Exception e) {
@@ -264,7 +270,7 @@ public class RecoverSignManager {
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error durante la postfirma"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.POSTSIGNING);
+    			sendError(response, session, FIReError.SIGNING);
     			return;
     		}
     	}
@@ -319,7 +325,7 @@ public class RecoverSignManager {
     				catch (final Exception e) {
     					LOGGER.log(Level.WARNING, logF.f("Error al registrar la operacion asincrona en el DocumentManager"), e); //$NON-NLS-1$
     					AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
-    		    		sendError(response, session, FIReError.SAVING_SIGNATURE);
+    		    		sendError(response, session, FIReError.INTERNAL_ERROR);
     					return;
 					}
     			}
@@ -347,7 +353,7 @@ public class RecoverSignManager {
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error en el guardado de la firma del documento " + docId), e); //$NON-NLS-1$
         	AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
-    		sendError(response, session, FIReError.SAVING_SIGNATURE);
+    		sendError(response, session, FIReError.INTERNAL_ERROR);
 			return;
 		}
 

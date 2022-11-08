@@ -77,19 +77,23 @@ public class RecoverNewCertificateService extends HttpServlet {
 
 		final String generateTrId = session.getString(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID);
 		final String providerName = session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-	    final TransactionConfig connConfig =
-	    		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	    final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
-		if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
-			errorUrl = connConfig.getRedirectErrorUrl();
+		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
+			LOGGER.warning(logF.f("No se encontro en la sesion la URL redireccion de error para la operacion")); //$NON-NLS-1$
+			processError(FIReError.INTERNAL_ERROR, session, errorUrl, request, response);
+			return;
 		}
+
+		// Usaremos la URL de error establecida en la sesion
+		errorUrl = connConfig.getRedirectErrorUrl();
 
 		byte[] certEncoded = null;
 	    try {
 	    	certEncoded = RecoverCertificateManager.recoverCertificate(
 	    			providerName,
 	    			generateTrId,
-	    			connConfig != null ? connConfig.getProperties() : null
+	    			connConfig.getProperties()
 	    	);
 	    }
         catch (final FIReConnectorFactoryException e) {
@@ -105,7 +109,7 @@ public class RecoverNewCertificateService extends HttpServlet {
 	    }
 	    catch (final FIReCertificateException e) {
 	    	LOGGER.log(Level.SEVERE, logF.f("Error en la generacion del certificado"), e); //$NON-NLS-1$
-	    	processError(FIReError.CERTIFICATE_GENERATION, session, errorUrl, request, response);
+	    	processError(FIReError.CERTIFICATE_ERROR, session, errorUrl, request, response);
 	    	return;
 	    }
         catch (final Exception e) {
@@ -132,7 +136,7 @@ public class RecoverNewCertificateService extends HttpServlet {
         }
         catch (final CertificateException e) {
             LOGGER.severe(logF.f("Error cargando el certificado del usuario proporcionado por el proveedor de firma en la nube")); //$NON-NLS-1$
-            processError(FIReError.PROVIDER_DATA_ERROR, session, errorUrl, request, response);
+            processError(FIReError.PROVIDER_ERROR, session, errorUrl, request, response);
             return;
         }
 

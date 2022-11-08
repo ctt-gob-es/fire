@@ -135,7 +135,15 @@ public class SignOperationManager {
 		final String docManagerName = connConfig.getDocumentManager();
 
 		// Copiamos al extraParams la informacion del documento firmado y el formato de firma
-		final Properties extraParams = AOUtil.base642Properties(extraParamsB64);
+		Properties extraParams = null;
+		try {
+			extraParams = AOUtil.base642Properties(extraParamsB64);
+		}
+		catch (final Exception e) {
+			LOGGER.warning(logF.f("Se ha proporcionado un extraParam mal formado: ") + e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_SIGNATURE_PARAMS_INVALID);
+			return;
+		}
 		final DocInfo docInfo = DocInfo.extractDocInfo(connConfig.getProperties());
 		DocInfo.addDocInfoToSign(extraParams, docInfo);
 
@@ -167,14 +175,15 @@ public class SignOperationManager {
         }
         catch (final IllegalAccessException | IllegalArgumentException e) {
         	LOGGER.log(Level.WARNING, logF.f("No existe o no se tiene permisos para acceder al gestor de documentos: " + docManagerName), e); //$NON-NLS-1$
-        	ErrorManager.setErrorToSession(session, FIReError.FORBIDDEN);
-        	Responser.sendError(response, FIReError.FORBIDDEN, new SignOperationResult(transactionId, redirectErrorUrl));
+        	ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DOCUMENT_MANAGER_INVALID);
+        	// En el mensaje de error se indica que no existe para no revelar si simplemente no se tiene permiso
+        	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_MANAGER_INVALID, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
-        	ErrorManager.setErrorToSession(session, FIReError.FORBIDDEN);
-        	Responser.sendError(response, FIReError.FORBIDDEN, new SignOperationResult(transactionId, redirectErrorUrl));
+        	ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR);
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
         }
 

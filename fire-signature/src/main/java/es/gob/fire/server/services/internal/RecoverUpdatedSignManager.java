@@ -71,28 +71,20 @@ public class RecoverUpdatedSignManager {
 
 		// Cargamos la configuracion de la operacion
         Properties config = null;
-    	if (configB64 != null && configB64.length() > 0) {
+    	if (configB64 != null && !configB64.isEmpty()) {
     		try {
     			config = ServiceUtil.base642Properties(configB64);
     		}
     		catch (final Exception e) {
-            	LOGGER.log(Level.SEVERE, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$
+            	LOGGER.log(Level.WARNING, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$
                 Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
                 return;
 			}
     	}
 
-		TransactionConfig connConfig = null;
-		if (configB64 != null && configB64.length() > 0) {
-			try {
-				connConfig = new TransactionConfig(configB64);
-			}
-			catch(final Exception e) {
-				LOGGER.warning(logF.f("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
-				Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
-				return;
-			}
-		}
+		final TransactionConfig connConfig = config != null
+				? new TransactionConfig((Properties) config.clone())
+				: null;
 
         // Obtenemos la informacion para la configuracion particular de la mejora/validacion de la firma
         final Properties upgraterConfig = UpgraderUtils.extractUpdaterProperties(config);
@@ -132,7 +124,23 @@ public class RecoverUpdatedSignManager {
         	return;
         }
 
-        final String docManager = connConfig != null ? connConfig.getDocumentManager() : null;
+        final String docManagerName = connConfig != null ? connConfig.getDocumentManager() : null;
+
+		FIReDocumentManager docManager;
+		try {
+			docManager = FIReDocumentManagerFactory.newDocumentManager(appId, null, docManagerName);
+		}
+        catch (final IllegalAccessException | IllegalArgumentException e) {
+        	LOGGER.log(Level.WARNING, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$
+        	// En el mensaje de error se indica que no existe para no revelar si simplemente no se tiene permiso
+        	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_MANAGER_INVALID);
+        	return;
+        }
+        catch (final Exception e) {
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName), e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+        	return;
+        }
 
         // Si debemos seguir esperando, actualizamos la situacion en el gestor de documentos
         // y devolvemos la informacion del nuevo tiempo de gracia
@@ -154,12 +162,11 @@ public class RecoverUpdatedSignManager {
         // Almacenamos la firma con el gestor de documentos
         byte[] partialResult;
         try {
-        	partialResult = storeWithDocumentManager(upgradeResult, asyncId, appId,
-        			docManager, logF);
+        	partialResult = storeWithDocumentManager(upgradeResult, asyncId, appId, docManager, logF);
         }
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("No se pudo almacenar la firma con el gestor de documentos indicado"), e); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.SAVING_SIGNATURE);
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
         	return;
 		}
 
@@ -194,13 +201,13 @@ public class RecoverUpdatedSignManager {
 	 * Actualiza la informaci&oacute;n de la operaci&oacute;n as&iacute;crona.
 	 * @param upgradeResult Resultado obtenido al tratar de recuperar el resultado de la operaci&opacute;n.
 	 * @param appId Identificador de la aplicaci&oacute;n que solicit&oacute; la firma.
-	 * @param docManagerName Nombre del gestor de documentos.
-	 * @throws IOException
+	 * @param docManager Gestor de documentos.
+	 * @throws IOException Cuando ocurre un error al solicitar la firma asincrona o cuando el gestor no
+	 * soporta esta operaci&oacute;n.
 	 */
 	private static void updateAsynOperation(final UpgradeResult upgradeResult,
-			final String appId, final String docManagerName) throws IOException {
+			final String appId, final FIReDocumentManager docManager) throws IOException {
 
-		final FIReDocumentManager docManager = getDocumentManager(appId, docManagerName);
         if (docManager instanceof FireAsyncDocumentManager) {
         	try {
         		((FireAsyncDocumentManager) docManager).registryAsyncOperation(
@@ -222,7 +229,7 @@ public class RecoverUpdatedSignManager {
 	 * @param upgradeResult Resultado de la operaci&oacute;n de actualizaci&oacute;n.
 	 * @param asyncId Identificador de la operaci&oacute;n as&iacute;ncrona.
 	 * @param appId Identificador de la aplicaci&oacute;n que solicit&oacute; la operaci&oacute;n.
-	 * @param docManagerName Nombre del gestor de documentos a utilizar.
+	 * @param docManager Gestor de documentos a utilizar.
 	 * @param logF Formateador de logs.
 	 * @return Valor devuelto por el gestor de documentos utilizado. En el caso de ser el por defecto,
 	 * se devuelve la firma actualizada.
@@ -230,10 +237,9 @@ public class RecoverUpdatedSignManager {
 	 * seleccionado, si el gestor no existe o si no se tiene permiso de acceso a &eacute;l.
 	 */
 	private static byte[] storeWithDocumentManager(final UpgradeResult upgradeResult,
-			final String asyncId, final String appId, final String docManagerName,
+			final String asyncId, final String appId, final FIReDocumentManager docManager,
 			final LogTransactionFormatter logF) throws IOException {
 
-		final FIReDocumentManager docManager = getDocumentManager(appId, docManagerName);
         byte[] result;
         if (docManager instanceof FireAsyncDocumentManager) {
         	try {
@@ -251,28 +257,5 @@ public class RecoverUpdatedSignManager {
         }
 
         return result;
-	}
-
-
-	/**
-	 * Carga un gestor de documentos.
-	 * @param appId Identificador de la aplicaci&oacute;n que lo solicita.
-	 * @param docManagerName Nombre del gestor de documentos a cargar.
-	 * @return Gestor de documentos.
-	 * @throws IOException Cuando no se puede cargar el gestor.
-	 */
-	private static FIReDocumentManager getDocumentManager(final String appId,
-			final String docManagerName) throws IOException {
-        FIReDocumentManager docManager;
-        try {
-        	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, null, docManagerName);
-        }
-        catch (final IllegalAccessException | IllegalArgumentException e) {
-        	throw new IOException("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName, e); //$NON-NLS-1$
-        }
-        catch (final Exception e) {
-        	throw new IOException("No se ha podido cargar el gestor de documentos con el nombre: " + docManagerName, e); //$NON-NLS-1$
-        }
-        return docManager;
 	}
 }

@@ -704,9 +704,6 @@
 			if (FIReErrors::FORBIDDEN == $errorCode || FIReErrors::UNAUTHORIZED == $errorCode) {
 				throw new HttpForbiddenException($errorMessage, $errorCode);
 			}
-			else if (FIReErrors::TIMEOUT == $errorCode) {
-				throw new HttpNetworkException($errorMessage, $errorCode);
-			}
 			else if (FIReErrors::UNKNOWN_USER == $errorCode) {
 				throw new HttpNoUserException($errorMessage, $errorCode);
 			}
@@ -754,8 +751,6 @@
 		const PARAMETER_APP_ID_NEEDED = 2;
 		/** No se ha indicado la operacion a realizar. */
 		const PARAMETER_OPERATION_NEEDED = 3;
-		/** Se ha indicado un id de operacion incorrecto. */
-		const PARAMETER_OPERATION_INVALID = 4;
 		/** Se ha indicado un id de operacion no soportado. */
 		const PARAMETER_OPERATION_NOT_SUPPORTED = 5;
 		/** No se ha indicado el certificado de autenticacion. */
@@ -784,76 +779,53 @@
 		const PARAMETER_URL_ERROR_REDIRECION_NEEDED = 17;
 		/** No se ha indicado el identificador de transaccion. */
 		const PARAMETER_TRANSACTION_ID_NEEDED = 18;
-		/** No se ha indicado la referencia del usuario. */
-		const PARAMETER_USER_REF_NEEDED = 19;
 		/** Se han indicado propiedades de configuracion de fima mal formadas. */
 		const PARAMETER_SIGNATURE_PARAMS_INVALID = 20;
-		/** No se ha indicado el identificador del usuario que solicita el certificado. */
+		/** El proveedor no tiene dado de alta al usuario indicado. */
 		const UNKNOWN_USER = 21;
 		/** El usuario ya dispone de un certificado del tipo que se esta solicitando generar. */
 		const CERTIFICATE_DUPLICATED = 22;
-		/** Error en la generacion de un nuevo certificado. */
-		const CERTIFICATE_GENERATION = 23;
+		/** Error al obtener los certificados del usuario o al generar uno nuevo. */
+		const CERTIFICATE_ERROR = 23;
 		/** El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente. */
 		const CERTIFICATE_WEAK_REGISTRY = 24;
-		/** Error desconocido durante la operacion. */
-		const UNDEFINED_ERROR = 25;
 		/** Error durante la firma. */
 		const SIGNING = 26;
 		/** No se selecciono un proveedor de firma. */
 		const PROVIDER_NOT_SELECTED = 27;
-		/** El proveedor no proporciono el certificado para firmar. */
-		const PARAMETER_SIGNING_CERTIFICATE_NEEDED = 28;
-		/** El proveedor o cliente de firma proporciono un certificado mal formado. */
-		const PARAMETER_SIGNING_CERTIFICATE_INVALID = 29;
-		/** Error en la composicion de la firma. */
-		const POSTSIGNING = 30;
 		/** La firma generada no es valida. */
 		const INVALID_SIGNATURE = 31;
 		/** Error durante la actualizacion de firma. */
 		const UPGRADING_SIGNATURE = 32;
-		/** Error al guardar la firma en servidor. */
-		const SAVING_SIGNATURE = 33;
 		/** No se ha indicado el identificador de los datos asincronos. */
 		const PARAMETER_ASYNC_ID_NEEDED = 34;
 		/** Gestor de documentos no valido. */
 		const PARAMETER_DOCUMENT_MANAGER_INVALID = 35;
-		/** Error al conectar con el servicio de validacion y actualizacion de firmas. */
-		const UPGRADE_SERVICE_NETWORK = 36;
-		/** El usuario ya tiene un certificado del tipo indicado. */
-		const CERTIFICATE_AVAILABLE = 37;
 		/** Los certificados del usuario estan bloqueados. */
 		const CERTIFICATE_BLOCKED = 38;
 		/** El usuario no dispone de certificados y el proveedor no le permite generarlos en este momento. */
 		const CERTIFICATE_NO_CERTS = 39;
-
-		/** Se ha indicado una configuracion particular mal formada para el documento del lote. */
-		const PARAMETER_BATCH_CONFIG_INVALID = 41;
 		/** El identificador de documento ya existe en el lote. */
 		const BATCH_DUPLICATE_DOCUMENT = 42;
 		/** Se ha excedido el numero maximo de documentos permitidos en el lote. */
 		const BATCH_NUM_DOCUMENTS_EXCEEDED = 43;
 		/** Se intenta firmar un lote sin documentos. */
 		const BATCH_NO_DOCUMENTS = 44;
-		/** Error en la prefirma de los datos. Es posible que se haya establecido una configuracion no valida para los datos proporcionados. */
-		const PRESIGNING = 45;
-		/** Se produjo un error preparando los datos para firmar. */
-		const BATCH_PREPARING = 46;
-		/** Error en la prefirma de los datos de un lote. Es posible que se haya establecido una configuracion no valida para los datos proporcionados. */
-		const BATCH_PRESIGNING = 47;
 		/** No se ha indicado el identificador del documento del lote. */
 		const PARAMETER_DOCUMENT_ID_NEEDED = 48;
 		/** No se ha firmado previamente el lote. */
 		const BATCH_NO_SIGNED = 49;
 		/** Error al firmar el lote. */
 		const BATCH_SIGNING = 50;
-		/** La firma se recuperon anteriormente. */
+		/** La firma se recupero anteriormente. */
 		const BATCH_RECOVERED = 51;
 		/** Se requiere esperar un periodo de gracia para recuperar el documento. */
 		const BATCH_DOCUMENT_GRACE_PERIOD = 52;
 		/** El documento no estaba en el lote. */
 		const BATCH_INVALID_DOCUMENT = 53;
-
+		/** El resultado del lote se recupero anteriormente. */
+		const BATCH_RESULT_RECOVERED = 54;
+	
 		/** Error interno del servidor. */
 		const INTERNAL_ERROR = 500;
 		/** Peticion rechazada. */
@@ -866,14 +838,10 @@
 		const EXTERNAL_SERVICE_ERROR_TO_LOGIN = 504;
 		/** Error detectado despues de llamar a la pasarela externa para firmar. */
 		const EXTERNAL_SERVICE_ERROR_TO_SIGN = 505;
-		/** Ha caducado la sesion. */
-		const TIMEOUT = 506;
 		/** Operacion cancelada. */
 		const OPERATION_CANCELED = 507;
 		/** El proveedor de firma devolvio un error. */
 		const PROVIDER_ERROR = 508;
-		/** Los datos proporcionados por el proveedor de firma son incorrectos. */
-		const PROVIDER_DATA_ERROR = 509;
 		/** No se pudo conectar con el proveedor de firma. */
 		const PROVIDER_INACCESIBLE_SERVICE = 510;
 	}

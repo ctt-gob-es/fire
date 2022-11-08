@@ -83,6 +83,12 @@ public class CreateBatchManager {
 			return;
 		}
 
+		if (configB64 == null || configB64.isEmpty()) {
+			LOGGER.warning(logF.f("No se proporciono la configuracion de la transaccion de lote")); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_NEEDED);
+			return;
+		}
+
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
 		// Si se especificaron filtros de certificados para su uso con el
@@ -101,18 +107,16 @@ public class CreateBatchManager {
 		final String filters = MiniAppletHelper.extractCertFiltersParams(extraParams);
 
 		TransactionConfig connConfig = null;
-		if (configB64 != null && configB64.length() > 0) {
-			try {
-				connConfig = new TransactionConfig(configB64);
-			}
-			catch(final Exception e) {
-				LOGGER.warning(logF.f("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
-				Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
-				return;
-			}
+		try {
+			connConfig = new TransactionConfig(configB64);
+		}
+		catch(final Exception e) {
+			LOGGER.warning(logF.f("Se proporcionaron datos malformados para la conexion y configuracion de los proveedores de firma")); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.PARAMETER_CONFIG_TRANSACTION_INVALID);
+			return;
 		}
 
-		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
+		if (!connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning(logF.f("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.PARAMETER_URL_ERROR_REDIRECION_NEEDED);
 			return;
@@ -166,8 +170,8 @@ public class CreateBatchManager {
         	docManager = FIReDocumentManagerFactory.newDocumentManager(appId, transactionId, docManagerName);
         }
         catch (final IllegalAccessException | IllegalArgumentException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$
-        	// En el mensaje de error se indica que no existe para no revelar si no existe simplemente es un tema de permisos
+        	LOGGER.log(Level.WARNING, logF.f("El gestor de documentos no existe o no se tiene permiso para acceder a el: " + docManagerName), e); //$NON-NLS-1$
+        	// En el mensaje de error se indica que no existe para no revelar si simplemente no se tiene permiso
         	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_MANAGER_INVALID);
         	return;
         }

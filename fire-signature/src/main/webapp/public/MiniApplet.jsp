@@ -154,7 +154,6 @@
 		// Obtenemos las URL a las que hay que redirigir al usuario en caso de exito y error
 		final TransactionConfig connConfig =
 			(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-		final String successUrl = connConfig.getRedirectSuccessUrl();
 		final String errorUrl = connConfig.getRedirectErrorUrl();
 	
 		final String formFunction = isBatchOperation ? "doSignBatch()" : "doSign()"; //$NON-NLS-1$ //$NON-NLS-2$

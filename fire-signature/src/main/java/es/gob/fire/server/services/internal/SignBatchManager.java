@@ -75,12 +75,10 @@ public class SignBatchManager {
 
         final TransactionConfig connConfig =
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-
-		// Listamos los certificados del usuario
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning(logF.f("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
 			TRANSLOGGER.register(session, false);
-			Responser.sendError(response, FIReError.PARAMETER_URL_ERROR_REDIRECION_NEEDED);
+			Responser.sendError(response, FIReError.INTERNAL_ERROR);
 			return;
 		}
 
@@ -88,6 +86,7 @@ public class SignBatchManager {
         // para tenerlo en cuenta en este paso y los siguientes
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR, stopOnError);
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
+        session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE);
         SessionCollector.commit(session);
 
         LOGGER.info(logF.f("Generamos la URL de redireccion")); //$NON-NLS-1$

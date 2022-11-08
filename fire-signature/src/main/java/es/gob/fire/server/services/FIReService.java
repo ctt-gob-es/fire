@@ -174,7 +174,7 @@ public class FIReService extends HttpServlet {
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("La aplicacion que solicita la peticion no es valida o esta desactivada"), e); //$NON-NLS-1$
-        		Responser.sendError(response, FIReError.INTERNAL_ERROR);
+        		Responser.sendError(response, FIReError.UNAUTHORIZED);
         		return;
         	}
         }
@@ -219,7 +219,7 @@ public class FIReService extends HttpServlet {
         }
         catch (final Exception e) {
             LOGGER.warning(logF.f("Se ha indicado un id de operacion incorrecto: " + e)); //$NON-NLS-1$
-            Responser.sendError(response, FIReError.PARAMETER_OPERATION_INVALID);
+            Responser.sendError(response, FIReError.PARAMETER_OPERATION_NOT_SUPPORTED);
             return;
 		}
 
