@@ -101,7 +101,7 @@ public class RecoverBatchResultManager {
 
 		// Si, ahora que los datos estan actualizados, se indica que la operacion anterior fue una recuperacion
 		// es que los datos ya se han recuperado y no se debe repetir la operacion
-		if (SessionFlags.OP_RECOVER != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+		if (SessionFlags.OP_RECOVER == session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
 			LOGGER.warning(logF.f("El resultado del lote ya se solicito previamente")); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.BATCH_RESULT_RECOVERED);
 			return;
