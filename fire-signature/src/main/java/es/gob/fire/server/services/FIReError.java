@@ -53,7 +53,7 @@ public enum FIReError {
 	// Errores que no devuelven informacion significativa a la aplicacion
 	INTERNAL_ERROR(500, 500, "Error interno del servidor. Espere unos momentos antes de reintentar la operaci\u00F3n."), //$NON-NLS-1$
 	FORBIDDEN(501, 403, "Petici\u00F3n rechazada."), //$NON-NLS-1$
-	UNAUTHORIZED(502, 401, "No se proporcionaron los par\u00E1metros de autenticaci\u00F3n."), //$NON-NLS-1$
+	UNAUTHORIZED(502, 401, "No se proporcionaron los par\u00E1metros de autenticaci\u00F3n o no son correctos."), //$NON-NLS-1$
 	INVALID_TRANSACTION(503, 403, "La transacci\u00F3n no se ha inicializado o ha caducado."), //$NON-NLS-1$
 	EXTERNAL_SERVICE_ERROR_TO_LOGIN(504, 500, "Error detectado despues de llamar a la pasarela externa para autenticar al usuario."), //$NON-NLS-1$
 	EXTERNAL_SERVICE_ERROR_TO_SIGN(505, 500, "Error detectado despues de llamar a la pasarela externa para firmar."), //$NON-NLS-1$

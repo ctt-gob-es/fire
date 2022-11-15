@@ -835,7 +835,7 @@
 		const INTERNAL_ERROR = 500;
 		/** Peticion rechazada. */
 		const FORBIDDEN = 501;
-		/** No se proporcionaron los parametros de autenticacion. */
+		/** No se proporcionaron los parametros de autenticacion o no son correctos. */
 		const UNAUTHORIZED = 502;
 		/** La transaccion no se ha inicializado o ha caducado. */
 		const INVALID_TRANSACTION = 503;

@@ -91,7 +91,7 @@ public class FIReErrors {
 	public static final int INTERNAL_ERROR = 500;
 	/** Petici&oacute;n rechazada. */
 	public static final int FORBIDDEN = 501;
-	/** No se proporcionaron los par&aacute;metros de autenticaci&oacute;n. */
+	/** No se proporcionaron los par&aacute;metros de autenticaci&oacute;n o no son correctos. */
 	public static final int UNAUTHORIZED = 502;
 	/** La transacci&oacute;n no se ha inicializado o ha caducado. */
 	public static final int INVALID_TRANSACTION = 503;

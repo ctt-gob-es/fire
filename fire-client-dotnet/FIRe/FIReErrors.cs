@@ -98,7 +98,7 @@ namespace FIRe
         public const int INTERNAL_ERROR = 500;
         /// Petición rechazada.
         public const int FORBIDDEN = 501;
-        /// No se proporcionaron los parámetros de autenticación.
+        /// No se proporcionaron los parámetros de autenticación o no son correctos.
         public const int UNAUTHORIZED = 502;
         /// La transacción no se ha inicializado o ha caducado.
         public const int INVALID_TRANSACTION = 503;
