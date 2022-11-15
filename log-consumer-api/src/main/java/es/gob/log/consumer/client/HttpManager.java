@@ -15,13 +15,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.net.URLStreamHandler;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -120,6 +123,9 @@ class HttpManager {
 
 	private TrustManager[] trustStoreManagers = null;
 
+	private static boolean urlHandlerLoaded = false;
+	private static Constructor<?> jsseUrlHandlerConstructor = null;
+
 	static {
 		final CookieManager cookieManager = new CookieManager();
 		cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
@@ -194,8 +200,7 @@ class HttpManager {
 			}
 		}
 
-		final URL uri = new URL(request != null ? request : url);
-
+		final URL uri = createURL(request != null ? request : url);
 		final HttpURLConnection conn = openConnection(uri);
 
 		conn.setRequestMethod(method.name());
@@ -268,6 +273,41 @@ class HttpManager {
 
 		return response;
 
+	}
+
+	private static URL createURL(final String url) throws MalformedURLException {
+
+		// Intentamos forzar el Handler de URL de JSSE para mantener un comportamiento homogeneo.
+		// Si no, segun la configuracion del servidor de aplicaciones, puede que se utilice una
+		// configuracion para las conexiones SSL distinta a la establecida
+		if (!urlHandlerLoaded) {
+			urlHandlerLoaded = true;
+			try {
+				final Class<?> handlerClass = Class.forName("sun.net.www.protocol.https.Handler", false, HttpManager.class.getClassLoader()); //$NON-NLS-1$
+				jsseUrlHandlerConstructor = handlerClass.getDeclaredConstructor();
+				jsseUrlHandlerConstructor.setAccessible(true);
+			}
+			catch (final Exception e) {
+				jsseUrlHandlerConstructor = null;
+			}
+		}
+
+		// Utilizamos el manejador de JSSE si se pudo cargar o el por defecto si no
+		URL uri;
+		if (jsseUrlHandlerConstructor != null) {
+			try {
+				final Object handler = jsseUrlHandlerConstructor.newInstance();
+				uri = new URL(null, url, (URLStreamHandler) handler);
+			}
+			catch (final Exception e) {
+				uri = new URL(url);
+			}
+		}
+		else {
+			uri = new URL(url);
+		}
+
+		return uri;
 	}
 
 	/**
