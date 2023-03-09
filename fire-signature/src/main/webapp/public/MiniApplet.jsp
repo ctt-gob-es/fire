@@ -365,12 +365,12 @@
 				var href;
 				if (AutoScript.isAndroid()) {
 					app = "Cliente @firma Android";
-					appVersion = "Cliente m\u00F3vil @firma 1.7 o superior";
+					appVersion = "Cliente m\u00F3vil @firma 1.8 o superior";
 					href = "https://play.google.com/store/apps/details?id=es.gob.afirma";
 				}
 				else if (AutoScript.isIOS()) {
 					app = "Cliente @firma iOS";
-					appVersion = "Cliente m\u00F3vil @firma 1.7 o superior";
+					appVersion = "Cliente m\u00F3vil @firma 1.8 o superior";
 					href = "https://itunes.apple.com/es/app/cliente-firma-movil/id627410001?mt=8&uo=4";
 				}
 				else {
