@@ -13,6 +13,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -105,6 +107,8 @@ public final class ClaveFirmaConnector extends FIReConnector {
             this.redirectErrorUrl = config.getProperty("redirectErrorUrl"); //$NON-NLS-1$
             this.procedureName = config.getProperty("procedureName"); //$NON-NLS-1$
         }
+
+        Security.removeProvider("BC");
     }
 
     @Override
