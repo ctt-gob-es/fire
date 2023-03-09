@@ -164,15 +164,6 @@ public final class StorageService extends HttpServlet {
 		ClienteAfirmaCache.saveData(id, data);
 
 
-
-
-		//XXX: Borrar - INICIO
-		LOGGER.info(" ==== Se guardo en memoria el documento con identificador: " + LogUtils.cleanText(id));
-		//XXX: Borrar - FIN
-
-
-
-
 		// Si estamos en modo alta disponibilidad, tambien almacenamos los datos en el almacen comun
 		if (HIGH_AVAILABILITY_ENABLED) {
 			try {
@@ -182,15 +173,6 @@ public final class StorageService extends HttpServlet {
 				sendError(response, ErrorManager.ERROR_COMMUNICATING_WITH_WEB);
 				return;
 			}
-
-
-
-			//XXX: Borrar - INICIO
-			LOGGER.info(" ==== Se guardo en almacenamiento compartido el documento con identificador: " + LogUtils.cleanText(id));
-			//XXX: Borrar - FIN
-
-
-
 		}
 
 		sendResult(response, SUCCESS);

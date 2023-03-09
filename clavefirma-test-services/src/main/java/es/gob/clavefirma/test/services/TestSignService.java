@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.CertificateFactory;
@@ -26,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,7 +37,6 @@ import es.gob.afirma.core.signers.AOPkcs1Signer;
 import es.gob.afirma.core.signers.AOSimpleSigner;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
-import es.gob.fire.server.connector.FIReSignatureException;
 
 /**
  * Servlet implementation class TestSignService
@@ -71,15 +70,27 @@ public class TestSignService extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 
 		final String transactionId = request.getParameter(KEY_TRANSACTIONID);
-
-		final File transactionFile = TestHelper.getCanonicalFile(TestHelper.getDataFolder(), transactionId);
-		if (!transactionFile.isFile() || !transactionFile.canRead()) {
+		if (transactionId == null || transactionId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado id de transaccion"); //$NON-NLS-1$
-			final Exception ex = new FIReSignatureException("La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new ServletException(ex);
+			Responser.sendError(response, "No se ha proporcionado ID de transaccion"); //$NON-NLS-1$
+			return;
+		}
+
+		File transactionFile;
+		try {
+			transactionFile = TestHelper.getCanonicalFile(TestHelper.getDataFolder(), transactionId);
+		} catch (final Exception e) {
+			LOGGER.severe("No se pudo componer la ruta del fichero '" + transactionId + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			Responser.sendError(response, "La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
+		}
+
+		if (!transactionFile.isFile() || !transactionFile.canRead()) {
+			Responser.sendError(response, "La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
 
 		final Properties p = new Properties();
@@ -88,18 +99,16 @@ public class TestSignService extends HttpServlet {
 		}
 		catch(final IOException e) {
 			LOGGER.warning("Error cargando la transaccion"); //$NON-NLS-1$
-			final Exception ex = new FIReSignatureException(
-				"Error cargando la transaccion: " + e, e //$NON-NLS-1$
-			);
-			throw new ServletException(ex);
+			Responser.sendError(response, "Error cargando la transaccion: " + e); //$NON-NLS-1$
+			return;
 		}
 
 		transactionFile.delete();
 
 		if (!Boolean.parseBoolean(p.getProperty("auth"))) { //$NON-NLS-1$
 			LOGGER.warning(" La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception ex = new FIReSignatureException("La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new ServletException(ex);
+			Responser.sendError(response, "La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
 
 		final X509Certificate signingCert;
@@ -112,28 +121,21 @@ public class TestSignService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.warning("La transaccion " + transactionId + " no contiene un certificado valido"); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception ex = new FIReSignatureException(
-				"La transaccion " + transactionId + " no contiene un certificado valido: " + e, e //$NON-NLS-1$ //$NON-NLS-2$
-			);
-			throw new ServletException(ex);
+			Responser.sendError(response, "La transaccion " + transactionId + " no contiene un certificado valido: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
 
 		final String algorithm = p.getProperty(KEY_ALGORITHM);
 		if (algorithm == null || algorithm.isEmpty()) {
-			LOGGER.warning("La transaccion " + transactionId + " no contiene un algoritmo valido"); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception ex = new FIReSignatureException(
-				"La transaccion " + transactionId + " no contiene un algoritmo valido" //$NON-NLS-1$ //$NON-NLS-2$
-			);
-			throw new ServletException(ex);
+			LOGGER.warning("La transaccion " + transactionId + " no contiene un algoritmo valido"); //; //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
 
 		final String subjectid = p.getProperty(KEY_SUBJECTID);
 		if (subjectid == null || subjectid.isEmpty()) {
 			LOGGER.warning("La transaccion " + transactionId + " no contiene un  identificador de titular valido"); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception ex = new FIReSignatureException(
-				"La transaccion " + transactionId + " no contiene un identificador de titular valido" //$NON-NLS-1$ //$NON-NLS-2$
-			);
-			throw new ServletException(ex);
+			Responser.sendError(response, "La transaccion " + transactionId + " no contiene un identificador de titular valido"); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
 
 		final TriphaseData td;
@@ -141,19 +143,15 @@ public class TestSignService extends HttpServlet {
 			final byte[] triphasedataBytes = Base64.decode(p.getProperty(KEY_TRIPHASEDATA));
 			if (triphasedataBytes == null || triphasedataBytes.length < 1) {
 				LOGGER.warning("La transaccion " + transactionId + " no contiene datos cargados para su firma"); //$NON-NLS-1$ //$NON-NLS-2$
-				final Exception ex = new FIReSignatureException(
-					"La transaccion " + transactionId + " no contiene datos cargados para su firma" //$NON-NLS-1$ //$NON-NLS-2$
-				);
-				throw new ServletException(ex);
+				Responser.sendError(response, "La transaccion " + transactionId + " no contiene datos cargados para su firma"); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
 			}
 			td = TriphaseData.parser(triphasedataBytes);
 		}
 		catch(final IOException e) {
 			LOGGER.log(Level.SEVERE, "Error cargando los datos trifasicos de la transaccion: " + e, e); //$NON-NLS-1$
-			final Exception ex = new FIReSignatureException(
-				"Error cargando los datos trifasicos de la transaccion: " + e, e //$NON-NLS-1$
-			);
-			throw new ServletException(ex);
+			Responser.sendError(response, "Error cargando los datos trifasicos de la transaccion: " + e); //$NON-NLS-1$
+			return;
 		}
 
 		final KeyStore ks;
@@ -167,10 +165,8 @@ public class TestSignService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "Error accediendo al nuevo almacen de usuario: " + e, e); //$NON-NLS-1$
-			final Exception ex = new FIReSignatureException(
-					"Error accediendo al nuevoalmacen de usuario '"  + subjectid + "': " + e, e //$NON-NLS-1$ //$NON-NLS-2$
-					);
-			throw new ServletException(ex);
+			Responser.sendError(response, "Error accediendo al nuevoalmacen de usuario '"  + subjectid + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
 
 		PrivateKeyEntry pke = null;
@@ -187,19 +183,15 @@ public class TestSignService extends HttpServlet {
 			}
 			catch(final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error accediendo al almacen del usuario '"  + subjectid + "': "  + e, e); //$NON-NLS-1$ //$NON-NLS-2$
-				final Exception ex = new FIReSignatureException(
-					"Error accediendo al almacen del usuario '"  + subjectid + "': " + e, e //$NON-NLS-1$ //$NON-NLS-2$
-				);
-				throw new ServletException(ex);
+				Responser.sendError(response, "Error accediendo al almacen del usuario '"  + subjectid + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
 			}
 		}
 
 		if (pke == null) {
 			LOGGER.severe("El almacen del usuario '"  + subjectid + "' no contiene el certificado indicado: " + AOUtil.getCN(signingCert)); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception ex = new FIReSignatureException(
-				"El almacen del usuario '"  + subjectid + "' no contiene el certificado indicado: " + AOUtil.getCN(signingCert) //$NON-NLS-1$ //$NON-NLS-2$
-			);
-			throw new ServletException(ex);
+			Responser.sendError(response, "El almacen del usuario '"  + subjectid + "' no contiene el certificado indicado: " + AOUtil.getCN(signingCert)); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
 
 		final Map<String, byte[]> ret = new ConcurrentHashMap<>(td.getSignsCount());
@@ -219,14 +211,16 @@ public class TestSignService extends HttpServlet {
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.SEVERE, "Error realizando la firma PKCS#1 de  '" + ts.getId() + "': " + e, e); //$NON-NLS-1$ //$NON-NLS-2$
-				final Exception ex = new FIReSignatureException(
-					"Error realizando la firma PKCS#1 de '" + ts.getId() + "': " + e, e //$NON-NLS-1$ //$NON-NLS-2$
-				);
-				throw new ServletException(ex);
+				Responser.sendError(response, "Error realizando la firma PKCS#1 de '" + ts.getId() + "': " + e); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
 			}
 		}
 
-		response.getWriter().print(buildJsonResult(ret).toString());
+		try (PrintWriter writer = response.getWriter()) {
+			writer.print(buildJsonResult(ret).toString());
+		} catch (final IOException e) {
+			LOGGER.log(Level.SEVERE, "No se pudo enviar la respuesta al servidor: " + e); //$NON-NLS-1$
+		}
 	}
 
 	private static StringBuilder buildJsonResult(final Map<String, byte[]> result) {

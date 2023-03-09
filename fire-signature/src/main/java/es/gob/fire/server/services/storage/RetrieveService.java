@@ -97,24 +97,8 @@ public final class RetrieveService extends HttpServlet {
 	private static void retrieveSign(final HttpServletResponse response,
 			final HttpServletRequest request, final String id) {
 
-		LOGGER.info("Se solicita cargar el documento con identificador " + LogUtils.cleanText(id));
-
 		// Tratamos de cargar los datos de la cache en memoria
 		byte[] data = ClienteAfirmaCache.recoverData(id);
-
-
-
-
-		// XXX: Borrar - INICIO
-		if (data != null) {
-			LOGGER.info(" ==== Se cargo de memoria el documento con identificador " + LogUtils.cleanText(id));
-		} else {
-			LOGGER.info(" ==== No se encontro en memoria el documento con identificador " + LogUtils.cleanText(id));
-		}
-		// XXX: Borrar - FIN
-
-
-
 
 		// Si no se encuentran los datos, comprobamos si estamos en modo alta disponibilidad
 		// y se encuentran en el almacen comun. Si tampoco, se indica que no se
@@ -141,19 +125,6 @@ public final class RetrieveService extends HttpServlet {
 					sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
 					return;
 				}
-
-
-
-				// XXX: Borrar - INICIO
-				if (data != null) {
-					LOGGER.info(" ==== Se cargo del almacenamiento compartido el documento con identificador " + LogUtils.cleanText(id));
-				} else {
-					LOGGER.info(" ==== No se cargo del almacenamiento compartido el documento con identificador " + LogUtils.cleanText(id));
-				}
-				// XXX: Borrar - FIN
-
-
-
 			}
 			else {
 				sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + id + "')"); //$NON-NLS-1$ //$NON-NLS-2$

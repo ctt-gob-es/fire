@@ -36,14 +36,14 @@ public class LoginService extends HttpServlet {
 
 		// Solo para pruebas, eliminamos los datos de sesion que pudiese haber de
 		// alguna prueba anterior
-		final HttpSession session = request.getSession(false);
+		HttpSession session = request.getSession(false);
 		if (session != null) {
 			session.invalidate();
 		}
 
-		request.getSession().setAttribute("user", userId); //$NON-NLS-1$
-
-		request.getSession().setAttribute("UserAgent", request.getHeader("user-agent"));  //$NON-NLS-1$ //$NON-NLS-2$
+		session = request.getSession();
+		session.setAttribute("user", userId); //$NON-NLS-1$
+		session.setAttribute("UserAgent", request.getHeader("user-agent"));  //$NON-NLS-1$ //$NON-NLS-2$
 
 		response.sendRedirect("SelectOperation.jsp"); //$NON-NLS-1$
 	}
