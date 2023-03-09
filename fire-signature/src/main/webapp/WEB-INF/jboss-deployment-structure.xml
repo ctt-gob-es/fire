@@ -1,0 +1,14 @@
+<jboss-deployment-structure>
+   <deployment>
+    <dependencies>
+      <system export="true">
+        <paths>
+		    <path name="sun/net/www/protocol/http"/>
+		    <path name="sun/net/www/protocol/https"/>
+        </paths>
+      </system>
+    </dependencies>
+   </deployment>
+</jboss-deployment-structure>
+
+
