@@ -6,7 +6,7 @@
 -- ********************************************************
 
 -- Tabla para el guardado temporal de sesiones en BD
-CREATE TABLE "TB_SESIONES" (
+CREATE TABLE "TB_COMP_SESIONES" (
   "ID" VARCHAR2(64) NOT NULL,
   "F_MODIFICACION" NUMBER (20,0) NOT NULL,
   "SESION" BLOB,
@@ -14,7 +14,7 @@ CREATE TABLE "TB_SESIONES" (
 );
 
 -- Tabla para el guardado temporal de documentos en BD
-CREATE TABLE "TB_DOCUMENTOS" (
+CREATE TABLE "TB_COMP_DOCUMENTOS" (
   "ID" VARCHAR2(64) NOT NULL,
   "F_MODIFICACION" NUMBER (20,0) NOT NULL,
   "DATOS" BLOB,

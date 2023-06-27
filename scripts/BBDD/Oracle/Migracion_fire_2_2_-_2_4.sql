@@ -1,7 +1,7 @@
 -- Script de migracion desde FIRe 2.2/2.3 a 2.4
 
 
--- TABLA USUARIOS
+-- TABLA de usuarios
 
 -- Agregamos un campo FK_ROL con un valor preestablecido para las entradas existentes
 ALTER TABLE "TB_USUARIOS" ADD "FK_ROL" NUMBER;
@@ -22,8 +22,8 @@ ALTER TABLE "TB_USUARIOS" ADD "REST_CLAVE" NUMBER(1,0) DEFAULT 0;
 -- Eliminamos el campo ROL
 ALTER TABLE "TB_USUARIOS" DROP COLUMN "ROL";
 
--- Incrementamos el tamano del campo CLAVE
-ALTER TABLE  "TB_USUARIOS" MODIFY ("CLAVE" VARCHAR2(2000));
+-- Incrementamos el tamano del campo CLAVE y hacemos que pueda contener nulos
+ALTER TABLE  "TB_USUARIOS" MODIFY ("CLAVE" VARCHAR2(2000) NULL);
 
 -- Ajustamos las restricciones del resto de campos
 ALTER TABLE  "TB_USUARIOS" MODIFY ("USU_DEFECTO" NUMBER(1,0) DEFAULT 0);
@@ -161,8 +161,7 @@ FROM "TB_USUARIOS"
 WHERE "FK_ROL" = 2;
 
 
-
--- TABLA APLICACIONES
+-- TABLA de aplicaciones
 
 -- Eliminamos los campos innecesarios de las aplicaciones
 ALTER TABLE "TB_APLICACIONES"

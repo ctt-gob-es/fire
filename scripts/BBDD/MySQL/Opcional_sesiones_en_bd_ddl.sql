@@ -6,7 +6,7 @@
 -- ********************************************************
 
 -- Tabla para el guardado temporal de sesiones en BD
-CREATE TABLE `tb_sesiones` (
+CREATE TABLE `tb_comp_sesiones` (
   `id` varchar(64) NOT NULL,
   `f_modificacion` bigint(10) NOT NULL,
   `sesion` blob,
@@ -14,7 +14,7 @@ CREATE TABLE `tb_sesiones` (
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Tabla para el guardado temporal de documentos en BD
-CREATE TABLE `tb_documentos` (
+CREATE TABLE `tb_comp_documentos` (
   `id` varchar(64) NOT NULL,
   `f_modificacion` bigint(10) NOT NULL,
   `datos` longblob,
