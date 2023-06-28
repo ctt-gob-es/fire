@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
@@ -53,7 +54,12 @@ public class WebConfig implements WebMvcConfigurer {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-		propertySourcesPlaceholderConfigurer.setLocations(new FileSystemResource(FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), PROPS_CONF_FILE_GENERAL)));
+
+		final String configDir = UtilsServer.getServerConfigDir();
+		final Resource configResource = configDir != null
+				? new FileSystemResource(FileUtilsDirectory.createAbsolutePath(configDir, PROPS_CONF_FILE_GENERAL))
+				: new org.springframework.core.io.DefaultResourceLoader().getResource("/" + PROPS_CONF_FILE_GENERAL);
+		propertySourcesPlaceholderConfigurer.setLocations(configResource);
 		return propertySourcesPlaceholderConfigurer;
 	}
 
