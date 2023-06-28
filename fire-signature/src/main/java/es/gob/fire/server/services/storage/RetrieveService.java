@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.signature.ConfigManager;
@@ -116,7 +115,7 @@ public final class RetrieveService extends HttpServlet {
 				}
 			}
 
-			if (HIGH_AVAILABILITY_ENABLED && existsDocument) {
+			if (existsDocument) {
 				try {
 					data = TempDocumentsManager.retrieveAndDeleteDocument(id);
 				}
@@ -132,7 +131,7 @@ public final class RetrieveService extends HttpServlet {
 			}
 		}
 		// Si hemos recuperado los datos de memoria, pero estamos en modo alta disponibilidad,
-		// al menos eliminamos los datos del almacen comun
+		// debemos eliminarlos del almacen comun para que no queden ahi residuales
 		else if (HIGH_AVAILABILITY_ENABLED) {
 			new DeleteSharedFileThread(id).start();
 		}

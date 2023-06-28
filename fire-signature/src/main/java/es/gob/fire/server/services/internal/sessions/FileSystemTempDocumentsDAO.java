@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,6 +34,20 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
         try {
             final String tmpDir = ConfigManager.getTempDir();
             final File f = tmpDir != null && tmpDir.trim().length() > 0 ? new File(tmpDir.trim()) : null;
+
+            // Si no existe el directorio configurado, tratamos de crearlo
+            if (f != null && !f.exists()) {
+    			// Creamos el directorio con permisos para despues poder crear subdirectorios desde la propia aplicacion
+    			try {
+    				final Set<PosixFilePermission> ownerWritable = PosixFilePermissions.fromString("rwxrwxrwx"); //$NON-NLS-1$
+    				final FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(ownerWritable);
+    				Files.createDirectories(f.toPath(), permissions);
+    			}
+    			catch (final Exception e) {
+    				f.mkdirs();
+    			}
+            }
+
             if (f == null || !f.isDirectory()) {
                 LOGGER.severe(
                 		"El directorio temporal configurado (" + //$NON-NLS-1$

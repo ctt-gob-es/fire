@@ -18,7 +18,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,7 +62,15 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 		this.dir = new File(ConfigManager.getTempDir(), SESSIONS_TEMP_DIR);
 
 		if (!this.dir.exists()) {
-			this.dir.mkdirs();
+			// Creamos el directorio con permisos para despues poder crear subdirectorios desde la propia aplicacion
+			try {
+				final Set<PosixFilePermission> ownerWritable = PosixFilePermissions.fromString("rwxrwxrwx"); //$NON-NLS-1$
+				final FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(ownerWritable);
+				Files.createDirectories(this.dir.toPath(), permissions);
+			}
+			catch (final Exception e) {
+				this.dir.mkdirs();
+			}
 		}
 		this.documentsDAO = new FileSystemTempDocumentsDAO();
 	}

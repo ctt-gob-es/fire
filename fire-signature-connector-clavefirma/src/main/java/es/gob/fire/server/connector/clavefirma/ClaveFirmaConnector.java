@@ -13,7 +13,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -471,14 +470,14 @@ public final class ClaveFirmaConnector extends FIReConnector {
 	 * @throws FIReCertificateException Cuando no se puede comprobar el motivo por el que el usuario
 	 * no puede recuperar sus certificados.
 	 */
-	private static boolean isUserWeakRegistry(final GateWayAPI gatewayApi, final String ownerId)
+	private boolean isUserWeakRegistry(final GateWayAPI gatewayApi, final String ownerId)
 			throws FIReCertificateException {
 
 		// Construimos una peticion al servicio con unas URL falsas que nunca tendran efecto,
 		// ya que nunca redirigiremos a ellas
 		final StartOperationInfo opInfo = new StartOperationInfo();
-		opInfo.setRedirectError(FAKE_URL);
-		opInfo.setRedirectOK(FAKE_URL);
+		opInfo.setRedirectError(this.redirectErrorUrl != null ? this.redirectErrorUrl : FAKE_URL);
+		opInfo.setRedirectOK(this.redirectOkUrl != null ? this.redirectOkUrl : FAKE_URL);
 		opInfo.setOperationName(StartOpTransactionCtes.ISSUE_CERTIFICATE);
 
 		final ParameterAux param = new ParameterAux();

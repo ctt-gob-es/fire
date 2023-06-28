@@ -152,6 +152,9 @@ public class FireClient {
 
     private static final String HTTP_ERROR_PREFIX = "Error HTTP "; //$NON-NLS-1$
 
+    private static final int ERROR_CODE_FORBIDEN = 501;
+    private static final int ERROR_CODE_UNKNOWN = 25;
+
 	/** Codificaci&oacute;n de caracters por defecto. */
 	public static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
 
@@ -414,8 +417,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de firma"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
         try {
@@ -534,8 +536,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de estado de firma"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
         TransactionResult result;
@@ -568,8 +569,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de firma"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
         result.setResult(signatureResponse.getContent());
@@ -649,8 +649,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion del estado de firma asincrona"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
         TransactionResult result;
@@ -683,8 +682,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido del servicio"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
         result.setResult(signatureResponse.getContent());
@@ -766,8 +764,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de creacion de lote"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
         try {
@@ -842,8 +839,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido del servicio de anadir documento a un lote"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
     }
 
@@ -929,8 +925,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de anadir documento a un lote con configuracion"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
     }
 
@@ -980,8 +975,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de firma de lote"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
         try {
@@ -1037,8 +1031,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de resultado de lote"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
     	try {
@@ -1094,8 +1087,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de estado de lote"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
     	try {
@@ -1155,8 +1147,7 @@ public class FireClient {
         }
 
         if (!response.isOk()) {
-        	throwFireException(response);
-        	throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de firma de lote"); //$NON-NLS-1$
+        	throw identifyException(response);
         }
 
         try {
@@ -1210,8 +1201,7 @@ public class FireClient {
     	}
 
     	if (!response.isOk()) {
-    		throwFireException(response);
-    		throw new HttpOperationException("Se recibio un error desconocido de la peticion de recuperacion de error"); //$NON-NLS-1$
+    		throw identifyException(response);
     	}
 
     	TransactionResult result;
@@ -1226,57 +1216,56 @@ public class FireClient {
     }
 
     /**
-     * Interpreta y lanza la excepci&oacute;n que corresponde a un error concreto.
+     * Interpreta un error devuelto por el servicio de FIRe.
      * @param errorResponse Respuesta de error.
-     * @throws HttpOperationException Excepci&oacute;n correspondiente al error recibido.
+     * @return Excepci&oacute;n correspondiente al error recibido.
      */
-    private static void throwFireException(final HttpResponse errorResponse) throws HttpOperationException {
+    private static HttpOperationException identifyException(final HttpResponse errorResponse) {
 
     	// Procesamos los errores devueltos por el propio FIRe, siempre estructurados en JSON
     	if (MIMETYPE_JSON.equals(errorResponse.getMimeType())) {
     		final ErrorResult errorResult = ErrorResult.parse(errorResponse.getContent());
     		if (FIReErrors.FORBIDDEN == errorResult.getCode()
     				|| FIReErrors.UNAUTHORIZED == errorResult.getCode()) {
-    			throw new HttpForbiddenException(errorResult.getCode(), errorResult.getMessage());
+    			return new HttpForbiddenException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else if (FIReErrors.UNKNOWN_USER == errorResult.getCode()) {
-    			throw new HttpNoUserException(errorResult.getCode(), errorResult.getMessage());
+    			return new HttpNoUserException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else if (FIReErrors.INVALID_TRANSACTION == errorResult.getCode()) {
-    			throw new InvalidTransactionException(errorResult.getCode(), errorResult.getMessage());
+    			return new InvalidTransactionException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else if (FIReErrors.CERTIFICATE_BLOCKED == errorResult.getCode()) {
-    			throw new HttpCertificateBlockedException(errorResult.getCode(), errorResult.getMessage());
+    			return new HttpCertificateBlockedException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else if (FIReErrors.CERTIFICATE_WEAK_REGISTRY == errorResult.getCode()) {
-    			throw new HttpWeakRegistryException(errorResult.getCode(), errorResult.getMessage());
+    			return new HttpWeakRegistryException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else if (FIReErrors.BATCH_DUPLICATE_DOCUMENT == errorResult.getCode()) {
-    			throw new DuplicateDocumentException(errorResult.getCode(), errorResult.getMessage());
+    			return new DuplicateDocumentException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else if (FIReErrors.BATCH_INVALID_DOCUMENT == errorResult.getCode()) {
-    			throw new InvalidBatchDocumentException(errorResult.getCode(), errorResult.getMessage());
+    			return new InvalidBatchDocumentException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else if (FIReErrors.BATCH_NUM_DOCUMENTS_EXCEEDED == errorResult.getCode()) {
-    			throw new NumDocumentsExceededException(errorResult.getCode(), errorResult.getMessage());
+    			return new NumDocumentsExceededException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else if (FIReErrors.BATCH_NO_SIGNED == errorResult.getCode()) {
-    			throw new BatchNoSignedException(errorResult.getCode(), errorResult.getMessage());
+    			return new BatchNoSignedException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else {
-    			throw new HttpOperationException(errorResult.getCode(), errorResult.getMessage());
+    			return new HttpOperationException(errorResult.getCode(), errorResult.getMessage());
     		}
     	}
 
     	// Procesamos los errores devueltos por el servidor, probablemente por un error interno o de
     	// comunicacion
     	if (errorResponse.getStatus() == HttpURLConnection.HTTP_FORBIDDEN) {
-    		throw new HttpForbiddenException(HTTP_ERROR_PREFIX + errorResponse.getStatus());
+    		return new HttpForbiddenException(ERROR_CODE_FORBIDEN, HTTP_ERROR_PREFIX + errorResponse.getStatus());
     	} else if (errorResponse.getStatus() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
-    		throw new HttpNetworkException(HTTP_ERROR_PREFIX + errorResponse.getStatus());
-    	} else {
-    		throw new HttpOperationException(HTTP_ERROR_PREFIX + errorResponse.getStatus());
+    		return new HttpNetworkException(ERROR_CODE_UNKNOWN, HTTP_ERROR_PREFIX + errorResponse.getStatus());
     	}
+    	return new HttpOperationException(ERROR_CODE_UNKNOWN, "Error desconocido en la llamada a FIRe: " + HTTP_ERROR_PREFIX + errorResponse.getStatus()); //$NON-NLS-1$
     }
 
     /**
