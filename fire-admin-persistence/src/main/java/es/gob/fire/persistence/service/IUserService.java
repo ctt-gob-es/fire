@@ -63,6 +63,13 @@ public interface IUserService {
 	User getUserByUserNameOrEmail(String userName, String email);
 
 	/**
+	 * Method that obtains an user by its email.
+	 * @param email The user email.
+	 * @return {@link User}
+	 */
+	User getUserByEmail(String email);
+	
+	/**
 	 * Method that obtains an user by its user renovation code.
 	 * @param renovationCode The user renovation code.
 	 * @return {@link User}

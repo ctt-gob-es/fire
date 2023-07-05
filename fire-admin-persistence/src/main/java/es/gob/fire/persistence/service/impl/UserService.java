@@ -341,4 +341,13 @@ public class UserService implements IUserService {
 		return this.rolRepository.findByRolId(idRol);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IUserService#getUserByEmail(java.lang.String)
+	 */
+	@Override
+	public User getUserByEmail(String email) {
+		return repository.findByEmail(email);
+	}
+
 }
