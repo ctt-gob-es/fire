@@ -36,5 +36,12 @@ public interface UserRepository extends JpaRepository<User, Long>  {
 	 * @return {@link User}
 	 */
 	User findByRenovationCode(String renovationCode);
+	
+	/**
+	 * Method that obtains from the persistence a user identified by its email.
+	 * @param email String that represents the user email.
+	 * @return Object that represents a user from the persistence.
+	 */
+	User findByEmail(String email);
 
 }

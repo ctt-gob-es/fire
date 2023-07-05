@@ -350,4 +350,13 @@ public class UserService implements IUserService {
 		return optional.isPresent();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IUserService#getUserByEmail(java.lang.String)
+	 */
+	@Override
+	public User getUserByEmail(String email) {
+		return repository.findByEmail(email);
+	}
+
 }
