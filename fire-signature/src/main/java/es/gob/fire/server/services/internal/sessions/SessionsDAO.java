@@ -24,10 +24,10 @@ public interface SessionsDAO {
 	/**
 	 * Guarda una sesi&oacute;n.
 	 * @param session Sesi&oacute;n a guardar.
-	 * @param created Indica si la sesi&oacute;n se est&aacute; creando ({@code true})
+	 * @param firstSave Indica si la sesi&oacute;n se est&aacute; creando ({@code true})
 	 * o si ya lo estaba ({@code false}).
 	 */
-	void saveSession(FireSession session, boolean created);
+	void saveSession(FireSession session, boolean firstSave);
 
 	/**
 	 * Comprueba la existencia de una sesi&oacute;n.

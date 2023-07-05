@@ -185,7 +185,7 @@ public class CreateBatchManager {
 
         session.setAttribute(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER, docManager);
 
-        SessionCollector.commit(session);
+        SessionCollector.commit(session, true);
 
 		LOGGER.info(logF.f("Se devuelve el identificador de sesion a la aplicacion")); //$NON-NLS-1$
 

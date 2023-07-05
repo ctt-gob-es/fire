@@ -68,7 +68,7 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 	}
 
 	@Override
-	public void saveSession(final FireSession session, final boolean created) {
+	public void saveSession(final FireSession session, final boolean firstSave) {
 
 		byte[] serializedSession;
 		try (final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -84,7 +84,7 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 		final String sessionId = session.getTransactionId();
 
 		// Creamos o actualizamos la sesion segun se indique
-		if (created) {
+		if (firstSave) {
 			try (Connection conn = DbManager.getConnection(true);
 					PreparedStatement st = conn.prepareStatement(DB_STATEMENT_INSERT_SESSION)) {
 				st.setString(1, sessionId);

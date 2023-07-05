@@ -267,7 +267,7 @@ public class SignOperationManager {
 		}
 
         // Guardamos los datos de la transaccion en la sesion del servidor y en la coleccion de sesiones
-        SessionCollector.commit(session);
+        SessionCollector.commit(session, true);
         session.saveIntoHttpSession(request.getSession());
 
 

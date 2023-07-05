@@ -123,7 +123,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	}
 
 	@Override
-	public void saveSession(final FireSession session, final boolean created) {
+	public void saveSession(final FireSession session, final boolean firstSave) {
 		try (final FileOutputStream fos = new FileOutputStream(new File(this.dir, session.getTransactionId()));) {
 			try (ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 				oos.writeObject(session.getAttributtes());

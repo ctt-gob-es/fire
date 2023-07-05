@@ -561,9 +561,20 @@ public final class SessionCollector {
 
 	/**
 	 * Guarda los datos de una transacci&oacute;n para permitir su futura recuperaci&oacute;n.
+	 * Si es la primera vez que se guarda la sesi&oacute;n, se deber&iacute;a usar el m&eacute;todo
+	 * {@link #commit(FireSession, boolean)}.
 	 * @param session Datos de la transacci&oacute;n a almacenar.
 	 */
 	public static void commit(final FireSession session) {
+		commit(session, false);
+	}
+
+	/**
+	 * Guarda los datos de una transacci&oacute;n para permitir su futura recuperaci&oacute;n.
+	 * @param session Datos de la transacci&oacute;n a almacenar.
+	 * @param creation Indica si la sesi&oacute;n se est&aacute; guardado por primera vez.
+	 */
+	public static void commit(final FireSession session, final boolean creation) {
 
 		// Cada vez que se actualiza la sesion, se actualiza su fecha de caducidad.
 		// Consideramos que una sesion sobre la que unicamente se hacen consultas, no
@@ -576,7 +587,7 @@ public final class SessionCollector {
 
 		// Actualizamos, si procede, la informacion de la sesion de la memoria compartida
 		if (dao != null) {
-			dao.saveSession(session, false);
+			dao.saveSession(session, creation);
 		}
 
 		// Si hemos llegado al limite establecido de peticiones entre las cuales limpiar,
