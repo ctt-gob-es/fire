@@ -27,10 +27,8 @@ package es.gob.fire.persistence.service.impl;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -45,12 +43,13 @@ import org.springframework.util.StringUtils;
 
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
-import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.permissions.Permissions;
+import es.gob.fire.persistence.permissions.PermissionsChecker;
 import es.gob.fire.persistence.repository.RolRepository;
 import es.gob.fire.persistence.repository.UserRepository;
 import es.gob.fire.persistence.repository.datatable.UserDataTablesRepository;
@@ -186,8 +185,7 @@ public class UserService implements IUserService {
 
 		// Eliminamos la contrasena, si el rol del usuario no tiene permisos de acceso
 		// Se da por hecho, que el permiso de acceso siempre se representara con un valor concreto
-		if (StringUtils.isEmpty(user.getRol().getPermissions())
-				|| !Arrays.asList(user.getRol().getPermissions().split(",")).contains(ROLE_ADMIN_PERMISSON)) { //$NON-NLS-1$
+		if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
 			user.setPassword(null);
 		}
 		// Actualizaremos la contrasena si se establece y si el usuario
@@ -336,18 +334,11 @@ public class UserService implements IUserService {
 	}
 
 	/* (non-Javadoc)
-	 * @see es.gob.fire.persistence.service.IUserService#isAdminRol(java.lang.Long)
+	 * @see es.gob.fire.persistence.service.IUserService#getRol(java.lang.Long)
 	 */
 	@Override
-	public boolean isAdminRol(final Long idRol) {
-
-		// Preguntar si permisos de administrador
-		final Rol rol = this.rolRepository.findByRolId(idRol);
-		final String[] permissions = rol.getPermissions()==null?new String[]{}:rol.getPermissions().split(UtilsStringChar.SYMBOL_COMMA_STRING);
-		final Optional<String> optional = Arrays.stream(permissions).filter(x -> ROLE_ADMIN_PERMISSON.equals(x))
-							.findFirst();
-
-		return optional.isPresent();
+	public Rol getRol(final Long idRol) {
+		return this.rolRepository.findByRolId(idRol);
 	}
 
 }

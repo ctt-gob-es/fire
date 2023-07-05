@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.service.IUserService.java.</p>
  * <b>Description:</b><p> .</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
@@ -34,7 +34,7 @@ import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
 
-/** 
+/**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * @version 1.0, 15/06/2018.
@@ -46,14 +46,14 @@ public interface IUserService {
 	 * @return {@link User}
 	 */
 	User getUserByUserId(Long userId);
-	
+
 	/**
 	 * Method that obtains an user by its user name.
 	 * @param userName The user login.
 	 * @return {@link User}
 	 */
 	User getUserByUserName(String userName);
-	
+
 	/**
 	 * Method that obtains an user by its user name or email.
 	 * @param userName The user login.
@@ -61,66 +61,66 @@ public interface IUserService {
 	 * @return {@link User}
 	 */
 	User getUserByUserNameOrEmail(String userName, String email);
-	
+
 	/**
 	 * Method that obtains an user by its user renovation code.
 	 * @param renovationCode The user renovation code.
 	 * @return {@link User}
 	 */
 	User getUserByRenovationCode(String renovationCode);
-	
+
 	/**
 	 * Method that stores a user in the persistence.
 	 * @param user a {@link User} with the information of the user.
 	 * @return {@link User} The user.
 	 */
 	User saveUser(User user);
-	
+
 	/** Method that stores a user in the persistence from User DTO object.
 	 * @param userDto a {@link UserDTO} with the information of the user.
 	 * @return {@link User} The user.
 	 */
 	User saveUser(UserDTO userDto);
-	
+
 	/**
 	 * Method that updates a user in the persistence.
 	 * @param userEditDto a {@link UserEditDTO} with the information of the user.
 	 * @return {@link User} The user.
 	 */
 	User updateUser(UserEditDTO userEditDto);
-			
+
 	/**
 	 * Method that deletes a user in the persistence.
 	 * @param userId {@link Integer} that represents the user identifier to delete.
 	 */
 	void deleteUser(Long userId);
-	
+
 	/**
 	 * Method that gets all the users from the persistence.
 	 * @return a {@link Iterable<User>} with the information of all users.
 	 */
 	Iterable<User> getAllUser();
-	
+
 	/**
 	 * Method that gets all the user roles from the persistence.
 	 * @return a {@link Iterable<Rol>} with the information of all roles.
 	 */
-	List<Rol> getAllRol();	
-		
+	List<Rol> getAllRol();
+
 	/**
-	 * Method that checks if the Rol identified by idRol is Adminstrador
+	 * Method that gets the Rol identified by idRol.
 	 * @param idRol Long that represents the Rol identifier.
-	 * @return true if the Rol is Administrador
+	 * @return Rol entity.
 	 */
-	boolean isAdminRol(Long idRol);
-		
+	Rol getRol(Long idRol);
+
 	/**
 	 * Method that gets the list for the given {@link DataTablesInput}.
 	 * @param input the {@link DataTablesInput} mapped from the Ajax request.
 	 * @return {@link DataTablesOutput}
 	 */
 	DataTablesOutput<User> getAllUser(DataTablesInput input);
-	
+
 	/**
 	 * Method that change the password of a user.
 	 * @param userPasswordDto a {@link UserPasswordDTO} with the information of the user.
@@ -130,5 +130,5 @@ public interface IUserService {
 	 *     -2: Error updating the user with new password
 	 */
 	String changeUserPassword(UserPasswordDTO userPasswordDto);
-	
+
 }

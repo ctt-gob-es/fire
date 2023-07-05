@@ -32,7 +32,6 @@ import java.util.stream.StreamSupport;
 import javax.servlet.ServletContext;
 import javax.validation.constraints.NotEmpty;
 
-import es.gob.fire.commons.log.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -50,6 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IWebLogMessages;
@@ -59,7 +59,10 @@ import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.dto.validation.OrderedValidation;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
+import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.permissions.Permissions;
+import es.gob.fire.persistence.permissions.PermissionsChecker;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.IUserService;
 
@@ -175,7 +178,7 @@ public class UserRestController {
 		List<User> listNewUser = new ArrayList<>();
 		final JSONObject json = new JSONObject();
 
-		boolean adminRol;
+
 		boolean error = false;
 
 		if (bindingResult.hasErrors()) {
@@ -187,13 +190,17 @@ public class UserRestController {
 
 		}
 
-		if ((adminRol = this.userService.isAdminRol(userForm.getRolId())) && emptyAdminPassword(userForm.getPasswordAdd())) {
+		final Rol rol = this.userService.getRol(userForm.getRolId());
+		final boolean hasAccessPermission = PermissionsChecker.hasPermission(rol, Permissions.ACCESS);
+
+		// Si el usuario debe tener acceso a la administracion, entonces es obligatorio que tenga contrasena
+		if (hasAccessPermission && emptyAdminPassword(userForm.getPasswordAdd())) {
 			error = true;
 			json.put("passwordAdd" + SPAN, "El campo contrase\u00F1a es obligatorio.");
 
 		}
 
-		if (adminRol && !matchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
+		if (hasAccessPermission && !matchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
 			error = true;
 			json.put("passwordAdd" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
 			json.put("confirmPasswordAdd" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
@@ -245,15 +252,15 @@ public class UserRestController {
 	}
 
 	/**
-	 * Method that checks if the identifier 'id' belongs to an user with admin role
-	 * @param id Long that represents the user id
+	 * Method that checks if a user had the access permission.
+	 * @param userId User id.
 	 * @return
 	 */
-	private boolean wasAdminBeforeEdit(final Long id) {
+	private boolean hadAccessBeforeEdit(final Long userId) {
 
-		final User user = this.userService.getUserByUserId(id);
+		final User user = this.userService.getUserByUserId(userId);
 
-		return this.userService.isAdminRol(user.getRol().getRolId());
+		return PermissionsChecker.hasPermission(user, Permissions.ACCESS);
 	}
 
 	/**
@@ -279,7 +286,10 @@ public class UserRestController {
 
 		// Si se esta estableciendo el rol administrador a un usuario distinto al original,
 		// comprobamos que se hayan establecido correctamente las contrasenas
-		if (this.userService.isAdminRol(userForm.getRolId()) && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !wasAdminBeforeEdit(userForm.getIdUserFireEdit())) {
+		final Rol rol = this.userService.getRol(userForm.getRolId());
+		final boolean hasAccessPermission = PermissionsChecker.hasPermission(rol, Permissions.ACCESS);
+
+		if (hasAccessPermission && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !hadAccessBeforeEdit(userForm.getIdUserFireEdit())) {
 			if (emptyAdminPassword(userForm.getPasswordEdit())) {
 				error = true;
 				json.put("passwordEdit" + SPAN, "El campo contrase\u00F1a es obligatorio.");

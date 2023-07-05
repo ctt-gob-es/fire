@@ -39,7 +39,6 @@ import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -48,8 +47,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.permissions.Permissions;
+import es.gob.fire.persistence.permissions.PermissionsChecker;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.web.authentication.CustomUserAuthentication;
 import es.gob.fire.web.mail.MailSenderService;
@@ -115,16 +117,15 @@ public class MailPasswordRestorationController {
 	 * @throws AddressException
 	 */
 	@RequestMapping(value = "mailpasswordrestoration", method = RequestMethod.POST)
-	public String mialRestorePassword(@RequestParam("userNameOrEmail") final String userNameOrEmail,
+	public String mailRestorePassword(@RequestParam("userNameOrEmail") final String userNameOrEmail,
 			final HttpServletRequest request, final Model model) throws Exception {
 		String result = "login.html";
 		try {
 			final User user = this.userService.getUserByUserNameOrEmail(userNameOrEmail, userNameOrEmail);
-			if (user != null /* && user.getEmail() != null */ /*
-																 * user tiene
-																 * permiso de
-																 * adminitrador
-																 */) {
+
+			// Comprobamos que el usuario exista, que tenga un correo y que tenga asignada una contrasena
+			// que debamos restablecer (propio de los usuarios con acceso a la herramienta)
+			if (user != null && user.getEmail() != null && PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
 				// Generamos el codigo de restauracion
 				final String id = new String();
 				final String renovationCode = buildRestorationCode(id);
@@ -145,10 +146,16 @@ public class MailPasswordRestorationController {
                 model.addAttribute("mailsuccess", Boolean.TRUE);
                 model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
 
+                // Por seguridad, no podemos revelar que usuarios existen o cuales tienen permisos de acceso
+                // asi que fingiremos enviar el correo incluso cuando no se corresponda. En estos casos, para
+                // detectar si hay problema real con el envio nos tendriamos que enviar un correo aunque sea
+                // a una direccion que no lo reciba, como a nuestra propia direccion.
+                //TODO: Mejorar esto para que que no haya diferencia de tiempos con el envio a un usuario real
 			} else {
-				model.addAttribute("mailerror", Boolean.TRUE);
-				model.addAttribute("mailErrorMessage", "El usuario indicado no se encuentra registrado en el sistema");
-				result = "mailpasswordrestoration.html";
+				// Enviamos el email
+                this.mailSenderService.checkSendEmail();
+                model.addAttribute("mailsuccess", Boolean.TRUE);
+                model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
 			}
 		} catch (IOException | MessagingException e) {
 			LOGGER.error("No ha sido posible enviar el correo", e);

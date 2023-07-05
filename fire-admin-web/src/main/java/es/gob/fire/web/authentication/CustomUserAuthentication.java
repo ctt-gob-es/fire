@@ -51,6 +51,8 @@ import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.permissions.Permissions;
+import es.gob.fire.persistence.permissions.PermissionsChecker;
 import es.gob.fire.persistence.service.IUserService;
 
 /**
@@ -111,7 +113,7 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 
 		if (user != null) {
 
-			if (!this.userService.isAdminRol(user.getRol().getRolId())) {
+			if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
 				throw new InsufficientAuthenticationException("El usuario " + UtilsStringChar.removeBlanksFromString(userName)
 						+ " no tiene permisos de acceso");
 			}

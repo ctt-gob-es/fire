@@ -41,6 +41,9 @@ import es.gob.fire.persistence.entity.User;
 @Component
 public class MailSenderService {
 
+
+	private static final Logger LOGGER = Logger.getLogger(MailSenderService.class);
+
 	/**
 	 * Attribute that represents the default expired time.
 	 */
@@ -155,9 +158,6 @@ public class MailSenderService {
 			properties.put(Constants.MAIL_SMTP_STARTTLS_REQUIRED, this.mailSmtpStarttlsRequired);
 		}
 
-		final Logger LOGGER = Logger.getLogger("es.gob.fire");
-		LOGGER.info("this.mailSmtpSslProtocols = " + this.mailSmtpSslProtocols);
-
 		if (!this.mailSmtpSslProtocols.isEmpty()) {
 			properties.put(Constants.MAIL_SMTP_SSL_PROTOCOLS, this.mailSmtpSslProtocols);
 		}
@@ -191,28 +191,73 @@ public class MailSenderService {
 	public void sendEmail(final User user, final String url) throws FileNotFoundException, IOException, AddressException, MessagingException {
 			init();
 
-			final MimeMessage message = new MimeMessage(sessionMail);
-			// String cuerpoMensaje = "";
-
-			// Establecemos los destinatarios
-			message.setFrom(new InternetAddress((String) properties.get(Constants.MAIL_SMTP_MAIL_SENDER)));
 			// Insertamos todos los destinatarios configurados en el properties
-			final String[ ] listaDestinatarios = user.getEmail().split(UtilsStringChar.SYMBOL_COMMA_STRING);
-			for (int i = 0; i < listaDestinatarios.length; i++) {
-				message.addRecipient(Message.RecipientType.TO, new InternetAddress(listaDestinatarios[i]));
+			final String email = user.getEmail();
+			if (email == null || email.trim().isEmpty()) {
+				LOGGER.warn("Se ha pedido reestablecer la contrasena de un usuario que no tiene correo electronico asociado"); //$NON-NLS-1$
+				return;
 			}
+			final String[ ] listaDestinatarios = email.split(UtilsStringChar.SYMBOL_COMMA_STRING);
+
 
 			// Creamos el cuerpo del correo
-			final BodyPart bodyPart = new MimeBodyPart();
-			final String bodyBase = Constants.MAIL_TEXT + "<br><br>" + Constants.MAIL_FOOTER;
-
-			// Insertamos los datos del usuario
+			final String bodyBase = Constants.MAIL_TEXT + "<br><br>" + Constants.MAIL_FOOTER; //$NON-NLS-1$
 			final String body = bodyBase
 					.replace("%%NAME%%", user.getName()) //$NON-NLS-1$
 					.replace("%%USERNAME%%", user.getUserName()) //$NON-NLS-1$
 					.replace("%%MAIL%%", user.getEmail()) //$NON-NLS-1$
 					.replace("%%URL%%", url); //$NON-NLS-1$
 
+
+			sendEmail(listaDestinatarios, body);
+	}
+
+	/**
+	 * Method that sends a email to itself to check the mail is working.
+	 * @throws FileNotFoundException file not found
+	 * @throws IOException error load file
+	 * @throws MessagingException
+	 * @throws AddressException
+	 */
+	public void checkSendEmail() throws FileNotFoundException, IOException, AddressException, MessagingException {
+			init();
+
+			// Establezco la propia direccion de envio como la de destino
+			final String[ ] listaDestinatarios = new String[]
+					{
+							(String) properties.get(Constants.MAIL_SMTP_MAIL_SENDER)
+					};
+
+			// Establecemos como mensaje el basico sin personalizar
+			final String body = Constants.MAIL_TEXT + "<br><br>" + Constants.MAIL_FOOTER; //$NON-NLS-1$
+
+			// Realizamos el envio
+			sendEmail(listaDestinatarios, body);
+	}
+
+	/**
+	 * Method that sends a email to restore the user password.
+	 * @param user to send the email
+	 * @param URL to restore the user password
+	 * @throws FileNotFoundException file not found
+	 * @throws IOException error load file
+	 * @throws MessagingException
+	 * @throws AddressException
+	 */
+	private void sendEmail(final String[] listaDestinatarios, final String body) throws FileNotFoundException, IOException, AddressException, MessagingException {
+
+			final MimeMessage message = new MimeMessage(sessionMail);
+
+			// Indicamos el emisor
+			message.setFrom(new InternetAddress((String) properties.get(Constants.MAIL_SMTP_MAIL_SENDER)));
+
+			// Establecemos los destinatarios
+			for (int i = 0; i < listaDestinatarios.length; i++) {
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(listaDestinatarios[i]));
+			}
+
+			// Creamos el cuerpo del correo
+			final BodyPart bodyPart = new MimeBodyPart();
 			bodyPart.setContent(body, Constants.MAIL_TEXT_HTML_CHARSET);
 
 
@@ -220,7 +265,7 @@ public class MailSenderService {
 			final MimeMultipart multiPart = new MimeMultipart();
 			multiPart.addBodyPart(bodyPart);
 
-			// Añadimos los datos al mensaje
+			// Anadimos los datos al mensaje
 			// Establecemos el Asunto del correo
 			message.setSubject(Constants.MAIL_SUBJECT);
 			message.setFrom(new InternetAddress(this.mailSmtpMailSender, this.mailFromName));
