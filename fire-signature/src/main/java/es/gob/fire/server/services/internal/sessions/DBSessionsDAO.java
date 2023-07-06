@@ -90,7 +90,9 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 				st.setString(1, sessionId);
 				st.setBlob(2, new ByteArrayInputStream(serializedSession));
 				st.setLong(3, new Date().getTime());
-				st.executeUpdate();
+				if (st.executeUpdate() < 1) {
+					LOGGER.log(Level.WARNING, "No se pudo insertar en base de datos la sesion con ID: " + sessionId); //$NON-NLS-1$
+				}
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.WARNING, "Error al crear la sesion con ID: " + sessionId, e); //$NON-NLS-1$
@@ -102,7 +104,9 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 				st.setBlob(1, new ByteArrayInputStream(serializedSession));
 				st.setLong(2, new Date().getTime());
 				st.setString(3, sessionId);
-				st.executeUpdate();
+				if (st.executeUpdate() < 1) {
+					LOGGER.log(Level.WARNING, "No se pudo actualizar en base de datos la sesion con ID: " + sessionId); //$NON-NLS-1$
+				}
 			}
 			catch (final Exception e) {
 				LOGGER.log(Level.WARNING, "Error al actualizar la sesion con ID: " + sessionId, e); //$NON-NLS-1$
@@ -114,38 +118,38 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 	public FireSession recoverSession(final String id, final HttpSession session) {
 
 		// Cargamos los datos de sesion
-		InputStream sessionIs = null;
+		FireSession fireSession = null;
 		long lastModification = 0;
 		try (Connection conn = DbManager.getConnection();
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_RECOVER_SESSION)) {
 			st.setString(1, id);
 			try (final ResultSet dbResult = st.executeQuery()) {
+				InputStream sessionIs = null;
 				if (dbResult.next()) {
 					sessionIs = dbResult.getBlob(1).getBinaryStream();
 					lastModification = dbResult.getLong(2);
 				}
+				if (sessionIs != null) {
+					try (ObjectInputStream ois = new ObjectInputStream(sessionIs)) {
+						final Map<String, Object> sessionData = (Map<String, Object>) ois.readObject();
+						fireSession = FireSession.newSession(
+								id, sessionData, lastModification + ConfigManager.getTempsTimeout());
+					}
+					catch (final Exception e) {
+						LOGGER.log(Level.WARNING, "Error al reconstruir los datos de la session con ID: " + id, e); //$NON-NLS-1$
+						fireSession = null;
+					}
+				}
 			}
+
+			if (fireSession == null) {
+				LOGGER.warning("No se encontro la sesion con ID: " + id); //$NON-NLS-1$
+			}
+
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error al recuperar la session con ID: " + id, e); //$NON-NLS-1$
-			sessionIs = null;
-		}
-
-		// Reconstruimos la sesion desde los datos cargados
-		FireSession fireSession = null;
-		if (sessionIs != null) {
-			try (ObjectInputStream ois = new ObjectInputStream(sessionIs)) {
-				final Map<String, Object> sessionData = (Map<String, Object>) ois.readObject();
-				fireSession = FireSession.newSession(
-						id, sessionData, lastModification + ConfigManager.getTempsTimeout());
-			}
-			catch (final Exception e) {
-				LOGGER.log(Level.WARNING, "Error al reconstruir los datos de la session con ID: " + id, e); //$NON-NLS-1$
-				fireSession = null;
-			}
-		}
-		else {
-			LOGGER.warning("No se encontro la sesion con ID: " + id); //$NON-NLS-1$
+			fireSession = null;
 		}
 
 		return fireSession;

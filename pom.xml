@@ -105,7 +105,7 @@
 		</profile>
 
 		<profile>
-			<id>clavefirma</id>	<!-- Perfil que agrega el conector de Cl@ve Firma -->
+			<id>clavefirma</id>	<!-- Perfil que general el conector de Cl@ve Firma -->
 			
 			<modules>
 				<module>fire-signature-connector-clavefirma</module>
@@ -113,7 +113,7 @@
 		</profile>
 		
 		<profile>
-			<id>eventmanager</id>	<!-- Perfil que agrega el conector de Cl@ve Firma -->
+			<id>eventmanager</id>	<!-- Perfil que genera el conector para el envío de notificaciones a Monitoriz@ -->
 			
 			<modules>
 				<module>fire-alarms-eventmanager</module>

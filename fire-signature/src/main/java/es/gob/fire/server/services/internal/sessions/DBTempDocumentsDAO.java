@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.fire.signature.DbManager;
@@ -51,7 +52,7 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	@Override
 	public String storeDocument(final String id, final byte[] data, final boolean newDocument) throws IOException {
 
-		// Insertamos o actualizamos los datos
+		// Insertamos o actualizamos los datos segun corresponda
 		String docId = id;
 		if (newDocument || docId == null) {
 			// Si no se nos ha pasado un identificador de documento, generamos uno que no exista
@@ -66,10 +67,12 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 				st.setString(1, docId);
 				st.setBlob(2, new ByteArrayInputStream(data));
 				st.setLong(3, new Date().getTime());
-				st.executeUpdate();
+				if (st.executeUpdate() < 1) {
+					LOGGER.log(Level.WARNING, "No se pudo insertar en base de datos el documento temporal con ID: " + docId); //$NON-NLS-1$
+				}
 			}
 			catch (final Exception e) {
-				throw new IOException("Error al crear el documento con ID: " + docId, e); //$NON-NLS-1$
+				throw new IOException("Error al insertar en base de datos el documento con ID: " + docId, e); //$NON-NLS-1$
 			}
 		}
 		else {
@@ -78,10 +81,12 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 				st.setBlob(1, new ByteArrayInputStream(data));
 				st.setLong(2, new Date().getTime());
 				st.setString(3, docId);
-				st.executeUpdate();
+				if (st.executeUpdate() < 1) {
+					LOGGER.log(Level.WARNING, "No se pudo actualizar en base de datos el documento temporal con ID: " + docId); //$NON-NLS-1$
+				}
 			}
 			catch (final Exception e) {
-				throw new IOException("Error al actualizar el documento con ID: " + docId, e); //$NON-NLS-1$
+				throw new IOException("Error al actualizar en base de datos el documento con ID: " + docId, e); //$NON-NLS-1$
 			}
 		}
 		return docId;
@@ -90,13 +95,26 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	@Override
 	public byte[] retrieveDocument(final String id) throws IOException {
 
-		Blob dataBlob = null;
+		byte[] data = null;
 		try (Connection conn = DbManager.getConnection();
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_RECOVER_DOCUMENT)) {
 			st.setString(1, id);
+			Blob dataBlob = null;
 			try (final ResultSet dbResult = st.executeQuery()) {
 				if (dbResult.next()) {
 					dataBlob = dbResult.getBlob(1);
+				}
+				// Cargamos los datos en memoria
+				if (dataBlob != null) {
+					try (InputStream dataIs = dataBlob.getBinaryStream()) {
+						data = readInputStream(dataIs);
+					}
+					catch (final Exception e) {
+						throw new IOException("Error al cargar el documento con ID: " + id, e); //$NON-NLS-1$
+					}
+				}
+				else {
+					throw new IOException("No se encontro el documento con ID: " + id); //$NON-NLS-1$
 				}
 			}
 		}
@@ -104,19 +122,6 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 			throw new IOException("Error al recuperar el documento con ID: " + id, e); //$NON-NLS-1$
 		}
 
-		// Cargamos los datos en memoria
-		byte[] data = null;
-		if (dataBlob != null) {
-			try (InputStream dataIs = dataBlob.getBinaryStream()) {
-				data = readInputStream(dataIs);
-			}
-			catch (final Exception e) {
-				throw new IOException("Error al cargar el documento con ID: " + id, e); //$NON-NLS-1$
-			}
-		}
-		else {
-			throw new IOException("No se encontro el documento con ID: " + id); //$NON-NLS-1$
-		}
 		return data;
 	}
 
