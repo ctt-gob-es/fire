@@ -58,7 +58,6 @@ public class ApplicationsDAO {
 		try (Connection conn = DbManager.getConnection();
 				PreparedStatement st = conn.prepareStatement(STATEMENT_SELECT_APP_NAME);) {
 
-
 			st.setString(1, appId);
 
 			if (!st.execute()) {
