@@ -63,12 +63,12 @@ final class SingleSignPreProcessor {
 		}
 		catch (final IOException e) {
 			LOGGER.log(Level.WARNING,
-					"No se ha podido recuperar el documento a firmar: " + LoggerUtil.getTrimStr(sSign.getDataRef()), e); //$NON-NLS-1$
+					"No se ha podido recuperar el documento con la referencia " + LoggerUtil.getTrimStr(sSign.getDataRef()), e); //$NON-NLS-1$
 			throw new IOException("No se ha podido recuperar el documento a firmar", e); //$NON-NLS-1$
 		}
 		catch (final SecurityException e) {
 			LOGGER.log(Level.WARNING,
-					"Se excedio el limite establecido de tamano de documento: " + sSign.getDataRef().length(), e); //$NON-NLS-1$
+					"El documento excedio el limite de tamano establecido: " + sSign.getDataRef().length(), e); //$NON-NLS-1$
 			throw new IOException("Se excedio el limite establecido de tamano de documento", e); //$NON-NLS-1$
 		}
 
@@ -138,7 +138,7 @@ final class SingleSignPreProcessor {
 		try {
 			FIReTriHelper.addVerificationCodes(td, certChain[0]);
 		} catch (final Exception e) {
-			throw new AOException("No se pudo agregar le codigo de verfificacion de firmas", e); //$NON-NLS-1$
+			throw new AOException("No se pudo agregar el codigo de verificacion de firmas", e); //$NON-NLS-1$
 		}
 
 		return td;

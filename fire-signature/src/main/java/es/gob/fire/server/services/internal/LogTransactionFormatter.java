@@ -9,6 +9,8 @@ public class LogTransactionFormatter {
 
 	private String transactionId;
 
+	private String logHeader;
+
 	public LogTransactionFormatter(final String appId) {
 		this(appId, null);
 	}
@@ -16,22 +18,62 @@ public class LogTransactionFormatter {
 	public LogTransactionFormatter(final String appId, final String transactionId) {
 		this.appId = appId;
 		this.transactionId = transactionId;
+
+		buildHeader();
 	}
 
+	/**
+	 * Construye la cabecera que deben mostrar las trazas de log.
+	 */
+	private void buildHeader() {
+		if (this.appId != null && this.transactionId != null) {
+			this.logHeader = String.format("App %1s, TrId %2s: ", this.appId, this.transactionId); //$NON-NLS-1$
+		}
+		else if (this.appId != null && this.transactionId == null) {
+			this.logHeader = String.format("App %1s: ", this.appId); //$NON-NLS-1$
+		}
+		else if (this.appId == null && this.transactionId != null) {
+			this.logHeader = String.format("TrId %1s: ", this.transactionId); //$NON-NLS-1$
+		}
+		else {
+			this.logHeader = null;
+		}
+	}
+
+	/**
+	 * Obtiene el identificador de aplicaci&oacute;n.
+	 * @return Identificador de aplicaci&oacute;n.
+	 */
 	public String getAppId() {
 		return this.appId;
 	}
 
+	/**
+	 * Establece el identificador de aplicaci&oacute;n.
+	 * @param appId Identificador de aplicaci&oacute;n.
+	 */
 	public void setAppId(final String appId) {
 		this.appId = appId;
+
+		buildHeader();
 	}
 
+	/**
+	 * Obtiene el identificador de transacci&oacute;n.
+	 * @return Identificador de transacci&oacute;n.
+	 */
 	public String getTransactionId() {
 		return this.transactionId;
 	}
 
+	/**
+	 * Establece el identificador de transacci&oacute;n.
+	 * @param transactionId Identificador de transacci&oacute;n.
+	 */
 	public void setTransactionId(final String transactionId) {
 		this.transactionId = transactionId;
+
+		buildHeader();
 	}
 
 	/**
@@ -41,16 +83,9 @@ public class LogTransactionFormatter {
 	 * @return Cadena con los prefijos.
 	 */
 	public String f(final String message) {
-		if (this.appId != null && this.transactionId != null) {
-			return String.format("App %1s, TrId %2s: %3s", this.appId, this.transactionId, message); //$NON-NLS-1$
-		}
-		else if (this.appId != null && this.transactionId == null) {
-			return String.format("App %1s: %2s", this.appId, message); //$NON-NLS-1$
-		}
-		else if (this.appId == null && this.transactionId != null) {
-			return String.format("TrId %1s: %2s", this.transactionId, message); //$NON-NLS-1$
-		}
-		return message;
+		return this.logHeader != null
+				? this.logHeader + message
+				: message;
 	}
 
 	/**
@@ -61,20 +96,20 @@ public class LogTransactionFormatter {
 	 * @return Cadena con los prefijos.
 	 */
 	public String f(final String message, final Object... subtexts) {
-		return f(subtexts != null && subtexts.length > 0 ?
-					String.format(message, subtexts) :
-					message);
+		return f(subtexts != null && subtexts.length > 0
+				? String.format(message, subtexts)
+				: message);
 	}
 
 	/**
-	 * Devuelve un mensaje con el prefijo que indica el identificador de la transacci&oacute;n
-	 * si se han configurado.
+	 * Devuelve un mensaje formateado usando el identificador indicado como identificador de
+	 * la transacci&oacute;n.
 	 * @param trId Identificador de transacci&oacute;n.
-	 * @param message Mensaje al que agregar el prefijo.
-	 * @return Cadena con el prefijo.
+	 * @param message Mensaje.
+	 * @return Mensaje formateado.
 	 */
-	public static String format(final String trId, final String message) {
-		return format(null, trId, message);
+	public String fTr(final String trId, final String message) {
+		return format(this.appId, trId, message);
 	}
 
 	/**

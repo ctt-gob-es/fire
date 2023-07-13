@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.AOUtil;
+import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.server.services.batch.ProcessResult.Result;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
@@ -355,12 +356,12 @@ public final class SingleSign {
 
 			PreProcessResult result;
 			try {
-				final TriphaseData presignature = SingleSignPreProcessor.doPreProcess(this.ss, this.certChain,
-					this.algorithm);
+				final TriphaseData presignature = SingleSignPreProcessor.doPreProcess(
+						this.ss, this.certChain, this.algorithm);
 				result = new PreProcessResult(presignature);
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.WARNING, "Error en la pretfirma del documento: " + this.ss.getId(), e); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, "Error en la prefirma del documento con referencia " + LoggerUtil.getTrimStr(this.ss.getDataRef()), e); //$NON-NLS-1$
 				final ProcessResult errorResult = new ProcessResult(Result.ERROR_PRE, e.getMessage());
 				errorResult.setId(this.ss.getId());
 				final ResultSingleSign singleResult = new ResultSingleSign(this.ss.getId(), false, errorResult);
@@ -397,7 +398,7 @@ public final class SingleSign {
 														this.algorithm, this.batchId);
 			}
 			catch(final Exception e) {
-				LOGGER.log(Level.WARNING, "Error en la postfirma del documento: " + this.ss.getId(), e); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, "Error en la postfirma del documento con referencia " + LoggerUtil.getTrimStr(this.ss.getDataRef()), e); //$NON-NLS-1$
 				final ProcessResult result = new ProcessResult(Result.ERROR_POST, e.getMessage());
 				return new ResultSingleSign(this.ss.getId(), false, result);
 			}

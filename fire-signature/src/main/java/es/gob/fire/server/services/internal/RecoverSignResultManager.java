@@ -34,18 +34,18 @@ public class RecoverSignResultManager {
 	/**
 	 * Obtiene el resultado del proceso de firma.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
-	public static void recoverSignature(final RequestParameters params, final HttpServletResponse response)
+	public static void recoverSignature(final RequestParameters params, final TransactionAuxParams trAux, final HttpServletResponse response)
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
-		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
@@ -57,7 +57,7 @@ public class RecoverSignResultManager {
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
-        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false, trAux);
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
@@ -67,7 +67,7 @@ public class RecoverSignResultManager {
         // Si la operacion anterior no fue una recuperacion de resultado de firma,
         // forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_RECOVER != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
 		}
 
         // Comprobamos que no se haya declarado ya un error
@@ -77,8 +77,8 @@ public class RecoverSignResultManager {
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma: " + errMessage)); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
-    		SessionCollector.removeSession(session);
-        	final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, Integer.parseInt(errType), errMessage);
+    		SessionCollector.removeSession(session, trAux);
+        	final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, Integer.parseInt(errType), errMessage, trAux);
         	Responser.sendError(response, FIReError.SIGNING, result);
         	return;
         }
@@ -90,10 +90,10 @@ public class RecoverSignResultManager {
         	signResult = TempDocumentsManager.retrieveDocument(transactionId);
         }
         catch (final Exception e) {
-        	LOGGER.warning(logF.f("No se encuentra el resultado de la operacion. Puede haber caducado la sesion: " + e)); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se encuentra el resultado de la operacion de firma. Puede haber caducado la sesion: " + e)); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
-    		SessionCollector.removeSession(session);
+    		SessionCollector.removeSession(session, trAux);
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
         }
@@ -103,7 +103,7 @@ public class RecoverSignResultManager {
         TRANSLOGGER.register(session, true);
 
         // Ya no necesitaremos la sesion, asi que la eliminamos del pool
-        SessionCollector.removeSession(session);
+        SessionCollector.removeSession(session, trAux);
 
         LOGGER.info(logF.f("Se devuelve el resultado de la operacion")); //$NON-NLS-1$
 

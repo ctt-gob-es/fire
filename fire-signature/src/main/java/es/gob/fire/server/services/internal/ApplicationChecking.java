@@ -1,4 +1,4 @@
-package es.gob.fire.signature;
+package es.gob.fire.server.services.internal;
 
 /**
  * Estado de una aplicaci&oacute;n.

@@ -39,11 +39,12 @@ public class CreateBatchManager {
 	 * @param request Petici&oacute;n para la creaci&oacute;n del lote.
 	 * @param appName Nombre de la aplicaci&oacute;n.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta de la creaci&oacute;n del lote.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
 	public static void createBatch(final HttpServletRequest request, final String appName,
-			final RequestParameters params, final HttpServletResponse response)
+			final RequestParameters params, final TransactionAuxParams trAux, final HttpServletResponse response)
 		throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
@@ -56,7 +57,7 @@ public class CreateBatchManager {
 		final String upgrade	= params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
 		final String extraParamsB64	= params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
 		if (subjectId == null || subjectId.isEmpty()) {
@@ -140,7 +141,7 @@ public class CreateBatchManager {
 		final Properties upgradeConfig = UpgraderUtils.extractUpdaterProperties(connConfig.getProperties());
 
         // Creamos la transaccion
-        final FireSession session = SessionCollector.createFireSession(subjectId);
+        final FireSession session = SessionCollector.createFireSession(subjectId, trAux);
         final String transactionId = session.getTransactionId();
 
         logF.setTransactionId(transactionId);
@@ -185,7 +186,7 @@ public class CreateBatchManager {
 
         session.setAttribute(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER, docManager);
 
-        SessionCollector.commit(session, true);
+        SessionCollector.commit(session, true, trAux);
 
 		LOGGER.info(logF.f("Se devuelve el identificador de sesion a la aplicacion")); //$NON-NLS-1$
 

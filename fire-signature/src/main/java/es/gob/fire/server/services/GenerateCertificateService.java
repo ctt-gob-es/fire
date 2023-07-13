@@ -9,6 +9,7 @@
  */
 package es.gob.fire.server.services;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.GenerateCertificateManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.ServiceParams;
+import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
@@ -111,8 +113,10 @@ public final class GenerateCertificateService extends HttpServlet {
     	updateParamNames(params);
 
     	final String appId = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
+    	final String transactionId	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, null);
+    	final TransactionAuxParams trAux = new TransactionAuxParams(appId, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
     	// Comprobacion de la aplicacion solicitante
         if (ConfigManager.isCheckApplicationNeeded()) {
@@ -127,7 +131,7 @@ public final class GenerateCertificateService extends HttpServlet {
             }
 
         	try {
-        		ServiceUtil.checkValidApplication(appId);
+        		ServiceUtil.checkValidApplication(appId, trAux);
 	        }
 	        catch (final DBConnectionException e) {
 	        	LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
@@ -147,9 +151,15 @@ public final class GenerateCertificateService extends HttpServlet {
 
     	if (ConfigManager.isCheckCertificateNeeded()) {
     		LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
-    		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
-	    	try {
-				ServiceUtil.checkValidCertificate(appId, certificates);
+    		try {
+    			final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
+				ServiceUtil.checkValidCertificate(appId, certificates, trAux);
+			}
+    		catch (final IOException e) {
+				LOGGER.log(Level.WARNING, logF.f("No se encontro el certificado cliente en la peticion entrante"), e); //$NON-NLS-1$
+				Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+						"No se encontro el certificado cliente en la peticion entrante"); //$NON-NLS-1$
+				return;
 			}
 	    	catch (final DBConnectionException e) {
 				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
@@ -177,7 +187,7 @@ public final class GenerateCertificateService extends HttpServlet {
 
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion
-    	generateCertificate(params, response);
+    	generateCertificate(params, response, trAux);
     }
 
     private static void updateParamNames(final RequestParameters params) {
@@ -192,15 +202,14 @@ public final class GenerateCertificateService extends HttpServlet {
 	 */
 	private static void generateCertificate(
 			final RequestParameters params,
-            final HttpServletResponse response) {
+            final HttpServletResponse response,
+            final TransactionAuxParams trAux) {
 
-		final String appId 			= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
-        final String transactionId	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
         final String subjectId      = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String providerName	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 		final String configB64      = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+		final LogTransactionFormatter logF =  trAux.getLogFormatter();
 
 		// Comprobamos del usuario
     	if (subjectId == null || subjectId.isEmpty()) {

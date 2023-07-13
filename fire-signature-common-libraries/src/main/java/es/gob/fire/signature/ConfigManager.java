@@ -625,7 +625,8 @@ public class ConfigManager {
 			try {
 				loadConfig();
 			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central. Se usaran " //$NON-NLS-1$
+						+ DEFAULT_FIRE_TEMP_TIMEOUT + " segundos: " + e); //$NON-NLS-1$
 				return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 			}
 		}

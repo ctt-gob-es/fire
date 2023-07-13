@@ -32,19 +32,19 @@ public class SignBatchManager {
      * Inicia el proceso de firma de un lote.
 	 * @param request Petici&oacute;n de firma del lote.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta con el resultado del inicio de firma del lote.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
      */
-	public static void signBatch(final HttpServletRequest request, final RequestParameters params, final HttpServletResponse response)
-    		throws IOException {
+	public static void signBatch(final HttpServletRequest request, final RequestParameters params,
+			final TransactionAuxParams trAux, final HttpServletResponse response) throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
-		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
     	final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
     	final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String stopOnError = params.getParameter(ServiceParams.HTTP_PARAM_BATCH_STOP_ON_ERROR);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
     	if (transactionId == null || transactionId.isEmpty()) {
@@ -57,7 +57,7 @@ public class SignBatchManager {
 
 		// Recuperamos los datos de sesion de la transaccion, lo que tambien comprueba que
 		// esa sesion corresponda a ese usuario
-    	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true);
+    	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, request.getSession(false), false, true, trAux);
     	if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
@@ -68,7 +68,7 @@ public class SignBatchManager {
     	if (batchResult == null || batchResult.documentsCount() == 0) {
     		LOGGER.warning(logF.f("Se ha pedido firmar un lote sin documentos. Se aborta la operacion.")); //$NON-NLS-1$
     		TRANSLOGGER.register(session, false);
-        	SessionCollector.removeSession(session);
+        	SessionCollector.removeSession(session, trAux);
         	Responser.sendError(response, FIReError.BATCH_NO_DOCUMENTS);
     		return;
     	}
@@ -87,9 +87,7 @@ public class SignBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR, stopOnError);
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE);
-        SessionCollector.commit(session);
-
-        LOGGER.info(logF.f("Generamos la URL de redireccion")); //$NON-NLS-1$
+        SessionCollector.commit(session, trAux);
 
 		// Recuperamos los proveedores cargados para la aplicacion
 		final String[] provs = (String[]) session.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
@@ -119,6 +117,8 @@ public class SignBatchManager {
         			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$
         			+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
         }
+
+        LOGGER.fine(logF.f("Generamos la URL de redireccion")); //$NON-NLS-1$
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual

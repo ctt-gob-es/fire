@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.signature;
+package es.gob.fire.server.services.internal;
 
 
 import java.io.ByteArrayInputStream;
@@ -24,6 +24,8 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.Base64;
+import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.DbManager;
 
 
 /**
@@ -40,10 +42,12 @@ public class ApplicationsDAO {
 
 	/** Comprueba si una aplicaci&oacute;n est&aacute; habilitada en el sistema.
 	 * @param appId Identificador de la aplicaci&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Resultado de la comprobaci&oacute;n.
 	 * @throws SQLException Cuando no se puede realizar la comprobaci&oacute;n.
 	 */
-	public static ApplicationChecking checkApplicationId(final String appId) throws SQLException {
+	public static ApplicationChecking checkApplicationId(final String appId, final TransactionAuxParams trAux)
+			throws SQLException {
 
 		// Si no hay conexion con la BD y si esta la aplicacion en el fichero de configuracion,
 		// comprobamos el identificador proporcionado contra el declarado en el fichero
@@ -61,17 +65,17 @@ public class ApplicationsDAO {
 			st.setString(1, appId);
 
 			if (!st.execute()) {
-				LOGGER.fine("Error al buscar la aplicacion con el ID: " + appId); //$NON-NLS-1$
+				LOGGER.fine(trAux.getLogFormatter().f("Error al buscar la aplicacion con el ID: " + appId)); //$NON-NLS-1$
 				return new ApplicationChecking(appId, null, false, false);
 			}
 
 			try (ResultSet rs = st.getResultSet();) {
 				if (rs.next()) {
-					LOGGER.fine("Se ha identificado correctamente una peticion de la aplicacion: " + appId); //$NON-NLS-1$
+					LOGGER.fine(trAux.getLogFormatter().f("Se ha identificado correctamente una peticion de la aplicacion: " + appId)); //$NON-NLS-1$
 					result = new ApplicationChecking(appId, rs.getString(1), true, rs.getBoolean(2));
 				}
 				else {
-					LOGGER.fine("No se ha encontrado en el sistema la aplicacion con el ID: " + appId); //$NON-NLS-1$
+					LOGGER.fine(trAux.getLogFormatter().f("No se ha encontrado en el sistema la aplicacion con el ID: " + appId)); //$NON-NLS-1$
 					result =  new ApplicationChecking(appId, null, false, false);
 				}
 			}
@@ -84,13 +88,15 @@ public class ApplicationsDAO {
 	 * Comprueba si la huella digital que se pasa por par&aacute;metro existe en el sistema.
 	 * @param appId Identificador de la aplicaci&oacute;n declarado.
 	 * @param thumb Huella digital en base 64 que se va a comprobar.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return <code> true </code> en caso de que la huella exista en el sistema. <code> false </code> en caso contrario
 	 * @throws SQLException En caso de ocurrir un error al acceder a la base de datos.
 	 * @throws IOException Si hay un error de entrada o salida.
 	 * @throws CertificateException Si hay un problema al decodificar el certificado.
 	 * @throws NoSuchAlgorithmException No se encuentra el algoritmo en el sistema.
 	 */
-	public static boolean checkThumbPrint(final String appId, final String thumb) throws SQLException, CertificateException, IOException, NoSuchAlgorithmException {
+	public static boolean checkThumbPrint(final String appId, final String thumb, final TransactionAuxParams trAux)
+			throws SQLException, CertificateException, IOException, NoSuchAlgorithmException {
 
 		// Si no hay conexion con la BD y si esta el certificado en el fichero de configuracion, lo comprobamos
 		if (!DbManager.isConfigured() && ConfigManager.getCert() != null) {
@@ -117,17 +123,17 @@ public class ApplicationsDAO {
 			st.setString(3, thumb);
 
 			if (!st.execute()) {
-				LOGGER.fine("No existe ningun certificado con la huella: " + thumb); //$NON-NLS-1$
+				LOGGER.fine(trAux.getLogFormatter().f("No existe ningun certificado con la huella: ") + thumb); //$NON-NLS-1$
 				return false;
 			}
 
 			try (ResultSet rs = st.getResultSet();) {
 				if (!rs.next()) {
-					LOGGER.fine("No se ha podido leer la huella del certificado: " + thumb); //$NON-NLS-1$
+					LOGGER.fine(trAux.getLogFormatter().f("No se ha podido leer la huella del certificado: ") + thumb); //$NON-NLS-1$
 					result = false;
 				}
 				else {
-					LOGGER.fine("La huella del certificado se encuentra registrada en el sistema: " + thumb); //$NON-NLS-1$
+					LOGGER.fine(trAux.getLogFormatter().f("La huella del certificado se encuentra registrada en el sistema: ") + thumb); //$NON-NLS-1$
 					result = rs.getInt(1) > 0;
 				}
 			}

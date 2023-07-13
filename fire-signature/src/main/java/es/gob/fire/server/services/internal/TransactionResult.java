@@ -124,8 +124,11 @@ public class TransactionResult extends OperationResult {
 
 	private GracePeriodInfo gracePeriod = null;
 
-	public TransactionResult(final int resultType) {
+	private final TransactionAuxParams trAux;
+
+	public TransactionResult(final int resultType, final TransactionAuxParams trAux) {
 		this.resultType = resultType;
+		this.trAux = trAux;
 	}
 
 	/**
@@ -135,11 +138,12 @@ public class TransactionResult extends OperationResult {
 	 * @param errorCode C&oacute;digo de error.
 	 * @param errorMessage Mensaje de error.
 	 */
-	public TransactionResult(final int resultType, final int errorCode, final String errorMessage) {
+	public TransactionResult(final int resultType, final int errorCode, final String errorMessage, final TransactionAuxParams trAux) {
 		this.resultType = resultType;
 		this.state = STATE_ERROR;
 		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
+		this.trAux = trAux;
 	}
 
 	/**
@@ -148,10 +152,11 @@ public class TransactionResult extends OperationResult {
 	 * @param resultType Tipo de resultado.
 	 * @param providerName Nombre del proveedor utilizado.
 	 */
-	public TransactionResult(final int resultType, final String providerName) {
+	public TransactionResult(final int resultType, final String providerName, final TransactionAuxParams trAux) {
 		this.resultType = resultType;
 		this.state = STATE_OK;
 		this.providerName = providerName;
+		this.trAux = trAux;
 	}
 
 	/**
@@ -160,10 +165,11 @@ public class TransactionResult extends OperationResult {
 	 * @param resultType Tipo de resultado.
 	 * @param result Datos resultantes de la operaci&oacute;n.
 	 */
-	public TransactionResult(final int resultType, final byte[] result) {
+	public TransactionResult(final int resultType, final byte[] result, final TransactionAuxParams trAux) {
 		this.resultType = resultType;
 		this.state = STATE_OK;
 		this.result = result;
+		this.trAux = trAux;
 	}
 
 	/**
@@ -321,7 +327,7 @@ public class TransactionResult extends OperationResult {
 				resultBuilder.add(JSON_ATTR_SIGNING_CERT, encodeCertificate(this.signingCert));
 			} catch (final CertificateEncodingException e) {
 				// Error al codificar el certificado, no se devolvera certificado en ese caso
-				LOGGER.log(Level.WARNING, "Error al codificar el certificado de firma", e); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, this.trAux.getLogFormatter().f("Error al codificar el certificado de firma"), e); //$NON-NLS-1$
 			}
 		}
 		if (this.upgradeFormat != null) {
@@ -335,7 +341,7 @@ public class TransactionResult extends OperationResult {
 				resultBuilder.add(JSON_ATTR_GRACE_PERIOD, gracePeriodBuilder);
 			} catch (final Exception e) {
 				// Error al codificar el certificado, no se devolvera certificado en ese caso
-				LOGGER.log(Level.WARNING, "Error al codificar el certificado de firma", e); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, this.trAux.getLogFormatter().f("Error al codificar el certificado de firma"), e); //$NON-NLS-1$
 			}
 		}
 
@@ -365,11 +371,12 @@ public class TransactionResult extends OperationResult {
 	 * datos obtenidos en los servicios para recuperaci&oacute;n de datos de FIRe.
 	 * @param resultType Tipo de resultado.
 	 * @param result Datos devueltos por la operacion de recuperacion de datos.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Resultado de la operaci&oacute;n.
 	 */
-	public static TransactionResult parse(final int resultType, final byte[] result) {
+	public static TransactionResult parse(final int resultType, final byte[] result, final TransactionAuxParams trAux) {
 
-		final TransactionResult opResult = new TransactionResult(resultType);
+		final TransactionResult opResult = new TransactionResult(resultType, trAux);
 
 		opResult.state = STATE_OK;
 

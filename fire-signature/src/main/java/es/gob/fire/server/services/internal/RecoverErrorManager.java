@@ -30,18 +30,18 @@ public class RecoverErrorManager {
 	/**
 	 * Obtiene el error detectado durante la transacci&oacute;n.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
-	public static void recoverError(final RequestParameters params, final HttpServletResponse response)
-			throws IOException {
+	public static void recoverError(final RequestParameters params, final TransactionAuxParams trAux,
+			final HttpServletResponse response) throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
-		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
         // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
@@ -53,10 +53,10 @@ public class RecoverErrorManager {
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
-        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
+        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		final TransactionResult result = buildErrorResult(session, FIReError.INVALID_TRANSACTION);
+    		final TransactionResult result = buildErrorResult(session, FIReError.INVALID_TRANSACTION, trAux);
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION, result);
     		return;
         }
@@ -69,22 +69,22 @@ public class RecoverErrorManager {
         	// la firma o emitir nuevos certificados, se notifica como tal
         	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_LOGIN)) {
             	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autenticar al usuario")); //$NON-NLS-1$
-            	final TransactionResult result = buildErrorResult(session, FIReError.EXTERNAL_SERVICE_ERROR_TO_LOGIN);
-            	SessionCollector.removeSession(session);
+            	final TransactionResult result = buildErrorResult(session, FIReError.EXTERNAL_SERVICE_ERROR_TO_LOGIN, trAux);
+            	SessionCollector.removeSession(session, trAux);
             	Responser.sendResult(response, result);
         		return;
         	}
         	if (session.containsAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_SIGN)) {
             	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autorizar la firma en la nube o emitir certificados")); //$NON-NLS-1$
-            	final TransactionResult result = buildErrorResult(session, FIReError.EXTERNAL_SERVICE_ERROR_TO_SIGN);
-            	SessionCollector.removeSession(session);
+            	final TransactionResult result = buildErrorResult(session, FIReError.EXTERNAL_SERVICE_ERROR_TO_SIGN, trAux);
+            	SessionCollector.removeSession(session, trAux);
             	Responser.sendResult(response, result);
         		return;
         	}
 
         	LOGGER.severe(logF.f("Se ha producido un error del que no se ha establecido el tipo")); //$NON-NLS-1$
-            final TransactionResult result = buildErrorResult(session, FIReError.INTERNAL_ERROR);
-        	SessionCollector.removeSession(session);
+            final TransactionResult result = buildErrorResult(session, FIReError.INTERNAL_ERROR, trAux);
+        	SessionCollector.removeSession(session, trAux);
         	Responser.sendResult(response, result);
         	return;
         }
@@ -92,31 +92,35 @@ public class RecoverErrorManager {
         LOGGER.info(logF.f("Se devuelve el error identificado")); //$NON-NLS-1$
 
         // Recuperamos la informacion de error y eliminamos la sesion
-        final TransactionResult result = buildErrorResult(session);
+        final TransactionResult result = buildErrorResult(session, trAux);
 
 
-        SessionCollector.removeSession(session);
+        SessionCollector.removeSession(session, trAux);
     	Responser.sendResult(response, result);
 	}
 
-	private static TransactionResult buildErrorResult(final FireSession session, final FIReError error) {
-		return buildErrorResult(session, error.getCode(), error.getMessage());
+	private static TransactionResult buildErrorResult(final FireSession session,
+			final FIReError error, final TransactionAuxParams trAux) {
+		return buildErrorResult(session, error.getCode(), error.getMessage(), trAux);
 	}
 
-	private static TransactionResult buildErrorResult(final FireSession session) {
+	private static TransactionResult buildErrorResult(final FireSession session,
+			final TransactionAuxParams trAux) {
 
         final String errorType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         final String errorMsg = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
 
-		return buildErrorResult(session, Integer.parseInt(errorType), errorMsg);
+		return buildErrorResult(session, Integer.parseInt(errorType), errorMsg, trAux);
 	}
 
-	private static TransactionResult buildErrorResult(final FireSession session, final int errorCode, final String errorMsg) {
+	private static TransactionResult buildErrorResult(final FireSession session, final int errorCode
+			, final String errorMsg, final TransactionAuxParams trAux) {
 
 		final TransactionResult tr = new TransactionResult(
 				TransactionResult.RESULT_TYPE_ERROR,
 				errorCode,
-				errorMsg);
+				errorMsg,
+				trAux);
 
 		if (session != null) {
 			tr.setProviderName(session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN));

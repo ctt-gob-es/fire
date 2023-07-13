@@ -33,14 +33,14 @@ public class RecoverUpdatedSignResultManager {
 	 * @param response Respuesta de la petici&oacute;n.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
-	public static void recoverSignature(final RequestParameters params, final HttpServletResponse response)
+	public static void recoverSignature(final RequestParameters params, final TransactionAuxParams trAux, final HttpServletResponse response)
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
-		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String docId = params.getParameter(ServiceParams.HTTP_PARAM_DOCUMENT_ID);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, null);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (docId == null || docId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID devuelto por la plataforma para la recuperacion de la firma")); //$NON-NLS-1$

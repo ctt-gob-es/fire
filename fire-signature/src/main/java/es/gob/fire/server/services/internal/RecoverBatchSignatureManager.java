@@ -34,19 +34,19 @@ public class RecoverBatchSignatureManager {
 	/**
 	 * Devuelve el resultado de una firma concreta de un lote. Si es necesario, actualiza la firma.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
-	public static void recoverSignature(final RequestParameters params, final HttpServletResponse response)
+	public static void recoverSignature(final RequestParameters params, final TransactionAuxParams trAux, final HttpServletResponse response)
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
-		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String docId = params.getParameter(ServiceParams.HTTP_PARAM_DOCUMENT_ID);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
@@ -64,7 +64,7 @@ public class RecoverBatchSignatureManager {
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
-        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false, trAux);
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
@@ -73,7 +73,7 @@ public class RecoverBatchSignatureManager {
 
 		// Si la operacion anterior no fue la recuperacion del resultado del lote, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_RECOVER != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
 		}
 
         // Comprobamos que previamente se haya recuperado el resultado global del lote
@@ -87,7 +87,7 @@ public class RecoverBatchSignatureManager {
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
         	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
-        	SessionCollector.removeSession(session);
+        	SessionCollector.removeSession(session, trAux);
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
         	Responser.sendError(
         			response,
@@ -95,7 +95,8 @@ public class RecoverBatchSignatureManager {
         			new TransactionResult(
         					TransactionResult.RESULT_TYPE_BATCH_SIGN,
         					Integer.parseInt(errType),
-        					errMessage));
+        					errMessage,
+        					trAux));
         	return;
         }
 
@@ -105,7 +106,7 @@ public class RecoverBatchSignatureManager {
         final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         if (batchResult == null || batchResult.documentsCount() == 0) {
             LOGGER.severe(logF.f("No se han encontrado documentos registrados en el lote")); //$NON-NLS-1$
-        	SessionCollector.removeSession(session);
+        	SessionCollector.removeSession(session, trAux);
         	Responser.sendError(response, FIReError.INTERNAL_ERROR);
         	return;
         }
@@ -149,7 +150,7 @@ public class RecoverBatchSignatureManager {
         	batchResult.setErrorResult(docId, BatchResult.ERROR_RECOVERING);
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SIGNLOGGER.register(session, false, docId);
-        	SessionCollector.commit(session);
+        	SessionCollector.commit(session, trAux);
         	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
         }
@@ -162,14 +163,14 @@ public class RecoverBatchSignatureManager {
         // Revisamos si queda alguna firma valida sin recuperar, en cuyo caso,
         // eliminamos la sesion. Si no, actualizamos el estado
         if (isAllProcessed(batchResult)) {
-        	SessionCollector.removeSession(session);
+        	SessionCollector.removeSession(session, trAux);
         }
         else {
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
-        	SessionCollector.commit(session);
+        	SessionCollector.commit(session, trAux);
         }
 
-        LOGGER.fine(logF.f("Se devuelve el resultado de la firma")); //$NON-NLS-1$
+        LOGGER.info(logF.f("Se devuelve el resultado de la firma")); //$NON-NLS-1$
 
         Responser.sendResult(response, signature);
 	}

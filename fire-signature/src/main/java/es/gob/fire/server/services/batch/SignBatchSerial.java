@@ -17,6 +17,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
+import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.server.services.batch.ProcessResult.Result;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
@@ -64,14 +65,18 @@ public final class SignBatchSerial extends SignBatch {
 
 				if (this.stopOnError) {
 					ignoreRemaining = true;
-					LOGGER.log(Level.WARNING, "Error en una de las firmas del lote (" + ss.getId() //$NON-NLS-1$
-							+ "), se ignoraran el resto de elementos", e); //$NON-NLS-1$
-
+					LOGGER.log(Level.WARNING,
+							String.format(
+									"Error en una de las firmas del lote (%1s), se ignoraran el resto de elementos", //$NON-NLS-1$
+									LoggerUtil.getTrimStr(ss.getDataRef())),
+							e);
 				} else {
-					LOGGER.log(Level.WARNING, "Error en una de las firmas del lote (" + ss.getId() //$NON-NLS-1$
-							+ "), se continua con el siguiente elemento", e); //$NON-NLS-1$
+					LOGGER.log(Level.WARNING,
+							String.format(
+									"Error en una de las firmas del lote (%1s), se continua con el siguiente elemento", //$NON-NLS-1$
+									LoggerUtil.getTrimStr(ss.getDataRef())),
+							e);
 				}
-				continue;
 			}
 		}
 
@@ -102,10 +107,14 @@ public final class SignBatchSerial extends SignBatch {
 			if (td.getTriSigns(ss.getId()) == null) {
 				error = true;
 				if (this.stopOnError) {
-					LOGGER.warning("Se detecto un error previo en la firma, se ignoraran el resto de elementos"); //$NON-NLS-1$
+					LOGGER.warning(String.format(
+							"Se detecto un error previo en la firma %1s, se ignoraran el resto de elementos", //$NON-NLS-1$
+							LoggerUtil.getTrimStr(ss.getDataRef())));
 					ignoreRemaining = true;
 				} else {
-					LOGGER.warning("Se detecto un error previo en la firma, se continua con el resto de elementos"); //$NON-NLS-1$
+					LOGGER.warning(String.format(
+							"Se detecto un error previo en la firma %1s, se continua con el resto de elementos", //$NON-NLS-1$
+							LoggerUtil.getTrimStr(ss.getDataRef())));
 				}
 				ss.setProcessResult(new ProcessResult(Result.ERROR_PRE, "Error en la prefirma")); //$NON-NLS-1$
 				continue;
@@ -121,14 +130,16 @@ public final class SignBatchSerial extends SignBatch {
 				ss.setProcessResult(new ProcessResult(Result.ERROR_POST, e.toString()));
 
 				if (this.stopOnError) {
-					LOGGER.log(Level.SEVERE,
-							"Error en una de las firmas del lote (" + ss.getId() + "), se parara el proceso: " + e, //$NON-NLS-1$ //$NON-NLS-2$
+					LOGGER.log(Level.SEVERE, String.format(
+								"Error al postfirmar una de las firmas del lote (%1s), se parara el proceso", //$NON-NLS-1$
+								LoggerUtil.getTrimStr(ss.getDataRef())),
 							e);
 					ignoreRemaining = true;
 				}
-				LOGGER.severe("Error en una de las firmas del lote (" + ss.getId() //$NON-NLS-1$
-						+ "), se continua con el siguiente elemento: " + e //$NON-NLS-1$
-				);
+				LOGGER.log(Level.SEVERE, String.format(
+						"Error al postfirmar una de las firmas del lote (%1s), se continua con el siguiente elemento", //$NON-NLS-1$
+						LoggerUtil.getTrimStr(ss.getDataRef())),
+					e);
 				continue;
 			}
 
@@ -156,7 +167,7 @@ public final class SignBatchSerial extends SignBatch {
 				ss.save(TempDocumentsManager.retrieveDocument(ss.getName(getId())));
 				ss.setProcessResult(ProcessResult.PROCESS_RESULT_DONE_SAVED);
 			} catch (final IOException e) {
-				LOGGER.warning("Error en el guardado de la firma: " + e); //$NON-NLS-1$
+				LOGGER.warning(String.format("Error en el guardado de la firma %1s: ", LoggerUtil.getTrimStr(ss.getDataRef())) + e); //$NON-NLS-1$
 				error = true;
 				ss.setProcessResult(new ProcessResult(ProcessResult.Result.DONE_BUT_ERROR_SAVING, e.toString()));
 				if (this.stopOnError) {

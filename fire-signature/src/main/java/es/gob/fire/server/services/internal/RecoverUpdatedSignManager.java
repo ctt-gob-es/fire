@@ -47,11 +47,12 @@ public class RecoverUpdatedSignManager {
 	/**
 	 * Obtiene de la plataforma de actualizaci&oacute;n la firma actualizada.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
-	public static void recoverSignature(final RequestParameters params, final HttpServletResponse response)
-			throws IOException {
+	public static void recoverSignature(final RequestParameters params, final TransactionAuxParams trAux,
+			final HttpServletResponse response) throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
 		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
@@ -59,7 +60,8 @@ public class RecoverUpdatedSignManager {
 		final String upgrade = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
         final String configB64  = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, null);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
         // Comprobamos que se hayan prorcionado los parametros indispensables
         if (asyncId == null || asyncId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID devuelto por la plataforma para la recuperacion de la firma")); //$NON-NLS-1$
@@ -153,7 +155,7 @@ public class RecoverUpdatedSignManager {
         		LOGGER.log(Level.WARNING,
         				logF.f("No se pudo actualizar la informacion de la operacion asincrona " + asyncId), e); //$NON-NLS-1$
 			}
-            final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN);
+            final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, trAux);
             result.setGracePeriod(upgradeResult.getGracePeriodInfo());
             Responser.sendResult(response, result);
             return;
@@ -184,12 +186,9 @@ public class RecoverUpdatedSignManager {
         }
 
         // Devolvemos la informacion de la firma
-        final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN);
-        result.setGracePeriod(upgradeResult.getGracePeriodInfo());
+        final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, trAux);
         result.setUpgradeFormat(upgradeResult.getFormat());
-        if (upgradeResult.getState() == State.PARTIAL) {
-        	result.setState(TransactionResult.STATE_PARTIAL);
-        }
+        result.setState(upgradeResult.getState() == State.PARTIAL ? TransactionResult.STATE_PARTIAL : TransactionResult.STATE_OK);
 
         LOGGER.info(logF.f("Se devuelve el estado de la actualizacion asincrona")); //$NON-NLS-1$
 

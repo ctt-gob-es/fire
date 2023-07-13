@@ -35,6 +35,7 @@ import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.server.services.internal.ServiceParams;
+import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
@@ -128,7 +129,8 @@ public final class LoadService extends HttpServlet {
         final String dataB64        = params.getParameter(PARAMETER_NAME_DATA);
         String providerName  	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 
-        final LogTransactionFormatter logF = new LogTransactionFormatter(appId, null);
+        final TransactionAuxParams trAux = new TransactionAuxParams(appId);
+        final LogTransactionFormatter logF = trAux.getLogFormatter();
 
         if (ConfigManager.isCheckApplicationNeeded()) {
         	LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
@@ -142,7 +144,7 @@ public final class LoadService extends HttpServlet {
             }
 
         	try {
-        		ServiceUtil.checkValidApplication(appId);
+        		ServiceUtil.checkValidApplication(appId, trAux);
 	        }
 	        catch (final DBConnectionException e) {
 	        	LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
@@ -162,9 +164,15 @@ public final class LoadService extends HttpServlet {
 
     	if (ConfigManager.isCheckCertificateNeeded()){
     		LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
-    		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
-	    	try {
-				ServiceUtil.checkValidCertificate(appId, certificates);
+    		try {
+    			final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
+				ServiceUtil.checkValidCertificate(appId, certificates, trAux);
+			}
+    		catch (final IOException e) {
+				LOGGER.log(Level.WARNING, logF.f("No se encontro el certificado cliente en la peticion entrante"), e); //$NON-NLS-1$
+				Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+						"No se encontro el certificado cliente en la peticion entrante"); //$NON-NLS-1$
+				return;
 			}
 	    	catch (final DBConnectionException e) {
 				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$

@@ -703,42 +703,56 @@ public final class FIReTriHelper {
 			return;
 		}
 
-		final SecretKeySpec key = new SecretKeySpec(hmacSeed.getBytes(DEFAULT_CHARSET), HMAC_ALGORITHM);
+		// Clave que se va a usar para verificar la integridad de las prefirmas
+		final SecretKeySpec hmacKey = new SecretKeySpec(hmacSeed.getBytes(DEFAULT_CHARSET), HMAC_ALGORITHM);
+
 		for (final TriSign triSign : triphaseData.getTriSigns()) {
 
-			final String verificationHMac = triSign.getProperty(PROPERTY_NAME_HMAC);
-			if (verificationHMac == null) {
-				throw new SecurityException("Alguna de las firmas no contenida el codigo de verificacion"); //$NON-NLS-1$
-			}
+			// Comprobamos que la prefirma y el certificado usados coincidan con los de la prefirma
+			checkPresignIntegrity(triSign, cert, hmacSeed, hmacKey);
 
-			final String preSign = triSign.getProperty(PROPERTY_NAME_PRESIGN);
-
-			// No se puede hacer esta comprobacion sin la prefirma (hay que revisar si en XAdES se pudiese con el BASE)
-			if (preSign != null) {
-				byte[] hmac;
-				try {
-					final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-					mac.init(key);
-					mac.update(preSign.getBytes(DEFAULT_CHARSET));
-					mac.update(hmacSeed.getBytes(DEFAULT_CHARSET));
-					mac.update(cert.getEncoded());
-					hmac = mac.doFinal();
-				}
-				catch (final Exception e) {
-					throw new SecurityException("No se pudo completar la verificacion de integridad de la firma", e); //$NON-NLS-1$
-				}
-
-				if (!Arrays.equals(hmac, Base64.decode(verificationHMac))) {
-					throw new SecurityException("Se ha detectado un error de integridad en los datos de firma"); //$NON-NLS-1$
-				}
-			}
-
-			final String signatureValue = triSign.getProperty(PROPERTY_NAME_PKCS1_SIGN);
-			if (signatureValue == null) {
-				throw new SecurityException("No se ha proporcionado el PKCS#1 de la firma"); //$NON-NLS-1$
-			}
-
-			CryptoHelper.verifyPkcs1(Base64.decode(signatureValue), cert.getPublicKey(), logF);
+			// Comprobamos que se haya firmado con la clave privada del certificado indicado
+			checkPkcs1Integrity(triSign, cert, logF);
 		}
+	}
+
+	private static void checkPresignIntegrity(final TriSign triSign, final X509Certificate cert,
+			final String hmacSeed, final SecretKeySpec hmacKey) throws IOException {
+		final String verificationHMac = triSign.getProperty(PROPERTY_NAME_HMAC);
+		if (verificationHMac == null) {
+			throw new SecurityException("Alguna de las firmas no contenida el codigo de verificacion"); //$NON-NLS-1$
+		}
+
+		final String preSign = triSign.getProperty(PROPERTY_NAME_PRESIGN);
+
+		// No se puede hacer esta comprobacion sin la prefirma (hay que revisar si en XAdES se pudiese con el BASE)
+		if (preSign != null) {
+			byte[] hmac;
+			try {
+				final Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+				mac.init(hmacKey);
+				mac.update(preSign.getBytes(DEFAULT_CHARSET));
+				mac.update(hmacSeed.getBytes(DEFAULT_CHARSET));
+				mac.update(cert.getEncoded());
+				hmac = mac.doFinal();
+			}
+			catch (final Exception e) {
+				throw new SecurityException("No se pudo completar la verificacion de integridad de la firma", e); //$NON-NLS-1$
+			}
+
+			if (!Arrays.equals(hmac, Base64.decode(verificationHMac))) {
+				throw new SecurityException("Se ha detectado un error de integridad en los datos de firma"); //$NON-NLS-1$
+			}
+		}
+	}
+
+	private static void checkPkcs1Integrity(final TriSign triSign, final X509Certificate cert,
+			final LogTransactionFormatter logF) throws SecurityException, IOException {
+		final String signatureValue = triSign.getProperty(PROPERTY_NAME_PKCS1_SIGN);
+		if (signatureValue == null) {
+			throw new SecurityException("No se ha proporcionado el PKCS#1 de la firma"); //$NON-NLS-1$
+		}
+
+		CryptoHelper.verifyPkcs1(Base64.decode(signatureValue), cert.getPublicKey(), logF);
 	}
 }

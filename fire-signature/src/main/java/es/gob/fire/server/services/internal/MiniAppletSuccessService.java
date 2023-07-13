@@ -24,7 +24,6 @@ import javax.json.JsonReader;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.Base64;
@@ -60,7 +59,8 @@ public class MiniAppletSuccessService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-        final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, transactionId);
+        final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de exito de firma con certificado local")); //$NON-NLS-1$
 
@@ -69,31 +69,33 @@ public class MiniAppletSuccessService extends HttpServlet {
         String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
         if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado la URL de redireccion de error")); //$NON-NLS-1$
-            SessionCollector.removeSession(transactionId);
+            SessionCollector.removeSession(transactionId, trAux);
             Responser.sendError(response, FIReError.FORBIDDEN);
             return;
         }
 
-        FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), true, false);
+        FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), true, false, trAux);
         if (session == null) {
         	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
-        	SessionCollector.removeSession(transactionId);
-        	redirectToExternalUrl(redirectErrorUrl, request, response);
+        	SessionCollector.removeSession(transactionId, trAux);
+        	Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
     		return;
         }
 
 		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
+			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true, trAux);
 		}
+
+		trAux.setAppId(session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID));
 
     	// Comprobamos que haya URL de redireccion
     	final TransactionConfig connConfig	= (TransactionConfig) session
     			.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
     	if (connConfig == null || connConfig.getRedirectSuccessUrl() == null || !connConfig.isDefinedRedirectErrorUrl()) {
     		LOGGER.warning(logF.f("No se encontraron en la sesion las URL de redireccion para la operacion")); //$NON-NLS-1$
-    		ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR);
-    		redirectToExternalUrl(redirectErrorUrl, request, response);
+    		ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
+    		Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
     		return;
     	}
 		final String redirectUrl = connConfig.getRedirectSuccessUrl();
@@ -119,12 +121,12 @@ public class MiniAppletSuccessService extends HttpServlet {
         	} catch (final AOException e) {
         		LOGGER.log(Level.WARNING, logF.f("Fallo alguna de las firmas del lote y se aborta la operacion como se habia solicitado"), e); //$NON-NLS-1$
         		ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, true, null);
-        		redirectToExternalUrl(redirectErrorUrl, request, response);
+        		Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
         		return;
         	} catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("Error al procesar el resultado de la firma de lote del Cliente @firma"), e); //$NON-NLS-1$
         		ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, true, null);
-        		redirectToExternalUrl(redirectErrorUrl, request, response);
+        		Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
         		return;
         	}
         }
@@ -133,37 +135,12 @@ public class MiniAppletSuccessService extends HttpServlet {
         // ejecucion de una firma
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_PRE);
 
-        SessionCollector.commit(session);
+        SessionCollector.commit(session, trAux);
 
-        redirectToExternalUrl(redirectUrl, request, response);
+        Responser.redirectToExternalUrl(redirectUrl, request, response, trAux);
 
 		LOGGER.fine(logF.f("Fin de la llamada al servicio publico de exito de firma con certificado local")); //$NON-NLS-1$
 	}
-
-    /**
-     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
-     * tuviese, para borrar cualquier dato que hubiese en ella.
-     * @param url URL a la que redirigir al usuario.
-     * @param request Objeto de petici&oacute;n realizada al servlet.
-     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
-     * @throws IOException Cuando no se puede redirigir al usuario.
-     */
-    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) {
-
-        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
-    	final HttpSession httpSession = request.getSession(false);
-        if (httpSession != null) {
-        	httpSession.invalidate();
-        }
-
-        try {
-        	response.sendRedirect(url);
-        }
-        catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
-		}
-    }
 
 	/**
 	 * Actualiza el estado del lote con el resultado obtenido al firmarlo con el Cliente @firma.

@@ -10,13 +10,11 @@
 package es.gob.fire.server.services.internal;
 
 import java.net.URLDecoder;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.Responser;
@@ -41,7 +39,8 @@ public class CancelOperationService extends HttpServlet {
 		final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
@@ -73,10 +72,10 @@ public class CancelOperationService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
 
-		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), true, false);
+		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), true, false, trAux);
     	if (session == null) {
     		LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
     		return;
     	}
 
@@ -85,40 +84,16 @@ public class CancelOperationService extends HttpServlet {
 
 		final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			SessionCollector.removeSession(session);
+			SessionCollector.removeSession(session, trAux);
 			LOGGER.warning(logF.f("No se encontro en la sesion la URL de redireccion de la operacion")); //$NON-NLS-1$
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
 
-		ErrorManager.setErrorToSession(session, FIReError.OPERATION_CANCELED);
+		ErrorManager.setErrorToSession(session, FIReError.OPERATION_CANCELED, trAux);
 
-		redirectToExternalUrl(connConfig.getRedirectErrorUrl(), request, response);
+		Responser.redirectToExternalUrl(connConfig.getRedirectErrorUrl(), request, response, trAux);
 
 		LOGGER.fine(logF.f("Fin de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
 	}
-
-    /**
-     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
-     * tuviese, para borrar cualquier dato que hubiese en ella.
-     * @param url URL a la que redirigir al usuario.
-     * @param request Objeto de petici&oacute;n realizada al servlet.
-     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
-     */
-    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) {
-
-        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
-    	final HttpSession httpSession = request.getSession(false);
-        if (httpSession != null) {
-        	httpSession.invalidate();
-        }
-
-        try {
-        	response.sendRedirect(url);
-        }
-        catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
-		}
-    }
 }

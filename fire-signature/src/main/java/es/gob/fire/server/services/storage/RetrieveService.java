@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.signature.ConfigManager;
@@ -110,7 +111,7 @@ public final class RetrieveService extends HttpServlet {
 					existsDocument = TempDocumentsManager.existDocument(id);
 				}
 				catch (final Exception e) {
-					LOGGER.log(Level.SEVERE, "Error al comprobar la existencia del documento", e); //$NON-NLS-1$
+					LOGGER.log(Level.SEVERE, "Error al comprobar la existencia del documento " + LoggerUtil.getTrimStr(id), e); //$NON-NLS-1$
 					existsDocument = false;
 				}
 			}
@@ -126,7 +127,7 @@ public final class RetrieveService extends HttpServlet {
 				}
 			}
 			else {
-				sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + id + "')"); //$NON-NLS-1$ //$NON-NLS-2$
+				sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + LoggerUtil.getTrimStr(id) + "')"); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
 		}

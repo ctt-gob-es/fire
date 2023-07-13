@@ -40,10 +40,11 @@ public class AddDocumentBatchManager {
     /**
      * Agrega un nuevo documento a un lote de firma.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta con el resultado de agregar el documento al lote.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
      */
-    public static void addDocument(final RequestParameters params, final HttpServletResponse response)
+    public static void addDocument(final RequestParameters params, final TransactionAuxParams trAux, final HttpServletResponse response)
     		throws IOException {
 
     	// Recogemos los parametros proporcionados en la peticion
@@ -53,7 +54,7 @@ public class AddDocumentBatchManager {
     	final String docId			= params.getParameter(ServiceParams.HTTP_PARAM_DOCUMENT_ID);
     	final String dataB64		= params.getParameter(ServiceParams.HTTP_PARAM_DATA);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
     	// Comprobamos que se hayan proporcionado los parametros indispensables
     	if (transactionId == null || transactionId.isEmpty()) {
@@ -62,7 +63,6 @@ public class AddDocumentBatchManager {
     		return;
     	}
 
-    	// Comprobamos que se hayan proporcionado los parametros indispensables
     	if (docId == null || docId.isEmpty()) {
     		LOGGER.warning(logF.f("No se ha proporcionado el ID del documento")); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_ID_NEEDED);
@@ -98,7 +98,7 @@ public class AddDocumentBatchManager {
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
-    	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
+    	final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
     	if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
@@ -215,7 +215,9 @@ public class AddDocumentBatchManager {
         batchResult.addDocument(docId, filename, config, docInfo);
 
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
-        SessionCollector.commit(session);
+        SessionCollector.commit(session, trAux);
+
+        LOGGER.info(logF.f("Se devuelve el resultado de la operacion")); //$NON-NLS-1$
 
         Responser.sendResult(response, Boolean.TRUE.toString().getBytes(StandardCharsets.UTF_8));
     }

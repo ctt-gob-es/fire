@@ -6,10 +6,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.connector.OperationResult;
 import es.gob.fire.server.services.internal.ErrorResult;
+import es.gob.fire.server.services.internal.TransactionAuxParams;
 
 /**
  * Construye una respuesta estructurada para una petici&oacute;n del servicio.
@@ -157,4 +160,31 @@ public class Responser {
 	private static ErrorResult buildError(final int code, final String message) {
 		return new ErrorResult(code, message);
 	}
+
+
+    /**
+     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
+     * tuviese, para borrar cualquier dato que hubiese en ella.
+     * @param url URL a la que redirigir al usuario.
+     * @param request Objeto de petici&oacute;n realizada al servlet.
+     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+     */
+    public static void redirectToExternalUrl(final String url, final HttpServletRequest request,
+    		final HttpServletResponse response, final TransactionAuxParams trAux) {
+
+        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
+    	final HttpSession httpSession = request.getSession(false);
+        if (httpSession != null) {
+        	httpSession.invalidate();
+        }
+
+        try {
+        	response.sendRedirect(url);
+        }
+        catch (final Exception e) {
+        	LOGGER.log(Level.SEVERE, trAux.getLogFormatter().f("No se ha podido redirigir al usuario a la URL externa"), e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+		}
+    }
 }

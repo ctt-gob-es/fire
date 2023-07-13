@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
@@ -49,7 +48,8 @@ public class AuthenticationService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(null, transactionId);
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de seleccion de origen")); //$NON-NLS-1$
 
@@ -69,40 +69,40 @@ public class AuthenticationService extends HttpServlet {
 		// Comprobamos que se haya indicado el identificador de transaccion
 		if (transactionId == null || transactionId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
 
 		// Comprobamos que se haya indicado el identificador de usuario
 		if (subjectRef == null || subjectRef.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la referencia del usuario")); //$NON-NLS-1$
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
 
 		// Comprobamos que se haya indicado el proveedor
 		if (origin == null || origin.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado el proveedor")); //$NON-NLS-1$
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
 
 		// Cargamos los datos de sesion
-		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, false);
+		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, false, trAux);
 		if (session == null) {
 			LOGGER.severe(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
 
 		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true);
+			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true, trAux);
 		}
 
 		// Terminamos de configurar el formateador para los logs
 		final String appId = session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
-		logF.setAppId(appId);
+		trAux.setAppId(appId);
 
 		final TransactionConfig connConfig =
 				(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
@@ -110,8 +110,8 @@ public class AuthenticationService extends HttpServlet {
 		// Usamos la URL de error indicada en la transaccion
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.warning(logF.f("No se encontro en la sesion la URL de redireccion de error para la operacion")); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR);
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
 		redirectErrorUrl = connConfig.getRedirectErrorUrl();
@@ -124,8 +124,8 @@ public class AuthenticationService extends HttpServlet {
 			);
 		} catch (final FIReConnectorFactoryException e) {
 			LOGGER.warning(logF.f("Error al obtener el conector")); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR);
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
 
@@ -149,44 +149,20 @@ public class AuthenticationService extends HttpServlet {
 			}
 			catch (final Exception e) {
 	            LOGGER.log(Level.SEVERE, logF.f("Error en la autenticacion del usuario en el proveedor: ") + e, e); //$NON-NLS-1$
-	            ErrorManager.setErrorToSession(session, FIReError.PROVIDER_ERROR, originForced);
-	            redirectToExternalUrl(redirectErrorUrl, request, response);
+	            ErrorManager.setErrorToSession(session, FIReError.PROVIDER_ERROR, originForced, trAux);
+	            Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 	        	return;
 			}
 		} else {
 			LOGGER.warning(logF.f("El conector no puede ser nulo")); //$NON-NLS-1$
-			redirectToExternalUrl(redirectErrorUrl, request, response);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
 
 		// Registramos que vamos a redirigir al proveedor externo para autenticar al usuario
 		session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_LOGIN, Boolean.TRUE);
-		SessionCollector.commit(session);
+		SessionCollector.commit(session, trAux);
 
-    	redirectToExternalUrl(authUrl, request, response);
+    	Responser.redirectToExternalUrl(authUrl, request, response, trAux);
 	}
-
-    /**
-     * Redirige al usuario a una URL externa y elimina su sesion HTTP, si la
-     * tuviese, para borrar cualquier dato que hubiese en ella.
-     * @param url URL a la que redirigir al usuario.
-     * @param request Objeto de petici&oacute;n realizada al servlet.
-     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
-     */
-    private static void redirectToExternalUrl(final String url, final HttpServletRequest request, final HttpServletResponse response) {
-
-        // Invalidamos la sesion entre el navegador y el componente central porque no se usara mas
-    	final HttpSession httpSession = request.getSession(false);
-        if (httpSession != null) {
-        	httpSession.invalidate();
-        }
-
-        try {
-        	response.sendRedirect(url);
-        }
-        catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
-		}
-    }
 }

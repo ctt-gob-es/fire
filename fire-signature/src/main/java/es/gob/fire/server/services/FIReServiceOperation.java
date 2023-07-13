@@ -34,6 +34,9 @@ public enum FIReServiceOperation {
 	RECOVER_SIGN_RESULT(11),
 	/** Operaci&oacute;n para recuperar una firma previamente enviada a actualizar y para la que se debi&oacute; esperar un periodo de gracia. */
 	RECOVER_UPDATED_SIGN(70),
+	/** Operaci&oacute;n para recuperar la firma resultante de una operaci&oacute;n de
+	 * actualizaci&oacute;n para la que se solicit&oacute; la espera de un periodo de gracia. */
+	RECOVER_UPDATED_SIGN_RESULT(71),
 	/** Operaci&oacute;n para recuperar el detalle de un error producido durante una transacci&oacute;n. */
 	RECOVER_ERROR(99);
 

@@ -22,22 +22,19 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.signature.ApplicationChecking;
-import es.gob.fire.signature.ApplicationsDAO;
+import es.gob.fire.server.services.internal.ApplicationChecking;
+import es.gob.fire.server.services.internal.ApplicationsDAO;
+import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigManager;
 
 /**
  *  Conjunto de funciones est&aacute;ticas de car&aacute;cter general.
  */
 public final class ServiceUtil {
-
-    private static final Logger LOGGER = Logger.getLogger(ServiceUtil.class.getName());
 
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
@@ -103,18 +100,24 @@ public final class ServiceUtil {
     }
 
     /**
-     * Devuelve una lista de certificados X509 de la cabecera de una peticion HTTP
-     * @param request Cabecera HTTP recibida.
-     * @return Lista de los certificados X509 contenidos en la cabecera HTTP o
-     * {@code null} si no hay ninguno.
+     * Obtiene la cadena de certificados cliente de la petici&oacute;n HTTP.
+     * @param request Petici&oacute; HTTP recibida.
+     * @return Cadena de certificados X509.
+     * @throws IOException Cuando no se encuentra el certificado cliente.
      */
-    static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request) {
+    static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request) throws IOException {
 
     	X509Certificate[] certificates = getCertificatesFromAttribute(request);
     	if (certificates == null) {
     		final String propName = ConfigManager.getHttpsCertAttributeHeader();
     		if (propName != null && !propName.isEmpty()) {
     			certificates = getCertificatesFromHeader(request, propName);
+    			if (certificates == null) {
+    				throw new IOException(String.format("No se encontro el certificado cliente como atributo de la peticion ni en el atributo %1s de su cabecera", propName)); //$NON-NLS-1$
+    			}
+    		}
+    		else {
+    			throw new IOException("No se encontro el certificado cliente como atributo de la peticion"); //$NON-NLS-1$
     		}
     	}
     	return certificates;
@@ -159,8 +162,10 @@ public final class ServiceUtil {
      * @param propName Nombre de la propiedad de la que extraer los certificados.
      * @return Lista de los certificados X509 enviados o {@code null} se enviaron en la propiedad
      * de la cabecera.
+     * @throws IOException Cuando ocurre un error al extraer el certificado de la cabecera de la
+     * petici&oacute;n o cuando no se puede componer el certificado extra&iacute;do.
      */
-    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName) {
+    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName) throws IOException {
 
         X509Certificate certificates[] = null;
         final String headerName = propName;
@@ -175,12 +180,10 @@ public final class ServiceUtil {
                 final X509Certificate cer = (X509Certificate)fact.generateCertificate(bis);
                 certificates = new X509Certificate[1];
                 certificates[0] = cer;
-            } else {
-                LOGGER.fine("No existe certificado en la request en el header " + headerName); //$NON-NLS-1$
             }
         }
         catch(final Exception ex) {
-            LOGGER.log(Level.WARNING, "Ha ocurrido un error al extraer certificado de la cabecera de la peticion", ex); //$NON-NLS-1$
+            throw new IOException("Error al extraer el certificado de la cabecera de la peticion", ex); //$NON-NLS-1$
         }
         return certificates;
     }
@@ -188,17 +191,18 @@ public final class ServiceUtil {
     /**
 	 * Valida si la aplicaci&oacute;n indicada existe y si se encuentra activada.
 	 * @param appId Identificador de la aplicaci&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Nombre de la aplicaci&oacute;n o {@code null} si no est&aacute; definido.
 	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
      * @throws InvalidApplicationException Cuando la aplicaci&oacute;n no existe.
 	 * @throws InactiveApplicationException Cuando la aplicaci&oacute;n est&aacute; desactivada
 	 */
-	public static String checkValidApplication(final String appId)
+	public static String checkValidApplication(final String appId, final TransactionAuxParams trAux)
 			throws DBConnectionException, InvalidApplicationException, InactiveApplicationException {
 
 		ApplicationChecking appCheck;
 		try {
-			appCheck = ApplicationsDAO.checkApplicationId(appId);
+			appCheck = ApplicationsDAO.checkApplicationId(appId, trAux);
 		}
 		catch (final Exception e) {
 			throw new DBConnectionException("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
@@ -216,12 +220,14 @@ public final class ServiceUtil {
 	 * Valida si el certificado que se le pasa a la petici&oacute;n tiene permisos.
 	 * Lee el certificado de la cabecera HTTP.
 	 * @param appId Identificador de la aplicaci&oacute;n.
-	 * @param certificates Listado de certificados
+	 * @param certificates Listado de certificados.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @throws CertificateValidationException En caso de ocurrir alg&uacute;n error o si el certificado
 	 *                                        no tiene acceso.
 	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
 	 */
-	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates)
+	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates,
+			final TransactionAuxParams trAux)
 			throws CertificateValidationException, DBConnectionException {
 
 		if (certificates == null || certificates.length == 0 || certificates[0] == null) {
@@ -230,7 +236,7 @@ public final class ServiceUtil {
 
 		try {
 			final String thumbPrint = ServiceUtil.getThumbPrint(certificates[0]);
-			ServiceUtil.checkValideThumbPrint(appId, thumbPrint);
+			ServiceUtil.checkValideThumbPrint(appId, thumbPrint, trAux);
 		}
 		catch (final NoSuchAlgorithmException e) {
 			throw new CertificateValidationException(FIReError.INTERNAL_ERROR, "El algoritmo de huella no se ha encontrado en el sistema", e);//$NON-NLS-1$
@@ -249,30 +255,34 @@ public final class ServiceUtil {
 		}
 	}
 
-    /** Devuelve la huella del certificado en Base64.
+    /**
+     * Devuelve la huella del certificado en Base64.
      * @param cert Certificado del que extraer su huella.
      * @return Huella obtenida codificada en Base64.
      * @throws NoSuchAlgorithmException Si no se encuentra el algoritmo SHA-1.
-     * @throws CertificateEncodingException Si hay alg&uacute;n problema codificando el certificado. */
+     * @throws CertificateEncodingException Si hay alg&uacute;n problema codificando el certificado.
+     */
 	private static String getThumbPrint(final X509Certificate cert) throws NoSuchAlgorithmException,
 	                                                                       CertificateEncodingException {
 		final MessageDigest md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
 		return Base64.encode(md.digest(cert.getEncoded()));
 	}
 
-	/** Comprueba si la huella del certificado pasada est&aacute;n registrada en la base de datos.
+	/**
+	 * Comprueba si la huella del certificado pasada est&aacute;n registrada en la base de datos.
 	 * @param appId Identificador de la aplicaci&oacute;n.
 	 * @param thumbPrint Huella a encontrar en la base de datos.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @throws SQLException Si ocurre una excepci&oacute;n en el acceso a la base de datos.
 	 * @throws IllegalAccessException Si la huella no se encuentra registrada en el sistema.
 	 * @throws IOException Si hay un error de entrada o salida.
 	 * @throws CertificateException Si hay un problema al decodificar el certificado.
 	 * @throws NoSuchAlgorithmException No se encuentra el algoritmo en el sistema.
 	 */
-	private static void checkValideThumbPrint(final String appId, final String thumbPrint) throws SQLException,
-	                                                                          IllegalAccessException, CertificateException,
-	                                                                          NoSuchAlgorithmException, IOException {
-		if (!ApplicationsDAO.checkThumbPrint(appId, thumbPrint)) {
+	private static void checkValideThumbPrint(final String appId, final String thumbPrint,
+			final TransactionAuxParams trAux) throws SQLException, IllegalAccessException,
+				CertificateException, NoSuchAlgorithmException, IOException {
+		if (!ApplicationsDAO.checkThumbPrint(appId, thumbPrint, trAux)) {
     		throw new IllegalAccessException("El certificado utilizado no tiene permiso para acceder"); //$NON-NLS-1$
     	}
 	}

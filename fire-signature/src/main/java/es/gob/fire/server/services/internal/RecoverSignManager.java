@@ -70,10 +70,11 @@ public class RecoverSignManager {
 	/**
 	 * Finaliza un proceso de firma y devuelve el resultado del mismo.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
-	public static void recoverSignature(final RequestParameters params, final HttpServletResponse response)
+	public static void recoverSignature(final RequestParameters params, final TransactionAuxParams trAux, final HttpServletResponse response)
 			throws IOException {
 
 		// Recogemos los parametros proporcionados en la peticion
@@ -83,7 +84,7 @@ public class RecoverSignManager {
 		final String upgrade = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
 		final String configB64 = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, transactionId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
         // Comprobamos que se hayan proporcionado los parametros indispensables
         if (transactionId == null || transactionId.isEmpty()) {
@@ -118,7 +119,7 @@ public class RecoverSignManager {
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
         // Recuperamos el resto de parametros de la sesion
-        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false);
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false, trAux);
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
@@ -127,7 +128,7 @@ public class RecoverSignManager {
 
         // Si la operacion anterior no fue el inicio de una firma, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_PRE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true);
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
 		}
 
         // Comprobamos que no se haya declarado ya un error, en cuyo caso, lo devolvemos
@@ -136,8 +137,8 @@ public class RecoverSignManager {
         	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma: " + errMessage)); //$NON-NLS-1$
-        	final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, Integer.parseInt(errType), errMessage);
-        	sendError(response, session, FIReError.SIGNING, result);
+        	final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, Integer.parseInt(errType), errMessage, trAux);
+        	sendError(response, session, FIReError.SIGNING, result, trAux);
         	return;
         }
 
@@ -155,7 +156,7 @@ public class RecoverSignManager {
 
         if (providerName == null) {
     		LOGGER.severe(logF.f("No se selecciono un proveedor de firma. Probablemente el usuario no fue redirigido a la URL indicada en la transaccion")); //$NON-NLS-1$
-    		sendError(response, session, FIReError.PROVIDER_NOT_SELECTED);
+    		sendError(response, session, FIReError.PROVIDER_NOT_SELECTED, trAux);
     		return;
         }
 
@@ -163,7 +164,7 @@ public class RecoverSignManager {
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
         if (connConfig == null) {
 			LOGGER.warning(logF.f("No se encontro en la sesion la configuracion de la transaccion")); //$NON-NLS-1$
-    		sendError(response, session, FIReError.INTERNAL_ERROR);
+    		sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
 			return;
         }
 
@@ -172,7 +173,6 @@ public class RecoverSignManager {
         final FIReDocumentManager docManager = (FIReDocumentManager) session.getObject(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER);
 
         // Decodificamos el certificado si se indico.
-        // Si no se indico, es posible que el proceso falle mas adelante si resulta que este era obligatorio
         X509Certificate signingCert = null;
         if (certB64 != null) {
         	try {
@@ -182,9 +182,15 @@ public class RecoverSignManager {
         	}
         	catch (final Exception e) {
         		LOGGER.severe(logF.f("No se ha podido decodificar el certificado del firmante: " + e)); //$NON-NLS-1$
-        		sendError(response, session, FIReError.SIGNING);
+        		sendError(response, session, FIReError.SIGNING, trAux);
         		return;
         	}
+        }
+        // Si no se indico, pero era obligatorio (firma con certificado en la nube), el proceso falla
+        else if (!ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(providerName)) {
+        	LOGGER.severe(logF.f("El certificado firmante es obligatorio para componer la firma con proveedores en la nube y no se devolvio")); //$NON-NLS-1$
+        	sendError(response, session, FIReError.PROVIDER_ERROR, trAux);
+        	return;
         }
 
     	// Recuperamos la firma parcial o los datos (segun el proveedor utilizado)
@@ -195,7 +201,7 @@ public class RecoverSignManager {
     	}
     	catch (final Exception e) {
     		LOGGER.warning(logF.f("No se encuentra la firma parcial generada. Puede haber caducado la sesion: " + e)); //$NON-NLS-1$
-			sendError(response, session, FIReError.INVALID_TRANSACTION);
+			sendError(response, session, FIReError.INVALID_TRANSACTION, trAux);
     		return;
     	}
 
@@ -205,14 +211,7 @@ public class RecoverSignManager {
         // completa, pero si se uso un certificado en la nube, se debera completar el proceso de firma
     	if (!ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(providerName)) {
 
-    		LOGGER.info(logF.f(String.format("Se enviaron los datos al proveedor remoto %3s y ahora se le solicitara su PKCS#1", providerName))); //$NON-NLS-1$
-
-    		// Comprobamos el certificado
-    		if (signingCert == null) {
-    			LOGGER.severe(logF.f("El certificado firmante es obligatorio para componer la firma con proveedores en la nube y no se devolvio")); //$NON-NLS-1$
-    			sendError(response, session, FIReError.PROVIDER_ERROR);
-    			return;
-    		}
+    		LOGGER.info(logF.f("Se enviaron los datos al proveedor remoto %1s y ahora se le solicitara su PKCS#1", providerName)); //$NON-NLS-1$
 
     		// Decodificamos la informacion de la firma trifasica
     		TriphaseData td;
@@ -221,7 +220,7 @@ public class RecoverSignManager {
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error de codificacion en los datos de firma trifasica proporcionados"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.INTERNAL_ERROR);
+    			sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
     			return;
     		}
 
@@ -232,33 +231,33 @@ public class RecoverSignManager {
     		}
     		catch (final IllegalArgumentException e) {
     			LOGGER.log(Level.SEVERE, logF.f("Parametro no valido en la operacion de firma trifasica"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.INTERNAL_ERROR);
+    			sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
     			return;
 			}
     		catch(final FIReConnectorFactoryException e) {
     			LOGGER.log(Level.WARNING, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.INTERNAL_ERROR);
+    			sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
     			return;
     		}
     		catch(final FIReConnectorUnknownUserException e) {
     			LOGGER.log(Level.WARNING, logF.f("El usuario no esta dado de alta en el sistema"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.UNKNOWN_USER);
+    			sendError(response, session, FIReError.UNKNOWN_USER, trAux);
     			return;
     		}
     		catch(final FIReConnectorNetworkException e) {
     			LOGGER.log(Level.SEVERE, logF.f("No se ha podido conectar con el proveedor de firma en la nube"), e); //$NON-NLS-1$
     			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
-                sendError(response, session, FIReError.PROVIDER_INACCESIBLE_SERVICE);
+                sendError(response, session, FIReError.PROVIDER_INACCESIBLE_SERVICE, trAux);
     			return;
     		}
     		catch(final FIReSignatureException e) {
     			LOGGER.log(Level.WARNING, logF.f("Error de integridad. El PKCS#1 recibido no se genero con el certificado indicado"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.PROVIDER_ERROR);
+    			sendError(response, session, FIReError.PROVIDER_ERROR, trAux);
     			return;
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error interno durante la firma"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.PROVIDER_ERROR);
+    			sendError(response, session, FIReError.PROVIDER_ERROR, trAux);
     			return;
 			}
 
@@ -270,7 +269,7 @@ public class RecoverSignManager {
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error durante la postfirma"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.SIGNING);
+    			sendError(response, session, FIReError.SIGNING, trAux);
     			return;
     		}
     	}
@@ -281,7 +280,7 @@ public class RecoverSignManager {
 
     		// Comprobamos si es necesaria la validacion de la firma
         	final boolean signValidationNeeded = needValidation(
-        			ConfigManager.isSecureProvider(providerName), cop, format);
+        			ConfigManager.isSecureProvider(providerName), cop, format, logF);
 
         	final PostProcessResult postProcessResult;
     		try {
@@ -290,18 +289,18 @@ public class RecoverSignManager {
     		}
     		catch (final InvalidSignatureException e) {
     			LOGGER.log(Level.WARNING, logF.f("La firma generada no es valida: " + e.getMessage())); //$NON-NLS-1$
-    			sendError(response, session, FIReError.INVALID_SIGNATURE);
+    			sendError(response, session, FIReError.INVALID_SIGNATURE, trAux);
     			return;
     		}
     		catch (final ConnectionException e) {
     			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$
     			AlarmsManager.notify(Alarm.CONNECTION_VALIDATION_PLATFORM);
-    			sendError(response, session, FIReError.UPGRADING_SIGNATURE);
+    			sendError(response, session, FIReError.UPGRADING_SIGNATURE, trAux);
     			return;
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error al validar o actualizar la firma"), e); //$NON-NLS-1$
-    			sendError(response, session, FIReError.UPGRADING_SIGNATURE);
+    			sendError(response, session, FIReError.UPGRADING_SIGNATURE, trAux);
     			return;
     		}
 
@@ -325,14 +324,14 @@ public class RecoverSignManager {
     				catch (final Exception e) {
     					LOGGER.log(Level.WARNING, logF.f("Error al registrar la operacion asincrona en el DocumentManager"), e); //$NON-NLS-1$
     					AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
-    		    		sendError(response, session, FIReError.INTERNAL_ERROR);
+    		    		sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
     					return;
 					}
     			}
     			SIGNLOGGER.register(session, true);
     			TRANSLOGGER.register(session, true);
-    			SessionCollector.removeSession(session);
-    	        Responser.sendResult(response, buildResult(providerName, signingCert, gracePeriod));
+    			SessionCollector.removeSession(session, trAux);
+    	        Responser.sendResult(response, buildResult(providerName, signingCert, gracePeriod, trAux));
     	        return;
     		}
     	}
@@ -353,7 +352,7 @@ public class RecoverSignManager {
         catch (final Exception e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error en el guardado de la firma del documento " + docId), e); //$NON-NLS-1$
         	AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
-    		sendError(response, session, FIReError.INTERNAL_ERROR);
+    		sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
 			return;
 		}
 
@@ -366,18 +365,18 @@ public class RecoverSignManager {
     	}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al almacenar la firma despues de haberla completado"), e); //$NON-NLS-1$
-        	sendError(response, session, FIReError.INTERNAL_ERROR);
+        	sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
 			return;
     	}
 
     	// Ya no necesitaremos de nuevo la sesion, asi que la eliminamos del pool
     	session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_RECOVER);
-    	SessionCollector.commit(session);
+    	SessionCollector.commit(session, trAux);
 
     	LOGGER.info(logF.f("Se devuelve la informacion del resultado de la operacion")); //$NON-NLS-1$
 
     	// Enviamos el resultado de la operacion y los datos de la misma, aunque no la propia firma generada
-        Responser.sendResult(response, buildResult(providerName, signingCert, finalUpgradeFormat));
+        Responser.sendResult(response, buildResult(providerName, signingCert, finalUpgradeFormat, trAux));
 	}
 
 	/**
@@ -453,11 +452,13 @@ public class RecoverSignManager {
 	 * @param providerName Nombre del proveedor seleccionado.
 	 * @param signingCert Certificado utilizado para firmar.
 	 * @param upgradeFormat Formato al que se ha actualizado la firma.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Resultado de la operaci&oacute;n de firma.
 	 */
 	private static TransactionResult buildResult(final String providerName,
-			final X509Certificate signingCert, final String upgradeFormat) {
-		final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, providerName);
+			final X509Certificate signingCert, final String upgradeFormat,
+			final TransactionAuxParams trAux) {
+		final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, providerName, trAux);
 		result.setSigningCert(signingCert);
 		result.setUpgradeFormat(upgradeFormat);
 		return result;
@@ -466,11 +467,13 @@ public class RecoverSignManager {
 	/** Construye el resultado de la operaci&oacute;n.
 	 * @param providerName Nombre del proveedor seleccionado.
 	 * @param signingCert Certificado utilizado para firmar.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Resultado de la operaci&oacute;n de firma.
 	 */
 	private static TransactionResult buildResult(final String providerName,
-			final X509Certificate signingCert, final GracePeriodInfo gracePeriod) {
-		final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, providerName);
+			final X509Certificate signingCert, final GracePeriodInfo gracePeriod,
+			final TransactionAuxParams trAux) {
+		final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, providerName, trAux);
 		result.setSigningCert(signingCert);
 		result.setGracePeriod(gracePeriod);
 		return result;
@@ -538,12 +541,14 @@ public class RecoverSignManager {
 	 * @param response Respuesta a la petici&oacute;n.
 	 * @param session Sesi&oacute;n de la que extraer los datos de la operaci&oacute;n y que limpiar.
 	 * @param errorCode C&oacute;digo de error que enviar.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @throws IOException Cuando ocurre un error al enviar el error.
 	 */
-	private static void sendError(final HttpServletResponse response, final FireSession session, final FIReError error) throws IOException {
+	private static void sendError(final HttpServletResponse response, final FireSession session,
+			final FIReError error, final TransactionAuxParams trAux) throws IOException {
 		SIGNLOGGER.register(session, false, null);
 		TRANSLOGGER.register(session, false);
-		SessionCollector.removeSession(session);
+		SessionCollector.removeSession(session, trAux);
 		Responser.sendError(response, error);
 	}
 
@@ -554,12 +559,15 @@ public class RecoverSignManager {
 	 * @param session Sesi&oacute;n de la que extraer los datos de la operaci&oacute;n y que limpiar.
 	 * @param error Error que enviar.
 	 * @param result Resultado de la transacci&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @throws IOException Cuando ocurre un error al enviar el error.
 	 */
-	private static void sendError(final HttpServletResponse response, final FireSession session, final FIReError error, final TransactionResult result) throws IOException {
+	private static void sendError(final HttpServletResponse response, final FireSession session,
+			final FIReError error, final TransactionResult result, final TransactionAuxParams trAux)
+					throws IOException {
 		SIGNLOGGER.register(session, false, null);
 		TRANSLOGGER.register(session, false);
-		SessionCollector.removeSession(session);
+		SessionCollector.removeSession(session, trAux);
 		Responser.sendError(response, error, result);
 	}
 
@@ -567,17 +575,21 @@ public class RecoverSignManager {
 	 * Realiza las comprobaciones necesarias para identificar si es necesario validar una firma
 	 * cuando se ha solicitado que se haga. Si este m&eacute;todo devuelve {@code false} se
 	 * ignorar&aacute;n las peticiones de validaci&oacute;n.
+	 * @param secureProvider Indica si se considera que el proveedor es seguro.
+	 * @param signOperation Operacion criptogr&aacute;fica.
+	 * @param signFormat Formato de firma.
+	 * @param logF Objeto para el formateo de logs.
 	 * @return {@code true} si es necesario validar las firmas que se soliciten, {@code false} en
 	 * caso contrario.
 	 */
-	static boolean needValidation(final boolean secureProvider, final String signOperation, final String signFormat) {
+	static boolean needValidation(final boolean secureProvider, final String signOperation, final String signFormat, final LogTransactionFormatter logF) {
 		try {
 			return !secureProvider ||
 					SignOperation.parse(signOperation) != SignOperation.SIGN ||
 					AOSignConstants.SIGN_FORMAT_PADES.equals(signFormat);
 		}
 		catch (final Exception e) {
-			LOGGER.warning("No se pudo comprobar si la firma era apta para validacion: " + e); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No se pudo comprobar si la firma era apta para validacion: " + e)); //$NON-NLS-1$
 			return true;
 		}
 	}

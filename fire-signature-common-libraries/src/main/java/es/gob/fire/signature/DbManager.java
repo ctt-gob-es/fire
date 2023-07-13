@@ -12,7 +12,6 @@ package es.gob.fire.signature;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Logger;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -22,14 +21,6 @@ import com.zaxxer.hikari.HikariDataSource;
  * Manejador para la conexi&oacute;n a la base de datos.
  */
 public class DbManager {
-
-	private static final String HK_PROPERTY_SERVERNAME = "serverName";
-	private static final String HK_PROPERTY_PORT = "portNumber";
-	private static final String HK_PROPERTY_DATABASE_NAME = "databaseName";
-	private static final String HK_PROPERTY_USER = "user";
-	private static final String HK_PROPERTY_PASSWORD = "password";
-
-	private static final Logger LOGGER = Logger.getLogger(DbManager.class.getName());
 
 	private static boolean configured = false;
 

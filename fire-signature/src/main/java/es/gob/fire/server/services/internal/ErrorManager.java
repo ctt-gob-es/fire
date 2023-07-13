@@ -26,9 +26,11 @@ public class ErrorManager {
 	 * cualquier otro dato imprescindible.
 	 * @param session Sesi&oacute;n en la que se produce y se debe almacenar el error.
 	 * @param error Error producido.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
-	public static void setErrorToSession(final FireSession session, final FIReError error) {
-		setErrorToSession(session, error, true);
+	public static void setErrorToSession(final FireSession session, final FIReError error,
+			final TransactionAuxParams trAux) {
+		setErrorToSession(session, error, true, trAux);
 	}
 
 	/**
@@ -40,10 +42,11 @@ public class ErrorManager {
 	 * @param error Error producido.
 	 * @param returnToApp Indica si debe prepararse la sesi&oacute;n para volver a la
 	 * aplicaci&oacute;n y borrarse cualquier dato de sesion ajeno a este error.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
 	public static void setErrorToSession(final FireSession session, final FIReError error,
-			final boolean returnToApp) {
-		setErrorToSession(session, error, returnToApp, null);
+			final boolean returnToApp, final TransactionAuxParams trAux) {
+		setErrorToSession(session, error, returnToApp, null, trAux);
 	}
 
 	/**
@@ -57,9 +60,10 @@ public class ErrorManager {
 	 * aplicaci&oacute;n y borrarse cualquier dato de sesion ajeno a este error.
 	 * @param messageError Mensaje de error a almacenar. Si no se indica, se
 	 * usar&aacute; el por defecto del tipo de error.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
 	public static void setErrorToSession(final FireSession session, final FIReError error,
-			final boolean returnToApp, final String messageError) {
+			final boolean returnToApp, final String messageError, final TransactionAuxParams trAux) {
 
 		// Si se va a volver a la aplicacion, eliminamos los datos de sesion innecesarios
 		if (returnToApp) {
@@ -80,7 +84,7 @@ public class ErrorManager {
 			else if (op == TransactionType.SIGN) { // Operacion Simple
 				SIGNLOGGER.register(session, false, null);
 			}
-			SessionCollector.cleanSession(session);
+			SessionCollector.cleanSession(session, trAux);
 		}
 
 		session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
@@ -90,6 +94,6 @@ public class ErrorManager {
 		else {
 			session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
 		}
-		SessionCollector.commit(session);
+		SessionCollector.commit(session, trAux);
 	}
 }

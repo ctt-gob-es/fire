@@ -31,9 +31,11 @@ import es.gob.fire.server.services.internal.RecoverErrorManager;
 import es.gob.fire.server.services.internal.RecoverSignManager;
 import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.RecoverUpdatedSignManager;
+import es.gob.fire.server.services.internal.RecoverUpdatedSignResultManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
+import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.DbManager;
@@ -150,7 +152,8 @@ public class FIReService extends HttpServlet {
         final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
         final String trId      = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 
-		final LogTransactionFormatter logF = new LogTransactionFormatter(appId, trId);
+        final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario
 		// validarlo posteriormente
@@ -165,7 +168,7 @@ public class FIReService extends HttpServlet {
     	if (ConfigManager.isCheckApplicationNeeded()) {
         	LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
         	try {
-        		appName = ServiceUtil.checkValidApplication(appId);
+        		appName = ServiceUtil.checkValidApplication(appId, trAux);
         	}
         	catch (final DBConnectionException e) {
         		LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos para validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
@@ -186,9 +189,15 @@ public class FIReService extends HttpServlet {
 
     	if (ConfigManager.isCheckCertificateNeeded()){
     		LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
-    		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
-	    	try {
-				ServiceUtil.checkValidCertificate(appId, certificates);
+    		try {
+    			final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
+				ServiceUtil.checkValidCertificate(appId, certificates, trAux);
+			}
+    		catch (final IOException e) {
+				LOGGER.log(Level.WARNING, logF.f("No se encontro el certificado cliente en la peticion entrante"), e); //$NON-NLS-1$
+				Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+						"No se encontro el certificado cliente en la peticion entrante"); //$NON-NLS-1$
+				return;
 			}
 	    	catch (final DBConnectionException e) {
 				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
@@ -229,37 +238,40 @@ public class FIReService extends HttpServlet {
     	try {
     		switch (op) {
     		case SIGN:
-    			SignOperationManager.sign(request, appName, params, response);
+    			SignOperationManager.sign(request, appName, params, trAux, response);
     			break;
     		case RECOVER_SIGN:
-    			RecoverSignManager.recoverSignature(params, response);
+    			RecoverSignManager.recoverSignature(params, trAux, response);
     			break;
     		case RECOVER_SIGN_RESULT:
-    			RecoverSignResultManager.recoverSignature(params, response);
+    			RecoverSignResultManager.recoverSignature(params, trAux, response);
     			break;
     		case CREATE_BATCH:
-    			CreateBatchManager.createBatch(request, appName, params, response);
+    			CreateBatchManager.createBatch(request, appName, params, trAux, response);
     			break;
     		case ADD_DOCUMENT_TO_BATCH:
-    			AddDocumentBatchManager.addDocument(params, response);
+    			AddDocumentBatchManager.addDocument(params, trAux, response);
     			break;
     		case SIGN_BATCH:
-    			SignBatchManager.signBatch(request, params, response);
+    			SignBatchManager.signBatch(request, params, trAux, response);
     			break;
     		case RECOVER_BATCH:
-    			RecoverBatchResultManager.recoverResult(params, response);
+    			RecoverBatchResultManager.recoverResult(params, trAux, response);
     			break;
     		case RECOVER_BATCH_STATE:
-    			RecoverBatchStateManager.recoverState(params, response);
+    			RecoverBatchStateManager.recoverState(params, trAux, response);
     			break;
     		case RECOVER_SIGN_BATCH:
-    			RecoverBatchSignatureManager.recoverSignature(params, response);
+    			RecoverBatchSignatureManager.recoverSignature(params, trAux, response);
     			break;
     		case RECOVER_ERROR:
-    			RecoverErrorManager.recoverError(params, response);
+    			RecoverErrorManager.recoverError(params, trAux, response);
     			break;
     		case RECOVER_UPDATED_SIGN:
-    			RecoverUpdatedSignManager.recoverSignature(params, response);
+    			RecoverUpdatedSignManager.recoverSignature(params, trAux, response);
+    			break;
+    		case RECOVER_UPDATED_SIGN_RESULT:
+    			RecoverUpdatedSignResultManager.recoverSignature(params, trAux, response);
     			break;
     		default:
     			LOGGER.warning(logF.f("Se ha enviado una peticion con una operacion no soportada: " + op.name())); //$NON-NLS-1$

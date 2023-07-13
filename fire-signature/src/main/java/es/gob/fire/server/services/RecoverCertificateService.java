@@ -9,6 +9,7 @@
  */
 package es.gob.fire.server.services;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -27,6 +28,7 @@ import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.RecoverCertificateManager;
 import es.gob.fire.server.services.internal.ServiceParams;
+import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
@@ -107,9 +109,11 @@ public final class RecoverCertificateService extends HttpServlet {
 		updateLegacyKeys(params);
 
     	final String appId = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
-    	final String trId = params.getParameter(PARAMETER_NAME_TRANSACTION_ID);
+    	final String transactionId = params.getParameter(PARAMETER_NAME_TRANSACTION_ID);
 
-    	final LogTransactionFormatter logF = new LogTransactionFormatter(appId, trId);
+    	final TransactionAuxParams trAux = new TransactionAuxParams(appId, transactionId);
+    	final LogTransactionFormatter logF = trAux.getLogFormatter();
+
     	LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de recuperacion del certificado generado")); //$NON-NLS-1$
 
     	// Comprobacion de la aplicacion solicitante
@@ -122,7 +126,7 @@ public final class RecoverCertificateService extends HttpServlet {
             }
 
         	try {
-        		ServiceUtil.checkValidApplication(appId);
+        		ServiceUtil.checkValidApplication(appId, trAux);
 	        }
 	        catch (final DBConnectionException e) {
 	        	LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
@@ -142,9 +146,15 @@ public final class RecoverCertificateService extends HttpServlet {
 
     	if (ConfigManager.isCheckCertificateNeeded()) {
     		LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
-    		final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
-	    	try {
-				ServiceUtil.checkValidCertificate(appId, certificates);
+    		try {
+    			final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
+				ServiceUtil.checkValidCertificate(appId, certificates, trAux);
+			}
+    		catch (final IOException e) {
+				LOGGER.log(Level.WARNING, logF.f("No se encontro el certificado cliente en la peticion entrante"), e); //$NON-NLS-1$
+				Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+						"No se encontro el certificado cliente en la peticion entrante"); //$NON-NLS-1$
+				return;
 			}
 	    	catch (final DBConnectionException e) {
 				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
