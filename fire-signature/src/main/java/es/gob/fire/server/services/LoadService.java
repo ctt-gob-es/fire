@@ -132,63 +132,30 @@ public final class LoadService extends HttpServlet {
         final TransactionAuxParams trAux = new TransactionAuxParams(appId);
         final LogTransactionFormatter logF = trAux.getLogFormatter();
 
-        if (ConfigManager.isCheckApplicationNeeded()) {
-        	LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
-        	if (appId == null || appId.isEmpty()) {
-        		LOGGER.warning(logF.f("No se ha proporcionado el identificador de la aplicacion")); //$NON-NLS-1$
-        		Responser.sendError(response,
-            		HttpServletResponse.SC_BAD_REQUEST,
-                    "No se ha proporcionado el identificador de la aplicacion" //$NON-NLS-1$
-        		);
-                return;
-            }
-
-        	try {
-        		ServiceUtil.checkValidApplication(appId, trAux);
-	        }
-	        catch (final DBConnectionException e) {
-	        	LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
-	        	AlarmsManager.notify(Alarm.CONNECTION_DB);
-	        	Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	        	return;
-	        }
-        	catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, logF.f("La aplicacion que solicita la peticion no es valida o esta desactivada"), e); //$NON-NLS-1$
-				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				return;
-			}
-        }
-        else{
-        	LOGGER.fine("No se realiza la validacion de aplicacion en la base de datos"); //$NON-NLS-1$
-        }
-
-    	if (ConfigManager.isCheckCertificateNeeded()){
-    		LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
-    		try {
-    			final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
-				ServiceUtil.checkValidCertificate(appId, certificates, trAux);
-			}
-    		catch (final IOException e) {
-				LOGGER.log(Level.WARNING, logF.f("No se encontro el certificado cliente en la peticion entrante"), e); //$NON-NLS-1$
-				Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
-						"No se encontro el certificado cliente en la peticion entrante"); //$NON-NLS-1$
-				return;
-			}
-	    	catch (final DBConnectionException e) {
-				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
-				AlarmsManager.notify(Alarm.CONNECTION_DB);
-				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-				return;
-			}
-	    	catch (final CertificateValidationException e) {
-				LOGGER.log(Level.SEVERE, logF.f("Error en la validacion del certificado: ") + e, e); //$NON-NLS-1$
-				Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-				return;
-			}
+    	// Comprobamos que la peticion este autorizada
+    	try {
+    		ServiceUtil.checkAccess(appId, request, trAux);
     	}
-    	else {
-    		LOGGER.fine(logF.f("No se validara el certificado"));//$NON-NLS-1$
-    	}
+    	catch (final IOException e) {
+    		LOGGER.log(Level.SEVERE, logF.f("Error interno al validar la peticion"), e); //$NON-NLS-1$
+            Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+		}
+    	catch (final CertificateValidationException | IllegalArgumentException e) {
+    		LOGGER.log(Level.WARNING, logF.f("Error al validar la peticion"), e); //$NON-NLS-1$
+            Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+            return;
+		}
+    	catch (final UnauthorizedApplicacionException e) {
+    		LOGGER.log(Level.WARNING, logF.f("Acceso denegado: ") + e); //$NON-NLS-1$
+            Responser.sendError(response, HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+		}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.SEVERE, logF.f("Error desconocido al validar la peticion"), e); //$NON-NLS-1$
+            Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+		}
 
         if (subjectId == null || subjectId.isEmpty()) {
             LOGGER.warning(logF.f("No se ha proporcionado el identificador del titular de la clave de firma")); //$NON-NLS-1$

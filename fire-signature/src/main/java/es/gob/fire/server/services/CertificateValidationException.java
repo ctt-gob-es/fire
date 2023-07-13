@@ -24,7 +24,7 @@ public class CertificateValidationException extends Exception {
 	 * @param error Error que notificar a los usuarios.
 	 * @param msg Mensaje descriptivo del error.
 	 */
-	CertificateValidationException(final FIReError error, final String msg) {
+	public CertificateValidationException(final FIReError error, final String msg) {
 		super(msg);
 		this.error = error;
     }
@@ -35,7 +35,7 @@ public class CertificateValidationException extends Exception {
 	 * @param msg Mensaje descriptivo del error.
 	 * @param cause Error que orig&oacute; la excepci&oacute;n.
 	 */
-	CertificateValidationException(final FIReError error, final String msg, final Throwable cause) {
+	public CertificateValidationException(final FIReError error, final String msg, final Throwable cause) {
 		super(msg, cause);
 		this.error = error;
     }

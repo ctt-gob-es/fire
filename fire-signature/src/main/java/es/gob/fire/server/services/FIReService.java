@@ -10,7 +10,6 @@
 package es.gob.fire.server.services;
 
 import java.io.IOException;
-import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.services.internal.AddDocumentBatchManager;
 import es.gob.fire.server.services.internal.AlarmsManager;
+import es.gob.fire.server.services.internal.ApplicationInfo;
 import es.gob.fire.server.services.internal.CreateBatchManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.RecoverBatchResultManager;
@@ -142,7 +142,7 @@ public class FIReService extends HttpServlet {
 		try {
 			params = RequestParameters.extractParameters(request);
 		}
-		catch (final IOException e) {
+		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
@@ -163,57 +163,31 @@ public class FIReService extends HttpServlet {
             return;
         }
 
-		String appName = null;
-
-    	if (ConfigManager.isCheckApplicationNeeded()) {
-        	LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
-        	try {
-        		appName = ServiceUtil.checkValidApplication(appId, trAux);
-        	}
-        	catch (final DBConnectionException e) {
-        		LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos para validar el identificador de aplicacion enviado"), e); //$NON-NLS-1$
-        		AlarmsManager.notify(Alarm.CONNECTION_DB);
-        		Responser.sendError(response, FIReError.INTERNAL_ERROR);
-        		return;
-        	}
-        	catch (final Exception e) {
-        		LOGGER.log(Level.SEVERE, logF.f("La aplicacion que solicita la peticion no es valida o esta desactivada"), e); //$NON-NLS-1$
-        		Responser.sendError(response, FIReError.UNAUTHORIZED);
-        		return;
-        	}
-        }
-        else {
-        	LOGGER.fine(logF.f("No se realiza la validacion del identificador de aplicacion")); //$NON-NLS-1$
-        }
-
-
-    	if (ConfigManager.isCheckCertificateNeeded()){
-    		LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
-    		try {
-    			final X509Certificate[] certificates = ServiceUtil.getCertificatesFromRequest(request);
-				ServiceUtil.checkValidCertificate(appId, certificates, trAux);
-			}
-    		catch (final IOException e) {
-				LOGGER.log(Level.WARNING, logF.f("No se encontro el certificado cliente en la peticion entrante"), e); //$NON-NLS-1$
-				Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
-						"No se encontro el certificado cliente en la peticion entrante"); //$NON-NLS-1$
-				return;
-			}
-	    	catch (final DBConnectionException e) {
-				LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con la base de datos"), e); //$NON-NLS-1$
-				AlarmsManager.notify(Alarm.CONNECTION_DB);
-				Responser.sendError(response, FIReError.INTERNAL_ERROR);
-				return;
-			}
-	    	catch (final CertificateValidationException e) {
-				LOGGER.severe(logF.f("Error en la validacion del certificado: " + e)); //$NON-NLS-1$
-				Responser.sendError(response, e.getError());
-				return;
-			}
+    	// Comprobamos que la peticion este autorizada
+    	ApplicationInfo appInfo;
+    	try {
+    		appInfo = ServiceUtil.checkAccess(appId, request, trAux);
     	}
-    	else {
-    		LOGGER.fine(logF.f("No se valida el certificado"));//$NON-NLS-1$
-    	}
+    	catch (final IOException e) {
+    		LOGGER.log(Level.SEVERE, logF.f("Error interno al validar la peticion"), e); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.INTERNAL_ERROR);
+            return;
+		}
+    	catch (final CertificateValidationException e) {
+    		LOGGER.log(Level.WARNING, logF.f("Error al validar el certificado cliente"), e); //$NON-NLS-1$
+            Responser.sendError(response, e.getError());
+            return;
+		}
+    	catch (final UnauthorizedApplicacionException e) {
+    		LOGGER.log(Level.WARNING, logF.f("Acceso denegado: ") + e); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.UNAUTHORIZED);
+            return;
+		}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.SEVERE, logF.f("Error desconocido al validar la peticion"), e); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.INTERNAL_ERROR);
+            return;
+		}
 
     	LOGGER.fine(logF.f("Peticion autorizada")); //$NON-NLS-1$
 
@@ -238,7 +212,7 @@ public class FIReService extends HttpServlet {
     	try {
     		switch (op) {
     		case SIGN:
-    			SignOperationManager.sign(request, appName, params, trAux, response);
+    			SignOperationManager.sign(request, appInfo.getName(), params, trAux, response);
     			break;
     		case RECOVER_SIGN:
     			RecoverSignManager.recoverSignature(params, trAux, response);
@@ -247,7 +221,7 @@ public class FIReService extends HttpServlet {
     			RecoverSignResultManager.recoverSignature(params, trAux, response);
     			break;
     		case CREATE_BATCH:
-    			CreateBatchManager.createBatch(request, appName, params, trAux, response);
+    			CreateBatchManager.createBatch(request, appInfo.getName(), params, trAux, response);
     			break;
     		case ADD_DOCUMENT_TO_BATCH:
     			AddDocumentBatchManager.addDocument(params, trAux, response);

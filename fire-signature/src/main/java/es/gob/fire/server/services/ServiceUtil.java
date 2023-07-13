@@ -14,20 +14,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
 import es.gob.afirma.core.misc.Base64;
-import es.gob.fire.server.services.internal.ApplicationChecking;
-import es.gob.fire.server.services.internal.ApplicationsDAO;
+import es.gob.fire.server.services.internal.ApplicationAccessChecker;
+import es.gob.fire.server.services.internal.ApplicationAccessInfo;
+import es.gob.fire.server.services.internal.ApplicationInfo;
+import es.gob.fire.server.services.internal.ApplicationsDAOFactory;
 import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigManager;
 
@@ -35,6 +33,8 @@ import es.gob.fire.signature.ConfigManager;
  *  Conjunto de funciones est&aacute;ticas de car&aacute;cter general.
  */
 public final class ServiceUtil {
+
+	private static final Logger LOGGER = Logger.getLogger(ServiceUtil.class.getName());
 
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
@@ -104,8 +104,9 @@ public final class ServiceUtil {
      * @param request Petici&oacute; HTTP recibida.
      * @return Cadena de certificados X509.
      * @throws IOException Cuando no se encuentra el certificado cliente.
+     * @throws CertificateValidationException Cuando no se puede decodificar el certificado cliente.
      */
-    static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request) throws IOException {
+    static X509Certificate[] getCertificatesFromRequest(final HttpServletRequest request) throws IOException, CertificateValidationException {
 
     	X509Certificate[] certificates = getCertificatesFromAttribute(request);
     	if (certificates == null) {
@@ -162,10 +163,11 @@ public final class ServiceUtil {
      * @param propName Nombre de la propiedad de la que extraer los certificados.
      * @return Lista de los certificados X509 enviados o {@code null} se enviaron en la propiedad
      * de la cabecera.
-     * @throws IOException Cuando ocurre un error al extraer el certificado de la cabecera de la
+     * @throws CertificateValidationException Cuando ocurre un error al extraer el certificado de la cabecera de la
      * petici&oacute;n o cuando no se puede componer el certificado extra&iacute;do.
      */
-    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request, final String propName) throws IOException {
+    private static X509Certificate[] getCertificatesFromHeader(final HttpServletRequest request,
+    		final String propName) throws CertificateValidationException {
 
         X509Certificate certificates[] = null;
         final String headerName = propName;
@@ -183,107 +185,187 @@ public final class ServiceUtil {
             }
         }
         catch(final Exception ex) {
-            throw new IOException("Error al extraer el certificado de la cabecera de la peticion", ex); //$NON-NLS-1$
+            throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID,
+            		"Error al extraer el certificado de la cabecera de la peticion", ex); //$NON-NLS-1$
         }
         return certificates;
     }
 
     /**
-	 * Valida si la aplicaci&oacute;n indicada existe y si se encuentra activada.
-	 * @param appId Identificador de la aplicaci&oacute;n.
+     * Comprueba que una petici&oacute;n tenga acceso.
+     * @param appId Identificador declarado por la aplicaci&oacute;n.
+     * @param request Petici&oacute;n realizada.
 	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
-	 * @return Nombre de la aplicaci&oacute;n o {@code null} si no est&aacute; definido.
-	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
-     * @throws InvalidApplicationException Cuando la aplicaci&oacute;n no existe.
-	 * @throws InactiveApplicationException Cuando la aplicaci&oacute;n est&aacute; desactivada
-	 */
-	public static String checkValidApplication(final String appId, final TransactionAuxParams trAux)
-			throws DBConnectionException, InvalidApplicationException, InactiveApplicationException {
-
-		ApplicationChecking appCheck;
-		try {
-			appCheck = ApplicationsDAO.checkApplicationId(appId, trAux);
-		}
-		catch (final Exception e) {
-			throw new DBConnectionException("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
-		}
-    	if (!appCheck.isValid()) {
-    		throw new InvalidApplicationException("Se proporciono un identificador de aplicacion no valido"); //$NON-NLS-1$
-    	}
-    	if (!appCheck.isEnabled()) {
-    		throw new InactiveApplicationException("Se proporciono un identificador de aplicacion desactivada"); //$NON-NLS-1$
-    	}
-    	return appCheck.getName();
-	}
-
-	/**
-	 * Valida si el certificado que se le pasa a la petici&oacute;n tiene permisos.
-	 * Lee el certificado de la cabecera HTTP.
-	 * @param appId Identificador de la aplicaci&oacute;n.
-	 * @param certificates Listado de certificados.
-	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
-	 * @throws CertificateValidationException En caso de ocurrir alg&uacute;n error o si el certificado
-	 *                                        no tiene acceso.
-	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
-	 */
-	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates,
-			final TransactionAuxParams trAux)
-			throws CertificateValidationException, DBConnectionException {
-
-		if (certificates == null || certificates.length == 0 || certificates[0] == null) {
-			throw new CertificateValidationException(FIReError.UNAUTHORIZED, "No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$
-		}
-
-		try {
-			final String thumbPrint = ServiceUtil.getThumbPrint(certificates[0]);
-			ServiceUtil.checkValideThumbPrint(appId, thumbPrint, trAux);
-		}
-		catch (final NoSuchAlgorithmException e) {
-			throw new CertificateValidationException(FIReError.INTERNAL_ERROR, "El algoritmo de huella no se ha encontrado en el sistema", e);//$NON-NLS-1$
-		}
-		catch (final IllegalArgumentException e){
-			throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado", e); //$NON-NLS-1$
-		}
-		catch (final IllegalAccessException e) {
-			throw new CertificateValidationException(FIReError.UNAUTHORIZED, "Acceso no permitido. El certificado utilizado no tiene permiso para acceder", e); //$NON-NLS-1$
-		}
-		catch (final SQLException e) {
-			throw new DBConnectionException ("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
-		}
-		catch (final Exception e) {
-			throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID, "Ha ocurrido un error al decodificar el certificado", e); //$NON-NLS-1$
-		}
-	}
-
-    /**
-     * Devuelve la huella del certificado en Base64.
-     * @param cert Certificado del que extraer su huella.
-     * @return Huella obtenida codificada en Base64.
-     * @throws NoSuchAlgorithmException Si no se encuentra el algoritmo SHA-1.
-     * @throws CertificateEncodingException Si hay alg&uacute;n problema codificando el certificado.
+     * @return La informaci&oacute;n de la aplicaci&oacute;n asociada a la petici&oacute;n o {@code null}
+     * si no se llega a indicar el identificador de aplicaci&oacute;n.
+     * @throws IOException Cuando no se pude validar la petici&oacute;n.
+     * @throws IllegalArgumentException Cuando no se indica el identificador de aplicacion y es obligatorio.
+     * @throws UnauthorizedApplicacionException Cuando la aplicaci&oacute;n no est&aacute; autorizada.
+     * @throws CertificateValidationException Cuando no se puede comprobar la validez del certificado cliente.
      */
-	private static String getThumbPrint(final X509Certificate cert) throws NoSuchAlgorithmException,
-	                                                                       CertificateEncodingException {
-		final MessageDigest md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
-		return Base64.encode(md.digest(cert.getEncoded()));
+	public static ApplicationInfo checkAccess(final String appId, final HttpServletRequest request, final TransactionAuxParams trAux)
+			throws IOException, IllegalArgumentException, UnauthorizedApplicacionException, CertificateValidationException {
+
+		ApplicationInfo appInfo = null;
+
+    	if (ConfigManager.isCheckApplicationNeeded() || ConfigManager.isCheckCertificateNeeded()) {
+    		LOGGER.fine(trAux.getLogFormatter().f("Se comprueba que la aplicacion este dada de alta en el sistema")); //$NON-NLS-1$
+
+    		if (appId == null) {
+    			throw new IllegalArgumentException("No se ha proporcionado el identificador de aplicacion"); //$NON-NLS-1$
+    		}
+
+    		ApplicationAccessInfo registeredAppInfo = null;
+			try {
+				registeredAppInfo = ApplicationsDAOFactory.getApplicationsDAO()
+						.getApplicationAccessInfo(appId, trAux);
+			}
+			catch (final IOException e) {
+				throw new IOException("No se pudo obtener la informacion del sistema para la validacion de la peticion", e); //$NON-NLS-1$
+			}
+
+			appInfo = new ApplicationInfo(appId, registeredAppInfo.getName());
+
+    		// Comprobamos que la aplicacion este registrada en el sistema y habilitada
+    		if (ConfigManager.isCheckApplicationNeeded()) {
+    			LOGGER.fine(trAux.getLogFormatter().f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
+    			try {
+    				ApplicationAccessChecker.checkAppEnabled(registeredAppInfo);
+    			}
+    			catch (final IllegalAccessException e) {
+    				throw new UnauthorizedApplicacionException("La aplicacion no se encuentra habilitada", e); //$NON-NLS-1$
+    			}
+    		}
+    		else {
+    			LOGGER.fine(trAux.getLogFormatter().f("No se realiza la validacion del identificador de aplicacion")); //$NON-NLS-1$
+    		}
+
+    		if (ConfigManager.isCheckCertificateNeeded()) {
+    			LOGGER.fine(trAux.getLogFormatter().f("Se realizara la validacion del certificado")); //$NON-NLS-1$
+
+    			X509Certificate[] certificates;
+    			try {
+    				certificates = ServiceUtil.getCertificatesFromRequest(request);
+    			}
+    			catch (final IOException e) {
+    				throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED, "No se encontro el certificado cliente en la peticion entrante", e); //$NON-NLS-1$
+    			}
+
+    			try {
+    				ApplicationAccessChecker.checkValidCertificate(certificates, registeredAppInfo);
+    			}
+    			catch (final IllegalAccessException e) {
+    				throw new UnauthorizedApplicacionException("El certificado no esta autorizado", e); //$NON-NLS-1$
+    			}
+    		}
+    		else {
+    			LOGGER.fine(trAux.getLogFormatter().f("No se valida el certificado"));//$NON-NLS-1$
+    		}
+    	}
+
+    	if (appInfo == null && appId != null) {
+    		appInfo = new ApplicationInfo(appId, appId);
+    	}
+
+		return appInfo;
 	}
 
-	/**
-	 * Comprueba si la huella del certificado pasada est&aacute;n registrada en la base de datos.
-	 * @param appId Identificador de la aplicaci&oacute;n.
-	 * @param thumbPrint Huella a encontrar en la base de datos.
-	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
-	 * @throws SQLException Si ocurre una excepci&oacute;n en el acceso a la base de datos.
-	 * @throws IllegalAccessException Si la huella no se encuentra registrada en el sistema.
-	 * @throws IOException Si hay un error de entrada o salida.
-	 * @throws CertificateException Si hay un problema al decodificar el certificado.
-	 * @throws NoSuchAlgorithmException No se encuentra el algoritmo en el sistema.
-	 */
-	private static void checkValideThumbPrint(final String appId, final String thumbPrint,
-			final TransactionAuxParams trAux) throws SQLException, IllegalAccessException,
-				CertificateException, NoSuchAlgorithmException, IOException {
-		if (!ApplicationsDAO.checkThumbPrint(appId, thumbPrint, trAux)) {
-    		throw new IllegalAccessException("El certificado utilizado no tiene permiso para acceder"); //$NON-NLS-1$
-    	}
-	}
+//    /**
+//	 * Valida si la aplicaci&oacute;n indicada existe y si se encuentra activada.
+//	 * @param appId Identificador de la aplicaci&oacute;n.
+//	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+//	 * @return Nombre de la aplicaci&oacute;n o {@code null} si no est&aacute; definido.
+//	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
+//     * @throws InvalidApplicationException Cuando la aplicaci&oacute;n no existe.
+//	 * @throws InactiveApplicationException Cuando la aplicaci&oacute;n est&aacute; desactivada
+//	 */
+//	public static String checkValidApplication(final String appId, final TransactionAuxParams trAux)
+//			throws DBConnectionException, InvalidApplicationException, InactiveApplicationException {
+//
+//		ApplicationChecking appCheck;
+//		try {
+//			appCheck = ApplicationsDAO.checkApplicationId(appId, trAux);
+//		}
+//		catch (final Exception e) {
+//			throw new DBConnectionException("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
+//		}
+//    	if (!appCheck.isValid()) {
+//    		throw new InvalidApplicationException("Se proporciono un identificador de aplicacion no valido"); //$NON-NLS-1$
+//    	}
+//    	if (!appCheck.isEnabled()) {
+//    		throw new InactiveApplicationException("Se proporciono un identificador de aplicacion desactivada"); //$NON-NLS-1$
+//    	}
+//    	return appCheck.getName();
+//	}
+//
+//	/**
+//	 * Valida si el certificado que se le pasa a la petici&oacute;n tiene permisos.
+//	 * Lee el certificado de la cabecera HTTP.
+//	 * @param appId Identificador de la aplicaci&oacute;n.
+//	 * @param certificates Listado de certificados.
+//	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+//	 * @throws CertificateValidationException En caso de ocurrir alg&uacute;n error o si el certificado
+//	 *                                        no tiene acceso.
+//	 * @throws DBConnectionException Cuando ocurre un error al conectar con la base de datos.
+//	 */
+//	public static void checkValidCertificate(final String appId, final X509Certificate[] certificates,
+//			final TransactionAuxParams trAux)
+//			throws CertificateValidationException, DBConnectionException {
+//
+//		if (certificates == null || certificates.length == 0 || certificates[0] == null) {
+//			throw new CertificateValidationException(FIReError.UNAUTHORIZED, "No se ha recibido ningun certificado para la autenticacion del cliente"); //$NON-NLS-1$
+//		}
+//
+//		try {
+//			final String thumbPrint = ServiceUtil.getThumbPrint(certificates[0]);
+//			ServiceUtil.checkValideThumbPrint(appId, thumbPrint, trAux);
+//		}
+//		catch (final NoSuchAlgorithmException e) {
+//			throw new CertificateValidationException(FIReError.INTERNAL_ERROR, "El algoritmo de huella no se ha encontrado en el sistema", e);//$NON-NLS-1$
+//		}
+//		catch (final IllegalArgumentException e){
+//			throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED, "Ha ocurrido un error con los parametros de la llamada, no se ha recibido ningun certificado", e); //$NON-NLS-1$
+//		}
+//		catch (final IllegalAccessException e) {
+//			throw new CertificateValidationException(FIReError.UNAUTHORIZED, "Acceso no permitido. El certificado utilizado no tiene permiso para acceder", e); //$NON-NLS-1$
+//		}
+//		catch (final SQLException e) {
+//			throw new DBConnectionException ("Ha ocurrido un problema en el acceso a la base de datos", e); //$NON-NLS-1$
+//		}
+//		catch (final Exception e) {
+//			throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID, "Ha ocurrido un error al decodificar el certificado", e); //$NON-NLS-1$
+//		}
+//	}
+//
+//    /**
+//     * Devuelve la huella del certificado en Base64.
+//     * @param cert Certificado del que extraer su huella.
+//     * @return Huella obtenida codificada en Base64.
+//     * @throws NoSuchAlgorithmException Si no se encuentra el algoritmo SHA-1.
+//     * @throws CertificateEncodingException Si hay alg&uacute;n problema codificando el certificado.
+//     */
+//	private static String getThumbPrint(final X509Certificate cert) throws NoSuchAlgorithmException,
+//	                                                                       CertificateEncodingException {
+//		final MessageDigest md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
+//		return Base64.encode(md.digest(cert.getEncoded()));
+//	}
+//
+//	/**
+//	 * Comprueba si la huella del certificado pasada est&aacute;n registrada en la base de datos.
+//	 * @param appId Identificador de la aplicaci&oacute;n.
+//	 * @param thumbPrint Huella a encontrar en la base de datos.
+//	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+//	 * @throws SQLException Si ocurre una excepci&oacute;n en el acceso a la base de datos.
+//	 * @throws IllegalAccessException Si la huella no se encuentra registrada en el sistema.
+//	 * @throws IOException Si hay un error de entrada o salida.
+//	 * @throws CertificateException Si hay un problema al decodificar el certificado.
+//	 * @throws NoSuchAlgorithmException No se encuentra el algoritmo en el sistema.
+//	 */
+//	private static void checkValideThumbPrint(final String appId, final String thumbPrint,
+//			final TransactionAuxParams trAux) throws SQLException, IllegalAccessException,
+//				CertificateException, NoSuchAlgorithmException, IOException {
+//		if (!ApplicationsDAO.checkThumbPrint(appId, thumbPrint, trAux)) {
+//    		throw new IllegalAccessException("El certificado utilizado no tiene permiso para acceder"); //$NON-NLS-1$
+//    	}
+//	}
 }
