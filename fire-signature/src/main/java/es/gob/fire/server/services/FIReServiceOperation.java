@@ -32,7 +32,7 @@ public enum FIReServiceOperation {
 	RECOVER_SIGN_BATCH (10),
 	/** Operaci&oacute;n para recuperar una firma simple generada que se sabe que termin&oacute; correctamente. */
 	RECOVER_SIGN_RESULT(11),
-	/** Operaci&oacute;n para recuperar una firma previamente enviada a actualizar y para la que se debi&oacute; esperar un periodo de gracia. */
+	/** Operaci&oacute;n para recuperar el estado de una firma previamente enviada a actualizar y para la que se debi&oacute; esperar un periodo de gracia. */
 	RECOVER_UPDATED_SIGN(70),
 	/** Operaci&oacute;n para recuperar la firma resultante de una operaci&oacute;n de
 	 * actualizaci&oacute;n para la que se solicit&oacute; la espera de un periodo de gracia. */
