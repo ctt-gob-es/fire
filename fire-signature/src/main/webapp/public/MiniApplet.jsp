@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.statistics.TransactionType"%>
 <%@page import="es.gob.fire.server.services.internal.PublicContext"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
@@ -59,7 +60,14 @@
 		String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
 		String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 		
-		FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false);
+		if (subjectRef == null || trId == null) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+
+		TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+		
+		FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false, trAux);
 		if (fireSession == null) {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;

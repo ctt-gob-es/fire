@@ -38,6 +38,8 @@ public final class ServiceUtil {
 
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	private static final String UNIDENTIFIED = "NO_IDENTIFICADA"; //$NON-NLS-1$
+
     private static final String[] CERT_REQUEST_ATTRS = {
     		// Atributo usado por los clientes Apache Tomcat
     		"javax.servlet.request.X509Certificate", //$NON-NLS-1$
@@ -224,7 +226,7 @@ public final class ServiceUtil {
 				throw new IOException("No se pudo obtener la informacion del sistema para la validacion de la peticion", e); //$NON-NLS-1$
 			}
 
-			appInfo = new ApplicationInfo(appId, registeredAppInfo.getName());
+			appInfo = new ApplicationInfo(appId, registeredAppInfo != null ? registeredAppInfo.getName() : appId);
 
     		// Comprobamos que la aplicacion este registrada en el sistema y habilitada
     		if (ConfigManager.isCheckApplicationNeeded()) {
@@ -265,6 +267,8 @@ public final class ServiceUtil {
 
     	if (appInfo == null && appId != null) {
     		appInfo = new ApplicationInfo(appId, appId);
+    	} else {
+    		appInfo = new ApplicationInfo(UNIDENTIFIED, UNIDENTIFIED);
     	}
 
 		return appInfo;

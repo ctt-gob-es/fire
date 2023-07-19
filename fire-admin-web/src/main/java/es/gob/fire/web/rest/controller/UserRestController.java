@@ -187,7 +187,6 @@ public class UserRestController {
 			for (final FieldError o: bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
-
 		}
 
 		final Rol rol = this.userService.getRol(userForm.getRolId());
@@ -217,7 +216,7 @@ public class UserRestController {
 			error = true;
 			json.put("emailAdd" + SPAN, "El campo email no es v\u00E1lido.");
 		}
-		
+
 		if (this.userService.getUserByEmail(userForm.getEmailAdd()) != null) {
 			error = true;
 			json.put("emailAdd" + SPAN, "Ya existe un usuario con el correo seleccionado.");
@@ -310,7 +309,7 @@ public class UserRestController {
 			error = true;
 			json.put("emailEdit" + SPAN, "El campo email no es v\u00E1lido.");
 		}
-		
+
 		if (this.userService.getUserByEmail(userForm.getEmailEdit()) != null) {
 			error = true;
 			json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");

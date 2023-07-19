@@ -1,4 +1,5 @@
 
+<%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
@@ -26,7 +27,9 @@
 		return;
 	}
 	
-	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
+	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+	
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
@@ -38,14 +41,14 @@
 	}
 	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true);
+		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
 	}
 
 	// Leemos los valores necesarios de la configuracion
 	final String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
 	final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
-	
+		
 	final boolean originForced = Boolean.parseBoolean(
 		fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 	

@@ -1,5 +1,5 @@
 
-<%@page import="java.util.logging.Logger"%>
+<%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
@@ -31,11 +31,13 @@
 		return;
 	}
 
+	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+	
 	// Cargamos la sesion. Deberia estar en memoria, pero permitimos su carga de otras fuentes,
 	// ya que, por ejemplo, si el proveedor de firma en la nube requirio que se validase la
 	// identidad del usuario antes de acceder a sus certificados, habríamos borrado la sesion
 	// de memoria al saltar de FIRe a la web del proveedor.
-	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
@@ -43,12 +45,12 @@
 	
 	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
 	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true);
+		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
 	}
 	
-	// Nombre de la aplicacion
+	// Obtenemos de la sesion la informacion de la aplicacion
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
-	
+		
 	String errorUrl = null;
 	TransactionConfig connConfig = (TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {

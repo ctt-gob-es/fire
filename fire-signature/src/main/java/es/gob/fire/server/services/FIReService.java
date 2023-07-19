@@ -247,9 +247,6 @@ public class FIReService extends HttpServlet {
     		case RECOVER_UPDATED_SIGN_RESULT:
     			RecoverUpdatedSignResultManager.recoverSignature(params, trAux, response);
     			break;
-    		case RECOVER_UPDATED_SIGN_RESULT:
-    			RecoverUpdatedSignResultManager.recoverSignature(params, response);
-    			break;
     		default:
     			LOGGER.warning(logF.f("Se ha enviado una peticion con una operacion no soportada: " + op.name())); //$NON-NLS-1$
     			Responser.sendError(response, FIReError.PARAMETER_OPERATION_NOT_SUPPORTED);

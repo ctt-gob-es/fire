@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
@@ -22,16 +23,22 @@
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return;
 	}
+
+	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 	
 	// Nos aseguramos de tener cargada la ultima version de la sesion
-	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true);
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
 	if (fireSession == null) {
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		return;
 	}
 	
-	// Nombre de la aplicacion
+	// Recuperamos la informacion del la aplicacion
+	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
+	
+	trAux.setAppId(appId);
+	
 	String errorUrl = null;
 	TransactionConfig connConfig =
 		(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
@@ -66,7 +73,7 @@
 	fireSession.removeAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE);
 	fireSession.removeAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
 	
-	SessionCollector.commit(fireSession);
+	SessionCollector.commit(fireSession, trAux);
 	
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();

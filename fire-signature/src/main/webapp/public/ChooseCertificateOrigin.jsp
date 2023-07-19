@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="java.net.URLDecoder"%>
 <%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
@@ -27,12 +28,14 @@
 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return;
 	}
+
+	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 	
 	// Ya que este es uno de los puntos de entrada del usuario a la operativa de FIRe, se establece aqui
 	// el tiempo maximo de sesion 
 	session.setMaxInactiveInterval((int) (FireSession.MAX_INACTIVE_INTERVAL / 1000));
 	
-	final FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false);
+	final FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
 	if (fireSession == null) {
 		if (errorUrl != null) {
 			errorUrl = URLDecoder.decode(errorUrl, "utf-8"); //$NON-NLS-1$

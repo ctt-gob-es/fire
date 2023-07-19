@@ -70,12 +70,12 @@ public class UserService implements IUserService {
 	/**
 	 * Attribute that represents the default charset.
 	 */
-	private static final String DEFAULT_CHARSET = "utf-8";
+	private static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the md algorithm.
 	 */
-	private static final String MD_ALGORITHM = "SHA-256";
+	private static final String MD_ALGORITHM = "SHA-256"; //$NON-NLS-1$
 
 	/**
 	 * Constant attribute that represents the value of the administrator permission.
@@ -282,12 +282,12 @@ public class UserService implements IUserService {
 			if (bcpe.matches(oldPwd, user.getPassword()) || checkPasswordOldSystem(oldPwd, user.getPassword())) {
 				user.setPassword(hashPwd);
 				this.repository.save(user);
-				result = "0";
+				result = "0"; //$NON-NLS-1$
 			} else {
-				result = "-1";
+				result = "-1"; //$NON-NLS-1$
 			}
 		} catch (final Exception e) {
-			result = "-2";
+			result = "-2"; //$NON-NLS-1$
 			throw e;
 		}
 		return result;
@@ -346,8 +346,8 @@ public class UserService implements IUserService {
 	 * @see es.gob.fire.persistence.services.IUserService#getUserByEmail(java.lang.String)
 	 */
 	@Override
-	public User getUserByEmail(String email) {
-		return repository.findByEmail(email);
+	public User getUserByEmail(final String email) {
+		return this.repository.findByEmail(email);
 	}
 
 }

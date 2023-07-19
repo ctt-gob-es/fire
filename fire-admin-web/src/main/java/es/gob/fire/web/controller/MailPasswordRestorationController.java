@@ -99,7 +99,7 @@ public class MailPasswordRestorationController {
 	private CustomUserAuthentication customUserAuthentication;
 
 	/**
-	 * Method that restores password.
+	 * Method that sends a mail to restore the user's password.
 	 *
 	 * @param userNameOrLogin
 	 *            user name or email of the user.
@@ -124,7 +124,7 @@ public class MailPasswordRestorationController {
 			final User user = this.userService.getUserByUserNameOrEmail(userNameOrEmail, userNameOrEmail);
 
 			// Comprobamos que el usuario exista, que tenga un correo y que tenga asignada una contrasena
-			// que debamos restablecer (propio de los usuarios con acceso a la herramienta)
+			// que debamos restablecer (propio de los usuarios con acceso a la herramienta). Si no cumple este
 			if (user != null && user.getEmail() != null && PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
 				// Generamos el codigo de restauracion
 				final String id = new String();
@@ -146,12 +146,15 @@ public class MailPasswordRestorationController {
                 model.addAttribute("mailsuccess", Boolean.TRUE);
                 model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
 
-                // Por seguridad, no podemos revelar que usuarios existen o cuales tienen permisos de acceso
-                // asi que fingiremos enviar el correo incluso cuando no se corresponda. En estos casos, para
-                // detectar si hay problema real con el envio nos tendriamos que enviar un correo aunque sea
-                // a una direccion que no lo reciba, como a nuestra propia direccion.
-                //TODO: Mejorar esto para que que no haya diferencia de tiempos con el envio a un usuario real
-			} else {
+
+			}
+			// Aunque el usuario no fuese valido como para restaurar su contrasena, fingiremos hacerlo
+			// para evitar revelar informacion sobre que usuarios son validos y cuales no. En estos casos,
+			// para detectar si hay problema con el envio y que el comportamiento sea el mismo que con
+			// los usuarios reales, tendriamos que enviar un correo aunque sea a una direccion que no lo
+			// reciba, como a nuestra propia direccion de envio.
+            //TODO: Mejorar esto para que que no haya diferencia de tiempos con el envio a un usuario real
+			else {
 				// Enviamos el email
                 this.mailSenderService.checkSendEmail();
                 model.addAttribute("mailsuccess", Boolean.TRUE);
