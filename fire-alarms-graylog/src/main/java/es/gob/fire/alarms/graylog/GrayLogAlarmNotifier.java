@@ -182,7 +182,6 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 	 */
 	private void loadGrayLogDeclaredFields(final Properties config) {
 
-		this.grayLogDeclaredFields = new ConcurrentHashMap<>();
 		if (config != null && !config.isEmpty()) {
 
 			final Set<Object> keySet = config.keySet();
@@ -190,7 +189,7 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 				final String keyString = (String) key;
 				if (keyString.startsWith(PROP_EXTRA_FIELDS_PREFIX)) {
 					final String value = config.getProperty(keyString);
-					this.grayLogDeclaredFields.put(keyString.substring(PROP_EXTRA_FIELDS_PREFIX.length()), value);
+					getDeclaredFields().put(keyString.substring(PROP_EXTRA_FIELDS_PREFIX.length()), value);
 				}
 			}
 		}
@@ -216,6 +215,9 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 				LOGGER.log(Level.SEVERE, "No se ha podido cargar el objeto para el envio de mensajes a GrayLog", e); //$NON-NLS-1$
 			}
 		}
+		else {
+			this.initializationError = true;
+		}
 	}
 
 	/**
@@ -229,15 +231,21 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 			this.hostname = ip.getHostName();
 
 		} catch (final UnknownHostException e) {
-			this.initializationError = true;
-			LOGGER.log(Level.SEVERE, "No se ha podido cargar el objeto para el envio de mensajes a GrayLog", e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "No se ha podido identificar el nombre del host que envia los mensajes a GrayLog", e); //$NON-NLS-1$
 			this.hostname = HOSTNAME_UNDEFINED;
 		}
 	}
 
 	@Override
 	public void setModule(final String module) {
-		this.grayLogDeclaredFields.put(PROP_EXTRA_FIELD_MODULE, module);
+		getDeclaredFields().put(PROP_EXTRA_FIELD_MODULE, module);
+	}
+
+	private Map<String, String> getDeclaredFields() {
+		if (this.grayLogDeclaredFields == null) {
+			this.grayLogDeclaredFields = new ConcurrentHashMap<>();
+		}
+		return this.grayLogDeclaredFields;
 	}
 
 	@Override
