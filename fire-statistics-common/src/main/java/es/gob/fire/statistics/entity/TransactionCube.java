@@ -63,10 +63,10 @@ public class TransactionCube {
 		trans.setProvider(cube[2]);
 
 		// Proveedor forzado
-		trans.setMandatoryProvider(cube[3].equals("1")); //$NON-NLS-1$
+		trans.setMandatoryProvider("1".equals(cube[3])); //$NON-NLS-1$
 
 		// Resultado de la transaccion
-		trans.setResultTransaction(cube[4].equals("1")); //$NON-NLS-1$
+		trans.setResultTransaction("1".equals(cube[4])); //$NON-NLS-1$
 
 		// Identificador de la transaccion
 		trans.setIdTransaction(cube[5]);

@@ -301,11 +301,11 @@ public class LoadStatisticsRunnable implements Runnable {
 
 	/**
 	 * Funci&oacute;n que prepara los registros de los ficheros log pasados por par&aacute;metro
-	 * para ser insertados en la BBDD.
+	 * para ser insertados en la BBDD. Si se encuentra algun registro mal formado, se ignorar&aacute;.
 	 * @param signaturesFile Fichero con los datos de firma.
 	 * @param transactionsFile Fichero con los datos de transacci&oacute;n.
 	 * @return Datos extra&iacute;dos de los ficheros.
-	 * @throws IOException Cuando no se pueden obtener todos los datos de los ficheros indicados.
+	 * @throws IOException Cuando no se pueden leer los datos de los ficheros indicados.
 	 */
 	private static CompactedData extractData(final File signaturesFile, final File transactionsFile)
 			throws IOException {
@@ -330,7 +330,8 @@ public class LoadStatisticsRunnable implements Runnable {
 					signCube =  SignatureCube.parse(registry);
 				}
 				catch (final Exception e) {
-					throw new IOException(String.format("Se encontro un registro no valido en el fichero %1s", signaturesFile.getAbsolutePath()), e); //$NON-NLS-1$
+					LOGGER.warning(String.format("Error al cargar un registro de firma del fichero %1s: %2s", signaturesFile.getAbsolutePath(), e.getMessage())); //$NON-NLS-1$
+					continue;
 				}
 
 				// Se inserta en el conjunto de datos
@@ -353,7 +354,8 @@ public class LoadStatisticsRunnable implements Runnable {
 					transCube =  TransactionCube.parse(registry);
 				}
 				catch (final Exception e) {
-					throw new IllegalArgumentException(String.format("Se encontro un registro no valido en el fichero %1s", transactionsFile.getAbsolutePath()), e); //$NON-NLS-1$
+					LOGGER.warning(String.format("Error al cargar un registro de transaccion del fichero %1s: %2s", transactionsFile.getAbsolutePath(), e.getMessage())); //$NON-NLS-1$
+					continue;
 				}
 
 				// Se inserta en el conjunto de datos

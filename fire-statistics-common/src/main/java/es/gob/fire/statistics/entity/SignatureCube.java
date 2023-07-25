@@ -69,7 +69,7 @@ public class SignatureCube {
 		sign.setBrowser(cube[5]);
 
 		// Resultado de la firma
-		sign.setResultSign(cube[6].equals("1")); //$NON-NLS-1$
+		sign.setResultSign("1".equals(cube[6])); //$NON-NLS-1$
 
 		// Identificador de la transaccion
 		sign.setIdTransaction(cube[7]);
