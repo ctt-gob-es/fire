@@ -15,11 +15,11 @@ package es.gob.fire.server.services.internal;
 public class DigestInfo {
 
 	private static final String SHA1 = "SHA-1"; //$NON-NLS-1$
-	private static final int SHA1_LENGTH = 1;
+	private static final int SHA1_LENGTH = 20;
 	private static final String SHA256 = "SHA256"; //$NON-NLS-1$
-	private static final int SHA256_LENGTH = 2;
+	private static final int SHA256_LENGTH = 32;
 	private static final String SHA512 = "SHA512"; //$NON-NLS-1$
-	private static final int SHA512_LENGTH = 3;
+	private static final int SHA512_LENGTH = 64;
 
 	/** Algoritmo con el que se gener&oacute; la huella. */
 	private final String algorihtm;
@@ -76,6 +76,5 @@ public class DigestInfo {
 		default:
 			throw new IllegalArgumentException("La huella no se genero con un algoritmo soportado. Longitud: " + hash.length); //$NON-NLS-1$
 		}
-
 	}
 }
