@@ -1,6 +1,6 @@
 package es.gob.fire.server.services.internal;
 
-import es.gob.fire.signature.DbManager;
+import es.gob.fire.signature.ConfigManager;
 
 /**
  * Factor&iacute;a para la obtenci&oacute;n del objeto de acceso a datos para la obtenci&oacute;n
@@ -23,7 +23,7 @@ public class ApplicationsDAOFactory {
 	}
 
 	private static ApplicationsDAO loadDAOInstance() {
-		if (DbManager.isConfigured()) {
+		if (ConfigManager.getDataBaseConnectionString() != null && !ConfigManager.getDataBaseConnectionString().isEmpty()) {
 			return new DBApplicationsDAO();
 		}
 		return new ConfigFileApplicationsDAO();

@@ -96,23 +96,21 @@ public class DbManager {
 		}
 		config.setDriverClassName(driverClassname);
 
-
+		// Se configura la cadena de conexion si se define. Si no, se configuran
+		// los valores por separado
 		final String dbConnString = ConfigManager.getDataBaseConnectionString();
-
-		// Se configura la cadena del driver o los valores por separado
 		if (dbConnString != null) {
 			config.setJdbcUrl(dbConnString);
 		}
 		else {
-
 			final String host = ConfigManager.getDataBaseHost();
 			final String port = ConfigManager.getDataBasePort();
 			final String databaseName = ConfigManager.getDataBaseName();
 
 			if (host != null && port != null && databaseName != null) {
-				config.addDataSourceProperty("serverName", host);
-				config.addDataSourceProperty("portNumber", port);
-				config.addDataSourceProperty("databaseName", databaseName);
+				config.addDataSourceProperty("serverName", host); //$NON-NLS-1$
+				config.addDataSourceProperty("portNumber", port); //$NON-NLS-1$
+				config.addDataSourceProperty("databaseName", databaseName); //$NON-NLS-1$
 			}
 			else {
 				throw new IOException("No se ha declarado la cadena de conexion ni los parametros independientes para la conexion con la base de datos"); //$NON-NLS-1$
@@ -121,12 +119,12 @@ public class DbManager {
 
 		final String username = ConfigManager.getDataBaseUsername();
 		if (username != null) {
-			config.addDataSourceProperty("user", username);
+			config.addDataSourceProperty("user", username); //$NON-NLS-1$
 		}
 
 		final String password = ConfigManager.getDataBasePassword();
 		if (password != null) {
-			config.addDataSourceProperty("password", password);
+			config.addDataSourceProperty("password", password); //$NON-NLS-1$
 		}
 
 
