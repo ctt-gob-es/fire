@@ -1,3 +1,5 @@
+<%@page import="es.gob.fire.server.services.FIReError"%>
+<%@page import="es.gob.fire.server.services.internal.ErrorManager"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="java.net.URLDecoder"%>
 <%@page import="java.util.logging.Logger"%>
@@ -46,9 +48,13 @@
 		return;
 	}
 
+	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+	if (appId != null) {
+		trAux.setAppId(appId);
+	}
+		
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
-	TransactionConfig connConfig = (TransactionConfig) fireSession
-			.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	TransactionConfig connConfig = (TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 		errorUrl = connConfig.getRedirectErrorUrl();
 	}
@@ -59,9 +65,23 @@
 		logoUrl = "img/general/dms/logo-institucional.png"; //$NON-NLS-1$
 	}
 
+	// Preparamos la URL del boton de cancelacion
 	final String cancelUrlParams = ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId + "&" + //$NON-NLS-1$ //$NON-NLS-2$ 
-			ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + //$NON-NLS-1$
-			(errorUrl != null ? "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + //$NON-NLS-1$
+	(errorUrl != null ? "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	
+	// Comprobamos tener un listado de proveedores validos
+	String[] providers = (String[]) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
+	if (providers == null || providers.length == 0) {
+		ErrorManager.setErrorToSession(fireSession, FIReError.PROVIDER_NOT_SELECTED, trAux);
+		if (errorUrl != null) {
+			errorUrl = URLDecoder.decode(errorUrl, "utf-8"); //$NON-NLS-1$
+			response.sendRedirect(errorUrl);
+		} else {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		}
+		return;
+	}
 %>
 
 <!DOCTYPE html>
@@ -119,8 +139,6 @@
 		
 		<div class="container-box">	
 		<%
-		String[] providers = (String[]) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
-		
 		for (String provider : providers) {
 			ProviderInfo info = ProviderManager.getProviderInfo(provider);
 			boolean enabled = ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(provider) ||
