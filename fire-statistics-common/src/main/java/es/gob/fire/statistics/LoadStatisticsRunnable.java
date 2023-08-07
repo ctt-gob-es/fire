@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -47,33 +48,27 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * quiere procesar la informaci&oacute;n de hoy, ya que puede que a&uacute;n no hayan terminado
 	 * de generarse todos los datos.
 	 * @param dataPath Ruta de los ficheros de datos.
-	 * @param jdbcDriver Nombre de la clase del controlador JDBC.
-	 * @param dbConnectionString Cadena de conexi&oacute;n con la base de datos.
 	 */
-	public LoadStatisticsRunnable(final String dataPath, final String jdbcDriver, final String dbConnectionString) {
-		this(dataPath, jdbcDriver, dbConnectionString, false);
+	public LoadStatisticsRunnable(final String dataPath) {
+		this(dataPath, false);
 	}
 
 	/**
 	 * Crea la tarea indicando el directorio de los ficheros de datos estadisticos y si se desea
 	 * procesar la informaci&oacute;n de hoy, ya que puede que a&uacute;n no hayan terminado
 	 * de generarse todos los datos.
-	 * @param dataPath Ruta de los ficheros de datos.
-	 * @param jdbcDriver Nombre de la clase del controlador JDBC.
-	 * @param dbConnectionString Cadena de conexi&oacute;n con la base de datos.
 	 * @param processCurrentDay Indica si se debe procesar los datos del d&iacute;a actual
 	 * ({@code true}) o si no ({@code false}).
 	 */
-	public LoadStatisticsRunnable(final String dataPath, final String jdbcDriver, final String dbConnectionString,
-			final boolean processCurrentDay) {
+	public LoadStatisticsRunnable(final String dataPath, final boolean processCurrentDay) {
 		this.dataPath = dataPath;
 		this.processCurrentDay = processCurrentDay;
-
-		DbManager.initialize(jdbcDriver, dbConnectionString);
 	}
 
 	@Override
 	public void run() {
+
+		LOGGER.log(Level.INFO, "Se inicia la tarea de volcado de estadisticas"); //$NON-NLS-1$
 
 		// Identificamos la fecha de los ultimos ficheros que se cargaron
 		Date lastDateLoaded;
@@ -138,17 +133,6 @@ public class LoadStatisticsRunnable implements Runnable {
 			LOGGER.warning("No se pudo cargar ningun fichero de las estadisticas en la base de datos"); //$NON-NLS-1$
 		}
 	}
-
-//	public static enum Result {
-//		/** La operacion no se ha inicializado o no ha finalizado. */
-//		NONE,
-//		/** La operacion finalizo correctamente. */
-//		OK,
-//		/** La operacion termino sin procesar todos los datos. */
-//		WARNING,
-//		/** La operacion termino con errores. */
-//		ERROR
-//	}
 
 	/**
 	 * Obtiene cual es la fecha m&aacute;s reciente de datos cargados.
@@ -273,7 +257,6 @@ public class LoadStatisticsRunnable implements Runnable {
 			// Insertamos los datos en base de datos
 			try {
 				insertDataIntoDb(date, compactedData);
-				DbManager.runCommit();
 			}
 			catch (final DBConnectionException e) {
 				final String errorMsg = "No se pudo conectar con la base de datos. Se aborta el proceso de carga de los datos del dia " + dateText; //$NON-NLS-1$
@@ -283,11 +266,6 @@ public class LoadStatisticsRunnable implements Runnable {
 			catch (final Exception e) {
 				final String errorMsg = "Ocurrio un error al guardar los datos del dia " + dateText; //$NON-NLS-1$
 				LOGGER.log(Level.SEVERE, errorMsg, e);
-				try {
-					DbManager.runRollBack();
-				} catch (final Exception e1) {
-					LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas del dia " + dateText, e1); //$NON-NLS-1$
-				}
 				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 
@@ -380,20 +358,55 @@ public class LoadStatisticsRunnable implements Runnable {
 		final Map<SignatureCube, Long> signaturesCube = compactedData.getSignatureData();
 
 		final Iterator<SignatureCube> itSigns = signaturesCube.keySet().iterator();
-		while (itSigns.hasNext()) {
-			final SignatureCube signatureConfig = itSigns.next();
-			final Long total = signaturesCube.get(signatureConfig);
-			SignaturesDAO.insertSignature(date, signatureConfig, total.longValue());
-		}
+		try (Connection conn = DbManager.getInstance().getConnection(false)) {
+			while (itSigns.hasNext()) {
 
-		// Insertamos la informacion de las transacciones realizadas
-		final Map<TransactionCube, TransactionTotal> transactionsCube = compactedData.getTransactionData();
+				final SignatureCube signatureConfig = itSigns.next();
+				final Long total = signaturesCube.get(signatureConfig);
+				try {
+					SignaturesDAO.insertSignature(date, signatureConfig, total.longValue(), conn);
+				}
+				catch (final Exception e) {
+					LOGGER.log(Level.SEVERE,
+							String.format("No se pudo insertar las firmas del dia %1s. Se desharan las inserciones realizadas de este dia", new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$ //$NON-NLS-2$
+							e);
+					try {
+						conn.rollback();
+					} catch (final Exception e1) {
+						LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
+					}
+					throw e;
+				}
+			}
 
-		final Iterator<TransactionCube> itTrans = transactionsCube.keySet().iterator();
-		while (itTrans.hasNext()) {
-			final TransactionCube transactionConfig = itTrans.next();
-			final TransactionTotal total = transactionsCube.get(transactionConfig);
-			TransactionsDAO.insertTransaction(date, transactionConfig, total);
+			// Insertamos la informacion de las transacciones realizadas
+			final Map<TransactionCube, TransactionTotal> transactionsCube = compactedData.getTransactionData();
+
+			final Iterator<TransactionCube> itTrans = transactionsCube.keySet().iterator();
+			while (itTrans.hasNext()) {
+				final TransactionCube transactionConfig = itTrans.next();
+				final TransactionTotal total = transactionsCube.get(transactionConfig);
+				try {
+					TransactionsDAO.insertTransaction(date, transactionConfig, total, conn);
+				}
+				catch (final Exception e) {
+					LOGGER.log(Level.SEVERE,
+							String.format("No se pudo insertar las transacciones del dia %1s. Se desharan las inserciones realizadas de este dia", new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$ //$NON-NLS-2$
+							e);
+					try {
+						DbManager.getInstance().runRollBack();
+					} catch (final Exception e1) {
+						LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
+					}
+					throw e;
+				}
+			}
+
+			try {
+				conn.commit();
+			} catch (final Exception e1) {
+				LOGGER.log(Level.WARNING, "No se pudieron confirmar las inserciones ya realizadas", e1); //$NON-NLS-1$
+			}
 		}
 	}
 

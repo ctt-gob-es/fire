@@ -24,6 +24,10 @@ public class ConfigManager {
 
 	private static final String PROP_DB_CONNECTION = "bbdd.conn"; //$NON-NLS-1$
 
+	private static final String PROP_DB_USERNAME = "bbdd.username"; //$NON-NLS-1$
+
+	private static final String PROP_DB_PASSWORD = "bbdd.password"; //$NON-NLS-1$
+
 	/** Configuraci&oacute;n de la pol&iacute;tica de volcado de datos estad&iacute;sticos*/
 	private static final String PROP_STATISTICS_POLICY ="statistics.policy"; //$NON-NLS-1$
 
@@ -96,6 +100,24 @@ public class ConfigManager {
 	 */
 	public static String getDataBaseConnectionString() {
 		return getProperty(PROP_DB_CONNECTION);
+	}
+
+	/**
+	 * Recupera el usuario de acceso a la base de datos.
+	 * @return Usuario o {@code null} si no se defini&oacute;.
+	 */
+	public static String getDataBaseUsername() {
+		final String value = getProperty(PROP_DB_USERNAME);
+		return value != null && !value.isEmpty() ? value : null;
+	}
+
+	/**
+	 * Recupera la contrase&ntilde;a de acceso a la base de datos.
+	 * @return Usuario o {@code null} si no se defini&oacute;.
+	 */
+	public static String getDataBasePassword() {
+		final String value = getProperty(PROP_DB_PASSWORD);
+		return value != null && !value.isEmpty() ? value : null;
 	}
 
 	/**

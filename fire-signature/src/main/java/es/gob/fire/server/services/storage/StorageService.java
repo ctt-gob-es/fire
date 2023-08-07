@@ -67,8 +67,6 @@ public final class StorageService extends HttpServlet {
 
 		LOGGER.fine(" == INICIO GUARDADO == "); //$NON-NLS-1$
 
-
-
 		// Leemos la entrada
 		RequestParameters params;
 		try {
@@ -162,7 +160,6 @@ public final class StorageService extends HttpServlet {
 
 		// Tratamos de guardar los datos en la cache en memoria
 		ClienteAfirmaCache.saveData(id, data);
-
 
 		// Si estamos en modo alta disponibilidad, tambien almacenamos los datos en el almacen comun
 		if (HIGH_AVAILABILITY_ENABLED) {

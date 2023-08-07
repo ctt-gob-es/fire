@@ -44,7 +44,9 @@ public class FireLogManager {
 			handler.setAutoFlush(true);
 			handler.setFormatter(new SimpleFormatter());
 			handler.setEnabled(true);
-			handler.setLevel(Level.FINER);
+			// Establecemos el nivel minimo como FINE para que los FINER y FINEST no se impriman. Estos
+			// pueden usarse para otros fines como imprimir las estadisticas en sus ficheros correspondientes
+			handler.setLevel(Level.FINE);
 
 			RollingPolicy policy;
 			try {
@@ -62,6 +64,7 @@ public class FireLogManager {
 			Logger.getLogger("").setLevel(parseLevel(ConfigManager.getLogsLevel())); //$NON-NLS-1$
 			Logger.getLogger(LOG_FIRE_NAME).setLevel(parseLevel(ConfigManager.getLogsLevelFire()));
 			Logger.getLogger(LOG_AFIRMA_NAME).setLevel(parseLevel(ConfigManager.getLogsLevelAfirma()));
+
 		}
 	}
 

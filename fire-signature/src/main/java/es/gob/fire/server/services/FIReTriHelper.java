@@ -299,7 +299,7 @@ public final class FIReTriHelper {
         					false
         					);
         		}
-        		catch (final Exception e) {
+        		catch (final Throwable e) {
         			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
             		if (stopOnError) {
             			stopOperation = true;
@@ -323,8 +323,8 @@ public final class FIReTriHelper {
         					false
         					);
         		}
-        		catch (final Exception e) {
-        			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
+        		catch (final Throwable e) {
+        			LOGGER.warning(logF.f("Error en la prefirma al cofirmar: ") + e); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
 					}
@@ -356,8 +356,8 @@ public final class FIReTriHelper {
         					false
         					);
         		}
-        		catch (final Exception e) {
-        			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
+        		catch (final Throwable e) {
+        			LOGGER.warning(logF.f("Error en la prefirma al contrafirmar: ") + e); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
 					}

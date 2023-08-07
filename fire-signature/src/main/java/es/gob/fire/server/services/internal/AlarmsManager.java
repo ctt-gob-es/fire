@@ -60,7 +60,7 @@ public class AlarmsManager {
 						+ CONFIG_FILE, e);
 				notifier = null;
 			}
-			catch (final Exception e) {
+			catch (final Throwable e) {
 				LOGGER.log(Level.WARNING, "No se ha podido cargar el gestor de alarmas configurado", e); //$NON-NLS-1$
 				notifier = null;
 			}

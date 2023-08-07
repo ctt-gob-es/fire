@@ -1,6 +1,7 @@
 package es.gob.fire.statistics.dao;
 
 import java.io.StringWriter;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -65,6 +66,27 @@ public class SignaturesDAO {
 
 	/**
 	 * Inserta una configuraci&oacute;n de operaci&oacute;n de firma en base de datos indicando
+	 * cuantas veces se dio esta configuraci&oacute;n un d&iacute;a concreto. Se hace un commit
+	 * tras la transacci&oacute;n.
+	 * @param date Fecha del d&iacute;a en la que se realiz&oacute; la firma.
+	 * @param signature Configuraci&oacute;n de la operaci&oacute;n de firma.
+	 * @param total N&uacute;mero total de firmas que se generaron ese d&iacute;a con la
+	 * configuraci&oacute;n indicada.
+	 * @param conn Conexi&oacute;n con la base de datos.
+	 * @return {@code true} si la configuraci&oacute;n se inserto correctamente. {@code false}
+	 * en caso contrario.
+	 * @throws SQLException Cuando se produce un error al insertar los datos.
+	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
+	 */
+	public static void insertSignature(final Date date, final SignatureCube signature, final long total)
+			throws SQLException, DBConnectionException {
+		try (final Connection conn = DbManager.getInstance().getConnection(true);) {
+			insertSignature(date, signature, total, conn);
+		}
+	}
+
+	/**
+	 * Inserta una configuraci&oacute;n de operaci&oacute;n de firma en base de datos indicando
 	 * cuantas veces se dio esta configuraci&oacute;n un d&iacute;a concreto.
 	 * @param date Fecha del d&iacute;a en la que se realiz&oacute; la firma.
 	 * @param signature Configuraci&oacute;n de la operaci&oacute;n de firma.
@@ -75,10 +97,11 @@ public class SignaturesDAO {
 	 * @throws SQLException Cuando se produce un error al insertar los datos.
 	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
 	 */
-	public static boolean insertSignature(final Date date, final SignatureCube signature, final long total)
+	public static void insertSignature(final Date date, final SignatureCube signature, final long total,
+			 final Connection conn)
 			throws SQLException, DBConnectionException {
 
-		try (final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_SIGNATURE, false)) {
+		try (final PreparedStatement st = conn.prepareStatement(ST_INSERT_SIGNATURE)) {
 			st.setTimestamp (1, new java.sql.Timestamp(date.getTime()));
 			st.setString(2, signature.getFormat());
 			st.setString(3, signature.getImprovedFormat());
@@ -89,10 +112,9 @@ public class SignaturesDAO {
 			st.setLong(8, total);
 			st.setString(9, signature.getApplication());
 			if (st.executeUpdate() < 1) {
-				return false;
+				throw new SQLException("No se insertaron registros en la tabla de firmas"); //$NON-NLS-1$
 			}
 		}
-		return true;
 	}
 
 	/**
@@ -109,7 +131,8 @@ public class SignaturesDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final PreparedStatement st = DbManager.prepareStatement(SIGNATURES_BYPROVIDER);) {
+		try (final Connection conn = DbManager.getInstance().getConnection(false);
+				final PreparedStatement st = conn.prepareStatement(SIGNATURES_BYPROVIDER);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
 			try (final ResultSet rs = st.executeQuery();) {
@@ -163,7 +186,8 @@ public class SignaturesDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final PreparedStatement st = DbManager.prepareStatement(SIGNATURES_BYAPP);) {
+		try (final Connection conn = DbManager.getInstance().getConnection(false);
+				final PreparedStatement st = conn.prepareStatement(SIGNATURES_BYAPP);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
 			try (final ResultSet rs = st.executeQuery();) {
@@ -217,7 +241,8 @@ public class SignaturesDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final PreparedStatement st = DbManager.prepareStatement(SIGNATURES_BYFORMAT);) {
+		try (final Connection conn = DbManager.getInstance().getConnection(false);
+				final PreparedStatement st = conn.prepareStatement(SIGNATURES_BYFORMAT);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
 			try (final ResultSet rs = st.executeQuery();) {
@@ -270,7 +295,8 @@ public class SignaturesDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final PreparedStatement st = DbManager.prepareStatement(SIGNMATURES_BYLONGLIVE_FORMAT);) {
+		try (final Connection conn = DbManager.getInstance().getConnection(true);
+				final PreparedStatement st = conn.prepareStatement(SIGNMATURES_BYLONGLIVE_FORMAT);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
 

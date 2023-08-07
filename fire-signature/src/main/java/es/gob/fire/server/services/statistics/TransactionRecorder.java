@@ -62,7 +62,7 @@ public class TransactionRecorder {
 		}
 
 		if (!this.enable) {
-			LOGGER.info("No se encuentra habilitado el registro de las estadisticas de transaccion o no se ha proporcionado un directorio de salida"); //$NON-NLS-1$
+			LOGGER.info("El registro de estadisticas esta deshabilitado o no se proporciono un directorio de salida"); //$NON-NLS-1$
 			return;
 		}
 

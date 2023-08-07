@@ -170,13 +170,10 @@ public class SignatureRecorder {
 		this.getSignCube().setAlgorithm(algorithm);
 
 		// Obtenemos el tamano del documento
-		Long docSize = new Long(0);
+		Long docSize = Long.valueOf(0);
 		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
-		if (docSize != null) {
+		if (docSizeObject != null && docSizeObject instanceof Long) {
 			docSize = (Long) docSizeObject;
-			if (docSize == null) {
-				docSize = new Long(0);
-			}
 		}
 
 		// Obtenemos el formato de firma configurado
@@ -192,7 +189,7 @@ public class SignatureRecorder {
 				// Actualizamos el tamano del documento
 				final DocInfo docinf = batchResult.getDocInfo(docId);
 			    if (docinf != null) {
-			    	docSize = new Long(docinf.getSize());
+			    	docSize = Long.valueOf(docinf.getSize());
 			    }
 			    // Si se establecio una configuracion especifica para el documento, registramos esta
 			    final SignBatchConfig signConfig = batchResult.getSignConfig(docId);

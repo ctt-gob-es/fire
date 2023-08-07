@@ -122,9 +122,9 @@ public class ConfigManager {
 
 	private static final String PROP_SKIP_CERT_SELECTION = "skipCertSelection"; //$NON-NLS-1$
 
-	private static final String DEFAULT_FIRE_LOGS_LEVEL = "INFO"; //$NON-NLS-1$
-	private static final String DEFAULT_AFIRMA_LOGS_LEVEL = "WARNING"; //$NON-NLS-1$
-	private static final String DEFAULT_GENERAL_LOGS_LEVEL = "OFF"; //$NON-NLS-1$
+	private static final String DEFAULT_FIRE_LOGS_LEVEL = Level.INFO.getName();
+	private static final String DEFAULT_AFIRMA_LOGS_LEVEL = Level.WARNING.getName();
+	private static final String DEFAULT_GENERAL_LOGS_LEVEL = Level.OFF.getName();
 
 	private static final String PROP_HTTP_CERT_ATTR = "http.cert.attr"; //$NON-NLS-1$
 

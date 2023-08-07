@@ -1,6 +1,10 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +18,16 @@ public class TempDocumentsManager {
 	private static final Logger LOGGER = Logger.getLogger(TempDocumentsManager.class.getName());
 
 	private static final TempDocumentsDAO documentsDao;
+
+	/**
+	 * Ejecutor del ser servicio de limpieza de la cache.
+	 */
+	private static ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+	/**
+	 * &Uacute;timo proceso de limpieza que se ejecut&oacute;.
+	 */
+	private static Future<?> cleaningProcess = null;
 
 	/** N&uacute;mero de veces que se puden guardar datos antes ejecutar el proceso para
 	 * eliminar aquellos que estan caducados. */
@@ -56,7 +70,7 @@ public class TempDocumentsManager {
 		documentsDao.storeDocument(id, data, newDocument);
 
 		synchronized (documentsDao) {
-			if (++uses >= MAX_USE_TO_CLEANING) {
+			if (++uses >= MAX_USE_TO_CLEANING && (cleaningProcess == null || cleaningProcess.isDone())) {
 				deleteExpiredDocuments();
 				uses = 0;
 			}
@@ -88,12 +102,29 @@ public class TempDocumentsManager {
 	 */
 	private static void deleteExpiredDocuments() {
 		try {
-			new ExpiredDocumentsCleanerThread(documentsDao, ConfigManager.getTempsTimeout()).start();
+			cleaningProcess = executorService.submit(new ExpiredDocumentsCleanerThread(documentsDao, ConfigManager.getTempsTimeout()));
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING,
 					"Error al solicitar la eliminacion de los documentos temporales caducados", //$NON-NLS-1$
 					e);
+		}
+	}
+
+	/**
+	 * Libera los recursos necesarios para la ejecuci&oacute;n del gestor.
+	 */
+	public static void release() {
+		// Al destruir el servicio liberamos el pool de hilos
+		if (executorService != null) {
+			executorService.shutdown();
+			try {
+				if (!executorService.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
+					executorService.shutdownNow();
+				}
+			} catch (final InterruptedException e) {
+				executorService.shutdownNow();
+			}
 		}
 	}
 

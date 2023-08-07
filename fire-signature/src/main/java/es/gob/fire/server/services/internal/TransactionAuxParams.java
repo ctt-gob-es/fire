@@ -13,7 +13,6 @@ public class TransactionAuxParams {
 
 	/**
 	 * Construye el objeto auxiliar.
-	 * @param appId Identificador de la aplicaci&oacute;n que se procesa.
 	 */
 	public TransactionAuxParams() {
 		this(null, null);
@@ -59,5 +58,21 @@ public class TransactionAuxParams {
 	public void setAppId(final String appId) {
 		this.appId = appId;
 		this.logFormatter.setAppId(appId);
+	}
+
+	/**
+	 * Obtiene el identificador de aplicaci&oacute;n asociado.
+	 * @return Identificador de aplicaci&oacute;n.
+	 */
+	public String getAppId() {
+		return this.appId;
+	}
+
+	/**
+	 * Obtiene el identificador de transacci&oacute;n asociado.
+	 * @return Identificador de transacci&oacute;n.
+	 */
+	public String getTransactionId() {
+		return this.transactionId;
 	}
 }

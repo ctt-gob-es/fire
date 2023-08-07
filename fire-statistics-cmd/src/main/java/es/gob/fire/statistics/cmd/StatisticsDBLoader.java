@@ -2,6 +2,7 @@ package es.gob.fire.statistics.cmd;
 
 import java.io.Console;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 
 import es.gob.fire.statistics.FireStatistics;
@@ -23,15 +24,19 @@ public class StatisticsDBLoader {
 
 	private static final String PARAM_DB_CONNECTION = "-conn"; //$NON-NLS-1$
 
+	private static final String PARAM_DB_USERNAME = "-user"; //$NON-NLS-1$
+
+	private static final String PARAM_DB_PASSWORD = "-pwd"; //$NON-NLS-1$
+
 	private static final String DEFAULT_JAR_NAME = "FireStatisticsDbLoader.jar"; //$NON-NLS-1$
 
 	private static String JAR_NAME;
 
 	static {
 		try {
-		final Class<?> clazz = StatisticsDBLoader.class;
-		final URL location = clazz.getProtectionDomain().getCodeSource().getLocation();
-		JAR_NAME = new File(location.toURI()).getName();
+			final Class<?> clazz = StatisticsDBLoader.class;
+			final URL location = clazz.getProtectionDomain().getCodeSource().getLocation();
+			JAR_NAME = new File(location.toURI()).getName();
 		}
 		catch (final Exception e) {
 			JAR_NAME = DEFAULT_JAR_NAME;
@@ -52,6 +57,8 @@ public class StatisticsDBLoader {
 		String dataDir = null;
 		String dbDriver = null;
 		String dbConnection = null;
+		String dbUsername = null;
+		String dbPassword = null;
 
 		for (int i = 0; i < args.length; i++) {
 
@@ -91,10 +98,28 @@ public class StatisticsDBLoader {
 				}
 				break;
 
+			case PARAM_DB_USERNAME:
+				if (i < args.length - 1) {
+					dbUsername = args[++i];
+				} else {
+					System.out.println("No se ha indicado el usuario de base de datos"); //$NON-NLS-1$
+					showHelp();
+				}
+				break;
+
+			case PARAM_DB_PASSWORD:
+				if (i < args.length - 1) {
+					dbPassword = args[++i];
+				} else {
+					System.out.println("No se ha indicado la contrasena de base de datos"); //$NON-NLS-1$
+					showHelp();
+				}
+				break;
+
 			default:
 				System.out.println("Se ha indicado un parametro no soportado: " + args[i].substring(0, Math.min(args[i].length(), 30))); //$NON-NLS-1$
-//				showHelp();
-//				return;
+				showHelp();
+				return;
 			}
 		}
 
@@ -117,12 +142,17 @@ public class StatisticsDBLoader {
 
 		// Comprobamos si se indica usar expresamente el fichero de configuracion
 		LoadStatisticsResult result = null;
-		if (useFileConfig) {
-			result = init(processCurrentDay);
+		try {
+			if (useFileConfig) {
+				result = init(processCurrentDay);
+			}
+			// Comprobamos si se nos pasa la configuracion especifica para ejecutar el proceso
+			else if (dataDir != null && dbDriver != null && dbConnection != null ) {
+				result = init(dataDir, dbDriver, dbConnection, dbUsername, dbPassword, processCurrentDay);
+			}
 		}
-		// Comprobamos si se nos pasa la configuracion especifica para ejecutar el proceso
-		else if (dataDir != null && dbDriver != null && dbConnection != null ) {
-			result = init(dataDir, dbDriver, dbConnection, processCurrentDay);
+		catch (final Exception e) {
+			System.err.println("No se pudo realizar el volcado de datos: " + e.getMessage()); //$NON-NLS-1$
 		}
 
 		if (result != null) {
@@ -136,7 +166,7 @@ public class StatisticsDBLoader {
 			return;
 		}
 
-		// Si no se ha mostrado ninguna convinacion valida de parametros para ejecutar
+		// Si no se ha mostrado ninguna combinacion valida de parametros para ejecutar
 		// la operacion, mostramos el mensaje de ayuda
 		showHelp();
 	}
@@ -144,8 +174,9 @@ public class StatisticsDBLoader {
 	/**
 	 * Iniciamos la carga de datos utilizando la informaci&oacute;n del fichero de configuraci&oacute;n.
 	 * @param processCurrentDay Indica si se deben procesar los datos del d&iacute;a actual.
+	 * @throws IOException Cuando falla el volcado.
 	 */
-	private static LoadStatisticsResult init(final boolean processCurrentDay) {
+	private static LoadStatisticsResult init(final boolean processCurrentDay) throws IOException {
 
 		try {
 			ConfigManager.checkConfiguration("config.properties"); //$NON-NLS-1$
@@ -158,8 +189,10 @@ public class StatisticsDBLoader {
 		final String dataDir = ConfigManager.getStatisticsDir();
 		final String dbDriver = ConfigManager.getJdbcDriverString();
 		final String dbConn = ConfigManager.getDataBaseConnectionString();
+		final String username = ConfigManager.getDataBaseUsername();
+		final String password = ConfigManager.getDataBasePassword();
 
-		return init(dataDir, dbDriver, dbConn, processCurrentDay);
+		return init(dataDir, dbDriver, dbConn, username, password, processCurrentDay);
 	}
 
 	/**
@@ -167,11 +200,14 @@ public class StatisticsDBLoader {
 	 * @param dataDir Ruta absoluta del directorio con los ficheros de datos.
 	 * @param dbDriver Clase del controlador JDBC.
 	 * @param dbConn Cadena de conexi&oacute;n con la base de datos.
+	 * @param username Nombre de usuario con el que conectarse a la base de datos.
+	 * @param password Contrase&ntilde;a del usuario.
 	 * @param processCurrentDay Indica si se deben procesar los datos del d&iacute;a actual.
+	 * @throws IOException Cuando falla el volcado.
 	 */
 	private static LoadStatisticsResult init(final String dataDir, final String dbDriver, final String dbConn,
-			final boolean processCurrentDay) {
-		return FireStatistics.init(dataDir, null, dbDriver, dbConn, processCurrentDay);
+			final String username, final String password, final boolean processCurrentDay) throws IOException {
+		return FireStatistics.dumpData(dataDir, dbDriver, dbConn, username, password, processCurrentDay);
 	}
 
 	/**
@@ -213,8 +249,14 @@ public class StatisticsDBLoader {
 		System.out.println("\t" + PARAM_DB_CONNECTION); //$NON-NLS-1$
 		System.out.println("\t\tCadena de conexion con la base de datos.\n"); //$NON-NLS-1$
 
+		System.out.println("\t" + PARAM_DB_USERNAME); //$NON-NLS-1$
+		System.out.println("\t\tUsuario de base de datos (en caso de que no se indique en la cadena de conexion).\n"); //$NON-NLS-1$
+
+		System.out.println("\t" + PARAM_DB_PASSWORD); //$NON-NLS-1$
+		System.out.println("\t\tContrasena de base de datos (en caso de que no se indique en la cadena de conexion).\n"); //$NON-NLS-1$
+
 		System.out.println("\t" + PARAM_PROCESS_CURRENT_DAY); //$NON-NLS-1$
-		System.out.println("\t\tEl proceso de carga incluye los datos de hoy (por defecto, no se hace). Esto provoca que despues \n" //$NON-NLS-1$
+		System.out.println("\t\tEl proceso de carga incluira los datos de hoy (por defecto, no se hace). Esto provoca que despues \n" //$NON-NLS-1$
 				+ "\t\tno se puedan registrar los datos generados el resto del dia.\n"); //$NON-NLS-1$
 
 		System.out.println("Ejemplos:"); //$NON-NLS-1$

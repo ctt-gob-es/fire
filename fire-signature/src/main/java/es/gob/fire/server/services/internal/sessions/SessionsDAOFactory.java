@@ -49,7 +49,7 @@ public class SessionsDAOFactory {
 		// Cargamos la clase
 		try {
 			daoInstance = (SessionsDAO) Class.forName(daoClassname).getConstructor().newInstance();
-		} catch (final Exception e) {
+		} catch (final Throwable e) {
 			LOGGER.log(Level.SEVERE, "Error al cargar el gestor para la comparticion de sesiones entre nodos", e); //$NON-NLS-1$
 			AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, daoClassname);
 		}

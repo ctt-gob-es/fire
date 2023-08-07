@@ -33,8 +33,10 @@ import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.RecoverUpdatedSignManager;
 import es.gob.fire.server.services.internal.RecoverUpdatedSignResultManager;
 import es.gob.fire.server.services.internal.ServiceParams;
+import es.gob.fire.server.services.internal.SessionCollector;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
+import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
@@ -55,6 +57,9 @@ public class FIReService extends HttpServlet {
     @Override
     public void init() throws ServletException {
     	super.init();
+
+    	// Configuramos el modulo de alarmas
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
 
     	// Comprobamos la configuracion
     	try {
@@ -83,9 +88,6 @@ public class FIReService extends HttpServlet {
 			);
 		}
 
-    	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
-
     	// Configuramos la autenticacion del proxy de red
     	try {
     		NetworkAuthenticator.configure();
@@ -95,22 +97,25 @@ public class FIReService extends HttpServlet {
     	}
 
     	// Codigo para programar el volcado de estadisticas a BD si procede
-		try {
-			final int configStatistic = ConfigManager.getStatisticsPolicy();
-			final String statisticsDirPath = ConfigManager.getStatisticsDir();
-			final String jdbcDriver = ConfigManager.getJdbcDriverString();
-			final String dbConnectionString = ConfigManager.getDataBaseConnectionString();
-			if (configStatistic == 2 &&
-					statisticsDirPath != null && !statisticsDirPath.isEmpty() &&
-					jdbcDriver != null && !jdbcDriver.isEmpty() &&
-					dbConnectionString != null && !dbConnectionString.isEmpty()) {
-				final String startTime = ConfigManager.getStatisticsDumpTime();
-				FireStatistics.init(statisticsDirPath, startTime, jdbcDriver, dbConnectionString, false);
-			}
-		}
-		catch (final Exception e) {
-			LOGGER.warning("Error al cargar la configuracion de estadisticas. No se generaran: " + e); //$NON-NLS-1$
-		}
+    	final int configStatistic = ConfigManager.getStatisticsPolicy();
+    	if (configStatistic == 2) {
+    		try {
+    			final String statisticsDirPath = ConfigManager.getStatisticsDir();
+    			final String jdbcDriver = ConfigManager.getJdbcDriverString();
+    			final String dbConnectionString = ConfigManager.getDataBaseConnectionString();
+    			final String dbUser = ConfigManager.getDataBaseUsername();
+    			final String dbPass = ConfigManager.getDataBasePassword();
+    			if (statisticsDirPath != null && !statisticsDirPath.isEmpty() &&
+    					jdbcDriver != null && !jdbcDriver.isEmpty() &&
+    					dbConnectionString != null && !dbConnectionString.isEmpty()) {
+    				final String startTime = ConfigManager.getStatisticsDumpTime();
+    				FireStatistics.init(statisticsDirPath, startTime, jdbcDriver, dbConnectionString, dbUser, dbPass, false);
+    			}
+    		}
+    		catch (final Exception e) {
+    			LOGGER.warning("Error al configurar el volcado de estadisticas. No se generaran: " + e); //$NON-NLS-1$
+    		}
+    	}
 
     	LOGGER.info("Componente central de FIRe cargado correctamente"); //$NON-NLS-1$
     }
@@ -264,6 +269,28 @@ public class FIReService extends HttpServlet {
 
 	@Override
 	public void destroy() {
-		DbManager.closeResources();
+		try {
+			SessionCollector.release();
+		} catch (final Throwable e) {
+			LOGGER.log(Level.SEVERE, "No se pudieron liberar los recursos del gestor de sesiones", e); //$NON-NLS-1$
+		}
+
+		try {
+			FireStatistics.release();
+		} catch (final Throwable e) {
+			LOGGER.log(Level.SEVERE, "No se pudieron liberar los recursos del gestor de estadisticas", e); //$NON-NLS-1$
+		}
+
+		try {
+			DbManager.closeResources();
+		} catch (final Throwable e) {
+			LOGGER.log(Level.SEVERE, "No se pudieron liberar los recursos del gestor de bases de datos", e); //$NON-NLS-1$
+		}
+
+		try {
+			TempDocumentsManager.release();
+		} catch (final Throwable e) {
+			LOGGER.log(Level.SEVERE, "No se pudieron liberar los recursos del gestor de ficheros temporales", e); //$NON-NLS-1$
+		}
 	}
 }

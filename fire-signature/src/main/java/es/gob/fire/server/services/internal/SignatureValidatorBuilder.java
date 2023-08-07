@@ -36,19 +36,19 @@ public class SignatureValidatorBuilder {
 			}
 			catch (final InvalidConfigurationException e) {
 				AlarmsManager.notify(Alarm.RESOURCE_CONFIG, e.getProperty(), e.getFileName());
-				throw new ValidatorException("No se encontro una propiedad necesaria pudo crear el conector con la plataforma de " //$NON-NLS-1$
-						+ "validacion y actualizacion de firmas", e); //$NON-NLS-1$
+				throw new ValidatorException(
+						"No se encontro una propiedad necesaria pudo crear el conector con la plataforma de validacion y actualizacion de firmas", e); //$NON-NLS-1$
 			}
 
 			try {
 				final Class<?> validatorClass = Class.forName(validatorClassName);
 				validator = (SignatureValidator) validatorClass.getConstructor().newInstance();
 			}
-			catch (final Exception e) {
+			catch (final Throwable e) {
 				validator = null;
 				AlarmsManager.notify(Alarm.LIBRARY_NOT_FOUND, validatorClassName);
-				throw new ValidatorException("No se pudo crear el conector con la plataforma de " //$NON-NLS-1$
-						+ "validacion y actualizacion de firmas", e); //$NON-NLS-1$
+				throw new ValidatorException(
+						"No se pudo crear el conector con la plataforma de validacion y actualizacion de firmas", e); //$NON-NLS-1$
 			}
 
 			Properties config;
@@ -62,8 +62,8 @@ public class SignatureValidatorBuilder {
 						+ DEFAULT_PLATFORM_FILENAME), e);
 				AlarmsManager.notify(Alarm.RESOURCE_NOT_FOUND, DEFAULT_PLATFORM_FILENAME);
 				validator = null;
-				throw new  ValidatorException("No se pudo cargar el fichero de configuracion para " //$NON-NLS-1$
-						+ "la plataforma de validacion y actualizacion de firmas", e); //$NON-NLS-1$
+				throw new  ValidatorException(
+						"No se pudo cargar el fichero de configuracion para la plataforma de validacion y actualizacion de firmas", e); //$NON-NLS-1$
 			}
 
 			try {
@@ -83,8 +83,8 @@ public class SignatureValidatorBuilder {
 			catch (final Exception e) {
 				LOGGER.log(Level.WARNING, logF.f("Error en la configuracion de la plataforma de validacion"), e); //$NON-NLS-1$
 				validator = null;
-				throw new  ValidatorException("No se pudo inicializar el conector con " //$NON-NLS-1$
-						+ "la plataforma de validacion y actualizacion de firmas", e); //$NON-NLS-1$
+				throw new  ValidatorException(
+						"No se pudo inicializar el conector con la plataforma de validacion y actualizacion de firmas", e); //$NON-NLS-1$
 			}
 		}
 

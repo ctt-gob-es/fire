@@ -11,6 +11,9 @@ package es.gob.fire.server.services.storage;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.LoggerUtil;
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.signature.ConfigManager;
@@ -45,6 +49,8 @@ public final class RetrieveService extends HttpServlet {
 	private static final String OPERATION_RETRIEVE = "get"; //$NON-NLS-1$
 
 	private static final boolean HIGH_AVAILABILITY_ENABLED;
+
+	private ExecutorService executorService = null;
 
 	static {
 		final String sessionsDao = ConfigManager.getSessionsDao();
@@ -94,15 +100,14 @@ public final class RetrieveService extends HttpServlet {
 	 * @param request Petici&oacute;n.
 	 * @param id Identificador del documento a recuperar.
 	 */
-	private static void retrieveSign(final HttpServletResponse response,
+	private void retrieveSign(final HttpServletResponse response,
 			final HttpServletRequest request, final String id) {
 
 		// Tratamos de cargar los datos de la cache en memoria
 		byte[] data = ClienteAfirmaCache.recoverData(id);
 
-		// Si no se encuentran los datos, comprobamos si estamos en modo alta disponibilidad
-		// y se encuentran en el almacen comun. Si tampoco, se indica que no se
-		// encuentran
+		// Si no se encuentran los datos en cache y estamos en modo alta disponibilidad,
+		// se tratan de obtener del almacen comun
 		if (data == null) {
 
 			boolean existsDocument = false;
@@ -114,30 +119,60 @@ public final class RetrieveService extends HttpServlet {
 					LOGGER.log(Level.SEVERE, "Error al comprobar la existencia del documento " + LoggerUtil.getTrimStr(id), e); //$NON-NLS-1$
 					existsDocument = false;
 				}
-			}
 
-			if (existsDocument) {
-				try {
-					data = TempDocumentsManager.retrieveAndDeleteDocument(id);
+				if (existsDocument) {
+					try {
+						data = TempDocumentsManager.retrieveAndDeleteDocument(id);
+					}
+					catch (final Exception e) {
+						LOGGER.log(Level.SEVERE, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA), e);
+						sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
+						return;
+					}
 				}
-				catch (final Exception e) {
-					LOGGER.log(Level.SEVERE, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA), e);
-					sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA));
-					return;
-				}
-			}
-			else {
-				sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + LoggerUtil.getTrimStr(id) + "')"); //$NON-NLS-1$ //$NON-NLS-2$
-				return;
 			}
 		}
 		// Si hemos recuperado los datos de memoria, pero estamos en modo alta disponibilidad,
 		// debemos eliminarlos del almacen comun para que no queden ahi residuales
 		else if (HIGH_AVAILABILITY_ENABLED) {
-			new DeleteSharedFileThread(id).start();
+			deleteSharedFile(id);
+		}
+
+		// Si no se encontraron los datos, se indica como tal
+		if (data == null) {
+			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_INVALID_DATA_ID)  + " ('" + LoggerUtil.getTrimStr(id) + "')"); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
 
 		sendResult(response, data);
+	}
+
+	private void deleteSharedFile(final String fileId) {
+		if (this.executorService == null) {
+			this.executorService = Executors.newFixedThreadPool(10);
+		}
+		this.executorService.execute(new DeleteSharedFileThread(fileId));
+	}
+
+	@Override
+	public void destroy() {
+
+		// Al destruir el servicio liberamos el pool de hilos
+		if (this.executorService != null) {
+			this.executorService.shutdown();
+			try {
+				if (!this.executorService.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
+					this.executorService.shutdownNow();
+				}
+			} catch (final InterruptedException e) {
+				this.executorService.shutdownNow();
+			}
+		}
+
+		// Liberamos tambien los datos en cache
+		ClienteAfirmaCache.release();
+
+		super.destroy();
 	}
 
     private static void sendResult(final HttpServletResponse response, final String text) {
@@ -171,8 +206,9 @@ public final class RetrieveService extends HttpServlet {
     		try {
 				TempDocumentsManager.deleteDocument(this.docId);
 			} catch (final IOException e) {
-				Logger.getLogger(RetrieveService.class.getName()).warning("No se pudo eliminar el fichero " //$NON-NLS-1$
-						+ this.docId + " de comunicacion con el Cliente Afirma del almacen comun: " + e); //$NON-NLS-1$
+				Logger.getLogger(RetrieveService.class.getName()).warning(String.format(
+						"No se pudo eliminar el fichero %1s de comunicacion con el Cliente Afirma del almacen comun: ", LogUtils.cleanText(this.docId)) //$NON-NLS-1$
+						+ e);
 			}
     	}
     }

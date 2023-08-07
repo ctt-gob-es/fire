@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,6 +56,8 @@ public class RecoverBatchResultManager {
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 	private static final Logger LOGGER = Logger.getLogger(RecoverBatchResultManager.class.getName());
+
+	private static final int NUM_SIMUTANEOUS_THREADS = 10;
 
 	/**
 	 * Finaliza un proceso de firma y devuelve el resultado del mismo.
@@ -340,7 +346,8 @@ public class RecoverBatchResultManager {
         	// obtenemos la informacion de firma trifasica y realizamos la postfirma.
         	// La firma generada se almacena en lugar del documento y se compone un JSON
         	// con la informacion del resultado de cada firma.
-        	final List<ConcurrentProcessThread> threads = new ArrayList<>();
+        	final List<Future<String>> results = new ArrayList<>();
+        	final ExecutorService executorService = Executors.newFixedThreadPool(Math.min(batchResult.documentsCount(), NUM_SIMUTANEOUS_THREADS));
         	final Iterator<String> it = batchResult.iterator();
         	while (it.hasNext()) {
 
@@ -370,19 +377,21 @@ public class RecoverBatchResultManager {
     			final PostSignBatchRecover signRecover = new CloudPostSignBatchRecover(
     					docId, algorithm, signConfig, ret, td, batchResult, logF);
     			// Ejecutamos un hilo encargado de componer las firmas y actualizarlas
-    			final ConcurrentProcessThread t = new PostSignBatchThread(
+    			final PostSignBatchTask t = new PostSignBatchTask(
     					appId, transactionId, docId, batchResult, signConfig,
     					signValidationNeeded, docManager, signRecover);
 
-        		threads.add(t);
-        		t.start();
+    			results.add(executorService.submit(t));
         	}
 
         	// Esperamos a que terminen todos los hilos y los
         	// interrumpimos todos si detectamos que alguno de
         	// ellos fue interrumpido y no se admiten errores parciales
-        	ConcurrentProcessThread.waitThreads(threads, stopOnError,
+        	TasksPoolManager.waitTasks(results, stopOnError,
         			session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS);
+
+        	// Liberamos el pool de hilos
+        	shutdownExecutorService(executorService);
         }
 
     	LOGGER.info(logF.f("Devolvemos el resultado del lote")); //$NON-NLS-1$
@@ -407,6 +416,21 @@ public class RecoverBatchResultManager {
 
         // Enviamos el JSON resultado de la firma del lote
         Responser.sendResult(response, batchResult);
+	}
+
+	/**
+	 * Libera los recursos de un pool de hilos.
+	 * @param executorService Pool de hilos.
+	 */
+	private static void shutdownExecutorService(final ExecutorService executorService) {
+    	executorService.shutdown();
+    	try {
+    		if (!executorService.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
+    			executorService.shutdownNow();
+    		}
+    	} catch (final InterruptedException e) {
+    		executorService.shutdownNow();
+    	}
 	}
 
 	/**
@@ -457,7 +481,8 @@ public class RecoverBatchResultManager {
 			final FIReDocumentManager docManager, final FireSession session,
 			final boolean stopOnError) {
 
-		final List<ConcurrentProcessThread> threads = new ArrayList<>();
+		final List<Future<String>> results = new ArrayList<>();
+		final ExecutorService executorService = Executors.newFixedThreadPool(Math.min(batchResult.documentsCount(), NUM_SIMUTANEOUS_THREADS));
     	final Iterator<String> it = batchResult.iterator();
     	while (it.hasNext()) {
 
@@ -475,19 +500,24 @@ public class RecoverBatchResultManager {
 
     			final PostSignBatchRecover signRecover = new ClienteAfirmaPostSignBatchRecover(
     					docId, batchResult);
-    			final ConcurrentProcessThread t = new PostSignBatchThread(
+
+    			// Ejecutamos la tarea
+    			final PostSignBatchTask t = new PostSignBatchTask(
     					appId, trId, docId, batchResult, signConfig, true,
     					docManager, signRecover);
-    			threads.add(t);
-    			t.start();
+
+    			results.add(executorService.submit(t));
     		}
     	}
 
         // Esperamos a que terminen todos los hilos y los
         // interrumpimos todos si detectamos que alguno de
         // ellos fue interrumpido y no se admiten errores parciales
-        ConcurrentProcessThread.waitThreads(threads, stopOnError,
+        TasksPoolManager.waitTasks(results, stopOnError,
         		session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS);
+
+    	// Liberamos el pool de hilos
+        shutdownExecutorService(executorService);
 	}
 
 	/**

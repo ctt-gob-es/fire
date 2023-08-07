@@ -258,7 +258,7 @@ public class SignOperationManager {
         try {
         	TempDocumentsManager.storeDocument(transactionId, data, true);
         	// Registramos el tamano del documento con fines estadisticos
-       	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, new Long(data.length));
+       	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, Long.valueOf(data.length));
         }
         catch (final Exception e) {
         	LOGGER.severe(logF.f("Error en el guardado temporal de los datos a firmar: " + e)); //$NON-NLS-1$

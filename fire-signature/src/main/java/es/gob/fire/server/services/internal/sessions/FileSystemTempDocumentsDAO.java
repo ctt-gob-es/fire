@@ -100,11 +100,10 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
         		checkFile(filename) :
         		File.createTempFile(DEFAULT_PREFIX, null, TMPDIR);
 
-        final OutputStream fos = new FileOutputStream(f);
-        final OutputStream bos = new BufferedOutputStream(fos);
-        bos.write(data);
-        bos.close();
-        fos.close();
+        		try (final OutputStream fos = new FileOutputStream(f);
+        				final OutputStream bos = new BufferedOutputStream(fos);) {
+        			bos.write(data);
+        		}
 
         LOGGER.fine("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
 

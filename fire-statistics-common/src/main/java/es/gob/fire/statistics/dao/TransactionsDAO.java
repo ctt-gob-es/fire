@@ -1,6 +1,7 @@
 package es.gob.fire.statistics.dao;
 
 import java.io.StringWriter;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,14 +34,14 @@ public class TransactionsDAO {
 			" SUM(CASE When t.correcta = '0' then t.total else 0 end) AS INCORRECTAS " + //$NON-NLS-1$
 			" FROM tb_transacciones t " + //$NON-NLS-1$
 			" WHERE year(t.fecha) = ? AND month(t.fecha) = ? " + //$NON-NLS-1$
-			" GROUP BY NOMBRE_APP ";*/ //$NON-NLS-1$
-	
+			" GROUP BY NOMBRE_APP ";  //$NON-NLS-1$ */
+
 	private static final String TRANSACTIONS_BYAPP = "SELECT  t.aplicacion APLICACION, " + //$NON-NLS-1$
 			" SUM(CASE When t.correcta = '1' then t.total  else 0 end) AS CORRECTAS, " + //$NON-NLS-1$
 			" SUM(CASE When t.correcta = '0' then t.total else 0 end) AS INCORRECTAS " + //$NON-NLS-1$
 			" FROM tb_transacciones t " + //$NON-NLS-1$
 			" WHERE EXTRACT(YEAR FROM t.fecha) = ? AND EXTRACT(MONTH FROM t.fecha) = ? " + //$NON-NLS-1$
-			" GROUP BY APLICACION ";
+			" GROUP BY APLICACION "; //$NON-NLS-1$
 
 	/** Transacciones finalizadas correctamente/ incorrectamente por cada origen de
 	 * certificados/proveedor. (Filtrado por a&ntilde;o y mes). */
@@ -49,8 +50,8 @@ public class TransactionsDAO {
 			" SUM(CASE When t.correcta = '0' then t.total else 0 end) AS INCORRECTAS " +  //$NON-NLS-1$
 			" FROM tb_transacciones t " +  //$NON-NLS-1$
 			" WHERE  year(t.fecha) = ? AND month(t.fecha) = ? " +  //$NON-NLS-1$
-			" GROUP BY t.proveedor";*/ //$NON-NLS-1$
-	
+			" GROUP BY t.proveedor";  //$NON-NLS-1$ */
+
 	private static final String TRANSACTIONS_BYPROVIDER = "SELECT t.proveedor AS PROVEEDOR, " +  //$NON-NLS-1$
 			" SUM(CASE When t.correcta = '1' then t.total else 0 end) AS CORRECTAS, " +  //$NON-NLS-1$
 			" SUM(CASE When t.correcta = '0' then t.total else 0 end) AS INCORRECTAS " +  //$NON-NLS-1$
@@ -63,8 +64,8 @@ public class TransactionsDAO {
 	/*private static final String TRANSACTIONS_BYDOCSIZE = "SELECT t.aplicacion AS nombre_app, SUM(t.tamanno) AS bytes " + //$NON-NLS-1$
 			" FROM tb_transacciones t "+ //$NON-NLS-1$
 			" WHERE  year(t.fecha) = ? AND month(t.fecha) = ? "+  //$NON-NLS-1$
-			" GROUP BY t.aplicacion";*/ //$NON-NLS-1$
-	
+			" GROUP BY t.aplicacion";  //$NON-NLS-1$ */
+
 	private static final String TRANSACTIONS_BYDOCSIZE = "SELECT t.aplicacion APLICACION, SUM(t.tamanno) AS bytes " + //$NON-NLS-1$
 			" FROM tb_transacciones t "+ //$NON-NLS-1$
 			" WHERE EXTRACT(YEAR FROM t.fecha) = ? AND EXTRACT(MONTH FROM t.fecha) = ? "+  //$NON-NLS-1$
@@ -80,8 +81,8 @@ public class TransactionsDAO {
 			 " FROM tb_transacciones t"+ //$NON-NLS-1$
 			 " WHERE year(t.fecha) = ? "+  //$NON-NLS-1$
 			 " AND month(t.fecha) = ? "+		 //$NON-NLS-1$
-			 " GROUP BY t.aplicacion" ;*/ //$NON-NLS-1$
-	
+			 " GROUP BY t.aplicacion";  //$NON-NLS-1$ */
+
 	private static final String TRANSACTIONS_BYOPERATION = "SELECT t.aplicacion, "+ //$NON-NLS-1$
 			 " sum(case when t.operacion = 'SIGN' then (case when t.correcta = '1' then t.total else 0 end) else 0 end )FirmasSimplesCorrectas,"+ //$NON-NLS-1$
 			 " sum(case when t.operacion = 'SIGN' then (case when t.correcta = '0' then t.total else 0 end) else 0 end )FirmasSimplesINCorrectas,"+ //$NON-NLS-1$
@@ -92,8 +93,9 @@ public class TransactionsDAO {
 			 " GROUP BY t.aplicacion" ; //$NON-NLS-1$
 
 	/**
-	 * Inserta una configuraci&oacute;n de transacci&oacute;n en base de datos indicando cuantas veces
-	 * se dio esta configuraci&oacute;n un d&iacute;a concreto.
+	 * Inserta una configuraci&oacute;n de transacci&oacute;n en base de datos indicando cuantas
+	 * veces se dio esta configuraci&oacute;n un d&iacute;a concreto. Se hace un commit tras la
+	 * transacci&oacute;n.
 	 * @param date Fecha del d&iacute;a en la que se realiz&oacute; la transacci&oacute;n.
 	 * @param transaction Configuraci&oacute;n de la transacci&oacute;n.
 	 * @param total N&uacute;mero total de transacciones que se generaron ese d&iacute;a con la
@@ -103,12 +105,32 @@ public class TransactionsDAO {
 	 * @throws SQLException Cuando se produce un error al insertar los datos.
 	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
 	 */
-	public static boolean insertTransaction(final Date date, final TransactionCube transaction, final TransactionTotal total)
+	public static void insertTransaction(final Date date, final TransactionCube transaction, final TransactionTotal total)
+			throws SQLException, DBConnectionException {
+		try (final Connection conn = DbManager.getInstance().getConnection(false);) {
+			insertTransaction(date, transaction, total, conn);
+		}
+	}
+
+	/**
+	 * Inserta una configuraci&oacute;n de transacci&oacute;n en base de datos indicando cuantas veces
+	 * se dio esta configuraci&oacute;n un d&iacute;a concreto.
+	 * @param date Fecha del d&iacute;a en la que se realiz&oacute; la transacci&oacute;n.
+	 * @param transaction Configuraci&oacute;n de la transacci&oacute;n.
+	 * @param total N&uacute;mero total de transacciones que se generaron ese d&iacute;a con la
+	 * configuraci&oacute;n indicada.
+	 * @param conn Conexi&oacute;n con la base de datos.
+	 * @return {@code true} si la configuraci&oacute;n se inserto correctamente. {@code false}
+	 * en caso contrario.
+	 * @throws SQLException Cuando se produce un error al insertar los datos.
+	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
+	 */
+	public static void insertTransaction(final Date date, final TransactionCube transaction,
+			final TransactionTotal total, final Connection conn)
 			throws SQLException, DBConnectionException {
 
 		int totalInsertReg = 0;
-		try (final PreparedStatement st = DbManager.prepareStatement(ST_INSERT_TRANSACTION,false);) {
-
+		try (final PreparedStatement st = conn.prepareStatement(ST_INSERT_TRANSACTION);) {
 			st.setTimestamp(1, new java.sql.Timestamp(date.getTime()));
 			st.setString(2, transaction.getApplication());
 			st.setString(3, transaction.getOperation());
@@ -118,9 +140,10 @@ public class TransactionsDAO {
 			st.setLong(7, total.getDataSize());
 			st.setLong(8, total.getTotal());
 			totalInsertReg = st.executeUpdate();
+			if (totalInsertReg < 1) {
+				throw new SQLException("No se insertaron registros en la tabla de transacciones"); //$NON-NLS-1$
+			}
 		}
-
-		return totalInsertReg == 1;
 	}
 
 	/**
@@ -138,7 +161,8 @@ public class TransactionsDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final PreparedStatement st = DbManager.prepareStatement(TRANSACTIONS_BYAPP);) {
+		try (final Connection conn = DbManager.getInstance().getConnection(false);
+				final PreparedStatement st = conn.prepareStatement(TRANSACTIONS_BYAPP);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
 			try (final ResultSet rs = st.executeQuery();) {
@@ -192,7 +216,8 @@ public class TransactionsDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final PreparedStatement st = DbManager.prepareStatement(TRANSACTIONS_BYPROVIDER);) {
+		try (final Connection conn = DbManager.getInstance().getConnection(false);
+				final PreparedStatement st = conn.prepareStatement(TRANSACTIONS_BYPROVIDER);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
 
@@ -248,7 +273,8 @@ public class TransactionsDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final PreparedStatement st = DbManager.prepareStatement(TRANSACTIONS_BYDOCSIZE);) {
+		try (final Connection conn = DbManager.getInstance().getConnection(false);
+				final PreparedStatement st = conn.prepareStatement(TRANSACTIONS_BYDOCSIZE);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
 			try (final ResultSet rs = st.executeQuery();) {
@@ -303,7 +329,8 @@ public class TransactionsDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final PreparedStatement st = DbManager.prepareStatement(TRANSACTIONS_BYOPERATION);) {
+		try (final Connection conn = DbManager.getInstance().getConnection(false);
+				final PreparedStatement st = conn.prepareStatement(TRANSACTIONS_BYOPERATION);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
 			try (final ResultSet rs = st.executeQuery();) {

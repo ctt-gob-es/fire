@@ -167,8 +167,6 @@ public class DbManager {
 			}
 			throw new SQLException("No se pudo obtener conexion con la BD", e); //$NON-NLS-1$
 		}
-
-
 	}
 
 	/**
@@ -187,6 +185,7 @@ public class DbManager {
 		if (ds != null) {
 			configured = false;
 			ds.close();
+			ds = null;
 		}
 	}
 }

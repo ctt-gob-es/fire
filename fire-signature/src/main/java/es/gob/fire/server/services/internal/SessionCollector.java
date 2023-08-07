@@ -18,6 +18,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +49,12 @@ public final class SessionCollector {
 
 	private static final Logger LOGGER = Logger.getLogger(SessionCollector.class.getName());
 
-	private static final Map<String, FireSession> sessions = new HashMap<>();
+	private static Map<String, FireSession> sessions = null;
+
+	/**
+	 * &Uacute;timo proceso de limpieza que se ejecut&oacute;.
+	 */
+	private static Future<?> cleaningProcess = null;
 
 	/**
 	 * N&uacute;mero de veces que se puden guardar sesiones antes ejecutar el proceso para
@@ -58,11 +67,13 @@ public final class SessionCollector {
 
 	private static int uses = 0;
 
-    private static SessionsDAO dao;
+    private static SessionsDAO dao = null;
 
-    private static SecureRandom random;
+    private static SecureRandom random = null;
 
     static {
+
+    	sessions = new HashMap<>();
 
     	// Cargamos el DAO de sesiones compartidas
     	final String daoType = ConfigManager.getSessionsDao();
@@ -603,7 +614,7 @@ public final class SessionCollector {
 		// Si hemos llegado al limite establecido de peticiones entre las cuales limpiar,
 		// ejecutamos la limpieza
 		synchronized (sessions) {
-			if (++uses > MAX_USE_TO_CLEANING) {
+			if (++uses > MAX_USE_TO_CLEANING && (cleaningProcess == null || cleaningProcess.isDone())) {
 				deleteExpiredSessions(trAux);
 				uses = 0;
 			}
@@ -626,14 +637,44 @@ public final class SessionCollector {
      * el periodo de validez.
 	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
      */
-    private static void deleteExpiredSessions(final TransactionAuxParams trAux) {
-        new ExpiredSessionCleanerThread(
-        		sessions.keySet().toArray(new String[sessions.size()]),
-        		sessions,
-        		dao,
-        		ConfigManager.getTempsTimeout(),
-        		trAux).start();
-    }
+	private static void deleteExpiredSessions(final TransactionAuxParams trAux) {
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		try {
+			cleaningProcess = executorService.submit(new ExpiredSessionCleanerThread(
+					sessions.keySet().toArray(new String[sessions.size()]),
+					sessions,
+					dao,
+					ConfigManager.getTempsTimeout(),
+					trAux));
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING,
+					"Error en la ejecucion del proceso de borrado de seiones expiradas", //$NON-NLS-1$
+					e);
+		}
+		finally {
+			// Al destruir el servicio liberamos el pool de hilos
+			executorService.shutdown();
+			try {
+				if (!executorService.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
+					executorService.shutdownNow();
+				}
+			} catch (final InterruptedException e) {
+				executorService.shutdownNow();
+			}
+			executorService = null;
+		}
+	}
+
+	public static void release() {
+		cleaningProcess.cancel(true);
+		cleaningProcess = null;
+
+		sessions.clear();
+		sessions = null;
+
+	    random = null;
+	}
 
     /**
      * Hilo para la eliminaci&oacute;n de sesiones y datos caducados.
