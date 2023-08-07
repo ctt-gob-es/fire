@@ -11,6 +11,7 @@ package es.gob.fire.test.webapp;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -62,7 +63,7 @@ public class SignBatchService extends HttpServlet {
 			signOperationResult = ConfigManager.getInstance().getFireClient(appId).signBatch(transactionId, userId, stopOnError);
 		} catch (final Exception e) {
 			LOGGER.error("Error durante la operacion de firma del lote", e); //$NON-NLS-1$
-			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode("Error en la llamada a la operacion de firma de lote:<br>" + e.getMessage(), "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
+			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode("Error en la llamada a la operacion de firma de lote:<br>" + e.getMessage(), StandardCharsets.UTF_8)); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 

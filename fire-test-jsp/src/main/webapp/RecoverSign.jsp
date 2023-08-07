@@ -1,3 +1,4 @@
+<%@page import="org.slf4j.Logger"%>
 <%@page import="es.gob.fire.client.GracePeriodInfo"%>
 <%@page import="java.security.cert.CertificateEncodingException"%>
 <%@page import="es.gob.fire.client.TransactionResult"%>
@@ -9,6 +10,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
+
+	Logger LOGGER = LoggerFactory.getLogger("es.gob.fire.test.webapp"); //$NON-NLS-1$
 
 	String user = (String) session.getAttribute("user"); //$NON-NLS-1$
 	if (user == null) {
@@ -22,14 +25,8 @@
     try {
     	result = SignHelper.recoverSignResult(request);
     }
-/*     catch (final Exception e) {
-    	LoggerFactory.getLogger("es.gob.fire.test.webapp").error("Ocurrio un error al agregar el documento al lote", e); //$NON-NLS-1$
-		request.getRequestDispatcher("ErrorTransactionPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8")).forward(request, response); //$NON-NLS-1$ //$NON-NLS-2$
-		return;
-	} */
     catch (Exception e) {
-		LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
-				"Error durante la operacion de recuperacion de firma: {}", e.toString()); //$NON-NLS-1$
+    	LOGGER.error("Error durante la operacion de recuperacion de firma: {}", e.toString()); //$NON-NLS-1$
 		String msg = e.getMessage();
 		String params = msg != null ? URLEncoder.encode(e.getMessage(), "utf-8") : ""; //$NON-NLS-1$ //$NON-NLS-2$
     	response.sendRedirect("ErrorPage.jsp?msg=" + params); //$NON-NLS-1$
@@ -84,21 +81,21 @@
 		    					"\nFecha estimada: " + gracePeriod.getResolutionDate()) : //$NON-NLS-1$
 		    				"No se ha obtenido resultado"); //$NON-NLS-1$
 		    
-		    LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
-		    		"Estado: " + result.getState()); //$NON-NLS-1$
-		    LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
-		    		"Nombre de proveedor: " + result.getProviderName()); //$NON-NLS-1$
-			LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
-				    "Formato de actualizacion: " + result.getUpgradeFormat()); //$NON-NLS-1$
+		    				
+		    				
+		    				
+		    LOGGER.info("Estado: " + result.getState()); //$NON-NLS-1$
+		    LOGGER.info("Nombre de proveedor: " + result.getProviderName()); //$NON-NLS-1$
+		    LOGGER.info("Formato de actualizacion: " + result.getUpgradeFormat()); //$NON-NLS-1$
 		    try {
-		    	 LoggerFactory.getLogger("es.gob.fire.test.webapp").info( //$NON-NLS-1$
+		    	LOGGER.info(
 		    			 "Certificado de firma: " + (result.getSigningCert() != null ? //$NON-NLS-1$
 							Base64.encode(result.getSigningCert().getEncoded()) : null));
 			} catch (final CertificateEncodingException e) {
-				LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
+				LOGGER.error(
 						"No se pudo decodificar el certificado de firma: " + e); //$NON-NLS-1$
 			}
-			
+
 			// Identificamos si el resultado es demasiado grande, en cuyo caso no lo mostraremos en Base 64 
 			final boolean dataTooLarge = resultMsg.length() > 1024 * 1024; // 1 Mb
 			

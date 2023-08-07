@@ -101,6 +101,8 @@ public class AddDocumentBatchService extends HttpServlet {
 		}
 
 		final Properties config = new Properties();
+
+		// Opcional. Titulo y nombre que mostrar al usuario al autorizar la firma
 		config.setProperty("docTitle", "T\u00EDtulo " + doc.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 		config.setProperty("docName", "Nombre " + doc.getId()); //$NON-NLS-1$ //$NON-NLS-2$
 

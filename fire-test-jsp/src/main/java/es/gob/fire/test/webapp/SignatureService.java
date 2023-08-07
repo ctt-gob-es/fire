@@ -125,7 +125,7 @@ public class SignatureService extends HttpServlet {
         }
 
         // Desactivacion del periodo de gracia (puede ser necesario si se configura politica de firma)
-       	//confProperties.setProperty("updater.ignoreGracePeriod", Boolean.TRUE.toString()); //$NON-NLS-1$
+       	confProperties.setProperty("updater.ignoreGracePeriod", Boolean.TRUE.toString()); //$NON-NLS-1$
 
         // Configuracion del nombre y titulo del documento
 //        confProperties.setProperty("docTitle", "Mi titulo"); //$NON-NLS-1$ //$NON-NLS-2$

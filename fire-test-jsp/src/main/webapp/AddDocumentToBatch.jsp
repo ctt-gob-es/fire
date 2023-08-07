@@ -143,11 +143,11 @@
 
 					<%-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
 					   - mode=implicit
-					   - filters=keyusage.nonrepudiation:true;nonexpired:
-					  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
-					  de certificados de firma no caducados. --%>
+					   - updater.ignoreGracePeriod=true
+					  Con ellos se generan firmas que contienen los datos firmados y se indica a la plataforma
+					  de actualizacion de firmas que se ignore el periodo de gracia. \nupdater.ignoreGracePeriod=true--%>
 					<input id="extraparams-conf" type="hidden" name="extraParams"
-						value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true;nonexpired:".getBytes()) %>"/>
+						value="<%= Base64.encode("mode=implicit".getBytes()) %>" />
 				</fieldset>
 
 				<div style="margin-top:30px;text-align: left;">
