@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.server.services.statistics.AuditTransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 
 /**
@@ -27,6 +28,7 @@ public class SignBatchManager {
 
 	private static final Logger LOGGER = Logger.getLogger(SignBatchManager.class.getName());
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
+	private static final AuditTransactionRecorder AUDITTRANSLOGGER = AuditTransactionRecorder.getInstance();
 
 	/**
      * Inicia el proceso de firma de un lote.
@@ -66,8 +68,10 @@ public class SignBatchManager {
 
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
-    		LOGGER.warning(logF.f("Se ha pedido firmar un lote sin documentos. Se aborta la operacion.")); //$NON-NLS-1$
+    		String errorMessage = "Se ha pedido firmar un lote sin documentos. Se aborta la operacion.";
+    		LOGGER.warning(logF.f(errorMessage)); //$NON-NLS-1$
     		TRANSLOGGER.register(session, false);
+    		AUDITTRANSLOGGER.register(session, false, errorMessage);
         	SessionCollector.removeSession(session, trAux);
         	Responser.sendError(response, FIReError.BATCH_NO_DOCUMENTS);
     		return;
@@ -76,8 +80,10 @@ public class SignBatchManager {
         final TransactionConfig connConfig =
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning(logF.f("No se proporcionaron las URL de redireccion para la operacion")); //$NON-NLS-1$
+			String errorMessage = "No se proporcionaron las URL de redireccion para la operacion";
+			LOGGER.warning(logF.f(errorMessage)); //$NON-NLS-1$
 			TRANSLOGGER.register(session, false);
+			AUDITTRANSLOGGER.register(session, false, errorMessage);
 			Responser.sendError(response, FIReError.INTERNAL_ERROR);
 			return;
 		}

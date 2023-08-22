@@ -32,6 +32,7 @@ import es.gob.fire.server.services.internal.sessions.SessionException;
 import es.gob.fire.server.services.internal.sessions.SessionsDAO;
 import es.gob.fire.server.services.internal.sessions.SessionsDAOFactory;
 import es.gob.fire.server.services.internal.sessions.TempDocumentsDAO;
+import es.gob.fire.server.services.statistics.AuditTransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
 
@@ -684,6 +685,7 @@ public final class SessionCollector {
     	private static Logger THREAD_LOGGER = Logger.getLogger(ExpiredSessionCleanerThread.class.getName());
 
     	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
+    	private static final AuditTransactionRecorder AUDITTRANSLOGGER = AuditTransactionRecorder.getInstance();
 
     	private final String[] ids;
     	private final Map<String, FireSession> sessionsMap;
@@ -722,7 +724,10 @@ public final class SessionCollector {
         		session = this.sessionsMap.get(id);
         		if (session != null && currentTime > session.getExpirationTime()) {
         			// Registramos la transaccion como erronea
+        			String errorMessage = "La sesion ha caducado";
         			TRANSLOGGER.register(session, false);
+        			AUDITTRANSLOGGER.register(session, false, errorMessage);
+        			
         			// Borramos la sesion
         			SessionCollector.removeSession(session, this.trAux);
         		}

@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 
 
@@ -30,6 +31,7 @@ public class RecoverBatchSignatureManager {
 
 	private static final Logger LOGGER = Logger.getLogger(RecoverBatchSignatureManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+	private static final AuditSignatureRecorder AUDITSIGNLOGGER = AuditSignatureRecorder.getInstance();
 
 	/**
 	 * Devuelve el resultado de una firma concreta de un lote. Si es necesario, actualiza la firma.
@@ -146,10 +148,12 @@ public class RecoverBatchSignatureManager {
         	signature = TempDocumentsManager.retrieveAndDeleteDocument(docFilename);
         }
         catch (final Exception e) {
+        	String errorMessage = "No se encuentra el resultado de la firma del documento: " + docId + ". Puede haber caducado la sesion";
         	LOGGER.log(Level.SEVERE, logF.f("No se encuentra el resultado de la firma del documento: %1s. Puede haber caducado la sesion", docId), e); //$NON-NLS-1$
         	batchResult.setErrorResult(docId, BatchResult.ERROR_RECOVERING);
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SIGNLOGGER.register(session, false, docId);
+        	AUDITSIGNLOGGER.register(session, false, docId, errorMessage);
         	SessionCollector.commit(session, trAux);
         	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
@@ -159,6 +163,7 @@ public class RecoverBatchSignatureManager {
         batchResult.setErrorResult(docId, BatchResult.RECOVERED);
 
         SIGNLOGGER.register(session, true, docId);
+        AUDITSIGNLOGGER.register(session, true, docId);
 
         // Revisamos si queda alguna firma valida sin recuperar, en cuyo caso,
         // eliminamos la sesion. Si no, actualizamos el estado
