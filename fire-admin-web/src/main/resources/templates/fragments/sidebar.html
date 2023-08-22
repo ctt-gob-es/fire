@@ -123,22 +123,39 @@
 	            
 	            
                 
-                 <!-- Estadisticas -->
+                <!-- Estadisticas -->
                 
-                  <li class="nav-item">
+                <li class="nav-item">
 	             	<a id="aStatsAdmin" class='sidebar-link' href="#">
 	              		<span class="icon-holder">
 	                		<i class="c-black-500 ti-stats-up"></i>
 	                	</span>
 	                	<span class="title" th:text="#{menu.admin.stats}"></span>
 						<script th:inline="javascript">
-               				var actionStatistics = /*[[@{/statistics}]]*/;
-               				$('#aStatsAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatistics, 'optionReplacement', 'GET', null, true); return false;});
-             			</script>
-            		</a>
+	              				var actionStatistics = /*[[@{/statistics}]]*/;
+	              				$('#aStatsAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionStatistics, 'optionReplacement', 'GET', null, true); return false;});
+	            			</script>
+	           		</a>
             	</li>
                 
                 <!-- Fin estadisticas -->
+                
+                <!-- Auditoría -->
+                
+                <li class="nav-item">
+	             	<a id="aAuditAdmin" class='sidebar-link' href="#">
+	              		<span class="icon-holder">
+	                		<i class="c-black-500 ti-search"></i>
+	                	</span>
+	                	<span class="title" th:text="#{menu.admin.audit}"></span>
+						<script th:inline="javascript">
+	              				var actionAudit = /*[[@{/auditadmin}]]*/;
+	              				$('#aAuditAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionAudit, 'optionReplacement', 'GET', null, true); return false;});
+	            			</script>
+	           		</a>
+            	</li>
+                
+                <!-- Fin Auditoría -->
                
 	          </ul>
           </form>

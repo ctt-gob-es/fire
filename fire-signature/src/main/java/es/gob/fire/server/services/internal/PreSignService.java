@@ -39,6 +39,7 @@ import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
 
@@ -57,6 +58,7 @@ public final class PreSignService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
 
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+	private static final AuditSignatureRecorder AUDITSIGNLOGGER = AuditSignatureRecorder.getInstance();
 
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
@@ -240,7 +242,7 @@ public final class PreSignService extends HttpServlet {
             }
             catch (final Exception e) {
                 LOGGER.log(Level.SEVERE, logF.f("Error en la prefirma de los datos"), e); //$NON-NLS-1$
-                ErrorManager.setErrorToSession(session, FIReError.SIGNING, trAux);
+                ErrorManager.setErrorToSession(session, FIReError.SIGNING, true, e.getMessage(), trAux);
                 Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
                 return;
             }
@@ -318,6 +320,7 @@ public final class PreSignService extends HttpServlet {
             for (final BatchDocument doc : documents) {
         		if (doc.getResult() != null) {
         			SIGNLOGGER.register(session, false, doc.getId());
+        			AUDITSIGNLOGGER.register(session, false, doc.getId(), doc.getResult());
         			batchResult.setErrorResult(doc.getId(), doc.getResult());
         			failed = true;
         		}

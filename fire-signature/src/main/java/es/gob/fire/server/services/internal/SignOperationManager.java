@@ -27,6 +27,8 @@ import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
+import es.gob.fire.server.services.statistics.AuditTransactionRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
@@ -40,6 +42,8 @@ public class SignOperationManager {
 	private static final Logger LOGGER = Logger.getLogger(SignOperationManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
+	private static final AuditTransactionRecorder AUDITTRANSLOGGER = AuditTransactionRecorder.getInstance();
+	private static final AuditSignatureRecorder AUDITSIGNLOGGER = AuditSignatureRecorder.getInstance();
 
 	/**
 	 * Inicia la operaci&oacute;n de firma asociada al componente central.
@@ -197,9 +201,12 @@ public class SignOperationManager {
         	docId = Base64.decode(dataB64, true);
         }
         catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, logF.f("El documento enviado a firmar no esta bien codificado"), e); //$NON-NLS-1$
+        	String errorMessage = "El documento enviado a firmar no esta bien codificado";
+        	LOGGER.log(Level.SEVERE, errorMessage, e); //$NON-NLS-1$
 			SIGNLOGGER.register(session, false, null);
 			TRANSLOGGER.register(session, false);
+			AUDITSIGNLOGGER.register(session, false, null, errorMessage);
+			AUDITTRANSLOGGER.register(session, false, errorMessage);
 			ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DATA_TO_SIGN_INVALID, trAux);
 			Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_INVALID, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
@@ -236,9 +243,12 @@ public class SignOperationManager {
         	}
         }
         catch (final Exception e) {
-    		LOGGER.log(Level.SEVERE, logF.f("Error al obtener los datos a firmar del servidor remoto"), e); //$NON-NLS-1$
+        	String errorMessage = "Error al obtener los datos a firmar del servidor remoto";
+    		LOGGER.log(Level.SEVERE, errorMessage, e); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
+    		AUDITSIGNLOGGER.register(session, false, null, errorMessage);
+			AUDITTRANSLOGGER.register(session, false, errorMessage);
     		AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
     		ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, trAux);
 			Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, new SignOperationResult(transactionId, redirectErrorUrl));
@@ -246,9 +256,12 @@ public class SignOperationManager {
         }
 
     	if (data == null) {
-    		LOGGER.severe(logF.f("No se han obtenido los datos a firmar")); //$NON-NLS-1$
+    		String errorMessage = "No se han obtenido los datos a firmar";
+    		LOGGER.severe(logF.f(errorMessage)); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
+    		AUDITSIGNLOGGER.register(session, false, null, errorMessage);
+			AUDITTRANSLOGGER.register(session, false, errorMessage);
     		ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, trAux);
 			Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, new SignOperationResult(transactionId, redirectErrorUrl));
     		return;

@@ -19,8 +19,12 @@ import java.util.logging.Logger;
 
 import es.gob.fire.statistics.config.DBConnectionException;
 import es.gob.fire.statistics.config.DbManager;
+import es.gob.fire.statistics.dao.AuditSignaturesDAO;
+import es.gob.fire.statistics.dao.AuditTransactionsDAO;
 import es.gob.fire.statistics.dao.SignaturesDAO;
 import es.gob.fire.statistics.dao.TransactionsDAO;
+import es.gob.fire.statistics.entity.AuditSignatureCube;
+import es.gob.fire.statistics.entity.AuditTransactionCube;
 import es.gob.fire.statistics.entity.SignatureCube;
 import es.gob.fire.statistics.entity.TransactionCube;
 import es.gob.fire.statistics.entity.TransactionTotal;
@@ -35,6 +39,8 @@ public class LoadStatisticsRunnable implements Runnable {
 
 	private static final String FILE_SIGN_PREFIX = "FIRE_SIGNATURE_";//$NON-NLS-1$
 	private static final String FILE_TRANS_PREFIX = "FIRE_TRANSACTION_";//$NON-NLS-1$
+	private static final String FILE_AUDIT_SIGN_PREFIX = "FIRE_AUDIT_SIGNATURE_";//$NON-NLS-1$
+	private static final String FILE_AUDIT_TRANS_PREFIX = "FIRE_AUDIT_TRANSACTION_";//$NON-NLS-1$
 
 	private final static SimpleDateFormat formatter =  new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
 
@@ -84,9 +90,13 @@ public class LoadStatisticsRunnable implements Runnable {
 		// de cargar en base de datos
 		File[] signatureFiles;
 		File[] transaccionFiles;
+		File[] auditSignatureFiles;
+		File[] auditTransaccionFiles;
 		try {
 			signatureFiles = getPendingDataFiles(FILE_SIGN_PREFIX, lastDateLoaded);
 			transaccionFiles = getPendingDataFiles(FILE_TRANS_PREFIX, lastDateLoaded);
+			auditSignatureFiles = getPendingDataFiles(FILE_AUDIT_SIGN_PREFIX, lastDateLoaded);
+			auditTransaccionFiles = getPendingDataFiles(FILE_AUDIT_TRANS_PREFIX, lastDateLoaded);
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No se pudieron cargar los ficheros de datos a procesar", e); //$NON-NLS-1$
@@ -101,7 +111,7 @@ public class LoadStatisticsRunnable implements Runnable {
 
 		// Cargamos los ficheros en base de datos
 		try {
-			this.result = exeLoadStatistics(signatureFiles, transaccionFiles);
+			this.result = exeLoadStatistics(signatureFiles, transaccionFiles, auditSignatureFiles, auditTransaccionFiles);
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No ha sido posible cargar todos los datos en base de datos", e); //$NON-NLS-1$
@@ -206,9 +216,11 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * Carga en base de datos los datos estad&iacute;sticos de los ficheros encontrados.
 	 * @param signatureFiles Ficheros con los datos de las firmas ejecutadas.
 	 * @param transactionFiles Ficheros con los datos de las transacciones ejecutadas.
+	 * @param petitionFiles Ficheros con los datos de las peticiones ejecutadas.
+	 * @param auditTransaccionFiles 
 	 * @return Resultado del proceso de carga.
 	 */
-	private static LoadStatisticsResult exeLoadStatistics(final File[] signatureFiles, final File[] transactionFiles) {
+	private static LoadStatisticsResult exeLoadStatistics(final File[] signatureFiles, final File[] transactionFiles, final File[] auditSignatureFiles, File[] auditTransactionFiles) {
 
 		Date lastDateProcessed = null;
 		String lastDateProcessedText = null;
@@ -217,6 +229,23 @@ public class LoadStatisticsRunnable implements Runnable {
 
 			// Por orden, procesamos cada pareja de ficheros, cuidando que tengamos ambos ficheros
 			// para cada una de las fechas encontradas
+			
+			String signatureFileDate = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length());
+			String transactionFileDate = transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length());
+			String auditSignatureFileDate = auditSignatureFiles[i].getName().substring(FILE_AUDIT_SIGN_PREFIX.length());
+			String auditTransactionFileDate = auditTransactionFiles[i].getName().substring(FILE_AUDIT_TRANS_PREFIX.length());
+			
+			final int dateComparison = checkDatesFromFiles(signatureFileDate, transactionFileDate, auditSignatureFileDate, auditTransactionFileDate);
+			
+			if (dateComparison < 1){
+				String errorMsg = "No coinciden las fechas de los ficheros";
+				if (errorMsg != null) {
+					LOGGER.severe(errorMsg);
+					return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
+				}
+			}
+			
+			/*
 			final int c = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length()).compareTo(
 					transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length()));
 			if (c != 0) {
@@ -231,7 +260,8 @@ public class LoadStatisticsRunnable implements Runnable {
 				LOGGER.severe(errorMsg);
 				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
-
+			*/
+			
 			// Identificamos la fecha de los ficheros que estamos procesando
 			final String dateText = parseDateStringFromFilename(signatureFiles[i], FILE_SIGN_PREFIX);
 			Date date;
@@ -246,7 +276,7 @@ public class LoadStatisticsRunnable implements Runnable {
 			// Extraemos la informacion de los ficheros
 			CompactedData compactedData;
 			try {
-				compactedData = extractData(signatureFiles[i], transactionFiles[i]);
+				compactedData = extractData(signatureFiles[i], transactionFiles[i], auditSignatureFiles[i], auditTransactionFiles[i]);
 			}
 			catch (final Exception e) {
 				final String errorMsg = "Ocurrio un error al extraer los datos de los ficheros del dia " + dateText; //$NON-NLS-1$
@@ -276,16 +306,19 @@ public class LoadStatisticsRunnable implements Runnable {
 
 		return new LoadStatisticsResult(true, lastDateProcessed, lastDateProcessedText);
 	}
+	
 
 	/**
 	 * Funci&oacute;n que prepara los registros de los ficheros log pasados por par&aacute;metro
 	 * para ser insertados en la BBDD. Si se encuentra algun registro mal formado, se ignorar&aacute;.
 	 * @param signaturesFile Fichero con los datos de firma.
 	 * @param transactionsFile Fichero con los datos de transacci&oacute;n.
+	 * @param auditSignaturesFile Fichero con los datos de firma de auditoria.
+	 * @param auditTransactionsFile Fichero con los datos de transacci&oacute;n de auditoria.
 	 * @return Datos extra&iacute;dos de los ficheros.
 	 * @throws IOException Cuando no se pueden leer los datos de los ficheros indicados.
 	 */
-	private static CompactedData extractData(final File signaturesFile, final File transactionsFile)
+	private static CompactedData extractData(final File signaturesFile, final File transactionsFile, final File auditSignaturesFile, final File auditTransactionsFile)
 			throws IOException {
 
 		final CompactedData compactedData = new CompactedData();
@@ -338,6 +371,52 @@ public class LoadStatisticsRunnable implements Runnable {
 
 				// Se inserta en el conjunto de datos
 				compactedData.addTransactionData(transCube);
+			}
+		}
+		
+		// Procesamos el fichero de firmas de auditoria
+		try (final FileReader fr = new FileReader(auditSignaturesFile);
+			final BufferedReader br = new BufferedReader(fr);) {
+
+			String registry;
+			while ((registry = br.readLine()) != null) {
+				if (registry.trim().isEmpty()) {
+					continue;
+				}
+
+				AuditSignatureCube auditSignatureCube;
+				try {
+					auditSignatureCube =  AuditSignatureCube.parse(registry);
+				}
+				catch (final Exception e) {
+					throw new IllegalArgumentException(String.format("Se encontro un registro no valido en el fichero %1s", auditSignaturesFile.getAbsolutePath()), e); //$NON-NLS-1$
+				}
+
+				// Se inserta en el conjunto de datos
+				compactedData.addAuditSignatureData(auditSignatureCube);
+			}
+		}
+		
+		// Procesamos el fichero de transacciones de auditoria
+		try (final FileReader fr = new FileReader(auditTransactionsFile);
+			final BufferedReader br = new BufferedReader(fr);) {
+
+			String registry;
+			while ((registry = br.readLine()) != null) {
+				if (registry.trim().isEmpty()) {
+					continue;
+				}
+
+				AuditTransactionCube auditTransactionCube;
+				try {
+					auditTransactionCube =  AuditTransactionCube.parse(registry);
+				}
+				catch (final Exception e) {
+					throw new IllegalArgumentException(String.format("Se encontro un registro no valido en el fichero %1s", auditTransactionsFile.getAbsolutePath()), e); //$NON-NLS-1$
+				}
+
+				// Se inserta en el conjunto de datos
+				compactedData.addAuditTransactionData(auditTransactionCube);
 			}
 		}
 
@@ -408,6 +487,26 @@ public class LoadStatisticsRunnable implements Runnable {
 				LOGGER.log(Level.WARNING, "No se pudieron confirmar las inserciones ya realizadas", e1); //$NON-NLS-1$
 			}
 		}
+		
+		// Insertamos la informacion de las firmas realizadas
+		final Map<AuditSignatureCube, Long> auditSignaturesCube = compactedData.getAuditSignatureData();
+
+		final Iterator<AuditSignatureCube> itAuditSigns = auditSignaturesCube.keySet().iterator();
+		while (itAuditSigns.hasNext()) {
+			final AuditSignatureCube auditSignatureConfig = itAuditSigns.next();
+			final Long total = auditSignaturesCube.get(auditSignatureConfig);
+			AuditSignaturesDAO.insertAuditSignature(auditSignatureConfig, total.longValue());
+		}
+
+		// Insertamos la informacion de las transacciones realizadas
+		final Map<AuditTransactionCube, TransactionTotal> auditTransactionsCube = compactedData.getAuditTransactionData();
+
+		final Iterator<AuditTransactionCube> itAuditTrans = auditTransactionsCube.keySet().iterator();
+		while (itAuditTrans.hasNext()) {
+			final AuditTransactionCube auditTransactionConfig = itAuditTrans.next();
+			final TransactionTotal total = auditTransactionsCube.get(auditTransactionConfig);
+			AuditTransactionsDAO.insertAuditTransaction(auditTransactionConfig, total);
+		}
 	}
 
 	/**
@@ -443,6 +542,22 @@ public class LoadStatisticsRunnable implements Runnable {
 	 */
 	public LoadStatisticsResult getResult() {
 		return this.result;
+	}
+	
+	private static int checkDatesFromFiles(String signatureFileDate, String transactionFileDate, String auditSignatureFileDate, String auditTransactionFileDate) {
+		
+		//Returns 0 if all the dates are different
+		int comparison = 0;
+		
+		if (signatureFileDate.equals(transactionFileDate) && transactionFileDate.equals(auditSignatureFileDate) && auditSignatureFileDate.equals(auditTransactionFileDate)) {
+            //Returns 1 if all dates are equal
+			comparison = 1;
+        } else {
+        	//Returns -1 if there is difference between at least 1 of them
+            comparison = -1;
+        }
+		
+		return comparison;
 	}
 
 
