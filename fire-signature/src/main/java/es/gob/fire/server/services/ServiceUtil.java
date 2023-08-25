@@ -265,10 +265,12 @@ public final class ServiceUtil {
     		}
     	}
 
-    	if (appInfo == null && appId != null) {
-    		appInfo = new ApplicationInfo(appId, appId);
-    	} else {
-    		appInfo = new ApplicationInfo(UNIDENTIFIED, UNIDENTIFIED);
+    	if (appInfo == null) {
+    		if (appId != null) {
+        		appInfo = new ApplicationInfo(appId, appId);
+        	} else {
+        		appInfo = new ApplicationInfo(UNIDENTIFIED, UNIDENTIFIED);
+        	}
     	}
 
 		return appInfo;

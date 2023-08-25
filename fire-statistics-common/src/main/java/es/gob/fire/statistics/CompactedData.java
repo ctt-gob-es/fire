@@ -2,6 +2,7 @@ package es.gob.fire.statistics;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import es.gob.fire.statistics.entity.AuditSignatureCube;
 import es.gob.fire.statistics.entity.AuditTransactionCube;
@@ -132,8 +133,27 @@ public class CompactedData {
 
 		totalInstances = totalInstances != null ?
 				new Long(totalInstances.longValue() + 1) : new Long(1);
-
-		this.auditSignatureData.put(auditSignatureCube, totalInstances);
+		
+		boolean contained = false;
+		Set<AuditSignatureCube> keySet = this.auditSignatureData.keySet();
+		
+		for (AuditSignatureCube signature : keySet){
+			if (signature.equals(auditSignatureCube)) {
+				int errorComparison = signature.checkErrorDetail(auditSignatureCube);
+				contained = true;
+				
+				//Solo si la comparacion sale como valor 3 (el detalle de error de la firma ya guardada es nulo, y la nueva tiene un detalle de error)
+				if (errorComparison == 3){
+					//Eliminamos la firma guardada e insertamos la nueva
+					this.auditSignatureData.remove(signature);
+					this.auditSignatureData.put(auditSignatureCube, totalInstances);
+				}
+			}
+		}
+		
+		if (!contained){
+			this.auditSignatureData.put(auditSignatureCube, totalInstances);
+		}
 
 		// Almacenamos en otro map el tamano acumulado de los datos firmados en esa transaccion
 		// para despues poder completar la informacion de las transacciones con el
