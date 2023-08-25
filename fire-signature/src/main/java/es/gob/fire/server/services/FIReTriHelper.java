@@ -300,11 +300,12 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-        			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
+        			String errorMessage = logF.f("Error en la prefirma: ") + e;
+        			LOGGER.warning(errorMessage); //$NON-NLS-1$
             		if (stopOnError) {
             			stopOperation = true;
 					}
-            		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+            		doc.setBatchResult(BatchResult.PRESIGN_ERROR + ": " + errorMessage);
         			continue;
         		}
         	}
@@ -324,11 +325,12 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-        			LOGGER.warning(logF.f("Error en la prefirma al cofirmar: ") + e); //$NON-NLS-1$
+        			String errorMessage = logF.f("Error en la prefirma al cofirmar: ") + e;
+        			LOGGER.warning(errorMessage); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
 					}
-            		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+            		doc.setBatchResult(BatchResult.PRESIGN_ERROR + ": " + errorMessage);
         			continue;
         		}
         	}
@@ -357,11 +359,12 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-        			LOGGER.warning(logF.f("Error en la prefirma al contrafirmar: ") + e); //$NON-NLS-1$
+        			String errorMessage = logF.f("Error en la prefirma al contrafirmar: ") + e;
+        			LOGGER.warning(errorMessage); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
 					}
-            		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+            		doc.setBatchResult(BatchResult.PRESIGN_ERROR + ": " + errorMessage);
         			continue;
         		}
 
@@ -372,11 +375,12 @@ public final class FIReTriHelper {
         		preRes = FIReTriSignIdProcessor.make(preRes);
         	}
         	else {
-        		LOGGER.warning(logF.f("Operacion no soportada")); //$NON-NLS-1$
+        		String errorMessage = logF.f("Operacion no soportada");
+        		LOGGER.warning(errorMessage); //$NON-NLS-1$
         		if (stopOnError) {
         			stopOperation = true;
         		}
-        		doc.setBatchResult(BatchResult.INVALID_SIGNATURE_OPERATION);
+        		doc.setBatchResult(BatchResult.INVALID_SIGNATURE_OPERATION + ": " + errorMessage);
     			continue;
         	}
 
