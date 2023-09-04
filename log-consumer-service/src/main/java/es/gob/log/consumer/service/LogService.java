@@ -14,9 +14,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.LoggerContext;
 import es.gob.log.consumer.LogConstants;
 import es.gob.log.consumer.LogDirInfo;
 import es.gob.log.consumer.LogFiles;
@@ -419,5 +421,15 @@ public class LogService extends HttpServlet {
 		response.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
 		response.getOutputStream().flush();
 		return;
+	}
+
+	@Override
+	public void destroy() {
+
+		// Cerramos el contexto de logback si es el API de logger que se uso
+		final ILoggerFactory loggerContext = LoggerFactory.getILoggerFactory();
+		if (loggerContext instanceof LoggerContext) {
+			((LoggerContext) loggerContext).stop();
+		}
 	}
 }
