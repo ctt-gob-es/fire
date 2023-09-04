@@ -71,6 +71,7 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 			catch (final Exception e) {
 				this.dir.mkdirs();
 			}
+			LOGGER.warning("No se encontro el directorio de guardado de sesiones y se tratara de crear: " + this.dir.getAbsolutePath()); //$NON-NLS-1$
 		}
 		this.documentsDAO = new FileSystemTempDocumentsDAO();
 	}

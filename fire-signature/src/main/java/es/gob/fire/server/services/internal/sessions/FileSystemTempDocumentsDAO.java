@@ -46,6 +46,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
     			catch (final Exception e) {
     				f.mkdirs();
     			}
+    			LOGGER.warning("No se encontro el directorio de guardado de temporales y se tratara de crear: " + f.getAbsolutePath()); //$NON-NLS-1$
             }
 
             if (f == null || !f.isDirectory()) {

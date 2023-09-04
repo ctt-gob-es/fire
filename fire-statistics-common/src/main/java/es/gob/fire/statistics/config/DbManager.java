@@ -141,6 +141,11 @@ public class DbManager {
 			config.addDataSourceProperty("password", password); //$NON-NLS-1$
 		}
 
+		// Establecemos una configuracion especifica para Oracle con la que establecemos como
+		// comprobar que la conexion sigue siendo valida
+		if (jdbcDriver.contains("Oracle")) { //$NON-NLS-1$
+			config.setConnectionTestQuery("SELECT 1 FROM DUAL"); //$NON-NLS-1$
+		}
 
 		// Milisegundos de espera hasta que se de una conexion
 		config.setConnectionTimeout(10000);
@@ -150,123 +155,8 @@ public class DbManager {
 		config.setMaxLifetime(1800000);
 //		// Milisegundos entre los que se comprobara que la conexion sigue abierta
 //		config.setKeepaliveTime(600000);
-		config.setPoolName("FIRe"); //$NON-NLS-1$
+		config.setPoolName("FIRe-Statistics"); //$NON-NLS-1$
 
 		return config;
 	}
-
-//	/**
-//	 * Inicializa la conexi&oacute;n de base de datos para la configuraci&oacute;n de base de datos
-//	 * previamente cargada.
-//	 * @return Conexi&oacute;n de base de datos o null si se produce un error.
-//	 */
-//	private static Connection initConnection() {
-//
-//		// Cargamos el driver JDBC
-//		try {
-//			final Class<?> driverClass = Class.forName(dbConnDriver, false, DbManager.class.getClassLoader());
-//			if (!java.sql.Driver.class.isAssignableFrom(driverClass)) {
-//				throw new IllegalArgumentException("La clase indicada como drive JDBC no es valida " + dbConnDriver); //$NON-NLS-1$
-//			}
-//			Class.forName(dbConnDriver).newInstance();
-//
-//			return DriverManager.getConnection(dbConnString);
-//		}
-//		catch (final Exception e) {
-//			LOGGER.log(Level.SEVERE, "Error al crear la conexion con la base de datos", e); //$NON-NLS-1$
-//			return null;
-//		}
-//	}
-//
-//
-//	/**
-//	 * Obtiene la conexi&oacute;n de base de datos.
-//	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo conectar.
-//	 */
-//	private static Connection getConnection() {
-//
-//		try {
-//			if (conn != null && !conn.isValid(2)) {
-//				LOGGER.warning("La conexion con base de datos ha dejado de ser valida y se reiniciara."); //$NON-NLS-1$
-//				conn = null;
-//			}
-//		} catch (final SQLException e) {
-//			LOGGER.warning("La conexion con base de datos no es valida y se reiniciara: " + e); //$NON-NLS-1$
-//			conn = null;
-//		}
-//
-//		if (conn == null) {
-//			LOGGER.info("Se inicia la conexion con base de datos"); //$NON-NLS-1$
-//			conn = initConnection();
-//		}
-//
-//		return conn;
-//	}
-
-	/**
-	 * Realiza a acci&oacute;n de commit desde la &uacute;ltima acci&oacute;n de commit o rollback anterior
-	 * @throws SQLException Error al confirmar la transacci&oacute;n.
-	 */
-	public void runCommit() throws SQLException {
-		getConnection().commit();
-	}
-	/**
-	 * Deshace todos los cambios de la actual transacci&oacute;n.
-	 * @throws SQLException Cuando ocurre alg&uacute;n error.
-	 */
-	public void runRollBack() throws SQLException {
-		getConnection().rollback();
-	}
-
-//	/**
-//	 * Cierra la conexi&oacute;n con la base de datos.
-//	 * @throws SQLException Cuando ocurre un error al cerrar la conexi&oacute;n.
-//	 */
-//	public static void close() throws SQLException {
-//		if (conn != null && !conn.isClosed()) {
-//			conn.close();
-//		}
-//	}
-//
-//	/**
-//	 * Prepara una sentencia SQL para ser ejecutada.
-//	 * @param statement Sentencia SQL.
-//	 * @return Sentencia SQL.
-//	 * @throws SQLException Cuando se produce un error al preparar la sentencia.
-//	 * @throws DBConnectionException Cuando no se ha podido inicializar la conexion con base de datos.
-//	 */
-//	public static PreparedStatement prepareStatement(final String statement) throws SQLException, DBConnectionException {
-//		final Connection c = getConnection();
-//		if (c == null)  {
-//			throw new DBConnectionException("No se ha encontrado una conexion abierta contra la base de datos"); //$NON-NLS-1$
-//		}
-//
-//		return c.prepareStatement(statement);
-//	}
-//
-//	/**
-//	 * Prepara una sentencia SQL para ser ejecutada.
-//	 * @param statement Sentencia SQL.
-//	 * @param autoCommit true or false
-//	 * @return Sentencia SQL.
-//	 * @throws SQLException Cuando se produce un error al preparar la sentencia.
-//	 * @throws DBConnectionException Cuando no se ha podido inicializar la conexion con base de datos.
-//	 */
-//	public static PreparedStatement prepareStatement(final String statement, final boolean autoCommit) throws SQLException, DBConnectionException {
-//		final Connection c = getConnection();
-//		if (c == null)  {
-//			throw new DBConnectionException("No se ha encontrado una conexion abierta contra la base de datos"); //$NON-NLS-1$
-//		}
-//		c.setAutoCommit(autoCommit);
-//		return c.prepareStatement(statement);
-//	}
-//
-//	/**
-//	 * Indica si la conexi&oacute;n a base de datos esta conigurada y puede usarse.
-//	 * @return {@code true} si la conexi&oacute;n a base de datos puede usarse.
-//	 * {@code false} en caso contrario.
-//	 */
-//	public static boolean isConfigured() {
-//		return conn != null;
-//	}
 }

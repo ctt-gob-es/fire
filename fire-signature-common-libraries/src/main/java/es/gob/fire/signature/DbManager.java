@@ -90,11 +90,11 @@ public class DbManager {
 
 		final HikariConfig config = new HikariConfig();
 
-		final String driverClassname = ConfigManager.getJdbcDriverString();
-		if (driverClassname == null) {
+		final String jdbcDriver = ConfigManager.getJdbcDriverString();
+		if (jdbcDriver == null) {
 			throw new IOException("No se ha declarado el driver JDBC en el fichero de configuracion"); //$NON-NLS-1$
 		}
-		config.setDriverClassName(driverClassname);
+		config.setDriverClassName(jdbcDriver);
 
 		// Se configura la cadena de conexion si se define. Si no, se configuran
 		// los valores por separado
@@ -127,6 +127,11 @@ public class DbManager {
 			config.addDataSourceProperty("password", password); //$NON-NLS-1$
 		}
 
+		// Establecemos una configuracion especifica para Oracle con la que establecemos como
+		// comprobar que la conexion sigue siendo valida
+		if (jdbcDriver.contains("Oracle")) { //$NON-NLS-1$
+			config.setConnectionTestQuery("SELECT 1 FROM DUAL"); //$NON-NLS-1$
+		}
 
 		// Milisegundos de espera hasta que se de una conexion
 		config.setConnectionTimeout(10000);
@@ -151,21 +156,12 @@ public class DbManager {
 			}
 		}
 		catch (final Exception e) {
-			// Si no pudimos obtener una conexion, pero se definio un driver en lugar de un datasource,
-			// probamos a establecer este (no se hizo antes por recomendacion de HikariPC).
-			final String driverClassname = ConfigManager.getJdbcDriverString();
-			if (driverClassname != null) {
-				// Intentamos obtener una conexion
-				try (Connection conn = ds.getConnection();) {
-					if (conn == null) {
-						throw new SQLException("No se pudo obtener la conexion con la BD en un segundo intento", e); //$NON-NLS-1$
-					}
-				}
-				catch (final Exception e2) {
-					throw new SQLException("No se obtuvo conexion con la BD", e2); //$NON-NLS-1$
+			// Si no pudimos obtener una conexion, realizamos un segundo intento
+			try (Connection conn = ds.getConnection();) {
+				if (conn == null) {
+					throw new SQLException("No se pudo obtener la conexion con la BD en un segundo intento", e); //$NON-NLS-1$
 				}
 			}
-			throw new SQLException("No se pudo obtener conexion con la BD", e); //$NON-NLS-1$
 		}
 	}
 
