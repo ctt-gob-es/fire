@@ -17,6 +17,8 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import es.gob.fire.signature.ConfigManager;
+
 /**
  * Clase para la lectura y guardado de los par&aacute;metros de una petici&oacute;n.
  */
@@ -60,11 +62,16 @@ public class RequestParameters extends HashMap<String, String> {
 
 		final RequestParameters params = new RequestParameters();
 
+		final long requestMaxSize = ConfigManager.getRequestMaxSize();
+		if (requestMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && request.getContentLengthLong() > requestMaxSize) {
+			throw new IOException("La peticion excede el tamano maximo configurado. Tamano declarado en la peticion: " + request.getContentLength()); //$NON-NLS-1$
+		}
+
 		if ("GET".equals(request.getMethod())) { //$NON-NLS-1$
 			extractParametersFromUrl(request, params);
 		}
 		else {
-			extractParametersFromBody(request, params);
+			extractParametersFromBody(request, params, ConfigManager.getParamMaxSize(), requestMaxSize);
 		}
 
 		return params;
@@ -80,30 +87,71 @@ public class RequestParameters extends HashMap<String, String> {
 		}
 	}
 
-	private static void extractParametersFromBody(final HttpServletRequest request, final RequestParameters params) throws IOException {
+	private static void extractParametersFromBody(final HttpServletRequest request, final RequestParameters params, final int paramsMaxSize, final long requestMaxSize) throws IOException {
 		final char[] block = new char[1048576];
 		final StringBuilder buffer = new StringBuilder(1048576);
+
+		long totalSize = 0;
 
 		int n = 0;
 		request.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 		try (final BufferedReader reader = request.getReader(); ) {
 			while ((n = reader.read(block, 0, block.length)) > 0) {
-				int startParams = 0;
+
+				// Comprobamos que la peticion en conjunto no exceda el tamano maximo configurado
+				totalSize += n;
+				if (requestMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit(totalSize, requestMaxSize)) {
+					throw new IOException("La peticion excede el tamano maximo configurado. Tamano leido: " + totalSize); //$NON-NLS-1$
+				}
+
+				int startParamsIdx = 0;
 				for (int i = 0; i < n; i++) {
 					if (block[i] == '&') {
 						if (i > 0) {
-							buffer.append(Arrays.copyOfRange(block, startParams, i));
+
+							// Comprobamos que el tamano no exceda el maximo configurado
+							if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit(i - startParamsIdx, paramsMaxSize)) {
+								throw new IOException("Se envio un parametro al servicio que excedia el tamano maximo permitido: " + paramsMaxSize); //$NON-NLS-1$
+							}
+							// Agregamos al buffer el parametro que ya tenemos leido
+							buffer.append(Arrays.copyOfRange(block, startParamsIdx, i));
 						}
+
 						saveParam(params, buffer);
-						startParams = i + 1;
+						startParamsIdx = i + 1;
 					}
 				}
-				buffer.append(Arrays.copyOfRange(block, startParams, n));
+
+				// Comprobamos que el parametro almacenado en el buffer mas lo nuevo no exceda el
+				// tamano maximo configurado
+
+				if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit(buffer.length() + n - startParamsIdx, paramsMaxSize)) {
+					throw new IOException("Se envio un parametro al servicio que excedia el tamano maximo permitido: " + paramsMaxSize); //$NON-NLS-1$
+				}
+				// Agregamos al buffer el inicio de parametro que ya tenemos leido
+				buffer.append(Arrays.copyOfRange(block, startParamsIdx, n));
 			}
 			saveParam(params, buffer);
 		}
 	}
 
+	/**
+	 * Hace un calculo aproximado de si un tama&ntilde;o de datos Base 64 exceder&iacute;a un
+	 * tama&ntilde;o de datos expresado en bytes.
+	 * @param base64Size Numero de caracteres en base 64.
+	 * @param maxBytesSize Tama&ntilde;o m&aacute;ximo en bytes.
+	 * @return {@code true} si el los datos excederian el tama&ntilde; indicado, {@code false} en
+	 * caso contrario.
+	 */
+	private static boolean checkLimit(final long base64Size, final long maxBytesSize) {
+		return base64Size * 0.75 > maxBytesSize;
+	}
+
+	/**
+	 * Guarda en el mapa de par&aacute;metros aquel que se encuentra en {@code param} y luego vacia este buffer.
+	 * @param params Mapa en el que almacenar el nuevo parm&aacute;metro.
+	 * @param param Buffer con el nuevo par&aacute;metro.
+	 */
 	private static void saveParam(final HashMap<String, String> params, final StringBuilder param) {
 
 		if (param.length() == 0) {

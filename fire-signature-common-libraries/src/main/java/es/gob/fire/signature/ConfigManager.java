@@ -73,8 +73,10 @@ public class ConfigManager {
 	/** Propiedad con la clase encargada de la validaci&oacute;n y actualizaci&oacute;n de las firmas. */
 	private static final String PROP_VALIDATOR_CLASS = "validator.class"; //$NON-NLS-1$
 
-	/** Sufijo utilizado para las propiedades que determinan si un proveedor es de confianza.
-	 * Ejemplo: provider.NOMBRE_PROVEEDOR.trusted=true */
+	/**
+	 * Sufijo utilizado para las propiedades que determinan si un proveedor es de confianza.
+	 * Ejemplo: provider.NOMBRE_PROVEEDOR.trusted=true
+	 */
 	private static final String SUFIX_PROP_TRUSTED_PROVIDER = ".trusted"; //$NON-NLS-1$
 
 	private static final String PROP_APP_ID = "default.appId"; //$NON-NLS-1$
@@ -82,6 +84,21 @@ public class ConfigManager {
 	private static final String PROP_CERTIFICATE = "default.certificate"; //$NON-NLS-1$
 
 	private static final String PROP_LOCAL_VERIFICATION_KEY = "local.verification.key"; //$NON-NLS-1$
+
+	/** Tama&ntilde;o m&aacute;ximo permitido para un par&aacute;metro de la petici&oacute;n. */
+	private static final String DEFAULT_PARAMS_MAX_SIZE = "8388608"; // 8 Mb //$NON-NLS-1$
+
+	/** Propiedad con el tama&ntilde;o m&aacute;ximo permitido para una petici&oacute;n. */
+	private static final String PROP_PARAMS_MAX_SIZE = "params.maxSize"; //$NON-NLS-1$
+
+	/** Tama&ntilde;o m&aacute;ximo permitido para una petici&oacute;n. */
+	private static final String DEFAULT_REQUEST_MAX_SIZE = "12582912"; // 12 Mb //$NON-NLS-1$
+
+	/**
+	 * Propiedad con el tama&ntilde;o m&aacute;ximo permitido para un par&aacute;metro
+	 * de la petici&oacute;n.
+	 */
+	private static final String PROP_REQUEST_MAX_SIZE = "request.maxSize"; //$NON-NLS-1$
 
 	private static final String PROP_BATCH_MAX_DOCUMENTS = "batch.maxDocuments"; //$NON-NLS-1$
 
@@ -156,6 +173,11 @@ public class ConfigManager {
 	 * el n&uacute;mero de documentos no est&aacute; limitado.
 	 */
 	public static final int UNLIMITED_NUM_DOCUMENTS = 0;
+	/**
+	 * N&uacute;mero que identifica cuando el valor de configuraci&oacute;n que indica el
+	 * tama&ntilde;o m&aacute;ximo el n&uacute;mero de documentos no est&aacute; limitado.
+	 */
+	public static final int UNLIMITED_MAX_SIZE = 0;
 
 	/** Ruta del directorio por defecto para el guardado de temporales (directorio temporal del sistema). */
 	private static String DEFAULT_TMP_DIR;
@@ -420,6 +442,39 @@ public class ConfigManager {
 	public static String getHMacKey() {
 		final String value = getProperty(PROP_LOCAL_VERIFICATION_KEY);
 		return value != null && !value.isEmpty() ? value : null;
+	}
+
+	/**
+	 * Recupera el tama&ntilde;o m&aacute;ximo que puede tener un par&aacute;metro enviado en la
+	 * petici&oacute;n. Si se devuelve el valor {@code #UNLIMITED_MAX_SIZE} se
+	 * debe considerar que no hay l&iacute;mite al n&uacute;mero de documentos de un
+	 * lote.
+	 * @return Tama&ntilde;o m&aacute;ximo de un par&aacute;metro enviado al servicio.
+	 */
+	public static int getParamMaxSize() {
+		try {
+			return Integer.parseInt(getProperty(PROP_PARAMS_MAX_SIZE, DEFAULT_PARAMS_MAX_SIZE));
+		}
+		catch (final Exception e) {
+			LOGGER.warning("Se encontro un valor invalido para la propiedad '" + //$NON-NLS-1$
+					PROP_PARAMS_MAX_SIZE +
+					"' del fichero de configuracion. Se establecera el valor " + DEFAULT_PARAMS_MAX_SIZE); //$NON-NLS-1$
+			return Integer.parseInt(DEFAULT_PARAMS_MAX_SIZE);
+		}
+	}
+
+
+
+	public static long getRequestMaxSize() {
+		try {
+			return Long.parseLong(getProperty(PROP_REQUEST_MAX_SIZE, DEFAULT_REQUEST_MAX_SIZE));
+		}
+		catch (final Exception e) {
+			LOGGER.warning("Se encontro un valor invalido para la propiedad '" + //$NON-NLS-1$
+					PROP_REQUEST_MAX_SIZE +
+					"' del fichero de configuracion. Se establecera el valor " + DEFAULT_REQUEST_MAX_SIZE); //$NON-NLS-1$
+			return Long.parseLong(DEFAULT_REQUEST_MAX_SIZE);
+		}
 	}
 
 	/**
