@@ -34,7 +34,6 @@ import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.statistics.entity.Browser;
 
 
 /**
@@ -139,11 +138,6 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
-
-		// Identificamos el navegador para uso de las estadisticas
-		final String userAgent = request.getHeader("user-agent"); //$NON-NLS-1$
-	    final Browser browser =  Browser.identify(userAgent);
-	    session.setAttribute(ServiceParams.SESSION_PARAM_BROWSER, browser.getName());
 
 		// Agregamos a la sesion el origen del certificado
 		session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, origin);

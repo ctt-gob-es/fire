@@ -148,13 +148,7 @@ public class RecoverNewCertificateService extends HttpServlet {
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         SessionCollector.commit(session, trAux);
 
-        try {
-        	request.getRequestDispatcher(FirePages.PG_CHOOSE_CERTIFICATE).forward(request, response);
-        }
-        catch (final Exception e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido redirigir al usuario a la URL interna"), e); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
-		}
+        Responser.redirectToUrl(FirePages.PG_CHOOSE_CERTIFICATE, request, response, trAux);
 	}
 
     /**

@@ -187,4 +187,23 @@ public class Responser {
         	Responser.sendError(response, FIReError.INTERNAL_ERROR);
 		}
     }
+
+    /**
+     * Redirige al usuario a una URL interna.
+     * @param url URL a la que redirigir al usuario.
+     * @param request Objeto de petici&oacute;n realizada al servlet.
+     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+     */
+    public static void redirectToUrl(final String url, final HttpServletRequest request,
+    		final HttpServletResponse response, final TransactionAuxParams trAux) {
+
+        try {
+        	request.getRequestDispatcher(url).forward(request, response);
+        }
+        catch (final Exception e) {
+        	LOGGER.log(Level.SEVERE, trAux.getLogFormatter().f("No se ha podido redirigir al usuario a la URL"), e); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.INTERNAL_ERROR);
+		}
+     }
 }

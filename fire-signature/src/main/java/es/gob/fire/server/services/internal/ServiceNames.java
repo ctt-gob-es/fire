@@ -24,6 +24,9 @@ public class ServiceNames {
 	 /** Servicio interno para la autenticaci&oacuten del usuario que permite obtener los certificados de la nube. */
 	public static final String PUBLIC_SERVICE_AUTH_USER = "authenticationService"; //$NON-NLS-1$
 
+	/** Servicio interno para la redireccion del usuario a la selecci&oacuten del origen del certificado. */
+	public static final String PUBLIC_SERVICE_CHOOSE_ORIGIN = "chooseOriginService"; //$NON-NLS-1$
+
 	/** Servicio interno para la selecci&oacuten del origen del certificado de firma (nube o local). */
 	public static final String PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN = "chooseCertificateOriginService"; //$NON-NLS-1$
 

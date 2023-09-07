@@ -214,13 +214,7 @@ public final class RequestNewCertificateService extends HttpServlet {
     		Responser.redirectToExternalUrl(errorUrlRedirection, request, response, trAux);
     	}
     	else {
-    		try {
-    			request.getRequestDispatcher(FirePages.PG_SIGNATURE_ERROR).forward(request, response);
-    		}
-            catch (final Exception e) {
-            	LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL interna", e); //$NON-NLS-1$
-            	Responser.sendError(response, FIReError.INTERNAL_ERROR);
-    		}
+    		Responser.redirectToUrl(FirePages.PG_SIGNATURE_ERROR, request, response, trAux);
     	}
 	}
 }
