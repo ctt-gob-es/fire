@@ -184,6 +184,8 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			final HttpServletRequest request, final HttpServletResponse response, final boolean originForced,
 			final TransactionAuxParams trAux) {
 
+		LOGGER.info(trAux.getLogFormatter().f("Se ha seleccionado la firma con certificado local")); //$NON-NLS-1$
+
 		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null ?
 				connConfig.isAppSkipCertSelection().booleanValue() : ConfigManager.isSkipCertSelection();
 
