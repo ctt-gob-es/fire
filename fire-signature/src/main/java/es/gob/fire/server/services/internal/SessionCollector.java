@@ -385,7 +385,9 @@ public final class SessionCollector {
     	if (fireSession != null) {
     		removeAssociattedTempFiles(fireSession, trAux);
     		fireSession.invalidate();
-    		sessions.remove(id);
+    		synchronized (sessions) {
+    			sessions.remove(id);
+			}
     	}
     	try {
 			TempDocumentsManager.deleteDocument(id);
@@ -421,7 +423,9 @@ public final class SessionCollector {
 		}
 
    		// Eliminamos la sesion de la memoria
-   		sessions.remove(fireSession.getTransactionId());
+   		synchronized (sessions) {
+   			sessions.remove(fireSession.getTransactionId());
+   		}
 
     	// Eliminamos la sesion del espacio compartido con el resto de nodos
 		if (dao != null) {
@@ -605,7 +609,9 @@ public final class SessionCollector {
 
 		// Actualizamos la informacion de la sesion, que ya existira, de la relacion que se
 		// guarda en memoria
-		sessions.put(session.getTransactionId(), session);
+		synchronized (sessions) {
+			sessions.put(session.getTransactionId(), session);
+		}
 
 		// Actualizamos, si procede, la informacion de la sesion de la memoria compartida
 		if (dao != null) {
@@ -640,9 +646,15 @@ public final class SessionCollector {
      */
 	private static void deleteExpiredSessions(final TransactionAuxParams trAux) {
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+		String[] sessionsIds;
+		synchronized (sessions) {
+			sessionsIds = sessions.keySet().toArray(new String[sessions.size()]);
+		}
+
 		try {
 			cleaningProcess = executorService.submit(new ExpiredSessionCleanerThread(
-					sessions.keySet().toArray(new String[sessions.size()]),
+					sessionsIds,
 					sessions,
 					dao,
 					ConfigManager.getTempsTimeout(),
@@ -670,8 +682,9 @@ public final class SessionCollector {
 	public static void release() {
 		cleaningProcess.cancel(true);
 		cleaningProcess = null;
-
-		sessions.clear();
+		synchronized (sessions) {
+			sessions.clear();
+		}
 		sessions = null;
 
 	    random = null;
@@ -724,10 +737,10 @@ public final class SessionCollector {
         		session = this.sessionsMap.get(id);
         		if (session != null && currentTime > session.getExpirationTime()) {
         			// Registramos la transaccion como erronea
-        			String errorMessage = "La sesion ha caducado";
+        			final String errorMessage = "La sesion ha caducado";
         			TRANSLOGGER.register(session, false);
         			AUDITTRANSLOGGER.register(session, false, errorMessage);
-        			
+
         			// Borramos la sesion
         			SessionCollector.removeSession(session, this.trAux);
         		}

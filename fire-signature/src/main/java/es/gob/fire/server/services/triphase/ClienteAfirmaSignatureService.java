@@ -29,6 +29,7 @@ import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.RuntimeConfigNeededException;
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
+import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
@@ -294,7 +295,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 		if (PARAM_VALUE_OPERATION_PRESIGN.equalsIgnoreCase(operation)) {
 
-			LOGGER.fine(" == PREFIRMA en servidor"); //$NON-NLS-1$
+			LOGGER.info(" == PREFIRMA en servidor: " + LoggerUtil.getTrimStr(docId)); //$NON-NLS-1$
 
 			// En FIRe, nunca se solicitara comprobar las firmas previas en este punto del proceso
 	        final boolean checkSignatures = false;
@@ -371,11 +372,11 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			sendResponse(response, Base64.encode(preRes.toString().getBytes(StandardCharsets.UTF_8), true));
 
-			LOGGER.fine("== FIN PREFIRMA"); //$NON-NLS-1$
+			LOGGER.info("== FIN PREFIRMA: " + LoggerUtil.getTrimStr(docId)); //$NON-NLS-1$
 		}
 		else if (PARAM_VALUE_OPERATION_POSTSIGN.equalsIgnoreCase(operation)) {
 
-			LOGGER.fine(" == POSTFIRMA en servidor"); //$NON-NLS-1$
+			LOGGER.info(" == POSTFIRMA en servidor: " + LoggerUtil.getTrimStr(docId)); //$NON-NLS-1$
 
 			TriphaseData triphaseData;
 			try {
@@ -483,7 +484,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			sendResponse(response, SUCCESS + newDocId);
 
-			LOGGER.fine("== FIN POSTFIRMA ****"); //$NON-NLS-1$
+			LOGGER.info("== FIN POSTFIRMA: " + LoggerUtil.getTrimStr(docId)); //$NON-NLS-1$
 		}
 		else {
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.UNSUPPORTED_TRIPHASE_OPERATION));

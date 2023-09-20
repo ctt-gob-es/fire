@@ -8,7 +8,7 @@ public enum SessionFlags {
 
 	/** Indicador de que la &uacute;ltima operaci&oacute;n realizada iniciaba una firma. */
 	OP_SIGN,
-	/** Indicador de que la &uacute;ltima operaci&oacute;n realizada gener&oacute; un certificado. */
+	/** Indicador de que la &uacute;ltima operaci&oacute;n realizada gener&oacute; una firma. */
 	OP_PRE,
 	/** Indicador de que la &uacute;ltima operaci&oacute;n realizada gener&oacute; un certificado. */
 	OP_GEN,
