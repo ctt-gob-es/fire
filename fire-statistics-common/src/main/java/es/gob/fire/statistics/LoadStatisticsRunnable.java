@@ -236,112 +236,8 @@ public class LoadStatisticsRunnable implements Runnable {
 	}
 
 	/**
-	 * Compara los elementos fuente y objetivo, cuyos elementos deben estar
-	 * ordenados
-	 * alfab&eacute;ticamente. El listado resultante tendr&aacute; los elementos del
-	 * listado fuente y un nulo en aquellas posiciones del listado que le falten.
-	 * La comparaci&oacute;n entre elementos de uno y otro se hace seg&uacute;n el
-	 * texto
-	 * tras el prefijo.
-	 * 
-	 * @param sourceFiles       Listado de ficheros que se debe completar.
-	 * @param sourceFilesPrefix Prefijo de los nombres de fichero del listado
-	 *                          fuente.
-	 * @param targetFiles       Listado de ficheros con los elementos que deberia
-	 *                          incluir el listado
-	 *                          fuente. Podr&iacute;a contener nulos.
-	 * @param targetFilesPrefix Prefijo de los nombres de fichero del listado
-	 *                          objetivo.
-	 * @return Listado de ficheros fuentes con los nulos necesarios para ocupar las
-	 *         posiciones
-	 *         correspondientes a los elementos del listado destino que le faltan.
-	 */
-	private static File[] includeMissingElements(final File[] sourceFiles, final String sourceFilesPrefix,
-			final File[] targetFiles, final String targetFilesPrefix) {
-
-		final List<File> sourceFilesList = new ArrayList<>();
-
-		int sourceIdx = 0;
-		int targetIdx = 0;
-
-		// Cargamos las fechas del listado objetivo
-		final String[] targetDates = loadDatesList(targetFiles, targetFilesPrefix, FILE_EXT_LOG);
-
-		// Compondremos el listado de ficheros mientras no hayamos incorporado un
-		// elemento correspondiente
-		// a cada una de las fechas encontradas entre ambos listados
-		while (sourceIdx < sourceFiles.length || targetIdx < targetDates.length) {
-
-			// Si se agoto ya el listado de ficheros fuentes, hacemos una entrada nula por
-			// cada
-			// fecha objetivo que quede
-			if (sourceIdx >= sourceFiles.length) {
-				for (; targetIdx < targetDates.length; targetIdx++) {
-					sourceFilesList.add(null);
-				}
-			}
-			// Si se agoto ya el listado de fechas objetivo, solo debemos volcar los
-			// ficheros
-			// fuentes que queden
-			else if (targetIdx >= targetDates.length) {
-				for (; sourceIdx < sourceFiles.length; sourceIdx++) {
-					sourceFilesList.add(sourceFiles[sourceIdx]);
-				}
-			}
-			// Si aun quedan de ambos listados, introducimos el elemento que corresponda
-			else {
-				final String sourceDate = getDateFromName(sourceFiles[sourceIdx].getName(), sourceFilesPrefix,
-						FILE_EXT_LOG);
-				final int dateComparation = sourceDate.compareTo(targetDates[targetIdx]);
-				// El elemento solo esta en el listado origen. Lo introducimos y avanzamos ese
-				// listado
-				if (dateComparation < 0) {
-					sourceFilesList.add(sourceFiles[sourceIdx]);
-					sourceIdx++;
-				}
-				// El elemento solo esta en el listado destino. Dejamos el hueco y avanzamos en
-				// ese listado
-				else if (dateComparation > 0) {
-					sourceFilesList.add(null);
-					targetIdx++;
-				}
-				// El elemento esta en ambos listados. Lo introducimos y avanzamos en ambos
-				else {
-					sourceFilesList.add(sourceFiles[sourceIdx]);
-					sourceIdx++;
-					targetIdx++;
-				}
-			}
-		}
-
-		return sourceFilesList.toArray(new File[0]);
-	}
-
-	private static String[] loadDatesList(final File[] files, final String prefix, final String suffix) {
-		final List<String> dates = new ArrayList<>();
-		for (final File file : files) {
-			if (file != null) {
-				final String filename = file.getName();
-				if (filename.startsWith(prefix) && filename.endsWith(suffix)) {
-					dates.add(getDateFromName(filename, prefix, suffix));
-				}
-			}
-		}
-		return dates.toArray(new String[0]);
-	}
-
-	private static String getDateFromName(final String filename, final String prefix, final String suffix) {
-		return filename.substring(prefix.length(), filename.length() - suffix.length());
-	}
-
-	/**
 	 * Carga en base de datos los datos estad&iacute;sticos de los ficheros
-	 * encontrados. Los listados
-	 * recibidos ya deberian estar depurados de tal forma que tengan los mismos
-	 * elementos, rellenando
-	 * con nulos de ser necesario, y que en cada posicion se encuentren los
-	 * elementos de una misma
-	 * fecha.
+	 * encontrados.
 	 * 
 	 * @param signatureFiles        Ficheros con los datos de las firmas ejecutadas.
 	 * @param transactionFiles      Ficheros con los datos de las transacciones
@@ -358,12 +254,6 @@ public class LoadStatisticsRunnable implements Runnable {
 		String lastDateProcessedText = null;
 
 		for (int i = 0; i < Math.min(signatureFiles.length, transactionFiles.length); i++) {
-
-			// Si alguno es nulo, omitimos el registro del fichero de esta distintas
-			// asociados
-			if (signatureFiles[i] == null || transactionFiles[i] == null) {
-				continue;
-			}
 
 			// Por orden, procesamos cada pareja de ficheros, cuidando que tengamos ambos
 			// ficheros
@@ -521,6 +411,56 @@ public class LoadStatisticsRunnable implements Runnable {
 
 				// Se inserta en el conjunto de datos
 				compactedData.addTransactionData(transCube);
+			}
+		}
+
+		// Procesamos el fichero de firmas de auditoria
+		try (final FileReader fr = new FileReader(auditSignaturesFile);
+				final BufferedReader br = new BufferedReader(fr);) {
+
+			String registry;
+			while ((registry = br.readLine()) != null) {
+				if (registry.trim().isEmpty()) {
+					continue;
+				}
+
+				AuditSignatureCube auditSignatureCube;
+				try {
+					auditSignatureCube = AuditSignatureCube.parse(registry);
+				} catch (final Exception e) {
+					throw new IllegalArgumentException(
+							String.format("Se encontro un registro no valido en el fichero %1s", //$NON-NLS-1$
+									auditSignaturesFile.getAbsolutePath()),
+							e);
+				}
+
+				// Se inserta en el conjunto de datos
+				compactedData.addAuditSignatureData(auditSignatureCube);
+			}
+		}
+
+		// Procesamos el fichero de transacciones de auditoria
+		try (final FileReader fr = new FileReader(auditTransactionsFile);
+				final BufferedReader br = new BufferedReader(fr);) {
+
+			String registry;
+			while ((registry = br.readLine()) != null) {
+				if (registry.trim().isEmpty()) {
+					continue;
+				}
+
+				AuditTransactionCube auditTransactionCube;
+				try {
+					auditTransactionCube = AuditTransactionCube.parse(registry);
+				} catch (final Exception e) {
+					throw new IllegalArgumentException(
+							String.format("Se encontro un registro no valido en el fichero %1s", //$NON-NLS-1$
+									auditTransactionsFile.getAbsolutePath()),
+							e);
+				}
+
+				// Se inserta en el conjunto de datos
+				compactedData.addAuditTransactionData(auditTransactionCube);
 			}
 		}
 
