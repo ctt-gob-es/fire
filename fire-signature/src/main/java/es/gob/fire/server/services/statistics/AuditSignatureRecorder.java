@@ -1,6 +1,7 @@
 package es.gob.fire.server.services.statistics;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -13,6 +14,9 @@ import es.gob.fire.server.services.internal.BatchResult;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchConfig;
+import es.gob.fire.statistics.config.DBConnectionException;
+import es.gob.fire.statistics.dao.AuditSignaturesDAO;
+import es.gob.fire.statistics.dao.AuditTransactionsDAO;
 import es.gob.fire.statistics.entity.AuditSignatureCube;
 
 public class AuditSignatureRecorder {
@@ -31,6 +35,8 @@ public class AuditSignatureRecorder {
 	
 	private boolean enable;
 	
+	private boolean enableDB;
+	
 	private static AuditSignatureRecorder instance;
 	
 	/**
@@ -45,16 +51,17 @@ public class AuditSignatureRecorder {
 	}
 	
 	private AuditSignatureRecorder(){
-		final StatisticsConfig config;
+		final AuditConfig config;
 		
 		try {
-			config = StatisticsConfig.load();
+			config = AuditConfig.load();
 		} catch (final Exception e) {
 			LOGGER.warning("No se configuro una politica valida para el guardado de estadisticas. No se almacenaran"); //$NON-NLS-1$
 			return;
 		}
 		
 		this.enable = config.isEnabled();
+		this.enableDB = config.isSavingToDB();
 		
 		final String logsPath = config.getDataDirPath();
 		if (logsPath == null || logsPath.isEmpty()) {
@@ -110,7 +117,8 @@ public class AuditSignatureRecorder {
 	 * generar la firma o fallaron todas las firmas del lote).
 	 * @param docId Identificador del documento firmado en caso de encontrarse dentro de un lote.
 	 */
-	public final void register(final FireSession fireSession, final boolean result, final String docId) {
+	public final void register(final FireSession fireSession, final boolean result, final String docId, final String callingClassName) {
+				
 		// Si no hay que registrar estadisticas, no se hace
 		if (!this.enable) {
 			return;
@@ -187,6 +195,15 @@ public class AuditSignatureRecorder {
 		}
 		
 		this.dataLogger.finest(this.getAuditSignatureCube().toString());
+		
+		if (this.enableDB) {
+			try {
+				AuditSignaturesDAO.insertAuditSignature(this.getAuditSignatureCube(), docSize.longValue());
+			} catch (SQLException | DBConnectionException e) {
+				final String errorMsg = "Ocurrio un error al guardar los datos de la firma en base de datos."; //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, errorMsg, e);
+			}
+		}
 	}
 	
 	/**
@@ -199,7 +216,8 @@ public class AuditSignatureRecorder {
 	 * @param messageError Mensaje de error a almacenar. Si no se indica, se
 	 * usar&aacute; el por defecto del tipo de error.
 	 */
-	public final void register(final FireSession fireSession, final boolean result, final String docId, String messageError) {
+	public final void register(final FireSession fireSession, final boolean result, final String docId, String messageError, String callingClassName) {
+		
 		// Si no hay que registrar estadisticas, no se hace
 		if (!this.enable) {
 			return;
@@ -276,6 +294,15 @@ public class AuditSignatureRecorder {
 		}
 		
 		this.dataLogger.finest(this.getAuditSignatureCube().toString());
+		
+		if (this.enableDB) {
+			try {
+				AuditSignaturesDAO.insertAuditSignature(this.getAuditSignatureCube(), docSize.longValue());
+			} catch (SQLException | DBConnectionException e) {
+				final String errorMsg = "Ocurrio un error al guardar los datos de la firma en base de datos."; //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, errorMsg, e);
+			}
+		}
 	}
 
 	public AuditSignatureCube getAuditSignatureCube() {

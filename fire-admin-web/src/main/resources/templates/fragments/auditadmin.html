@@ -78,14 +78,8 @@ $(document).ready(function() {
             },
            
         "columns": [
-              { "data": "idAuditTransaction", "width": "8%",
-       	  		"render": function (data) {
-       	  			return '<a onclick=viewAuditTransaction('+data+'); alt='+viewBtn+' title='+viewBtn+'>	<span class="c-black-500 ti-eye icon-tb"></span></a>'; 
-           	  	}, 
-              	"createdCell": function (td, cellData, rowData, row, col) {
-                    $(td).addClass('text-center');
-                } 
-              },
+              { "data": "idAuditTransaction",
+      	          "visible": false},
               { "data": "date", "width": "22%",
             	  "render": function(data, type, row) {
                       // Formatea la fecha utilizando Moment.js
@@ -174,7 +168,41 @@ $(document).ready(function() {
     								}
     							});
     						}
-    		        	}
+    		        	},
+                		{extend: 'selected', text: 'Visualizar', name: 'view',
+                	    	action: function ( e, dt, node, config ) {   		
+                	    	
+                	    		for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+                					id: o.context[0].aoColumns[e].mData,
+                					title: o.context[0].aoColumns[e].sTitle                
+                				  });
+                			  	
+                			  	 var d = dt.rows({
+                	                selected: !0
+                				 });
+                			  	 
+                			  	 var index = dt.row({
+                	                selected: !0
+                	             }).index();
+                			  	 			  	 
+                			  	var idAuditTransaction = d.data()[0][a[0].id];
+              				  
+              				  	var viewAuditTransaction = /*[[@{/viewAuditTransactionDetails}]]*/;
+              					
+                 					$.ajax({
+                 				        url : viewAuditTransaction,
+                 				        type : 'POST',
+                 				        data : $.param({'idAuditTransaction':idAuditTransaction}),
+                 				        cache : false,
+                 				        success : function(data) {
+                 				            hide();
+                 				            $('#modal').html(data);
+                 				            $('#auditTransactionViewModal').modal('show');                                                                
+                 				        },
+                 				        error : function() {}
+                 				    });
+                			}
+                		}
                     ]
         });
     
@@ -220,14 +248,8 @@ $(document).ready(function() {
                 },
                
                 "columns": [
-                    { "data": "idAuditTransaction", "width": "8%",
-             	  		"render": function (data) {
-             	  			return '<a onclick=viewAuditTransaction('+data+'); alt='+viewBtn+' title='+viewBtn+'>	<span class="c-black-500 ti-eye icon-tb"></span></a>'; 
-                 	  	}, 
-                    	"createdCell": function (td, cellData, rowData, row, col) {
-                          $(td).addClass('text-center');
-                      } 
-                    },
+                    { "data": "idAuditTransaction",
+          	          "visible": false},
                     { "data": "date", "width": "22%",
                     	"render": function(data, type, row) {
                             // Formatea la fecha utilizando Moment.js
@@ -316,7 +338,41 @@ $(document).ready(function() {
           								}
           							});
           						}
-          		        	}
+          		        	},
+                    		{extend: 'selected', text: 'Visualizar', name: 'view',
+                    	    	action: function ( e, dt, node, config ) {   		
+                    	    	
+                    	    		for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+                    					id: o.context[0].aoColumns[e].mData,
+                    					title: o.context[0].aoColumns[e].sTitle                
+                    				  });
+                    			  	
+                    			  	 var d = dt.rows({
+                    	                selected: !0
+                    				 });
+                    			  	 
+                    			  	 var index = dt.row({
+                    	                selected: !0
+                    	             }).index();
+                    			  	 			  	 
+                    				  var idAuditTransaction = d.data()[0][a[0].id];
+                    				  
+                    				  var viewAuditTransaction = /*[[@{/viewAuditTransactionDetails}]]*/;
+                    					
+	                   					$.ajax({
+	                   				        url : viewAuditTransaction,
+	                   				        type : 'POST',
+	                   				        data : $.param({'idAuditTransaction':idAuditTransaction}),
+	                   				        cache : false,
+	                   				        success : function(data) {
+	                   				            hide();
+	                   				            $('#modal').html(data);
+	                   				            $('#auditTransactionViewModal').modal('show');                                                                
+	                   				        },
+	                   				        error : function() {}
+	                   				    });
+                    			}
+                    		}
                           ]
               });
 	});

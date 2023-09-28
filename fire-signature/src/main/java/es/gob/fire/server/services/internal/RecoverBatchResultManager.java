@@ -360,6 +360,7 @@ public class RecoverBatchResultManager {
         					final String docId = it.next();
         					if (!batchResult.isSignFailed(docId)) {
         						batchResult.setErrorResult(docId, BatchResult.ABORTED);
+        						batchResult.setErrorMessage(docId, "Se ha abortado la operacion.");
         					}
         				}
         			}
@@ -476,6 +477,7 @@ public class RecoverBatchResultManager {
     	while (it.hasNext()) {
     		final String docId = it.next();
     		final boolean failed = batchResult.isSignFailed(docId);
+    		final String errorMessage = batchResult.getErrorMessage(docId);
     		if (failed || batchResult.getGracePeriod(docId) != null) {
     			final String docRef = batchResult.getDocumentReference(docId);
     			try {
@@ -487,7 +489,7 @@ public class RecoverBatchResultManager {
     		}
     		if (failed) {
     			SIGNLOGGER.register(session, false, docId);
-    			AUDITSIGNLOGGER.register(session, false, docId);
+    			AUDITSIGNLOGGER.register(session, false, docId, errorMessage, RecoverBatchResultManager.class.getName());
     		}
     	}
         TRANSLOGGER.register(session, true);

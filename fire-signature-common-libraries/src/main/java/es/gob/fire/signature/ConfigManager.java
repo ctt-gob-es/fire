@@ -155,6 +155,15 @@ public class ConfigManager {
 
 	/** Configuraci&oacute;n del directorio de volcado de datosestad&iacute;sticos. */
 	private static final String PROP_STATISTICS_DIR = "statistics.dir"; //$NON-NLS-1$
+	
+	/** Configuraci&oacute;n de la pol&iacute;tica de volcado de datos estad&iacute;sticos*/
+	private static final String PROP_AUDIT_POLICY ="audit.policy"; //$NON-NLS-1$
+
+	/** Configuraci&oacute;n de la hora del volcado a base de datos si la pol&iacute;tica lo permite). */
+	private static final String PROP_AUDIT_DUMPTIME = "audit.dumptime"; //$NON-NLS-1$
+
+	/** Configuraci&oacute;n del directorio de volcado de datosestad&iacute;sticos. */
+	private static final String PROP_AUDIT_DIR = "audit.dir"; //$NON-NLS-1$
 
 	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
@@ -608,6 +617,44 @@ public class ConfigManager {
 	 */
 	public static String getStatisticsDumpTime() {
 		 String time =  getProperty(PROP_STATISTICS_DUMPTIME);
+		 if (time == null || !time.matches(PATTERN_TIME)) {
+			 time = "00:00:00";	 //$NON-NLS-1$
+		 }
+		return time;
+	}
+
+	/**
+	 * Devuelve la ruta configurada del directorio en el que almacenar los datos para la generaci&oacute;n de estad&iacute;sticas.
+	 * @return Ruta del directorio o {@code null} si no est&aacute; definida.
+	 */
+	public static String getAuditDir() {
+		 return getProperty(PROP_AUDIT_DIR);
+	}
+	
+	/**
+	 * Devuelve el identificador num&eacute;rico de la pol&iacute;tica de firma configurada.
+	 * En caso de error, devuelve -1.
+	 * @return Dato num&eacute;rico.
+	 */
+	public static int getAuditPolicy() {
+		int policy;
+		try {
+			policy = Integer.parseInt(getProperty(PROP_AUDIT_POLICY));
+		}
+		catch (final NumberFormatException e) {
+			policy = -1;
+		}
+		return policy;
+	}
+
+	/**
+	 * Devuelve la hora a la que deber&iacute;n volcarse los datos estad&iacute;sticos a base de datos. En caso de no
+	 * encontrarse configurada una hora con el formato hh:mm:ss se devolver&aacute; 00:00:00.
+	 * @return Hora con formato hh:mm:ss
+	 *
+	 */
+	public static String getAuditDumpTime() {
+		 String time =  getProperty(PROP_AUDIT_DUMPTIME);
 		 if (time == null || !time.matches(PATTERN_TIME)) {
 			 time = "00:00:00";	 //$NON-NLS-1$
 		 }

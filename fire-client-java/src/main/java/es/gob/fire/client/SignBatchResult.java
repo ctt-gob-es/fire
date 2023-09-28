@@ -17,6 +17,7 @@ public class SignBatchResult {
 	private final boolean signed;
 	private final String errorType;
 	private final GracePeriodInfo gracePeriod;
+	private final String errorMessage;
 
 	/**
 	 * Crea el resultado de una firma de un lote indicando
@@ -26,6 +27,7 @@ public class SignBatchResult {
 		this.signed = true;
 		this.errorType = null;
 		this.gracePeriod = null;
+		this.errorMessage = null;
 	}
 
 	/**
@@ -37,6 +39,7 @@ public class SignBatchResult {
 		this.signed = true;
 		this.errorType = null;
 		this.gracePeriod = gracePeriod;
+		this.errorMessage = null;
 	}
 
 	/**
@@ -48,6 +51,20 @@ public class SignBatchResult {
 		this.signed = signed;
 		this.errorType = detail;
 		this.gracePeriod = null;
+		this.errorMessage = null;
+	}
+	
+	/**
+	 * Crea el resultado de una firma de un lote indicando
+	 * que esta no finaliz&oacute; correctamente.
+	 * @param detail Detalle del resultado (tipo de error o estado final).
+	 * @param errorMessage Mensaje de error de la firma.
+	 */
+	SignBatchResult(final boolean signed, final String detail, final String errorMessage) {
+		this.signed = signed;
+		this.errorType = detail;
+		this.gracePeriod = null;
+		this.errorMessage = errorMessage;
 	}
 
 	/**

@@ -3,7 +3,6 @@ package es.gob.fire.statistics.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Date;
 
 import es.gob.fire.statistics.config.DBConnectionException;
 import es.gob.fire.statistics.config.DbManager;
@@ -29,9 +28,22 @@ public class AuditSignaturesDAO {
 			throws SQLException, DBConnectionException {
 
 		boolean inserted = false;
-		
-		try (final Connection conn = DbManager.getInstance().getConnection(true);) {
-			insertAuditSignature(signature, total, conn);
+		Connection conn = null;
+		try {
+			conn = DbManager.getInstance().getConnection(false);
+			inserted = insertAuditSignature(signature, total, conn);
+
+			conn.commit();
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			if (conn != null){
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					throw e;
+				}
+			}
 		}
 		
 		return inserted;

@@ -81,7 +81,7 @@ public class RecoverSignResultManager {
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma: " + errMessage)); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
-    		AUDITSIGNLOGGER.register(session, false, null);
+    		AUDITSIGNLOGGER.register(session, false, null, RecoverSignResultManager.class.getName());
     		AUDITTRANSLOGGER.register(session, true);
     		SessionCollector.removeSession(session, trAux);
         	final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, Integer.parseInt(errType), errMessage, trAux);
@@ -100,7 +100,7 @@ public class RecoverSignResultManager {
 			LOGGER.warning(logF.f(errorMessage)); //$NON-NLS-1$
 			SIGNLOGGER.register(session, false, null);
 			TRANSLOGGER.register(session, false);
-			AUDITSIGNLOGGER.register(session, false, null, errorMessage);
+			AUDITSIGNLOGGER.register(session, false, null, errorMessage, RecoverSignResultManager.class.getName());
 			AUDITTRANSLOGGER.register(session, false, errorMessage);
     		SessionCollector.removeSession(session, trAux);
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
@@ -110,7 +110,7 @@ public class RecoverSignResultManager {
         // Se registra resultado de operacion firma
         SIGNLOGGER.register(session, true, null);
         TRANSLOGGER.register(session, true);
-        AUDITSIGNLOGGER.register(session, true, null);
+        AUDITSIGNLOGGER.register(session, true, null, RecoverSignResultManager.class.getName());
         AUDITTRANSLOGGER.register(session, true);
 
         // Ya no necesitaremos la sesion, asi que la eliminamos del pool

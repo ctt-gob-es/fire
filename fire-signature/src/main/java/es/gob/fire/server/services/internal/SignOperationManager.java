@@ -205,7 +205,7 @@ public class SignOperationManager {
         	LOGGER.log(Level.SEVERE, errorMessage, e); //$NON-NLS-1$
 			SIGNLOGGER.register(session, false, null);
 			TRANSLOGGER.register(session, false);
-			AUDITSIGNLOGGER.register(session, false, null, errorMessage);
+			AUDITSIGNLOGGER.register(session, false, null, errorMessage, SignOperationManager.class.getName());
 			AUDITTRANSLOGGER.register(session, false, errorMessage);
 			ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DATA_TO_SIGN_INVALID, trAux);
 			Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_INVALID, new SignOperationResult(transactionId, redirectErrorUrl));
@@ -247,7 +247,7 @@ public class SignOperationManager {
     		LOGGER.log(Level.SEVERE, errorMessage, e); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
-    		AUDITSIGNLOGGER.register(session, false, null, errorMessage);
+    		AUDITSIGNLOGGER.register(session, false, null, errorMessage, SignOperationManager.class.getName());
 			AUDITTRANSLOGGER.register(session, false, errorMessage);
     		AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
     		ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, trAux);
@@ -260,7 +260,7 @@ public class SignOperationManager {
     		LOGGER.severe(logF.f(errorMessage)); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
-    		AUDITSIGNLOGGER.register(session, false, null, errorMessage);
+    		AUDITSIGNLOGGER.register(session, false, null, errorMessage, SignOperationManager.class.getName());
 			AUDITTRANSLOGGER.register(session, false, errorMessage);
     		ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, trAux);
 			Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, new SignOperationResult(transactionId, redirectErrorUrl));

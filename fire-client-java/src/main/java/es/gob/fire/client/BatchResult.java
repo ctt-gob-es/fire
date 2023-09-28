@@ -45,6 +45,8 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 	private static final String JSON_FIELD_OK = "ok"; //$NON-NLS-1$
 
 	private static final String JSON_FIELD_DETAIL = "dt"; //$NON-NLS-1$
+	
+	private static final String JSON_FIELD_ERROR_MESSAGE = "errorm"; //$NON-NLS-1$
 
 	private static final String JSON_FIELD_GRACE_PERIOD = "grace"; //$NON-NLS-1$
 
@@ -179,6 +181,10 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 			if (jsonObject.containsKey(JSON_FIELD_DETAIL)) {
 				dt = jsonObject.getString(JSON_FIELD_DETAIL);
 			}
+			String errorMessage = null;
+			if (jsonObject.containsKey(JSON_FIELD_ERROR_MESSAGE)) {
+				errorMessage = jsonObject.getString(JSON_FIELD_ERROR_MESSAGE);
+			}
 			GracePeriodInfo gp = null;
 			if (jsonObject.containsKey(JSON_FIELD_GRACE_PERIOD)) {
 				final JsonObject gpObject = jsonObject.getJsonObject(JSON_FIELD_GRACE_PERIOD);
@@ -187,8 +193,14 @@ public class BatchResult extends HashMap<String, SignBatchResult> {
 				gp = new GracePeriodInfo(gpId, new Date(gpMillis));
 			}
 
-			final SignBatchResult batchResult = gp != null ?
-					new SignBatchResult(gp) : new SignBatchResult(ok, dt);
+			final SignBatchResult batchResult;
+			if (gp != null) {
+				batchResult = new SignBatchResult(gp);
+			} else {
+				batchResult = errorMessage != null ?
+						new SignBatchResult(ok, dt, errorMessage) : new SignBatchResult(ok, dt);
+			}
+					
 			result.put(id, batchResult);
 			if (!ok) {
 				result.error = true;

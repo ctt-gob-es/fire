@@ -110,7 +110,7 @@ FOREIGN KEY (`fk_rol`)
 ON DELETE RESTRICT
  ON UPDATE CASCADE;
 
-CREATE TABLE `tb_transacciones` (
+CREATE TABLE `tb_audit_transacciones` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fecha` TIMESTAMP NOT NULL,
   `id_aplicacion` varchar(48) NOT NULL,
@@ -131,7 +131,7 @@ CREATE TABLE `tb_transacciones` (
   PRIMARY KEY (`id`),
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `tb_firmas` (
+CREATE TABLE `tb_audit_firmas` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_transaccion` varchar(45) NOT NULL,
   `operacion_criptografica` varchar(10) NOT NULL,

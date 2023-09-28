@@ -151,6 +151,9 @@ public class ServiceParams {
 
 	 /** Par&aacute;metro usado para el guardado del tama&ntilde;o de los datos a firmar en sesi&oacute;n */
 	public static final String SESSION_PARAM_DOCSIZE = "docsize"; //$NON-NLS-1$
+	
+	/** Par&aacute;metro usado para el guardado del tama&ntilde;o de los datos de la transacci&oacute;n en sesi&oacute;n */
+	public static final String SESSION_PARAM_TRANSACTION_SIZE = "transactionsize"; //$NON-NLS-1$
 
     /** Valor del parametro de actualizacion que determina que la firma debe validarse. */
     public static final String UPGRADE_VERIFY = "verify"; //$NON-NLS-1$

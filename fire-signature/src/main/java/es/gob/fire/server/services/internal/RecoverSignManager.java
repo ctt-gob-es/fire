@@ -552,7 +552,7 @@ public class RecoverSignManager {
 			final FIReError error, final TransactionAuxParams trAux) throws IOException {
 		SIGNLOGGER.register(session, false, null);
 		TRANSLOGGER.register(session, false);
-		AUDITSIGNLOGGER.register(session, false, null, error.getMessage());
+		AUDITSIGNLOGGER.register(session, false, null, error.getMessage(), RecoverSignManager.class.getName());
 		AUDITTRANSLOGGER.register(session, false, error.getMessage());
 		SessionCollector.removeSession(session, trAux);
 		Responser.sendError(response, error);
@@ -573,7 +573,7 @@ public class RecoverSignManager {
 					throws IOException {
 		SIGNLOGGER.register(session, false, null);
 		TRANSLOGGER.register(session, false);
-		AUDITSIGNLOGGER.register(session, false, null, error.getMessage());
+		AUDITSIGNLOGGER.register(session, false, null, error.getMessage(), RecoverSignManager.class.getName());
 		AUDITTRANSLOGGER.register(session, false, error.getMessage());
 		SessionCollector.removeSession(session, trAux);
 		Responser.sendError(response, error, result);

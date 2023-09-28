@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.server.services.batch.ProcessResult.Result;
 
 
 /** Realiza la primera fase de un proceso de firma por lote.
@@ -109,6 +110,7 @@ public final class BatchPresigner extends HttpServlet {
 
 		response.setHeader(CONFIG_PARAM_ALLOW_ORIGIN, ALL_ORIGINS_ALLOWED);
 		response.setContentType("application/json"); //$NON-NLS-1$
+		LOGGER.log(Level.INFO, String.format("Preproceso en formato String: " + pre.toString()));
 		Responser.sendResult(response, pre.toString().getBytes(StandardCharsets.UTF_8));
 	}
 

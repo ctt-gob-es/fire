@@ -147,6 +147,7 @@ public final class BatchPostsigner extends HttpServlet {
 
 		response.setHeader(CONFIG_PARAM_ALLOW_ORIGIN, ALL_ORIGINS_ALLOWED);
 		response.setContentType("application/json"); //$NON-NLS-1$
+		LOGGER.info(ret);
 		Responser.sendResult(response, ret.getBytes(StandardCharsets.UTF_8));
 	}
 

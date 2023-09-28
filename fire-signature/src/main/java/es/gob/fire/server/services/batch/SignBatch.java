@@ -247,7 +247,7 @@ public abstract class SignBatch {
 		if (errors != null && !errors.isEmpty()) {
 			preBatch.add(JSELEM_RESULTS, errors);
 		}
-
+		
 		return preBatch.build();
 	}
 

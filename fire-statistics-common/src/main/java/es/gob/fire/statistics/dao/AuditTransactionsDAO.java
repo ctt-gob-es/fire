@@ -3,9 +3,6 @@ package es.gob.fire.statistics.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import es.gob.fire.statistics.config.DBConnectionException;
 import es.gob.fire.statistics.config.DbManager;
@@ -31,9 +28,22 @@ public class AuditTransactionsDAO {
 	public static boolean insertAuditTransaction(final AuditTransactionCube transaction, final TransactionTotal total)
 			throws SQLException, DBConnectionException {
 		boolean inserted = false;
-		
-		try (final Connection conn = DbManager.getInstance().getConnection(true);) {
+		Connection conn = null;
+		try {
+			conn = DbManager.getInstance().getConnection(false);
 			inserted = insertAuditTransaction(transaction, total, conn);
+			
+			conn.commit();
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			if (conn != null){
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					throw e;
+				}
+			}
 		}
 		
 		return inserted;

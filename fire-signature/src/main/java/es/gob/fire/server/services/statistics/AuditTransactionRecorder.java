@@ -3,6 +3,7 @@ package es.gob.fire.server.services.statistics;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -16,7 +17,10 @@ import es.gob.fire.server.services.internal.BatchResult;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchConfig;
+import es.gob.fire.statistics.config.DBConnectionException;
+import es.gob.fire.statistics.dao.AuditTransactionsDAO;
 import es.gob.fire.statistics.entity.AuditTransactionCube;
+import es.gob.fire.statistics.entity.TransactionTotal;
 
 public class AuditTransactionRecorder {
 	
@@ -34,6 +38,8 @@ public class AuditTransactionRecorder {
 	
 	private boolean enable;
 	
+	private boolean enableDB;
+	
 	private static AuditTransactionRecorder instance;
 	
 	/**
@@ -48,15 +54,16 @@ public class AuditTransactionRecorder {
 	}
 
 	private AuditTransactionRecorder() {
-		final StatisticsConfig config;
+		final AuditConfig config;
 		try {
-			config = StatisticsConfig.load();
+			config = AuditConfig.load();
 		} catch (final Exception e) {
 			LOGGER.warning("No se configuro una politica valida para el guardado de estadisticas. No se almacenaran"); //$NON-NLS-1$
 			return;
 		}
 		
 		this.enable = config.isEnabled();
+		this.enableDB = config.isSavingToDB();
 		
 		final String logsPath = config.getDataDirPath();
 		if (logsPath == null || logsPath.isEmpty()) {
@@ -152,9 +159,9 @@ public class AuditTransactionRecorder {
 		
 		//Formato y formato mejorado
 		
-		// Obtenemos el tamano del documento
+		// Obtenemos el tamano de la transaccion
 		Long docSize = new Long(0);
-		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
+		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE);
 		if (docSize != null) {
 			docSize = (Long) docSizeObject;
 			if (docSize == null) {
@@ -218,6 +225,16 @@ public class AuditTransactionRecorder {
 		}
 		
 		this.dataLogger.finest(this.getAuditTransactionCube().toString());
+		
+		if (this.enableDB) {
+			TransactionTotal total = new TransactionTotal(this.getAuditTransactionCube().getDataSize(), this.getAuditTransactionCube().getTotal());
+			try {
+				AuditTransactionsDAO.insertAuditTransaction(this.getAuditTransactionCube(), total);
+			} catch (SQLException | DBConnectionException e) {
+				final String errorMsg = "Ocurrio un error al guardar los datos de la transaccion en base de datos."; //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, errorMsg, e);
+			}
+		}
 	}
 	
 	/**
@@ -273,7 +290,7 @@ public class AuditTransactionRecorder {
 		
 		// Obtenemos el tamano del documento
 		Long docSize = new Long(0);
-		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
+		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE);
 		if (docSize != null) {
 			docSize = (Long) docSizeObject;
 			if (docSize == null) {
@@ -337,6 +354,16 @@ public class AuditTransactionRecorder {
 		}
 		
 		this.dataLogger.finest(this.getAuditTransactionCube().toString());
+		
+		if (this.enableDB) {
+			TransactionTotal total = new TransactionTotal(this.getAuditTransactionCube().getDataSize(), this.getAuditTransactionCube().getTotal());
+			try {
+				AuditTransactionsDAO.insertAuditTransaction(this.getAuditTransactionCube(), total);
+			} catch (SQLException | DBConnectionException e) {
+				final String errorMsg = "Ocurrio un error al guardar los datos de la transaccion en base de datos."; //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, errorMsg, e);
+			}
+		}
 	}
 
 	public AuditTransactionCube getAuditTransactionCube() {

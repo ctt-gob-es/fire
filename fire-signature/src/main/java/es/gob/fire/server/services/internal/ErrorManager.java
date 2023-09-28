@@ -84,13 +84,13 @@ public class ErrorManager {
 					while (it.hasNext()) {
 						final String docId = it.next();
 						SIGNLOGGER.register(session, false, docId);
-						AUDITSIGNLOGGER.register(session, false, docId, messageError);
+						AUDITSIGNLOGGER.register(session, false, docId, messageError, ErrorManager.class.getName());
 					}
 				}
 			}
 			else if (op == TransactionType.SIGN) { // Operacion Simple
 				SIGNLOGGER.register(session, false, null);
-				AUDITSIGNLOGGER.register(session, false, null, messageError);
+				AUDITSIGNLOGGER.register(session, false, null, messageError, ErrorManager.class.getName());
 			}
 			SessionCollector.cleanSession(session, trAux);
 		}

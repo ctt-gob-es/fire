@@ -320,8 +320,9 @@ public final class PreSignService extends HttpServlet {
             for (final BatchDocument doc : documents) {
         		if (doc.getResult() != null) {
         			SIGNLOGGER.register(session, false, doc.getId());
-        			AUDITSIGNLOGGER.register(session, false, doc.getId(), doc.getResult());
+        			//AUDITSIGNLOGGER.register(session, false, doc.getId(), doc.getErrorMessage(), PreSignService.class.getName());
         			batchResult.setErrorResult(doc.getId(), doc.getResult());
+        			batchResult.setErrorMessage(doc.getId(), doc.getErrorMessage());
         			failed = true;
         		}
         	}
