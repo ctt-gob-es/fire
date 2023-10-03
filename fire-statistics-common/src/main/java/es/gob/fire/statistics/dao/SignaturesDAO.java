@@ -12,8 +12,8 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
-import es.gob.fire.statistics.config.DBConnectionException;
-import es.gob.fire.statistics.config.DbManager;
+import es.gob.fire.signature.DBConnectionException;
+import es.gob.fire.signature.DbManager;
 import es.gob.fire.statistics.entity.SignatureCube;
 
 /**
@@ -80,7 +80,7 @@ public class SignaturesDAO {
 	 */
 	public static void insertSignature(final Date date, final SignatureCube signature, final long total)
 			throws SQLException, DBConnectionException {
-		try (final Connection conn = DbManager.getInstance().getConnection(true);) {
+		try (final Connection conn = DbManager.getConnection(true);) {
 			insertSignature(date, signature, total, conn);
 		}
 	}
@@ -131,7 +131,7 @@ public class SignaturesDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final Connection conn = DbManager.getInstance().getConnection(false);
+		try (final Connection conn = DbManager.getConnection(false);
 				final PreparedStatement st = conn.prepareStatement(SIGNATURES_BYPROVIDER);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
@@ -186,7 +186,7 @@ public class SignaturesDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final Connection conn = DbManager.getInstance().getConnection(false);
+		try (final Connection conn = DbManager.getConnection(false);
 				final PreparedStatement st = conn.prepareStatement(SIGNATURES_BYAPP);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
@@ -241,7 +241,7 @@ public class SignaturesDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final Connection conn = DbManager.getInstance().getConnection(false);
+		try (final Connection conn = DbManager.getConnection(false);
 				final PreparedStatement st = conn.prepareStatement(SIGNATURES_BYFORMAT);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
@@ -295,7 +295,7 @@ public class SignaturesDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final Connection conn = DbManager.getInstance().getConnection(true);
+		try (final Connection conn = DbManager.getConnection(true);
 				final PreparedStatement st = conn.prepareStatement(SIGNMATURES_BYLONGLIVE_FORMAT);) {
 			st.setInt(1, year);
 			st.setInt(2, month);

@@ -207,7 +207,14 @@ public class StatisticsDBLoader {
 	 */
 	private static LoadStatisticsResult init(final String dataDir, final String dbDriver, final String dbConn,
 			final String username, final String password, final boolean processCurrentDay) throws IOException {
-		return FireStatistics.dumpData(dataDir, dbDriver, dbConn, username, password, processCurrentDay);
+		LoadStatisticsResult result;
+		try {
+			result = FireStatistics.dumpData(dataDir, dbDriver, dbConn, username, password, processCurrentDay);
+		}
+		finally {
+			FireStatistics.release();
+		}
+		return result;
 	}
 
 	/**

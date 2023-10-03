@@ -319,17 +319,21 @@ public final class PreSignService extends HttpServlet {
             boolean failed = false;
             for (final BatchDocument doc : documents) {
         		if (doc.getResult() != null) {
-        			SIGNLOGGER.register(session, false, doc.getId());
-        			//AUDITSIGNLOGGER.register(session, false, doc.getId(), doc.getErrorMessage(), PreSignService.class.getName());
         			batchResult.setErrorResult(doc.getId(), doc.getResult());
         			batchResult.setErrorMessage(doc.getId(), doc.getErrorMessage());
         			failed = true;
+        			// Si la operacion va a continuar despues de este error, nos aseguramos de registrarlo a nivel individual
+        			if (!stopOnError) {
+        				SIGNLOGGER.register(session, false, doc.getId());
+            			AUDITSIGNLOGGER.register(session, false, doc.getId(), doc.getErrorMessage());
+        			}
         		}
         	}
 
             if (failed && stopOnError) {
-                LOGGER.log(Level.SEVERE, logF.f("Se encontraron errores en las prefirmas del lote y se aborta la operacion")); //$NON-NLS-1$
-                ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, trAux);
+            	final String errorMessage = "Se encontraron errores en las prefirmas del lote y se aborta la operacion"; //$NON-NLS-1$
+                LOGGER.log(Level.SEVERE, logF.f(errorMessage));
+                ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, false, errorMessage, trAux);
                 Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
                 return;
             }

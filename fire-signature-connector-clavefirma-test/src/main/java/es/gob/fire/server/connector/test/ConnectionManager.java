@@ -129,9 +129,9 @@ public class ConnectionManager {
         if (ksFile != null && ksPassword != null) {
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
 
-        	final FileInputStream ksFis = new FileInputStream(ksFile);
-        	ks.load(ksFis, ksPassword);
-        	ksFis.close();
+        	try (final FileInputStream ksFis = new FileInputStream(ksFile);) {
+        		ks.load(ksFis, ksPassword);
+        	}
         }
 
         KeyStore ts = null;

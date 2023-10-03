@@ -72,7 +72,7 @@ public class ErrorManager {
 		// Si se va a volver a la aplicacion, eliminamos los datos de sesion innecesarios
 		if (returnToApp) {
 			// Se registra en log de estadisticas que la transaccion ha terminado erroneamente.
-			
+
 			TRANSLOGGER.register(session, false);
 			AUDITTRANSLOGGER.register(session, false, messageError != null ? messageError : error.getMessage());
 			// Comprobar el tipo de operacion si es simple o lote  (SIGN o BATCH)
@@ -84,13 +84,13 @@ public class ErrorManager {
 					while (it.hasNext()) {
 						final String docId = it.next();
 						SIGNLOGGER.register(session, false, docId);
-						AUDITSIGNLOGGER.register(session, false, docId, messageError, ErrorManager.class.getName());
+						AUDITSIGNLOGGER.register(session, false, docId, messageError);
 					}
 				}
 			}
 			else if (op == TransactionType.SIGN) { // Operacion Simple
 				SIGNLOGGER.register(session, false, null);
-				AUDITSIGNLOGGER.register(session, false, null, messageError, ErrorManager.class.getName());
+				AUDITSIGNLOGGER.register(session, false, null, messageError);
 			}
 			SessionCollector.cleanSession(session, trAux);
 		}

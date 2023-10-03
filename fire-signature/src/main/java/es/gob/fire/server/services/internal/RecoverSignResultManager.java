@@ -96,11 +96,11 @@ public class RecoverSignResultManager {
         	signResult = TempDocumentsManager.retrieveDocument(transactionId);
         }
         catch (final Exception e) {
-			String errorMessage = "No se encuentra el resultado de la operacion. Puede haber caducado la sesion: " + e;
-			LOGGER.warning(logF.f(errorMessage)); //$NON-NLS-1$
+			final String errorMessage = "No se encuentra el resultado de la operacion. Puede haber caducado la sesion: " + e; //$NON-NLS-1$
+			LOGGER.warning(logF.f(errorMessage));
 			SIGNLOGGER.register(session, false, null);
 			TRANSLOGGER.register(session, false);
-			AUDITSIGNLOGGER.register(session, false, null, errorMessage, RecoverSignResultManager.class.getName());
+			AUDITSIGNLOGGER.register(session, false, null, errorMessage);
 			AUDITTRANSLOGGER.register(session, false, errorMessage);
     		SessionCollector.removeSession(session, trAux);
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
@@ -110,7 +110,7 @@ public class RecoverSignResultManager {
         // Se registra resultado de operacion firma
         SIGNLOGGER.register(session, true, null);
         TRANSLOGGER.register(session, true);
-        AUDITSIGNLOGGER.register(session, true, null, RecoverSignResultManager.class.getName());
+        AUDITSIGNLOGGER.register(session, true, null);
         AUDITTRANSLOGGER.register(session, true);
 
         // Ya no necesitaremos la sesion, asi que la eliminamos del pool

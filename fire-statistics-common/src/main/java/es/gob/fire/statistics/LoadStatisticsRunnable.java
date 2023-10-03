@@ -19,10 +19,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import es.gob.fire.statistics.config.DBConnectionException;
-import es.gob.fire.statistics.config.DbManager;
-import es.gob.fire.statistics.dao.AuditSignaturesDAO;
-import es.gob.fire.statistics.dao.AuditTransactionsDAO;
+import es.gob.fire.signature.DBConnectionException;
+import es.gob.fire.signature.DbManager;
 import es.gob.fire.statistics.dao.SignaturesDAO;
 import es.gob.fire.statistics.dao.TransactionsDAO;
 import es.gob.fire.statistics.entity.AuditSignatureCube;
@@ -57,7 +55,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * quiere procesar la informaci&oacute;n de hoy, ya que puede que a&uacute;n no
 	 * hayan terminado
 	 * de generarse todos los datos.
-	 * 
+	 *
 	 * @param dataPath Ruta de los ficheros de datos.
 	 */
 	public LoadStatisticsRunnable(final String dataPath) {
@@ -70,7 +68,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * procesar la informaci&oacute;n de hoy, ya que puede que a&uacute;n no hayan
 	 * terminado
 	 * de generarse todos los datos.
-	 * 
+	 *
 	 * @param processCurrentDay Indica si se debe procesar los datos del d&iacute;a
 	 *                          actual
 	 *                          ({@code true}) o si no ({@code false}).
@@ -164,7 +162,7 @@ public class LoadStatisticsRunnable implements Runnable {
 
 	/**
 	 * Obtiene cual es la fecha m&aacute;s reciente de datos cargados.
-	 * 
+	 *
 	 * @return Fecha de los &uacute;ltimos datos cargados o {@code null}
 	 *         si no se tiene referencia de que se hayan cargado datos.
 	 * @throws IOException Si se produce un error en la lectura del fichero de
@@ -197,7 +195,7 @@ public class LoadStatisticsRunnable implements Runnable {
 
 	/**
 	 * Lee la &uacute;ltima l&iacute;nea de un fichero.
-	 * 
+	 *
 	 * @param file Fichero de datos.
 	 * @return &Uacute;ltima linea del fichero o {@code null} si no tiene contenido.
 	 */
@@ -214,7 +212,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * Obtiene los ficheros del directorio de logs cuyo nombre empiece por un sufijo
 	 * concreto y
 	 * que esten seguidos por una fecha mayor que la indicada.
-	 * 
+	 *
 	 * @param suffix Sufijo de los ficheros.
 	 * @param date   Fecha m&iacute;nima que deben mostrar los ficheros en su nombre
 	 *               (no incluida).
@@ -331,7 +329,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * @return Resultado del proceso de carga.
 	 */
 	private static LoadStatisticsResult exeLoadStatistics(final File[] signatureFiles, final File[] transactionFiles,
-			final File[] auditSignatureFiles, File[] auditTransactionFiles) {
+			final File[] auditSignatureFiles, final File[] auditTransactionFiles) {
 
 		Date lastDateProcessed = null;
 		String lastDateProcessedText = null;
@@ -342,45 +340,37 @@ public class LoadStatisticsRunnable implements Runnable {
 			// ficheros
 			// para cada una de las fechas encontradas
 
-			String signatureFileDate = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length());
-			String transactionFileDate = transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length());
-			String auditSignatureFileDate = auditSignatureFiles[i].getName().substring(FILE_AUDIT_SIGN_PREFIX.length());
-			String auditTransactionFileDate = auditTransactionFiles[i].getName()
+			final String signatureFileDate = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length());
+			final String transactionFileDate = transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length());
+			final String auditSignatureFileDate = auditSignatureFiles[i].getName().substring(FILE_AUDIT_SIGN_PREFIX.length());
+			final String auditTransactionFileDate = auditTransactionFiles[i].getName()
 					.substring(FILE_AUDIT_TRANS_PREFIX.length());
 
 			final int dateComparison = checkDatesFromFiles(signatureFileDate, transactionFileDate,
 					auditSignatureFileDate, auditTransactionFileDate);
 
 			if (dateComparison < 1) {
-				String errorMsg = "No coinciden las fechas de los ficheros";
-				if (errorMsg != null) {
-					LOGGER.severe(errorMsg);
-					return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
-				}
+				final String errorMsg = "No coinciden las fechas de los ficheros"; //$NON-NLS-1$
+				LOGGER.severe(errorMsg);
+				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 
-			/*
-			 * final int c =
-			 * signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length()).compareTo(
-			 * transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length()));
-			 * if (c != 0) {
-			 * String errorMsg;
-			 * if (c < 0) {
-			 * errorMsg =
-			 * "No se ha encontrado el fichero con los datos de las transacciones correspondiente a la fecha "
-			 * + //$NON-NLS-1$
-			 * parseDateStringFromFilename(signatureFiles[i], FILE_SIGN_PREFIX);
-			 * } else {
-			 * errorMsg =
-			 * "No se ha encontrado el fichero con los datos de las firmas correspondiente a la fecha "
-			 * + //$NON-NLS-1$
-			 * parseDateStringFromFilename(transactionFiles[i], FILE_TRANS_PREFIX);
-			 * }
-			 * LOGGER.severe(errorMsg);
-			 * return new LoadStatisticsResult(false, lastDateProcessed,
-			 * lastDateProcessedText, errorMsg);
-			 * }
-			 */
+
+//			final int c = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length()).compareTo(
+//							transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length()));
+//			if (c != 0) {
+//				String errorMsg;
+//				if (c < 0) {
+//					errorMsg = "No se ha encontrado el fichero con los datos de las transacciones correspondiente a la fecha " //$NON-NLS-1$
+//								+ parseDateStringFromFilename(signatureFiles[i], FILE_SIGN_PREFIX);
+//				} else {
+//					errorMsg = "No se ha encontrado el fichero con los datos de las firmas correspondiente a la fecha " //$NON-NLS-1$
+//								+ parseDateStringFromFilename(transactionFiles[i], FILE_TRANS_PREFIX);
+//				}
+//				LOGGER.severe(errorMsg);
+//				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
+//			}
+
 
 			// Identificamos la fecha de los ficheros que estamos procesando
 			final String dateText = parseDateStringFromFilename(signatureFiles[i], FILE_SIGN_PREFIX);
@@ -431,7 +421,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * par&aacute;metro
 	 * para ser insertados en la BBDD. Si se encuentra algun registro mal formado,
 	 * se ignorar&aacute;.
-	 * 
+	 *
 	 * @param signaturesFile        Fichero con los datos de firma.
 	 * @param transactionsFile      Fichero con los datos de transacci&oacute;n.
 	 * @param auditSignaturesFile   Fichero con los datos de firma de auditoria.
@@ -605,7 +595,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	/**
 	 * Inserta la informacion de las firmas y transacciones de un d&iacute;a en base
 	 * de datos.
-	 * 
+	 *
 	 * @param date          Fecha en la que se realizaron las operaciones.
 	 * @param compactedData Conjunto de datos de las operaciones.
 	 * @throws SQLException          Cuando se produce un error al insertar los
@@ -620,7 +610,7 @@ public class LoadStatisticsRunnable implements Runnable {
 		final Map<SignatureCube, Long> signaturesCube = compactedData.getSignatureData();
 
 		final Iterator<SignatureCube> itSigns = signaturesCube.keySet().iterator();
-		try (Connection conn = DbManager.getInstance().getConnection(false)) {
+		try (Connection conn = DbManager.getConnection(false)) {
 			while (itSigns.hasNext()) {
 
 				final SignatureCube signatureConfig = itSigns.next();
@@ -672,36 +662,13 @@ public class LoadStatisticsRunnable implements Runnable {
 				LOGGER.log(Level.WARNING, "No se pudieron confirmar las inserciones ya realizadas", e1); //$NON-NLS-1$
 			}
 		}
-
-		/*
-		// Insertamos la informacion de las firmas realizadas
-		final Map<AuditSignatureCube, Long> auditSignaturesCube = compactedData.getAuditSignatureData();
-
-		final Iterator<AuditSignatureCube> itAuditSigns = auditSignaturesCube.keySet().iterator();
-		while (itAuditSigns.hasNext()) {
-			final AuditSignatureCube auditSignatureConfig = itAuditSigns.next();
-			final Long total = auditSignaturesCube.get(auditSignatureConfig);
-			AuditSignaturesDAO.insertAuditSignature(auditSignatureConfig, total.longValue());
-		}
-
-		// Insertamos la informacion de las transacciones realizadas
-		final Map<AuditTransactionCube, TransactionTotal> auditTransactionsCube = compactedData
-				.getAuditTransactionData();
-
-		final Iterator<AuditTransactionCube> itAuditTrans = auditTransactionsCube.keySet().iterator();
-		while (itAuditTrans.hasNext()) {
-			final AuditTransactionCube auditTransactionConfig = itAuditTrans.next();
-			final TransactionTotal total = auditTransactionsCube.get(auditTransactionConfig);
-			AuditTransactionsDAO.insertAuditTransaction(auditTransactionConfig, total);
-		}
-		*/
 	}
 
 	/**
 	 * Actualiza la fecha del fichero de informaci&oacute;n para indicar la fecha de
 	 * los
 	 * &uacute;ltimos registros cargados en base de datos.
-	 * 
+	 *
 	 * @param lastDateProcessed Fecha de los &uacute;ltimos
 	 * @throws IOException Cuando se produce un error al actualizar la fecha.
 	 */
@@ -717,7 +684,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	/**
 	 * Extrae el texto que identifica la fecha a la que pertenecen los datos de un
 	 * fichero.
-	 * 
+	 *
 	 * @param file   Fichero del que obtener la fecha.
 	 * @param suffix Sufijo que se antepone a la fecha en el nombre del fichero.
 	 * @return Texto con la fecha de los datos.
@@ -731,15 +698,15 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * Permite obtener el resultado de la operaci&oacute;n de carga una vez ha
 	 * terminado
 	 * la actividad.
-	 * 
+	 *
 	 * @return Resultado de la operaci&oacute;n de carga.
 	 */
 	public LoadStatisticsResult getResult() {
 		return this.result;
 	}
 
-	private static int checkDatesFromFiles(String signatureFileDate, String transactionFileDate,
-			String auditSignatureFileDate, String auditTransactionFileDate) {
+	private static int checkDatesFromFiles(final String signatureFileDate, final String transactionFileDate,
+			final String auditSignatureFileDate, final String auditTransactionFileDate) {
 
 		// Returns 0 if all the dates are different
 		int comparison = 0;
@@ -813,7 +780,7 @@ public class LoadStatisticsRunnable implements Runnable {
 		/**
 		 * Obtiene el los milisegundos correspondiente al primer instante del d&iacute;a
 		 * de hoy.
-		 * 
+		 *
 		 * @return Milisegundos del primer instante del d&iacute;a de hoy.
 		 */
 		private static long getTodayMilis() {

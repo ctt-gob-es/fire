@@ -155,12 +155,12 @@ public class ConfigManager {
 
 	/** Configuraci&oacute;n del directorio de volcado de datosestad&iacute;sticos. */
 	private static final String PROP_STATISTICS_DIR = "statistics.dir"; //$NON-NLS-1$
-	
-	/** Configuraci&oacute;n de la pol&iacute;tica de volcado de datos estad&iacute;sticos*/
+
+	/** Configuraci&oacute;n de la pol&iacute;tica de volcado de datos estad&iacute;sticos. */
 	private static final String PROP_AUDIT_POLICY ="audit.policy"; //$NON-NLS-1$
 
-	/** Configuraci&oacute;n de la hora del volcado a base de datos si la pol&iacute;tica lo permite). */
-	private static final String PROP_AUDIT_DUMPTIME = "audit.dumptime"; //$NON-NLS-1$
+	/** Configuraci&oacute;n de la hora de borrado de los datos de auditoria de base de datos. */
+	private static final String PROP_AUDIT_DELETE_TIME ="audit.deletetime"; //$NON-NLS-1$
 
 	/** Configuraci&oacute;n del directorio de volcado de datosestad&iacute;sticos. */
 	private static final String PROP_AUDIT_DIR = "audit.dir"; //$NON-NLS-1$
@@ -630,7 +630,7 @@ public class ConfigManager {
 	public static String getAuditDir() {
 		 return getProperty(PROP_AUDIT_DIR);
 	}
-	
+
 	/**
 	 * Devuelve el identificador num&eacute;rico de la pol&iacute;tica de firma configurada.
 	 * En caso de error, devuelve -1.
@@ -648,17 +648,12 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Devuelve la hora a la que deber&iacute;n volcarse los datos estad&iacute;sticos a base de datos. En caso de no
-	 * encontrarse configurada una hora con el formato hh:mm:ss se devolver&aacute; 00:00:00.
-	 * @return Hora con formato hh:mm:ss
-	 *
+	 * Devuelve la hora a la que se debe realizar el borrado de los datos de auditoria de base de
+	 * datos o {@code null} si no
+	 * @return Hora con formato hh:mm:ss o {@code null} si no se establece.
 	 */
-	public static String getAuditDumpTime() {
-		 String time =  getProperty(PROP_AUDIT_DUMPTIME);
-		 if (time == null || !time.matches(PATTERN_TIME)) {
-			 time = "00:00:00";	 //$NON-NLS-1$
-		 }
-		return time;
+	public static String getAuditDeleteTime() {
+		 return getProperty(PROP_AUDIT_DELETE_TIME);
 	}
 
 	/**

@@ -148,13 +148,13 @@ public class RecoverBatchSignatureManager {
         	signature = TempDocumentsManager.retrieveAndDeleteDocument(docFilename);
         }
         catch (final Exception e) {
-        	String errorMessage = "No se encuentra el resultado de la firma del documento: " + docId + ". Puede haber caducado la sesion";
-        	LOGGER.log(Level.SEVERE, logF.f("No se encuentra el resultado de la firma del documento: %1s. Puede haber caducado la sesion", docId), e); //$NON-NLS-1$
+        	final String errorMessage = String.format("No se encuentra el resultado de la firma del documento: %1s. Puede haber caducado la sesion", docId); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f(errorMessage), e);
         	batchResult.setErrorResult(docId, BatchResult.ERROR_RECOVERING);
         	batchResult.setErrorMessage(docId, errorMessage);
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SIGNLOGGER.register(session, false, docId);
-        	//AUDITSIGNLOGGER.register(session, false, docId, errorMessage, RecoverBatchSignatureManager.class.getName());
+        	AUDITSIGNLOGGER.register(session, false, docId, errorMessage);
         	SessionCollector.commit(session, trAux);
         	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
@@ -162,9 +162,9 @@ public class RecoverBatchSignatureManager {
 
         // Actualizamos el estado para que quede registrado que no se puede volver a recuperar
         batchResult.setErrorResult(docId, BatchResult.RECOVERED);
-        
+
         SIGNLOGGER.register(session, true, docId);
-        //AUDITSIGNLOGGER.register(session, true, docId, RecoverBatchSignatureManager.class.getName());
+        AUDITSIGNLOGGER.register(session, true, docId);
 
         // Revisamos si queda alguna firma valida sin recuperar, en cuyo caso,
         // eliminamos la sesion. Si no, actualizamos el estado

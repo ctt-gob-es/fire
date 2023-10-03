@@ -737,7 +737,7 @@ public final class SessionCollector {
         		session = this.sessionsMap.get(id);
         		if (session != null && currentTime > session.getExpirationTime()) {
         			// Registramos la transaccion como erronea
-        			final String errorMessage = "La sesion ha caducado";
+        			final String errorMessage = "La sesion ha caducado"; //$NON-NLS-1$
         			TRANSLOGGER.register(session, false);
         			AUDITTRANSLOGGER.register(session, false, errorMessage);
 

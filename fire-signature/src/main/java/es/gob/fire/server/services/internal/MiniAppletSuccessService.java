@@ -203,7 +203,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 					afirmaResults.put(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_ID), AfirmaSingleResult.getAfirmaOkResult());
 				} else {
 					final String error = singleSignsArray.getJsonObject(i).getString(JSON_PARAM_RESULT);
-					final String description = singleSignsArray.getJsonObject(i).getString(JSON_PARAM_DESCRIPTION, "Error desconocido"); //$NON-NLS-1$ 
+					final String description = singleSignsArray.getJsonObject(i).getString(JSON_PARAM_DESCRIPTION, "Error desconocido"); //$NON-NLS-1$
 					afirmaResults.put(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_ID),
 							AfirmaSingleResult.getAfirmaErrorResult(error, description));
 				}
@@ -288,7 +288,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 			this.error = error;
 			this.errorMessage = null;
 		}
-		
+
 		private AfirmaSingleResult(final String error, final String errorMessage) {
 			this.error = error;
 			this.errorMessage = errorMessage;
@@ -301,7 +301,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 		public String getError() {
 			return this.error;
 		}
-		
+
 		public String getErrorMessage() {
 			return this.errorMessage;
 		}
@@ -310,10 +310,6 @@ public class MiniAppletSuccessService extends HttpServlet {
 			return new AfirmaSingleResult(null);
 		}
 
-		public static AfirmaSingleResult getAfirmaErrorResult(final String error) {
-			return new AfirmaSingleResult(error);
-		}
-		
 		public static AfirmaSingleResult getAfirmaErrorResult(final String error, final String errorMessage) {
 			return new AfirmaSingleResult(error, errorMessage);
 		}

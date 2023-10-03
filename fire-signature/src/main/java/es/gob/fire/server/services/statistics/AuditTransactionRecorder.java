@@ -12,18 +12,14 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import es.gob.fire.logs.handlers.DailyFileHandler;
-import es.gob.fire.server.services.DocInfo;
-import es.gob.fire.server.services.internal.BatchResult;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
-import es.gob.fire.server.services.internal.SignBatchConfig;
-import es.gob.fire.statistics.config.DBConnectionException;
+import es.gob.fire.signature.DBConnectionException;
 import es.gob.fire.statistics.dao.AuditTransactionsDAO;
 import es.gob.fire.statistics.entity.AuditTransactionCube;
-import es.gob.fire.statistics.entity.TransactionTotal;
 
 public class AuditTransactionRecorder {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(AuditTransactionRecorder.class.getName());
 
 	private static String LOGGER_NAME = "AUDIT_TRANSACTION"; //$NON-NLS-1$
@@ -31,19 +27,17 @@ public class AuditTransactionRecorder {
 	private static String LOG_FILENAME = "FIRE_" + LOGGER_NAME + ".log"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static String LOG_CHARSET = "utf-8"; //$NON-NLS-1$
-	
-	private AuditTransactionCube auditTransactionCube;
-	
+
 	private Logger dataLogger = null;
-	
+
 	private boolean enable;
-	
+
 	private boolean enableDB;
-	
+
 	private static AuditTransactionRecorder instance;
-	
+
 	/**
-	 * Obtenemos el logger para el guardado de los datos estad&iacute;sticos de las peticiones realizadas.
+	 * Obtenemos el logger para el guardado de los datos de auditor&iacute;a de las peticiones realizadas.
 	 * @return Objeto para el registro de los datos de las peticiones.
 	 */
 	public final static AuditTransactionRecorder getInstance() {
@@ -58,28 +52,30 @@ public class AuditTransactionRecorder {
 		try {
 			config = AuditConfig.load();
 		} catch (final Exception e) {
-			LOGGER.warning("No se configuro una politica valida para el guardado de estadisticas. No se almacenaran"); //$NON-NLS-1$
+			LOGGER.warning("No se configuro una politica valida para el guardado de auditoria. No se almacenaran"); //$NON-NLS-1$
 			return;
 		}
-		
+
 		this.enable = config.isEnabled();
 		this.enableDB = config.isSavingToDB();
-		
+
 		final String logsPath = config.getDataDirPath();
 		if (logsPath == null || logsPath.isEmpty()) {
+			LOGGER.warning("No se configuro un directorio para el guardado de auditoria. No se almacenaran"); //$NON-NLS-1$
 			this.enable = false;
+			return;
 		}
-		
-		LOGGER.info("Se registraran los datos de las estadisticas de peticion"); //$NON-NLS-1$
-		
+
 		// Comprobamos que el directorio exista y se pueda escribir en el
 		final File logsDir = new File(logsPath);
 		if (!logsDir.isDirectory() || !logsDir.canWrite()) {
-			LOGGER.log(Level.WARNING, "El directorio para el guardado de estadisticas no existe o no se tienen permisos"); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "El directorio para el guardado de auditoria no existe o no se tienen permisos"); //$NON-NLS-1$
 			this.enable = false;
 			return;
 		}
-		
+
+		LOGGER.fine("Se registraran los datos de las auditoria de transaccion"); //$NON-NLS-1$
+
 		// Creamos el logger con el que imprimiremos los resultados a disco
 		final Logger fileLogger = Logger.getLogger(LOGGER_NAME);
 		fileLogger.setLevel(Level.FINEST);
@@ -89,7 +85,7 @@ public class AuditTransactionRecorder {
 			fileLogger.removeHandler(handler);
 		}
 
-		// Instalamos el manejador para la impresion en el fichero de estadisticas
+		// Instalamos el manejador para la impresion en el fichero
 		try {
 			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
@@ -103,14 +99,14 @@ public class AuditTransactionRecorder {
 			fileLogger.addHandler(logHandler);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para las estadisticas de transaccion", e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero para la auditoria de transacciones", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
 		}
 
-		this.setDataLogger(fileLogger);
+		this.dataLogger = fileLogger;
 	}
-	
+
 	/**
 	 * Registra los datos de la petici&oacute;n.
 	 * @param fireSession Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
@@ -120,123 +116,12 @@ public class AuditTransactionRecorder {
 	 * @param docId Identificador del documento firmado en caso de encontrarse dentro de un lote.
 	 */
 	public final void register(final FireSession fireSession, final boolean result) {
-		// Si no hay que registrar estadisticas, no se hace
-		if (!this.enable) {
-			return;
-		}
-		
-		// Inicializamos el cubo de datos si no lo estaba
-		if(getAuditTransactionCube() == null) {
-			this.setAuditTransactionCube(new AuditTransactionCube());
-		}
-		// Fecha
-		this.getAuditTransactionCube().setDate(new Date()); //$NON-NLS-1$
-		
-		// Id transaccion
-		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-		this.getAuditTransactionCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
-		
-		// Resultado
-		this.getAuditTransactionCube().setResult(result);
-		
-		// Id Aplicacion
-		final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
-		this.getAuditTransactionCube().setIdApplication(appId);
-		
-		// Nombre Aplicacion
-		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
-		this.getAuditTransactionCube().setNameApplication(appName);
-		
-		// Operacion
-		TransactionType type = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);
-		if (type == null) {
-			type = TransactionType.OTHER;
-		}
-		this.getAuditTransactionCube().setOperation(type.name());
-		
-		// Operacion criptografica
-		this.getAuditTransactionCube().setCryptoOperation(fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION));
-		
-		//Formato y formato mejorado
-		
-		// Obtenemos el tamano de la transaccion
-		Long docSize = new Long(0);
-		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE);
-		if (docSize != null) {
-			docSize = (Long) docSizeObject;
-			if (docSize == null) {
-				docSize = new Long(0);
-			}
-		}
-		
-		// Obtenemos el formato de firma configurado
-		String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
 
-		// Obtenemos el formato de actualizacion configurado
-		String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
-
-		// Registramos el tamano del documento, el formato y el formato de actualizacion
-		this.getAuditTransactionCube().setDataSize(docSize.longValue());
-		this.getAuditTransactionCube().setFormat(format);
-		this.getAuditTransactionCube().setImprovedFormat(upgrade);
-		
-		// Algoritmo
-		final String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-		this.getAuditTransactionCube().setAlgorithm(algorithm);
-		
-		// Almacenamos la informacion del proveedor
-		final String[] provsSession = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
-		final String prov = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		final String provForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
-
-		if (provForced != null && !provForced.isEmpty()) {
-			this.getAuditTransactionCube().setProvider(provForced);
-			this.getAuditTransactionCube().setMandatoryProvider(true);
-		}
-		else if (prov != null && !prov.isEmpty()) {
-			this.getAuditTransactionCube().setProvider(prov);
-		}
-		else if(provsSession != null && provsSession.length == 1) {
-			this.getAuditTransactionCube().setProvider(provsSession[0]);
-			this.getAuditTransactionCube().setMandatoryProvider(true);
-		}
-		
-		// Navegador
-		final String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
-		this.getAuditTransactionCube().setBrowser(browser);
-		
-		// Resultado
-		this.getAuditTransactionCube().setResult(result);
-		
-		//Error detalle
-		final String errorDetail = fireSession.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
-		if (errorDetail != null && !result) {
-			this.getAuditTransactionCube().setErrorDetail(errorDetail);
-		} else {
-			this.getAuditTransactionCube().setErrorDetail(null);
-		}
-		
-		//Nodo
-		try {
-			final String node = InetAddress.getLocalHost().getHostName();
-			this.getAuditTransactionCube().setNode(node);
-		} catch (UnknownHostException e) {
-			
-		}
-		
-		this.dataLogger.finest(this.getAuditTransactionCube().toString());
-		
-		if (this.enableDB) {
-			TransactionTotal total = new TransactionTotal(this.getAuditTransactionCube().getDataSize(), this.getAuditTransactionCube().getTotal());
-			try {
-				AuditTransactionsDAO.insertAuditTransaction(this.getAuditTransactionCube(), total);
-			} catch (SQLException | DBConnectionException e) {
-				final String errorMsg = "Ocurrio un error al guardar los datos de la transaccion en base de datos."; //$NON-NLS-1$
-				LOGGER.log(Level.SEVERE, errorMsg, e);
-			}
-		}
+		register(fireSession, result, fireSession.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE));
 	}
-	
+
+	private String nodeName = null;
+
 	/**
 	 * Registra los datos de la petici&oacute;n.
 	 * @param fireSession Sesi&oacute;n con la informaci&oacute;n de la firma a realizar.
@@ -247,118 +132,117 @@ public class AuditTransactionRecorder {
 	 * @param errorMessage Mensaje de error a almacenar. Si no se indica, se
 	 * usar&aacute; el por defecto del tipo de error.
 	 */
-	public final void register(final FireSession fireSession, final boolean result, String errorMessage) {
-		// Si no hay que registrar estadisticas, no se hace
+	public final void register(final FireSession fireSession, final boolean result, final String errorMessage) {
+
+		// Si esta desactivado el registro, no se hace nada
 		if (!this.enable) {
 			return;
 		}
-		
+
 		// Inicializamos el cubo de datos si no lo estaba
-		if(getAuditTransactionCube() == null) {
-			this.setAuditTransactionCube(new AuditTransactionCube());
-		}
-		
+		final AuditTransactionCube auditTransactionCube = new AuditTransactionCube();
+
 		// Fecha
-		this.getAuditTransactionCube().setDate(new Date()); //$NON-NLS-1$
-		
+		auditTransactionCube.setDate(new Date());
+
 		// Id transaccion
 		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-		this.getAuditTransactionCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
-		
+		auditTransactionCube.setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+
 		// Resultado
-		this.getAuditTransactionCube().setResult(result);
-		
+		auditTransactionCube.setResult(result);
+
 		// Id Aplicacion
 		final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
-		this.getAuditTransactionCube().setIdApplication(appId);
-		
+		auditTransactionCube.setIdApplication(appId);
+
 		// Nombre Aplicacion
 		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
-		this.getAuditTransactionCube().setNameApplication(appName);
-		
+		auditTransactionCube.setNameApplication(appName);
+
 		// Operacion
 		TransactionType type = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);
 		if (type == null) {
 			type = TransactionType.OTHER;
 		}
-		this.getAuditTransactionCube().setOperation(type.name());
-		
+		auditTransactionCube.setOperation(type.name());
+
 		// Operacion criptografica
-		this.getAuditTransactionCube().setCryptoOperation(fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION));
-		
+		auditTransactionCube.setCryptoOperation(fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION));
+
 		//Formato y formato mejorado
-		
-		// Obtenemos el tamano del documento
-		Long docSize = new Long(0);
+
+		// Obtenemos el tamano de la transaccion
+		long docSize = 0;
 		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE);
-		if (docSize != null) {
-			docSize = (Long) docSizeObject;
-			if (docSize == null) {
-				docSize = new Long(0);
-			}
+		if (docSizeObject != null && docSizeObject instanceof Long) {
+			docSize = ((Long) docSizeObject).longValue();
 		}
-		
+
 		// Obtenemos el formato de firma configurado
-		String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
+		final String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
 
 		// Obtenemos el formato de actualizacion configurado
-		String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
+		final String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
 
 		// Registramos el tamano del documento, el formato y el formato de actualizacion
-		this.getAuditTransactionCube().setDataSize(docSize.longValue());
-		this.getAuditTransactionCube().setFormat(format);
-		this.getAuditTransactionCube().setImprovedFormat(upgrade);
-		
+		auditTransactionCube.setDataSize(docSize);
+		auditTransactionCube.setFormat(format);
+		auditTransactionCube.setImprovedFormat(upgrade);
+
 		// Algoritmo
 		final String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-		this.getAuditTransactionCube().setAlgorithm(algorithm);
-		
+		auditTransactionCube.setAlgorithm(algorithm);
+
 		// Almacenamos la informacion del proveedor
 		final String[] provsSession = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
 		final String prov = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
 		final String provForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
 
 		if (provForced != null && !provForced.isEmpty()) {
-			this.getAuditTransactionCube().setProvider(provForced);
-			this.getAuditTransactionCube().setMandatoryProvider(true);
+			auditTransactionCube.setProvider(provForced);
+			auditTransactionCube.setMandatoryProvider(true);
 		}
 		else if (prov != null && !prov.isEmpty()) {
-			this.getAuditTransactionCube().setProvider(prov);
+			auditTransactionCube.setProvider(prov);
 		}
 		else if(provsSession != null && provsSession.length == 1) {
-			this.getAuditTransactionCube().setProvider(provsSession[0]);
-			this.getAuditTransactionCube().setMandatoryProvider(true);
+			auditTransactionCube.setProvider(provsSession[0]);
+			auditTransactionCube.setMandatoryProvider(true);
 		}
-		
+
 		// Navegador
 		final String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
-		this.getAuditTransactionCube().setBrowser(browser);
-		
+		auditTransactionCube.setBrowser(browser);
+
 		// Resultado
-		this.getAuditTransactionCube().setResult(result);
-		
+		auditTransactionCube.setResult(result);
+
 		//Error detalle
 		final String errorDetail = errorMessage;
 		if (errorDetail != null && !result) {
-			this.getAuditTransactionCube().setErrorDetail(errorDetail);
+			auditTransactionCube.setErrorDetail(errorDetail);
 		} else {
-			this.getAuditTransactionCube().setErrorDetail(null);
+			auditTransactionCube.setErrorDetail(null);
 		}
-		
-		//Nodo
-		try {
-			final String node = InetAddress.getLocalHost().getHostName();
-			this.getAuditTransactionCube().setNode(node);
-		} catch (UnknownHostException e) {
-			
-		}
-		
-		this.dataLogger.finest(this.getAuditTransactionCube().toString());
-		
-		if (this.enableDB) {
-			TransactionTotal total = new TransactionTotal(this.getAuditTransactionCube().getDataSize(), this.getAuditTransactionCube().getTotal());
+
+		// Nodo
+		if (this.nodeName == null) {
 			try {
-				AuditTransactionsDAO.insertAuditTransaction(this.getAuditTransactionCube(), total);
+				this.nodeName = InetAddress.getLocalHost().getHostName();
+			} catch (final UnknownHostException e) {
+				this.nodeName = "Desconocido"; //$NON-NLS-1$
+			}
+		}
+		auditTransactionCube.setNode(this.nodeName);
+
+		// Registramos el cubo en fichero
+		this.dataLogger.finest(auditTransactionCube.toString());
+
+		// Registramos el cubo en base de datos
+		if (this.enableDB) {
+			try {
+				AuditTransactionsDAO.insertAuditTransaction(auditTransactionCube);
 			} catch (SQLException | DBConnectionException e) {
 				final String errorMsg = "Ocurrio un error al guardar los datos de la transaccion en base de datos."; //$NON-NLS-1$
 				LOGGER.log(Level.SEVERE, errorMsg, e);
@@ -366,19 +250,7 @@ public class AuditTransactionRecorder {
 		}
 	}
 
-	public AuditTransactionCube getAuditTransactionCube() {
-		return auditTransactionCube;
-	}
-
-	public void setAuditTransactionCube(AuditTransactionCube petitionCube) {
-		this.auditTransactionCube = petitionCube;
-	}
-
 	public Logger getDataLogger() {
-		return dataLogger;
-	}
-
-	public void setDataLogger(Logger dataLogger) {
-		this.dataLogger = dataLogger;
+		return this.dataLogger;
 	}
 }

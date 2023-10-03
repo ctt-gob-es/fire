@@ -12,8 +12,8 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
-import es.gob.fire.statistics.config.DBConnectionException;
-import es.gob.fire.statistics.config.DbManager;
+import es.gob.fire.signature.DBConnectionException;
+import es.gob.fire.signature.DbManager;
 import es.gob.fire.statistics.entity.TransactionCube;
 import es.gob.fire.statistics.entity.TransactionTotal;
 
@@ -107,7 +107,7 @@ public class TransactionsDAO {
 	 */
 	public static void insertTransaction(final Date date, final TransactionCube transaction, final TransactionTotal total)
 			throws SQLException, DBConnectionException {
-		try (final Connection conn = DbManager.getInstance().getConnection(false);) {
+		try (final Connection conn = DbManager.getConnection(false);) {
 			insertTransaction(date, transaction, total, conn);
 		}
 	}
@@ -161,7 +161,7 @@ public class TransactionsDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final Connection conn = DbManager.getInstance().getConnection(false);
+		try (final Connection conn = DbManager.getConnection(false);
 				final PreparedStatement st = conn.prepareStatement(TRANSACTIONS_BYAPP);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
@@ -216,7 +216,7 @@ public class TransactionsDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final Connection conn = DbManager.getInstance().getConnection(false);
+		try (final Connection conn = DbManager.getConnection(false);
 				final PreparedStatement st = conn.prepareStatement(TRANSACTIONS_BYPROVIDER);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
@@ -273,7 +273,7 @@ public class TransactionsDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final Connection conn = DbManager.getInstance().getConnection(false);
+		try (final Connection conn = DbManager.getConnection(false);
 				final PreparedStatement st = conn.prepareStatement(TRANSACTIONS_BYDOCSIZE);) {
 			st.setInt(1, year);
 			st.setInt(2, month);
@@ -329,7 +329,7 @@ public class TransactionsDAO {
 
 		final JsonObjectBuilder jsonObj = Json.createObjectBuilder();
 
-		try (final Connection conn = DbManager.getInstance().getConnection(false);
+		try (final Connection conn = DbManager.getConnection(false);
 				final PreparedStatement st = conn.prepareStatement(TRANSACTIONS_BYOPERATION);) {
 			st.setInt(1, year);
 			st.setInt(2, month);

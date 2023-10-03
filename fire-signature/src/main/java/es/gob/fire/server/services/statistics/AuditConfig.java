@@ -10,7 +10,7 @@ public class AuditConfig {
 
 	private Policy policy = Policy.DISABLE;
 	private String dataDirPath = null;
-	private String dumpTime = null;
+	private String deleteTime = null;
 
 	/**
 	 * Carga la configuraci&oacute;n para la generaci&oacute;n de los datos estad&iacute;sticos de auditoria.
@@ -28,7 +28,7 @@ public class AuditConfig {
 		final AuditConfig config = new AuditConfig();
 		config.setPolicy(policy);
 		config.setDataDirPath(ConfigManager.getAuditDir());
-		config.setDumpTime(ConfigManager.getStatisticsDumpTime());
+		config.setDeleteTime(ConfigManager.getAuditDeleteTime());
 
 		return config;
 	}
@@ -41,8 +41,8 @@ public class AuditConfig {
 		this.dataDirPath = dataDirPath;
 	}
 
-	private void setDumpTime(final String dumpTime) {
-		this.dumpTime = dumpTime;
+	private void setDeleteTime(final String deleteTime) {
+		this.deleteTime = deleteTime;
 	}
 
 	public Policy getPolicy() {
@@ -58,7 +58,7 @@ public class AuditConfig {
 	public boolean isEnabled() {
 		return this.policy != Policy.DISABLE;
 	}
-	
+
 	/**
 	 * Comprueba que la pol&iacute;tica establecida permita el guardado de datos
 	 * estad&iacute;sticos de auditor&iacute;a en base de datos.
@@ -73,8 +73,8 @@ public class AuditConfig {
 		return this.dataDirPath;
 	}
 
-	public String getDumpTime() {
-		return this.dumpTime;
+	public String getDeleteTime() {
+		return this.deleteTime;
 	}
 
 	/**

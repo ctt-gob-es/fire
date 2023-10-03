@@ -68,8 +68,8 @@ public class SignBatchManager {
 
     	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
     	if (batchResult == null || batchResult.documentsCount() == 0) {
-    		String errorMessage = "Se ha pedido firmar un lote sin documentos. Se aborta la operacion.";
-    		LOGGER.warning(logF.f(errorMessage)); //$NON-NLS-1$
+    		final String errorMessage = "Se ha pedido firmar un lote sin documentos. Se aborta la operacion."; //$NON-NLS-1$
+    		LOGGER.warning(logF.f(errorMessage));
     		TRANSLOGGER.register(session, false);
     		AUDITTRANSLOGGER.register(session, false, errorMessage);
         	SessionCollector.removeSession(session, trAux);
@@ -80,8 +80,8 @@ public class SignBatchManager {
         final TransactionConfig connConfig =
         		(TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			String errorMessage = "No se proporcionaron las URL de redireccion para la operacion";
-			LOGGER.warning(logF.f(errorMessage)); //$NON-NLS-1$
+			final String errorMessage = "No se proporcionaron las URL de redireccion para la operacion"; //$NON-NLS-1$
+			LOGGER.warning(logF.f(errorMessage));
 			TRANSLOGGER.register(session, false);
 			AUDITTRANSLOGGER.register(session, false, errorMessage);
 			Responser.sendError(response, FIReError.INTERNAL_ERROR);

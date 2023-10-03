@@ -8,7 +8,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import es.gob.fire.statistics.config.DbManager;
+import es.gob.fire.signature.DbManager;
+
 
 
 public class FireStatistics {
@@ -56,19 +57,6 @@ public class FireStatistics {
 
 		dataPath = path;
 		startTime = time;
-
-		// Se crea la conexion con base de datos para la carga de las estadisticas
-		final DbManager dbManager = DbManager.getInstance();
-		try {
-			if (!dbManager.isInitialized()) {
-				if (jdbcDriver == null || dbConnectionString == null) {
-					throw new NullPointerException("No se ha indicado la informacion necesaria para la comunicaci&oacute;n con la base de datos"); //$NON-NLS-1$
-				}
-				dbManager.initialize(jdbcDriver, dbConnectionString, username, password);
-			}
-		} catch (final IOException e) {
-			throw new IOException("No se pudo inicializar la base de datos para el volcado de estadisticas"); //$NON-NLS-1$
-		}
 
 		// Se crea una tarea para la carga de los datos de estadistica
 		final LoadStatisticsRunnable loadStatisticsDataTask = new LoadStatisticsRunnable(dataPath, processCurrentDay);
@@ -152,13 +140,12 @@ public class FireStatistics {
 		}
 
 		try {
-			DbManager.getInstance().close();
+			DbManager.closeResources();
 		}
 		catch (final Throwable e) {
 			LOGGER.log(Level.WARNING, "Error al liberar la conexion de base de datos para el guardado de datos estadisticos", e); //$NON-NLS-1$
 		}
 	}
-
 
 
 	/**
@@ -186,14 +173,6 @@ public class FireStatistics {
 			throw new NullPointerException("No se ha indicado la informacion necesaria para la comunicaci&oacute;n con la base de datos"); //$NON-NLS-1$
 		}
 
-		// Se crea la conexion con base de datos para la carga de las estadisticas
-		final DbManager dbManager = DbManager.getInstance();
-		try {
-			dbManager.initialize(jdbcDriver, dbConnectionString, username, password);
-		} catch (final IOException e) {
-			throw new IOException("No se pudo abrir la conexion con la base de datos para el volcado de las estadisticas", e); //$NON-NLS-1$
-		}
-
 		// Se crea una tarea para la carga de los datos de estadistica
 		final LoadStatisticsRunnable loadStatisticsDataTask = new LoadStatisticsRunnable(dataPath, processCurrentDay);
 
@@ -202,13 +181,6 @@ public class FireStatistics {
 			loadStatisticsDataTask.run();
 		} catch (final Exception e) {
 			throw new IOException("Fallo la ejecucion inmediata de la carga de los datos estadisticos", e); //$NON-NLS-1$
-		}
-
-		// Se cierra la conexion con la base de datos
-		try {
-			dbManager.close();
-		} catch (final Exception e) {
-			throw new IOException("No se pudo cerrar la conexion con la base de datos tras el volcado de las estadisticas", e); //$NON-NLS-1$
 		}
 
 		// Devolvemos el resultado que debe haber quedado registrado

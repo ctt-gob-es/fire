@@ -254,17 +254,17 @@ public class BatchResult extends OperationResult implements Serializable {
 		final String error = docRef.getDetails();
 		return !docRef.isSigned() && !PENDING.equals(error);
 	}
-	
+
 	public synchronized void setErrorMessage(final String docId, final String errorMessage) {
 		this.results.get(docId).setErrorMessage(errorMessage);
 	}
-	
+
 	public String getErrorMessage(final String docId) {
 		final BatchDocumentReference docRef = this.results.get(docId);
 		if (docRef == null) {
 			return null;
 		}
-		
+
 		final String errorMessage = docRef.getErrorMessage();
 		return errorMessage;
 	}
@@ -322,7 +322,7 @@ public class BatchResult extends OperationResult implements Serializable {
 			final JsonObjectBuilder docInfo = Json.createObjectBuilder()
 			.add(JSON_ATTR_DOC_ID, id)
 			.add(JSON_ATTR_DOC_OK, result.isSigned())
-			.add(JSON_ATTR_DOC_DETAILS, result.getDetails() != null ? result.getDetails() : "")
+			.add(JSON_ATTR_DOC_DETAILS, result.getDetails() != null ? result.getDetails() : "") //$NON-NLS-1$
 			.add(JSON_ATTR_DOC_ERROR_MESSAGE, result.getErrorMessage() != null ? result.getErrorMessage() : "");//$NON-NLS-1$
 
 			// Si hay informacion del periodo de gracia, la agregamos
@@ -416,7 +416,7 @@ public class BatchResult extends OperationResult implements Serializable {
 			this.signed = false;
 			this.details = error;
 		}
-		
+
 		public void setErrorMessage(final String errorMessage) {
 			this.errorMessage = errorMessage;
 		}
@@ -432,7 +432,7 @@ public class BatchResult extends OperationResult implements Serializable {
 		public String getDetails() {
 			return this.details;
 		}
-		
+
 		public String getErrorMessage()	{
 			return this.errorMessage;
 		}

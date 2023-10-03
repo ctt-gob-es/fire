@@ -96,7 +96,7 @@ class PostSignBatchTask implements Callable<String> {
     	// al detectar que nos han interrumpido desde afuera
     	if (currentThread.isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
-    		this.batchResult.setErrorMessage(this.docId, "Se ha interrumpido la operacion.");
+    		this.batchResult.setErrorMessage(this.docId, "Se ha interrumpido la operacion."); //$NON-NLS-1$
     		return null;
     	}
 
@@ -107,13 +107,13 @@ class PostSignBatchTask implements Callable<String> {
     	catch (final BatchRecoverException e) {
 			LOGGER.log(Level.SEVERE, logF.f("Error al componer y recuperar la firma con docId: " + this.docId), e); //$NON-NLS-1$
 			this.batchResult.setErrorResult(this.docId, e.getResultState());
-			this.batchResult.setErrorMessage(this.docId, "Error al componer y recuperar la firma");
+			this.batchResult.setErrorMessage(this.docId, "Error al componer y recuperar la firma"); //$NON-NLS-1$
 			throw e;
 		}
 
     	if (currentThread.isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
-    		this.batchResult.setErrorMessage(this.docId, "Se ha interrumpido la operacion.");
+    		this.batchResult.setErrorMessage(this.docId, "Se ha interrumpido la operacion."); //$NON-NLS-1$
     		return null;
     	}
 
@@ -133,7 +133,7 @@ class PostSignBatchTask implements Callable<String> {
     					if (!verifyResult.isOk()) {
     		    			LOGGER.log(Level.WARNING, logF.f("La firma del document %1s no es valida: %2s", this.docId, verifyResult.getDescription())); //$NON-NLS-1$
     		    			this.batchResult.setErrorResult(this.docId, BatchResult.INVALID_SIGNATURE);
-    		    			this.batchResult.setErrorMessage(this.docId, "La firma del documento no es valida");
+    		    			this.batchResult.setErrorMessage(this.docId, "La firma del documento no es valida"); //$NON-NLS-1$
     		    			throw new VerifyException("La firma del documento no es valida"); //$NON-NLS-1$
     					}
     				}
@@ -151,7 +151,7 @@ class PostSignBatchTask implements Callable<String> {
     				catch (final VerifyException e) {
     	    			LOGGER.log(Level.WARNING, logF.f("Se ha intentado actualizar una firma invalida con el docId: " + this.docId), e); //$NON-NLS-1$
     	    			this.batchResult.setErrorResult(this.docId, BatchResult.INVALID_SIGNATURE);
-    	    			this.batchResult.setErrorMessage(this.docId, "La firma del documento no es valida");
+    	    			this.batchResult.setErrorMessage(this.docId, "La firma del documento no es valida"); //$NON-NLS-1$
     	    			throw e;
     	    		}
 
@@ -164,7 +164,7 @@ class PostSignBatchTask implements Callable<String> {
     		        if (!allowPartialUpgrade && upgradeResult.getState() == UpgradeResult.State.PARTIAL) {
     	    			LOGGER.log(Level.WARNING, logF.f("No se pudo actualizar hasta el formato solicitado la firma del documento: " + this.docId)); //$NON-NLS-1$
     	    			this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
-    	    			this.batchResult.setErrorMessage(docId, "No se pudo actualizar hasta el formato solicitado la firma del documento");
+    	    			this.batchResult.setErrorMessage(this.docId, "No se pudo actualizar hasta el formato solicitado la firma del documento"); //$NON-NLS-1$
     	    			throw new UpgradeException("No se pudo actualizar hasta el formato solicitado la firma del documento"); //$NON-NLS-1$
     		        }
 
@@ -183,19 +183,19 @@ class PostSignBatchTask implements Callable<String> {
     			LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$
     			AlarmsManager.notify(Alarm.CONNECTION_VALIDATION_PLATFORM);
     			this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
-    			this.batchResult.setErrorMessage(docId, "No se pudo conectar con el servicio de validacion y mejora de firmas.");
+    			this.batchResult.setErrorMessage(this.docId, "No se pudo conectar con el servicio de validacion y mejora de firmas."); //$NON-NLS-1$
     			throw e;
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error al validar/actualizar la firma con docId: " + this.docId), e); //$NON-NLS-1$
     			this.batchResult.setErrorResult(this.docId, BatchResult.UPGRADE_ERROR);
-    			this.batchResult.setErrorMessage(docId, "Error al validar/actualizar la firma.");
+    			this.batchResult.setErrorMessage(this.docId, "Error al validar/actualizar la firma."); //$NON-NLS-1$
     			throw e;
     		}
 
         	if (currentThread.isInterrupted()) {
         		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
-        		this.batchResult.setErrorMessage(docId, "No se ha procesado la firma.");
+        		this.batchResult.setErrorMessage(this.docId, "No se ha procesado la firma."); //$NON-NLS-1$
     			return null;
         	}
     	}
@@ -232,7 +232,7 @@ class PostSignBatchTask implements Callable<String> {
     			LOGGER.log(Level.WARNING, logF.f("Error al postprocesar con el DocumentManager la firma del documento: " + this.docId), e); //$NON-NLS-1$
     			AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, this.docManager.getClass().getCanonicalName());
         		this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
-        		this.batchResult.setErrorMessage(this.docId, "Error al postprocesar con el DocumentManager la firma del documento");
+        		this.batchResult.setErrorMessage(this.docId, "Error al postprocesar con el DocumentManager la firma del documento"); //$NON-NLS-1$
     			throw e;
     		}
     	}
@@ -242,7 +242,7 @@ class PostSignBatchTask implements Callable<String> {
 
     	if (currentThread.isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
-    		this.batchResult.setErrorMessage(this.docId, "Se ha interrumpido la operacion.");
+    		this.batchResult.setErrorMessage(this.docId, "Se ha interrumpido la operacion."); //$NON-NLS-1$
     		return null;
     	}
 
@@ -254,13 +254,13 @@ class PostSignBatchTask implements Callable<String> {
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al almacenar la firma en el temporal"), e); //$NON-NLS-1$
     		this.batchResult.setErrorResult(this.docId, BatchResult.ERROR_SAVING_DATA);
-    		this.batchResult.setErrorMessage(this.docId, "Error al almacenar la firma en el temporal");
+    		this.batchResult.setErrorMessage(this.docId, "Error al almacenar la firma en el temporal"); //$NON-NLS-1$
 			throw e;
 		}
 
     	if (currentThread.isInterrupted()) {
     		this.batchResult.setErrorResult(this.docId, BatchResult.NO_PROCESSED);
-    		this.batchResult.setErrorMessage(this.docId, "Se ha interrumpido la operacion.");
+    		this.batchResult.setErrorMessage(this.docId, "Se ha interrumpido la operacion."); //$NON-NLS-1$
     		return null;
     	}
 
