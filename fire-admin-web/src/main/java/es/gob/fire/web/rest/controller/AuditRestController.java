@@ -2,6 +2,7 @@ package es.gob.fire.web.rest.controller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,6 +68,21 @@ public class AuditRestController {
 	 * Constant that defines the report extension.
 	 */
 	public static final String REPORT_EXTENSION = ".xls";
+	
+	/**
+	 * Constant that defines the time expression for no end date in the filter.
+	 */
+	public static final String TIME_EXPRESSION_SEPARATOR = " - ";
+	
+	/**
+	 * Constant that defines the time expression for no end date in the filter.
+	 */
+	public static final String TIME_EXPRESSION_NO_START_DATE = "INICIO";
+	
+	/**
+	 * Constant that defines the time expression for no end date in the filter.
+	 */
+	public static final String TIME_EXPRESSION_NO_END_DATE = "AHORA";
 	
 	/**
 	 * Attribute that represents the mail hot.
@@ -203,5 +219,47 @@ public class AuditRestController {
 		}
 		
 		return dtOuput;
+	}
+	
+	@RequestMapping(path = "/getAuditTransactionsFirstLoadDate", method = RequestMethod.GET)
+	public String getAuditFirstLoadDate() {
+		String loadDateString = "Fecha de filtrado: ";
+		
+		Integer auditTimeDefault = Integer.parseInt(auditTimeProperty); 
+		
+		Date firstLoadDate = new Date(System.currentTimeMillis() - auditTimeDefault * 60 * 1000); 
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		
+		loadDateString += dateFormat.format(firstLoadDate) + TIME_EXPRESSION_SEPARATOR + TIME_EXPRESSION_NO_END_DATE;
+		
+		return loadDateString;
+	}
+	
+	@RequestMapping(path = "/getAuditTransactionsFilterLoadDate", method = RequestMethod.GET)
+	public String getAuditFilterLoadDate(@RequestParam("from") String from, @RequestParam("to") String to, @RequestParam("app") String app) {
+		String loadDateString = "Fecha de filtrado: ";
+		
+		boolean fromIsNotNull = from != null && !from.isEmpty();
+		boolean toIsNotNull = to != null && !to.isEmpty();
+		
+		int compareMode = (fromIsNotNull && toIsNotNull) ? 1 : (fromIsNotNull ? 2 : (toIsNotNull ? 3 : 4)); 
+		
+		switch (compareMode) {
+		case 1:
+			loadDateString += from + TIME_EXPRESSION_SEPARATOR + to;
+			break;
+		case 2:
+			loadDateString += from + TIME_EXPRESSION_SEPARATOR + TIME_EXPRESSION_NO_END_DATE;
+			break;
+		case 3:
+			loadDateString += TIME_EXPRESSION_NO_START_DATE + TIME_EXPRESSION_SEPARATOR + to;
+			break;
+		default:
+			loadDateString += TIME_EXPRESSION_NO_START_DATE + TIME_EXPRESSION_SEPARATOR + TIME_EXPRESSION_NO_END_DATE;
+			break;
+		}
+		
+		return loadDateString;
 	}
 }
