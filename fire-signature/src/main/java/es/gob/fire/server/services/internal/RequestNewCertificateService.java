@@ -75,6 +75,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
+		// Cargamos la sesion forzando que se cargue de almacenamiento compartido si lo hubiese
 		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true, trAux);
         if (session == null) {
 			LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$

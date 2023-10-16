@@ -147,6 +147,10 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED, Boolean.TRUE.toString());
 		}
 
+		// Marcamos que ya se ha seleccionado origen del certificado
+		session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_CHOOSE);
+		SessionCollector.commit(session, trAux);
+
 		// Se selecciono firmar con un certificado local
 		if (ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(origin)) {
 			signWithClienteAfirma(session, connConfig, request, response, originForced, trAux);
