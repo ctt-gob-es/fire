@@ -5,6 +5,7 @@
 		<div class="col-md-3">
 			<div class="bgc-white bd bdrs-3 p-20 mB-20">
 				<h5 class="c-grey-900 mB-20" th:text="#{table.audit.filterTitle}"></h5>
+				<p id="filterDate"></p>
 				<div class="col-md-12 form-group row">
 					<label for="audit-datepicker-from" th:text="#{table.audit.datefrom}"></label>
 					<input type="text" id="audit-datepicker-from" name="auditDatepicker" class="form-control" style="overflow: hidden">
@@ -22,6 +23,7 @@
 				</div>
 				<div class="col-md-12 form-group row">
 					<button id="auditFilterBtn" type="submit" class="btn btn-primary" th:text="#{button.audit.filter}"></button>
+					<button id="cleanFilterInputsBtn" type="submit" class="btn btn-primary ml-1" th:text="#{button.audit.cleanFilter}"></button>
 				</div>
 			</div>
 		</div>
@@ -214,6 +216,8 @@ $(document).ready(function() {
 		format: 'DD/MM/YYYY HH:mm:ss'
 	});
     
+    obtainAuditFilterDate(true);
+    
     $("#auditFilterBtn").click(function( event ) {
     	event.preventDefault();
     	
@@ -375,7 +379,13 @@ $(document).ready(function() {
                     		}
                           ]
               });
+    	
+    	obtainAuditFilterDate(false);
 	});
+    
+    $("#cleanFilterInputsBtn").click(function( event ) {
+    	cleanInputs();
+    });
 
 });
 
@@ -396,4 +406,64 @@ function viewAuditTransaction(idAuditTransaction){
         error : function() {}
     });
 }
+
+function obtainAuditFilterDate(isFirstLoad) {
+	
+	var obtainAuditFilterDate;
+	
+	if (isFirstLoad) {
+		obtainAuditFilterDate = /*[[@{/getAuditTransactionsFirstLoadDate}]]*/;
+		
+		$.ajax({
+	        type: "GET",
+	        url: obtainAuditFilterDate,
+	        dataType: "text",
+	        success: function (data) {
+	        	$("#filterDate").text(data);
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        }
+	    });
+	} else {
+		var fromDate = $("#audit-datepicker-from").val();
+    	var toDate = $("#audit-datepicker-to").val();
+    	var appFilter = $("#audit-app-filter").val();
+    	
+		obtainAuditFilterDate = /*[[@{/getAuditTransactionsFilterLoadDate}]]*/;
+		
+		$.ajax({
+	        type: "GET",
+	        url: obtainAuditFilterDate+"?from="+fromDate+"&to="+toDate+"&app="+appFilter,
+	        dataType: "text",
+	        success: function (data) {
+	        	$("#filterDate").text(data);
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        }
+	    });
+	}
+	
+    
+}
+
+
+function cleanInputs() { // Obtener referencias a los elementos de entrada por sus IDs 
+	var fromInput = document.getElementById("audit-datepicker-from");
+	var toInput = document.getElementById("audit-datepicker-to");  
+	var appInput = document.getElementById("audit-app-filter");
+	
+	if (fromInput) { 
+		fromInput.value = ""; 
+	} 
+	if (toInput) { 
+		toInput.value = "";
+	} 
+	if (appInput) { 
+		appInput.value = "";
+	}
+}
+
+
 </script>
