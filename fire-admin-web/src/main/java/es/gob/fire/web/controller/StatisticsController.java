@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.lowagie.text.DocumentException;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.QueryEnum;
@@ -84,6 +85,11 @@ public class StatisticsController {
 	 */
 	@Autowired
 	private IStatisticsService statService;
+	
+	/**
+	 * Constant that represents the parameter log.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(StatisticsController.class);
 
 	/**
 	 * Method that maps the list users web requests to the controller and forwards the list of platforms
@@ -222,8 +228,7 @@ public class StatisticsController {
 				try {
 					data = this.statService.writeTransStatAsPDF(250, 195, chartList, transactions, NumberConstants.NUM1, Language.getResWebFire(IWebViewMessages.STAT_TITLE_TRANS_ENDED_BY_APP) + monthDate);
 				} catch (final DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ha ocurrido un error durante la operacion. Excepcion: " + e);
 				}
 			} else if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getName())) {
 
@@ -241,8 +246,7 @@ public class StatisticsController {
 				try {
 					data = this.statService.writeTransStatAsPDF(250, 195, chartList, transactions, NumberConstants.NUM1, Language.getResWebFire(IWebViewMessages.STAT_TITLE_TRANS_ENDED_BY_PROV) + monthDate);
 				} catch (final DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ha ocurrido un error durante la operacion. Excepcion: " + e);
 				}
 
 			} else if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getName())) {
@@ -257,8 +261,7 @@ public class StatisticsController {
 				try {
 					data = this.statService.writeTransStatAsPDF(375, 293, chartList, transactions, NumberConstants.NUM3, Language.getResWebFire(IWebViewMessages.STAT_TITLE_TRANS_ENDED_BY_SIZE) + monthDate);
 				} catch (final DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ha ocurrido un error durante la operacion. Excepcion: " + e);
 				}
 
 			} else if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getName())) {
@@ -289,8 +292,7 @@ public class StatisticsController {
 				try {
 					data = this.statService.writeTransStatCompositeAsPDF(250, 195, chartList, transactions, NumberConstants.NUM2, titles);
 				} catch (final DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ha ocurrido un error durante la operacion. Excepcion: " + e);
 				}
 			}
 			// Consulta de firmas
@@ -310,8 +312,7 @@ public class StatisticsController {
 				try {
 					data = this.statService.writeSigStatAsPDF(250, 195, chartList, signatures, Language.getResWebFire(IWebViewMessages.STAT_TITLE_SIG_ENDED_BY_APP) + monthDate);
 				} catch (final DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ha ocurrido un error durante la operacion. Excepcion: " + e);
 				}
 
 			} else if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getName())) {
@@ -330,8 +331,7 @@ public class StatisticsController {
 				try {
 					data = this.statService.writeSigStatAsPDF(250, 195, chartList, signatures, Language.getResWebFire(IWebViewMessages.STAT_TITLE_SIG_ENDED_BY_PROV) + monthDate);
 				} catch (final DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ha ocurrido un error durante la operacion. Excepcion: " + e);
 				}
 
 			} else if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getName())) {
@@ -350,8 +350,7 @@ public class StatisticsController {
 				try {
 					data = this.statService.writeSigStatAsPDF(250, 195, chartList, signatures, Language.getResWebFire(IWebViewMessages.STAT_TITLE_SIG_ENDED_BY_FORMAT) + monthDate);
 				} catch (final DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ha ocurrido un error durante la operacion. Excepcion: " + e);
 				}
 
 			} else if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getName())) {
@@ -370,8 +369,7 @@ public class StatisticsController {
 				try {
 					data = this.statService.writeSigStatAsPDF(250, 195, chartList, signatures, Language.getResWebFire(IWebViewMessages.STAT_TITLE_SIG_ENDED_BY_FORMAT_LONG) + monthDate);
 				} catch (final DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ha ocurrido un error durante la operacion. Excepcion: " + e);
 				}
 
 			}
@@ -380,7 +378,9 @@ public class StatisticsController {
 		response.setContentType("application/pdf");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=firereport.pdf");
 
-        data.toString();
+        if (data != null) {
+        	data.toString();
+        }
 
 		return data;
 

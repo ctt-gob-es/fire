@@ -21,21 +21,24 @@ public class ErrorResult {
 			throw new IllegalArgumentException(
 					"El JSON de definicion no puede ser nulo"); //$NON-NLS-1$
 		}
-
-		final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(json));
-		final JsonObject jsonObject = jsonReader.readObject();
-
+ 
+		
+		JsonReader jsonReader = null;
 		ErrorResult result;
 		try {
+			jsonReader = Json.createReader(new ByteArrayInputStream(json));
+			final JsonObject jsonObject = jsonReader.readObject();
 			result = parse(jsonObject);
 		}
 		catch (final IllegalArgumentException e) {
-			jsonReader.close();
 			throw e;
 		}
 		catch (final Exception e) {
-			jsonReader.close();
 			throw new IllegalArgumentException("La respuesta del servidor no esta bien formada", e); //$NON-NLS-1$
+		} finally {
+			if (jsonReader != null) {
+				jsonReader.close();
+			}
 		}
 
 		jsonReader.close();

@@ -217,7 +217,6 @@ public class PeriodicRotatingFileHandler extends FileHandler {
         final Period period = this.period;
         // clear out less-significant fields
         switch (period) {
-            default:
             case YEAR:
                 calendar.set(Calendar.MONTH, 0);
             case MONTH:
@@ -247,6 +246,8 @@ public class PeriodicRotatingFileHandler extends FileHandler {
             case MINUTE:
                 calendar.set(Calendar.SECOND, 0);
                 calendar.set(Calendar.MILLISECOND, 0);
+            default:
+            	break;
         }
         // increment the relevant field
         switch (period) {
@@ -271,6 +272,8 @@ public class PeriodicRotatingFileHandler extends FileHandler {
             case MINUTE:
                 calendar.add(Calendar.MINUTE, 1);
                 break;
+            default:
+            	break;
         }
         this.nextRollover = calendar.getTimeInMillis();
     }

@@ -86,8 +86,9 @@ public class AuditTransactionRecorder {
 		}
 
 		// Instalamos el manejador para la impresion en el fichero
+		Handler logHandler = null;
 		try {
-			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
 			logHandler.setFormatter(new Formatter() {
 				@Override
@@ -102,7 +103,12 @@ public class AuditTransactionRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero para la auditoria de transacciones", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
+		} finally {
+			if (logHandler != null){
+				logHandler.close();
+			}
 		}
+		
 
 		this.dataLogger = fileLogger;
 	}
@@ -241,12 +247,7 @@ public class AuditTransactionRecorder {
 
 		// Registramos el cubo en base de datos
 		if (this.enableDB) {
-			try {
-				AuditTransactionsDAO.insertAuditTransaction(auditTransactionCube);
-			} catch (SQLException | DBConnectionException e) {
-				final String errorMsg = "Ocurrio un error al guardar los datos de la transaccion en base de datos."; //$NON-NLS-1$
-				LOGGER.log(Level.SEVERE, errorMsg, e);
-			}
+			AuditTransactionsDAO.insertAuditTransaction(auditTransactionCube);
 		}
 	}
 

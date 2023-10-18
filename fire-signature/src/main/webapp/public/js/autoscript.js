@@ -584,7 +584,7 @@ var AutoScript = ( function ( window, undefined ) {
 					try {
 						var element = document.getElementById("iframeAfirma");
 						element.outerHTML = "";
-						delete element;
+						// delete element;
 					}
 					catch (e) {
 						// No hacemos nada
@@ -2869,9 +2869,9 @@ var AutoScript = ( function ( window, undefined ) {
 			/**
 			 * Realiza una operacion de obtencion de log actual de la aplicacion
 			 */
-			function getCurrentLogByService() {
+			function getCurrentLogByService(serviceName) {
 				
-				var data = generateDataToLoad("getLog");
+				var data = generateDataToLoad(serviceName);
 				
 				execAppIntent(buildUrl(data));
 			} 

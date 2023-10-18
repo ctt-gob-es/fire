@@ -66,10 +66,12 @@ public class ReportProperties {
 				} catch (IOException e) {
 					LOGGER.error("Ha ocurrido un error", e);
 				} finally {
-					try {
-						fileInput.close();
-					} catch (IOException e) {
-						LOGGER.error("Ha ocurrido un error", e);
+					if (fileInput != null) {
+						try {
+							fileInput.close();
+						} catch (IOException e) {
+							LOGGER.error("Ha ocurrido un error", e);
+						}
 					}
 				}
 			}

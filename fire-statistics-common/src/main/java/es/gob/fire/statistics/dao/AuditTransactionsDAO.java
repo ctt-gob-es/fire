@@ -3,12 +3,16 @@ package es.gob.fire.statistics.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import es.gob.fire.signature.DBConnectionException;
 import es.gob.fire.signature.DbManager;
 import es.gob.fire.statistics.entity.AuditTransactionCube;
 
 public class AuditTransactionsDAO {
+	
+	private static final Logger LOGGER = Logger.getLogger(AuditTransactionsDAO.class.getName());
 
 	/** SQL para insertar una peticion. */
 	private static final String ST_INSERT_AUDIT_TRANS = "INSERT INTO TB_AUDIT_TRANSACCIONES " //$NON-NLS-1$
@@ -21,17 +25,15 @@ public class AuditTransactionsDAO {
 	 * @param transaction Configuraci&oacute;n de la operaci&oacute;n de firma.
 	 * @return {@code true} si la configuraci&oacute;n se inserto correctamente. {@code false}
 	 * en caso contrario.
-	 * @throws SQLException Cuando se produce un error al insertar los datos.
-	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
 	 */
-	public static boolean insertAuditTransaction(final AuditTransactionCube transaction)
-			throws SQLException, DBConnectionException {
+	public static boolean insertAuditTransaction(final AuditTransactionCube transaction) {
 		boolean inserted = false;
 		try (Connection conn = DbManager.getConnection(false);) {
 			inserted = insertAuditTransaction(transaction, conn);
 			conn.commit();
-		} catch (final SQLException e) {
-			throw e;
+		} catch (final SQLException | DBConnectionException e) {
+			final String errorMsg = "Ocurrio un error al guardar los datos de la transaccion en base de datos."; //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, errorMsg, e);
 		}
 
 		return inserted;

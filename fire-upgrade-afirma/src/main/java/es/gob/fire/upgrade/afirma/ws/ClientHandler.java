@@ -128,7 +128,7 @@ class ClientHandler extends AbstractCommonHandler {
 				secMsg = this.createBinarySecurityToken(doc);
 			}
 
-			if (!this.securityOption.equals(NONEOPTION)) {
+			if (!this.securityOption.equals(NONEOPTION) && secMsg != null) {
 				// Modificacion de la peticion SOAP...
 
 				// Eliminamos el contenido del body e insertamos el nuevo body

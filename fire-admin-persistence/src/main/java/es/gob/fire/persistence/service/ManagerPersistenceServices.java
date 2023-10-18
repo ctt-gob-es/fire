@@ -62,15 +62,15 @@ public class ManagerPersistenceServices {
 	 * Method that initializes the singleton unique instance.
 	 */
 	@PostConstruct
-	public void init() {
-		instance = this;
+	public static void init() {
+		instance = new ManagerPersistenceServices();
 	}
 
 	/**
 	 * Method that destroy the singleton unique instance of this class.
 	 */
 	@PreDestroy
-	public final void destroy() {
+	public static final void destroy() {
 		instance = null;
 	}
 

@@ -363,8 +363,8 @@ public class ApplicationRestController {
 		}
 
 		dtOutput.setDraw(NumberConstants.NUM1);
-		dtOutput.setRecordsFiltered(new Long(listaUser.size()));
-		dtOutput.setRecordsTotal(new Long(listaUser.size()));
+		dtOutput.setRecordsFiltered((long) listaUser.size());
+		dtOutput.setRecordsTotal((long) listaUser.size());
 		dtOutput.setData(listaUser);
 
 

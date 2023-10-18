@@ -110,7 +110,6 @@ public final class BatchPresigner extends HttpServlet {
 
 		response.setHeader(CONFIG_PARAM_ALLOW_ORIGIN, ALL_ORIGINS_ALLOWED);
 		response.setContentType("application/json"); //$NON-NLS-1$
-		LOGGER.log(Level.INFO, String.format("Preproceso en formato String: " + pre.toString()));
 		Responser.sendResult(response, pre.toString().getBytes(StandardCharsets.UTF_8));
 	}
 

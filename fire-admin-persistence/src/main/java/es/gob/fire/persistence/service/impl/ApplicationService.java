@@ -209,7 +209,7 @@ public class ApplicationService implements IApplicationService{
 			mac.init(hmacKey);
 		}
 		catch (final GeneralSecurityException e) {
-			LOGGER.equals("No ha sido posible generar una clave aleatoria como identificador de aplicacion: " + e);
+			LOGGER.error("No ha sido posible generar una clave aleatoria como identificador de aplicacion: " + e);
 			throw e;
 		}
 
@@ -334,8 +334,8 @@ public class ApplicationService implements IApplicationService{
 		}
 
 		dtOutput.setDraw(NumberConstants.NUM1);
-		dtOutput.setRecordsFiltered(new Long(appsCert.size()));
-		dtOutput.setRecordsTotal(new Long(appsCert.size()));
+		dtOutput.setRecordsFiltered(appsCert.size());
+		dtOutput.setRecordsTotal(appsCert.size());
 		dtOutput.setData(appsCert);
 
 		return dtOutput;

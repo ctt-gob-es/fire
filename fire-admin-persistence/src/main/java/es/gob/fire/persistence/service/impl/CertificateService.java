@@ -235,7 +235,7 @@ public class CertificateService implements ICertificateService{
 
 				if (certificate.getCertPrincipal() != null && !certificate.getCertPrincipal().isEmpty()) {
 
-					x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertPrincipal()))); //$NON-NLS-1$
+					x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertPrincipal()))); //$NON-NLS-1$
 				} else {
 					x509CertPrincipal = null;
 				}
@@ -249,7 +249,7 @@ public class CertificateService implements ICertificateService{
 			try {
 
 				if (certificate.getCertBackup() != null && !certificate.getCertBackup().isEmpty()) {
-					x509CertBackup = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertBackup()))); //$NON-NLS-1$
+					x509CertBackup = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertBackup()))); //$NON-NLS-1$
 				} else {
 					x509CertBackup = null;
 				}

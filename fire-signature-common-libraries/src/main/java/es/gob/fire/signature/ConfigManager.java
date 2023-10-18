@@ -259,18 +259,20 @@ public class ConfigManager {
 			}
 
 			// Comprobamos el valor establecido para la clase de cifrado
-			if (config.containsKey(PARAM_CIPHER_CLASS)) {
-				final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
-				if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
-					try {
-						final Class<?> decipherClass = Class.forName(decipherClassname);
-						final Object decipher = decipherClass.getConstructor().newInstance();
-						if (PropertyDecipher.class.isInstance(decipher)) {
-							decipherImpl = (PropertyDecipher) decipher;
+			if (config != null) {
+				if (config.containsKey(PARAM_CIPHER_CLASS)) {
+					final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
+					if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
+						try {
+							final Class<?> decipherClass = Class.forName(decipherClassname);
+							final Object decipher = decipherClass.getConstructor().newInstance();
+							if (PropertyDecipher.class.isInstance(decipher)) {
+								decipherImpl = (PropertyDecipher) decipher;
+							}
 						}
-					}
-					catch (final Exception e) {
-						LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
+						catch (final Exception e) {
+							LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
+						}
 					}
 				}
 			}
@@ -724,7 +726,7 @@ public class ConfigManager {
 			} catch (final ConfigFilesException e) {
 				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central. Se usaran " //$NON-NLS-1$
 						+ DEFAULT_FIRE_TEMP_TIMEOUT + " segundos: " + e); //$NON-NLS-1$
-				return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
+				return (long) DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 			}
 		}
 
@@ -736,7 +738,7 @@ public class ConfigManager {
 			LOGGER.log(Level.WARNING, "Tiempo de expiracion invalido en la propiedad '" + PROP_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
 					"' del fichero de configuracion. Se usaran " + DEFAULT_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
 					" segundos: " + e); //$NON-NLS-1$
-			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
+			return (long) DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 		}
 	}
 

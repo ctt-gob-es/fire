@@ -148,21 +148,22 @@ public class FileHandler extends OutputStreamHandler {
                 parentFile.mkdirs();
             }
             boolean ok = false;
-            final FileOutputStream fos = new FileOutputStream(file, this.append);
+            FileOutputStream fos = null;
+            OutputStream bos = null;
             try {
-                final OutputStream bos = new BufferedOutputStream(fos);
-                try {
-                    setOutputStream(bos);
-                    this.file = file;
-                    ok = true;
-                } finally {
-                    if (! ok) {
-                        safeClose(bos);
-                    }
-                }
+            	fos = new FileOutputStream(file, this.append);
+                bos = new BufferedOutputStream(fos);
+	            setOutputStream(bos);
+	            this.file = file;
+	            ok = true;
             } finally {
                 if (! ok) {
-                    safeClose(fos);
+                	if (fos != null){
+                		safeClose(fos);
+                	}
+                	if (bos != null){
+                		safeClose(bos);
+                	}
                 }
             }
         }

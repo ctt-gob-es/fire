@@ -147,9 +147,15 @@ public class HttpsConnection {
 
         	ks = KeyStore.getInstance(ksType != null ? ksType : KeyStore.getDefaultType());
 
-        	final FileInputStream ksFis = new FileInputStream(ksFile);
-        	ks.load(ksFis, ksPassword.getPassword());
-        	ksFis.close();
+        	FileInputStream ksFis = null;
+        	try {
+        		ksFis = new FileInputStream(ksFile);
+        		ks.load(ksFis, ksPassword.getPassword());
+        	} finally {
+        		if (ksFis != null) {
+        			ksFis.close();
+        		}
+        	}
         }
 
         // Inicializamos el TrustStore
@@ -177,9 +183,15 @@ public class HttpsConnection {
                 }
 
                 ts = KeyStore.getInstance(tsType);
-                final FileInputStream tsFis = new FileInputStream(new File(trustStore));
-                ts.load(tsFis, new KeyStorePassword(tsPasswordText, this.decipher).getPassword());
-                tsFis.close();
+                FileInputStream tsFis = null;
+                try {
+                	tsFis = new FileInputStream(new File(trustStore));
+                	ts.load(tsFis, new KeyStorePassword(tsPasswordText, this.decipher).getPassword());
+                } finally {
+                	if (tsFis != null) {
+                		tsFis.close();
+                	}
+                }                
         	}
         }
 
@@ -358,7 +370,7 @@ public class HttpsConnection {
 				charset = Charset.forName(contentEncoding.trim());
 			}
 		} catch (final Exception e) {
-			e.printStackTrace();
+			LOGGER.error("No se pudo obtener el set de caracteres. Excepcion: " + e);
 			charset = null;
 		}
 
