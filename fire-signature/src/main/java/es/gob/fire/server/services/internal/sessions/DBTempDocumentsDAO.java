@@ -41,7 +41,9 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 		try (Connection conn = DbManager.getConnection();
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_CHECK_DOCUMENT)) {
 			st.setString(1, id);
-			exists = st.executeQuery().next();
+			try (ResultSet rs = st.executeQuery()) { 
+				exists = rs.next(); 
+			}
 		}
 		catch (final Exception e) {
 			throw new IOException("Error al buscar el documento con ID: " + id, e); //$NON-NLS-1$

@@ -71,9 +71,7 @@ public class AuditSignatureCube {
 
 		for (int i = 0; i < registryDatas.length; i++) {
 			String data = registryDatas[i];
-			if (data == null) {
-				return false;
-			} else if (data.isEmpty() && Arrays.binarySearch(nullableIndex, i) < 0){
+			if ((data == null) || (data.isEmpty() && Arrays.binarySearch(nullableIndex, i) < 0)) {
 				return false;
 			}
 		}

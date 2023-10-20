@@ -17,7 +17,7 @@ public class FireStatistics {
 	static final Logger LOGGER = Logger.getLogger(FireStatistics.class.getName());
 
 	/** Segundos en un d&iacute;a. */
-	private static final long SECONDS_OF_A_DAY = 24 * 60 * 60;
+	private static final long SECONDS_OF_A_DAY = (long) 24 * 60 * 60;
 
 
 	/** Ruta de los ficheros con los datos. */

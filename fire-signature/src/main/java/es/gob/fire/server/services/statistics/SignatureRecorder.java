@@ -94,8 +94,9 @@ public class SignatureRecorder {
 		}
 
 		// Instalamos el manejador para la impresion en el fichero de estadisticas
+		Handler logHandler = null;
 		try {
-			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
 			logHandler.setFormatter(new Formatter() {
 				@Override
@@ -110,6 +111,10 @@ public class SignatureRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para las estadisticas de firma", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
+		} finally {
+			if (logHandler != null){
+				logHandler.close();
+			}
 		}
 
 		this.dataLogger = fileLogger;

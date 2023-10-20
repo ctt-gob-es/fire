@@ -136,7 +136,7 @@ public class FragmentedFileReader implements LogReader {
 		this.bufferReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(this.bBuffer.array()), this.charset));
 		this.nextLine = readNewLine();
 		// Si la primera linea tiene el caracter de BOM, nos lo saltamos
-		if (this.nextLine.length() > 0) {
+		if (this.nextLine != null && this.nextLine.length() > 0) {
 			if (this.nextLine.get() != CHAR_BOM_PREFIX) {
 				this.nextLine.rewind();
 			}
@@ -220,7 +220,7 @@ public class FragmentedFileReader implements LogReader {
 
 			if (nextCharacter == R_INTRO) {
 				this.charactersReaded += 2;
-				this.bufferReader.read();
+				//this.bufferReader.read();
 				break;
 			}
 			if (nextCharacter == N_INTRO) {

@@ -62,7 +62,6 @@ public final class SignBatchSerial extends SignBatch {
 				trisignsArrayBuilder.add(TriphaseDataParser.triphaseDataToJson(td));
 			} catch (final Exception e) {
 				errorsArrayBuilder.add(buildSignResult(ss.getId(), Result.ERROR_PRE, e));
-				LOGGER.log(Level.INFO, String.format("JSON contruido: " + buildSignResult(ss.getId(), Result.ERROR_PRE, e).toString()));
 				if (this.stopOnError) {
 					ignoreRemaining = true;
 					LOGGER.log(Level.WARNING,

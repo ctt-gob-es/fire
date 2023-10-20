@@ -125,6 +125,16 @@ public final class FireApi {
 	public static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
 
 	private static final String MIMETYPE_JSON = "application/json"; //$NON-NLS-1$
+	
+	private static final String ERROR_NULL_OPERATION_TYPE = "El tipo de operacion de firma a realizar no puede ser nulo";
+
+	private static final String ERROR_NULL_SIGN_FORMAT = "El formato de firma no puede ser nulo";
+	
+	private static final String ERROR_NULL_SIGN_ALGORITHM = "El algoritmo de firma no puede ser nulo";
+	
+	private static final String ERROR_NULL_SUBJECT_IDENTIFIER = "El identificador del titular no puede ser nulo";
+	
+	private static final String ERROR_NULL_TRANSACTION_ID = "El id de la transaccion no puede ser nulo";
 
     private static boolean initialized = false;
 
@@ -228,17 +238,17 @@ public final class FireApi {
 
         if (op == null) {
             throw new IllegalArgumentException(
-                    "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_OPERATION_TYPE //$NON-NLS-1$
             );
         }
         if (ft == null) {
             throw new IllegalArgumentException(
-                    "El formato de firma no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SIGN_FORMAT //$NON-NLS-1$
             );
         }
         if (algth == null) {
             throw new IllegalArgumentException(
-                    "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SIGN_ALGORITHM //$NON-NLS-1$
             );
         }
         if (d == null) {
@@ -248,7 +258,7 @@ public final class FireApi {
         }
         if (subjectId == null || "".equals(subjectId)) { //$NON-NLS-1$
             throw new IllegalArgumentException(
-                    "El identificador del titular no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SUBJECT_IDENTIFIER //$NON-NLS-1$
             );
         }
 
@@ -308,17 +318,17 @@ public final class FireApi {
 
     	if (op == null) {
             throw new IllegalArgumentException(
-                    "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_OPERATION_TYPE //$NON-NLS-1$
             );
         }
         if (ft == null) {
             throw new IllegalArgumentException(
-                    "El formato de firma no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SIGN_FORMAT //$NON-NLS-1$
             );
         }
         if (algth == null) {
             throw new IllegalArgumentException(
-                    "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SIGN_ALGORITHM //$NON-NLS-1$
             );
         }
         if (dataB64 == null) {
@@ -328,7 +338,7 @@ public final class FireApi {
         }
         if (subjectId == null || "".equals(subjectId)) { //$NON-NLS-1$
             throw new IllegalArgumentException(
-                    "El identificador del titular no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SUBJECT_IDENTIFIER //$NON-NLS-1$
             );
         }
 
@@ -398,7 +408,7 @@ public final class FireApi {
 
         if (transactionId == null) {
             throw new InvalidTransactionException(
-                    "El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_TRANSACTION_ID //$NON-NLS-1$
             );
         }
 
@@ -636,22 +646,22 @@ public final class FireApi {
 
     	if (op == null) {
             throw new IllegalArgumentException(
-                    "El tipo de operacion de firma a realizar no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_OPERATION_TYPE //$NON-NLS-1$
             );
         }
         if (ft == null) {
             throw new IllegalArgumentException(
-                    "El formato de firma no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SIGN_FORMAT //$NON-NLS-1$
             );
         }
         if (algth == null) {
             throw new IllegalArgumentException(
-                    "El algoritmo de firma no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SIGN_ALGORITHM //$NON-NLS-1$
             );
         }
         if (subjectId == null || "".equals(subjectId)) { //$NON-NLS-1$
             throw new IllegalArgumentException(
-                    "El identificador del titular no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_SUBJECT_IDENTIFIER //$NON-NLS-1$
             );
         }
 
@@ -726,7 +736,7 @@ public final class FireApi {
 
         if (transactionId == null) {
             throw new InvalidTransactionException(
-                    "El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_TRANSACTION_ID //$NON-NLS-1$
             );
         }
         if (documentId == null) {
@@ -803,7 +813,7 @@ public final class FireApi {
 
         if (transactionId == null) {
             throw new InvalidTransactionException(
-                    "El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_TRANSACTION_ID //$NON-NLS-1$
             );
         }
         if (documentId == null) {
@@ -873,7 +883,7 @@ public final class FireApi {
 
         if (transactionId == null) {
             throw new InvalidTransactionException(
-                    "El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+                    ERROR_NULL_TRANSACTION_ID //$NON-NLS-1$
             );
         }
 
@@ -930,7 +940,7 @@ public final class FireApi {
 
     	if (transactionId == null) {
     		throw new InvalidTransactionException(
-    				"El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+    				ERROR_NULL_TRANSACTION_ID //$NON-NLS-1$
     				);
     	}
 
@@ -985,7 +995,7 @@ public final class FireApi {
 
     	if (transactionId == null) {
     		throw new InvalidTransactionException(
-    				"El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+    				ERROR_NULL_TRANSACTION_ID //$NON-NLS-1$
     				);
     	}
 
@@ -1039,7 +1049,7 @@ public final class FireApi {
 
     	if (transactionId == null) {
     		throw new InvalidTransactionException(
-    				"El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+    				ERROR_NULL_TRANSACTION_ID //$NON-NLS-1$
     				);
     	}
 
@@ -1093,7 +1103,7 @@ public final class FireApi {
 
     	if (transactionId == null) {
     		throw new InvalidTransactionException(
-    				"El id de la transaccion no puede ser nulo" //$NON-NLS-1$
+    				ERROR_NULL_TRANSACTION_ID //$NON-NLS-1$
     				);
     	}
 

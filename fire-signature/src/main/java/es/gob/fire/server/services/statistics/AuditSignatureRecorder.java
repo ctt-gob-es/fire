@@ -85,8 +85,9 @@ public class AuditSignatureRecorder {
 		}
 
 		// Instalamos el manejador para la impresion en el fichero de estadisticas
+		Handler logHandler = null;
 		try {
-			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
 			logHandler.setFormatter(new Formatter() {
 				@Override
@@ -101,6 +102,10 @@ public class AuditSignatureRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para la auditoria de transaccion", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
+		} finally {
+			if (logHandler != null){
+				logHandler.close();
+			}
 		}
 
 		this.dataLogger = fileLogger;
@@ -204,12 +209,7 @@ public class AuditSignatureRecorder {
 		this.dataLogger.finest(signatureCube.toString());
 
 		if (this.enableDB) {
-			try {
-				AuditSignaturesDAO.insertAuditSignature(signatureCube);
-			} catch (final SQLException | DBConnectionException e) {
-				final String errorMsg = "Ocurrio un error al guardar los datos de auditoria de la firma en base de datos."; //$NON-NLS-1$
-				LOGGER.log(Level.SEVERE, errorMsg, e);
-			}
+			AuditSignaturesDAO.insertAuditSignature(signatureCube);
 		}
 	}
 

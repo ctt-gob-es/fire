@@ -365,8 +365,9 @@ public class TransactionResult {
 
 		// Si los datos empiezan por un prefijo concreto, es la informacion de la operacion
 		if (prefix != null && Arrays.equals(prefix, JSON_RESULT_PREFIX.getBytes())) {
+			JsonReader jsonReader = null;
 			try {
-				final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(result));
+				jsonReader = Json.createReader(new ByteArrayInputStream(result));
 				final JsonObject json = jsonReader.readObject();
 				final JsonObject resultObject = json.getJsonObject(JSON_ATTR_RESULT);
 				if (resultObject.containsKey(JSON_ATTR_ERROR_CODE)) {
@@ -411,13 +412,13 @@ public class TransactionResult {
 							gracePeriodObject.getString(JSON_ATTR_GRACE_PERIOD_ID),
 							gracePeriodDate);
 				}
-				jsonReader.close();
 			}
 			catch (final Exception e) {
 				opResult.state = STATE_ERROR;
 				opResult.errorCode = 0;
 				opResult.errorMessage = "El formato de la respuesta del servidor no es valido"; //$NON-NLS-1$
-
+			} finally {
+				jsonReader.close();
 			}
 		}
 		// Si no, habremos recibido directamente el resultado.

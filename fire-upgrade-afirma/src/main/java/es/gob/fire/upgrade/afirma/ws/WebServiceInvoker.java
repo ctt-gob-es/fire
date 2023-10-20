@@ -229,7 +229,7 @@ public class WebServiceInvoker {
 					addHandler(phase, requestHandler, 2);
 					break;
 				} catch (final PhaseException e) {
-					e.printStackTrace();
+					LOGGER.log(Level.SEVERE, "Ha ocurrido un error al anadir el handler de seguridad de salida. Excepcion: " + e);
 				}
 			}
 		}
@@ -243,7 +243,7 @@ public class WebServiceInvoker {
 						addHandler(phase, responseHandler, 2);
 						break;
 					} catch (final PhaseException e) {
-						e.printStackTrace();
+						LOGGER.log(Level.SEVERE, "Ha ocurrido un error al anadir el handler de seguridad de entrada. Excepcion: " + e);
 					}
 				}
 			}

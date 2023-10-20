@@ -96,7 +96,7 @@ public final class RequestNewCertificateService extends HttpServlet {
     	// del certificado generado
     	final String redirectUrlBase = PublicContext.getPublicContext(request);
 
-        final TransactionConfig requestCertConfig = (TransactionConfig) connConfig.clone();
+        final TransactionConfig requestCertConfig = new TransactionConfig(connConfig);
         requestCertConfig.setRedirectSuccessUrl(
         		redirectUrlBase + ServiceNames.PUBLIC_SERVICE_RECOVER_NEW_CERT + "?" + //$NON-NLS-1$
         				ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$

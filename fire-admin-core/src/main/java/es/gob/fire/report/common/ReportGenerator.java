@@ -30,7 +30,10 @@ public class ReportGenerator {
 		switch (type){
 		case REPORT_TYPE_AUDIT:
 			report = new AuditReport(parameters);
+		default:
+			break;
 		}
+		
 		
 		return report;
 	}
