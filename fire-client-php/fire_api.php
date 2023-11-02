@@ -1,6 +1,6 @@
 <?php
 
-/** Copyright (C) 2017 [Gobierno de Espana]
+/** Copyright (C) 2018 [Gobierno de Espana]
  * This file is part of FIRe.
  * FIRe is free software; you can redistribute it and/or modify it under the terms of:
  *   - the GNU General Public License as published by the Free Software Foundation;
@@ -10,18 +10,16 @@
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
 
- /* ================= Componente distribuido PHP de FIRe (Version 2.3) ================= */
- 
 	// Definimos la url del servicio de FIRe
-	define ("SERVICEURL","https://127.0.0.1:8443/fire-signature/fireService");
+	define ("SERVICEURL","https://servidorcentral:8443/fire-signature_2_3/fireService");
 	
 	// Definimos los parametros de conexion SSL (https://curl.haxx.se/libcurl/c/easy_setopt_options.html)
 	$client_ssl_curl_options = array(
-		CURLOPT_SSLCERT => "C:/Entrada/client_ssl_public_cert.pem",
+		CURLOPT_SSLCERT => "C:/FIRe/Ficheros_Despliegue/client_ssl_new_public_cert.pem",
 		CURLOPT_SSLCERTTYPE => "PEM",
-		CURLOPT_SSLKEY => "C:/Entrada/client_ssl_private_key.pem",
+		CURLOPT_SSLKEY => "C:/FIRe/Ficheros_Despliegue/client_ssl_new_private_key.pem",
 		CURLOPT_SSLKEYTYPE => "PEM",
-		CURLOPT_SSLKEYPASSWD => "12341234",
+		CURLOPT_KEYPASSWD => "12341234",
 		CURLOPT_SSL_VERIFYPEER => 0
 	);
 	
@@ -248,7 +246,7 @@
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
 	 * @param $documentId Identificador unico del documento que se adjunta al lote.
-     * @param $document Datos a firmar como parte del lote.
+     * @param $documentB64 Datos en base 64 a firmar como parte del lote.
      * @param $confB64 Configuraci&oacute;n de la operaci&oacute;n.
 	 * de exito y error ("redirectOkUrl" y "redirectErrorUrl", respectivamente).
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
@@ -297,10 +295,11 @@
 	 * @param $appId Identificador de la aplicacion (proporcionado por el administrador del servidor central).
 	 * @param $transactionId Identificador de la transaccion (devuelto en la llamada a createBatch()).
 	 * @param $documentId Identificador unico del documento que se adjunta al lote.
-     * @param $document Datos a firmar como parte del lote.
+     * @param $documentB64 Datos a firmar como parte del lote codificados en base 64.
 	 * @param $op Operacion a realizar ('sign', 'cosign' o 'countersign').
 	 * @param $ft Formato de firma ('CAdES', 'XAdES', 'PAdES'...)
-	 * @param $propB64 Configuracion de la operacion de firma. Equivalente al extraParams del MiniApplet @firma.
+	 * @param $propB64 Configuracion de la operacion de firma codificada en base 64. Equivalente al extraParams
+	 * del MiniApplet @firma.
 	 * @param $upgrade Actualizacion.
      * @param $confB64 Configuraci&oacute;n de la operaci&oacute;n.
 	 * de exito y error ("redirectOkUrl" y "redirectErrorUrl", respectivamente).
@@ -672,12 +671,16 @@
 	class TransactionIdResult {
 		var $transactionId;
 		
-		function TransactionIdResult ($response){
+		function __construct ($response){
 			$json = json_decode($response, true);
 			$this->transactionId = $json["transactionid"];
 			if (empty($this->transactionId)){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el identificador de la transacción");
 			}
+		}
+		
+		function TransactionIdResult ($response){
+			__construct ($response);
 		}
 	}
 		
@@ -691,7 +694,7 @@
 		var $dt;
 		var $providerName;
 		
-		function BatchResult ($response, $provName){
+		function __construct ($response, $provName){
 			if(isset($response->id)) {
 				$this->id = $response->id;
 			}
@@ -718,6 +721,10 @@
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga el codigo de error si la firma no se llevo a cabo correctamente");
 			}
 		}
+		
+		function BatchResult ($response, $provName) {
+			__construct ($response);
+		}
 	};
 	
 	/**
@@ -727,7 +734,7 @@
 		var $transactionId;
 		var $redirectUrl;
 		
-		function SignOperationResult ($response){
+		function __construct ($response){
 			$json = json_decode($response, true);
 			$this->transactionId = $json["transactionid"];
 			$this->redirectUrl = $json["redirecturl"];
@@ -737,6 +744,10 @@
 			if (empty($this->redirectUrl)){
 				throw new InvalidArgumentException("Es obligatorio que el JSON contenga la URL a redireccionar al usuario para que se autentique");
 			}
+		}
+		
+		function SignOperationResult ($response){
+			__construct($response);
 		}
 	};
 	  
@@ -751,7 +762,7 @@
 		var $errorMessage;
 		var $result;
 		
-		function TransactionResult ($result) {
+		function __construct($result){
 			// Especifica que la transacci&oacute;n finaliz&oacute; correctamente.
 			$STATE_OK = 0;
 			// Especifica que la transacci&oacute;n no pudo finalizar debido a un error.
@@ -780,6 +791,10 @@
 			else {
 				$this->result = $result;
 			}
+		}
+		
+		function TransactionResult ($result) {
+			__construct($result);
 		}
 	};
 ?>
