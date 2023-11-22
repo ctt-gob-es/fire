@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
@@ -8,33 +9,41 @@
 	<packaging>pom</packaging>
 	<name>fire-artifacts</name>
 	<description>Proyectos que componen FIRe</description>
-	
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.2.6.RELEASE</version>
 	</parent>
-	
+
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 
 		<jdk.version>1.8</jdk.version>
-		
+
 		<fire.version>2.4</fire.version>
 		<clienteafirma.version>1.8.2</clienteafirma.version>
 		<fnmt.version>2.0</fnmt.version>
 		<log-consumer.version>1.3</log-consumer.version>
-		
+
 		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
 		<javax.json-api.version>1.1.3</javax.json-api.version>
 		<org.glassfish-javax.json.version>1.1.3</org.glassfish-javax.json.version>
 		<junit.version>4.13.1</junit.version>
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
 		<hibernate.version>5.2.13.Final</hibernate.version>
+		<sonar.host.url>http://localhost:9002/</sonar.host.url>
+		<sonar.login>92cd52099ab8a69edd44ec6b04939f079b84f21d</sonar.login>
+		<!-- JaCoCo Properties -->
+		<jacoco.version>0.8.7</jacoco.version>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.language>java</sonar.language>
 	</properties>
 
 	<url>https://administracionelectronica.gob.es/ctt/fire</url>
-	
+
 	<developers>
 		<developer>
 			<name>Secretaría General de Administración Digital</name>
@@ -43,7 +52,7 @@
 			<organizationUrl>https://administracionelectronica.gob.es</organizationUrl>
 		</developer>
 	</developers>
-	
+
 	<licenses>
 		<license>
 			<name>GPL-v2.0</name>
@@ -60,14 +69,14 @@
 		<developerConnection>scm:git:ssh://github.com/ctt-gob-es/fire.git</developerConnection>
 		<url>https://github.com/ctt-gob-es/fire</url>
 	</scm>
-	
-	
+
+
 	<profiles>
 		<profile>
 			<id>main</id>	 <!-- Este perfil contiene los modulos basicos que usa FIRe -->
 			<activation>
 				<activeByDefault>true</activeByDefault> <!-- Se activa cuando no se indica un perfil concreto -->
-      		</activation>
+			</activation>
 
 			<modules>
 				<module>fire-admin-commons-util</module>
@@ -94,7 +103,7 @@
 
 		<profile>
 			<id>services</id>	 <!-- Este perfil contiene los servicios de FIRe -->
-	
+
 			<modules>
 				<module>fire-admin-web</module>
 				<module>clavefirma-test-services</module>
@@ -106,15 +115,15 @@
 
 		<profile>
 			<id>clavefirma</id>	<!-- Perfil que general el conector de Cl@ve Firma -->
-			
+
 			<modules>
 				<module>fire-signature-connector-clavefirma</module>
 			</modules>
 		</profile>
-		
+
 		<profile>
 			<id>eventmanager</id>	<!-- Perfil que genera el conector para el envío de notificaciones a Monitoriz@ -->
-			
+
 			<modules>
 				<module>fire-alarms-eventmanager</module>
 			</modules>
@@ -177,7 +186,7 @@
 				<artifactId>fire-signature-connector</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-connector-clavefirma</artifactId>
@@ -213,13 +222,13 @@
 				<artifactId>fire-upgrade-afirma</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-alarms</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-alarms-graylog</artifactId>
@@ -230,7 +239,7 @@
 				<artifactId>fire-alarms-eventmanager</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-			
+
 			<!-- Hibernate 5 -->
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -307,13 +316,13 @@
 				<artifactId>servlet-api</artifactId>
 				<version>2.5</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
 				<version>2.0.1.Final</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
@@ -325,9 +334,9 @@
 				<version>1.2</version>
 			</dependency>
 			<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.4</version>
+				<groupId>commons-beanutils</groupId>
+				<artifactId>commons-beanutils</artifactId>
+				<version>1.9.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -344,7 +353,7 @@
 				<artifactId>bcprov-jdk16</artifactId>
 				<version>1.46</version>
 			</dependency>
-			
+
 			<!-- Jackson -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -363,14 +372,11 @@
 			</dependency>
 
 			<!-- JUnit -->
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${junit.version}</version>
-				<scope>test</scope>
-			</dependency>
-			
-			<!-- Sobreescritura de la versión de Log4j2 para evitar vulnerabilidad: https://nvd.nist.gov/vuln/detail/CVE-2021-44228 -->
+			<!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
+				<version>${junit.version}</version> <scope>test</scope> </dependency> -->
+
+			<!-- Sobreescritura de la versión de Log4j2 para evitar vulnerabilidad: 
+				https://nvd.nist.gov/vuln/detail/CVE-2021-44228 -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-bom</artifactId>
@@ -378,8 +384,13 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+			</dependency>
 		</dependencies>
-</dependencyManagement>
+	</dependencyManagement>
 
 
 	<build>
@@ -390,7 +401,7 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven-compiler-plugin.version}</version>
 				</plugin>
-				
+
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
@@ -416,18 +427,40 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore/>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+				<!-- Plugin de ejecución de test junit -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.0.0</version>
+					<executions>
+						<execution>
+							<id>default-test</id>
+							<goals>
+								<goal>test</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<argLine>
+							@{argLine} -javaagent:C:\Users\alvaro.deporras\.m2\repository\org\jmockit\jmockit\1.49\jmockit-1.49.jar
+						</argLine>
+						<includes>
+							<include>**/*Test.java</include>
+						</includes>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
-	
+
 		<plugins>
-		
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -435,11 +468,8 @@
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
 					<fork>true</fork>
-<!--
-					<compilerArgs>
-						<arg>-Xbootclasspath:${java.home}/lib/jsse.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</arg>
-					</compilerArgs>
--->
+					<!-- <compilerArgs> <arg>-Xbootclasspath:${java.home}/lib/jsse.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</arg> 
+						</compilerArgs> -->
 					<debug>false</debug>
 				</configuration>
 			</plugin>
@@ -452,114 +482,76 @@
 					<tagNameFormat>${project.name}_@{project.version}</tagNameFormat>
 				</configuration>
 			</plugin>
-		
-	
-	<!-- Definición de los plugins genéricos -->
-		
-			<!-- Plugin para generar la fecha de empaquetado que se incluirá en el 
-				manifest. -->
-<!--
-			<plugin>
-				<groupId>com.keyboardsamurais.maven</groupId>
-				<artifactId>maven-timestamp-plugin</artifactId>
-				<version>1.0</version>
-				<configuration>
-					<propertyName>timestamp</propertyName>
-					<timestampPattern>dd/MM/yyyy HH:mm</timestampPattern>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>clean</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
--->
-			<!-- Plugin para generar las fuentes -->
-<!--			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
-				<configuration>
-					<skipSource>${plugin.source.skip}</skipSource>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
--->
-			<!-- Plugin para generar el javadoc -->
-<!--
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<skip>${plugin.javadoc.skip}</skip>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+
+			<!-- Plugin de generación del site. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.6</version>
 				<configuration>
 					<locales>es,en</locales>
 				</configuration>
 			</plugin>
--->
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.7</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<!-- Sets the path to the file which contains the execution data. -->
+							<dataFile>target/jacoco.exec</dataFile>
+							<!-- Sets the output directory for the code coverage report. -->
+							<outputDirectory>target/jacoco-ut</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Definición de los plugins genéricos -->
+
+			<!-- Plugin para generar la fecha de empaquetado que se incluirá en el 
+				manifest. -->
+			<!-- <plugin> <groupId>com.keyboardsamurais.maven</groupId> <artifactId>maven-timestamp-plugin</artifactId> 
+				<version>1.0</version> <configuration> <propertyName>timestamp</propertyName> 
+				<timestampPattern>dd/MM/yyyy HH:mm</timestampPattern> </configuration> <executions> 
+				<execution> <phase>clean</phase> <goals> <goal>create</goal> </goals> </execution> 
+				</executions> </plugin> -->
+			<!-- Plugin para generar las fuentes -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-source-plugin</artifactId> 
+				<version>2.2.1</version> <configuration> <skipSource>${plugin.source.skip}</skipSource> 
+				</configuration> <executions> <execution> <id>attach-sources</id> <goals> 
+				<goal>jar</goal> </goals> </execution> </executions> </plugin> -->
+			<!-- Plugin para generar el javadoc -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
+				<version>2.9</version> <configuration> <skip>${plugin.javadoc.skip}</skip> 
+				</configuration> <executions> <execution> <id>attach-javadocs</id> <goals> 
+				<goal>jar</goal> </goals> </execution> </executions> </plugin> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+				<artifactId>maven-site-plugin</artifactId> <version>3.6</version> <configuration> 
+				<locales>es,en</locales> </configuration> </plugin> -->
 		</plugins>
 	</build>
-	
+
 	<!-- CONFIGURACIÓN REPOSITORIOS MAVEN: JBOSS Y MAVEN CENTRAL -->
-<!--
-	<repositories>
-	
-		<repository>
-			<id>jboss-public-repository-group</id>
-			<name>JBoss Public Maven Repository Group</name>
-			<url>http://repository.jboss.org/nexus/content/groups/public</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
-			</snapshots>
-		</repository>
-
-	</repositories>
--->
-	<!-- <pluginRepositories>
-		<pluginRepository>
-			<id>jboss-public-repository-group</id>
-			<name>JBoss Public Maven Repository Group</name>
-			<url>http://repository.jboss.org/nexus/content/groups/public</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories> -->
-
+	<!-- <repositories> <repository> <id>jboss-public-repository-group</id> 
+		<name>JBoss Public Maven Repository Group</name> <url>http://repository.jboss.org/nexus/content/groups/public</url> 
+		<releases> <enabled>true</enabled> <updatePolicy>never</updatePolicy> </releases> 
+		<snapshots> <enabled>false</enabled> <updatePolicy>never</updatePolicy> </snapshots> 
+		</repository> </repositories> -->
+	<!-- <pluginRepositories> <pluginRepository> <id>jboss-public-repository-group</id> 
+		<name>JBoss Public Maven Repository Group</name> <url>http://repository.jboss.org/nexus/content/groups/public</url> 
+		<releases> <enabled>true</enabled> <updatePolicy>never</updatePolicy> </releases> 
+		<snapshots> <enabled>false</enabled> <updatePolicy>never</updatePolicy> </snapshots> 
+		</pluginRepository> </pluginRepositories> -->
 </project>

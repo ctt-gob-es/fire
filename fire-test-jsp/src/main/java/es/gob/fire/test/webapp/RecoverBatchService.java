@@ -72,13 +72,21 @@ public class RecoverBatchService extends HttpServlet {
 				LOGGER.error("No se pudo decodificar el certificado de firma: " + e); //$NON-NLS-1$
 			}
 
-		    response.getOutputStream().write(result.toString().getBytes(StandardCharsets.UTF_8));
-		    response.flushBuffer();
+		    try {
+		    	response.getOutputStream().write(result.toString().getBytes(StandardCharsets.UTF_8));
+			    response.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			}
 		} catch (Exception e) {
 			LOGGER.error("Error interno: " + e); //$NON-NLS-1$
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
-			response.flushBuffer();
+			try {
+				response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
+				response.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			}
 		}
 	}
 }

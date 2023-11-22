@@ -26,6 +26,7 @@ package es.gob.fire.web.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -379,7 +380,7 @@ public class StatisticsController {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=firereport.pdf");
 
         if (data != null) {
-        	data.toString();
+        	Arrays.toString(data);
         }
 
 		return data;

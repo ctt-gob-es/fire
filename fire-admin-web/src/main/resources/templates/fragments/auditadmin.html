@@ -5,7 +5,6 @@
 		<div class="col-md-3">
 			<div class="bgc-white bd bdrs-3 p-20 mB-20">
 				<h5 class="c-grey-900 mB-20" th:text="#{table.audit.filterTitle}"></h5>
-				<p id="filterDate"></p>
 				<div class="col-md-12 form-group row">
 					<label for="audit-datepicker-from" th:text="#{table.audit.datefrom}"></label>
 					<input type="text" id="audit-datepicker-from" name="auditDatepicker" class="form-control" style="overflow: hidden">
@@ -208,6 +207,27 @@ $(document).ready(function() {
                     ]
         });
     
+    $('#auditDatatable tbody').on('dblclick', 'tr', function() {
+        // Lógica para el doble clic en la fila
+        var rowData = tblAuditTransactions.row(this).data();
+        var idAuditTransaction = rowData.idAuditTransaction;
+        
+        var viewAuditTransaction = /*[[@{/viewAuditTransactionDetails}]]*/;
+			
+		$.ajax({
+	        url : viewAuditTransaction,
+	        type : 'POST',
+	        data : $.param({'idAuditTransaction':idAuditTransaction}),
+	        cache : false,
+	        success : function(data) {
+	            hide();
+	            $('#modal').html(data);
+	            $('#auditTransactionViewModal').modal('show');                                                                
+	        },
+	        error : function() {}
+	    });
+    });
+    
     $("#audit-datepicker-from").datetimepicker({
 		format: 'DD/MM/YYYY HH:mm:ss'
 	});
@@ -216,7 +236,9 @@ $(document).ready(function() {
 		format: 'DD/MM/YYYY HH:mm:ss'
 	});
     
-    obtainAuditFilterDate(true);
+    //obtainAuditFilterDate(true);
+    
+    setAuditDateFilterFirstLoad(true);
     
     $("#auditFilterBtn").click(function( event ) {
     	event.preventDefault();
@@ -380,7 +402,7 @@ $(document).ready(function() {
                           ]
               });
     	
-    	obtainAuditFilterDate(false);
+    	//obtainAuditFilterDate(false);
 	});
     
     $("#cleanFilterInputsBtn").click(function( event ) {
@@ -445,6 +467,57 @@ function obtainAuditFilterDate(isFirstLoad) {
 	    });
 	}
 	
+    
+}
+
+function setAuditDateFilterFirstLoad(isFirstLoad) {
+    var fromDateInput = document.getElementById('audit-datepicker-from');
+    var toDateInput = document.getElementById('audit-datepicker-to');
+    
+    var fromDate;
+    var toDate;
+	
+    if (isFirstLoad) {
+		obtainAuditFilterFromDate = /*[[@{/getAuditTransactionsFirstLoadFromDate}]]*/;
+		
+		$.ajax({
+	        type: "GET",
+	        url: obtainAuditFilterFromDate,
+	        dataType: "text",
+	        success: function (data) {
+	        	fromDate = data;
+	        	fromDateInput.value = fromDate;
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        }
+	    });
+		
+		obtainAuditFilterToDate = /*[[@{/getAuditTransactionsFirstLoadToDate}]]*/;
+		
+		$.ajax({
+	        type: "GET",
+	        url: obtainAuditFilterToDate,
+	        dataType: "text",
+	        success: function (data) {
+	        	toDate = data;
+	        	toDateInput.value = toDate;
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        }
+	    });
+		
+		
+        
+	} else {
+		fromDate = $("#audit-datepicker-from").val();
+    	toDate = $("#audit-datepicker-to").val();
+        
+        fromDateInput.value = fromDate;
+        toDateInput.value = toDate;
+	}
+
     
 }
 

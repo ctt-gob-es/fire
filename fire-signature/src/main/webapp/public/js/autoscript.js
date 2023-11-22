@@ -1610,7 +1610,7 @@ var AutoScript = ( function ( window, undefined ) {
 					filenames = new Array();
 					datasB64 = new Array();
 
-					for (i = 0; i < fileNamesDataBase64.length; i++) {
+					for (let i = 0; i < fileNamesDataBase64.length; i++) {
 						var sepPos = fileNamesDataBase64[i].indexOf(":");
 
 						filenames.push(fileNamesDataBase64[i].substring(0, sepPos));
@@ -2417,7 +2417,7 @@ var AutoScript = ( function ( window, undefined ) {
 			 * Realiza una operacion que se ha mandando en varios fragmentos.
 			 */
 			function doFirm () {
-				httpRequest = getHttpRequest();
+				var httpRequest = getHttpRequest();
 				httpRequest.open("POST", urlHttpRequest, true);
 				httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 				httpRequest.onreadystatechange = function() {
@@ -2472,7 +2472,7 @@ var AutoScript = ( function ( window, undefined ) {
 			 * Se encarga de solicitar y montar la respuesta de la operacion realizada.
 			 */
 			function addFragmentRequest (part, totalParts){
-				httpRequest = getHttpRequest();
+				var httpRequest = getHttpRequest();
 				httpRequest.open("POST", urlHttpRequest, true);
 				httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 				httpRequest.onreadystatechange = function() {
@@ -2641,6 +2641,9 @@ var AutoScript = ( function ( window, undefined ) {
 						
 						var sepPos = fileNamesDataBase64[0].indexOf(":");
 						var fileNameDataBase64 = fileNamesDataBase64[0];
+						
+						var fileName = null;
+						var dataB64 = null;
 						
 						if (sepPos == -1) {
 							fileName = Base64.decode(fileNameDataBase64, true);
@@ -3525,7 +3528,7 @@ var AutoScript = ( function ( window, undefined ) {
 					if (httpRequest.readyState == 4) {
 						 if (httpRequest.status == 200) {
 	
-							url = buildUrlWithoutData(op, fileId, retrieverServletAddress, cipherKey);
+							var url = buildUrlWithoutData(op, fileId, retrieverServletAddress, cipherKey);
 							if (isURLTooLong(url)) {
 								errorCallback("java.lang.IllegalArgumentException", "La URL de invocacion al servicio de firma es demasiado larga.");
 								return;
