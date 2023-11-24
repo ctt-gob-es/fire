@@ -103,10 +103,6 @@ public class AuditTransactionRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero para la auditoria de transacciones", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
-		} finally {
-			if (logHandler != null){
-				logHandler.close();
-			}
 		}
 		
 
