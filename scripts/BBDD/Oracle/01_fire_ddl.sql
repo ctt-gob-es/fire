@@ -221,6 +221,7 @@ begin
     select "TB_AUDIT_TRANSACCIONES_SEQ".nextval into :NEW."ID" from dual;
   end if;
 end;
+/
 
 ALTER TRIGGER "BI_TB_AUDIT_TRANSACCIONES" ENABLE;
 
@@ -249,5 +250,6 @@ begin
     select "TB_AUDIT_FIRMAS_SEQ".nextval into :NEW."ID" from dual;
   end if;
 end;
+/
 
 ALTER TRIGGER "BI_TB_AUDIT_FIRMAS" ENABLE;
