@@ -145,7 +145,7 @@ public class RecoverNewCertificateService extends HttpServlet {
         // que la ultima operacion valida fue la de firma, ya que ha terminado la generacion
         // del nuevo certificado
         session.setAttribute(transactionId + "-certs", new X509Certificate[] { cert }); //$NON-NLS-1$
-        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
+        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_CHOOSE);
         SessionCollector.commit(session, trAux);
 
         Responser.redirectToUrl(FirePages.PG_CHOOSE_CERTIFICATE, request, response, trAux);
