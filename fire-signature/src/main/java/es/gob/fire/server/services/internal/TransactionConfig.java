@@ -48,6 +48,15 @@ public class TransactionConfig implements Serializable {
 	public TransactionConfig(final Properties config) {
 		this.config = config != null ? config : new Properties();
 	}
+	
+	/**
+	 * Crea un objeto de configuraci&oacute;n de transacci&oacute;n a
+	 * partir de otro.
+	 * @param clone de configuraci&oacute;n de transacci&oacute;n.
+	 */
+	public TransactionConfig(TransactionConfig clone) {
+		this.config = (Properties) clone.config.clone();
+	}
 
 	/**
 	 * Crea un objeto de configuraci&oacute;n de transacci&oacute;n a
@@ -156,10 +165,5 @@ public class TransactionConfig implements Serializable {
 	public Boolean isAppSkipCertSelection() {
 		final String skipSelection = this.config.getProperty(PARAM_SKIP_CERT_SELECTION);
 		return skipSelection == null ? null : Boolean.valueOf(skipSelection);
-	}
-
-	@Override
-	public Object clone() {
-		return new TransactionConfig((Properties) this.config.clone());
 	}
 }

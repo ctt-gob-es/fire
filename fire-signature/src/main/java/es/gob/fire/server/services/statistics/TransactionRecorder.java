@@ -22,8 +22,6 @@ public class TransactionRecorder {
 
 	private static String LOG_CHARSET = "utf-8"; //$NON-NLS-1$
 
-	private  TransactionCube transactCube;
-
 	private Logger dataLogger = null;
 
 	private boolean enable;
@@ -86,8 +84,9 @@ public class TransactionRecorder {
 		}
 
 		// Instalamos el manejador para la impresion en el fichero de estadisticas
+		Handler logHandler = null;
 		try {
-			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
 			logHandler.setFormatter(new Formatter() {
 				@Override
@@ -102,6 +101,10 @@ public class TransactionRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para las estadisticas de transaccion", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
+		} finally {
+			if (logHandler != null){
+				logHandler.close();
+			}
 		}
 
 		this.dataLogger = fileLogger;
@@ -123,25 +126,23 @@ public class TransactionRecorder {
 		}
 
 		// Inicializamos el cubo de datos si no lo estaba
-		if(getTransactCube() == null) {
-			this.setTransactCube(new TransactionCube());
-		}
+		final TransactionCube transactionCube = new TransactionCube();
 
 		// Id transaccion
 		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-		this.getTransactCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+		transactionCube.setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
 
 		// Resultado
-		this.getTransactCube().setResultTransaction(result);
+		transactionCube.setResultTransaction(result);
 
 		// Nombre de la aplicacion
 		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
 		if (appName != null && !appName.isEmpty()) {
-			this.getTransactCube().setApplication(appName);
+			transactionCube.setApplication(appName);
 		}
 		else {
 			final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
-			this.getTransactCube().setApplication(appId);
+			transactionCube.setApplication(appId);
 		}
 
 		// Operacion
@@ -149,7 +150,7 @@ public class TransactionRecorder {
 		if (type == null) {
 			type = TransactionType.OTHER;
 		}
-		this.getTransactCube().setOperation(type.name());
+		transactionCube.setOperation(type.name());
 
 		// Almacenamos la informacion del proveedor
 		 final String[] provsSession = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
@@ -157,26 +158,17 @@ public class TransactionRecorder {
 		 final String provForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
 
 		if (provForced != null && !provForced.isEmpty()) {
-			this.getTransactCube().setProvider(provForced);
-			this.getTransactCube().setMandatoryProvider(true);
+			transactionCube.setProvider(provForced);
+			transactionCube.setMandatoryProvider(true);
 		}
 		else if (prov != null && !prov.isEmpty()) {
-			this.getTransactCube().setProvider(prov);
+			transactionCube.setProvider(prov);
 		}
 		else if(provsSession != null && provsSession.length == 1) {
-			this.getTransactCube().setProvider(provsSession[0]);
-			this.getTransactCube().setMandatoryProvider(true);
+			transactionCube.setProvider(provsSession[0]);
+			transactionCube.setMandatoryProvider(true);
 		}
 
-		this.dataLogger.finest(this.getTransactCube().toString());
-	}
-
-	private final TransactionCube getTransactCube() {
-		return this.transactCube;
-	}
-
-
-	private final void setTransactCube(final TransactionCube transactCube) {
-		this.transactCube = transactCube;
+		this.dataLogger.finest(transactionCube.toString());
 	}
 }

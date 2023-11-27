@@ -5,6 +5,8 @@ package es.gob.fire.server.services.internal;
 import java.util.Iterator;
 
 import es.gob.fire.server.services.FIReError;
+import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
+import es.gob.fire.server.services.statistics.AuditTransactionRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
@@ -18,6 +20,8 @@ public class ErrorManager {
 
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
+	private static final AuditTransactionRecorder AUDITTRANSLOGGER = AuditTransactionRecorder.getInstance();
+	private static final AuditSignatureRecorder AUDITSIGNLOGGER = AuditSignatureRecorder.getInstance();
 
 	/**
 	 * Establece un error en sesi&oacute;n interpretando que se va a redirigir
@@ -68,7 +72,9 @@ public class ErrorManager {
 		// Si se va a volver a la aplicacion, eliminamos los datos de sesion innecesarios
 		if (returnToApp) {
 			// Se registra en log de estadisticas que la transaccion ha terminado erroneamente.
+
 			TRANSLOGGER.register(session, false);
+			AUDITTRANSLOGGER.register(session, false, messageError != null ? messageError : error.getMessage());
 			// Comprobar el tipo de operacion si es simple o lote  (SIGN o BATCH)
 			final TransactionType op = (TransactionType) session.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);
 			if (op == TransactionType.BATCH) { // Operacion por Lote
@@ -78,11 +84,13 @@ public class ErrorManager {
 					while (it.hasNext()) {
 						final String docId = it.next();
 						SIGNLOGGER.register(session, false, docId);
+						AUDITSIGNLOGGER.register(session, false, docId, messageError);
 					}
 				}
 			}
 			else if (op == TransactionType.SIGN) { // Operacion Simple
 				SIGNLOGGER.register(session, false, null);
+				AUDITSIGNLOGGER.register(session, false, null, messageError);
 			}
 			SessionCollector.cleanSession(session, trAux);
 		}

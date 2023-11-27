@@ -177,9 +177,9 @@ public final class HttpCertificateList {
             LOGGER.error("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
             throw new HttpNetworkException("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
 		}
-
+        JsonReader jsonReader = null;
         try {
-        	final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(responseJSON));
+        	jsonReader = Json.createReader(new ByteArrayInputStream(responseJSON));
         	final JsonArray certList = jsonReader.readObject().getJsonArray(CERT_JSON_PARAM);
             for (final JsonValue cert : certList) {
                 certificates.add((X509Certificate) CertificateFactory
@@ -194,6 +194,10 @@ public final class HttpCertificateList {
         } catch (final Exception e) {
             LOGGER.error("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
             throw new HttpOperationException("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
+        } finally {
+        	if (jsonReader != null) {
+        		jsonReader.close();
+        	}
         }
 
         return certificates;
@@ -283,8 +287,9 @@ public final class HttpCertificateList {
             throw new HttpNetworkException("Error en la llamada al servicio de obtencion de certificados", e); //$NON-NLS-1$
 		}
 
+        JsonReader jsonReader = null;
         try {
-        	final JsonReader jsonReader = Json.createReader(new ByteArrayInputStream(responseJSON));
+        	jsonReader = Json.createReader(new ByteArrayInputStream(responseJSON));
         	final JsonArray certList = jsonReader.readObject().getJsonArray(CERT_JSON_PARAM);
             for (final JsonValue cert : certList) {
                 certificates.add((X509Certificate) CertificateFactory
@@ -292,13 +297,16 @@ public final class HttpCertificateList {
                                 new ByteArrayInputStream(Base64.decode(cert
                                         .toString()))));
             }
-            jsonReader.close();
         } catch (final CertificateException e) {
         	LOGGER.error("Error en la composicion de uno de los certificados del usuario", e); //$NON-NLS-1$
         	throw e;
         } catch (final Exception e) {
             LOGGER.error("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
             throw new HttpOperationException("Error en la lectura del JSON de certificados", e); //$NON-NLS-1$
+        } finally {
+        	if (jsonReader != null) {
+        		jsonReader.close();
+        	}
         }
 
         return certificates;

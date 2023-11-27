@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<div class="container-fluid">
+	<h4 class="c-grey-900 mT-10 mB-30" th:text="#{audit.admin.title}"></h4>
+	<div class="row">
+		<div class="col-md-3">
+			<div class="bgc-white bd bdrs-3 p-20 mB-20">
+				<h5 class="c-grey-900 mB-20" th:text="#{table.audit.filterTitle}"></h5>
+				<div class="col-md-12 form-group row">
+					<label for="audit-datepicker-from" th:text="#{table.audit.datefrom}"></label>
+					<input type="text" id="audit-datepicker-from" name="auditDatepicker" class="form-control" style="overflow: hidden">
+				</div>
+				<div class="col-md-12 form-group row">
+					<label for="audit-datepicker-to" th:text="#{table.audit.dateto}"></label>
+					<input type="text" id="audit-datepicker-to" name="auditDatepicker" class="form-control" style="overflow: hidden">
+				</div>
+				<div class="col-md-12 form-group row">
+					<label for="audit-app-filter" th:text="#{table.audit.app}"></label>
+					<select id="audit-app-filter" name="appFilter" class="form-control">
+						<option value=""></option>
+						<option th:each="option : ${applicationsDropdown}" th:value="${option}" th:text="${option}"></option>
+					</select>
+				</div>
+				<div class="col-md-12 form-group row">
+					<button id="auditFilterBtn" type="submit" class="btn btn-primary" th:text="#{button.audit.filter}"></button>
+					<button id="cleanFilterInputsBtn" type="submit" class="btn btn-primary ml-1" th:text="#{button.audit.cleanFilter}"></button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-9">
+			<div class="bgc-white bd bdrs-3 p-20 mB-20">
+				<h4 class="c-grey-900 mB-20" th:text="#{table.audit.title}"></h4>
+				<table id="auditDatatable" class="table table-striped table-bordered" 
+					cellspacing="0" width="100%">
+					<thead>
+						<tr>
+							<!-- Columna oculta para el identificador de las aplicaciones -->
+							<th></th>
+							<th th:text="#{table.audit.date}"></th>
+							<th th:text="#{table.audit.app}"></th>
+							<th th:text="#{table.audit.operation}"></th>
+							<th th:text="#{table.audit.provider}"></th>
+							<th th:text="#{table.audit.result}"></th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.36/moment-timezone-with-data.min.js"></script>
+<script type="text/javascript" th:src="@{js/bootstrap-datetimepicker.min.js}"></script>
+<script th:inline="javascript">
+$(document).ready(function() {
+    
+    var getAuditTransactions = /*[[@{/getAuditTransactionsFirstLoad}]]*/;
+    var actionViewAuditTransactionDetails = /*[[@{/viewAuditTransactionDetails}]]*/;
+    var viewBtn = /*[[#{table.audit.btn.view}]]*/;
+    
+    var tblAuditTransactions = $('#auditDatatable').DataTable({     
+    	"pageLength": 10,
+ 		"pagingType" : "full_numbers",
+        "ajax": {
+            "url": getAuditTransactions,
+            "dataSrc" : "data",
+            "data": function (data) {
+                // Datos a pasar al modal
+                data.formId = "auditTransactionViewModal";
+            }
+        },
+        "language": {
+            "url": "js/datatables/i18n/spanish.json",
+            select: {
+                rows: {
+                    _: "%d filas seleccionadas",
+                    1: "1 fila seleccionada"
+                }
+              }
+            },
+           
+        "columns": [
+              { "data": "idAuditTransaction",
+      	          "visible": false},
+              { "data": "date", "width": "22%",
+            	  "render": function(data, type, row) {
+                      // Formatea la fecha utilizando Moment.js
+                      return moment(data).format('DD/MM/YYYY HH:mm:ss');
+                  }
+              },
+	          { "data": "nameApp", "width": "22%"},
+	          { "data": "operation", "width": "20%"},
+	          { "data": "provider", "width": "20%"},
+              { "data": "result", "width": "8%",
+        		"render": function (data, type, row) {
+        			if (data === true) {
+        				return 'OK';
+        			} else {
+        				return 'ERROR';
+        			}
+              	}, 
+              	"createdCell": function (td, cellData, rowData, row, col) {
+                    $(td).addClass('text-center');
+                } 
+              }
+            ],
+            dom: 'Bfrtip',
+            select: 'single',
+            responsive: true,
+            buttons: [{text: 'Exportar',name: 'export', action: function ( e, dt, node, config ) {	
+	   			 			  hide();
+	   					  	  var exportAuditTransactions = /*[[@{/exportAudit}]]*/;
+	    					  var fromDate = $("#audit-datepicker-from").val();
+	    				      var toDate = $("#audit-datepicker-to").val();
+    						  $.ajax({
+    								url : exportAuditTransactions+"?from="+fromDate+"&to="+toDate,
+    								processData: false,
+    								contentType: "application/vnd.ms-excel",
+    								type : 'GET',
+    								success : function(data, status, xhr) {
+    									hide();	
+    									
+    									if (data != null && data != "FAIL") {
+    										var b64Data = data;
+    										var contentType = xhr.getResponseHeader("Content-Type"); //Obtenemos el tipo de los datos
+    										var filename = xhr.getResponseHeader("Content-disposition");//Obtenemos el nombre del fichero a desgargar
+    										filename = filename.substring(filename.lastIndexOf("=") + 1) || "download";
+
+    										var sliceSize = 512;
+    										
+    										
+    										var byteCharacters = window.atob(b64Data);
+    										var byteArrays = [];
+
+    										for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    											var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    											var byteNumbers = new Array(slice.length);
+    											for (var i = 0; i < slice.length; i++) {
+    												byteNumbers[i] = slice.charCodeAt(i);
+    											}
+
+    											var byteArray = new Uint8Array(byteNumbers);
+
+    											byteArrays.push(byteArray);
+    										}
+    										//Tras el procesado anterior creamos un objeto blob
+    										var blob = new Blob(byteArrays, {
+    											type : contentType
+    										});
+
+    										// IE 10+
+    										if (navigator.msSaveBlob) {
+    											navigator.msSaveBlob(blob, filename);
+    										} else {
+    										//Descargamos el fichero obtenido en la petición ajax
+    											var url = URL.createObjectURL(blob);
+    											var link = document.createElement('a');
+    											link.href = url;
+    											link.download = filename;
+    											document.body.appendChild(link);
+    											link.click();
+    											document.body.removeChild(link);
+    										}
+
+    									}
+    								},
+    								error : function() {
+    									
+    								}
+    							});
+    						}
+    		        	},
+                		{extend: 'selected', text: 'Visualizar', name: 'view',
+                	    	action: function ( e, dt, node, config ) {   		
+                	    	
+                	    		for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+                					id: o.context[0].aoColumns[e].mData,
+                					title: o.context[0].aoColumns[e].sTitle                
+                				  });
+                			  	
+                			  	 var d = dt.rows({
+                	                selected: !0
+                				 });
+                			  	 
+                			  	 var index = dt.row({
+                	                selected: !0
+                	             }).index();
+                			  	 			  	 
+                			  	var idAuditTransaction = d.data()[0][a[0].id];
+              				  
+              				  	var viewAuditTransaction = /*[[@{/viewAuditTransactionDetails}]]*/;
+              					
+                 					$.ajax({
+                 				        url : viewAuditTransaction,
+                 				        type : 'POST',
+                 				        data : $.param({'idAuditTransaction':idAuditTransaction}),
+                 				        cache : false,
+                 				        success : function(data) {
+                 				            hide();
+                 				            $('#modal').html(data);
+                 				            $('#auditTransactionViewModal').modal('show');                                                                
+                 				        },
+                 				        error : function() {}
+                 				    });
+                			}
+                		}
+                    ]
+        });
+    
+    $('#auditDatatable tbody').on('dblclick', 'tr', function() {
+        // Lógica para el doble clic en la fila
+        var rowData = tblAuditTransactions.row(this).data();
+        var idAuditTransaction = rowData.idAuditTransaction;
+        
+        var viewAuditTransaction = /*[[@{/viewAuditTransactionDetails}]]*/;
+			
+		$.ajax({
+	        url : viewAuditTransaction,
+	        type : 'POST',
+	        data : $.param({'idAuditTransaction':idAuditTransaction}),
+	        cache : false,
+	        success : function(data) {
+	            hide();
+	            $('#modal').html(data);
+	            $('#auditTransactionViewModal').modal('show');                                                                
+	        },
+	        error : function() {}
+	    });
+    });
+    
+    $("#audit-datepicker-from").datetimepicker({
+		format: 'DD/MM/YYYY HH:mm:ss'
+	});
+    
+    $("#audit-datepicker-to").datetimepicker({
+		format: 'DD/MM/YYYY HH:mm:ss'
+	});
+    
+    //obtainAuditFilterDate(true);
+    
+    setAuditDateFilterFirstLoad(true);
+    
+    $("#auditFilterBtn").click(function( event ) {
+    	event.preventDefault();
+    	
+    	var getAuditTransactionsWithFilter = /*[[@{/auditTransactionDatatableWithFilter}]]*/;
+    	var fromDate = $("#audit-datepicker-from").val();
+    	var toDate = $("#audit-datepicker-to").val();
+    	var appFilter = $("#audit-app-filter").val();
+    	
+    	tblAuditTransactions = $('#auditDatatable').DataTable();
+    	
+    	tblAuditTransactions.destroy();
+    	
+    	tblAuditTransactions = $('#auditDatatable').DataTable({
+    		"pageLength": 10,
+	 		"pagingType" : "full_numbers",
+            "ajax": {
+                "url": getAuditTransactionsWithFilter+"?from="+fromDate+"&to="+toDate+"&app="+appFilter,
+                "dataSrc" : "data",
+                "data": function (data) {
+                    // Datos a pasar al modal
+                    data.formId = "viewPetitionModal";
+                }
+            },
+            "language": {
+                "url": "js/datatables/i18n/spanish.json",
+                select: {
+                    rows: {
+                        _: "%d filas seleccionadas",
+                        1: "1 fila seleccionada"
+                    }
+                  }
+                },
+               
+                "columns": [
+                    { "data": "idAuditTransaction",
+          	          "visible": false},
+                    { "data": "date", "width": "22%",
+                    	"render": function(data, type, row) {
+                            // Formatea la fecha utilizando Moment.js
+                            return moment(data).format('DD/MM/YYYY HH:mm:ss');
+                        }
+                    },
+      	          { "data": "nameApp", "width": "22%"},
+      	          { "data": "operation", "width": "20%"},
+      	          { "data": "provider", "width": "20%"},
+                    { "data": "result", "width": "8%",
+              		"render": function (data, type, row) {
+              			if (data === true) {
+              				return 'OK';
+              			} else {
+              				return 'ERROR';
+              			}
+                    	}, 
+                    	"createdCell": function (td, cellData, rowData, row, col) {
+                          $(td).addClass('text-center');
+                      } 
+                    }
+                  ],
+                  dom: 'Bfrtip',
+                  select: 'single',
+                  responsive: true,
+                  buttons: [{text: 'Exportar',name: 'export', action: function ( e, dt, node, config ) {	
+      	   			 			  hide();
+      	   					  	  var exportPetitions = /*[[@{/exportAudit}]]*/;
+      	    					  var fromDate = $("#audit-datepicker-from").val();
+      	    				      var toDate = $("#audit-datepicker-to").val();
+          						  $.ajax({
+          								url : exportPetitions+"?from="+fromDate+"&to="+toDate,
+          								processData: false,
+          								contentType: "application/vnd.ms-excel",
+          								type : 'GET',
+          								success : function(data, status, xhr) {
+          									hide();	
+          									
+          									if (data != null && data != "FAIL") {
+          										var b64Data = data;
+          										var contentType = xhr.getResponseHeader("Content-Type"); //Obtenemos el tipo de los datos
+          										var filename = xhr.getResponseHeader("Content-disposition");//Obtenemos el nombre del fichero a desgargar
+          										filename = filename.substring(filename.lastIndexOf("=") + 1) || "download";
+
+          										var sliceSize = 512;
+          										
+          										
+          										var byteCharacters = window.atob(b64Data);
+          										var byteArrays = [];
+
+          										for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+          											var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+          											var byteNumbers = new Array(slice.length);
+          											for (var i = 0; i < slice.length; i++) {
+          												byteNumbers[i] = slice.charCodeAt(i);
+          											}
+
+          											var byteArray = new Uint8Array(byteNumbers);
+
+          											byteArrays.push(byteArray);
+          										}
+          										//Tras el procesado anterior creamos un objeto blob
+          										var blob = new Blob(byteArrays, {
+          											type : contentType
+          										});
+
+          										// IE 10+
+          										if (navigator.msSaveBlob) {
+          											navigator.msSaveBlob(blob, filename);
+          										} else {
+          										//Descargamos el fichero obtenido en la petición ajax
+          											var url = URL.createObjectURL(blob);
+          											var link = document.createElement('a');
+          											link.href = url;
+          											link.download = filename;
+          											document.body.appendChild(link);
+          											link.click();
+          											document.body.removeChild(link);
+          										}
+
+          									}
+          								},
+          								error : function() {
+          									
+          								}
+          							});
+          						}
+          		        	},
+                    		{extend: 'selected', text: 'Visualizar', name: 'view',
+                    	    	action: function ( e, dt, node, config ) {   		
+                    	    	
+                    	    		for (var o = dt, a = [], e = 0; e < o.context[0].aoColumns.length; e++) a.push({
+                    					id: o.context[0].aoColumns[e].mData,
+                    					title: o.context[0].aoColumns[e].sTitle                
+                    				  });
+                    			  	
+                    			  	 var d = dt.rows({
+                    	                selected: !0
+                    				 });
+                    			  	 
+                    			  	 var index = dt.row({
+                    	                selected: !0
+                    	             }).index();
+                    			  	 			  	 
+                    				  var idAuditTransaction = d.data()[0][a[0].id];
+                    				  
+                    				  var viewAuditTransaction = /*[[@{/viewAuditTransactionDetails}]]*/;
+                    					
+	                   					$.ajax({
+	                   				        url : viewAuditTransaction,
+	                   				        type : 'POST',
+	                   				        data : $.param({'idAuditTransaction':idAuditTransaction}),
+	                   				        cache : false,
+	                   				        success : function(data) {
+	                   				            hide();
+	                   				            $('#modal').html(data);
+	                   				            $('#auditTransactionViewModal').modal('show');                                                                
+	                   				        },
+	                   				        error : function() {}
+	                   				    });
+                    			}
+                    		}
+                          ]
+              });
+    	
+    	//obtainAuditFilterDate(false);
+	});
+    
+    $("#cleanFilterInputsBtn").click(function( event ) {
+    	cleanInputs();
+    });
+
+});
+
+function viewAuditTransaction(idAuditTransaction){
+	
+	var viewAuditTransaction = /*[[@{/viewAuditTransactionDetails}]]*/;
+	
+	$.ajax({
+        url : viewAuditTransaction,
+        type : 'POST',
+        data : $.param({'idAuditTransaction':idAuditTransaction}),
+        cache : false,
+        success : function(data) {
+            hide();
+            $('#modal').html(data);
+            $('#auditTransactionViewModal').modal('show');                                                                
+        },
+        error : function() {}
+    });
+}
+
+function obtainAuditFilterDate(isFirstLoad) {
+	
+	var obtainAuditFilterDate;
+	
+	if (isFirstLoad) {
+		obtainAuditFilterDate = /*[[@{/getAuditTransactionsFirstLoadDate}]]*/;
+		
+		$.ajax({
+	        type: "GET",
+	        url: obtainAuditFilterDate,
+	        dataType: "text",
+	        success: function (data) {
+	        	$("#filterDate").text(data);
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        }
+	    });
+	} else {
+		var fromDate = $("#audit-datepicker-from").val();
+    	var toDate = $("#audit-datepicker-to").val();
+    	var appFilter = $("#audit-app-filter").val();
+    	
+		obtainAuditFilterDate = /*[[@{/getAuditTransactionsFilterLoadDate}]]*/;
+		
+		$.ajax({
+	        type: "GET",
+	        url: obtainAuditFilterDate+"?from="+fromDate+"&to="+toDate+"&app="+appFilter,
+	        dataType: "text",
+	        success: function (data) {
+	        	$("#filterDate").text(data);
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        }
+	    });
+	}
+	
+    
+}
+
+function setAuditDateFilterFirstLoad(isFirstLoad) {
+    var fromDateInput = document.getElementById('audit-datepicker-from');
+    var toDateInput = document.getElementById('audit-datepicker-to');
+    
+    var fromDate;
+    var toDate;
+	
+    if (isFirstLoad) {
+		obtainAuditFilterFromDate = /*[[@{/getAuditTransactionsFirstLoadFromDate}]]*/;
+		
+		$.ajax({
+	        type: "GET",
+	        url: obtainAuditFilterFromDate,
+	        dataType: "text",
+	        success: function (data) {
+	        	fromDate = data;
+	        	fromDateInput.value = fromDate;
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        }
+	    });
+		
+		obtainAuditFilterToDate = /*[[@{/getAuditTransactionsFirstLoadToDate}]]*/;
+		
+		$.ajax({
+	        type: "GET",
+	        url: obtainAuditFilterToDate,
+	        dataType: "text",
+	        success: function (data) {
+	        	toDate = data;
+	        	toDateInput.value = toDate;
+	        },
+	        error: function (xhr, status, error) {
+	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        }
+	    });
+		
+		
+        
+	} else {
+		fromDate = $("#audit-datepicker-from").val();
+    	toDate = $("#audit-datepicker-to").val();
+        
+        fromDateInput.value = fromDate;
+        toDateInput.value = toDate;
+	}
+
+    
+}
+
+
+function cleanInputs() { // Obtener referencias a los elementos de entrada por sus IDs 
+	var fromInput = document.getElementById("audit-datepicker-from");
+	var toInput = document.getElementById("audit-datepicker-to");  
+	var appInput = document.getElementById("audit-app-filter");
+	
+	if (fromInput) { 
+		fromInput.value = ""; 
+	} 
+	if (toInput) { 
+		toInput.value = "";
+	} 
+	if (appInput) { 
+		appInput.value = "";
+	}
+}
+
+
+</script>

@@ -52,104 +52,116 @@ public class TestGetCertificateService extends HttpServlet {
 
 		final KeyStore ks;
 		try {
-			ks = TestHelper.getKeyStore(subjectId, true);
-		}
-		catch (final KeyStoreException e) {
-			LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore: " + e, e); //$NON-NLS-1$
-			final Exception cause = new FIReCertificateException(
-					"Error obteniendo el KeyStore: " + e, e //$NON-NLS-1$
-				);
-			throw new ServletException(cause);
-		}
-		catch (final NoSuchAlgorithmException e) {
-			LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore por algoritmo no soportado: " + e); //$NON-NLS-1$
-			final Exception cause = new FIReCertificateException(
-					"Error obteniendo el KeyStore por algoritmo no soportado: " + e, e //$NON-NLS-1$
-				);
-			throw new ServletException(cause);
-		}
-		catch (final CertificateException e) {
-			LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore por certificado corrupto: " + e); //$NON-NLS-1$
-			final Exception cause = new FIReCertificateException(
-					"Error obteniendo el KeyStore por certificado corrupto: " + e, e //$NON-NLS-1$
-				);
-			throw new ServletException(cause);
-		}
-		catch (final IOException e) {
-			LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore en la lectura de datos: " + e, e); //$NON-NLS-1$
-			final Exception cause = new FIReCertificateException(
-					"Error obteniendo el KeyStore en la lectura de datos: " + e, e //$NON-NLS-1$
-				);
-			throw new ServletException(cause);
-		}
-		catch (final FIReCertificateException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no tiene certificados: " + e); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendError(CustomHttpErrors.HTTP_ERROR_NO_CERT, "El usuario no tiene certificados"); //$NON-NLS-1$
-			response.flushBuffer();
-			return;
-		}
-		catch (final InvalidUserException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no existe", e); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendError(CustomHttpErrors.HTTP_ERROR_UNKNOWN_USER, "El usuario no existe"); //$NON-NLS-1$
-			response.flushBuffer();
-			return;
-		}
-		catch (final BlockedCertificateException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " tiene certificados bloqueados", e); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendError(CustomHttpErrors.HTTP_ERROR_BLOCKED_CERT, "El usuario tiene certificados bloqueados"); //$NON-NLS-1$
-			response.flushBuffer();
-			return;
-		}
-		catch (final WeakRegistryException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " realizo un registro debil y no puede tener certificados de firma", e); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendError(CustomHttpErrors.HTTP_ERROR_WEAK_REGISTRY, "El usuario realizo un registro debil y no puede tener certificados de firma"); //$NON-NLS-1$
-			response.flushBuffer();
-			return;
-		}
-
-		Enumeration<String> aliases;
-		try {
-			aliases = ks.aliases();
-		}
-		catch (final KeyStoreException e) {
-			LOGGER.log(Level.WARNING, "Error obteniendo los certificados del KeyStore: " + e, e); //$NON-NLS-1$
-			final Exception cause = new FIReCertificateException(
-					"Error obteniendo los certificados del KeyStore: " + e, e //$NON-NLS-1$
-				);
-			throw new ServletException(cause);
-		}
-		final List<X509Certificate> certs = new ArrayList<>();
-		while(aliases.hasMoreElements()) {
-			final String alias = aliases.nextElement();
 			try {
-				certs.add((X509Certificate) ks.getCertificate(alias));
+				ks = TestHelper.getKeyStore(subjectId, true);
+			}
+			catch (final KeyStoreException e) {
+				LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore: " + e, e); //$NON-NLS-1$
+				final Exception cause = new FIReCertificateException(
+						"Error obteniendo el KeyStore: " + e, e //$NON-NLS-1$
+					);
+				throw new ServletException(cause);
+			}
+			catch (final NoSuchAlgorithmException e) {
+				LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore por algoritmo no soportado: " + e); //$NON-NLS-1$
+				final Exception cause = new FIReCertificateException(
+						"Error obteniendo el KeyStore por algoritmo no soportado: " + e, e //$NON-NLS-1$
+					);
+				throw new ServletException(cause);
+			}
+			catch (final CertificateException e) {
+				LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore por certificado corrupto: " + e); //$NON-NLS-1$
+				final Exception cause = new FIReCertificateException(
+						"Error obteniendo el KeyStore por certificado corrupto: " + e, e //$NON-NLS-1$
+					);
+				throw new ServletException(cause);
+			}
+			catch (final IOException e) {
+				LOGGER.log(Level.SEVERE, "Error obteniendo el KeyStore en la lectura de datos: " + e, e); //$NON-NLS-1$
+				final Exception cause = new FIReCertificateException(
+						"Error obteniendo el KeyStore en la lectura de datos: " + e, e //$NON-NLS-1$
+					);
+				throw new ServletException(cause);
+			}
+			catch (final FIReCertificateException e) {
+				LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no tiene certificados: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+				response.sendError(CustomHttpErrors.HTTP_ERROR_NO_CERT, "El usuario no tiene certificados"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+			catch (final InvalidUserException e) {
+				LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no existe", e); //$NON-NLS-1$ //$NON-NLS-2$
+				response.sendError(CustomHttpErrors.HTTP_ERROR_UNKNOWN_USER, "El usuario no existe"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+			catch (final BlockedCertificateException e) {
+				LOGGER.log(Level.WARNING, "El usuario " + subjectId + " tiene certificados bloqueados", e); //$NON-NLS-1$ //$NON-NLS-2$
+				response.sendError(CustomHttpErrors.HTTP_ERROR_BLOCKED_CERT, "El usuario tiene certificados bloqueados"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+			catch (final WeakRegistryException e) {
+				LOGGER.log(Level.WARNING, "El usuario " + subjectId + " realizo un registro debil y no puede tener certificados de firma", e); //$NON-NLS-1$ //$NON-NLS-2$
+				response.sendError(CustomHttpErrors.HTTP_ERROR_WEAK_REGISTRY, "El usuario realizo un registro debil y no puede tener certificados de firma"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+	
+			Enumeration<String> aliases;
+			try {
+				aliases = ks.aliases();
 			}
 			catch (final KeyStoreException e) {
 				LOGGER.log(Level.WARNING, "Error obteniendo los certificados del KeyStore: " + e, e); //$NON-NLS-1$
 				final Exception cause = new FIReCertificateException(
-						"Error obteniendo el certificado " + alias + " del KeyStore: " + e, e //$NON-NLS-1$ //$NON-NLS-2$
+						"Error obteniendo los certificados del KeyStore: " + e, e //$NON-NLS-1$
 					);
 				throw new ServletException(cause);
 			}
+			final List<X509Certificate> certs = new ArrayList<>();
+			while(aliases.hasMoreElements()) {
+				final String alias = aliases.nextElement();
+				try {
+					certs.add((X509Certificate) ks.getCertificate(alias));
+				}
+				catch (final KeyStoreException e) {
+					LOGGER.log(Level.WARNING, "Error obteniendo los certificados del KeyStore: " + e, e); //$NON-NLS-1$
+					final Exception cause = new FIReCertificateException(
+							"Error obteniendo el certificado " + alias + " del KeyStore: " + e, e //$NON-NLS-1$ //$NON-NLS-2$
+						);
+					throw new ServletException(cause);
+				}
+			}
+	
+			final StringBuilder jsonResponse = new StringBuilder("["); //$NON-NLS-1$
+			for (int i = 0; i < certs.size(); i++) {
+				byte[] certEncoded;
+				try {
+					certEncoded = certs.get(i).getEncoded();
+				}
+				catch (final CertificateEncodingException e) {
+					LOGGER.severe("No se pudo recuperar uno de los certificados del usuario: " + e); //$NON-NLS-1$
+					continue;
+				}
+				jsonResponse.append("\"").append(Base64.encode(certEncoded)).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
+				if (i < certs.size() - 1) {
+					jsonResponse.append(","); //$NON-NLS-1$
+				}
+			}
+			jsonResponse.append("]"); //$NON-NLS-1$
+			response.getWriter().print(jsonResponse.toString());
+			response.flushBuffer();
 		}
-
-		final StringBuilder jsonResponse = new StringBuilder("["); //$NON-NLS-1$
-		for (int i = 0; i < certs.size(); i++) {
-			byte[] certEncoded;
+		catch (final Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			try {
-				certEncoded = certs.get(i).getEncoded();
+				response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
+				response.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.warning("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
 			}
-			catch (final CertificateEncodingException e) {
-				LOGGER.severe("No se pudo recuperar uno de los certificados del usuario: " + e); //$NON-NLS-1$
-				continue;
-			}
-			jsonResponse.append("\"").append(Base64.encode(certEncoded)).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
-			if (i < certs.size() - 1) {
-				jsonResponse.append(","); //$NON-NLS-1$
-			}
+
 		}
-		jsonResponse.append("]"); //$NON-NLS-1$
-		response.getWriter().print(jsonResponse.toString());
-		response.flushBuffer();
 	}
 }

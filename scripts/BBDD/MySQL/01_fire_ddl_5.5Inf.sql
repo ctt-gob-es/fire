@@ -109,3 +109,36 @@ FOREIGN KEY (`fk_rol`)
   REFERENCES `tb_roles` (`id`)
 ON DELETE RESTRICT
  ON UPDATE CASCADE;
+
+CREATE TABLE `tb_audit_transacciones` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fecha` TIMESTAMP NOT NULL,
+  `id_aplicacion` varchar(48) NOT NULL,
+  `nombre_aplicacion` varchar(48) NOT NULL,
+  `id_transaccion` varchar(45) NOT NULL,
+  `operacion` varchar(10) NOT NULL,
+  `operacion_criptografica` varchar(10) NOT NULL,
+  `formato` varchar(20) NOT NULL, 
+  `formato_actualizado` varchar(20),
+  `algoritmo` varchar(20) NOT NULL, 
+  `proveedor` varchar(45) NOT NULL,
+  `proveedor_forzado` tinyint(1) NOT NULL,
+  `navegador` varchar(20) NOT NULL, 
+  `tamanno` int(11) DEFAULT 0,
+  `nodo` varchar(45),
+  `resultado` tinyint(1) NOT NULL,
+  `error_detalle` varchar(150),
+  PRIMARY KEY (`id`),
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `tb_audit_firmas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_transaccion` varchar(45) NOT NULL,
+  `operacion_criptografica` varchar(10) NOT NULL,
+  `formato` varchar(20) NOT NULL, 
+  `formato_actualizado` varchar(20),
+  `tamanno` int(11) DEFAULT 0,
+  `resultado` tinyint(1) NOT NULL,
+  `error_detalle` varchar(150),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

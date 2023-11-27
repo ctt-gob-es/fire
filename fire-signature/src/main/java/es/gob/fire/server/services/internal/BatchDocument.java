@@ -21,6 +21,8 @@ public class BatchDocument {
 	private final byte[] data;
 
 	private String result;
+	
+	private String errorMessage;
 
 	private final SignBatchConfig config;
 
@@ -37,6 +39,7 @@ public class BatchDocument {
 		this.result = null;
 		this.config = null;
 		this.docInfo = null;
+		this.errorMessage = null;
 	}
 
 	/**
@@ -51,6 +54,7 @@ public class BatchDocument {
 		this.result = null;
 		this.config = config;
 		this.docInfo = null;
+		this.errorMessage = null;
 	}
 
 	/**
@@ -66,6 +70,7 @@ public class BatchDocument {
 		this.result = null;
 		this.config = config;
 		this.docInfo = docInfo;
+		this.errorMessage = null;
 	}
 
 	/**
@@ -115,5 +120,22 @@ public class BatchDocument {
 	 */
 	public DocInfo getDocInfo() {
 		return this.docInfo;
+	}
+	
+	/**
+	 * Establece el mensaje de error, en caso de existir, de la firma de este documento.
+	 * @param errorMessage Mensaje de error de la firma.
+	 */
+	public void setErrorMessage(final String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+	
+	/**
+	 * Mensaje de error de la operaci&oacute;n de firma.
+	 * @return Mensaje de un error producido durante la firma de los datos,
+	 * o {@code null} si no hay ning&uacute;n mensaje de error.
+	 */
+	public String getErrorMessage() {
+		return this.errorMessage;
 	}
 }

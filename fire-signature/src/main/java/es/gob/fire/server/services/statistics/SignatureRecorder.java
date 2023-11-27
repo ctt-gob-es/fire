@@ -29,8 +29,6 @@ public class SignatureRecorder {
 
 	private static String LOG_CHARSET = "utf-8"; //$NON-NLS-1$
 
-	private SignatureCube signCube = null;
-
 	private Logger dataLogger = null;
 
 	private boolean enable = false;
@@ -96,8 +94,9 @@ public class SignatureRecorder {
 		}
 
 		// Instalamos el manejador para la impresion en el fichero de estadisticas
+		Handler logHandler = null;
 		try {
-			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
 			logHandler.setFormatter(new Formatter() {
 				@Override
@@ -112,6 +111,10 @@ public class SignatureRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para las estadisticas de firma", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
+		} finally {
+			if (logHandler != null){
+				logHandler.close();
+			}
 		}
 
 		this.dataLogger = fileLogger;
@@ -142,32 +145,30 @@ public class SignatureRecorder {
 		}
 
 		 // Inicializamos el cubo de datos si no lo estaba
-		if (getSignCube() == null) {
-			this.setSingCube(new SignatureCube());
-		}
+		final SignatureCube signatureCube = new SignatureCube();
 
 		// Id transaccion
 		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
-		this.getSignCube().setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+		signatureCube.setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
 
 		// Aplicacion
 		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
-		this.getSignCube().setApplication(appName);
+		signatureCube.setApplication(appName);
 
 		// Resultado
-		this.getSignCube().setResultSign(result);
+		signatureCube.setResultSign(result);
 
 		// Navegador
 		final String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
-		this.getSignCube().setBrowser(browser);
+		signatureCube.setBrowser(browser);
 
 		// Proveedor que gestiona el certificado de firma
 		final String provider = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		this.getSignCube().setProvider(provider);
+		signatureCube.setProvider(provider);
 
 		// Algoritmo
 		final String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-		this.getSignCube().setAlgorithm(algorithm);
+		signatureCube.setAlgorithm(algorithm);
 
 		// Obtenemos el tamano del documento
 		Long docSize = Long.valueOf(0);
@@ -201,19 +202,11 @@ public class SignatureRecorder {
 		}
 
 		// Registramos el tamano del documento, el formato y el formato de actualizacion
-		this.getSignCube().setDataSize(docSize.longValue());
-		this.getSignCube().setFormat(format);
-		this.getSignCube().setImprovedFormat(upgrade);
+		signatureCube.setDataSize(docSize.longValue());
+		signatureCube.setFormat(format);
+		signatureCube.setImprovedFormat(upgrade);
 
 		// Imprimimos los datos del cubo en la salida de datos de firma
-		this.dataLogger.finest(this.getSignCube().toString());
-	}
-
-	protected final SignatureCube getSignCube() {
-		return this.signCube;
-	}
-
-	protected final void setSingCube(final SignatureCube signCube) {
-		this.signCube = signCube;
+		this.dataLogger.finest(signatureCube.toString());
 	}
 }

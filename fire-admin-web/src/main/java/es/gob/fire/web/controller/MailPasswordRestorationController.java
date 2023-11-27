@@ -193,27 +193,29 @@ public class MailPasswordRestorationController {
 					model.addAttribute("restoreerror", Boolean.TRUE);
 					model.addAttribute("restoreErrorMessage", "El usuario no ha sido encontrado");
 					result = "login.html";
-				}
+				} else {
+					//Se engloba en un else para asegurarnos de que user no es nulo.
+					
+					// Si el usuario tiene datos a nulo en base de datos se va fuera
+					if (user.getRenovationCode() == null || user.getRenovationDate() == null && !error) {
+						LOGGER.warn("El usuario no tenia registrada la informacion de restauraci\u00F3n de contrasena");
+						error = true;
+						model.addAttribute("restoreerror", Boolean.TRUE);
+						model.addAttribute("restoreErrorMessage",
+								"El usuario no tenia registrada la informaci\u00F3n de restauracion de contrase\u00F1a");
+						result = "login.html";
+					}
 
-				// Si el usuario tiene datos a nulo en base de datos se va fuera
-				if (user.getRenovationCode() == null || user.getRenovationDate() == null && !error) {
-					LOGGER.warn("El usuario no tenia registrada la informacion de restauraci\u00F3n de contrasena");
-					error = true;
-					model.addAttribute("restoreerror", Boolean.TRUE);
-					model.addAttribute("restoreErrorMessage",
-							"El usuario no tenia registrada la informaci\u00F3n de restauracion de contrase\u00F1a");
-					result = "login.html";
-				}
-
-				// Comprobar que el usuario tiene asignado en BD el codigo
-				if (!user.getRenovationCode().equals(code) && !error) {
-					LOGGER.warn(
-							"No se han proporcionado el identificador del usuario o no se han podido recuperar sus datos");
-					error = true;
-					model.addAttribute("restoreerror", Boolean.TRUE);
-					model.addAttribute("restoreErrorMessage",
-							"No se han proporcionado el identificador del usuario o no se han podido recuperar sus datos");
-					result = "login.html";
+					// Comprobar que el usuario tiene asignado en BD el codigo
+					if (!user.getRenovationCode().equals(code) && !error) {
+						LOGGER.warn(
+								"No se han proporcionado el identificador del usuario o no se han podido recuperar sus datos");
+						error = true;
+						model.addAttribute("restoreerror", Boolean.TRUE);
+						model.addAttribute("restoreErrorMessage",
+								"No se han proporcionado el identificador del usuario o no se han podido recuperar sus datos");
+						result = "login.html";
+					}
 				}
 
 				// Si se ha excedido el tiempo de espera, no permitimos la
@@ -283,21 +285,29 @@ public class MailPasswordRestorationController {
 
 			// Comprobamos que el usuario es el que realmente nos ha realizado
 			// la peticion
-			if (user == null || !user.getUserId().equals(restoreUserId)) {
-				LOGGER.warn("El id de usuario es distinto al utilizado en la sesion");
+			if (user == null) {
+				LOGGER.warn("El usuario es nulo");
 				error = true;
 				model.addAttribute("restorepassworderror", Boolean.TRUE);
 				model.addAttribute("restorePasswordErrorMessage",
 						"Se ha excedido el tiempo m\u00E1ximo de espera hasta la renovaci\u00F3n de la contrase\u00F1a");
-			}
-
-			// Comprobamos que el codigo del usuario es el que realmente nos ha
-			// realizado la peticion
-			if (restoreUserCode == null || !user.getRenovationCode().equals(restoreUserCode) && !error) {
-				LOGGER.warn("El usuario no ha sido encontrado o es nulo");
-				error = true;
-				model.addAttribute("restorepassworderror", Boolean.TRUE);
-				model.addAttribute("restorePasswordErrorMessage", "El usuario no ha sido encontrado o es nulo");
+			} else {
+				if (!user.getUserId().equals(restoreUserId)) {
+					LOGGER.warn("El id de usuario es distinto al utilizado en la sesion");
+					error = true;
+					model.addAttribute("restorepassworderror", Boolean.TRUE);
+					model.addAttribute("restorePasswordErrorMessage",
+							"Se ha excedido el tiempo m\u00E1ximo de espera hasta la renovaci\u00F3n de la contrase\u00F1a");
+				}
+				
+				// Comprobamos que el codigo del usuario es el que realmente nos ha
+				// realizado la peticion
+				if (restoreUserCode == null || !user.getRenovationCode().equals(restoreUserCode) && !error) {
+					LOGGER.warn("El usuario no ha sido encontrado o es nulo");
+					error = true;
+					model.addAttribute("restorepassworderror", Boolean.TRUE);
+					model.addAttribute("restorePasswordErrorMessage", "El usuario no ha sido encontrado o es nulo");
+				}
 			}
 
 			if (!error) {

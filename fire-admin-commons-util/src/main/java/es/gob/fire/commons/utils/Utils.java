@@ -36,7 +36,7 @@ public class Utils {
     /**
      * Simple regular expression for email validation.
      */
-    private static final String regexValidEmail = "^(.+)@(.+)$"; 
+    private static final String EMAIL_REGEX_PATTERN = "^(.+)@(.+)$"; 
 
 	/** Lee un flujo de datos de entrada y los recupera en forma de array de
      * bytes. Este m&eacute;todo consume pero no cierra el flujo de datos de
@@ -75,7 +75,7 @@ public class Utils {
      */
     public static boolean isValidEmail(final String email) {    	
     	    	
-    	Pattern pattern = Pattern.compile(regexValidEmail);
+    	Pattern pattern = Pattern.compile(EMAIL_REGEX_PATTERN);
     	
     	Matcher matcher = pattern.matcher(email);
     	

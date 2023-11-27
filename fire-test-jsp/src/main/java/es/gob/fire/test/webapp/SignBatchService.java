@@ -35,15 +35,17 @@ public class SignBatchService extends HttpServlet {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SignBatchService.class);
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void service(final HttpServletRequest request, final HttpServletResponse response)
+			throws ServletException, IOException {
 
 		final HttpSession session = request.getSession(false);
-		if ( session == null || session.getAttribute("user") == null) { //$NON-NLS-1$
+		if (session == null || session.getAttribute("user") == null) { //$NON-NLS-1$
 			response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 			return;
 		}
 
-		// El identificador de aplicacion es propio de cada aplicacion. En esta de ejemplo,
+		// El identificador de aplicacion es propio de cada aplicacion. En esta de
+		// ejemplo,
 		// se lee del fichero de configuracion
 		final String appId = ConfigManager.getInstance().getAppId();
 
@@ -60,10 +62,12 @@ public class SignBatchService extends HttpServlet {
 
 		SignOperationResult signOperationResult;
 		try {
-			signOperationResult = ConfigManager.getInstance().getFireClient(appId).signBatch(transactionId, userId, stopOnError);
+			signOperationResult = ConfigManager.getInstance().getFireClient(appId).signBatch(transactionId, userId,
+					stopOnError);
 		} catch (final Exception e) {
 			LOGGER.error("Error durante la operacion de firma del lote", e); //$NON-NLS-1$
-			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode("Error en la llamada a la operacion de firma de lote:<br>" + e.getMessage(), StandardCharsets.UTF_8.toString())); //$NON-NLS-1$ //$NON-NLS-2$
+			response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder //$NON-NLS-1$
+					.encode("Error en la llamada a la operacion de firma de lote:<br>" + e.getMessage(), "UTF-8")); //$NON-NLS-1$
 			return;
 		}
 

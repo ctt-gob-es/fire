@@ -183,6 +183,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 				}
 				else {
 					batchResult.setErrorResult(docId, translateAfirmaError(asr.getError()));
+					batchResult.setErrorMessage(docId, asr.getErrorMessage());
 				}
 			}
 		}
@@ -201,9 +202,10 @@ public class MiniAppletSuccessService extends HttpServlet {
 				if (AfirmaResult.DONE_AND_SAVED.name().equals(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_RESULT))) {
 					afirmaResults.put(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_ID), AfirmaSingleResult.getAfirmaOkResult());
 				} else {
+					final String error = singleSignsArray.getJsonObject(i).getString(JSON_PARAM_RESULT);
 					final String description = singleSignsArray.getJsonObject(i).getString(JSON_PARAM_DESCRIPTION, "Error desconocido"); //$NON-NLS-1$
 					afirmaResults.put(singleSignsArray.getJsonObject(i).getString(JSON_PARAM_ID),
-							AfirmaSingleResult.getAfirmaErrorResult(description));
+							AfirmaSingleResult.getAfirmaErrorResult(error, description));
 				}
 			}
 		}
@@ -280,9 +282,16 @@ public class MiniAppletSuccessService extends HttpServlet {
 	private static class AfirmaSingleResult {
 
 		private final String error;
+		private final String errorMessage;
 
 		private AfirmaSingleResult(final String error) {
 			this.error = error;
+			this.errorMessage = null;
+		}
+
+		private AfirmaSingleResult(final String error, final String errorMessage) {
+			this.error = error;
+			this.errorMessage = errorMessage;
 		}
 
 		public boolean isOk() {
@@ -293,12 +302,16 @@ public class MiniAppletSuccessService extends HttpServlet {
 			return this.error;
 		}
 
+		public String getErrorMessage() {
+			return this.errorMessage;
+		}
+
 		public static AfirmaSingleResult getAfirmaOkResult() {
 			return new AfirmaSingleResult(null);
 		}
 
-		public static AfirmaSingleResult getAfirmaErrorResult(final String error) {
-			return new AfirmaSingleResult(error);
+		public static AfirmaSingleResult getAfirmaErrorResult(final String error, final String errorMessage) {
+			return new AfirmaSingleResult(error, errorMessage);
 		}
 	}
 }

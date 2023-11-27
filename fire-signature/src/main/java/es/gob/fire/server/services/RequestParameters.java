@@ -110,7 +110,7 @@ public class RequestParameters extends HashMap<String, String> {
 						if (i > 0) {
 
 							// Comprobamos que el tamano no exceda el maximo configurado
-							if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit(i - startParamsIdx, paramsMaxSize)) {
+							if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit((long)i - startParamsIdx, paramsMaxSize)) {
 								throw new IOException("Se envio un parametro al servicio que excedia el tamano maximo permitido: " + paramsMaxSize); //$NON-NLS-1$
 							}
 							// Agregamos al buffer el parametro que ya tenemos leido
@@ -125,7 +125,7 @@ public class RequestParameters extends HashMap<String, String> {
 				// Comprobamos que el parametro almacenado en el buffer mas lo nuevo no exceda el
 				// tamano maximo configurado
 
-				if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit(buffer.length() + n - startParamsIdx, paramsMaxSize)) {
+				if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit((long)buffer.length() + n - startParamsIdx, paramsMaxSize)) {
 					throw new IOException("Se envio un parametro al servicio que excedia el tamano maximo permitido: " + paramsMaxSize); //$NON-NLS-1$
 				}
 				// Agregamos al buffer el inicio de parametro que ya tenemos leido

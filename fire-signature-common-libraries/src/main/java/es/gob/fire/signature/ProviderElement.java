@@ -60,10 +60,13 @@ public class ProviderElement {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof ProviderElement) {
-			return this.name.equalsIgnoreCase(((ProviderElement) obj).getName());
+		if (obj != null) {
+			if (obj instanceof ProviderElement) {
+				return this.name.equalsIgnoreCase(((ProviderElement) obj).getName());
+			}
+			return this.name.equalsIgnoreCase(obj.toString());
 		}
-		return this.name.equalsIgnoreCase(obj.toString());
+		return false;
 	}
 
 	@Override

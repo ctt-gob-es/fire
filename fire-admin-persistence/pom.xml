@@ -33,10 +33,8 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
 		</dependency>
-		<!-- <dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-		</dependency> -->
+		<!-- <dependency> <groupId>javax.validation</groupId> <artifactId>validation-api</artifactId> 
+			</dependency> -->
 		<!-- Jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -47,12 +45,18 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>	
-		
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-to-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -63,16 +67,23 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.darrachequesne</groupId>
 			<artifactId>spring-data-jpa-datatables</artifactId>
 			<version>5.0.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
+		</dependency>
+
+		<!-- Mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

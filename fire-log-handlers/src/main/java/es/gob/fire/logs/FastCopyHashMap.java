@@ -454,7 +454,7 @@ public void clear()
    }
 
    @Override
-@SuppressWarnings("unchecked")
+   @SuppressWarnings("unchecked")
    public FastCopyHashMap<K, V> clone()
    {
       try
@@ -471,6 +471,15 @@ public void clear()
          // should never happen
          throw new IllegalStateException(e);
       }
+   } 
+   
+   @SuppressWarnings("null")
+   public FastCopyHashMap (FastCopyHashMap<K, V> map) {
+	   this.table = map.table.clone();
+	   this.entrySet = null;
+	   this.keySet = null;
+	   this.values = null;
+	   this.loadFactor = (Float) null;
    }
 
    public void printDebugStats()
@@ -720,11 +729,14 @@ public Collection<V> values()
 
    private class KeyIterator extends FastCopyHashMapIterator<K>
    {
-      @Override
-	public K next()
-      {
-         return unmaskNull(nextEntry().key);
-      }
+	   @Override 
+	   public K next() { 
+		   Entry<K, V> entry = nextEntry(); 
+		   if (entry == null) { 
+			   throw new NoSuchElementException(); 
+		   } 
+		   return unmaskNull(entry.key); 
+	   }
    }
 
    private class ValueIterator extends FastCopyHashMapIterator<V>
@@ -732,6 +744,10 @@ public Collection<V> values()
       @Override
 	public V next()
       {
+    	 Entry<K, V> entry = nextEntry();
+    	 if (entry == null) { 
+    		 throw new NoSuchElementException(); 
+		 } 
          return nextEntry().value;
       }
    }
@@ -760,6 +776,9 @@ public Collection<V> values()
 	public Map.Entry<K, V> next()
       {
          final Entry<K, V> e = nextEntry();
+         if (e == null) {
+			   throw new NoSuchElementException(); 
+		 } 
          return new WriteThroughEntry(unmaskNull(e.key), e.value);
       }
 

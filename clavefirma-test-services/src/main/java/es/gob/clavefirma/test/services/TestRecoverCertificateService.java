@@ -47,55 +47,65 @@ public class TestRecoverCertificateService extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
-
-		final String transactionId = request.getParameter(KEY_TRANSACTIONID);
-
-		final File transactionFile = TestHelper.getCanonicalFile(TestHelper.getDataFolder(), transactionId);
-		if (!transactionFile.isFile() || !transactionFile.canRead()) {
-			LOGGER.log(Level.WARNING, "La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception e = new FIReSignatureException("La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new ServletException(e);
-		}
-
-		final Properties p;
-		try (final InputStream fis = new FileInputStream(transactionFile)) {
-			p = new Properties();
-			p.load(fis);
-		}
-		catch(final IOException e) {
-			LOGGER.log(Level.WARNING, "Error cargando la transaccion: " + e, e); //$NON-NLS-1$
-			final Exception ex = new FIReSignatureException(
-				"Error cargando la transaccion: " + e, e //$NON-NLS-1$
-			);
-			throw new ServletException(ex);
-		}
-
-		// Eliminamos el fichero de la transaccion
-		transactionFile.delete();
-
-		if (!Boolean.parseBoolean(p.getProperty("auth"))) { //$NON-NLS-1$
-			LOGGER.log(Level.WARNING, "La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception ex = new FIReSignatureException("La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new ServletException(ex);
-		}
-
-		final byte[] certEncoded = Base64.decode(p.getProperty(KEY_CERTIFICATE));
 		try {
-			CertificateFactory.getInstance("X.509") //$NON-NLS-1$
-				.generateCertificate(new ByteArrayInputStream(certEncoded));
+			final String transactionId = request.getParameter(KEY_TRANSACTIONID);
+			
+			final File transactionFile = TestHelper.getCanonicalFile(TestHelper.getDataFolder(), transactionId);
+			if (!transactionFile.isFile() || !transactionFile.canRead()) {
+				LOGGER.log(Level.WARNING, "La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
+				final Exception e = new FIReSignatureException("La transaccion " + transactionId + " no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new ServletException(e);
+			}
+	
+			final Properties p;
+			try (final InputStream fis = new FileInputStream(transactionFile)) {
+				p = new Properties();
+				p.load(fis);
+			}
+			catch(final IOException e) {
+				LOGGER.log(Level.WARNING, "Error cargando la transaccion: " + e, e); //$NON-NLS-1$
+				final Exception ex = new FIReSignatureException(
+					"Error cargando la transaccion: " + e, e //$NON-NLS-1$
+				);
+				throw new ServletException(ex);
+			}
+	
+			// Eliminamos el fichero de la transaccion
+			transactionFile.delete();
+	
+			if (!Boolean.parseBoolean(p.getProperty("auth"))) { //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, "La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
+				final Exception ex = new FIReSignatureException("La transaccion " + transactionId + " no esta autorizada"); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new ServletException(ex);
+			}
+	
+			final byte[] certEncoded = Base64.decode(p.getProperty(KEY_CERTIFICATE));
+			try {
+				CertificateFactory.getInstance("X.509") //$NON-NLS-1$
+					.generateCertificate(new ByteArrayInputStream(certEncoded));
+			}
+			catch (final Exception e) {
+				LOGGER.log(Level.WARNING, "La transaccion " + transactionId + " no contiene un certificado valido: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+				final Exception ex = new FIReSignatureException(
+					"La transaccion " + transactionId + " no contiene un certificado valido: " + e, e //$NON-NLS-1$ //$NON-NLS-2$
+				);
+				throw new ServletException(ex);
+			}
+	
+			final StringBuilder result = buildJsonResult(true, certEncoded);
+	
+			response.getOutputStream().print(result.toString());
+			response.getOutputStream().flush();
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "La transaccion " + transactionId + " no contiene un certificado valido: " + e); //$NON-NLS-1$ //$NON-NLS-2$
-			final Exception ex = new FIReSignatureException(
-				"La transaccion " + transactionId + " no contiene un certificado valido: " + e, e //$NON-NLS-1$ //$NON-NLS-2$
-			);
-			throw new ServletException(ex);
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			try {
+				response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
+				response.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.warning("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			}
 		}
-
-		final StringBuilder result = buildJsonResult(true, certEncoded);
-
-		response.getOutputStream().print(result.toString());
-		response.getOutputStream().flush();
 	}
 
 	private static StringBuilder buildJsonResult(final boolean ok, final byte[] certEncoded) {

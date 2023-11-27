@@ -156,6 +156,15 @@ public class ConfigManager {
 	/** Configuraci&oacute;n del directorio de volcado de datosestad&iacute;sticos. */
 	private static final String PROP_STATISTICS_DIR = "statistics.dir"; //$NON-NLS-1$
 
+	/** Configuraci&oacute;n de la pol&iacute;tica de volcado de datos estad&iacute;sticos. */
+	private static final String PROP_AUDIT_POLICY ="audit.policy"; //$NON-NLS-1$
+
+	/** Configuraci&oacute;n de la hora de borrado de los datos de auditoria de base de datos. */
+	private static final String PROP_AUDIT_DELETE_TIME ="audit.deletetime"; //$NON-NLS-1$
+
+	/** Configuraci&oacute;n del directorio de volcado de datosestad&iacute;sticos. */
+	private static final String PROP_AUDIT_DIR = "audit.dir"; //$NON-NLS-1$
+
 	private static final String USE_TSP = "usetsp"; //$NON-NLS-1$
 	private static final String PROP_CHECK_CERTIFICATE = "security.checkCertificate"; //$NON-NLS-1$
 	private static final String PROP_CHECK_APPLICATION = "security.checkApplication"; //$NON-NLS-1$
@@ -250,18 +259,20 @@ public class ConfigManager {
 			}
 
 			// Comprobamos el valor establecido para la clase de cifrado
-			if (config.containsKey(PARAM_CIPHER_CLASS)) {
-				final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
-				if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
-					try {
-						final Class<?> decipherClass = Class.forName(decipherClassname);
-						final Object decipher = decipherClass.getConstructor().newInstance();
-						if (PropertyDecipher.class.isInstance(decipher)) {
-							decipherImpl = (PropertyDecipher) decipher;
+			if (config != null) {
+				if (config.containsKey(PARAM_CIPHER_CLASS)) {
+					final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
+					if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
+						try {
+							final Class<?> decipherClass = Class.forName(decipherClassname);
+							final Object decipher = decipherClass.getConstructor().newInstance();
+							if (PropertyDecipher.class.isInstance(decipher)) {
+								decipherImpl = (PropertyDecipher) decipher;
+							}
 						}
-					}
-					catch (final Exception e) {
-						LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
+						catch (final Exception e) {
+							LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
+						}
 					}
 				}
 			}
@@ -618,6 +629,39 @@ public class ConfigManager {
 	 * Devuelve la ruta configurada del directorio en el que almacenar los datos para la generaci&oacute;n de estad&iacute;sticas.
 	 * @return Ruta del directorio o {@code null} si no est&aacute; definida.
 	 */
+	public static String getAuditDir() {
+		 return getProperty(PROP_AUDIT_DIR);
+	}
+
+	/**
+	 * Devuelve el identificador num&eacute;rico de la pol&iacute;tica de firma configurada.
+	 * En caso de error, devuelve -1.
+	 * @return Dato num&eacute;rico.
+	 */
+	public static int getAuditPolicy() {
+		int policy;
+		try {
+			policy = Integer.parseInt(getProperty(PROP_AUDIT_POLICY));
+		}
+		catch (final NumberFormatException e) {
+			policy = -1;
+		}
+		return policy;
+	}
+
+	/**
+	 * Devuelve la hora a la que se debe realizar el borrado de los datos de auditoria de base de
+	 * datos o {@code null} si no
+	 * @return Hora con formato hh:mm:ss o {@code null} si no se establece.
+	 */
+	public static String getAuditDeleteTime() {
+		 return getProperty(PROP_AUDIT_DELETE_TIME);
+	}
+
+	/**
+	 * Devuelve la ruta configurada del directorio en el que almacenar los datos para la generaci&oacute;n de estad&iacute;sticas.
+	 * @return Ruta del directorio o {@code null} si no est&aacute; definida.
+	 */
 	public static String getStatisticsDir() {
 		 return getProperty(PROP_STATISTICS_DIR);
 	}
@@ -682,7 +726,7 @@ public class ConfigManager {
 			} catch (final ConfigFilesException e) {
 				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central. Se usaran " //$NON-NLS-1$
 						+ DEFAULT_FIRE_TEMP_TIMEOUT + " segundos: " + e); //$NON-NLS-1$
-				return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
+				return (long) DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 			}
 		}
 
@@ -694,7 +738,7 @@ public class ConfigManager {
 			LOGGER.log(Level.WARNING, "Tiempo de expiracion invalido en la propiedad '" + PROP_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
 					"' del fichero de configuracion. Se usaran " + DEFAULT_FIRE_TEMP_TIMEOUT + //$NON-NLS-1$
 					" segundos: " + e); //$NON-NLS-1$
-			return DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
+			return (long) DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
 		}
 	}
 

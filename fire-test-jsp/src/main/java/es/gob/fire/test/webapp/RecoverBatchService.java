@@ -38,40 +38,55 @@ public class RecoverBatchService extends HttpServlet {
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
 
-		final HttpSession session = request.getSession(false);
-		if ( session == null || session.getAttribute("user") == null) { //$NON-NLS-1$
-			response.sendRedirect("Login.jsp"); //$NON-NLS-1$
-			return;
+		try {
+			final HttpSession session = request.getSession(false);
+			if ( session == null || session.getAttribute("user") == null) { //$NON-NLS-1$
+				response.sendRedirect("Login.jsp"); //$NON-NLS-1$
+				return;
+			}
+
+			final String transactionId = (String) session.getAttribute("transactionId"); //$NON-NLS-1$
+			if (transactionId == null) {
+				LOGGER.error("No se ha encontrado id de transaccion iniciada"); //$NON-NLS-1$
+				response.sendRedirect("Login.jsp"); //$NON-NLS-1$
+				return;
+			}
+
+		   BatchResult result = null;
+		    try {
+		    	result = BatchHelper.recoverBatchResult(request);
+		    }
+		    catch (final Exception e) {
+				LOGGER.error("Error durante la operacion de recuperacion del lote", e); //$NON-NLS-1$
+				final String msg = e.getMessage() != null ? e.getMessage() : e.toString();
+		    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(msg, "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
+		    	return;
+		    }
+
+		    LOGGER.info("Proveedor usado: " + result.getProviderName()); //$NON-NLS-1$
+
+		    try {
+				LOGGER.info("Certificado de firma: " + (result.getSigningCert() != null ? //$NON-NLS-1$
+						Base64.encode(result.getSigningCert().getEncoded()) : null));
+			} catch (final CertificateEncodingException e) {
+				LOGGER.error("No se pudo decodificar el certificado de firma: " + e); //$NON-NLS-1$
+			}
+
+		    try {
+		    	response.getOutputStream().write(result.toString().getBytes(StandardCharsets.UTF_8));
+			    response.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error interno: " + e); //$NON-NLS-1$
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			try {
+				response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
+				response.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			}
 		}
-
-		final String transactionId = (String) session.getAttribute("transactionId"); //$NON-NLS-1$
-		if (transactionId == null) {
-			LOGGER.error("No se ha encontrado id de transaccion iniciada"); //$NON-NLS-1$
-			response.sendRedirect("Login.jsp"); //$NON-NLS-1$
-			return;
-		}
-
-	   BatchResult result = null;
-	    try {
-	    	result = BatchHelper.recoverBatchResult(request);
-	    }
-	    catch (final Exception e) {
-			LOGGER.error("Error durante la operacion de recuperacion del lote", e); //$NON-NLS-1$
-			final String msg = e.getMessage() != null ? e.getMessage() : e.toString();
-	    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(msg, "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$
-	    	return;
-	    }
-
-	    LOGGER.info("Proveedor usado: " + result.getProviderName()); //$NON-NLS-1$
-
-	    try {
-			LOGGER.info("Certificado de firma: " + (result.getSigningCert() != null ? //$NON-NLS-1$
-					Base64.encode(result.getSigningCert().getEncoded()) : null));
-		} catch (final CertificateEncodingException e) {
-			LOGGER.error("No se pudo decodificar el certificado de firma: " + e); //$NON-NLS-1$
-		}
-
-	    response.getOutputStream().write(result.toString().getBytes(StandardCharsets.UTF_8));
-	    response.flushBuffer();
 	}
 }

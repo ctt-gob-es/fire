@@ -62,7 +62,6 @@ public final class SignBatchSerial extends SignBatch {
 				trisignsArrayBuilder.add(TriphaseDataParser.triphaseDataToJson(td));
 			} catch (final Exception e) {
 				errorsArrayBuilder.add(buildSignResult(ss.getId(), Result.ERROR_PRE, e));
-
 				if (this.stopOnError) {
 					ignoreRemaining = true;
 					LOGGER.log(Level.WARNING,
@@ -116,7 +115,11 @@ public final class SignBatchSerial extends SignBatch {
 							"Se detecto un error previo en la firma %1s, se continua con el resto de elementos", //$NON-NLS-1$
 							LoggerUtil.getTrimStr(ss.getDataRef())));
 				}
-				ss.setProcessResult(new ProcessResult(Result.ERROR_PRE, "Error en la prefirma")); //$NON-NLS-1$
+				String errorMessage = ss.getProcessResult().getDescription();
+				if (errorMessage == null) {
+					errorMessage = "Error en la prefirma";
+				}
+				ss.setProcessResult(new ProcessResult(Result.ERROR_PRE, errorMessage)); //$NON-NLS-1$
 				continue;
 			}
 

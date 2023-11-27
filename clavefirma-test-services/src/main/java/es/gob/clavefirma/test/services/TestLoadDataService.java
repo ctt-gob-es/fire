@@ -75,43 +75,54 @@ public class TestLoadDataService extends HttpServlet {
 		final String redirectErrorUrlB64UrlSafe = request.getParameter(KEY_REDIRECT_ERROR);
 		final String infoDocumentosB64 = request.getParameter(KEY_INFODOCUMENTOS);
 
-		try {
-			TestHelper.doSubjectExist(subjectId);
-		}
-		catch (final InvalidUserException e) {
-			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no existe", e); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendError(CustomHttpErrors.HTTP_ERROR_UNKNOWN_USER, "El usuario no existe"); //$NON-NLS-1$
+		try{
+			try {
+				TestHelper.doSubjectExist(subjectId);
+			}
+			catch (final InvalidUserException e) {
+				LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no existe", e); //$NON-NLS-1$ //$NON-NLS-2$
+				response.sendError(CustomHttpErrors.HTTP_ERROR_UNKNOWN_USER, "El usuario no existe"); //$NON-NLS-1$
+				response.flushBuffer();
+				return;
+			}
+	
+			final Properties p = new Properties();
+			p.put(KEY_TRIPHASEDATA, triDataB64UrlSafe.replace('-', '+').replace('_', '/'));
+			p.put(KEY_ALGORITHM, algorithm != null ? algorithm : "SHA1withRSA"); //$NON-NLS-1$
+			p.put(KEY_SUBJECTID, subjectId);
+			p.put(KEY_CERTIFICATE, certB64UrlSafe.replace('-', '+').replace('_', '/'));
+	
+			if (!TestHelper.subjectKeyStoreExist(subjectId)) {
+				p.put(KEY_NEWCERT, Boolean.TRUE.toString());
+			}
+	
+			final String transactionId = UUID.randomUUID().toString();
+			final File transactionFile = new File(TestHelper.getDataFolder(), transactionId);
+			try (final OutputStream fos = new FileOutputStream(transactionFile)) {
+				p.store(fos, ""); //$NON-NLS-1$
+			}
+	
+			final String redirectUrl = TestHelper.getSignRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe, infoDocumentosB64);
+	
+			final LoadResult result = new LoadResult(
+				transactionId,
+				redirectUrl,
+				TriphaseData.parser(Base64.decode(triDataB64UrlSafe, true))
+			);
+	
+			response.setCharacterEncoding(TestHelper.DEFAULT_ENCODING.displayName());
+			response.getOutputStream().write(result.encodeResult(TestHelper.DEFAULT_ENCODING));
 			response.flushBuffer();
-			return;
 		}
-
-		final Properties p = new Properties();
-		p.put(KEY_TRIPHASEDATA, triDataB64UrlSafe.replace('-', '+').replace('_', '/'));
-		p.put(KEY_ALGORITHM, algorithm != null ? algorithm : "SHA1withRSA"); //$NON-NLS-1$
-		p.put(KEY_SUBJECTID, subjectId);
-		p.put(KEY_CERTIFICATE, certB64UrlSafe.replace('-', '+').replace('_', '/'));
-
-		if (!TestHelper.subjectKeyStoreExist(subjectId)) {
-			p.put(KEY_NEWCERT, Boolean.TRUE.toString());
+		catch (final Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			try {
+				response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
+				response.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.warning("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			}
 		}
-
-		final String transactionId = UUID.randomUUID().toString();
-		final File transactionFile = new File(TestHelper.getDataFolder(), transactionId);
-		try (final OutputStream fos = new FileOutputStream(transactionFile)) {
-			p.store(fos, ""); //$NON-NLS-1$
-		}
-
-		final String redirectUrl = TestHelper.getSignRedirectionUrl(subjectId, transactionId, redirectOkUrlB64UrlSafe, redirectErrorUrlB64UrlSafe, infoDocumentosB64);
-
-		final LoadResult result = new LoadResult(
-			transactionId,
-			redirectUrl,
-			TriphaseData.parser(Base64.decode(triDataB64UrlSafe, true))
-		);
-
-		response.setCharacterEncoding(TestHelper.DEFAULT_ENCODING.displayName());
-		response.getOutputStream().write(result.encodeResult(TestHelper.DEFAULT_ENCODING));
-		response.flushBuffer();
 	}
 
 }

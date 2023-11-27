@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.server.services.batch.ProcessResult.Result;
 
 
 /** Realiza la primera fase de un proceso de firma por lote.

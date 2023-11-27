@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Properties;
 
@@ -25,6 +26,7 @@ import com.openlandsw.rss.gateway.GateWayAPI;
 import com.openlandsw.rss.gateway.ListOwnerCertificateInfo;
 import com.openlandsw.rss.gateway.QueryCertificatesResult;
 import com.openlandsw.rss.gateway.RSSListOwnerCertificatesResult;
+import com.openlandsw.rss.gateway.SfdaDataInfo;
 import com.openlandsw.rss.gateway.constants.ConstantsGateWay;
 import com.openlandsw.rss.gateway.exception.SafeCertGateWayException;
 
@@ -44,6 +46,8 @@ public class TestSiaGateway {
 	private static final int ACTIVES = 1;
 	private static final int SIGNATURE = 2;
 	private static final int ALL = 3;
+
+	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/YYYY HH:mm"); //$NON-NLS-1$
 
 	/**
 	 * Comprueba la operaci&oacute;n de solicitud de certificados.
@@ -145,17 +149,67 @@ public class TestSiaGateway {
 		if (result == null) {
             throw new NoCertificatesException("No se han obtenido certificados"); //$NON-NLS-1$
         }
+
         final ListOwnerCertificateInfo[] certsInfo = result.getCertificates();
-        final byte[][] certs = new byte[certsInfo.length][];
+
+		final byte[][] certs = new byte[certsInfo.length][];
         for (int i = 0; i < certsInfo.length; i++) {
         	System.out.println("-----------------------------------------------"); //$NON-NLS-1$
         	System.out.println("Identificador: " + certsInfo[i].getIdentifier()); //$NON-NLS-1$
-        	System.out.println("Estado stateCode: " + certsInfo[i].getState().stateCode); //$NON-NLS-1$
-        	System.out.println("Estado useLocked: " + certsInfo[i].getState().useLocked); //$NON-NLS-1$
-        	System.out.println("Estado description: " + certsInfo[i].getState().stateDescription); //$NON-NLS-1$
-        	System.out.println("PKCS11Indo LabelKey: " + certsInfo[i].getpKCS11Info()); //$NON-NLS-1$
+        	if (certsInfo[i].getState() != null) {
+        		System.out.println("Estado stateCode: " + certsInfo[i].getState().getStateCode()); //$NON-NLS-1$
+        		System.out.println("Estado description: " + certsInfo[i].getState().getStateDescription()); //$NON-NLS-1$
+        		System.out.println("Estado useLocked: " + certsInfo[i].getState().isUseLocked()); //$NON-NLS-1$
+        	}
+        	System.out.println("Intentos hasta el bloqueo: " + certsInfo[i].getAttemptsToLock()); //$NON-NLS-1$
+        	if (certsInfo[i].getLockTime() != null) {
+        		System.out.println("Tiempo de bloqueo: " + dateFormatter.format(certsInfo[i].getLockTime().getTime())); //$NON-NLS-1$
+        	}
+        	if (certsInfo[i].getpKCS11Info() != null) {
+        		System.out.println("PKCS11Info IdKey: " + certsInfo[i].getpKCS11Info().getIdKey()); //$NON-NLS-1$
+        		System.out.println("PKCS11Info LabelKey: " + certsInfo[i].getpKCS11Info().getLabelKey()); //$NON-NLS-1$
+        		System.out.println("PKCS11Info Slot: " + certsInfo[i].getpKCS11Info().getSlot()); //$NON-NLS-1$
+        	}
+        	System.out.println((certsInfo[i].getCsr() != null ? "Si" : "No") + " tiene definido CSR"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            System.out.println("Repositorio: " + certsInfo[i].getRepository()); //$NON-NLS-1$
+        	System.out.println("GenerationCode: " + certsInfo[i].getGenerationCode()); //$NON-NLS-1$
         	System.out.println("GenerationDescription: " + certsInfo[i].getGenerationDescription()); //$NON-NLS-1$
-        	System.out.println("Repository: " + certsInfo[i].getRepository()); //$NON-NLS-1$
+        	if (certsInfo[i].getStartDate() != null) {
+        		System.out.println("Fecha de inicio: " + dateFormatter.format(certsInfo[i].getStartDate().getTime())); //$NON-NLS-1$
+        	}
+        	if (certsInfo[i].getEndDate() != null) {
+        		System.out.println("Fecha de fin: " + dateFormatter.format(certsInfo[i].getEndDate().getTime())); //$NON-NLS-1$
+        	}
+        	System.out.println("Se requiere PIN: " + certsInfo[i].isPinRequired()); //$NON-NLS-1$
+        	System.out.println("Se requiere segundo factor (SFDA): " + certsInfo[i].isSfdaRequired()); //$NON-NLS-1$
+        	final List<SfdaDataInfo> sfdaList = certsInfo[i].getSfdaList();
+        	if (sfdaList != null) {
+        		System.out.println("Listados de SFDAs:"); //$NON-NLS-1$
+        		for (final SfdaDataInfo sfda : sfdaList) {
+        			if (sfda.getSfdaIdentifier() != null) {
+        				System.out.println("\tId:" + sfda.getSfdaIdentifier().getIdSfda()); //$NON-NLS-1$
+        				System.out.println("\tNombre: " + sfda.getSfdaIdentifier().getNombreSfda()); //$NON-NLS-1$
+        			}
+        			if (sfda.getDataPrepareOperation() != null) {
+        				System.out.println("\tOperacion de preparacion de datos (Info cert):" + sfda.getDataPrepareOperation().getCertificateInfo()); //$NON-NLS-1$
+        				if (sfda.getDataPrepareOperation().getDateEndAuthValue() != null) {
+        					System.out.println("\tOperacion de preparacion de datos (Fecha fin auth):" + dateFormatter.format(sfda.getDataPrepareOperation().getDateEndAuthValue().getTime())); //$NON-NLS-1$
+        				}
+        				if (sfda.getDataPrepareOperation().getDateStartAuthValue() != null) {
+            				System.out.println("\tOperacion de preparacion de datos (Fecha inicio auth):" + dateFormatter.format(sfda.getDataPrepareOperation().getDateStartAuthValue().getTime())); //$NON-NLS-1$
+        				}
+        				if (sfda.getDataPrepareOperation().getDataExchange() != null) {
+            				System.out.println("\tOperacion de preparacion de datos (isCallPrepareOperation):" + sfda.getDataPrepareOperation().getDataExchange().isCallPrepareOperation()); //$NON-NLS-1$
+        				}
+        			}
+        			if (sfda.getSfdaErrorInfo() != null) {
+        				System.out.println("\tCodigo error: " + sfda.getSfdaErrorInfo().getSfdaErrorCode()); //$NON-NLS-1$
+        				System.out.println("\tMensaje error: " + sfda.getSfdaErrorInfo().getSfdaErrorCode()); //$NON-NLS-1$
+        			}
+
+        			System.out.println("\t---"); //$NON-NLS-1$
+        		}
+        	}
 
         	final byte[] certEncodedB64 = certsInfo[i].getContent();
         	certs[i] = Base64.decode(certEncodedB64, 0, certEncodedB64.length, false);

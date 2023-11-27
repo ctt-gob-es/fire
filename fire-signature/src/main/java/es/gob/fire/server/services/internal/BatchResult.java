@@ -75,6 +75,7 @@ public class BatchResult extends OperationResult implements Serializable {
 	private static final String JSON_ATTR_DOC_ID = "id"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_OK = "ok"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_DETAILS = "dt"; //$NON-NLS-1$
+	private static final String JSON_ATTR_DOC_ERROR_MESSAGE = "errorm"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_GRACE_PERIOD = "grace"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_GP_ID = "id"; //$NON-NLS-1$
 	private static final String JSON_ATTR_DOC_GP_DATE = "date"; //$NON-NLS-1$
@@ -254,6 +255,20 @@ public class BatchResult extends OperationResult implements Serializable {
 		return !docRef.isSigned() && !PENDING.equals(error);
 	}
 
+	public synchronized void setErrorMessage(final String docId, final String errorMessage) {
+		this.results.get(docId).setErrorMessage(errorMessage);
+	}
+
+	public String getErrorMessage(final String docId) {
+		final BatchDocumentReference docRef = this.results.get(docId);
+		if (docRef == null) {
+			return null;
+		}
+
+		final String errorMessage = docRef.getErrorMessage();
+		return errorMessage;
+	}
+
 	/**
 	 * Indica si la firma requiere que se espere un periodo de gracia.
 	 * @param docId Identificador del documento.
@@ -307,7 +322,8 @@ public class BatchResult extends OperationResult implements Serializable {
 			final JsonObjectBuilder docInfo = Json.createObjectBuilder()
 			.add(JSON_ATTR_DOC_ID, id)
 			.add(JSON_ATTR_DOC_OK, result.isSigned())
-			.add(JSON_ATTR_DOC_DETAILS, result.getDetails() != null ? result.getDetails() : ""); //$NON-NLS-1$
+			.add(JSON_ATTR_DOC_DETAILS, result.getDetails() != null ? result.getDetails() : "") //$NON-NLS-1$
+			.add(JSON_ATTR_DOC_ERROR_MESSAGE, result.getErrorMessage() != null ? result.getErrorMessage() : "");//$NON-NLS-1$
 
 			// Si hay informacion del periodo de gracia, la agregamos
 			if (result.getGracePeriod() != null) {
@@ -364,6 +380,7 @@ public class BatchResult extends OperationResult implements Serializable {
 		private final String dataReference;
 		private boolean signed;
 		private String details;
+		private String errorMessage;
 		private final SignBatchConfig config;
 		private final DocInfo docInfo;
 		private GracePeriodInfo gracePeriod = null;
@@ -400,6 +417,10 @@ public class BatchResult extends OperationResult implements Serializable {
 			this.details = error;
 		}
 
+		public void setErrorMessage(final String errorMessage) {
+			this.errorMessage = errorMessage;
+		}
+
 		public String getDataReference() {
 			return this.dataReference;
 		}
@@ -410,6 +431,10 @@ public class BatchResult extends OperationResult implements Serializable {
 
 		public String getDetails() {
 			return this.details;
+		}
+
+		public String getErrorMessage()	{
+			return this.errorMessage;
 		}
 
 		public SignBatchConfig getSignConfig() {

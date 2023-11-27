@@ -196,7 +196,7 @@ public class StatisticsServiceImpl implements IStatisticsService {
 			// docWriter.getVerticalPosition(true) will approximate the position
 			// that the content above the chart ended
 
-			cb.addTemplate(tp, margin + offsetx, writer.getVerticalPosition(true) - height);
+			cb.addTemplate(tp, (float)(margin + offsetx), writer.getVerticalPosition(true) - height);
 
 			offsetx += width;
 
@@ -305,7 +305,7 @@ public class StatisticsServiceImpl implements IStatisticsService {
 			// docWriter.getVerticalPosition(true) will approximate the position
 			// that the content above the chart ended
 
-			cb.addTemplate(tp, 38 + offsetx, writer.getVerticalPosition(true) - height);
+			cb.addTemplate(tp, (float)(38 + offsetx), writer.getVerticalPosition(true) - height);
 
 			offsetx += width;
 
@@ -352,7 +352,7 @@ public class StatisticsServiceImpl implements IStatisticsService {
 			// docWriter.getVerticalPosition(true) will approximate the position
 			// that the content above the chart ended
 
-			cb.addTemplate(tp, 38 + offsetx, writer.getVerticalPosition(true) - height);
+			cb.addTemplate(tp, (float)(38 + offsetx), writer.getVerticalPosition(true) - height);
 
 			offsetx += width;
 
@@ -995,7 +995,7 @@ public class StatisticsServiceImpl implements IStatisticsService {
 			// docWriter.getVerticalPosition(true) will approximate the position
 			// that the content above the chart ended
 
-			cb.addTemplate(tp, 38 + offsetx, writer.getVerticalPosition(true) - height);
+			cb.addTemplate(tp, (float)(38 + offsetx), writer.getVerticalPosition(true) - height);
 
 			offsetx += width;
 		}

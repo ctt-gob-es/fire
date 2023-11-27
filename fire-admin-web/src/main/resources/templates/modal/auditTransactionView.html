@@ -1,0 +1,187 @@
+<div class="modal" tabindex="-1" role="dialog" id="auditTransactionViewModal">
+	<div class="modal-dialog-centered">
+		<div class="modal-content lg-900">
+			<div class="modal-header">
+				<div id="titleAdd">
+					<h4 class="modal-title" th:text="#{form.auditTransaction.view.title}"/>
+				</div>
+				<button type="button" class="close"
+					onclick="closeModal('auditTransactionViewModal')" aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body ml-3 mr-3">
+				<form name="auditTransactionViewForm" role="form" id="auditTransactionViewForm"
+					th:object="${auditTransactionViewForm}" action="#" method="post" enctype="multipart/form-data">
+										
+					<input type="hidden" id="idAuditTransaction" th:field="*{idAuditTransaction}"/>
+					
+					<div class="form-group row">
+						<div class="col-6">
+							<label for="idTransactionField" class="col-form-label" th:text="#{form.auditTransaction.idtransaction}"></label>
+							<input  type="text" id="idTransactionField" th:field="*{idTransaction}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="idTransactionField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+						<div class="col-6">
+							<label for="dateField" class="col-form-label" th:text="#{form.auditTransaction.date}"></label>
+							<input  type="text" id="dateField" th:field="*{date}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="dateField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<div class="col-6">
+							<label for="appField" class="col-form-label" th:text="#{form.auditTransaction.app}"></label>							
+							<input type="text" id="idAppField" th:field="*{idApp}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="idAppField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+						<div class="col-6">
+							<label for="appField" class="col-form-label" th:text="#{form.auditTransaction.appName}"></label>							
+							<input type="text" id="nameAppField" th:field="*{nameApp}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="nameAppField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<div class="col-6">
+							<label for="operationField" class="col-form-label" th:text="#{form.auditTransaction.operation}"></label>
+							<input  type="text" id="operationField" th:field="*{operation}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="operationField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+						<div class="col-6">
+							<label for="cryptoOperationField" class="col-form-label" th:text="#{form.auditTransaction.cryptooperation}"></label>
+							<input  type="text" id="cryptoOperationField" th:field="*{cryptoOperation}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="cryptoOperationField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<div class="col-4">
+							<label for="algorithmField" class="col-form-label" th:text="#{form.auditTransaction.algorithm}"></label>
+							<input  type="text" id="algorithmField" th:field="*{algorithm}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="algorithmField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+						<div class="col-4">
+							<label for="formatField" class="col-form-label" th:text="#{form.auditTransaction.format}"></label>
+							<input  type="text" id="formatField" th:field="*{format}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="formatField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+						<div class="col-4">
+							<label for="updateFormatField" class="col-form-label" th:text="#{form.auditTransaction.updateformat}"></label>
+							<input  type="text" id="updateFormatField" th:field="*{updateFormat}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="updateFormatField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+					</div>
+					
+					<div class="row d-flex align-items-center">
+						<div class="form-group col-6">
+							<label for="providerField" class="col-form-label" th:text="#{form.auditTransaction.provider}"></label>
+							<input  type="text" id="providerField" th:field="*{provider}" th:disabled="${disableInputs}" style="overflow:hidden width:50%" class="form-control" />
+							<span id="providerField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+						<div class="form-check col-6 mt-4">
+							<input type="checkbox" id="forcedProviderField" th:field="*{forcedProvider}" th:disabled="${disableInputs}"/>
+							<label for="habilitado" th:text="#{form.auditTransaction.forcedprovider}"></label>
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<div class="col-12">
+							<label for="browserField" class="col-form-label" th:text="#{form.auditTransaction.browser}"></label>
+							<input  type="text" id="browserField" th:field="*{browser}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="browserField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+					</div>
+					
+					<div class="form-group row" th:if="${isBatch != true}">
+						<div class="col-12">
+							<label for="sizeField" class="col-form-label" th:text="#{form.auditTransaction.size}"></label>
+							<input  type="text" id="sizeField" th:field="*{size}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="sizeField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<div class="col-6">
+							<label for="resultField" class="col-form-label" th:text="#{form.auditTransaction.result}"></label>
+							<input  type="text" id="resultField" th:field="*{result}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="resultField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+						<div class="col-6">
+							<label for="nodeField" class="col-form-label" th:text="#{form.auditTransaction.node}"></label>
+							<input  type="text" id="node" th:field="*{node}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="node_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col-12" th:if="*{errorDetail != null}">
+							<label for="errorTypeField" class="col-form-label" th:text="#{form.auditTransaction.errorDetail}"></label>
+							<input  type="text" id="errorDetail" th:field="*{errorDetail}" th:disabled="${disableInputs}" style="overflow:hidden" class="form-control" />
+							<span id="errorDetailField_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+						</div>
+					</div>
+					
+					<div class="form-group row" th:if="${isBatch}">
+						<table id="auditSignaturesTable"
+							class="table table-striped table-bordered display"
+							cellspacing="0" width="100%">
+							<thead>
+								<tr>
+									<th th:text="#{table.auditSignatures.id}"></th>
+									<th th:text="#{table.auditSignatures.format}"></th>
+									<th th:text="#{table.auditSignatures.updateFormat}"></th>
+									<th th:text="#{table.auditSignatures.size}"></th>
+									<th th:text="#{table.auditSignatures.result}"></th>
+									<th th:text="#{table.auditSignatures.errorDetail}"></th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+
+				</form>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default"
+						onclick="closeModal('auditTransactionViewModal')">Cerrar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:inline="javascript">
+$(document).ready(function() {
+	
+	var getAuditSignatures = /*[[@{/getAuditSignaturesOfTransaction}]]*/;
+	var idAuditTransaction = $('#idAuditTransaction').val();
+	
+	var tblAuditTransactions = $('#auditSignaturesTable').DataTable({     
+		"searching": false,
+		"ordering": false,
+		"info": false,
+		"lengthChange": false,
+		"paging": false,
+		"processing": true,
+        "serverSide": true,
+        "ajax": {
+            "url": getAuditSignatures+"?idAuditTransaction="+idAuditTransaction,
+            "dataSrc" : "data",
+            "data": function (data) {
+                // Datos a pasar al modal
+                data.formId = "viewAuditTransactionModal";
+            }
+        },
+        "language": {
+            "url": "js/datatables/i18n/spanish.json"
+        },
+        "columns": [
+              { "data": "idIntLote"},
+	          { "data": "format"},
+              { "data": "updateFormat"},
+	          { "data": "size"},
+              { "data": "result"},
+              { "data": "errorDetail"}
+            ],
+            select: 'single',
+            responsive: true
+	});
+});
+</script>

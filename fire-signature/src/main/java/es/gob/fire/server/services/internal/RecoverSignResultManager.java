@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
+import es.gob.fire.server.services.statistics.AuditTransactionRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 
@@ -30,6 +32,8 @@ public class RecoverSignResultManager {
 	private static final Logger LOGGER = Logger.getLogger(RecoverSignResultManager.class.getName());
 	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 	private static final TransactionRecorder TRANSLOGGER = TransactionRecorder.getInstance();
+	private static final AuditSignatureRecorder AUDITSIGNLOGGER = AuditSignatureRecorder.getInstance();
+	private static final AuditTransactionRecorder AUDITTRANSLOGGER = AuditTransactionRecorder.getInstance();
 
 	/**
 	 * Obtiene el resultado del proceso de firma.
@@ -77,6 +81,8 @@ public class RecoverSignResultManager {
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma: " + errMessage)); //$NON-NLS-1$
     		SIGNLOGGER.register(session, false, null);
     		TRANSLOGGER.register(session, false);
+    		AUDITSIGNLOGGER.register(session, false, null, RecoverSignResultManager.class.getName());
+    		AUDITTRANSLOGGER.register(session, true);
     		SessionCollector.removeSession(session, trAux);
         	final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, Integer.parseInt(errType), errMessage, trAux);
         	Responser.sendError(response, FIReError.SIGNING, result);
@@ -90,9 +96,12 @@ public class RecoverSignResultManager {
         	signResult = TempDocumentsManager.retrieveDocument(transactionId);
         }
         catch (final Exception e) {
-        	LOGGER.warning(logF.f("No se encuentra el resultado de la operacion de firma. Puede haber caducado la sesion: " + e)); //$NON-NLS-1$
-    		SIGNLOGGER.register(session, false, null);
-    		TRANSLOGGER.register(session, false);
+			final String errorMessage = "No se encuentra el resultado de la operacion. Puede haber caducado la sesion: " + e; //$NON-NLS-1$
+			LOGGER.warning(logF.f(errorMessage));
+			SIGNLOGGER.register(session, false, null);
+			TRANSLOGGER.register(session, false);
+			AUDITSIGNLOGGER.register(session, false, null, errorMessage);
+			AUDITTRANSLOGGER.register(session, false, errorMessage);
     		SessionCollector.removeSession(session, trAux);
     		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
@@ -101,6 +110,8 @@ public class RecoverSignResultManager {
         // Se registra resultado de operacion firma
         SIGNLOGGER.register(session, true, null);
         TRANSLOGGER.register(session, true);
+        AUDITSIGNLOGGER.register(session, true, null);
+        AUDITTRANSLOGGER.register(session, true);
 
         // Ya no necesitaremos la sesion, asi que la eliminamos del pool
         SessionCollector.removeSession(session, trAux);

@@ -240,6 +240,7 @@ public final class FIReTriHelper {
         	// producido en alguna firma anterior), se marca todo como no procesado
         	if (stopOperation) {
         		doc.setBatchResult(BatchResult.NO_PROCESSED);
+        		doc.setErrorMessage("Se ha interrumpido la operacion.");
         		continue;
         	}
 
@@ -264,6 +265,7 @@ public final class FIReTriHelper {
     				stopOperation = true;
 				}
         		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+        		doc.setErrorMessage(e.getMessage());
     			continue;
             }
 
@@ -300,11 +302,12 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-        			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
+                    LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
             		if (stopOnError) {
             			stopOperation = true;
 					}
             		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+            		doc.setErrorMessage(e.getMessage());
         			continue;
         		}
         	}
@@ -324,11 +327,12 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-        			LOGGER.warning(logF.f("Error en la prefirma al cofirmar: ") + e); //$NON-NLS-1$
+                    LOGGER.warning(logF.f("Error en la prefirma al cofirmar: ") + e); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
 					}
             		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+            		doc.setErrorMessage(e.getMessage());
         			continue;
         		}
         	}
@@ -357,11 +361,12 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-        			LOGGER.warning(logF.f("Error en la prefirma al contrafirmar: ") + e); //$NON-NLS-1$
+                    LOGGER.warning(logF.f("Error en la prefirma al contrafirmar: ") + e); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
 					}
             		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+            		doc.setErrorMessage(e.getMessage());
         			continue;
         		}
 
@@ -372,11 +377,12 @@ public final class FIReTriHelper {
         		preRes = FIReTriSignIdProcessor.make(preRes);
         	}
         	else {
-        		LOGGER.warning(logF.f("Operacion no soportada")); //$NON-NLS-1$
+                LOGGER.warning(logF.f("Operacion no soportada")); //$NON-NLS-1$
         		if (stopOnError) {
         			stopOperation = true;
         		}
         		doc.setBatchResult(BatchResult.INVALID_SIGNATURE_OPERATION);
+        		doc.setErrorMessage("Operacion no soportada");
     			continue;
         	}
 

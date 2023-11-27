@@ -161,6 +161,17 @@ public class AddDocumentBatchManager {
     	// Registramos el tamano del documento con fines estadisticos
     	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, Long.valueOf(data.length));
 
+    	// Obtenemos el tamano de la transaccion
+		final Object transactionSizeObject = session.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE);
+		long transactionSize = transactionSizeObject != null && transactionSizeObject instanceof Long
+				? transactionSize = ((Long) transactionSizeObject).longValue()
+				: 0;
+
+		//Sumamos el tamano del documento actual al tamano de la transaccion
+		transactionSize = transactionSize + data.length;
+
+    	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE, Long.valueOf(transactionSize));
+
     	// Recuperamos el listado de documentos del lote o lo creamos si este es el primero
         BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
         if (batchResult == null) {

@@ -39,7 +39,6 @@ import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
-import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
 
 /**
@@ -55,8 +54,6 @@ public final class PreSignService extends HttpServlet {
 	private static final long serialVersionUID = 7165850857019380976L;
 
 	private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
-
-	private static final SignatureRecorder SIGNLOGGER = SignatureRecorder.getInstance();
 
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
@@ -240,7 +237,7 @@ public final class PreSignService extends HttpServlet {
             }
             catch (final Exception e) {
                 LOGGER.log(Level.SEVERE, logF.f("Error en la prefirma de los datos"), e); //$NON-NLS-1$
-                ErrorManager.setErrorToSession(session, FIReError.SIGNING, trAux);
+                ErrorManager.setErrorToSession(session, FIReError.SIGNING, true, e.getMessage(), trAux);
                 Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
                 return;
             }
@@ -317,15 +314,16 @@ public final class PreSignService extends HttpServlet {
             boolean failed = false;
             for (final BatchDocument doc : documents) {
         		if (doc.getResult() != null) {
-        			SIGNLOGGER.register(session, false, doc.getId());
         			batchResult.setErrorResult(doc.getId(), doc.getResult());
+        			batchResult.setErrorMessage(doc.getId(), doc.getErrorMessage());
         			failed = true;
         		}
         	}
 
             if (failed && stopOnError) {
-                LOGGER.log(Level.SEVERE, logF.f("Se encontraron errores en las prefirmas del lote y se aborta la operacion")); //$NON-NLS-1$
-                ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, trAux);
+            	final String errorMessage = "Se encontraron errores en las prefirmas del lote y se aborta la operacion"; //$NON-NLS-1$
+                LOGGER.log(Level.SEVERE, logF.f(errorMessage));
+                ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, false, errorMessage, trAux);
                 Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
                 return;
             }
