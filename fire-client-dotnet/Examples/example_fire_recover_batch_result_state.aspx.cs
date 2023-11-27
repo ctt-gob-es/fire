@@ -7,7 +7,7 @@ public partial class example_fire_recover_batch_result_state : System.Web.UI.Pag
     {
         // Funcion del API de Clave Firma para cargar los datos a firmar
         float batchResult;
-        string appId = "B244E473466F"; // Identificador de la aplicacion (dada de alta previamente en el sistema)
+        string appId = "196647C3A40B"; // Identificador de la aplicacion (dada de alta previamente en el sistema)
         string transactionId = "e839c903-0dae-4ff9-9b52-d90f70069ce9";
         try
         {

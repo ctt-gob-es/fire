@@ -17,8 +17,8 @@ public partial class example_fire_recover_async_sign : System.Web.UI.Page
         // Funcion del API de Clave Firma para cargar los datos a firmar
         FireTransactionResult signature;
         string docId = "1573460420268258223";
-        string appId = "B244E473466F";
-        string upgradeFormat = "ES-T";
+        string appId = "196647C3A40B";
+        string upgradeFormat = "T-LEVEL";
         try
         {
             signature = new FireClient(appId, serviceConfig).recoverAsyncSign(

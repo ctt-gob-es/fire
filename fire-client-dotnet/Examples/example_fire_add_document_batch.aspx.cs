@@ -10,7 +10,7 @@ public partial class example_fire_add_document_batch : System.Web.UI.Page
                       "redirectErrorUrl=http://www.ibm.com";        // URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
         string confB64 = Base64Encode(conf);
         string dataB64 = Base64Encode("Hola Mundo!!");
-        string appId = "B244E473466F"; // Identificador de la aplicacion (dada de alta previamente en el sistema)
+        string appId = "196647C3A40B"; // Identificador de la aplicacion (dada de alta previamente en el sistema)
         string transactionId = "844b2698-6595-4698-a9c1-7682b7182fa7";
 
         FireClient client;

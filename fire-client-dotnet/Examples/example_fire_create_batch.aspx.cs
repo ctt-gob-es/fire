@@ -5,7 +5,7 @@ public partial class example_fire_create_batch : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        string appId = "B244E473466F";         // Identificador de la aplicacion (dada de alta previamente en el sistema)
+        string appId = "196647C3A40B";         // Identificador de la aplicacion (dada de alta previamente en el sistema)
         string conf = "redirectOkUrl=http://www.google.es\n" +	// URL a la que llegara si el usuario se autentica correctamente
                       "redirectErrorUrl=http://www.ibm.com";        // URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente
         string confB64 = Base64Encode(conf);
@@ -21,8 +21,8 @@ public partial class example_fire_create_batch : System.Web.UI.Page
                 "00001",        // DNI de la persona
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
                 "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
-                "SHA1withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
-                extraParamsB64, // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
+                "SHA256withRSA",  // Algoritmo de firma
+                extraParamsB64, // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams de AutoFirma
                 upgradeFormat,  // Actualizacion
                 confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
             );
@@ -32,7 +32,7 @@ public partial class example_fire_create_batch : System.Web.UI.Page
                 "00001",        // DNI de la persona
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
                 "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
-                "SHA1withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
+                "SHA256withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
                 extraParamsB64, // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
                 upgradeFormat,  // Actualizacion
                 confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
