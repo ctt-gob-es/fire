@@ -60,37 +60,49 @@
 			<artifactId>json</artifactId>
 			<version>20180130</version>
 		</dependency>
-		
+
 		<!-- Driver de base de datos -->
 		<dependency>
-		    <groupId>mysql</groupId>
-		    <artifactId>mysql-connector-java</artifactId>
-		    <version>8.0.28</version>
-		    <scope>provided</scope>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.28</version>
+			<scope>provided</scope>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>2.2.6.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- Forzamos la version de esta dependencia a una que se puede obtener de los repositorios maven -->
+			<!-- Forzamos la version de esta dependencia a una que se puede obtener 
+				de los repositorios maven -->
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>activation</artifactId>
 				<version>1.1.1</version>
 			</dependency>
-			<!-- <dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-to-slf4j</artifactId>
-				<version>2.17.0</version>
-			</dependency> -->
+			<!-- <dependency> <groupId>org.apache.logging.log4j</groupId> <artifactId>log4j-to-slf4j</artifactId> 
+				<version>2.17.0</version> </dependency> -->
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<finalName>fire-admin-web</finalName>
 		<plugins>
-		
+
 			<!-- Eclipse project -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -105,12 +117,42 @@
 				</configuration>
 			</plugin>
 			<plugin>
-       	 		<artifactId>maven-war-plugin</artifactId>
-       	 		<version>3.3.2</version>
-        		<configuration>
-          			<packagingExcludes>WEB-INF/classes/fire-log4j2.xml</packagingExcludes>
-        		</configuration>
-      </plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.3.2</version>
+				<configuration>
+					<packagingExcludes>WEB-INF/classes/fire-log4j2.xml</packagingExcludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
+				<executions>
+					<!-- to avoid bugs in some situations -->
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+
+					<!-- create report during maven verify phase -->
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.18.1</version>
+				<configuration>
+					<argLine>${argLine}</argLine>
+				</configuration>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -121,6 +163,6 @@
 			</resource>
 		</resources>
 	</build>
-	
+
 
 </project>

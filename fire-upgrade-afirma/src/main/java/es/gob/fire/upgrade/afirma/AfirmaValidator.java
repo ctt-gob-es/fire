@@ -159,7 +159,7 @@ public class AfirmaValidator implements SignatureValidator {
 	public VerifyResult validateSignature(final byte[] signature, final Properties config)
 			throws ConnectionException, VerifyException {
 
-		if (this.conn == null || this.appId == null) {
+		if (this.conn == null) {
 			throw new VerifyException("No se ha inicializado el validador. Llame al metodo " //$NON-NLS-1$
 					+ "init() proporcionando la configuracion necesaria"); //$NON-NLS-1$
 		}

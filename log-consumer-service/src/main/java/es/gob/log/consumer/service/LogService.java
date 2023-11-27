@@ -96,7 +96,7 @@ public class LogService extends HttpServlet {
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			doPost(req, resp);
-		} catch (IOException e) {
+		} catch (ServletException | IOException e) {
 			LOGGER.warn("Ocurrio un error en la operacion. Excepcion: " + e);
 		}
 		
@@ -243,9 +243,12 @@ public class LogService extends HttpServlet {
 			resp.getOutputStream().flush();
 		} catch (Exception e) {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			resp.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
-			resp.flushBuffer();
-
+			try {
+				resp.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
+				resp.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			}
 		}
 	}
 

@@ -114,11 +114,19 @@ public final class SessionCollector {
     public static FireSession createFireSession(final String subjectId, final TransactionAuxParams trAux) {
 
     	final String transactionId = generateTransactionId();
-    	final String subjectRef = generateSubjectRef(transactionId, subjectId);
+    	final String subjectRef;
+    	if (transactionId != null) {
+    		subjectRef = generateSubjectRef(transactionId, subjectId);
+    	} else {
+    		LOGGER.warning("No se pudo generar la variable subjectRef puesto que transactionId es nulo");
+    		subjectRef = null;
+    	}
 
     	final FireSession fireSession = FireSession.newSession(transactionId);
     	fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_ID, subjectId);
-    	fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_REF, subjectRef);
+    	if (subjectRef != null) {
+    		fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_REF, subjectRef);
+    	}
 
     	if (LOGGER.isLoggable(Level.FINE)) {
     		LOGGER.fine(trAux.getLogFormatter().fTr(transactionId, "Se crea la transaccion " + transactionId)); //$NON-NLS-1$

@@ -99,8 +99,12 @@ public class TestRecoverCertificateService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
-			response.flushBuffer();
+			try {
+				response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
+				response.flushBuffer();
+			} catch (IOException ioe) {
+				LOGGER.warning("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			}
 		}
 	}
 

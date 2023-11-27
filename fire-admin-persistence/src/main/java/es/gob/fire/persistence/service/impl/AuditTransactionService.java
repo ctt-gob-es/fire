@@ -22,11 +22,6 @@ import es.gob.fire.persistence.service.IAuditTransactionService;
 public class AuditTransactionService implements IAuditTransactionService{
 	
 	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(AuditTransactionService.class);
-	
-	/**
 	 * Attribute that represents the injected interface that provides CRUD
 	 * operations for the persistence.
 	 */

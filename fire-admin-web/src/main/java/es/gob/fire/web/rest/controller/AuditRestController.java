@@ -89,7 +89,11 @@ public class AuditRestController {
 	 */
 	@Value("${audit.time.default}")
 	private String auditTimeProperty;
-	
+
+	public void setAuditTimeProperty(String auditTimeProperty) {
+		this.auditTimeProperty = auditTimeProperty;
+	}
+
 	/**
 	 * Attribute that represents the service object for accessing the
 	 * repository.
@@ -221,9 +225,9 @@ public class AuditRestController {
 		return dtOuput;
 	}
 	
-	@RequestMapping(path = "/getAuditTransactionsFirstLoadDate", method = RequestMethod.GET)
-	public String getAuditFirstLoadDate() {
-		String loadDateString = "Fecha de filtrado: ";
+	@RequestMapping(path = "/getAuditTransactionsFirstLoadFromDate", method = RequestMethod.GET)
+	public String getAuditFirstLoadFromDate() {
+		String loadDateString = "";
 		
 		Integer auditTimeDefault = Integer.parseInt(auditTimeProperty); 
 		
@@ -231,14 +235,27 @@ public class AuditRestController {
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		
-		loadDateString += dateFormat.format(firstLoadDate) + TIME_EXPRESSION_SEPARATOR + TIME_EXPRESSION_NO_END_DATE;
+		loadDateString += dateFormat.format(firstLoadDate);
+		
+		return loadDateString;
+	}
+	
+	@RequestMapping(path = "/getAuditTransactionsFirstLoadToDate", method = RequestMethod.GET)
+	public String getAuditFirstLoadToDate() {
+		String loadDateString = "";
+		
+		Date firstLoadDate = new Date(); 
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		
+		loadDateString += dateFormat.format(firstLoadDate);
 		
 		return loadDateString;
 	}
 	
 	@RequestMapping(path = "/getAuditTransactionsFilterLoadDate", method = RequestMethod.GET)
 	public String getAuditFilterLoadDate(@RequestParam("from") String from, @RequestParam("to") String to, @RequestParam("app") String app) {
-		String loadDateString = "Fecha de filtrado: ";
+		String loadDateString = "";
 		
 		boolean fromIsNotNull = from != null && !from.isEmpty();
 		boolean toIsNotNull = to != null && !to.isEmpty();

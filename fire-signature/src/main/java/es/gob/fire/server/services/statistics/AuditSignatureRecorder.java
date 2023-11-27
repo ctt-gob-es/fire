@@ -102,10 +102,6 @@ public class AuditSignatureRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para la auditoria de transaccion", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
-		} finally {
-			if (logHandler != null){
-				logHandler.close();
-			}
 		}
 
 		this.dataLogger = fileLogger;
