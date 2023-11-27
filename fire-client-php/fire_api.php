@@ -21,7 +21,7 @@
 		CURLOPT_SSLCERTTYPE => "PEM",
 		CURLOPT_SSLKEY => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_private_key.pem",
 		CURLOPT_SSLKEYTYPE => "PEM",
-		CURLOPT_SSLKEYPASSWD => "12341234",
+		CURLOPT_KEYPASSWD => "12341234",
 		CURLOPT_SSL_VERIFYPEER => 0
 	);
 	
