@@ -24,9 +24,11 @@
  */
 package es.gob.fire.persistence.jpa;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
@@ -39,7 +41,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jndi.JndiObjectFactoryBean;
 import org.springframework.orm.hibernate5.HibernateExceptionTranslator;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -75,27 +77,13 @@ public class JpaConfig {
 	 * Constant attribute that represents the MySql dialect.
 	 */
 	private static final String MYSQL_DIALECT = "org.hibernate.dialect.MySQLDialect";
-
+	
 	/**
-	 * Attribute that represents the driver data base.
+	 * Attribute that represents the datasource JNDI name.
 	 */
-	@Value("${datasource.driver}")
-	private String driver;
-	/**
-	 * Attribute that represents the URL data base.
-	 */
-	@Value("${datasource.url}")
-	private String url;
-	/**
-	 * Attribute that represents the user data base.
-	 */
-	@Value("${datasource.user}")
-	private String user;
-	/**
-	 * Attribute that represents the user pass data base.
-	 */
-	@Value("${datasource.pass}")
-	private String pass;
+	@Value("${datasource.jndi-name}")
+	private String jndiName;
+	
 	/**
 	 * Attribute that represents the dialect data base.
 	 */
@@ -110,15 +98,19 @@ public class JpaConfig {
 	/**
 	 * Method that configures the data source.
 	 * @return DataSource
+	 * @throws IOException 
 	 */
 	@Bean
 	public DataSource configureDataSource() {
-		final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName(this.driver);
-		dataSource.setUrl(this.url);
-		dataSource.setUsername(this.user);
-		dataSource.setPassword(this.pass);
-		return dataSource;
+		JndiObjectFactoryBean bean = new JndiObjectFactoryBean();
+		bean.setJndiName(this.jndiName);
+		bean.setProxyInterface(DataSource.class);
+		try {
+			bean.afterPropertiesSet();
+		} catch (IllegalArgumentException | NamingException e) {
+			//Lanzar excepcion
+		}
+        return (DataSource) bean.getObject();
 	}
 
 	/**
@@ -171,70 +163,6 @@ public class JpaConfig {
 	@Bean(name = "hibernateExceptionTranslator")
 	public HibernateExceptionTranslator hibernateExceptionTranslator() {
 		return new HibernateExceptionTranslator();
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #driver}.
-	 * @return the value of the attribute {@link #driver}.
-	 */
-	public String getDriver() {
-		return this.driver;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #driver}.
-	 * @param driverP The value for the attribute {@link #driver}.
-	 */
-	public void setDriver(final String driverP) {
-		this.driver = driverP;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #url}.
-	 * @return the value of the attribute {@link #url}.
-	 */
-	public String getUrl() {
-		return this.url;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #url}.
-	 * @param urlP The value for the attribute {@link #url}.
-	 */
-	public void setUrl(final String urlP) {
-		this.url = urlP;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #user}.
-	 * @return the value of the attribute {@link #user}.
-	 */
-	public String getUser() {
-		return this.user;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #user}.
-	 * @param userP The value for the attribute {@link #user}.
-	 */
-	public void setUser(final String userP) {
-		this.user = userP;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #pass}.
-	 * @return the value of the attribute {@link #pass}.
-	 */
-	public String getPass() {
-		return this.pass;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #pass}.
-	 * @param passP The value for the attribute {@link #pass}.
-	 */
-	public void setPass(final String passP) {
-		this.pass = passP;
 	}
 
 	/**

@@ -34,20 +34,8 @@ public class ConfigManager {
 	private static final String ENV_PROP_PREFIX = "%{"; //$NON-NLS-1$
 
 	private static final String PROP_SUFIX = "}"; //$NON-NLS-1$
-
-	private static final String PROP_DB_DRIVER = "bbdd.driver"; //$NON-NLS-1$
-
-	private static final String PROP_DB_CONNECTION = "bbdd.conn"; //$NON-NLS-1$
-
-	private static final String PROP_DB_HOST = "bbdd.host"; //$NON-NLS-1$
-
-	private static final String PROP_DB_PORT = "bbdd.port"; //$NON-NLS-1$
-
-	private static final String PROP_DB_NAME = "bbdd.name"; //$NON-NLS-1$
-
-	private static final String PROP_DB_USERNAME = "bbdd.username"; //$NON-NLS-1$
-
-	private static final String PROP_DB_PASSWORD = "bbdd.password"; //$NON-NLS-1$
+	
+	private static final String PROP_DATASOURCE_JNDI_NAME = "datasource.jndi-name"; //$NON-NLS-1$
 
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 
@@ -279,8 +267,8 @@ public class ConfigManager {
 
 			// Comprobamos si se establecieron las propiedades para la conexion con la base de
 			// datos y advertimos de las consecuencias en caso contrario
-			if (getProperty(PROP_DB_DRIVER) == null || getProperty(PROP_DB_CONNECTION) == null) {
-				LOGGER.warning("No se ha declarado la clase del driver JDBC y/o la cadena de conexion a la BD en el fichero de configuracion. " //$NON-NLS-1$
+			if (getProperty(PROP_DATASOURCE_JNDI_NAME) == null) {
+				LOGGER.warning("No se ha declarado el nombre del datasource encargado de la conexión a base de datos." //$NON-NLS-1$
 						+ String.format("Asegurese de habilitar las propiedades %1s y %2s como alternativa", //$NON-NLS-1$
 								PROP_APP_ID, PROP_CERTIFICATE));
 			}
@@ -380,68 +368,13 @@ public class ConfigManager {
 	public static String getValidatorClass(final boolean required) throws InvalidConfigurationException {
 		return getProperty(PROP_VALIDATOR_CLASS, required);
 	}
-
+	
 	/**
-	 * Recupera la clase del driver JDBC para el acceso a la base de datos.
-	 * @return Clase del driver o {@code null} si no se defini&oacute;.
+	 * Recupera el nombre del datasource para el acceso a la base de datos.
+	 * @return nombre del datasource.
 	 */
-	public static String getJdbcDriverString() {
-		final String value = getProperty(PROP_DB_DRIVER);
-		return value != null && !value.isEmpty() ? value : null;
-	}
-
-	/**
-	 * Recupera la cadena de conexi&oacute;n con la base de datos.
-	 * @return Cadena de conexi&oacute;n con la base de datos.
-	 */
-	public static String getDataBaseConnectionString() {
-		final String value = getProperty(PROP_DB_CONNECTION);
-		return value != null && !value.isEmpty() ? value : null;
-	}
-
-
-	/**
-	 * Recupera el host (dominio o IP) de la base de datos.
-	 * @return Nombre de host/IP del servidor de base de datos o {@code null} si no se defini&oacute;.
-	 */
-	public static String getDataBaseHost() {
-		final String value = getProperty(PROP_DB_HOST);
-		return value != null && !value.isEmpty() ? value : null;
-	}
-
-	/**
-	 * Recupera el puerto del servicio de la base de datos.
-	 * @return Puerto del servicio de base de datos o {@code null} si no se defini&oacute;.
-	 */
-	public static String getDataBasePort() {
-		final String value = getProperty(PROP_DB_PORT);
-		return value != null && !value.isEmpty() ? value : null;
-	}
-
-	/**
-	 * Recupera el nombre de la base de datos.
-	 * @return Nombre de la base de datos o {@code null} si no se defini&oacute;.
-	 */
-	public static String getDataBaseName() {
-		final String value = getProperty(PROP_DB_NAME);
-		return value != null && !value.isEmpty() ? value : null;
-	}
-
-	/**
-	 * Recupera el usuario de acceso a la base de datos.
-	 * @return Usuario o {@code null} si no se defini&oacute;.
-	 */
-	public static String getDataBaseUsername() {
-		final String value = getProperty(PROP_DB_USERNAME);
-		return value != null && !value.isEmpty() ? value : null;
-	}
-
-	/**
-	 * Recupera la contrase&ntilde;a de acceso a la base de datos.
-	 * @return Usuario o {@code null} si no se defini&oacute;.
-	 */
-	public static String getDataBasePassword() {
-		final String value = getProperty(PROP_DB_PASSWORD);
+	public static String getDatasourceJNDIName(){
+		final String value = getProperty(PROP_DATASOURCE_JNDI_NAME);
 		return value != null && !value.isEmpty() ? value : null;
 	}
 
@@ -532,17 +465,17 @@ public class ConfigManager {
 
 		checkProviders(providers);
 
-		if (isCheckApplicationNeeded() && getDataBaseConnectionString() == null && getAppId() == null) {
+		if (isCheckApplicationNeeded() && getDatasourceJNDIName() == null && getAppId() == null) {
 			LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_APP_ID //$NON-NLS-1$
 					+ " para la verificacion del identificador de aplicacion"); //$NON-NLS-1$
 			throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " //$NON-NLS-1$
-					+ PROP_APP_ID + " para la verificacion del identificador de aplicacion", PROP_DB_CONNECTION, CONFIG_FILE); //$NON-NLS-1$
+					+ PROP_APP_ID + " para la verificacion del identificador de aplicacion", PROP_DATASOURCE_JNDI_NAME, CONFIG_FILE); //$NON-NLS-1$
 		}
-		if (isCheckCertificateNeeded() && getDataBaseConnectionString() == null && getCert() == null) {
+		if (isCheckCertificateNeeded() && getDatasourceJNDIName() == null && getCert() == null) {
 			LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
 					+ " para la verificacion del certificado de auteticacion"); //$NON-NLS-1$
 			throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
-					+ " para la verificacion del certificado de auteticacion", PROP_DB_CONNECTION, CONFIG_FILE); //$NON-NLS-1$
+					+ " para la verificacion del certificado de auteticacion", PROP_DATASOURCE_JNDI_NAME, CONFIG_FILE); //$NON-NLS-1$
 		}
 
 		initialized = true;

@@ -35,16 +35,12 @@ public class FireStatistics {
 	 * ejecutar en el mismo contexto.
 	 * @param path Ruta del directorio con los datos estad&iacute;sticos.
 	 * @param time Hora a la que realizar el volcado a base de datos. Si no se indica, se usar&aacute; la 00:00:00.
-	 * @param jdbcDriver Clase controladora JDBC para la conexi&oacute;n con la base de datos.
-	 * @param dbConnectionString Cadena de conexi&oacute;on a la base de datos.
-	 * @param username Nombre de usuario con el que conectarse a la base de datos.
-	 * @param password Contrase&ntilde;a del usuario.
+	 * @param datasourceJndiName Nombre del datasource para el acceso a base de datos.
 	 * @param processCurrentDay Indica si se deben procesar tambi&eacute;n los datos del d&iacute;a actual.
 	 * @return Si la operaci&oacute;n se ejecuta de inmediato, el resultado de la operaci&oacute;n. Si no, {@code null}.
 	 * @throws IOException Cuando falla la inicializacion de la tarea.
 	 */
-	public static final void init(final String path, final String time, final String jdbcDriver,
-			final String dbConnectionString, final String username, final String password, final boolean processCurrentDay)
+	public static final void init(final String path, final String time, final String datasourceJndiName, final boolean processCurrentDay)
 					throws IOException {
 
 		if (path == null) {
