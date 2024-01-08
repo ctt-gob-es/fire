@@ -102,12 +102,12 @@ public class TransactionService implements ITransactionService {
 	public List<TransactionDTO> getTransactionsByApplication(final Integer month, final Integer year) {
 		List<TransactionDTO> transactions = null;
 		final Query nativeQuery = this.entityManager.createNativeQuery(
-				"select  t.aplicacion, "
-						+ " sum(case when t.correcta = '1' then total else 0 end) as corrects, "
-						+ " sum(case when t.correcta = '0' then total else 0 end) as incorrects "
-						+ " from tb_transacciones t"
-						+ " where extract(month from t.fecha) = ? and extract(year from t.fecha) = ? "
-						+ " group by t.aplicacion ");
+				"SELECT  t.aplicacion, "
+						+ " SUM(t.correcta) AS corrects, "
+						+ " SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects "
+						+ " FROM tb_transacciones t"
+						+ " WHERE EXTRACT(MONTH FROM t.fecha) = ? AND EXTRACT(YEAR FROM t.fecha) = ? "
+						+ " GROUP BY t.aplicacion ");
 
 		nativeQuery.setParameter(1, month);
 		nativeQuery.setParameter(2, year);
@@ -133,12 +133,12 @@ public class TransactionService implements ITransactionService {
 	public List<TransactionDTO> getTransactionsByProvider(final Integer month, final Integer year) {
 		List<TransactionDTO> transactions = null;
 		final Query nativeQuery = this.entityManager.createNativeQuery(
-				"select  t.proveedor, "
-						+ " sum(case when t.correcta = '1' then total else 0 end) as corrects, "
-						+ " sum(case when t.correcta = '0' then total else 0 end) as incorrects "
-						+ " from tb_transacciones t"
-						+ " where extract(month from t.fecha) = ? and extract(year from t.fecha) = ? "
-						+ " group by t.proveedor ");
+				"SELECT  t.proveedor, "
+						+ " SUM(t.correcta) AS corrects, "
+						+ " SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects "
+						+ " FROM tb_transacciones t"
+						+ " WHERE EXTRACT(MONTH FROM t.fecha) = ? AND EXTRACT(YEAR FROM t.fecha) = ? "
+						+ " GROUP BY t.proveedor ");
 
 		nativeQuery.setParameter(1, month);
 		nativeQuery.setParameter(2, year);

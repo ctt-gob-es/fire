@@ -114,9 +114,13 @@ $(document)
 		$("#cert-prin").empty();
   		$("#cert-resp").empty();
   		
+  		opSel = $(this).val();
+  		
+  		/*
   		$("select option:selected").each(function(){
       		opSel=$(this).val();
       	});
+  		*/
   		
   		var previewCertAppUrl = /*[[@{/previewCertApp}]]*/;
   		$.ajax(previewCertAppUrl,{
