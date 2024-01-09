@@ -11,6 +11,7 @@ package es.gob.fire.server.services.batch;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 import java.util.logging.Level;
 
 import javax.json.Json;
@@ -119,7 +120,7 @@ public final class SignBatchSerial extends SignBatch {
 				if (errorMessage == null) {
 					errorMessage = "Error en la prefirma";
 				}
-				ss.setProcessResult(new ProcessResult(Result.ERROR_PRE, errorMessage)); //$NON-NLS-1$
+				ss.setProcessResult(new ProcessResult(Result.ERROR_PRE, errorMessage));
 				continue;
 			}
 

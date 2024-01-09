@@ -90,7 +90,7 @@ final class SingleSignPostProcessor {
 		}
 		catch (final IncompatiblePolicyException e) {
 			LOGGER.log(
-					Level.WARNING, "No se ha podido expandir la politica de firma. Se realizara una firma basica: " + e, e); //$NON-NLS-1$
+					Level.WARNING, "Se han indicado una politica de firma y un formato incompatibles: " + e); //$NON-NLS-1$
 			extraParams = sSign.getExtraParams();
 		}
 
@@ -141,7 +141,7 @@ final class SingleSignPostProcessor {
 		}
 
 		// Guardamos el resultado en almacenamiento temporal
-		TempDocumentsManager.storeDocument(sSign.getName(batchId), signedDoc, true);
+		TempDocumentsManager.storeDocument(sSign.getName(batchId), signedDoc, true, null);  //TODO: Pasar parametros para logs
 	}
 
 	/** Elimina los datos de sesi&oacute;n que no est&eacute;n relacionados con la firma actual.

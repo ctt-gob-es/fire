@@ -49,6 +49,8 @@ public enum FIReError {
 	BATCH_DOCUMENT_GRACE_PERIOD(52, 500, "Se requiere esperar un periodo de gracia para recuperar el documento."), //$NON-NLS-1$
 	BATCH_INVALID_DOCUMENT(53, 500, "El documento no estaba en el lote."), //$NON-NLS-1$
 	BATCH_RESULT_RECOVERED(54, 500, "El resultado del lote se recuper\u00F3 anteriormente."), //$NON-NLS-1$
+	PARAMETER_PROVIDERS_INVALID(55, 400, "El listado de proveedores indicado no permite seleccionar un proveedor v\u00E1lido."), //$NON-NLS-1$
+
 
 	// Errores que no devuelven informacion significativa a la aplicacion
 	INTERNAL_ERROR(500, 500, "Error interno del servidor. Espere unos momentos antes de reintentar la operaci\u00F3n."), //$NON-NLS-1$

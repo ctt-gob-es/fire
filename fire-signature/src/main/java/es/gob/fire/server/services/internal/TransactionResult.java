@@ -360,7 +360,7 @@ public class TransactionResult extends OperationResult {
 			// Esta excepcion solo podria lanzarse durante el cierre de los flujos,
 			// luego no afecta a la operativa
 			LOGGER.log(Level.WARNING,
-				"Error al cerrar los flujos para la impresion del resultado de la transaccion", e); //$NON-NLS-1$
+					this.trAux.getLogFormatter().f("Error al cerrar los flujos para la impresion del resultado de la transaccion"), e); //$NON-NLS-1$
 		}
 
 		return response;
@@ -410,7 +410,7 @@ public class TransactionResult extends OperationResult {
 					}
 					catch (final Exception e) {
 						// Error al codificar el certificado, no se devolvera certificado en ese caso
-						LOGGER.log(Level.WARNING, "Error al decodificar el certificado de firma", e); //$NON-NLS-1$
+						LOGGER.log(Level.WARNING, trAux.getLogFormatter().f("Error al decodificar el certificado de firma"), e); //$NON-NLS-1$
 					}
 				}
 				if (resultObject.containsKey(JSON_ATTR_UPGRADE)) {

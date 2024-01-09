@@ -3,7 +3,6 @@ package es.gob.fire.server.services.statistics;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -14,7 +13,6 @@ import java.util.logging.Logger;
 import es.gob.fire.logs.handlers.DailyFileHandler;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
-import es.gob.fire.signature.DBConnectionException;
 import es.gob.fire.statistics.dao.AuditTransactionsDAO;
 import es.gob.fire.statistics.entity.AuditTransactionCube;
 
@@ -27,6 +25,8 @@ public class AuditTransactionRecorder {
 	private static String LOG_FILENAME = "FIRE_" + LOGGER_NAME + ".log"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static String LOG_CHARSET = "utf-8"; //$NON-NLS-1$
+
+	private static String UNDEFINED_VALUE = "Indefinido"; //$NON-NLS-1$
 
 	private Logger dataLogger = null;
 
@@ -44,6 +44,16 @@ public class AuditTransactionRecorder {
 		if (instance == null){
 			instance = new AuditTransactionRecorder();
 		}
+		return instance;
+	}
+
+	/**
+	 * Obtenemos el objeto de escritura para el guardado de los datos de auditor&iacute;a de las
+	 * peticiones realizadas si existe.
+	 * @return Objeto para el registro de los datos de las peticiones o {@code null} si no se ha
+	 * creado.
+	 */
+	public final static AuditTransactionRecorder getInstanceIfExists() {
 		return instance;
 	}
 
@@ -104,7 +114,6 @@ public class AuditTransactionRecorder {
 			this.enable = false;
 			return;
 		}
-		
 
 		this.dataLogger = fileLogger;
 	}
@@ -151,15 +160,19 @@ public class AuditTransactionRecorder {
 		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
 		auditTransactionCube.setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
 
-		// Resultado
-		auditTransactionCube.setResult(result);
-
 		// Id Aplicacion
-		final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+		String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+		if (appId == null) {
+			appId = UNDEFINED_VALUE;
+		}
 		auditTransactionCube.setIdApplication(appId);
 
 		// Nombre Aplicacion
-		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+		String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+		if (appName == null) {
+			appName = UNDEFINED_VALUE;
+		}
+		auditTransactionCube.setIdApplication(appId);
 		auditTransactionCube.setNameApplication(appName);
 
 		// Operacion
@@ -170,51 +183,59 @@ public class AuditTransactionRecorder {
 		auditTransactionCube.setOperation(type.name());
 
 		// Operacion criptografica
-		auditTransactionCube.setCryptoOperation(fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION));
+		String cryptoOperation = fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
+		if (cryptoOperation == null) {
+			cryptoOperation = UNDEFINED_VALUE;
+		}
+		auditTransactionCube.setCryptoOperation(cryptoOperation);
 
-		//Formato y formato mejorado
-
-		// Obtenemos el tamano de la transaccion
+		// Tamano de la transaccion
 		long docSize = 0;
 		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE);
 		if (docSizeObject != null && docSizeObject instanceof Long) {
 			docSize = ((Long) docSizeObject).longValue();
 		}
-
-		// Obtenemos el formato de firma configurado
-		final String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
-
-		// Obtenemos el formato de actualizacion configurado
-		final String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
-
-		// Registramos el tamano del documento, el formato y el formato de actualizacion
 		auditTransactionCube.setDataSize(docSize);
+
+		// Formato de firma
+		String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
+		if (format == null) {
+			format = UNDEFINED_VALUE;
+		}
 		auditTransactionCube.setFormat(format);
+
+		// Formato de actualizacion (puede ser nulo)
+		final String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
 		auditTransactionCube.setImprovedFormat(upgrade);
 
 		// Algoritmo
-		final String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
+		String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
+		if (algorithm == null) {
+			algorithm = UNDEFINED_VALUE;
+		}
 		auditTransactionCube.setAlgorithm(algorithm);
 
 		// Almacenamos la informacion del proveedor
-		final String[] provsSession = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
-		final String prov = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		final String provForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
+		final String selectedProvider = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+		final String[] selectableProviders = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
+		final String providerForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
 
-		if (provForced != null && !provForced.isEmpty()) {
-			auditTransactionCube.setProvider(provForced);
+		if (selectedProvider != null && !selectedProvider.isEmpty()) {
+			auditTransactionCube.setProvider(selectedProvider);
+			auditTransactionCube.setMandatoryProvider(providerForced != null && Boolean.parseBoolean(providerForced));
+		} else if(selectableProviders != null && selectableProviders.length == 1) {
+			auditTransactionCube.setProvider(selectableProviders[0]);
 			auditTransactionCube.setMandatoryProvider(true);
-		}
-		else if (prov != null && !prov.isEmpty()) {
-			auditTransactionCube.setProvider(prov);
-		}
-		else if(provsSession != null && provsSession.length == 1) {
-			auditTransactionCube.setProvider(provsSession[0]);
-			auditTransactionCube.setMandatoryProvider(true);
+		} else {
+			auditTransactionCube.setProvider(UNDEFINED_VALUE);
+			auditTransactionCube.setMandatoryProvider(false);
 		}
 
 		// Navegador
-		final String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
+		String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
+		if (browser == null) {
+			browser = UNDEFINED_VALUE;
+		}
 		auditTransactionCube.setBrowser(browser);
 
 		// Resultado

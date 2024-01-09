@@ -83,6 +83,8 @@ public class MiniAppletErrorService extends HttpServlet {
 
         redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
+        LOGGER.severe(logF.f("Error localizado durante la firma con certificado local: " + errorMessage)); //$NON-NLS-1$
+
         // Establecemos el mensaje de error y redirigimos a la pagina de error
         ErrorManager.setErrorToSession(session, FIReError.SIGNING, true, errorMessage, trAux);
     	Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);

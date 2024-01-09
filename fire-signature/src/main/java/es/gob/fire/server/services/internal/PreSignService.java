@@ -39,6 +39,7 @@ import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
+import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.statistics.TransactionType;
 
 /**
@@ -56,6 +57,9 @@ public final class PreSignService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
 
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
+
+    /** Par&aacute;metro de configuraci&oacute;n para obligar a la multifirma de firmas longevas. */
+    private static final String EXTRA_PARAM_ALLOW_SIGN_LTS_SIGNATURES = "allowSignLTSignature"; //$NON-NLS-1$
 
     static {
 		// Configuramos el proveedor de firma XML
@@ -130,8 +134,8 @@ public final class PreSignService extends HttpServlet {
         	return;
 		}
 
-		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
-		if (SessionFlags.OP_SIGN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+		// Si la operacion anterior no fue de seleccion de proveedor, forzamos a que se recargue por si faltan datos
+		if (SessionFlags.OP_CHOOSE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
 			session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), false, true, trAux);
 		}
 
@@ -139,8 +143,8 @@ public final class PreSignService extends HttpServlet {
 		final String appId         	= session.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 		final String userId         = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
         final String algorithm      = session.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-        final Properties extraParams = (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
-        final String subOperation   = session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
+        Properties extraParams 		= (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
+        final String cryptoOperation   = session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
         final String format         = session.getString(ServiceParams.SESSION_PARAM_FORMAT);
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
     	final boolean originForced  = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
@@ -158,7 +162,7 @@ public final class PreSignService extends HttpServlet {
             return;
         }
 
-        if (subOperation == null || subOperation.isEmpty()) {
+        if (cryptoOperation == null || cryptoOperation.isEmpty()) {
             LOGGER.warning(logF.f("No se encontro en la sesion la operacion de firma a realizar")); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
             Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
@@ -178,6 +182,15 @@ public final class PreSignService extends HttpServlet {
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
+
+        // Evitamos que se interrumpa la operacion en caso de estar cofirmandose o
+        // contrafirmandose una firma longeva
+        if (!SignOperation.SIGN.toString().equalsIgnoreCase(cryptoOperation)) {
+        	if (extraParams == null) {
+        		extraParams = new Properties();
+        	}
+        	extraParams.setProperty(EXTRA_PARAM_ALLOW_SIGN_LTS_SIGNATURES, Boolean.TRUE.toString());
+        }
 
 		// Usaremos preferiblemente la URL de error establecida en la sesion
 		redirectErrorUrl = connConfig.getRedirectErrorUrl();
@@ -219,7 +232,7 @@ public final class PreSignService extends HttpServlet {
 
         	try {
                 td = FIReTriHelper.getPreSign(
-                    subOperation,
+                    cryptoOperation,
                     format,
                     algorithm,
                     extraParams,
@@ -292,7 +305,7 @@ public final class PreSignService extends HttpServlet {
 
             try {
                 td = FIReTriHelper.getPreSign(
-                    subOperation,
+                    cryptoOperation,
                     format,
                     algorithm,
                     extraParams,

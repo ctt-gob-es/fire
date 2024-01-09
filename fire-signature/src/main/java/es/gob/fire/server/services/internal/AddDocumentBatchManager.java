@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
@@ -73,7 +72,7 @@ public class AddDocumentBatchManager {
     	Properties documentConfig = null;
     	if (params.containsKey(ServiceParams.HTTP_PARAM_CONFIG)) {
     		try {
-    			documentConfig = AOUtil.base642Properties(params.getParameter(ServiceParams.HTTP_PARAM_CONFIG));
+    			documentConfig = PropertiesUtils.base642Properties(params.getParameter(ServiceParams.HTTP_PARAM_CONFIG));
     		}
     		catch (final IOException e) {
     			LOGGER.warning(logF.f("Se ha proporcionado una configuracion de la operacion mal formada: ") + e); //$NON-NLS-1$
@@ -195,7 +194,7 @@ public class AddDocumentBatchManager {
 
         final String filename = transactionId + "_" + docId; //$NON-NLS-1$
         try {
-        	TempDocumentsManager.storeDocument(filename, data, true);
+        	TempDocumentsManager.storeDocument(filename, data, true, trAux);
         	docInfo.setSize(data.length);
         }
         catch (final Exception e) {
@@ -217,9 +216,9 @@ public class AddDocumentBatchManager {
         	}
         	else {
         		if (config.getExtraParams() == null) {
-        			config.setExtraParamsB64(""); //$NON-NLS-1$
+        			config.setExtraParams(new Properties());
         		}
-        		config.getExtraParams().setProperty(MiniAppletHelper.PARAM_UPGRADE_FORMAT, config.getUpgrade());
+        		config.getExtraParams().setProperty(MiniAppletHelper.PARAM_UPGRADE_FORMAT, upgrade);
         	}
         }
 

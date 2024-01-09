@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.DocInfo;
@@ -114,8 +113,6 @@ public class SignOperationManager {
 			return;
 		}
 
-		LOGGER.fine(logF.f("Peticion de inicio de transaccion de FIRMA bien formada")); //$NON-NLS-1$
-
 		final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
         // Se obtiene el listado final de proveedores para la operacion, filtrando la
@@ -124,6 +121,11 @@ public class SignOperationManager {
 		final String[] requestedProvs = connConfig.getProviders();
 		if (requestedProvs != null) {
 			provs = ProviderManager.getFilteredProviders(requestedProvs);
+			if (provs.length == 0) {
+				LOGGER.warning(logF.f("No hay proveedores dados de alta que se ajusten a los criterios establecidos en la peticion")); //$NON-NLS-1$
+				Responser.sendError(response, FIReError.PARAMETER_PROVIDERS_INVALID);
+				return;
+			}
 		}
         else {
         	provs = ProviderManager.getProviderNames();
@@ -132,10 +134,10 @@ public class SignOperationManager {
 		final String appTitle = connConfig.getAppTitle();
 		final String docManagerName = connConfig.getDocumentManager();
 
-		// Copiamos al extraParams la informacion del documento firmado y el formato de firma
+		// Copiamos al extraParams la informacion del documento y el formato de firma
 		Properties extraParams = null;
 		try {
-			extraParams = AOUtil.base642Properties(extraParamsB64);
+			extraParams = PropertiesUtils.base642Properties(extraParamsB64);
 		}
 		catch (final Exception e) {
 			LOGGER.warning(logF.f("Se ha proporcionado un extraParam mal formado: ") + e); //$NON-NLS-1$
@@ -144,6 +146,8 @@ public class SignOperationManager {
 		}
 		final DocInfo docInfo = DocInfo.extractDocInfo(connConfig.getProperties());
 		DocInfo.addDocInfoToSign(extraParams, docInfo);
+
+		LOGGER.fine(logF.f("Peticion de inicio de transaccion de FIRMA bien formada")); //$NON-NLS-1$
 
 		final FireSession session = SessionCollector.createFireSession(subjectId, trAux);
 		final String transactionId = session.getTransactionId();
@@ -194,7 +198,7 @@ public class SignOperationManager {
         }
         catch (final Exception e) {
         	final String errorMessage = "El documento enviado a firmar no esta bien codificado"; //$NON-NLS-1$
-        	LOGGER.log(Level.SEVERE, errorMessage, e);
+        	LOGGER.log(Level.SEVERE, logF.f(errorMessage), e);
 			ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DATA_TO_SIGN_INVALID, true, errorMessage, trAux);
 			Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_INVALID, new SignOperationResult(transactionId, redirectErrorUrl));
         	return;
@@ -232,7 +236,7 @@ public class SignOperationManager {
         }
         catch (final Exception e) {
         	final String errorMessage = "Error al obtener los datos a firmar del servidor remoto"; //$NON-NLS-1$
-    		LOGGER.log(Level.SEVERE, errorMessage, e);
+    		LOGGER.log(Level.SEVERE, logF.f(errorMessage), e);
     		AlarmsManager.notify(Alarm.CONNECTION_DOCUMENT_MANAGER, docManager.getClass().getCanonicalName());
     		ErrorManager.setErrorToSession(session, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, true, errorMessage, trAux);
 			Responser.sendError(response, FIReError.PARAMETER_DATA_TO_SIGN_NOT_FOUND, new SignOperationResult(transactionId, redirectErrorUrl));
@@ -247,9 +251,12 @@ public class SignOperationManager {
     		return;
     	}
 
+    	// Registramos el tamano de los datos
+    	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE, Long.valueOf(data.length));
+
         // Creamos un temporal con los datos a procesar asociado a la sesion
         try {
-        	TempDocumentsManager.storeDocument(transactionId, data, true);
+        	TempDocumentsManager.storeDocument(transactionId, data, true, trAux);
         	// Registramos el tamano del documento con fines estadisticos
        	 	session.setAttribute(ServiceParams.SESSION_PARAM_DOCSIZE, Long.valueOf(data.length));
         }

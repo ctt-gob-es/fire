@@ -1,4 +1,7 @@
 
+<%@page import="es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyException"%>
+<%@page import="es.gob.afirma.core.signers.ExtraParamsProcessor"%>
+<%@page import="es.gob.fire.server.services.internal.PropertiesUtils"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.statistics.TransactionType"%>
 <%@page import="es.gob.fire.server.services.internal.PublicContext"%>
@@ -18,9 +21,7 @@
 <%@page import="es.gob.fire.server.services.internal.BatchResult"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
-<%@page import="es.gob.fire.server.services.FIReServiceOperation"%>
 <%@page import="es.gob.fire.server.services.FIReTriHelper"%>
-<%@page import="es.gob.fire.server.services.ServiceUtil"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page import="java.util.Properties"%>
@@ -52,6 +53,8 @@
 		<%
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 	
+		final String EXTRA_PARAM_EXP_POLICY = "expPolicy"; //$NON-NLS-1$
+		
 		// Recogemos de la peticion todos los parametros y con el identificador de transaccion
 		// recuperamos la configuracion de la operacion y la referencia a los datos sobre los
 		// que operar
@@ -92,6 +95,21 @@
 		String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
 		Properties upgradeConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_UPGRADE_CONFIG);
 		
+		
+		// AutoFirma es estricto al validar los atributos de los extraParams, asi que los expandimos
+		// nostros previamente y no cancelamos la operacion en caso de no poder expandir alguno 
+		try {
+			extraParams = ExtraParamsProcessor.expandProperties(
+					extraParams,
+					null,
+					format
+					);
+		}
+		catch (final IncompatiblePolicyException e) {
+			// Eliminamos el parametro extra de politica si no fuese compatible
+			extraParams.remove(EXTRA_PARAM_EXP_POLICY);
+		}
+		
 		// Valores de la operacion de firma
 		String triphaseFormat = null;
 		
@@ -119,11 +137,13 @@
 			preSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_PRESIGN; //$NON-NLS-1$
 			postSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_POSTSIGN; //$NON-NLS-1$
 	
+			String extraParamsPlain = PropertiesUtils.properties2String(defaultConfig.getExtraParams()).replace("\n", "\\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			
 			%>
 			AutoScript.createBatch( "<%= algorithm %>", 
 									"<%= defaultConfig.getFormat() %>", 
 									"<%= defaultConfig.getCryptoOperation() %>", 
-									"<%= defaultConfig.getExtraParams() %>"
+									"<%= extraParamsPlain %>"
 									);
 			<%
 		
@@ -139,15 +159,17 @@
 				
 				final Properties singleExtraParams = signConfig.getExtraParams();
 				if (signConfig.getUpgrade() != null && !signConfig.getUpgrade().isEmpty()) {
-					extraParams.setProperty("upgradeFormat", signConfig.getUpgrade());
+					singleExtraParams.setProperty("upgradeFormat", signConfig.getUpgrade()); //$NON-NLS-1$
 				}
+				
+				String singleExtraParamsPlain = PropertiesUtils.properties2String(signConfig.getExtraParams()).replace("\n", "\\n");  //$NON-NLS-1$ //$NON-NLS-2$
 				
 				%>
 				AutoScript.addDocumentToBatch("<%= docId %>",
 												"<%= dataReference %>",
 												"<%= signConfig.getFormat() %>",
 												"<%= signConfig.getCryptoOperation() %>",
-												"<%= signConfig.getExtraParams() %>"
+												"<%= singleExtraParamsPlain %>"
 												);
 				<% 
 			} 
@@ -277,7 +299,7 @@
 				var refB64 = "<%= refB64 %>";
 				var format = "<%= triphaseFormat %>";
 				var algorithm = "<%= algorithm %>";
-				var extraParams = "<%= AOUtil.propertiesAsString(extraParams).replace("\n", "\\n") %>";
+				var extraParams = "<%= PropertiesUtils.properties2String(extraParams).replace("\n", "\\n") %>";
 	
 				try {				
 					showProgress();

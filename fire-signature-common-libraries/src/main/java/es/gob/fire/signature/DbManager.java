@@ -50,6 +50,7 @@ public class DbManager {
 				throw new SQLException("No se ha podido inicializar la conexion con la base de datos", e); //$NON-NLS-1$
 			}
 		}
+
 		final Connection conn = ds.getConnection();
 		conn.setAutoCommit(autoCommit);
 		return conn;
@@ -136,7 +137,8 @@ public class DbManager {
 		// Milisegundos de espera hasta que se de una conexion
 		config.setConnectionTimeout(10000);
 		// Numero maximo de conexiones que mantendra el pool simultaneamente
-		config.setMaximumPoolSize(50);
+		final int poolSize = ConfigManager.getDataBasePoolSize();
+		config.setMaximumPoolSize(poolSize);
 		// Milisegundos maximos que permanecera abierta una conexion
 		config.setMaxLifetime(1800000);
 //		// Milisegundos entre los que se comprobara que la conexion sigue abierta

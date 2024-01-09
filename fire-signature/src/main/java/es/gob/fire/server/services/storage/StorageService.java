@@ -164,7 +164,7 @@ public final class StorageService extends HttpServlet {
 		// Si estamos en modo alta disponibilidad, tambien almacenamos los datos en el almacen comun
 		if (HIGH_AVAILABILITY_ENABLED) {
 			try {
-				TempDocumentsManager.storeDocument(id, dataText.getBytes(), true);
+				TempDocumentsManager.storeDocument(id, dataText.getBytes(), true, null); //TODO: Pasar parametros para logs
 			} catch (final IOException e) {
 				LOGGER.log(Level.SEVERE, "Error al guardar el temporal para la comunicacion con el Cliente @firma", e); //$NON-NLS-1$
 				sendError(response, ErrorManager.ERROR_COMMUNICATING_WITH_WEB);

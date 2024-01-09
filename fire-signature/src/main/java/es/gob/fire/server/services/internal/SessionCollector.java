@@ -118,7 +118,7 @@ public final class SessionCollector {
     	if (transactionId != null) {
     		subjectRef = generateSubjectRef(transactionId, subjectId);
     	} else {
-    		LOGGER.warning("No se pudo generar la variable subjectRef puesto que transactionId es nulo");
+    		LOGGER.warning("No se pudo generar la variable subjectRef puesto que transactionId es nulo"); //$NON-NLS-1$
     		subjectRef = null;
     	}
 
@@ -670,7 +670,7 @@ public final class SessionCollector {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING,
-					"Error en la ejecucion del proceso de borrado de seiones expiradas", //$NON-NLS-1$
+					trAux.getLogFormatter().f("Error en la ejecucion del proceso de borrado de seiones expiradas"), //$NON-NLS-1$
 					e);
 		}
 		finally {
@@ -745,9 +745,8 @@ public final class SessionCollector {
         		session = this.sessionsMap.get(id);
         		if (session != null && currentTime > session.getExpirationTime()) {
         			// Registramos la transaccion como erronea
-        			final String errorMessage = "La sesion ha caducado"; //$NON-NLS-1$
         			TRANSLOGGER.register(session, false);
-        			AUDITTRANSLOGGER.register(session, false, errorMessage);
+        			AUDITTRANSLOGGER.register(session, false, "La sesion ha caducado"); //$NON-NLS-1$
 
         			// Borramos la sesion
         			SessionCollector.removeSession(session, this.trAux);

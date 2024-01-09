@@ -22,7 +22,6 @@ import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
-import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.upgrade.UpgraderUtils;
 
@@ -98,7 +97,7 @@ public class CreateBatchManager {
 		// propiedades (si los hubiese) y los almacenamos por separado
 		Properties extraParams;
 		try {
-			extraParams = ServiceUtil.base642Properties(extraParamsB64);
+			extraParams = PropertiesUtils.base642Properties(extraParamsB64);
 		}
 		catch (final Exception e) {
 			LOGGER.warning(logF.f("Se ha proporcionado un extraParam mal formado: ") + e); //$NON-NLS-1$
@@ -129,6 +128,11 @@ public class CreateBatchManager {
 		final String[] requestedProvs = connConfig.getProviders();
 		if (requestedProvs != null) {
 			provs = ProviderManager.getFilteredProviders(requestedProvs);
+			if (provs.length == 0) {
+				LOGGER.warning(logF.f("No hay proveedores dados de alta que se ajusten a los criterios establecidos en la peticion")); //$NON-NLS-1$
+				Responser.sendError(response, FIReError.PARAMETER_PROVIDERS_INVALID);
+				return;
+			}
 		}
         else {
         	provs = ProviderManager.getProviderNames();

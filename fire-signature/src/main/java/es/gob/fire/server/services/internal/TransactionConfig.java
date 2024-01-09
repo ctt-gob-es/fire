@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
-import es.gob.fire.server.services.ServiceUtil;
-
 /**
  * Configuraci&oacute;n asociada a una transacci&oacute;n.
  */
@@ -48,13 +46,13 @@ public class TransactionConfig implements Serializable {
 	public TransactionConfig(final Properties config) {
 		this.config = config != null ? config : new Properties();
 	}
-	
+
 	/**
 	 * Crea un objeto de configuraci&oacute;n de transacci&oacute;n a
 	 * partir de otro.
 	 * @param clone de configuraci&oacute;n de transacci&oacute;n.
 	 */
-	public TransactionConfig(TransactionConfig clone) {
+	public TransactionConfig(final TransactionConfig clone) {
 		this.config = (Properties) clone.config.clone();
 	}
 
@@ -67,7 +65,7 @@ public class TransactionConfig implements Serializable {
 	 * bien formado y no se pueda decodificar.
 	 */
 	public TransactionConfig(final String configB64) throws IOException {
-		this.config = ServiceUtil.base642Properties(configB64);
+		this.config = PropertiesUtils.base642Properties(configB64);
 	}
 
 	/**

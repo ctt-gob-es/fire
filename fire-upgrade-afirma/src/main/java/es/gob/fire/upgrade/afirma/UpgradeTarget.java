@@ -34,7 +34,7 @@ public enum UpgradeTarget {
     /** ES-A. */
     A_FORMAT("ES-A", "urn:oasis:names:tc:dss:1.0:profiles:AdES:forms:ES-A"), //$NON-NLS-1$ //$NON-NLS-2$
     /** ES-LTV. */
-    PADES_LTV_FORMAT("ES-LTV", "urn:afirma:dss:1.0:profile:XSS:PAdES:1.1.2:forms:LTV"), //$NON-NLS-1$ //$NON-NLS-2$
+    PADES_LTV_FORMAT("ES-LTV", "urn:afirma:dss:1.0:profile:XSS:PAdES:1.1.2:forms:LTV", "LT-Level", "urn:afirma:dss:1.0:profile:XSS:AdES:forms:LT-Level"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     /** T-Level. */
     T_LEVEL_FORMAT("T-Level", "urn:afirma:dss:1.0:profile:XSS:AdES:forms:T-Level", "ES-T", "urn:oasis:names:tc:dss:1.0:profiles:AdES:forms:ES-T"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     /** LT-Level. */
@@ -55,7 +55,7 @@ public enum UpgradeTarget {
      * @param formatUrn URN de definici&oacute;n del formato .
      * @param alternatives Cadenas alternativas para denominar al formato.
      */
-    private UpgradeTarget(final String s, final String formatUrn, final String... alternatives) {
+    UpgradeTarget(final String s, final String formatUrn, final String... alternatives) {
         this.str = s;
         this.formatUrn = formatUrn;
         this.alternatives = alternatives;

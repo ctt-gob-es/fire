@@ -34,6 +34,7 @@ import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.statistics.entity.Browser;
 
 
 /**
@@ -125,6 +126,13 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		}
 		redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
+		// Registramos el navegador usado si no lo estaba ya
+		if (!session.containsAttribute(ServiceParams.SESSION_PARAM_BROWSER)) {
+			final String userAgent = request.getHeader("user-agent"); //$NON-NLS-1$
+			final Browser browser =  Browser.identify(userAgent);
+			session.setAttribute(ServiceParams.SESSION_PARAM_BROWSER, browser.getName());
+		}
+
     	// Si llegamos hasta aqui usando correctamente el API, es que no se produjo ningun
     	// error al autenticar al usuario (si es que el conector requeria autenticacion),
 		// asi que podemos eliminar el valor bandera que nos indicaba que habiamos sido
@@ -146,6 +154,10 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		if (originForced) {
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED, Boolean.TRUE.toString());
 		}
+
+		// Indicamos que la ultima operacion de la transaccion fue elegir certificado
+		session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_CHOOSE);
+		SessionCollector.commit(session, trAux);
 
 		// Se selecciono firmar con un certificado local
 		if (ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(origin)) {
@@ -184,7 +196,9 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			final HttpServletRequest request, final HttpServletResponse response, final boolean originForced,
 			final TransactionAuxParams trAux) {
 
-		LOGGER.info(trAux.getLogFormatter().f("Se ha seleccionado la firma con certificado local")); //$NON-NLS-1$
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
+		LOGGER.info(logF.f("Se ha seleccionado la firma con certificado local")); //$NON-NLS-1$
 
 		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null ?
 				connConfig.isAppSkipCertSelection().booleanValue() : ConfigManager.isSkipCertSelection();
@@ -201,7 +215,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			request.getRequestDispatcher(FirePages.PG_CLIENTE_AFIRMA).forward(request, response);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, trAux.getLogFormatter().f("Error al redirigir al usuario"), e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, logF.f("Error al redirigir al usuario"), e); //$NON-NLS-1$
 			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, originForced, trAux);
 			redirectToErrorPage(originForced, connConfig, request, response, trAux);
 			return;

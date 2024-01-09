@@ -264,9 +264,7 @@ public class BatchResult extends OperationResult implements Serializable {
 		if (docRef == null) {
 			return null;
 		}
-
-		final String errorMessage = docRef.getErrorMessage();
-		return errorMessage;
+		return docRef.getErrorMessage();
 	}
 
 	/**

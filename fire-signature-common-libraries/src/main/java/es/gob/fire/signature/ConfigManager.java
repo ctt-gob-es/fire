@@ -49,6 +49,10 @@ public class ConfigManager {
 
 	private static final String PROP_DB_PASSWORD = "bbdd.password"; //$NON-NLS-1$
 
+	private static final String PROP_DB_POOL_SIZE = "bbdd.pool.size"; //$NON-NLS-1$
+
+	private static final int DEFAULT_DB_POOL_SIZE = 15;
+
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
 
 	private static final String PROP_TEMP_DIR = "temp.dir"; //$NON-NLS-1$
@@ -137,11 +141,11 @@ public class ConfigManager {
 
 	private static final String PROP_LOGS_LEVEL_GENERAL = "logs.level"; //$NON-NLS-1$
 
-	private static final String PROP_SKIP_CERT_SELECTION = "skipCertSelection"; //$NON-NLS-1$
-
 	private static final String DEFAULT_FIRE_LOGS_LEVEL = Level.INFO.getName();
 	private static final String DEFAULT_AFIRMA_LOGS_LEVEL = Level.WARNING.getName();
 	private static final String DEFAULT_GENERAL_LOGS_LEVEL = Level.OFF.getName();
+
+	private static final String PROP_SKIP_CERT_SELECTION = "skipCertSelection"; //$NON-NLS-1$
 
 	private static final String PROP_HTTP_CERT_ATTR = "http.cert.attr"; //$NON-NLS-1$
 
@@ -1053,24 +1057,13 @@ public class ConfigManager {
 				try {
 					value = decipherFragment(value);
 				} catch (final IOException e) {
-					if (defaultValue != null) {
-						LOGGER.log(
-								Level.WARNING,
-								String.format(
-										"Ocurrio un error al descifrar un fragmento de la propiedad %1s. Se usara el valor %2s", //$NON-NLS-1$
-										key,
-										defaultValue),
-								e);
-						value = defaultValue;
-					}
-					else {
-						LOGGER.log(
-								Level.WARNING,
-								String.format(
-										"Ocurrio un error al descifrar un fragmento de la propiedad %1s. Se usara el valor predefinido.", //$NON-NLS-1$
-										key)
-								);
-					}
+					LOGGER.log(Level.WARNING,
+							String.format(
+									"Ocurrio un error al descifrar un fragmento de la propiedad %1s. Se usara el valor por defecto proporcionado: %2", //$NON-NLS-1$
+									key,
+									defaultValue),
+							e);
+					value = null;
 					break;
 				}
 			}
@@ -1191,5 +1184,23 @@ public class ConfigManager {
 	 */
 	public static boolean isSkipCertSelection(){
 		return 	Boolean.parseBoolean(getProperty(PROP_SKIP_CERT_SELECTION, Boolean.FALSE.toString()));
+	}
+
+	public static int getDataBasePoolSize() {
+
+		int poolSize;
+		try {
+			poolSize = Integer.parseInt(getProperty(PROP_DB_POOL_SIZE));
+		}
+		catch (final Exception e) {
+			poolSize = -1;
+		}
+
+		if (poolSize < 1) {
+			LOGGER.warning("No se ha indicado un tamano valido para el pool de base de datos. Se usara el por defecto: " + DEFAULT_DB_POOL_SIZE); //$NON-NLS-1$
+			poolSize = DEFAULT_DB_POOL_SIZE;
+		}
+
+		return poolSize;
 	}
 }

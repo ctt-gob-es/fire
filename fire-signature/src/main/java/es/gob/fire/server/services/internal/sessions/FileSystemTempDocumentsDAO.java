@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.misc.AOUtil;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.signature.ConfigManager;
 
 public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
@@ -88,7 +89,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
      * @throws IOException Cuando ocurre un error durante el guardado.
      */
     @Override
-    public String storeDocument(final String filename, final byte[] data, final boolean newDocument)
+    public String storeDocument(final String filename, final byte[] data, final boolean newDocument, final LogTransactionFormatter formt)
     		throws IOException {
 
         if (data == null || data.length < 1) {
@@ -106,7 +107,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
         			bos.write(data);
         		}
 
-        LOGGER.fine("Almacenado temporal de datos en: " + f.getAbsolutePath()); //$NON-NLS-1$
+        LOGGER.fine(formt.f("Almacenado temporal de datos en: " + f.getAbsolutePath())); //$NON-NLS-1$
 
         return f.getName();
     }

@@ -21,6 +21,7 @@ import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.statistics.entity.Browser;
 
 /**
  * Servlet que redirige a la autenticacion de usuarios para la obtenci&oacute;n
@@ -115,6 +116,13 @@ public class AuthenticationService extends HttpServlet {
 			return;
 		}
 		redirectErrorUrl = connConfig.getRedirectErrorUrl();
+
+		// Registramos el navegador usado si no lo estaba ya
+		if (!session.containsAttribute(ServiceParams.SESSION_PARAM_BROWSER)) {
+			final String userAgent = request.getHeader("user-agent"); //$NON-NLS-1$
+			final Browser browser =  Browser.identify(userAgent);
+			session.setAttribute(ServiceParams.SESSION_PARAM_BROWSER, browser.getName());
+		}
 
 		FIReConnector connector = null;
 		try {

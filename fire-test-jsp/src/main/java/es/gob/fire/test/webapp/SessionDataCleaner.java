@@ -50,6 +50,8 @@ public final class SessionDataCleaner implements HttpSessionListener {
 
     @Override
     public void sessionDestroyed(final HttpSessionEvent hse) {
+
+    	LOGGER.info("Destruida sesion " + (hse != null && hse.getSession() != null ? hse.getSession().getId() : "null)")); //$NON-NLS-1$
         if (hse != null) {
             final HttpSession ses = hse.getSession();
         	if (ses != null) {

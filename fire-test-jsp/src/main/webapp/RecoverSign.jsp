@@ -10,11 +10,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
-
-	Logger LOGGER = LoggerFactory.getLogger("es.gob.fire.test.webapp"); //$NON-NLS-1$
+	Logger LOGGER = LoggerFactory.getLogger("es.gob.fire.test.webapp.recoversign"); //$NON-NLS-1$
 
 	String user = (String) session.getAttribute("user"); //$NON-NLS-1$
 	if (user == null) {
+		LOGGER.warn("No se encontro sesion de usuario"); //$NON-NLS-1$
 		response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 		return;
 	}

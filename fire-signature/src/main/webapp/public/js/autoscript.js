@@ -14,7 +14,7 @@ var originalXMLHttpRequest = window.XMLHttpRequest;
 
 var AutoScript = ( function ( window, undefined ) {
 
-		var VERSION = "1.8.0";
+		var VERSION = "1.8.2";
 		var VERSION_CODE = 2;
 
 		/* ========== DEPRECADO: No se utiliza, pero se mantiene por compatibilidad con los despliegues del MiniApplet. */
@@ -571,7 +571,7 @@ var AutoScript = ( function ( window, undefined ) {
 			// Usamos el modo de invocacion mas apropiado segun el entorno
 			
 			// Redireccion del navegador
-			if (Platform.isChrome() || Platform.isIOS()) {
+			if (Platform.isChrome() || Platform.isIOS() || (Platform.isAndroid() && Platform.isFirefox())) {
 				// Usamos document.location porque tiene mejor soporte por los navegadores que
 				// window.location que es el mecanismo estandar
 				document.location = url;
@@ -584,14 +584,14 @@ var AutoScript = ( function ( window, undefined ) {
 					try {
 						var element = document.getElementById("iframeAfirma");
 						element.outerHTML = "";
-						// delete element;
+						delete element;
 					}
 					catch (e) {
 						// No hacemos nada
 					}
 				}
 
-				// En el caso de ser una version de internet Explorer que soportase la deteccion de aplicacion
+				// En el caso de ser una version de internet Explorer que soportase la deteccion de aplicaciones
 				// capaces de manejar el protocolo, aprovechamos esta caracteristica (Internet Explorer para Windows 8 Modern UI)
 
 				if (navigator.msLaunchUri) {
@@ -676,15 +676,16 @@ var AutoScript = ( function ( window, undefined ) {
 			}
 			// Si podemos utilizar un WebSocket local y no estamos en Internet Explorer
 			// (en el que no podemos asegurar el funcionamiento si se encuentra habilitada
-			// una opcion de red concreta), usamos WebSockets 
-			else if (isWebSocketsSupported() && !Platform.isInternetExplorer()) {
+			// una opcion de red concreta), ni en un Firefox antiguo (con el que las llamadas
+			// multiples pueden dar problemas despues de los cambios para VDI) usamos WebSockets 
+			else if (isWebSocketsSupported() && !Platform.isInternetExplorer() && !Platform.isFirefox60orLower()) {
 				clienteFirma = new AppAfirmaWebSocketClient(window, undefined);
 				// Si se establecio un rango de puertos, lo trasladamos al cliente
 				if (!!minPort) {
 					clienteFirma.setPortRange(minPort, maxPort);
 				}
 			}
-			// Si no se esta en una version antigua de Internet Explorer o Safari
+			// Si no se esta en una version antigua de Internet Explorer, Firefox o Safari
 			else if (!Platform.isInternetExplorer10orLower() && !Platform.isSafari10()) {
 				clienteFirma = new AppAfirmaJSSocket(clientAddress, window, undefined);
 				// Si se establecio un rango de puertos, lo trasladamos al cliente
@@ -776,6 +777,27 @@ var AutoScript = ( function ( window, undefined ) {
 			function isFirefox() {
 				return navigator.userAgent.toUpperCase().indexOf("FIREFOX") != -1
 			}
+			
+			/** Indica si el navegador es Firefox 60 o inferior. */
+			function isFirefox60orLower() {
+				navigator.sayswho= (function(){
+				    var ua= navigator.userAgent, tem, 
+				    M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+				    if(/trident/i.test(M[1])){
+				        tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
+				        return 'IE '+(tem[1] || '');
+				    }
+				    if(M[1]=== 'Chrome'){
+				        tem= ua.match(/\b(OPR|Edge)\/(\d+)/);
+				        if(tem!= null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+				    }
+				    M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+				    if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+				    return M.join(' ');
+				})();
+				var myNav = navigator.sayswho;
+				return (myNav.indexOf('Firefox') != -1) ? (60 >= parseInt(myNav.split('Firefox')[1])) : false;
+			}
 
 			/** Indica si el navegador es Chrome. */
 			function isChrome() {
@@ -792,6 +814,7 @@ var AutoScript = ( function ( window, undefined ) {
 				isInternetExplorer7orLower : isInternetExplorer7orLower,
 				isSafari10 : isSafari10,
 				isFirefox : isFirefox,
+				isFirefox60orLower : isFirefox60orLower,
 				isChrome : isChrome				
 			};
 		})(window, undefined);
@@ -963,6 +986,8 @@ var AutoScript = ( function ( window, undefined ) {
 			
 			var OPERATION_LOAD = "load";
 			
+			var OPERATION_MULTI_LOAD = "multiload";
+			
 			var OPERATION_WITHOUT_RETURN = "save";
 			
 			var OPERATION_BATCH = "batch";
@@ -1133,7 +1158,7 @@ var AutoScript = ( function ( window, undefined ) {
 			 */
 			var getMultiFileNameContentBase64 = function (title, extensions, description, filePath, successCallbackFunction, errorCallbackFunction) {
 				setCallbacks(successCallbackFunction, errorCallbackFunction);
-				currentOperation = OPERATION_LOAD;
+				currentOperation = OPERATION_MULTI_LOAD;
 				var requestData = createLoadDataRequest("load", title, extensions, description, filePath, true);
 				execAppIntent(buildUrl(requestData));
 			}
@@ -1377,7 +1402,7 @@ var AutoScript = ( function ( window, undefined ) {
 			/** Comprobacion recursiva de la disponibilidad de la aplicacion en los distintos
 			 * puertos hasta un maximo del numero de intentos indicados. */ 
 			function waitAppAndProcessRequest (ports, retries) {
-								
+
 				if (!connected) {
 				
 					if (retries > 0) {
@@ -1389,7 +1414,7 @@ var AutoScript = ( function ( window, undefined ) {
 						setTimeout(waitAppAndProcessRequest, AutoScript.AUTOFIRMA_LAUNCHING_TIME, ports, retries - 1);
 					}
 					else {
-						processErrorResponse("java.util.concurrent.TimeoutException", "No se pudo contactar con AutoFirma");
+						processErrorResponse("es.gob.afirma.standalone.ApplicationNotFoundException", "No se ha podido conectar con AutoFirma.");
 					}
 				}
 				else {
@@ -1413,7 +1438,8 @@ var AutoScript = ( function ( window, undefined ) {
 					console.log("Error estableciendo el WebSocket: " + e);
 				}
 				
-				webSocket.onopen = function() {
+				webSocket.onopen = function(arg0, arg1) {
+					
 					// Indicamos que la conexion esta activa y que el WebSocket activo es el actual 
 					connected = true;
 					ws = this;
@@ -1425,6 +1451,7 @@ var AutoScript = ( function ( window, undefined ) {
 						connected = false;
 						ws = null;
 						console.log("Se cierra el socket. Codigo WebSocket de cierre: " + (e ? e.code : null));
+						processErrorResponse("java.lang.InterruptedException", "AutoFirma se ha cerrado o ha cerrado el websocket de comunicacion");
 					}
 				};
 
@@ -1478,7 +1505,7 @@ var AutoScript = ( function ( window, undefined ) {
 			function sendEcho(ws, idSession, retries) {
 				
 				if (retries <= 0) {
-					processErrorResponse("java.util.concurrent.TimeoutException", "No se pudo contactar con AutoFirma");
+					processErrorResponse("java.util.concurrent.TimeoutException", "AutoFirma no respondio al saludo.");
 					return;
 				}
 				
@@ -1531,7 +1558,10 @@ var AutoScript = ( function ( window, undefined ) {
 					processResponseWithoutReturn(data);
 				}
 				else if (currentOperation == OPERATION_LOAD) {
-					processLoadResponse(data);
+					processLoadResponse(data, false);
+				}
+				else if (currentOperation == OPERATION_MULTI_LOAD) {
+					processLoadResponse(data, true);
 				}
 				else if (currentOperation == OPERATION_SELECT_CERTIFICATE) {
 					processSelectCertificateResponse(data);
@@ -1548,7 +1578,9 @@ var AutoScript = ( function ( window, undefined ) {
 				else {
 					console.log("Operacion desconocida. Se devuelve directamente su resultado.");
 					if (!!successCallback) {
-						successCallback(data);
+						var responseSuccessCallback = successCallback;
+						setCallbacks(null, null);
+						responseSuccessCallback(data);
 					}
 					else {
 						console.log("No se ha proporcionado funcion callback para procesar el resultado de la operacion");
@@ -1563,14 +1595,16 @@ var AutoScript = ( function ( window, undefined ) {
 				errorType = exception;
 				errorMessage = message;
 				if (!!errorCallback) {
-					errorCallback(exception, message);
+					var responseErrorCallback = errorCallback;
+					setCallbacks(null, null);
+					responseErrorCallback(exception, message);
 				}
 			}
 			
 			/**
 			 * Procesa la respuesta de las operaciones de carga de ficheros.
 			 */
-			function processLoadResponse(data) {
+			function processLoadResponse(data, multi) {
 
 				// Compruebo si se trata de una respuesta valida de una operacion de carga/multicarga (load).
 				// El separador "|"  distingue los pares "filename-1:dataBase64-1|filename-2:dataBase64-2...", uno por cada archivo cargado.
@@ -1597,7 +1631,7 @@ var AutoScript = ( function ( window, undefined ) {
 				var fileNamesDataBase64 = data.split("|");
 
 				// Si solo se carga un fichero
-				if (fileNamesDataBase64.length == 1) {
+				if (!multi) {
 
 					var sepPos = fileNamesDataBase64[0].indexOf(":");
 
@@ -1610,7 +1644,7 @@ var AutoScript = ( function ( window, undefined ) {
 					filenames = new Array();
 					datasB64 = new Array();
 
-					for (let i = 0; i < fileNamesDataBase64.length; i++) {
+					for (i = 0; i < fileNamesDataBase64.length; i++) {
 						var sepPos = fileNamesDataBase64[i].indexOf(":");
 
 						filenames.push(fileNamesDataBase64[i].substring(0, sepPos));
@@ -1619,7 +1653,14 @@ var AutoScript = ( function ( window, undefined ) {
 
 				}
 
-				successCallback(filenames, datasB64);
+				if (!!successCallback) {
+					var responseSuccessCallback = successCallback;
+					setCallbacks(null, null);
+					responseSuccessCallback(filenames, datasB64);
+				}
+				else {
+					console.log("No se ha proporcionado funcion callback a la que notificar el resultado de la carga de datos");
+				}
 			}
 			
 			/**
@@ -1630,7 +1671,12 @@ var AutoScript = ( function ( window, undefined ) {
 				if (data == "OK" || data == "SAVE_OK") {
 					// Si no se ha indicado funcion de guardado, entonces no se hace nada
 					if (!!successCallback) {
-						successCallback(data);
+						var responseSuccessCallback = successCallback;
+						setCallbacks(null, null);
+						responseSuccessCallback(data);
+					}
+					else {
+						console.log("No se ha proporcionado funcion callback a la notificar el resultado");
 					}
 				}
 				// Termina mal
@@ -1645,10 +1691,12 @@ var AutoScript = ( function ( window, undefined ) {
 			 */
 			function processSelectCertificateResponse(data) {
 				if (!!successCallback) {
-					successCallback(data.replace(/\-/g, "+").replace(/\_/g, "/"));
+					var responseSuccessCallback = successCallback;
+					setCallbacks(null, null);
+					responseSuccessCallback(data.replace(/\-/g, "+").replace(/\_/g, "/"));
 				}
 				else {
-					console.log("No se ha proporcionado funcion callback para procesar el certificado seleccionado");
+					console.log("No se ha proporcionado funcion callback para devolver el certificado seleccionado");
 				}
 			}
 
@@ -1673,7 +1721,15 @@ var AutoScript = ( function ( window, undefined ) {
 					}
 					catch (e) {}
 					
-					successCallback(result, certificate);
+					
+					if (!!successCallback) {
+						var responseSuccessCallback = successCallback;
+						setCallbacks(null, null);
+						responseSuccessCallback(result, certificate);
+					}
+					else {
+						console.log("No se ha proporcionado funcion callback a la que devolver el resultado del lote");
+					}
 				}
 				else {
 					console.log("No se ha proporcionado funcion callback para procesar el resultado del lote de firma");
@@ -1702,7 +1758,14 @@ var AutoScript = ( function ( window, undefined ) {
 				"\nscreen.height: " + (window.screen ? screen.height : 0) +
 				"\n\n   === CLIENTE LOG === \n" + data;
 				
-				successCallback(log);
+				if (!!successCallback) {
+					var responseSuccessCallback = successCallback;
+					setCallbacks(null, null);
+					responseSuccessCallback(log);
+				}
+				else {
+					console.log("No se ha proporcionado funcion callback a la que devolver el log");
+				}
 			}
 
 			/**
@@ -1737,7 +1800,14 @@ var AutoScript = ( function ( window, undefined ) {
 					}
 				}
 
-				successCallback(signature, certificate, extraInfo);
+				if (!!successCallback) {
+					var responseSuccessCallback = successCallback;
+					setCallbacks(null, null);
+					responseSuccessCallback(signature, certificate, extraInfo);
+				}
+				else {
+					console.log("No se ha proporcionado funcion callback a la que devolver la firma generada");
+				}
 			}
 			
 			/** Crea un objeto con los parametros indicados. */
@@ -2417,7 +2487,7 @@ var AutoScript = ( function ( window, undefined ) {
 			 * Realiza una operacion que se ha mandando en varios fragmentos.
 			 */
 			function doFirm () {
-				var httpRequest = getHttpRequest();
+				httpRequest = getHttpRequest();
 				httpRequest.open("POST", urlHttpRequest, true);
 				httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 				httpRequest.onreadystatechange = function() {
@@ -2472,7 +2542,7 @@ var AutoScript = ( function ( window, undefined ) {
 			 * Se encarga de solicitar y montar la respuesta de la operacion realizada.
 			 */
 			function addFragmentRequest (part, totalParts){
-				var httpRequest = getHttpRequest();
+				httpRequest = getHttpRequest();
 				httpRequest.open("POST", urlHttpRequest, true);
 				httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 				httpRequest.onreadystatechange = function() {
@@ -2641,9 +2711,6 @@ var AutoScript = ( function ( window, undefined ) {
 						
 						var sepPos = fileNamesDataBase64[0].indexOf(":");
 						var fileNameDataBase64 = fileNamesDataBase64[0];
-						
-						var fileName = null;
-						var dataB64 = null;
 						
 						if (sepPos == -1) {
 							fileName = Base64.decode(fileNameDataBase64, true);
@@ -2872,9 +2939,9 @@ var AutoScript = ( function ( window, undefined ) {
 			/**
 			 * Realiza una operacion de obtencion de log actual de la aplicacion
 			 */
-			function getCurrentLogByService(serviceName) {
+			function getCurrentLogByService() {
 				
-				var data = generateDataToLoad(serviceName);
+				var data = generateDataToLoad("getLog");
 				
 				execAppIntent(buildUrl(data));
 			} 
@@ -3255,7 +3322,7 @@ var AutoScript = ( function ( window, undefined ) {
 						batchPostSignerUrl != undefined) {				params[i++] = {key:"batchpostsignerurl", value:batchPostSignerUrl}; }
 				if (extraParams != null && extraParams != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(extraParams)}; }
 				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"aw", value:"true"}; } // Espera activa
-				params[i++] = {key:"needcert", value:"true"};
+				params[i++] = {key:"needcert", value:"true"}; 
 				if (batchB64 != null) {									params[i++] = {key:"dat", value:batchB64}; }
 
 				var url = buildUrl(opId, params);
@@ -3528,7 +3595,7 @@ var AutoScript = ( function ( window, undefined ) {
 					if (httpRequest.readyState == 4) {
 						 if (httpRequest.status == 200) {
 	
-							var url = buildUrlWithoutData(op, fileId, retrieverServletAddress, cipherKey);
+							url = buildUrlWithoutData(op, fileId, retrieverServletAddress, cipherKey);
 							if (isURLTooLong(url)) {
 								errorCallback("java.lang.IllegalArgumentException", "La URL de invocacion al servicio de firma es demasiado larga.");
 								return;
@@ -3722,9 +3789,9 @@ var AutoScript = ( function ( window, undefined ) {
 				}
 				
 				// Si no se obtuvo un error ni hemos recibido ninguno de los resultados anteriores,
-				// procesamos el resultado según el tipo de operacion:
+				// procesamos el resultado segun el tipo de operacion:
 				//  - Si es una firma; se recibira la firma, el certificado + la firma, o el certificado + firma + datos extra.
-				// ´- Si es una seleccion de certificado; solo se recibira el certificado.
+				//  - Si es una seleccion de certificado; solo se recibira el certificado.
 				//  - Si es una firma de lote; se recibira el resultado del lote, o el resultado del lote + certificado. 
 				// Los distintos valores del resultado se separan con una tuberia ('|'). Si se
 				// definio una clave de cifrado, consideramos que cada uno de los datos se han
@@ -3806,17 +3873,6 @@ var AutoScript = ( function ( window, undefined ) {
 					else {
 						signature = fromBase64UrlSaveToBase64(html);
 					}
-					
-					// Guardamos el dato, por si es necesario para la seleccion
-					// de certificado automatica
-					if (!!stickySignatory) {
-						if (!!signature) {
-							stickyCertificate = signature;
-						}
-					}
-					else {
-						stickyCertificate = null;
-					}
 				}
 				else {
 					var sepPos2 = html.indexOf('|', sepPos + 1);
@@ -3842,17 +3898,17 @@ var AutoScript = ( function ( window, undefined ) {
 							extraInfo = Base64.decode(fromBase64UrlSaveToBase64(html.substring(sepPos2 + 1)));
 						}
 					}
-					
-					if (!!stickySignatory) {
-						if (!!certificate) {
-							stickyCertificate = certificate;
-						}
-					}
-					else {
-						stickyCertificate = null;
-					}
 				}
 
+				if (!!stickySignatory) {
+					if (!!certificate) {
+						stickyCertificate = certificate;
+					}
+				}
+				else {
+					stickyCertificate = null;
+				}
+				
 				successCallback(signature, certificate, extraInfo);
 				return false;
 			}

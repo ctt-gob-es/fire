@@ -2,7 +2,6 @@
 <%@page import="es.gob.fire.server.services.internal.ErrorManager"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="java.net.URLDecoder"%>
-<%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderInfo"%>

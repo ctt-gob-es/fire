@@ -76,6 +76,7 @@ public class SignHelper {
 
         final Properties config = new Properties();
         config.setProperty("updater.ignoreGracePeriod", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+        //config.setProperty("updater.allowPartialUpgrade", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
         // Recuperamos la firma generada (actualizanda en caso de haberse solicitado)
         TransactionResult result;

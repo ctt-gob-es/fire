@@ -23,7 +23,6 @@ import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
-import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;
@@ -75,7 +74,7 @@ public class RecoverUpdatedSignManager {
         Properties config = null;
     	if (configB64 != null && !configB64.isEmpty()) {
     		try {
-    			config = ServiceUtil.base642Properties(configB64);
+    			config = PropertiesUtils.base642Properties(configB64);
     		}
     		catch (final Exception e) {
             	LOGGER.log(Level.WARNING, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$
@@ -176,7 +175,7 @@ public class RecoverUpdatedSignManager {
         // una futura llamada
         if (upgradeResult.getResult() != null) {
         	try {
-        		TempDocumentsManager.storeDocument(asyncId, partialResult, true);
+        		TempDocumentsManager.storeDocument(asyncId, partialResult, true, trAux);
         	}
         	catch (final Exception e) {
         		LOGGER.log(Level.SEVERE, logF.f("No se pudo almacenar la firma actualizada en el almacen temporal"), e); //$NON-NLS-1$

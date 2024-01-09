@@ -266,7 +266,7 @@ public class RecoverBatchResultManager {
         	}
         	catch (final FIReConnectorFactoryException e) {
         		final String errorMessage = "No se ha podido cargar el conector del proveedor de firma: " + providerName; //$NON-NLS-1$
-        		LOGGER.log(Level.SEVERE, errorMessage, e);
+        		LOGGER.log(Level.SEVERE, logF.f(errorMessage), e);
         		TRANSLOGGER.register(session, false);
         		AUDITTRANSLOGGER.register(session, false, errorMessage);
         		SessionCollector.removeSession(session, trAux);
@@ -426,9 +426,8 @@ public class RecoverBatchResultManager {
 
         // Si todas las firmas fallaron, damos por terminada la transaccion y eliminamos la sesion.
         if (isAllFailed(batchResult)) {
-        	final String errorMessage = "Todas las firmas fallaron"; //$NON-NLS-1$
     		TRANSLOGGER.register(session, false);
-    		AUDITTRANSLOGGER.register(session, false, errorMessage);
+    		AUDITTRANSLOGGER.register(session, false, "Todas las firmas fallaron"); //$NON-NLS-1$
         	SessionCollector.removeSession(session, trAux);
         }
         // Si no, indicamos que ya se ha firmado el lote para permitir que se puedan recuperar los

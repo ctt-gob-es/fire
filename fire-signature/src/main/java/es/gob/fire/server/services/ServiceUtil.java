@@ -11,12 +11,8 @@ package es.gob.fire.server.services;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,8 +31,6 @@ import es.gob.fire.signature.ConfigManager;
 public final class ServiceUtil {
 
 	private static final Logger LOGGER = Logger.getLogger(ServiceUtil.class.getName());
-
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final String UNIDENTIFIED = "NO_IDENTIFICADA"; //$NON-NLS-1$
 
@@ -65,40 +59,6 @@ public final class ServiceUtil {
             );
         }
         return b64.replace("-", "+").replace("_", "/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-    }
-
-	/** Convierte una cadena Base64 en un objeto de propiedades.
-	 * @param base64 Base64 que descodificado es un fichero de propiedades en texto plano.
-	 * @return Objeto de propiedades.
-	 * @throws IOException Si hay problemas en el proceso. */
-    public static Properties base642Properties(final String base64) throws IOException {
-    	final Properties p = new Properties();
-    	if (base64 == null || base64.isEmpty()) {
-    		return p;
-    	}
-
-    	p.load(new InputStreamReader(
-    			new ByteArrayInputStream(
-    					Base64.decode(base64, base64.indexOf('-') > -1 || base64.indexOf('_') > -1)
-    					),
-    			DEFAULT_CHARSET));
-
-    	return p;
-    }
-
-    /** Convierte un objeto de propiedades en una cadena Base64 con todos sus elementos.
-	 * @param p Objeto de propiedades.
-	 * @return Cadena Base64. */
-    public static String properties2Base64(final Properties p) {
-
-    	if (p == null) {
-    		return ""; //$NON-NLS-1$
-    	}
-    	final StringBuilder buffer = new StringBuilder();
-    	for (final String k : p.keySet().toArray(new String[p.size()])) {
-    		buffer.append(k).append("=").append(p.getProperty(k)).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
-    	}
-    	return Base64.encode(buffer.toString().getBytes(DEFAULT_CHARSET));
     }
 
     /**

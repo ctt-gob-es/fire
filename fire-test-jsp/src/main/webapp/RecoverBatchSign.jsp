@@ -37,7 +37,10 @@
 	<body style=" font-weight: 300;">
 
 		<%
+			Logger LOGGER = LoggerFactory.getLogger("es.gob.fire.test.webapp.recoverbatchsign"); //$NON-NLS-1$
+			
 			if (session.getAttribute("user") == null) { //$NON-NLS-1$
+				LOGGER.warn("No se encontro sesion de usuario"); //$NON-NLS-1$
 				response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 				return;
 			}
@@ -47,8 +50,7 @@
 		    	signature = BatchHelper.recoverBatchSign(request);
 		    }
 		    catch (Exception e) {
-				LoggerFactory.getLogger("es.gob.fire.test.webapp").error( //$NON-NLS-1$
-						"Error al recuperar una firma del lote: {}", e.toString()); //$NON-NLS-1$
+				LOGGER.error("Error al recuperar una firma del lote: {}", e.toString()); //$NON-NLS-1$
 		    	response.sendRedirect("ErrorPage.jsp?msg=" + URLEncoder.encode(e.getMessage(), "utf-8") + "&fatal=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		    	return;
 		    }
@@ -82,7 +84,7 @@
 	 						ext = ".asics"; //$NON-NLS-1$
 	 						break;
 	 					default:
-	 						ext = ""; //$NON-NLS-1$
+	 						ext = ".sig"; //$NON-NLS-1$
 	 				}
 	 			}
 		    }

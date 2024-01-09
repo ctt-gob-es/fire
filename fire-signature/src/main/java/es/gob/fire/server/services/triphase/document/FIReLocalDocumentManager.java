@@ -48,7 +48,8 @@ public class FIReLocalDocumentManager implements DocumentManager {
 						Base64.decode(id.replace('-', '+').replace('_', '/')),
 						DEFAULT_CHARSET),
 				signature,
-				false);
+				false,
+				null);  //TODO: Pasar parametros para logs
 
 		return Base64.encode(RESULT_OK.getBytes());
 	}

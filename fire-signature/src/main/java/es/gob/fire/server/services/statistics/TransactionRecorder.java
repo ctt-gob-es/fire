@@ -22,6 +22,8 @@ public class TransactionRecorder {
 
 	private static String LOG_CHARSET = "utf-8"; //$NON-NLS-1$
 
+	private static String UNDEFINED_VALUE = "Indefinido"; //$NON-NLS-1$
+
 	private Logger dataLogger = null;
 
 	private boolean enable;
@@ -37,6 +39,16 @@ public class TransactionRecorder {
 		if (instance == null) {
 			instance =  new TransactionRecorder();
 		}
+		return instance;
+	}
+
+	/**
+	 * Obtenemos el objeto para el guardado de los datos estad&iacute;sticos de las
+	 * transacciones realizadas si existe.
+	 * @return Objeto para el registro de los datos de las transacciones o {@code null}.
+	 * si no se cre&oacute; antes.
+	 */
+	public final static TransactionRecorder getInstanceIfExists() {
 		return instance;
 	}
 
@@ -101,10 +113,6 @@ public class TransactionRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para las estadisticas de transaccion", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
-		} finally {
-			if (logHandler != null){
-				logHandler.close();
-			}
 		}
 
 		this.dataLogger = fileLogger;
@@ -132,9 +140,6 @@ public class TransactionRecorder {
 		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
 		transactionCube.setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
 
-		// Resultado
-		transactionCube.setResultTransaction(result);
-
 		// Nombre de la aplicacion
 		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
 		if (appName != null && !appName.isEmpty()) {
@@ -142,7 +147,12 @@ public class TransactionRecorder {
 		}
 		else {
 			final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
-			transactionCube.setApplication(appId);
+			if (appId != null && !appId.isEmpty()) {
+				transactionCube.setApplication(appId);
+			}
+			else {
+				transactionCube.setApplication(UNDEFINED_VALUE);
+			}
 		}
 
 		// Operacion
@@ -153,21 +163,23 @@ public class TransactionRecorder {
 		transactionCube.setOperation(type.name());
 
 		// Almacenamos la informacion del proveedor
-		 final String[] provsSession = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
-		 final String prov = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		 final String provForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
+		final String selectedProvider = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+		final String[] selectableProviders = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
+		final String providerForced = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED);
 
-		if (provForced != null && !provForced.isEmpty()) {
-			transactionCube.setProvider(provForced);
+		if (selectedProvider != null && !selectedProvider.isEmpty()) {
+			transactionCube.setProvider(selectedProvider);
+			transactionCube.setMandatoryProvider(providerForced != null && Boolean.parseBoolean(providerForced));
+		} else if(selectableProviders != null && selectableProviders.length == 1) {
+			transactionCube.setProvider(selectableProviders[0]);
 			transactionCube.setMandatoryProvider(true);
+		} else {
+			transactionCube.setProvider(UNDEFINED_VALUE);
+			transactionCube.setMandatoryProvider(false);
 		}
-		else if (prov != null && !prov.isEmpty()) {
-			transactionCube.setProvider(prov);
-		}
-		else if(provsSession != null && provsSession.length == 1) {
-			transactionCube.setProvider(provsSession[0]);
-			transactionCube.setMandatoryProvider(true);
-		}
+
+		// Resultado
+		transactionCube.setResultTransaction(result);
 
 		this.dataLogger.finest(transactionCube.toString());
 	}

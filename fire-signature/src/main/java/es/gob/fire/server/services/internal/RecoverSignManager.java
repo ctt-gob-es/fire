@@ -38,7 +38,6 @@ import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
-import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.crypto.CryptoHelper;
 import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
@@ -108,7 +107,7 @@ public class RecoverSignManager {
         Properties config = null;
     	if (configB64 != null && !configB64.isEmpty()) {
     		try {
-    			config = ServiceUtil.base642Properties(configB64);
+    			config = PropertiesUtils.base642Properties(configB64);
     		}
     		catch (final Exception e) {
             	LOGGER.log(Level.SEVERE, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$
@@ -365,7 +364,7 @@ public class RecoverSignManager {
     	// firma generada
         LOGGER.info(logF.f("Se almacena temporalmente el resultado de la operacion")); //$NON-NLS-1$
     	try {
-    		TempDocumentsManager.storeDocument(transactionId, partialResult, false);
+    		TempDocumentsManager.storeDocument(transactionId, partialResult, false, trAux);
     	}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al almacenar la firma despues de haberla completado"), e); //$NON-NLS-1$
@@ -438,7 +437,7 @@ public class RecoverSignManager {
 
 	        // Comprobamos si era necesario recuperar la firma totalmente actualizada y si se ha hecho asi
 	        if (!allowPartialUpgrade && upgradeResult.getState() == State.PARTIAL) {
-	        	throw new UpgradeException("La firma no se actualizo hasta el formato solicitado"); //$NON-NLS-1$
+	        	throw new UpgradeException("La firma no se actualizo hasta el formato solicitado (" + upgradeResult.getFormat() + ")"); //$NON-NLS-1$
 	        }
 
 			if (upgradeResult.getState() == UpgradeResult.State.PENDING) {

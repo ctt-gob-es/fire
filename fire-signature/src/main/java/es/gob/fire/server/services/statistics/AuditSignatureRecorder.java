@@ -1,7 +1,6 @@
 package es.gob.fire.server.services.statistics;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -14,7 +13,6 @@ import es.gob.fire.server.services.internal.BatchResult;
 import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignBatchConfig;
-import es.gob.fire.signature.DBConnectionException;
 import es.gob.fire.statistics.dao.AuditSignaturesDAO;
 import es.gob.fire.statistics.entity.AuditSignatureCube;
 
@@ -28,6 +26,8 @@ public class AuditSignatureRecorder {
 
 	private static String LOG_CHARSET = "utf-8"; //$NON-NLS-1$
 
+	private static String UNDEFINED_VALUE = "Indefinido"; //$NON-NLS-1$
+
 	private Logger dataLogger = null;
 
 	private boolean enable;
@@ -37,13 +37,24 @@ public class AuditSignatureRecorder {
 	private static AuditSignatureRecorder instance;
 
 	/**
-	 * Obtenemos el logger para el guardado de los datos de auditor&iacute;a de las peticiones realizadas.
+	 * Obtenemos el objeto de escritura para el guardado de los datos de auditor&iacute;a de las
+	 * peticiones realizadas.
 	 * @return Objeto para el registro de los datos de las peticiones.
 	 */
 	public final static AuditSignatureRecorder getInstance() {
 		if (instance == null){
 			instance = new AuditSignatureRecorder();
 		}
+		return instance;
+	}
+
+	/**
+	 * Obtenemos el objeto de escritura para el guardado de los datos de auditor&iacute;a de las
+	 * peticiones realizadas si existe.
+	 * @return Objeto para el registro de los datos de las peticiones o {@code null} si no se ha
+	 * creado.
+	 */
+	public final static AuditSignatureRecorder getInstanceIfExists() {
 		return instance;
 	}
 
@@ -140,14 +151,14 @@ public class AuditSignatureRecorder {
 		// Inicializamos el cubo de datos si no lo estaba
 		final AuditSignatureCube signatureCube = new AuditSignatureCube();
 
-		//Id int lote
-		if (docId != null){
-			signatureCube.setIdIntLote(docId);
-		}
-
 		// Id transaccion
 		final String trId = fireSession.getString(ServiceParams.SESSION_PARAM_TRANSACTION_ID);
 		signatureCube.setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
+
+		// Id documento (identificador dentro del lote)
+		if (docId != null){
+			signatureCube.setIdIntLote(docId);
+		}
 
 		// Resultado
 		signatureCube.setResult(result);
@@ -156,11 +167,10 @@ public class AuditSignatureRecorder {
 		signatureCube.setCryptoOperation(fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION));
 
 		// Obtenemos el tamano del documento
-
 		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
-		Long docSize = docSizeObject != null && docSizeObject instanceof Long
-				? (Long) docSizeObject
-				: Long.valueOf(0);
+		long docSize = docSizeObject != null && docSizeObject instanceof Long
+				? ((Long) docSizeObject).longValue()
+				: 0;
 
 		// Obtenemos el formato de firma configurado
 		String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
@@ -175,7 +185,7 @@ public class AuditSignatureRecorder {
 				// Actualizamos el tamano del documento
 				final DocInfo docinf = batchResult.getDocInfo(docId);
 			    if (docinf != null) {
-			    	docSize = Long.valueOf(docinf.getSize());
+			    	docSize = docinf.getSize();
 			    }
 			    // Si se establecio una configuracion especifica para el documento, registramos esta
 			    final SignBatchConfig signConfig = batchResult.getSignConfig(docId);
@@ -187,7 +197,10 @@ public class AuditSignatureRecorder {
 		}
 
 		// Registramos el tamano del documento, el formato y el formato de actualizacion
-		signatureCube.setDataSize(docSize.longValue());
+		signatureCube.setDataSize(docSize);
+		if (format == null) {
+			format = UNDEFINED_VALUE;
+		}
 		signatureCube.setFormat(format);
 		signatureCube.setImprovedFormat(upgrade);
 

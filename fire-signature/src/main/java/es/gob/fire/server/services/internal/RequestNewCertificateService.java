@@ -75,11 +75,16 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
-		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true, trAux);
+		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true, trAux);
         if (session == null) {
 			LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-			processError(FIReError.FORBIDDEN, errorUrl, request, response);
+			processError(FIReError.FORBIDDEN, errorUrl, request, response, trAux);
     		return;
+        }
+
+        // Si la operacion anterior no fue la solicitud de seleccion de certificado, forzamos a que se recargue por si faltan datos
+    	if (SessionFlags.OP_CHOOSE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true, trAux);
         }
 
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
@@ -172,10 +177,11 @@ public final class RequestNewCertificateService extends HttpServlet {
      * @param url URL de error a la que redirigir al usuario.
      * @param request Objeto de petici&oacute;n realizada al servlet.
      * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
+     * @param trAux Par&aacute;metro auxiliar de la transacci&oacute;n.
      * @throws IOException Cuando no se puede redirigir al usuario.
      */
     private static void processError(final FIReError error, final String url, final HttpServletRequest request,
-    		final HttpServletResponse response) {
+    		final HttpServletResponse response, final TransactionAuxParams trAux) {
 
 		// Invalidamos la sesion por seguridad
 		final HttpSession httpSession = request.getSession(false);
@@ -187,7 +193,7 @@ public final class RequestNewCertificateService extends HttpServlet {
 				response.sendRedirect(url);
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "No se ha podido redirigir al usuario a la URL externa", e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, trAux.getLogFormatter().f("No se ha podido redirigir al usuario a la URL externa"), e); //$NON-NLS-1$
 				Responser.sendError(response, FIReError.INTERNAL_ERROR);
 			}
 		} else {

@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.RuntimeConfigNeededException;
-import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.afirma.core.signers.AOSignConstants;
@@ -47,6 +46,7 @@ import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.internal.Pkcs1TriPhasePreProcessor;
+import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.triphase.document.DocumentManager;
 import es.gob.fire.server.services.triphase.document.FIReLocalDocumentManager;
 import es.gob.fire.signature.ConfigManager;
@@ -65,7 +65,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 	private static final String PARAM_VALUE_OPERATION_PRESIGN = "pre"; //$NON-NLS-1$
 	private static final String PARAM_VALUE_OPERATION_POSTSIGN = "post"; //$NON-NLS-1$
 
-	private static final String PARAM_NAME_SUB_OPERATION = "cop"; //$NON-NLS-1$
+	private static final String PARAM_NAME_CRYPTO_OPERATION = "cop"; //$NON-NLS-1$
 
 	// Parametros que necesitamos para la prefirma
 	private static final String PARAM_NAME_DOCID = "doc"; //$NON-NLS-1$
@@ -87,6 +87,9 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 	private static final String EXTRA_PARAM_HEADLESS = "headless"; //$NON-NLS-1$
 
 	private static final String EXTRA_PARAM_VALIDATE_PKCS1 = "validatePkcs1"; //$NON-NLS-1$
+
+    /** Par&aacute;metro de configuraci&oacute;n para obligar a la multifirma de firmas longevas. */
+    private static final String EXTRA_PARAM_ALLOW_SIGN_LTS_SIGNATURES = "allowSignLTSignature"; //$NON-NLS-1$
 
 	/** Or&iacute;genes permitidos por defecto desde los que se pueden realizar peticiones al servicio. */
 	private static final String ALL_ORIGINS_ALLOWED = "*"; //$NON-NLS-1$
@@ -133,8 +136,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		// Obtenemos el codigo de operacion
-		final SignOperation subOperation = SignOperation.parse(parameters.get(PARAM_NAME_SUB_OPERATION));
-		if (subOperation == null) {
+		final SignOperation cryptoOperation = SignOperation.parse(parameters.get(PARAM_NAME_CRYPTO_OPERATION));
+		if (cryptoOperation == null) {
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_CRYPTO_OPERATION));
 			return;
 		}
@@ -152,7 +155,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		Properties extraParams;
 		if (parameters.containsKey(PARAM_NAME_EXTRA_PARAM)) {
 			try {
-				extraParams = AOUtil.base642Properties(parameters.get(PARAM_NAME_EXTRA_PARAM));
+				extraParams = PropertiesUtils.base642Properties(parameters.get(PARAM_NAME_EXTRA_PARAM));
 			}
 			catch (final Exception e) {
 				LOGGER.severe("El formato de los parametros adicionales suministrado es erroneo: " +  e); //$NON-NLS-1$
@@ -163,6 +166,12 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		else {
 			extraParams = new Properties();
 		}
+
+        // Evitamos que se interrumpa la operacion en caso de estar cofirmandose o
+        // contrafirmandose una firma longeva
+        if (SignOperation.SIGN != cryptoOperation) {
+        	extraParams.setProperty(EXTRA_PARAM_ALLOW_SIGN_LTS_SIGNATURES, Boolean.TRUE.toString());
+        }
 
 		// Eliminamos configuraciones que no deseemos que se utilicen extenamente
 		extraParams.remove(EXTRA_PARAM_VALIDATE_PKCS1);
@@ -302,7 +311,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			final TriphaseData preRes;
 			try {
-				switch (subOperation) {
+				switch (cryptoOperation) {
 				case SIGN:
 					preRes = prep.preProcessPreSign(
 							docBytes,
@@ -340,10 +349,15 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 					);
 					break;
 				default:
-					throw new AOException("No se reconoce el codigo de sub-operacion: " + subOperation); //$NON-NLS-1$
+					throw new AOException("No se reconoce el codigo de sub-operacion: " + cryptoOperation); //$NON-NLS-1$
 				}
 
 				LOGGER.fine("Se ha calculado el resultado de la prefirma y se devuelve"); //$NON-NLS-1$
+			}
+			catch (final UnsupportedOperationException e) {
+				LOGGER.log(Level.SEVERE, "Se requiere intervencion del usuario para la prefirma de los datos", e); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.CONFIGURATION_NEEDED) + ": " + e); //$NON-NLS-1$
+				return;
 			}
 			catch (final RuntimeConfigNeededException e) {
 				LOGGER.log(Level.SEVERE, "Se requiere intervencion del usuario para la prefirma de los datos", e); //$NON-NLS-1$
@@ -411,7 +425,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			final byte[] signedDoc;
 			try {
-				switch (subOperation) {
+				switch (cryptoOperation) {
 				case SIGN:
 					signedDoc = prep.preProcessPostSign(
 							docBytes,
@@ -448,7 +462,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 							);
 					break;
 				default:
-					throw new AOException("No se reconoce el codigo de sub-operacion: " + subOperation); //$NON-NLS-1$
+					throw new AOException("No se reconoce el codigo de sub-operacion: " + cryptoOperation); //$NON-NLS-1$
 				}
 			}
 			catch (final RuntimeConfigNeededException e) {

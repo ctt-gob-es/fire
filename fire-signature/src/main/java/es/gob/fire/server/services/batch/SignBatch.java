@@ -25,9 +25,9 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
-import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.server.services.batch.ProcessResult.Result;
+import es.gob.fire.server.services.internal.PropertiesUtils;
 
 /** Lote de firmas electr&oacute;nicas */
 public abstract class SignBatch {
@@ -194,9 +194,9 @@ public abstract class SignBatch {
 					try {
 						Properties signExtraParams;
 						if (jsonSingleSign.containsKey(JSON_ELEMENT_EXTRAPARAMS)) {
-							signExtraParams = AOUtil.base642Properties(jsonSingleSign.getString(JSON_ELEMENT_EXTRAPARAMS));
+							signExtraParams = PropertiesUtils.base642Properties(jsonSingleSign.getString(JSON_ELEMENT_EXTRAPARAMS));
 						} else {
-							signExtraParams = AOUtil.base642Properties(this.extraParams);
+							signExtraParams = PropertiesUtils.base642Properties(this.extraParams);
 						}
 						singleSign.setExtraParams(signExtraParams);
 					} catch (final Exception e) {
@@ -247,7 +247,7 @@ public abstract class SignBatch {
 		if (errors != null && !errors.isEmpty()) {
 			preBatch.add(JSELEM_RESULTS, errors);
 		}
-		
+
 		return preBatch.build();
 	}
 

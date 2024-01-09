@@ -1,3 +1,5 @@
+<%@page import="org.slf4j.LoggerFactory"%>
+<%@page import="org.slf4j.Logger"%>
 <%@page import="es.gob.fire.test.webapp.Base64"%>
 <%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -33,8 +35,10 @@
 	</head>
 	<body style=" font-weight: 300;">
 		<%
-		
+			Logger LOGGER = LoggerFactory.getLogger("es.gob.fire.test.webapp.adddocumenttobatch"); //$NON-NLS-1$
+			
 			if (session.getAttribute("user") == null) { //$NON-NLS-1$
+				LOGGER.warn("No se encontro sesion de usuario"); //$NON-NLS-1$
 				response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 				return;
 			}
@@ -145,7 +149,7 @@
 					   - mode=implicit
 					   - updater.ignoreGracePeriod=true
 					  Con ellos se generan firmas que contienen los datos firmados y se indica a la plataforma
-					  de actualizacion de firmas que se ignore el periodo de gracia. \nupdater.ignoreGracePeriod=true--%>
+					  de actualizacion de firmas que se ignore el periodo de gracia. --%>
 					<input id="extraparams-conf" type="hidden" name="extraParams"
 						value="<%= Base64.encode("mode=implicit".getBytes()) %>" />
 				</fieldset>

@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.signature.DbManager;
 
 /**
@@ -41,8 +42,8 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 		try (Connection conn = DbManager.getConnection();
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_CHECK_DOCUMENT)) {
 			st.setString(1, id);
-			try (ResultSet rs = st.executeQuery()) { 
-				exists = rs.next(); 
+			try (ResultSet rs = st.executeQuery()) {
+				exists = rs.next();
 			}
 		}
 		catch (final Exception e) {
@@ -52,7 +53,7 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	}
 
 	@Override
-	public String storeDocument(final String id, final byte[] data, final boolean newDocument) throws IOException {
+	public String storeDocument(final String id, final byte[] data, final boolean newDocument, final LogTransactionFormatter formt) throws IOException {
 
 		// Insertamos o actualizamos los datos segun corresponda
 		String docId = id;
@@ -70,7 +71,7 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 				st.setBlob(2, new ByteArrayInputStream(data));
 				st.setLong(3, new Date().getTime());
 				if (st.executeUpdate() < 1) {
-					LOGGER.log(Level.WARNING, "No se pudo insertar en base de datos el documento temporal con ID: " + docId); //$NON-NLS-1$
+					LOGGER.log(Level.WARNING, formt.f("No se pudo insertar en base de datos el documento temporal con ID: " + docId)); //$NON-NLS-1$
 				}
 			}
 			catch (final Exception e) {
@@ -84,7 +85,7 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 				st.setLong(2, new Date().getTime());
 				st.setString(3, docId);
 				if (st.executeUpdate() < 1) {
-					LOGGER.log(Level.WARNING, "No se pudo actualizar en base de datos el documento temporal con ID: " + docId); //$NON-NLS-1$
+					LOGGER.log(Level.WARNING, formt.f("No se pudo actualizar en base de datos el documento temporal con ID: " + docId)); //$NON-NLS-1$
 				}
 			}
 			catch (final Exception e) {

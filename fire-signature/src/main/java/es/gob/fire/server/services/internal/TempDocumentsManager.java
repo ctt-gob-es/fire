@@ -66,8 +66,13 @@ public class TempDocumentsManager {
 		return documentsDao.existDocument(id);
 	}
 
-	public static void storeDocument(final String id, final byte[] data, final boolean newDocument) throws IOException {
-		documentsDao.storeDocument(id, data, newDocument);
+	public static void storeDocument(final String id, final byte[] data, final boolean newDocument, final TransactionAuxParams trAux) throws IOException {
+
+		//XXX: El segundo parametro LogTransactionFormatter deberia imprimir un identificador concreto no asociado a una transaccion
+		// sino a una llamada independiente
+		final LogTransactionFormatter logFormatter = trAux != null ? trAux.getLogFormatter() : new LogTransactionFormatter(id);
+
+		documentsDao.storeDocument(id, data, newDocument, logFormatter);
 
 		synchronized (documentsDao) {
 			if (++uses >= MAX_USE_TO_CLEANING && (cleaningProcess == null || cleaningProcess.isDone())) {

@@ -136,7 +136,7 @@ public class MailPasswordRestorationController {
 
 				// Construimos la URL para restaurar la contrasena
 				// Para evitar errores recuperando el parametro code,
-				// parseamos los símbolos mas antes de enviar la URL al usuario
+				// parseamos los simbolos mas antes de enviar la URL al usuario
 				final String renovationCodeURL = URLEncoder.encode(renovationCode, StandardCharsets.UTF_8.toString());
 
 				final String restorationUrl = getRestorationPageUrl(request, renovationCodeURL);
@@ -195,7 +195,7 @@ public class MailPasswordRestorationController {
 					result = "login.html";
 				} else {
 					//Se engloba en un else para asegurarnos de que user no es nulo.
-					
+
 					// Si el usuario tiene datos a nulo en base de datos se va fuera
 					if (user.getRenovationCode() == null || user.getRenovationDate() == null && !error) {
 						LOGGER.warn("El usuario no tenia registrada la informacion de restauraci\u00F3n de contrasena");
@@ -299,7 +299,7 @@ public class MailPasswordRestorationController {
 					model.addAttribute("restorePasswordErrorMessage",
 							"Se ha excedido el tiempo m\u00E1ximo de espera hasta la renovaci\u00F3n de la contrase\u00F1a");
 				}
-				
+
 				// Comprobamos que el codigo del usuario es el que realmente nos ha
 				// realizado la peticion
 				if (restoreUserCode == null || !user.getRenovationCode().equals(restoreUserCode) && !error) {

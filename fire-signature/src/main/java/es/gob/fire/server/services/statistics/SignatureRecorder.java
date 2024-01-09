@@ -29,6 +29,8 @@ public class SignatureRecorder {
 
 	private static String LOG_CHARSET = "utf-8"; //$NON-NLS-1$
 
+	private static String UNDEFINED_VALUE = "Indefinido"; //$NON-NLS-1$
+
 	private Logger dataLogger = null;
 
 	private boolean enable = false;
@@ -36,7 +38,7 @@ public class SignatureRecorder {
 	private static SignatureRecorder instance;
 
 	/**
-	 * Obtenemos el logger para el guardado de los datos estad&iacute;sticos de las
+	 * Obtenemos el objeto para el guardado de los datos estad&iacute;sticos de las
 	 * firmas realizadas.
 	 * @return Objeto para el registro de los datos de las firmas.
 	 */
@@ -48,9 +50,23 @@ public class SignatureRecorder {
 	}
 
 	/**
+	 * Obtenemos el objeto para el guardado de los datos estad&iacute;sticos de las
+	 * firmas realizadas si existe.
+	 * @return Objeto para el registro de los datos de las firmas o {@code null} si
+	 * no se cre&oacute; antes.
+	 */
+	public final static SignatureRecorder getInstanceIfExists() {
+		if (instance == null) {
+			instance =  new SignatureRecorder();
+		}
+		return instance;
+	}
+
+	/**
 	 * Construye un objeto para el registro de los datos de firma en base a los cuales generar
 	 * estad&iacute;sticas sobre las firmas generadas por FIRe.
 	 */
+	@SuppressWarnings("resource")
 	private SignatureRecorder() {
 
 		final StatisticsConfig config;
@@ -111,10 +127,6 @@ public class SignatureRecorder {
 			LOGGER.log(Level.WARNING, "No se ha podido crear el fichero de datos para las estadisticas de firma", e); //$NON-NLS-1$
 			this.enable = false;
 			return;
-		} finally {
-			if (logHandler != null){
-				logHandler.close();
-			}
 		}
 
 		this.dataLogger = fileLogger;
@@ -152,29 +164,45 @@ public class SignatureRecorder {
 		signatureCube.setIdTransaction(trId != null && !trId.isEmpty() ? trId : "0"); //$NON-NLS-1$
 
 		// Aplicacion
-		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+		String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_NAME);
+		if (appName == null) {
+			appName = UNDEFINED_VALUE;
+		}
 		signatureCube.setApplication(appName);
 
 		// Resultado
 		signatureCube.setResultSign(result);
 
 		// Navegador
-		final String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
+		String browser = fireSession.getString(ServiceParams.SESSION_PARAM_BROWSER);
+		if (browser == null) {
+			browser = UNDEFINED_VALUE;
+		}
 		signatureCube.setBrowser(browser);
 
 		// Proveedor que gestiona el certificado de firma
-		final String provider = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-		signatureCube.setProvider(provider);
+		final String selectedProvider = fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+		final String[] selectableProviders = (String []) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
+		if (selectedProvider != null && !selectedProvider.isEmpty()) {
+			signatureCube.setProvider(selectedProvider);
+		} else if(selectableProviders != null && selectableProviders.length == 1) {
+			signatureCube.setProvider(selectableProviders[0]);
+		} else {
+			signatureCube.setProvider(UNDEFINED_VALUE);
+		}
 
 		// Algoritmo
-		final String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
+		String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
+		if (algorithm == null) {
+			algorithm = UNDEFINED_VALUE;
+		}
 		signatureCube.setAlgorithm(algorithm);
 
 		// Obtenemos el tamano del documento
-		Long docSize = Long.valueOf(0);
+		long docSize = 0;
 		final Object docSizeObject = fireSession.getObject(ServiceParams.SESSION_PARAM_DOCSIZE);
 		if (docSizeObject != null && docSizeObject instanceof Long) {
-			docSize = (Long) docSizeObject;
+			docSize = ((Long) docSizeObject).longValue();
 		}
 
 		// Obtenemos el formato de firma configurado
@@ -190,7 +218,7 @@ public class SignatureRecorder {
 				// Actualizamos el tamano del documento
 				final DocInfo docinf = batchResult.getDocInfo(docId);
 			    if (docinf != null) {
-			    	docSize = Long.valueOf(docinf.getSize());
+			    	docSize = docinf.getSize();
 			    }
 			    // Si se establecio una configuracion especifica para el documento, registramos esta
 			    final SignBatchConfig signConfig = batchResult.getSignConfig(docId);
@@ -202,7 +230,10 @@ public class SignatureRecorder {
 		}
 
 		// Registramos el tamano del documento, el formato y el formato de actualizacion
-		signatureCube.setDataSize(docSize.longValue());
+		signatureCube.setDataSize(docSize);
+		if (format == null) {
+			format = UNDEFINED_VALUE;
+		}
 		signatureCube.setFormat(format);
 		signatureCube.setImprovedFormat(upgrade);
 

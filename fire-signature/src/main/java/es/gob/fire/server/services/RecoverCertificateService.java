@@ -25,6 +25,7 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
+import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.internal.RecoverCertificateManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.TransactionAuxParams;
@@ -196,7 +197,7 @@ public final class RecoverCertificateService extends HttpServlet {
     	Properties config = null;
     	if (configB64 != null && !configB64.isEmpty()) {
     		try {
-    			config = ServiceUtil.base642Properties(configB64);
+    			config = PropertiesUtils.base642Properties(configB64);
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$

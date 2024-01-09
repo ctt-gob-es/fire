@@ -34,6 +34,7 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
+import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.SignatureValidatorBuilder;
@@ -177,7 +178,7 @@ public final class SignService extends HttpServlet {
 
         final Properties config;
         try {
-        	config = extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null;
+        	config = extraParamsB64 != null ? PropertiesUtils.base642Properties(extraParamsB64) : null;
         }
         catch (final IOException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El parametro de configuracion de la operacion estaba mal formado"), e); //$NON-NLS-1$

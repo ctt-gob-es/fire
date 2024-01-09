@@ -408,14 +408,15 @@ public final class FIReTriHelper {
 	 * @param cop operacion a realizar
 	 * @throws UnsupportedOperationException Cuando se configur&oacute; una operaci&oacute;n no soportada.
 	 */
-	private static void checkMultiSignatureCompatibility(final String format, final String cop) throws UnsupportedOperationException {
+	public static void checkMultiSignatureCompatibility(final String format, final String cop) throws UnsupportedOperationException {
 		if (SignOperation.COSIGN.toString().equals(cop)
         		|| SignOperation.COUNTERSIGN.toString().equals(cop)) {
-	        if (SignatureFormat.FACTURAE.toString().equals(format)) {
-	        	throw new UnsupportedOperationException("No se permiten multifirmas para el formato FacturaE"); //$NON-NLS-1$
+	        if (SignatureFormat.FACTURAE.toString().equals(format)
+	        		|| SignatureFormat.NONE.toString().equals(format)) {
+	        	throw new UnsupportedOperationException("No se permiten multifirmas para el formato " + format); //$NON-NLS-1$
 	        } else if (SignatureFormat.XADES_ASIC_S.toString().equals(format)
 	        		|| SignatureFormat.CADES_ASIC_S.toString().equals(format)) {
-	        	throw new UnsupportedOperationException("Operacion no soportada para el formato seleccionado"); //$NON-NLS-1$
+	        	throw new UnsupportedOperationException("Operacion no soportada para el formato " + format); //$NON-NLS-1$
 	        } else if (SignOperation.COUNTERSIGN.toString().equals(cop) && SignatureFormat.PADES.toString().equals(format)) {
 	        	throw new UnsupportedOperationException("El formato PDF no permite contrafirmas"); //$NON-NLS-1$
 	        }

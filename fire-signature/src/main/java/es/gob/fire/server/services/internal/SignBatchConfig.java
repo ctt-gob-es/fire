@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
-import es.gob.fire.server.services.ServiceUtil;
-
 /**
  * Configuraci&oacute;n de firma particular para un documento de un lote.
  * @author Carlos Gamuci
@@ -83,7 +81,7 @@ public class SignBatchConfig implements Serializable {
 	 */
 	public void setExtraParamsB64(final String extraParamsB64) throws IOException {
 		if (extraParamsB64 != null) {
-			this.extraParams = ServiceUtil.base642Properties(extraParamsB64);
+			this.extraParams = PropertiesUtils.base642Properties(extraParamsB64);
 		}
 	}
 

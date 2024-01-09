@@ -19,7 +19,10 @@ public enum SignatureFormat {
     FACTURAE("FacturaE"), //$NON-NLS-1$
 
     /** PAdES. */
-    PADES("PAdES"); //$NON-NLS-1$
+    PADES("PAdES"), //$NON-NLS-1$
+
+	/** Sin formato (PKCS#1). */
+    NONE("NONE"); //$NON-NLS-1$
 
     private final String fmtName;
 

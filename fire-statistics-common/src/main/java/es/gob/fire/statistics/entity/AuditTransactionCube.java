@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
  * Conjunto de datos de las transacciones de auditor&iacute;a que se registran con objeto de obtener estad&iacute;sticas.
  */
 public class AuditTransactionCube {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuditTransactionCube.class);
-	
+
 	private Date date;
 	private String idApplication;
 	private String nameApplication;
@@ -34,19 +34,19 @@ public class AuditTransactionCube {
 	// Propiedades para obtener el tamano de los datos de las operaciones de firma
 	private String idTransaction;
 	private long dataSize = 0;
-	
+
 	// Valor utilizado para almacenar el numero de ocurrencias encontradas hasta el momento
 	private long total = 1;
-	
+
 	/**
 	 * Construye un cubo sin datos.
 	 */
 	public AuditTransactionCube() {
 		super();
 	}
-	
+
 	public final static AuditTransactionCube parse(final String registry){
-		
+
 		if (registry == null || registry.isEmpty()) {
 			throw new IllegalArgumentException("Se ha proporcionado una cadena vacia"); //$NON-NLS-1$
 		}
@@ -55,17 +55,17 @@ public class AuditTransactionCube {
 		if (!checkRegistryData(cube)) {
 			throw new IllegalArgumentException("Se ha encontrado un registro con formato no valido: " + registry); //$NON-NLS-1$
 		}
-		
+
 		final AuditTransactionCube auditTransaction = new AuditTransactionCube();
-		
+
 
 		auditTransaction.setIdTransaction(cube[0]);
-		
-		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+		final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm"); //$NON-NLS-1$
 		try {
 			auditTransaction.setDate(format.parse(cube[1]));
-		} catch (ParseException e) {
-			LOGGER.error("Ha ocurrido un error al establecer la fecha. Excepcion: " + e);
+		} catch (final ParseException e) {
+			LOGGER.error("Ha ocurrido un error al establecer la fecha. Excepcion: " + e); //$NON-NLS-1$
 		}
 		auditTransaction.setIdApplication(cube[2]);
 		auditTransaction.setNameApplication(cube[3]);
@@ -75,16 +75,16 @@ public class AuditTransactionCube {
 		auditTransaction.setImprovedFormat(cube[7]);
 		auditTransaction.setAlgorithm(cube[8]);
 		auditTransaction.setProvider(cube[9]);
-		auditTransaction.setMandatoryProvider(cube[10].equals("1"));
+		auditTransaction.setMandatoryProvider(cube[10].equals("1")); //$NON-NLS-1$
 		auditTransaction.setBrowser(cube[11]);
 		auditTransaction.setNode(cube[12]);
 		auditTransaction.setErrorDetail(cube[13]);
-		auditTransaction.setResult(cube[14].equals("1"));
-		
+		auditTransaction.setResult(cube[14].equals("1")); //$NON-NLS-1$
+
 		return auditTransaction;
-		
+
 	}
-	
+
 	/**
 	 * Comprueba que un registro de datos contenga el numero de campos adecuado y
 	 * que estos contengan un valor.
@@ -94,155 +94,155 @@ public class AuditTransactionCube {
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		int[] nullableIndex = new int[]{7, 13};
-		
+		final int[] nullableIndex = new int[]{7, 13};
+
 		if (registryDatas == null || registryDatas.length != 15) {
 			return false;
 		}
 
 		for (int i = 0; i < registryDatas.length; i++) {
-			String data = registryDatas[i];
-			
-			if ((data == null) || (data.isEmpty() && Arrays.binarySearch(nullableIndex, i) < 0)) {
+			final String data = registryDatas[i];
+
+			if (data == null || data.isEmpty() && Arrays.binarySearch(nullableIndex, i) < 0) {
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	public Date getDate() {
-		return date;
+		return this.date;
 	}
 
-	public void setDate(Date date) {
+	public void setDate(final Date date) {
 		this.date = date;
 	}
 
 	public String getIdApplication() {
-		return idApplication;
+		return this.idApplication;
 	}
 
-	public void setIdApplication(String idApplication) {
+	public void setIdApplication(final String idApplication) {
 		this.idApplication = idApplication;
 	}
 
 	public String getOperation() {
-		return operation;
+		return this.operation;
 	}
 
-	public void setOperation(String operation) {
+	public void setOperation(final String operation) {
 		this.operation = operation;
 	}
 
 	public String getCryptoOperation() {
-		return cryptoOperation;
+		return this.cryptoOperation;
 	}
 
-	public void setCryptoOperation(String cryptoOperation) {
+	public void setCryptoOperation(final String cryptoOperation) {
 		this.cryptoOperation = cryptoOperation;
 	}
 
 	public String getFormat() {
-		return format;
+		return this.format;
 	}
 
-	public void setFormat(String format) {
+	public void setFormat(final String format) {
 		this.format = format;
 	}
 
 	public String getImprovedFormat() {
-		return improvedFormat;
+		return this.improvedFormat;
 	}
 
-	public void setImprovedFormat(String improvedFormat) {
+	public void setImprovedFormat(final String improvedFormat) {
 		this.improvedFormat = improvedFormat;
 	}
 
 	public String getAlgorithm() {
-		return algorithm;
+		return this.algorithm;
 	}
 
-	public void setAlgorithm(String algorithm) {
+	public void setAlgorithm(final String algorithm) {
 		this.algorithm = algorithm;
 	}
 
 	public String getProvider() {
-		return provider;
+		return this.provider;
 	}
 
-	public void setProvider(String provider) {
+	public void setProvider(final String provider) {
 		this.provider = provider;
 	}
 
 	public boolean isMandatoryProvider() {
-		return mandatoryProvider;
+		return this.mandatoryProvider;
 	}
 
-	public void setMandatoryProvider(boolean mandatoryProvider) {
+	public void setMandatoryProvider(final boolean mandatoryProvider) {
 		this.mandatoryProvider = mandatoryProvider;
 	}
 
 	public boolean isResult() {
-		return result;
+		return this.result;
 	}
 
-	public void setResult(boolean result) {
+	public void setResult(final boolean result) {
 		this.result = result;
 	}
 
 	public String getBrowser() {
-		return browser;
+		return this.browser;
 	}
 
-	public void setBrowser(String browser) {
+	public void setBrowser(final String browser) {
 		this.browser = browser;
 	}
 
 	public String getErrorDetail() {
-		return errorDetail;
+		return this.errorDetail;
 	}
 
-	public void setErrorDetail(String errorDetail) {
+	public void setErrorDetail(final String errorDetail) {
 		this.errorDetail = errorDetail;
 	}
 
 	public String getNode() {
-		return node;
+		return this.node;
 	}
 
-	public void setNode(String node) {
+	public void setNode(final String node) {
 		this.node = node;
 	}
 
 	public String getIdTransaction() {
-		return idTransaction;
+		return this.idTransaction;
 	}
 
-	public void setIdTransaction(String idTransaction) {
+	public void setIdTransaction(final String idTransaction) {
 		this.idTransaction = idTransaction;
 	}
 
 	public long getDataSize() {
-		return dataSize;
+		return this.dataSize;
 	}
 
-	public void setDataSize(long dataSize) {
+	public void setDataSize(final long dataSize) {
 		this.dataSize = dataSize;
 	}
 
 	public long getTotal() {
-		return total;
+		return this.total;
 	}
 
-	public void setTotal(long total) {
+	public void setTotal(final long total) {
 		this.total = total;
 	}
-	
+
 	public String getNameApplication() {
-		return nameApplication;
+		return this.nameApplication;
 	}
 
-	public void setNameApplication(String nameApplication) {
+	public void setNameApplication(final String nameApplication) {
 		this.nameApplication = nameApplication;
 	}
 
@@ -255,56 +255,56 @@ public class AuditTransactionCube {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj == null) {
 			return false;
 		}
-		
+
 		// Solo implementamos un nuevo modo de comparacion cuando el objeto al que se compara es de tipo PetitionCube
 		if (!(obj instanceof AuditTransactionCube)) {
 			return super.equals(obj);
 		}
-		
+
 		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
 
 		final AuditTransactionCube petition = (AuditTransactionCube) obj;
-		
+
 		// Id Transaccion
 		if (!(getIdTransaction() == null && petition.getIdTransaction() == null ||
 				getIdTransaction() != null && getIdTransaction().equals(petition.getIdTransaction()))) {
 			return false;
 		}
-		
+
 		// Date
 		if (!(getDate() == null && petition.getDate() == null ||
 				getDate() != null && getDate().equals(petition.getDate()))) {
 			return false;
 		}
-		
+
 		// Id Aplicacion
 		if (!(getIdApplication() == null && petition.getIdApplication() == null ||
 				getIdApplication() != null && getIdApplication().equals(petition.getIdApplication()))) {
 			return false;
 		}
-		
+
 		// Nombre Aplicacion
 		if (!(getNameApplication() == null && petition.getNameApplication() == null ||
 				getNameApplication() != null && getNameApplication().equals(petition.getNameApplication()))) {
 			return false;
 		}
-		
+
 		// Operacion
 		if (!(getOperation() == null && petition.getOperation() == null ||
 				getOperation() != null && getOperation().equals(petition.getOperation()))) {
 			return false;
 		}
-		
+
 		// Operacion criptografica
 		if (!(getCryptoOperation() == null && petition.getCryptoOperation() == null ||
 				getOperation() != null && getOperation().equals(petition.getOperation()))) {
 			return false;
 		}
-		
+
 		// Algoritmo
 		if (!(getAlgorithm() == null && petition.getAlgorithm() == null ||
 				getAlgorithm() != null && getAlgorithm().equals(petition.getAlgorithm()))) {
@@ -328,7 +328,7 @@ public class AuditTransactionCube {
 				getProvider() != null && getProvider().equals(petition.getProvider()))) {
 			return false;
 		}
-		
+
 		// Proveedor forzado
 		if (isMandatoryProvider() != petition.isMandatoryProvider()) {
 			return  false;
@@ -339,7 +339,7 @@ public class AuditTransactionCube {
 				getBrowser() != null && getBrowser().equals(petition.getBrowser()))) {
 			return false;
 		}
-		
+
 		// Nodo
 		if (!(getNode() == null && petition.getNode() == null ||
 				getNode() != null && getNode().equals(petition.getNode()))) {
@@ -350,108 +350,108 @@ public class AuditTransactionCube {
 		if (isResult() != petition.isResult()) {
 			return  false;
 		}
-		
+
 		// Error detalle
 		if (!(getErrorDetail() == null && petition.getErrorDetail() == null ||
 				getErrorDetail() != null && getErrorDetail().equals(petition.getErrorDetail()))) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder result = new StringBuilder();
-		
-		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-		
+		final StringBuilder buffer = new StringBuilder();
+
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm"); //$NON-NLS-1$
+
 		//Id transaccion
-		result.append(this.getIdTransaction() != null ? this.getIdTransaction() : "0");
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(this.getIdTransaction() != null ? this.getIdTransaction() : "0"); //$NON-NLS-1$
+		buffer.append(";");//$NON-NLS-1$
+
 		//Fecha
 		if (this.getDate() != null) {
-			result.append(clean(format.format(this.getDate()), 19));
+			buffer.append(clean(dateFormat.format(this.getDate()), 19));
 		}
-		result.append(";");
-		
+		buffer.append(";"); //$NON-NLS-1$
+
 		//Id Aplicacion
 		if (this.getIdApplication() != null) {
-			result.append(clean(this.getIdApplication(), 48));
+			buffer.append(clean(this.getIdApplication(), 48));
 		}
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(";");//$NON-NLS-1$
+
 		//Nombre Aplicacion
 		if (this.getNameApplication() != null) {
-			result.append(clean(this.getNameApplication(), 45));
+			buffer.append(clean(this.getNameApplication(), 45));
 		}
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(";");//$NON-NLS-1$
+
 		//Operacion
 		if (this.getOperation() != null) {
-			result.append(clean(this.getOperation(), 10));
+			buffer.append(clean(this.getOperation(), 10));
 		}
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(";");//$NON-NLS-1$
+
 		//Operacion criptografica
 		if (this.getCryptoOperation() != null) {
-			result.append(clean(this.getCryptoOperation(), 10));
+			buffer.append(clean(this.getCryptoOperation(), 10));
 		}
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(";");//$NON-NLS-1$
+
 		//Formato
 		if (this.getFormat() != null) {
-			result.append(clean(this.getFormat(), 20));
+			buffer.append(clean(this.getFormat(), 20));
 		}
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(";");//$NON-NLS-1$
+
 		//Formato mejorado
 		if (this.getImprovedFormat() != null) {
-			result.append(clean(this.getImprovedFormat(), 20));
+			buffer.append(clean(this.getImprovedFormat(), 20));
 		}
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(";");//$NON-NLS-1$
+
 		//Algoritmo
 		if (this.getAlgorithm() != null) {
-			result.append(clean(this.getAlgorithm(), 20));
+			buffer.append(clean(this.getAlgorithm(), 20));
 		}
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(";");//$NON-NLS-1$
+
 		//Proveedor
 		if (this.getProvider() != null) {
-			result.append(clean(this.getProvider(), 45));
+			buffer.append(clean(this.getProvider(), 45));
 		}
-		result.append(";");//$NON-NLS-1$
-		
+		buffer.append(";");//$NON-NLS-1$
+
 		//Proveedor forzado
-		result.append(this.isMandatoryProvider() ? "1" : "0");
-		result.append(";");
-		
+		buffer.append(this.isMandatoryProvider() ? "1" : "0"); //$NON-NLS-1$ //$NON-NLS-2$
+		buffer.append(";"); //$NON-NLS-1$
+
 		//Navegador
 		if (this.getBrowser() != null) {
-			result.append(this.getBrowser());
+			buffer.append(this.getBrowser());
 		}
-		result.append(";");
-		
+		buffer.append(";"); //$NON-NLS-1$
+
 		//Nodo
 		if (this.getNode() != null) {
-			result.append(this.getNode());
+			buffer.append(this.getNode());
 		}
-		result.append(";");
-		
+		buffer.append(";"); //$NON-NLS-1$
+
 		//Error detalle
 		if (this.getErrorDetail() != null) {
-			result.append(this.getErrorDetail());
+			buffer.append(this.getErrorDetail());
 		}
-		result.append(";");
-		
+		buffer.append(";"); //$NON-NLS-1$
+
 		//Resultado
-		result.append(this.isResult() ? "1" : "0");
-		
-		return result.toString();
+		buffer.append(this.isResult() ? "1" : "0"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		return buffer.toString();
 	}
-	
+
 	/**
 	 * Elimina caracteres problem&aacute;ticos de un texto y lo ajusta a un tama&ntilde;o m&aacute;ximo.
 	 * @param text Texto que hay que limpiar.
@@ -465,5 +465,5 @@ public class AuditTransactionCube {
 		}
 		return cleanedText.trim();
 	}
-	
+
 }

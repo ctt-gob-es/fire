@@ -33,6 +33,7 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
+import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.internal.ProviderManager;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.TransactionAuxParams;
@@ -218,7 +219,7 @@ public final class LoadService extends HttpServlet {
                 subOperation,
                 format,
                 algorithm,
-                extraParamsB64 != null ? ServiceUtil.base642Properties(extraParamsB64) : null,
+                extraParamsB64 != null ? PropertiesUtils.base642Properties(extraParamsB64) : null,
     			signerCert,
                 Base64.decode(dataB64, true),
                 logF
@@ -236,7 +237,7 @@ public final class LoadService extends HttpServlet {
         try {
         	Properties config = null;
         	if (configB64 != null && configB64.length() > 0) {
-        		config = ServiceUtil.base642Properties(configB64);
+        		config = PropertiesUtils.base642Properties(configB64);
         	}
         	if (providerName == null) {
         		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;

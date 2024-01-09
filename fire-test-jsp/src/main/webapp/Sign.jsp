@@ -1,3 +1,5 @@
+<%@page import="org.slf4j.LoggerFactory"%>
+<%@page import="org.slf4j.Logger"%>
 <%@page import="es.gob.fire.test.webapp.Base64"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -9,9 +11,11 @@
 		<link rel="stylesheet" href="styles/styles.css"/>
 	</head>
 	<body style=" font-weight: 300;">
-		<% 
+		<%
+			Logger LOGGER = LoggerFactory.getLogger("es.gob.fire.test.webapp.sign"); //$NON-NLS-1$
 		
 			if (session.getAttribute("user") == null) { //$NON-NLS-1$
+				LOGGER.warn("No se encontro sesion de usuario"); //$NON-NLS-1$
 				response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 				return;
 			}

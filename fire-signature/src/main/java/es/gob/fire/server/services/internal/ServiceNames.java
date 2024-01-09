@@ -30,7 +30,7 @@ public class ServiceNames {
 	/** Servicio interno para la selecci&oacuten del origen del certificado de firma (nube o local). */
 	public static final String PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN = "chooseCertificateOriginService"; //$NON-NLS-1$
 
-	 /** Servicio para la prefirma*/
+	 /** Servicio para la prefirma. */
 	public static final String PUBLIC_SERVICE_PRESIGN = "presignService"; //$NON-NLS-1$
 
 	 /** Servicio para errores del Miniapplet*/

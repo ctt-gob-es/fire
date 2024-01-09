@@ -27,6 +27,7 @@ import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.server.services.batch.ProcessResult.Result;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignSubOperation;
+import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 /** Firma electr&oacute;nica &uacute;nica dentro de un lote.
@@ -134,14 +135,7 @@ public final class SingleSign {
 		sb.append("\""); //$NON-NLS-1$
 		sb.append(JSON_ELEMENT_EXTRAPARAMS);
 		sb.append("\":\""); //$NON-NLS-1$
-		try {
-			sb.append(AOUtil.properties2Base64(this.extraParams));
-		}
-		catch (final IOException e) {
-			LOGGER.severe(
-				"Error convirtiendo los parametros adicionales de la firma '" + this.id + "' a Base64: " + e //$NON-NLS-1$ //$NON-NLS-2$
-			);
-		}
+		sb.append(PropertiesUtils.properties2Base64(this.extraParams));
 		sb.append("\",\n"); //$NON-NLS-1$
 		sb.append("\""); //$NON-NLS-1$
 		sb.append("\n}\n"); //$NON-NLS-1$
@@ -328,7 +322,7 @@ public final class SingleSign {
 	 * @throws IOException Cuando no pueden guardarse los datos.
 	 */
 	void save(final byte[] dataToSave) throws IOException {
-		TempDocumentsManager.storeDocument(this.dataRef, dataToSave, false);
+		TempDocumentsManager.storeDocument(this.dataRef, dataToSave, false, null);  //TODO: Pasar parametros para logs
 	}
 
 	/**
@@ -420,7 +414,7 @@ public final class SingleSign {
 		public ResultSingleSign call() {
 			try {
 				final byte[] dataToSave = TempDocumentsManager.retrieveDocument(this.ss.getName(this.batchId));
-				TempDocumentsManager.storeDocument(this.ss.dataRef, dataToSave, false);
+				TempDocumentsManager.storeDocument(this.ss.dataRef, dataToSave, false, null);  //TODO: Pasar parametros para logs
 			}
 			catch(final Exception e) {
 				LOGGER.log(Level.WARNING, "No se puede almacenar la firma del documento: " + this.ss.getId(), e); //$NON-NLS-1$

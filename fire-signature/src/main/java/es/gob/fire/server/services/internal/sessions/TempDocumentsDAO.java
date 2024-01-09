@@ -2,6 +2,8 @@ package es.gob.fire.server.services.internal.sessions;
 
 import java.io.IOException;
 
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
+
 /**
  * DAO para la gesti&oacute;n de los documentos temporales procesados como
  * parte de las operaciones del
@@ -23,10 +25,11 @@ public interface TempDocumentsDAO {
 	 * @param data Contenido del documento.
 	 * @param newDocument {@code true} si el documento no exist&iacute;a previamente,
 	 * {@code false} si s&iacute; exist&iacute;a.
+	 * @param formt Formateador de logs.
 	 * @return Identificador del documento almacenado.
 	 * @throws IOException Cuando ocurre un error que hace fallar la operaci&oacute;n.
 	 */
-	String storeDocument(String id, byte[] data, boolean newDocument) throws IOException;
+	String storeDocument(String id, byte[] data, boolean newDocument, LogTransactionFormatter formt) throws IOException;
 
 	/**
 	 * Recupera un documento.

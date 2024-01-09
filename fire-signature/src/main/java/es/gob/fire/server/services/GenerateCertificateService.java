@@ -30,6 +30,7 @@ import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.GenerateCertificateManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
+import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
@@ -186,7 +187,7 @@ public final class GenerateCertificateService extends HttpServlet {
 		Properties config = null;
     	if (configB64 != null && !configB64.isEmpty()) {
     		try {
-    			config = ServiceUtil.base642Properties(configB64);
+    			config = PropertiesUtils.base642Properties(configB64);
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error al decodificar las configuracion de los proveedores de firma"), e); //$NON-NLS-1$

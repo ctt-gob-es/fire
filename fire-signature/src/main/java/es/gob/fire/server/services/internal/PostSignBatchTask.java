@@ -83,7 +83,9 @@ class PostSignBatchTask implements Callable<String> {
 
 	@Override
 	public String call() throws Exception {
-		final LogTransactionFormatter logF = new LogTransactionFormatter(this.appId, this.trId);
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(this.appId, this.trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		final Thread currentThread = Thread.currentThread();
 
@@ -249,7 +251,7 @@ class PostSignBatchTask implements Callable<String> {
     	// Guardamos el resultado sobre el documento de datos
     	final String docFilename = this.batchResult.getDocumentReference(this.docId);
     	try {
-    		TempDocumentsManager.storeDocument(docFilename, result, false);
+    		TempDocumentsManager.storeDocument(docFilename, result, false, trAux);
     	}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al almacenar la firma en el temporal"), e); //$NON-NLS-1$
