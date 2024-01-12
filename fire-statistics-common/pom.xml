@@ -14,14 +14,6 @@
 	</parent>
 
 	<dependencies>
-
-		<!-- Pool de conexiones de base de datos -->
-		<dependency>
-		    <groupId>com.zaxxer</groupId>
-		    <artifactId>HikariCP</artifactId>
-		    <version>4.0.3</version>
-		</dependency>
-		
 		<dependency>
     		<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-common-libraries</artifactId>

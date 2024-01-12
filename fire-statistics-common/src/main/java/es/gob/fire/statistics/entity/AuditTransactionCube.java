@@ -6,15 +6,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Conjunto de datos de las transacciones de auditor&iacute;a que se registran con objeto de obtener estad&iacute;sticas.
  */
 public class AuditTransactionCube {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(AuditTransactionCube.class);
 	
 	private Date date;
 	private String idApplication;
@@ -65,7 +60,7 @@ public class AuditTransactionCube {
 		try {
 			auditTransaction.setDate(format.parse(cube[1]));
 		} catch (ParseException e) {
-			LOGGER.error("Ha ocurrido un error al establecer la fecha. Excepcion: " + e);
+			throw new IllegalArgumentException("Ha ocurrido un error al establecer la fecha. Excepcion: " + e);
 		}
 		auditTransaction.setIdApplication(cube[2]);
 		auditTransaction.setNameApplication(cube[3]);

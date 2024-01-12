@@ -2,6 +2,8 @@ package es.gob.fire.statistics;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -170,7 +172,52 @@ public class FireStatistics {
 		}
 
 		// Se crea una tarea para la carga de los datos de estadistica
-		final LoadStatisticsRunnable loadStatisticsDataTask = new LoadStatisticsRunnable(dataPath, processCurrentDay);
+		final LoadStatisticsRunnable loadStatisticsDataTask = new LoadStatisticsRunnable(path, processCurrentDay);
+
+		// Se ejecuta la tarea de forma sincrona (sin usar hilos)
+		try {
+			loadStatisticsDataTask.run();
+		} catch (final Exception e) {
+			throw new IOException("Fallo la ejecucion inmediata de la carga de los datos estadisticos", e); //$NON-NLS-1$
+		}
+
+		// Devolvemos el resultado que debe haber quedado registrado
+		return loadStatisticsDataTask.getResult();
+	}
+	
+	/**
+	 * Lanza la ejecuci&oacute;n de la carga de datos de los fichero de estad&iacute;sticas a la base de
+	 * datos. Este metodo y el m&eacute;todo {@link #init(String, String, String, String, String, String, boolean)}
+	 * nunca se deberian ejecutar en el mismo contexto.
+	 * @param path Ruta del directorio con los datos estad&iacute;sticos.
+	 * @param jdbcDriver Clase controladora JDBC para la conexi&oacute;n con la base de datos.
+	 * @param dbConnectionString Cadena de conexi&oacute;on a la base de datos.
+	 * @param username Nombre de usuario con el que conectarse a la base de datos.
+	 * @param password Contrase&ntilde;a del usuario.
+	 * @param processCurrentDay Indica si se deben procesar tambi&eacute;n los datos del d&iacute;a actual.
+	 * @return Resultado de la carga.
+	 * @throws IOException Si no es posible realizar la carga.
+	 */
+	public static final LoadStatisticsResult dumpDataCMD(final String path, final String jdbcDriver,
+			final String dbConnectionString, final String username, final String password, final boolean processCurrentDay)
+					throws IOException {
+
+		if (path == null) {
+			throw new NullPointerException("No se ha indicado la ruta del directorio con los ficheros de datos estadisticos"); //$NON-NLS-1$
+		}
+
+		if (jdbcDriver == null || dbConnectionString == null) {
+			throw new NullPointerException("No se ha indicado la informacion necesaria para la comunicaci&oacute;n con la base de datos"); //$NON-NLS-1$
+		}
+		
+		Map<String, String> connectionAttributes = new HashMap<>();
+		connectionAttributes.put("jdbcDriver", jdbcDriver);
+		connectionAttributes.put("dbConnectionString", dbConnectionString);
+		connectionAttributes.put("username", username);
+		connectionAttributes.put("password", password);
+
+		// Se crea una tarea para la carga de los datos de estadistica
+		final LoadStatisticsRunnable loadStatisticsDataTask = new LoadStatisticsRunnable(path, processCurrentDay, true, connectionAttributes);
 
 		// Se ejecuta la tarea de forma sincrona (sin usar hilos)
 		try {

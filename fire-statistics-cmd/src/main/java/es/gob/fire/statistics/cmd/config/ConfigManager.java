@@ -42,18 +42,18 @@ public class ConfigManager {
 
 	/**
 	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n.
-	 * @param configFile Nombre del fichero de configuraci&oacute;n.
+	 * @param configFilePath Nombre del fichero de configuraci&oacute;n.
 	 * @throws ConfigFilesException Si no encuentra el fichero indicado como parametro .properties.
 	 */
-	public static void checkConfiguration(final String configFile) throws ConfigFilesException {
+	public static void checkConfiguration(final String configFilePath) throws ConfigFilesException {
 
 		initialized = false;
 
-		loadConfig(configFile);
+		loadConfig(configFilePath);
 
 		if (config == null) {
 			LOGGER.severe("No se ha encontrado el fichero de configuracion de la conexion"); //$NON-NLS-1$
-			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion de la conexion",configFile ); //$NON-NLS-1$ CONFIG_FILE
+			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion de la conexion",configFilePath ); //$NON-NLS-1$ CONFIG_FILE
 		}
 
 		initialized = true;

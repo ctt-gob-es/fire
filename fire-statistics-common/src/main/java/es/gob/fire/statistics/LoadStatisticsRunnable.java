@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class LoadStatisticsRunnable implements Runnable {
 
 	private final String dataPath;
 	private final boolean processCurrentDay;
+	private final boolean executedFromCmd;
+	private final Map<String, String> connectionAttributes;
 
 	private LoadStatisticsResult result = null;
 
@@ -76,6 +79,27 @@ public class LoadStatisticsRunnable implements Runnable {
 	public LoadStatisticsRunnable(final String dataPath, final boolean processCurrentDay) {
 		this.dataPath = dataPath;
 		this.processCurrentDay = processCurrentDay;
+		this.executedFromCmd = false;
+		this.connectionAttributes = null;
+	}
+	
+	/**
+	 * Crea la tarea indicando el directorio de los ficheros de datos estadisticos y
+	 * si se desea
+	 * procesar la informaci&oacute;n de hoy, ya que puede que a&uacute;n no hayan
+	 * terminado
+	 * de generarse todos los datos.
+	 *
+	 * @param processCurrentDay Indica si se debe procesar los datos del d&iacute;a
+	 *                          actual
+	 *                          ({@code true}) o si no ({@code false}).
+	 */
+	public LoadStatisticsRunnable(final String dataPath, final boolean processCurrentDay, final boolean executedFromCmd, final Map<String, String> connectionAttributes) {
+		this.dataPath = dataPath;
+		this.processCurrentDay = processCurrentDay;
+		this.executedFromCmd = executedFromCmd;
+		this.connectionAttributes = connectionAttributes;
+		
 	}
 
 	@Override
@@ -130,7 +154,7 @@ public class LoadStatisticsRunnable implements Runnable {
 		// Cargamos los ficheros en base de datos
 		try {
 			this.result = exeLoadStatistics(signatureFiles, transaccionFiles, auditSignatureFiles,
-					auditTransaccionFiles);
+					auditTransaccionFiles, executedFromCmd, connectionAttributes);
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No ha sido posible cargar todos los datos en base de datos", e); //$NON-NLS-1$
 			return;
@@ -326,10 +350,11 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * fecha.
 	 * @param signatureFiles Ficheros con los datos de las firmas ejecutadas.
 	 * @param transactionFiles Ficheros con los datos de las transacciones ejecutadas.
+	 * @param connectionAttributes 
 	 * @return Resultado del proceso de carga.
 	 */
 	private static LoadStatisticsResult exeLoadStatistics(final File[] signatureFiles, final File[] transactionFiles,
-			final File[] auditSignatureFiles, final File[] auditTransactionFiles) {
+			final File[] auditSignatureFiles, final File[] auditTransactionFiles, final boolean executedFromCmd, Map<String, String> connectionAttributes) {
 
 		Date lastDateProcessed = null;
 		String lastDateProcessedText = null;
@@ -396,7 +421,12 @@ public class LoadStatisticsRunnable implements Runnable {
 
 			// Insertamos los datos en base de datos
 			try {
-				insertDataIntoDb(date, compactedData);
+				if (!executedFromCmd) {
+					insertDataIntoDb(date, compactedData);
+				} else {
+					insertDataIntoDbFromCmd(date, compactedData, connectionAttributes);
+				}
+				
 			} catch (final DBConnectionException e) {
 				final String errorMsg = "No se pudo conectar con la base de datos. Se aborta el proceso de carga de los datos del dia " //$NON-NLS-1$
 						+ dateText;
@@ -612,6 +642,86 @@ public class LoadStatisticsRunnable implements Runnable {
 		final Iterator<SignatureCube> itSigns = signaturesCube.keySet().iterator();
 		try (Connection conn = DbManager.getConnection(false)) {
 			while (itSigns.hasNext()) {
+
+				final SignatureCube signatureConfig = itSigns.next();
+				final Long total = signaturesCube.get(signatureConfig);
+				try {
+					SignaturesDAO.insertSignature(date, signatureConfig, total.longValue(), conn);
+				} catch (final Exception e) {
+					LOGGER.log(Level.SEVERE,
+							String.format(
+									"No se pudo insertar las firmas del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
+									new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$
+							e);
+					try {
+						conn.rollback();
+					} catch (final Exception e1) {
+						LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
+					}
+					throw e;
+				}
+			}
+
+			// Insertamos la informacion de las transacciones realizadas
+			final Map<TransactionCube, TransactionTotal> transactionsCube = compactedData.getTransactionData();
+
+			final Iterator<TransactionCube> itTrans = transactionsCube.keySet().iterator();
+			while (itTrans.hasNext()) {
+				final TransactionCube transactionConfig = itTrans.next();
+				final TransactionTotal total = transactionsCube.get(transactionConfig);
+				try {
+					TransactionsDAO.insertTransaction(date, transactionConfig, total, conn);
+				} catch (final Exception e) {
+					LOGGER.log(Level.SEVERE,
+							String.format(
+									"No se pudo insertar las transacciones del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
+									new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$
+							e);
+					try {
+						conn.rollback();
+					} catch (final Exception e1) {
+						LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
+					}
+					throw e;
+				}
+			}
+
+			try {
+				conn.commit();
+			} catch (final Exception e1) {
+				LOGGER.log(Level.WARNING, "No se pudieron confirmar las inserciones ya realizadas", e1); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	/**
+	 * Inserta la informacion de las firmas y transacciones de un d&iacute;a en base
+	 * de datos.
+	 *
+	 * @param date          Fecha en la que se realizaron las operaciones.
+	 * @param compactedData Conjunto de datos de las operaciones.
+	 * @param connectionAttributes	Mapa con los atributos para conectar con la base de datos.
+	 * @throws SQLException          Cuando se produce un error al insertar los
+	 *                               datos.
+	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n
+	 *                               con la base de datos.
+	 */
+	private static void insertDataIntoDbFromCmd(final Date date, final CompactedData compactedData, Map<String, String> connectionAttributes)
+			throws SQLException, DBConnectionException {
+
+		// Insertamos la informacion de las firmas realizadas
+		final Map<SignatureCube, Long> signaturesCube = compactedData.getSignatureData();
+
+		final Iterator<SignatureCube> itSigns = signaturesCube.keySet().iterator();
+		
+		String jdbcDriver = connectionAttributes.get("jdbcDriver");
+        String dbConnectionString = connectionAttributes.get("dbConnectionString");
+        String username = connectionAttributes.get("username");
+        String password = connectionAttributes.get("password").trim();
+        
+        try (Connection conn = DriverManager.getConnection(dbConnectionString, username, password)) {
+			conn.setAutoCommit(false);
+        	while (itSigns.hasNext()) {
 
 				final SignatureCube signatureConfig = itSigns.next();
 				final Long total = signaturesCube.get(signatureConfig);

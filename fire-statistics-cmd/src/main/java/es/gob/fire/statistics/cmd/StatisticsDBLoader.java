@@ -4,6 +4,8 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import es.gob.fire.statistics.FireStatistics;
 import es.gob.fire.statistics.LoadStatisticsResult;
@@ -14,7 +16,7 @@ import es.gob.fire.statistics.cmd.config.ConfigManager;
  */
 public class StatisticsDBLoader {
 
-	private static final String PARAM_USE_CONFIG = "-useConfigFile"; //$NON-NLS-1$
+	private static final String PARAM_CONFIG_FILE_PATH = "-configFilePath"; //$NON-NLS-1$
 
 	private static final String PARAM_PROCESS_CURRENT_DAY = "-processCurrentDay"; //$NON-NLS-1$
 
@@ -52,19 +54,24 @@ public class StatisticsDBLoader {
 			return;
 		}
 
-		boolean useFileConfig = false;
 		boolean processCurrentDay = false;
 		String dataDir = null;
 		String dbDriver = null;
 		String dbConnection = null;
 		String dbUsername = null;
 		String dbPassword = null;
+		String configFilePath = null;
 
 		for (int i = 0; i < args.length; i++) {
 
 			switch (args[i]) {
-			case PARAM_USE_CONFIG:
-				useFileConfig = true;
+			case PARAM_CONFIG_FILE_PATH:
+				if (i < args.length - 1) {
+					configFilePath = args[++i];
+				} else {
+					System.out.println("No se ha indicado una ruta para el fichero de configuracion"); //$NON-NLS-1$
+					showHelp();
+				}
 				break;
 
 			case PARAM_PROCESS_CURRENT_DAY:
@@ -84,7 +91,7 @@ public class StatisticsDBLoader {
 				if (i < args.length - 1) {
 					dbDriver = args[++i];
 				} else {
-					System.out.println("No se ha indicado el el driver para la conexion con la base de datos"); //$NON-NLS-1$
+					System.out.println("No se ha indicado el driver para la conexion con la base de datos"); //$NON-NLS-1$
 					showHelp();
 				}
 				break;
@@ -125,26 +132,35 @@ public class StatisticsDBLoader {
 
 		// Si no se ha indicado configuracion ni se ha petido usar el fichero del componente central,
 		// entonces preguntamos por consola
-		if (!useFileConfig && dataDir == null && dbDriver == null && dbConnection == null) {
+		if (configFilePath == null && dataDir == null && dbDriver == null && dbConnection == null) {
 			final Console console = System.console();
 			if (console != null) {
-				System.out.println("Desea utilizar el fichero de configuracion de FIRe para cargar los datos? [s/N]"); //$NON-NLS-1$
+				System.out.println("Desea utilizar un fichero de configuracion de FIRe para cargar los datos? [s/N]"); //$NON-NLS-1$
 				final String r = console.readLine();
 				if (!"s".equalsIgnoreCase(r)) { //$NON-NLS-1$
 					System.out.println("Se cancela la carga de datos.\n"); //$NON-NLS-1$
 					showHelp();
 					return;
 				}
-				useFileConfig = true;
+				System.out.println("Introduzca la ruta del fichero de configuracion de FIRe: "); //$NON-NLS-1$
+				final String r2 = console.readLine();
+				if (r2 == null || r2.isEmpty() || !new File(r2).exists()){
+					System.out.println("La ruta introducida no es valida. Se cancela la carga de datos.\n"); //$NON-NLS-1$
+					showHelp();
+					return;
+				} else {
+					configFilePath = r2;
+				}
 			}
 		}
 
+		
 
 		// Comprobamos si se indica usar expresamente el fichero de configuracion
 		LoadStatisticsResult result = null;
 		try {
-			if (useFileConfig) {
-				result = init(processCurrentDay);
+			if (configFilePath != null) {
+				result = init(processCurrentDay, configFilePath);
 			}
 			// Comprobamos si se nos pasa la configuracion especifica para ejecutar el proceso
 			else if (dataDir != null && dbDriver != null && dbConnection != null ) {
@@ -174,12 +190,15 @@ public class StatisticsDBLoader {
 	/**
 	 * Iniciamos la carga de datos utilizando la informaci&oacute;n del fichero de configuraci&oacute;n.
 	 * @param processCurrentDay Indica si se deben procesar los datos del d&iacute;a actual.
+	 * @param configFilePath Indica la ruta del fichero de configuraci&oacute;n.
 	 * @throws IOException Cuando falla el volcado.
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
 	 */
-	private static LoadStatisticsResult init(final boolean processCurrentDay) throws IOException {
+	private static LoadStatisticsResult init(final boolean processCurrentDay, final String configFilePath) throws IOException, ClassNotFoundException, SQLException {
 
 		try {
-			ConfigManager.checkConfiguration("config.properties"); //$NON-NLS-1$
+			ConfigManager.checkConfiguration(configFilePath); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
 			System.err.println("Error al cargar la configuracion"); //$NON-NLS-1$
@@ -204,12 +223,14 @@ public class StatisticsDBLoader {
 	 * @param password Contrase&ntilde;a del usuario.
 	 * @param processCurrentDay Indica si se deben procesar los datos del d&iacute;a actual.
 	 * @throws IOException Cuando falla el volcado.
+	 * @throws ClassNotFoundException 
+	 * @throws SQLException 
 	 */
 	private static LoadStatisticsResult init(final String dataDir, final String dbDriver, final String dbConn,
-			final String username, final String password, final boolean processCurrentDay) throws IOException {
+			final String username, final String password, final boolean processCurrentDay) throws IOException, ClassNotFoundException, SQLException {
 		LoadStatisticsResult result;
 		try {
-			result = FireStatistics.dumpData(dataDir, dbDriver, dbConn, username, password, processCurrentDay);
+			result = FireStatistics.dumpDataCMD(dataDir, dbDriver, dbConn, username, password, processCurrentDay);
 		}
 		finally {
 			FireStatistics.release();
@@ -230,7 +251,7 @@ public class StatisticsDBLoader {
 		System.out.println("Uso:"); //$NON-NLS-1$
 		System.out.println(String.format("\tjava -jar %1s [Opciones]\n", JAR_NAME)); //$NON-NLS-1$
 		System.out.println("\t\tCarga los datos usando las opciones proporcionadas.\n"); //$NON-NLS-1$
-		System.out.println(String.format("\tjava -Dfire.config.path=\"DIRECTORIO_CONFIGURACION\" -jar %1s %2s\n", JAR_NAME, PARAM_USE_CONFIG)); //$NON-NLS-1$
+		System.out.println(String.format("\tjava -Dfire.config.path=\"DIRECTORIO_CONFIGURACION\" -jar %1s \n", JAR_NAME)); //$NON-NLS-1$
 		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero config.properties que se\n" //$NON-NLS-1$
 				+ "\t\tencuentra en el directorio que establecemos en la propia llamada.\n"); //$NON-NLS-1$
 		System.out.println(String.format("\tjava -cp \"Ruta_JDBC%1s%2s\" es.gob.fire.statistics.cmd.StatisticsDBLoader [Opciones]\n", File.pathSeparator, JAR_NAME)); //$NON-NLS-1$
@@ -243,8 +264,8 @@ public class StatisticsDBLoader {
 
 		System.out.println("Opciones:"); //$NON-NLS-1$
 
-		System.out.println("\t" + PARAM_USE_CONFIG); //$NON-NLS-1$
-		System.out.println("\t\tCarga los datos en BD usando el fichero de configuracion de FIRe. Si no se usa, se deben\n" //$NON-NLS-1$
+		System.out.println("\t" + PARAM_CONFIG_FILE_PATH); //$NON-NLS-1$
+		System.out.println("\t\tCarga los datos en BD usando el fichero de configuracion de FIRe indicado en la propiedad. Si no se usa, se deben\n" //$NON-NLS-1$
 				+ String.format("\t\tusar las opciones %1s, %2s y %3s.\n", PARAM_DATA_DIR, PARAM_DB_DRIVER, PARAM_DB_CONNECTION)); //$NON-NLS-1$
 
 		System.out.println("\t" + PARAM_DATA_DIR); //$NON-NLS-1$
@@ -273,6 +294,9 @@ public class StatisticsDBLoader {
 				JAR_NAME, PARAM_DATA_DIR, PARAM_DB_DRIVER, PARAM_DB_CONNECTION));
 
 		System.out.println(String.format("\tjava -Dfire.config.path=\"/usr/fire/config\" -jar %1s", //$NON-NLS-1$
+				JAR_NAME));
+		
+		System.out.println(String.format("\tjava -jar %1s -configFilePath \"/usr/fire/config/stats_cmd_config.properties\" ", //$NON-NLS-1$
 				JAR_NAME));
 	}
 }
