@@ -3,49 +3,10 @@
   <display-name>fire-signature</display-name>
   <description>Componente central de FIRe v2.4</description>
 
-<!-- 
-  <security-constraint id="SecurityConstraint_1">
-  	<web-resource-collection id="WebResourceCollection_1">
-	  <url-pattern>/*</url-pattern>
-	  <http-method>GET</http-method>
-	  <http-method>POST</http-method>
-	</web-resource-collection>
-	<auth-constraint id="AuthConstraint_1">
-	  <login-config>
-        <auth-method>CLIENT-CERT</auth-method>
-      </login-config>
-	</auth-constraint>
-	<user-data-constraint>
-      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-    </user-data-constraint>
-  </security-constraint>
-  <security-constraint id="SecurityConstraint_2">
-  	<web-resource-collection id="WebResourceCollection_2">
-	  <url-pattern>/public/*</url-pattern>
-	  <http-method>GET</http-method>
-	  <http-method>POST</http-method>
-	</web-resource-collection>
-	<auth-constraint id="AuthConstraint_2">
-	  <login-config>
-        <auth-method>NONE</auth-method>
-      </login-config>
-	</auth-constraint>
-  </security-constraint>
- -->
- <!-- 
-  <security-constraint>
-  	<web-resource-collection>
-	  <url-pattern>/public/*</url-pattern>
-	  <http-method>GET</http-method>
-	  <http-method>POST</http-method>
-	</web-resource-collection>
-	<auth-constraint>
-	  <login-config>
-        <auth-method>NONE</auth-method>
-      </login-config>
-	</auth-constraint>
-  </security-constraint>
- -->
+  <!-- Listener para la liberacion de recursos al cerrar el servicio -->
+  <listener>
+	<listener-class>es.gob.fire.server.services.ContextListener</listener-class>
+  </listener>
 
   <servlet>
   	<description>Servicio central de FIRe v2 y superiores</description>

@@ -33,14 +33,11 @@ import es.gob.fire.server.services.internal.RecoverSignResultManager;
 import es.gob.fire.server.services.internal.RecoverUpdatedSignManager;
 import es.gob.fire.server.services.internal.RecoverUpdatedSignResultManager;
 import es.gob.fire.server.services.internal.ServiceParams;
-import es.gob.fire.server.services.internal.SessionCollector;
 import es.gob.fire.server.services.internal.SignBatchManager;
 import es.gob.fire.server.services.internal.SignOperationManager;
-import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
-import es.gob.fire.signature.DbManager;
 import es.gob.fire.signature.InvalidConfigurationException;
 import es.gob.fire.statistics.FireStatistics;
 
@@ -265,32 +262,5 @@ public class FIReService extends HttpServlet {
     		Responser.sendError(response, FIReError.INTERNAL_ERROR);
     		return;
     	}
-	}
-
-	@Override
-	public void destroy() {
-		try {
-			SessionCollector.release();
-		} catch (final Throwable e) {
-			LOGGER.log(Level.SEVERE, "No se pudieron liberar los recursos del gestor de sesiones", e); //$NON-NLS-1$
-		}
-
-		try {
-			FireStatistics.release();
-		} catch (final Throwable e) {
-			LOGGER.log(Level.SEVERE, "No se pudieron liberar los recursos del gestor de estadisticas", e); //$NON-NLS-1$
-		}
-
-		try {
-			DbManager.closeResources();
-		} catch (final Throwable e) {
-			LOGGER.log(Level.SEVERE, "No se pudieron liberar los recursos del gestor de bases de datos", e); //$NON-NLS-1$
-		}
-
-		try {
-			TempDocumentsManager.release();
-		} catch (final Throwable e) {
-			LOGGER.log(Level.SEVERE, "No se pudieron liberar los recursos del gestor de ficheros temporales", e); //$NON-NLS-1$
-		}
 	}
 }
