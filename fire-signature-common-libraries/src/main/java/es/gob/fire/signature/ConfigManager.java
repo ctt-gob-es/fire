@@ -34,7 +34,7 @@ public class ConfigManager {
 	private static final String ENV_PROP_PREFIX = "%{"; //$NON-NLS-1$
 
 	private static final String PROP_SUFIX = "}"; //$NON-NLS-1$
-	
+
 	private static final String PROP_DATASOURCE_JNDI_NAME = "datasource.jndi-name"; //$NON-NLS-1$
 
 	private static final String PARAM_CIPHER_CLASS = "cipher.class"; //$NON-NLS-1$
@@ -368,7 +368,7 @@ public class ConfigManager {
 	public static String getValidatorClass(final boolean required) throws InvalidConfigurationException {
 		return getProperty(PROP_VALIDATOR_CLASS, required);
 	}
-	
+
 	/**
 	 * Recupera el nombre del datasource para el acceso a la base de datos.
 	 * @return nombre del datasource.
@@ -453,27 +453,23 @@ public class ConfigManager {
 		loadConfig();
 
 		if (config == null) {
-			LOGGER.severe("No se ha encontrado el fichero de configuracion del componente central"); //$NON-NLS-1$
 			throw new ConfigFilesException("No se ha encontrado el fichero de configuracion del componente central", CONFIG_FILE); //$NON-NLS-1$
 		}
 
 		final ProviderElement[] providers = getProviders();
 		if (providers == null) {
-			LOGGER.severe("Debe declararse al menos un proveedor mediante la propiedad " + PROP_PROVIDERS_LIST); //$NON-NLS-1$
 			throw new InvalidConfigurationException("Debe declararse al menos un proveedor con la propiedad " + PROP_PROVIDERS_LIST, PROP_PROVIDERS_LIST, CONFIG_FILE); //$NON-NLS-1$
 		}
 
 		checkProviders(providers);
 
 		if (isCheckApplicationNeeded() && getDatasourceJNDIName() == null && getAppId() == null) {
-			LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_APP_ID //$NON-NLS-1$
-					+ " para la verificacion del identificador de aplicacion"); //$NON-NLS-1$
-			throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " //$NON-NLS-1$
-					+ PROP_APP_ID + " para la verificacion del identificador de aplicacion", PROP_DATASOURCE_JNDI_NAME, CONFIG_FILE); //$NON-NLS-1$
+			throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos en la propiedad " + PROP_DATASOURCE_JNDI_NAME //$NON-NLS-1$
+					+ ", ni tampoco la propiedad " + PROP_APP_ID //$NON-NLS-1$
+					+ " para la verificacion del identificador de aplicacion", //$NON-NLS-1$
+					PROP_DATASOURCE_JNDI_NAME, CONFIG_FILE);
 		}
 		if (isCheckCertificateNeeded() && getDatasourceJNDIName() == null && getCert() == null) {
-			LOGGER.severe("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
-					+ " para la verificacion del certificado de auteticacion"); //$NON-NLS-1$
 			throw new InvalidConfigurationException("No se ha configurado el acceso a la base de datos ni el campo " + PROP_CERTIFICATE //$NON-NLS-1$
 					+ " para la verificacion del certificado de auteticacion", PROP_DATASOURCE_JNDI_NAME, CONFIG_FILE); //$NON-NLS-1$
 		}

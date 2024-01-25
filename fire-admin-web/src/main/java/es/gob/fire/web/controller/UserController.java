@@ -42,7 +42,6 @@ import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
-import es.gob.fire.persistence.service.ManagerPersistenceServices;
 
 /**
  * <p>Class that manages the requests related to the Users administration.</p>
@@ -152,19 +151,14 @@ public class UserController {
 	private List<RolDTO> loadRoles() {
 		final List<RolDTO> listRoles = new ArrayList<>();
 		// obtenemos los tipos de planificadores.
-		final IUserService userService = ManagerPersistenceServices.getInstance().getManagerPersistenceConfigurationServices().getUserFireService();
-		final List<Rol> listRol = userService.getAllRol();
+		final List<Rol> listRol = this.userService.getAllRol();
 		for (final Rol rol: listRol) {
 			final RolDTO item = new RolDTO(rol.getRolId(), rol.getRolName(), rol.getPermissions());
 			listRoles.add(item);
-
 		}
 
 		return listRoles;
 	}
-
-
-
 
 	/**
 	 * Get userService.
