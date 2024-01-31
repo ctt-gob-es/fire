@@ -43,27 +43,34 @@ import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.statistics.TransactionType;
 
 /**
- * Servicio de carga y prefirma de datos para su posterior firma a trav&eacute;s de
- * un proveedor de firma en la nube. Este servicio se utiliza internamente, por lo que
- * se devolver&aacute;n errores gen&eacute;ricos cuando ocurr&aacute;n errores que no
+ * Servicio de carga y prefirma de datos para su posterior firma a trav&eacute;s
+ * de
+ * un proveedor de firma en la nube. Este servicio se utiliza internamente, por
+ * lo que
+ * se devolver&aacute;n errores gen&eacute;ricos cuando ocurr&aacute;n errores
+ * que no
  * deber&iacute;an ocurrir nunca.
+ * 
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
  */
 public final class PreSignService extends HttpServlet {
 
     /** Serial Id. */
-	private static final long serialVersionUID = 7165850857019380976L;
+    private static final long serialVersionUID = 7165850857019380976L;
 
-	private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
 
     private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
 
-    /** Par&aacute;metro de configuraci&oacute;n para obligar a la multifirma de firmas longevas. */
+    /**
+     * Par&aacute;metro de configuraci&oacute;n para obligar a la multifirma de
+     * firmas longevas.
+     */
     private static final String EXTRA_PARAM_ALLOW_SIGN_LTS_SIGNATURES = "allowSignLTSignature"; //$NON-NLS-1$
 
     static {
-		// Configuramos el proveedor de firma XML
-    	XmlDSigProviderHelper.configureXmlDSigProvider();
+        // Configuramos el proveedor de firma XML
+        XmlDSigProviderHelper.configureXmlDSigProvider();
     }
 
     /** Carga los datos para su posterior firma en servidor.
@@ -412,21 +419,27 @@ public final class PreSignService extends HttpServlet {
 
 	/**
 	 * Redirige a una p&aacute;gina de error. La p&aacute;gina sera de de error de firma, si existe la posibilidad de
-	 * que se pueda reintentar la operaci&oacute;n, o la p&aacute;gina de error proporcionada por el usuario.
-	 * @param originForced Indica si era obligatorio el uso de un proveedor de firma concreto.
-	 * @param connConfig Configuraci&oacute;n de la transacci&oacute;n.
-	 * @param request Objeto de petici&oacute;n al servlet.
-	 * @param response Objeto de respuesta del servlet.
-	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
-	 */
-	private static void redirectToErrorPage(final boolean originForced, final String redirectErrorUrl,
-			final HttpServletRequest request, final HttpServletResponse response,
-			final TransactionAuxParams trAux) {
-		if (originForced) {
-			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
-		}
-		else {
-			Responser.redirectToUrl(FirePages.PG_SIGNATURE_ERROR, request, response, trAux);
-		}
-	}
-}
+	 * q
+
+     * 
+     * @param request Objeto de petici&oacute;n al servlet.
+     * 
+     * @param response Objeto de respuesta del servlet.
+     * 
+     * 
+     * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+     *                     
+     */   
+     rivate static vo      d redirectToErrorPage(final boolean o
+     	final HttpServle     Request request, final HttpServl
+     	final Transac        ionAuxParams trAux) {
+     if
+    		Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
+            
+            lse {
+        	Responser.redirect
+            
+         
+            
+        
+    

@@ -63,12 +63,12 @@ var tableCertFire = $('#certServiceTable').DataTable({
           }
         },
         "columns" : [
-        	 { data: 'idCertificado',"visible": false},
-        	 { data: 'certificateName' },
-        	 { data: 'certPrincipal' },
-        	 { data: 'certBackup' },
-        	 { data: 'fechaAlta'}
-        	],
+            { data: 'idCertificado', "visible": false },
+            { data: 'certificateName', "orderable": true },
+            { data: 'certPrincipal', "orderable": false },
+            { data: 'certBackup', "orderable": false },
+            { data: 'fechaAlta', "orderable": true }
+        ],
     "order" : [ 1, 'desc' ],
     responsive :  true,
     dom: 'Bfrtip',

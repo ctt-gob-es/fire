@@ -279,6 +279,8 @@ public class UserRestController {
 		final DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
 		List<User> listNewUser = new ArrayList<>();
 		final JSONObject json = new JSONObject();
+		
+		final User userBeforeUpdate = this.userService.getUserByUserId(userForm.getIdUserFireEdit());
 
 		boolean error = false;
 		if (bindingResult.hasErrors()) {
@@ -310,7 +312,7 @@ public class UserRestController {
 			json.put("emailEdit" + SPAN, "El campo email no es v\u00E1lido.");
 		}
 
-		if (this.userService.getUserByEmail(userForm.getEmailEdit()) != null) {
+		if (!userBeforeUpdate.getEmail().equals(userForm.getEmailEdit()) && this.userService.getUserByEmail(userForm.getEmailEdit()) != null) {
 			error = true;
 			json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}

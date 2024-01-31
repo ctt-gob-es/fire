@@ -81,7 +81,7 @@ public class RecoverBatchStateManager {
         	}
     	}
 
-		LOGGER.info(logF.f("Se devuelve el estado del lote")); //$NON-NLS-1$
+		LOGGER.fine(logF.f("Se devuelve el estado del lote")); //$NON-NLS-1$
 
     	final String progress = Float.toString(1 - (float) pending / numOperations);
     	Responser.sendResult(response, progress.getBytes());

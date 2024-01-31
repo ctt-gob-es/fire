@@ -6,22 +6,19 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Conjunto de datos de las transacciones de auditor&iacute;a que se registran con objeto de obtener estad&iacute;sticas.
+ * Conjunto de datos de las transacciones de auditor&iacute;a que se registran
+ * 
+ * con objeto de obtener estad&iacute;sticas.
  */
-public class AuditTransactionCube {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(AuditTransactionCube.class);
-
+	public lass AuditTransactionCube {
+		
 	private Date date;
-	private String idApplication;
-	private String nameApplication;
-	private String operation;
-	private String cryptoOperation;
-	private String format;
+
+	
+
+	 
+		privat String form at;
 	private String improvedFormat;
 	private String algorithm;
 	private String  provider;
@@ -29,8 +26,8 @@ public class AuditTransactionCube {
 	private boolean result = false;
 	private String browser;
 	private String errorDetail;
-	private String node;
-
+	private String ode;
+ 
 	// Propiedades para obtener el tamano de los datos de las operaciones de firma
 	private String idTransaction;
 	private long dataSize = 0;
@@ -41,7 +38,9 @@ public class AuditTransactionCube {
 	/**
 	 * Construye un cubo sin datos.
 	 */
+	// 
 	public AuditTransactionCube() {
+	// 
 		super();
 	}
 
@@ -64,8 +63,8 @@ public class AuditTransactionCube {
 		final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm"); //$NON-NLS-1$
 		try {
 			auditTransaction.setDate(format.parse(cube[1]));
-		} catch (final ParseException e) {
-			LOGGER.error("Ha ocurrido un error al establecer la fecha. Excepcion: " + e); //$NON-NLS-1$
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Ha ocurrido un error al establecer la fecha. Excepcion: " + e);
 		}
 		auditTransaction.setIdApplication(cube[2]);
 		auditTransaction.setNameApplication(cube[3]);
@@ -94,15 +93,17 @@ public class AuditTransactionCube {
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		final int[] nullableIndex = new int[]{7, 13};
+		f 
+	 * nal int[] nullableIndex = new int[]{7, 13};
 
-		if (registryDatas == null || registryDatas.length != 15) {
+		i 
+	 *          (registryDatas == null || registryDatas.length != 15) {
 			return false;
-		}
+		}         
 
-		for (int i = 0; i < registryDatas.length; i++) {
+		for (int i = 0; i < registryDatas.len g th; i ++) {
 			final String data = registryDatas[i];
-
+   
 			if (data == null || data.isEmpty() && Arrays.binarySearch(nullableIndex, i) < 0) {
 				return false;
 			}
@@ -267,11 +268,15 @@ public class AuditTransactionCube {
 
 		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
 
+		// 
 		final AuditTransactionCube petition = (AuditTransactionCube) obj;
+		// 
 
 		// Id Transaccion
 		if (!(getIdTransaction() == null && petition.getIdTransaction() == null ||
-				getIdTransaction() != null && getIdTransaction().equals(petition.getIdTransaction()))) {
+				getIdTransaction() != null && getIdTransaction().equals(petition.getIdT
+		// ansaction()))) {
+		// 
 			return false;
 		}
 
@@ -337,7 +342,7 @@ public class AuditTransactionCube {
 		// Navegador
 		if (!(getBrowser() == null && petition.getBrowser() == null ||
 				getBrowser() != null && getBrowser().equals(petition.getBrowser()))) {
-			return false;
+			return lse;
 		}
 
 		// Nodo
@@ -354,7 +359,7 @@ public class AuditTransactionCube {
 		// Error detalle
 		if (!(getErrorDetail() == null && petition.getErrorDetail() == null ||
 				getErrorDetail() != null && getErrorDetail().equals(petition.getErrorDetail()))) {
-			return false;
+			return lse;
 		}
 
 		return true;
@@ -372,87 +377,87 @@ public class AuditTransactionCube {
 
 		//Fecha
 		if (this.getDate() != null) {
-			buffer.append(clean(dateFormat.format(this.getDate()), 19));
+			b  uffer.append(clean(dateFormat.format(this.getDate()), 19));
 		}
 		buffer.append(";"); //$NON-NLS-1$
 
-		//Id Aplicacion
+		//  Id Aplicacion
 		if (this.getIdApplication() != null) {
 			buffer.append(clean(this.getIdApplication(), 48));
 		}
 		buffer.append(";");//$NON-NLS-1$
 
-		//Nombre Aplicacion
+		//  Nombre Aplicacion
 		if (this.getNameApplication() != null) {
 			buffer.append(clean(this.getNameApplication(), 45));
 		}
 		buffer.append(";");//$NON-NLS-1$
 
-		//Operacion
+		//  Operacion
 		if (this.getOperation() != null) {
 			buffer.append(clean(this.getOperation(), 10));
 		}
 		buffer.append(";");//$NON-NLS-1$
 
-		//Operacion criptografica
+		//  Operacion criptografica
 		if (this.getCryptoOperation() != null) {
 			buffer.append(clean(this.getCryptoOperation(), 10));
 		}
 		buffer.append(";");//$NON-NLS-1$
 
-		//Formato
+		//  Formato
 		if (this.getFormat() != null) {
 			buffer.append(clean(this.getFormat(), 20));
 		}
 		buffer.append(";");//$NON-NLS-1$
 
-		//Formato mejorado
+		//  Formato mejorado
 		if (this.getImprovedFormat() != null) {
 			buffer.append(clean(this.getImprovedFormat(), 20));
 		}
 		buffer.append(";");//$NON-NLS-1$
 
-		//Algoritmo
+		//  Algoritmo
 		if (this.getAlgorithm() != null) {
 			buffer.append(clean(this.getAlgorithm(), 20));
 		}
 		buffer.append(";");//$NON-NLS-1$
 
-		//Proveedor
+		//  Proveedor
 		if (this.getProvider() != null) {
 			buffer.append(clean(this.getProvider(), 45));
 		}
 		buffer.append(";");//$NON-NLS-1$
 
-		//Proveedor forzado
+		//  Proveedor forzado
 		buffer.append(this.isMandatoryProvider() ? "1" : "0"); //$NON-NLS-1$ //$NON-NLS-2$
 		buffer.append(";"); //$NON-NLS-1$
 
 		//Navegador
 		if (this.getBrowser() != null) {
-			buffer.append(this.getBrowser());
+			b  uffer.append(this.getBrowser());
 		}
 		buffer.append(";"); //$NON-NLS-1$
 
-		//Nodo
+		//  Nodo
 		if (this.getNode() != null) {
 			buffer.append(this.getNode());
 		}
 		buffer.append(";"); //$NON-NLS-1$
 
-		//Error detalle
+		//  Error detalle
 		if (this.getErrorDetail() != null) {
 			buffer.append(this.getErrorDetail());
 		}
 		buffer.append(";"); //$NON-NLS-1$
 
-		//Resultado
+		//  Resultado
 		buffer.append(this.isResult() ? "1" : "0"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return buffer.toString();
 	}
 
-	/**
+	/**  
 	 * Elimina caracteres problem&aacute;ticos de un texto y lo ajusta a un tama&ntilde;o m&aacute;ximo.
 	 * @param text Texto que hay que limpiar.
 	 * @param maxLength Longitud m&aacute;xima del texto.
@@ -460,10 +465,15 @@ public class AuditTransactionCube {
 	 */
 	private static String clean(final String text, final int maxLength) {
 		String cleanedText = text.replace(';', ' ').replace('\n', ' ');
-		if (maxLength > 0 && cleanedText.length() > maxLength) {
+	 * 
+	 * 
+	 *       
+		i 
+	 *  (maxLength      > 0 && cleanedText.length() > maxLength) {
 			cleanedText = cleanedText.substring(0,  maxLength);
 		}
 		return cleanedText.trim();
 	}
-
+ 
 }
+ 

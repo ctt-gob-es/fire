@@ -30,23 +30,19 @@ class ConfigFileLoader {
 	/**
 	 * Carga un fichero de configuraci&oacute;n del directorio configurado
 	 * o del classpath si no se configur&oacute;.
-	 * @param configFilename Nombre del fichero de configuraci&oacute;n.
+	 * @param configFilePath Nombre del fichero de configuraci&oacute;n.
 	 * @return Propiedades de fichero de configuraci&oacute:n.
 	 * @throws IOException Cuando no se puede cargar el fichero de configuraci&oacute;n.
 	 * @throws FileNotFoundException Cuando no se encuentra el fichero de configuraci&oacute;n.
 	 */
-	public static Properties loadConfigFile(final String configFilename) throws  IOException, FileNotFoundException {
+	public static Properties loadConfigFile(final String configFilePath) throws  IOException, FileNotFoundException {
 
 		boolean loaded = false;
 		final Properties config = new Properties();
 		try {
-			final String configDir = System.getProperty(ENVIRONMENT_VAR_CONFIG_DIR);
-			if (configDir != null) {
-				final File configFile = new File(configDir, configFilename).getCanonicalFile();
-				// Comprobamos que se trate de un fichero sobre el que tengamos permisos y que no
-				// nos hayamos salido del directorio de configuracion indicado
-				if (configFile.isFile() && configFile.canRead()
-						&& configDir.replace('\\', '/').startsWith(configFile.getParent().replace('\\', '/')))  {
+				final File configFile = new File(configFilePath).getCanonicalFile();
+				// Comprobamos que se trate de un fichero sobre el que tengamos permisos
+				if (configFile.isFile() && configFile.canRead())  {
 					try (InputStream is = new FileInputStream(configFile);) {
 						config.load(is);
 						loaded = true;
@@ -54,15 +50,13 @@ class ConfigFileLoader {
 				}
 				else {
 					LOGGER.warning(
-							"El fichero " + configFilename + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + ". El fichero debe encontrase dentro del directorio '" + configDir + //$NON-NLS-1$
-							"'.\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+							"El fichero " + configFilePath + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
+									ENVIRONMENT_VAR_CONFIG_DIR + "'.\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
 				}
-			}
 
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio
 			if (!loaded) {
-				try (InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilename);) {
+				try (InputStream is = ConfigFileLoader.class.getResourceAsStream('/' + configFilePath);) {
 					if (is == null) {
 						throw new FileNotFoundException();
 					}
@@ -74,7 +68,7 @@ class ConfigFileLoader {
 			throw e;
 		}
 		catch(final Exception e){
-			throw new IOException("No se ha podido cargar el fichero de configuracion: " + configFilename, e); //$NON-NLS-1$
+			throw new IOException("No se ha podido cargar el fichero de configuracion: " + configFilePath, e); //$NON-NLS-1$
 		}
 
 		return config;

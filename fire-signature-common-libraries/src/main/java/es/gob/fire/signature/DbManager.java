@@ -13,9 +13,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
 
 /**
  * Manejador para la conexi&oacute;n a la base de datos.
@@ -24,11 +24,13 @@ public class DbManager {
 
 	private static boolean configured = false;
 
-	private static HikariDataSource ds = null;
+	private static DataSource dataSource = null;
 
 	/**
 	 * Obtiene la conexi&oacute;n de base de datos.
-	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo conectar.
+	 * 
+	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo
+	 *         conectar.
 	 * @throws SQLException Cuando no se puede crear la conexi&oacute;n.
 	 */
 	public static Connection getConnection() throws SQLException {
@@ -37,129 +39,61 @@ public class DbManager {
 
 	/**
 	 * Obtiene la conexi&oacute;n de base de datos.
+	 * 
 	 * @param autoCommit Indica si se debe hacer commit autom&aacute;tico tras cada
-	 * operaci&oacute;n de inserci&oacute;n y borrado de entradas en base de datos.
-	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo conectar.
+	 *                   operaci&oacute;n de inserci&oacute;n y borrado de entradas
+	 *                   en base de datos.
+	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo
+	 *         conectar.
 	 * @throws SQLException Cuando no se puede crear la conexi&oacute;n.
 	 */
 	public static Connection getConnection(final boolean autoCommit) throws SQLException {
-		if (ds == null) {
+		if (dataSource == null) {
 			try {
 				initialize();
 			} catch (final IOException e) {
 				throw new SQLException("No se ha podido inicializar la conexion con la base de datos", e); //$NON-NLS-1$
 			}
 		}
-
-		final Connection conn = ds.getConnection();
+		final Connection conn = dataSource.getConnection();
 		conn.setAutoCommit(autoCommit);
 		return conn;
 	}
 
-
 	/**
 	 * Inicializa al completo el manejador de base de datos, leyendo el fichero
 	 * de configuraci&oacute;n y recuperando la conexi&oacute;n.
-	 * @return Conexi&oacute;n de base de datos o {@code null} si se produce un error.
-	 * @throws IOException Cuando no se encuentra correctamente configurada la conexi&ioacute;n.
+	 * 
+	 * @return Conexi&oacute;n de base de datos o {@code null} si se produce un
+	 *         error.
+	 * @throws IOException Cuando no se encuentra correctamente configurada la
+	 *                     conexi&ioacute;n.
 	 */
 	private static void initialize() throws IOException {
-
-		final HikariConfig config = loadConfig();
-
-		ds = new HikariDataSource(config);
-
 		try {
+			Context context = new InitialContext();
+			dataSource = (DataSource) context.lookup(ConfigManager.getDatasourceJNDIName());
+
 			checkConnection();
-		}
-		catch (final Exception e) {
-			ds.close();
-			ds = null;
+		} catch (final Exception e) {
+			dataSource = null;
 			configured = false;
-			throw new IOException("No se ha podido verificar el correcto funcionamiento de la conexion", e); //$NON-NLS-1$
+			throw new IOException("No se ha podido verificar el correcto funcionamiento de la conexion", e);
 		}
 
 		configured = true;
 	}
 
-	/**
-	 * Carga la configuraci&oacute;n para inicializar el pool de conexiones.
-	 * @return Configuracion del pool de conexiones.
-	 * @throws IOException Cuando no se encuentran valores necesarios para configurar la conexi&oacute;n.
-	 */
-	private static HikariConfig loadConfig() throws IOException {
-
-		final HikariConfig config = new HikariConfig();
-
-		final String jdbcDriver = ConfigManager.getJdbcDriverString();
-		if (jdbcDriver == null) {
-			throw new IOException("No se ha declarado el driver JDBC en el fichero de configuracion"); //$NON-NLS-1$
-		}
-		config.setDriverClassName(jdbcDriver);
-
-		// Se configura la cadena de conexion si se define. Si no, se configuran
-		// los valores por separado
-		final String dbConnString = ConfigManager.getDataBaseConnectionString();
-		if (dbConnString != null) {
-			config.setJdbcUrl(dbConnString);
-		}
-		else {
-			final String host = ConfigManager.getDataBaseHost();
-			final String port = ConfigManager.getDataBasePort();
-			final String databaseName = ConfigManager.getDataBaseName();
-
-			if (host != null && port != null && databaseName != null) {
-				config.addDataSourceProperty("serverName", host); //$NON-NLS-1$
-				config.addDataSourceProperty("portNumber", port); //$NON-NLS-1$
-				config.addDataSourceProperty("databaseName", databaseName); //$NON-NLS-1$
-			}
-			else {
-				throw new IOException("No se ha declarado la cadena de conexion ni los parametros independientes para la conexion con la base de datos"); //$NON-NLS-1$
-			}
-		}
-
-		final String username = ConfigManager.getDataBaseUsername();
-		if (username != null) {
-			config.addDataSourceProperty("user", username); //$NON-NLS-1$
-		}
-
-		final String password = ConfigManager.getDataBasePassword();
-		if (password != null) {
-			config.addDataSourceProperty("password", password); //$NON-NLS-1$
-		}
-
-		// Establecemos una configuracion especifica para Oracle con la que establecemos como
-		// comprobar que la conexion sigue siendo valida
-		if (jdbcDriver.contains("Oracle")) { //$NON-NLS-1$
-			config.setConnectionTestQuery("SELECT 1 FROM DUAL"); //$NON-NLS-1$
-		}
-
-		// Milisegundos de espera hasta que se de una conexion
-		config.setConnectionTimeout(10000);
-		// Numero maximo de conexiones que mantendra el pool simultaneamente
-		final int poolSize = ConfigManager.getDataBasePoolSize();
-		config.setMaximumPoolSize(poolSize);
-		// Milisegundos maximos que permanecera abierta una conexion
-		config.setMaxLifetime(1800000);
-//		// Milisegundos entre los que se comprobara que la conexion sigue abierta
-//		config.setKeepaliveTime(600000);
-		config.setPoolName("FIRe"); //$NON-NLS-1$
-
-		return config;
-	}
-
-
 	private static void checkConnection() throws SQLException {
 
 		// Intentamos obtener una conexion
-		try (Connection conn = ds.getConnection();) {
+		try (Connection conn = dataSource.getConnection();) {
 			if (conn == null) {
 				throw new SQLException("No se obtuvo conexion con la BD en un primer intento"); //$NON-NLS-1$
 			}
-		}
-		catch (final Exception e) {
+		} catch (final Exception e) {
 			// Si no pudimos obtener una conexion, realizamos un segundo intento
-			try (Connection conn = ds.getConnection();) {
+			try (Connection conn = dataSource.getConnection();) {
 				if (conn == null) {
 					throw new SQLException("No se pudo obtener la conexion con la BD en un segundo intento", e); //$NON-NLS-1$
 				}
@@ -169,8 +103,9 @@ public class DbManager {
 
 	/**
 	 * Indica si la conexi&oacute;n a base de datos esta conigurada y puede usarse.
+	 * 
 	 * @return {@code true} si la conexi&oacute;n a base de datos puede usarse.
-	 * {@code false} en caso contrario.
+	 *         {@code false} en caso contrario.
 	 */
 	public static boolean isConfigured() {
 		return configured;
@@ -180,10 +115,9 @@ public class DbManager {
 	 * Libera los recursos de acceso a base de datos.
 	 */
 	public static void closeResources() {
-		if (ds != null) {
+		if (dataSource != null) {
 			configured = false;
-			ds.close();
-			ds = null;
+			dataSource = null;
 		}
 	}
 }

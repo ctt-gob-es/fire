@@ -174,19 +174,22 @@ public final class RequestNewCertificateService extends HttpServlet {
     /**
      * Invalida la sesion del usuario y, si se ha indicado una URL de error, lo redirige a ella o devuelve el error en caso contrario.
      * @param error Tipo de error que se ha producido.
-     * @param url URL de error a la que redirigir al usuario.
-     * @param request Objeto de petici&oacute;n realizada al servlet.
-     * @param response Objeto de respuesta con el que realizar la redirecci&oacute;n.
-     * @param trAux Par&aacute;metro auxiliar de la transacci&oacute;n.
-     * @throws IOException Cuando no se puede redirigir al usuario.
-     */
-    private static void processError(final FIReError error, final String url, final HttpServletRequest request,
-    		final HttpServletResponse response, final TransactionAuxParams trAux) {
+  
 
-		// Invalidamos la sesion por seguridad
-		final HttpSession httpSession = request.getSession(false);
-		if (httpSession != null) {
-			httpSession.invalidate();
+	 * 
+	 * @param trAux Par&aacute;metro auxiliar de la transacci&oacute;n.
+	 * 
+	 * 
+	 * @throws IOEx    eption Cuando no se puede redirigi
+	 */      
+	 rivate static vo  d processError(final FIReError error, final Str
+	 	final HttpServletResponse response, final TransactionAuxPar
+	 *                 ms trAux) {
+	     
+	 Invalidamos la sesion por seguridad
+	 al
+	 (httpSession != null) {
+			pSession.invalidate();
 		}
 		if (url != null) {
 			try {
@@ -196,31 +199,39 @@ public final class RequestNewCertificateService extends HttpServlet {
 				LOGGER.log(Level.SEVERE, trAux.getLogFormatter().f("No se ha podido redirigir al usuario a la URL externa"), e); //$NON-NLS-1$
 				Responser.sendError(response, FIReError.INTERNAL_ERROR);
 			}
-		} else {
-			Responser.sendError(response, error);
+		}  Responser.sendError(response, error);
 		}
+						
     }
 
 	/**
 	 * Establece el mensaje interno de error y redirige a la p&aacute;gina de error interna
-	 * para que el usuario pueda seleccionar otro proveedor o a la pagina de error indicada
-	 * por el usuario si se forz&oacute; el uso de un proveedor concreto.
+	 *
+	por el usuario si se forz&oacute; el uso de un proveedor concreto.
 	 * @param request Objeto con la petici&oacute;n realizada.
 	 * @param response Objeto para la respuesta a la petici&oacute;n.
 	 * @param session Sesi&oacute;n con los datos de la transacci&oacute;n.
+	 * 
 	 * @param operationError Error que debe declararse.
+	 * 
 	 * @param errorUrlRedirection URL externa de error indicada por la aplicaci&ooacute;n.
-	 * @param originForced {@code true} si se forz&oacute; al uso de un proveedor concreto.
-	 */
-	private static void redirectToErrorPage(final HttpServletRequest request, final HttpServletResponse response,
-			final FireSession session, final FIReError operationError,
-			final String errorUrlRedirection, final boolean originForced, final TransactionAuxParams trAux) {
-		ErrorManager.setErrorToSession(session, operationError, originForced, trAux);
+	 * 
+	 * @param originF             rced {@code true} si se forz&oacute; al uso de un proveedor concreto.
+	 */            
+	private static vo             d redirectToErrorPage(final HttpS
+	 *                            rvletRequest request, final HttpServletResponse response,
+			final FireSession sess      on, final FIReError operationError,
+			final String errorUrlRedirection, final boolean originForced, fi
+	 *                            al TransactionAuxParams trAux) {
+		ErrorManager.setError        oSession(session, operationError, originForc
+	 *                            d, trAux);
     	if (originForced) {
     		Responser.redirectToExternalUrl(errorUrlRedirection, request, response, trAux);
     	}
     	else {
-    		Responser.redirectToUrl(FirePages.PG_SIGNATURE_ERROR, request, response, trAux);
-    	}
-	}
-}
+    		Responser.redirectToUrl(FirePages.PG_SIGNATURE_ERROR, request, response, 
+		}
+			
+		 
+			
+		

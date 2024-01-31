@@ -98,15 +98,11 @@ public class FIReService extends HttpServlet {
     	if (configStatistic == 2) {
     		try {
     			final String statisticsDirPath = ConfigManager.getStatisticsDir();
-    			final String jdbcDriver = ConfigManager.getJdbcDriverString();
-    			final String dbConnectionString = ConfigManager.getDataBaseConnectionString();
-    			final String dbUser = ConfigManager.getDataBaseUsername();
-    			final String dbPass = ConfigManager.getDataBasePassword();
+    			final String datasourceJndiName = ConfigManager.getDatasourceJNDIName();
     			if (statisticsDirPath != null && !statisticsDirPath.isEmpty() &&
-    					jdbcDriver != null && !jdbcDriver.isEmpty() &&
-    					dbConnectionString != null && !dbConnectionString.isEmpty()) {
+    					datasourceJndiName != null && !datasourceJndiName.isEmpty()) {
     				final String startTime = ConfigManager.getStatisticsDumpTime();
-    				FireStatistics.init(statisticsDirPath, startTime, jdbcDriver, dbConnectionString, dbUser, dbPass, false);
+    				FireStatistics.init(statisticsDirPath, startTime, datasourceJndiName, false);
     			}
     		}
     		catch (final Exception e) {

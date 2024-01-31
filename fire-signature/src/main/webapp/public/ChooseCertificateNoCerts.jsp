@@ -40,7 +40,7 @@
 		 providerName = info.getTitle();
 	}
 	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
-	if (SessionFlags.OP_SIGN != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+	if (SessionFlags.OP_CHOOSE != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
 		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
 	}
 
