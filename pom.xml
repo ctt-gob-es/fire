@@ -29,6 +29,7 @@
 		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
 		<javax.json-api.version>1.1.3</javax.json-api.version>
 		<org.glassfish-javax.json.version>1.1.3</org.glassfish-javax.json.version>
+		<mockito.version>3.12.4</mockito.version>
 		<junit.version>4.13.1</junit.version>
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
 		<hibernate.version>5.2.13.Final</hibernate.version>
@@ -372,8 +373,20 @@
 			</dependency>
 
 			<!-- JUnit -->
-			<!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
-				<version>${junit.version}</version> <scope>test</scope> </dependency> -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId> 
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- Mockito -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>			
 
 			<!-- Sobreescritura de la versión de Log4j2 para evitar vulnerabilidad: 
 				https://nvd.nist.gov/vuln/detail/CVE-2021-44228 -->
@@ -429,28 +442,7 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
-				<!-- Plugin de ejecución de test junit -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0</version>
-					<executions>
-						<execution>
-							<id>default-test</id>
-							<goals>
-								<goal>test</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<argLine>
-							@{argLine} -javaagent:C:\Users\alvaro.deporras\.m2\repository\org\jmockit\jmockit\1.49\jmockit-1.49.jar
-						</argLine>
-						<includes>
-							<include>**/*Test.java</include>
-						</includes>
-					</configuration>
-				</plugin>
+				
 			</plugins>
 		</pluginManagement>
 
@@ -477,64 +469,6 @@
 					<tagNameFormat>${project.name}_@{project.version}</tagNameFormat>
 				</configuration>
 			</plugin>
-
-			<!-- Plugin de generación del site. -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<configuration>
-					<locales>es,en</locales>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.7</version>
-				<executions>
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
-							<dataFile>target/jacoco.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>target/jacoco-ut</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- Definición de los plugins genéricos -->
-
-			<!-- Plugin para generar la fecha de empaquetado que se incluirá en el 
-				manifest. -->
-			<!-- <plugin> <groupId>com.keyboardsamurais.maven</groupId> <artifactId>maven-timestamp-plugin</artifactId> 
-				<version>1.0</version> <configuration> <propertyName>timestamp</propertyName> 
-				<timestampPattern>dd/MM/yyyy HH:mm</timestampPattern> </configuration> <executions> 
-				<execution> <phase>clean</phase> <goals> <goal>create</goal> </goals> </execution> 
-				</executions> </plugin> -->
-			<!-- Plugin para generar las fuentes -->
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-source-plugin</artifactId> 
-				<version>2.2.1</version> <configuration> <skipSource>${plugin.source.skip}</skipSource> 
-				</configuration> <executions> <execution> <id>attach-sources</id> <goals> 
-				<goal>jar</goal> </goals> </execution> </executions> </plugin> -->
-			<!-- Plugin para generar el javadoc -->
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
-				<version>2.9</version> <configuration> <skip>${plugin.javadoc.skip}</skip> 
-				</configuration> <executions> <execution> <id>attach-javadocs</id> <goals> 
-				<goal>jar</goal> </goals> </execution> </executions> </plugin> <plugin> <groupId>org.apache.maven.plugins</groupId> 
-				<artifactId>maven-site-plugin</artifactId> <version>3.6</version> <configuration> 
-				<locales>es,en</locales> </configuration> </plugin> -->
 		</plugins>
 	</build>
 

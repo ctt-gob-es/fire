@@ -50,7 +50,7 @@ import es.gob.fire.server.services.statistics.TransactionType;
  * se devolver&aacute;n errores gen&eacute;ricos cuando ocurr&aacute;n errores
  * que no
  * deber&iacute;an ocurrir nunca.
- * 
+ *
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s.
  */
 public final class PreSignService extends HttpServlet {
@@ -417,29 +417,23 @@ public final class PreSignService extends HttpServlet {
         LOGGER.fine(logF.f("Fin de la llamada al servicio publico de prefirma")); //$NON-NLS-1$
     }
 
-	/**
+    /**
 	 * Redirige a una p&aacute;gina de error. La p&aacute;gina sera de de error de firma, si existe la posibilidad de
-	 * q
-
-     * 
-     * @param request Objeto de petici&oacute;n al servlet.
-     * 
-     * @param response Objeto de respuesta del servlet.
-     * 
-     * 
-     * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
-     *                     
-     */   
-     rivate static vo      d redirectToErrorPage(final boolean o
-     	final HttpServle     Request request, final HttpServl
-     	final Transac        ionAuxParams trAux) {
-     if
-    		Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
-            
-            lse {
-        	Responser.redirect
-            
-         
-            
-        
-    
+	 * que se pueda reintentar la operaci&oacute;n, o la p&aacute;gina de error proporcionada por el usuario.
+	 * @param originForced Indica si era obligatorio el uso de un proveedor de firma concreto.
+	 * @param connConfig Configuraci&oacute;n de la transacci&oacute;n.
+	 * @param request Objeto de petici&oacute;n al servlet.
+	 * @param response Objeto de respuesta del servlet.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+	 */
+	private static void redirectToErrorPage(final boolean originForced, final String redirectErrorUrl,
+			final HttpServletRequest request, final HttpServletResponse response,
+			final TransactionAuxParams trAux) {
+		if (originForced) {
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
+		}
+		else {
+			Responser.redirectToUrl(FirePages.PG_SIGNATURE_ERROR, request, response, trAux);
+		}
+	}
+}

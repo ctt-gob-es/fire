@@ -17,19 +17,19 @@ public class AuditSignatureCube {
 	// Propiedades para obtener el tamano de los datos de las operaciones de firma
 	private String idTransaction;
 	private long dataSize = 0;
-	
+
 	// Valor utilizado para almacenar el numero de ocurrencias encontradas hasta el momento
 	private long total = 1;
-	
+
 	/**
 	 * Construye un cubo sin datos.
 	 */
 	public AuditSignatureCube() {
 		super();
 	}
-	
+
 	public final static AuditSignatureCube parse(final String registry){
-		
+
 		if (registry == null || registry.isEmpty()) {
 			throw new IllegalArgumentException("Se ha proporcionado una cadena vacia"); //$NON-NLS-1$
 		}
@@ -38,9 +38,9 @@ public class AuditSignatureCube {
 		if (!checkRegistryData(cube)) {
 			throw new IllegalArgumentException("Se ha encontrado un registro con formato no valido: " + registry); //$NON-NLS-1$
 		}
-		
+
 		final AuditSignatureCube auditSignature = new AuditSignatureCube();
-		
+
 		auditSignature.setIdTransaction(cube[0]);
 		auditSignature.setIdIntLote(cube[1]);
 		auditSignature.setCryptoOperation(cube[2]);
@@ -49,11 +49,11 @@ public class AuditSignatureCube {
 		auditSignature.setDataSize(Long.parseLong(cube[5]));
 		auditSignature.setErrorDetail(cube[6]);
 		auditSignature.setResult(cube[7].equals("1"));
-		
+
 		return auditSignature;
-		
+
 	}
-	
+
 	/**
 	 * Comprueba que un registro de datos contenga el numero de campos adecuado y
 	 * que estos contengan un valor.
@@ -63,90 +63,90 @@ public class AuditSignatureCube {
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		int[] nullableIndex = new int[]{1, 4, 6};
-		
+		final int[] nullableIndex = new int[]{1, 4, 6};
+
 		if (registryDatas == null || registryDatas.length != 8) {
 			return false;
 		}
 
 		for (int i = 0; i < registryDatas.length; i++) {
-			String data = registryDatas[i];
-			if ((data == null) || (data.isEmpty() && Arrays.binarySearch(nullableIndex, i) < 0)) {
+			final String data = registryDatas[i];
+			if (data == null || data.isEmpty() && Arrays.binarySearch(nullableIndex, i) < 0) {
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	public String getIdIntLote() {
-		return idIntLote;
+		return this.idIntLote;
 	}
 
-	public void setIdIntLote(String idIntLote) {
+	public void setIdIntLote(final String idIntLote) {
 		this.idIntLote = idIntLote;
 	}
 
 	public String getCryptoOperation() {
-		return cryptoOperation;
+		return this.cryptoOperation;
 	}
 
-	public void setCryptoOperation(String cryptoOperation) {
+	public void setCryptoOperation(final String cryptoOperation) {
 		this.cryptoOperation = cryptoOperation;
 	}
 
 	public String getFormat() {
-		return format;
+		return this.format;
 	}
 
-	public void setFormat(String format) {
+	public void setFormat(final String format) {
 		this.format = format;
 	}
 
 	public String getImprovedFormat() {
-		return improvedFormat;
+		return this.improvedFormat;
 	}
 
-	public void setImprovedFormat(String improvedFormat) {
+	public void setImprovedFormat(final String improvedFormat) {
 		this.improvedFormat = improvedFormat;
 	}
 
 	public boolean isResult() {
-		return result;
+		return this.result;
 	}
 
-	public void setResult(boolean result) {
+	public void setResult(final boolean result) {
 		this.result = result;
 	}
 
 	public String getErrorDetail() {
-		return errorDetail;
+		return this.errorDetail;
 	}
 
-	public void setErrorDetail(String errorDetail) {
+	public void setErrorDetail(final String errorDetail) {
 		this.errorDetail = errorDetail;
 	}
 
 	public String getIdTransaction() {
-		return idTransaction;
+		return this.idTransaction;
 	}
 
-	public void setIdTransaction(String idTransaction) {
+	public void setIdTransaction(final String idTransaction) {
 		this.idTransaction = idTransaction;
 	}
 
 	public long getDataSize() {
-		return dataSize;
+		return this.dataSize;
 	}
 
-	public void setDataSize(long dataSize) {
+	public void setDataSize(final long dataSize) {
 		this.dataSize = dataSize;
 	}
 
 	public long getTotal() {
-		return total;
+		return this.total;
 	}
 
-	public void setTotal(long total) {
+	public void setTotal(final long total) {
 		this.total = total;
 	}
 
@@ -156,26 +156,26 @@ public class AuditSignatureCube {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj == null) {
 			return false;
 		}
-		
+
 		// Solo implementamos un nuevo modo de comparacion cuando el objeto al que se compara es de tipo PetitionCube
 		if (!(obj instanceof AuditSignatureCube)) {
 			return super.equals(obj);
 		}
-		
+
 		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
 
 		final AuditSignatureCube petition = (AuditSignatureCube) obj;
-		
+
 		// Id Int Lote
 		if (!(getIdIntLote() == null && petition.getIdIntLote() == null ||
 				getIdIntLote() != null && getIdIntLote().equals(petition.getIdIntLote()))) {
 			return false;
 		}
-		
+
 		// Id Transaction
 		if (!(getIdTransaction() == null && petition.getIdTransaction() == null ||
 				getIdTransaction() != null && getIdTransaction().equals(petition.getIdTransaction()))) {
@@ -198,7 +198,7 @@ public class AuditSignatureCube {
 		if (isResult() != petition.isResult()) {
 			return  false;
 		}
-		
+
 		/*
 		// Error detalle
 		if (!(getErrorDetail() == null && petition.getErrorDetail() == null ||
@@ -212,53 +212,53 @@ public class AuditSignatureCube {
 	@Override
 	public String toString() {
 		final StringBuilder result = new StringBuilder();
-		
+
 		//Id transaccion
 		result.append(this.getIdTransaction() != null ? this.getIdTransaction() : "0");
 		result.append(";");//$NON-NLS-1$
-		
+
 		//Id Int Lote
 		if (this.getIdIntLote() != null) {
 			result.append(clean(this.getIdIntLote(), 48));
 		}
 		result.append(";");//$NON-NLS-1$
-		
+
 		//Operacion criptografica
 		if (this.getCryptoOperation() != null) {
 			result.append(clean(this.getCryptoOperation(), 10));
 		}
 		result.append(";");//$NON-NLS-1$
-		
+
 		//Formato
 		if (this.getFormat() != null) {
 			result.append(clean(this.getFormat(), 20));
 		}
 		result.append(";");//$NON-NLS-1$
-		
+
 		//Formato mejorado
 		if (this.getImprovedFormat() != null) {
 			result.append(clean(this.getImprovedFormat(), 20));
 		}
 		result.append(";");//$NON-NLS-1$
-		
+
 		//Tamano
 		if ((Long)this.getDataSize() != null) {
 			result.append(this.getDataSize());
 		}
 		result.append(";");
-		
+
 		//Error detalle
 		if (this.getErrorDetail() != null) {
 			result.append(this.getErrorDetail());
 		}
 		result.append(";");
-		
+
 		//Resultado
 		result.append(this.isResult() ? "1" : "0");
-		
+
 		return result.toString();
 	}
-	
+
 	/**
 	 * Elimina caracteres problem&aacute;ticos de un texto y lo ajusta a un tama&ntilde;o m&aacute;ximo.
 	 * @param text Texto que hay que limpiar.
@@ -272,13 +272,13 @@ public class AuditSignatureCube {
 		}
 		return cleanedText.trim();
 	}
-	
+
 	/**
 	 * Comprueba cual de los objetos contiene un detalle de error
 	 * @param signature Objeto AuditSignatureCube con el que comparar.
 	 * @return int con el resultado.
 	 */
-	public int checkErrorDetail(AuditSignatureCube signature) {
+	public int checkErrorDetail(final AuditSignatureCube signature) {
 	    if (getErrorDetail() == null && signature.getErrorDetail() == null) {
 	        return 1; // Ambos nulos
 	    } else if (getErrorDetail() != null && signature.getErrorDetail() != null) {
@@ -299,5 +299,5 @@ public class AuditSignatureCube {
 
 
 
-	
+
 }

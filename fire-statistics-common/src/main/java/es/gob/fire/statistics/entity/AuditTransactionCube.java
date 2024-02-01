@@ -7,18 +7,16 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * Conjunto de datos de las transacciones de auditor&iacute;a que se registran
- * 
- * con objeto de obtener estad&iacute;sticas.
+ * Conjunto de datos de las transacciones de auditor&iacute;a que se registran con objeto de obtener estad&iacute;sticas.
  */
-	public lass AuditTransactionCube {
-		
+public class AuditTransactionCube {
+
 	private Date date;
-
-	
-
-	 
-		privat String form at;
+	private String idApplication;
+	private String nameApplication;
+	private String operation;
+	private String cryptoOperation;
+	private String format;
 	private String improvedFormat;
 	private String algorithm;
 	private String  provider;
@@ -26,8 +24,8 @@ import java.util.Objects;
 	private boolean result = false;
 	private String browser;
 	private String errorDetail;
-	private String ode;
- 
+	private String node;
+
 	// Propiedades para obtener el tamano de los datos de las operaciones de firma
 	private String idTransaction;
 	private long dataSize = 0;
@@ -38,9 +36,7 @@ import java.util.Objects;
 	/**
 	 * Construye un cubo sin datos.
 	 */
-	// 
 	public AuditTransactionCube() {
-	// 
 		super();
 	}
 
@@ -63,8 +59,8 @@ import java.util.Objects;
 		final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm"); //$NON-NLS-1$
 		try {
 			auditTransaction.setDate(format.parse(cube[1]));
-		} catch (ParseException e) {
-			throw new IllegalArgumentException("Ha ocurrido un error al establecer la fecha. Excepcion: " + e);
+		} catch (final ParseException e) {
+			throw new IllegalArgumentException("Ha ocurrido un error al establecer la fecha", e); //$NON-NLS-1$
 		}
 		auditTransaction.setIdApplication(cube[2]);
 		auditTransaction.setNameApplication(cube[3]);
@@ -93,17 +89,15 @@ import java.util.Objects;
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		f 
-	 * nal int[] nullableIndex = new int[]{7, 13};
+		final int[] nullableIndex = new int[]{7, 13};
 
-		i 
-	 *          (registryDatas == null || registryDatas.length != 15) {
+		if (registryDatas == null || registryDatas.length != 15) {
 			return false;
-		}         
+		}
 
-		for (int i = 0; i < registryDatas.len g th; i ++) {
+		for (int i = 0; i < registryDatas.length; i++) {
 			final String data = registryDatas[i];
-   
+
 			if (data == null || data.isEmpty() && Arrays.binarySearch(nullableIndex, i) < 0) {
 				return false;
 			}
@@ -268,15 +262,11 @@ import java.util.Objects;
 
 		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
 
-		// 
 		final AuditTransactionCube petition = (AuditTransactionCube) obj;
-		// 
 
 		// Id Transaccion
 		if (!(getIdTransaction() == null && petition.getIdTransaction() == null ||
-				getIdTransaction() != null && getIdTransaction().equals(petition.getIdT
-		// ansaction()))) {
-		// 
+				getIdTransaction() != null && getIdTransaction().equals(petition.getIdTransaction()))) {
 			return false;
 		}
 
@@ -342,7 +332,7 @@ import java.util.Objects;
 		// Navegador
 		if (!(getBrowser() == null && petition.getBrowser() == null ||
 				getBrowser() != null && getBrowser().equals(petition.getBrowser()))) {
-			return lse;
+			return false;
 		}
 
 		// Nodo
@@ -359,7 +349,7 @@ import java.util.Objects;
 		// Error detalle
 		if (!(getErrorDetail() == null && petition.getErrorDetail() == null ||
 				getErrorDetail() != null && getErrorDetail().equals(petition.getErrorDetail()))) {
-			return lse;
+			return false;
 		}
 
 		return true;
@@ -367,97 +357,97 @@ import java.util.Objects;
 
 	@Override
 	public String toString() {
-		final StringBuilder buffer = new StringBuilder();
+		final StringBuilder result = new StringBuilder();
 
-		final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm"); //$NON-NLS-1$
+		final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm"); //$NON-NLS-1$
 
 		//Id transaccion
-		buffer.append(this.getIdTransaction() != null ? this.getIdTransaction() : "0"); //$NON-NLS-1$
-		buffer.append(";");//$NON-NLS-1$
+		result.append(this.getIdTransaction() != null ? this.getIdTransaction() : "0"); //$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
 		//Fecha
 		if (this.getDate() != null) {
-			b  uffer.append(clean(dateFormat.format(this.getDate()), 19));
+			result.append(clean(format.format(this.getDate()), 19));
 		}
-		buffer.append(";"); //$NON-NLS-1$
+		result.append(";"); //$NON-NLS-1$
 
-		//  Id Aplicacion
+		//Id Aplicacion
 		if (this.getIdApplication() != null) {
-			buffer.append(clean(this.getIdApplication(), 48));
+			result.append(clean(this.getIdApplication(), 48));
 		}
-		buffer.append(";");//$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
-		//  Nombre Aplicacion
+		//Nombre Aplicacion
 		if (this.getNameApplication() != null) {
-			buffer.append(clean(this.getNameApplication(), 45));
+			result.append(clean(this.getNameApplication(), 45));
 		}
-		buffer.append(";");//$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
-		//  Operacion
+		//Operacion
 		if (this.getOperation() != null) {
-			buffer.append(clean(this.getOperation(), 10));
+			result.append(clean(this.getOperation(), 10));
 		}
-		buffer.append(";");//$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
-		//  Operacion criptografica
+		//Operacion criptografica
 		if (this.getCryptoOperation() != null) {
-			buffer.append(clean(this.getCryptoOperation(), 10));
+			result.append(clean(this.getCryptoOperation(), 10));
 		}
-		buffer.append(";");//$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
-		//  Formato
+		//Formato
 		if (this.getFormat() != null) {
-			buffer.append(clean(this.getFormat(), 20));
+			result.append(clean(this.getFormat(), 20));
 		}
-		buffer.append(";");//$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
-		//  Formato mejorado
+		//Formato mejorado
 		if (this.getImprovedFormat() != null) {
-			buffer.append(clean(this.getImprovedFormat(), 20));
+			result.append(clean(this.getImprovedFormat(), 20));
 		}
-		buffer.append(";");//$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
-		//  Algoritmo
+		//Algoritmo
 		if (this.getAlgorithm() != null) {
-			buffer.append(clean(this.getAlgorithm(), 20));
+			result.append(clean(this.getAlgorithm(), 20));
 		}
-		buffer.append(";");//$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
-		//  Proveedor
+		//Proveedor
 		if (this.getProvider() != null) {
-			buffer.append(clean(this.getProvider(), 45));
+			result.append(clean(this.getProvider(), 45));
 		}
-		buffer.append(";");//$NON-NLS-1$
+		result.append(";");//$NON-NLS-1$
 
-		//  Proveedor forzado
-		buffer.append(this.isMandatoryProvider() ? "1" : "0"); //$NON-NLS-1$ //$NON-NLS-2$
-		buffer.append(";"); //$NON-NLS-1$
+		//Proveedor forzado
+		result.append(this.isMandatoryProvider() ? "1" : "0"); //$NON-NLS-1$ //$NON-NLS-2$
+		result.append(";"); //$NON-NLS-1$
 
 		//Navegador
 		if (this.getBrowser() != null) {
-			b  uffer.append(this.getBrowser());
+			result.append(this.getBrowser());
 		}
-		buffer.append(";"); //$NON-NLS-1$
+		result.append(";"); //$NON-NLS-1$
 
-		//  Nodo
+		//Nodo
 		if (this.getNode() != null) {
-			buffer.append(this.getNode());
+			result.append(this.getNode());
 		}
-		buffer.append(";"); //$NON-NLS-1$
+		result.append(";"); //$NON-NLS-1$
 
-		//  Error detalle
+		//Error detalle
 		if (this.getErrorDetail() != null) {
-			buffer.append(this.getErrorDetail());
+			result.append(this.getErrorDetail());
 		}
-		buffer.append(";"); //$NON-NLS-1$
+		result.append(";"); //$NON-NLS-1$
 
-		//  Resultado
-		buffer.append(this.isResult() ? "1" : "0"); //$NON-NLS-1$ //$NON-NLS-2$
+		//Resultado
+		result.append(this.isResult() ? "1" : "0"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		return buffer.toString();
+		return result.toString();
 	}
 
-	/**  
+	/**
 	 * Elimina caracteres problem&aacute;ticos de un texto y lo ajusta a un tama&ntilde;o m&aacute;ximo.
 	 * @param text Texto que hay que limpiar.
 	 * @param maxLength Longitud m&aacute;xima del texto.
@@ -465,15 +455,10 @@ import java.util.Objects;
 	 */
 	private static String clean(final String text, final int maxLength) {
 		String cleanedText = text.replace(';', ' ').replace('\n', ' ');
-	 * 
-	 * 
-	 *       
-		i 
-	 *  (maxLength      > 0 && cleanedText.length() > maxLength) {
+		if (maxLength > 0 && cleanedText.length() > maxLength) {
 			cleanedText = cleanedText.substring(0,  maxLength);
 		}
 		return cleanedText.trim();
 	}
- 
+
 }
- 

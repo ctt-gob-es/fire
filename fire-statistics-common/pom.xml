@@ -17,6 +17,16 @@
 		<dependency>
     		<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-common-libraries</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>es.gob.afirma</groupId>
+					<artifactId>afirma-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>es.gob.afirma</groupId>
+					<artifactId>afirma-server-triphase-signer-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		
 		<dependency>
@@ -32,13 +42,13 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 		
 		<!-- Mockito -->
 	    <dependency>
 	        <groupId>org.mockito</groupId>
 	        <artifactId>mockito-core</artifactId>
-	        <version>3.11.2</version>
 	        <scope>test</scope>
 	    </dependency>
 
@@ -49,7 +59,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>

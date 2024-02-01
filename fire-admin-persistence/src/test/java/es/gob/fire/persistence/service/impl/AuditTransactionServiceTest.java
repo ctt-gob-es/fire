@@ -1,7 +1,10 @@
 package es.gob.fire.persistence.service.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,7 +34,7 @@ public class AuditTransactionServiceTest {
 
     @InjectMocks
     private AuditTransactionService auditTransactionService;
-    
+
     @Mock
     private AuditTransactionRepository auditTransactionRepository;
 
@@ -43,30 +46,30 @@ public class AuditTransactionServiceTest {
 
     @Mock
     private AuditSignatureDataTablesRepository auditSignatureDataTablesRepository;
-    
+
     private AuditTransaction expectedAuditTransaction;
-    
+
     private List<AuditTransaction> expectedListAuditTransactions;
-    
+
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        
-        expectedListAuditTransactions = new ArrayList<AuditTransaction>();
-        
+
+        this.expectedListAuditTransactions = new ArrayList<>();
+
         for (int i = 1; i < 5; i++) {
         	if (i == 1) {
-        		expectedAuditTransaction = generateSampleTransaction(i);
+        		this.expectedAuditTransaction = generateSampleTransaction(i);
         	}
-        	expectedListAuditTransactions.add(generateSampleTransaction(i));
+        	this.expectedListAuditTransactions.add(generateSampleTransaction(i));
         }
-        
+
     }
-    
-    private AuditTransaction generateSampleTransaction(int idAuditTransaction) {
-    	AuditTransaction at = new AuditTransaction();
-    	
+
+    private AuditTransaction generateSampleTransaction(final int idAuditTransaction) {
+    	final AuditTransaction at = new AuditTransaction();
+
     	at.setIdAuditTransaction(idAuditTransaction);
     	at.setIdApp("0000001");
     	at.setNameApp("testApp");
@@ -83,309 +86,308 @@ public class AuditTransactionServiceTest {
     	at.setResult(true);
 		return at;
     }
-    
-    private AuditSignature generateSampleSignature(String auditTransaction) {
-    	AuditSignature as = new AuditSignature();
-    	
+
+    private AuditSignature generateSampleSignature(final String auditTransaction) {
+    	final AuditSignature as = new AuditSignature();
+
     	as.setIdIntLote("1");
     	as.setIdTransaction(auditTransaction);
     	as.setCryptoOperation("sign");
     	as.setFormat("CAdES");
     	as.setSize(100000);
     	as.setResult(true);
-    	
+
 		return as;
     }
-    
+
     @Test
-	public void testGetAuditTransactionByAuditTransactionId() {
-    	when(auditTransactionRepository.findByIdAuditTransaction(1)).thenReturn(expectedAuditTransaction);
+    public void testGetAuditTransactionByAuditTransactionId() {
+    	when(this.auditTransactionRepository.findByIdAuditTransaction(1)).thenReturn(this.expectedAuditTransaction);
 
-        AuditTransaction result = auditTransactionService.getAuditTransactionByAuditTransactionId(1);
+        final AuditTransaction result = this.auditTransactionService.getAuditTransactionByAuditTransactionId(1);
 
-        verify(auditTransactionRepository).findByIdAuditTransaction(1);
+        verify(this.auditTransactionRepository).findByIdAuditTransaction(1);
 
-        assertEquals(expectedAuditTransaction, result);
+        assertEquals(this.expectedAuditTransaction, result);
 	}
-    
+
     @Test
     public void testGetAllAuditTransactions() {
-        when(auditTransactionRepository.findAll()).thenReturn(expectedListAuditTransactions);
+        when(this.auditTransactionRepository.findAll()).thenReturn(this.expectedListAuditTransactions);
 
-        List<AuditTransaction> result = auditTransactionService.getAllAuditTransactions();
+        final List<AuditTransaction> result = this.auditTransactionService.getAllAuditTransactions();
 
-        verify(auditTransactionRepository).findAll();
+        verify(this.auditTransactionRepository).findAll();
 
-        assertEquals(expectedListAuditTransactions, result);
+        assertEquals(this.expectedListAuditTransactions, result);
     }
-    
+
     @Test
-	public void testGetAllAuditTransactionsDataTablesInput() {
-    	DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<AuditTransaction>();
-    	DataTablesInput input = new DataTablesInput();
-    	
-    	expectedResult.setData(expectedListAuditTransactions);
-    	
-    	when(auditTransactionDataTablesRepository.findAll(input)).thenReturn(expectedResult);
-    	
-    	DataTablesOutput<AuditTransaction> result = auditTransactionService.getAllAuditTransactions(input);
-    	
-    	verify(auditTransactionDataTablesRepository).findAll(input);
-    	
+    public void testGetAllAuditTransactionsDataTablesInput() {
+    	final DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<>();
+    	final DataTablesInput input = new DataTablesInput();
+
+    	expectedResult.setData(this.expectedListAuditTransactions);
+
+    	when(this.auditTransactionDataTablesRepository.findAll(input)).thenReturn(expectedResult);
+
+    	final DataTablesOutput<AuditTransaction> result = this.auditTransactionService.getAllAuditTransactions(input);
+
+    	verify(this.auditTransactionDataTablesRepository).findAll(input);
+
     	assertEquals(expectedResult, result);
 	}
 
 	@Test
 	public void testGetAuditTransactionsWithDateFilterCompareMode1() {
-		DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<AuditTransaction>();
-    	DataTablesInput input = new DataTablesInput();
-    	
-    	expectedResult.setData(expectedListAuditTransactions);
-    	
-    	String startDateFilterString = "2020-01-01";
-    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		
+		final DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<>();
+    	final DataTablesInput input = new DataTablesInput();
+
+    	expectedResult.setData(this.expectedListAuditTransactions);
+
+    	final String startDateFilterString = "2020-01-01";
+    	final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
 		Date startDate = null;
 		try {
 			startDate = dateFormat.parse(startDateFilterString);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			fail("Ha ocurrido un error al convertir la fecha de inicio.");
 		}
-		Date endDate = new Date();
-		
-		when(auditTransactionRepository.findByDateBetween(startDate, endDate)).thenReturn(expectedListAuditTransactions);
-		
-		DataTablesOutput<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate);
-    	
-		verify(auditTransactionRepository).findByDateBetween(startDate, endDate);
-    	
+		final Date endDate = new Date();
+
+		when(this.auditTransactionRepository.findByDateBetween(startDate, endDate)).thenReturn(this.expectedListAuditTransactions);
+
+		final DataTablesOutput<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate);
+
+		verify(this.auditTransactionRepository).findByDateBetween(startDate, endDate);
+
     	assertEquals(expectedResult, result);
 	}
-	
+
 	@Test
 	public void testGetAuditTransactionsWithDateFilterCompareMode2() {
-		DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<AuditTransaction>();
-    	DataTablesInput input = new DataTablesInput();
-    	
-    	expectedResult.setData(expectedListAuditTransactions);
-		
-		Date startDate = null;
-		Date endDate = new Date();
-		
-		when(auditTransactionRepository.findByDateBefore(endDate)).thenReturn(expectedListAuditTransactions);
-		
-		DataTablesOutput<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate);
-    	
-		verify(auditTransactionRepository).findByDateBefore(endDate);
-    	
+		final DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<>();
+    	final DataTablesInput input = new DataTablesInput();
+
+    	expectedResult.setData(this.expectedListAuditTransactions);
+
+		final Date startDate = null;
+		final Date endDate = new Date();
+
+		when(this.auditTransactionRepository.findByDateBefore(endDate)).thenReturn(this.expectedListAuditTransactions);
+
+		final DataTablesOutput<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate);
+
+		verify(this.auditTransactionRepository).findByDateBefore(endDate);
+
     	assertEquals(expectedResult, result);
 	}
-	
+
 	@Test
 	public void testGetAuditTransactionsWithDateFilterCompareMode3() {
-		DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<AuditTransaction>();
-    	DataTablesInput input = new DataTablesInput();
-    	
-    	expectedResult.setData(expectedListAuditTransactions);
-    	
-    	String startDateFilterString = "2020-01-01";
-    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    	
+		final DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<>();
+    	final DataTablesInput input = new DataTablesInput();
+
+    	expectedResult.setData(this.expectedListAuditTransactions);
+
+    	final String startDateFilterString = "2020-01-01";
+    	final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     	Date startDate = null;
 		try {
 			startDate = dateFormat.parse(startDateFilterString);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			fail("Ha ocurrido un error al convertir la fecha de inicio.");
 		}
-		Date endDate = null;
-		
-		when(auditTransactionRepository.findByDateAfter(startDate)).thenReturn(expectedListAuditTransactions);
-		
-		DataTablesOutput<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate);
-    	
-		verify(auditTransactionRepository).findByDateAfter(startDate);
-    	
+		final Date endDate = null;
+
+		when(this.auditTransactionRepository.findByDateAfter(startDate)).thenReturn(this.expectedListAuditTransactions);
+
+		final DataTablesOutput<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate);
+
+		verify(this.auditTransactionRepository).findByDateAfter(startDate);
+
     	assertEquals(expectedResult, result);
 	}
-	
+
 	@Test
 	public void testGetAuditTransactionsWithDateFilterCompareModeDefault() {
-		DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<AuditTransaction>();
-    	DataTablesInput input = new DataTablesInput();
-    	
-    	expectedResult.setData(expectedListAuditTransactions);
-    	
-		Date startDate = null;
-		Date endDate = null;
-		
-		when(auditTransactionRepository.findAll()).thenReturn(expectedListAuditTransactions);
-		
-		DataTablesOutput<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate);
-    	
-		verify(auditTransactionRepository).findAll();
-    	
+		final DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<>();
+    	final DataTablesInput input = new DataTablesInput();
+
+    	expectedResult.setData(this.expectedListAuditTransactions);
+
+		final Date startDate = null;
+		final Date endDate = null;
+
+		when(this.auditTransactionRepository.findAll()).thenReturn(this.expectedListAuditTransactions);
+
+		final DataTablesOutput<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate);
+
+		verify(this.auditTransactionRepository).findAll();
+
     	assertEquals(expectedResult, result);
 	}
 
 	@Test
 	public void testGetAllAuditSignaturesOfTransaction() {
 
-	    
-		List<AuditSignature> expectedListAuditSignatures = generateExpectedSignatures();
-		
-        when(auditSignatureRepository.findByIdTransaction(expectedAuditTransaction.getIdTransaction())).thenReturn(expectedListAuditSignatures);
 
-        DataTablesOutput<AuditSignature> result = auditTransactionService.getAllAuditSignaturesOfTransaction(new DataTablesInput(), expectedAuditTransaction);
+		final List<AuditSignature> expectedListAuditSignatures = generateExpectedSignatures();
+
+        when(this.auditSignatureRepository.findByIdTransaction(this.expectedAuditTransaction.getIdTransaction())).thenReturn(expectedListAuditSignatures);
+
+        final DataTablesOutput<AuditSignature> result = this.auditTransactionService.getAllAuditSignaturesOfTransaction(new DataTablesInput(), this.expectedAuditTransaction);
 
         assertNotNull(result);
         assertEquals(expectedListAuditSignatures.size(), result.getData().size());
 	}
 
 	private List<AuditSignature> generateExpectedSignatures() {
-		List<AuditSignature> expectedListAuditSignatures = new ArrayList<>();
-		
+		final List<AuditSignature> expectedListAuditSignatures = new ArrayList<>();
+
 		for (int i = 1; i < 3; i++){
-			expectedListAuditSignatures.add(generateSampleSignature(expectedAuditTransaction.getIdTransaction()));
+			expectedListAuditSignatures.add(generateSampleSignature(this.expectedAuditTransaction.getIdTransaction()));
 		}
-		
+
 		return expectedListAuditSignatures;
 	}
 
 	@Test
 	public void testGetAuditTransactionsWithDateFilterListCompareMode1() {
-		String startDateFilterString = "2020-01-01";
-    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		
+		final String startDateFilterString = "2020-01-01";
+    	final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
 		Date startDate = null;
 		try {
 			startDate = dateFormat.parse(startDateFilterString);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			fail("Ha ocurrido un error al convertir la fecha de inicio.");
 		}
-		Date endDate = new Date();
-		
-		when(auditTransactionRepository.findByDateBetween(startDate, endDate)).thenReturn(expectedListAuditTransactions);
+		final Date endDate = new Date();
 
-        List<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(startDate, endDate);
+		when(this.auditTransactionRepository.findByDateBetween(startDate, endDate)).thenReturn(this.expectedListAuditTransactions);
+
+        final List<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(startDate, endDate);
 
         assertNotNull(result);
-        assertEquals(expectedListAuditTransactions.size(), result.size());
+        assertEquals(this.expectedListAuditTransactions.size(), result.size());
 	}
-	
+
 	@Test
 	public void testGetAuditTransactionsWithDateFilterListCompareMode2() {
-		Date startDate = null;
-		Date endDate = new Date();
-		
-		when(auditTransactionRepository.findByDateBefore(endDate)).thenReturn(expectedListAuditTransactions);
+		final Date startDate = null;
+		final Date endDate = new Date();
 
-        List<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(startDate, endDate);
+		when(this.auditTransactionRepository.findByDateBefore(endDate)).thenReturn(this.expectedListAuditTransactions);
+
+        final List<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(startDate, endDate);
 
         assertNotNull(result);
-        assertEquals(expectedListAuditTransactions.size(), result.size());
+        assertEquals(this.expectedListAuditTransactions.size(), result.size());
 	}
-	
+
 	@Test
 	public void testGetAuditTransactionsWithDateFilterListCompareMode3() {
-    	String startDateFilterString = "2020-01-01";
-    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    	
+    	final String startDateFilterString = "2020-01-01";
+    	final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     	Date startDate = null;
 		try {
 			startDate = dateFormat.parse(startDateFilterString);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			fail("Ha ocurrido un error al convertir la fecha de inicio.");
 		}
-		Date endDate = null;
-		
-		when(auditTransactionRepository.findByDateAfter(startDate)).thenReturn(expectedListAuditTransactions);
+		final Date endDate = null;
 
-        List<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(startDate, endDate);
+		when(this.auditTransactionRepository.findByDateAfter(startDate)).thenReturn(this.expectedListAuditTransactions);
+
+        final List<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(startDate, endDate);
 
         assertNotNull(result);
-        assertEquals(expectedListAuditTransactions.size(), result.size());
+        assertEquals(this.expectedListAuditTransactions.size(), result.size());
 	}
-	
+
 	@Test
 	public void testGetAuditTransactionsWithDateFilterListCompareModeDefault() {
-		Date startDate = null;
-		Date endDate = null;
-		
-		when(auditTransactionRepository.findAll()).thenReturn(expectedListAuditTransactions);
+		final Date startDate = null;
+		final Date endDate = null;
 
-        List<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(startDate, endDate);
+		when(this.auditTransactionRepository.findAll()).thenReturn(this.expectedListAuditTransactions);
+
+        final List<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(startDate, endDate);
 
         assertNotNull(result);
-        assertEquals(expectedListAuditTransactions.size(), result.size());
+        assertEquals(this.expectedListAuditTransactions.size(), result.size());
 	}
 
 	@Test
 	public void testGetAllAuditSignature() {
-		List<AuditSignature> expectedListAuditSignatures = generateExpectedSignatures();
-		
-		when(auditSignatureRepository.findAll()).thenReturn(expectedListAuditSignatures);
-		
-		List<AuditSignature> result = auditTransactionService.getAllAuditSignature();
-		
+		final List<AuditSignature> expectedListAuditSignatures = generateExpectedSignatures();
+
+		when(this.auditSignatureRepository.findAll()).thenReturn(expectedListAuditSignatures);
+
+		final List<AuditSignature> result = this.auditTransactionService.getAllAuditSignature();
+
 		assertNotNull(result);
 		assertEquals(expectedListAuditSignatures.size(), result.size());
 	}
 
 	@Test
 	public void testGetAuditTransactionsWithDateFilterWithApp() {
-		DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<AuditTransaction>();
-    	DataTablesInput input = new DataTablesInput();
-    	
-    	expectedResult.setData(expectedListAuditTransactions);
-    	
-    	String startDateFilterString = "2020-01-01";
-    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    	
+		final DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<>();
+    	final DataTablesInput input = new DataTablesInput();
+
+    	expectedResult.setData(this.expectedListAuditTransactions);
+
+    	final String startDateFilterString = "2020-01-01";
+    	final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     	Date startDate = null;
 		try {
 			startDate = dateFormat.parse(startDateFilterString);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			fail("Ha ocurrido un error al convertir la fecha de inicio.");
 		}
-		Date endDate = new Date();
-		
-		String app = "testApp";
-		
-		when(auditTransactionRepository.findByDateRangeAndApplication(startDate, endDate, app)).thenReturn(expectedListAuditTransactions);
-		
-		DataTablesOutput<AuditTransaction> result = auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate, app);
-	
+		final Date endDate = new Date();
+
+		final String app = "testApp";
+
+		when(this.auditTransactionRepository.findByDateRangeAndApplication(startDate, endDate, app)).thenReturn(this.expectedListAuditTransactions);
+
+		final DataTablesOutput<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsWithDateFilter(input, startDate, endDate, app);
+
 		assertNotNull(result);
 		assertEquals(expectedResult, result);
 	}
 
 	@Test
 	public void testGetAuditTransactionsFirstQuery() {
-		DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<AuditTransaction>();
-    	DataTablesInput input = new DataTablesInput();
-    	
-    	expectedResult.setData(expectedListAuditTransactions);
-    	
-    	Integer minutesProperty = 20;
-    	
-    	when(auditTransactionRepository.findByDateAfter(new Date(System.currentTimeMillis() - minutesProperty * 60 * 1000))).thenReturn(expectedListAuditTransactions);
-		
-		DataTablesOutput<AuditTransaction> result = auditTransactionService.getAuditTransactionsFirstQuery(input, minutesProperty);
-	
+		final DataTablesOutput<AuditTransaction> expectedResult = new DataTablesOutput<>();
+    	final DataTablesInput input = new DataTablesInput();
+
+    	expectedResult.setData(this.expectedListAuditTransactions);
+
+    	final Integer minutesProperty = 20;
+
+    	when(this.auditTransactionRepository.findByDateAfter(new Date(System.currentTimeMillis() - minutesProperty * 60 * 1000))).thenReturn(this.expectedListAuditTransactions);
+
+		final DataTablesOutput<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsFirstQuery(input, minutesProperty);
+
 		assertNotNull(result);
 		assertEquals(expectedResult.getData().size(), result.getData().size());
 	}
 
 	@Test
 	public void testGetApplicationsDropdown() {
-		List<String> expectedResult = new ArrayList<>();
-		
-		when(auditTransactionRepository.findDistinctApp()).thenReturn(expectedResult);
-		
-		List<String> result = auditTransactionService.getApplicationsDropdown();
-		
+		final List<String> expectedResult = new ArrayList<>();
+
+		when(this.auditTransactionRepository.findDistinctApp()).thenReturn(expectedResult);
+
+		final List<String> result = this.auditTransactionService.getApplicationsDropdown();
+
 		assertNotNull(result);
 		assertEquals(expectedResult.size(), result.size());
 	}
-    
 }

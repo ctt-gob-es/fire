@@ -82,7 +82,7 @@ public class LoadStatisticsRunnable implements Runnable {
 		this.executedFromCmd = false;
 		this.connectionAttributes = null;
 	}
-	
+
 	/**
 	 * Crea la tarea indicando el directorio de los ficheros de datos estadisticos y
 	 * si se desea
@@ -99,7 +99,7 @@ public class LoadStatisticsRunnable implements Runnable {
 		this.processCurrentDay = processCurrentDay;
 		this.executedFromCmd = executedFromCmd;
 		this.connectionAttributes = connectionAttributes;
-		
+
 	}
 
 	@Override
@@ -154,7 +154,7 @@ public class LoadStatisticsRunnable implements Runnable {
 		// Cargamos los ficheros en base de datos
 		try {
 			this.result = exeLoadStatistics(signatureFiles, transaccionFiles, auditSignatureFiles,
-					auditTransaccionFiles, executedFromCmd, connectionAttributes);
+					auditTransaccionFiles, this.executedFromCmd, this.connectionAttributes);
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No ha sido posible cargar todos los datos en base de datos", e); //$NON-NLS-1$
 			return;
@@ -244,15 +244,21 @@ public class LoadStatisticsRunnable implements Runnable {
 	 */
 	private File[] getPendingDataFiles(final String suffix, final Date date) {
 
-		final File[] dataFiles = new File(this.dataPath)
+		File[] dataFiles = new File(this.dataPath)
 				.listFiles(new DataStatisticsFileFilter(suffix, date, formatter, this.processCurrentDay));
 
-		Arrays.sort(dataFiles, new Comparator<File>() {
-			@Override
-			public int compare(final File f1, final File f2) {
-				return f1.getName().compareTo(f2.getName());
-			}
-		});
+		// Si se obtiene el listado de ficheros del directorio, se ordena. Si no, se devuelve un listado vacio
+		if (dataFiles != null) {
+			Arrays.sort(dataFiles, new Comparator<File>() {
+				@Override
+				public int compare(final File f1, final File f2) {
+					return f1.getName().compareTo(f2.getName());
+				}
+			});
+		}
+		else {
+			dataFiles = new File[0];
+		}
 
 		return dataFiles;
 	}
@@ -350,11 +356,11 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * fecha.
 	 * @param signatureFiles Ficheros con los datos de las firmas ejecutadas.
 	 * @param transactionFiles Ficheros con los datos de las transacciones ejecutadas.
-	 * @param connectionAttributes 
+	 * @param connectionAttributes
 	 * @return Resultado del proceso de carga.
 	 */
 	private static LoadStatisticsResult exeLoadStatistics(final File[] signatureFiles, final File[] transactionFiles,
-			final File[] auditSignatureFiles, final File[] auditTransactionFiles, final boolean executedFromCmd, Map<String, String> connectionAttributes) {
+			final File[] auditSignatureFiles, final File[] auditTransactionFiles, final boolean executedFromCmd, final Map<String, String> connectionAttributes) {
 
 		Date lastDateProcessed = null;
 		String lastDateProcessedText = null;
@@ -426,7 +432,7 @@ public class LoadStatisticsRunnable implements Runnable {
 				} else {
 					insertDataIntoDbFromCmd(date, compactedData, connectionAttributes);
 				}
-				
+
 			} catch (final DBConnectionException e) {
 				final String errorMsg = "No se pudo conectar con la base de datos. Se aborta el proceso de carga de los datos del dia " //$NON-NLS-1$
 						+ dateText;
@@ -693,7 +699,7 @@ public class LoadStatisticsRunnable implements Runnable {
 			}
 		}
 	}
-	
+
 	/**
 	 * Inserta la informacion de las firmas y transacciones de un d&iacute;a en base
 	 * de datos.
@@ -706,19 +712,19 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n
 	 *                               con la base de datos.
 	 */
-	private static void insertDataIntoDbFromCmd(final Date date, final CompactedData compactedData, Map<String, String> connectionAttributes)
+	private static void insertDataIntoDbFromCmd(final Date date, final CompactedData compactedData, final Map<String, String> connectionAttributes)
 			throws SQLException, DBConnectionException {
 
 		// Insertamos la informacion de las firmas realizadas
 		final Map<SignatureCube, Long> signaturesCube = compactedData.getSignatureData();
 
 		final Iterator<SignatureCube> itSigns = signaturesCube.keySet().iterator();
-		
-		String jdbcDriver = connectionAttributes.get("jdbcDriver");
-        String dbConnectionString = connectionAttributes.get("dbConnectionString");
-        String username = connectionAttributes.get("username");
-        String password = connectionAttributes.get("password").trim();
-        
+
+		final String jdbcDriver = connectionAttributes.get("jdbcDriver");
+        final String dbConnectionString = connectionAttributes.get("dbConnectionString");
+        final String username = connectionAttributes.get("username");
+        final String password = connectionAttributes.get("password").trim();
+
         try (Connection conn = DriverManager.getConnection(dbConnectionString, username, password)) {
 			conn.setAutoCommit(false);
         	while (itSigns.hasNext()) {
