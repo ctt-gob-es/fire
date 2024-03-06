@@ -11,8 +11,12 @@ import es.gob.fire.signature.DbManager;
 import es.gob.fire.statistics.entity.AuditTransactionCube;
 
 public class AuditTransactionsDAO {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(AuditTransactionsDAO.class.getName());
+
+	//TODO: Se deberia incluir este valor en un properties interno para facilitar su gestion
+	/** Tama&ntilde;o del campo del detalle de error en base de datos. */
+	private static final int ERROR_DETAIL_FIELD_LENGTH = 150;
 
 	/** SQL para insertar una peticion. */
 	private static final String ST_INSERT_AUDIT_TRANS = "INSERT INTO TB_AUDIT_TRANSACCIONES " //$NON-NLS-1$
@@ -32,7 +36,7 @@ public class AuditTransactionsDAO {
 			inserted = insertAuditTransaction(transaction, conn);
 			conn.commit();
 		} catch (final SQLException | DBConnectionException e) {
-			final String errorMsg = "Ocurrio un error al guardar los datos de la transaccion en base de datos."; //$NON-NLS-1$
+			final String errorMsg = "Ocurrio un error al guardar los datos de auditoria de la transaccion en base de datos."; //$NON-NLS-1$
 			LOGGER.log(Level.SEVERE, errorMsg, e);
 		}
 
@@ -52,6 +56,14 @@ public class AuditTransactionsDAO {
 	public static boolean insertAuditTransaction(final AuditTransactionCube transaction, final Connection conn)
 			throws SQLException, DBConnectionException {
 
+
+		// Si hay un detalle de error, nos aseguramos de que no exceda el tamano
+		// del campo de base de datos (tamano fijo)
+		String errorDetail = transaction.getErrorDetail();
+		if (errorDetail != null && errorDetail.length() > ERROR_DETAIL_FIELD_LENGTH) {
+			errorDetail = errorDetail.substring(0, ERROR_DETAIL_FIELD_LENGTH);
+		}
+
 		try (final PreparedStatement st = conn.prepareStatement(ST_INSERT_AUDIT_TRANS)) {
 			st.setTimestamp (1, new java.sql.Timestamp(transaction.getDate().getTime()));
 			st.setString(2, transaction.getIdApplication());
@@ -67,7 +79,7 @@ public class AuditTransactionsDAO {
 			st.setString(12, transaction.getBrowser());
 			st.setLong(13, transaction.getDataSize());
 			st.setBoolean(14, transaction.isResult());
-			st.setString(15, transaction.getErrorDetail());
+			st.setString(15, errorDetail);
 			st.setString(16, transaction.getNode());
 			if (st.executeUpdate() < 1) {
 				return false;

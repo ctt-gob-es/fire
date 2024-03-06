@@ -11,8 +11,12 @@ import es.gob.fire.signature.DbManager;
 import es.gob.fire.statistics.entity.AuditSignatureCube;
 
 public class AuditSignaturesDAO {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(AuditSignaturesDAO.class.getName());
+
+	//TODO: Se deberia incluir este valor en un properties interno para facilitar su gestion
+	/** Tama&ntilde;o del campo del detalle de error en base de datos. */
+	private static final int ERROR_DETAIL_FIELD_LENGTH = 150;
 
 	/** SQL para insertar una peticion. */
 	private static final String ST_INSERT_AUDIT_SIGN = "INSERT INTO TB_AUDIT_FIRMAS " //$NON-NLS-1$
@@ -53,6 +57,13 @@ public class AuditSignaturesDAO {
 	public static boolean insertAuditSignature( final AuditSignatureCube signature, final Connection conn)
 			throws SQLException, DBConnectionException {
 
+		// Si hay un detalle de error, nos aseguramos de que no exceda el tamano
+		// del campo de base de datos (tamano fijo)
+		String errorDetail = signature.getErrorDetail();
+		if (errorDetail != null && errorDetail.length() > ERROR_DETAIL_FIELD_LENGTH) {
+			errorDetail = errorDetail.substring(0, ERROR_DETAIL_FIELD_LENGTH);
+		}
+
 		try (final PreparedStatement st = conn.prepareStatement(ST_INSERT_AUDIT_SIGN)) {
 			st.setString(1, signature.getIdTransaction());
 			st.setString(2, signature.getIdIntLote());
@@ -61,7 +72,7 @@ public class AuditSignaturesDAO {
 			st.setString(5, signature.getImprovedFormat());
 			st.setLong(6, signature.getDataSize());
 			st.setBoolean(7, signature.isResult());
-			st.setString(8, signature.getErrorDetail());
+			st.setString(8, errorDetail);
 			if (st.executeUpdate() < 1) {
 				return false;
 			}
