@@ -95,7 +95,7 @@ public class SignatureRecorder {
 		// Comprobamos que el directorio exista y se pueda escribir en el
 		final File logsDir = new File(logsPath);
 		if (!logsDir.isDirectory() || !logsDir.canWrite()) {
-			LOGGER.warning("El directorio para el guardado de estadisticas no existe o no se tienen permisos"); //$NON-NLS-1$
+			LOGGER.warning("El directorio para el guardado de estadisticas no existe o no se tienen permisos: " + logsPath); //$NON-NLS-1$
 			this.enable = false;
 			return;
 		}

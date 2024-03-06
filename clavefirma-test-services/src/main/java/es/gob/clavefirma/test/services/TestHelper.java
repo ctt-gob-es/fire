@@ -266,7 +266,7 @@ class TestHelper {
 
 	static InputStream doSubjectExist(final String subjectId) throws InvalidUserException {
 		if (subjectId == null) {
-			throw new IllegalArgumentException(
+			throw new InvalidUserException(
 					"El identificador del titular no puede ser nulo" //$NON-NLS-1$
 					);
 		}

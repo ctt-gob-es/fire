@@ -177,7 +177,7 @@ public class FIReService extends HttpServlet {
             return;
 		}
     	catch (final UnauthorizedApplicacionException e) {
-    		LOGGER.log(Level.WARNING, logF.f("Acceso denegado: ") + e); //$NON-NLS-1$
+    		LOGGER.log(Level.WARNING, logF.f("Acceso denegado"), e); //$NON-NLS-1$
             Responser.sendError(response, FIReError.UNAUTHORIZED);
             return;
 		}

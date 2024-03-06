@@ -195,7 +195,7 @@ public final class ServiceUtil {
     				ApplicationAccessChecker.checkAppEnabled(registeredAppInfo);
     			}
     			catch (final IllegalAccessException e) {
-    				throw new UnauthorizedApplicacionException("La aplicacion no se encuentra habilitada", e); //$NON-NLS-1$
+    				throw new UnauthorizedApplicacionException("Se deniega el acceso a la aplicacion " + appId, e); //$NON-NLS-1$
     			}
     		}
     		else {

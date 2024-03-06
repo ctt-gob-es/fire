@@ -105,23 +105,23 @@ public class TestConnector extends FIReConnector {
 
 		// Obtenemos las propiedades del KeyStore
 		if (config.getProperty(PROP_TEST_SSL_KS) != null) {
-			c.setProperty("javax.net.ssl.keyStore", config.getProperty(PROP_TEST_SSL_KS)); //$NON-NLS-1$
+			c.setProperty(ConnectionManager.KEYSTORE_PROPERTY, config.getProperty(PROP_TEST_SSL_KS));
 			if (config.getProperty(PROP_TEST_SSL_KS_PASS) != null) {
-				c.setProperty("javax.net.ssl.keyStorePassword", config.getProperty(PROP_TEST_SSL_KS_PASS)); //$NON-NLS-1$
+				c.setProperty(ConnectionManager.KEYSTORE_PASS_PROPERTY, config.getProperty(PROP_TEST_SSL_KS_PASS));
 			}
 			if (config.getProperty(PROP_TEST_SSL_KS_TYPE) != null) {
-				c.setProperty("javax.net.ssl.keyStoreType", config.getProperty(PROP_TEST_SSL_KS_TYPE)); //$NON-NLS-1$
+				c.setProperty(ConnectionManager.KEYSTORE_TYPE_PROPERTY, config.getProperty(PROP_TEST_SSL_KS_TYPE));
 			}
 		}
 
 		// Obtenemos las propiedades del TrustStore
 		if (config.getProperty(PROP_TEST_SSL_TS) != null) {
-			c.setProperty("javax.net.ssl.trustStore", config.getProperty(PROP_TEST_SSL_TS)); //$NON-NLS-1$
+			c.setProperty(ConnectionManager.TRUSTSTORE_PROPERTY, config.getProperty(PROP_TEST_SSL_TS));
 			if (config.getProperty(PROP_TEST_SSL_TS_PASS) != null) {
-				c.setProperty("javax.net.ssl.trustStorePassword", config.getProperty(PROP_TEST_SSL_TS_PASS)); //$NON-NLS-1$
+				c.setProperty(ConnectionManager.TRUSTSTORE_PASS_PROPERTY, config.getProperty(PROP_TEST_SSL_TS_PASS));
 			}
 			if (config.getProperty(PROP_TEST_SSL_TS_TYPE) != null) {
-				c.setProperty("javax.net.ssl.trustStoreType", config.getProperty(PROP_TEST_SSL_TS_TYPE)); //$NON-NLS-1$
+				c.setProperty(ConnectionManager.TRUSTSTORE_TYPE_PROPERTY, config.getProperty(PROP_TEST_SSL_TS_TYPE));
 			}
 		}
 

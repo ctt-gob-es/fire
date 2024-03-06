@@ -24,8 +24,6 @@ import es.gob.fire.signature.DBConnectionException;
 import es.gob.fire.signature.DbManager;
 import es.gob.fire.statistics.dao.SignaturesDAO;
 import es.gob.fire.statistics.dao.TransactionsDAO;
-import es.gob.fire.statistics.entity.AuditSignatureCube;
-import es.gob.fire.statistics.entity.AuditTransactionCube;
 import es.gob.fire.statistics.entity.SignatureCube;
 import es.gob.fire.statistics.entity.TransactionCube;
 import es.gob.fire.statistics.entity.TransactionTotal;
@@ -40,8 +38,11 @@ public class LoadStatisticsRunnable implements Runnable {
 
 	private static final String FILE_SIGN_PREFIX = "FIRE_SIGNATURE_";//$NON-NLS-1$
 	private static final String FILE_TRANS_PREFIX = "FIRE_TRANSACTION_";//$NON-NLS-1$
-	private static final String FILE_AUDIT_SIGN_PREFIX = "FIRE_AUDIT_SIGNATURE_";//$NON-NLS-1$
-	private static final String FILE_AUDIT_TRANS_PREFIX = "FIRE_AUDIT_TRANSACTION_";//$NON-NLS-1$
+
+	private static final String PROP_JDBC_DRIVER = "jdbcDriver"; //$NON-NLS-1$
+	private static final String PROP_DB_CONN_STRING = "dbConnectionString"; //$NON-NLS-1$
+	private static final String PROP_DB_USERNAME = "username"; //$NON-NLS-1$
+	private static final String PROP_DB_PWD = "password"; //$NON-NLS-1$
 
 	private final static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
 
@@ -121,13 +122,9 @@ public class LoadStatisticsRunnable implements Runnable {
 		// de cargar en base de datos
 		File[] signatureFiles;
 		File[] transaccionFiles;
-		File[] auditSignatureFiles;
-		File[] auditTransaccionFiles;
 		try {
 			signatureFiles = getPendingDataFiles(FILE_SIGN_PREFIX, lastDateLoaded);
 			transaccionFiles = getPendingDataFiles(FILE_TRANS_PREFIX, lastDateLoaded);
-			auditSignatureFiles = getPendingDataFiles(FILE_AUDIT_SIGN_PREFIX, lastDateLoaded);
-			auditTransaccionFiles = getPendingDataFiles(FILE_AUDIT_TRANS_PREFIX, lastDateLoaded);
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No se pudieron cargar los ficheros de datos a procesar", e); //$NON-NLS-1$
 			return;
@@ -153,8 +150,7 @@ public class LoadStatisticsRunnable implements Runnable {
 
 		// Cargamos los ficheros en base de datos
 		try {
-			this.result = exeLoadStatistics(signatureFiles, transaccionFiles, auditSignatureFiles,
-					auditTransaccionFiles, this.executedFromCmd, this.connectionAttributes);
+			this.result = exeLoadStatistics(signatureFiles, transaccionFiles, this.executedFromCmd, this.connectionAttributes);
 		} catch (final Exception e) {
 			LOGGER.log(Level.SEVERE, "No ha sido posible cargar todos los datos en base de datos", e); //$NON-NLS-1$
 			return;
@@ -360,7 +356,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * @return Resultado del proceso de carga.
 	 */
 	private static LoadStatisticsResult exeLoadStatistics(final File[] signatureFiles, final File[] transactionFiles,
-			final File[] auditSignatureFiles, final File[] auditTransactionFiles, final boolean executedFromCmd, final Map<String, String> connectionAttributes) {
+			final boolean executedFromCmd, final Map<String, String> connectionAttributes) {
 
 		Date lastDateProcessed = null;
 		String lastDateProcessedText = null;
@@ -373,12 +369,8 @@ public class LoadStatisticsRunnable implements Runnable {
 
 			final String signatureFileDate = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length());
 			final String transactionFileDate = transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length());
-			final String auditSignatureFileDate = auditSignatureFiles[i].getName().substring(FILE_AUDIT_SIGN_PREFIX.length());
-			final String auditTransactionFileDate = auditTransactionFiles[i].getName()
-					.substring(FILE_AUDIT_TRANS_PREFIX.length());
 
-			final int dateComparison = checkDatesFromFiles(signatureFileDate, transactionFileDate,
-					auditSignatureFileDate, auditTransactionFileDate);
+			final int dateComparison = checkDatesFromFiles(signatureFileDate, transactionFileDate);
 
 			if (dateComparison < 1) {
 				final String errorMsg = "No coinciden las fechas de los ficheros"; //$NON-NLS-1$
@@ -417,8 +409,7 @@ public class LoadStatisticsRunnable implements Runnable {
 			// Extraemos la informacion de los ficheros
 			CompactedData compactedData;
 			try {
-				compactedData = extractData(signatureFiles[i], transactionFiles[i], auditSignatureFiles[i],
-						auditTransactionFiles[i]);
+				compactedData = extractData(signatureFiles[i], transactionFiles[i]);
 			} catch (final Exception e) {
 				final String errorMsg = "Ocurrio un error al extraer los datos de los ficheros del dia " + dateText; //$NON-NLS-1$
 				LOGGER.log(Level.SEVERE, errorMsg, e);
@@ -428,9 +419,14 @@ public class LoadStatisticsRunnable implements Runnable {
 			// Insertamos los datos en base de datos
 			try {
 				if (!executedFromCmd) {
-					insertDataIntoDb(date, compactedData);
+					try (Connection dbConnection = getConection()) {
+						insertDataIntoDb(dbConnection, date, compactedData);
+					}
 				} else {
-					insertDataIntoDbFromCmd(date, compactedData, connectionAttributes);
+					try (Connection dbConnection = getConection(connectionAttributes)) {
+						dbConnection.setAutoCommit(false);
+						insertDataIntoDb(dbConnection, date, compactedData);
+					}
 				}
 
 			} catch (final DBConnectionException e) {
@@ -453,6 +449,35 @@ public class LoadStatisticsRunnable implements Runnable {
 	}
 
 	/**
+	 * Obtiene la conexion a base de datos a trav&eacute;s del gestor
+	 * de BD del proyecto.
+	 * @return Conexi&oacute;n con la BD.
+	 * @throws SQLException Cuando ocurre un error al establecer la conexi&oacute;n.
+	 */
+	private static Connection getConection() throws SQLException {
+		return DbManager.getConnection(false);
+	}
+
+	/**
+	 * Crea una nueva conexi&oacute;n con la base de datos a partir
+	 * de las propiedades suministradas.
+	 * @param connectionAttributes Propiedades para la conexi&oacute;n.
+	 * @return Conexi&oacute;n con la BD.
+	 * @throws SQLException Cuando ocurre un error al establecer la conexi&oacute;n.
+	 */
+	private static Connection getConection(final Map<String, String> connectionAttributes) throws SQLException {
+
+		final String jdbcDriver = connectionAttributes.get(PROP_JDBC_DRIVER);
+        final String dbConnectionString = connectionAttributes.get(PROP_DB_CONN_STRING);
+        final String username = connectionAttributes.get(PROP_DB_USERNAME);
+        final String password = connectionAttributes.get(PROP_DB_PWD).trim();
+
+        //TODO: Hay que configurar el driver
+
+        return DriverManager.getConnection(dbConnectionString, username, password);
+	}
+
+	/**
 	 * Funci&oacute;n que prepara los registros de los ficheros log pasados por
 	 * par&aacute;metro
 	 * para ser insertados en la BBDD. Si se encuentra algun registro mal formado,
@@ -460,15 +485,11 @@ public class LoadStatisticsRunnable implements Runnable {
 	 *
 	 * @param signaturesFile        Fichero con los datos de firma.
 	 * @param transactionsFile      Fichero con los datos de transacci&oacute;n.
-	 * @param auditSignaturesFile   Fichero con los datos de firma de auditoria.
-	 * @param auditTransactionsFile Fichero con los datos de transacci&oacute;n de
-	 *                              auditoria.
 	 * @return Datos extra&iacute;dos de los ficheros.
 	 * @throws IOException Cuando no se pueden leer los datos de los ficheros
 	 *                     indicados.
 	 */
-	private static CompactedData extractData(final File signaturesFile, final File transactionsFile,
-			final File auditSignaturesFile, final File auditTransactionsFile)
+	private static CompactedData extractData(final File signaturesFile, final File transactionsFile)
 			throws IOException {
 
 		final CompactedData compactedData = new CompactedData();
@@ -523,115 +544,13 @@ public class LoadStatisticsRunnable implements Runnable {
 			}
 		}
 
-		// Procesamos el fichero de firmas de auditoria
-		try (final FileReader fr = new FileReader(auditSignaturesFile);
-				final BufferedReader br = new BufferedReader(fr);) {
-
-			String registry;
-			while ((registry = br.readLine()) != null) {
-				if (registry.trim().isEmpty()) {
-					continue;
-				}
-
-				AuditSignatureCube auditSignatureCube;
-				try {
-					auditSignatureCube = AuditSignatureCube.parse(registry);
-				} catch (final Exception e) {
-					throw new IllegalArgumentException(
-							String.format("Se encontro un registro no valido en el fichero %1s", //$NON-NLS-1$
-									auditSignaturesFile.getAbsolutePath()),
-							e);
-				}
-
-				// Se inserta en el conjunto de datos
-				compactedData.addAuditSignatureData(auditSignatureCube);
-			}
-		}
-
-		// Procesamos el fichero de transacciones de auditoria
-		try (final FileReader fr = new FileReader(auditTransactionsFile);
-				final BufferedReader br = new BufferedReader(fr);) {
-
-			String registry;
-			while ((registry = br.readLine()) != null) {
-				if (registry.trim().isEmpty()) {
-					continue;
-				}
-
-				AuditTransactionCube auditTransactionCube;
-				try {
-					auditTransactionCube = AuditTransactionCube.parse(registry);
-				} catch (final Exception e) {
-					throw new IllegalArgumentException(
-							String.format("Se encontro un registro no valido en el fichero %1s", //$NON-NLS-1$
-									auditTransactionsFile.getAbsolutePath()),
-							e);
-				}
-
-				// Se inserta en el conjunto de datos
-				compactedData.addAuditTransactionData(auditTransactionCube);
-			}
-		}
-
-		/*
-		// Procesamos el fichero de firmas de auditoria
-		try (final FileReader fr = new FileReader(auditSignaturesFile);
-				final BufferedReader br = new BufferedReader(fr);) {
-
-			String registry;
-			while ((registry = br.readLine()) != null) {
-				if (registry.trim().isEmpty()) {
-					continue;
-				}
-
-				AuditSignatureCube auditSignatureCube;
-				try {
-					auditSignatureCube = AuditSignatureCube.parse(registry);
-				} catch (final Exception e) {
-					throw new IllegalArgumentException(
-							String.format("Se encontro un registro no valido en el fichero %1s", //$NON-NLS-1$
-									auditSignaturesFile.getAbsolutePath()),
-							e);
-				}
-
-				// Se inserta en el conjunto de datos
-				compactedData.addAuditSignatureData(auditSignatureCube);
-			}
-		}
-
-		// Procesamos el fichero de transacciones de auditoria
-		try (final FileReader fr = new FileReader(auditTransactionsFile);
-				final BufferedReader br = new BufferedReader(fr);) {
-
-			String registry;
-			while ((registry = br.readLine()) != null) {
-				if (registry.trim().isEmpty()) {
-					continue;
-				}
-
-				AuditTransactionCube auditTransactionCube;
-				try {
-					auditTransactionCube = AuditTransactionCube.parse(registry);
-				} catch (final Exception e) {
-					throw new IllegalArgumentException(
-							String.format("Se encontro un registro no valido en el fichero %1s", //$NON-NLS-1$
-									auditTransactionsFile.getAbsolutePath()),
-							e);
-				}
-
-				// Se inserta en el conjunto de datos
-				compactedData.addAuditTransactionData(auditTransactionCube);
-			}
-		}
-		*/
-
 		return compactedData;
 	}
 
 	/**
 	 * Inserta la informacion de las firmas y transacciones de un d&iacute;a en base
 	 * de datos.
-	 *
+	 * @param conn			Conexi&oacute;n de base de datos.
 	 * @param date          Fecha en la que se realizaron las operaciones.
 	 * @param compactedData Conjunto de datos de las operaciones.
 	 * @throws SQLException          Cuando se produce un error al insertar los
@@ -639,144 +558,62 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n
 	 *                               con la base de datos.
 	 */
-	private static void insertDataIntoDb(final Date date, final CompactedData compactedData)
+	private static void insertDataIntoDb(final Connection conn, final Date date, final CompactedData compactedData)
 			throws SQLException, DBConnectionException {
 
 		// Insertamos la informacion de las firmas realizadas
 		final Map<SignatureCube, Long> signaturesCube = compactedData.getSignatureData();
 
 		final Iterator<SignatureCube> itSigns = signaturesCube.keySet().iterator();
-		try (Connection conn = DbManager.getConnection(false)) {
-			while (itSigns.hasNext()) {
+		while (itSigns.hasNext()) {
 
-				final SignatureCube signatureConfig = itSigns.next();
-				final Long total = signaturesCube.get(signatureConfig);
-				try {
-					SignaturesDAO.insertSignature(date, signatureConfig, total.longValue(), conn);
-				} catch (final Exception e) {
-					LOGGER.log(Level.SEVERE,
-							String.format(
-									"No se pudo insertar las firmas del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
-									new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$
-							e);
-					try {
-						conn.rollback();
-					} catch (final Exception e1) {
-						LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
-					}
-					throw e;
-				}
-			}
-
-			// Insertamos la informacion de las transacciones realizadas
-			final Map<TransactionCube, TransactionTotal> transactionsCube = compactedData.getTransactionData();
-
-			final Iterator<TransactionCube> itTrans = transactionsCube.keySet().iterator();
-			while (itTrans.hasNext()) {
-				final TransactionCube transactionConfig = itTrans.next();
-				final TransactionTotal total = transactionsCube.get(transactionConfig);
-				try {
-					TransactionsDAO.insertTransaction(date, transactionConfig, total, conn);
-				} catch (final Exception e) {
-					LOGGER.log(Level.SEVERE,
-							String.format(
-									"No se pudo insertar las transacciones del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
-									new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$
-							e);
-					try {
-						conn.rollback();
-					} catch (final Exception e1) {
-						LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
-					}
-					throw e;
-				}
-			}
-
+			final SignatureCube signatureConfig = itSigns.next();
+			final Long total = signaturesCube.get(signatureConfig);
 			try {
-				conn.commit();
-			} catch (final Exception e1) {
-				LOGGER.log(Level.WARNING, "No se pudieron confirmar las inserciones ya realizadas", e1); //$NON-NLS-1$
+				SignaturesDAO.insertSignature(date, signatureConfig, total.longValue(), conn);
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE,
+						String.format(
+								"No se pudo insertar las firmas del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
+								new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$
+						e);
+				try {
+					conn.rollback();
+				} catch (final Exception e1) {
+					LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
+				}
+				throw e;
 			}
 		}
-	}
 
-	/**
-	 * Inserta la informacion de las firmas y transacciones de un d&iacute;a en base
-	 * de datos.
-	 *
-	 * @param date          Fecha en la que se realizaron las operaciones.
-	 * @param compactedData Conjunto de datos de las operaciones.
-	 * @param connectionAttributes	Mapa con los atributos para conectar con la base de datos.
-	 * @throws SQLException          Cuando se produce un error al insertar los
-	 *                               datos.
-	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n
-	 *                               con la base de datos.
-	 */
-	private static void insertDataIntoDbFromCmd(final Date date, final CompactedData compactedData, final Map<String, String> connectionAttributes)
-			throws SQLException, DBConnectionException {
+		// Insertamos la informacion de las transacciones realizadas
+		final Map<TransactionCube, TransactionTotal> transactionsCube = compactedData.getTransactionData();
 
-		// Insertamos la informacion de las firmas realizadas
-		final Map<SignatureCube, Long> signaturesCube = compactedData.getSignatureData();
-
-		final Iterator<SignatureCube> itSigns = signaturesCube.keySet().iterator();
-
-		final String jdbcDriver = connectionAttributes.get("jdbcDriver");
-        final String dbConnectionString = connectionAttributes.get("dbConnectionString");
-        final String username = connectionAttributes.get("username");
-        final String password = connectionAttributes.get("password").trim();
-
-        try (Connection conn = DriverManager.getConnection(dbConnectionString, username, password)) {
-			conn.setAutoCommit(false);
-        	while (itSigns.hasNext()) {
-
-				final SignatureCube signatureConfig = itSigns.next();
-				final Long total = signaturesCube.get(signatureConfig);
-				try {
-					SignaturesDAO.insertSignature(date, signatureConfig, total.longValue(), conn);
-				} catch (final Exception e) {
-					LOGGER.log(Level.SEVERE,
-							String.format(
-									"No se pudo insertar las firmas del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
-									new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$
-							e);
-					try {
-						conn.rollback();
-					} catch (final Exception e1) {
-						LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
-					}
-					throw e;
-				}
-			}
-
-			// Insertamos la informacion de las transacciones realizadas
-			final Map<TransactionCube, TransactionTotal> transactionsCube = compactedData.getTransactionData();
-
-			final Iterator<TransactionCube> itTrans = transactionsCube.keySet().iterator();
-			while (itTrans.hasNext()) {
-				final TransactionCube transactionConfig = itTrans.next();
-				final TransactionTotal total = transactionsCube.get(transactionConfig);
-				try {
-					TransactionsDAO.insertTransaction(date, transactionConfig, total, conn);
-				} catch (final Exception e) {
-					LOGGER.log(Level.SEVERE,
-							String.format(
-									"No se pudo insertar las transacciones del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
-									new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$
-							e);
-					try {
-						conn.rollback();
-					} catch (final Exception e1) {
-						LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
-					}
-					throw e;
-				}
-			}
-
+		final Iterator<TransactionCube> itTrans = transactionsCube.keySet().iterator();
+		while (itTrans.hasNext()) {
+			final TransactionCube transactionConfig = itTrans.next();
+			final TransactionTotal total = transactionsCube.get(transactionConfig);
 			try {
-				conn.commit();
-			} catch (final Exception e1) {
-				LOGGER.log(Level.WARNING, "No se pudieron confirmar las inserciones ya realizadas", e1); //$NON-NLS-1$
+				TransactionsDAO.insertTransaction(date, transactionConfig, total, conn);
+			} catch (final Exception e) {
+				LOGGER.log(Level.SEVERE,
+						String.format(
+								"No se pudo insertar las transacciones del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
+								new SimpleDateFormat("dd/MM/yyyy").format(date)), //$NON-NLS-1$
+						e);
+				try {
+					conn.rollback();
+				} catch (final Exception e1) {
+					LOGGER.log(Level.WARNING, "No se pudieron deshacer las inserciones ya realizadas", e1); //$NON-NLS-1$
+				}
+				throw e;
 			}
+		}
+
+		try {
+			conn.commit();
+		} catch (final Exception e1) {
+			LOGGER.log(Level.WARNING, "No se pudieron confirmar las inserciones ya realizadas", e1); //$NON-NLS-1$
 		}
 	}
 
@@ -821,14 +658,12 @@ public class LoadStatisticsRunnable implements Runnable {
 		return this.result;
 	}
 
-	private static int checkDatesFromFiles(final String signatureFileDate, final String transactionFileDate,
-			final String auditSignatureFileDate, final String auditTransactionFileDate) {
+	private static int checkDatesFromFiles(final String signatureFileDate, final String transactionFileDate) {
 
 		// Returns 0 if all the dates are different
 		int comparison = 0;
 
-		if (signatureFileDate.equals(transactionFileDate) && transactionFileDate.equals(auditSignatureFileDate)
-				&& auditSignatureFileDate.equals(auditTransactionFileDate)) {
+		if (signatureFileDate.equals(transactionFileDate)) {
 			// Returns 1 if all dates are equal
 			comparison = 1;
 		} else {
