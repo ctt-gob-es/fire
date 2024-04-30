@@ -17,23 +17,33 @@ FIRe es software libre y se publica con licencia [GPL 2+](https://www.gnu.org/li
 		* La dependencia Maven necesaria para poder compilar y empaquetar el conector con Cl@ve Firma es:
 			* `com.openlandsw.rss:gateway-api`
 
-	* FNMT: El conector para el acceso al servicio de firma de la FNMT ha sido desarrollado por la propia entidad y se requiere autorización de esta para su uso.
+	* CloudId: El conector para el acceso al servicio de firma de la FNMT ha sido desarrollado por la propia entidad y se requiere autorización de esta para su uso.
 		* La dependencia Maven del conector al servicio de la FNMT es:
 			* `es.gob.fnmt:fnmt-fire-connector`
 
-* Para construir los artefactos de FIRe mediante Maven deberá usarse el comando:
+* Para construir los artefactos comunes deberá usarse el perfil "main" o no indicar perfil: `mvn clean install`
 
-	* `mvn clean install`
+* Para construir los servicios de FIRe deberá usarse el perfil "services": `mvn clean install -Pservices`
 
-* Para construir los artefactos de FIRe, incluyendo el conector de Cl@ve Firma, deberá agregarse el perfil "claveFirma":
+* Para construir el conector de Cl@ve Firma (requiere bibliotecas privadas) deberá usarse el perfil "claveFirma": `mvn clean install -Pclavefirma`
 
-	* `mvn clean install -Pclavefirma`
+* Para construir el conector de CloudId (requiere bibliotecas privadas) deberá usarse el perfil "fnmt": `mvn clean install -Pfnmt`
 
-* Para construir los artefactos de FIRe, incluyendo el conector con los servicios de la FNMT, deberá agregarse el perfil "fnmt":
+* Para construir el servicio de FIRe con distintos componentes, se puede acceder al directorio del módulo **fire-signature** e indicar los componentes durante la contrucción:
 
-	* `mvn clean install -Pfnmt`
+	* Para la construcción de todos los componentes: `mvn clean install -Dall`
+	
+	* Para la construcción con el conector de Cl@ve Firma se debe agregar el perfil "clavefirma": `mvn clean install -Pclavefirma`
+	
+	* Para la construcción con el conector de CloudId se debe agregar el perfil "fnmt": `mvn clean install -Pfnmt`
+	
+	* Para la construcción con el módulo para la validación y actualización de firmas con @firma se debe agregar el perfil "afirma": `mvn clean install -Pafirma`
+	
+	* Para la construcción con el módulo para el envío de alertas a GrayLog se debe agregar el perfil "graylog": `mvn clean install -Pgraylog`
+	
+	* Para la construcción con el módulo para el envío de alertas a Monitoriz@ se debe agregar el perfil "eventmanager": `mvn clean install -Peventmanager`
 
-* La versión aquí publicada de FIRe se distribuye con versiones del MiniApplet @firma y AutoFirma WebStart firmadas con certificados de prueba. Un despliegue en producción de FIRe debería publicarse con versiones de estos JAR firmadas con certificados de confianza.
+* Para evitar la ejecución de las pruebas unitarias durante la contrucción de cualquier módulo, se debe agregar al comando en cuestión el parámetro '-DskipTests'.
 
 ## Arquitectura
 
@@ -45,20 +55,20 @@ El sistema FIRe está compuesto principalmente por dos elementos:
    
     - Componente de firma **(fire-signature)**
     - Simulador de Cl@veFirma **(clavefirma-test-services)**
-    - Aplicación de administración **(fire-admin-jsp)**
+    - Aplicación de administración **(fire-admin-web)**
    
 2. Cliente distruido
 
    Está formado por las librerías de integración **(fire-client)** que utilizan las aplicaciones para conectarse al componente central. Las librerías se proporcionan en los lenguajes Java, .Net y PHP.
    
-Junto a estos elementos se distribuye una aplicación de prueba en lenguaje java **(fire-test-jsp)** que permite demostrar las funcionalidades del sistema y que puede servir de ejemplo para desarrollos propios.
+Junto a estos elementos se distribuye una aplicación de prueba en lenguaje java **(fire-test-jsp)** que permite demostrar las funcionalidades del sistema y que puede servir de ejemplo para desarrollos propios. También se pueden encontrar páginas de prueba ASP y PHP en los módulos de los correspondientes componentes distribuidos (**fire-client-dotnet** y **fire-client-php**).
    
 
 ## Release notes
 
 Principales cambios en la historia de versiones:
 
-### v2.4-SNAPSHOT
+### v2.4-SNAPSHOT (listado temporalmente incompleto)
 
 #### Componente central
 
