@@ -12,6 +12,10 @@ import es.gob.fire.server.services.internal.FireSession;
 import es.gob.fire.server.services.internal.ServiceParams;
 import es.gob.fire.statistics.entity.TransactionCube;
 
+/**
+ * Permite registrar la informaci&oacute;n relevante de las transacciones realizadas
+ * para el c&aacute;lculo de estad&iacute;sticas.
+ */
 public class TransactionRecorder {
 
 	private static final Logger LOGGER = Logger.getLogger(TransactionRecorder.class.getName());

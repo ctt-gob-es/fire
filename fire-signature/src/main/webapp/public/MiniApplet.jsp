@@ -281,7 +281,6 @@
 			function sendBatchResultCallback(batchResultB64, certificateB64) {
 				var encodedResult = Base64.encode(JSON.stringify((batchResultB64)));
 				document.getElementById("afirmaBatchResult").value = encodedResult;
-				console.log(certificateB64);
 				if (certificateB64) {
 					document.getElementById("cert").value = certificateB64.replace(/\+/g, "-").replace(/\//g, "_");
 				}
@@ -544,10 +543,12 @@
 
 	<script type="text/javascript">
 
-		AutoScript.setForceWSMode(true);
-		AutoScript.cargarAppAfirma("<%= baseUrl %>afirma");
-		AutoScript.setServlets("<%= baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_STORAGE %>", "<%= baseUrl  + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_RETRIEVE %>");
+		SupportDialog.enableSupportDialog(false);
 
+		AutoScript.setForceWSMode(true);
+		AutoScript.setServlets("<%= baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_STORAGE %>", "<%= baseUrl  + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_RETRIEVE %>");
+		AutoScript.cargarAppAfirma("<%= baseUrl %>afirma");
+		
 		// Actualizamos el texto de requisitos
 		updateRequirementsText();
 

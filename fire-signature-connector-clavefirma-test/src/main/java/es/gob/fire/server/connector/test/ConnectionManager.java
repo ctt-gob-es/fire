@@ -45,17 +45,17 @@ import es.gob.afirma.core.misc.http.HttpError;
  */
 public class ConnectionManager {
 
-    private static final String KEYSTORE_PROPERTY = "javax.net.ssl.keyStore"; //$NON-NLS-1$
+    static final String KEYSTORE_PROPERTY = "javax.net.ssl.keyStore"; //$NON-NLS-1$
 
-    private static final String KEYSTORE_PASS_PROPERTY = "javax.net.ssl.keyStorePassword"; //$NON-NLS-1$
+    static final String KEYSTORE_PASS_PROPERTY = "javax.net.ssl.keyStorePassword"; //$NON-NLS-1$
 
-    private static final String KEYSTORE_TYPE_PROPERTY = "javax.net.ssl.keyStoreType"; //$NON-NLS-1$
+    static final String KEYSTORE_TYPE_PROPERTY = "javax.net.ssl.keyStoreType"; //$NON-NLS-1$
 
-    private static final String TRUSTSTORE_PROPERTY = "javax.net.ssl.trustStore"; //$NON-NLS-1$
+    static final String TRUSTSTORE_PROPERTY = "javax.net.ssl.trustStore"; //$NON-NLS-1$
 
-    private static final String TRUSTSTORE_PASS_PROPERTY = "javax.net.ssl.trustStorePassword"; //$NON-NLS-1$
+    static final String TRUSTSTORE_PASS_PROPERTY = "javax.net.ssl.trustStorePassword"; //$NON-NLS-1$
 
-    private static final String TRUSTSTORE_TYPE_PROPERTY = "javax.net.ssl.trustStoreType"; //$NON-NLS-1$
+    static final String TRUSTSTORE_TYPE_PROPERTY = "javax.net.ssl.trustStoreType"; //$NON-NLS-1$
 
     private static final String ACCEPT_ALL_CERTS = "all"; //$NON-NLS-1$
 

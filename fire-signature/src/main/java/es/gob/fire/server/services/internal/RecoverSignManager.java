@@ -131,17 +131,26 @@ public class RecoverSignManager {
 
         // Si la operacion anterior no fue el inicio de una firma, forzamos a que se recargue por si faltan datos
 		if (SessionFlags.OP_PRE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			LOGGER.info(logF.f("La anterior operacion fue %1s. Actualizamos la sesion", //$NON-NLS-1$
+					session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)));
 			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
 		}
 
         // Comprobamos que no se haya declarado ya un error, en cuyo caso, lo devolvemos
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
-
         	final String errType = session.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
         	final String errMessage = session.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma: " + errMessage)); //$NON-NLS-1$
         	final TransactionResult result = new TransactionResult(TransactionResult.RESULT_TYPE_SIGN, Integer.parseInt(errType), errMessage, trAux);
         	sendError(response, session, FIReError.SIGNING, result, trAux);
+        	return;
+        }
+
+        // El proveedor de firma debe estar establecido. Si no lo esta, podemos deducir
+        // que ocurrio un error en FIRe o el proveedor pero no quedo clasificado como error
+        if (!session.containsAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN)) {
+        	LOGGER.warning("El usuario no selecciono proveedor de firma o no ha quedado registrado"); //$NON-NLS-1$
+        	sendError(response, session, FIReError.EXTERNAL_SERVICE_ERROR_TO_SIGN, trAux);
         	return;
         }
 
@@ -437,7 +446,7 @@ public class RecoverSignManager {
 
 	        // Comprobamos si era necesario recuperar la firma totalmente actualizada y si se ha hecho asi
 	        if (!allowPartialUpgrade && upgradeResult.getState() == State.PARTIAL) {
-	        	throw new UpgradeException("La firma no se actualizo hasta el formato solicitado (" + upgradeResult.getFormat() + ")"); //$NON-NLS-1$
+	        	throw new UpgradeException("La firma no se actualizo hasta el formato solicitado: " + upgradeResult.getFormat()); //$NON-NLS-1$
 	        }
 
 			if (upgradeResult.getState() == UpgradeResult.State.PENDING) {

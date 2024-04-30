@@ -124,11 +124,22 @@ public class RecoverBatchResultManager {
         	LOGGER.warning(logF.f("Ocurrio un error durante la operacion de firma de lote: " + errMessage)); //$NON-NLS-1$
         	TRANSLOGGER.register(session, false);
         	AUDITTRANSLOGGER.register(session, false, errMessage);
-        	SessionCollector.cleanSession(session, trAux);
+        	SessionCollector.removeSession(session, trAux);
         	Responser.sendError(response, FIReError.BATCH_SIGNING, errMessage);
         	return;
         }
 
+        // El proveedor de firma debe estar establecido. Si no lo esta, podemos deducir
+        // que ocurrio un error en FIRe o el proveedor pero no quedo clasificado como error
+        if (!session.containsAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN)) {
+        	final String errMessage = "No se ha encontrado proveedor seleccionado"; //$NON-NLS-1$
+        	LOGGER.warning(logF.f("Error durante la firma del lote: " + errMessage)); //$NON-NLS-1$
+        	TRANSLOGGER.register(session, false);
+        	AUDITTRANSLOGGER.register(session, false, errMessage);
+        	SessionCollector.removeSession(session, trAux);
+        	Responser.sendError(response, FIReError.BATCH_NO_SIGNED, errMessage);
+        	return;
+        }
 
         // En el caso de firma con un certificado en la nube, todavia tendremos que
         // componer la propia firma
@@ -426,8 +437,7 @@ public class RecoverBatchResultManager {
 
         // Si todas las firmas fallaron, damos por terminada la transaccion y eliminamos la sesion.
         if (isAllFailed(batchResult)) {
-    		TRANSLOGGER.register(session, false);
-    		AUDITTRANSLOGGER.register(session, false, "Todas las firmas fallaron"); //$NON-NLS-1$
+    		registryResults(batchResult, session, logF);
         	SessionCollector.removeSession(session, trAux);
         }
         // Si no, indicamos que ya se ha firmado el lote para permitir que se puedan recuperar los
@@ -472,6 +482,7 @@ public class RecoverBatchResultManager {
 	private static void registryResults(final BatchResult batchResult, final FireSession session,
 			final LogTransactionFormatter logF)
 			throws IOException {
+		boolean anyOk = false;
         final Iterator<String> it = batchResult.iterator();
     	while (it.hasNext()) {
     		final String docId = it.next();
@@ -490,9 +501,12 @@ public class RecoverBatchResultManager {
     			SIGNLOGGER.register(session, false, docId);
     			AUDITSIGNLOGGER.register(session, false, docId, errorMessage);
     		}
+    		else {
+    			anyOk = true;
+    		}
     	}
-        TRANSLOGGER.register(session, true);
-        AUDITTRANSLOGGER.register(session, true);
+        TRANSLOGGER.register(session, anyOk);
+        AUDITTRANSLOGGER.register(session, anyOk, !anyOk ? "Todas las firmas fallaron" : null); //$NON-NLS-1$
 	}
 
 	/**
@@ -559,14 +573,14 @@ public class RecoverBatchResultManager {
 	 * {@code false} en caso contrario.
 	 */
 	private static boolean isAllFailed(final BatchResult batchResult) {
-        boolean recovered = true;
+        boolean allErrors = true;
         final Iterator<String> it = batchResult.iterator();
-        while (it.hasNext() && recovered) {
+        while (it.hasNext() && allErrors) {
         	if (!batchResult.isSignFailed(it.next())) {
-        		recovered = false;
+        		allErrors = false;
         	}
         }
-        return recovered;
+        return allErrors;
 	}
 
 	/**

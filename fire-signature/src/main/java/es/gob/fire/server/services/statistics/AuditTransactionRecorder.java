@@ -96,9 +96,8 @@ public class AuditTransactionRecorder {
 		}
 
 		// Instalamos el manejador para la impresion en el fichero
-		Handler logHandler = null;
 		try {
-			logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
 			logHandler.setFormatter(new Formatter() {
 				@Override
