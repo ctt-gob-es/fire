@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.client.FIReErrors"%>
 <%@page import="org.slf4j.LoggerFactory"%>
 <%@page import="org.slf4j.Logger"%>
 <%@page import="es.gob.fire.test.webapp.Base64"%>
@@ -68,6 +69,11 @@
 				} else if ("duplid".equals(errorType)) { //$NON-NLS-1$
 					errorMsg = "El identificador de documento ya se utilizo para otro documento del lote"; //$NON-NLS-1$
 				}
+			}
+			
+			if (session.getAttribute("errorMessage") != null) { //$NON-NLS-1$
+				errorMsg = (String) session.getAttribute("errorMessage"); //$NON-NLS-1$
+				session.removeAttribute("errorMessage"); //$NON-NLS-1$
 			}
 		%>
 		<div id="menubar">

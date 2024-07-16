@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.BatchResult;
+import es.gob.fire.client.SignBatchResult;
 
 /**
  * Servicio para la recuperaci&oacute;n del resultado de firma de un lote.
@@ -63,8 +64,8 @@ public class RecoverBatchService extends HttpServlet {
 		    	return;
 		    }
 
+		    // Mostramos por consola los algunos datos referentes al lote
 		    LOGGER.info("Proveedor usado: " + result.getProviderName()); //$NON-NLS-1$
-
 		    try {
 				LOGGER.info("Certificado de firma: " + (result.getSigningCert() != null ? //$NON-NLS-1$
 						Base64.encode(result.getSigningCert().getEncoded()) : null));
@@ -72,20 +73,30 @@ public class RecoverBatchService extends HttpServlet {
 				LOGGER.error("No se pudo decodificar el certificado de firma: " + e); //$NON-NLS-1$
 			}
 
+		    // Almacenamos el numero de firma para saber cuantas podemos descargar
+		    int numSigs = 0;
+		    for (final SignBatchResult signResult : result.values().toArray(new SignBatchResult[0])) {
+		    	if ((signResult.getErrotType() == null || signResult.getErrotType().isEmpty())
+		    			&& signResult.getGracePeriod() == null) {
+		    		numSigs++;
+		    	}
+		    }
+		    session.setAttribute("numsigs", Integer.valueOf(numSigs)); //$NON-NLS-1$
+
 		    try {
 		    	response.getOutputStream().write(result.toString().getBytes(StandardCharsets.UTF_8));
 			    response.flushBuffer();
-			} catch (IOException ioe) {
-				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			} catch (final IOException ioe) {
+				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe); //$NON-NLS-1$
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error interno: " + e); //$NON-NLS-1$
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			try {
 				response.getWriter().write("Error interno: " + e.getMessage()); //$NON-NLS-1$
 				response.flushBuffer();
-			} catch (IOException ioe) {
-				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe);
+			} catch (final IOException ioe) {
+				LOGGER.error("Ha ocurrido un error al tratar de pasar el mensaje de error a la respuesta. Error: " + ioe); //$NON-NLS-1$
 			}
 		}
 	}

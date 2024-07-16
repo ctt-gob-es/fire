@@ -30,6 +30,26 @@
   	<url-pattern>/SignatureService</url-pattern>
   </servlet-mapping>
   <servlet>
+  	<description>Servicio de prueba de recuperacion del resultado de firma</description>
+  	<display-name>RecoverSignatureService</display-name>
+  	<servlet-name>RecoverSignatureService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.RecoverSignService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>RecoverSignatureService</servlet-name>
+  	<url-pattern>/RecoverSignatureService</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<description>Servicio de prueba para la descarga de una firma</description>
+  	<display-name>DownloadSignatureService</display-name>
+  	<servlet-name>DownloadSignatureService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.DownloadSignService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>DownloadSignatureService</servlet-name>
+  	<url-pattern>/DownloadSignatureService</url-pattern>
+  </servlet-mapping>
+  <servlet>
   	<description>Servicio de prueba para la creacion de un lote de firmas</description>
   	<display-name>CreateBatchService</display-name>
   	<servlet-name>CreateBatchService</servlet-name>
@@ -60,7 +80,7 @@
   	<url-pattern>/SignBatchService</url-pattern>
   </servlet-mapping>
   <servlet>
-  	<description>Servicio de prueba para la recuperacion del resultado de la firma de un lote</description>
+  	<description>Servicio de prueba para la recuperacion del resultado de la firma de un lote de firmas</description>
   	<display-name>RecoverBatchService</display-name>
   	<servlet-name>RecoverBatchService</servlet-name>
   	<servlet-class>es.gob.fire.test.webapp.RecoverBatchService</servlet-class>
@@ -70,7 +90,7 @@
   	<url-pattern>/RecoverBatchService</url-pattern>
   </servlet-mapping>
   <servlet>
-  	<description>Servicio de prueba para la consulta del progreso de un lote de firma</description>
+  	<description>Servicio de prueba para la consulta del progreso de un lote de firmas</description>
   	<display-name>RecoverBatchStateService</display-name>
   	<servlet-name>RecoverBatchStateService</servlet-name>
   	<servlet-class>es.gob.fire.test.webapp.RecoverBatchStateService</servlet-class>
@@ -78,5 +98,15 @@
   <servlet-mapping>
   	<servlet-name>RecoverBatchStateService</servlet-name>
   	<url-pattern>/RecoverBatchStateService</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<description>Servicio de prueba para la descarga de un documento de un lote de firmas</description>
+  	<display-name>DownloadBatchSignatureService</display-name>
+  	<servlet-name>DownloadBatchSignatureService</servlet-name>
+  	<servlet-class>es.gob.fire.test.webapp.DownloadBatchSignService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>DownloadBatchSignatureService</servlet-name>
+  	<url-pattern>/DownloadBatchSignatureService</url-pattern>
   </servlet-mapping>
 </web-app>

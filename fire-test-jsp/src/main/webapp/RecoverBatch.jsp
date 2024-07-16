@@ -90,15 +90,19 @@
 						htmlResult += results.batch[i].dt;
 					}
 					htmlResult += "</td>";
-					htmlResult += "<td>";
+					htmlResult += "<td id='" + i + "'>";
 					if (results.batch[i].ok == "true" && !results.batch[i].gp) {
-						htmlResult += "<a target=\"_blank\" href=\"RecoverBatchSign.jsp?docid=" + results.batch[i].id + "\">Recuperar firma</a>";
+						htmlResult += "<a target=\"_blank\" onclick=\"clickDownload('" + i + "')\" href=\"DownloadBatchSignatureService?docid=" + results.batch[i].id + "\">Descargar firma</a>";
 					}
 					htmlResult += "</td>";
 					htmlResult += "</tr>";
 				}
 				
 				document.getElementById("table-results-body").innerHTML = htmlResult;
+			}
+			
+			function clickDownload(id) {
+				document.getElementById(id).innerHTML = "Descargada";
 			}
 			
 			/** Cargamos el objeto con el que hacer las peticiones remotas. */

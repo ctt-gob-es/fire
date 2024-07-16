@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.DuplicateDocumentException;
 import es.gob.fire.client.FireClient;
+import es.gob.fire.client.HttpOperationException;
 import es.gob.fire.client.NumDocumentsExceededException;
 
 /**
@@ -126,6 +127,12 @@ public class AddDocumentBatchService extends HttpServlet {
 			return;
 		} catch (final NumDocumentsExceededException e) {
 			LOGGER.error("Se excedio el numero maximo de documentos configurados para el lote", e); //$NON-NLS-1$
+			request.getRequestDispatcher("AddDocumentToBatch.jsp?error=maxdocs").forward(request, response); //$NON-NLS-1$
+			return;
+		}
+		catch (final HttpOperationException e) {
+			LOGGER.error("Se devolvio un tipo de error no diferenciado", e); //$NON-NLS-1$
+			session.setAttribute("errorMessage", e.getMessage()); //$NON-NLS-1$
 			request.getRequestDispatcher("AddDocumentToBatch.jsp?error=maxdocs").forward(request, response); //$NON-NLS-1$
 			return;
 		}

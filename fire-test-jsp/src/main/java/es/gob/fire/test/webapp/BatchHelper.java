@@ -76,7 +76,7 @@ public class BatchHelper {
 	 * @throws IOException Cuando no se puede procesar el resultado.
 	 * @throws InvalidTransactionException Cuando la transacci&oacute;n indicada no exista o este caducada.
 	 */
-	public static byte[] recoverBatchSign(final HttpServletRequest request) throws IOException, HttpOperationException, InvalidTransactionException {
+	public static TransactionResult recoverBatchSign(final HttpServletRequest request) throws IOException, HttpOperationException, InvalidTransactionException {
 
 		// El identificador de aplicacion es propio de cada aplicacion. En esta de ejemplo,
     	// se lee del fichero de configuracion
@@ -111,11 +111,11 @@ public class BatchHelper {
         	throw new IOException("No se encontro el fichero de configuracion del componente cliente FIRe", e); //$NON-NLS-1$
 		}
 
-        if (result.getState() != TransactionResult.STATE_OK) {
+        if (result.getState() == TransactionResult.STATE_ERROR) {
         	LOGGER.error("No se ha podido obtener la firma del lote (Estado " + result.getState() + "): " + result.getErrorMessage()); //$NON-NLS-1$ //$NON-NLS-2$
         	throw new IOException("No se ha podido obtener la firma del lote (Estado " + result.getState() + "): " + result.getErrorMessage()); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        return result.getResult();
+        return result;
 	}
 }

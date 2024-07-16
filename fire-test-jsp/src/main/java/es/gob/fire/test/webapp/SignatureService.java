@@ -39,7 +39,7 @@ public class SignatureService extends HttpServlet {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SignatureService.class);
 
-	private static final String REDIRECT_SUCCESS_PAGE = "RecoverSign.jsp"; //$NON-NLS-1$
+	private static final String REDIRECT_SUCCESS_PAGE = "RecoverSignatureService"; //$NON-NLS-1$
 	private static final String REDIRECT_ERROR_PAGE = "ErrorTransactionPage.jsp"; //$NON-NLS-1$
 
 	@Override
