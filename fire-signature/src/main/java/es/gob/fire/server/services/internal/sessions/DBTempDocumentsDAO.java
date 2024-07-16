@@ -35,19 +35,24 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(DBTempDocumentsDAO.class.getName());
 
+	private static final int MAX_ID_SIZE = 80;
+
 
 	@Override
 	public boolean existDocument(final String id) throws IOException {
+
+		final String docId = cleanDataId(id);
+
 		boolean exists;
 		try (Connection conn = DbManager.getConnection();
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_CHECK_DOCUMENT)) {
-			st.setString(1, id);
+			st.setString(1, docId);
 			try (ResultSet rs = st.executeQuery()) {
 				exists = rs.next();
 			}
 		}
 		catch (final Exception e) {
-			throw new IOException("Error al buscar el documento con ID: " + id, e); //$NON-NLS-1$
+			throw new IOException("Error al buscar el documento con ID: " + docId, e); //$NON-NLS-1$
 		}
 		return exists;
 	}
@@ -56,7 +61,7 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	public String storeDocument(final String id, final byte[] data, final boolean newDocument, final LogTransactionFormatter formt) throws IOException {
 
 		// Insertamos o actualizamos los datos segun corresponda
-		String docId = id;
+		String docId = cleanDataId(id);
 		if (newDocument || docId == null) {
 			// Si no se nos ha pasado un identificador de documento, generamos uno que no exista
 			if (docId == null) {
@@ -98,10 +103,12 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	@Override
 	public byte[] retrieveDocument(final String id) throws IOException {
 
+		final String docId = cleanDataId(id);
+
 		byte[] data = null;
 		try (Connection conn = DbManager.getConnection();
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_RECOVER_DOCUMENT)) {
-			st.setString(1, id);
+			st.setString(1, docId);
 			Blob dataBlob = null;
 			try (final ResultSet dbResult = st.executeQuery()) {
 				if (dbResult.next()) {
@@ -113,16 +120,16 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 						data = readInputStream(dataIs);
 					}
 					catch (final Exception e) {
-						throw new IOException("Error al cargar el documento con ID: " + id, e); //$NON-NLS-1$
+						throw new IOException("Error al cargar el documento con ID: " + docId, e); //$NON-NLS-1$
 					}
 				}
 				else {
-					throw new IOException("No se encontro el documento con ID: " + id); //$NON-NLS-1$
+					throw new IOException("No se encontro el documento con ID: " + docId); //$NON-NLS-1$
 				}
 			}
 		}
 		catch (final Exception e) {
-			throw new IOException("Error al recuperar el documento con ID: " + id, e); //$NON-NLS-1$
+			throw new IOException("Error al recuperar el documento con ID: " + docId, e); //$NON-NLS-1$
 		}
 
 		return data;
@@ -131,13 +138,15 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 	@Override
 	public void deleteDocument(final String id) throws IOException {
 
+		final String docId = cleanDataId(id);
+
 		try (Connection conn = DbManager.getConnection(true);
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_REMOVE_DOCUMENT)) {
-			st.setString(1, id);
+			st.setString(1, docId);
 			st.execute();
 		}
 		catch (final Exception e) {
-			LOGGER.warning("Error al eliminar el documento con ID: " + id); //$NON-NLS-1$
+			LOGGER.warning("Error al eliminar el documento con ID: " + docId); //$NON-NLS-1$
 		}
 	}
 
@@ -180,4 +189,27 @@ public class DBTempDocumentsDAO implements TempDocumentsDAO {
 		return baos.toByteArray();
 	}
 
+
+    /**
+     * Limpia un nombre de fichero para asegurar que no haya caracteres con los que no puedan
+     * guardarse los ficheros en disco y lo recorta a un tama&ntilde;o m&aacute;ximo.
+     * @param filename Nombre de fichero.
+     * @return Nombre de fichero limpio.
+     */
+    private static String cleanDataId(final String id) {
+
+    	// Componemos un nombre de hasta 64 caracters con caracteres validos para nombres de fichero
+    	final StringBuilder builder = new StringBuilder();
+    	for (final char c : id.toCharArray()) {
+    		if (Character.isLetterOrDigit(c) || c == '.' || c == '-') {
+    			builder.append(c);
+    		} else {
+    			builder.append('_');
+    		}
+    		if (builder.length() >= MAX_ID_SIZE) {
+    			break;
+    		}
+    	}
+    	return builder.toString();
+    }
 }

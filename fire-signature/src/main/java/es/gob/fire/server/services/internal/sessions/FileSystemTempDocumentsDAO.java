@@ -26,6 +26,8 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
 
     private static final String DEFAULT_PREFIX = "fire-"; //$NON-NLS-1$
 
+    private static final int MAX_FILENAME_SIZE = 80;
+
     private static File TMPDIR;
 
     static {
@@ -98,14 +100,14 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
             );
         }
 
-        final File f = filename != null ?
-        		checkFile(filename) :
-        		File.createTempFile(DEFAULT_PREFIX, null, TMPDIR);
+        final File f = filename != null
+        	? checkFile(filename)
+        	: File.createTempFile(DEFAULT_PREFIX, null, TMPDIR);
 
-        		try (final OutputStream fos = new FileOutputStream(f);
-        				final OutputStream bos = new BufferedOutputStream(fos);) {
-        			bos.write(data);
-        		}
+        try (final OutputStream fos = new FileOutputStream(f);
+        		final OutputStream bos = new BufferedOutputStream(fos);) {
+        	bos.write(data);
+        }
 
         LOGGER.fine(formt.f("Almacenado temporal de datos en: " + f.getAbsolutePath())); //$NON-NLS-1$
 
@@ -201,12 +203,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
                     "El nombre del fichero a recuperar no puede ser nulo" //$NON-NLS-1$
             );
         }
-        if (filename.contains("..") || filename.contains(File.separator) || filename.contains(File.pathSeparator)) { //$NON-NLS-1$
-            throw new IOException(
-                    "El nombre del fichero a recuperar no es valido: " + filename //$NON-NLS-1$
-            );
-        }
-        final File f = new File(TMPDIR, filename);
+        final File f = new File(TMPDIR, cleanFileName(filename));
         try {
         	if (!f.getCanonicalPath().startsWith(TMPDIR.getCanonicalPath())) {
         		throw new IOException("Se ha intentado acceder a una ruta fuera del directorio de logs: " + f.getAbsolutePath()); //$NON-NLS-1$
@@ -217,5 +214,28 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
         }
 
         return f;
+    }
+
+    /**
+     * Limpia un nombre de fichero para asegurar que no haya caracteres con los que no puedan
+     * guardarse los ficheros en disco y lo recorta a un tama&ntilde;o m&aacute;ximo.
+     * @param filename Nombre de fichero.
+     * @return Nombre de fichero limpio.
+     */
+    private static String cleanFileName(final String filename) {
+
+    	// Componemos un nombre de hasta 64 caracters con caracteres validos para nombres de fichero
+    	final StringBuilder builder = new StringBuilder();
+    	for (final char c : filename.toCharArray()) {
+    		if (Character.isLetterOrDigit(c) || c == '.' || c == '-') {
+    			builder.append(c);
+    		} else {
+    			builder.append('_');
+    		}
+    		if (builder.length() >= MAX_FILENAME_SIZE) {
+    			break;
+    		}
+    	}
+    	return builder.toString();
     }
 }

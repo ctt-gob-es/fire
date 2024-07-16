@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,6 +36,8 @@ import es.gob.fire.upgrade.UpgraderUtils;
 public class AddDocumentBatchManager {
 
 	private static final Logger LOGGER = Logger.getLogger(AddDocumentBatchManager.class.getName());
+
+	private static Pattern pattern = null;
 
     /**
      * Agrega un nuevo documento a un lote de firma.
@@ -65,6 +68,12 @@ public class AddDocumentBatchManager {
     	if (docId == null || docId.isEmpty()) {
     		LOGGER.warning(logF.f("No se ha proporcionado el ID del documento")); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_ID_NEEDED);
+    		return;
+    	}
+
+    	if (!checkValidDocId(docId)) {
+    		LOGGER.warning(logF.f("El ID del documento contiene caracteres no validos")); //$NON-NLS-1$
+        	Responser.sendError(response, FIReError.PARAMETER_DOCUMENT_ID_INVALID);
     		return;
     	}
 
@@ -262,5 +271,14 @@ public class AddDocumentBatchManager {
 		config.setUpgradeConfig(UpgraderUtils.extractUpdaterProperties(docConfig));
 
 		return config;
+	}
+
+	private static final boolean checkValidDocId(final String docId) {
+
+		if (pattern == null) {
+			pattern = Pattern.compile("[0-9a-zA-Z-_\\.]+"); //$NON-NLS-1$
+		}
+
+		return docId.length() <= 40 && pattern.matcher(docId).matches();
 	}
 }

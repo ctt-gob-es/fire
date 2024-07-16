@@ -96,12 +96,14 @@ public class TransactionResult extends OperationResult {
 	/** Especifica que la transacci&oacute;n no pudo finalizar debido a un error. */
 	public static final int STATE_ERROR = -1;
 
-	/** Especifica que la transacci&oacute;n aun no ha finalizado y se deber&aacute; pedir el resultamos m&aacute;s adelante. */
+	/** Especifica que la transacci&oacute;n aun no ha finalizado y se deber&aacute; pedir el resultado m&aacute;s adelante. */
 	public static final int STATE_PENDING = 1;
 
-	/** Especifica que la transacci&oacute;n ha finalizado pero que el resultado puede
+	/**
+	 * Especifica que la transacci&oacute;n ha finalizado pero que el resultado puede
 	 * diferir de lo solicitado por la aplicaci&oacute;n. Por ejemplo, puede haberse
-	 * solicitado una firma ES-A y recibirse una ES-T. */
+	 * solicitado una firma ES-A y recibirse una ES-T.
+	 */
 	public static final int STATE_PARTIAL = 2;
 
 	private static final Logger LOGGER = Logger.getLogger(TransactionResult.class.getName());

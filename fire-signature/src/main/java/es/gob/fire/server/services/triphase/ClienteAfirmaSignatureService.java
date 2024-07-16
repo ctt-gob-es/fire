@@ -34,18 +34,10 @@ import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.signers.xml.XmlDSigProviderHelper;
-import es.gob.afirma.triphase.signer.processors.AutoTriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.CAdESASiCSTriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.FacturaETriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.PAdESTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.XAdESASiCSTriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.SignOperation;
-import es.gob.fire.server.services.internal.Pkcs1TriPhasePreProcessor;
 import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.triphase.document.DocumentManager;
 import es.gob.fire.server.services.triphase.document.FIReLocalDocumentManager;
@@ -262,44 +254,24 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			return;
 		}
 
+		//TODO: Cuando se importen las bibliotecas del Cliente 1.9, usar el PreProcessorFactory que
+		// tiene en lugar del de este proyecto, que es una copia de aquel. Hay que eliminar tambien
+		// la copia de este proyecto.
+
 		// Instanciamos el preprocesador adecuado
 		final TriPhasePreProcessor prep;
-		if (AOSignConstants.SIGN_FORMAT_PADES.equalsIgnoreCase(format) ||
-			AOSignConstants.SIGN_FORMAT_PADES_TRI.equalsIgnoreCase(format)) {
-					prep = new PAdESTriPhasePreProcessor();
-		}
-		else if (AOSignConstants.SIGN_FORMAT_CADES.equalsIgnoreCase(format) ||
-				 AOSignConstants.SIGN_FORMAT_CADES_TRI.equalsIgnoreCase(format)) {
-					prep = new CAdESTriPhasePreProcessor();
-		}
-		else if (AOSignConstants.SIGN_FORMAT_XADES.equalsIgnoreCase(format) ||
-				 AOSignConstants.SIGN_FORMAT_XADES_TRI.equalsIgnoreCase(format)) {
-					prep = new XAdESTriPhasePreProcessor();
-		}
-		else if (AOSignConstants.SIGN_FORMAT_CADES_ASIC_S.equalsIgnoreCase(format) ||
-				 AOSignConstants.SIGN_FORMAT_CADES_ASIC_S_TRI.equalsIgnoreCase(format)) {
-					prep = new CAdESASiCSTriPhasePreProcessor();
-		}
-		else if (AOSignConstants.SIGN_FORMAT_XADES_ASIC_S.equalsIgnoreCase(format) ||
-				 AOSignConstants.SIGN_FORMAT_XADES_ASIC_S_TRI.equalsIgnoreCase(format)) {
-					prep = new XAdESASiCSTriPhasePreProcessor();
-		}
-		else if (AOSignConstants.SIGN_FORMAT_FACTURAE.equalsIgnoreCase(format) ||
-				 AOSignConstants.SIGN_FORMAT_FACTURAE_TRI.equalsIgnoreCase(format) ||
-				 AOSignConstants.SIGN_FORMAT_FACTURAE_ALT1.equalsIgnoreCase(format)) {
-					prep = new FacturaETriPhasePreProcessor();
-		}
-		else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format) ||
-				 AOSignConstants.SIGN_FORMAT_PKCS1_TRI.equalsIgnoreCase(format)) {
-					prep = new Pkcs1TriPhasePreProcessor();
-		}
-		else if (AOSignConstants.SIGN_FORMAT_AUTO.equalsIgnoreCase(format)) {
-			prep = new AutoTriPhasePreProcessor();
+		if (AOSignConstants.SIGN_FORMAT_AUTO.equalsIgnoreCase(format)) {
+			prep = PreProcessorFactory.getPreProcessor(docBytes);
 		}
 		else {
-			LOGGER.severe("Formato de firma no soportado: " + format); //$NON-NLS-1$
-			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.UNSUPPORTED_SIGNATURE_FORMAT));
-			return;
+			try {
+				prep = PreProcessorFactory.getPreProcessor(format);
+			}
+			catch (final IllegalArgumentException e) {
+				LOGGER.severe("Formato de firma no soportado: " + format); //$NON-NLS-1$
+				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.UNSUPPORTED_SIGNATURE_FORMAT));
+				return;
+			}
 		}
 
 		if (PARAM_VALUE_OPERATION_PRESIGN.equalsIgnoreCase(operation)) {

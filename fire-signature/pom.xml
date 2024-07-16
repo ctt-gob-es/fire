@@ -3,7 +3,6 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-signature</artifactId>
 	<packaging>war</packaging>
 	
@@ -112,7 +111,6 @@
 				<dependency>
 					<groupId>javax.servlet</groupId>
 					<artifactId>javax.servlet-api</artifactId>
-					<version>3.1.0</version>
 					<scope>provided</scope>
 				</dependency>
 		
@@ -246,7 +244,6 @@
 			<plugin>
 			  <groupId>org.codehaus.mojo</groupId>
 			  <artifactId>build-helper-maven-plugin</artifactId>
-			  <version>1.12</version>
 			  <executions>
 			    <execution>
 			      <id>timestamp-property</id>
@@ -257,6 +254,7 @@
 			      <configuration>
 			        <name>current.year</name>
 			        <pattern>yyyy</pattern>
+			        <locale>es,ES</locale>
 			      </configuration>
 			    </execution>
 			  </executions>
@@ -265,7 +263,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>

@@ -73,7 +73,7 @@ public final class TestUpgrade {
 	/** Prueba de mejora de firma.
 	 * @throws Exception en cualquier error. */
 	@Test
-	//@Ignore
+	@Ignore
 	public void testSignUpgrade() throws Exception {
 
 		final UpgradeTarget format = UpgradeTarget.T_LEVEL_FORMAT;
@@ -94,7 +94,7 @@ public final class TestUpgrade {
 	 * en la plataforma respete los periodos de gracia para la actualizaci&oacute;n de la firma.
 	 * @throws Exception en cualquier error. */
 	@Test
-	//@Ignore
+	@Ignore
 	public void testSignUpgradeAsync() throws Exception {
 
 		final UpgradeTarget format = UpgradeTarget.T_LEVEL_FORMAT;
@@ -114,7 +114,7 @@ public final class TestUpgrade {
 	/** Prueba de recuperaci&oacute;n de firma enviada a actualizar anteriormente.
 	 * @throws Exception en cualquier error. */
 	@Test
-	//@Ignore
+	@Ignore
 	public void testRecoverSignatureAsync() throws Exception {
 
 		final UpgradeTarget format = UpgradeTarget.T_LEVEL_FORMAT;
