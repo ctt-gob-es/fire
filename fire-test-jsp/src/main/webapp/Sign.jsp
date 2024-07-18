@@ -55,13 +55,13 @@
 			   	</fieldset>
 
 				<fieldset  class="fieldset-fire">
-					<legend>Seleccione el algoritmo de firma: </legend>
-						<input id="algo-256" type="radio" name="algorithm" value="SHA256withRSA" checked="checked"/>
-							<label for="algo-256" >SHA256withRSA</label><br>
-						<input id="algo-512" type="radio" name="algorithm" value="SHA512withRSA"/>
-							<label for="algo-512" >SHA512withRSA</label><br>
-						<input id="algo-1" type="radio" name="algorithm" value="SHA1withRSA"/>
-							<label for="algo-1">SHA1withRSA</label><br>
+					<legend>Seleccione el algoritmo de hash para la firma: </legend>
+						<input id="algo-256" type="radio" name="algorithm" value="SHA256" checked="checked"/>
+							<label for="algo-256" >SHA256</label><br>
+						<input id="algo-512" type="radio" name="algorithm" value="SHA512"/>
+							<label for="algo-512" >SHA512</label><br>
+						<input id="algo-1" type="radio" name="algorithm" value="SHA1"/>
+							<label for="algo-1">SHA1</label><br>
 			   	</fieldset>
 
 			   	<fieldset  class="fieldset-fire">

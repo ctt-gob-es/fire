@@ -59,7 +59,7 @@ final class SingleSignPostProcessor {
 	static void doPostProcess(final SingleSign sSign,
 			                  final X509Certificate[] certChain,
 			                  final TriphaseData tdata,
-			                  final SingleSignConstants.SignAlgorithm algorithm,
+			                  final SignatureAlgorithm algorithm,
 			                  final String batchId) throws IOException,
 			                                                                            AOException,
 			                                                                            NoSuchAlgorithmException {

@@ -9,6 +9,8 @@
  */
 package es.gob.fire.server.services.batch;
 
+import java.security.Key;
+
 import es.gob.afirma.core.AOInvalidFormatException;
 import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.triphase.signer.processors.CAdESASiCSTriPhasePreProcessor;
@@ -119,50 +121,122 @@ public final class SingleSignConstants {
 	}
 
 	/** Algoritmo de firma. */
-	public enum SignAlgorithm {
+	public enum DigestAlgorithm {
 
-		/** SHA1withRSA. */
-		SHA1WITHRSA(AOSignConstants.SIGN_ALGORITHM_SHA1WITHRSA),
+		/** SHA1. */
+		SHA1(AOSignConstants.DIGEST_ALGORITHM_SHA1, "SHA-1"), //$NON-NLS-1$
 
-		/** SHA256withRSA. */
-		SHA256WITHRSA(AOSignConstants.SIGN_ALGORITHM_SHA256WITHRSA),
+		/** SHA256. */
+		SHA256(AOSignConstants.DIGEST_ALGORITHM_SHA256, "SHA-256"), //$NON-NLS-1$
 
-		/** SHA284withRSA. */
-		SHA384WITHRSA(AOSignConstants.SIGN_ALGORITHM_SHA384WITHRSA),
+		/** SHA284. */
+		SHA384(AOSignConstants.DIGEST_ALGORITHM_SHA384, "SHA-384"), //$NON-NLS-1$
 
-		/** SHA512withRSA. */
-		SHA512WITHRSA(AOSignConstants.SIGN_ALGORITHM_SHA512WITHRSA);
+		/** SHA512. */
+		SHA512(AOSignConstants.DIGEST_ALGORITHM_SHA512, "SHA-512"); //$NON-NLS-1$
 
 		private final String name;
+		private final String jcaName;
 
-		SignAlgorithm(final String n) {
+		DigestAlgorithm(final String n, final String jcaName) {
 			this.name = n;
+			this.jcaName = jcaName;
+		}
+
+		/**
+		 * Obtiene el nombre del algoritmo..
+		 * @return Nombre del algoritmo.
+		 */
+		public String getName() {
+			return this.name;
+		}
+
+		/**
+		 * Obtiene el nombre del algoritmo JCA.
+		 * @return Nombre del algoritmo JCA.
+		 */
+		public String getJcaName() {
+			return this.jcaName;
 		}
 
 		@Override
 		public String toString() {
+			return getName();
+		}
+
+		/**
+		 * Obtiene el algoritmo de huella a partir de su nombre.
+		 * @param name Nombre del algoritmo de huella.
+		 * @return Algoritmo de huella o de firma RSA/ECDSA.
+		 */
+		public static DigestAlgorithm getAlgorithm(final String name) {
+			// Ademas del algoritmo de huella, comparamos si nos pasan un algoritmo de firma RSA
+			// por retrocompatibilidad (v1.9 y anteriores)
+			final String cleanName = name != null ? name.replace("-", "") : null; //$NON-NLS-1$ //$NON-NLS-2$
+			if (SHA1.getName().equalsIgnoreCase(cleanName)
+					|| "SHA1withRSA".equalsIgnoreCase(cleanName) //$NON-NLS-1$
+					|| "SHA1withECDSA".equalsIgnoreCase(cleanName)) { //$NON-NLS-1$
+				return SHA1;
+			}
+			if (SHA256.getName().equalsIgnoreCase(cleanName)
+					|| "SHA256withRSA".equalsIgnoreCase(cleanName) //$NON-NLS-1$
+					|| "SHA256withECDSA".equalsIgnoreCase(cleanName)) { //$NON-NLS-1$) {
+				return SHA256;
+			}
+			if (SHA384.getName().equalsIgnoreCase(cleanName)
+					|| "SHA384withRSA".equalsIgnoreCase(cleanName) //$NON-NLS-1$
+					|| "SHA284withECDSA".equalsIgnoreCase(cleanName)) { //$NON-NLS-1$) {
+				return SHA384;
+			}
+			if (SHA512.getName().equalsIgnoreCase(cleanName)
+					|| "SHA512withRSA".equalsIgnoreCase(cleanName) //$NON-NLS-1$
+					|| "SHA512withECDSA".equalsIgnoreCase(cleanName)) { //$NON-NLS-1$) {
+				return SHA512;
+			}
+			throw new IllegalArgumentException(
+				"Algoritmo de huella no soportado: " + name //$NON-NLS-1$
+			);
+		}
+	}
+
+	/** Algoritmo de firma. */
+	public enum AsyncCipherAlgorithm {
+
+		/** RSA. */
+		RSA("RSA", "RSA"), //$NON-NLS-1$ //$NON-NLS-2$
+
+		/** ECDSA. */
+		ECDSA("ECDSA", "ECC"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		private final String name;
+		private final String certKey;
+
+		AsyncCipherAlgorithm(final String name, final String certKey) {
+			this.name = name;
+			this.certKey = certKey;
+		}
+
+		/**
+		 * Obtiene el nombre del algoritmo.
+		 * @return Nombre del algoritmo.
+		 */
+		public String getName() {
 			return this.name;
 		}
 
-		/** Obtiene el algoritmo de firma a partir de su nombre.
-		 * @param name Nombre del algoritmo de firma.
-		 * @return Algoritmo firma. */
-		public static SignAlgorithm getAlgorithm(final String name) {
-			if (SHA1WITHRSA.toString().equalsIgnoreCase(name)) {
-				return SHA1WITHRSA;
+		@Override
+		public String toString() {
+			return getName();
+		}
+
+		static AsyncCipherAlgorithm getInstanceFromKey(final Key key)
+				throws IllegalArgumentException {
+			for (final AsyncCipherAlgorithm algo : values()) {
+				if (algo.certKey.equals(key.getAlgorithm())) {
+					return algo;
+				}
 			}
-			if (SHA256WITHRSA.toString().equalsIgnoreCase(name)) {
-				return SHA256WITHRSA;
-			}
-			if (SHA384WITHRSA.toString().equalsIgnoreCase(name)) {
-				return SHA384WITHRSA;
-			}
-			if (SHA512WITHRSA.toString().equalsIgnoreCase(name)) {
-				return SHA512WITHRSA;
-			}
-			throw new IllegalArgumentException(
-				"Tipo de algoritmo de firma no soportado: " + name //$NON-NLS-1$
-			);
+			throw new IllegalArgumentException("Tipo de clave no soportada: " + key.getAlgorithm()); //$NON-NLS-1$
 		}
 	}
 
@@ -189,5 +263,4 @@ public final class SingleSignConstants {
 				throw new AOInvalidFormatException("Formato de firma no soportado: " + sSign.getFormat()); //$NON-NLS-1$
 		}
 	}
-
 }

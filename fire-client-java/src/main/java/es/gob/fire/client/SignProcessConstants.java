@@ -33,11 +33,23 @@ public final class SignProcessConstants {
         SHA384WITHRSA("SHA384withRSA"), //$NON-NLS-1$
 
         /** SHA256withRSA. */
-        SHA256WITHRSA("SHA256withRSA"); //$NON-NLS-1$
+        SHA256WITHRSA("SHA256withRSA"), //$NON-NLS-1$
+
+        /** SHA1. */
+        SHA1("SHA1"), //$NON-NLS-1$
+
+        /** SHA512. */
+        SHA512("SHA512"), //$NON-NLS-1$
+
+        /** SHA384. */
+        SHA384("SHA284"), //$NON-NLS-1$
+
+        /** SHA256. */
+        SHA256("SHA256"); //$NON-NLS-1$
 
         private final String algName;
 
-        private SignatureAlgorithm(final String name) {
+        SignatureAlgorithm(final String name) {
             this.algName = name;
         }
 
@@ -61,7 +73,7 @@ public final class SignProcessConstants {
 
         private final String opName;
 
-        private SignatureOperation(final String op) {
+        SignatureOperation(final String op) {
             this.opName = op;
         }
 
@@ -94,7 +106,7 @@ public final class SignProcessConstants {
 
         private final String fmtName;
 
-        private SignatureFormat(final String fmt) {
+        SignatureFormat(final String fmt) {
             this.fmtName = fmt;
         }
 
@@ -153,7 +165,7 @@ public final class SignProcessConstants {
             return this.str;
         }
 
-        private SignatureUpgrade(final String s) {
+        SignatureUpgrade(final String s) {
             this.str = s;
         }
     }

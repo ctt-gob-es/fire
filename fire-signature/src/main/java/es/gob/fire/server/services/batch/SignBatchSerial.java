@@ -10,8 +10,8 @@
 package es.gob.fire.server.services.batch;
 
 import java.io.IOException;
+import java.security.Key;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 import java.util.logging.Level;
 
 import javax.json.Json;
@@ -21,6 +21,7 @@ import javax.json.JsonObject;
 import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.server.services.batch.ProcessResult.Result;
+import es.gob.fire.server.services.batch.SingleSignConstants.AsyncCipherAlgorithm;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 
 /**
@@ -47,8 +48,18 @@ public final class SignBatchSerial extends SignBatch {
 	@Override
 	public JsonObject doPreBatch(final X509Certificate[] certChain) throws BatchException {
 
+		if (certChain == null || certChain.length < 1) {
+			throw new IllegalArgumentException(
+				"La cadena de certificados del firmante no puede ser nula ni vacia" //$NON-NLS-1$
+			);
+		}
+
 		final JsonArrayBuilder errorsArrayBuilder = Json.createArrayBuilder();
 		final JsonArrayBuilder trisignsArrayBuilder = Json.createArrayBuilder();
+
+		final Key key = certChain[0].getPublicKey();
+		final SignatureAlgorithm signatureAlgoritm = new SignatureAlgorithm(
+				this.digestAlgorithm, AsyncCipherAlgorithm.getInstanceFromKey(key));
 
 		boolean ignoreRemaining = false;
 		for (int i = 0; i < this.signs.size(); i++) {
@@ -59,7 +70,7 @@ public final class SignBatchSerial extends SignBatch {
 			}
 
 			try {
-				final TriphaseData td = ss.doPreProcess(certChain, this.algorithm);
+				final TriphaseData td = ss.doPreProcess(certChain, signatureAlgoritm);
 				trisignsArrayBuilder.add(TriphaseDataParser.triphaseDataToJson(td));
 			} catch (final Exception e) {
 				errorsArrayBuilder.add(buildSignResult(ss.getId(), Result.ERROR_PRE, e));
@@ -89,6 +100,12 @@ public final class SignBatchSerial extends SignBatch {
 		if (td == null) {
 			throw new IllegalArgumentException("Los datos de sesion trifasica no pueden ser nulos"); //$NON-NLS-1$
 		}
+
+		final Key key = certChain[0].getPublicKey();
+		final SignatureAlgorithm signatureAlgorithm = new SignatureAlgorithm(
+				this.digestAlgorithm, AsyncCipherAlgorithm.getInstanceFromKey(key));
+
+
 
 		boolean ignoreRemaining = false;
 		boolean error = false;
@@ -126,7 +143,7 @@ public final class SignBatchSerial extends SignBatch {
 
 			// Postfirmamos la firma
 			try {
-				ss.doPostProcess(certChain, td, this.algorithm, getId());
+				ss.doPostProcess(certChain, td, signatureAlgorithm, getId());
 			} catch (final Exception e) {
 
 				error = true;

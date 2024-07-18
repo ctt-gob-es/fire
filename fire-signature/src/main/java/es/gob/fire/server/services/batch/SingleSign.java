@@ -152,7 +152,7 @@ public final class SingleSign {
 	 * @throws AOException Si hay problemas en la propia firma electr&oacute;nica.
 	 * @throws IOException Si hay problemas en la obtenci&oacute;n, tratamiento o gradado de datos. */
 	TriphaseData doPreProcess(final X509Certificate[] certChain,
-			            final SingleSignConstants.SignAlgorithm algorithm) throws IOException,
+			            final SignatureAlgorithm algorithm) throws IOException,
 			                                                                      AOException {
 		return SingleSignPreProcessor.doPreProcess(this, certChain, algorithm);
 	}
@@ -164,7 +164,7 @@ public final class SingleSign {
 	 * @param docCacheManager Gestor para el guardado de datos en cach&eacute;.
 	 * @return Tarea de preproceso de firma para ser ejecutada en paralelo. */
 	Callable<PreProcessResult> getPreProcessCallable(final X509Certificate[] certChain,
-                                                  final SingleSignConstants.SignAlgorithm algorithm) {
+                                                  final SignatureAlgorithm algorithm) {
 		return new PreProcessCallable(this, certChain, algorithm);
 	}
 
@@ -205,7 +205,7 @@ public final class SingleSign {
 	 * @throws NoSuchAlgorithmException Si no se soporta alg&uacute;n algoritmo necesario. */
 	void doPostProcess(final X509Certificate[] certChain,
 			                  final TriphaseData td,
-			                  final SingleSignConstants.SignAlgorithm algorithm,
+			                  final SignatureAlgorithm algorithm,
 			                  final String batchId) throws IOException,
 			                                               AOException,
 			                                               NoSuchAlgorithmException {
@@ -243,7 +243,7 @@ public final class SingleSign {
 	 * @return Tarea de postproceso de firma para ser ejecutada en paralelo. */
 	Callable<ResultSingleSign> getPostProcessCallable(final X509Certificate[] certChain,
 			                                                          final TriphaseData td,
-			                                                          final SingleSignConstants.SignAlgorithm algorithm,
+			                                                          final SignatureAlgorithm algorithm,
 			                                                          final String batchId) {
 		return new PostProcessCallable(this, certChain, td, algorithm, batchId);
 	}
@@ -336,10 +336,10 @@ public final class SingleSign {
 	static class PreProcessCallable implements Callable<PreProcessResult> {
 		private final SingleSign ss;
 		private final X509Certificate[] certChain;
-		private final SingleSignConstants.SignAlgorithm algorithm;
+		private final SignatureAlgorithm algorithm;
 
 		public PreProcessCallable(final SingleSign ss, final X509Certificate[] certChain,
-                final SingleSignConstants.SignAlgorithm algorithm) {
+                final SignatureAlgorithm algorithm) {
 			this.ss = ss;
 			this.certChain = certChain;
 			this.algorithm = algorithm;
@@ -360,7 +360,6 @@ public final class SingleSign {
 				errorResult.setId(this.ss.getId());
 				final ResultSingleSign singleResult = new ResultSingleSign(this.ss.getId(), false, errorResult);
 				result = new PreProcessResult(singleResult);
-
 			}
 
 			return result;
@@ -372,11 +371,11 @@ public final class SingleSign {
 		private final SingleSign ss;
 		private final X509Certificate[] certChain;
 		private final TriphaseData td;
-		private final SingleSignConstants.SignAlgorithm algorithm;
+		private final SignatureAlgorithm algorithm;
 		private final String batchId;
 
 		public PostProcessCallable(final SingleSign ss, final X509Certificate[] certChain,
-                final TriphaseData td, final SingleSignConstants.SignAlgorithm algorithm,
+                final TriphaseData td, final SignatureAlgorithm algorithm,
                 final String batchId) {
 			this.ss = ss;
 			this.certChain = certChain;

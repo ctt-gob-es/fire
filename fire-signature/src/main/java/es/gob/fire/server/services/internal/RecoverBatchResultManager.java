@@ -18,7 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -327,10 +326,9 @@ public class RecoverBatchResultManager {
         	}
 
         	// Verificamos cada uno de los PKCS#1 generados
-    		final Set<String> keys = ret.keySet();
-    		for (final String key : keys) {
+    		for (final String pkcs1Ref : ret.keySet()) {
 
-    			final byte[] pkcs1 = ret.get(key);
+    			final byte[] pkcs1 = ret.get(pkcs1Ref);
     			try {
     				CryptoHelper.verifyPkcs1(pkcs1, signingCert.getPublicKey(), logF);
     			}

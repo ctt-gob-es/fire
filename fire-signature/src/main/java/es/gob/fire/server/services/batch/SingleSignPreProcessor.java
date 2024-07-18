@@ -46,7 +46,7 @@ final class SingleSignPreProcessor {
 	 * @throws IOException Si hay problemas en la obtenci&oacute;n, tratamiento o gradado de datos. */
 	static TriphaseData doPreProcess(final SingleSign sSign,
 			                   final X509Certificate[] certChain,
-			                   final SingleSignConstants.SignAlgorithm algorithm) throws IOException,
+			                   final SignatureAlgorithm algorithm) throws IOException,
 			                                                                             AOException {
 
 		if (certChain == null || certChain.length < 1) {

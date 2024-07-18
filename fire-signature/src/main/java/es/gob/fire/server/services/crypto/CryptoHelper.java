@@ -26,11 +26,11 @@ public class CryptoHelper {
 
     		//TODO: Probar y soportar algoritmos de cifrado de curva eliptica
     		if (!"RSA".equalsIgnoreCase(publicKey.getAlgorithm())) { //$NON-NLS-1$
-    			String msg = "No se soporta la validacion del PKCS#1 con el algoritmo de cifrado asociado a la clave de firma utilizada"; //$NON-NLS-1$
+    			String msg = "Omitimos la validacion del PKCS#1 por no soportar la validacion del cifrado de claves" + publicKey.getAlgorithm(); //$NON-NLS-1$
     			if (logF != null) {
     				msg = logF.f(msg);
     			}
-    			LOGGER.warning(msg);
+    			LOGGER.fine(msg);
     			return;
     		}
 

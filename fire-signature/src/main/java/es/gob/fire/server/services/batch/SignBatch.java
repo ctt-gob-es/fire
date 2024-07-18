@@ -54,7 +54,7 @@ public abstract class SignBatch {
 	/** Lista de firmas a procesar. */
 	protected final List<SingleSign> signs;
 
-	protected SingleSignConstants.SignAlgorithm algorithm = null;
+	protected SingleSignConstants.DigestAlgorithm digestAlgorithm = null;
 
 	protected String id;
 
@@ -123,11 +123,11 @@ public abstract class SignBatch {
 				jsonObject.getBoolean(JSON_ELEMENT_STOPONERROR) : false;
 
 		if (jsonObject.containsKey(JSON_ELEMENT_ALGORITHM)) {
-			this.algorithm = SingleSignConstants.SignAlgorithm.getAlgorithm(
+			this.digestAlgorithm = SingleSignConstants.DigestAlgorithm.getAlgorithm(
 								jsonObject.getString(JSON_ELEMENT_ALGORITHM)
 								);
 		} else {
-			this.algorithm = null;
+			this.digestAlgorithm = null;
 		}
 
 		if (jsonObject.containsKey(JSON_ELEMENT_FORMAT)) {
@@ -260,7 +260,7 @@ public abstract class SignBatch {
 		sb.append("\",\n\"format\":\""); //$NON-NLS-1$
 		sb.append(this.format);
 		sb.append("\",\n\"algorithm\":\""); //$NON-NLS-1$
-		sb.append(this.algorithm);
+		sb.append(this.digestAlgorithm);
 		sb.append(",\n\"Id\":\""); //$NON-NLS-1$
 		sb.append(this.id);
 		sb.append("\",\n"); //$NON-NLS-1$
@@ -337,10 +337,10 @@ public abstract class SignBatch {
 	}
 
 	/**
-	 * Obtiene el algoritmo de firma.
-	 * @return Algoritmo de firma.
+	 * Obtiene el algoritmo de huella que se usar&aacute; en la firma.
+	 * @return Algoritmo de huella digital.
 	 * */
-	public SingleSignConstants.SignAlgorithm getSignAlgorithm() {
-		return this.algorithm;
+	public SingleSignConstants.DigestAlgorithm getDigestAlgorithm() {
+		return this.digestAlgorithm;
 	}
 }
