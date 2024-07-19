@@ -53,7 +53,7 @@ public class DownloadSignService extends HttpServlet {
 			final byte[] signature = (byte[]) session.getAttribute("sig"); //$NON-NLS-1$
 
 	    	response.setContentType(mimetype);
-	    	response.setHeader("Content-Disposition", "filename=\"" + filename + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	    	response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	    	response.getOutputStream().write(signature);
 	    	response.getOutputStream().flush();
 

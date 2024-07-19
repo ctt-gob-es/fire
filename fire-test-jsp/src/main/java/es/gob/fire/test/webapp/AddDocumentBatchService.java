@@ -121,6 +121,7 @@ public class AddDocumentBatchService extends HttpServlet {
 				signatureFormats.put(doc.getId(), (String) session.getAttribute("format")); //$NON-NLS-1$
 				fireClient.addDocumentToBatch(transactionId, userId, doc.getId(), doc.getData(), config);
 			}
+			session.setAttribute("formats", signatureFormats); //$NON-NLS-1$
 		} catch (final DuplicateDocumentException e) {
 			LOGGER.error("El identificador de documento ya se utilizo para otro documento del lote", e); //$NON-NLS-1$
 			request.getRequestDispatcher("AddDocumentToBatch.jsp?error=duplid").forward(request, response); //$NON-NLS-1$

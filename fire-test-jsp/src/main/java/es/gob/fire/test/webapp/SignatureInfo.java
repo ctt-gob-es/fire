@@ -61,6 +61,7 @@ class SignatureInfo {
 				break;
 			default:
 				ext = ""; //$NON-NLS-1$
+				type = "application/octet-stream"; //$NON-NLS-1$
 			}
 		}
 

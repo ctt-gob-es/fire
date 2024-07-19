@@ -44,7 +44,7 @@
 			<div style="margin-top: 10px; text-align: left; ">
 				<% if (resultState != null && resultState.booleanValue()) { %>
 					<span>La firma se ha generado correctamente.</span><br>
-					<a id="download_link" href="DownloadSignatureService" onclick="this.style='display:none;'">Descargar firma</a>
+					<a id="download_link"  target="_blank" href="DownloadSignatureService" onclick="this.style='display:none;'">Descargar firma</a>
 				<% } else { %>
 					<span id="message-txt"><%= message %></span>
 				<% } %>

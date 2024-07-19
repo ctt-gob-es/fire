@@ -11,6 +11,7 @@ package es.gob.fire.test.webapp;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -74,7 +75,7 @@ public class DownloadBatchSignService extends HttpServlet {
 	    	final SignatureInfo info = getSignatureInfo(result.getResult(), docId, session);
 
 	    	response.setContentType(info.getMimetype());
-	    	response.setHeader("Content-Disposition", "filename=\"" + info.getFilename() + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	    	response.setHeader("Content-Disposition", "attachment; filename=\"" + info.getFilename() + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	    	response.getOutputStream().write(info.getSignature());
 	    	response.getOutputStream().flush();
 
@@ -107,7 +108,9 @@ public class DownloadBatchSignService extends HttpServlet {
 			sufix = docId.substring(0, docId.lastIndexOf('.'));
 		}
 		final String filename = "firma_" + sufix; //$NON-NLS-1$
-		final String signFormat = (String) session.getAttribute("format"); //$NON-NLS-1$
+		final Map<String, String> signFormats = (Map<String, String>) session.getAttribute("formats"); //$NON-NLS-1$
+		final String signFormat = signFormats != null ? signFormats.get(docId) : session.getAttribute("format").toString(); //$NON-NLS-1$
+
 		signatureInfo.setFileInfo(filename, signFormat);
 
 		return signatureInfo;
