@@ -84,7 +84,7 @@ public final class FIReTriHelper {
      * trif&aacute;sica.
      * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign").
      * @param format Formato de firma.
-     * @param algorithm Algoritmo de firma.
+     * @param digestAlgorithm Algoritmo de huella que aplicar en la firma.
      * @param extraParams Configuraci&oacute;n de firma.
      * @param signerCert Certificado con el que se debe firmar.
      * @param docBytes Datos que se firman/multifirman.
@@ -97,7 +97,7 @@ public final class FIReTriHelper {
      */
     public static TriphaseData getPreSign(final String criptoOperation,
                                          final String format,
-                                         final String algorithm,
+                                         final String digestAlgorithm,
                                          final Properties extraParams,
                                          final X509Certificate signerCert,
                                          final byte[] docBytes,
@@ -122,12 +122,15 @@ public final class FIReTriHelper {
         	}
         }
 
+        final String signAlgorithm = AOSignConstants.composeSignatureAlgorithmName(
+        		digestAlgorithm, signerCert.getPublicKey().getAlgorithm());
+
         TriphaseData preRes;
         if (SignOperation.SIGN.toString().equalsIgnoreCase(criptoOperation)) {
             try {
                 preRes = prep.preProcessPreSign(
             		docBytes,
-            		algorithm,
+            		signAlgorithm,
                     new X509Certificate[] { signerCert },
                     expandedParams,
                     false
@@ -147,7 +150,7 @@ public final class FIReTriHelper {
             try {
                 preRes = prep.preProcessPreCoSign(
             		docBytes,
-            		algorithm,
+            		signAlgorithm,
                     new X509Certificate[] { signerCert },
                     expandedParams,
                     false
@@ -175,7 +178,7 @@ public final class FIReTriHelper {
             try {
                 preRes = prep.preProcessPreCounterSign(
             		docBytes,
-                    algorithm,
+            		signAlgorithm,
                     new X509Certificate[] { signerCert },
                     expandedParams,
                     target,
@@ -213,7 +216,7 @@ public final class FIReTriHelper {
      * Ejecuta la prefirma de los documentos de un lote.
      * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign") por defecto.
      * @param format Formato de firma por defecto.
-     * @param algorithm Algoritmo de firma por defecto.
+     * @param digestAlgorithm Algoritmo de huella que aplicar por defecto en las firmas.
      * @param extraParams Configuraci&oacute;n de firma por defecto.
      * @param signerCert Certificado con el que se debe firmar.
      * @param documents Datos que se firman/multifirman.
@@ -224,7 +227,7 @@ public final class FIReTriHelper {
      */
     public static TriphaseData getPreSign(final String criptoOperation,
                                          final String format,
-                                         final String algorithm,
+                                         final String digestAlgorithm,
                                          final Properties extraParams,
                                          final X509Certificate signerCert,
                                          final List<BatchDocument> documents,
@@ -232,6 +235,9 @@ public final class FIReTriHelper {
                                          final LogTransactionFormatter logF) {
 
         final TriphaseData batchTriPhaseData = new TriphaseData();
+
+        final String signAlgorithm = AOSignConstants.composeSignatureAlgorithmName(
+        		digestAlgorithm, signerCert.getPublicKey().getAlgorithm());
 
         boolean stopOperation = false;
         for (final BatchDocument doc : documents) {
@@ -295,7 +301,7 @@ public final class FIReTriHelper {
         		try {
         			preRes = prep.preProcessPreSign(
         					doc.getData(),
-        					algorithm,
+        					signAlgorithm,
         					new X509Certificate[] { signerCert },
         					expandedParams,
         					false
@@ -320,7 +326,7 @@ public final class FIReTriHelper {
 
         			preRes = prep.preProcessPreCoSign(
         					doc.getData(),
-        					algorithm,
+        					signAlgorithm,
         					new X509Certificate[] { signerCert },
         					expandedParams,
         					false
@@ -353,7 +359,7 @@ public final class FIReTriHelper {
 
         			preRes = prep.preProcessPreCounterSign(
         					doc.getData(),
-        					algorithm,
+        					signAlgorithm,
         					new X509Certificate[] { signerCert },
         					expandedParams,
         					target,
@@ -458,7 +464,7 @@ public final class FIReTriHelper {
      * trif&aacute;sica para una firma trif&aacute;sica concreta.
      * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign").
      * @param format Formato de firma.
-     * @param algorithm Algoritmo de firma.
+     * @param digestAlgorithm Algoritmo de huella que utilizar en la firma.
      * @param extraParams Configuraci&oacute;n de firma.
      * @param signerCert Certificado con el que se debe firmar.
      * @param docBytes Datos que se firman/multifirman.
@@ -470,7 +476,7 @@ public final class FIReTriHelper {
      */
     public static byte[] getPostSign(final String criptoOperation,
                                     final String format,
-                                    final String algorithm,
+                                    final String digestAlgorithm,
                                     final Properties extraParams,
                                     final X509Certificate signerCert,
                                     final byte[] docBytes,
@@ -489,11 +495,14 @@ public final class FIReTriHelper {
         	}
         }
 
+        final String signAlgorithm = AOSignConstants.composeSignatureAlgorithmName(
+        		digestAlgorithm, signerCert.getPublicKey().getAlgorithm());
+
         if (SignOperation.SIGN.toString().equalsIgnoreCase(criptoOperation)) {
             try {
                 return prep.preProcessPostSign(
             		docBytes,
-            		algorithm,
+            		signAlgorithm,
                     new X509Certificate[] { signerCert },
                     expandedParams,
                     triphaseData
@@ -509,7 +518,7 @@ public final class FIReTriHelper {
             try {
                 return prep.preProcessPostCoSign(
             		docBytes,
-            		algorithm,
+            		signAlgorithm,
                     new X509Certificate[] { signerCert },
                     expandedParams,
                     triphaseData
@@ -536,7 +545,7 @@ public final class FIReTriHelper {
             try {
                 return prep.preProcessPostCounterSign(
             		docBytes,
-                    algorithm,
+            		signAlgorithm,
                     new X509Certificate[] { signerCert },
                     expandedParams,
                     FIReTriSignIdProcessor.unmake(triphaseData),

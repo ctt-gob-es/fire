@@ -206,7 +206,7 @@ public final class SingleSignConstants {
 		RSA("RSA", "RSA"), //$NON-NLS-1$ //$NON-NLS-2$
 
 		/** ECDSA. */
-		ECDSA("ECDSA", "ECC"); //$NON-NLS-1$ //$NON-NLS-2$
+		ECDSA("ECDSA", "EC"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		private final String name;
 		private final String certKey;
