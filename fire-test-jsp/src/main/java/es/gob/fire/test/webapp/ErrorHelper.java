@@ -11,9 +11,11 @@ package es.gob.fire.test.webapp;
 
 import java.io.IOException;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import es.gob.fire.client.ClientConfigFilesNotFoundException;
@@ -25,6 +27,8 @@ import es.gob.fire.client.TransactionResult;
  * Clase de ayuda para obtener un error detectado durante una transacci&oacute;n.
  */
 public class ErrorHelper {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ErrorHelper.class);
 
     /**
      * Constructor privado para no permir la instanciaci&oacute;n
@@ -53,6 +57,16 @@ public class ErrorHelper {
     public static TransactionResult recoverErrorResult(final HttpServletRequest request)
             throws IllegalArgumentException, IOException, HttpOperationException, InvalidTransactionException {
 
+    	LOGGER.info("Se intenta recuperar el error producido por la operacion"); //$NON-NLS-1$
+
+    	final Cookie[] cookies = request.getCookies();
+    	LOGGER.info("Cookies recibidas: " + (cookies == null ? "null" : Integer.toString(cookies.length))); //$NON-NLS-1$ //$NON-NLS-2$
+    	if (cookies != null) {
+    		for (final Cookie cookie : cookies) {
+    			LOGGER.info("Cookie: " + cookie.getName());
+    		}
+    	}
+
     	// El identificador de aplicacion es propio de cada aplicacion. En esta de ejemplo,
     	// se lee del fichero de configuracion
     	final String appId = ConfigManager.getInstance().getAppId();
@@ -60,6 +74,12 @@ public class ErrorHelper {
     	// Recuperamos de la sesion el ID de transaccion que obtuvimos y guardamos al iniciar
     	// la operaci&oacute;n
         final HttpSession session = request.getSession(false);
+		if ( session == null || session.getAttribute("user") == null) { //$NON-NLS-1$
+			LOGGER.error(session == null ? "No se ha encontrado sesion" : "No habia registrado un usuario en la sesion"); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException(
+                    "No se encontro la sesion o no habia un usuario registrado en ella"); //$NON-NLS-1$
+		}
+
         final String transactionId = (String) session.getAttribute("transactionId"); //$NON-NLS-1$
         final String subjectId = (String) session.getAttribute("user"); //$NON-NLS-1$
 
@@ -75,7 +95,7 @@ public class ErrorHelper {
         try {
         	result = ConfigManager.getInstance().getFireClient(appId).recoverErrorResult(transactionId, subjectId);
 		} catch (final ClientConfigFilesNotFoundException e) {
-			LoggerFactory.getLogger(ErrorHelper.class).error(
+			LOGGER.error(
 					"No se encuentra el fichero de configuracion del componente distribuido de FIRe", e); //$NON-NLS-1$
 			throw new IOException("No se encuentra el fichero de configuracion del componente distribuido de FIRe", e); //$NON-NLS-1$
 		}

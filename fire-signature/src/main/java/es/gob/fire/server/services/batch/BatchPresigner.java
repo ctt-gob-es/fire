@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.Responser;
-import es.gob.fire.server.services.batch.ProcessResult.Result;
 
 
 /** Realiza la primera fase de un proceso de firma por lote.
@@ -68,7 +67,7 @@ public final class BatchPresigner extends HttpServlet {
 			batch = new SignBatchSerial(batchConfig);
 		}
 		catch(final Exception e) {
-			LOGGER.severe("La definicion de lote es invalida: " + e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "La definicion de lote es invalida", e); //$NON-NLS-1$
 			Responser.sendError(response,
 				HttpServletResponse.SC_BAD_REQUEST,
 				"La definicion de lote es invalida"); //$NON-NLS-1$

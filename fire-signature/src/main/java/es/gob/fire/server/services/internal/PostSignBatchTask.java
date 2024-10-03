@@ -131,7 +131,10 @@ class PostSignBatchTask implements Callable<String> {
     			if (ServiceParams.UPGRADE_VERIFY.equalsIgnoreCase(upgradeLevel)) {
     				if (this.needValidation) {
     					LOGGER.info(logF.f("Validamos la firma: " + this.docId)); //$NON-NLS-1$
+    					final long beforeTimeMillis = System.currentTimeMillis();
     					final VerifyResult verifyResult = validator.validateSignature(signature, upgradeConfig);
+    					LOGGER.info(logF.f("Tiempo de validacion: %sms", Long.toString(System.currentTimeMillis() - beforeTimeMillis))); //$NON-NLS-1$
+
     					if (!verifyResult.isOk()) {
     		    			LOGGER.log(Level.WARNING, logF.f("La firma del document %1s no es valida: %2s", this.docId, verifyResult.getDescription())); //$NON-NLS-1$
     		    			this.batchResult.setErrorResult(this.docId, BatchResult.INVALID_SIGNATURE);
@@ -148,7 +151,9 @@ class PostSignBatchTask implements Callable<String> {
     				LOGGER.info(logF.f("Actualizamos la firma '%1s' a: %2s", this.docId, upgradeLevel)); //$NON-NLS-1$
     				UpgradeResult upgradeResult;
     				try {
+    					final long beforeTimeMillis = System.currentTimeMillis();
     					upgradeResult = validator.upgradeSignature(signature, upgradeLevel, upgradeConfig);
+    					LOGGER.info(logF.f("Tiempo de actualizacion: %sms", Long.toString(System.currentTimeMillis() - beforeTimeMillis))); //$NON-NLS-1$
     				}
     				catch (final VerifyException e) {
     	    			LOGGER.log(Level.WARNING, logF.f("Se ha intentado actualizar una firma invalida con el docId: " + this.docId), e); //$NON-NLS-1$

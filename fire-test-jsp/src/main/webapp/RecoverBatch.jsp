@@ -136,6 +136,8 @@
 
 			Logger LOGGER = LoggerFactory.getLogger("es.gob.fire.test.webapp.recoverbatch"); //$NON-NLS-1$
 		
+			LOGGER.info("Se intenta recuperar el lote"); //$NON-NLS-1$
+			
 			if (session.getAttribute("user") == null) { //$NON-NLS-1$
 				LOGGER.warn("No se encontro sesion de usuario"); //$NON-NLS-1$
 				response.sendRedirect("Login.jsp"); //$NON-NLS-1$

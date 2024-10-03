@@ -93,7 +93,10 @@ public class RecoverUpdatedSignManager {
         UpgradeResult upgradeResult;
         try {
         	final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator(logF);
+        	LOGGER.info(logF.f("Recuperamos la firma longeva")); //$NON-NLS-1$
+        	final long beforeTimeMillis = System.currentTimeMillis();
         	upgradeResult = validator.recoverUpgradedSignature(asyncId, upgrade, upgraterConfig);
+        	LOGGER.info(logF.f("Tiempo de recuperacion: %sms", Long.toString(System.currentTimeMillis() - beforeTimeMillis))); //$NON-NLS-1$
         } catch (final ValidatorException e) {
         	LOGGER.log(Level.SEVERE, logF.f("Error interno al cargar el conector con el sistema de actualizacion de firmas"), e); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.INTERNAL_ERROR);

@@ -55,7 +55,7 @@ public final class BatchPostsigner extends HttpServlet {
 	 * Devuelve un JSON de resumen de resultado (<a href="../doc-files/resultlog-scheme.html">descripci&oacute;n
 	 * del formato</a>)
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
-	 * */
+	 */
 	@Override
 	protected void service(final HttpServletRequest request,
 			               final HttpServletResponse response) {
@@ -84,7 +84,7 @@ public final class BatchPostsigner extends HttpServlet {
 			batch = new SignBatchSerial(jsonBatch);
 		}
 		catch(final Exception e) {
-			LOGGER.severe("La definicion de lote es invalida: " + e); //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, "La definicion de lote es invalida", e); //$NON-NLS-1$
 			Responser.sendError(response,
 				HttpServletResponse.SC_BAD_REQUEST,
 				"La definicion de lote es invalida: " + e); //$NON-NLS-1$

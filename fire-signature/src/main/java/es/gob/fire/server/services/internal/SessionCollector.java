@@ -128,9 +128,7 @@ public final class SessionCollector {
     		fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_REF, subjectRef);
     	}
 
-    	if (LOGGER.isLoggable(Level.FINE)) {
-    		LOGGER.fine(trAux.getLogFormatter().fTr(transactionId, "Se crea la transaccion " + transactionId)); //$NON-NLS-1$
-    	}
+   		LOGGER.fine(trAux.getLogFormatter().fTr(transactionId, "Se crea la transaccion " + transactionId)); //$NON-NLS-1$
 
     	return fireSession;
     }
@@ -256,7 +254,7 @@ public final class SessionCollector {
 		if (!needForceLoad && session != null && session.getAttribute(trId) != null) {
 			fireSession = findSessionFromCurrentSession(trId, session, trAux);
 
-			if (fireSession != null && LOGGER.isLoggable(Level.FINE)) {
+			if (fireSession != null) {
 				LOGGER.fine(trAux.getLogFormatter().fTr(trId, "Sesion ya cargada")); //$NON-NLS-1$
 			}
 		}
@@ -269,7 +267,7 @@ public final class SessionCollector {
 				if (fireSession != null && session != null) {
 					fireSession.saveIntoHttpSession(session);
 				}
-				if (fireSession != null && LOGGER.isLoggable(Level.FINE)) {
+				if (fireSession != null) {
 					LOGGER.fine(trAux.getLogFormatter().fTr(trId, "Sesion cargada de memoria")); //$NON-NLS-1$
 				}
 			}
@@ -280,13 +278,13 @@ public final class SessionCollector {
 				if (fireSession != null && session != null) {
 					fireSession.saveIntoHttpSession(session);
 				}
-				if (fireSession != null && LOGGER.isLoggable(Level.FINE)) {
+				if (fireSession != null) {
 					LOGGER.fine(trAux.getLogFormatter().fTr(trId, "Sesion cargada de almacenamiento persistente")); //$NON-NLS-1$
 				}
 			}
 		}
 
-		if (onlyLoaded && fireSession == null && LOGGER.isLoggable(Level.FINE)) {
+		if (onlyLoaded && fireSession == null) {
 			LOGGER.fine(trAux.getLogFormatter().fTr(trId, "Se esperaba que la sesion estuviese en memoria y no fue asi")); //$NON-NLS-1$
 		}
 
@@ -442,9 +440,7 @@ public final class SessionCollector {
 
 		fireSession.invalidate();
 
-		if (LOGGER.isLoggable(Level.FINE)) {
-	    	LOGGER.fine(trAux.getLogFormatter().fTr(fireSession.getTransactionId(), "Se elimina la transaccion")); //$NON-NLS-1$
-		}
+    	LOGGER.fine(trAux.getLogFormatter().fTr(fireSession.getTransactionId(), "Se elimina la transaccion")); //$NON-NLS-1$
     }
 
     /**

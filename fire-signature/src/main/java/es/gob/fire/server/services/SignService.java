@@ -247,7 +247,9 @@ public final class SignService extends HttpServlet {
         // Insertamos los PKCS#1 en la sesion trifasica
         final Set<String> keys = ret.keySet();
         for (final String key : keys) {
-            LOGGER.fine(logF.f("Firma " + key + " =\n" + AOUtil.hexify(ret.get(key), true))); //$NON-NLS-1$ //$NON-NLS-2$
+        	if (LOGGER.isLoggable(Level.FINE)) {
+        		LOGGER.fine(logF.f("Firma " + key + " =\n" + AOUtil.hexify(ret.get(key), true))); //$NON-NLS-1$ //$NON-NLS-2$
+        	}
             FIReTriHelper.addPkcs1ToTriSign(ret.get(key), key, td);
         }
 
@@ -294,7 +296,10 @@ public final class SignService extends HttpServlet {
         	// Procedemos a la validacion
         	try {
         		final SignatureValidator validator = SignatureValidatorBuilder.getSignatureValidator(logF);
+        		LOGGER.info(logF.f("Actualizamos la firma a: " + upgrade)); //$NON-NLS-1$
+        		final long beforeTimeMillis = System.currentTimeMillis();
         		final UpgradeResult upgradeResult = validator.upgradeSignature(signResult, upgrade, upgraterConfig);
+        		LOGGER.info(logF.f("Tiempo de actualizacion: %sms", Long.toString(System.currentTimeMillis() - beforeTimeMillis))); //$NON-NLS-1$
         		signResult = upgradeResult.getResult();
         	} catch (final ConnectionException e) {
         		LOGGER.log(Level.SEVERE, logF.f("No se pudo conectar con el servicio de validacion y mejora de firmas"), e); //$NON-NLS-1$

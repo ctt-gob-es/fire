@@ -3,7 +3,7 @@
     
     <Appenders>
         
-        <RollingFile name="FIRE-WEB" fileName="${sys:catalina.base}/logs/fire-web.log" filePattern="${sys:catalina.base}/logs/fire-web-%d{yyyy-MM-dd}.log">
+        <RollingFile name="FIRE-WEB" fileName="${sys:catalina.base}/logs/fire-admin.log" filePattern="${sys:catalina.base}/logs/fire-admin-%d{yyyy-MM-dd}.log">
             <PatternLayout>
                 <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
             </PatternLayout>

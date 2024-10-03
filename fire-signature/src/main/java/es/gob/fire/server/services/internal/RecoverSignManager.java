@@ -263,7 +263,7 @@ public class RecoverSignManager {
     			return;
     		}
     		catch(final FIReSignatureException e) {
-    			LOGGER.log(Level.WARNING, logF.f("Error de integridad. El PKCS#1 recibido no se genero con el certificado indicado"), e); //$NON-NLS-1$
+    			LOGGER.log(Level.WARNING, logF.f("En la operacion de firma"), e); //$NON-NLS-1$
     			sendError(response, session, FIReError.PROVIDER_ERROR, trAux);
     			return;
     		}
@@ -300,7 +300,7 @@ public class RecoverSignManager {
     					upgraterConfig, signValidationNeeded, logF);
     		}
     		catch (final InvalidSignatureException e) {
-    			LOGGER.log(Level.WARNING, logF.f("La firma generada no es valida: " + e.getMessage())); //$NON-NLS-1$
+    			LOGGER.log(Level.WARNING, logF.f("La firma generada no es valida: " + e)); //$NON-NLS-1$
     			sendError(response, session, FIReError.INVALID_SIGNATURE, trAux);
     			return;
     		}
@@ -419,7 +419,9 @@ public class RecoverSignManager {
 		if (ServiceParams.UPGRADE_VERIFY.equalsIgnoreCase(upgradeLevel)) {
 			if (needValidation) {
 				LOGGER.info(logF.f("Validamos la firma")); //$NON-NLS-1$
+				final long beforeTimeMillis = System.currentTimeMillis();
 				final VerifyResult verifyResult = validator.validateSignature(signature, upgraderConfig);
+				LOGGER.info(logF.f("Tiempo de validacion: %sms", Long.toString(System.currentTimeMillis() - beforeTimeMillis))); //$NON-NLS-1$
 				if (!verifyResult.isOk()) {
 					throw new InvalidSignatureException("La firma generada no es valida: " + verifyResult.getDescription()); //$NON-NLS-1$
 				}
@@ -433,7 +435,9 @@ public class RecoverSignManager {
 			LOGGER.info(logF.f("Actualizamos la firma a: " + upgradeLevel)); //$NON-NLS-1$
 			UpgradeResult upgradeResult;
 			try {
+				final long beforeTimeMillis = System.currentTimeMillis();
 				upgradeResult = validator.upgradeSignature(signature, upgradeLevel, upgraderConfig);
+				LOGGER.info(logF.f("Tiempo de actualizacion: %sms", Long.toString(System.currentTimeMillis() - beforeTimeMillis))); //$NON-NLS-1$
 			}
 			catch (final VerifyException e) {
 				throw new InvalidSignatureException("Se ha intentado actualizar una firma invalida", e); //$NON-NLS-1$

@@ -12,6 +12,7 @@ package es.gob.fire.test.webapp;
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,9 +36,20 @@ public class RecoverSignService extends HttpServlet {
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 
+		LOGGER.info("Se intenta recuperar el resultado de exito de la firma"); //$NON-NLS-1$
+
+    	final Cookie[] cookies = request.getCookies();
+    	LOGGER.info("Cookies recibidas: " + (cookies == null ? "null" : Integer.toString(cookies.length))); //$NON-NLS-1$ //$NON-NLS-2$
+    	if (cookies != null) {
+    		for (final Cookie cookie : cookies) {
+    			LOGGER.info("Cookie: " + cookie.getName());
+    		}
+    	}
+
 		try {
 			final HttpSession session = request.getSession(false);
 			if ( session == null || session.getAttribute("user") == null) { //$NON-NLS-1$
+				LOGGER.error(session == null ? "No se ha encontrado sesion" : "No habia registrado un usuario en la sesion"); //$NON-NLS-1$ //$NON-NLS-2$
 				response.sendRedirect("Login.jsp"); //$NON-NLS-1$
 				return;
 			}
