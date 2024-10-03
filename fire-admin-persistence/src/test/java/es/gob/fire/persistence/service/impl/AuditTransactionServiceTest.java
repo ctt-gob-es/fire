@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -371,8 +372,9 @@ public class AuditTransactionServiceTest {
 
     	final Integer minutesProperty = 20;
 
-    	when(this.auditTransactionRepository.findByDateAfter(new Date(System.currentTimeMillis() - minutesProperty * 60 * 1000))).thenReturn(this.expectedListAuditTransactions);
-
+    	when(this.auditTransactionRepository.findByDateAfter(any(Date.class)))
+        .thenReturn(this.expectedListAuditTransactions);
+    	
 		final DataTablesOutput<AuditTransaction> result = this.auditTransactionService.getAuditTransactionsFirstQuery(input, minutesProperty);
 
 		assertNotNull(result);
