@@ -233,15 +233,15 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * concreto y
 	 * que esten seguidos por una fecha mayor que la indicada.
 	 *
-	 * @param suffix Sufijo de los ficheros.
+	 * @param prefix Prefijo de los ficheros.
 	 * @param date   Fecha m&iacute;nima que deben mostrar los ficheros en su nombre
 	 *               (no incluida).
 	 * @return Listado de ficheros.
 	 */
-	private File[] getPendingDataFiles(final String suffix, final Date date) {
+	private File[] getPendingDataFiles(final String prefix, final Date date) {
 
 		File[] dataFiles = new File(this.dataPath)
-				.listFiles(new DataStatisticsFileFilter(suffix, date, formatter, this.processCurrentDay));
+				.listFiles(new DataStatisticsFileFilter(prefix, date, formatter, this.processCurrentDay));
 
 		// Si se obtiene el listado de ficheros del directorio, se ordena. Si no, se devuelve un listado vacio
 		if (dataFiles != null) {
@@ -352,7 +352,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * fecha.
 	 * @param signatureFiles Ficheros con los datos de las firmas ejecutadas.
 	 * @param transactionFiles Ficheros con los datos de las transacciones ejecutadas.
-	 * @param connectionAttributes
+	 * @param connectionAttributes Propiedades para la conexi&oacute;n con la base de datos.
 	 * @return Resultado del proceso de carga.
 	 */
 	private static LoadStatisticsResult exeLoadStatistics(final File[] signatureFiles, final File[] transactionFiles,
@@ -363,6 +363,16 @@ public class LoadStatisticsRunnable implements Runnable {
 
 		for (int i = 0; i < Math.min(signatureFiles.length, transactionFiles.length); i++) {
 
+			// Comprobamos que ningun elemento de la pareja sea nulo, que significaria que falta ese fichero
+			if (signatureFiles[i] == null) {
+				LOGGER.warning(String.format("No se procesara el fichero de transacciones %s por no existir el fichero de firmas del mismo dia", transactionFiles[i].getName())); //$NON-NLS-1$
+				continue;
+			}
+			if (transactionFiles[i] == null) {
+				LOGGER.warning(String.format("No se procesara el fichero de firmas %s por no existir el fichero de firmas del mismo dia", signatureFiles[i].getName())); //$NON-NLS-1$
+				continue;
+			}
+
 			// Por orden, procesamos cada pareja de ficheros, cuidando que tengamos ambos
 			// ficheros
 			// para cada una de las fechas encontradas
@@ -370,14 +380,13 @@ public class LoadStatisticsRunnable implements Runnable {
 			final String signatureFileDate = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length());
 			final String transactionFileDate = transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length());
 
-			final int dateComparison = checkDatesFromFiles(signatureFileDate, transactionFileDate);
+			final boolean sameDate = checkDatesFromFiles(signatureFileDate, transactionFileDate);
 
-			if (dateComparison < 1) {
+			if (!sameDate) {
 				final String errorMsg = "No coinciden las fechas de los ficheros"; //$NON-NLS-1$
 				LOGGER.severe(errorMsg);
 				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
-
 
 //			final int c = signatureFiles[i].getName().substring(FILE_SIGN_PREFIX.length()).compareTo(
 //							transactionFiles[i].getName().substring(FILE_TRANS_PREFIX.length()));
@@ -394,16 +403,14 @@ public class LoadStatisticsRunnable implements Runnable {
 //				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 //			}
 
-
 			// Identificamos la fecha de los ficheros que estamos procesando
 			final String dateText = parseDateStringFromFilename(signatureFiles[i], FILE_SIGN_PREFIX);
 			Date date;
 			try {
 				date = formatter.parse(dateText);
 			} catch (final Exception e) {
-				final String errorMsg = "Se encontro un fichero con una fecha no valida: " + signatureFiles[i]; //$NON-NLS-1$
-				LOGGER.severe(errorMsg);
-				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
+				LOGGER.warning(String.format("Se omitira la pareja de ficheros %1s y %2s por presentar un formato de fecha no valido", signatureFiles[i], transactionFiles[i])); //$NON-NLS-1$
+				continue;
 			}
 
 			// Extraemos la informacion de los ficheros
@@ -658,20 +665,8 @@ public class LoadStatisticsRunnable implements Runnable {
 		return this.result;
 	}
 
-	private static int checkDatesFromFiles(final String signatureFileDate, final String transactionFileDate) {
-
-		// Returns 0 if all the dates are different
-		int comparison = 0;
-
-		if (signatureFileDate.equals(transactionFileDate)) {
-			// Returns 1 if all dates are equal
-			comparison = 1;
-		} else {
-			// Returns -1 if there is difference between at least 1 of them
-			comparison = -1;
-		}
-
-		return comparison;
+	private static boolean checkDatesFromFiles(final String signatureFileDate, final String transactionFileDate) {
+		return signatureFileDate.equals(transactionFileDate);
 	}
 
 	/**
@@ -680,15 +675,15 @@ public class LoadStatisticsRunnable implements Runnable {
 	 */
 	private static class DataStatisticsFileFilter implements java.io.FileFilter {
 
-		private final String fileSuffix;
+		private final String filePrefix;
 		private final Date date;
 		private final SimpleDateFormat dateFormatter;
 		private final boolean processCurrentDay;
 		private final long todayMillis;
 
-		public DataStatisticsFileFilter(final String suffix, final Date initialDate,
+		public DataStatisticsFileFilter(final String prefix, final Date initialDate,
 				final SimpleDateFormat formatter, final boolean processCurrentDay) {
-			this.fileSuffix = suffix;
+			this.filePrefix = prefix;
 			this.date = initialDate;
 			this.dateFormatter = formatter;
 			this.processCurrentDay = processCurrentDay;
@@ -703,11 +698,11 @@ public class LoadStatisticsRunnable implements Runnable {
 			}
 
 			final String name = pathname.getName();
-			if (!name.endsWith(FILE_EXT_LOG) || !name.startsWith(this.fileSuffix)) {
+			if (!name.endsWith(FILE_EXT_LOG) || !name.startsWith(this.filePrefix)) {
 				return false;
 			}
 
-			final String dateText = name.substring(this.fileSuffix.length(), name.length() - FILE_EXT_LOG.length());
+			final String dateText = name.substring(this.filePrefix.length(), name.length() - FILE_EXT_LOG.length());
 
 			Date dataDate;
 			try {
