@@ -2,7 +2,6 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-signature-connector-clavefirma</artifactId>
 	<packaging>jar</packaging>
 
@@ -30,7 +29,7 @@
 		<dependency>
 			<groupId>com.openlandsw.rss</groupId>
     		<artifactId>gateway-api</artifactId>
-    		<version>2.4.05</version>
+    		<version>2.5.01</version>
     		<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -42,7 +41,7 @@
 		<dependency>
 			<groupId>com.openlandsw.rss</groupId>
     		<artifactId>gateway-api-comun</artifactId>
-    		<version>2.4.05</version>
+    		<version>2.5.01</version>
     		<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
