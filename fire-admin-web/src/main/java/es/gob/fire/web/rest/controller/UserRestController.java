@@ -139,23 +139,23 @@ public class UserRestController {
 	 * @return String that represents the name of the view to redirect.
 	 */
 	@RequestMapping(path = "/deleteuser", method = RequestMethod.POST)
-	public String deleteUser(@RequestParam("id") final Long userId, @RequestParam("index") final String index) {
+	public String deleteUser(@RequestParam("username") final String username, @RequestParam("index") final String index) {
 
 		String result = index;
 
-		final User user = this.userService.getUserByUserId(userId);
+		final User user = this.userService.getUserByUserName(username);
 
 		if (user.getRoot() == Boolean.TRUE) {
 			result = "error.No se puede eliminar al administrador principal.";
 		}
 		else {
-			final List<ApplicationResponsible> responsables = this.appService.getApplicationResponsibleByUserId(userId);
+			final List<ApplicationResponsible> responsables = this.appService.getApplicationResponsibleByUserId(user.getUserId());
 
 			if (responsables == null || responsables.size() > 0) {
 				result = "error.No se ha podido borrar el usuario, tiene aplicaciones asociadas.";
 			}
 			else {
-				this.userService.deleteUser(userId);
+				this.userService.deleteUser(user.getUserId());
 			}
 		}
 		return result;
