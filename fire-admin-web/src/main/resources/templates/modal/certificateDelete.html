@@ -12,24 +12,48 @@
 			</div>
 			<div class="modal-body">
 				<form name="altEditor-form" role="form" id="idCertificateForm"
-					th:object="${certificateform}" th:action="@{/}"
-					method="post" enctype="multipart/form-data">
-					<div id="errorDeleteCertificate" role="alert" />
-					<input type='hidden' id="idCertificate"
-						th:field="*{idCertificate}"></input>
+					th:object="${certificateform}" th:action="@{/}" method="post"
+					enctype="multipart/form-data">
+					<div id="errorDeleteCertificate" role="alert"></div>
+					<input type='hidden' id="idCertificate" th:field="*{idCertificate}"></input>
 					<input type='hidden' id="rowIndexValmetDel"
-						th:field="*{rowIndexCert}"></input>	
+						th:field="*{rowIndexCert}"></input>
 					<div class="form-group col-md-12">
-						<h5 class="c-grey-900" th:text="#{form.certificate.delete.message}"></h5>
+						<h5 class="c-grey-900"
+							th:text="#{form.certificate.delete.message}"></h5>
+					</div>
+					<!-- Tabla para mostrar las aplicaciones certificadas -->
+					<div class="row" id="appCertTableWrapper" style="display:none;">
+						<div class="col-md-12">
+							<div class="bgc-white bd bdrs-3 p-20 mB-20">
+								<h6 class="c-grey-900 mB-20"
+									th:text="#{table.certificate.app.title}"></h6>
+								<table id="appCertTable"
+									class="table table-striped table-bordered" cellspacing="0"
+									width="100%">
+									<thead>
+										<tr>
+											<th th:text="#{table.app.name}"></th>
+											<th th:text="#{table.app.id}"></th>
+											<th th:text="#{table.app.responsable}"></th>
+											<th th:text="#{table.app.fec_alt}"></th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+								</table>
+							</div>
+						</div>
 					</div>
 				</form>
 			</div>
+
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default"
 					onclick="closeModalButton('modalDeleteCert', 'idCertificateForm')"
 					th:text="#{form.certificate.app.btn.cancel}"></button>
-				<button type="button" id="idDeleteResponsibleBtn" class="btn btn-danger"
-					th:text="#{form.certificate.btn.delete}" onclick="deleteCertificate();"></button>
+				<button type="button" id="idDeleteResponsibleBtn"
+					class="btn btn-danger" th:text="#{form.certificate.btn.delete}"
+					onclick="deleteCertificate();"></button>
 			</div>
 		</div>
 	</div>
@@ -56,6 +80,7 @@ function deleteCertificate(){
         		$('#modalDeleteCert .modal-body .alert').remove();
 	            $('#modalDeleteCert .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + msgError + '</strong></div>');
         		$('#idDeleteResponsibleBtn').prop('disabled', true);
+        		$('#appCertTableWrapper').show();
         		createAssociatedAppTable();
 	    	} else {                    
         	
@@ -86,52 +111,42 @@ function closeModalButton(btnId, nameForm){
 	$('#' + btnId).modal('hide');	
 }
 
-function createAssociatedAppTable(){
-	var tableTitle =  /*[[#{table.certificate.app.title}]]*/;
-	var tableColName =  /*[[#{table.app.name}]]*/;
-	var tableColId =  /*[[#{table.app.id}]]*/;
-	var tableColResponsable =  /*[[#{table.app.responsable}]]*/;
-	var tableColFecAlta =  /*[[#{table.app.fec_alt}]]*/;
-	
-	if ($.fn.DataTable.isDataTable('#miTabla')) {
-        $('#appCertTable').DataTable().destroy();
-        $('#appCertTable').empty();
+function createAssociatedAppTable() {
+    var idCertificado = $("#idCertificate").val();
+    var getCertApps = /*[[@{/certappdatatable}]]*/;
+
+    // Inicializa la tabla solo si aún no está creada
+    if (!$.fn.DataTable.isDataTable('#appCertTable')) {
+        $('#appCertTable').DataTable({
+            "processing": true,
+            "serverSide": false,
+            "ajax": {
+                "url": getCertApps,
+                "data": {
+                    "idCertificate": idCertificado
+                },
+                "type": "POST"
+            },
+            "language": {
+                "url": "js/datatables/i18n/spanish.json",
+                select: {
+                    rows: {
+                        _: "%d filas seleccionadas",
+                        1: "1 fila seleccionada"
+                    }
+                }
+            },
+            "columns": [
+                { "data": "appName" },
+                { "data": "appId" },
+                { "data": "responsables" },
+                { "data": "fechaAltaApp" }
+            ],
+            "responsive": true
+        });
     } else {
-        $('#modalDeleteCert .modal-body').append('<div class="row"><div class="col-md-12"><div class="bgc-white bd bdrs-3 p-20 mB-20"><h6 class="c-grey-900 mB-20" th:text="' + tableTitle + '"></h6><table id="appCertTable" class="table table-striped table-bordered" cellspacing="0" width="100%"><thead><tr><th th:text="' + tableColName +'"></th><th th:text="' + tableColId +'"></th><th th:text="' + tableColResponsable + '"></th><th th:text="' + tableColFecAlta +'"></th></tr></thead></table></div></div></div>');
+        $('#appCertTable').DataTable().ajax.reload();
     }
-	
-	var idCertificado = $("#idCertificate").val();
-	var getCertApps = /*[[@{/certappdatatable}]]*/;
-	tblCertApp = $('#appCertTable').DataTable({
-	    "iTotalRecords": "totalElements",
-	    "iTotalDisplayRecords": "numberOfElements",        
-	    "processing": true,
-	    "serverSide": false,
-	    "ajax": {
-	        "url": getCertApps,
-	        "data": {
-	            "idCertificate": idCertificado
-	        },
-	        "type": "POST"
-	    },
-	    "language": {
-	        "url": "js/datatables/i18n/spanish.json",
-	        select: {
-	            rows: {
-	                _: "%d filas seleccionadas",
-	                1: "1 fila seleccionada"
-	            }
-	          }
-	        },
-	       
-	    "columns": [
-	          { "data": "appName" },
-	          { "data": "appId"},
-	          { "data": "responsables"},
-	          { "data": "fechaAltaApp" }
-	        ],
-	        responsive: true
-	});
 }
 </script>
 

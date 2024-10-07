@@ -26,8 +26,10 @@ package es.gob.fire.web.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +59,9 @@ public class UserController {
 	 */
 	@Autowired
 	private IUserService userService;
+	
+	@Autowired
+    private MessageSource messageSource;
 
 	/**
 	 * Method that maps the list users web requests to the controller and
@@ -82,9 +87,9 @@ public class UserController {
 	 * @return String that represents the name of the view to forward.
 	 */
 	@RequestMapping(value = "adduser", method = RequestMethod.GET)
-	public String addUser(final Model model) {
+	public String addUser(final Model model, Locale locale) {
 
-		model.addAttribute("listRoles", loadRoles());
+		model.addAttribute("listRoles", loadRoles(locale));
 		model.addAttribute("userform", new UserDTO());
 		model.addAttribute("accion", "add");
 		return "modal/userForm";
@@ -114,7 +119,7 @@ public class UserController {
 	 * @return String that represents the navigation HTML fragment
 	 */
 	@RequestMapping(value = "menuedit")
-	public String menuEdit(@RequestParam("username") final String username, final Model model) {
+	public String menuEdit(@RequestParam("username") final String username, final Model model, Locale locale) {
 		 final User user = this.userService.getUserByUserName(username);
 		 final UserEditDTO userformedit = new UserEditDTO();
 
@@ -126,7 +131,7 @@ public class UserController {
 		userformedit.setRolId(user.getRol().getRolId());
 		userformedit.setTelfEdit(user.getPhone());
 
-		model.addAttribute("listRoles", loadRoles());
+		model.addAttribute("listRoles", loadRoles(locale));
 		model.addAttribute("userformedit", userformedit);
 		return "modal/userFormEdit.html";
 	}
@@ -148,12 +153,13 @@ public class UserController {
 	 * Method that loads association types.
 	 * @return List of es.gob.fire.constants that represents the different association types.
 	 */
-	private List<RolDTO> loadRoles() {
+	private List<RolDTO> loadRoles(Locale locale) {
 		final List<RolDTO> listRoles = new ArrayList<>();
 		// obtenemos los tipos de planificadores.
 		final List<Rol> listRol = this.userService.getAllRol();
 		for (final Rol rol: listRol) {
-			final RolDTO item = new RolDTO(rol.getRolId(), rol.getRolName(), rol.getPermissions());
+			String rolProperty = messageSource.getMessage("form.user.rol." + rol.getRolName(), null, locale);
+			final RolDTO item = new RolDTO(rol.getRolId(), rolProperty, rol.getPermissions());
 			listRoles.add(item);
 		}
 

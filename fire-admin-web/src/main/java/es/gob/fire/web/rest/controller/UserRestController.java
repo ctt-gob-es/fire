@@ -26,6 +26,7 @@ package es.gob.fire.web.rest.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -34,6 +35,7 @@ import javax.validation.constraints.NotEmpty;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.http.MediaType;
@@ -57,6 +59,7 @@ import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
+import es.gob.fire.persistence.dto.UserTableDTO;
 import es.gob.fire.persistence.dto.validation.OrderedValidation;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Rol;
@@ -67,8 +70,15 @@ import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.IUserService;
 
 /**
- * <p>Class that manages the REST requests related to the Users administration and JSON communication.</p>
- * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <p>
+ * Class that manages the REST requests related to the Users administration and
+ * JSON communication.
+ * </p>
+ * <b>Project:</b>
+ * <p>
+ * Application for signing documents of @firma suite systems.
+ * </p>
+ * 
  * @version 1.2, 02/02/2022.
  */
 @RestController
@@ -114,6 +124,9 @@ public class UserRestController {
 	@Autowired
 	private ServletContext context;
 
+	@Autowired
+	private MessageSource messageSource;
+
 	/**
 	 * Method that maps the list users web requests to the controller and
 	 * forwards the list of users to the view.
@@ -124,8 +137,33 @@ public class UserRestController {
 	 */
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/usersdatatable", method = RequestMethod.GET)
-	public DataTablesOutput<User> users(@NotEmpty final DataTablesInput input) {
-		return this.userService.getAllUser(input);
+	public DataTablesOutput<UserTableDTO> users(@NotEmpty final DataTablesInput input, Locale locale) {
+		// Obtener la lista de usuarios desde el servicio
+		Iterable<User> users = this.userService.getAllUser();
+
+		// Crear un nuevo DataTablesOutput para el DTO
+		DataTablesOutput<UserTableDTO> dtoOutput = new DataTablesOutput<>();
+		dtoOutput.setDraw(input.getDraw());
+
+		// Convertir la lista de usuarios en una lista de DTOs
+		List<UserTableDTO> dtoList = StreamSupport.stream(users.spliterator(), false).map(user -> {
+			String rolProperty = messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
+			UserTableDTO userTable = new UserTableDTO(user);
+			userTable.setRolName(rolProperty);
+			return userTable;
+		}).collect(Collectors.toList());
+
+		// Configurar registros totales (sin paginación)
+		dtoOutput.setRecordsTotal(dtoList.size());
+
+		int start = input.getStart();
+		int length = input.getLength();
+		List<UserTableDTO> paginatedList = dtoList.stream().skip(start).limit(length).collect(Collectors.toList());
+
+		dtoOutput.setRecordsFiltered(dtoList.size());
+		dtoOutput.setData(paginatedList);
+
+		return dtoOutput;
 	}
 
 	/**
@@ -139,7 +177,8 @@ public class UserRestController {
 	 * @return String that represents the name of the view to redirect.
 	 */
 	@RequestMapping(path = "/deleteuser", method = RequestMethod.POST)
-	public String deleteUser(@RequestParam("username") final String username, @RequestParam("index") final String index) {
+	public String deleteUser(@RequestParam("username") final String username,
+			@RequestParam("index") final String index) {
 
 		String result = index;
 
@@ -147,14 +186,13 @@ public class UserRestController {
 
 		if (user.getRoot() == Boolean.TRUE) {
 			result = "error.No se puede eliminar al administrador principal.";
-		}
-		else {
-			final List<ApplicationResponsible> responsables = this.appService.getApplicationResponsibleByUserId(user.getUserId());
+		} else {
+			final List<ApplicationResponsible> responsables = this.appService
+					.getApplicationResponsibleByUserId(user.getUserId());
 
 			if (responsables == null || responsables.size() > 0) {
 				result = "error.No se ha podido borrar el usuario, tiene aplicaciones asociadas.";
-			}
-			else {
+			} else {
 				this.userService.deleteUser(user.getUserId());
 			}
 		}
@@ -173,18 +211,19 @@ public class UserRestController {
 	 */
 	@RequestMapping(value = "/saveuser", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<User> save(@Validated(OrderedValidation.class) @RequestBody final UserDTO userForm, final BindingResult bindingResult) {
-		final DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
+	public @ResponseBody DataTablesOutput<UserTableDTO> save(
+			@Validated(OrderedValidation.class) @RequestBody final UserDTO userForm,
+			final BindingResult bindingResult, Locale locale) {
+		final DataTablesOutput<UserTableDTO> dtOutput = new DataTablesOutput<>();
 		List<User> listNewUser = new ArrayList<>();
 		final JSONObject json = new JSONObject();
-
 
 		boolean error = false;
 
 		if (bindingResult.hasErrors()) {
 			error = true;
 
-			for (final FieldError o: bindingResult.getFieldErrors()) {
+			for (final FieldError o : bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 		}
@@ -192,14 +231,16 @@ public class UserRestController {
 		final Rol rol = this.userService.getRol(userForm.getRolId());
 		final boolean hasAccessPermission = PermissionsChecker.hasPermission(rol, Permissions.ACCESS);
 
-		// Si el usuario debe tener acceso a la administracion, entonces es obligatorio que tenga contrasena
+		// Si el usuario debe tener acceso a la administracion, entonces es
+		// obligatorio que tenga contrasena
 		if (hasAccessPermission && emptyAdminPassword(userForm.getPasswordAdd())) {
 			error = true;
 			json.put("passwordAdd" + SPAN, "El campo contrase\u00F1a es obligatorio.");
 
 		}
 
-		if (hasAccessPermission && !matchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
+		if (hasAccessPermission
+				&& !matchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
 			error = true;
 			json.put("passwordAdd" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
 			json.put("confirmPasswordAdd" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
@@ -212,7 +253,8 @@ public class UserRestController {
 
 		}
 
-		if (userForm.getEmailAdd() != null && !userForm.getEmailAdd().isEmpty() && !Utils.isValidEmail(userForm.getEmailAdd())) {
+		if (userForm.getEmailAdd() != null && !userForm.getEmailAdd().isEmpty()
+				&& !Utils.isValidEmail(userForm.getEmailAdd())) {
 			error = true;
 			json.put("emailAdd" + SPAN, "El campo email no es v\u00E1lido.");
 		}
@@ -230,24 +272,38 @@ public class UserRestController {
 				listNewUser.add(user);
 			} catch (final Exception e) {
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
-				listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+				listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false)
+						.collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_USER, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
 				dtOutput.setError(json.toString());
 			}
 		} else {
-			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false)
+					.collect(Collectors.toList());
 			dtOutput.setError(json.toString());
 		}
 
-		dtOutput.setData(listNewUser);
+
+		// Convertir la lista de usuarios en una lista de DTOs
+		List<UserTableDTO> dtoList = StreamSupport.stream(listNewUser.spliterator(), false).map(user -> {
+			String rolProperty = messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
+			UserTableDTO userTable = new UserTableDTO(user);
+			userTable.setRolName(rolProperty);
+			return userTable;
+		}).collect(Collectors.toList());
+
+		// Configurar registros totales (sin paginación)
+		dtOutput.setRecordsTotal(dtoList.size());
+		dtOutput.setRecordsFiltered(dtoList.size());
+		dtOutput.setData(dtoList);
 
 		return dtOutput;
 
 	}
 
-
 	/**
 	 * Method that checks if the password field is empty
+	 * 
 	 * @param userForm
 	 * @return
 	 */
@@ -257,7 +313,9 @@ public class UserRestController {
 
 	/**
 	 * Method that checks if a user had the access permission.
-	 * @param userId User id.
+	 * 
+	 * @param userId
+	 *            User id.
 	 * @return
 	 */
 	private boolean hadAccessBeforeEdit(final Long userId) {
@@ -269,50 +327,58 @@ public class UserRestController {
 
 	/**
 	 * Method that updates a user.
-	 * @param userForm UserForm
-	 * @param bindingResult  BindingResult
+	 * 
+	 * @param userForm
+	 *            UserForm
+	 * @param bindingResult
+	 *            BindingResult
 	 * @return DataTablesOutput<User> users
 	 */
 	@RequestMapping(value = "/saveuseredit", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<User> saveEdit(@Validated(OrderedValidation.class) @RequestBody final UserEditDTO userForm, final BindingResult bindingResult) {
-		final DataTablesOutput<User> dtOutput = new DataTablesOutput<>();
+	public @ResponseBody DataTablesOutput<UserTableDTO> saveEdit(
+			@Validated(OrderedValidation.class) @RequestBody final UserEditDTO userForm,
+			final BindingResult bindingResult, Locale locale) {
+		final DataTablesOutput<UserTableDTO> dtOutput = new DataTablesOutput<>();
 		List<User> listNewUser = new ArrayList<>();
 		final JSONObject json = new JSONObject();
-		
+
 		final User userBeforeUpdate = this.userService.getUserByUserId(userForm.getIdUserFireEdit());
 
 		boolean error = false;
 		if (bindingResult.hasErrors()) {
 			error = true;
-			for (final FieldError o: bindingResult.getFieldErrors()) {
+			for (final FieldError o : bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 		}
 
-		// Si se esta estableciendo el rol administrador a un usuario distinto al original,
+		// Si se esta estableciendo el rol administrador a un usuario distinto
+		// al original,
 		// comprobamos que se hayan establecido correctamente las contrasenas
 		final Rol rol = this.userService.getRol(userForm.getRolId());
 		final boolean hasAccessPermission = PermissionsChecker.hasPermission(rol, Permissions.ACCESS);
 
-		if (hasAccessPermission && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit()) && !hadAccessBeforeEdit(userForm.getIdUserFireEdit())) {
+		if (hasAccessPermission && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit())
+				&& !hadAccessBeforeEdit(userForm.getIdUserFireEdit())) {
 			if (emptyAdminPassword(userForm.getPasswordEdit())) {
 				error = true;
 				json.put("passwordEdit" + SPAN, "El campo contrase\u00F1a es obligatorio.");
-			}
-			else if (!matchingConfirmPassword(userForm.getPasswordEdit(), userForm.getConfirmPasswordEdit())) {
+			} else if (!matchingConfirmPassword(userForm.getPasswordEdit(), userForm.getConfirmPasswordEdit())) {
 				error = true;
 				json.put("passwordEdit" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
 				json.put("confirmPasswordEdit" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
 			}
 		}
 
-		if (userForm.getEmailEdit() != null && !userForm.getEmailEdit().isEmpty() && !Utils.isValidEmail(userForm.getEmailEdit())) {
+		if (userForm.getEmailEdit() != null && !userForm.getEmailEdit().isEmpty()
+				&& !Utils.isValidEmail(userForm.getEmailEdit())) {
 			error = true;
 			json.put("emailEdit" + SPAN, "El campo email no es v\u00E1lido.");
 		}
 
-		if (!userBeforeUpdate.getEmail().equals(userForm.getEmailEdit()) && this.userService.getUserByEmail(userForm.getEmailEdit()) != null) {
+		if (!userBeforeUpdate.getEmail().equals(userForm.getEmailEdit())
+				&& this.userService.getUserByEmail(userForm.getEmailEdit()) != null) {
 			error = true;
 			json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}
@@ -325,16 +391,29 @@ public class UserRestController {
 
 			} catch (final Exception e) {
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
-				listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+				listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false)
+						.collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_USER, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
 				dtOutput.setError(json.toString());
 			}
 		} else {
-			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+			listNewUser = StreamSupport.stream(this.userService.getAllUser().spliterator(), false)
+					.collect(Collectors.toList());
 			dtOutput.setError(json.toString());
 		}
 
-		dtOutput.setData(listNewUser);
+		// Convertir la lista de usuarios en una lista de DTOs
+		List<UserTableDTO> dtoList = StreamSupport.stream(listNewUser.spliterator(), false).map(user -> {
+			String rolProperty = messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
+			UserTableDTO userTable = new UserTableDTO(user);
+			userTable.setRolName(rolProperty);
+			return userTable;
+		}).collect(Collectors.toList());
+
+		// Configurar registros totales (sin paginación)
+		dtOutput.setRecordsTotal(dtoList.size());
+		dtOutput.setRecordsFiltered(dtoList.size());
+		dtOutput.setData(dtoList);
 
 		return dtOutput;
 
@@ -342,17 +421,21 @@ public class UserRestController {
 
 	/**
 	 * Method that changes the password.
-	 * @param userFormPassword UserFormPassword
-	 * @param bindingResult BindingResult
+	 * 
+	 * @param userFormPassword
+	 *            UserFormPassword
+	 * @param bindingResult
+	 *            BindingResult
 	 * @return String result
 	 */
 	@RequestMapping(value = "/saveuserpassword", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public String savePassword(@Validated(OrderedValidation.class) @RequestBody final UserPasswordDTO userFormPassword, final BindingResult bindingResult) {
+	public String savePassword(@Validated(OrderedValidation.class) @RequestBody final UserPasswordDTO userFormPassword,
+			final BindingResult bindingResult) {
 		String result = UtilsStringChar.EMPTY_STRING;
 
 		if (bindingResult.hasErrors()) {
 			final JSONObject json = new JSONObject();
-			for (final FieldError o: bindingResult.getFieldErrors()) {
+			for (final FieldError o : bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 			result = json.toString();
@@ -383,18 +466,22 @@ public class UserRestController {
 
 	/**
 	 * Method that edits the user.
-	 * @param userForm UserFormEdit
-	 * @param bindingResult BindingResult
+	 * 
+	 * @param userForm
+	 *            UserFormEdit
+	 * @param bindingResult
+	 *            BindingResult
 	 * @return String result
 	 */
 	@RequestMapping(value = "/menueditsave", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public String saveEditMenu(@Validated(OrderedValidation.class) @RequestBody final UserEditDTO userForm, final BindingResult bindingResult) {
+	public String saveEditMenu(@Validated(OrderedValidation.class) @RequestBody final UserEditDTO userForm,
+			final BindingResult bindingResult) {
 
 		String result = UtilsStringChar.EMPTY_STRING;
 
 		if (bindingResult.hasErrors()) {
 			final JSONObject json = new JSONObject();
-			for (final FieldError o: bindingResult.getFieldErrors()) {
+			for (final FieldError o : bindingResult.getFieldErrors()) {
 				json.put(o.getField() + SPAN, o.getDefaultMessage());
 			}
 			result = json.toString();
@@ -415,6 +502,7 @@ public class UserRestController {
 
 	/**
 	 * Get userService.
+	 * 
 	 * @return userService
 	 */
 	public IUserService getUserService() {
@@ -423,7 +511,9 @@ public class UserRestController {
 
 	/**
 	 * Set userService.
-	 * @param userServiceP set userService
+	 * 
+	 * @param userServiceP
+	 *            set userService
 	 */
 	public void setUserService(final IUserService userServiceP) {
 		this.userService = userServiceP;
@@ -431,6 +521,7 @@ public class UserRestController {
 
 	/**
 	 * Get context.
+	 * 
 	 * @return context
 	 */
 	public ServletContext getContext() {
@@ -439,7 +530,9 @@ public class UserRestController {
 
 	/**
 	 * Set context.
-	 * @param contextP set context
+	 * 
+	 * @param contextP
+	 *            set context
 	 */
 	public void setContext(final ServletContext contextP) {
 		this.context = contextP;

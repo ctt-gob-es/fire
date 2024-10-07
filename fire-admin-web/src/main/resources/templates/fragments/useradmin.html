@@ -25,67 +25,6 @@
 	</div>
 </div>
 
-
-
-<div class="modal" tabindex="-1" role="dialog" id="modalPassword">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title" th:text="#{user.admin.changePassword}"></h4>
-				<button type="button" class="close" data-dismiss="modal"
-					aria-label="Cerrar">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form role="form" id="userFormPassword"
-					th:object="${userFormPassword}" th:action="@{/saveuserpassword}"
-					method="post">
-
-					<input type='hidden' class='primarykey' id="idUser"
-						th:field="*{idUser}">
-
-					<div class="form-group-modal">
-						<label for="oldPassword" class="col-form-label"
-							th:text="#{form.user.oldPassword}"></label> <span
-							id="oldPassword_span"
-							class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
-						<input type="password" style="display: none"> <input
-							type="password" id="oldPassword" th:field="*{oldPassword}"
-							class="form-control" />
-					</div>
-
-					<div class="form-group-modal">
-						<label for="password" class="col-form-label"
-							th:text="#{form.user.password}"></label> <span id="password_span"
-							class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
-						<input type="password" id="password" th:field="*{password}"
-							class="form-control" />
-					</div>
-
-					<div class="form-group-modal">
-						<label for="confirmPassword" class="col-form-label"
-							th:text="#{form.user.confirmPassword}"></label> <span
-							id="confirmPassword_span"
-							class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
-						<input onblur="validateConfirmPassword();" type="password"
-							id="confirmPassword" th:field="*{confirmPassword}"
-							class="form-control" />
-					</div>
-				</form>
-
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal"
-					th:text="#{button.close}"></button>
-				<button type="submit" id="passwordBtn" class="btn btn-primary"
-					th:text="#{button.save}"></button>
-			</div>
-		</div>
-	</div>
-</div>
-
-
 <script th:inline="javascript">
 $(document).ready(function() {
 	
@@ -235,7 +174,7 @@ $(document).ready(function() {
 	          "visible": false},
 	        { "data": "email" },
 	        { "data": "phone" },
-	        { "data": "rol.rolName" }
+	        { "data": "rolName" }
 	        ]
 		}).on('crudaction', function(e, accion, idUserFire, data, rowindex){
 		    // e          Evento Jquery
