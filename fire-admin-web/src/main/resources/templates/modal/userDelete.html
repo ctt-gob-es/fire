@@ -1,0 +1,104 @@
+<!-- Modal para eliminar usuarios -->
+<div class="modal fade" tabindex="-1" role="dialog" id="modalDeleteUser">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" th:text="#{form.user.delete.title}"></h4>
+				<button type="button" class="close"
+					onclick="closeModalButton('modalDeleteUser', 'idUserDeleteForm')"
+					aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form name="altEditor-form" role="form" id="idUserDeleteForm"
+					th:object="${userDeleteForm}" th:action="@{/deleteuser}"
+					method="post" enctype="multipart/form-data">
+					<!-- Mensaje -->
+					<div class="form-group col-md-12">
+						<h5 class="c-grey-900" th:text="#{form.user.delete.message}"></h5>
+					</div>
+					<div id="errorDeleteUser" role="alert"></div>
+
+					<!-- El id del usuario -->
+					<input type='hidden' id="idUser" th:field="*{userId}" />
+
+					<!-- El Ìndice de la fila de la tabla -->
+					<input type='hidden' id="tableIndexRow" th:field="${tableIndexRow}" />
+
+					<!-- Nombre de usuario -->
+					<div class="form-group">
+						<label for="userName" class="col-form-label"
+							th:text="#{form.user.delete.username}"></label> <input
+							type="text" id="userName" th:field="*{userName}"
+							class="form-control" />
+					</div>
+
+					<!-- Email -->
+					<div class="form-group">
+						<label for="email" class="col-form-label"
+							th:text="#{form.user.delete.email}"></label> <input type="text"
+							id="email" th:field="*{email}" class="form-control" />
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default"
+					onclick="closeModalButton('modalDeleteUser', 'idUserDeleteForm')"
+					th:text="#{form.user.delete.btn.cancel}"></button>
+				<button type="button" id="idDeleteResponsibleBtn"
+					class="btn btn-danger" th:text="#{form.user.delete.btn.confirm}"
+					onclick="deleteUser();"></button>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:inline="javascript">
+function deleteUser(){
+	var msgErrorDelete =  /*[[#{message.delete.user.error}]]*/;
+	var actionDelete = /*[[@{/deleteuser}]]*/;
+	
+	var userNameValue = $('#userName').val();
+	var indexRow = $('#email').val();
+	
+	tableUser = $("#userTable").DataTable();
+	$.ajax(actionDelete,{
+			data:$.param({'username':userNameValue, 'index':indexRow}),
+	        type:'POST',
+           success: function(data){
+           	
+           	// Se oculta la capa 'cargando...'
+           	hide();
+           	
+           	if (data.indexOf("error") != -1) {
+           		var msgErrorDelete = data.replace('error.','');
+		  		$('#errorDeleteUser').html(msgErrorDelete);
+				$('#errorDeleteUser').addClass('alert alert-danger');
+           	} else {
+                tableUser.row(data.index).remove().draw();
+    			closeModalButton('modalDeleteUser', 'idApplicationForm');
+           	}
+           },
+           error:function(){
+		  		$('#errorDeleteUser').html(msgErrorDelete);
+				$('#errorDeleteUser').addClass('alert alert-danger');
+           }
+});
+}
+
+//funci√≥n cerrar modales
+function closeModalButton(btnId, nameForm){
+	//se limpia posibles mensajes error de span
+	$('#'+nameForm+' *').filter('span').each(function(){
+		cleanSpan($(this).attr('idApplication'));
+	});
+		
+	//se limpia valores del formulario
+	
+	$('#' + btnId).modal('hide');	
+}
+</script>
+
+
+
+

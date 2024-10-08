@@ -29,7 +29,7 @@
 $(document).ready(function() {
 	
 	var actionSave = /*[[@{/saveuser}]]*/;
-	var actionDelete = /*[[@{/deleteuser}]]*/;
+	var actionDelete = /*[[@{/menuDeleteUser}]]*/;
 	var getusers = /*[[@{/usersdatatable}]]*/;
 	var editTemplate = /*[[@{/edituser}]]*/;
 	var addTemplate = /*[[@{/adduser}]]*/;
@@ -118,7 +118,10 @@ $(document).ready(function() {
    						                	
    						                	// Se oculta la capa 'cargando...'
    						                	hide();
+				 							$('#modal').html(data);
+				 							$('#modalDeleteUser').modal('show');		
    						                	
+   						                	/*
    						                	if (data.indexOf("error") != -1) {
    						                		
    						                		var msgError = data.replace('error.','');
@@ -131,6 +134,7 @@ $(document).ready(function() {
    							                    $('#altEditor-modal .modal-body .alert').remove();
    							                    $('#altEditor-modal').modal('hide');
    						                	}
+   						                	*/
    						                },
    						                error:function(){}
       					});
@@ -190,7 +194,6 @@ $(document).ready(function() {
 		    switch(accion){
 		       // Eliminado case add
 		        case 'delete':
-		        	console.log("Llega aquí");
 		            $.ajax(actionDelete,{
 		            	data:$.param({'id':data.userId, 'index':rowindex}),
 		                type:'POST',

@@ -181,5 +181,13 @@ public class UserController {
 	public void setUserService(final IUserService userServiceP) {
 		this.userService = userServiceP;
 	}
+	
+	@RequestMapping(value = "menuDeleteUser")
+	public String loadConfirmDeleteUser(@RequestParam("username") final String username, Long index, final Model model, Locale locale) {
+		User user = this.userService.getUserByUserName(username);
+		model.addAttribute("userDeleteForm", user);
+		model.addAttribute("tableIndexRow", index);
+		return "modal/userDelete.html";
+	}
 
 }

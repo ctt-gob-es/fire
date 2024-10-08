@@ -25,6 +25,7 @@
 package es.gob.fire.web.rest.controller;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.datatables.mapping.Order;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -138,32 +140,129 @@ public class UserRestController {
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/usersdatatable", method = RequestMethod.GET)
 	public DataTablesOutput<UserTableDTO> users(@NotEmpty final DataTablesInput input, Locale locale) {
-		// Obtener la lista de usuarios desde el servicio
-		Iterable<User> users = this.userService.getAllUser();
+	    // Obtener la lista completa de usuarios desde el servicio
+	    Iterable<User> users = this.userService.getAllUser();
 
-		// Crear un nuevo DataTablesOutput para el DTO
-		DataTablesOutput<UserTableDTO> dtoOutput = new DataTablesOutput<>();
-		dtoOutput.setDraw(input.getDraw());
+	    // Convertir la lista de usuarios en una lista de DTOs
+	    List<UserTableDTO> dtoList = StreamSupport.stream(users.spliterator(), false).map(user -> {
+	        String rolProperty = messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
+	        UserTableDTO userTable = new UserTableDTO(user);
+	        userTable.setRolName(rolProperty);
+	        return userTable;
+	    }).collect(Collectors.toList());
 
-		// Convertir la lista de usuarios en una lista de DTOs
-		List<UserTableDTO> dtoList = StreamSupport.stream(users.spliterator(), false).map(user -> {
-			String rolProperty = messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
-			UserTableDTO userTable = new UserTableDTO(user);
-			userTable.setRolName(rolProperty);
-			return userTable;
-		}).collect(Collectors.toList());
+	    // 1. Aplicar la búsqueda global con manejo de valores nulos
+	    String searchValue = input.getSearch().getValue(); // Valor de búsqueda global
+	    if (searchValue != null && !searchValue.isEmpty()) {
+	        dtoList = dtoList.stream()
+	            .filter(dto -> 
+	                (dto.getUserName() != null && dto.getUserName().toLowerCase().contains(searchValue.toLowerCase())) ||
+	                (dto.getEmail() != null && dto.getEmail().toLowerCase().contains(searchValue.toLowerCase())) ||
+	                (dto.getName() != null && dto.getName().toLowerCase().contains(searchValue.toLowerCase())) ||
+	                (dto.getSurnames() != null && dto.getSurnames().toLowerCase().contains(searchValue.toLowerCase())) ||
+	                (dto.getPhone() != null && dto.getPhone().toLowerCase().contains(searchValue.toLowerCase())) ||
+	                (dto.getRolName() != null && dto.getRolName().toLowerCase().contains(searchValue.toLowerCase()))
+	            )
+	            .collect(Collectors.toList());
+	    }
 
-		// Configurar registros totales (sin paginación)
-		dtoOutput.setRecordsTotal(dtoList.size());
+	    // 2. Aplicar la ordenación con manejo de valores nulos usando expresiones lambda
+	    List<Order> orders = input.getOrder();
+	    if (!orders.isEmpty()) {
+	        Order order = orders.get(0); // Obtener la primera ordenación (solo manejamos una por ahora)
+	        int columnIndex = order.getColumn(); // Índice de la columna a ordenar
+	        String sortDirection = order.getDir(); // Dirección ('asc' o 'desc')
 
-		int start = input.getStart();
-		int length = input.getLength();
-		List<UserTableDTO> paginatedList = dtoList.stream().skip(start).limit(length).collect(Collectors.toList());
+	        Comparator<UserTableDTO> comparator = null;
 
-		dtoOutput.setRecordsFiltered(dtoList.size());
-		dtoOutput.setData(paginatedList);
+	        // Determinar la columna por la cual se está ordenando y manejar los valores nulos
+	        switch (input.getColumns().get(columnIndex).getData()) {
+	            case "userName":
+	                comparator = (dto1, dto2) -> {
+	                    String userName1 = dto1.getUserName();
+	                    String userName2 = dto2.getUserName();
+	                    if (userName1 == null) return 1;
+	                    if (userName2 == null) return -1;
+	                    return userName1.compareTo(userName2);
+	                };
+	                break;
+	            case "email":
+	                comparator = (dto1, dto2) -> {
+	                    String email1 = dto1.getEmail();
+	                    String email2 = dto2.getEmail();
+	                    if (email1 == null) return 1;
+	                    if (email2 == null) return -1;
+	                    return email1.compareTo(email2);
+	                };
+	                break;
+	            case "name":
+	                comparator = (dto1, dto2) -> {
+	                    String name1 = dto1.getName();
+	                    String name2 = dto2.getName();
+	                    if (name1 == null) return 1;
+	                    if (name2 == null) return -1;
+	                    return name1.compareTo(name2);
+	                };
+	                break;
+	            case "surnames":
+	                comparator = (dto1, dto2) -> {
+	                    String surnames1 = dto1.getSurnames();
+	                    String surnames2 = dto2.getSurnames();
+	                    if (surnames1 == null) return 1;
+	                    if (surnames2 == null) return -1;
+	                    return surnames1.compareTo(surnames2);
+	                };
+	                break;
+	            case "phone":
+	                comparator = (dto1, dto2) -> {
+	                    String phone1 = dto1.getPhone();
+	                    String phone2 = dto2.getPhone();
+	                    if (phone1 == null) return 1;
+	                    if (phone2 == null) return -1;
+	                    return phone1.compareTo(phone2);
+	                };
+	                break;
+	            case "rolName":
+	                comparator = (dto1, dto2) -> {
+	                    String rolName1 = dto1.getRolName();
+	                    String rolName2 = dto2.getRolName();
+	                    if (rolName1 == null) return 1;
+	                    if (rolName2 == null) return -1;
+	                    return rolName1.compareTo(rolName2);
+	                };
+	                break;
+	            default:
+	                comparator = (dto1, dto2) -> {
+	                    String userName1 = dto1.getUserName();
+	                    String userName2 = dto2.getUserName();
+	                    if (userName1 == null) return 1;
+	                    if (userName2 == null) return -1;
+	                    return userName1.compareTo(userName2);
+	                };
+	        }
 
-		return dtoOutput;
+	        // Aplicar la dirección de la ordenación (ascendente o descendente)
+	        if ("desc".equalsIgnoreCase(sortDirection)) {
+	            comparator = comparator.reversed();
+	        }
+
+	        // Ordenar la lista
+	        dtoList = dtoList.stream().sorted(comparator).collect(Collectors.toList());
+	    }
+
+	    // 3. Paginación
+	    int start = input.getStart(); // Índice de inicio de los resultados
+	    int length = input.getLength(); // Cantidad de resultados por página
+	    List<UserTableDTO> paginatedList = dtoList.stream().skip(start).limit(length).collect(Collectors.toList());
+
+	    // 4. Configurar el resultado para DataTables
+	    DataTablesOutput<UserTableDTO> dtoOutput = new DataTablesOutput<>();
+	    dtoOutput.setDraw(input.getDraw()); // Configurar el valor de "draw"
+	    dtoOutput.setRecordsTotal(dtoList.size()); // Total de registros antes de la paginación
+	    dtoOutput.setRecordsFiltered(dtoList.size()); // Registros filtrados después de la búsqueda
+	    dtoOutput.setData(paginatedList); // Datos paginados
+
+	    return dtoOutput;
 	}
 
 	/**
