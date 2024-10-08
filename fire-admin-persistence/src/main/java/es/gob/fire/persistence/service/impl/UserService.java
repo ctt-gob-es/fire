@@ -341,4 +341,14 @@ public class UserService implements IUserService {
 		return this.repository.findByEmail(email);
 	}
 
+	@Override
+	public List<User> getAllUserByUserNameOrEmail(String userName, String email) {
+		return this.repository.findAllByUserNameOrEmail(userName, email);
+	}
+
+	@Override
+	public List<User> getAllUserByEmail(String email) {
+		return this.repository.findAllByEmail(email);
+	}
+
 }

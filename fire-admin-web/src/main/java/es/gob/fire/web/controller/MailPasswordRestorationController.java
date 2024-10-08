@@ -32,6 +32,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.mail.MessagingException;
@@ -121,45 +122,61 @@ public class MailPasswordRestorationController {
 			final HttpServletRequest request, final Model model) throws Exception {
 		String result = "login.html";
 		try {
-			final User user = this.userService.getUserByUserNameOrEmail(userNameOrEmail, userNameOrEmail);
+			final List<User> listUsers = this.userService.getAllUserByUserNameOrEmail(userNameOrEmail, userNameOrEmail);
 
-			// Comprobamos que el usuario exista, que tenga un correo y que tenga asignada una contrasena
+			// Comprobamos que existan usuarios, que cada unotenga un correo y que tenga asignada una contrasena
 			// que debamos restablecer (propio de los usuarios con acceso a la herramienta). Si no cumple este
-			if (user != null && user.getEmail() != null && PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
-				// Generamos el codigo de restauracion
-				final String id = new String();
-				final String renovationCode = buildRestorationCode(id);
-				// Asociamos el codigo al ususario y la fecha actual
-				user.setRenovationCode(renovationCode);
-				user.setRenovationDate(new Date());
-				this.userService.saveUser(user);
+			if (listUsers != null && !listUsers.isEmpty()) {
+				for (User user : listUsers) {
+					if (user != null && user.getEmail() != null && PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
+						// Generamos el codigo de restauracion
+						final String id = new String();
+						final String renovationCode = buildRestorationCode(id);
+						// Asociamos el codigo al ususario y la fecha actual
+						user.setRenovationCode(renovationCode);
+						user.setRenovationDate(new Date());
+						this.userService.saveUser(user);
 
-				// Construimos la URL para restaurar la contrasena
-				// Para evitar errores recuperando el parametro code,
-				// parseamos los simbolos mas antes de enviar la URL al usuario
-				final String renovationCodeURL = URLEncoder.encode(renovationCode, StandardCharsets.UTF_8.toString());
+						// Construimos la URL para restaurar la contrasena
+						// Para evitar errores recuperando el parametro code,
+						// parseamos los simbolos mas antes de enviar la URL al usuario
+						final String renovationCodeURL = URLEncoder.encode(renovationCode, StandardCharsets.UTF_8.toString());
 
-				final String restorationUrl = getRestorationPageUrl(request, renovationCodeURL);
+						final String restorationUrl = getRestorationPageUrl(request, renovationCodeURL);
 
-				// Enviamos el email
-                this.mailSenderService.sendEmail(user, restorationUrl);
-                model.addAttribute("mailsuccess", Boolean.TRUE);
-                model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
+						// Enviamos el email
+		                this.mailSenderService.sendEmail(user, restorationUrl);
+		                model.addAttribute("mailsuccess", Boolean.TRUE);
+		                model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
 
 
-			}
-			// Aunque el usuario no fuese valido como para restaurar su contrasena, fingiremos hacerlo
-			// para evitar revelar informacion sobre que usuarios son validos y cuales no. En estos casos,
-			// para detectar si hay problema con el envio y que el comportamiento sea el mismo que con
-			// los usuarios reales, tendriamos que enviar un correo aunque sea a una direccion que no lo
-			// reciba, como a nuestra propia direccion de envio.
-            //TODO: Mejorar esto para que que no haya diferencia de tiempos con el envio a un usuario real
-			else {
+					}
+					// Aunque el usuario no fuese valido como para restaurar su contrasena, fingiremos hacerlo
+					// para evitar revelar informacion sobre que usuarios son validos y cuales no. En estos casos,
+					// para detectar si hay problema con el envio y que el comportamiento sea el mismo que con
+					// los usuarios reales, tendriamos que enviar un correo aunque sea a una direccion que no lo
+					// reciba, como a nuestra propia direccion de envio.
+		            //TODO: Mejorar esto para que que no haya diferencia de tiempos con el envio a un usuario real
+					else {
+						// Enviamos el email
+		                this.mailSenderService.checkSendEmail();
+		                model.addAttribute("mailsuccess", Boolean.TRUE);
+		                model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
+					}
+				}
+			} else {
+				// Aunque el usuario no fuese valido como para restaurar su contrasena, fingiremos hacerlo
+				// para evitar revelar informacion sobre que usuarios son validos y cuales no. En estos casos,
+				// para detectar si hay problema con el envio y que el comportamiento sea el mismo que con
+				// los usuarios reales, tendriamos que enviar un correo aunque sea a una direccion que no lo
+				// reciba, como a nuestra propia direccion de envio.
+	            //TODO: Mejorar esto para que que no haya diferencia de tiempos con el envio a un usuario real
 				// Enviamos el email
                 this.mailSenderService.checkSendEmail();
                 model.addAttribute("mailsuccess", Boolean.TRUE);
                 model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
 			}
+			
 		} catch (IOException | MessagingException e) {
 			LOGGER.error("No ha sido posible enviar el correo", e);
 			model.addAttribute("mailErrorMessage", "No ha sido posible enviar el correo");

@@ -138,4 +138,18 @@ public interface IUserService {
 	 */
 	String changeUserPassword(UserPasswordDTO userPasswordDto);
 
+	/**
+	 * Method that obtains a list of users by an email or username value.
+	 * @param userName The user login.
+	 * @param email The user email.
+	 * @return a {@link List<User>} with the information of all users.
+	 */
+	List<User> getAllUserByUserNameOrEmail(String userName, String email);
+
+	/**
+	 * Method that obtains a list of users by an email value.
+	 * @param email The user email.
+	 * @return a {@link List<User>} with the information of all users.
+	 */
+	List<User> getAllUserByEmail(String email);
 }

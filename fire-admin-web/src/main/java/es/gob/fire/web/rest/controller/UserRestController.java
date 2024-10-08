@@ -259,7 +259,7 @@ public class UserRestController {
 			json.put("emailAdd" + SPAN, "El campo email no es v\u00E1lido.");
 		}
 
-		if (this.userService.getUserByEmail(userForm.getEmailAdd()) != null) {
+		if (this.userService.getAllUserByEmail(userForm.getEmailAdd())!=null && !this.userService.getAllUserByEmail(userForm.getEmailAdd()).isEmpty()) {
 			error = true;
 			json.put("emailAdd" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}
@@ -378,7 +378,7 @@ public class UserRestController {
 		}
 
 		if (!userBeforeUpdate.getEmail().equals(userForm.getEmailEdit())
-				&& this.userService.getUserByEmail(userForm.getEmailEdit()) != null) {
+				&& (this.userService.getAllUserByEmail(userForm.getEmailEdit())!=null && !this.userService.getAllUserByEmail(userForm.getEmailEdit()).isEmpty())) {
 			error = true;
 			json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}
