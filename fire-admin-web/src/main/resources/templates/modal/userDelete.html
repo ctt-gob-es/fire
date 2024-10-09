@@ -14,6 +14,7 @@
 				<form name="altEditor-form" role="form" id="idUserDeleteForm"
 					th:object="${userDeleteForm}" th:action="@{/deleteuser}"
 					method="post" enctype="multipart/form-data">
+
 					<!-- Mensaje -->
 					<div class="form-group col-md-12">
 						<h5 class="c-grey-900" th:text="#{form.user.delete.message}"></h5>
@@ -31,16 +32,17 @@
 						<label for="userName" class="col-form-label"
 							th:text="#{form.user.delete.username}"></label> <input
 							type="text" id="userName" th:field="*{userName}"
-							class="form-control" />
+							class="form-control" readonly />
 					</div>
 
 					<!-- Email -->
 					<div class="form-group">
 						<label for="email" class="col-form-label"
 							th:text="#{form.user.delete.email}"></label> <input type="text"
-							id="email" th:field="*{email}" class="form-control" />
+							id="email" th:field="*{email}" class="form-control" readonly />
 					</div>
 				</form>
+
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default"
