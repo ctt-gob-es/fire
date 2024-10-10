@@ -18,6 +18,12 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-admin-core</artifactId>
+			<exclusions>
+				<exclusion>
+				  <groupId>javax.mail</groupId>
+				  <artifactId>mail</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -76,6 +82,13 @@
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity5</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>
+		
 		<!-- marked the embedded servlet container as provided -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

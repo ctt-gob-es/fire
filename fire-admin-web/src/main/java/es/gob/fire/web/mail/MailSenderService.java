@@ -275,9 +275,10 @@ public class MailSenderService {
 			message.saveChanges();
 
 			// Obtenemos el objeto transport para conectarnos y enviar el correo
-			final Transport transport = sessionMail.getTransport(properties.getProperty(Constants.MAIL_PROTOCOL));
-			transport.connect();
-			transport.sendMessage(message, message.getAllRecipients());
+			try (final Transport transport = sessionMail.getTransport(properties.getProperty(Constants.MAIL_PROTOCOL))) {
+				transport.connect();
+				transport.sendMessage(message, message.getAllRecipients());
+			}
 	}
 
 	/**
