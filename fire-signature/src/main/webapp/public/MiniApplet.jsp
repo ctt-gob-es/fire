@@ -49,7 +49,6 @@
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 	<script type="text/javascript" src="js/autoscript.js"></script>
 	
-	<script type="text/javascript">
 		<%
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 	
@@ -123,8 +122,9 @@
 		
 		// Obtenemos las propiedades extra de configuracion de las firmas
 		BatchResult batchResult = null;
+		SignBatchConfig defaultConfig = null;
 		if (isBatchOperation) {
-			final SignBatchConfig defaultConfig = new SignBatchConfig();
+			defaultConfig = new SignBatchConfig();
 			defaultConfig.setCryptoOperation(cop);
 			defaultConfig.setFormat(format);
 			defaultConfig.setExtraParams(extraParams);
@@ -136,43 +136,6 @@
 			
 			preSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_PRESIGN; //$NON-NLS-1$
 			postSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_POSTSIGN; //$NON-NLS-1$
-	
-			String extraParamsPlain = PropertiesUtils.properties2String(defaultConfig.getExtraParams()).replace("\n", "\\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			
-			%>
-			AutoScript.createBatch( "<%= algorithm %>", 
-									"<%= defaultConfig.getFormat() %>", 
-									"<%= defaultConfig.getCryptoOperation() %>", 
-									"<%= extraParamsPlain %>"
-									);
-			<%
-		
-			final Iterator<String> it = batchResult.iterator();
-			while (it.hasNext()) {
-				final String docId = it.next();
-				final String dataReference = batchResult.getDocumentReference(docId);
-				SignBatchConfig signConfig = batchResult.getSignConfig(docId);
-				
-				if (signConfig == null) {
-					signConfig = defaultConfig;
-				}
-				
-				final Properties singleExtraParams = signConfig.getExtraParams();
-				if (signConfig.getUpgrade() != null && !signConfig.getUpgrade().isEmpty()) {
-					singleExtraParams.setProperty("upgradeFormat", signConfig.getUpgrade()); //$NON-NLS-1$
-				}
-				
-				String singleExtraParamsPlain = PropertiesUtils.properties2String(signConfig.getExtraParams()).replace("\n", "\\n");  //$NON-NLS-1$ //$NON-NLS-2$
-				
-				%>
-				AutoScript.addDocumentToBatch("<%= docId %>",
-												"<%= dataReference %>",
-												"<%= signConfig.getFormat() %>",
-												"<%= signConfig.getCryptoOperation() %>",
-												"<%= singleExtraParamsPlain %>"
-												);
-				<% 
-			} 
 		}
 		else {
 			triphaseFormat = FIReTriHelper.getTriPhaseFormat(format);
@@ -245,11 +208,52 @@
 			logoUrl = "img/general/dms/logo-institucional.png"; //$NON-NLS-1$
 		}
 		%>
-	</script>
 	
 	<script type="text/javascript">
 		
-		<% if (isBatchOperation) { %>
+		<%
+		if (isBatchOperation) {
+			String extraParamsPlain = PropertiesUtils.properties2String(defaultConfig.getExtraParams()).replace("\n", "\\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		%>
+		
+			function prepareBatch() {
+				AutoScript.createBatch( "<%= algorithm %>", 
+						"<%= defaultConfig.getFormat() %>", 
+						"<%= defaultConfig.getCryptoOperation() %>", 
+						"<%= extraParamsPlain %>"
+						);
+				
+
+				
+		<%		
+				final Iterator<String> it = batchResult.iterator();
+				while (it.hasNext()) {
+					final String docId = it.next();
+					final String dataReference = batchResult.getDocumentReference(docId);
+					SignBatchConfig signConfig = batchResult.getSignConfig(docId);
+					
+					if (signConfig == null) {
+						signConfig = defaultConfig;
+					}
+					
+					final Properties singleExtraParams = signConfig.getExtraParams();
+					if (signConfig.getUpgrade() != null && !signConfig.getUpgrade().isEmpty()) {
+						singleExtraParams.setProperty("upgradeFormat", signConfig.getUpgrade()); //$NON-NLS-1$
+					}
+					
+					String singleExtraParamsPlain = PropertiesUtils.properties2String(signConfig.getExtraParams()).replace("\n", "\\n");  //$NON-NLS-1$ //$NON-NLS-2$
+					
+		%>
+					AutoScript.addDocumentToBatch("<%= docId %>",
+													"<%= dataReference %>",
+													"<%= signConfig.getFormat() %>",
+													"<%= signConfig.getCryptoOperation() %>",
+													"<%= singleExtraParamsPlain %>"
+													);
+		<% 
+				}
+		%>
+			}
 		
 			function doSignBatch() {
 				
@@ -264,6 +268,7 @@
 				try {
 					showProgress();
 					console.log(preSignUrl);
+					
 					AutoScript.signBatchProcess(
 						stopOnError,
 						preSignUrl,
@@ -354,6 +359,9 @@
 
 			function sendErrorCallback(errorType, errorMessage) {
 				hideProgress();
+			<% if (isBatchOperation) { %>
+				prepareBatch();
+			<% } %>	
 				document.getElementById("inputerrortype").value = errorType;
 				document.getElementById("inputerrormsg").value = errorMessage;								
 				document.getElementById("errorMsg").innerHTML = "" + errorType + ": " + errorMessage;
@@ -364,7 +372,7 @@
 			}
 
 			function showErrorOptions() {
-				hideProgress(); 
+				
 				// Ocultamos el boton de firmar
 				document.getElementById("signButtonsPanel").style.display = "none";
 				
@@ -412,8 +420,16 @@
 				document.getElementById("signningAppVersion").innerText = appVersion;
 				document.getElementById("linkDownload").href = href;
 			}
+			
+			<%
+			if (isBatchOperation) {
+			%>
+				prepareBatch();
+			<%
+			}
+			%>
 		</script>
-
+		
 </head>
 <body>
 	<%-- Barra de navegacion --%>

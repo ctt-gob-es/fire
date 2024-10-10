@@ -181,8 +181,6 @@ public abstract class SignBatch {
 
 					singleSign.setDataRef(dataReference);
 
-					singleSign.setProcessResult(null);
-
 					singleSign.setFormat(jsonSingleSign.containsKey(JSON_ELEMENT_FORMAT)
 							? SingleSignConstants.SignFormat.getFormat(jsonSingleSign.getString(JSON_ELEMENT_FORMAT))
 									: this.format);
