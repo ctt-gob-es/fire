@@ -52,7 +52,9 @@ public final class StorageService extends HttpServlet {
 	/** Nombre del par&aacute;metro con los datos a firmar. */
 	private static final String PARAMETER_NAME_DATA = "dat"; //$NON-NLS-1$
 
+
 	private static final String OPERATION_STORE = "put"; //$NON-NLS-1$
+	private static final String OPERATION_CHECK = "check"; //$NON-NLS-1$
 	private static final String SUCCESS = "OK"; //$NON-NLS-1$
 
 	private static final boolean HIGH_AVAILABILITY_ENABLED;
@@ -89,9 +91,15 @@ public final class StorageService extends HttpServlet {
 		if (operation == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_OPERATION_NAME));
 			sendError(response, ErrorManager.ERROR_MISSING_OPERATION_NAME);
-
 			return;
 		}
+
+		// Si solo se queria identificar la operatividad del servicio, respondemos directamente
+		if (OPERATION_CHECK.equals(operation)) {
+			sendResult(response, SUCCESS);
+			return;
+		}
+
 		if (syntaxVersion == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
 			sendError(response, ErrorManager.ERROR_MISSING_SYNTAX_VERSION);

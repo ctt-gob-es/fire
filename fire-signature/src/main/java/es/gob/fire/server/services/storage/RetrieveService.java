@@ -47,6 +47,9 @@ public final class RetrieveService extends HttpServlet {
 	private static final String PARAMETER_NAME_SYNTAX_VERSION = "v"; //$NON-NLS-1$
 
 	private static final String OPERATION_RETRIEVE = "get"; //$NON-NLS-1$
+	private static final String OPERATION_CHECK = "check"; //$NON-NLS-1$
+	private static final String SUCCESS = "OK"; //$NON-NLS-1$
+
 
 	private static final boolean HIGH_AVAILABILITY_ENABLED;
 
@@ -63,8 +66,6 @@ public final class RetrieveService extends HttpServlet {
 		LOGGER.fine("== INICIO DE LA RECUPERACION =="); //$NON-NLS-1$
 
 		final String operation = request.getParameter(PARAMETER_NAME_OPERATION);
-		final String syntaxVersion = request.getParameter(PARAMETER_NAME_SYNTAX_VERSION);
-		final String id = request.getParameter(PARAMETER_NAME_ID);
 		response.setHeader("Access-Control-Allow-Origin", "*"); //$NON-NLS-1$ //$NON-NLS-2$
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -73,6 +74,16 @@ public final class RetrieveService extends HttpServlet {
 			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_MISSING_OPERATION_NAME));
 			return;
 		}
+
+		// Si solo se queria identificar la operatividad del servicio, respondemos directamente
+		if (OPERATION_CHECK.equals(operation)) {
+			sendResult(response, SUCCESS);
+			return;
+		}
+
+		final String syntaxVersion = request.getParameter(PARAMETER_NAME_SYNTAX_VERSION);
+		final String id = request.getParameter(PARAMETER_NAME_ID);
+
 		if (syntaxVersion == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
 			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
