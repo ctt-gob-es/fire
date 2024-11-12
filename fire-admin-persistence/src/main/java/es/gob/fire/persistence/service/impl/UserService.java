@@ -187,7 +187,16 @@ public class UserService implements IUserService {
 		// Se da por hecho, que el permiso de acceso siempre se representara con un valor concreto
 		if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
 			user.setPassword(null);
-		}
+		}         
+		// Actualizaremos la contrasena si se establece y si el usuario
+        // no tenia ya una contrasena, ya que en ese caso la estariamos cambiando.
+        else if (!StringUtils.isEmpty(userDto.getPasswordEdit()) && StringUtils.isEmpty(user.getPassword())) {
+            final String pwd = userDto.getPasswordEdit();
+            final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
+            final String hashPwd = bcpe.encode(pwd);
+
+            user.setPassword(hashPwd);
+        }
 
 		user.setName(userDto.getNameEdit());
 		user.setSurnames(userDto.getSurnamesEdit());
