@@ -1,3 +1,5 @@
+<%@page import="es.gob.fire.server.services.FIReError"%>
+<%@page import="es.gob.fire.server.services.Responser"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
@@ -17,10 +19,9 @@
 
 	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-	String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	
 	if (subjectRef == null || trId == null) {
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
 
@@ -29,7 +30,7 @@
 	// Nos aseguramos de tener cargada la ultima version de la sesion
 	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
 	if (fireSession == null) {
-		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
 	
@@ -55,14 +56,18 @@
 	boolean originForced = Boolean.parseBoolean(
 		fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED)
 	);
-	
-	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-	ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
-	if (!originForced && op != null) {
-		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
-	}
+
+	// Parametros para el enlace del boton Atras o Cancelar
+	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
+		 + "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$ //$NON-NLS-2$
 	if (errorUrl != null) {
 		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	// Si no se forzo el uso de este proveedor concreto, agregamos los parametros necesarios
+	// para permitir seleccionar otro
+	if (!originForced) {
+		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_PAGE + "=" + ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	// Cargamos los errores configurados
@@ -140,7 +145,7 @@
 						</div>
 						<div class="separatorbutton"></div>
 						<div class="containerbutton">
-							<a href= "<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" + buttonUrlParams %>" class="button-volver">
+							<a href= "<%= ServiceNames.PUBLIC_SERVICE_BACK + "?" + buttonUrlParams %>" class="button-volver">
 								<span class="arrow-left-white"></span>
 								<span >Volver</span>
 							</a>

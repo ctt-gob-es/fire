@@ -55,11 +55,11 @@
 
 				<fieldset  class="fieldset-fire">
 					<legend>Seleccione el algoritmo de hash para la firma: </legend>
-						<input id="algo-256" type="radio" name="algorithm" value="SHA256" checked="checked"/>
+						<input id="algo-256" type="radio" name="algorithm" value="SHA256withRSA" checked="checked"/>
 							<label for="algo-256" >SHA256</label><br>
-						<input id="algo-512" type="radio" name="algorithm" value="SHA512"/>
+						<input id="algo-512" type="radio" name="algorithm" value="SHA512withRSA"/>
 							<label for="algo-512" >SHA512</label><br>
-						<input id="algo-1" type="radio" name="algorithm" value="SHA1"/>
+						<input id="algo-1" type="radio" name="algorithm" value="SHA1withRSA"/>
 							<label for="algo-1">SHA1</label><br>
 			   	</fieldset>
 
@@ -101,7 +101,7 @@
 				  Con ellos se generan firmas que contienen los datos firmados y solo se permite el uso
 				  de certificados de firma. --%>
 				<input id="extraparams-conf" type="hidden" name="extraParams"
-				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true".getBytes()) %>"/>
+				value="<%= Base64.encode("mode=implicit\nfilters=keyusage.nonrepudiation:true;nonexpired:".getBytes()) %>"/>
 
 				<div style="margin-top:30px;text-align: center; ">
 					<input  id="submit-btn"  type="submit" value="AGREGAR DOCUMENTOS AL LOTE">

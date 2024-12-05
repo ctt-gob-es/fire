@@ -66,8 +66,9 @@ public class RecoverNewCertificateService extends HttpServlet {
 
 		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(), false, false, trAux);
 		if (session == null) {
-			LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-			processError(FIReError.FORBIDDEN, session, errorUrl, request, response, trAux);
+        	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado. Se redirige a la pagina proporcionada en la llamada", transactionId)); //$NON-NLS-1$
+        	SessionCollector.removeSession(transactionId, trAux);
+        	Responser.redirectToExternalUrl(errorUrl, request, response, trAux);
 			return;
 		}
 
@@ -165,6 +166,8 @@ public class RecoverNewCertificateService extends HttpServlet {
 
     	if (url != null) {
     		if (fireSession != null) {
+    			fireSession.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
+   				fireSession.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
     			SessionCollector.cleanSession(fireSession, trAux);
     		}
     		try {

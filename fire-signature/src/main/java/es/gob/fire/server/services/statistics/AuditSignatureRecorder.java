@@ -96,9 +96,8 @@ public class AuditSignatureRecorder {
 		}
 
 		// Instalamos el manejador para la impresion en el fichero de estadisticas
-		Handler logHandler = null;
 		try {
-			logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
 			logHandler.setFormatter(new Formatter() {
 				@Override

@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.statistics.entity.Browser;
 
@@ -40,21 +41,33 @@ public class ChooseOriginService extends HttpServlet {
 
 		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-
-		if (subjectRef == null || trId == null) {
-			Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
 
 		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
+        // Comprobamos que se hayan proporcionado los parametros indispensables
+        if (trId == null || trId.isEmpty()) {
+        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
+            return;
+        }
+
+		if (subjectRef == null) {
+            LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
+			SessionCollector.removeSession(trId, trAux);
+			Responser.sendError(response, FIReError.FORBIDDEN);
+			return;
+		}
+
 		// Cargamos los datos de sesion
 		final FireSession session = SessionCollector.getFireSessionOfuscated(trId, subjectRef, request.getSession(false), false, false, trAux);
 		if (session == null) {
+			// Este es uno de los servicios de entrada de la aplicacion una vez redirigido al
+			// usuario, por lo que no deberia darse el caso de que la sesion no existiese o
+			// hubiese caducado y devolveremos directamente un error en lugar de redirigir a la URL
+			// de error
 			LOGGER.severe(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
-			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
+			Responser.sendError(response, FIReError.INVALID_TRANSACTION);
 			return;
 		}
 

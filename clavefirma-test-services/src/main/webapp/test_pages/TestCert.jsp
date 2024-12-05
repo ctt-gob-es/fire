@@ -48,12 +48,12 @@
 			formulario.submit();
 		}
 	</script>
-	<link href="https://clave-dninbrt.dev.seg-social.gob.es/rss-gateway-static/img/faviconQ3E1TZ34.ico" rel="icon">
+	<link href="./TestCert_files/faviconQ3E1TZ34.ico" rel="icon">
 </head>
 <body id="decision-body">
 <div class="container_cabecera">
 <div class="cabecera_clave">
-<img src="./TestCert_files/imagenCorporativa.png" alt="" title=""></div>
+<img src="./img/imagenCorporativa.png" alt="" title=""></div>
 </div>
 <div class="container" id="page-wrapper">
 <div id="pasarela-header" class="home_titulo">

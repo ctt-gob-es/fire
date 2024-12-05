@@ -15,8 +15,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -34,6 +34,12 @@ public final class TestServiceAuthServlet extends HttpServlet {
 
 	private static final String ERROR_PAGE = "test_pages/ErrorTransaction.html"; //$NON-NLS-1$
 
+	private static final String EXT_ERR_UNKOWN_ERROR = "00"; //$NON-NLS-1$
+	private static final String EXT_ERR_UNKNOWN_USER = "02"; //$NON-NLS-1$
+	private static final String EXT_ERR_BLOCKED_USER = "03"; //$NON-NLS-1$
+	private static final String EXT_ERR_SIGNING_ERROR = "11"; //$NON-NLS-1$
+	private static final String EXT_ERR_INVALID_OPERATION = "12"; //$NON-NLS-1$
+
 	/** @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
 	@Override
 	protected void service(final HttpServletRequest request,
@@ -47,16 +53,26 @@ public final class TestServiceAuthServlet extends HttpServlet {
 			return;
 		}
 
+		String errorTypeParam = redirectKo.contains("?") ? "&" : "?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		errorTypeParam += "errortype="; //$NON-NLS-1$
+
+		final String redirectOk = request.getParameter("redirectok"); //$NON-NLS-1$
+		if (redirectOk == null || "".equals(redirectOk.trim())) { //$NON-NLS-1$
+			LOGGER.warning("No se ha enviado en la peticion la URL a la que redirigir en caso de exito"); //$NON-NLS-1$
+			response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_UNKOWN_ERROR);
+			return;
+		}
+
 		final String transaction = request.getParameter("transactionid"); //$NON-NLS-1$
 		if (transaction == null || "".equals(transaction.trim())) { //$NON-NLS-1$
 			LOGGER.warning("No se ha proporcionado id de transaccion"); //$NON-NLS-1$
-			response.sendRedirect(redirectKo);
+			response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_UNKOWN_ERROR);
 			return;
 		}
 		final File transactionFile = TestHelper.getCanonicalFile(TestHelper.getDataFolder(), transaction.trim());
 		if (!transactionFile.exists() || !transactionFile.canRead()) {
 			LOGGER.warning("La transaccion '" + transaction + "' no existe o no es valida"); //$NON-NLS-1$ //$NON-NLS-2$
-			response.sendRedirect(redirectKo);
+			response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_SIGNING_ERROR);
 			return;
 		}
 		final Properties transactionProps = new Properties();
@@ -67,19 +83,19 @@ public final class TestServiceAuthServlet extends HttpServlet {
 		final String subjectId = transactionProps.getProperty("subjectid"); //$NON-NLS-1$
 		if (subjectId == null || "".equals(subjectId.trim())) { //$NON-NLS-1$
 			LOGGER.warning("El objeto de transaccion no contiene el identificador del titular"); //$NON-NLS-1$
-			response.sendError(
-				HttpURLConnection.HTTP_INTERNAL_ERROR,
-				"El objeto de transaccion no contiene el identificador del titular" //$NON-NLS-1$
-			);
+			response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_UNKOWN_ERROR);
 			return;
 		}
 
 		final Properties subjectProps = new Properties();
-		subjectProps.load(
-			TestServiceAuthServlet.class.getResourceAsStream(
-				"/testservice/" + subjectId + ".properties" //$NON-NLS-1$ //$NON-NLS-2$
-			)
-		);
+		try (InputStream is = TestServiceAuthServlet.class.getResourceAsStream("/testservice/" + subjectId + ".properties")) { //$NON-NLS-1$ //$NON-NLS-2$
+			subjectProps.load(is);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "El usuario " + subjectId + " no existe o no esta bien configurado", e); //$NON-NLS-1$ //$NON-NLS-2$
+			response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_UNKNOWN_USER);
+			return;
+		}
 
 		if (!TestHelper.subjectKeyStoreExist(subjectId)) {
 			try {
@@ -87,29 +103,28 @@ public final class TestServiceAuthServlet extends HttpServlet {
 			}
 			catch (final Exception e) {
 				LOGGER.warning("No se ha encontrado la contrasena predefinida para el almacen del usuario: " + e); //$NON-NLS-1$
-				response.sendRedirect(redirectKo);
+				response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_SIGNING_ERROR);
 				return;
 			}
 		}
 
 		final String password = request.getParameter("password"); //$NON-NLS-1$
 
-		final String redirectOk = request.getParameter("redirectok"); //$NON-NLS-1$
-		if (redirectOk == null || "".equals(redirectOk.trim())) { //$NON-NLS-1$
-			LOGGER.warning("No se ha enviado en la peticion la URL a la que redirigir en caso de exito"); //$NON-NLS-1$
-			response.sendRedirect(redirectKo);
-			return;
-		}
-
 		if (password == null || "".equals(password.trim())) { //$NON-NLS-1$
 			LOGGER.warning("No se ha obtenido en la peticion la contrasena del certificado de firma"); //$NON-NLS-1$
-			response.sendRedirect(redirectKo);
+			response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_SIGNING_ERROR);
 			return;
 		}
 
 		if (!password.equals(subjectProps.getProperty("password"))) { //$NON-NLS-1$
 			LOGGER.warning("La contrasena introducida no es valida para la transaccion " + transaction); //$NON-NLS-1$
-			response.sendRedirect(redirectKo);
+			response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_SIGNING_ERROR);
+			return;
+		}
+
+		if ("BLOCKED".equals(subjectProps.getProperty("state"))) { //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.warning("El usuario esta bloqueado " + transaction); //$NON-NLS-1$
+			response.sendRedirect(redirectKo + errorTypeParam + EXT_ERR_BLOCKED_USER);
 			return;
 		}
 

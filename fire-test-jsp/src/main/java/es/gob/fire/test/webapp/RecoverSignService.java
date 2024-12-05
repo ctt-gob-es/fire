@@ -10,6 +10,7 @@
 package es.gob.fire.test.webapp;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.security.cert.CertificateEncodingException;
 
 import javax.servlet.http.Cookie;
@@ -42,7 +43,7 @@ public class RecoverSignService extends HttpServlet {
     	LOGGER.info("Cookies recibidas: " + (cookies == null ? "null" : Integer.toString(cookies.length))); //$NON-NLS-1$ //$NON-NLS-2$
     	if (cookies != null) {
     		for (final Cookie cookie : cookies) {
-    			LOGGER.info("Cookie: " + cookie.getName());
+    			LOGGER.info("Cookie: " + cookie.getName()); //$NON-NLS-1$
     		}
     	}
 
@@ -69,7 +70,7 @@ public class RecoverSignService extends HttpServlet {
 		    }
 		    catch (final Exception e) {
 		    	LOGGER.error("Error al recuperar la firma: {}", e.toString()); //$NON-NLS-1$
-				session.setAttribute("message", "Ocurrio un error al recuperar la firma: " + e); //$NON-NLS-1$ //$NON-NLS-2$
+				request.getRequestDispatcher("/ErrorPage.jsp?msg=" + URLEncoder.encode("Ocurrio un error al recuperar la firma: " + e, "utf-8")).forward(request, response); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		    	return;
 		    }
 

@@ -1,4 +1,6 @@
 
+<%@page import="es.gob.fire.server.services.FIReError"%>
+<%@page import="es.gob.fire.server.services.Responser"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
@@ -23,7 +25,7 @@
 	String providerName = null;
 	
 	if (subjectRef == null || trId == null) {
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
 	
@@ -31,7 +33,7 @@
 	
 	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
 	if (fireSession == null) {
-		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
 
@@ -66,20 +68,21 @@
 	// (se muestra el boton Cancelar) o no (boton Volver) 
 	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
 		+ "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$ //$NON-NLS-2$
-		
-	// Si no se forzo el uso de este proveedor concreto, agregamos los parametros necesario
-	// para permitir seleccionar otro
-	if (!originForced) {
-		if (unregistered != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
 	
 	// Agregamos la URL de error si la hay
 	if (errorUrl != null) {
 		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
+		
+	// Si no se forzo el uso de este proveedor concreto, agregamos los parametros necesarios
+	// para permitir seleccionar otro
+	if (!originForced) {
+		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_PAGE + "=" + ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN; //$NON-NLS-1$ //$NON-NLS-2$
+		if (unregistered != null) {
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+	
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
 	if (logoUrl == null || logoUrl.isEmpty()) {
@@ -182,7 +185,7 @@
 							<span >Cancelar</span>
 						</a>
 					<% } else { %>
-						<a href= "<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" + buttonUrlParams %>" class="button-volver">
+						<a href= "<%= ServiceNames.PUBLIC_SERVICE_BACK + "?" + buttonUrlParams %>" class="button-volver">
 							<span class="arrow-left-white"></span>
 							<span >Volver</span>
 						</a>

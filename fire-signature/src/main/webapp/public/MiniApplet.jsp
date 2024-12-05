@@ -1,4 +1,6 @@
 
+<%@page import="es.gob.fire.server.services.Responser"%>
+<%@page import="es.gob.fire.server.services.FIReError"%>
 <%@page import="es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyException"%>
 <%@page import="es.gob.afirma.core.signers.ExtraParamsProcessor"%>
 <%@page import="es.gob.fire.server.services.internal.PropertiesUtils"%>
@@ -60,18 +62,17 @@
 		String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
-		String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 		
 		if (subjectRef == null || trId == null) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
 		TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 		
-		FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false, trAux);
+		FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
 		if (fireSession == null) {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 		
@@ -86,7 +87,7 @@
 		boolean isBatchOperation = TransactionType.BATCH == transactionType;
 	
 		// Valores genericos
-		final String stopOnError = fireSession.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR);
+		final boolean stopOnError = Boolean.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
 		String cop = fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
 		String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
 		String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
@@ -157,27 +158,19 @@
 		boolean originForced = Boolean.parseBoolean(
 		fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 	
-		// Parametros para el enlace del boton Volver (solo si se selecciono la operacion desde la pagina anterior)
-		String buttonBackUrlParams = null;
-		if (!originForced) {
-			buttonBackUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
-			if (unregistered != null) {
-		buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			if (op != null) {
-		buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			if (errorUrl != null) {
-		buttonBackUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		}
-	
-		// Parametros para el enlace del boton Cancelar
-		String buttonCancelUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-		ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
+		// Parametros para el enlace del boton Atras o Cancelar
+		String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
+			 + "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$ //$NON-NLS-2$
 		if (errorUrl != null) {
-			buttonCancelUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		// Si no se forzo el uso de este proveedor concreto, agregamos los parametros necesarios
+		// para permitir seleccionar otro
+		if (!originForced) {
+			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_PAGE + "=" + ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN; //$NON-NLS-1$ //$NON-NLS-2$
+			if (unregistered != null) {
+				buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}
 	
 		// Preparamos la informacion de los documentos a firmar
@@ -421,13 +414,9 @@
 				document.getElementById("linkDownload").href = href;
 			}
 			
-			<%
-			if (isBatchOperation) {
-			%>
+			<% if (isBatchOperation) { %>
 				prepareBatch();
-			<%
-			}
-			%>
+			<% } %>
 		</script>
 		
 </head>
@@ -528,11 +517,11 @@
 		<% } %>
 		<div class="container_btn_operation">
 		<% if (originForced) { %>
-			<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonCancelUrlParams %>" class="button-cancelar">							
+			<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonUrlParams %>" class="button-cancelar">							
 				<span >Cancelar</span>							
 			</a>
-			<% } else { %>
-			<a href= "<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" + buttonBackUrlParams %>" class="button-volver">							
+		<% } else { %>
+			<a href= "<%= ServiceNames.PUBLIC_SERVICE_BACK + "?" + buttonUrlParams %>" class="button-volver">							
 				<span class="arrow-left-white"></span>
 				<span >Volver</span>							
 			</a>

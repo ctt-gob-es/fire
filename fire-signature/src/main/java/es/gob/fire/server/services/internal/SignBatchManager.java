@@ -101,9 +101,6 @@ public class SignBatchManager {
 		// Obtenemos la referencia al usuario de la sesion
         final String subjectRef = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF);
 
-        // Cargamos el URL de error
-        final String redirectErrorUrl = connConfig.getRedirectErrorUrl();
-
         // Si ya se definio el origen del certificado, se envia al servicio que se encarga de
         // redirigirlo. Si no, se envia la pagina de seleccion
         String redirectUrl;
@@ -115,14 +112,12 @@ public class SignBatchManager {
         			+ "?" + ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] //$NON-NLS-1$ //$NON-NLS-2$
         			+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true" //$NON-NLS-1$ //$NON-NLS-2$
         			+ "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
         	LOGGER.fine(logF.f("Se forzara el uso del proveedor " + provs[0])); //$NON-NLS-1$
         } else {
         	redirectUrl = ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN
         			+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         LOGGER.fine(logF.f("Generamos la URL de redireccion")); //$NON-NLS-1$

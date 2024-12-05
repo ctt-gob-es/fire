@@ -1,4 +1,6 @@
 
+<%@page import="es.gob.fire.server.services.FIReError"%>
+<%@page import="es.gob.fire.server.services.Responser"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
@@ -24,10 +26,9 @@
 	
 	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-	String op = request.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 	
 	if (subjectRef == null || trId == null) {
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
 
@@ -39,7 +40,7 @@
 	// de memoria al saltar de FIRe a la web del proveedor.
 	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
 	if (fireSession == null) {
-		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
 	
@@ -68,17 +69,11 @@
 
 	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
 			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
-	if (originForced) {
-		if (errorUrl != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	} else {
-		if (op != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_OPERATION + "=" + op; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		if (errorUrl != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-		}
+	if (errorUrl != null) {
+		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	if (!originForced) {
+		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_PAGE + "=" + ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// Extraemos de la sesion los certificados y los eliminamos de la misma
@@ -198,7 +193,7 @@
 					<span >Cancelar</span>
 					</a>
 				<% } else { %>
-					<a href= "<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN + "?" + buttonUrlParams %>" class="button-volver">
+					<a href= "<%= ServiceNames.PUBLIC_SERVICE_BACK + "?" + buttonUrlParams %>" class="button-volver">
 						<span class="arrow-left-white"></span>
 						<span >Volver</span>
 					</a>

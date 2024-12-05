@@ -42,6 +42,12 @@ public class ServiceNames {
 	/** Servicio para la cancelacion de la operaci&oacute;n. */
 	public static final String PUBLIC_SERVICE_CANCEL_OPERATION = "cancelOperationService"; //$NON-NLS-1$
 
+	/** Servicio de recepcion de errores en servicios externos. */
+	public static final String PUBLIC_SERVICE_EXTERNAL_ERROR = "externalErrorService"; //$NON-NLS-1$
+
+	/** Servicio para regresar a una p&aacute;gina. */
+	public static final String PUBLIC_SERVICE_BACK = "backService"; //$NON-NLS-1$
+
 	/** Servicio para el guardado de datos temporales del Cliente @firma. */
 	public static final String PUBLIC_SERVICE_AFIRMA_STORAGE = "storage"; //$NON-NLS-1$
 

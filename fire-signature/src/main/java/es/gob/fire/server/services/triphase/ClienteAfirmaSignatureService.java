@@ -34,9 +34,12 @@ import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.signers.xml.XmlDSigProviderHelper;
+import es.gob.afirma.triphase.signer.processors.PreProcessorFactory;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.triphase.document.DocumentManager;
@@ -106,11 +109,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 		catch (final Throwable e) {
 			LOGGER.severe("No se pudieron leer los parametros de la peticion: " + e); //$NON-NLS-1$
-			try {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			} catch (final IOException e1) {
-				LOGGER.log(Level.SEVERE, "No se pudo enviar un error al cliente", e); //$NON-NLS-1$
-			}
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
@@ -253,10 +252,6 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_ALGORITHM));
 			return;
 		}
-
-		//TODO: Cuando se importen las bibliotecas del Cliente 1.9, usar el PreProcessorFactory que
-		// tiene en lugar del de este proyecto, que es una copia de aquel. Hay que eliminar tambien
-		// la copia de este proyecto.
 
 		// Instanciamos el preprocesador adecuado
 		final TriPhasePreProcessor prep;
@@ -489,9 +484,9 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			out = response.getWriter();
 		}
         catch (final Exception e) {
-        	LOGGER.severe("No se pudo contestar a la peticion: " + e); //$NON-NLS-1$
+        	LOGGER.severe("No se puede contestar a la peticion: " + e); //$NON-NLS-1$
         	try {
-				response.sendError(HttpURLConnection.HTTP_INTERNAL_ERROR, "No se pude contestar a la peticion: " + e); //$NON-NLS-1$
+				response.sendError(HttpURLConnection.HTTP_INTERNAL_ERROR, "No se puede contestar a la peticion: " + e); //$NON-NLS-1$
 			}
         	catch (final IOException e1) {
         		LOGGER.severe("No se pudo enviar un error HTTP 500: " + e1); //$NON-NLS-1$

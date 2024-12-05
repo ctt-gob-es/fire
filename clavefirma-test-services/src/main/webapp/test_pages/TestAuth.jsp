@@ -42,7 +42,7 @@
 <body id="pasarela-body">
 <div class="container_cabecera">
 	<div class="cabecera_clave">
-		<img src="./TestAuth_files/imagenCorporativa.png" alt="" title="">
+		<img src="./img/imagenCorporativa.png" alt="" title="">
 	</div>
 </div>
 <div class="container" id="page-wrapper">

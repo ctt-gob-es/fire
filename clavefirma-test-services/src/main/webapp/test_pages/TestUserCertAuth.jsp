@@ -9,13 +9,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Tu seguridad social</title>
-<link href="./TestAuth_files/IdP.css" media="screen" rel="stylesheet">
+<link href="./test_pages/TestAuth_files/IdP.css" media="screen" rel="stylesheet">
 
 <script type="text/javascript">
 
 	function cancelar() {
 		var formulario = document.getElementById("pinAndSFDA");
-		formulario.action = '<%= URLDecoder.decode(new String(Base64.decode(request.getParameter("redirectko"), true))) %>';
+		formulario.action = '<%= URLDecoder.decode(request.getParameter("redirectko"), "utf-8") %>';
 		formulario.submit();
 	}
 </script>
@@ -23,7 +23,7 @@
 <body id="pasarela-body">
 <div class="container_cabecera">
 	<div class="cabecera_clave">
-		<img src="./TestAuth_files/imagenCorporativa.png" alt="" title="">
+		<img src="./test_pages/img/imagenCorporativa.png" alt="" title="">
 	</div>
 </div>
 <div class="container" id="page-wrapper">
@@ -60,14 +60,14 @@
 		</div>
 <fieldset>
 	 <p>
-	 <label class="grisoscuro" for="owner">USUARIO</label>&nbsp;&nbsp;								<%= request.getParameter("id") %></p>
-	  <label class="grisoscuro" for="owner">CONTRASEÑA&nbsp;&nbsp;										</label>
+	 <label class="grisoscuro">USUARIO</label>&nbsp;&nbsp;								<%= request.getParameter("subjectid") %></p>
+	  <label class="grisoscuro" for="password">CONTRASEÑA&nbsp;&nbsp;										</label>
 	  <input type="password" name="password" class="password" id="pin" value="" maxlength="255"  required="required" autocomplete="off">
 	  <br>
 
 	  <input type="hidden" name="subjectid" value="<%= request.getParameter("subjectid") %>">
-	  <input type="hidden" name="redirectok" value="<%= URLDecoder.decode(new String(Base64.decode(request.getParameter("redirectok"), true))) %>">
-	  <input type="hidden" name="redirectko" value="<%= URLDecoder.decode(new String(Base64.decode(request.getParameter("redirectko"), true))) %>">
+	  <input type="hidden" name="redirectok" value="<%= URLDecoder.decode(request.getParameter("redirectok"), "utf-8") %>">
+	  <input type="hidden" name="redirectko" value="<%= URLDecoder.decode(request.getParameter("redirectko"), "utf-8") %>">
 
 	 
 	 <div align="left" id="botonera">

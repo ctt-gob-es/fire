@@ -3,6 +3,12 @@
   <display-name>clavefirma-test-services</display-name>
   <description>Servicio backend de prueba de Cl@ve firma v2.4</description>
   <servlet>
+  	<description>Servicio de autenticacion de usuario</description>
+  	<display-name>TestAuthUserService</display-name>
+  	<servlet-name>TestAuthUserService</servlet-name>
+  	<servlet-class>es.gob.clavefirma.test.services.TestAuthUserService</servlet-class>
+  </servlet>
+  <servlet>
   	<description>Servicio de recuperacion de certificados</description>
   	<display-name>TestGetCertificateService</display-name>
   	<servlet-name>TestGetCertificateService</servlet-name>
@@ -53,7 +59,11 @@
   	<servlet-class>es.gob.clavefirma.test.services.TestServiceGenCertServlet</servlet-class>
   </servlet>
   
-  <!-- Mapeo -->  
+  <!-- Mapeo -->
+  <servlet-mapping>
+  	<servlet-name>TestAuthUserService</servlet-name>
+  	<url-pattern>/TestAuthUserService</url-pattern>
+  </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>TestGetCertificateService</servlet-name>
   	<url-pattern>/TestGetCertificateService</url-pattern>

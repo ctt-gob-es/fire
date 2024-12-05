@@ -143,10 +143,13 @@ public final class RetrieveService extends HttpServlet {
 				}
 			}
 		}
-		// Si hemos recuperado los datos de memoria, pero estamos en modo alta disponibilidad,
-		// debemos eliminarlos del almacen comun para que no queden ahi residuales
-		else if (HIGH_AVAILABILITY_ENABLED) {
-			deleteSharedFile(id);
+		// Si hemos recuperado los datos de memoria, los eliminamos de ahi y, si estamos en modo alta
+		// disponibilidad, tambien los eliminamos del almacen comun para que no queden ahi residuales
+		else {
+			ClienteAfirmaCache.removeData(id);
+			if (HIGH_AVAILABILITY_ENABLED) {
+				deleteSharedFile(id);
+			}
 		}
 
 		// Si no se encontraron los datos, se indica como tal

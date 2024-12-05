@@ -77,8 +77,9 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true, trAux);
         if (session == null) {
-			LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-			processError(FIReError.FORBIDDEN, errorUrl, request, response, trAux);
+        	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado. Se redirige a la pagina proporcionada en la llamada", transactionId)); //$NON-NLS-1$
+        	SessionCollector.removeSession(transactionId, trAux);
+        	Responser.redirectToExternalUrl(errorUrl, request, response, trAux);
     		return;
         }
 

@@ -1,3 +1,4 @@
+<%@page import="es.gob.fire.server.services.Responser"%>
 <%@page import="es.gob.fire.server.services.FIReError"%>
 <%@page import="es.gob.fire.server.services.internal.ErrorManager"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
@@ -23,10 +24,9 @@
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
 	boolean userRegistered = !Boolean.parseBoolean(unregistered);
-	String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 	
 	if (subjectRef == null || trId == null) {
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
 
@@ -38,15 +38,10 @@
 	
 	final FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
 	if (fireSession == null) {
-		if (errorUrl != null) {
-			errorUrl = URLDecoder.decode(errorUrl, "utf-8"); //$NON-NLS-1$
-			response.sendRedirect(errorUrl);
-		} else {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN);
-		}
+		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
-
+	
 	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	if (appId != null) {
 		trAux.setAppId(appId);
@@ -54,9 +49,9 @@
 		
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 	TransactionConfig connConfig = (TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
-		errorUrl = connConfig.getRedirectErrorUrl();
-	}
+
+	// Usamos la URL de error indicada en la transaccion
+	String errorUrl = connConfig.getRedirectErrorUrl();
 
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
@@ -65,9 +60,9 @@
 	}
 
 	// Preparamos la URL del boton de cancelacion
-	final String cancelUrlParams = ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId + "&" + //$NON-NLS-1$ //$NON-NLS-2$ 
-	ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + //$NON-NLS-1$
-	(errorUrl != null ? "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	final String cancelUrlParams = ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId + "&" //$NON-NLS-1$ //$NON-NLS-2$ 
+		+ ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
+		+ (errorUrl != null ? "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	
 	// Comprobamos tener un listado de proveedores validos
 	String[] providers = (String[]) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
@@ -75,9 +70,9 @@
 		ErrorManager.setErrorToSession(fireSession, FIReError.PROVIDER_NOT_SELECTED, trAux);
 		if (errorUrl != null) {
 			errorUrl = URLDecoder.decode(errorUrl, "utf-8"); //$NON-NLS-1$
-			response.sendRedirect(errorUrl);
+			Responser.redirectToExternalUrl(errorUrl, request, response, trAux);
 		} else {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			Responser.sendError(response, FIReError.FORBIDDEN);
 		}
 		return;
 	}

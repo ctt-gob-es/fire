@@ -98,6 +98,27 @@ public final class PreSignService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de prefirma")); //$NON-NLS-1$
 
+        // Comprobamos que se hayan prorcionado los parametros indispensables
+        if (transactionId == null || transactionId.isEmpty()) {
+        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
+            return;
+        }
+
+        if (certB64 == null || certB64.isEmpty()) {
+        	LOGGER.warning(logF.f("No se ha proporcionado el certificado del firmante")); //$NON-NLS-1$
+        	SessionCollector.removeSession(transactionId, trAux);
+			Responser.sendError(response, FIReError.FORBIDDEN);
+        	return;
+        }
+
+        if (userRef == null || userRef.isEmpty()) {
+            LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
+            SessionCollector.removeSession(transactionId, trAux);
+			Responser.sendError(response, FIReError.FORBIDDEN);
+            return;
+        }
+
 		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
@@ -112,32 +133,11 @@ public final class PreSignService extends HttpServlet {
         	LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: %1s", e)); //$NON-NLS-1$
 		}
 
-        // Comprobamos que se hayan prorcionado los parametros indispensables
-        if (transactionId == null || transactionId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-        	Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
-            return;
-        }
-
-        if (certB64 == null || certB64.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el certificado del firmante")); //$NON-NLS-1$
-        	SessionCollector.removeSession(transactionId, trAux);
-        	Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
-        	return;
-        }
-
-        if (userRef == null || userRef.isEmpty()) {
-            LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
-            SessionCollector.removeSession(transactionId, trAux);
-            Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
-            return;
-        }
-
         FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), false, false, trAux);
         if (session == null) {
-        	LOGGER.warning(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado. Se redirige a la pagina proporcionada en la llamada", transactionId)); //$NON-NLS-1$
         	SessionCollector.removeSession(transactionId, trAux);
-        	Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
         	return;
 		}
 
@@ -161,7 +161,18 @@ public final class PreSignService extends HttpServlet {
 
         trAux.setAppId(appId);
 
-    	// Comprobaciones
+        // Comprobamos primero cual es la URL de redireccion en casos de error
+		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
+			LOGGER.warning(logF.f("No se encontro en la sesion la URL redireccion de error para la operacion")); //$NON-NLS-1$
+			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
+			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
+			return;
+		}
+
+		// Usaremos preferiblemente la URL de error establecida en la sesion
+		redirectErrorUrl = connConfig.getRedirectErrorUrl();
+
+    	// Comprobacion del resto de parametros
         if (algorithm == null || algorithm.isEmpty()) {
             LOGGER.warning(logF.f("No se encontro en la sesion el algoritmo de firma")); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
@@ -183,13 +194,6 @@ public final class PreSignService extends HttpServlet {
             return;
         }
 
-		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			LOGGER.warning(logF.f("No se encontro en la sesion la URL redireccion de error para la operacion")); //$NON-NLS-1$
-			ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
-			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
-			return;
-		}
-
         // Evitamos que se interrumpa la operacion en caso de estar cofirmandose o
         // contrafirmandose una firma longeva
         if (!SignOperation.SIGN.toString().equalsIgnoreCase(cryptoOperation)) {
@@ -199,8 +203,6 @@ public final class PreSignService extends HttpServlet {
         	extraParams.setProperty(EXTRA_PARAM_ALLOW_SIGN_LTS_SIGNATURES, Boolean.TRUE.toString());
         }
 
-		// Usaremos preferiblemente la URL de error establecida en la sesion
-		redirectErrorUrl = connConfig.getRedirectErrorUrl();
 
         // Decodificamos el certificado de firma
         final X509Certificate signerCert;

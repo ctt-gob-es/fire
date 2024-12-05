@@ -69,6 +69,12 @@
   	<servlet-class>es.gob.fire.server.services.internal.CancelOperationService</servlet-class>
   </servlet>
   <servlet>
+  	<description>Servicio interno para la vuelta a una pagina anterior</description>
+  	<display-name>backService</display-name>
+  	<servlet-name>backService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.BackService</servlet-class>
+  </servlet>
+  <servlet>
   	<description>Servicio interno para la seleccion de certificado y prefirma de los datos</description>
   	<display-name>presignService</display-name>
   	<servlet-name>presignService</servlet-name>
@@ -105,29 +111,31 @@
   	<servlet-class>es.gob.fire.server.services.storage.RetrieveService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Servicio de recepcion del resultado del Cliente de firma.</description>
   	<display-name>MiniAppletSuccessService</display-name>
   	<servlet-name>MiniAppletSuccessService</servlet-name>
   	<servlet-class>es.gob.fire.server.services.internal.MiniAppletSuccessService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Servicio de recepcion de los errores del Cliente de firma.</description>
   	<display-name>MiniAppletErrorService</display-name>
   	<servlet-name>MiniAppletErrorService</servlet-name>
   	<servlet-class>es.gob.fire.server.services.internal.MiniAppletErrorService</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Servicio para la redireccion desde los proveedores.</description>
+  	<display-name>ExternalErrorService</display-name>
+  	<servlet-name>ExternalErrorService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.ExternalErrorService</servlet-class>
+  </servlet>
+  <servlet>
+  	<description>Servicio de prefirma del Cliente de firma.</description>
   	<display-name>PreSignBatchService</display-name>
   	<servlet-name>PreSignBatchService</servlet-name>
   	<servlet-class>es.gob.fire.server.services.batch.BatchPresigner</servlet-class>
   </servlet>
   <servlet>
-  	<description>
-  	</description>
+  	<description>Servicio de postfirma del Cliente de firma.</description>
   	<display-name>PostSignBatchService</display-name>
   	<servlet-name>PostSignBatchService</servlet-name>
   	<servlet-class>es.gob.fire.server.services.batch.BatchPostsigner</servlet-class>
@@ -186,12 +194,20 @@
   	<url-pattern>/public/cancelOperationService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
+  	<servlet-name>backService</servlet-name>
+  	<url-pattern>/public/backService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
   	<servlet-name>MiniAppletSuccessService</servlet-name>
   	<url-pattern>/public/miniappletSuccessService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>MiniAppletErrorService</servlet-name>
   	<url-pattern>/public/miniappletErrorService</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>ExternalErrorService</servlet-name>
+  	<url-pattern>/public/externalErrorService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>storageService</servlet-name>

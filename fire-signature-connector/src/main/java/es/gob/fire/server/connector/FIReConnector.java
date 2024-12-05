@@ -121,12 +121,15 @@ public abstract class FIReConnector {
 	 * Mecanismo de autenticaci&oacute;n para la obtenci&oacute;n de certificados de la nube.
 	 * Este metodo se sobrecargar&aacute; en los conectores que lo utilicen
 	 * @param subjectId Id de usuario.
-	 * @param okRedirectUrl URL para operaciones correctas.
-	 * @param errorRedirectUrl URL para operaciones err&oacute;neas.
+	 * @param successUrl URL a la que redireccionar cuando se identifique correctamente el usuario.
+	 * @param errorUrl URL a la que redireccionar cuando no se identifique correctamente el usuario.
 	 * @return URL que permite al usuario autenticarse.
+     * @throws FIReConnectorUnknownUserException Si el usuario no est&aacute; dado de alta en el servicio.
+     * @throws FIReConnectorNetworkException Si hay problemas de conectividad de red.
 	 */
-	public String userAutentication(final String subjectId, final String okRedirectUrl,
-									final String errorRedirectUrl) {
+	public String userAutentication(final String subjectId, final String successUrl, final String errorUrl) throws FIReConnectorUnknownUserException,
+          FIReConnectorNetworkException {
 		return null;
 	}
 }
+

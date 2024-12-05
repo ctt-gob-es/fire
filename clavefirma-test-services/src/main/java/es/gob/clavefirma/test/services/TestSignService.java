@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.AOPkcs1Signer;
+import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.AOSimpleSigner;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
@@ -194,6 +195,11 @@ public class TestSignService extends HttpServlet {
 			return;
 		}
 
+		final String digestAlgorithm = AOSignConstants.getDigestAlgorithmName(algorithm);
+		final String keyType = pke.getCertificate().getPublicKey().getAlgorithm();
+		final String signatureAlgorithm = AOSignConstants.composeSignatureAlgorithmName(digestAlgorithm, keyType);
+
+
 		final Map<String, byte[]> ret = new ConcurrentHashMap<>(td.getSignsCount());
 		final AOSimpleSigner signer = new AOPkcs1Signer();
 		for (final TriSign ts : td.getTriSigns()) {
@@ -202,7 +208,7 @@ public class TestSignService extends HttpServlet {
 					ts.getId(),
 					signer.sign(
 						Base64.decode(ts.getProperty(PROPERTY_NAME_PRESIGN)),
-						algorithm,
+						signatureAlgorithm,
 						pke.getPrivateKey(),
 						pke.getCertificateChain(),
 						null // extraParams, no usado en PKCS#1

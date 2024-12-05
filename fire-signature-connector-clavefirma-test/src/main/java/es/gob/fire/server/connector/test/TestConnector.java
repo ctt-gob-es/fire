@@ -417,12 +417,30 @@ public class TestConnector extends FIReConnector {
 	}
 
 	@Override
-	public String userAutentication(final String subjectId, final String okRedirectUrl, final String errorRedirectUrl) {
+	public String userAutentication(final String subjectId, final String successUrl, final String errorUrl)
+			throws FIReConnectorUnknownUserException, FIReConnectorNetworkException {
+
+		String errorUrlEncoded;
+		try {
+			errorUrlEncoded = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
+		}
+		catch (final Exception e) {
+			LOGGER.warning("No se pudo codificar la URL de error. Se usara tal cual: " + e); //$NON-NLS-1$
+			errorUrlEncoded = errorUrl;
+		}
+		String successUrlEncoded;
+		try {
+			successUrlEncoded = URLEncoder.encode(successUrl, "utf-8"); //$NON-NLS-1$
+		}
+		catch (final Exception e) {
+			LOGGER.warning("No se pudo codificar la URL de exito. Se usara tal cual: " + e); //$NON-NLS-1$
+			successUrlEncoded = successUrl;
+		}
+
 		final StringBuilder url = new StringBuilder();
-		url.append(this.testUrlBase).append("test_pages/TestUserCertAuth.jsp?subjectid=").append(subjectId) //$NON-NLS-1$
-		.append("&redirectko=").append(Base64.encode(errorRedirectUrl.getBytes(), true)) //$NON-NLS-1$
-		.append("&redirectok=").append(Base64.encode(okRedirectUrl.getBytes(), true)) //$NON-NLS-1$
-		.append("&id=").append(subjectId); //$NON-NLS-1$
+		url.append(this.testUrlBase).append("TestAuthUserService?subjectid=").append(subjectId) //$NON-NLS-1$
+			.append("&redirectko=").append(errorUrlEncoded) //$NON-NLS-1$
+			.append("&redirectok=").append(successUrlEncoded); //$NON-NLS-1$
 		return url.toString();
 	}
 }

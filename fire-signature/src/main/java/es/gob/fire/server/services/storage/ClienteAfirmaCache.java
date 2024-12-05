@@ -87,6 +87,13 @@ public class ClienteAfirmaCache {
 		}
 	}
 
+	/**
+	 * Eliminamos los datos de la cach&eacute;.
+	 * @param id Identificador del dato que se desea eliminar.
+	 */
+	public static void removeData(final String id) {
+		cache.remove(id);
+	}
 
 	/**
 	 * Identifica si es necesaria limpiar la cache. Ser&aacute; necesario limpiar si se han

@@ -73,9 +73,25 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de seleccion de origen")); //$NON-NLS-1$
 
+		// Comprobamos que se haya indicado el identificador de transaccion
+		if (transactionId == null || transactionId.isEmpty()) {
+			LOGGER.warning(logF.f("No se ha proporcionado el identificador de transaccion")); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
+			return;
+		}
+
+		// Comprobamos que se haya indicado el identificador de usuario
+		if (subjectRef == null || subjectRef.isEmpty()) {
+			LOGGER.warning(logF.f("No se ha proporcionado la referencia del usuario")); //$NON-NLS-1$
+			SessionCollector.removeSession(transactionId, trAux);
+			Responser.sendError(response, FIReError.FORBIDDEN);
+			return;
+		}
+
 		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
+			SessionCollector.removeSession(transactionId, trAux);
 			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
@@ -85,25 +101,12 @@ public class ChooseCertificateOriginService extends HttpServlet {
 			LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: %1s", e)); //$NON-NLS-1$
 		}
 
-		// Comprobamos que se haya indicado el identificador de transaccion
-		if (transactionId == null || transactionId.isEmpty()) {
-			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
-			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
-			return;
-		}
-
-		// Comprobamos que se haya indicado el identificador de usuario
-		if (subjectRef == null || subjectRef.isEmpty()) {
-			LOGGER.warning(logF.f("No se ha proporcionado la referencia del usuario")); //$NON-NLS-1$
-			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
-			return;
-		}
-
 		// Cargamos los datos de sesion
 		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef,
-				request.getSession(false), false, false, trAux);
+				request.getSession(false), false, true, trAux);
 		if (session == null) {
-			LOGGER.severe(logF.f("No existe sesion vigente asociada a la transaccion")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado. Se redirige a la pagina proporcionada en la llamada", transactionId)); //$NON-NLS-1$
+        	SessionCollector.removeSession(transactionId, trAux);
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
@@ -124,6 +127,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 		// Usamos la URL de error indicada en la transaccion
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
 			LOGGER.severe(logF.f("No se encontro en la sesion la URL de redireccion de error para la operacion")); //$NON-NLS-1$
+			SessionCollector.removeSession(session, trAux);
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
@@ -182,7 +186,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 	/**
 	 * Establece el tiempo maximo de vida de la sesi&oacute;n del usuario.
-	 * 
+	 *
 	 * @param request Petici&oacute;n realizada al servicio.
 	 */
 	private static void setSessionMaxAge(final HttpServletRequest request) {
@@ -194,7 +198,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 
 	/**
 	 * Ejecuta y gestiona el flujo de firma con el Cliente @firma.
-	 * 
+	 *
 	 * @param session      Datos de la transacci&oacute;n.
 	 * @param connConfig   Configuraci&oacute;n indicada por la llamada desde el
 	 *                     cliente.
@@ -237,7 +241,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	/**
 	 * Redirige el flujo de ejecuci&oacute;n para la firma con los certificados
 	 * en la nube del proveedor indicado.
-	 * 
+	 *
 	 * @param providerName Nombre del proveedor de firma en la nube que se debe
 	 *                     utilizar.
 	 * @param subjectId    Identificador del usuario.
@@ -371,7 +375,7 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	 * firma, si existe la posibilidad de
 	 * que se pueda reintentar la operaci&oacute;n, o la p&aacute;gina de error
 	 * proporcionada por el usuario.
-	 * 
+	 *
 	 * @param originForced Indica si era obligatorio el uso de un proveedor de firma
 	 *                     concreto.
 	 * @param connConfig   Configuraci&oacute;n de la transacci&oacute;n.

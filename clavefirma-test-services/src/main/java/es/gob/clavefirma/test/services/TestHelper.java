@@ -15,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -239,10 +238,9 @@ class TestHelper {
 		Security.removeProvider("BC"); //$NON-NLS-1$
 
 		final KeyStore ks = KeyStore.getInstance("PKCS12"); //$NON-NLS-1$
-		ks.load(
-				TestGetCertificateService.class.getResourceAsStream("/testservice/"+ subjectId + ".p12"), //$NON-NLS-1$ //$NON-NLS-2$
-				getSubjectPassword(subjectId).toCharArray()
-				);
+		try (InputStream is = TestHelper.class.getResourceAsStream("/testservice/"+ subjectId + ".p12")) { //$NON-NLS-1$ //$NON-NLS-2$
+			ks.load(is, getSubjectPassword(subjectId).toCharArray());
+		}
 		return ks;
 	}
 
@@ -270,7 +268,7 @@ class TestHelper {
 					"El identificador del titular no puede ser nulo" //$NON-NLS-1$
 					);
 		}
-		final InputStream resIs = TestGetCertificateService.class.getResourceAsStream(
+		final InputStream resIs = TestHelper.class.getResourceAsStream(
 				"/testservice/"+ subjectId + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (resIs == null) {
 			throw new InvalidUserException("El titular no existe: " + subjectId); //$NON-NLS-1$
@@ -291,7 +289,7 @@ class TestHelper {
 	 * @throws BlockedCertificateException Cuando el usuario no tenga certificados activos y s&iacute; bloqueados.
 	 * @throws WeakRegistryException Cuando el usuario realiz&oacute; un registro d&eacute;bil y no puede tener certificados de firma.
 	 */
-	private static void checkSubject(final String subjectId) throws InvalidUserException, FIReCertificateException, BlockedCertificateException, WeakRegistryException {
+	static void checkSubject(final String subjectId) throws InvalidUserException, FIReCertificateException, BlockedCertificateException, WeakRegistryException {
 
 		final Properties tempProperties = new Properties();
 		try (final InputStream is = doSubjectExist(subjectId)) {
@@ -316,19 +314,16 @@ class TestHelper {
 		if (subjectId == null) {
 			return false;
 		}
-		final File f;
-		final URL subUrl = TestGetCertificateService.class.getResource("/testservice/"+ subjectId + ".p12"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (subUrl == null) {
-			return false;
-		}
-		try {
-			f = new File(subUrl.toURI());
-		}
-		catch (final Exception e) {
-			return false;
+		boolean exists = false;
+		try (final InputStream is = TestHelper.class.getResourceAsStream("/testservice/"+ subjectId + ".p12")) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (is != null) {
+				exists = true;
+			}
+		} catch (final Exception e) {
+			LOGGER.info("No existe el usuario " + subjectId + ": " + e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		return f.isFile() && f.canRead();
+		return exists;
 	}
 
 	@SuppressWarnings("deprecation")

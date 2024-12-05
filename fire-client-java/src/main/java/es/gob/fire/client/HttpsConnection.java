@@ -107,8 +107,8 @@ public class HttpsConnection {
 
 	/**
 	 * Inicializa el objeto para las conexiones SSL.
-	 * @param config Opciones de configuraci&oacute;n.
-	 * @param decipher Descifrador encargado de descifrar las contrase&ntilde;as de
+	 * @param sslConfig Opciones de configuraci&oacute;n.
+	 * @param passwordDecipher Descifrador encargado de descifrar las contrase&ntilde;as de
 	 * los almacenes de claves y certificados de confianza.
 	 * @throws IllegalArgumentException Cuando se configura un fichero de almac&eacute;n que no existe.
 	 * @throws GeneralSecurityException Cuando se produce un error en la configuraci&oacute;n de la conexi&oacute;n.

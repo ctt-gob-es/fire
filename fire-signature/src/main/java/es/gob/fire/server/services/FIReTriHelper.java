@@ -138,15 +138,11 @@ public final class FIReTriHelper {
             }
             catch (final Throwable e) {
                 throw new FIReSignatureException(
-            		"Error en la prefirma: " + e, e //$NON-NLS-1$
+            		"Error en la prefirma: " + e.getMessage(), e //$NON-NLS-1$
                 );
             }
         }
         else if (SignOperation.COSIGN.toString().equalsIgnoreCase(criptoOperation)) {
-        	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
-        	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-        	checkMultiSignatureCompatibility(format, criptoOperation);
-
             try {
                 preRes = prep.preProcessPreCoSign(
             		docBytes,
@@ -158,15 +154,11 @@ public final class FIReTriHelper {
             }
             catch (final Throwable e) {
                 throw new FIReSignatureException(
-                    "Error en la precofirma: " + e,  e //$NON-NLS-1$
+                    "Error en la precofirma: " + e.getMessage(),  e //$NON-NLS-1$
                 );
             }
         }
         else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(criptoOperation)) {
-        	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
-        	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-        	checkMultiSignatureCompatibility(format, criptoOperation);
-
             CounterSignTarget target = CounterSignTarget.LEAFS;
             if (expandedParams != null && expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
                 final String targetValue = expandedParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
@@ -190,7 +182,7 @@ public final class FIReTriHelper {
             }
             catch (final Throwable e) {
                 throw new FIReSignatureException(
-                    "Error en la precontrafirma: " + e, e //$NON-NLS-1$
+                    "Error en la precontrafirma: " + e.getMessage(), e //$NON-NLS-1$
                 );
             }
 
@@ -320,10 +312,6 @@ public final class FIReTriHelper {
         	else if (SignOperation.COSIGN.toString().equalsIgnoreCase(cop)) {
 
         		try {
-                	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
-                	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-                	checkMultiSignatureCompatibility(frmt, cop);
-
         			preRes = prep.preProcessPreCoSign(
         					doc.getData(),
         					signAlgorithm,
@@ -353,10 +341,6 @@ public final class FIReTriHelper {
         		}
 
         		try {
-                	// TODO: Comprobamos que no se permitan multifirmas para FacturaE o firmas ASiC.
-                	// Eliminar esta comprobacion cuando se publique la version 1.8 de AutoFirma
-                	checkMultiSignatureCompatibility(frmt, cop);
-
         			preRes = prep.preProcessPreCounterSign(
         					doc.getData(),
         					signAlgorithm,
@@ -407,27 +391,6 @@ public final class FIReTriHelper {
 
         return batchTriPhaseData;
     }
-
-	/**
-	 * Valida que la operaci&oacute;n de cofirma o contrafirma se permita y sea compatible con el formato.
-	 * @param format formato con el que cofirmar o contrafirmar
-	 * @param cop operacion a realizar
-	 * @throws UnsupportedOperationException Cuando se configur&oacute; una operaci&oacute;n no soportada.
-	 */
-	public static void checkMultiSignatureCompatibility(final String format, final String cop) throws UnsupportedOperationException {
-		if (SignOperation.COSIGN.toString().equals(cop)
-        		|| SignOperation.COUNTERSIGN.toString().equals(cop)) {
-	        if (SignatureFormat.FACTURAE.toString().equals(format)
-	        		|| SignatureFormat.NONE.toString().equals(format)) {
-	        	throw new UnsupportedOperationException("No se permiten multifirmas para el formato " + format); //$NON-NLS-1$
-	        } else if (SignatureFormat.XADES_ASIC_S.toString().equals(format)
-	        		|| SignatureFormat.CADES_ASIC_S.toString().equals(format)) {
-	        	throw new UnsupportedOperationException("Operacion no soportada para el formato " + format); //$NON-NLS-1$
-	        } else if (SignOperation.COUNTERSIGN.toString().equals(cop) && SignatureFormat.PADES.toString().equals(format)) {
-	        	throw new UnsupportedOperationException("El formato PDF no permite contrafirmas"); //$NON-NLS-1$
-	        }
-		}
-	}
 
     /**
      * Agrega un PKCS#1 a la informaci&oacute;n ya disponible de una operaci&oacute;n
@@ -707,7 +670,7 @@ public final class FIReTriHelper {
 	 * @throws IOException Cuando falla la decodificaci&oacute;n Base 64 de los datos.
 	 */
 	// TODO: Esto podria ser mas robusto en las firmas XAdES, en la que no se utiliza la
-	// prefirma (parametro PRE) para completar la firma, sino el parametro BASE. Habr&iacute;a
+	// prefirma (parametro PRE) para completar la firma, sino el parametro BASE. Habria
 	// que extraer la prefirma del BASE en lugar de coger la que se pasa como parametro (que
 	// ya podria dejar de pasarse).
 	public static void checkSignaturesIntegrity(final TriphaseData triphaseData, final X509Certificate cert,

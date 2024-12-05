@@ -74,7 +74,8 @@ public class CancelOperationService extends HttpServlet {
 
 		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), true, false, trAux);
     	if (session == null) {
-    		LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado. Se redirige a la pagina proporcionada en la llamada", transactionId)); //$NON-NLS-1$
+        	SessionCollector.removeSession(transactionId, trAux);
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
     		return;
     	}
@@ -84,8 +85,8 @@ public class CancelOperationService extends HttpServlet {
 
 		final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 		if (connConfig == null || !connConfig.isDefinedRedirectErrorUrl()) {
-			SessionCollector.removeSession(session, trAux);
 			LOGGER.warning(logF.f("No se encontro en la sesion la URL de redireccion de la operacion")); //$NON-NLS-1$
+			SessionCollector.removeSession(session, trAux);
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}

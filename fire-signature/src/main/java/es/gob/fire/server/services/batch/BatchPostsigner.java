@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 
@@ -65,16 +66,13 @@ public final class BatchPostsigner extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.severe("No se han podido cargar los parametros de la peticion"); //$NON-NLS-1$
-			Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
-				"No se han podido cargar los parametros de la peticion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 		final String json = parameters.get(BATCH_JSON_PARAM);
 		if (json == null) {
 			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
@@ -85,18 +83,14 @@ public final class BatchPostsigner extends HttpServlet {
 		}
 		catch(final Exception e) {
 			LOGGER.log(Level.SEVERE, "La definicion de lote es invalida", e); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"La definicion de lote es invalida: " + e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
 		final String certListUrlSafeBase64 = parameters.get(BATCH_CRT_PARAM);
 		if (certListUrlSafeBase64 == null) {
 			LOGGER.severe("No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
@@ -106,18 +100,14 @@ public final class BatchPostsigner extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.severe("La cadena de certificados del firmante es invalida: " + e); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"La cadena de certificados del firmante es invalida: " + e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
 		final String triphaseDataAsUrlSafeBase64 = parameters.get(BATCH_TRI_PARAM);
 		if (triphaseDataAsUrlSafeBase64 == null) {
 			LOGGER.severe("No se ha recibido el resultado de las firmas cliente en el parametro " + BATCH_TRI_PARAM); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido el resultado de las firmas cliente en el parametro " + BATCH_TRI_PARAM); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
@@ -127,9 +117,7 @@ public final class BatchPostsigner extends HttpServlet {
 		}
 		catch(final Exception e) {
 			LOGGER.severe("El JSON de firmas cliente es invalido: " + e); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"El JSON de firmas cliente es invalido: " + e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 

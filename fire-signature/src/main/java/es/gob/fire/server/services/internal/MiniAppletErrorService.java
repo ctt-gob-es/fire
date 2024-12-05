@@ -63,8 +63,8 @@ public class MiniAppletErrorService extends HttpServlet {
 
 		final FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), true, false, trAux);
 		if (session == null) {
-			LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado", transactionId)); //$NON-NLS-1$
-			SessionCollector.removeSession(transactionId, trAux);
+        	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado. Se redirige a la pagina proporcionada en la llamada", transactionId)); //$NON-NLS-1$
+        	SessionCollector.removeSession(transactionId, trAux);
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
     		return;
         }

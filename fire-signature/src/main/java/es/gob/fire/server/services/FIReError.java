@@ -60,6 +60,7 @@ public enum FIReError {
 	INVALID_TRANSACTION(503, 403, "La transacci\u00F3n no se ha inicializado o ha caducado."), //$NON-NLS-1$
 	EXTERNAL_SERVICE_ERROR_TO_LOGIN(504, 500, "Error detectado despues de llamar a la pasarela externa para autenticar al usuario."), //$NON-NLS-1$
 	EXTERNAL_SERVICE_ERROR_TO_SIGN(505, 500, "Error detectado despues de llamar a la pasarela externa para firmar."), //$NON-NLS-1$
+	EXTERNAL_SERVICE_ERROR(506, 500, "Error detectado despues de llamar a la pasarela externa."), //$NON-NLS-1$
 	OPERATION_CANCELED(507, 400, "Operaci\u00F3n cancelada."), //$NON-NLS-1$
 	PROVIDER_ERROR(508, 500, "El proveedor de firma devolvi\u00F3 un error."), //$NON-NLS-1$
 	PROVIDER_INACCESIBLE_SERVICE(510, 500, "No se pudo conectar con el proveedor de firma."), //$NON-NLS-1$

@@ -287,14 +287,12 @@ public class SignOperationManager {
         			+ "?" + ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] //$NON-NLS-1$ //$NON-NLS-2$
         			+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true" //$NON-NLS-1$ //$NON-NLS-2$
         			+ "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
         	LOGGER.fine(logF.f("Se forzara el uso del proveedor " + provs[0])); //$NON-NLS-1$
         } else {
         	redirectUrl = ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN
         			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + redirectErrorUrl; //$NON-NLS-1$ //$NON-NLS-2$
+        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,

@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.Responser;
 
 
@@ -52,9 +53,7 @@ public final class BatchPresigner extends HttpServlet {
 		final String json = request.getParameter(BATCH_JSON_PARAM);
 		if (json == null) {
 			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
@@ -68,18 +67,14 @@ public final class BatchPresigner extends HttpServlet {
 		}
 		catch(final Exception e) {
 			LOGGER.log(Level.SEVERE, "La definicion de lote es invalida", e); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"La definicion de lote es invalida"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
 		final String certListUrlSafeBase64 = request.getParameter(BATCH_CRT_PARAM);
 		if (certListUrlSafeBase64 == null) {
 			LOGGER.severe("No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
@@ -89,9 +84,7 @@ public final class BatchPresigner extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.severe("La cadena de certificados del firmante es invalida: " + e); //$NON-NLS-1$
-			Responser.sendError(response,
-				HttpServletResponse.SC_BAD_REQUEST,
-				"La cadena de certificados del firmante es invalida"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 

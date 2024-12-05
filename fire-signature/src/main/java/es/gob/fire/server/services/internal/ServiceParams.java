@@ -68,6 +68,8 @@ public class ServiceParams {
     public static final String HTTP_PARAM_ERROR_TYPE = "errortype"; //$NON-NLS-1$
     /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con el mensaje de error obtenido. */
     public static final String HTTP_PARAM_ERROR_MESSAGE = "errormsg"; //$NON-NLS-1$
+    /** Par&aacute;metro usado en el env&iacute;o de datos HTTP con un nombre de p&aacute;gina a la que redirigir. */
+    public static final String HTTP_PARAM_PAGE = "page"; //$NON-NLS-1$
     /** Atributo usado en el env&iacute;o de datos HTTP con el certificado de firma. */
     public static final String HTTP_ATTR_CERT = "cert"; //$NON-NLS-1$
 
@@ -151,7 +153,7 @@ public class ServiceParams {
 
 	 /** Par&aacute;metro usado para el guardado del tama&ntilde;o de los datos a firmar en sesi&oacute;n */
 	public static final String SESSION_PARAM_DOCSIZE = "docsize"; //$NON-NLS-1$
-	
+
 	/** Par&aacute;metro usado para el guardado del tama&ntilde;o de los datos de la transacci&oacute;n en sesi&oacute;n */
 	public static final String SESSION_PARAM_TRANSACTION_SIZE = "transactionsize"; //$NON-NLS-1$
 

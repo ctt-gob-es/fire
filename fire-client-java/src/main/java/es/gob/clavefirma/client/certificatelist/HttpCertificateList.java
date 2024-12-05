@@ -210,10 +210,9 @@ public final class HttpCertificateList {
      * 				Identificador de la aplicaci&oacute;n.
      * @param subjectId
      * 				Identificador del titular de los certificados.
-     * @param config
-     * 			  	Configuraci&oacute;n adicional del proveedor (propiedad
-     * 				"certorigin" con el nombre del proveedor, etc.). Puede ser
-     * 				{@code null}.
+     * @param providerName
+     * 			  	Nombre del proveedor de firma dado de alta en FIRe que se desea utilizar.
+     * 			  	Puede ser {@code null}.
      * @return Lista de certificados almacenados en el sistema.
      * @throws CertificateException
      * 				Si ocurren errores en la extracci&oacute;n del certificado
