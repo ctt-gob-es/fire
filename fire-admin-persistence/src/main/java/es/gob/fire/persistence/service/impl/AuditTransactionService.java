@@ -168,4 +168,17 @@ public class AuditTransactionService implements IAuditTransactionService{
 		return repository.findDistinctApp();
 	}
 
+	@Override
+	public List<AuditSignature> getAllAuditSignaturesOfTransaction(AuditTransaction transaction) {
+		
+		String idTransaction = transaction.getIdTransaction();
+		
+		if (idTransaction != null && !idTransaction.isEmpty()) {
+			return signatureRepository.findByIdTransaction(idTransaction);
+		} else {
+			return new ArrayList<AuditSignature>();
+		}
+		
+	}
+
 }

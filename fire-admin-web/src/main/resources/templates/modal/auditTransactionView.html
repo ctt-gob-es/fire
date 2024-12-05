@@ -149,8 +149,8 @@
 </div>
 <script th:inline="javascript">
 $(document).ready(function() {
-	
-	var getAuditSignatures = /*[[@{/getAuditSignaturesOfTransaction}]]*/;
+	/*
+	var getAuditSignatures = /*[[@{/getAuditSignaturesOfTransaction}]];
 	var idAuditTransaction = $('#idAuditTransaction').val();
 	
 	var tblAuditTransactions = $('#auditSignaturesTable').DataTable({     
@@ -182,6 +182,33 @@ $(document).ready(function() {
             ],
             select: 'single',
             responsive: true
+	});
+	*/
+	
+	var dataJson = [[${listAuditSignatures}]];
+	
+	var tblAuditTransactions = $('#auditSignaturesTable').DataTable({	 
+    	responsive: true,
+    	"paging": true,
+    	"data": dataJson,
+    	"lengthChange": false,
+    	"language": {
+	        "url": "js/datatables/i18n/spanish.json",
+	        select: {
+	            rows: {
+	                _: "%d filas seleccionadas",
+	                1: "1 fila seleccionada"
+	            }
+	    	}
+	    },
+	    "columns": [
+	    	{ "data": "idIntLote"},
+          	{ "data": "format"},
+            { "data": "updateFormat"},
+          	{ "data": "size"},
+            { "data": "result"},
+            { "data": "errorDetail"}
+	    ],
 	});
 });
 </script>

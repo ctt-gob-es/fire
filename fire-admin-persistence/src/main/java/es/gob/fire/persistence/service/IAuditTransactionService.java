@@ -87,4 +87,11 @@ public interface IAuditTransactionService {
 	DataTablesOutput<AuditTransaction> getAuditTransactionsFirstQuery(DataTablesInput input, Integer minutes);
 	
 	List<String> getApplicationsDropdown();
+	
+	/**
+	 * Method that gets all the petitions batch signatures related to a certain transaction from the persistence.
+	 * @param transaction AuditTransaction to filter by.
+	 * @return a {@link List<PetitionBatchSignature>} with all petitions related to the given transaction.
+	 */
+	List<AuditSignature> getAllAuditSignaturesOfTransaction(AuditTransaction transaction);
 }

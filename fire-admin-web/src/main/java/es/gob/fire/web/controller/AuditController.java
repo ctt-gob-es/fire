@@ -68,6 +68,7 @@ public class AuditController {
 		model.addAttribute("auditTransactionViewForm", aduitTransactionForm);
 		model.addAttribute("isBatch", auditTransaction.getOperation().equals(BATCH_SIGN_VALUE));
 		model.addAttribute("disableInputs", true);
+		model.addAttribute("listAuditSignatures", auditTransactionService.getAllAuditSignaturesOfTransaction(auditTransaction));
 
 		return "modal/auditTransactionView.html";
 	}
