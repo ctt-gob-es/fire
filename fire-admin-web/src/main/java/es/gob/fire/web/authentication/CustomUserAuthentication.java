@@ -69,17 +69,17 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 	/**
 	 * Attribute that represents the default charset.
 	 */
-	private static final String DEFAULT_CHARSET = "utf-8";
+	private static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the md algorithm.
 	 */
-	private static final String MD_ALGORITHM = "SHA-256";
+	private static final String MD_ALGORITHM = "SHA-256"; //$NON-NLS-1$
 
 	/**
 	 * Constant attribute that represents the value of the administrator permission.
 	 */
-	private static final String ROLE_ADMIN_PERMISSON = "1";
+	private static final String ROLE_ADMIN_PERMISSON = "1"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the user service.
@@ -114,13 +114,14 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 		if (user != null) {
 
 			if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
-				throw new InsufficientAuthenticationException("El usuario " + UtilsStringChar.removeBlanksFromString(userName)
-						+ " no tiene permisos de acceso");
+				LOGGER.error("El usuario {} no tiene permisos de acceso", UtilsStringChar.removeBlanksFromString(userName)); //$NON-NLS-1$
+				throw new InsufficientAuthenticationException("El usuario " + UtilsStringChar.removeBlanksFromString(userName) //$NON-NLS-1$
+						+ " no tiene permisos de acceso"); //$NON-NLS-1$
 			}
 
 			// If password is OK
 			if (passwordEncoder().matches(password, user.getPassword())
-					|| checkAdminPassword(password, user.getPassword())) {
+					|| checkAdminPassword(user.getUserName(), password, user.getPassword())) {
 				final List<GrantedAuthority> grantedAuths = new ArrayList<>();
 				// Asignamos los roles del usuario
 				// TODO Hacerlo mediante un bucle
@@ -128,20 +129,23 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 				auth = new UsernamePasswordAuthenticationToken(userName, password,
 						/* getAuthorities(user.getRoles()) */grantedAuths);
 			} else {
+				LOGGER.error("El usuario {} inserto una constrasena incorrecta", UtilsStringChar.removeBlanksFromString(userName)); //$NON-NLS-1$
 				throw new BadCredentialsException(
-						"Las credenciales introducidas no son correctas.");
+						"Las credenciales introducidas no son correctas."); //$NON-NLS-1$
 			}
 
 		} else {
+			LOGGER.error("El usuario {} no existe en el sistema", UtilsStringChar.removeBlanksFromString(userName)); //$NON-NLS-1$
 			throw new UsernameNotFoundException(
-					"Las credenciales introducidas no son correctas.");
+					"Las credenciales introducidas no son correctas."); //$NON-NLS-1$
 		}
 		return auth;
 	}
 
 	/**
 	 * Method that checks if the password belong to the user.
-	 *
+	 *@param userName
+	 *            user id
 	 * @param password
 	 *            user password
 	 * @param keyAdminB64
@@ -149,24 +153,24 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 	 * @return {@code true} if the password is of the user, {@code false} an
 	 *         other case.
 	 */
-	private static boolean checkAdminPassword(final String password, final String keyAdminB64) {
+	private static boolean checkAdminPassword(final String userName, final String password, final String keyAdminB64) {
 
-		boolean result = Boolean.FALSE;
+		boolean result = false;
 		final byte[] md;
 		try {
 			md = MessageDigest.getInstance(MD_ALGORITHM).digest(password.getBytes(DEFAULT_CHARSET));
-			result = Boolean.TRUE;
-			if (keyAdminB64 == null || !keyAdminB64.equals(Base64.encode(md))) {
-				LOGGER.error("Se ha insertado una contrasena de administrador no valida"); //$NON-NLS-1$
+			if (keyAdminB64 != null && keyAdminB64.equals(Base64.encode(md))) {
+				result = true;
+			}
+			else {
+				LOGGER.error("Se ha insertado una contrasena no valida para el usuario {}", UtilsStringChar.removeBlanksFromString(userName)); //$NON-NLS-1$
 				result = false;
 			}
 		} catch (final NoSuchAlgorithmException nsae) {
 			LOGGER.error("Error de configuracion en el servicio de administracion. Algoritmo de huella incorrecto", //$NON-NLS-1$
 					nsae);
-			return false;
 		} catch (final UnsupportedEncodingException uee) {
 			LOGGER.error("Error de configuracion en el servicio de administracion. Codificacion incorrecta", uee); //$NON-NLS-1$
-			return false;
 		}
 		return result;
 	}
