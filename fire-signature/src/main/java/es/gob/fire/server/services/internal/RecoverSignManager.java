@@ -36,6 +36,7 @@ import es.gob.fire.server.document.FireAsyncDocumentManager;
 import es.gob.fire.server.document.FireDocumentManagerBase;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.SignOperation;
@@ -121,20 +122,13 @@ public class RecoverSignManager {
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
-        // Recuperamos el resto de parametros de la sesion
-        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false, trAux);
+        // Cargamos los datos de la transaccion
+        //final FireSession session = loadSession(transactionId, subjectId, trAux);
+		final FireSession session = loadSession (transactionId, subjectId, trAux);
         if (session == null) {
-    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
-    		return;
+        	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
+        	return;
         }
-
-        // Si la operacion anterior no fue el inicio de una firma, forzamos a que se recargue por si faltan datos
-		if (SessionFlags.OP_PRE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			LOGGER.info(logF.f("La anterior operacion fue %1s. Actualizamos la sesion", //$NON-NLS-1$
-					session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)));
-			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
-		}
 
         // Comprobamos que no se haya declarado ya un error, en cuyo caso, lo devolvemos
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
@@ -223,7 +217,7 @@ public class RecoverSignManager {
         // completa, pero si se uso un certificado en la nube, se debera completar el proceso de firma
     	if (!ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(providerName)) {
 
-    		LOGGER.info(logF.f("Se enviaron los datos al proveedor remoto %1s y ahora se le solicitara su PKCS#1", providerName)); //$NON-NLS-1$
+    		LOGGER.info(logF.f("Se enviaron los datos al proveedor remoto %1s y ahora se le solicitara su PKCS#1", LogUtils.cleanText(providerName))); //$NON-NLS-1$
 
     		// Decodificamos la informacion de la firma trifasica
     		TriphaseData td;
@@ -247,7 +241,7 @@ public class RecoverSignManager {
     			return;
 			}
     		catch(final FIReConnectorFactoryException e) {
-    			LOGGER.log(Level.WARNING, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+    			LOGGER.log(Level.WARNING, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", LogUtils.cleanText(providerName)), e); //$NON-NLS-1$
     			sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
     			return;
     		}
@@ -391,6 +385,24 @@ public class RecoverSignManager {
         Responser.sendResult(response, buildResult(providerName, signingCert, finalUpgradeFormat, trAux));
 	}
 
+	private static FireSession loadSession(final String transactionId, final String subjectId, final TransactionAuxParams trAux) {
+
+		// Recuperamos el resto de parametros de la sesion
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, ConfigManager.isSessionSharingForced(), trAux);
+        if (session == null && ConfigManager.isSessionSharingForced()) {
+    		LOGGER.warning(trAux.getLogFormatter().f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+    		return null;
+        }
+
+        // Si la operacion anterior no fue el inicio de una firma, forzamos a que se recargue por si faltan datos
+		if (session == null || SessionFlags.OP_PRE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			LOGGER.info(trAux.getLogFormatter().f("No se encontro la sesion o no estaba actualizada. Forzamos la carga")); //$NON-NLS-1$
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
+		}
+
+		return session;
+	}
+
 	/**
 	 * Se encarga de postprocesar la firma, ya sea mejor&aacute;ndola a formato longevo o
 	 * valid&aacute;ndola.
@@ -502,6 +514,8 @@ public class RecoverSignManager {
 	 * @param remoteTrId Identificador de transacci&oacute;n del proveedor.
 	 * @param trConfig Configuraci&oacute;n para el proveedor.
 	 * @param td Informaci&oacute;n de firma trif&aacute;sica en el que insertar el PKCS#1.
+	 * @param signingCert Certificado de firma.
+     * @param logF Formateador de trazas de log.
 	 * @return informaci&oacute;n de firma trif&aacute;sica con el PKCS#1.
 	 * @throws IllegalArgumentException Cuando falta un par&aacute;metro o se ha proporcionado uno no v&aacute;lido.
 	 * @throws FIReConnectorUnknownUserException Cuando el usuario no est&aacute; registrado.
@@ -523,7 +537,7 @@ public class RecoverSignManager {
 		}
 
 		// Obtenemos el conector con el backend ya configurado
-		final FIReConnector connector = ProviderManager.getProviderConnector(providerName, trConfig.getProperties());
+		final FIReConnector connector = ProviderManager.getProviderConnector(providerName, trConfig.getProperties(), logF);
 
 		final Map<String, byte[]> ret;
 		ret = connector.sign(remoteTrId);

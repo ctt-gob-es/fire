@@ -93,41 +93,27 @@ public class SignBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR, stopOnError);
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE);
-        SessionCollector.commit(session, trAux);
 
-		// Recuperamos los proveedores cargados para la aplicacion
-		final String[] provs = (String[]) session.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
+        // Guardamos los datos de la transaccion en la coleccion de sesiones y en la sesion del propio servidor
+        session.saveIntoHttpSession(request.getSession());
+        SessionCollector.commit(session, trAux);
 
 		// Obtenemos la referencia al usuario de la sesion
         final String subjectRef = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF);
 
-        // Si ya se definio el origen del certificado, se envia al servicio que se encarga de
-        // redirigirlo. Si no, se envia la pagina de seleccion
-        String redirectUrl;
-        if (provs != null && provs.length == 1) {
-        	// Si el unico proveedor que hay requiere que el usuario se autentique previamente, lo
-        	// redirigimos a la pagina de autenticacion. Si no, a la de seleccion de certificado
-        	final ProviderInfo info = ProviderManager.getProviderInfo(provs[0]);
-        	redirectUrl = (info.isUserRequiredAutentication() ? ServiceNames.PUBLIC_SERVICE_AUTH_USER : ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN)
-        			+ "?" + ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true" //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
-        	LOGGER.fine(logF.f("Se forzara el uso del proveedor " + provs[0])); //$NON-NLS-1$
-        } else {
-        	redirectUrl = ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN
-        			+ "?" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
-        }
-
-        LOGGER.fine(logF.f("Generamos la URL de redireccion")); //$NON-NLS-1$
+        // Componemos los parametros del servicio
+		final String redirectUrl = ServiceNames.PUBLIC_SERVICE_ENTRY_POINT
+    			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
+    			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$;
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		final String redirectUrlBase = PublicContext.getPublicContext(request);
 
-        // Devolvemos la pagina a la que debe dirigir al usuario
-        final SignOperationResult result = new SignOperationResult(transactionId, redirectUrlBase + redirectUrl);
+		// Devolvemos al usuario el ID de la transaccion y la pagina a la que debe dirigir al usuario
+        final SignOperationResult result = new SignOperationResult(
+        		transactionId,
+        		redirectUrlBase + redirectUrl);
 
         LOGGER.info(logF.f("Devolvemos la URL de redireccion con el ID de transaccion")); //$NON-NLS-1$
 

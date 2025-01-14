@@ -80,7 +80,7 @@ public class TransactionRecorder {
 			return;
 		}
 
-		LOGGER.info("Se registraran los datos de las estadisticas de transaccion"); //$NON-NLS-1$
+		LOGGER.info("Se registraran estadisticas de las transacciones"); //$NON-NLS-1$
 
 		// Comprobamos que el directorio exista y se pueda escribir en el
 		final File logsDir = new File(logsPath);
@@ -129,7 +129,7 @@ public class TransactionRecorder {
 	 * correctamente o lo hizo alguna de las firmas del lote; {@code false}, no se pudo
 	 * generar la firma o fallaron todas las firmas del lote).
 	 */
-	public final void register(final FireSession fireSession, final boolean result) {
+	public synchronized final void register(final FireSession fireSession, final boolean result) {
 
 		// Si no hay que registrar estadisticas, no se hace
 		if (!this.enable) {

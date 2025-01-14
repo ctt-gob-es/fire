@@ -7,6 +7,7 @@ import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
+import es.gob.fire.server.services.LogUtils;
 
 /**
  * Clase para la composici&oacute;n y recuperaci&oacute;n de la firma iniciada
@@ -80,7 +81,7 @@ public class CloudPostSignBatchRecover implements PostSignBatchRecover {
     	catch (final FIReSignatureException e) {
     		throw new BatchRecoverException(String.format(
     				"Error durante la postfirma. Verifique el codigo de operacion (%1s) y el formato (%2s)", //$NON-NLS-1$
-					this.signConfig.getCryptoOperation(), this.signConfig.getFormat()), e,
+					LogUtils.cleanText(this.signConfig.getCryptoOperation()), LogUtils.cleanText(this.signConfig.getFormat())), e,
     				BatchResult.POSTSIGN_ERROR);
     	}
 

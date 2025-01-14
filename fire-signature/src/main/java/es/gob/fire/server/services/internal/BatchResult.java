@@ -69,6 +69,10 @@ public class BatchResult extends OperationResult implements Serializable {
 	/** Estado que indica que es necesario esperar un periodo de gracia para recuperar la firma. */
 	public static final String GRACE_PERIOD = "GRACE_PERIOD"; //$NON-NLS-1$
 
+	public static final int WITHOUT_ERRORS = 0;
+	public static final int ANY_FAILED = 1;
+	public static final int ALL_FAILED = 2;
+
 	private static final String JSON_ATTR_PROVIDER_NAME = "prov"; //$NON-NLS-1$
 	private static final String JSON_ATTR_SIGNING_CERT = "cert"; //$NON-NLS-1$
 	private static final String JSON_ATTR_BATCH_RESULT = "batch"; //$NON-NLS-1$
@@ -253,6 +257,31 @@ public class BatchResult extends OperationResult implements Serializable {
 		}
 		final String error = docRef.getDetails();
 		return !docRef.isSigned() && !PENDING.equals(error);
+	}
+
+	/**
+	 * Comprueba si el resultado contiene firmas err&oacute;neas. El valor de retorno
+	 * indica si no hay firmas erroneas, si hay alguna o si todas fallaron.
+	 * @return {@code 0} si ninguna firma ha fallado todavia, {code 1} si alguna fall&oacute;
+	 * y {@code 2} si fallaron todas.
+	 */
+	public synchronized int hasErrors() {
+
+		int errors = 0;
+		for (final BatchDocumentReference ref : this.results.values()) {
+			if (ref != null && !ref.isSigned() && !PENDING.equals(ref.getDetails())) {
+				errors++;
+			}
+		}
+		int result;
+		if (errors == 0) {
+			result = WITHOUT_ERRORS;
+		} else if (errors < this.results.size()) {
+			result = ANY_FAILED;
+		} else {
+			result = ALL_FAILED;
+		}
+        return result;
 	}
 
 	public synchronized void setErrorMessage(final String docId, final String errorMessage) {

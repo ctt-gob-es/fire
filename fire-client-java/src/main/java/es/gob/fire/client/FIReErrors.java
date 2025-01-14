@@ -50,6 +50,8 @@ public class FIReErrors {
 	public static final int CERTIFICATE_ERROR = 23;
 	/** El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente. */
 	public static final int CERTIFICATE_WEAK_REGISTRY = 24;
+	/** Error desconocido durante la operaci&oacute;n. */
+	public static final int UNDEFINED_ERROR = 25;
 	/** Error durante la firma. */
 	public static final int SIGNING = 26;
 	/** No se seleccion&oacute; un proveedor de firma. */
@@ -87,6 +89,8 @@ public class FIReErrors {
 	/** El resultado del lote se recuper&oacute; anteriormente. */
 	public static final int BATCH_RESULT_RECOVERED = 54;
 
+	/** El contenido de la petici&oacute;n era demasiado grande. */
+	public static final int TOO_LARGE_CONTENT = 413;
 	/** Error interno del servidor. */
 	public static final int INTERNAL_ERROR = 500;
 	/** Petici&oacute;n rechazada. */

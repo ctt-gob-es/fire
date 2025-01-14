@@ -17,10 +17,12 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
+import es.gob.fire.signature.ConfigManager;
 
 
 /**
@@ -65,18 +67,12 @@ public class RecoverBatchSignatureManager {
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
-        // Recuperamos el resto de parametros de la sesion
-        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false, trAux);
+        // Cargamos los datos de la transaccion
+        final FireSession session = loadSession(transactionId, subjectId, trAux);
         if (session == null) {
-    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
-    		return;
+        	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
+        	return;
         }
-
-		// Si la operacion anterior no fue la recuperacion del resultado del lote, forzamos a que se recargue por si faltan datos
-		if (SessionFlags.OP_RECOVER != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
-		}
 
         // Comprobamos que previamente se haya recuperado el resultado global del lote
         if (!Boolean.TRUE.equals(session.getObject(ServiceParams.SESSION_PARAM_BATCH_RECOVERED))) {
@@ -148,13 +144,14 @@ public class RecoverBatchSignatureManager {
         	signature = TempDocumentsManager.retrieveAndDeleteDocument(docFilename);
         }
         catch (final Exception e) {
-        	final String errorMessage = String.format("No se encuentra el resultado de la firma del documento: %1s. Puede haber caducado la sesion", docId); //$NON-NLS-1$
+        	final String errorMessage = String.format("No se encuentra el resultado de la firma del documento: %1s. Puede haber caducado la sesion", LogUtils.cleanText(docId)); //$NON-NLS-1$
         	LOGGER.log(Level.SEVERE, logF.f(errorMessage), e);
         	batchResult.setErrorResult(docId, BatchResult.ERROR_RECOVERING);
         	batchResult.setErrorMessage(docId, errorMessage);
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SIGNLOGGER.register(session, false, docId);
         	AUDITSIGNLOGGER.register(session, false, docId, errorMessage);
+
         	SessionCollector.commit(session, trAux);
         	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
@@ -179,6 +176,24 @@ public class RecoverBatchSignatureManager {
         LOGGER.info(logF.f("Se devuelve el resultado de la firma")); //$NON-NLS-1$
 
         Responser.sendResult(response, signature);
+	}
+
+	private static FireSession loadSession(final String transactionId, final String subjectId, final TransactionAuxParams trAux) {
+
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, ConfigManager.isSessionSharingForced(), trAux);
+        if (session == null && ConfigManager.isSessionSharingForced()) {
+    		LOGGER.warning(trAux.getLogFormatter().f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+    		return null;
+        }
+
+		// Si no se ha encontrado la sesion o si la operacion anterior no fue la recuperacion
+        // del resultado del lote, forzamos a que se recargue por si faltan datos
+		if (session == null || SessionFlags.OP_RECOVER != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			LOGGER.info(trAux.getLogFormatter().f("No se encontro la sesion o no estaba actualizada. Forzamos la carga")); //$NON-NLS-1$
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
+		}
+
+		return session;
 	}
 
 	/**

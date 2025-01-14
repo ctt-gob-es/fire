@@ -71,19 +71,22 @@ public final class SingleSign {
 		}
 	}
 
-	/** Crea una definici&oacute;n de tarea de firma electr&oacute;nica &uacute;nica.
-	 * @param id Identificador de la firma. */
+	/**
+	 * Crea una definici&oacute;n de tarea de firma electr&oacute;nica &uacute;nica.
+	 * @param id Identificador de la firma.
+	 */
 	SingleSign(final String id) {
 		this.id = id;
 	}
 
-	/** Crea una definici&oacute;n de tarea de firma electr&oacute;nica &uacute;nica.
+	/**
+	 * Crea una definici&oacute;n de tarea de firma electr&oacute;nica &uacute;nica.
 	 * @param id Identificador de la firma.
 	 * @param dataSrc Datos a firmar.
 	 * @param fmt Formato de firma.
 	 * @param subOp Tipo de firma a realizar.
 	 * @param xParams Opciones adicionales de la firma.
-	 * @param ss Objeto para guardar la firma una vez completada. */
+	 */
 	public SingleSign(final String id,
 			          final String dataSrc,
 			          final SignFormat fmt,
@@ -419,7 +422,7 @@ public final class SingleSign {
 			}
 			catch(final Exception e) {
 				LOGGER.log(Level.WARNING, "No se puede almacenar la firma del documento: " + this.ss.getId(), e); //$NON-NLS-1$
-				final ProcessResult result = new ProcessResult(Result.DONE_BUT_ERROR_SAVING, "Error al almacenar la firma del documento"); //$NON-NLS-1$
+				final ProcessResult result = new ProcessResult(Result.DONE_BUT_ERROR_SAVING, e.getMessage());
 				return new ResultSingleSign(this.ss.getId(), false, result);
 			}
 			return new ResultSingleSign(this.ss.getId(), true, ProcessResult.PROCESS_RESULT_DONE_SAVED);

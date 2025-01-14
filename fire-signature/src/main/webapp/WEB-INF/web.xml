@@ -44,17 +44,17 @@
   	<servlet-name>recoverCertificate</servlet-name>
   	<servlet-class>es.gob.fire.server.services.RecoverCertificateService</servlet-class>
   </servlet>
-    <servlet>
+  <servlet>
+  	<description>Servicio interno que hace de punto de entrada para el usuario desde el navegador</description>
+  	<display-name>entryService</display-name>
+  	<servlet-name>entryService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.EntryService</servlet-class>
+  </servlet>
+  <servlet>
   	<description>Servicio interno para la autenticacion para la obtencion de certificados de la nube</description>
   	<display-name>authenticationService</display-name>
   	<servlet-name>authenticationService</servlet-name>
   	<servlet-class>es.gob.fire.server.services.internal.AuthenticationService</servlet-class>
-  </servlet>
-  <servlet>
-  	<description>Servicio interno para el acceso al proceso de seleccion del origen del certificado de firma</description>
-  	<display-name>chooseOriginService</display-name>
-  	<servlet-name>chooseOriginService</servlet-name>
-  	<servlet-class>es.gob.fire.server.services.internal.ChooseOriginService</servlet-class>
   </servlet>
   <servlet>
   	<description>Servicio interno para la seleccion del origen del certificado de firma (nube o local)</description>
@@ -165,13 +165,13 @@
   	<servlet-name>recoverCertificate</servlet-name>
   	<url-pattern>/recoverCertificate</url-pattern>
   </servlet-mapping>
-    <servlet-mapping>
-  	<servlet-name>authenticationService</servlet-name>
-  	<url-pattern>/public/authenticationService</url-pattern>
+  <servlet-mapping>
+  	<servlet-name>entryService</servlet-name>
+  	<url-pattern>/public/entry</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-  	<servlet-name>chooseOriginService</servlet-name>
-  	<url-pattern>/public/chooseOriginService</url-pattern>
+  	<servlet-name>authenticationService</servlet-name>
+  	<url-pattern>/public/authenticationService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>chooseCertificateOriginService</servlet-name>

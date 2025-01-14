@@ -22,7 +22,7 @@
 		<jdk.version>1.8</jdk.version>
 
 		<fire.version>2.4</fire.version>
-		<clienteafirma.version>1.9-SNAPSHOT</clienteafirma.version>
+		<clienteafirma.version>1.9</clienteafirma.version>
 		<fnmt.version>2.0</fnmt.version>
 		<log-consumer.version>1.3</log-consumer.version>
 		<slf4j.version>1.7.36</slf4j.version>

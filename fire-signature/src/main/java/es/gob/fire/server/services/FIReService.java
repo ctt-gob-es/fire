@@ -150,7 +150,7 @@ public class FIReService extends HttpServlet {
         final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
         final String trId      = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 
-        final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
+        final TransactionAuxParams trAux = new TransactionAuxParams(appId, LogUtils.limitText(trId));
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario

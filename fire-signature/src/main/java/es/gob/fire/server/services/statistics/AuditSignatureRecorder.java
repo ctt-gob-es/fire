@@ -140,7 +140,7 @@ public class AuditSignatureRecorder {
 	 * @param messageError Mensaje de error a almacenar. Si no se indica, se
 	 * usar&aacute; el por defecto del tipo de error.
 	 */
-	public final void register(final FireSession fireSession, final boolean result, final String docId, final String messageError) {
+	public synchronized final void register(final FireSession fireSession, final boolean result, final String docId, final String messageError) {
 
 		// Si no hay que registrar estadisticas, no se hace
 		if (!this.enable) {

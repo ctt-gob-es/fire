@@ -1,4 +1,6 @@
 
+<%@page import="es.gob.fire.server.services.internal.ErrorManager"%>
+<%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.Responser"%>
 <%@page import="es.gob.fire.server.services.FIReError"%>
 <%@page import="es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyException"%>
@@ -27,7 +29,153 @@
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page import="java.util.Properties"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	final String EXTRA_PARAM_EXP_POLICY = "expPolicy"; //$NON-NLS-1$
+	
+	// Recogemos de la peticion todos los parametros y con el identificador de transaccion
+	// recuperamos la configuracion de la operacion y la referencia a los datos sobre los
+	// que operar
+	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+	
+	if (subjectRef == null || trId == null) {
+		Responser.sendError(response, FIReError.FORBIDDEN);
+		return;
+	}
+	
+	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+	
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false, trAux);
+	if (fireSession == null) {
+		Responser.sendError(response, FIReError.FORBIDDEN);
+		return;
+	}
+
+	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+	trAux.setAppId(appId);
+	
+	// Obtenemos las URL a las que hay que redirigir al usuario en caso de exito y error
+	final TransactionConfig connConfig =
+		(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	final String errorUrl = connConfig.getRedirectErrorUrl();
+	
+	// Referencia a los datos cargados (que no el documento a firmar)
+	final String refB64 = Base64.encode(trId.getBytes(StandardCharsets.UTF_8));
+	
+	// Nombre de la aplicacion
+	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
+	
+	// Identificamos si estamos ante una firma de lote o una firma normal
+	final TransactionType transactionType = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);
+	boolean isBatchOperation = TransactionType.BATCH == transactionType;
+
+	// Valores genericos
+	final boolean stopOnError = Boolean.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
+	String cop = fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
+	String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
+	String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
+	Properties extraParams = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
+	String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
+	Properties upgradeConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_UPGRADE_CONFIG);
+	
+	
+	// AutoFirma es estricto al validar los atributos de los extraParams, asi que los expandimos
+	// nostros previamente y no cancelamos la operacion en caso de no poder expandir alguno 
+	try {
+		extraParams = ExtraParamsProcessor.expandProperties(
+				extraParams,
+				null,
+				format
+				);
+	}
+	catch (final IncompatiblePolicyException e) {
+		// Eliminamos el parametro extra de politica si no fuese compatible
+		extraParams.remove(EXTRA_PARAM_EXP_POLICY);
+	}
+	
+	// Valores de la operacion de firma
+	String triphaseFormat = null;
+	
+	// Valores en la operacion de lote
+	String preSignBatchUrl = null;
+	String postSignBatchUrl = null;
+	String certFilters = null;
+	
+	// Para la carga de recursos y acceso a los servicios, obtenemos la URL publica
+	String baseUrl = PublicContext.getPublicContext(request);
+	
+	// Obtenemos las propiedades extra de configuracion de las firmas
+	BatchResult batchResult = null;
+	SignBatchConfig defaultConfig = null;
+	if (isBatchOperation) {
+		defaultConfig = new SignBatchConfig();
+		defaultConfig.setCryptoOperation(cop);
+		defaultConfig.setFormat(format);
+		defaultConfig.setExtraParams(extraParams);
+		defaultConfig.setUpgrade(upgrade);
+		defaultConfig.setUpgradeConfig(upgradeConfig);
+		
+		certFilters = fireSession.getString(ServiceParams.SESSION_PARAM_FILTERS);
+		batchResult = (BatchResult) fireSession.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
+		
+		if (batchResult == null) {	//TODO: Habria que comprobar en el servicio este caso
+			String errorMessage = "No se ha encontrado en la sesion el listado de documentos del lote"; //$NON-NLS-1$
+			String errorCode = Integer.toString(FIReError.INTERNAL_ERROR.getCode());
+			Logger.getLogger("es.gob.fire").severe(trAux.getLogFormatter().f( //$NON-NLS-1$
+					"Error %s - " + errorMessage, errorCode)); //$NON-NLS-1$
+  				ErrorManager.setErrorToSession(fireSession, FIReError.INTERNAL_ERROR, true, errorMessage, trAux);
+			Responser.redirectToExternalUrl(errorUrl, request, response, trAux);
+			return;
+		}
+		
+		preSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_PRESIGN; //$NON-NLS-1$
+		postSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_POSTSIGN; //$NON-NLS-1$
+	}
+	else {
+		triphaseFormat = FIReTriHelper.getTriPhaseFormat(format);
+		
+		// Agregamos a los extraParams el parametro necesario para la generacion de una firma trifasica
+		extraParams.setProperty("serverUrl", baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_TRISIGN); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	final String formFunction = isBatchOperation ? "doSignBatch()" : "doSign()"; //$NON-NLS-1$ //$NON-NLS-2$
+	
+	// Obtenemos si el origen del certificado vino forzado por la aplicacion. Si es asi, se
+	// mostrara un boton cancelar y, en caso contrario, un boton volver. Configuramos tambien
+	// los parametros que necesitaran estos dos botones
+	boolean originForced = Boolean.parseBoolean(
+	fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
+
+	// Preparamos la informacion de los documentos a firmar
+	DocInfo[] docInfos = null;
+	if (isBatchOperation) {
+		final List<DocInfo> docInfosList = new ArrayList<DocInfo>();
+		Iterator<String> it = batchResult.iterator();
+		while (it.hasNext()) {
+			String docId = it.next();			
+			DocInfo docInfo = batchResult.getDocInfo(docId);
+			if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null)) {
+				docInfosList.add(docInfo);
+			}
+		}
+		docInfos = docInfosList.toArray(new DocInfo[docInfosList.size()]);
+	} else {
+		DocInfo docInfo = DocInfo.extractDocInfo(extraParams);
+		if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null)) {
+			docInfos = new DocInfo[] { docInfo };
+		}
+	}
+
+	// Preparamos el logo de la pantalla
+	String logoUrl = ConfigManager.getPagesLogoUrl();
+	if (logoUrl == null || logoUrl.isEmpty()) {
+		logoUrl = "img/general/dms/logo-institucional.png"; //$NON-NLS-1$
+	}
+%>
 
 <!DOCTYPE html>
 <html xml:lang="es" lang="es" class="no-js">
@@ -51,157 +199,6 @@
 	<link rel="stylesheet" type="text/css" href="css/personal.css">
 	<script type="text/javascript" src="js/autoscript.js"></script>
 	
-		<%
-		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
-	
-		final String EXTRA_PARAM_EXP_POLICY = "expPolicy"; //$NON-NLS-1$
-		
-		// Recogemos de la peticion todos los parametros y con el identificador de transaccion
-		// recuperamos la configuracion de la operacion y la referencia a los datos sobre los
-		// que operar
-		String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
-		
-		if (subjectRef == null || trId == null) {
-			Responser.sendError(response, FIReError.FORBIDDEN);
-			return;
-		}
-
-		TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
-		
-		FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
-		if (fireSession == null) {
-			Responser.sendError(response, FIReError.FORBIDDEN);
-			return;
-		}
-		
-		// Referencia a los datos cargados (que no el documento a firmar)
-		final String refB64 = Base64.encode(trId.getBytes(StandardCharsets.UTF_8));
-		
-		// Nombre de la aplicacion
-		final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
-		
-		// Identificamos si estamos ante una firma de lote o una firma normal
-		final TransactionType transactionType = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);
-		boolean isBatchOperation = TransactionType.BATCH == transactionType;
-	
-		// Valores genericos
-		final boolean stopOnError = Boolean.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
-		String cop = fireSession.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
-		String algorithm = fireSession.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
-		String format = fireSession.getString(ServiceParams.SESSION_PARAM_FORMAT);
-		Properties extraParams = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
-		String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
-		Properties upgradeConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_UPGRADE_CONFIG);
-		
-		
-		// AutoFirma es estricto al validar los atributos de los extraParams, asi que los expandimos
-		// nostros previamente y no cancelamos la operacion en caso de no poder expandir alguno 
-		try {
-			extraParams = ExtraParamsProcessor.expandProperties(
-					extraParams,
-					null,
-					format
-					);
-		}
-		catch (final IncompatiblePolicyException e) {
-			// Eliminamos el parametro extra de politica si no fuese compatible
-			extraParams.remove(EXTRA_PARAM_EXP_POLICY);
-		}
-		
-		// Valores de la operacion de firma
-		String triphaseFormat = null;
-		
-		// Valores en la operacion de lote
-		String preSignBatchUrl = null;
-		String postSignBatchUrl = null;
-		String certFilters = null;
-		
-		// Para la carga de recursos y acceso a los servicios, obtenemos la URL publica
-		String baseUrl = PublicContext.getPublicContext(request);
-		
-		// Obtenemos las propiedades extra de configuracion de las firmas
-		BatchResult batchResult = null;
-		SignBatchConfig defaultConfig = null;
-		if (isBatchOperation) {
-			defaultConfig = new SignBatchConfig();
-			defaultConfig.setCryptoOperation(cop);
-			defaultConfig.setFormat(format);
-			defaultConfig.setExtraParams(extraParams);
-			defaultConfig.setUpgrade(upgrade);
-			defaultConfig.setUpgradeConfig(upgradeConfig);
-			
-			certFilters = fireSession.getString(ServiceParams.SESSION_PARAM_FILTERS);
-			batchResult = (BatchResult) fireSession.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
-			
-			preSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_PRESIGN; //$NON-NLS-1$
-			postSignBatchUrl = baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_BATCH_POSTSIGN; //$NON-NLS-1$
-		}
-		else {
-			triphaseFormat = FIReTriHelper.getTriPhaseFormat(format);
-			
-			// Agregamos a los extraParams el parametro necesario para la generacion de una firma trifasica
-			extraParams.setProperty("serverUrl", baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_TRISIGN); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		
-		// Obtenemos las URL a las que hay que redirigir al usuario en caso de exito y error
-		final TransactionConfig connConfig =
-			(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
-		final String errorUrl = connConfig.getRedirectErrorUrl();
-	
-		final String formFunction = isBatchOperation ? "doSignBatch()" : "doSign()"; //$NON-NLS-1$ //$NON-NLS-2$
-		
-		// Obtenemos si el origen del certificado vino forzado por la aplicacion. Si es asi, se
-		// mostrara un boton cancelar y, en caso contrario, un boton volver. Configuramos tambien
-		// los parametros que necesitaran estos dos botones
-		boolean originForced = Boolean.parseBoolean(
-		fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
-	
-		// Parametros para el enlace del boton Atras o Cancelar
-		String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
-			 + "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$ //$NON-NLS-2$
-		if (errorUrl != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		// Si no se forzo el uso de este proveedor concreto, agregamos los parametros necesarios
-		// para permitir seleccionar otro
-		if (!originForced) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_PAGE + "=" + ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN; //$NON-NLS-1$ //$NON-NLS-2$
-			if (unregistered != null) {
-				buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		}
-	
-		// Preparamos la informacion de los documentos a firmar
-		DocInfo[] docInfos = null;
-		if (isBatchOperation) {
-			if (batchResult != null) {
-				final List<DocInfo> docInfosList = new ArrayList<DocInfo>();
-				Iterator<String> it = batchResult.iterator();
-				while (it.hasNext()) {
-					String docId = it.next();
-					DocInfo docInfo = batchResult.getDocInfo(docId);
-					if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null)) {
-						docInfosList.add(docInfo);
-					}
-				}
-				docInfos = docInfosList.toArray(new DocInfo[docInfosList.size()]);
-			}
-		} else {
-			DocInfo docInfo = DocInfo.extractDocInfo(extraParams);
-			if (docInfo != null && (docInfo.getName() != null || docInfo.getTitle() != null)) {
-				docInfos = new DocInfo[] { docInfo };
-			}
-		}
-	
-		// Preparamos el logo de la pantalla
-		String logoUrl = ConfigManager.getPagesLogoUrl();
-		if (logoUrl == null || logoUrl.isEmpty()) {
-			logoUrl = "img/general/dms/logo-institucional.png"; //$NON-NLS-1$
-		}
-		%>
-	
 	<script type="text/javascript">
 		
 		<%
@@ -215,8 +212,6 @@
 						"<%= defaultConfig.getCryptoOperation() %>", 
 						"<%= extraParamsPlain %>"
 						);
-				
-
 				
 		<%		
 				final Iterator<String> it = batchResult.iterator();
@@ -463,7 +458,7 @@
 					<input id="buttonCancel" type="button" class="button-operacion" value="Cancelar" onclick="doCancel()"/>
 				</div>
 			</div>
-				
+
 			<div id="signButtonsPanel" Class="container-firmar "> 
 				<form name="formSign" id="formSign" method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_MINIAPPLET_SUCCESS %>">
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
@@ -517,13 +512,26 @@
 		<% } %>
 		<div class="container_btn_operation">
 		<% if (originForced) { %>
-			<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonUrlParams %>" class="button-cancelar">							
-				<span >Cancelar</span>							
+			<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION %>" id="formCancel">
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+			</form>
+		
+			<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
+				<span >Cancelar</span>
 			</a>
 		<% } else { %>
-			<a href= "<%= ServiceNames.PUBLIC_SERVICE_BACK + "?" + buttonUrlParams %>" class="button-volver">							
+			<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN %>" />
+			</form>
+		
+			<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 				<span class="arrow-left-white"></span>
-				<span >Volver</span>							
+				<span >Volver</span>
 			</a>
 		<% } %>
 		</div>
@@ -556,7 +564,6 @@
 		
 		// Actualizamos el texto de requisitos
 		updateRequirementsText();
-
 		
 		/** Muestra y actualiza el dialogo de progreso. */
 		function showProgress() {

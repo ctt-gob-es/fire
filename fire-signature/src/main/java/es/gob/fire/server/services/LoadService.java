@@ -242,7 +242,7 @@ public final class LoadService extends HttpServlet {
         	if (providerName == null) {
         		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
         	}
-            connector = ProviderManager.getProviderConnector(providerName, config);
+            connector = ProviderManager.getProviderConnector(providerName, config, logF);
         }
         catch (final IOException e) {
         	LOGGER.log(Level.SEVERE, logF.f("El parametro de configuracion de la transaccion estaba mal formado"), e); //$NON-NLS-1$
@@ -251,7 +251,7 @@ public final class LoadService extends HttpServlet {
             return;
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", LogUtils.cleanText(providerName)), e); //$NON-NLS-1$
         	Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error en la configuracion del conector con el servicio de custodia"); //$NON-NLS-1$
             return;

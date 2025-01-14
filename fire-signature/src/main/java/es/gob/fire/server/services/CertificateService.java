@@ -156,10 +156,10 @@ public final class CertificateService extends HttpServlet {
         	if (providerName == null) {
         		providerName = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
         	}
-            connector = ProviderManager.getProviderConnector(providerName, null);
+            connector = ProviderManager.getProviderConnector(providerName, null, logF);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", LogUtils.cleanText(providerName)), e); //$NON-NLS-1$
         	Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error en la configuracion del conector con el servicio de custodia: " + e //$NON-NLS-1$
             );

@@ -139,6 +139,7 @@ public class TransactionResult extends OperationResult {
 	 * @param resultType Tipo de resultado.
 	 * @param errorCode C&oacute;digo de error.
 	 * @param errorMessage Mensaje de error.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
 	public TransactionResult(final int resultType, final int errorCode, final String errorMessage, final TransactionAuxParams trAux) {
 		this.resultType = resultType;
@@ -153,6 +154,7 @@ public class TransactionResult extends OperationResult {
 	 * ha finalizado correctamente. Este objeto no tiene definido el resultado final.
 	 * @param resultType Tipo de resultado.
 	 * @param providerName Nombre del proveedor utilizado.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
 	public TransactionResult(final int resultType, final String providerName, final TransactionAuxParams trAux) {
 		this.resultType = resultType;
@@ -166,6 +168,7 @@ public class TransactionResult extends OperationResult {
 	 * ha finalizado correctamente.
 	 * @param resultType Tipo de resultado.
 	 * @param result Datos resultantes de la operaci&oacute;n.
+	 * @param trAux        Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
 	public TransactionResult(final int resultType, final byte[] result, final TransactionAuxParams trAux) {
 		this.resultType = resultType;
@@ -282,26 +285,9 @@ public class TransactionResult extends OperationResult {
 	}
 
 	/**
-	 * Devuelve los datos obtenidos como resultado cuando la transacci&oacute;n ha
-	 * finalizado correctamente.
-	 * @return Resultado de la operaci&oacute;n.
-	 */
-	public byte[] getResult() {
-		return this.result;
-	}
-
-	/**
-	 * Establece el resultado de la transacci&oacute;n.
-	 * @param result Resultado de la transacci&oacute;n.
-	 */
-	public void setResult(final byte[] result) {
-		this.result = result;
-	}
-
-	/**
 	 * Obtiene el resultado de la transacci&oacute;n, que puede ser los bytes del resultado
 	 * o un objeto JSON con la informaci&oacute;n del proceso si este no se obtuvo. Este
-	 * resultado es susceptible de parsearse mediante el m&eacute;todo {@link #parse(int, byte[])}.
+	 * resultado es susceptible de parsearse mediante el m&eacute;todo {@link #parse(int, byte[], TransactionAuxParams)}.
 	 * @param charset Juego de caracteres a usar en caso de que el resultado sea un texto.
 	 * @return Resultado de la operaci&oacute;n.
 	 */

@@ -73,7 +73,7 @@ public class FireSession implements Serializable {
 
 	/**
 	 * Crea una nueva sesi&oacute;n de FIRe en la que se va a procesar una transacci&oacute;n.
-	 * @param id Identificador de transacci&oacute;n.
+	 * @param trId Identificador de transacci&oacute;n.
 	 * @param sessionData Datos de la sesi&oacute;n.
 	 * @param expirationTime Momento del tiempo en el que expirara la sesi&oacute;n.
 	 * @return Sesi&oacute;n de FIRe.

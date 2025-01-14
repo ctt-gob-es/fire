@@ -52,16 +52,10 @@ public class RecoverBatchStateManager {
         	return;
         }
 
-		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
-
-        // Recuperamos el resto de parametros de la sesion
-        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false, trAux);
-
-        // Si no se ha encontrado la session en el pool de sesiones vigentes, se
-        // interpreta que estaba caducada
+        // Cargamos los datos de la transaccion
+        final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
         if (session == null) {
-    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
-    		Responser.sendError(response, FIReError.INVALID_TRANSACTION);
+        	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;
         }
 
@@ -80,8 +74,6 @@ public class RecoverBatchStateManager {
         		pending = pendingInt.intValue();
         	}
     	}
-
-		LOGGER.fine(logF.f("Se devuelve el estado del lote")); //$NON-NLS-1$
 
     	final String progress = Float.toString(1 - (float) pending / numOperations);
     	Responser.sendResult(response, progress.getBytes());

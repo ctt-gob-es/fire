@@ -123,7 +123,6 @@ public class AuditTransactionRecorder {
 	 * @param result Resultado de la operaci&oacute;n ({@code true}, la firma termino
 	 * correctamente o lo hizo alguna de las firmas del lote; {@code false}, no se pudo
 	 * generar la firma o fallaron todas las firmas del lote).
-	 * @param docId Identificador del documento firmado en caso de encontrarse dentro de un lote.
 	 */
 	public final void register(final FireSession fireSession, final boolean result) {
 
@@ -138,11 +137,10 @@ public class AuditTransactionRecorder {
 	 * @param result Resultado de la operaci&oacute;n ({@code true}, la firma termino
 	 * correctamente o lo hizo alguna de las firmas del lote; {@code false}, no se pudo
 	 * generar la firma o fallaron todas las firmas del lote).
-	 * @param docId Identificador del documento firmado en caso de encontrarse dentro de un lote.
 	 * @param errorMessage Mensaje de error a almacenar. Si no se indica, se
 	 * usar&aacute; el por defecto del tipo de error.
 	 */
-	public final void register(final FireSession fireSession, final boolean result, final String errorMessage) {
+	public synchronized final void register(final FireSession fireSession, final boolean result, final String errorMessage) {
 
 		// Si esta desactivado el registro, no se hace nada
 		if (!this.enable) {

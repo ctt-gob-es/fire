@@ -8,6 +8,7 @@
 /*Inicial*/
 
 .hide {display: none !important;}
+.invisible {visibility: hidden !important;}
 .temp-hide {display: none;}
 .bold {font-weight: bold;  }
 .clear {clear: both;}

@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
  * Respuesta de una petici&oacute;n HTTP.
  * @author carlos.gamuci
  */
-public class HttpResponse {
+class HttpResponse {
 
 	private final boolean ok;
 	private final int status;
@@ -64,7 +64,7 @@ public class HttpResponse {
 	 * Recupera el contenido de la respuesta.
 	 * @return Contenido de la respuesta.
 	 */
-	public byte[] getContent() {
+	byte[] getContent() {
 		return this.content;
 	}
 

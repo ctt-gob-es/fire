@@ -102,6 +102,7 @@ public class ErrorManager {
 		else {
 			session.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
 		}
+
 		SessionCollector.commit(session, trAux);
 	}
 }

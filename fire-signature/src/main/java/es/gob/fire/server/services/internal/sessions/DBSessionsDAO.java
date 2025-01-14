@@ -156,31 +156,39 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 	}
 
 	@Override
-	public void deleteSession(final String id) {
+	public boolean deleteSession(final String id) {
 
+		boolean deleted = false;
 		try (Connection conn = DbManager.getConnection(true);
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_REMOVE_SESSION)) {
 			st.setString(1, id);
-			st.execute();
+			if (st.executeUpdate() > 0) {
+				deleted = true;
+			}
 		}
 		catch (final Exception e) {
 			LOGGER.warning("Error al eliminar la sesion con ID: " + id); //$NON-NLS-1$
 		}
+		return deleted;
 	}
 
 	@Override
-	public void deleteExpiredSessions(final long expirationTime) throws IOException {
+	public boolean deleteExpiredSessions(final long expirationTime) throws IOException {
 
 		final long maxTime = new Date().getTime() - expirationTime;
 
+		boolean deleted = false;
 		try (Connection conn = DbManager.getConnection(true);
 				PreparedStatement st = conn.prepareStatement(DB_STATEMENT_REMOVE_EXPIRED_SESSIONS)) {
 			st.setLong(1, maxTime);
-			st.execute();
+			if (st.executeUpdate() > 0) {
+				deleted = true;
+			}
 		}
 		catch (final Exception e) {
 			LOGGER.warning("Error durante la limpieza de sesiones caducadas: " + e); //$NON-NLS-1$
 		}
+		return deleted;
 	}
 
 	@Override

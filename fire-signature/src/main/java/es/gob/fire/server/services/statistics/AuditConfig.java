@@ -60,6 +60,17 @@ public class AuditConfig {
 	}
 
 	/**
+	 * Indica a nivel general si se deben guardar los registros de auditor&iacute;a.
+	 * @return {@code true} si la generaci&oacute;n no est&aacute; desactivada.
+	 * {@code false} si s&iacute; se deben generar los datos.
+	 */
+	public static boolean needRegistry() {
+		final int policyId = ConfigManager.getAuditPolicy();
+		final Policy policy = Policy.valueOf(policyId);
+		return policy != null && policy != Policy.DISABLE;
+	}
+
+	/**
 	 * Comprueba que la pol&iacute;tica establecida permita el guardado de datos
 	 * estad&iacute;sticos de auditor&iacute;a en base de datos.
 	 * @return {@code true} si el guardado no est&aacute; desactivada.
@@ -90,7 +101,7 @@ public class AuditConfig {
 
 		int id;
 
-		private Policy(final int id) {
+		Policy(final int id) {
 			this.id = id;
 		}
 

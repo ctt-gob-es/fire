@@ -109,9 +109,9 @@ public final class RecoverCertificateService extends HttpServlet {
 		updateLegacyKeys(params);
 
     	final String appId = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
-    	final String transactionId = params.getParameter(PARAMETER_NAME_TRANSACTION_ID);
+    	final String trId = params.getParameter(PARAMETER_NAME_TRANSACTION_ID);
 
-    	final TransactionAuxParams trAux = new TransactionAuxParams(appId, transactionId);
+    	final TransactionAuxParams trAux = new TransactionAuxParams(LogUtils.limitText(appId), LogUtils.limitText(trId));
     	final LogTransactionFormatter logF = trAux.getLogFormatter();
 
     	LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de recuperacion del certificado generado")); //$NON-NLS-1$
@@ -215,10 +215,10 @@ public final class RecoverCertificateService extends HttpServlet {
 
     	byte[] newCertEncoded;
         try {
-        	newCertEncoded = RecoverCertificateManager.recoverCertificate(providerName, transactionId, config);
+        	newCertEncoded = RecoverCertificateManager.recoverCertificate(providerName, transactionId, config, logF);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", LogUtils.cleanText(providerName)), e); //$NON-NLS-1$
         	Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }

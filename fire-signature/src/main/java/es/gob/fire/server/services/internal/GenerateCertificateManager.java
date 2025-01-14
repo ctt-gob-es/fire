@@ -33,6 +33,7 @@ public class GenerateCertificateManager {
 	 * @param providerName Nombre del proveedor de firma en la nube.
 	 * @param subjectId Identificador del usuario.
 	 * @param config Properties de configuraci&oacute;n del conector con el servicio de custodia.
+     * @param logF Formateador de trazas de log.
 	 * @return Resultado de la operaci&oacute;n, compuesto por el identificador de la
 	 * transacci&oacute;n y la URL a la que redirigir al usuario.
 	 * @throws IOException Cuando no se puede leer el par&aacute;metro de configuraci&oacute;n.
@@ -47,13 +48,13 @@ public class GenerateCertificateManager {
 	 * y no se pueda crear otro.
 	 */
 	public static GenerateCertificateResult generateCertificate(final String providerName,
-			final String subjectId, final Properties config)
+			final String subjectId, final Properties config, final LogTransactionFormatter logF)
 					throws IOException, FIReConnectorFactoryException, FIReCertificateAvailableException,
 					FIReCertificateException, FIReConnectorUnknownUserException, FIReConnectorNetworkException,
 					WeakRegistryException {
 
     	// Obtenemos el conector con el backend ya configurado
-    	final FIReConnector connector = ProviderManager.getProviderConnector(providerName, config);
+    	final FIReConnector connector = ProviderManager.getProviderConnector(providerName, config, logF);
 
         return connector.generateCertificate(subjectId);
 	}

@@ -56,6 +56,8 @@ public class ProviderInfo {
 
 	private static final String DATA_URI_IMAGE_HEADER = "image/png;base64,"; //$NON-NLS-1$
 
+	private static final String PROVIDER_LOCAL_NAME = "local"; //$NON-NLS-1$
+
 	private static final Logger LOGGER = Logger.getLogger(ProviderInfo.class.getName());
 
 	private final String name;
@@ -175,8 +177,7 @@ public class ProviderInfo {
 
 	/**
 	 * Indica si la propiedad certselectioninprovider est&aacute; activa o no.
-	 * @return {@code true} est&iacute; activa. {@code false}
-	 * en caso contrario.
+	 * @return {@code true} si est&aacute; activa. {@code false} en caso contrario.
 	 */
 	public boolean isCertSelectionInProvider() {
 		return Boolean.parseBoolean(
@@ -194,6 +195,15 @@ public class ProviderInfo {
 		return Boolean.parseBoolean(
 				infoProperties.getProperty(PROP_ALLOW_EXTERNAL_PROVIDER_INFO,
 						DEFAULT_ALLOW_EXTERNAL_PROVIDER_INFO));
+	}
+
+	/**
+	 * Indica si se trata del proveedor de firma con certificado local.
+	 * @return {@code true} si es el proveedor de firma local. {@code false}
+	 * en caso contrario.
+	 */
+	public boolean isLocalProvider() {
+		return PROVIDER_LOCAL_NAME.equals(this.name);
 	}
 
 	/**

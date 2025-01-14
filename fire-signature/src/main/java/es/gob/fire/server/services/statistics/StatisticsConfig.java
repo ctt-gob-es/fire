@@ -59,6 +59,17 @@ public class StatisticsConfig {
 		return this.policy != Policy.DISABLE;
 	}
 
+	/**
+	 * Indica a nivel general si se deben guardar las estad&acute;sticas.
+	 * @return {@code true} si la generaci&oacute;n no est&aacute; desactivada.
+	 * {@code false} si s&iacute; se deben generar los datos.
+	 */
+	public static boolean needRegistry() {
+		final int policyId = ConfigManager.getStatisticsPolicy();
+		final Policy policy = Policy.valueOf(policyId);
+		return policy != null && policy != Policy.DISABLE;
+	}
+
 	public String getDataDirPath() {
 		return this.dataDirPath;
 	}
@@ -80,7 +91,7 @@ public class StatisticsConfig {
 
 		int id;
 
-		private Policy(final int id) {
+		Policy(final int id) {
 			this.id = id;
 		}
 

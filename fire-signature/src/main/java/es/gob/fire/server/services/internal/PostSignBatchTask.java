@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.document.FireDocumentManagerBase;
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;
@@ -51,6 +52,8 @@ class PostSignBatchTask implements Callable<String> {
 
 	private final PostSignBatchRecover signRecover;
 
+	private final TransactionAuxParams trAux;
+
 	/**
 	 * Construye un hilo que se encargar&aacute; de componer la firma electr&oacute;nica
 	 * realizada con el certificado en la nube y, si se configura, de validarla o actualizarla
@@ -65,11 +68,12 @@ class PostSignBatchTask implements Callable<String> {
 	 * @param docManager Gestor de documentos que realizar&aacute; el tratamiento de la firma.
 	 * del hilo en caso de detectar un error en alguna de las firmas del lote.
 	 * @param signRecover Objeto para la composici&oacute;n y recuperaci&oacute;n de la firma.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
 	public PostSignBatchTask(final String appId, final String trId,
 			final String docId, final BatchResult batchResult, final SignBatchConfig signConfig,
 			final boolean needValidation, final FIReDocumentManager docManager,
-			final PostSignBatchRecover signRecover) {
+			final PostSignBatchRecover signRecover, final TransactionAuxParams trAux) {
 
 		this.appId = appId;
 		this.trId = trId;
@@ -79,13 +83,13 @@ class PostSignBatchTask implements Callable<String> {
 		this.needValidation = needValidation;
 		this.docManager = docManager;
 		this.signRecover = signRecover;
+		this.trAux = trAux;
 	}
 
 	@Override
 	public String call() throws Exception {
 
-		final TransactionAuxParams trAux = new TransactionAuxParams(this.appId, this.trId);
-		final LogTransactionFormatter logF = trAux.getLogFormatter();
+		final LogTransactionFormatter logF = this.trAux.getLogFormatter();
 
 		final Thread currentThread = Thread.currentThread();
 
@@ -136,7 +140,8 @@ class PostSignBatchTask implements Callable<String> {
     					LOGGER.info(logF.f("Tiempo de validacion: %sms", Long.toString(System.currentTimeMillis() - beforeTimeMillis))); //$NON-NLS-1$
 
     					if (!verifyResult.isOk()) {
-    		    			LOGGER.log(Level.WARNING, logF.f("La firma del document %1s no es valida: %2s", this.docId, verifyResult.getDescription())); //$NON-NLS-1$
+    		    			LOGGER.log(Level.WARNING, logF.f("La firma del document %1s no es valida: %2s", //$NON-NLS-1$
+    		    					LogUtils.cleanText(this.docId), LogUtils.cleanText(verifyResult.getDescription())));
     		    			this.batchResult.setErrorResult(this.docId, BatchResult.INVALID_SIGNATURE);
     		    			this.batchResult.setErrorMessage(this.docId, "La firma del documento no es valida"); //$NON-NLS-1$
     		    			throw new VerifyException("La firma del documento no es valida"); //$NON-NLS-1$
@@ -148,7 +153,7 @@ class PostSignBatchTask implements Callable<String> {
     				processResult = new PostProcessResult(signature);
     			}
     			else {
-    				LOGGER.info(logF.f("Actualizamos la firma '%1s' a: %2s", this.docId, upgradeLevel)); //$NON-NLS-1$
+    				LOGGER.info(logF.f("Actualizamos la firma '%1s' a: %2s", LogUtils.cleanText(this.docId), LogUtils.cleanText(upgradeLevel))); //$NON-NLS-1$
     				UpgradeResult upgradeResult;
     				try {
     					final long beforeTimeMillis = System.currentTimeMillis();
@@ -256,7 +261,7 @@ class PostSignBatchTask implements Callable<String> {
     	// Guardamos el resultado sobre el documento de datos
     	final String docFilename = this.batchResult.getDocumentReference(this.docId);
     	try {
-    		TempDocumentsManager.storeDocument(docFilename, result, false, trAux);
+    		TempDocumentsManager.storeDocument(docFilename, result, false, this.trAux);
     	}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error al almacenar la firma en el temporal"), e); //$NON-NLS-1$

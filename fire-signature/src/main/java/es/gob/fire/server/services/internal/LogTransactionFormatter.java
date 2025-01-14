@@ -5,6 +5,8 @@ package es.gob.fire.server.services.internal;
  */
 public class LogTransactionFormatter {
 
+	private static final int PARTICLE_MAX_LENGTH = 40;
+
 	private String appId;
 
 	private String transactionId;
@@ -16,8 +18,8 @@ public class LogTransactionFormatter {
 	}
 
 	public LogTransactionFormatter(final String appId, final String transactionId) {
-		this.appId = appId;
-		this.transactionId = transactionId;
+		this.appId = trim(appId);
+		this.transactionId = trim(transactionId);
 
 		buildHeader();
 	}
@@ -53,7 +55,7 @@ public class LogTransactionFormatter {
 	 * @param appId Identificador de aplicaci&oacute;n.
 	 */
 	public void setAppId(final String appId) {
-		this.appId = appId;
+		this.appId = trim(appId);
 
 		buildHeader();
 	}
@@ -71,7 +73,7 @@ public class LogTransactionFormatter {
 	 * @param transactionId Identificador de transacci&oacute;n.
 	 */
 	public void setTransactionId(final String transactionId) {
-		this.transactionId = transactionId;
+		this.transactionId = trim(transactionId);
 
 		buildHeader();
 	}
@@ -131,5 +133,17 @@ public class LogTransactionFormatter {
 			return String.format("TrId %1s: %2s", trId, message); //$NON-NLS-1$
 		}
 		return message;
+	}
+
+	private static String trim(final String text) {
+		if (text == null) {
+			return null;
+		}
+
+		String trimmed = text.trim();
+		if (trimmed.length() > PARTICLE_MAX_LENGTH) {
+			trimmed = trimmed.substring(0, PARTICLE_MAX_LENGTH).trim();
+		}
+		return trimmed;
 	}
 }

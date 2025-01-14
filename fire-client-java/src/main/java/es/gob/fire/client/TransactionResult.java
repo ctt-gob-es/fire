@@ -10,7 +10,6 @@
 package es.gob.fire.client;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -21,9 +20,7 @@ import java.util.Date;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
-import javax.json.JsonWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -285,65 +282,6 @@ public class TransactionResult {
 	}
 
 	/**
-	 * Obtiene el resultado de la transacci&oacute;n, que puede ser los bytes del resultado
-	 * o un objeto JSON con la informaci&oacute;n del proceso si este no se obtuvo. Este
-	 * resultado es susceptible de parsearse mediante el m&eacute;todo {@link #parse(int, byte[])}.
-	 * @return Resultado de la operaci&oacute;n.
-	 */
-	public byte[] encodeResult() {
-
-		// Si tenemos un resultado, lo devolvemos directamente
-		if (this.result != null) {
-			return this.result;
-		}
-
-		// Si no tenemos resultado, devolvemos un JSON con la informacion que se
-		// dispone de la transaccion
-		final JsonObjectBuilder resultBuilder = Json.createObjectBuilder();
-		resultBuilder.add(JSON_ATTR_STATE, this.state);
-		if (this.errorMessage != null) {
-			resultBuilder.add(JSON_ATTR_ERROR_MSG, this.errorMessage);
-			resultBuilder.add(JSON_ATTR_ERROR_CODE, this.errorCode);
-		}
-		if (this.providerName != null) {
-			resultBuilder.add(JSON_ATTR_PROVIDER_NAME, this.providerName);
-		}
-		if (this.signingCert != null) {
-			try {
-				resultBuilder.add(JSON_ATTR_SIGNING_CERT, encodeCertificate(this.signingCert));
-			} catch (final CertificateEncodingException e) {
-				// Error al codificar el certificado, no se devolvera certificado en ese caso
-				LOGGER.warn("Error al codificar el certificado de firma", e); //$NON-NLS-1$
-			}
-		}
-		if (this.upgradeFormat != null) {
-			resultBuilder.add(JSON_ATTR_UPGRADE, this.upgradeFormat);
-		}
-		if (this.gracePeriod != null) {
-			try {
-				final JsonObjectBuilder gracePeriodBuilder = Json.createObjectBuilder();
-				gracePeriodBuilder.add(JSON_ATTR_GRACE_PERIOD_ID, this.gracePeriod.getResponseId());
-				gracePeriodBuilder.add(JSON_ATTR_GRACE_PERIOD_DATE, this.gracePeriod.getResolutionDate().getTime());
-				resultBuilder.add(JSON_ATTR_GRACE_PERIOD, gracePeriodBuilder);
-			} catch (final Exception e) {
-				// Error al codificar el certificado, no se devolvera certificado en ese caso
-				LOGGER.warn("Error al codificar el certificado de firma", e); //$NON-NLS-1$
-			}
-		}
-
-		// Construimos la respuesta
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final JsonWriter json = Json.createWriter(baos);
-		final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-		jsonBuilder.add(JSON_ATTR_RESULT, resultBuilder);
-
-		json.writeObject(jsonBuilder.build());
-		json.close();
-
-		return baos.toByteArray();
-	}
-
-	/**
 	 * Obtiene un objeto con el resultado de la transacci&oacute;n a partir de los
 	 * datos obtenidos en los servicios para recuperaci&oacute;n de datos de FIRe.
 	 * @param resultType Tipo de resultado.
@@ -418,7 +356,9 @@ public class TransactionResult {
 				opResult.errorCode = 0;
 				opResult.errorMessage = "El formato de la respuesta del servidor no es valido"; //$NON-NLS-1$
 			} finally {
-				jsonReader.close();
+				if (jsonReader != null) {
+					jsonReader.close();
+				}
 			}
 		}
 		// Si no, habremos recibido directamente el resultado.

@@ -41,6 +41,9 @@ public class Responser {
 	 * @param content Mensaje.
 	 */
 	public static void sendResult(final HttpServletResponse response, final int status, final byte[] content) {
+
+		LOGGER.info(" ==== Enviamos respuesta con status: " + status); //$NON-NLS-1$
+
 		response.setStatus(status);
 		try (OutputStream os = response.getOutputStream()) {
 			os.write(content);
@@ -73,16 +76,18 @@ public class Responser {
 	}
 
 	/**
-	 * Env&iacute;a una respuesta al cliente de un servicio utilizando el c&oacute;dio de estado por defecto del error.
+	 * Env&iacute;a un mensaje de error al cliente de un servicio utilizando el c&oacute;dio de estado por defecto
+	 * del error indicado.
 	 * @param response Respuesta a la que inscribir el mensaje.
-	 * @param content Mensaje.
+	 * @param error Error que se ha producido.
 	 */
 	public static void sendError(final HttpServletResponse response, final FIReError error) {
 		sendResult(response, error.getHttpStatus(), buildError(error));
 	}
 
 	/**
-	 * Env&iacute;a una respuesta al cliente de un servicio utilizando el c&oacute;dio de estado por defecto del error.
+	 * Env&iacute;a el resultado de error al cliente de un servicio utilizando el c&oacute;dio de estado por defecto
+	 * del error indicado.
 	 * @param response Respuesta a la que inscribir el mensaje.
 	 * @param error Error que se ha producido.
 	 * @param operationResult Resultado de la operaci&oacute;n.
@@ -124,7 +129,7 @@ public class Responser {
 	 * Env&iacute;a una respuesta al cliente de un servicio.
 	 * @param response Respuesta a la que inscribir el mensaje.
 	 * @param status C&oacute;digo de respuesta.
-	 * @param content Mensaje.
+	 * @param error Error que devolver.
 	 */
 	public static void sendError(final HttpServletResponse response, final int status, final FIReError error) {
 		response.setContentType(JSON_MIMETYPE);
@@ -145,7 +150,8 @@ public class Responser {
 	 * Env&iacute;a una respuesta al cliente de un servicio.
 	 * @param response Respuesta a la que inscribir el mensaje.
 	 * @param status C&oacute;digo de respuesta.
-	 * @param content Mensaje.
+	 * @param errorCode C&oacute;digo de error.
+	 * @param message Mensaje.
 	 */
 	public static void sendError(final HttpServletResponse response, final int status, final int errorCode, final String message) {
 		sendResult(response, status, buildError(errorCode, message));
@@ -179,6 +185,8 @@ public class Responser {
         	httpSession.invalidate();
         }
 
+        LOGGER.fine(trAux.getLogFormatter().f("Redirigimos a URL externa: " + LogUtils.limitText(url))); //$NON-NLS-1$
+
         try {
         	response.sendRedirect(url);
         }
@@ -197,6 +205,8 @@ public class Responser {
      */
     public static void redirectToUrl(final String url, final HttpServletRequest request,
     		final HttpServletResponse response, final TransactionAuxParams trAux) {
+
+    	LOGGER.fine(trAux.getLogFormatter().f("Redirigimos a URL interna: " + LogUtils.limitText(url))); //$NON-NLS-1$
 
         try {
         	request.getRequestDispatcher(url).forward(request, response);

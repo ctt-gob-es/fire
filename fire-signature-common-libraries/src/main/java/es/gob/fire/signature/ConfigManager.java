@@ -117,6 +117,8 @@ public class ConfigManager {
 
 	private static final String PROP_SESSIONS_DAO = "sessions.dao"; //$NON-NLS-1$
 
+	private static final String PROP_SESSIONS_FORCE_SHARING = "sessions.sharing.forced"; //$NON-NLS-1$
+
 	private static final String PROP_TEMP_DOCUMENTS_DAO = "sessions.documents.dao"; //$NON-NLS-1$
 
 	private static final String PROP_LOGS_DIR = "logs.dir"; //$NON-NLS-1$
@@ -792,6 +794,16 @@ public class ConfigManager {
 		}
 
 		return getProperty(PROP_SESSIONS_DAO);
+	}
+
+	/**
+	 * Indica si se debe forzar la carga de sesiones compartidas. Esta opci&oacute;
+	 * solo se debe habilitar si se sufren problemas de carga de las sesiones al
+	 * realizarse un despliegue en alta disponibilidad.
+	 * @return {@code true} si se les debe dar soporte, {@code false} en caso contrario.
+	 */
+	public static boolean isSessionSharingForced() {
+		return Boolean.parseBoolean(getProperty(PROP_SESSIONS_FORCE_SHARING));
 	}
 
 	/**

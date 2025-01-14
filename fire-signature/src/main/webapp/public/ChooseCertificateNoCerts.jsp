@@ -1,28 +1,27 @@
 
 <%@page import="es.gob.fire.server.services.FIReError"%>
+<%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.Responser"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
-<%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
-<%@page import="java.net.URLEncoder"%>
-<%@page import="java.util.Properties"%>
-<%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
-<%@page import="java.util.Map"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderInfo"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderManager"%>
+<%@page import="es.gob.fire.signature.ConfigManager"%>
+<%@page import="java.net.URLEncoder"%>
+<%@page import="java.util.Map"%>
 
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
 	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 	final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-	String providerName = null;
 	
 	if (subjectRef == null || trId == null) {
 		Responser.sendError(response, FIReError.FORBIDDEN);
@@ -31,28 +30,35 @@
 	
 	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 	
-	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false, trAux);
+
+// 	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
+// 	if (fireSession == null || SessionFlags.OP_CHOOSE != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+// 		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
+// 	}
+
 	if (fireSession == null) {
 		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
 
-	final ProviderInfo info = ProviderManager.getProviderInfo(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN));
-	if (info != null && info.getTitle() != null) {
-		 providerName = info.getTitle();
-	}
-	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
-	if (SessionFlags.OP_CHOOSE != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
-	}
-
 	// Leemos los valores necesarios de la configuracion
-	final String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
 	final String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	final String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 		
 	final boolean originForced = Boolean.parseBoolean(
 		fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
+
+	// Completamos los datos de la transaccion
+	trAux.setAppId(appId);
+	
+	String providerName = null;
+	final ProviderInfo info = ProviderManager.getProviderInfo(
+			fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN), trAux.getLogFormatter());
+	if (info != null && info.getTitle() != null) {
+		 providerName = info.getTitle();
+	}
+
 	
 	String errorUrl = null;
 	TransactionConfig connConfig =
@@ -64,24 +70,10 @@
 		}
 	}
 
-	// Se define el comportamiento del boton en base a si se forzo el origen
-	// (se muestra el boton Cancelar) o no (boton Volver) 
-	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
-		+ "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$ //$NON-NLS-2$
-	
-	// Agregamos la URL de error si la hay
-	if (errorUrl != null) {
-		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-		
-	// Si no se forzo el uso de este proveedor concreto, agregamos los parametros necesarios
-	// para permitir seleccionar otro
-	if (!originForced) {
-		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_PAGE + "=" + ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN; //$NON-NLS-1$ //$NON-NLS-2$
-		if (unregistered != null) {
-			buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED + "=" + unregistered; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
+	// Preparamos la URL del boton de volver/cancelacion
+	final String buttonUrlParams = ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId + "&" //$NON-NLS-1$ //$NON-NLS-2$ 
+		+ ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
+		+ (errorUrl != null ? "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
@@ -101,7 +93,7 @@
 	<meta http-equiv="Content-Security-Policy" content="style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' *">
 
 	<meta name="description" content="El usuario no tiene certificados del proveedor en la nube">
-	<meta name="author" content="Gobierno de España">
+	<meta name="author" content="Gobierno de EspaÃ±a">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>No dispone de certificado de firma</title>
@@ -167,7 +159,7 @@
 							<p class="text-error-box">Tambien puede firmar usando sus certificados locales (incluyendo DNIe).</p>
 						</div>								  				
 						<div  id="certLocalcontainer" class="error-box hide">
-							<form id="certLocal" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>" class="hide">
+							<form id="certLocal" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
@@ -177,8 +169,8 @@
 						</div>
 					</div>			
 				<% } %>
-				
-				
+
+<!-- 
 				<div class="container_btn_operation">
 					<% if (originForced) { %>
 						<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonUrlParams %>" class="button-cancelar">
@@ -191,6 +183,32 @@
 						</a>
 					<% } %>
 					</div>
+ -->
+				<div class="container_btn_operation">
+					<% if (originForced) { %>
+						<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION %>" id="formCancel">
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+						</form>
+					
+						<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
+							<span >Cancelar</span>
+						</a>
+					<% } else { %>
+						<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN %>" />
+						</form>
+					
+						<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
+							<span class="arrow-left-white"></span>
+							<span >Volver</span>
+						</a>
+					<% } %>
+				</div>
 					
 			</section>
 		</main>

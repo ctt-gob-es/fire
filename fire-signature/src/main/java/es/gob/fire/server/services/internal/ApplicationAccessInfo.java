@@ -51,9 +51,9 @@ public class ApplicationAccessInfo {
 
 	/**
 	 * Recupera el listado de huellas de los certificados dados de alta para el uso de la aplicaci&oacute;n.
-	 * @return
+	 * @return Listado de huellas de certificado permitidas.
 	 */
 	public DigestInfo[] getCertDigests() {
-		return this.certDigests;
+		return this.certDigests.clone();
 	}
 }

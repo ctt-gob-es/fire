@@ -113,9 +113,9 @@ public final class GenerateCertificateService extends HttpServlet {
     	updateParamNames(params);
 
     	final String appId = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
-    	final String transactionId	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+    	final String trId	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 
-    	final TransactionAuxParams trAux = new TransactionAuxParams(appId, transactionId);
+    	final TransactionAuxParams trAux = new TransactionAuxParams(LogUtils.limitText(appId), LogUtils.limitText(trId));
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
     	// Comprobamos que la peticion este autorizada
@@ -198,15 +198,16 @@ public final class GenerateCertificateService extends HttpServlet {
 
         final GenerateCertificateResult gcr;
         try {
-        	gcr = GenerateCertificateManager.generateCertificate(providerName, subjectId, config);
+        	gcr = GenerateCertificateManager.generateCertificate(providerName, subjectId, config, logF);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", LogUtils.cleanText(providerName)), e); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.INTERNAL_ERROR);
         	return;
         }
         catch (final FIReConnectorUnknownUserException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("El usuario %1s no esta dado de alta en el proveedor de firma en la nube %2s", subjectId, providerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("El usuario %1s no esta dado de alta en el proveedor de firma en la nube %2s", //$NON-NLS-1$
+        			LogUtils.cleanText(subjectId), LogUtils.cleanText(providerName)), e);
 			AlarmsManager.notify(Alarm.CONNECTION_SIGNATURE_PROVIDER, providerName);
         	Responser.sendError(response, HttpCustomErrors.NO_USER.getErrorCode(), HttpCustomErrors.NO_USER.getErrorDescription());
         	return;

@@ -64,7 +64,7 @@
 			
 			/** Muestra y actualiza el dialogo de progreso. */
 			function showProgress(progress) {
-				document.getElementById("progressText").innerHTML = "Ejecutando firma: " + progress + "%"; 
+				document.getElementById("progressText").innerHTML = "Ejecutando firmas: " + progress + "%"; 
 				document.getElementById("progressDialog").style.display = "block";
 			}
 

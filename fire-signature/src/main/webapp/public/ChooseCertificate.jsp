@@ -19,8 +19,7 @@
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.security.cert.X509Certificate"%>
 
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
 	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 	
@@ -33,23 +32,22 @@
 	}
 
 	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
-	
+
 	// Cargamos la sesion. Deberia estar en memoria, pero permitimos su carga de otras fuentes,
 	// ya que, por ejemplo, si el proveedor de firma en la nube requirio que se validase la
-	// identidad del usuario antes de acceder a sus certificados, habríamos borrado la sesion
-	// de memoria al saltar de FIRe a la web del proveedor.
-	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
+	// identidad del usuario antes de acceder a sus certificados, la sesion podriamos haber
+	// saltado a otro nodo
+	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false, trAux);
 	if (fireSession == null) {
 		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
-	
-	// Si la operacion anterior no fue de solicitud de firma, forzamos a que se recargue por si faltan datos
-	if (SessionFlags.OP_CHOOSE != fireSession.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-		fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
+		
+	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
+	if (appId != null) {
+		trAux.setAppId(appId);
 	}
 	
-	// Obtenemos de la sesion la informacion de la aplicacion
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 		
 	String errorUrl = null;
@@ -60,22 +58,12 @@
 			errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 		}
 	}
-
-	// Preparamos el boton para cancelar o volver a atras. Se define el comportamiento
-	// de este boton en base a si se forzo el origen (se muestra el boton Cancelar) o
-	// no (boton Volver) 
+ 
+	
+	// Preparamos la URL del boton de volver/cancelacion
 	boolean originForced = Boolean
 			.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
-
-	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef + "&" + //$NON-NLS-1$ //$NON-NLS-2$
-			ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$
-	if (errorUrl != null) {
-		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	if (!originForced) {
-		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_PAGE + "=" + ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
+		
 	// Extraemos de la sesion los certificados y los eliminamos de la misma
 	final X509Certificate[] certificates = (X509Certificate[]) fireSession.getObject(trId + "-certs"); //$NON-NLS-1$
 	fireSession.removeAttribute(trId + "-certs"); //$NON-NLS-1$
@@ -189,11 +177,24 @@
 			
 			<div class="container_btn_operation">
 				<% if (originForced) { %>
-					<a href="<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonUrlParams %>" class="button-cancelar">
-					<span >Cancelar</span>
+					<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION %>" id="formCancel">
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+					</form>
+				
+					<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
+						<span >Cancelar</span>
 					</a>
 				<% } else { %>
-					<a href= "<%= ServiceNames.PUBLIC_SERVICE_BACK + "?" + buttonUrlParams %>" class="button-volver">
+					<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN %>" />
+					</form>
+				
+					<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 						<span class="arrow-left-white"></span>
 						<span >Volver</span>
 					</a>

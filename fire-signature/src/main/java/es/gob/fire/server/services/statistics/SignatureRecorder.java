@@ -110,9 +110,8 @@ public class SignatureRecorder {
 		}
 
 		// Instalamos el manejador para la impresion en el fichero de estadisticas
-		Handler logHandler = null;
 		try {
-			logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
+			final Handler logHandler = new DailyFileHandler(new File(logsPath, LOG_FILENAME).getAbsolutePath());
 			logHandler.setEncoding(LOG_CHARSET);
 			logHandler.setFormatter(new Formatter() {
 				@Override
@@ -149,7 +148,7 @@ public class SignatureRecorder {
 	 * {@code false}, no se pudo generar la firma).
 	 * @param docId Identificador del documento firmado en caso de encontrarse dentro de un lote.
 	 */
-	public final void register(final FireSession fireSession, final boolean result, final String docId) {
+	public synchronized final void register(final FireSession fireSession, final boolean result, final String docId) {
 
 		// Si no hay que registrar estadisticas, no se hace
 		if (!this.enable) {

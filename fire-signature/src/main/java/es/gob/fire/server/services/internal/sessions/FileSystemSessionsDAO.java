@@ -136,28 +136,35 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	}
 
 	@Override
-	public void deleteSession(final String id) {
+	public boolean deleteSession(final String id) {
+
+		boolean deleted = false;
 		try {
 			Files.delete(new File(this.dir, id).toPath());
+			deleted = true;
 		} catch (final NoSuchFileException e) {
 			// No hacemos nada
 		} catch (final IOException e) {
 			LOGGER.warning("No se pudo eliminar de disco la sesion " + id); //$NON-NLS-1$
 		}
+		return deleted;
 	}
 
 	@Override
-	public void deleteExpiredSessions(final long expirationTime) throws IOException {
+	public boolean deleteExpiredSessions(final long expirationTime) throws IOException {
 
+		boolean deleted = false;
     	for (final File tempFile : this.dir.listFiles(new ExpiredFileFilter(expirationTime))) {
     		try {
     			Files.delete(tempFile.toPath());
+    			deleted = true;
     		}
     		catch (final Exception e) {
     			LOGGER.warning("No se pudo eliminar la sesion caducada " + tempFile.getName() + //$NON-NLS-1$
     					": " + e); //$NON-NLS-1$
     		}
     	}
+		return deleted;
 	}
 
 	@Override

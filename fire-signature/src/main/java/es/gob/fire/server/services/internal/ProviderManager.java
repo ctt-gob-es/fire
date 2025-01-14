@@ -50,10 +50,11 @@ public class ProviderManager {
 	 * Obtenemos el conector necesario para operar con un proveedor de firma en la nube.
 	 * @param providerName Nombre del proveedor.
 	 * @param transactionConfig Configuraci&oacute;n a aplicar al conector.
+     * @param logF Formateador de trazas de log.
 	 * @return Conector con el proveedor ya configurado para realizar cualquier transacci&oacute;n.
 	 * @throws FIReConnectorFactoryException Cuando falla la inicializaci&oacute;n del conector.
 	 */
-	public static FIReConnector getProviderConnector(final String providerName, final Properties transactionConfig)
+	public static FIReConnector getProviderConnector(final String providerName, final Properties transactionConfig, final LogTransactionFormatter logF)
 			throws FIReConnectorFactoryException {
 
 		// Obtenemos la clase del connector
@@ -64,7 +65,7 @@ public class ProviderManager {
 		}
 
 		// Obtenemos el fichero de configuracion del proveedor
-		final Properties providerConfig = loadProviderConfig(providerName);
+		final Properties providerConfig = loadProviderConfig(providerName, logF);
 
 		// Si se ha definido una clase para el descifrado de constrasenas, actualizamos
 		// el objeto con los valores descifrados de cada una de ellas
@@ -135,9 +136,10 @@ public class ProviderManager {
 	 * Obtiene la informaci&oacute;n necesaria de un proveedor para pod&eacute;rsela
 	 * mostrar a un usuario y que as&iacute; identifique su uso.
 	 * @param providerName Nombre del proveedor.
+     * @param logF Formateador de trazas de log.
 	 * @return Informaci&oacute;n del proveedor.
 	 */
-	public static ProviderInfo getProviderInfo(final String providerName) {
+	public static ProviderInfo getProviderInfo(final String providerName, final LogTransactionFormatter logF) {
 
 		if (providersInfo.containsKey(providerName)) {
 			return providersInfo.get(providerName);
@@ -145,13 +147,13 @@ public class ProviderManager {
 
 		Properties infoProperties;
 		if (PROVIDER_NAME_LOCAL.equalsIgnoreCase(providerName)) {
-			infoProperties = loadLocalProviderInfoProperties();
+			infoProperties = loadLocalProviderInfoProperties(logF);
 		}
 		else {
 			final String classname = ConfigManager.getProviderClass(providerName);
 			final String infoFilename = ConfigManager.getProviderInfoFile(providerName);
 
-			infoProperties = loadProviderInfoProperties(classname, null);
+			infoProperties = loadProviderInfoProperties(classname, null, logF);
 
 			// Si se detecta un fichero 'provider info' externo, miramos primero si el conector permite usarlo mediante la
 			// propiedad 'allowexternalproviderinfo', en caso de que no se permita se cargaran las propiedades del fichero
@@ -160,7 +162,7 @@ public class ProviderManager {
 			final boolean allowExternalProviderInfo = ProviderInfo.isAllowExternalProviderInfo(infoProperties);
 
 			if (infoFilename != null && allowExternalProviderInfo) {
-				infoProperties = loadProviderInfoProperties(classname, infoFilename);
+				infoProperties = loadProviderInfoProperties(classname, infoFilename, logF);
 			}
 
 		}
@@ -177,15 +179,16 @@ public class ProviderManager {
 	 * Carga la configuraci&oacute;n de un proveedor, de cache si ya la hab&iacute;a
 	 * cargado anteriormente o de fichero si no.
 	 * @param providerName Nombre el proveedor.
+     * @param logF Formateador de trazas de log.
 	 * @return Configuraci&oacute;n cargada.
 	 */
-	private static Properties loadProviderConfig(final String providerName) {
+	private static Properties loadProviderConfig(final String providerName, final LogTransactionFormatter logF) {
 
 		Properties providerConfig;
 		if (providersConfig.containsKey(providerName)) {
 			providerConfig = providersConfig.get(providerName);
 		} else {
-			providerConfig = loadProviderConfigFromFile(providerName);
+			providerConfig = loadProviderConfigFromFile(providerName, logF);
 			providersConfig.put(providerName, providerConfig);
 		}
 
@@ -195,9 +198,10 @@ public class ProviderManager {
 	/**
 	 * Carga el fichero de configuraci&oacute;n de un proveedor.
 	 * @param providerName Nombre el proveedor.
+	 * @param trAux        Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Configuraci&oacute;n cargada.
 	 */
-	private static Properties loadProviderConfigFromFile(final String providerName) {
+	private static Properties loadProviderConfigFromFile(final String providerName, final LogTransactionFormatter logF) {
 
 		Properties providerConfig;
 		final String providerConfigFilename = String.format(PROVIDER_CONFIG_FILE_TEMPLATE, providerName);
@@ -205,7 +209,7 @@ public class ProviderManager {
 			providerConfig = ConfigFileLoader.loadConfigFile(providerConfigFilename);
 
 		} catch (final FileNotFoundException e) {
-			LOGGER.warning(String.format(
+			LOGGER.warning(logF.f(
 					"No se ha encontrado el fichero '%s' para la configuracion del proveedor '%s': " + e, //$NON-NLS-1$
 					LogUtils.cleanText(providerConfigFilename), LogUtils.cleanText(providerName)
 					));
@@ -214,7 +218,7 @@ public class ProviderManager {
 		} catch (final IOException e) {
 			LOGGER.log(
 					Level.SEVERE,
-					String.format(
+					logF.f(
 							"No se ha podido cargar el fichero de configuracion del proveedor %s", //$NON-NLS-1$
 							LogUtils.cleanText(providerName)),
 					e);
@@ -227,7 +231,7 @@ public class ProviderManager {
 		catch (final Exception e) {
 			LOGGER.log(
 					Level.SEVERE,
-					String.format(
+					logF.f(
 							"No se han podido mapear las variables declaradas en el fichero de configuracion del proveedor %s", //$NON-NLS-1$
 							LogUtils.cleanText(providerName)),
 					e);
@@ -244,9 +248,10 @@ public class ProviderManager {
 	 * @param infoFilename Nombre del fichero externo con las propiedades visuales
 	 * y comprobaciones del proveedor. Debe encontrarse con el resto de ficheros de
 	 * configuraci&oacute;n.
+	 * @param trAux        Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Propiedades de visualizaci&oacute;n.
 	 */
-	private static Properties loadProviderInfoProperties(final String classname, final String infoFilename) {
+	private static Properties loadProviderInfoProperties(final String classname, final String infoFilename, final LogTransactionFormatter logF) {
 
 		Properties infoProperties;
 
@@ -257,7 +262,7 @@ public class ProviderManager {
 			}
 			catch (final Exception e) {
 				LOGGER.warning(
-						String.format(
+						logF.f(
 								"No se ha encontrado o no ha podido cargarse el fichero externo '%s'", //$NON-NLS-1$
 								infoFilename)
 						);
@@ -280,7 +285,7 @@ public class ProviderManager {
 			}
 
 			final String providerInfoPath = classPath + PROVIDER_INFO_FILE;
-			infoProperties = loadInternalProperties(providerInfoPath);
+			infoProperties = loadInternalProperties(providerInfoPath, logF);
 		}
 		return infoProperties;
 	}
@@ -288,18 +293,20 @@ public class ProviderManager {
 	/**
 	 * Carga el fichero interno de propiedades del proveedor de firma con certificados
 	 * locales.
+	 * @param trAux        Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Properties cargado.
 	 */
-	private static Properties loadLocalProviderInfoProperties() {
-		return loadInternalProperties(LOCAL_PROVIDER_INFO_PATH);
+	private static Properties loadLocalProviderInfoProperties(final LogTransactionFormatter logF) {
+		return loadInternalProperties(LOCAL_PROVIDER_INFO_PATH, logF);
 	}
 
 	/**
 	 * Carga un fichero interno de propiedades.
 	 * @param path Ruta interna del fichero.
+	 * @param trAux        Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @return Properties cargado.
 	 */
-	private static Properties loadInternalProperties(final String path) {
+	private static Properties loadInternalProperties(final String path, final LogTransactionFormatter logF) {
 
 		final Properties providerInfoProperties = new Properties();
 		try (InputStream is = ProviderManager.class.getResourceAsStream(path);
@@ -308,7 +315,7 @@ public class ProviderManager {
 		}
 		catch (final Exception e) {
 			LOGGER.warning(
-				String.format(
+					logF.f(
 					"No se ha encontrado o no ha podido cargarse el fichero interno '%s' con la informacion del proveedor", //$NON-NLS-1$
 					path)
 			);

@@ -25,11 +25,11 @@ public interface TempDocumentsDAO {
 	 * @param data Contenido del documento.
 	 * @param newDocument {@code true} si el documento no exist&iacute;a previamente,
 	 * {@code false} si s&iacute; exist&iacute;a.
-	 * @param formt Formateador de logs.
+	 * @param logF Formateador de logs.
 	 * @return Identificador del documento almacenado.
 	 * @throws IOException Cuando ocurre un error que hace fallar la operaci&oacute;n.
 	 */
-	String storeDocument(String id, byte[] data, boolean newDocument, LogTransactionFormatter formt) throws IOException;
+	String storeDocument(String id, byte[] data, boolean newDocument, LogTransactionFormatter logF) throws IOException;
 
 	/**
 	 * Recupera un documento.

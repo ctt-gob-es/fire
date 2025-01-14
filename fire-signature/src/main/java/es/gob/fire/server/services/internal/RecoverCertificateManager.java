@@ -31,18 +31,20 @@ public class RecoverCertificateManager {
 	 * @param transactionId Id de la transaccion de generacion de certificado.
 	 * @param config Configuraci&oacute;n del conector para la recuperacion del certificador y
 	 * redirecci&oacute;n del usuario.
+     * @param logF Formateador de trazas de log.
 	 * @return Bytes que componen el certificado.
 	 * @throws FIReCertificateException Si ocurre un error durante la generaci&oacute;n del certificado.
 	 * @throws FIReConnectorNetworkException Cuando falla la comunicaci&oacute;n con el servicio.
 	 * @throws FIReConnectorFactoryException Cuando la configuraci&oacute;n del conector del
 	 * servicio de custodia no es v&aacute;lida.
 	 */
-	public static byte[] recoverCertificate(final String providerName, final String transactionId, final Properties config)
+	public static byte[] recoverCertificate(final String providerName, final String transactionId,
+			final Properties config, final LogTransactionFormatter logF)
 			throws	FIReCertificateException, FIReConnectorNetworkException,
 					FIReConnectorFactoryException {
 
 		// Obtenemos el conector con el backend ya configurado
-		final FIReConnector connector = ProviderManager.getProviderConnector(providerName, config);
+		final FIReConnector connector = ProviderManager.getProviderConnector(providerName, config, logF);
 
 		// Recuperamos el certificado
 		return connector.recoverCertificate(transactionId);

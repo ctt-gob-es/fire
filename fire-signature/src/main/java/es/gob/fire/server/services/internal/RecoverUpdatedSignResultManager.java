@@ -30,6 +30,7 @@ public class RecoverUpdatedSignResultManager {
 	/**
 	 * Obtiene de la plataforma de actualizaci&oacute;n la firma actualizada.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta de la petici&oacute;n.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */

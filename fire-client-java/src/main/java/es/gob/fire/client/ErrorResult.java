@@ -21,8 +21,8 @@ public class ErrorResult {
 			throw new IllegalArgumentException(
 					"El JSON de definicion no puede ser nulo"); //$NON-NLS-1$
 		}
- 
-		
+
+
 		JsonReader jsonReader = null;
 		ErrorResult result;
 		try {
@@ -40,8 +40,6 @@ public class ErrorResult {
 				jsonReader.close();
 			}
 		}
-
-		jsonReader.close();
 
 		return result;
 	}

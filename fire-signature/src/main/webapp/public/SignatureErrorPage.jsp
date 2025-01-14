@@ -1,11 +1,10 @@
 <%@page import="es.gob.fire.server.services.FIReError"%>
+<%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.Responser"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
-<%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
@@ -14,8 +13,9 @@
 <%@page import="java.net.URLEncoder"%>
 <%@page import="java.util.Properties"%>
 
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
@@ -26,50 +26,35 @@
 	}
 
 	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
-	
+
 	// Nos aseguramos de tener cargada la ultima version de la sesion
 	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, true, trAux);
 	if (fireSession == null) {
 		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
-	
+
 	// Recuperamos la informacion del la aplicacion
 	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
-	
+
 	trAux.setAppId(appId);
-	
+
 	String errorUrl = null;
-	TransactionConfig connConfig =
-		(TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+	TransactionConfig connConfig = (TransactionConfig) fireSession
+	.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 	if (connConfig != null && connConfig.isDefinedRedirectErrorUrl()) {
 		errorUrl = connConfig.getRedirectErrorUrl();
 		if (errorUrl != null) {
-			errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
+	errorUrl = URLEncoder.encode(errorUrl, "utf-8"); //$NON-NLS-1$
 		}
 	}
-	
+
 	// Preparamos el boton para cancelar o volver a atras. Se define el comportamiento
 	// de este boton en base a si se forzo el origen (se muestra el boton Cancelar) o
 	// no (boton Volver) 
-	boolean originForced = Boolean.parseBoolean(
-		fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED)
-	);
+	boolean originForced = Boolean.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 
-	// Parametros para el enlace del boton Atras o Cancelar
-	String buttonUrlParams = ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
-		 + "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId; //$NON-NLS-1$ //$NON-NLS-2$
-	if (errorUrl != null) {
-		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	// Si no se forzo el uso de este proveedor concreto, agregamos los parametros necesarios
-	// para permitir seleccionar otro
-	if (!originForced) {
-		buttonUrlParams += "&" + ServiceParams.HTTP_PARAM_PAGE + "=" + ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
 	// Cargamos los errores configurados
 	final String errorType = fireSession.getString(ServiceParams.SESSION_PARAM_ERROR_TYPE);
 	final String errorMsg = fireSession.getString(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
@@ -77,9 +62,9 @@
 	// Eliminamos los errores de la sesion para que no afecten a siguientes operaciones
 	fireSession.removeAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE);
 	fireSession.removeAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE);
-	
+
 	SessionCollector.commit(fireSession, trAux);
-	
+
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
 	if (logoUrl == null || logoUrl.isEmpty()) {
@@ -139,19 +124,36 @@
 				
 					<div id="containerError" class="botones">
 						<div class="containerbutton">
-						<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + buttonUrlParams %>" class="button-cancelar">
+	
+							<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION %>" id="formCancel">
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+							</form>
+						
+							<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
 								<span >Cancelar</span>
 							</a>
 						</div>
-						<div class="separatorbutton"></div>
+					<% if (!originForced) { %>
 						<div class="containerbutton">
-							<a href= "<%= ServiceNames.PUBLIC_SERVICE_BACK + "?" + buttonUrlParams %>" class="button-volver">
+							<div class="separatorbutton"></div>
+							<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN %>" />
+							</form>
+						
+							<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 								<span class="arrow-left-white"></span>
 								<span >Volver</span>
 							</a>
-						</div>																		
-					</div>				
-				</div>	
+					<% } %>
+						</div>
+					</div>
+
+				</div>
 			</div>
 		</section>
 	</main>		

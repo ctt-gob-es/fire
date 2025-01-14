@@ -32,7 +32,7 @@ public class MiniAppletHelper {
 	 * @param extraParams Propiedades de configuracion. Se modifica el objeto de entrada
 	 * eliminando las propiedades de los certificados.
 	 * @return Cadena de texto con las claves y propiedades concatenadas para la
-	 * configruaci&oacute;n de los filtros de certificados.
+	 * configuraci&oacute;n de los filtros de certificados.
 	 */
 	static String extractCertFiltersParams(final Properties extraParams) {
 		final StringBuilder filters = new StringBuilder();

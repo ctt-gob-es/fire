@@ -149,7 +149,7 @@ public class CreateBatchManager {
         final String transactionId = session.getTransactionId();
 
         logF.setTransactionId(transactionId);
-		LOGGER.info(logF.f("Iniciada transaccion de tipo LOTE")); //$NON-NLS-1$
+		LOGGER.info(logF.f("Iniciada transaccion de tipo LOTE: " + transactionId)); //$NON-NLS-1$
 
         // Guardamos los datos recibidos en la sesion
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ID, appId);
@@ -191,8 +191,7 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_DOCUMENT_MANAGER, docManager);
 
         SessionCollector.commit(session, true, trAux);
-
-		LOGGER.info(logF.f("Se devuelve el identificador de sesion a la aplicacion")); //$NON-NLS-1$
+        session.saveIntoHttpSession(request.getSession());
 
 		Responser.sendResult(response, new CreateBatchResult(transactionId));
 	}

@@ -87,11 +87,14 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
      * @param filename Nombre del fichero en el que se almacenar&aacute;n los datos.
      * 			Si se indica null, se generar&aacute; un nombre aleatorio
      * @param data Datos a almacenar.
+     * @param newDocument Indica si es la primera vez que se guarda el documento, para
+     * simplificar la operativa.
+     * @param logF Formateador de logs.
      * @return Nombre final del fichero almacenado.
      * @throws IOException Cuando ocurre un error durante el guardado.
      */
     @Override
-    public String storeDocument(final String filename, final byte[] data, final boolean newDocument, final LogTransactionFormatter formt)
+    public String storeDocument(final String filename, final byte[] data, final boolean newDocument, final LogTransactionFormatter logF)
     		throws IOException {
 
         if (data == null || data.length < 1) {
@@ -109,8 +112,6 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
         	bos.write(data);
         }
 
-        LOGGER.fine(formt.f("Almacenado temporal de datos en: " + f.getAbsolutePath())); //$NON-NLS-1$
-
         return f.getName();
     }
 
@@ -123,6 +124,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
      */
     @Override
 	public byte[] retrieveDocument(final String filename) throws IOException {
+
         final File dataFile = checkFile(filename);
         return readFile(dataFile);
     }
@@ -162,7 +164,6 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
      */
     @Override
 	public byte[] retrieveAndDeleteDocument(final String filename) throws IOException {
-
     	final File dataFile = checkFile(filename);
     	final byte[] ret = readFile(dataFile);
     	Files.delete(dataFile.toPath());

@@ -15,15 +15,13 @@
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
 	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 	String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-	String unregistered = request.getParameter(ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED);
-	boolean userRegistered = !Boolean.parseBoolean(unregistered);
 	
 	if (subjectRef == null || trId == null) {
 		Responser.sendError(response, FIReError.FORBIDDEN);
@@ -31,12 +29,8 @@
 	}
 
 	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
-	
-	// Ya que este es uno de los puntos de entrada del usuario a la operativa de FIRe, se establece aqui
-	// el tiempo maximo de sesion 
-	session.setMaxInactiveInterval((int) (FireSession.MAX_INACTIVE_INTERVAL / 1000));
-	
-	final FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, false, false, trAux);
+
+	final FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false, trAux);
 	if (fireSession == null) {
 		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
@@ -46,7 +40,7 @@
 	if (appId != null) {
 		trAux.setAppId(appId);
 	}
-		
+	
 	String appName = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_TITLE);
 	TransactionConfig connConfig = (TransactionConfig) fireSession.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
 
@@ -59,11 +53,6 @@
 		logoUrl = "img/general/dms/logo-institucional.png"; //$NON-NLS-1$
 	}
 
-	// Preparamos la URL del boton de cancelacion
-	final String cancelUrlParams = ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + trId + "&" //$NON-NLS-1$ //$NON-NLS-2$ 
-		+ ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$
-		+ (errorUrl != null ? "&" + ServiceParams.HTTP_PARAM_ERROR_URL + "=" + errorUrl : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	
 	// Comprobamos tener un listado de proveedores validos
 	String[] providers = (String[]) fireSession.getObject(ServiceParams.SESSION_PARAM_PROVIDERS);
 	if (providers == null || providers.length == 0) {
@@ -134,56 +123,55 @@
 		<div class="container-box">	
 		<%
 		for (String provider : providers) {
-			ProviderInfo info = ProviderManager.getProviderInfo(provider);
-			boolean enabled = ProviderManager.PROVIDER_NAME_LOCAL.equalsIgnoreCase(provider) ||
-				(userRegistered && !info.isNeedJavaScript());
-
-			String serviceToRedirect = info.isUserRequiredAutentication() ?
-					ServiceNames.PUBLIC_SERVICE_AUTH_USER :
-					ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN;
+			ProviderInfo info = ProviderManager.getProviderInfo(provider, trAux.getLogFormatter());
 		%>
-			<div name="provider-option" class="main-box-left <%= info.isNeedJavaScript() ? "need-javascript" : "" %> <%= enabled ? "" : "disabled" %>" id="option<%= info.getName() %>">
-					<div class="contain-box-top">
-						<img alt="<%= info.getTitle() %>" title="<%= info.getTitle() %>" src="<%= info.getLogoUri() %>" >
-					</div>
-					<div class="contain-box-bottom">
-						<h2 class="title-box"><%= info.getHeader() %></h2>
-						<% if (info.isNeedJavaScript()) { %>
-							<noscript>
-								<p class="text-box">Su navegador web tiene JavaScript desactivado. Habilite JavaScript para poder usar sus certificados.</p>
-							</noscript>
-						<% } %>
-						<p name="provider-description" class="text-box <%= info.isNeedJavaScript() ? "hide" : "" %>">
-							<%= userRegistered ? info.getDescription() : info.getNoRegisteredMessage() %>													
-						</p>
-					</div>
-					<form method="POST" action="<%= serviceToRedirect %>" id="form<%= info.getName() %>" class="formProvider">
-						<div style="display: none">
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
-							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= info.getName() %>" />
-							<% if (unregistered != null) { %>
-								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_USER_NOT_REGISTERED %>" value="<%= unregistered %>" />
-							<% } %>
-						</div>
-						<a class="button" title="<%= info.getHeader() %>" onclick="document.getElementById('form<%= info.getName() %>').submit();" href="javascript:{}">
-							<span>Acceder</span>
-							<span class="arrow-right arrow-right-inicio"></span>
-						</a>
-					</form>
+			<div name="provider-option" class="main-box-left" id="option<%= info.getName() %>">
+			
+				<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>" id="form<%= info.getName() %>" class="formProvider">
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= info.getName() %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_NEED_AUTH_USER %>" value="<%= info.isUserRequiredAutentication() %>" />
+				</form>
+				
+				<div class="contain-box-top">
+					<img alt="<%= info.getTitle() %>" title="<%= info.getTitle() %>" src="<%= info.getLogoUri() %>" >
 				</div>
+				<div class="contain-box-bottom">
+					<h2 class="title-box"><%= info.getHeader() %></h2>
+					<% if (info.isNeedJavaScript()) { %>
+						<noscript>
+							<p class="text-box">Su navegador web tiene JavaScript desactivado. Habilite JavaScript para poder usar sus certificados.</p>
+						</noscript>
+					<% } %>
+					<p name="provider-description" class="text-box <%= info.isNeedJavaScript() ? "hide" : "" %>">
+						<%= info.getDescription() %>													
+					</p>
+				</div>
+				<a name="provider-option" class="button <%= info.isNeedJavaScript() ? "invisible" : "" %>" title="<%= info.getHeader() %>" onclick="document.getElementById('form<%= info.getName() %>').submit();" href="javascript:{}">
+					<span>Acceder</span>
+					<span class="arrow-right arrow-right-inicio"></span>
+				</a>
+			</div>
 		<%
 		}
 		%>
 			</div>
 			<div class="container-title">
-				<div class="title-button">				
-					<a href= "<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION + "?" + cancelUrlParams %>" class="button-cancelar">
-						<span>Cancelar</span>
+				<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION %>" id="formCancel">
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+				</form>
+
+				<div class="title-button">
+					<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
+						<span >Cancelar</span>
 					</a>
 				</div>
 			</div>
+					
 		</section>
 	</main>
       
@@ -212,10 +200,8 @@
 		
 		var disabledElementsProvOp = document.getElementsByName("provider-option");
 		for (var i = 0; i < disabledElementsProvOp.length; i++) {
-			disabledElementsProvOp[i].className=disabledElementsProvOp[i].className.replace( /(?:^|\s)need-javascript(?!\S)/g , '' )	
+			disabledElementsProvOp[i].className=disabledElementsProvOp[i].className.replace( /(?:^|\s)invisible(?!\S)/g , '' )	
 		}
-		
-   		   
    	</script>
 </body>
 </html>

@@ -21,12 +21,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.services.FIReError;
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.signature.ConfigManager;
 
 
 /**
@@ -42,20 +45,20 @@ public class RecoverNewCertificateService extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
-		final String transactionId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		if (transactionId == null || transactionId.isEmpty()) {
+		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+
+		if (trId == null || trId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
-		final TransactionAuxParams trAux = new TransactionAuxParams(null, transactionId);
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		if (subjectRef == null || subjectRef.isEmpty()) {
@@ -64,18 +67,12 @@ public class RecoverNewCertificateService extends HttpServlet {
 			return;
 		}
 
-		FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(), false, false, trAux);
+        // Cargamos los datos de la transaccion
+		final FireSession session = loadSession(trId, subjectRef, request, trAux);
 		if (session == null) {
-        	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado. Se redirige a la pagina proporcionada en la llamada", transactionId)); //$NON-NLS-1$
-        	SessionCollector.removeSession(transactionId, trAux);
-        	Responser.redirectToExternalUrl(errorUrl, request, response, trAux);
-			return;
-		}
-
-		// Si la operacion anterior no fue la solicitud de generacion de un certificado, forzamos a que se recargue por si faltan datos
-		if (SessionFlags.OP_GEN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(false), false, true, trAux);
-		}
+        	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
+        	return;
+        }
 
 		final String generateTrId = session.getString(ServiceParams.SESSION_PARAM_GENERATE_TRANSACTION_ID);
 		final String providerName = session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
@@ -95,11 +92,12 @@ public class RecoverNewCertificateService extends HttpServlet {
 	    	certEncoded = RecoverCertificateManager.recoverCertificate(
 	    			providerName,
 	    			generateTrId,
-	    			connConfig.getProperties()
+	    			connConfig.getProperties(),
+	    			logF
 	    	);
 	    }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", LogUtils.cleanText(providerName)), e); //$NON-NLS-1$
         	processError(FIReError.INTERNAL_ERROR, session, errorUrl, request, response, trAux);
         	return;
         }
@@ -142,17 +140,55 @@ public class RecoverNewCertificateService extends HttpServlet {
             return;
         }
 
-        // Adjuntamos los certificados a la sesion para que los reciba el JSP y configuramos
-        // que la ultima operacion valida fue la de firma, ya que ha terminado la generacion
-        // del nuevo certificado
-        session.setAttribute(transactionId + "-certs", new X509Certificate[] { cert }); //$NON-NLS-1$
-        session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_CHOOSE);
-        SessionCollector.commit(session, trAux);
+		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null
+				? connConfig.isAppSkipCertSelection().booleanValue()
+						: ConfigManager.isSkipCertSelection();
 
-        Responser.redirectToUrl(FirePages.PG_CHOOSE_CERTIFICATE, request, response, trAux);
+		String redirectUrl;
+
+		// Si se ha indicado seleccionar automaticamente el certificado, lo establecemos
+		if (skipSelection) {
+			request.setAttribute(ServiceParams.HTTP_ATTR_CERT, Base64.encode(certEncoded, true));
+			redirectUrl = ServiceNames.PUBLIC_SERVICE_PRESIGN;
+		}
+		// Si no, lo agregamos como listado para permitir la seleccion
+		else {
+	        session.setAttribute(trId + "-certs", new X509Certificate[] { cert }); //$NON-NLS-1$
+			redirectUrl = FirePages.PG_CHOOSE_CERTIFICATE;
+		}
+
+		// Configuramos que la ultima operacion valida fue la de firma, ya que ha terminado
+		// la generacion del nuevo certificado
+		session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_CHOOSE);
+
+		// Guardamos en la sesion compartida los datos agregados hasta ahora
+		session.saveIntoHttpSession(request.getSession());
+		SessionCollector.commit(session, trAux);
+
+        Responser.redirectToUrl(redirectUrl, request, response, trAux);
 	}
 
-    /**
+    private static FireSession loadSession(final String transactionId, final String subjectRef, final HttpServletRequest request,
+			final TransactionAuxParams trAux) {
+
+    	FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef, request.getSession(), false, ConfigManager.isSessionSharingForced(), trAux);
+		if (session == null && ConfigManager.isSessionSharingForced()) {
+        	LOGGER.warning(trAux.getLogFormatter().f("La transaccion %1s no se ha inicializado o ha caducado", LogUtils.cleanText(transactionId))); //$NON-NLS-1$
+			return null;
+		}
+
+		// Si la operacion anterior no fue de solicitud de firma, forzamos a que se
+		// recargue por si faltan datos
+		if (session == null || SessionFlags.OP_GEN != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			LOGGER.info(trAux.getLogFormatter().f("No se encontro la sesion o no estaba actualizada. Forzamos la carga")); //$NON-NLS-1$
+			session = SessionCollector.getFireSessionOfuscated(transactionId, subjectRef,
+					request.getSession(false), false, true, trAux);
+		}
+
+		return session;
+	}
+
+	/**
      * Invalida la sesion del usuario y, si se ha indicado una URL de error, lo redirige a ella o devuelve el error en caso contrario.
      * @param error Tipo de error que se ha producido.
      * @param fireSession Sesi&oacute;n de la transacci&oacute;n.
@@ -166,17 +202,9 @@ public class RecoverNewCertificateService extends HttpServlet {
 
     	if (url != null) {
     		if (fireSession != null) {
-    			fireSession.setAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE, Integer.toString(error.getCode()));
-   				fireSession.setAttribute(ServiceParams.SESSION_PARAM_ERROR_MESSAGE, error.getMessage());
-    			SessionCollector.cleanSession(fireSession, trAux);
+    			ErrorManager.setErrorToSession(fireSession, error, false, trAux);
     		}
-    		try {
-    			response.sendRedirect(url);
-    		}
-    		catch (final Exception e) {
-    			LOGGER.log(Level.SEVERE, trAux.getLogFormatter().f("No se ha podido redirigir al usuario a la URL externa"), e); //$NON-NLS-1$
-    			Responser.sendError(response, FIReError.INTERNAL_ERROR);
-    		}
+    		Responser.redirectToExternalUrl(url, request, response, trAux);
     	}
     	else {
     		// Invalidamos la sesion entre el navegador y el componente central porque no se usara mas

@@ -37,7 +37,7 @@ public final class SignBatchSerial extends SignBatch {
 	 * @param json JSON de definici&oacute;n de lote.
 	 * @throws IOException       Si hay problemas en la creaci&oacute;n del lote.
 	 * @throws SecurityException Si se sobrepasa alguna de las limitaciones
-	 *                           establecidas para el lote (n&ueacute;mero de
+	 *                           establecidas para el lote (n&uacute;mero de
 	 *                           documentos, tama&ntilde;o de las referencias,
 	 *                           tama&ntilde;o de documento, etc.)
 	 */

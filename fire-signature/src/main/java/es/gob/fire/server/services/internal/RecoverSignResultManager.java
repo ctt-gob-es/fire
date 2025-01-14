@@ -21,6 +21,7 @@ import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
 import es.gob.fire.server.services.statistics.AuditTransactionRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
+import es.gob.fire.signature.ConfigManager;
 
 
 /**
@@ -60,19 +61,12 @@ public class RecoverSignResultManager {
 
 		LOGGER.fine(logF.f("Peticion bien formada")); //$NON-NLS-1$
 
-        // Recuperamos el resto de parametros de la sesion
-        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, false, trAux);
+        // Cargamos los datos de la transaccion
+        final FireSession session = loadSession(transactionId, subjectId, trAux);
         if (session == null) {
-    		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
-    		return;
+        	return;
         }
-
-        // Si la operacion anterior no fue una recuperacion de resultado de firma,
-        // forzamos a que se recargue por si faltan datos
-		if (SessionFlags.OP_RECOVER != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
-		}
 
         // Comprobamos que no se haya declarado ya un error
         if (session.containsAttribute(ServiceParams.SESSION_PARAM_ERROR_TYPE)) {
@@ -120,5 +114,23 @@ public class RecoverSignResultManager {
 
         // Enviamos la firma electronica como resultado
         Responser.sendResult(response, signResult);
+	}
+
+	private static FireSession loadSession(final String transactionId, final String subjectId, final TransactionAuxParams trAux) {
+
+        FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, ConfigManager.isSessionSharingForced(), trAux);
+        if (session == null && ConfigManager.isSessionSharingForced()) {
+    		LOGGER.warning(trAux.getLogFormatter().f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
+    		return null;
+        }
+
+        // Si no se encuentra la sesion o si la operacion anterior no fue una recuperacion de resultado de firma,
+        // forzamos a que se recargue por si faltan datos
+		if (session == null || SessionFlags.OP_RECOVER != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			LOGGER.info(trAux.getLogFormatter().f("No se encontro la sesion o no estaba actualizada. Forzamos la carga")); //$NON-NLS-1$
+			session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
+		}
+
+		return session;
 	}
 }

@@ -37,10 +37,12 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
+import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.statistics.TransactionType;
+import es.gob.fire.signature.ConfigManager;
 
 /**
  * Servicio de carga y prefirma de datos para su posterior firma a trav&eacute;s
@@ -60,8 +62,6 @@ public final class PreSignService extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(PreSignService.class.getName());
 
-    private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
-
     /**
      * Par&aacute;metro de configuraci&oacute;n para obligar a la multifirma de
      * firmas longevas.
@@ -79,71 +79,62 @@ public final class PreSignService extends HttpServlet {
     protected void service(final HttpServletRequest request,
     		               final HttpServletResponse response) {
 
-    	final String transactionId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-    	final String userRef  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-    	String redirectErrorUrl 	= request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-    	String certB64        		= request.getParameter(ServiceParams.HTTP_PARAM_CERT);
-
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
+
+    	final String trId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+    	final String userRef  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+    	String certB64        		= request.getParameter(ServiceParams.HTTP_PARAM_CERT);
 
     	// Con la seleccion automatica de certificado, se recibe el certificado en un
     	// atributo en lugar de por parametro
     	if (certB64 == null || certB64.isEmpty()) {
-    		certB64 = (String) request.getAttribute(ServiceParams.HTTP_PARAM_CERT);
+    		certB64 = (String) request.getAttribute(ServiceParams.HTTP_ATTR_CERT);
     	}
 
-    	final TransactionAuxParams trAux = new TransactionAuxParams(null, transactionId);
+    	final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
     	final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de prefirma")); //$NON-NLS-1$
 
-        // Comprobamos que se hayan prorcionado los parametros indispensables
-        if (transactionId == null || transactionId.isEmpty()) {
+        // Comprobamos que se hayan proporcionado los parametros indispensables
+        if (trId == null || trId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
+            return;
+        }
+
+        if (userRef == null || userRef.isEmpty()) {
+            LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
             return;
         }
 
         if (certB64 == null || certB64.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el certificado del firmante")); //$NON-NLS-1$
-        	SessionCollector.removeSession(transactionId, trAux);
 			Responser.sendError(response, FIReError.FORBIDDEN);
         	return;
-        }
-
-        if (userRef == null || userRef.isEmpty()) {
-            LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
-            SessionCollector.removeSession(transactionId, trAux);
-			Responser.sendError(response, FIReError.FORBIDDEN);
-            return;
         }
 
 		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
+		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			SessionCollector.removeSession(transactionId, trAux);
 			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
-        try {
-        	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, URL_ENCODING);
+		try {
+        	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, StandardCharsets.UTF_8.name());
         }
         catch (final Exception e) {
-        	LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: %1s", e)); //$NON-NLS-1$
+        	LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: ") + e); //$NON-NLS-1$
 		}
 
-        FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), false, false, trAux);
-        if (session == null) {
-        	LOGGER.warning(logF.f("La transaccion %1s no se ha inicializado o ha caducado. Se redirige a la pagina proporcionada en la llamada", transactionId)); //$NON-NLS-1$
-        	SessionCollector.removeSession(transactionId, trAux);
-			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
+		final FireSession session = loadSession(trId, userRef, request, trAux);
+		if (session == null) {
+       		LOGGER.warning(logF.f("Se redirige a la pagina proporcionada en la llamada")); //$NON-NLS-1$
+       		Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
         	return;
-		}
-
-		// Si la operacion anterior no fue de seleccion de proveedor, forzamos a que se recargue por si faltan datos
-		if (SessionFlags.OP_CHOOSE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
-			session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), false, true, trAux);
 		}
 
     	// Leemos los valores necesarios de la configuracion
@@ -221,10 +212,12 @@ public final class PreSignService extends HttpServlet {
         // Calculamos la prefirma de una forma u otra segun se trate de una operacion de
         // firma individual o la de un lote.
         TriphaseData td;
+
+        // Transaccion de firma
         if (TransactionType.SIGN == transactionType) {
         	final byte[] data;
         	try {
-        		data = TempDocumentsManager.retrieveDocument(transactionId);
+        		data = TempDocumentsManager.retrieveDocument(trId);
         	}
         	catch (final Exception e) {
         		LOGGER.warning(logF.f("No se han podido recuperar los datos de la operacion: " + e)); //$NON-NLS-1$
@@ -264,6 +257,7 @@ public final class PreSignService extends HttpServlet {
                 return;
             }
         }
+     // Transaccion de lote
         else if (TransactionType.BATCH == transactionType) {
 
         	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
@@ -274,11 +268,13 @@ public final class PreSignService extends HttpServlet {
         		return;
 			}
 
+        	// Cargamos los daos del
             final List<BatchDocument> documents = new ArrayList<>();
         	final Iterator<String> it = batchResult.iterator();
         	while (it.hasNext()) {
 
         		final String docId = it.next();
+
         		if (batchResult.isSignFailed(docId)) {
         			LOGGER.log(Level.WARNING, logF.f("La firma estaba marcada como erronea desde el inicio")); //$NON-NLS-1$
             		if (stopOnError) {
@@ -312,6 +308,10 @@ public final class PreSignService extends HttpServlet {
                 return;
             }
 
+            //TODO: Hacerlo de esta manera obliga a tener cargados todos los documentos del lote en
+            // memoria simultaneamente para poder prefirmarlos. Lo ideal seria que se cargara cada
+            // documento, se procesara y se descargara antes de pasar al siguiente
+
             try {
                 td = FIReTriHelper.getPreSign(
                     cryptoOperation,
@@ -342,6 +342,7 @@ public final class PreSignService extends HttpServlet {
         		}
         	}
 
+            // En caso de haber detectado algún error y que no se permitan errores, se aborta la operacion
             if (failed && stopOnError) {
             	final String errorMessage = "Se encontraron errores en las prefirmas del lote y se aborta la operacion"; //$NON-NLS-1$
                 LOGGER.log(Level.SEVERE, logF.f(errorMessage));
@@ -349,7 +350,19 @@ public final class PreSignService extends HttpServlet {
                 Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
                 return;
             }
+
+            // Si todas las firmas fallaron, saltamos a la pantalla de resultado en lugar de redirigir al
+            // proveedor de firma
+            if (batchResult.hasErrors() == BatchResult.ALL_FAILED) {
+            	LOGGER.info(logF.f("Han fallado todas las firmas del lote. Se redirige a la pantalla de resultado")); //$NON-NLS-1$
+            	session.setAttribute(ServiceParams.SESSION_PARAM_TRIPHASE_DATA, Base64.encode(td.toString().getBytes(StandardCharsets.UTF_8), true));
+            	session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_PRE);
+                SessionCollector.commit(session, trAux);
+                Responser.redirectToExternalUrl(connConfig.getRedirectSuccessUrl(), request, response, trAux);
+                return;
+            }
         }
+        // Transaccion no reconocida
         else {
         	LOGGER.log(Level.WARNING, logF.f("Tipo de transaccion no soportada: " + transactionType)); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
@@ -360,10 +373,10 @@ public final class PreSignService extends HttpServlet {
         // Obtenemos el conector con el backend ya configurado
         final FIReConnector connector;
         try {
-            connector = ProviderManager.getProviderConnector(providerName, connConfig.getProperties());
+            connector = ProviderManager.getProviderConnector(providerName, connConfig.getProperties(), logF);
         }
         catch (final FIReConnectorFactoryException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", providerName), e); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el conector del proveedor de firma: %1s", LogUtils.cleanText(providerName)), e); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
         	redirectToErrorPage(originForced, redirectErrorUrl, request, response, trAux);
             return;
@@ -381,7 +394,7 @@ public final class PreSignService extends HttpServlet {
             );
         }
         catch (final FIReConnectorUnknownUserException e) {
-        	LOGGER.log(Level.SEVERE, logF.f("El usuario %1s no tiene certificados en el sistema: %2s", userId, e)); //$NON-NLS-1$
+        	LOGGER.log(Level.SEVERE, logF.f("El usuario %1s no tiene certificados en el sistema: %2s", LogUtils.cleanText(userId), e)); //$NON-NLS-1$
         	ErrorManager.setErrorToSession(session, FIReError.UNKNOWN_USER, originForced, trAux);
         	redirectToErrorPage(originForced, redirectErrorUrl, request, response, trAux);
         	return;
@@ -412,14 +425,31 @@ public final class PreSignService extends HttpServlet {
         session.setAttribute(ServiceParams.SESSION_PARAM_REDIRECTED_SIGN, Boolean.TRUE);
 
         SessionCollector.commit(session, trAux);
+        session.saveIntoHttpSession(request.getSession());
 
         // Redirigimos al usuario a la pantalla de autorizacion indicada por el conector
         Responser.redirectToExternalUrl(lr.getRedirectUrl(), request, response, trAux);
-
-        LOGGER.fine(logF.f("Fin de la llamada al servicio publico de prefirma")); //$NON-NLS-1$
     }
 
-    /**
+    private static FireSession loadSession(final String transactionId, final String userRef, final HttpServletRequest request,
+			final TransactionAuxParams trAux) {
+
+    	FireSession session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), false, ConfigManager.isSessionSharingForced(), trAux);
+        if (session == null && ConfigManager.isSessionSharingForced()) {
+        	LOGGER.warning(trAux.getLogFormatter().f("La transaccion %1s no se ha inicializado o ha caducado", LogUtils.cleanText(transactionId))); //$NON-NLS-1$
+        	return null;
+		}
+
+		// Si la operacion anterior no fue de seleccion de proveedor, forzamos a que se recargue por si faltan datos
+		if (session == null || SessionFlags.OP_CHOOSE != session.getObject(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION)) {
+			LOGGER.info(trAux.getLogFormatter().f("No se encontro la sesion o no estaba actualizada. Forzamos la carga")); //$NON-NLS-1$
+			session = SessionCollector.getFireSessionOfuscated(transactionId, userRef, request.getSession(false), false, true, trAux);
+		}
+
+		return session;
+	}
+
+	/**
 	 * Redirige a una p&aacute;gina de error. La p&aacute;gina sera de de error de firma, si existe la posibilidad de
 	 * que se pueda reintentar la operaci&oacute;n, o la p&aacute;gina de error proporcionada por el usuario.
 	 * @param originForced Indica si era obligatorio el uso de un proveedor de firma concreto.

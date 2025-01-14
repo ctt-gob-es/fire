@@ -50,16 +50,18 @@ public interface SessionsDAO {
 	/**
 	 * Elimina una sesi&oacute;n.
 	 * @param id Identificador de la sesi&oacute;n.
+	 * @return {@code true} si la sesion se elimin&oacute; y {@code false} si no exist&iacute;a o no pudo eliminarse.
 	 */
-	void deleteSession(String id);
+	boolean deleteSession(String id);
 
 	/**
 	 * Elimina las sesiones caducadas.
 	 * @param expirationTime Tiempo que puede haber trasncurrido desde su uso creaci&oacute;n/modificaci&oacute;n antes
 	 * de considerarse caducada.
+	 * @return {@code true} si la sesion se elimin&oacute; y {@code false} si no exist&iacute;a o no pudo eliminarse.
 	 * @throws IOException Cuando ocurre alg&uacute;n error al borrar los ficheros.
 	 */
-	void deleteExpiredSessions(long expirationTime) throws IOException;
+	boolean deleteExpiredSessions(long expirationTime) throws IOException;
 
 	/**
 	 * Recupera el gestor de documentos temporales asociado a un gestor de sesiones.

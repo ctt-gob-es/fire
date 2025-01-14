@@ -57,7 +57,7 @@ public class TempDocumentsManager {
 			associatedDao :
 			new FileSystemTempDocumentsDAO();
 
-		LOGGER.info("Gestor de documentos temporales: " + documentsDao.getClass().getName()); //$NON-NLS-1$
+		LOGGER.info("Inicializacion del gestor de documentos temporales: " + documentsDao.getClass().getName()); //$NON-NLS-1$
 
 		deleteExpiredDocuments();
 	}

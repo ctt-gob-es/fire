@@ -1254,6 +1254,11 @@ public class FireClient {
     			return new BatchNoSignedException(errorResult.getCode(), errorResult.getMessage());
     		}
     		else {
+    			// El codigo de error no revela lo ocurrido, pero quizas se pueda determinar por otras vias
+    			if (errorResponse.getStatus() == 413) {
+    				return new HttpTooLargeContentException(FIReErrors.TOO_LARGE_CONTENT);
+    			}
+
     			return new HttpOperationException(errorResult.getCode(), errorResult.getMessage());
     		}
     	}

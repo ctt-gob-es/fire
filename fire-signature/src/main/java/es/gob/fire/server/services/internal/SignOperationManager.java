@@ -27,6 +27,7 @@ import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.statistics.TransactionType;
+import es.gob.fire.signature.ConfigManager;
 
 /**
  * Manejador encargado de la gesti&oacute;n de las operaciones de firma ordenadas al
@@ -131,6 +132,11 @@ public class SignOperationManager {
         	provs = ProviderManager.getProviderNames();
         }
 
+		// Se identifica si se debe omitir
+		final boolean skipSelection = connConfig.isAppSkipCertSelection() != null
+				? connConfig.isAppSkipCertSelection().booleanValue()
+						: ConfigManager.isSkipCertSelection();
+
 		final String appTitle = connConfig.getAppTitle();
 		final String docManagerName = connConfig.getDocumentManager();
 
@@ -167,6 +173,7 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
         session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, improvedFormat);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
+        session.setAttribute(ServiceParams.SESSION_PARAM_SKIP_CERT_SELECTION, Boolean.toString(skipSelection));
     	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.SIGN);
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
@@ -267,7 +274,7 @@ public class SignOperationManager {
         	return;
 		}
 
-        // Guardamos los datos de la transaccion en la sesion del servidor y en la coleccion de sesiones
+        // Guardamos los datos de la transaccion en la coleccion de sesiones y en la sesion del propio servidor
         SessionCollector.commit(session, true, trAux);
         session.saveIntoHttpSession(request.getSession());
 
@@ -276,24 +283,10 @@ public class SignOperationManager {
         // Obtenemos la referencia al usuario de la sesion
         final String subjectRef = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF);
 
-        // Si hay proveedor disponible, se selecciona automaticamente;
-        // si no, se envia a la pagina de seleccion de proveedor
-		final String redirectUrl;
-        if (provs.length == 1) {
-        	// Si el unico proveedor que hay requiere que el usuario se autentique previamente, lo
-        	// redirigimos a la pagina de autenticacion. Si no, a la de seleccion de certificado
-        	final ProviderInfo info = ProviderManager.getProviderInfo(provs[0]);
-        	redirectUrl = (info.isUserRequiredAutentication() ? ServiceNames.PUBLIC_SERVICE_AUTH_USER : ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN)
-        			+ "?" + ServiceParams.HTTP_PARAM_CERT_ORIGIN + "=" + provs[0] //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED + "=true" //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
-        	LOGGER.fine(logF.f("Se forzara el uso del proveedor " + provs[0])); //$NON-NLS-1$
-        } else {
-        	redirectUrl = ServiceNames.PUBLIC_SERVICE_CHOOSE_ORIGIN
-        			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-        			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$
-        }
+        // Componemos los parametros del servicio
+		final String redirectUrl = ServiceNames.PUBLIC_SERVICE_ENTRY_POINT
+    			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
+    			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$;
 
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
