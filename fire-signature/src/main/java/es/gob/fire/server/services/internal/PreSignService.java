@@ -342,7 +342,7 @@ public final class PreSignService extends HttpServlet {
         		}
         	}
 
-            // En caso de haber detectado algún error y que no se permitan errores, se aborta la operacion
+            // En caso de haber detectado algun error y que no se permitan errores, se aborta la operacion
             if (failed && stopOnError) {
             	final String errorMessage = "Se encontraron errores en las prefirmas del lote y se aborta la operacion"; //$NON-NLS-1$
                 LOGGER.log(Level.SEVERE, logF.f(errorMessage));

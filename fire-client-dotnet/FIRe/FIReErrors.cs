@@ -57,6 +57,8 @@ namespace FIRe
         public const int CERTIFICATE_ERROR = 23;
         /// El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente.
         public const int CERTIFICATE_WEAK_REGISTRY = 24;
+        /// Error desconocido durante la operacion.
+        public const int UNDEFINED_ERROR = 25;
         /// Error durante la firma.
         public const int SIGNING = 26;
         /// No se seleccionó un proveedor de firma.
@@ -94,6 +96,8 @@ namespace FIRe
         /// El resultado del lote se recuperó anteriormente.
         public const int BATCH_RESULT_RECOVERED = 54;
 
+        /// El contenido de la peticion era demasiado grande.
+        public const int TOO_LARGE_CONTENT = 413;
         /// Error interno del servidor.
         public const int INTERNAL_ERROR = 500;
         /// Petición rechazada.

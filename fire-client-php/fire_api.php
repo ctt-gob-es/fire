@@ -729,6 +729,9 @@
 				throw new BatchNoSignedException($errorMessage, $errorCode);
 			}
 			else {
+				if ($httpResponse->statusCode == 413) {
+					throw new HttpTooLargeContentException("El contenido de la peticion era demasiado grande", FIReErrors::TOO_LARGE_CONTENT);
+				}
 				throw new HttpOperationException($errorMessage, $errorCode);
 			}												  
 		}
@@ -789,6 +792,8 @@
 		const CERTIFICATE_ERROR = 23;
 		/** El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente. */
 		const CERTIFICATE_WEAK_REGISTRY = 24;
+		/** Error desconocido durante la operacion. */
+		const UNDEFINED_ERROR = 25;
 		/** Error durante la firma. */
 		const SIGNING = 26;
 		/** No se selecciono un proveedor de firma. */
@@ -826,6 +831,8 @@
 		/** El resultado del lote se recupero anteriormente. */
 		const BATCH_RESULT_RECOVERED = 54;
 	
+		/** El contenido de la peticion era demasiado grande. */
+		const TOO_LARGE_CONTENT = 413;
 		/** Error interno del servidor. */
 		const INTERNAL_ERROR = 500;
 		/** Peticion rechazada. */
@@ -851,6 +858,8 @@
 	class HttpForbiddenException extends Exception { }
 	
 	class HttpNetworkException extends Exception { }
+	
+	class HttpTooLargeContentException extends Exception { }
 	
 	class NumDocumentsExceededException extends HttpOperationException { }
 	
