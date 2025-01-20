@@ -13,10 +13,11 @@
 							<th th:text="#{table.user.login}"></th>
 							<th th:text="#{table.user.name}"></th>
 							<th th:text="#{table.user.surnames}"></th>
+							<th th:text="#{table.user.rol}"></th>
+							<th th:text="#{table.user.dni}"></th>
 							<th th:text="#{table.user.password}"></th>
 							<th th:text="#{table.user.email}"></th>
 							<th th:text="#{table.user.telf}"></th>
-							<th th:text="#{table.user.rol}"></th>
 						</tr>
 					</thead>
 				</table>
@@ -174,11 +175,12 @@ $(document).ready(function() {
 	          { "data": "userName" },
 	        { "data": "name" },
 	        { "data": "surnames" },
+	        { "data": "rolName" },
+	        { "data": "dni" },
 	        { "data": "password",
 	          "visible": false},
 	        { "data": "email" },
-	        { "data": "phone" },
-	        { "data": "rolName" }
+	        { "data": "phone" }
 	        ]
 		}).on('crudaction', function(e, accion, idUserFire, data, rowindex){
 		    // e          Evento Jquery

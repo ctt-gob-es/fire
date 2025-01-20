@@ -44,6 +44,9 @@ public class UserTableDTO {
 	@JsonView(DataTablesOutput.View.class)
     private String rolName;
 
+	@JsonView(DataTablesOutput.View.class)
+	private String dni;
+	
     // Constructors
     public UserTableDTO() {
     }
@@ -59,6 +62,7 @@ public class UserTableDTO {
         this.startDate = user.getStartDate();
         this.root = user.getRoot();
         this.rolName = user.getRol() != null ? user.getRol().getRolName() : null;
+        this.dni = user.getDni();
     }
 
     public UserTableDTO(Long userId, String userName, String password, String email, String name, String surnames, String phone, Date startDate, Boolean root, String rolName) {
@@ -154,4 +158,13 @@ public class UserTableDTO {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
+	public String getDni() {
+		return dni;
+	}
+
+	public void setDni(String dni) {
+		this.dni = dni;
+	}
+	
 }

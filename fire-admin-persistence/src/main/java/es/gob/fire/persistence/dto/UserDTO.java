@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 21/05/2021.
+ * @version 1.3, 20/01/2025.
  */
 package es.gob.fire.persistence.dto;
 
@@ -35,7 +35,7 @@ import es.gob.fire.persistence.dto.validation.ThenCheckIt;
 /**
  * <p>Class that represents the backing form for adding a user.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 21/05/2021.
+ * @version 1.3, 20/01/2025.
  */
 public class UserDTO {
 
@@ -94,6 +94,11 @@ public class UserDTO {
    // @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM255, groups=ThenCheckIt.class)
     private String telfAdd = UtilsStringChar.EMPTY_STRING;
 
+	/**
+	 * Attribute that represents the value of the input DNI of the user in the form.
+	 */
+	private String dniAdd = UtilsStringChar.EMPTY_STRING;
+	
 	/**
 	 * Attribute that represents the identifier for the use role selected in the user form.
 	 */
@@ -241,13 +246,37 @@ public class UserDTO {
 	}
 
 
+	/**
+	 * Gets the value of the attribute {@link #rolId}.
+	 * @return the value of the attribute {@link #rolId}.
+	 */
 	public Long getRolId() {
 		return this.rolId;
 	}
 
-
+	/**
+	 * Sets the value of the attribute {@link #rolId}.
+	 * @param phoneP The value for the attribute {@link #rolId}.
+	 */
 	public void setRolId(final Long rolId) {
 		this.rolId = rolId;
 	}
 
+	/**
+	 * Gets the value of the attribute {@link #dniAdd}.
+	 * @return the value of the attribute {@link #dniAdd}.
+	 */
+	public String getDniAdd() {
+		return dniAdd;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dniAdd}.
+	 * @param dniAdd The value for the attribute {@link #dniAdd}.
+	 */
+	public void setDniAdd(String dniAdd) {
+		this.dniAdd = dniAdd;
+	}
+
+	
 }

@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>07/07/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 21/05/2021.
+ * @version 1.2, 20/01/2025.
  */
 package es.gob.fire.persistence.entity;
 
@@ -51,7 +51,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 /**
  * <p>Class that maps the <i>TB_USUARIOS</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.
- * @version 1.1, 21/05/2021.
+ * @version 1.2, 20/01/2025.
  */
 @Entity
 @Table(name = "TB_USUARIOS")
@@ -128,6 +128,8 @@ public class User implements Serializable {
 	 */
 	private Rol rol;
 
+	private String dni;
+	
 	/**
 	 * Gets the value of the attribute {@link #userId}.
 	 * @return the value of the attribute {@link #userId}.
@@ -362,5 +364,24 @@ public class User implements Serializable {
 	public void setRol(final Rol rolP) {
 		this.rol = rolP;
 	}
+
+	/**
+	 * Gets the value of the attribute {@link #dni}.
+	 * @return the value of the attribute {@link #dni}.
+	 */
+	@Column(name = "DNI", nullable = true, length = NumberConstants.NUM9)
+	public String getDni() {
+		return dni;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dni}.
+	 * @param dni The value for the attribute {@link #dni}.
+	 */
+	public void setDni(String dni) {
+		this.dni = dni;
+	}
+	
+	
 
 }

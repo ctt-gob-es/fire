@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>19/06/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 21/05/2021.
+ * @version 1.3, 20/01/2025.
  */
 package es.gob.fire.persistence.dto;
 
@@ -35,7 +35,7 @@ import es.gob.fire.persistence.dto.validation.ThenCheckIt;
 /**
  * <p>Class that represents the backing form for editing an user.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 21/05/2021.
+ * @version 1.3, 20/01/2025.
  */
 public class UserEditDTO {
 	/**
@@ -114,6 +114,10 @@ public class UserEditDTO {
 	//@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String rolEdit = UtilsStringChar.EMPTY_STRING;
 
+	/**
+	 * Attribute that represents the value of the input DNI of the user in the form.
+	 */
+	private String dniEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Gets the value of the attribute {@link #idUserFireEdit}.
@@ -287,4 +291,21 @@ public class UserEditDTO {
 	public void setConfirmPasswordEdit(final String confirmPasswordParam) {
 		this.confirmPasswordEdit = confirmPasswordParam;
 	}
+
+	/**
+	 * Gets the value of the attribute {@link #dniEdit}.
+	 * @return the value of the attribute {@link #dniEdit}.
+	 */
+	public String getDniEdit() {
+		return dniEdit;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dniEdit}.
+	 * @param dniEdit The value for the attribute {@link #dniEdit}.
+	 */
+	public void setDniEdit(String dniEdit) {
+		this.dniEdit = dniEdit;
+	}
+	
 }

@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 02/02/2022.
+ * @version 1.3, 20/01/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -58,7 +58,7 @@ import es.gob.fire.persistence.service.IUserService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 02/02/2022.
+ * @version 1.3, 20/01/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -154,7 +154,8 @@ public class UserService implements IUserService {
 		user.setPhone(userDto.getTelfAdd());
 		user.setStartDate(new Date());
 		user.setRenovationDate(new Date());
-
+		user.setDni(userDto.getDniAdd());
+		
 		//TODO Rellenar los campos que faltan
 		return this.repository.save(user);
 	}
@@ -202,7 +203,8 @@ public class UserService implements IUserService {
 		user.setSurnames(userDto.getSurnamesEdit());
 		user.setEmail(userDto.getEmailEdit());
 		user.setPhone(userDto.getTelfEdit());
-
+		user.setDni(userDto.getDniEdit());
+		
 		return this.repository.save(user);
 	}
 

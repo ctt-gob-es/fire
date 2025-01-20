@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 02/02/2022.
+ * @version 1.4, 20/01/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -81,7 +83,7 @@ import es.gob.fire.persistence.service.IUserService;
  * Application for signing documents of @firma suite systems.
  * </p>
  * 
- * @version 1.2, 02/02/2022.
+ * @version 1.4, 20/01/2025.
  */
 @RestController
 public class UserRestController {
@@ -161,7 +163,8 @@ public class UserRestController {
 	                (dto.getName() != null && dto.getName().toLowerCase().contains(searchValue.toLowerCase())) ||
 	                (dto.getSurnames() != null && dto.getSurnames().toLowerCase().contains(searchValue.toLowerCase())) ||
 	                (dto.getPhone() != null && dto.getPhone().toLowerCase().contains(searchValue.toLowerCase())) ||
-	                (dto.getRolName() != null && dto.getRolName().toLowerCase().contains(searchValue.toLowerCase()))
+	                (dto.getRolName() != null && dto.getRolName().toLowerCase().contains(searchValue.toLowerCase()) ||
+	                (dto.getDni() != null && dto.getDni().toLowerCase().contains(searchValue.toLowerCase())))
 	            )
 	            .collect(Collectors.toList());
 	    }
@@ -231,6 +234,15 @@ public class UserRestController {
 	                    return rolName1.compareTo(rolName2);
 	                };
 	                break;
+	            case "dni":
+	            	comparator = (dto1, dto2) -> {
+	            		String dni1 = dto1.getDni();
+	            		String dni2 = dto2.getDni();
+	            		if (dni1 == null) return 1;
+	            		if (dni2 == null) return -1;
+	            		return dni1.compareTo(dni2);
+	            	};
+	            	break;
 	            default:
 	                comparator = (dto1, dto2) -> {
 	                    String userName1 = dto1.getUserName();
@@ -362,7 +374,29 @@ public class UserRestController {
 			error = true;
 			json.put("emailAdd" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}
+		
+		if(hasAccessPermission) {
+			if(!UtilsStringChar.isNullOrEmpty(userForm.getDniAdd())) {
+				// Expresion regular para validar un DNI (8 digitos seguidos de una letra)
+		        String regex = "\\d{8}[A-Za-z]";
 
+		        // Creamos un Pattern con la expresion regular
+		        Pattern pattern = Pattern.compile(regex);
+		        
+		        // Creamos un matcher que va a hacer la validacion
+		        Matcher matcher = pattern.matcher(userForm.getDniAdd());
+		        
+		        if(!matcher.matches()) {
+		        	error = true;
+					json.put("dniAdd" + SPAN, "El DNI debe tener un formato de 8 n\u00FAmeros y 1 letra.");
+		        }
+
+			} else {
+				error = true;
+				json.put("dniAdd" + SPAN, "El campo dni es obligatorio.");
+			}
+		}
+		
 		if (!error) {
 			try {
 
@@ -482,6 +516,28 @@ public class UserRestController {
 			json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}
 
+		if(hasAccessPermission) {
+			if(!UtilsStringChar.isNullOrEmpty(userForm.getDniEdit())) {
+				// Expresion regular para validar un DNI (8 digitos seguidos de una letra)
+		        String regex = "\\d{8}[A-Za-z]";
+
+		        // Creamos un Pattern con la expresion regular
+		        Pattern pattern = Pattern.compile(regex);
+		        
+		        // Creamos un matcher que va a hacer la validacion
+		        Matcher matcher = pattern.matcher(userForm.getDniEdit());
+		        
+		        if(!matcher.matches()) {
+		        	error = true;
+					json.put("dniEdit" + SPAN, "El DNI debe tener un formato de 8 n\u00FAmeros y 1 letra.");
+		        }
+
+			} else {
+				error = true;
+				json.put("dniEdit" + SPAN, "El campo dni es obligatorio.");
+			}
+		}
+		
 		if (!error) {
 			try {
 
