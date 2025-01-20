@@ -20,14 +20,16 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 22/01/2021.
+ * @version 1.1, 20/01/2025.
  */
 package es.gob.fire.web.authentication;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -50,6 +52,7 @@ import org.springframework.stereotype.Component;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.UtilsStringChar;
+import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.permissions.Permissions;
 import es.gob.fire.persistence.permissions.PermissionsChecker;
@@ -86,7 +89,10 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 	 */
 	@Autowired
 	private IUserService userService;
-
+	
+	 @Autowired
+	 private UserLoggedDTO userLoggedDTO;
+	
 	/** The password encoder */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -128,6 +134,27 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 				grantedAuths.add(new SimpleGrantedAuthority(Constants.ROLE_ADMIN));
 				auth = new UsernamePasswordAuthenticationToken(userName, password,
 						/* getAuthorities(user.getRoles()) */grantedAuths);
+				
+				// Asignamos al bean de spring del usuario para usarlo en la app
+				userLoggedDTO.setDni(user.getDni());
+				userLoggedDTO.setEmail(user.getEmail());
+				userLoggedDTO.setIdRol(user.getRol().getRolId());
+				userLoggedDTO.setName(user.getName());
+				userLoggedDTO.setPassword(user.getPassword());
+				userLoggedDTO.setPhone(user.getPhone());
+				userLoggedDTO.setRenovationCode(user.getRenovationCode());
+				userLoggedDTO.setRenovationDate(user.getRenovationDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getRenovationDate()));
+				userLoggedDTO.setRestPassword(user.getRestPassword());
+				userLoggedDTO.setRoot(user.getRoot());
+				userLoggedDTO.setStartDate(user.getStartDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getStartDate()));
+				userLoggedDTO.setSurnames(user.getSurnames());
+				userLoggedDTO.setUserId(user.getUserId());
+				userLoggedDTO.setUserName(user.getUserName());
+				userLoggedDTO.setFecUltimoAcceso(user.getFecUltimoAcceso() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getFecUltimoAcceso()));
+				
+				// Actualizamos la fecha de último acceso
+				user.setFecUltimoAcceso(Calendar.getInstance().getTime());
+				userService.saveUser(user);
 			} else {
 				LOGGER.error("El usuario {} inserto una constrasena incorrecta", UtilsStringChar.removeBlanksFromString(userName)); //$NON-NLS-1$
 				throw new BadCredentialsException(

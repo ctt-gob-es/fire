@@ -128,7 +128,15 @@ public class User implements Serializable {
 	 */
 	private Rol rol;
 
+	/**
+	 * Attribute that represents the DNI.
+	 */
 	private String dni;
+	
+	/**
+	 * Attribute that represents the date last access.
+	 */
+	private Date fecUltimoAcceso;
 	
 	/**
 	 * Gets the value of the attribute {@link #userId}.
@@ -381,7 +389,23 @@ public class User implements Serializable {
 	public void setDni(String dni) {
 		this.dni = dni;
 	}
-	
-	
 
+	/**
+	 * Gets the value of the attribute {@link #fecUltimoAcceso}.
+	 * @return the value of the attribute {@link #fecUltimoAcceso}.
+	 */
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "FEC_ULTIMO_ACCESO", nullable = false, length = NumberConstants.NUM6)
+	public Date getFecUltimoAcceso() {
+		return fecUltimoAcceso;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dni}.
+	 * @param dni The value for the attribute {@link #dni}.
+	 */
+	public void setFecUltimoAcceso(Date fecUltimoAcceso) {
+		this.fecUltimoAcceso = fecUltimoAcceso;
+	}
+	
 }

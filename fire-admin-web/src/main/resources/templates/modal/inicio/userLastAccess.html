@@ -1,0 +1,32 @@
+<div class="modal fade" role="dialog" data-toggle="modal" data-backdrop="true" data-keyboard="true" id="modalUserLastAccess">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<!-- HEADER -->
+			<div class="modal-header bg-title">
+				<h4 class="modal-title" th:text="#{modal.userLastAccess.title}"></h4>
+				<button type="button" class="close"
+					onclick="closeModalButton('modalUserLastAccess')"
+					aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<!-- BODY -->
+			<div class="modal-body">
+				<!-- Mostrar la información del usuario -->
+				<p class="userLastAccessInfoParagraph">
+					<span th:text="#{modal.userLastAccess.infoParagraph.first}"></span>
+					<span th:text="${userName}" class="userLastAccessInfoParagraphValues"></span>
+					<span th:text="#{modal.userLastAccess.infoParagraph.second}"></span>
+					<span th:text="${formattedLastAccessTime}" class="userLastAccessInfoParagraphValues"></span>
+					<span th:text="#{modal.userLastAccess.infoParagraph.third}"></span>
+					<span th:text="${formattedLastAccessDate}" class="userLastAccessInfoParagraphValues"></span>
+				<p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary"
+					onclick="closeModalButton('modalUserLastAccess')"
+					th:text="#{modal.userLastAccess.button.accept}"></button>
+			</div>
+		</div>
+	</div>
+</div>

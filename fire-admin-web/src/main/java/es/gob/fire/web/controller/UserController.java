@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import es.gob.fire.persistence.dto.RolDTO;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
+import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
@@ -63,6 +64,9 @@ public class UserController {
 	@Autowired
     private MessageSource messageSource;
 
+	@Autowired
+	private UserLoggedDTO userLoggedDTO;
+	
 	/**
 	 * Method that maps the list users web requests to the controller and
 	 * forwards the list of users to the view.
@@ -189,6 +193,32 @@ public class UserController {
 		model.addAttribute("userDeleteForm", user);
 		model.addAttribute("tableIndexRow", index);
 		return "modal/userDelete.html";
+	}
+	
+	/**
+	 * Handles the GET request to retrieve and display the user's last access information in a modal.
+	 * 
+	 * @param idUser The ID of the user whose last access information is being retrieved.
+	 * @param model The Spring Model object to which attributes are added for rendering in the view.
+	 * @return The name of the view template to be rendered, "modal/inicio/userLastAccess.html".
+	 * 
+	 */
+	@RequestMapping(value = "userLastAccess", method = { RequestMethod.GET })
+	public String getUserLastAccessModal(final Model model) {
+		// Obtain the date
+	    String formattedLastAccessDate = userLoggedDTO.getFecUltimoAcceso().split(" ")[0];
+	    
+	    // Obtain the time
+	    String formattedLastAccessTime = userLoggedDTO.getFecUltimoAcceso().split(" ")[1];
+
+	    //Format the user name
+	    String userName = userLoggedDTO.getName() + " " + userLoggedDTO.getSurnames();
+	    
+		model.addAttribute("userName", userName);
+		model.addAttribute("formattedLastAccessDate", formattedLastAccessDate);
+	    model.addAttribute("formattedLastAccessTime", formattedLastAccessTime);
+	    
+		return "modal/inicio/userLastAccess.html";
 	}
 
 }

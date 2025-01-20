@@ -1,0 +1,17 @@
+
+.bg-title{
+	background-color:#529ed2!important;
+	color:#e9ecef;
+	font-size: 16px;
+}
+
+.userLastAccessInfoParagraph {
+    text-align: center;
+    font-size: 0.9rem;
+    margin: 0.5rem;
+}
+
+.userLastAccessInfoParagraphValues {
+    font-weight: 700;
+    color: #6f7477;
+}
