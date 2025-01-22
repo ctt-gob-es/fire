@@ -59,7 +59,15 @@
 							 th:text="#{fire-admin-web.login.acceso.button}"></button>
 						</div>	
 					</div>
-					
+					<div class="container-login-form-btn">
+						<div class="wrap-login-form-btn">
+							<div class="login-form-bgbtn"></div>
+							<button
+							onclick="redirectClave();"
+							class="login-form-btn"
+							th:text="#{fire-admin-web.login.acceso.clave.button}"></button>
+						</div>
+					</div>
 					<br></br>
 							
 					<div id="PasswordButton" >
@@ -89,6 +97,12 @@
 			
 		}
 	
+		function redirectClave() {
+			var loginClave = /*[[@{/loginClave}]]*/;
+		    document.getElementById("formLogin").action = loginClave;
+            document.getElementById("formLogin").submit();
+// 			window.location.href = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/loginClave');
+		}
 	</script>
 	
 </body>

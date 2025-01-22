@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 20/01/2025.
+ * @version 1.2, 22/01/2025.
  */
 package es.gob.fire.web.authentication;
 
@@ -60,8 +60,8 @@ import es.gob.fire.persistence.service.IUserService;
 
 /**
  * <p>Class that manages authentication through a spring custom authentication provider.</p>
-  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 22/01/2021.
+ * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * @version 1.2, 22/01/2025.
  */
 @Component
 public class CustomUserAuthentication implements AuthenticationProvider {
@@ -90,8 +90,11 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 	@Autowired
 	private IUserService userService;
 	
-	 @Autowired
-	 private UserLoggedDTO userLoggedDTO;
+	/**
+	 * Attribute that represents the user logged in platform.
+	 */
+	@Autowired
+	private UserLoggedDTO userLoggedDTO;
 	
 	/** The password encoder */
 	@Bean
@@ -126,7 +129,8 @@ public class CustomUserAuthentication implements AuthenticationProvider {
 			}
 
 			// If password is OK
-			if (passwordEncoder().matches(password, user.getPassword())
+			if (password.equals(user.getPassword()) 
+					|| passwordEncoder().matches(password, user.getPassword())
 					|| checkAdminPassword(user.getUserName(), password, user.getPassword())) {
 				final List<GrantedAuthority> grantedAuths = new ArrayList<>();
 				// Asignamos los roles del usuario

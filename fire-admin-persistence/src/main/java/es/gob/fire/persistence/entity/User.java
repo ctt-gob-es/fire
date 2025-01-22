@@ -401,8 +401,8 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Sets the value of the attribute {@link #dni}.
-	 * @param dni The value for the attribute {@link #dni}.
+	 * Sets the value of the attribute {@link #fecUltimoAcceso}.
+	 * @param fecUltimoAcceso The value for the attribute {@link #fecUltimoAcceso}.
 	 */
 	public void setFecUltimoAcceso(Date fecUltimoAcceso) {
 		this.fecUltimoAcceso = fecUltimoAcceso;

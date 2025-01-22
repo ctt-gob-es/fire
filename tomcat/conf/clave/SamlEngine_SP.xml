@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+	<comment>SAML constants for AuthnRequests and Responses.</comment>
+
+	<!--
+		Types of consent obtained from the user for this authentication and
+		data transfer.
+		Allow values: 'unspecified'.
+	-->
+	<entry key="consentAuthnRequest">unspecified</entry>
+	<!--
+	Allow values: 'obtained', 'prior', 'curent-implicit', 'curent-explicit', 'unspecified'.
+	-->
+	<entry key="consentAuthnResponse">obtained</entry>
+
+	<!--URI representing the classification of the identifier
+		Allow values: 'entity'.
+	-->
+	<entry key="formatEntity">entity</entry>
+	
+	<!--Only HTTP-POST binding is only supported for inter PEPS-->
+	<!--The SOAP binding is only supported for direct communication between SP-MW and VIdP-->
+	<entry key="protocolBinding">HTTP-POST</entry>
+	
+	<entry key="eIDSectorShare">false</entry>
+	<entry key="eIDCrossSectorShare">false</entry>
+	<entry key="eIDCrossBorderShare">false</entry>
+	
+	<entry key="validateSignature">true</entry>
+	
+	<!-- Attributes with require option -->
+	<entry key="isRequired">true</entry>
+	
+	<!-- A friendly name for the attribute that can be displayed to a user -->
+	<entry key="friendlyName">false</entry>
+	
+	<!--PEPS in the Service Provider's country-->
+	<entry key="requester">http://S-PEPS.gov.xx</entry>
+
+	<!--PEPS in the citizen's origin country-->
+	<entry key="responder">http://C-PEPS.gov.xx</entry>
+
+	<!--Subject cannot be confirmed on or after this seconds time (positive number)-->
+	<entry key="timeNotOnOrAfter">300</entry>
+
+	<!--Validation IP of the response-->
+	<entry key="ipAddrValidation">false</entry>
+	
+	<!--One time use-->
+	<entry key="oneTimeUse">true</entry>
+
+</properties>

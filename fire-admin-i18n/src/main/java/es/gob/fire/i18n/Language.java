@@ -36,6 +36,12 @@
  */
 package es.gob.fire.i18n;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -72,14 +78,34 @@ public final class Language {
 	private static ClassLoader classLoaderMessages = null;
 
 	/**
+	 * Constant attribute that represents the property key fire.config.path.
+	 */
+	private static final String PROP_SERVER_CONFIG_DIR = "fire.config.path";
+	
+	/**
+	 * Constant attribute that represents the messages directory.
+	 */
+	private static final String MESSAGES_DIRECTORY = "messages";
+	
+	/**
 	 * Constant attribute that represents the string to identify the the bundle name for the file with the application language.
 	 */
-	private static final String BUNDLENAME_LANGUAGE = "messages.Language";
+	private static final String BUNDLENAME_LANGUAGE = "Language";
 
 	/**
 	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin logs.
 	 */
-	private static final String BUNDLENAME_WEBADMIN = "messages.webAdmin.fire";
+	private static final String BUNDLENAME_WEBADMIN_FIRE = "webAdmin.fire";
+
+	/**
+	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin general logs.
+	 */
+	private static final String BUNDLENAME_WEBADMIN_GENERAL = "webAdmin.general";
+
+	/**
+	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin fire logs.
+	 */
+	private static final String BUNDLENAME_COMMONUTILS_FIRE = "commonsUtils.fire";
 
 	/**
 	 * Constant attribute that represents the key for the configured locale for the platform.
@@ -90,15 +116,33 @@ public final class Language {
 	 * Attribute that represents the properties for the locale for the core bundle messages.
 	 */
 	private static ResourceBundle resWebAdminBundle = null;
-
-
+	
+	/**
+	 * Attribute that represents the properties for the locale for the web admin general messages.
+	 */
+	private static ResourceBundle resWebAdminGeneral = null;
+	
+	/**
+	 * Attribute that represents the properties for the locale for the core bundle messages.
+	 */
+	private static ResourceBundle resCommonsUtilsBundle = null;
 
 	static {
 		// Preparamos el URLClassLoader con el que se cargaran los mensajes de logs
 		try {
-			classLoaderMessages = Language.class.getClassLoader();
+			final File configDirFile = new File(createAbsolutePath(getServerConfigDir(), MESSAGES_DIRECTORY));
+			classLoaderMessages = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+
+				public URLClassLoader run() {
+					try {
+						return new URLClassLoader(new URL[ ] { configDirFile.toURI().toURL() });
+					} catch (MalformedURLException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			});
 			reloadMessagesConfiguration();
-		} catch (final RuntimeException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error(e);
 		}
 	}
@@ -136,9 +180,30 @@ public final class Language {
 		// Se informa en el log del Locale selecccionado.
 		LOGGER.info("Take the next locale for messages logs: " + currentLocale.toString());
 		// Se cargan los mensajes del modulo de administracion web.
-		resWebAdminBundle = ResourceBundle.getBundle(BUNDLENAME_WEBADMIN, currentLocale, classLoaderMessages);
+		resWebAdminBundle = ResourceBundle.getBundle(BUNDLENAME_WEBADMIN_FIRE, currentLocale, classLoaderMessages);
+		resWebAdminGeneral = ResourceBundle.getBundle(BUNDLENAME_WEBADMIN_GENERAL, currentLocale, classLoaderMessages);	
+		// Cargamos los mensajes del modulo de commons utils.
+		resCommonsUtilsBundle = ResourceBundle.getBundle(BUNDLENAME_COMMONUTILS_FIRE, currentLocale, classLoaderMessages);
 	}
 
+	/**
+	 * Method that returns the value of the system property fire.config.path.
+	 * @return Value of the system property fire.config.path. Null if not exist.
+	 */
+	private static String getServerConfigDir() {
+		return System.getProperty(PROP_SERVER_CONFIG_DIR);
+	}
+	
+	/**
+	 * Auxiliar method to create an absolute path to a file.
+	 * @param pathDir Directory absolute path that contains the file.
+	 * @param filename Name of the file.
+	 * @return Absolute path of the file.
+	 */
+	private static String createAbsolutePath(String pathDir, String filename) {
+		return pathDir + File.separator + filename;
+	}
+	
 	/**
 	 * Gets the message with the key and values indicated as input parameters.
 	 * @param key Key for obtain the message.
@@ -158,4 +223,42 @@ public final class Language {
 		return resWebAdminBundle.getString(key);
 	}
 
+	/**
+	 * Gets the message with the key and values indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @param values Values for insert in the message.
+	 * @return String with the message well-formed.
+	 */
+	public static String getFormatResCommonsUtilsFire(String key, Object[ ] values) {
+		return new MessageFormat(resCommonsUtilsBundle.getString(key), currentLocale).format(values);
+	}
+
+	/**
+	 * Gets the message with the key indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @return String with the message.
+	 */
+	public static String getResCommonsUtilsFire(String key) {
+		return resCommonsUtilsBundle.getString(key);
+	}
+
+	/**
+	 * Method that gets the bundle message of the web admin general for a certain key.
+	 * @param key Parameter that represents the key for obtain the message.
+	 * @return The bundle message of the web admin general for certain key.
+	 */
+	public static String getResWebAdminGeneral(String key) {
+		return resWebAdminGeneral.getString(key);
+	}
+
+	/**
+	 * Method that gets the bundle message of the web admin general for a certain key and values indicated as input parameters.
+	 * @param key Parameter that represents the key for obtain the message.
+	 * @param values Parameter that represents the list of values for insert in the message.
+	 * @return the bundle message of the web admin general for certain key and values indicated as input parameters.
+	 */
+	public static String getFormatResWebAdminGeneral(String key, Object[ ] values) {
+		return new MessageFormat(resWebAdminGeneral.getString(key), currentLocale).format(values);
+	}
+	
 }

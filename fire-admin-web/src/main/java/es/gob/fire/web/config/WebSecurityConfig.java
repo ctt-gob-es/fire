@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>13 jun. 2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 13 jun. 2018.
+ * @version 1.1, 22/01/2025.
  */
 package es.gob.fire.web.config;
 
@@ -39,7 +39,7 @@ import es.gob.fire.web.authentication.CustomUserAuthentication;
 /** 
  * <p>Class that enables and configures the security of the Valet application. </p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 13 jun. 2018.
+ * @version 1.1, 22/01/2025.
  */
 @Configuration
 @EnableWebSecurity
@@ -63,8 +63,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	@Override
     protected void configure(HttpSecurity http) throws Exception {  
       http.authorizeRequests()
-	    .antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/chartist/**", "/mailpasswordrestoration", "/mailRestorePasswordUser/**", "/restorepassword")
-	    .permitAll() // Enable css, images and js when logged out
+	    .antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/chartist/**", // Enable css, images and js when logged out 
+	    		"/mailpasswordrestoration", "/mailRestorePasswordUser/**", "/restorepassword", "/loginClave", "/ResponseClave") // Rutas publicas que no requieren autenticacion
+	    .permitAll()
 		.and()
 		.authorizeRequests()
 		.antMatchers("/", "add", "delete/{id}", "edit/{id}", "save", "users")
