@@ -39,6 +39,8 @@ CREATE TABLE `tb_usuarios` (
   `codigo_renovacion` varchar(100) DEFAULT NULL,
   `fec_renovacion` TIMESTAMP DEFAULT NULL,
   `rest_clave` tinyint(4) DEFAULT '0',
+  `dni` varchar(9) NULL,
+  `fec_ultimo_acceso` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `nombre_usuario_UNIQUE` (`nombre_usuario`),
   UNIQUE KEY `codigo_renovacion_UNIQUE` (`codigo_renovacion`)
