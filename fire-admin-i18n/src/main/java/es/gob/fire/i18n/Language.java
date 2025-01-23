@@ -78,34 +78,24 @@ public final class Language {
 	private static ClassLoader classLoaderMessages = null;
 
 	/**
-	 * Constant attribute that represents the property key fire.config.path.
-	 */
-	private static final String PROP_SERVER_CONFIG_DIR = "fire.config.path";
-	
-	/**
-	 * Constant attribute that represents the messages directory.
-	 */
-	private static final String MESSAGES_DIRECTORY = "messages";
-	
-	/**
 	 * Constant attribute that represents the string to identify the the bundle name for the file with the application language.
 	 */
-	private static final String BUNDLENAME_LANGUAGE = "Language";
+	private static final String BUNDLENAME_LANGUAGE = "messages.Language";
 
 	/**
 	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin logs.
 	 */
-	private static final String BUNDLENAME_WEBADMIN_FIRE = "webAdmin.fire";
+	private static final String BUNDLENAME_WEBADMIN_FIRE = "messages.webAdmin.fire";
 
 	/**
 	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin general logs.
 	 */
-	private static final String BUNDLENAME_WEBADMIN_GENERAL = "webAdmin.general";
+	private static final String BUNDLENAME_WEBADMIN_GENERAL = "messages.webAdmin.general";
 
 	/**
 	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin fire logs.
 	 */
-	private static final String BUNDLENAME_COMMONUTILS_FIRE = "commonsUtils.fire";
+	private static final String BUNDLENAME_COMMONUTILS_FIRE = "messages.commonsUtils.fire";
 
 	/**
 	 * Constant attribute that represents the key for the configured locale for the platform.
@@ -130,19 +120,9 @@ public final class Language {
 	static {
 		// Preparamos el URLClassLoader con el que se cargaran los mensajes de logs
 		try {
-			final File configDirFile = new File(createAbsolutePath(getServerConfigDir(), MESSAGES_DIRECTORY));
-			classLoaderMessages = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-
-				public URLClassLoader run() {
-					try {
-						return new URLClassLoader(new URL[ ] { configDirFile.toURI().toURL() });
-					} catch (MalformedURLException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			});
+			classLoaderMessages = Language.class.getClassLoader();
 			reloadMessagesConfiguration();
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			LOGGER.error(e);
 		}
 	}
@@ -184,24 +164,6 @@ public final class Language {
 		resWebAdminGeneral = ResourceBundle.getBundle(BUNDLENAME_WEBADMIN_GENERAL, currentLocale, classLoaderMessages);	
 		// Cargamos los mensajes del modulo de commons utils.
 		resCommonsUtilsBundle = ResourceBundle.getBundle(BUNDLENAME_COMMONUTILS_FIRE, currentLocale, classLoaderMessages);
-	}
-
-	/**
-	 * Method that returns the value of the system property fire.config.path.
-	 * @return Value of the system property fire.config.path. Null if not exist.
-	 */
-	private static String getServerConfigDir() {
-		return System.getProperty(PROP_SERVER_CONFIG_DIR);
-	}
-	
-	/**
-	 * Auxiliar method to create an absolute path to a file.
-	 * @param pathDir Directory absolute path that contains the file.
-	 * @param filename Name of the file.
-	 * @return Absolute path of the file.
-	 */
-	private static String createAbsolutePath(String pathDir, String filename) {
-		return pathDir + File.separator + filename;
 	}
 	
 	/**

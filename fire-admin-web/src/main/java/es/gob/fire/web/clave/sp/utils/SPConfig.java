@@ -14,17 +14,17 @@ import es.gob.fire.commons.utils.UtilsServer;
 /**
  * Utility class for Service Provider configurations.
  */
-public class ClaveConfigUtil {
+public class SPConfig {
     
     /**
      * Constructor for SPUtil. Private to prevent instantiation.
      */
-    ClaveConfigUtil() {}
+    SPConfig() {}
 
     /**
      * Logger for this class.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(ClaveConfigUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SPConfig.class);
     
     /**
      * Retrieves the configuration file path.
@@ -51,7 +51,7 @@ public class ClaveConfigUtil {
         FileReader fileReader = null;
         
         try {
-            File f = new File(ClaveConfigUtil.getConfigFilePath() + fileName);
+            File f = new File(SPConfig.getConfigFilePath() + fileName);
             fileReader = new FileReader(f);
             properties.load(fileReader);
         } finally {
@@ -69,7 +69,7 @@ public class ClaveConfigUtil {
     public static Properties loadSPConfigs() {
         Properties result = null;
         try {
-            result = ClaveConfigUtil.loadConfigs(Constants.CLAVE_CONFIG_PROPERTIES);
+            result = SPConfig.loadConfigs(Constants.CLAVE_CONFIG_PROPERTIES);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }

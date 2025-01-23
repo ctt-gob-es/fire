@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import es.gob.fire.web.clave.sp.utils.Constants;
-import es.gob.fire.web.clave.sp.utils.ClaveConfigUtil;
+import es.gob.fire.web.clave.sp.utils.SPConfig;
 import eu.eidas.auth.engine.ProtocolEngineFactoryNoMetadata;
 import eu.eidas.auth.engine.ProtocolEngineNoMetadataI;
 import eu.eidas.auth.engine.configuration.ProtocolConfigurationAccessorNoMetadata;
@@ -39,7 +39,7 @@ public final class SpProtocolEngineFactory extends ProtocolEngineFactoryNoMetada
             try {
                 ProtocolEngineConfigurationFactoryNoMetadata protocolEngineConfigurationFactory = 
                 		new ProtocolEngineConfigurationFactoryNoMetadata(Constants.SP_SAMLENGINE_FILE, null,
-                				ClaveConfigUtil.getConfigFilePath());
+                				SPConfig.getConfigFilePath());
                 defaultProtocolEngineFactory =
                         new SpProtocolEngineFactory(protocolEngineConfigurationFactory);
             } catch (Exception ex) {

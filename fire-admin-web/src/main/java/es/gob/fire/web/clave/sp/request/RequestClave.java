@@ -25,7 +25,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import es.gob.fire.web.clave.sp.utils.ClaveConfigUtil;
+import es.gob.fire.web.clave.sp.utils.SPConfig;
 import es.gob.fire.web.clave.sp.utils.SessionHolder;
 import es.gob.fire.web.exception.WebAdminException;
 import es.gob.fire.i18n.IWebAdminGeneral;
@@ -83,7 +83,7 @@ public class RequestClave {
      */
 	public static String constructRequestSAML() throws WebAdminException {
 		
-		Properties spConfig = ClaveConfigUtil.loadSPConfigs();
+		Properties spConfig = SPConfig.loadSPConfigs();
 		
 		nodeServiceUrl = spConfig.getProperty(Constants.SERVICE_URL);
 		relayState = SecureRandomXmlIdGenerator.INSTANCE.generateIdentifier(8); 
