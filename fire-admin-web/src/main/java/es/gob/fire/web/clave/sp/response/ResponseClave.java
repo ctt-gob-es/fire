@@ -28,7 +28,7 @@ import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.web.authentication.CustomUserAuthentication;
 import es.gob.fire.web.clave.sp.SpProtocolEngineFactory;
 import es.gob.fire.web.clave.sp.utils.Constants;
-import es.gob.fire.web.clave.sp.utils.SPUtil;
+import es.gob.fire.web.clave.sp.utils.ClaveConfigUtil;
 import es.gob.fire.web.clave.sp.utils.SessionHolder;
 import eu.eidas.auth.commons.EidasStringUtil;
 import eu.eidas.auth.commons.attribute.AttributeDefinition;
@@ -59,7 +59,7 @@ public class ResponseClave {
 	    	String relayState = request.getParameter("RelayState");
 	    	String remoteHost = request.getRemoteHost();
 	    		
-	    	Properties spConfig = SPUtil.loadSPConfigs();
+	    	Properties spConfig = ClaveConfigUtil.loadSPConfigs();
 	    		
 	    	String claveReturnUrl = spConfig.getProperty(Constants.SP_RETURN);
 	    		

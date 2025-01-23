@@ -12,7 +12,7 @@ public final class Constants {
 	public static final String EIDAS_LEVELOFASSURANCE = "clave.eidas.levelofassurance";
 	
 	/** Otras constantes */
-	public static final String SP_PROPERTIES = "sp.properties";
+	public static final String CLAVE_CONFIG_PROPERTIES = "claveConfig.properties";
 	public static final String SP_SAMLENGINE_FILE = "SPSamlEngine.xml";
 	public static final String SP_CONF = "SPNoMetadata";
     

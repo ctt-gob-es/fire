@@ -72,10 +72,15 @@ ALTER TABLE `tb_usuarios`
 ADD `fk_rol` int(11) AFTER `telf_contacto`,
 ADD `codigo_renovacion` VARCHAR(100) UNIQUE DEFAULT NULL,
 ADD `fec_renovacion` datetime DEFAULT NULL,
-ADD `rest_clave` tinyint(4) DEFAULT 0;
- 
+ADD `rest_clave` tinyint(4) DEFAULT 0,
+ADD `dni` VARCHAR(9) NULL,
+ADD `fec_ultimo_acceso` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
 UPDATE `tb_usuarios`
 SET `fk_rol` = 1;
+
+UPDATE `tb_usuarios`
+SET `dni` = 'X0000000T';
 
 ALTER TABLE `tb_usuarios`
 MODIFY `fk_rol` int(11) NOT NULL;
