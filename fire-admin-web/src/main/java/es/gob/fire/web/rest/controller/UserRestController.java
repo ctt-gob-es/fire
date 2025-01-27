@@ -377,13 +377,17 @@ public class UserRestController {
 		
 		if(hasAccessPermission) {
 			if(!UtilsStringChar.isNullOrEmpty(userForm.getDniAdd())) {
+				String nif = null;
 				if (userForm.getDniAdd().toUpperCase().startsWith("X")
 						|| userForm.getDniAdd().toUpperCase().startsWith("Y")
-						|| userForm.getDniAdd().toUpperCase().startsWith("Z"))
-					userForm.setDniAdd(userForm.getDniAdd().substring(1));
-
+						|| userForm.getDniAdd().toUpperCase().startsWith("Z")) {
+					nif = userForm.getDniAdd().substring(1);
+				} else {
+					nif = userForm.getDniAdd();
+				}
+				
 				Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
-				Matcher m = nifPattern.matcher(userForm.getDniAdd());
+				Matcher m = nifPattern.matcher(nif);
 				if (m.matches()) {
 					String letra = m.group(2);
 					// Extraer letra del NIF
@@ -527,13 +531,17 @@ public class UserRestController {
 
 		if(hasAccessPermission) {
 			if(!UtilsStringChar.isNullOrEmpty(userForm.getDniEdit())) {
+				String nif = null;
 				if (userForm.getDniEdit().toUpperCase().startsWith("X")
 						|| userForm.getDniEdit().toUpperCase().startsWith("Y")
-						|| userForm.getDniEdit().toUpperCase().startsWith("Z"))
-					userForm.setDniEdit(userForm.getDniEdit().substring(1));
-
+						|| userForm.getDniEdit().toUpperCase().startsWith("Z")) {
+					nif = userForm.getDniEdit().substring(1);
+				} else {
+					nif = userForm.getDniEdit();
+				}
+					 
 				Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
-				Matcher m = nifPattern.matcher(userForm.getDniEdit());
+				Matcher m = nifPattern.matcher(nif);
 				if (m.matches()) {
 					String letra = m.group(2);
 					// Extraer letra del NIF
