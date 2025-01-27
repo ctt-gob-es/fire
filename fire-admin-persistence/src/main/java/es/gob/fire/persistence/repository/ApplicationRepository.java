@@ -33,21 +33,22 @@ public interface ApplicationRepository extends JpaRepository<Application, String
 	 * @param idCertificado Long that represents the Certificate identifier.
 	 * @return Object that represents a user from the persistence.
 	 */
-	List<Application> findByCertificateIdCertificado(Long idCertificado);
+	@Query("SELECT ap FROM Application ap, CertificatesApplication cerApp WHERE ap.appId = cerApp.application.appId AND cerApp.certificate.idCertificado = :idCertificado order by ap.appName")
+	List<Application> findByCertificateIdCertificado(@Param("idCertificado") Long idCertificado);
 
 	
 	/**
 	 * Method that gets the applications associated to the Certificate identified by idCertificate.
 	 * @return List<ApplicationCertDTO>
 	 */
-	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, ap.fechaAltaApp) FROM Application ap, Certificate cer WHERE ap.certificate.idCertificado = cer.idCertificado AND ap.certificate.idCertificado = :idCertificado order by ap.appName")
+	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, ap.fechaAltaApp) FROM Application ap, CertificatesApplication cerApp WHERE ap.appId = cerApp.application.appId AND cerApp.certificate.idCertificado = :idCertificado order by ap.appName")
 	List<ApplicationCertDTO> findApplicationCert(@Param("idCertificado") Long idCertificado);
 	
 	/**
 	 * Method that gets the applications associated to the Certificate identified by idCertificate.
 	 * @return ApplicationCertDTO
 	 */
-	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, cer.idCertificado, cer.certificateName) FROM Application ap, Certificate cer WHERE ap.certificate.idCertificado = cer.idCertificado AND ap.appId = :appId")
+	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, ap.fechaAltaApp) FROM Application ap WHERE ap.appId = :appId")
 	ApplicationCertDTO findViewApplication(@Param("appId") String appId);
 	
 }

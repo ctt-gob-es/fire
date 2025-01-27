@@ -1,13 +1,20 @@
 package es.gob.fire.web.controller;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.cert.CertificateException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,14 +24,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.gob.fire.commons.log.Logger;
-import es.gob.fire.commons.utils.Base64;
-import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Certificate;
+import es.gob.fire.persistence.entity.CertificatesApplication;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.ICertificateService;
@@ -40,7 +46,7 @@ import es.gob.fire.persistence.service.IUserService;
  * Application for monitoring services of @firma suite systems.
  * </p>
  *
- * @version 1.2, 28/10/2020.
+ * @version 1.3, 27/01/2025.
  */
 
 
@@ -104,11 +110,11 @@ public class ApplicationController {
 
 		final ApplicationDTO appDto = new ApplicationDTO();
 
-		final List<Certificate> certificates = this.certificateService.getAllCertificate();
-
+		final List<Certificate> availableCertficates = this.certificateService.getAllCertificate();
+		final List<Certificate> selectedCertificates = new ArrayList<>();
+		
 		final List<User> selectedUsers = new ArrayList<>();
 		final List<User> availableUsers = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
-
 
 		String userName;
 		for (final User userApp : availableUsers) {
@@ -122,19 +128,9 @@ public class ApplicationController {
 
 		model.addAttribute("selectedUsers", selectedUsers); //$NON-NLS-1$
 		model.addAttribute("availableUsers", availableUsers); //$NON-NLS-1$
-		model.addAttribute("certificados", certificates); //$NON-NLS-1$
-
-		String certPrincipal = ""; //$NON-NLS-1$
-		String certBackup = ""; //$NON-NLS-1$
-		if (certificates.size() > 0) {
-
-			final Certificate cert = certificates.get(NumberConstants.NUM0);
-			certPrincipal = this.certificateService.getCertificateText(cert.getCertPrincipal());
-			certBackup = this.certificateService.getCertificateText(cert.getCertBackup());
-		}
-
-		model.addAttribute("certPrincipal", certPrincipal); //$NON-NLS-1$
-		model.addAttribute("certBackup", certBackup); //$NON-NLS-1$
+		model.addAttribute("availableCertficates", availableCertficates);
+		model.addAttribute("selectedCertificates", selectedCertificates);
+		
 		model.addAttribute("appAddForm", appDto); //$NON-NLS-1$
 
 		return "modal/applicationAddForm.html"; //$NON-NLS-1$
@@ -151,8 +147,6 @@ public class ApplicationController {
 		final Application app = this.applicationService.getAppByAppId(appId);
 
 		final ApplicationDTO appDto = this.applicationService.applicationEntityToDto(app);
-
-		final List<Certificate> certificates = this.certificateService.getAllCertificate();
 
 		final List<User> selectedUsers = new ArrayList<>();
 
@@ -173,23 +167,24 @@ public class ApplicationController {
 					.concat(UtilsStringChar.SYMBOL_OPEN_BRACKET_STRING)
 					.concat(userApp.getUserName().concat(UtilsStringChar.SYMBOL_CLOSE_BRACKET_STRING)));
 		}
-
+		
+		final List<Certificate> selectedCertificates = new ArrayList<>();
+		
+		final List<CertificatesApplication> listCertificatesApplication = this.applicationService.getCertificatesApplicationByAppId(appId);
+		
+		for (CertificatesApplication certificatesApplication : listCertificatesApplication) {
+			selectedCertificates.add(certificatesApplication.getCertificate());
+		}
+		
+		final List<Certificate> availableCertficates = this.certificateService.getAllCertificate();
+		
+		availableCertficates.removeAll(selectedCertificates);
+		
 		model.addAttribute("selectedUsers", selectedUsers); //$NON-NLS-1$
 		model.addAttribute("availableUsers", availableUsers); //$NON-NLS-1$
-		model.addAttribute("certificados", certificates); //$NON-NLS-1$
-
-		String certPrincipal = ""; //$NON-NLS-1$
-		String certBackup = ""; //$NON-NLS-1$
-
-		if (certificates.size() > 0) {
-
-			final Certificate cert = app.getCertificate();
-			certPrincipal = this.certificateService.getCertificateText(cert.getCertPrincipal());
-			certBackup = this.certificateService.getCertificateText(cert.getCertBackup());
-		}
-
-		model.addAttribute("certPrincipal", certPrincipal); //$NON-NLS-1$
-		model.addAttribute("certBackup", certBackup); //$NON-NLS-1$
+		model.addAttribute("availableCertficates", availableCertficates);
+		model.addAttribute("selectedCertificates", selectedCertificates);
+		
 		model.addAttribute("appEditForm", appDto); //$NON-NLS-1$
 
 		return "modal/applicationEditForm.html"; //$NON-NLS-1$
@@ -221,40 +216,71 @@ public class ApplicationController {
 	@RequestMapping(value = "/viewapplication", method = RequestMethod.POST)
 	public String appView(@RequestParam("appId") final String appId, final Model model) {
 		final ApplicationCertDTO appViewForm = this.applicationService.getViewApplication(appId);
+		
+		final List<CertificatesApplication> listCertificatesApplication = this.applicationService.getCertificatesApplicationByAppId(appId);
 
-		final Certificate cert = this.certificateService.getCertificateByCertificateId(appViewForm.getIdCertificate());
-		appViewForm.setCertPrincipalB64(cert.getCertPrincipal());
-		appViewForm.setCertBackupB64(cert.getCertBackup());
-		String certData = ""; //$NON-NLS-1$
+		try {
+		    // Directorio temporal para guardar los certificados
+		    final File tempDir = Files.createTempDirectory("certificates").toFile();
+		    final File zipFile = new File(tempDir, "certificados.zip"); // Archivo ZIP temporal
 
-		if (cert.getCertPrincipal() != null && !cert.getCertPrincipal().isEmpty()) {
-			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertPrincipal()));) {
+		    // Crear archivo ZIP y procesar los certificados
+		    try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile))) {
+		        for (CertificatesApplication certificatesApplication : listCertificatesApplication) {
+		            // Crear InputStream desde el certificado Base64
+		            final InputStream certIs = new ByteArrayInputStream(
+		                    Base64.getDecoder().decode(certificatesApplication.getCertificate().getCertificate()));
+		            String certFileName = certificatesApplication.getCertificate().getCertificateName() + ".cer"; // Nombre del archivo .cer
+		            File certFile = new File(tempDir, certFileName);
 
-				certData = this.certificateService.getFormatCertText(certIs);
-				appViewForm.setCertPrincipal(certData);
+		            // Guardar el certificado en un archivo .cer
+		            try (FileOutputStream fileOut = new FileOutputStream(certFile)) {
+		                byte[] buffer = new byte[4096];
+		                int bytesRead;
+		                while ((bytesRead = certIs.read(buffer)) != -1) {
+		                    fileOut.write(buffer, 0, bytesRead);
+		                }
+		            }
 
-			} catch (final IOException e) {
-				LOGGER.error("No se ha podido cargar el certificado principal de la aplicacion", e); //$NON-NLS-1$
-			} catch (final CertificateException e) {
-				LOGGER.error("No se ha podido componer el certificado principal de la aplicacion", e); //$NON-NLS-1$
-			}
+		            // Añadir el archivo .cer al archivo ZIP
+		            try (FileInputStream fis = new FileInputStream(certFile)) {
+		                ZipEntry zipEntry = new ZipEntry(certFileName);
+		                zipOut.putNextEntry(zipEntry);
+
+		                byte[] buffer = new byte[4096];
+		                int bytesRead;
+		                while ((bytesRead = fis.read(buffer)) != -1) {
+		                    zipOut.write(buffer, 0, bytesRead);
+		                }
+		                zipOut.closeEntry();
+		            }
+		        }
+		    }
+
+		    // Convertir el archivo ZIP a Base64
+		    try (FileInputStream fis = new FileInputStream(zipFile);
+		         ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		        byte[] buffer = new byte[4096];
+		        int bytesRead;
+		        while ((bytesRead = fis.read(buffer)) != -1) {
+		            baos.write(buffer, 0, bytesRead);
+		        }
+		        appViewForm.setCertificatesB64(Base64.getEncoder().encodeToString(baos.toByteArray()));
+		    }
+
+		    // Limpiar archivos temporales
+		    File[] tempFiles = tempDir.listFiles();
+		    if (tempFiles != null) {
+		        for (File tempFile : tempFiles) {
+		            tempFile.delete();
+		        }
+		    }
+		    tempDir.delete();
+
+		} catch (IOException | IllegalArgumentException | NullPointerException e) {
+		    LOGGER.error("Se produjo un error procesando los certificados", e);
 		}
-
-		if (cert.getCertBackup() != null && !cert.getCertBackup().isEmpty()) {
-			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertBackup()));) {
-
-				certData = this.certificateService.getFormatCertText(certIs);
-				appViewForm.setCertBackup(certData);
-
-			} catch (final IOException e) {
-				LOGGER.error("No se ha podido cargar el certificado secundario de la aplicacion", e); //$NON-NLS-1$
-			} catch (final CertificateException e) {
-				LOGGER.error("No se ha podido componer el certificado secundario de la aplicacion", e); //$NON-NLS-1$
-			}
-		}
-
-		model.addAttribute("certBackup", appViewForm.getCertBackup()); //$NON-NLS-1$
-		model.addAttribute("certPrincipal", appViewForm.getCertPrincipal()); //$NON-NLS-1$
+		
 		model.addAttribute("appViewForm", appViewForm); //$NON-NLS-1$
 		return "modal/applicationViewForm.html"; //$NON-NLS-1$
 	}

@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 02/02/2022.
+ * @version 1.2, 27/01/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -34,7 +34,6 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.transaction.Transactional;
 
-import es.gob.fire.commons.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -42,6 +41,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Hexify;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
@@ -50,11 +50,13 @@ import es.gob.fire.persistence.dto.ApplicationDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.ApplicationResponsiblePK;
-import es.gob.fire.persistence.entity.Certificate;
+import es.gob.fire.persistence.entity.CertificatesApplication;
+import es.gob.fire.persistence.entity.CertificatesApplicationPK;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.repository.ApplicationRepository;
 import es.gob.fire.persistence.repository.ApplicationResponsibleRepository;
 import es.gob.fire.persistence.repository.CertificateRepository;
+import es.gob.fire.persistence.repository.CertificatesApplicationRepository;
 import es.gob.fire.persistence.repository.UserRepository;
 import es.gob.fire.persistence.repository.datatable.ApplicationDataTablesRepository;
 import es.gob.fire.persistence.service.IApplicationService;
@@ -62,7 +64,7 @@ import es.gob.fire.persistence.service.IApplicationService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.1, 02/02/2022.
+ * @version 1.2, 27/01/2025.
  */
 @Service
 public class ApplicationService implements IApplicationService{
@@ -107,6 +109,9 @@ public class ApplicationService implements IApplicationService{
 	@Autowired
 	private ApplicationDataTablesRepository appdtRepository;
 
+	@Autowired
+	private CertificatesApplicationRepository certificatesApplicationRepository;
+	
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#getAppByAppId(java.lang.String)
 	 */
@@ -129,7 +134,7 @@ public class ApplicationService implements IApplicationService{
 	 */
 	@Override
 	@Transactional
-	public Application saveApplication(final ApplicationDTO appDto, final List<Long> idsUsers) throws GeneralSecurityException{
+	public Application saveApplication(final ApplicationDTO appDto, final List<Long> idsUsers, List<Long> listIdCertificates) throws GeneralSecurityException{
 
 		Application appToSave = null;
 
@@ -142,10 +147,6 @@ public class ApplicationService implements IApplicationService{
 		} else {
 			appToSave = this.repository.findByAppId(appDto.getAppId());
 			appToSave.setAppName(appDto.getAppName());
-			if (appDto.getIdCertificado() != null) {
-				final Certificate cert = this.certRepository.findByIdCertificado(appDto.getIdCertificado());
-				appToSave.setCertificate(cert);
-			}
 			appToSave.setHabilitado(appDto.getHabilitado());
 
 		}
@@ -170,7 +171,26 @@ public class ApplicationService implements IApplicationService{
 
 			//appToSave.getListApplicationResponsible().add(appResp);
 		}
+		
+		// TODO: crear aplicaciones con certificados
+		CertificatesApplicationPK certAppPk = null;
+		CertificatesApplication certApp = null;
+		final List<CertificatesApplication> updatedCertApp = new ArrayList<>();
+		for (final Long idCertificate : listIdCertificates) {
 
+			certApp = new CertificatesApplication();
+			certApp.setApplication(appToSave);
+			certApp.setCertificate(this.certRepository.findByIdCertificado(idCertificate));
+
+			certAppPk = new CertificatesApplicationPK();
+			certAppPk.setIdApplication(appToSave.getAppId());
+			certAppPk.setIdCertificate(idCertificate);
+			certApp.setIdCertificatesApplication(certAppPk);
+
+			updatedCertApp.add(certApp);
+			
+		}
+		
 		if (appToSave.getAppId() != null) {
 			final List<ApplicationResponsible> current = appToSave.getListApplicationResponsible();
 
@@ -182,9 +202,19 @@ public class ApplicationService implements IApplicationService{
 				}
 			}
 
+			final List<CertificatesApplication> currentCertApp = appToSave.getListCertificatesApplication();
+			
+			currentCertApp.removeIf(x->!updatedCertApp.contains(x));
+			
+			for (final CertificatesApplication ar : updatedCertApp) {
+				if (!currentCertApp.contains(ar)) {
+					currentCertApp.add(ar);
+				}
+			}
 
 		} else {
 			appToSave.getListApplicationResponsible().addAll(updated);
+			appToSave.getListCertificatesApplication().addAll(updatedCertApp);
 		}
 
 		//app.setListApplicationResponsible(listApplicationResponsible);
@@ -253,19 +283,17 @@ public class ApplicationService implements IApplicationService{
 		app.setAppId(applicationDto.getAppId());
 		app.setAppName(applicationDto.getAppName());
 
-		if (applicationDto.getIdCertificado() != null) {
-			final Certificate cert = this.certRepository.findByIdCertificado(applicationDto.getIdCertificado());
-			app.setCertificate(cert);
-		}
-
 		if (applicationDto.getAppId() != null && !"".equals(applicationDto.getAppId())) {
 
 			final Application existingApp = this.repository.findByAppId(applicationDto.getAppId());
 			// Se obtiene la lista de la aplicacion responsable
 			app.setListApplicationResponsible(existingApp.getListApplicationResponsible());
+			// Se obtiene la certificados por aplicacion
+			app.setListCertificatesApplication(existingApp.getListCertificatesApplication());
 		} else {
 
 			app.setListApplicationResponsible(new ArrayList<ApplicationResponsible>());
+			app.setListCertificatesApplication(new ArrayList<CertificatesApplication>());
 		}
 
 		app.setFechaAltaApp(applicationDto.getFechaAltaApp());
@@ -284,7 +312,6 @@ public class ApplicationService implements IApplicationService{
 
 		appDto.setAppId(application.getAppId());
 		appDto.setAppName(application.getAppName());
-		appDto.setIdCertificado(application.getCertificate().getIdCertificado());
 		appDto.setFechaAltaApp(application.getFechaAltaApp());
 		appDto.setHabilitado(application.isHabilitado());
 
@@ -355,7 +382,6 @@ public class ApplicationService implements IApplicationService{
 	 */
 	@Override
 	public ApplicationCertDTO getViewApplication(final String appId) {
-		//
 		return this.repository.findViewApplication(appId);
 	}
 
@@ -364,8 +390,14 @@ public class ApplicationService implements IApplicationService{
 	 */
 	@Override
 	public List<Application> getByIdCertificado(final Long idCertificado) {
-
 		return this.repository.findByCertificateIdCertificado(idCertificado);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IApplicationService#getCertificatesApplicationByAppId(java.lang.String)
+	 */
+	public List<CertificatesApplication> getCertificatesApplicationByAppId(String appId) {
+		return this.certificatesApplicationRepository.findByApplicationAppId(appId);
+	}
 }

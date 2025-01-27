@@ -16,11 +16,6 @@ public class ApplicationCertDTO {
 	private String appId;
 
 	/**
-	 * Attribute that represents the value of the primary key as a hidden input in the form.
-	 */
-	private Long idCertificate;
-
-	/**
 	 * Attribute that represents the value of the input alias in the form.
 	 */
 	private String alias;
@@ -41,24 +36,9 @@ public class ApplicationCertDTO {
 	private String responsables;
 
 	/**
-	 * Attribute that represents the subject of the certificate principal.
-	 */
-	private String certPrincipal;
-
-	/**
-	 * Attribute that represents the subject of the certificate backup.
-	 */
-	private String	certBackup;
-
-	/**
 	 * Attribute that represents the data of the principal certificate in base64.
 	 */
-	private String certPrincipalB64;
-
-	/**
-	 * Attribute that represents the data of the backup certificate in base64.
-	 */
-	private String	certBackupB64;
+	private String certificatesB64;
 
 	/**
 	 * @param appiIdParam
@@ -77,11 +57,10 @@ public class ApplicationCertDTO {
 	 * @param appNameParam
 	 * @param fechaAltaAppParam
 	 */
-	public ApplicationCertDTO(final String appiIdParam, final String appNameParam, final Long idCertificate, final String alias) {
+	public ApplicationCertDTO(final String appiIdParam, final String appNameParam, final String alias) {
 		super();
 		this.appId = appiIdParam;
 		this.appName = appNameParam;
-		this.idCertificate = idCertificate;
 		this.alias = alias;
 	}
 
@@ -171,84 +150,19 @@ public class ApplicationCertDTO {
 	}
 
 	/**
-	 * Gets the value of the attribute {@link #certPrincipal}.
-	 * @return the value of the attribute {@link #certPrincipal}.
+	 * Gets the value of the attribute {@link #certificatesB64}.
+	 * @return the value of the attribute {@link #certificatesB64}.
 	 */
-	public String getCertPrincipal() {
-		return this.certPrincipal;
+	public String getCertificatesB64() {
+		return this.certificatesB64;
 	}
 
 	/**
-	 * Sets the value of the attribute {@link #certPrincipal}.
-	 * @param certPrincipal The value for the attribute {@link #certPrincipal}.
+	 * Sets the value of the attribute {@link #certificatesB64}.
+	 * @param certBackup The value for the attribute {@link #certificatesB64}.
 	 */
-	public void setCertPrincipal(final String certPrincipal) {
-		this.certPrincipal = certPrincipal;
+	public void setCertificatesB64(final String certPrincipalB64) {
+		this.certificatesB64 = certPrincipalB64;
 	}
-
-	/**
-	 * Gets the value of the attribute {@link #certBackup}.
-	 * @return the value of the attribute {@link #certBackup}.
-	 */
-	public String getCertBackup() {
-		return this.certBackup;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #certBackup}.
-	 * @param certBackup The value for the attribute {@link #certBackup}.
-	 */
-	public void setCertBackup(final String certBackup) {
-		this.certBackup = certBackup;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #certPrincipalB64}.
-	 * @return the value of the attribute {@link #certPrincipalB64}.
-	 */
-	public String getCertPrincipalB64() {
-		return this.certPrincipalB64;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #certPrincipalB64}.
-	 * @param certBackup The value for the attribute {@link #certPrincipalB64}.
-	 */
-	public void setCertPrincipalB64(final String certPrincipalB64) {
-		this.certPrincipalB64 = certPrincipalB64;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #certBackupB64}.
-	 * @return the value of the attribute {@link #certBackupB64}.
-	 */
-	public String getCertBackupB64() {
-		return this.certBackupB64;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #certBackupB64}.
-	 * @param certBackup The value for the attribute {@link #certBackupB64}.
-	 */
-	public void setCertBackupB64(final String certBackupB64) {
-		this.certBackupB64 = certBackupB64;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #idCertificate}.
-	 * @return the value of the attribute {@link #idCertificate}.
-	 */
-	public Long getIdCertificate() {
-		return this.idCertificate;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #idCertificate}.
-	 * @param idCertificate The value for the attribute {@link #idCertificate}.
-	 */
-	public void setIdCertificate(final Long idCertificate) {
-		this.idCertificate = idCertificate;
-	}
-
 
 }

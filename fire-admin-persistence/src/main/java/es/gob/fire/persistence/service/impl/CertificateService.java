@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 02/02/2022.
+ * @version 1.3, 27/01/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -56,7 +56,7 @@ import es.gob.fire.persistence.service.ICertificateService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 02/02/2022.
+ * @version 1.3, 27/01/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -144,19 +144,13 @@ public class CertificateService implements ICertificateService{
 		try {
 			md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
 
-			if (certificateDto.getCertBytes1() != null) {
+			if (certificateDto.getCertBytes() != null) {
 
-				final byte[] digest = md.digest(certificateDto.getCertBytes1());
+				final byte[] digest = md.digest(certificateDto.getCertBytes());
 				certificateDto.setHuellaPrincipal(Base64.encode(digest));
-				certificateDto.setCertPrincipal(Base64.encode(certificateDto.getCertBytes1()));
+				certificateDto.setCertificate(Base64.encode(certificateDto.getCertBytes()));
 			}
-			if (certificateDto.getCertBytes2() != null) {
-
-				final byte[] digest = md.digest(certificateDto.getCertBytes2());
-				certificateDto.setHuellaBackup(Base64.encode(digest));
-				certificateDto.setCertBackup(Base64.encode(certificateDto.getCertBytes2()));
-			}
-
+		
 		} catch (final NoSuchAlgorithmException e) {
 			LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e); //$NON-NLS-1$
 		}
@@ -180,11 +174,9 @@ public class CertificateService implements ICertificateService{
 
 		certificate.setIdCertificado(certificateDto.getIdCertificate());
 		certificate.setCertificateName(certificateDto.getAlias());
-		certificate.setCertPrincipal(certificateDto.getCertPrincipal());
-		certificate.setCertBackup(certificateDto.getCertBackup());
-		certificate.setHuellaPrincipal(certificateDto.getHuellaPrincipal());
-		certificate.setHuellaBackup(certificateDto.getHuellaBackup());
-
+		certificate.setCertificate(certificateDto.getCertificate());
+		certificate.setHuella(certificateDto.getHuellaPrincipal());
+		
 		return certificate;
 	}
 
@@ -198,13 +190,10 @@ public class CertificateService implements ICertificateService{
 
 		certificateDto.setIdCertificate(certificate.getIdCertificado());
 		certificateDto.setAlias(certificate.getCertificateName());
-		certificateDto.setCertPrincipal(certificate.getCertPrincipal());
-		certificateDto.setCertBackup(certificate.getCertBackup());
-		certificateDto.setHuellaPrincipal(certificate.getHuellaPrincipal());
-		certificateDto.setHuellaBackup(certificate.getHuellaBackup());
-		certificateDto.setCertPrincipalB64(certificate.getCertPrincipal());
-		certificateDto.setCertBackupB64(certificate.getCertBackup());
-
+		certificateDto.setCertificate(certificate.getCertificate());
+		certificateDto.setHuellaPrincipal(certificate.getHuella());
+		certificateDto.setCertificateB64(certificate.getCertificate());
+		
 		return certificateDto;
 	}
 
@@ -227,31 +216,16 @@ public class CertificateService implements ICertificateService{
 	@Override
 	public void getSubjectValuesForView(final List<Certificate> certificates) {
 
-		X509Certificate x509CertPrincipal = null;
-		X509Certificate x509CertBackup = null;
-
+		X509Certificate x509Certificate = null;
+		
 		for (final Certificate certificate : certificates) {
 			try {
 
-				if (certificate.getCertPrincipal() != null && !certificate.getCertPrincipal().isEmpty()) {
+				if (certificate.getCertificate() != null && !certificate.getCertificate().isEmpty()) {
 
-					x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertPrincipal()))); //$NON-NLS-1$
+					x509Certificate = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertificate()))); //$NON-NLS-1$
 				} else {
-					x509CertPrincipal = null;
-				}
-
-			} catch (final IOException e) {
-				LOGGER.error("No se ha podido leer el certificado", e); //$NON-NLS-1$
-			} catch (final CertificateException e) {
-				LOGGER.error("Los datos proporcionados no se corresponden con un certificado", e); //$NON-NLS-1$
-			}
-
-			try {
-
-				if (certificate.getCertBackup() != null && !certificate.getCertBackup().isEmpty()) {
-					x509CertBackup = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertBackup()))); //$NON-NLS-1$
-				} else {
-					x509CertBackup = null;
+					x509Certificate = null;
 				}
 
 			} catch (final IOException e) {
@@ -262,26 +236,16 @@ public class CertificateService implements ICertificateService{
 
 			java.util.Date expDatePrincipal = new java.util.Date();
 
-			if (x509CertPrincipal != null) {
-				expDatePrincipal = x509CertPrincipal.getNotAfter();
-				final String certSubject = x509CertPrincipal.getSubjectX500Principal().getName();
+			if (x509Certificate != null) {
+				expDatePrincipal = x509Certificate.getNotAfter();
+				final String certSubject = x509Certificate.getSubjectX500Principal().getName();
 				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
 				final String[] txtCert = certSubject.split(","); //$NON-NLS-1$
-				certificate.setCertPrincipal(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
+				certificate.setCertificate(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
 			} else {
-				certificate.setCertPrincipal(""); //$NON-NLS-1$
+				certificate.setCertificate(""); //$NON-NLS-1$
 			}
-
-			if (x509CertBackup != null) {
-
-				expDatePrincipal = x509CertBackup.getNotAfter();
-				final String certSubject = x509CertBackup.getSubjectX500Principal().getName();
-				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				final String[] txtCert = certSubject.split(","); //$NON-NLS-1$
-				certificate.setCertBackup(txtCert[0] + "</br> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
-			} else {
-				certificate.setCertBackup(""); //$NON-NLS-1$
-			}
+			
 		}
 	}
 

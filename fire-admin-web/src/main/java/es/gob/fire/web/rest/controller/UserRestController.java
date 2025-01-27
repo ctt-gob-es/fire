@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.4, 20/01/2025.
+ * @version 1.5, 27/01/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -83,7 +83,7 @@ import es.gob.fire.persistence.service.IUserService;
  * Application for signing documents of @firma suite systems.
  * </p>
  * 
- * @version 1.4, 20/01/2025.
+ * @version 1.5, 27/01/2025.
  */
 @RestController
 public class UserRestController {
@@ -377,23 +377,32 @@ public class UserRestController {
 		
 		if(hasAccessPermission) {
 			if(!UtilsStringChar.isNullOrEmpty(userForm.getDniAdd())) {
-				// Expresion regular para validar un DNI (8 digitos seguidos de una letra)
-		        String regex = "\\d{8}[A-Za-z]";
+				if (userForm.getDniAdd().toUpperCase().startsWith("X")
+						|| userForm.getDniAdd().toUpperCase().startsWith("Y")
+						|| userForm.getDniAdd().toUpperCase().startsWith("Z"))
+					userForm.setDniAdd(userForm.getDniAdd().substring(1));
 
-		        // Creamos un Pattern con la expresion regular
-		        Pattern pattern = Pattern.compile(regex);
-		        
-		        // Creamos un matcher que va a hacer la validacion
-		        Matcher matcher = pattern.matcher(userForm.getDniAdd());
-		        
-		        if(!matcher.matches()) {
-		        	error = true;
-					json.put("dniAdd" + SPAN, "El DNI debe tener un formato de 8 n\u00FAmeros y 1 letra.");
-		        }
+				Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
+				Matcher m = nifPattern.matcher(userForm.getDniAdd());
+				if (m.matches()) {
+					String letra = m.group(2);
+					// Extraer letra del NIF
+					String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
+					int dni = Integer.parseInt(m.group(1));
+					dni = dni % 23;
+					String reference = letras.substring(dni, dni + 1);
 
+					if (!reference.equalsIgnoreCase(letra)) {
+						error = true;
+						json.put("dniEdit" + SPAN, "El DNI debe tener un formato correcto.");
+					}
+				} else {
+					error = true;
+					json.put("dniEdit" + SPAN, "El DNI debe tener un formato correcto.");
+				}
 			} else {
 				error = true;
-				json.put("dniAdd" + SPAN, "El campo dni es obligatorio.");
+				json.put("dniEdit" + SPAN, "El campo dni es obligatorio.");
 			}
 		}
 		
@@ -510,7 +519,7 @@ public class UserRestController {
 			json.put("emailEdit" + SPAN, "El campo email no es v\u00E1lido.");
 		}
 
-		if (!userBeforeUpdate.getEmail().equals(userForm.getEmailEdit())
+		if (!userForm.getEmailEdit().equals(userBeforeUpdate.getEmail())
 				&& (this.userService.getAllUserByEmail(userForm.getEmailEdit())!=null && !this.userService.getAllUserByEmail(userForm.getEmailEdit()).isEmpty())) {
 			error = true;
 			json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");
@@ -518,20 +527,29 @@ public class UserRestController {
 
 		if(hasAccessPermission) {
 			if(!UtilsStringChar.isNullOrEmpty(userForm.getDniEdit())) {
-				// Expresion regular para validar un DNI (8 digitos seguidos de una letra)
-		        String regex = "\\d{8}[A-Za-z]";
+				if (userForm.getDniEdit().toUpperCase().startsWith("X")
+						|| userForm.getDniEdit().toUpperCase().startsWith("Y")
+						|| userForm.getDniEdit().toUpperCase().startsWith("Z"))
+					userForm.setDniEdit(userForm.getDniEdit().substring(1));
 
-		        // Creamos un Pattern con la expresion regular
-		        Pattern pattern = Pattern.compile(regex);
-		        
-		        // Creamos un matcher que va a hacer la validacion
-		        Matcher matcher = pattern.matcher(userForm.getDniEdit());
-		        
-		        if(!matcher.matches()) {
-		        	error = true;
-					json.put("dniEdit" + SPAN, "El DNI debe tener un formato de 8 n\u00FAmeros y 1 letra.");
-		        }
+				Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
+				Matcher m = nifPattern.matcher(userForm.getDniEdit());
+				if (m.matches()) {
+					String letra = m.group(2);
+					// Extraer letra del NIF
+					String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
+					int dni = Integer.parseInt(m.group(1));
+					dni = dni % 23;
+					String reference = letras.substring(dni, dni + 1);
 
+					if (!reference.equalsIgnoreCase(letra)) {
+						error = true;
+						json.put("dniEdit" + SPAN, "El DNI debe tener un formato correcto.");
+					}
+				} else {
+					error = true;
+					json.put("dniEdit" + SPAN, "El DNI debe tener un formato correcto.");
+				}
 			} else {
 				error = true;
 				json.put("dniEdit" + SPAN, "El campo dni es obligatorio.");

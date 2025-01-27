@@ -10,6 +10,7 @@ import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
+import es.gob.fire.persistence.entity.CertificatesApplication;
 
 /**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
@@ -36,9 +37,10 @@ public interface IApplicationService {
 	/**
 	 * Method that stores a application in the persistence.
 	 * @param app a {@link ApplicationDTO} with the information of the application.
+	 * @param listIdCertificates 
 	 * @return The application.
 	 */
-	Application saveApplication(ApplicationDTO app, List<Long> idsUsers) throws GeneralSecurityException;
+	Application saveApplication(ApplicationDTO app, List<Long> idsUsers, List<Long> listIdCertificates) throws GeneralSecurityException;
 
 	/**
 	 * Method that deletes a application in the persistence.
@@ -108,4 +110,13 @@ public interface IApplicationService {
 	 * @return Object that represents a user from the persistence.
 	 */
 	List<Application> getByIdCertificado(Long idCertificado);
+
+	/**
+	 * Retrieves a list of CertificatesApplication entities associated with the specified application ID.
+	 *
+	 * @param appId the unique identifier of the application whose certificates are to be retrieved.
+	 * @return a list of {@link CertificatesApplication} entities linked to the given application ID.
+	 *         If no entities are found, an empty list is returned.
+	 */
+	List<CertificatesApplication> getCertificatesApplicationByAppId(String appId);
 }

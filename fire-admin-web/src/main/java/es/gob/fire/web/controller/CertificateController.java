@@ -148,29 +148,16 @@ public class CertificateController {
 		final CertificateDTO certEditForm = this.certificateService.certificateEntityToDto(cert);
 		String certData = ""; //$NON-NLS-1$
 
-		if (cert.getCertPrincipal() != null && !cert.getCertPrincipal().isEmpty()) {
-			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertPrincipal()));) {
+		if (cert.getCertificate() != null && !cert.getCertificate().isEmpty()) {
+			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertificate()));) {
 
 				certData = this.certificateService.getFormatCertText(certIs);
-				certEditForm.setCertPrincipal(certData);
+				certEditForm.setCertificate(certData);
 
 			} catch (final IOException e) {
 				LOGGER.error("No se ha podido cargar el certificado principal de la aplicacion", e); //$NON-NLS-1$
 			} catch (final CertificateException e) {
 				LOGGER.error("No se ha podido componer el certificado principal de la aplicacion", e); //$NON-NLS-1$
-			}
-		}
-
-		if (cert.getCertBackup() != null && !cert.getCertBackup().isEmpty()) {
-			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertBackup()));) {
-
-				certData = this.certificateService.getFormatCertText(certIs);
-				certEditForm.setCertBackup(certData);
-
-			} catch (final IOException e) {
-				LOGGER.error("No se ha podido cargar el certificado secundario de la aplicacion", e); //$NON-NLS-1$
-			} catch (final CertificateException e) {
-				LOGGER.error("No se ha podido componer el certificado secundario de la aplicacion", e); //$NON-NLS-1$
 			}
 		}
 
@@ -191,11 +178,11 @@ public class CertificateController {
 		final CertificateDTO certViewForm = this.certificateService.certificateEntityToDto(cert);
 		String certData = ""; //$NON-NLS-1$
 
-		if (cert.getCertPrincipal() != null && !cert.getCertPrincipal().isEmpty()) {
-			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertPrincipal()));) {
+		if (cert.getCertificate() != null && !cert.getCertificate().isEmpty()) {
+			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertificate()));) {
 
 				certData = this.certificateService.getFormatCertText(certIs);
-				certViewForm.setCertPrincipal(certData);
+				certViewForm.setCertificate(certData);
 
 			} catch (final IOException e) {
 				LOGGER.error("No se ha podido cargar el certificado principal de la aplicacion", e);
@@ -203,22 +190,8 @@ public class CertificateController {
 				LOGGER.error("No se ha podido componer el certificado principal de la aplicacion", e);
 			}
 		}
-
-		if (cert.getCertBackup() != null && !cert.getCertBackup().isEmpty()) {
-			try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(cert.getCertBackup()));) {
-
-				certData = this.certificateService.getFormatCertText(certIs);
-				certViewForm.setCertBackup(certData);
-
-			} catch (final IOException e) {
-				LOGGER.error("No se ha podido cargar el certificado secundario de la aplicacion", e);
-			} catch (final CertificateException e) {
-				LOGGER.error("No se ha podido componer el certificado secundario de la aplicacion", e);
-			}
-		}
-
-		model.addAttribute("certBackup", certViewForm.getCertBackup()); //$NON-NLS-1$
-		model.addAttribute("certPrincipal", certViewForm.getCertPrincipal()); //$NON-NLS-1$
+		
+		model.addAttribute("certificate", certViewForm.getCertificate()); //$NON-NLS-1$
 		model.addAttribute("certViewForm", certViewForm); //$NON-NLS-1$
 		return "modal/certificateViewForm.html"; //$NON-NLS-1$
 	}

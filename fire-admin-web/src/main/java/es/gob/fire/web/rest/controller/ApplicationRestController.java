@@ -80,6 +80,11 @@ public class ApplicationRestController {
 	private static final String FIELD_ID_USERS_SELECTED = "idUsersSelected";
 
 	/**
+	 * Attribute that represents the identifier of the selected alarms from the summary.
+	 */
+	private static final String FIELD_ID_CERTIFICATES_SELECTED = "idCertificatesSelected";
+
+	/**
 	 * Constant that represents the key Json 'errorSaveApplication'.
 	 */
 	private static final String KEY_JS_ERROR_SAVE_APP = "errorSaveApplication";
@@ -169,11 +174,11 @@ public class ApplicationRestController {
 
 		if (cert != null) {
 
-			LOGGER.warn(" ======= /previewCertApp: Certificado principal: " + cert.getCertPrincipal());
+			LOGGER.warn(" ======= /previewCertApp: Certificado principal: " + cert.getCertificate());
 
 
 
-			final String certPrincipal = this.certificateService.getCertificateText(cert.getCertPrincipal());
+			final String certPrincipal = this.certificateService.getCertificateText(cert.getCertificate());
 
 
 			LOGGER.warn(" ======= /previewCertApp: Texto del certificado principal: " + certPrincipal);
@@ -185,18 +190,6 @@ public class ApplicationRestController {
 			}
 			data += "$*$"; //$NON-NLS-1$
 
-
-			LOGGER.warn(" ======= /previewCertApp: Certificado secundario: " + cert.getCertBackup());
-
-			final String certBackup = this.certificateService.getCertificateText(cert.getCertBackup());
-
-			LOGGER.warn(" ======= /previewCertApp: Texto del certificado secundario: " + certBackup);
-
-			if(certBackup.isEmpty()) {
-				data += "--"; //$NON-NLS-1$
-			} else {
-				data += certBackup;
-			}
 		}
 
 		return data;
@@ -211,7 +204,10 @@ public class ApplicationRestController {
 	 */
 	@RequestMapping(value = "/saveapp", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<Application> saveApplication(@RequestPart("appForm") final ApplicationDTO appForm, @RequestPart(FIELD_ID_USERS_SELECTED) final String idUsersSelected, final HttpServletRequest request) {
+	public @ResponseBody DataTablesOutput<Application> saveApplication(@RequestPart("appForm") final ApplicationDTO appForm, 
+			@RequestPart(FIELD_ID_USERS_SELECTED) final String idUsersSelected, 
+			@RequestPart(FIELD_ID_CERTIFICATES_SELECTED) final String idCertificatesSelected,
+			final HttpServletRequest request) {
 		final DataTablesOutput<Application> dtOutput = new DataTablesOutput<>();
 		List<Application> listNewApplication = new ArrayList<>();
 		final JSONObject json = new JSONObject();
@@ -222,6 +218,16 @@ public class ApplicationRestController {
 
 			for(int i=0; i < arrayUsers.length;i++){
 				listUsers.add(new Long(arrayUsers[i]));
+			}
+		}
+
+		final List<Long> listCertificates = new ArrayList<>();
+		
+		if (!"-1".equals(idCertificatesSelected)) {
+			final String[] arrayCertificates = idCertificatesSelected.split(",");
+			
+			for(int i=0; i < arrayCertificates.length;i++){
+				listCertificates.add(new Long(arrayCertificates[i]));
 			}
 		}
 
@@ -253,7 +259,7 @@ public class ApplicationRestController {
 		} else {
 
 			try {
-				final Application newApp = this.appService.saveApplication(appForm, listUsers);
+				final Application newApp = this.appService.saveApplication(appForm, listUsers, listCertificates);
 
 				listNewApplication.add(newApp);
 

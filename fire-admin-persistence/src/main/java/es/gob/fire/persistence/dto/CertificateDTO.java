@@ -1,6 +1,5 @@
 package es.gob.fire.persistence.dto;
 
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -9,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * <p>Class that represents the backing form for adding/editing a system certificate.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.2, 25/01/2019.
+ * @version 1.3, 27/01/2025.
  */
 public class CertificateDTO {
 
@@ -31,32 +30,17 @@ public class CertificateDTO {
 	/**
 	 * Attribute that represents the subject of the certificate principal.
 	 */
-	private String certPrincipal;
-
-	/**
-	 * Attribute that represents the subject of the certificate backup.
-	 */
-	private String	certBackup;
+	private String certificate;
 
 	/**
 	 * Attribute that represents the uploaded file of the system certificate.
 	 */
-	private MultipartFile certFile1;
-
-	/**
-	 * Attribute that represents the uploaded file of the system certificate.
-	 */
-	private MultipartFile certFile2;
+	private MultipartFile certFile;
 
 	/**
 	 * Attribute that represents byte array of the system certificate.
 	 */
-	private byte[] certBytes1;
-
-	/**
-	 * Attribute that represents byte array of the system certificate.
-	 */
-	private byte[] certBytes2;
+	private byte[] certBytes;
 
 	/**
 	 * Attribute that represents the subject of the system certificate.
@@ -68,28 +52,11 @@ public class CertificateDTO {
 	 * Attribute that represents the data.
 	 */
 	private Date fechaAlta;
-
-	/**
-	 * Attribute that represents the x509Principal.
-	 */
-
-	private X509Certificate x509Principal;
-
-	/**
-	 * Attribute that represents the x509Backup.
-	 */
-
-	private X509Certificate x509Backup;
-
+	
 	/**
 	 * Attribute that represents the huellaPrincipal.
 	 */
 	private String huellaPrincipal;
-
-	/**
-	 * Attribute that represents the huellaBackup.
-	 */
-	private String huellaBackup;
 
 	/**
 	 * Attribute that represents index of the row of the selected certificate.
@@ -99,13 +66,7 @@ public class CertificateDTO {
 	/**
 	 * Attribute that represents the data of the principal certificate in base64.
 	 */
-	private String certPrincipalB64;
-
-	/**
-	 * Attribute that represents the data of the backup certificate in base64.
-	 */
-	private String	certBackupB64;
-
+	private String certificateB64;
 
 	/**
 	 * Gets the value of the attribute {@link #idSystemCertificate}.
@@ -170,37 +131,13 @@ public class CertificateDTO {
 	public void setFechaAlta(final Date fechaAlta) {
 		this.fechaAlta = fechaAlta;
 	}
-
-	public X509Certificate getX509Principal() {
-		return this.x509Principal;
+	
+	public String getCertificate() {
+		return this.certificate;
 	}
 
-	public void setX509Principal(final X509Certificate x509Principal) {
-		this.x509Principal = x509Principal;
-	}
-
-	public X509Certificate getX509Backup() {
-		return this.x509Backup;
-	}
-
-	public void setX509Backup(final X509Certificate x509Backup) {
-		this.x509Backup = x509Backup;
-	}
-
-	public String getCertPrincipal() {
-		return this.certPrincipal;
-	}
-
-	public void setCertPrincipal(final String certPrincipal) {
-		this.certPrincipal = certPrincipal;
-	}
-
-	public String getCertBackup() {
-		return this.certBackup;
-	}
-
-	public void setCertBackup(final String certBackup) {
-		this.certBackup = certBackup;
+	public void setCertificate(final String certificate) {
+		this.certificate = certificate;
 	}
 
 	public String getIssuer() {
@@ -212,35 +149,19 @@ public class CertificateDTO {
 	}
 
 	/**
-	 * Gets the value of the attribute {@link #certFile1}.
-	 * @return the value of the attribute {@link #certFile1}.
+	 * Gets the value of the attribute {@link #certFile}.
+	 * @return the value of the attribute {@link #certFile}.
 	 */
-	public MultipartFile getCertFile1() {
-		return this.certFile1;
+	public MultipartFile getCertFile() {
+		return this.certFile;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #file}.
-	 * @param certFile1 the value for the attribute {@link #certFile1} to set.
+	 * @param certFile the value for the attribute {@link #certFile} to set.
 	 */
-	public void setCertFile1(final MultipartFile certFile1) {
-		this.certFile1 = certFile1;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #certFile2}.
-	 * @return the value of the attribute {@link #certFile2}.
-	 */
-	public MultipartFile getCertFile2() {
-		return this.certFile2;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #certFile2}.
-	 * @param certFile2 the value for the attribute {@link #certFile2} to set.
-	 */
-	public void setCertFile2(final MultipartFile certFile2) {
-		this.certFile2 = certFile2;
+	public void setCertFile(final MultipartFile certFile) {
+		this.certFile = certFile;
 	}
 
 	/**
@@ -260,22 +181,6 @@ public class CertificateDTO {
 	}
 
 	/**
-	 * Gets the value of the attribute {@link #huellaBackup}.
-	 * @return the value of the attribute {@link #huellaBackup}.
-	 */
-	public String getHuellaBackup() {
-		return this.huellaBackup;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #certFile2}.
-	 * @param huellaBackup the value for the attribute {@link #huellaBackup} to set.
-	 */
-	public void setHuellaBackup(final String huellaBackup) {
-		this.huellaBackup = huellaBackup;
-	}
-
-	/**
 	 * Gets the value of the attribute {@link #rowIndexCert}.
 	 * @return the value of the attribute {@link #rowIndexCert}.
 	 */
@@ -291,43 +196,22 @@ public class CertificateDTO {
 		this.rowIndexCert = rowIndexCert;
 	}
 
-	public String getCertPrincipalB64() {
-		return this.certPrincipalB64;
+	public String getCertificateB64() {
+		return this.certificateB64;
 	}
 
-	public void setCertPrincipalB64(final String certPrincipalB64) {
-		this.certPrincipalB64 = certPrincipalB64;
+	public void setCertificateB64(final String certificateB64) {
+		this.certificateB64 = certificateB64;
 	}
 
-	public String getCertBackupB64() {
-		return this.certBackupB64;
+	public byte[] getCertBytes() {
+		return this.certBytes != null
+				? Arrays.copyOf(this.certBytes, this.certBytes.length) : null;
 	}
 
-	public void setCertBackupB64(final String certBackupB64) {
-		this.certBackupB64 = certBackupB64;
+	public void setCertBytes(final byte[] certBytes) {
+		this.certBytes = certBytes != null
+				? Arrays.copyOf(certBytes, certBytes.length) : certBytes;
 	}
-
-	public byte[] getCertBytes1() {
-		return this.certBytes1 != null
-				? Arrays.copyOf(this.certBytes1, this.certBytes1.length) : null;
-	}
-
-	public void setCertBytes1(final byte[] certBytes1) {
-		this.certBytes1 = certBytes1 != null
-				? Arrays.copyOf(certBytes1, certBytes1.length) : certBytes1;
-	}
-
-	public byte[] getCertBytes2() {
-		return this.certBytes2 != null
-				? Arrays.copyOf(this.certBytes2, this.certBytes2.length) : null;
-	}
-
-	public void setCertBytes2(final byte[] certBytes2) {
-		this.certBytes2 = certBytes2 != null
-				? Arrays.copyOf(certBytes2, certBytes2.length) : null;
-	}
-
-
-
 
 }

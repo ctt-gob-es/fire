@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 02/02/2022.
+ * @version 1.3, 27/01/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -69,7 +69,7 @@ import es.gob.fire.persistence.service.ICertificateService;
 /**
  * <p>Class that manages the REST requests related to the Certificate administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 02/02/2022.
+ * @version 1.3, 27/01/2025.
  */
 @RestController
 public class CertificateRestController {
@@ -104,9 +104,9 @@ public class CertificateRestController {
 	private static final String FIELD_ALIAS = "alias";
 
 	/**
-	 * Constant that represents the field 'certFile1'.
+	 * Constant that represents the field 'certFile'.
 	 */
-	private static final String FIELD_FILE_CERTIFICATE1 = "certFile1";
+	private static final String FIELD_FILE_CERTIFICATE1 = "certFile";
 
 	/**
 	 * Constant that represents the field 'certFile2'.
@@ -124,9 +124,9 @@ public class CertificateRestController {
 	private static final String SPAN = "_span";
 
 	/**
-	 * Constant that represents the parameter 'certFile1'.
+	 * Constant that represents the parameter 'certFile'.
 	 */
-	private static final String PARAM_CER_PRINCIPAL = "certFile1";
+	private static final String PARAM_CER_PRINCIPAL = "certFile";
 	/**
 	 * Constant that represents the parameter 'certFile2'.
 	 */
@@ -211,12 +211,12 @@ public class CertificateRestController {
 	 */
 	@RequestMapping(value = "/savecertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<Certificate> saveNew(@RequestPart("certAddForm") final CertificateDTO certAddForm, @RequestPart("certFile1") final MultipartFile certFile1, @RequestPart("certFile2") final MultipartFile certFile2, final HttpServletRequest request) {
+	public @ResponseBody DataTablesOutput<Certificate> saveNew(@RequestPart("certAddForm") final CertificateDTO certAddForm, @RequestPart("certFile") final MultipartFile certFile, final HttpServletRequest request) {
 		final DataTablesOutput<Certificate> dtOutput = new DataTablesOutput<>();
 		List<Certificate> listNewCertificate = new ArrayList<>();
 		final JSONObject json = new JSONObject();
 
-		if (isAliasBlank(certAddForm.getAlias()) || isAliasSizeNotValid(certAddForm.getAlias()) || hasNoCertData(certAddForm, certFile1, certFile2)) {
+		if (isAliasBlank(certAddForm.getAlias()) || isAliasSizeNotValid(certAddForm.getAlias()) || hasNoCertData(certAddForm, certFile)) {
 			listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
 
 			if (isAliasBlank(certAddForm.getAlias())) {
@@ -234,14 +234,14 @@ public class CertificateRestController {
 			}
 
 
-			if (hasNoCertData(certAddForm, certFile1, certFile2)) {
+			if (hasNoCertData(certAddForm, certFile)) {
 
 				//"Al menos debe indicarse un archivo de certificado"
 
 				final String errorValCert = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_CERT_REQUIRED, null, request.getLocale());
 
 				json.put(FIELD_FILE_CERTIFICATE1 + SPAN, errorValCert);
-				json.put(FIELD_FILE_CERTIFICATE2 + SPAN, errorValCert);
+				
 			}
 
 			dtOutput.setError(json.toString());
@@ -255,31 +255,18 @@ public class CertificateRestController {
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
 				X509Certificate cert1;
-				X509Certificate cert2;
-
-				if (!certFile1.isEmpty()) {
-	        		try (final InputStream certIs = certFile1.getInputStream();) {
+				
+				if (!certFile.isEmpty()) {
+	        		try (final InputStream certIs = certFile.getInputStream();) {
 	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			certAddForm.setCertBytes1(cert1.getEncoded());
+	        			certAddForm.setCertBytes(cert1.getEncoded());
 	        		} catch (final CertificateException e) {
-	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido";
+	        			msgerror = certFile.getOriginalFilename() + " no representa un certificado v\u00E1lido";
 	        			throw e;
 	        		}
 				}
 
-				if (!certFile2.isEmpty()) {
-
-					try (final InputStream certIs = certFile2.getInputStream();) {
-	        			cert2 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			certAddForm.setCertBytes2(cert2.getEncoded());
-	        		} catch (final CertificateException e) {
-	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido";
-	        			throw e;
-	        		}
-				}
-
-				certAddForm.setCertFile1(certFile1);
-				certAddForm.setCertFile2(certFile2);
+				certAddForm.setCertFile(certFile);
 
 				final Certificate certificate = this.certificateService.saveCertificate(certAddForm);
 
@@ -312,12 +299,12 @@ public class CertificateRestController {
 	 */
 	@RequestMapping(value = "/saveeditcert", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<Certificate> saveEdit(@RequestPart("certEditForm") final CertificateDTO certEditForm, @RequestPart("certFile1") final MultipartFile certFile1, @RequestPart("certFile2") final MultipartFile certFile2, final HttpServletRequest request) {
+	public @ResponseBody DataTablesOutput<Certificate> saveEdit(@RequestPart("certEditForm") final CertificateDTO certEditForm, @RequestPart("certFile") final MultipartFile certFile, final HttpServletRequest request) {
 		final DataTablesOutput<Certificate> dtOutput = new DataTablesOutput<>();
 		List<Certificate> listNewCertificate = new ArrayList<>();
 		final JSONObject json = new JSONObject();
 
-		if (isAliasBlank(certEditForm.getAlias()) || isAliasSizeNotValid(certEditForm.getAlias()) || hasNoCertData(certEditForm, certFile1, certFile2)) {
+		if (isAliasBlank(certEditForm.getAlias()) || isAliasSizeNotValid(certEditForm.getAlias()) || hasNoCertData(certEditForm, certFile)) {
 			listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
 
 			if (isAliasBlank(certEditForm.getAlias())) {
@@ -335,7 +322,7 @@ public class CertificateRestController {
 			}
 
 
-			if (hasNoCertData(certEditForm, certFile1, certFile2)) {
+			if (hasNoCertData(certEditForm, certFile)) {
 
 				//"Al menos debe indicarse un archivo de certificado"
 
@@ -356,36 +343,19 @@ public class CertificateRestController {
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
 				X509Certificate cert1;
-				X509Certificate cert2;
-
+				
 				// Si no se actualiza el certificado 1, dejamos el que estaba
-				if (certFile1.isEmpty() && certEditForm.getCertPrincipalB64() != null) {
+				if (certFile.isEmpty() && certEditForm.getCertificateB64() != null) {
 
-					certEditForm.setCertBytes1(Base64.decode(certEditForm.getCertPrincipalB64()));
+					certEditForm.setCertBytes(Base64.decode(certEditForm.getCertificateB64()));
 				// Si se actualiza el certificado 1, tenemos que comprobar que el archivo representa un certificado valido
-				} else if (!certFile1.isEmpty()) {
+				} else if (!certFile.isEmpty()) {
 
-					try (final InputStream certIs = certFile1.getInputStream();) {
+					try (final InputStream certIs = certFile.getInputStream();) {
 	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			certEditForm.setCertBytes1(cert1.getEncoded());
+	        			certEditForm.setCertBytes(cert1.getEncoded());
 	        		} catch (final CertificateException e) {
-	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido";
-	        			throw e;
-	        		}
-				}
-
-				// Si no se actualiza el certificado 2, dejamos el que estaba
-				if (certFile2.isEmpty() && certEditForm.getCertBackupB64() != null) {
-
-					certEditForm.setCertBytes2(Base64.decode(certEditForm.getCertBackupB64()));
-				// Si se actualiza el certificado 2, tenemos que comprobar que el archivo representa un certificado valido
-				} else if (!certFile2.isEmpty()) {
-
-					try (final InputStream certIs = certFile2.getInputStream();) {
-	        			cert2 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			certEditForm.setCertBytes2(cert2.getEncoded());
-	        		} catch (final CertificateException e) {
-	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido";
+	        			msgerror = certFile.getOriginalFilename() + " no representa un certificado v\u00E1lido";
 	        			throw e;
 	        		}
 				}
@@ -413,15 +383,15 @@ public class CertificateRestController {
 	/**
 	 * Method that checks if no certificate data is sent during edit
 	 * @param certEditForm
-	 * @param certFile1
+	 * @param certFile
 	 * @param certFile2
 	 * @return
 	 */
-	private static boolean hasNoCertData(final CertificateDTO certEditForm, final MultipartFile certFile1, final MultipartFile certFile2) {
+	private static boolean hasNoCertData(final CertificateDTO certEditForm, final MultipartFile certFile) {
 
 		boolean hasNoFileData = false;
 
-		if ((certFile1 == null || certFile1.isEmpty()) && (certFile2 == null || certFile2.isEmpty()) && (certEditForm.getCertPrincipalB64() == null || certEditForm.getCertPrincipalB64().isEmpty()) && (certEditForm.getCertBackupB64() == null || certEditForm.getCertBackupB64().isEmpty())) {
+		if ((certFile == null || certFile.isEmpty()) && (certEditForm.getCertificateB64() == null || certEditForm.getCertificateB64().isEmpty())) {
 			hasNoFileData = true;
 		}
 
@@ -470,38 +440,26 @@ public class CertificateRestController {
 
 	/**
 	 * Method that gets the certificate data from a File and returns it as a String.
-	 * @param certFile1 Object that represents the File of the Certificate 1.
+	 * @param certFile Object that represents the File of the Certificate 1.
 	 * @param certFile2 Object that represents the File of the Certificate 2.
 	 * @param idField Identifier of the HTML field that triggers the event.
 	 * @return String that represents the certificate data.
 	 */
 	@RequestMapping(value = "/previewCert", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public String previewCert(@RequestPart("certFile1") final MultipartFile certFile1, @RequestPart("certFile2") final MultipartFile certFile2, @RequestPart("idField") final String idField) {
+	public String previewCert(@RequestPart("certFile") final MultipartFile certFile, @RequestPart("idField") final String idField) {
 
 		String certData = "";
 
-		if (certFile1 != null && !certFile1.isEmpty() && PARAM_CER_PRINCIPAL.equals(idField)) {
+		if (certFile != null && !certFile.isEmpty() && PARAM_CER_PRINCIPAL.equals(idField)) {
 
-			try (final InputStream certIs = certFile1.getInputStream();) {
-
-				certData = this.certificateService.getFormatCertText(certIs);
-
-			} catch (final IOException e) {
-				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e);
-			} catch (final CertificateException e) {
-				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e);
-			}
-
-		} else if (certFile2 != null && !certFile2.isEmpty() && PARAM_CER_BKUP.equals(idField)) {
-
-			try (final InputStream certIs = certFile2.getInputStream();) {
+			try (final InputStream certIs = certFile.getInputStream();) {
 
 				certData = this.certificateService.getFormatCertText(certIs);
 
 			} catch (final IOException e) {
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e);
 			} catch (final CertificateException e) {
-				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e);
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e);
 			}
 
 		}

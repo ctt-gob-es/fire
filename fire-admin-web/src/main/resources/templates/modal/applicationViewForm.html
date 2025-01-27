@@ -15,10 +15,6 @@
 					th:object="${appViewForm}" action="#" method="post" enctype="multipart/form-data">
 										
 					<input type="hidden" id="appId" th:field="*{appId}"/>
-					<input type="hidden" id="certPrincipal" th:field="*{certPrincipal}"/>
-					<input type="hidden" id="certBackup" th:field="*{certBackup}"/>
-					<input type="hidden" id="certPrincipalB64" th:field="*{certPrincipalB64}"/>
-					<input type="hidden" id="certBackupB64" th:field="*{certBackupB64}"/>
 					
 					<div class="form-group">
 						<label for="appName" class="col-form-label"
@@ -27,40 +23,13 @@
 						
 						<div style="clear: both;" />
 					</div>
-												
-					<div class="form-group">
-						<label for="alias" class="col-form-label"
-							th:text="#{form.application.view.alias}"></label>
-						<input type="text" id="alias" th:field="*{alias}" class="form-control" readonly="readonly"/>
-						
-						<div style="clear: both;" />
-					</div>
+					
 					<div class="form-row">
 						<div class="form-group col-md-10">
-								<div th:if= "${certPrincipal != null && certPrincipal != ''}" class="btn_align">
-									<button type="button" class="btn btn-primary" onclick="downLoadCert('certPrincipalB64','1')">Descargar certificado 1</button>
+								<div th:if= "${appViewForm.certificatesB64 != null && appViewForm.certificatesB64 != ''}" class="btn_align">
+									<button type="button" class="btn btn-primary" onclick="downloadZip()">Descargar certificados</button>
 								</div>
 						</div>
-					</div>
-					<div th:if= "${certPrincipal != null && certPrincipal != ''}" id="cert-prin" name="cert-prin" class="edit-txt" 
-						style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
-					 	resize: none; background: rgb(245, 245, 245);">
-					</div>	
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<div class="form-row">
-						<div class="form-group col-md-10">
-							<div th:if= "${certBackup != null && certBackup != ''}" class="btn_align">
-								<button type="button" class="btn btn-primary" onclick="downLoadCert('certBackupB64','1')">Descargar certificado 2</button>
-							</div>
-						</div>
-						
-					</div>
-					<div th:if= "${certBackup != null && certBackup != ''}" id="cert-resp" name="cert-resp" class="edit-txt" 
-						style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
-					 	resize: none; background: rgb(245, 245, 245);">
 					</div>
 					<td></td>
 					<td></td>
@@ -99,8 +68,6 @@
 $('#appViewModal').on('shown.bs.modal', function (e) {
 	
 	hide();
-	$("#cert-prin").html($("#certPrincipal").val());
-	$("#cert-resp").html($("#certBackup").val());
 	
 	var appId = $("#appId").val();
 	var getRespApp = /*[[@{/respappdatatable}]]*/;
@@ -130,86 +97,26 @@ $('#appViewModal').on('shown.bs.modal', function (e) {
 	    responsive: true
 	});
 });
+ 	
+	// Función para descargar los certificados en un ZIP
+	function downloadZip() {
+		var appViewFormDTO = [[${appViewForm}]];
+		var base64Data = appViewFormDTO.certificatesB64; 
+		var fileName = appViewFormDTO.appName + "_certificados.zip";
+	    // Decodificamos el Base64 a un Blob
+	    const binaryData = atob(base64Data); // Decodifica el Base64
+	    const byteNumbers = new Uint8Array(binaryData.length);
+	    for (let i = 0; i < binaryData.length; i++) {
+	        byteNumbers[i] = binaryData.charCodeAt(i);
+	    }
+	    const blob = new Blob([byteNumbers], { type: "application/zip" });
 
-	var previewCertUrl = /*[[@{/previewCert}]]*/;
-	function previewCert(event) {
-		
-		hide();
-		var formData = new FormData();
-	 	var file1 =  $('#certFile1').prop('files')[0];
-	 	
-	 	if (file1 == undefined) {
-	 		file1 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
-	 	}
-	 	
-	 	var file2 =  $('#certFile2').prop('files')[0];
-	 	
-	 	if (file2 == undefined) {
-			file2 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
-		}
-	 	
-	 	var id = event.target.id;
-	 	
-	 	formData.append("certFile1", file1);
-	 	formData.append("certFile2", file2);
-	 	formData.append("idField",id)
-	 	
-		//var data = new FormData($("#appViewForm")[0]);
-		var idResult;
-		if (id == "certFile1") {
-			idResult = "cert-prin";
-			
-		} else if (id == "certFile2") {
-			idResult = "cert-resp";
-			
-		}
-		$.ajax(previewCertUrl,{
-			type : "POST",
-			data : formData,
-			processData : false,
-			contentType : false,
-			success : function(responseText) {
-				//document.getElementById(idResult).innerHTML = responseText;
-				hide();
-				$("#" + idResult).html(responseText);
-			},
-			error : function(e) {
-				alert("Error al cargar el certificado");
-			}
-		});
-
+	    // Creamos un enlace de descarga
+	    const link = document.createElement("a");
+	    link.href = URL.createObjectURL(blob); // Creamos la URL del Blob
+	    link.download = fileName; // Nombre del archivo para la descarga
+	    document.body.appendChild(link);
+	    link.click(); // Simulamos el clic
+	    document.body.removeChild(link); // Limpiamos el DOM
 	}
-		
- 
-	//Funcion para descargar el certificado de PSC
-	function downLoadCert(idDataCert, numCert) {
-		var datCert = $("#" + idDataCert).val();
-		var filename = $("#alias").val() + "_" + numCert + ".cer";
-				
-		downloadCertificate(b64toBlob(datCert, 'application/x-x509-ca-cert'), filename);
-		
-	}
-	
-	/* Descargar Certificado */
-	function downloadCertificate(contentBlob, fileName) {
-		var reader = new FileReader();
-		reader.onload = function(event) {
-			var save = document.createElement('a');
-			save.href = event.target.result;
-			save.target = '_blank';
-			save.download = fileName || 'certificado.cer';
-			var clicEvent = new MouseEvent('click', {
-				'view' : window,
-				'bubbles' : true,
-				'cancelable' : true
-			});
-			save.dispatchEvent(clicEvent);
-			(window.URL || window.webkitURL)
-					.revokeObjectURL(save.href);
-						
-		};
-		reader.readAsDataURL(contentBlob);
-	};	
-	
-
 </script>

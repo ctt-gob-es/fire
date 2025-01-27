@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>01/08/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 18/09/2018.
+ * @version 1.1, 27/01/2025.
  */
 package es.gob.fire.persistence.entity;
 
@@ -45,7 +45,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 /**
  * <p>Class that maps the <i>KEYSTORE</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.0, 18/09/2018.
+ * @version 1.1, 27/01/2025.
  */
 @Entity
 @Table(name = "TB_CERTIFICADOS")
@@ -75,23 +75,12 @@ public class Certificate implements Serializable {
 	/**
 	 * Attribute that represents the certPrincipal.
 	 */
-	private String certPrincipal;
-
-	/**
-	 * Attribute that represents the certBackup.
-	 */
-	private String certBackup;
+	private String certificate;
 
 	/**
 	 * Attribute that represents the huellaPrincipal.
 	 */
-	private String huellaPrincipal;
-
-	/**
-	 * Attribute that represents the huellaBackup.
-	 */
-	private String huellaBackup;
-
+	private String huella;
 
 	/**
 	 * Gets the value of the attribute {@link #idKeystore}.
@@ -152,82 +141,42 @@ public class Certificate implements Serializable {
 
 
 	/**
-	 * Gets the value of the attribute {@link #certPrincipal}.
-	 * @return the value of the attribute {@link #certPrincipal}.
+	 * Gets the value of the attribute {@link #certificate}.
+	 * @return the value of the attribute {@link #certificate}.
 	 */
-	@Column(name = "CERT_PRINCIPAL", nullable = false, length = NumberConstants.NUM5000)
+	@Column(name = "CERTIFICADO", nullable = false, length = NumberConstants.NUM5000)
 	@JsonView(DataTablesOutput.View.class)
-	public String getCertPrincipal() {
-		return this.certPrincipal;
+	public String getCertificate() {
+		return this.certificate;
 	}
 
 	/**
-	 * Sets the value of the attribute {@link #certPrincipal}.
-	 * @param keystoreTypeParam The value for the attribute {@link #certPrincipal}.
+	 * Sets the value of the attribute {@link #certificate}.
+	 * @param keystoreTypeParam The value for the attribute {@link #certificate}.
 	 */
 
-	public void setCertPrincipal (final String certPrincipalParam) {
-		this.certPrincipal = certPrincipalParam;
+	public void setCertificate (final String certificate) {
+		this.certificate = certificate;
 	}
 
 	/**
-	 * Gets the value of the attribute {@link #certBackup}.
-	 * @return the value of the attribute {@link #certBackup}.
+	 * Gets the value of the attribute {@link #certificate}.
+	 * @return the value of the attribute {@link #certificate}.
 	 */
-	@Column(name = "CERT_BACKUP", nullable = false, precision = NumberConstants.NUM5000)
+	@Column(name = "HUELLA", nullable = false, length = NumberConstants.NUM50)
 	@JsonView(DataTablesOutput.View.class)
-	public String getCertBackup() {
-		return this.certBackup;
+	public String getHuella() {
+		return this.huella;
 	}
 
 	/**
-	 * Sets the value of the attribute {@link #certBackup}.
-	 * @param versionParam The value for the attribute {@link #certBackup}.
-	 */
-	public void setCertBackup(final String certBackupParam) {
-		this.certBackup = certBackupParam;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #certPrincipal}.
-	 * @return the value of the attribute {@link #certPrincipal}.
-	 */
-	@Column(name = "HUELLA_PRINCIPAL", nullable = false, length = NumberConstants.NUM50)
-	@JsonView(DataTablesOutput.View.class)
-	public String getHuellaPrincipal() {
-		return this.huellaPrincipal;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #huellaPrincipal}.
-	 * @param huellaPrincipalParam The value for the attribute {@link #huellaPrincipal}.
+	 * Sets the value of the attribute {@link #huella}.
+	 * @param huellaPrincipalParam The value for the attribute {@link #huella}.
 	 */
 
-	public void setHuellaPrincipal (final String huellaPrincipalParam) {
-		this.huellaPrincipal = huellaPrincipalParam;
+	public void setHuella (final String huella) {
+		this.huella = huella;
 	}
-
-	/**
-	 * Gets the value of the attribute {@link #huellaBackup}.
-	 * @return the value of the attribute {@link #huellaBackup}.
-	 */
-	@Column(name = "HUELLA_BACKUP", nullable = false, precision = NumberConstants.NUM19)
-	@JsonView(DataTablesOutput.View.class)
-	public String getHuellaBackup() {
-		return this.huellaBackup;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #huellaBackup}.
-	 * @param huellaBackupParam The value for the attribute {@link #huellaBackup}.
-	 */
-	public void setHuellaBackup(final String huellaBackupParam) {
-		this.huellaBackup = huellaBackupParam;
-	}
-
-
-
-
 
 }
 

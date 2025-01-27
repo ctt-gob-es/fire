@@ -6,10 +6,8 @@ CREATE TABLE `tb_certificados` (
   `id_certificado` int(11) AUTO_INCREMENT,
   `nombre_cert` varchar(45) NOT NULL,
   `fec_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `cert_principal` varchar(5000) DEFAULT NULL,
-  `cert_backup` varchar(5000) DEFAULT NULL,
-  `huella_principal` varchar(45) DEFAULT NULL,
-  `huella_backup` varchar(45) DEFAULT NULL,
+  `certificado` varchar(5000) DEFAULT NULL,
+  `huella` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id_certificado`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4 COMMENT='tabla de certificados';
 
@@ -18,10 +16,8 @@ CREATE TABLE `tb_aplicaciones` (
   `id` varchar(48) NOT NULL,
   `nombre` varchar(45) NOT NULL,
   `fecha_alta` datetime NOT NULL,
-  `fk_certificado` int(11) NOT NULL,
   `habilitado` tinyint(4) DEFAULT '1',
-  PRIMARY KEY (`id`),
-  CONSTRAINT `fk_certificado` FOREIGN KEY (`fk_certificado`) REFERENCES `tb_certificados` (`id_certificado`) ON UPDATE CASCADE
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
@@ -101,6 +97,13 @@ CREATE TABLE `tb_responsable_de_aplicaciones` (
   `id_responsables` int(11) NOT NULL,
   `id_aplicaciones` varchar(48) NOT NULL,
   PRIMARY KEY (`id_responsables`,`id_aplicaciones`)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+
+CREATE TABLE `tb_certificados_de_aplicacion` (
+  `id_certificados` int(11) NOT NULL,
+  `id_aplicaciones` varchar(48) NOT NULL,
+  PRIMARY KEY (`id_certificados`,`id_aplicaciones`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 

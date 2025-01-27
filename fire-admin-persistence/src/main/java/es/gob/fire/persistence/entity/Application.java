@@ -11,7 +11,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
@@ -30,7 +29,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 /**
  * <p>Class that maps the <i>APPLICATION</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.0, 24/12/2020.
+ * @version 1.1, 27/01/2025.
  */
 @Entity
 @Table(name = "TB_APLICACIONES")
@@ -53,12 +52,6 @@ public class Application implements Serializable{
 	private String appName;
 
 	/**
-	 * Attribute that represents the certificate.
-	 */
-	private Certificate certificate;
-
-
-	/**
 	 * Attribute that represents the data.
 	 */
 	private Date fechaAltaApp;
@@ -72,6 +65,11 @@ public class Application implements Serializable{
 	  * Attribute that represents the header list for the validation method.
 	  */
 	private List<ApplicationResponsible> listApplicationResponsible;
+	
+	/**
+	 * Attribute that represents the header list for the validation method.
+	 */
+	private List<CertificatesApplication> listCertificatesApplication;
 
 	/**
 	 * Gets the value of the attribute {@link #appId}.
@@ -138,25 +136,6 @@ public class Application implements Serializable{
 	}
 
 	/**
-	 * Gets the value of the attribute {@link #certificate}.
-	 * @return the value of the attribute {@link #certificate}.
-	 */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "FK_CERTIFICADO", nullable = false)
-	@JsonView(DataTablesOutput.View.class)
-	public Certificate getCertificate() {
-		return this.certificate;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #certificate}.
-	 * @param rolP The value for the attribute {@link #certificate}.
-	 */
-	public void setCertificate(final Certificate certificateP) {
-		this.certificate = certificateP;
-	}
-
-	/**
 	 * Gets the value of the attribute {@link #habilitado}.
 	 * @return the value of the attribute {@link #habilitado}.
 	 */
@@ -196,5 +175,28 @@ public class Application implements Serializable{
 	public void setListApplicationResponsible(final List<ApplicationResponsible> listApplicationResponsibleParam) {
 		// CHECKSTYLE:ON
 		this.listApplicationResponsible = listApplicationResponsibleParam;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #listCertificatesApplication}.
+	 * @return the value of the attribute {@link #listCertificatesApplication}.
+	 */
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	@OneToMany(mappedBy = "application", cascade = {CascadeType.ALL }, orphanRemoval = true, fetch = FetchType.LAZY)
+	public List<CertificatesApplication> getListCertificatesApplication() {
+		// CHECKSTYLE:ON
+		return this.listCertificatesApplication;
+	}
+	
+	/**
+	 * Sets the value of the attribute {@link #listCertificatesApplication}.
+	 * @param listCertificatesApplication The value for the attribute {@link #listCertificatesApplication}.
+	 */
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	public void setListCertificatesApplication(final List<CertificatesApplication> listCertificatesApplicationParam) {
+		// CHECKSTYLE:ON
+		this.listCertificatesApplication = listCertificatesApplicationParam;
 	}
 }

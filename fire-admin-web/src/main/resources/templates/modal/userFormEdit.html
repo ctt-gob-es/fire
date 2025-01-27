@@ -85,7 +85,7 @@
 						
 							<label for="emailEdit" class="col-form-label" th:text="#{form.user.email}"></label>
 							<span id="emailEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
-							<input type="email" id="emailEdit" th:field="*{emailEdit}" autocomplete="nope" style="overflow:hidden" class="form-control" maxlength="45" required/>
+							<input type="email" id="emailEdit" name="emailEdit" th:field="*{emailEdit}" autocomplete="nope" style="overflow:hidden" class="form-control" maxlength="45" required/>
 							<div id="invalid-email" class="invalid-feedback" ></div>
 						
 						<div style="clear:both;"/>
@@ -145,6 +145,8 @@
 		
 		var rolSelected = $("#rolId option:selected").val();
 		
+		debugger;
+		
 		// Si eramos administrador, nunca activaremos los campos de contrasena.
 		// Tampoco se activaran cuando se asigne un rol distinto de administrador 
 		if (currentRol == 1 || rolSelected != 1) {
@@ -153,7 +155,11 @@
 			$('#passwordEdit').val('');
 			$('#confirmPasswordEdit').prop("disabled", true);
 			$('#confirmPasswordEdit').val('');
-			$('#dniEdit').prop("disabled", true);
+			if(rolSelected != 1) {
+				$('#dniEdit').prop("disabled", true);	
+			} else {
+				$('#dniEdit').prop("disabled", false);
+			}
 			$('#dniEdit').val('');
 		} else {
 			$('#passwordEdit').prop("disabled", false);
