@@ -3,18 +3,23 @@ package es.gob.fire.persistence.dto;
 import java.util.Arrays;
 import java.util.Date;
 
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonView;
 
 /**
  * <p>Class that represents the backing form for adding/editing a system certificate.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.3, 27/01/2025.
+ * @version 1.4, 28/01/2025.
  */
 public class CertificateDTO {
 
 	/**
 	 * Attribute that represents the value of the primary key as a hidden input in the form.
 	 */
+	@JsonView(DataTablesOutput.View.class)
 	private Long idCertificate;
 
 	/**
@@ -30,6 +35,7 @@ public class CertificateDTO {
 	/**
 	 * Attribute that represents the subject of the certificate principal.
 	 */
+	@JsonView(DataTablesOutput.View.class)
 	private String certificate;
 
 	/**
@@ -51,12 +57,14 @@ public class CertificateDTO {
 	/**
 	 * Attribute that represents the data.
 	 */
+	@JsonView(DataTablesOutput.View.class)
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm")
 	private Date fechaAlta;
 	
 	/**
 	 * Attribute that represents the huellaPrincipal.
 	 */
-	private String huellaPrincipal;
+	private String huella;
 
 	/**
 	 * Attribute that represents index of the row of the selected certificate.
@@ -68,6 +76,18 @@ public class CertificateDTO {
 	 */
 	private String certificateB64;
 
+	/**
+	 * Attribute that represents the data of the certificate name.
+	 */
+	@JsonView(DataTablesOutput.View.class)
+	private String certificateName;
+	
+	/**
+	 * Attribute that represents the data of the status.
+	 */
+	@JsonView(DataTablesOutput.View.class)
+	private String status;
+		
 	/**
 	 * Gets the value of the attribute {@link #idSystemCertificate}.
 	 * @return the value of the attribute {@link #idSystemCertificate}.
@@ -165,19 +185,19 @@ public class CertificateDTO {
 	}
 
 	/**
-	 * Gets the value of the attribute {@link #huellaPrincipal}.
-	 * @return the value of the attribute {@link #huellaPrincipal}.
+	 * Gets the value of the attribute {@link #huella}.
+	 * @return the value of the attribute {@link #huella}.
 	 */
-	public String getHuellaPrincipal() {
-		return this.huellaPrincipal;
+	public String getHuella() {
+		return this.huella;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #certFile2}.
 	 * @param huellaPrincipal the value for the attribute {@link #certFile2} to set.
 	 */
-	public void setHuellaPrincipal(final String huellaPrincipal) {
-		this.huellaPrincipal = huellaPrincipal;
+	public void setHuella(final String huellaPrincipal) {
+		this.huella = huellaPrincipal;
 	}
 
 	/**
@@ -212,6 +232,38 @@ public class CertificateDTO {
 	public void setCertBytes(final byte[] certBytes) {
 		this.certBytes = certBytes != null
 				? Arrays.copyOf(certBytes, certBytes.length) : certBytes;
+	}
+
+	/**
+	 * Gets the value of the attribute {@link #certificateName}.
+	 * @return the value of the attribute {@link #certificateName}.
+	 */
+	public String getCertificateName() {
+		return certificateName;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #certificateName}.
+	 * @param certificateName The value for the attribute {@link #certificateName}.
+	 */
+	public void setCertificateName(String certificateName) {
+		this.certificateName = certificateName;
+	}
+
+	/**
+	 * Gets the value of the attribute {@link #status}.
+	 * @return the value of the attribute {@link #status}.
+	 */
+	public String getStatus() {
+		return status;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #status}.
+	 * @param status The value for the attribute {@link #status}.
+	 */
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

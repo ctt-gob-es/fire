@@ -1,20 +1,9 @@
 package es.gob.fire.web.controller;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,6 +16,7 @@ import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
+import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Certificate;
@@ -46,7 +36,7 @@ import es.gob.fire.persistence.service.IUserService;
  * Application for monitoring services of @firma suite systems.
  * </p>
  *
- * @version 1.3, 27/01/2025.
+ * @version 1.4, 28/01/2025.
  */
 
 
@@ -110,8 +100,8 @@ public class ApplicationController {
 
 		final ApplicationDTO appDto = new ApplicationDTO();
 
-		final List<Certificate> availableCertficates = this.certificateService.getAllCertificate();
-		final List<Certificate> selectedCertificates = new ArrayList<>();
+		final List<CertificateDTO> listCertificateDTO = this.certificateService.obtainAllCertificateToDTO(this.certificateService.getAllCertificate());
+		final List<CertificateDTO> selectedCertificatesDTO = new ArrayList<>();
 		
 		final List<User> selectedUsers = new ArrayList<>();
 		final List<User> availableUsers = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
@@ -128,8 +118,8 @@ public class ApplicationController {
 
 		model.addAttribute("selectedUsers", selectedUsers); //$NON-NLS-1$
 		model.addAttribute("availableUsers", availableUsers); //$NON-NLS-1$
-		model.addAttribute("availableCertficates", availableCertficates);
-		model.addAttribute("selectedCertificates", selectedCertificates);
+		model.addAttribute("availableCertficates", listCertificateDTO);
+		model.addAttribute("selectedCertificates", selectedCertificatesDTO);
 		
 		model.addAttribute("appAddForm", appDto); //$NON-NLS-1$
 
@@ -176,14 +166,15 @@ public class ApplicationController {
 			selectedCertificates.add(certificatesApplication.getCertificate());
 		}
 		
-		final List<Certificate> availableCertficates = this.certificateService.getAllCertificate();
+		final List<CertificateDTO> availableCertficatesDTO = this.certificateService.obtainAllCertificateToDTO(this.certificateService.getAllCertificate());
+		final List<CertificateDTO> selectedCertificatesDTO = this.certificateService.obtainAllCertificateToDTO(selectedCertificates);
 		
-		availableCertficates.removeAll(selectedCertificates);
+		availableCertficatesDTO.removeAll(selectedCertificatesDTO);
 		
 		model.addAttribute("selectedUsers", selectedUsers); //$NON-NLS-1$
 		model.addAttribute("availableUsers", availableUsers); //$NON-NLS-1$
-		model.addAttribute("availableCertficates", availableCertficates);
-		model.addAttribute("selectedCertificates", selectedCertificates);
+		model.addAttribute("availableCertficates", availableCertficatesDTO);
+		model.addAttribute("selectedCertificates", selectedCertificatesDTO);
 		
 		model.addAttribute("appEditForm", appDto); //$NON-NLS-1$
 
@@ -219,69 +210,10 @@ public class ApplicationController {
 		
 		final List<CertificatesApplication> listCertificatesApplication = this.applicationService.getCertificatesApplicationByAppId(appId);
 
-		try {
-		    // Directorio temporal para guardar los certificados
-		    final File tempDir = Files.createTempDirectory("certificates").toFile();
-		    final File zipFile = new File(tempDir, "certificados.zip"); // Archivo ZIP temporal
-
-		    // Crear archivo ZIP y procesar los certificados
-		    try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile))) {
-		        for (CertificatesApplication certificatesApplication : listCertificatesApplication) {
-		            // Crear InputStream desde el certificado Base64
-		            final InputStream certIs = new ByteArrayInputStream(
-		                    Base64.getDecoder().decode(certificatesApplication.getCertificate().getCertificate()));
-		            String certFileName = certificatesApplication.getCertificate().getCertificateName() + ".cer"; // Nombre del archivo .cer
-		            File certFile = new File(tempDir, certFileName);
-
-		            // Guardar el certificado en un archivo .cer
-		            try (FileOutputStream fileOut = new FileOutputStream(certFile)) {
-		                byte[] buffer = new byte[4096];
-		                int bytesRead;
-		                while ((bytesRead = certIs.read(buffer)) != -1) {
-		                    fileOut.write(buffer, 0, bytesRead);
-		                }
-		            }
-
-		            // Añadir el archivo .cer al archivo ZIP
-		            try (FileInputStream fis = new FileInputStream(certFile)) {
-		                ZipEntry zipEntry = new ZipEntry(certFileName);
-		                zipOut.putNextEntry(zipEntry);
-
-		                byte[] buffer = new byte[4096];
-		                int bytesRead;
-		                while ((bytesRead = fis.read(buffer)) != -1) {
-		                    zipOut.write(buffer, 0, bytesRead);
-		                }
-		                zipOut.closeEntry();
-		            }
-		        }
-		    }
-
-		    // Convertir el archivo ZIP a Base64
-		    try (FileInputStream fis = new FileInputStream(zipFile);
-		         ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-		        byte[] buffer = new byte[4096];
-		        int bytesRead;
-		        while ((bytesRead = fis.read(buffer)) != -1) {
-		            baos.write(buffer, 0, bytesRead);
-		        }
-		        appViewForm.setCertificatesB64(Base64.getEncoder().encodeToString(baos.toByteArray()));
-		    }
-
-		    // Limpiar archivos temporales
-		    File[] tempFiles = tempDir.listFiles();
-		    if (tempFiles != null) {
-		        for (File tempFile : tempFiles) {
-		            tempFile.delete();
-		        }
-		    }
-		    tempDir.delete();
-
-		} catch (IOException | IllegalArgumentException | NullPointerException e) {
-		    LOGGER.error("Se produjo un error procesando los certificados", e);
-		}
+		applicationService.obtainZipWithCertificatesApp(appViewForm, listCertificatesApplication);
 		
 		model.addAttribute("appViewForm", appViewForm); //$NON-NLS-1$
 		return "modal/applicationViewForm.html"; //$NON-NLS-1$
 	}
+	
 }

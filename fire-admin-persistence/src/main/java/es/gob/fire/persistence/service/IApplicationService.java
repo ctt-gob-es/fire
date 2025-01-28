@@ -15,7 +15,7 @@ import es.gob.fire.persistence.entity.CertificatesApplication;
 /**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.0, 15/10/2020.
+ * @version 1.1, 28/01/2025.
  */
 public interface IApplicationService {
 
@@ -119,4 +119,20 @@ public interface IApplicationService {
 	 *         If no entities are found, an empty list is returned.
 	 */
 	List<CertificatesApplication> getCertificatesApplicationByAppId(String appId);
+
+	/**
+	 * Generates a ZIP file containing certificates and converts it to a Base64 string.
+	 * 
+	 * <p>This method takes a list of certificates, creates individual `.cer` files for each 
+	 * certificate, compresses them into a ZIP file, and encodes the ZIP file into a Base64 string.
+	 * The Base64 string is then set in the provided {@code ApplicationCertDTO} object.</p>
+	 *
+	 * @param appViewForm the {@code ApplicationCertDTO} object where the Base64-encoded ZIP will be set.
+	 * @param listCertificatesApplication the list of {@code CertificatesApplication} containing the certificates to be processed.
+	 *
+	 * @throws IOException if an I/O error occurs during file or ZIP operations.
+	 * @throws IllegalArgumentException if there is an error decoding Base64 or processing certificates.
+	 * @throws NullPointerException if a required object is null.
+	 */
+	void obtainZipWithCertificatesApp(ApplicationCertDTO appViewForm, List<CertificatesApplication> listCertificatesApplication);
 }

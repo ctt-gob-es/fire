@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.3, 27/01/2025.
+ * @version 1.4, 28/01/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -33,6 +33,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,6 +48,8 @@ import org.springframework.transaction.annotation.Transactional;
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.Utils;
+import es.gob.fire.i18n.IPersistenceGeneral;
+import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.repository.CertificateRepository;
@@ -56,7 +59,7 @@ import es.gob.fire.persistence.service.ICertificateService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.3, 27/01/2025.
+ * @version 1.4, 28/01/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -147,7 +150,7 @@ public class CertificateService implements ICertificateService{
 			if (certificateDto.getCertBytes() != null) {
 
 				final byte[] digest = md.digest(certificateDto.getCertBytes());
-				certificateDto.setHuellaPrincipal(Base64.encode(digest));
+				certificateDto.setHuella(Base64.encode(digest));
 				certificateDto.setCertificate(Base64.encode(certificateDto.getCertBytes()));
 			}
 		
@@ -175,7 +178,7 @@ public class CertificateService implements ICertificateService{
 		certificate.setIdCertificado(certificateDto.getIdCertificate());
 		certificate.setCertificateName(certificateDto.getAlias());
 		certificate.setCertificate(certificateDto.getCertificate());
-		certificate.setHuella(certificateDto.getHuellaPrincipal());
+		certificate.setHuella(certificateDto.getHuella());
 		
 		return certificate;
 	}
@@ -191,7 +194,7 @@ public class CertificateService implements ICertificateService{
 		certificateDto.setIdCertificate(certificate.getIdCertificado());
 		certificateDto.setAlias(certificate.getCertificateName());
 		certificateDto.setCertificate(certificate.getCertificate());
-		certificateDto.setHuellaPrincipal(certificate.getHuella());
+		certificateDto.setHuella(certificate.getHuella());
 		certificateDto.setCertificateB64(certificate.getCertificate());
 		
 		return certificateDto;
@@ -301,6 +304,49 @@ public class CertificateService implements ICertificateService{
 
 		return certText;
 
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IApplicationService#obtainZipWithCertificatesApp(java.util.List<Certificate>)
+	 */
+	@Override
+	public List<CertificateDTO> obtainAllCertificateToDTO(List<Certificate> listCertificate) {
+		List<CertificateDTO> listCertificateDTO = new ArrayList<>();
+		for (Certificate certificate : listCertificate) {
+			CertificateDTO certificateDTO = new CertificateDTO();
+			certificateDTO.setIdCertificate(certificate.getIdCertificado());
+			certificateDTO.setCertificateName(certificate.getCertificateName());
+			certificateDTO.setCertificate(certificate.getCertificate());
+			certificateDTO.setFechaAlta(certificate.getfechaAlta());
+			
+			try {
+				
+				X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertificate()))); //$NON-NLS-1$
+	            
+				// Comprobamos la validez del certificado
+	            try {
+	            	x509Certificate.checkValidity();
+	            	// El certificado sera valido
+	            	certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV001));
+	            }catch (Exception e) {
+	            	// El certificado sera caducado
+	            	certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV002));
+	            }
+	            
+	            java.util.Date expDatePrincipal = x509Certificate.getNotAfter();
+				final String certSubject = x509Certificate.getSubjectX500Principal().getName();
+				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
+				final String[] txtCert = certSubject.split(","); //$NON-NLS-1$
+				certificateDTO.setCertificate(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
+	            
+	        } catch (CertificateException | IOException e) {
+	        	LOGGER.error(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV003) , e );
+			}
+			
+			listCertificateDTO.add(certificateDTO);
+		}
+		return listCertificateDTO;
 	}
 
 }

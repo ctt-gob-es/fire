@@ -121,4 +121,19 @@ public interface ICertificateService {
 	 * @return
 	 */
 	String getCertificateText(String certificate);
+
+	/**
+	 * Converts a list of {@code Certificate} objects to a list of {@code CertificateDTO} objects.
+	 * 
+	 * <p>This method maps each {@code Certificate} object to a {@code CertificateDTO} and enriches the DTO
+	 * with additional information such as the certificate's validity status and formatted expiration date.
+	 * The validity of the certificate is determined using its X.509 structure.</p>
+	 *
+	 * @param listCertificate the list of {@code Certificate} objects to be converted.
+	 * @return a list of {@code CertificateDTO} objects containing mapped and enriched data.
+	 *
+	 * @throws CertificateException if an error occurs while parsing the certificate.
+	 * @throws IOException if an error occurs during Base64 decoding of the certificate.
+	 */
+	List<CertificateDTO> obtainAllCertificateToDTO(List<Certificate> listCertificate);
 }

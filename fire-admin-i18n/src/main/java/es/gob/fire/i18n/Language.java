@@ -32,16 +32,10 @@
  * </p>
  *
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 02/02/2021.
+ * @version 1.3, 28/01/2025.
  */
 package es.gob.fire.i18n;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -83,7 +77,7 @@ public final class Language {
 	private static final String BUNDLENAME_LANGUAGE = "messages.Language";
 
 	/**
-	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin logs.
+	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin fire logs.
 	 */
 	private static final String BUNDLENAME_WEBADMIN_FIRE = "messages.webAdmin.fire";
 
@@ -93,9 +87,14 @@ public final class Language {
 	private static final String BUNDLENAME_WEBADMIN_GENERAL = "messages.webAdmin.general";
 
 	/**
-	 * Constant attribute that represents the string to identify the bundle name to the file related with web admin fire logs.
+	 * Constant attribute that represents the string to identify the bundle name to the file related with common utils fire logs.
 	 */
 	private static final String BUNDLENAME_COMMONUTILS_FIRE = "messages.commonsUtils.fire";
+
+	/**
+	 * Constant attribute that represents the string to identify the bundle name to the file related with persistence general logs.
+	 */
+	private static final String BUNDLENAME_PERSISTENCE_GENERAL = "messages.persistence.general";
 
 	/**
 	 * Constant attribute that represents the key for the configured locale for the platform.
@@ -116,6 +115,11 @@ public final class Language {
 	 * Attribute that represents the properties for the locale for the core bundle messages.
 	 */
 	private static ResourceBundle resCommonsUtilsBundle = null;
+
+	/**
+	 * Attribute that represents the properties for the locale for the core bundle messages.
+	 */
+	private static ResourceBundle resPersistenceGeneral = null;
 
 	static {
 		// Preparamos el URLClassLoader con el que se cargaran los mensajes de logs
@@ -164,6 +168,8 @@ public final class Language {
 		resWebAdminGeneral = ResourceBundle.getBundle(BUNDLENAME_WEBADMIN_GENERAL, currentLocale, classLoaderMessages);	
 		// Cargamos los mensajes del modulo de commons utils.
 		resCommonsUtilsBundle = ResourceBundle.getBundle(BUNDLENAME_COMMONUTILS_FIRE, currentLocale, classLoaderMessages);
+		// Cargamos los mensajes del modulo de persistence general.
+		resPersistenceGeneral = ResourceBundle.getBundle(BUNDLENAME_PERSISTENCE_GENERAL, currentLocale, classLoaderMessages);
 	}
 	
 	/**
@@ -222,5 +228,24 @@ public final class Language {
 	public static String getFormatResWebAdminGeneral(String key, Object[ ] values) {
 		return new MessageFormat(resWebAdminGeneral.getString(key), currentLocale).format(values);
 	}
-	
+
+	/**
+	 * Method that gets the bundle message of the persistence general for a certain key.
+	 * @param key Parameter that represents the key for obtain the message.
+	 * @return The bundle message of the web admin general for certain key.
+	 */
+	public static String getResPersistenceGeneral(String key) {
+		return resPersistenceGeneral.getString(key);
+	}
+
+	/**
+	 * Method that gets the bundle message of the persistence general for a certain key and values indicated as input parameters.
+	 * @param key Parameter that represents the key for obtain the message.
+	 * @param values Parameter that represents the list of values for insert in the message.
+	 * @return the bundle message of the web admin general for certain key and values indicated as input parameters.
+	 */
+	public static String getFormatResPersistenceGeneral(String key, Object[ ] values) {
+		return new MessageFormat(resPersistenceGeneral.getString(key), currentLocale).format(values);
+	}
+
 }

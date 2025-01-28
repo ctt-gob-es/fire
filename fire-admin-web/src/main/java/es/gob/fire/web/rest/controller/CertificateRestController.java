@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.3, 27/01/2025.
+ * @version 1.4, 28/01/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -69,7 +69,7 @@ import es.gob.fire.persistence.service.ICertificateService;
 /**
  * <p>Class that manages the REST requests related to the Certificate administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.3, 27/01/2025.
+ * @version 1.4, 28/01/2025.
  */
 @RestController
 public class CertificateRestController {
@@ -155,17 +155,16 @@ public class CertificateRestController {
 
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/certificatedatatable", method = RequestMethod.GET)
-	public DataTablesOutput<Certificate> certificates(@NotEmpty final DataTablesInput input) {
+	public DataTablesOutput<CertificateDTO> certificates() {
 		//input.getColumn(COLUMN_CERT_NOT_VALID).setSearchable(Boolean.FALSE);
-
-		final DataTablesOutput<Certificate> certificates = this.certificateService.certificatesDataTable(input);
-		final List<Certificate> listCertificates = certificates.getData();
-
-		this.certificateService.getSubjectValuesForView(listCertificates);
-
-		certificates.setData(listCertificates);
-
-		return certificates;
+		
+		List<Certificate> listCertificates = this.certificateService.getAllCertificate();
+		
+		// Creamos un nuevo objeto DataTablesOutput con los DTO
+	    DataTablesOutput<CertificateDTO> dtoOutput = new DataTablesOutput<>();
+	    dtoOutput.setData(certificateService.obtainAllCertificateToDTO(listCertificates));
+		
+		return dtoOutput;
 	}
 
 	/**
@@ -211,8 +210,8 @@ public class CertificateRestController {
 	 */
 	@RequestMapping(value = "/savecertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<Certificate> saveNew(@RequestPart("certAddForm") final CertificateDTO certAddForm, @RequestPart("certFile") final MultipartFile certFile, final HttpServletRequest request) {
-		final DataTablesOutput<Certificate> dtOutput = new DataTablesOutput<>();
+	public @ResponseBody DataTablesOutput<CertificateDTO> saveNew(@RequestPart("certAddForm") final CertificateDTO certAddForm, @RequestPart("certFile") final MultipartFile certFile, final HttpServletRequest request) {
+		final DataTablesOutput<CertificateDTO> dtOutput = new DataTablesOutput<>();
 		List<Certificate> listNewCertificate = new ArrayList<>();
 		final JSONObject json = new JSONObject();
 
@@ -271,8 +270,8 @@ public class CertificateRestController {
 				final Certificate certificate = this.certificateService.saveCertificate(certAddForm);
 
 				listNewCertificate.add(certificate);
-				this.certificateService.getSubjectValuesForView(listNewCertificate);
-
+				dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
+				
 			} catch (IOException | CertificateException e) {
 				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
 				listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
@@ -280,8 +279,6 @@ public class CertificateRestController {
 				dtOutput.setError(json.toString());
 			}
 		}
-
-		dtOutput.setData(listNewCertificate);
 
 		return dtOutput;
 
@@ -299,8 +296,8 @@ public class CertificateRestController {
 	 */
 	@RequestMapping(value = "/saveeditcert", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<Certificate> saveEdit(@RequestPart("certEditForm") final CertificateDTO certEditForm, @RequestPart("certFile") final MultipartFile certFile, final HttpServletRequest request) {
-		final DataTablesOutput<Certificate> dtOutput = new DataTablesOutput<>();
+	public @ResponseBody DataTablesOutput<CertificateDTO> saveEdit(@RequestPart("certEditForm") final CertificateDTO certEditForm, @RequestPart("certFile") final MultipartFile certFile, final HttpServletRequest request) {
+		final DataTablesOutput<CertificateDTO> dtOutput = new DataTablesOutput<>();
 		List<Certificate> listNewCertificate = new ArrayList<>();
 		final JSONObject json = new JSONObject();
 
@@ -363,8 +360,8 @@ public class CertificateRestController {
 				final Certificate certificate = this.certificateService.saveCertificate(certEditForm);
 
 				listNewCertificate.add(certificate);
-				this.certificateService.getSubjectValuesForView(listNewCertificate);
-
+				dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
+				
 			} catch (IOException | CertificateException e) {
 				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
 				listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
@@ -372,8 +369,6 @@ public class CertificateRestController {
 				dtOutput.setError(json.toString());
 			}
 		}
-
-		dtOutput.setData(listNewCertificate);
 
 		return dtOutput;
 

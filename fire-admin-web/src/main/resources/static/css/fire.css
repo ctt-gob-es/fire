@@ -15,3 +15,47 @@
     font-weight: 700;
     color: #6f7477;
 }
+
+.fa {
+	display: inline-block;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale
+}
+
+.fa-multiselect {
+
+	font: normal normal normal 14px/1 FontAwesome,Roboto, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale
+}
+
+.fa-key-multiselect-green:before {
+	content: "\f084";
+	margin-right: 5px;
+	color: #43e500;
+}
+
+.fa-key-multiselect-red:before {
+	content: "\f084";
+	margin-right: 5px;
+	color: red;
+}
+
+.fa-key-multiselect-black:before {
+	content: "\f084";
+	margin-right: 5px;
+	color: black;
+}
+
+.mT-85{
+	margin-top: 85px !important;
+}
+
+.btn-custom-block {
+	background-color: #efefef;
+}

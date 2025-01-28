@@ -20,14 +20,25 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 27/01/2025.
+ * @version 1.3, 28/01/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -64,7 +75,7 @@ import es.gob.fire.persistence.service.IApplicationService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.2, 27/01/2025.
+ * @version 1.3, 28/01/2025.
  */
 @Service
 public class ApplicationService implements IApplicationService{
@@ -399,5 +410,73 @@ public class ApplicationService implements IApplicationService{
 	 */
 	public List<CertificatesApplication> getCertificatesApplicationByAppId(String appId) {
 		return this.certificatesApplicationRepository.findByApplicationAppId(appId);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IApplicationService#obtainZipWithCertificatesApp(es.gob.fire.persistence.dto.ApplicationCertDTO, java.util.List<CertificatesApplication>)
+	 */
+	public void obtainZipWithCertificatesApp(ApplicationCertDTO appViewForm, List<CertificatesApplication> listCertificatesApplication) {
+		try {
+		    // Directorio temporal para guardar los certificados
+		    final File tempDir = Files.createTempDirectory("certificates").toFile();
+		    final File zipFile = new File(tempDir, "certificados.zip"); // Archivo ZIP temporal
+
+		    // Crear archivo ZIP y procesar los certificados
+		    try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile))) {
+		        for (CertificatesApplication certificatesApplication : listCertificatesApplication) {
+		            // Crear InputStream desde el certificado Base64
+		            final InputStream certIs = new ByteArrayInputStream(
+		                    Base64.getDecoder().decode(certificatesApplication.getCertificate().getCertificate()));
+		            String certFileName = certificatesApplication.getCertificate().getCertificateName() + ".cer"; // Nombre del archivo .cer
+		            File certFile = new File(tempDir, certFileName);
+
+		            // Guardar el certificado en un archivo .cer
+		            try (FileOutputStream fileOut = new FileOutputStream(certFile)) {
+		                byte[] buffer = new byte[4096];
+		                int bytesRead;
+		                while ((bytesRead = certIs.read(buffer)) != -1) {
+		                    fileOut.write(buffer, 0, bytesRead);
+		                }
+		            }
+
+		            // Añadir el archivo .cer al archivo ZIP
+		            try (FileInputStream fis = new FileInputStream(certFile)) {
+		                ZipEntry zipEntry = new ZipEntry(certFileName);
+		                zipOut.putNextEntry(zipEntry);
+
+		                byte[] buffer = new byte[4096];
+		                int bytesRead;
+		                while ((bytesRead = fis.read(buffer)) != -1) {
+		                    zipOut.write(buffer, 0, bytesRead);
+		                }
+		                zipOut.closeEntry();
+		            }
+		        }
+		    }
+
+		    // Convertir el archivo ZIP a Base64
+		    try (FileInputStream fis = new FileInputStream(zipFile);
+		         ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		        byte[] buffer = new byte[4096];
+		        int bytesRead;
+		        while ((bytesRead = fis.read(buffer)) != -1) {
+		            baos.write(buffer, 0, bytesRead);
+		        }
+		        appViewForm.setCertificatesB64(Base64.getEncoder().encodeToString(baos.toByteArray()));
+		    }
+
+		    // Limpiar archivos temporales
+		    File[] tempFiles = tempDir.listFiles();
+		    if (tempFiles != null) {
+		        for (File tempFile : tempFiles) {
+		            tempFile.delete();
+		        }
+		    }
+		    tempDir.delete();
+
+		} catch (IOException | IllegalArgumentException | NullPointerException e) {
+		    LOGGER.error("Se produjo un error procesando los certificados", e);
+		}
 	}
 }

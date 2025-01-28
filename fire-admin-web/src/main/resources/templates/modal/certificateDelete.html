@@ -84,7 +84,11 @@ function deleteCertificate(){
         		createAssociatedAppTable();
 	    	} else {                    
         	
-        		tableCertFire.row(data.index).remove().draw();
+	    		var index = tableCertFire.row({
+	                selected: !0
+	            }).index();
+	    		
+        		tableCertFire.row(index).remove().draw();
                 
                 $('#modalDeleteCert .modal-body .alert').remove();
                 closeModalButton('modalDeleteCert', 'idCertificateForm');

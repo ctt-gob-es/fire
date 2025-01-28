@@ -215,9 +215,20 @@ function saveEditCert() {
  						});
  					  });
  				  }else{
- 					  
+ 					  debugger;
  					 hide();
- 					 tableCertFire.row.add($(data.data)).draw(false);
+ 					// Encuentra la fila en la tabla usando una función de búsqueda
+  					var row = $('#certServiceTable').DataTable().row(function (idx, rowData, node) {
+  					    return rowData.idCertificate === data.data[0].idCertificate;
+  					});
+
+  					if (row.length) {
+  					    // Si la fila existe, actualiza los datos y redibuja la tabla
+  					    row.data(data.data[0]).invalidate().draw(false); // .invalidate() asegura que los cambios se reflejen
+  					} else {
+  					    // Si no existe, añade una nueva fila
+  					    $('#certServiceTable').DataTable().row.add(data.data[0]).draw(false);
+  					}
  				  
  					 $("#certEditForm")[0].reset();
  					 $('#certEditForm *').filter('span').each(function(){

@@ -42,11 +42,9 @@
 					            
 					        </div>
 					        
-					        <div class="col-2">
-					            <button type="button" id="multiselectUser_rightAll" class="btn btn-block"><i class="c-blue ti-angle-double-right"></i></button>
-					            <button type="button" id="multiselectUser_rightSelected" class="btn btn-block"><i class="c-blue ti-angle-right"></i></button>
-					            <button type="button" id="multiselectUser_leftSelected" class="btn btn-block"><i class="c-blue ti-angle-left"></i></button>
-					            <button type="button" id="multiselectUser_leftAll" class="btn btn-block"><i class="c-blue ti-angle-double-left"></i></button>
+					        <div class="col-2 mT-85">
+					            <button type="button" id="multiselectUser_rightSelected" class="btn btn-block btn-custom-block"><i class="c-blue ti-angle-right"></i></button>
+					            <button type="button" id="multiselectUser_leftSelected" class="btn btn-block btn-custom-block"><i class="c-blue ti-angle-left"></i></button>
 					        </div>
 					        
 					        <div class="col-5">
@@ -65,19 +63,21 @@
 						<div class="col-5">
 					        <label for="multiselectCertificate" class="col-form-label" th:text="#{form.application.certificates.system}"></label>
 					        <select name="from[]" id="multiselectCertificate" class="form-control" size="9" multiple="multiple">
-					        	<option th:each="au: ${availableCertficates}" th:value="${au.idCertificado}" th:text="${au.certificateName}"/>
+					        	<option th:each="ak: ${availableCertficates}"
+									th:value="${ak.idCertificate}" th:text="${ak.certificateName}"  
+									th:class="'fa-multiselect ' + ${ak.status == 'V&aacute;lido' ? 'fa-key-multiselect-green' : ak.status == 'Caducado' ? 'fa-key-multiselect-red' : 'fa-key-multiselect-black'}" />
 							</select>
 					    </div>
-					    <div class="col-2">
-					        <button type="button" id="multiselectCertificate_rightAll" class="btn btn-block"><i class="c-blue ti-angle-double-right"></i></button>
-					        <button type="button" id="multiselectCertificate_rightSelected" class="btn btn-block"><i class="c-blue ti-angle-right"></i></button>
-					        <button type="button" id="multiselectCertificate_leftSelected" class="btn btn-block"><i class="c-blue ti-angle-left"></i></button>
-					    	<button type="button" id="multiselectCertificate_leftAll" class="btn btn-block"><i class="c-blue ti-angle-double-left"></i></button>
-						</div>
+					    <div class="col-2 mT-85">
+					        <button type="button" id="multiselectCertificate_rightSelected" class="btn btn-block btn-custom-block"><i class="c-blue ti-angle-right"></i></button>
+					    	<button type="button" id="multiselectCertificate_leftSelected" class="btn btn-block btn-custom-block"><i class="c-blue ti-angle-left"></i></button>
+					    </div>
 						<div class="col-5">
 							<label for="multiselectCertificate_to" class="col-form-label" th:text="#{form.application.certificates.app}"></label>
 					        <select name="to[]" id="multiselectCertificate_to" class="form-control" size="9" multiple="multiple">
-					        	<option th:each="su: ${selectedCertificates}" th:value="${su.idCertificado}" th:text="${su.certificateName}"/>
+					        	<option th:each="ak: ${selectedCertificates}"
+									th:value="${ak.idCertificate}" th:text="${ak.certificateName}"  
+									th:class="'fa-multiselect ' + ${ak.status == 'V&aacute;lido' ? 'fa-key-multiselect-green' : ak.status == 'Caducado' ? 'fa-key-multiselect-red' : 'fa-key-multiselect-black'}" />
 					        </select>
 						</div>
 					</div>
