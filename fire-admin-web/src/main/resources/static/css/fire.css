@@ -52,6 +52,12 @@
 	color: black;
 }
 
+.fa-key-multiselect-yellow:before {
+	content: "\f084";
+	margin-right: 5px;
+	color: #ffe000;
+}
+
 .mT-85{
 	margin-top: 85px !important;
 }

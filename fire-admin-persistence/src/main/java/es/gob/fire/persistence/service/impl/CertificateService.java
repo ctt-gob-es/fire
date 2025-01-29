@@ -30,7 +30,9 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -329,9 +331,12 @@ public class CertificateService implements ICertificateService{
 	            	x509Certificate.checkValidity();
 	            	// El certificado sera valido
 	            	certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV001));
-	            }catch (Exception e) {
-	            	// El certificado sera caducado
+	            } catch (CertificateExpiredException e) {
+	            	// El certificado esta caducado
 	            	certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV002));
+	            } catch (CertificateNotYetValidException e) {
+	            	// El certificado aun no es valido
+	            	certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV004));
 	            }
 	            
 	            java.util.Date expDatePrincipal = x509Certificate.getNotAfter();
