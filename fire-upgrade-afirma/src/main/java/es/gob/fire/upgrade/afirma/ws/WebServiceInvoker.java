@@ -146,7 +146,10 @@ public class WebServiceInvoker {
 
 			final String securityOption = this.config.getAuthMethod();
 			final ClientHandler requestHandler = newRequestHandler(securityOption);
-			final ResponseHandler responseHandler = new ResponseHandler(this.signingCert);
+			ResponseHandler responseHandler = null;
+			if (this.signingCert != null) {
+				responseHandler = new ResponseHandler(this.signingCert);
+			}
 
 			LOGGER.fine("Metodo a invocar: " + method); //$NON-NLS-1$
 
@@ -229,7 +232,7 @@ public class WebServiceInvoker {
 					addHandler(phase, requestHandler, 2);
 					break;
 				} catch (final PhaseException e) {
-					LOGGER.log(Level.SEVERE, "Ha ocurrido un error al anadir el handler de seguridad de salida. Excepcion: " + e);
+					LOGGER.log(Level.SEVERE, "Ha ocurrido un error al anadir el handler de seguridad de salida. Excepcion: " + e); //$NON-NLS-1$
 				}
 			}
 		}
@@ -243,7 +246,7 @@ public class WebServiceInvoker {
 						addHandler(phase, responseHandler, 2);
 						break;
 					} catch (final PhaseException e) {
-						LOGGER.log(Level.SEVERE, "Ha ocurrido un error al anadir el handler de seguridad de entrada. Excepcion: " + e);
+						LOGGER.log(Level.SEVERE, "Ha ocurrido un error al anadir el handler de seguridad de entrada. Excepcion: " + e); //$NON-NLS-1$
 					}
 				}
 			}

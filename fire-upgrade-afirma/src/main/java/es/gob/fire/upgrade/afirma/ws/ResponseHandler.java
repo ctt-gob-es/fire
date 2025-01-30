@@ -86,13 +86,11 @@ public class ResponseHandler extends AbstractHandler {
 				IdRegister.registerElements(doc.getDocumentElement());
 
 				// Comprobamos que la respuesta se haya firmado con el certificado necesario
-				if (this.signingCert != null) {
-					if (signature.checkSignatureValue(this.signingCert)) {
-						LOGGER.fine("La firma de la respuesta es valida"); //$NON-NLS-1$
-					} else {
-						throw new AxisFault("La firma de la respuesta del servicio web de @Firma no es valida segun certificado: " //$NON-NLS-1$
-								+ this.signingCert.getSubjectDN() + "  - Numero de serie: " + this.signingCert.getSerialNumber()); //$NON-NLS-1$
-					}
+				if (signature.checkSignatureValue(this.signingCert)) {
+					LOGGER.fine("La firma de la respuesta es valida"); //$NON-NLS-1$
+				} else {
+					throw new AxisFault("La firma de la respuesta del servicio web de @Firma no es valida segun certificado: " //$NON-NLS-1$
+							+ this.signingCert.getSubjectDN() + "  - Numero de serie: " + this.signingCert.getSerialNumber()); //$NON-NLS-1$
 				}
 			} else {
 				throw new AxisFault("No se localiza el nodo de firma en la respuesta del servicio"); //$NON-NLS-1$
