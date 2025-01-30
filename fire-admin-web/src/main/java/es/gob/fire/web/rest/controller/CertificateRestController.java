@@ -20,15 +20,18 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.4, 28/01/2025.
+ * @version 1.5, 30/01/2025.
  */
 package es.gob.fire.web.rest.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,6 +59,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.IWebViewMessages;
 import es.gob.fire.i18n.Language;
@@ -65,11 +69,14 @@ import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.upgrade.afirma.PlatformWsException;
+import es.gob.fire.upgrade.afirma.VerifyAfirmaCertificateResponse;
+import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 /**
  * <p>Class that manages the REST requests related to the Certificate administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.4, 28/01/2025.
+ * @version 1.5, 30/01/2025.
  */
 @RestController
 public class CertificateRestController {
@@ -207,6 +214,7 @@ public class CertificateRestController {
 	 * @param bindingResult
 	 *            Object that represents the form validation result.
 	 * @return {@link DataTablesOutput<Certificate>}
+	 * @throws Exception 
 	 */
 	@RequestMapping(value = "/savecertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@JsonView(DataTablesOutput.View.class)
@@ -253,25 +261,97 @@ public class CertificateRestController {
 				msgerror = "Error al instanciar el proveedor X.509";
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
-				X509Certificate cert1;
+				X509Certificate cert1 = null;
 				
+				// Validaremos si el certificado introducido por el usuario es válido
 				if (!certFile.isEmpty()) {
 	        		try (final InputStream certIs = certFile.getInputStream();) {
 	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			certAddForm.setCertBytes(cert1.getEncoded());
 	        		} catch (final CertificateException e) {
 	        			msgerror = certFile.getOriginalFilename() + " no representa un certificado v\u00E1lido";
 	        			throw e;
 	        		}
 				}
-
-				certAddForm.setCertFile(certFile);
-
-				final Certificate certificate = this.certificateService.saveCertificate(certAddForm);
-
-				listNewCertificate.add(certificate);
-				dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
 				
+				try {
+					// Validaremos si el certificado esta caducado o bien si su fecha de validez aun no ha entrado en vigor
+					cert1.checkValidity();
+					
+					// Validaremos otros estados del certificado haciendo una petición SOAP
+					VerifyAfirmaCertificateResponse verifyAfirmaCertificateResponse = this.certificateService.validateStatusCertificateInAfirmaWS(cert1);
+					
+					LOGGER.info(verifyAfirmaCertificateResponse.getDescription());
+					
+					// Si el certificado es valido almacenaremos el certificado en la BD
+					if(verifyAfirmaCertificateResponse.isDefinitive()) {
+						LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC004));
+						
+						certAddForm.setCertBytes(cert1.getEncoded());
+						certAddForm.setCertFile(certFile);
+
+						final Certificate certificate = this.certificateService.saveCertificate(certAddForm);
+
+						listNewCertificate.add(certificate);
+						dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
+					} else if(verifyAfirmaCertificateResponse.isBadCertificateFormat()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC005, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isBadCertificateSignature()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC006, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isExpired()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC007, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isNotYetValid()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC008, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isOnHold()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC009, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isPathValidationFails()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC010, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isRevoked()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC011, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isRevokedWithoutTST()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC012, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isTemporal()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC013, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					}
+				} catch (final CertificateExpiredException e) {
+					// El certificado está caducado
+				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				    String expirationDate = dateFormat.format(cert1.getNotAfter());
+				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC001, new Object[]{certFile.getOriginalFilename(), expirationDate});
+				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				} catch (final CertificateNotYetValidException e) {
+					 // El certificado aún no es válido
+				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				    String notBeforeDate = dateFormat.format(cert1.getNotBefore());
+				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC002, new Object[]{certFile.getOriginalFilename(), notBeforeDate});
+				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				} catch (PlatformWsException | WSServiceInvokerException e) {
+					// Se ha producido un fallo en la peticion o respuesta del SOAP
+					LOGGER.error(e);
+					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC003);
+					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				}
+			
 			} catch (IOException | CertificateException e) {
 				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
 				listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
@@ -339,7 +419,7 @@ public class CertificateRestController {
 				msgerror = "Error al instanciar el proveedor X.509";
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
-				X509Certificate cert1;
+				X509Certificate cert1 = null;
 				
 				// Si no se actualiza el certificado 1, dejamos el que estaba
 				if (certFile.isEmpty() && certEditForm.getCertificateB64() != null) {
@@ -356,11 +436,83 @@ public class CertificateRestController {
 	        			throw e;
 	        		}
 				}
+				
+				try {
+					// Validaremos si el certificado esta caducado o bien si su fecha de validez aun no ha entrado en vigor
+					cert1.checkValidity();
+					
+					// Validaremos otros estados del certificado haciendo una petición SOAP
+					VerifyAfirmaCertificateResponse verifyAfirmaCertificateResponse = this.certificateService.validateStatusCertificateInAfirmaWS(cert1);
+					
+					LOGGER.info(verifyAfirmaCertificateResponse.getDescription());
+					
+					// Si el certificado es valido almacenaremos el certificado en la BD
+					if(verifyAfirmaCertificateResponse.isDefinitive()) {
+						LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC004));
+						
+						final Certificate certificate = this.certificateService.saveCertificate(certEditForm);
 
-				final Certificate certificate = this.certificateService.saveCertificate(certEditForm);
-
-				listNewCertificate.add(certificate);
-				dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
+						listNewCertificate.add(certificate);
+						dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
+						
+					} else if(verifyAfirmaCertificateResponse.isBadCertificateFormat()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC005, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isBadCertificateSignature()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC006, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isExpired()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC007, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isNotYetValid()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC008, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isOnHold()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC009, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isPathValidationFails()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC010, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isRevoked()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC011, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isRevokedWithoutTST()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC012, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					} else if(verifyAfirmaCertificateResponse.isTemporal()) {
+						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC013, new Object[] {certFile.getOriginalFilename()});
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
+					}
+				} catch (final CertificateExpiredException e) {
+					// El certificado está caducado
+				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				    String expirationDate = dateFormat.format(cert1.getNotAfter());
+				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC001, new Object[]{certFile.getOriginalFilename(), expirationDate});
+				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				} catch (final CertificateNotYetValidException e) {
+					 // El certificado aún no es válido
+				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				    String notBeforeDate = dateFormat.format(cert1.getNotBefore());
+				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC002, new Object[]{certFile.getOriginalFilename(), notBeforeDate});
+				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				} catch (PlatformWsException | WSServiceInvokerException e) {
+					// Se ha producido un fallo en la peticion o respuesta del SOAP
+					LOGGER.error(e);
+					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC003);
+					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				}
 				
 			} catch (IOException | CertificateException e) {
 				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);

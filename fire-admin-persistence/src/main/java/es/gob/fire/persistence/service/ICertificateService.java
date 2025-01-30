@@ -20,13 +20,15 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>15/06/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 15/06/2018.
+ * @version 1.1, 30/01/2025.
  */
 package es.gob.fire.persistence.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -35,6 +37,9 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.upgrade.afirma.PlatformWsException;
+import es.gob.fire.upgrade.afirma.VerifyAfirmaCertificateResponse;
+import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 public interface ICertificateService {
 	/**
@@ -136,4 +141,18 @@ public interface ICertificateService {
 	 * @throws IOException if an error occurs during Base64 decoding of the certificate.
 	 */
 	List<CertificateDTO> obtainAllCertificateToDTO(List<Certificate> listCertificate);
+
+	/**
+	 * Validates the status of an X.509 certificate using the Afirma web service.
+	 *
+	 * <p>This method establishes a connection with AfirmaWS, initializes the necessary 
+	 * configuration properties, and invokes the certificate verification service.</p>
+	 *
+	 * @param x509Certificate The X.509 certificate to be validated.
+	 * @return A {@link VerifyAfirmaCertificateResponse} containing the verification result.
+	 * @throws CertificateEncodingException If there is an issue encoding the certificate.
+	 * @throws PlatformWsException If there is an error with the platform web service.
+	 * @throws WSServiceInvokerException If there is an issue invoking the web service.
+	 */
+	VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate) throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException;
 }

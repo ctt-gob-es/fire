@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.4, 28/01/2025.
+ * @version 1.5, 30/01/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
@@ -38,8 +39,10 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -57,11 +60,16 @@ import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.repository.CertificateRepository;
 import es.gob.fire.persistence.repository.datatable.CertificateDataTablesRepository;
 import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.upgrade.afirma.AfirmaConnector;
+import es.gob.fire.upgrade.afirma.PlatformWsException;
+import es.gob.fire.upgrade.afirma.Verify;
+import es.gob.fire.upgrade.afirma.VerifyAfirmaCertificateResponse;
+import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.4, 28/01/2025.
+ * @version 1.5, 30/01/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -77,6 +85,34 @@ public class CertificateService implements ICertificateService{
 	 */
 	private static final String X509 = "X.509"; //$NON-NLS-1$
 
+	/** Nombre de la propiedad en la que se guarda el nombre de la aplicacion con el que debe
+	 * conectarse a la plataforma @firma. */
+	private static final String PROP_APPID = "afirma.appId"; //$NON-NLS-1$
+	
+	/**
+	 * Constant that represents the afirma appId property.
+	 */
+	@Value("${afirma.appId}")
+	private String afirmaAppId;
+	
+	/**
+	 * Constant that represents the webservices timeout property.
+	 */
+	@Value("${webservices.timeout}")
+	private String webServiceTimeout;
+	
+	/**
+	 * Constant that represents the webservices endpoint property.
+	 */
+	@Value("${webservices.endpoint}")
+	private String webServicesEndpoint;
+	
+	/**
+	 * Constant that represents the webservices verify certificate property.
+	 */
+	@Value("${webservices.service.verifyCertificate}")
+	private String webServiceVerifyCertificate;
+	
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
@@ -353,5 +389,22 @@ public class CertificateService implements ICertificateService{
 		}
 		return listCertificateDTO;
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IApplicationService#validateStatusCertificateInAfirmaWS(java.security.cert.X509Certificate)
+	 */
+	public VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate) throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException {
+		// Obtenemos la conexión con AfirmaWS
+		AfirmaConnector afirmaConnector = new AfirmaConnector();
+		Properties config = new Properties();
+		config.setProperty("afirma.appId", afirmaAppId);
+		config.setProperty("webservices.timeout", webServiceTimeout);
+		config.setProperty("webservices.endpoint", webServicesEndpoint);
+		config.setProperty("webservices.service.verifyCertificate", webServiceVerifyCertificate);
+		
+		afirmaConnector.init(config);
+		
+		return Verify.verifyCertificate(afirmaConnector, x509Certificate, config.getProperty(PROP_APPID));
+	}
 }
