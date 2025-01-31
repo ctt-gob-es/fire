@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>es.gob.sgad</groupId>
+		<artifactId>clave-j20068.clave-saml-parent</artifactId>
+		<version>2.7</version>
+	</parent>
+
+	<artifactId>clave-j20068.eidas-encryption</artifactId>
+
+    <name>eIDAS Encryption</name>
+    <description>
+        Encryption for EIDASSAMLEngine
+    </description>
+
+	<properties>
+		<skipDeploy>true</skipDeploy>
+	</properties>
+
+    <repositories>
+        <repository>
+            <id>shib-release</id>
+            <url>
+                https://build.shibboleth.net/nexus/content/groups/public
+            </url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependencies>
+    
+    	<!-- 1) Dependencies on other modules: -->
+        <dependency>
+            <groupId>es.gob.sgad</groupId>
+            <artifactId>clave-j20068.eidas-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        
+        <!-- UNIT TEST Dependencies -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+    <build>
+    	<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>${basedir}/src/main/assembly/assembly-java.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>assembly-configurable-resources</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+    	</plugins>
+    </build>
+</project>

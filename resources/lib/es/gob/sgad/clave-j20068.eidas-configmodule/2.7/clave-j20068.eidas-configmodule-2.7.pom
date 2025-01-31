@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>es.gob.sgad</groupId>
+		<artifactId>clave-j20068.clave-saml-parent</artifactId>
+		<version>2.7</version>
+	</parent>
+
+	<artifactId>clave-j20068.eidas-configmodule</artifactId>
+
+    <name>eIDAS Configuration Module</name>
+    <description>
+        Handling of Eidas configuration
+    </description>
+
+	<properties>
+		<skipDeploy>true</skipDeploy>
+	</properties>
+
+    <dependencies>
+    
+        <!-- 1) Dependencies on other modules: -->
+        <dependency>
+            <groupId>es.gob.sgad</groupId>
+            <artifactId>clave-j20068.eidas-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- 2) Dependencies on libraries: -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+
+        <!-- UNIT TEST Dependencies -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+    <build>
+    	<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>${basedir}/src/main/assembly/assembly-java.xml</descriptor>
+						<descriptor>${basedir}/src/main/assembly/assembly-resources.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>assembly-configurable-resources</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+    	</plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>metrics</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>cobertura-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

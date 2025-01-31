@@ -5,7 +5,7 @@
     
     <groupId>es.gob.sgad</groupId>
     <artifactId>clave-j20068.clave-saml-parent</artifactId>
-    <version>2.8.4</version>
+    <version>2.7</version>
 
     <packaging>pom</packaging>
     <name>Clave SAML parent</name>
@@ -27,32 +27,72 @@
         <samlspecacept.version>0.5.1</samlspecacept.version>
 
         <!-- 2) Library dependency versions -->
-        <spring.version>5.3.21</spring.version>
-        <opensaml.version>3.4.6</opensaml.version>
-        <opensaml-security-ext.version>1.0.8</opensaml-security-ext.version>
+        <spring.version>4.3.15.RELEASE</spring.version>
+        <!-- 
+        <opensaml.not-yet-commons-ssl.version>0.3.9</opensaml.not-yet-commons-ssl.version>
+        <opensaml.xmltooling.version>1.4.5</opensaml.xmltooling.version>
+        <opensaml.openws.version>1.5.5</opensaml.openws.version>
+        -->
+        <opensaml.version>2.6.5-eidas_1</opensaml.version>
         <servlet.version>2.5</servlet.version>
+        <!-- 
+        <jsp.api>2.0</jsp.api>
+        <jstl.version>1.1.2</jstl.version>
+        <apache.taglibs>1.2.5</apache.taglibs>
+        -->
+        <slf4j.version>1.7.10</slf4j.version>
+        <logback.version>1.1.2</logback.version>
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
-        <commons.codec>1.11</commons.codec>
+        <commons.codec>1.9</commons.codec>
         <commons.collections>3.2.2</commons.collections>
-        <commons.io>2.11.0</commons.io>
+        <commons.io>2.4</commons.io>
         <commons.lang>2.6</commons.lang>
-        <commons.logging>1.2</commons.logging>
-        <commons.httpclient>4.5.13</commons.httpclient>
-        <commons.httpcore>4.4.9</commons.httpcore>
-        <hazelcast.version>5.1.1</hazelcast.version>
-        <bouncycastle.version>1.70</bouncycastle.version>
-        <owasp.version>1.2.3</owasp.version>
-        <owasp.esapi.version>2.2.3.1</owasp.esapi.version>
+        <commons.logging>1.1.3</commons.logging>
+        <commons.httpclient>3.1</commons.httpclient>
+        <!-- 
+        <commons.lang3>3.1</commons.lang3>
+        -->
+        <hazelcast.version>3.2</hazelcast.version>
+        <bouncycastle.version>1.60</bouncycastle.version>
+        <owasp.version>1.1.1</owasp.version>
+        <!-- 
+        <owasp.dependency-check.version>1.4.0</owasp.dependency-check.version>
+        -->
+        <owasp.esapi.version>2.1.0</owasp.esapi.version>
+        <!-- 
+        <cglib.version>2.2.2</cglib.version>
+        -->
         <xmlapis.version>1.4.01</xmlapis.version>
-        <xerces.version>2.12.2</xerces.version>
+        <xerces.version>2.11.0</xerces.version>
+        <!-- 
+        <xalan.version>2.7.2</xalan.version>
+        -->
         <joda.time.version>2.6</joda.time.version>
+        <!-- 
+        <log4j.version>1.2.17</log4j.version>
+        <log4j.api>2.3</log4j.api>
+        -->
         <xmlunit.version>1.5</xmlunit.version>
-        <xmlsec.version>2.3.0</xmlsec.version>
-        <guava.version>31.1-jre</guava.version>
+        <!--
+        <bdr.econnector.version>1.2.2</bdr.econnector.version>
+        <struts.version>2.3.32</struts.version>
+        <icu4j.version>55.1</icu4j.version>
+        <vaadin.version>7.4.2</vaadin.version>
+        <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
+        <vaadin-spring.version>1.0.0.beta1</vaadin-spring.version>
+        <vaadin4spring.version>0.0.5.RELEASE</vaadin4spring.version>
+        <jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
+        -->
+        <xmlsec.version>2.0.5</xmlsec.version>
+        <guava.version>19.0</guava.version>
         <jsr305.version>3.0.1</jsr305.version>
         <icu4j.version>57.1</icu4j.version>
+        <!--
+        <cxf.version>3.2.0</cxf.version>
+        <apache.commons.httpclient>4.5.5</apache.commons.httpclient>
+        -->
 
         <!-- 3) maven plugin versions -->
         <javadoc.plugin.version>2.8.1</javadoc.plugin.version>
@@ -60,13 +100,24 @@
         <surefire.plugin.version>2.19.1</surefire.plugin.version>
         <jar.plugin.version>3.1.1</jar.plugin.version>
         <deploy.plugin.version>2.7</deploy.plugin.version>
+        <!-- 
+        <war.plugin.version>2.0.2</war.plugin.version>
+        <ear.plugin.version>2.7</ear.plugin.version>
+        -->
         <resources.plugin.version>2.7</resources.plugin.version>
         <cobertura.plugin.version>2.7</cobertura.plugin.version>
+        <!-- 
+        <remote.resources.plugin.version>1.5</remote.resources.plugin.version>
+        -->
         <source.plugin.version>2.1.2</source.plugin.version>
+        <!-- 
+        <install.plugin.version>2.5.2</install.plugin.version>
+        <clean.plugin.version>2.6.1</clean.plugin.version>
+        -->
     </properties>
     
     <dependencyManagement>
-        <dependencies>
+    	<dependencies>
 
             <!-- Joda -->
             <dependency>
@@ -78,8 +129,33 @@
             <!-- HazelCast -->
             <dependency>
                 <groupId>com.hazelcast</groupId>
-                <artifactId>hazelcast-spring</artifactId>
+                <artifactId>hazelcast</artifactId>
                 <version>${hazelcast.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.hazelcast</groupId>
+                <artifactId>hazelcast-wm</artifactId>
+                <version>${hazelcast.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             
             <!-- ICU -->
@@ -89,6 +165,20 @@
                 <version>${icu4j.version}</version>
             </dependency>
             
+            <!-- LogBack -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+
             <!-- Bouncy Castle -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -132,9 +222,6 @@
                         <artifactId>commons-collections</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>                    <exclusion>
                         <groupId>log4j</groupId>
                         <artifactId>log4j</artifactId>
                     </exclusion>
@@ -165,8 +252,8 @@
                 <version>${commons.collections}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
+                <groupId>commons-httpclient</groupId>
+                <artifactId>commons-httpclient</artifactId>
                 <version>${commons.httpclient}</version>
                 <exclusions>
                     <exclusion>
@@ -180,17 +267,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore</artifactId>
-                <version>${commons.httpcore}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons.io}</version>
@@ -200,6 +276,7 @@
                 <artifactId>commons-lang</artifactId>
                 <version>${commons.lang}</version>
             </dependency>
+            
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -210,11 +287,9 @@
                 <artifactId>jsr305</artifactId>
                 <version>${jsr305.version}</version>
             </dependency>
-
-			<!-- opensaml -->
             <dependency>
                 <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-core</artifactId>
+                <artifactId>opensaml</artifactId>
                 <version>${opensaml.version}</version>
                 <exclusions>
                     <exclusion>
@@ -224,6 +299,10 @@
                     <exclusion>
                         <groupId>commons-collections</groupId>
                         <artifactId>commons-collections</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-httpclient</groupId>
+                        <artifactId>commons-httpclient</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>commons-lang</groupId>
@@ -250,12 +329,20 @@
                         <artifactId>log4j</artifactId>
                     </exclusion>
                     <exclusion>
+                        <groupId>org.apache.santuario</groupId>
+                        <artifactId>xmlsec</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>org.apache.velocity</groupId>
                         <artifactId>velocity</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.bouncycastle</groupId>
                         <artifactId>bcprov-jdk15on</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.owasp.esapi</groupId>
+                        <artifactId>esapi</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -279,62 +366,71 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-saml-api</artifactId>
-                <version>${opensaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-saml-impl</artifactId>
-                <version>${opensaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>se.swedenconnect.opensaml</groupId>
-                <artifactId>opensaml-security-ext</artifactId>
-                <version>${opensaml-security-ext.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.bouncycastle</groupId>
-                        <artifactId>bcprov-jdk15on</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-xmlsec-api</artifactId>
-                <version>${opensaml.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.bouncycastle</groupId>
-                        <artifactId>bcprov-jdk15on</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-xmlsec-impl</artifactId>
-                <version>${opensaml.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.bouncycastle</groupId>
-                        <artifactId>bcprov-jdk15on</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-                        
-            <!-- LogBack -->
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>1.2.10</version>
-            </dependency>
-	        <dependency>
-			    <groupId>org.slf4j</groupId>
-			    <artifactId>slf4j-api</artifactId>
-			    <version>1.7.32</version>
-	        </dependency>
             
+            <!-- SLF4J logging -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>            
+
+            <!-- commons-logging -->
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons.logging}</version>
+            </dependency>
+            
+            <!-- Log4J -->
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.jms</groupId>
+                        <artifactId>jms</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.sun.jdmk</groupId>
+                        <artifactId>jmxtools</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.sun.jmx</groupId>
+                        <artifactId>jmxri</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>mail</artifactId>
+                        <groupId>javax.mail</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <!-- Servlet API -->
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -352,11 +448,6 @@
             </dependency>
             
             <!-- Spring -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-beans</artifactId>
@@ -436,14 +527,8 @@
                 <version>${spring.version}</version>
                 <scope>test</scope>
             </dependency>
-	        <dependency>
-			    <groupId>org.slf4j</groupId>
-			    <artifactId>slf4j-simple</artifactId>
-			    <version>1.7.32</version>
-			    <scope>test</scope>
-	        </dependency>
             
-        </dependencies>
+    	</dependencies>
     </dependencyManagement>
     
     <dependencies>
@@ -516,10 +601,10 @@
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${resources.plugin.version}</version>
                 </plugin>
-                <plugin>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                       <version>2.4.1</version>
-                   </plugin>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+           			<version>2.4.1</version>
+           		</plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -548,14 +633,14 @@
                     <detectLinks>true</detectLinks>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${deploy.plugin.version}</version>				
-                <configuration>
-                    <skip>${skipDeploy}</skip>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>${deploy.plugin.version}</version>				
+				<configuration>
+					<skip>${skipDeploy}</skip>
+				</configuration>
+			</plugin>
         </plugins>
     </build>
 
@@ -564,7 +649,6 @@
         <module>EIDAS-Commons</module>
         <module>EIDAS-ConfigModule</module>
         <module>EIDAS-Encryption</module>
-        <module>EIDAS-Metadata</module>
         <module>EIDAS-SAMLEngine</module>
         <module>saml-engine</module>
     </modules>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>net.shibboleth</groupId>
+        <artifactId>parent-v2</artifactId>
+        <version>3</version>
+    </parent>
+    
+    <groupId>org.opensaml</groupId>
+    <artifactId>opensaml</artifactId>
+    <version>2.6.5-eidas_1</version>
+    <packaging>jar</packaging>
+
+    <name>OpenSAML-J</name>
+    <description>
+        The OpenSAML-J library provides tools to support developers working with the Security Assertion Markup Language
+        (SAML).
+    </description>
+    
+    <properties>
+        <svn.relative.location>java-opensaml2</svn.relative.location>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>shib-release</id>
+            <url>https://build.shibboleth.net/nexus/content/groups/public</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>shib-snapshot</id>
+            <url>https://build.shibboleth.net/nexus/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- Compile dependencies -->
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>openws</artifactId>
+            <version>1.5.5</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7-eidas_1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.owasp.esapi</groupId>
+            <artifactId>esapi</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-configuration</groupId>
+                    <artifactId>commons-configuration</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-fileupload</groupId>
+                    <artifactId>commons-fileupload</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xom</groupId>
+                    <artifactId>xom</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.beanshell</groupId>
+                    <artifactId>bsh-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.owasp.antisamy</groupId>
+                    <artifactId>antisamy</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+        </dependency>
+
+        <!-- Provided dependencies -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+        
+        <!-- Runtime dependencies -->
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+			<plugin> <!--  vargata: avoid proxy setting to forgot by child processes -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+<excludes>
+            <exclude>**</exclude>
+</excludes>
+				<argLine>-DforkMode=never</argLine>
+				</configuration>
+			</plugin>
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <configuration>
+    <excludes>
+      <exclude>**/src/test/*</exclude>
+    </excludes>
+  </configuration>
+</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <manifestEntries>
+                            <Main-Class>org.opensaml.Version</Main-Class>
+                        </manifestEntries>
+                        <manifestSections>
+                            <manifestSection>
+                                <name>org/opensaml/</name>
+                                <manifestEntries>
+                                    <Implementation-Title>${project.artifactId}</Implementation-Title>
+                                    <Implementation-Version>${project.version}</Implementation-Version>
+                                    <Implementation-Vendor>www.opensaml.org</Implementation-Vendor>
+                                </manifestEntries>
+                            </manifestSection>
+                            <manifestSection>
+                                <name>org/opensaml/saml1/</name>
+                                <manifestEntries>
+                                    <Specification-Title>Assertions and Protocol for the OASIS Security Assertion Markup Language (SAML) V1.1</Specification-Title>
+                                    <Specification-Version>1.1</Specification-Version>
+                                    <Specification-Vendor>OASIS</Specification-Vendor>
+                                </manifestEntries>
+                            </manifestSection>
+                            <manifestSection>
+                                <name>org/opensaml/saml2/</name>
+                                <manifestEntries>
+                                    <Specification-Title>Assertions and Protocol for the OASIS Security Assertion Markup Language (SAML) V2.0</Specification-Title>
+                                    <Specification-Version>2.0</Specification-Version>
+                                    <Specification-Vendor>OASIS</Specification-Vendor>
+                                </manifestEntries>
+                            </manifestSection>
+                            <manifestSection>
+                                <name>org/opensaml/xacml/</name>
+                                <manifestEntries>
+                                    <Specification-Title>eXtensible Access Control Markup Language (XACML) Version 2.0</Specification-Title>
+                                    <Specification-Version>2.0</Specification-Version>
+                                    <Specification-Vendor>OASIS</Specification-Vendor>
+                                </manifestEntries>
+                            </manifestSection>
+                            <manifestSection>
+                                <name>org/opensaml/xacml/profile/saml/</name>
+                                <manifestEntries>
+                                    <Specification-Title>SAML 2.0 Profile of XACML, Version 2</Specification-Title>
+                                    <Specification-Version>Working Draft 5</Specification-Version>
+                                    <Specification-Vendor>OASIS</Specification-Vendor>
+                                </manifestEntries>
+                            </manifestSection>
+                        </manifestSections>
+                    </archive>
+                </configuration>                
+            </plugin>		
+			<plugin>
+        <groupId>net.ju-n.maven.plugins</groupId>
+        <artifactId>checksum-maven-plugin</artifactId>        
+        <executions>
+          <execution>
+            <goals>
+              <goal>artifacts</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+        </configuration>
+      </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/bin.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <links>
+                                <link>https://build.shibboleth.net/nexus/service/local/repositories/releases/archive/org/opensaml/xmltooling/1.4.5/xmltooling-1.4.5-javadoc.jar/!/</link>
+                                <link>https://build.shibboleth.net/nexus/service/local/repositories/releases/archive/org/opensaml/openws/1.5.5/openws-1.5.5-javadoc.jar/!/</link>
+                            </links>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
+</project>
