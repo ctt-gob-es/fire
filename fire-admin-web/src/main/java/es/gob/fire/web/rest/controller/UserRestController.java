@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.5, 27/01/2025.
+ * @version 1.6, 31/01/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -83,7 +83,7 @@ import es.gob.fire.persistence.service.IUserService;
  * Application for signing documents of @firma suite systems.
  * </p>
  * 
- * @version 1.5, 27/01/2025.
+ * @version 1.6, 31/01/2025.
  */
 @RestController
 public class UserRestController {
@@ -377,6 +377,7 @@ public class UserRestController {
 		
 		if(hasAccessPermission) {
 			if(!UtilsStringChar.isNullOrEmpty(userForm.getDniAdd())) {
+				// Validaremos el formato del dni/nif
 				String nif = null;
 				if (userForm.getDniAdd().toUpperCase().startsWith("X")
 						|| userForm.getDniAdd().toUpperCase().startsWith("Y")
@@ -385,7 +386,6 @@ public class UserRestController {
 				} else {
 					nif = userForm.getDniAdd();
 				}
-				
 				Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
 				Matcher m = nifPattern.matcher(nif);
 				if (m.matches()) {
@@ -398,15 +398,21 @@ public class UserRestController {
 
 					if (!reference.equalsIgnoreCase(letra)) {
 						error = true;
-						json.put("dniEdit" + SPAN, "El DNI debe tener un formato correcto.");
+						json.put("dniAdd" + SPAN, "El DNI debe tener un formato correcto.");
 					}
 				} else {
 					error = true;
-					json.put("dniEdit" + SPAN, "El DNI debe tener un formato correcto.");
+					json.put("dniAdd" + SPAN, "El DNI debe tener un formato correcto.");
+				}
+				
+				// Validaremos que el dni/nif no esté repetido
+				if (this.userService.getUserByDni(userForm.getDniAdd())!=null) {
+					error = true;
+					json.put("dniAdd" + SPAN, "Ya existe un usuario con el DNI introducido.");
 				}
 			} else {
 				error = true;
-				json.put("dniEdit" + SPAN, "El campo dni es obligatorio.");
+				json.put("dniAdd" + SPAN, "El campo dni es obligatorio.");
 			}
 		}
 		
@@ -557,6 +563,13 @@ public class UserRestController {
 				} else {
 					error = true;
 					json.put("dniEdit" + SPAN, "El DNI debe tener un formato correcto.");
+				}
+				
+				// Validaremos que el dni/nif no exista
+				if (!userForm.getDniEdit().equals(userBeforeUpdate.getDni())
+						&& this.userService.getUserByDni(userForm.getDniEdit())!=null) {
+					error = true;
+					json.put("dniEdit" + SPAN, "Ya existe un usuario con el DNI introducido.");
 				}
 			} else {
 				error = true;

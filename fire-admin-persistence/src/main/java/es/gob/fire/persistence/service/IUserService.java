@@ -152,4 +152,11 @@ public interface IUserService {
 	 * @return a {@link List<User>} with the information of all users.
 	 */
 	List<User> getAllUserByEmail(String email);
+	
+	/**
+	 * Method that obtains a user by an dni value.
+	 * @param dni The user dni.
+	 * @return a {@link User} with the information of user.
+	 */
+	User getUserByDni(String dniAdd);
 }

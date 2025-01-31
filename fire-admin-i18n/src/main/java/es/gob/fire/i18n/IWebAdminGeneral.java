@@ -20,14 +20,14 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p> 22/01/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 30/01/2025.
+ * @version 1.2, 31/01/2025.
  */
 package es.gob.fire.i18n;
 
 /** 
  * <p>Interface that contains the keys of the messages shown in the @firma administration.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
- * @version 1.1, 30/01/2025.
+ * @version 1.2, 31/01/2025.
  */
 public interface IWebAdminGeneral {
 
@@ -65,6 +65,11 @@ public interface IWebAdminGeneral {
 	 * Constant attribute that represents the property key <code>UD007</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
 	 */
 	String UD_LOG007 = "UD007";
+
+	/**
+	 * Constant attribute that represents the property key <code>UD008</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String UD_LOG008 = "UD008";
 	
 	/***********************/
 	/** Mensajes para errores en el módulo de certificados **/ 

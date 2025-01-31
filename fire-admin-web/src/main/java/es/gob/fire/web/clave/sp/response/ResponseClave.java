@@ -2,6 +2,7 @@ package es.gob.fire.web.clave.sp.response;
 
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 
 import javax.servlet.http.HttpServletRequest;
@@ -52,8 +53,9 @@ public class ResponseClave {
 	
 	@RequestMapping(value = "/ResponseClave", method = RequestMethod.POST)
     public String responseClave(HttpServletRequest request, final Model model) {
+		AtomicReference<String> dniRef =  new AtomicReference<>("");
 		try {
-		
+			
 			// Obtenemos los parámetros de la solicitud si es necesario
 	        String samlResponse = request.getParameter("SAMLResponse");
 	    	String relayState = request.getParameter("RelayState");
@@ -64,14 +66,14 @@ public class ResponseClave {
 	    	String claveReturnUrl = spConfig.getProperty(Constants.SP_RETURN);
 	    		
 	    	PersonalInfoBean personalInfoBean = this.obtenerDatosUsuario(claveReturnUrl, samlResponse, relayState, remoteHost);
-	    		
-	    	String dni = personalInfoBean.getDni();
+	    	
+	    	dniRef.set(personalInfoBean.getDni());
 	    		
 	    	User user = StreamSupport.stream(iUserService.getAllUser().spliterator(), false) // Convierte el Iterable a Stream
-	           	.filter(p -> p.getDni().equals(dni))
+	           	.filter(p -> p.getDni().equals(dniRef.get()))
 	           	.findFirst()
 	           	.orElseThrow(() -> new BadCredentialsException(
-	           			Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] {dni})
+	           			Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] {dniRef.get()})
 	        ));
 	
 	    	// Creamos el token de autenticacion
@@ -86,6 +88,11 @@ public class ResponseClave {
 	        // Informamos en la traza que el usuario X se ha logueado en la administracion
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
 	        return "inicio.html";
+		
+		}catch (BadCredentialsException e) {
+			LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
+			model.addAttribute("errorMessage", e.getMessage());
+			return "login.html";
 		}catch (Exception e) {
 			model.addAttribute("errorMessage", e.getMessage());
 			return "login.html";

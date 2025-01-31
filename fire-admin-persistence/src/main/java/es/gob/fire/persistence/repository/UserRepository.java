@@ -60,4 +60,11 @@ public interface UserRepository extends JpaRepository<User, Long>  {
 	 * @return List that represents all the users from the persistence.
 	 */
 	List<User> findAllByUserNameOrEmail(String userName, String email);
+
+	/**
+	 * Method that obtains from the persistence all users identified by an dni value.
+	 * @param dni String that represents the user dni.
+	 * @return List that represents all the users from the persistence.
+	 */
+	User findAllByDni(String dni);
 }

@@ -26,7 +26,7 @@
 					
 					<div class="form-row">
 						<div class="form-group col-md-10">
-								<div th:if= "${appViewForm.certificatesB64 != null && appViewForm.certificatesB64 != ''}" class="btn_align">
+								<div th:if= "${appViewForm.certificatesB64 != null && appViewForm.certificatesB64 != '' && appViewForm.certificatesB64 != 'UEsFBgAAAAAAAAAAAAAAAAAAAAAAAA=='}" class="btn_align">
 									<button type="button" class="btn btn-primary" onclick="downloadZip()">Descargar certificados</button>
 								</div>
 						</div>

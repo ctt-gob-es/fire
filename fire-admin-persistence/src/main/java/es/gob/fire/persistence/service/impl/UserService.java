@@ -362,4 +362,11 @@ public class UserService implements IUserService {
 		return this.repository.findAllByEmail(email);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IUserService#getUserByDni(java.lang.String)
+	 */
+	public User getUserByDni(String dni) {
+		return this.repository.findAllByDni(dni);
+	}
 }
