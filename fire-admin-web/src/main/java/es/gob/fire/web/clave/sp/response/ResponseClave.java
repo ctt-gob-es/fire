@@ -111,7 +111,7 @@ public class ResponseClave {
 		byte[] decSamlToken = EidasStringUtil.decodeBytesFromBase64(samlResponse);
 		IAuthenticationResponseNoMetadata authnResponse = null;
 		try {
-			ProtocolEngineNoMetadataI protocolEngine = SpProtocolEngineFactory.getSpProtocolEngine(Constants.SP_CONF);
+			ProtocolEngineNoMetadataI protocolEngine = SpProtocolEngineFactory.getSpProtocolEngine(Constants.SP_CONF, SPConfig.getConfigFilePath());
 			
 			//validate SAML Token
 			authnResponse = protocolEngine.unmarshallResponseAndValidate(decSamlToken, remoteHost, 0, 0, 

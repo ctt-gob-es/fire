@@ -112,7 +112,7 @@ public class RequestClave {
         try {
             reqBuilder.id(SAMLEngineUtils.generateNCName());
             authRequest = reqBuilder.build();
-            ProtocolEngineNoMetadataI protocolEngine = SpProtocolEngineFactory.getSpProtocolEngine(Constants.SP_CONF);
+            ProtocolEngineNoMetadataI protocolEngine = SpProtocolEngineFactory.getSpProtocolEngine(Constants.SP_CONF, SPConfig.getConfigFilePath());
             binaryRequestMessage = protocolEngine.generateRequestMessage(authRequest, true);
         } catch (EIDASSAMLEngineException e) {
             LOGGER.error(e.getMessage(), e);
