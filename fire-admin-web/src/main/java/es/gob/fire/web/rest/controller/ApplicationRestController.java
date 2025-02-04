@@ -105,6 +105,11 @@ public class ApplicationRestController {
 	private static final String FIELD_RESPONSIBLE = "user";
 
 	/**
+	 * Constant that represents the field 'user'.
+	 */
+	private static final String FIELD_CERTIFICATE = "cert";
+
+	/**
 	 * Attribute that represents the span text.
 	 */
 	private static final String SPAN = "_span";
@@ -231,7 +236,7 @@ public class ApplicationRestController {
 			}
 		}
 
-		if (isAppNameBlank(appForm.getAppName()) || isAppNameSizeNotValid(appForm.getAppName()) || !isResponsibleSelected(listUsers)) {
+		if (isAppNameBlank(appForm.getAppName()) || isAppNameSizeNotValid(appForm.getAppName()) || !isResponsibleSelected(listUsers) || !isCertificatesSelected(listCertificates)) {
 
 			if (isAppNameBlank(appForm.getAppName())) {
 
@@ -252,6 +257,13 @@ public class ApplicationRestController {
 				final String errorValRespSelected = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APP_USER_SELECTED, null, request.getLocale());
 
 				json.put(FIELD_RESPONSIBLE + SPAN, errorValRespSelected);
+			}
+			
+			if (!isCertificatesSelected(listCertificates)) {
+				
+				final String errorValRespSelected = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APP_CERT_SELECTED, null, request.getLocale());
+
+				json.put(FIELD_CERTIFICATE + SPAN, errorValRespSelected);
 			}
 
 			dtOutput.setError(json.toString());
@@ -274,6 +286,16 @@ public class ApplicationRestController {
 		dtOutput.setData(listNewApplication);
 
 		return dtOutput;
+	}
+
+	/**
+	 * Checks if at least one certificate is selected from the given list.
+	 *
+	 * @param listCertificates A list of certificate IDs to check.
+	 * @return {@code true} if the list is not null and contains at least one certificate, {@code false} otherwise.
+	 */
+	private boolean isCertificatesSelected(List<Long> listCertificates) {
+		return listCertificates!=null && listCertificates.size()>0;
 	}
 
 	/**

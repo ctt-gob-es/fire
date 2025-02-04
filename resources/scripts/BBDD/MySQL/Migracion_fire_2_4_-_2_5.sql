@@ -17,6 +17,9 @@ ALTER TABLE `tb_certificados` CHANGE COLUMN `cert_principal` `certificado` varch
 ALTER TABLE `tb_certificados` CHANGE COLUMN `huella_principal` `huella` varchar(45);
 ALTER TABLE `tb_certificados` DROP COLUMN `cert_backup`;
 ALTER TABLE `tb_certificados` DROP COLUMN `huella_backup`;
+ALTER TABLE `tb_certificados` ADD `fec_caducidad` datetime NULL;
+ALTER TABLE `tb_certificados` ADD `fec_inicio` datetime NULL;
+ALTER TABLE `tb_certificados` ADD `subject` varchar(4000) NULL;
 
 -- TABLA DE CERTIFICADOS DE APLICACION
 

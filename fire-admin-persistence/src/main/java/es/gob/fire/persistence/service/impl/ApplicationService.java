@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.3, 28/01/2025.
+ * @version 1.4, 04/02/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -75,7 +75,7 @@ import es.gob.fire.persistence.service.IApplicationService;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.3, 28/01/2025.
+ * @version 1.4, 04/02/2025.
  */
 @Service
 public class ApplicationService implements IApplicationService{
@@ -120,8 +120,17 @@ public class ApplicationService implements IApplicationService{
 	@Autowired
 	private ApplicationDataTablesRepository appdtRepository;
 
+	/**
+	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
+	 */
 	@Autowired
 	private CertificatesApplicationRepository certificatesApplicationRepository;
+	
+	/**
+	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
+	 */
+	@Autowired
+	private ApplicationResponsibleRepository applicationResponsibleRepository;
 	
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#getAppByAppId(java.lang.String)
@@ -375,6 +384,29 @@ public class ApplicationService implements IApplicationService{
 		dtOutput.setRecordsFiltered(appsCert.size());
 		dtOutput.setRecordsTotal(appsCert.size());
 		dtOutput.setData(appsCert);
+
+		return dtOutput;
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see es.gob.fire.persistence.service.IApplicationService#getApplicationsUser(org.springframework.data.jpa.datatables.mapping.DataTablesInput, java.lang.Long)
+	 */
+	@Override
+	@JsonView(DataTablesOutput.View.class)
+	public DataTablesOutput<ApplicationCertDTO> getApplicationsUser(final DataTablesInput input, final Long idUser) {
+		List<ApplicationCertDTO> listApplicationCertDTO = new ArrayList<>();
+		List<ApplicationResponsible> listApplicationResponsible = applicationResponsibleRepository.findByResponsibleUserId(idUser);
+		for (ApplicationResponsible applicationResponsible : listApplicationResponsible) {
+			Application application = applicationResponsible.getApplication();
+			ApplicationCertDTO applicationCertDTO = new ApplicationCertDTO(application.getAppId(), application.getAppName(), application.getFechaAltaApp());
+			listApplicationCertDTO.add(applicationCertDTO);
+		}
+		final DataTablesOutput<ApplicationCertDTO> dtOutput = new DataTablesOutput<>();
+		dtOutput.setDraw(NumberConstants.NUM1);
+		dtOutput.setRecordsFiltered(listApplicationResponsible.size());
+		dtOutput.setRecordsTotal(listApplicationResponsible.size());
+		dtOutput.setData(listApplicationCertDTO);
 
 		return dtOutput;
 	}

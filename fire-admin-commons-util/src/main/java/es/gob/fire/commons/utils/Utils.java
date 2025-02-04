@@ -14,12 +14,12 @@ package es.gob.fire.commons.utils;
  * <b>Description:</b><p>Class with general utilities.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>21/06/2020.</p>
- * @version 1.1, 21/05/2021.
+ * @version 1.2, 04/02/2025.
  */
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 /** 
  * <p>Class with general utilities.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.1, 21/05/2021.
+ * @version 1.2, 04/02/2025.
  */
 public class Utils {
 
@@ -65,7 +65,11 @@ public class Utils {
      * @return Cadena de texto con la fecha.
      */
     public static String getStringDateFormat(final Date date) {
-    	return DateFormat.getInstance().format(date);
+        if (date == null) {
+            return null; // Manejo de valor nulo
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        return sdf.format(date);
     }
     
     /**

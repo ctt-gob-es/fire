@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>15/06/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 30/01/2025.
+ * @version 1.2, 04/02/2025.
  */
 package es.gob.fire.persistence.service;
 
@@ -68,7 +68,7 @@ public interface ICertificateService {
 	 * @param userDto a {@link CertificateDTO} with the information of the certificate.
 	 * @return {@link Certificate} The Certificate.
 	 */
-	Certificate saveCertificate(CertificateDTO certificateDto) throws IOException;
+	Certificate saveCertificate(CertificateDTO certificateDto, X509Certificate x509Certificate) throws IOException;
 					
 	/**
 	 * Method that deletes a certificate in the persistence.

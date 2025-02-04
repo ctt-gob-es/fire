@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 /**
  * <p>Class that represents the backing form for adding/editing a system certificate.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.4, 28/01/2025.
+ * @version 1.5, 04/01/2025.
  */
 public class CertificateDTO {
 
@@ -58,7 +58,7 @@ public class CertificateDTO {
 	 * Attribute that represents the data.
 	 */
 	@JsonView(DataTablesOutput.View.class)
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm")
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm")
 	private Date fechaAlta;
 	
 	/**

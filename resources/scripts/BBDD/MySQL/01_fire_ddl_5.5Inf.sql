@@ -8,6 +8,9 @@ CREATE TABLE `tb_certificados` (
   `fec_alta` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `certificado` varchar(5000) DEFAULT NULL,
   `huella` varchar(45) DEFAULT NULL,
+  `fec_inicio` datetime NULL,
+  `fec_caducidad` datetime NULL,
+  `subject` varchar(4000) NULL,
   PRIMARY KEY (`id_certificado`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='tabla de certificados';
 

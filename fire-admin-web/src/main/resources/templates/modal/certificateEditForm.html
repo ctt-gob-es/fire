@@ -39,11 +39,6 @@
 								</div>
 								<div style="clear: both;" />
 						</div>
-						<div class="form-group col-md-4">
-							<div class="btn_align">
-								<button type="button" class="btn btn-primary" onclick="deleteCert('certFile')">Eliminar certificado</button>
-							</div>
-						</div>
 					</div>
 					<div id="cert-prin" name="cert-prin" class="edit-txt" 
 					style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
@@ -215,7 +210,7 @@ function saveEditCert() {
  						});
  					  });
  				  }else{
- 					  debugger;
+ 					
  					 hide();
  					// Encuentra la fila en la tabla usando una función de búsqueda
   					var row = $('#certServiceTable').DataTable().row(function (idx, rowData, node) {
@@ -267,29 +262,6 @@ function saveEditCert() {
  			});
  	  }
  }
- 
- function deleteCert(id) {
-	 
-	 hide();
-	 
-	 var idResult;
-	 var hiddenField;
-	 var hiddenField64;
-	 var fileField;
-	 
-	 if (id == "certFile") {
-			idResult = "cert-prin";
-			hiddenField = "certificate";
-			hiddenField64 = "certificateB64";
-			fileField = "certFile";
-			
-	 }
-	 	 
-	 $("#" + hiddenField).val(null);
-	 $("#" + hiddenField64).val(null);
-	 $("#" + idResult).html('');
-	 $("#" + fileField).val(null);
-}
  
  function dataURLtoFile(dataurl, filename) {
 	 

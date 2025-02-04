@@ -29,7 +29,8 @@ public class VerifyAfirmaCertificateResponse {
 	private static final String RESULT_MINOR_PATHVALIDATIONFAILS = "PathValidationFails";
 	private static final String RESULT_MINOR_BADCERTIFICATESIGNATURE = "BadCertificateSignature";
 	private static final String RESULT_MINOR_REVOKEDWITHOUTTST = "RevokedWithoutTST";
-
+	private static final String RESULT_MAJOR_SUCCESS = "Success";
+	
 	private final boolean definitive;
 	private final boolean badCertificateFormat;
 	private final boolean temporal;
@@ -40,6 +41,7 @@ public class VerifyAfirmaCertificateResponse {
 	private final boolean pathValidationFails;
 	private final boolean badCertificateSignature;
 	private final boolean revokedWithoutTST;
+	private final boolean success;
 
     private String majorCode = null;
     private String minorCode = null;
@@ -77,6 +79,7 @@ public class VerifyAfirmaCertificateResponse {
         this.pathValidationFails = RESULT_MINOR_PATHVALIDATIONFAILS.equals(this.minorCode);
         this.badCertificateSignature = RESULT_MINOR_BADCERTIFICATESIGNATURE.equals(this.minorCode);
         this.revokedWithoutTST = RESULT_MINOR_REVOKEDWITHOUTTST.equals(this.minorCode);
+        this.success = RESULT_MAJOR_SUCCESS.equals(this.majorCode);
 	}
 
 	public String getMajorCode() {
@@ -141,6 +144,10 @@ public class VerifyAfirmaCertificateResponse {
 
 	public boolean isRevokedWithoutTST() {
 		return revokedWithoutTST;
+	}
+	
+	public boolean isSuccess() {
+		return success;
 	}
 
 	/**

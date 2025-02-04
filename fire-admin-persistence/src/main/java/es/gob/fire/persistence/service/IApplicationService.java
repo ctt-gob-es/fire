@@ -3,6 +3,8 @@ package es.gob.fire.persistence.service;
 import java.security.GeneralSecurityException;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
@@ -135,4 +137,15 @@ public interface IApplicationService {
 	 * @throws NullPointerException if a required object is null.
 	 */
 	void obtainZipWithCertificatesApp(ApplicationCertDTO appViewForm, List<CertificatesApplication> listCertificatesApplication);
+
+	/**
+	 * Retrieves a paginated and sorted list of applications associated with a specific user, 
+	 * formatted for use with DataTables.
+	 *
+	 * @param input  The {@link DataTablesInput} containing pagination, sorting, and filtering criteria.
+	 * @param userId The ID of the user whose applications are to be retrieved.
+	 * @return A {@link DataTablesOutput} containing the list of {@link ApplicationCertDTO} objects.
+	 * @throws IllegalArgumentException if {@code input} is empty.
+	 */
+	DataTablesOutput<ApplicationCertDTO> getApplicationsUser(@NotEmpty DataTablesInput input, Long userId);
 }

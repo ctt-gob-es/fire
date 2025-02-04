@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.5, 30/01/2025.
+ * @version 1.6, 04/02/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -31,12 +31,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -69,7 +67,7 @@ import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.5, 30/01/2025.
+ * @version 1.6, 04/02/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -176,7 +174,7 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.service.ICertificateService#saveCertificate(es.gob.fire.persistence.dto.CertificateDTO)
 	 */
 	@Override
-	public Certificate saveCertificate(final CertificateDTO certificateDto) throws IOException {
+	public Certificate saveCertificate(final CertificateDTO certificateDto, X509Certificate x509Certificate) throws IOException {
 
 		Certificate newCertificate = null;
 
@@ -198,7 +196,12 @@ public class CertificateService implements ICertificateService{
 
 		newCertificate = certificateDtoToEntity(certificateDto);
 		newCertificate.setFechaAlta(new Date());
-
+		newCertificate.setFechaInicio(x509Certificate.getNotBefore());
+		newCertificate.setFechaCaducidad(x509Certificate.getNotAfter());
+		final String certSubject = x509Certificate.getSubjectX500Principal().getName();
+		final String[] txtCert = certSubject.split(",");
+		newCertificate.setSubject(txtCert[0]);
+		
 		newCertificate = this.repository.save(newCertificate);
 
 		return newCertificate;
@@ -303,7 +306,7 @@ public class CertificateService implements ICertificateService{
 		String txtCert = null;
 		if (cert != null) {
 			final Date expDate = cert.getNotAfter();
-			txtCert = cert.getSubjectX500Principal().getName() + ", Fecha de Caducidad=" + DateFormat.getInstance().format(expDate); //$NON-NLS-1$
+			txtCert = cert.getSubjectX500Principal().getName() + ", Fecha de Caducidad=" + Utils.getStringDateFormat(expDate); //$NON-NLS-1$
 		}
 
 		String certData = ""; //$NON-NLS-1$
@@ -358,32 +361,22 @@ public class CertificateService implements ICertificateService{
 			certificateDTO.setCertificate(certificate.getCertificate());
 			certificateDTO.setFechaAlta(certificate.getfechaAlta());
 			
-			try {
-				
-				X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertificate()))); //$NON-NLS-1$
-	            
-				// Comprobamos la validez del certificado
-	            try {
-	            	x509Certificate.checkValidity();
-	            	// El certificado sera valido
-	            	certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV001));
-	            } catch (CertificateExpiredException e) {
-	            	// El certificado esta caducado
-	            	certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV002));
-	            } catch (CertificateNotYetValidException e) {
-	            	// El certificado aun no es valido
-	            	certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV004));
-	            }
-	            
-	            java.util.Date expDatePrincipal = x509Certificate.getNotAfter();
-				final String certSubject = x509Certificate.getSubjectX500Principal().getName();
-				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				final String[] txtCert = certSubject.split(","); //$NON-NLS-1$
-				certificateDTO.setCertificate(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
-	            
-	        } catch (CertificateException | IOException e) {
-	        	LOGGER.error(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV003) , e );
+			java.util.Date expDate = certificate.getFechaCaducidad();
+			java.util.Date startDate = certificate.getFechaInicio();
+			java.util.Date dateNow = Calendar.getInstance().getTime();
+
+			if (dateNow.before(startDate)) {
+			    // El certificado aún no es válido
+			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV004));
+			} else if (dateNow.after(expDate)) {
+			    // El certificado está caducado
+			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV002));
+			} else {
+			    // El certificado es válido
+			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV001));
 			}
+			
+			certificateDTO.setCertificate(certificate.getSubject() + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDate));
 			
 			listCertificateDTO.add(certificateDTO);
 		}

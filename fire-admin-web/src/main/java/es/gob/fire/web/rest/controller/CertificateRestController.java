@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.5, 30/01/2025.
+ * @version 1.6, 04/02/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -76,7 +76,7 @@ import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 /**
  * <p>Class that manages the REST requests related to the Certificate administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.5, 30/01/2025.
+ * @version 1.6, 04/02/2025.
  */
 @RestController
 public class CertificateRestController {
@@ -289,11 +289,11 @@ public class CertificateRestController {
 						certAddForm.setCertBytes(cert1.getEncoded());
 						certAddForm.setCertFile(certFile);
 
-						final Certificate certificate = this.certificateService.saveCertificate(certAddForm);
+						final Certificate certificate = this.certificateService.saveCertificate(certAddForm, cert1);
 
 						listNewCertificate.add(certificate);
 						dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
-					} else if(verifyAfirmaCertificateResponse.isBadCertificateFormat()) {
+					} else if(verifyAfirmaCertificateResponse.isBadCertificateFormat()) { 
 						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC005, new Object[] {certFile.getOriginalFilename()});
 						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 						dtOutput.setError(json.toString());
@@ -446,49 +446,59 @@ public class CertificateRestController {
 					
 					LOGGER.info(verifyAfirmaCertificateResponse.getDescription());
 					
-					// Si el certificado es valido almacenaremos el certificado en la BD
-					if(verifyAfirmaCertificateResponse.isDefinitive()) {
-						LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC004));
-						
-						final Certificate certificate = this.certificateService.saveCertificate(certEditForm);
+					if(verifyAfirmaCertificateResponse.isSuccess()) {
+						// Si el certificado es valido almacenaremos el certificado en la BD
+						if(verifyAfirmaCertificateResponse.isDefinitive()) {
+							LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC004));
+							
+							final Certificate certificate = this.certificateService.saveCertificate(certEditForm, cert1);
 
-						listNewCertificate.add(certificate);
-						dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
-						
-					} else if(verifyAfirmaCertificateResponse.isBadCertificateFormat()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC005, new Object[] {certFile.getOriginalFilename()});
-						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-						dtOutput.setError(json.toString());
-					} else if(verifyAfirmaCertificateResponse.isBadCertificateSignature()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC006, new Object[] {certFile.getOriginalFilename()});
-						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-						dtOutput.setError(json.toString());
-					} else if(verifyAfirmaCertificateResponse.isExpired()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC007, new Object[] {certFile.getOriginalFilename()});
-						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-						dtOutput.setError(json.toString());
-					} else if(verifyAfirmaCertificateResponse.isNotYetValid()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC008, new Object[] {certFile.getOriginalFilename()});
-						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-						dtOutput.setError(json.toString());
-					} else if(verifyAfirmaCertificateResponse.isOnHold()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC009, new Object[] {certFile.getOriginalFilename()});
-						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-						dtOutput.setError(json.toString());
-					} else if(verifyAfirmaCertificateResponse.isPathValidationFails()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC010, new Object[] {certFile.getOriginalFilename()});
-						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-						dtOutput.setError(json.toString());
-					} else if(verifyAfirmaCertificateResponse.isRevoked()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC011, new Object[] {certFile.getOriginalFilename()});
-						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-						dtOutput.setError(json.toString());
-					} else if(verifyAfirmaCertificateResponse.isRevokedWithoutTST()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC012, new Object[] {certFile.getOriginalFilename()});
-						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-						dtOutput.setError(json.toString());
-					} else if(verifyAfirmaCertificateResponse.isTemporal()) {
-						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC013, new Object[] {certFile.getOriginalFilename()});
+							listNewCertificate.add(certificate);
+							dtOutput.setData(this.certificateService.obtainAllCertificateToDTO(listNewCertificate));
+							
+						} else if(verifyAfirmaCertificateResponse.isBadCertificateFormat()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC005, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else if(verifyAfirmaCertificateResponse.isBadCertificateSignature()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC006, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else if(verifyAfirmaCertificateResponse.isExpired()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC007, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else if(verifyAfirmaCertificateResponse.isNotYetValid()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC008, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else if(verifyAfirmaCertificateResponse.isOnHold()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC009, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else if(verifyAfirmaCertificateResponse.isPathValidationFails()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC010, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else if(verifyAfirmaCertificateResponse.isRevoked()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC011, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else if(verifyAfirmaCertificateResponse.isRevokedWithoutTST()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC012, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else if(verifyAfirmaCertificateResponse.isTemporal()) {
+							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC013, new Object[] {certFile.getOriginalFilename()});
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						} else {
+							msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
+						}
+					} else {
+						msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
 						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 						dtOutput.setError(json.toString());
 					}

@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>01/08/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 27/01/2025.
+ * @version 1.2, 04/02/2025.
  */
 package es.gob.fire.persistence.entity;
 
@@ -45,7 +45,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 /**
  * <p>Class that maps the <i>KEYSTORE</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.1, 27/01/2025.
+ * @version 1.2, 04/02/2025.
  */
 @Entity
 @Table(name = "TB_CERTIFICADOS")
@@ -81,7 +81,13 @@ public class Certificate implements Serializable {
 	 * Attribute that represents the huellaPrincipal.
 	 */
 	private String huella;
+	
+	private Date fechaInicio;
+	
+	private Date fechaCaducidad;
 
+	private String subject;
+	
 	/**
 	 * Gets the value of the attribute {@link #idKeystore}.
 	 * @return the value of the attribute {@link #idKeystore}.
@@ -178,6 +184,58 @@ public class Certificate implements Serializable {
 		this.huella = huella;
 	}
 
+	/**
+	 * Gets the value of the attribute {@link #fechaInicio}.
+	 * @return the value of the attribute {@link #fechaInicio}.
+	 */
+	@Column(name = "FEC_INICIO", nullable = false, length = NumberConstants.NUM19)
+	@JsonView(DataTablesOutput.View.class)
+	public Date getFechaInicio() {
+		return this.fechaInicio;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #fechaInicioParam}.
+	 * @param fechaInicioParam The value for the attribute {@link #fechaInicioParam}.
+	 */
+	public void setFechaInicio(final Date fechaInicioParam) {
+		this.fechaInicio = fechaInicioParam;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #fecha_fechaCaducidadalta}.
+	 * @return the value of the attribute {@link #fechaCaducidad}.
+	 */
+	@Column(name = "FEC_CADUCIDAD", nullable = false, length = NumberConstants.NUM19)
+	@JsonView(DataTablesOutput.View.class)
+	public Date getFechaCaducidad() {
+		return this.fechaCaducidad;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #fechaCaducidadParam}.
+	 * @param fechaCaducidadParam The value for the attribute {@link #fechaCaducidadParam}.
+	 */
+	public void setFechaCaducidad(final Date fechaCaducidadParam) {
+		this.fechaCaducidad = fechaCaducidadParam;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #name}.
+	 * @return the value of the attribute {@link #name}.
+	 */
+	@Column(name = "SUBJECT", nullable = false, length = NumberConstants.NUM4000)
+	public String getSubject() {
+		return this.subject;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #name}.
+	 * @param nameParam The value for the attribute {@link #name}.
+	 */
+	public void setSubject(final String subjectParam) {
+		this.subject = subjectParam;
+	}
 }
 
 

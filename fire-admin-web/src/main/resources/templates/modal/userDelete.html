@@ -1,6 +1,6 @@
 <!-- Modal para eliminar usuarios -->
 <div class="modal fade" tabindex="-1" role="dialog" id="modalDeleteUser">
-	<div class="modal-dialog">
+	<div class="modal-dialog" style="max-width: 680px">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title" th:text="#{form.user.delete.title}"></h4>
@@ -41,6 +41,28 @@
 							th:text="#{form.user.delete.email}"></label> <input type="text"
 							id="email" th:field="*{email}" class="form-control" readonly />
 					</div>
+					
+					<!-- Tabla para mostrar las aplicaciones certificadas -->
+					<div class="row" id="appUserTableWrapper" style="display:none;">
+						<div class="col-md-12">
+							<div class="bgc-white bd bdrs-3 p-20 mB-20">
+								<h6 class="c-grey-900 mB-20"
+									th:text="#{table.certificate.app.title}"></h6>
+								<table id="appUserTable"
+									class="table table-striped table-bordered" cellspacing="0"
+									width="100%">
+									<thead>
+										<tr>
+											<th th:text="#{table.app.name}"></th>
+											<th th:text="#{table.app.id}"></th>
+											<th th:text="#{table.app.fec_alt}"></th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
 				</form>
 
 			</div>
@@ -74,8 +96,10 @@ function deleteUser(){
            	
            	if (data.indexOf("error") != -1) {
            		var msgErrorDelete = data.replace('error.','');
-		  		$('#errorDeleteUser').html(msgErrorDelete);
+		  		$('#errorDeleteUser').html("<strong>" + msgErrorDelete + "</strong>");
 				$('#errorDeleteUser').addClass('alert alert-danger');
+				$('#appUserTableWrapper').show();
+				createAssociatedAppTable();
            	} else {
                 tableUser.row(data.index).remove().draw();
     			closeModalButton('modalDeleteUser', 'idApplicationForm');
@@ -98,6 +122,43 @@ function closeModalButton(btnId, nameForm){
 	//se limpia valores del formulario
 	
 	$('#' + btnId).modal('hide');	
+}
+
+function createAssociatedAppTable() {
+	var userNameValue = $('#userName').val();
+    var getUserApps = /*[[@{/userappdatatable}]]*/;
+
+    // Inicializa la tabla solo si aún no está creada
+    if (!$.fn.DataTable.isDataTable('#appUserTable')) {
+        $('#appUserTable').DataTable({
+            "processing": true,
+            "serverSide": false,
+            "ajax": {
+                "url": getUserApps,
+                "data": {
+                    "userNameValue": userNameValue
+                },
+                "type": "POST"
+            },
+            "language": {
+                "url": "js/datatables/i18n/spanish.json",
+                select: {
+                    rows: {
+                        _: "%d filas seleccionadas",
+                        1: "1 fila seleccionada"
+                    }
+                }
+            },
+            "columns": [
+                { "data": "appName" },
+                { "data": "appId" },
+                { "data": "fechaAltaApp" }
+            ],
+            "responsive": true
+        });
+    } else {
+        $('#appUserTable').DataTable().ajax.reload();
+    }
 }
 </script>
 

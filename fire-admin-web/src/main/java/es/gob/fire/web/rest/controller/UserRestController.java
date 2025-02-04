@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.6, 31/01/2025.
+ * @version 1.7, 04/02/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -60,6 +60,7 @@ import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
@@ -83,7 +84,7 @@ import es.gob.fire.persistence.service.IUserService;
  * Application for signing documents of @firma suite systems.
  * </p>
  * 
- * @version 1.6, 31/01/2025.
+ * @version 1.7, 04/02/2025.
  */
 @RestController
 public class UserRestController {
@@ -731,5 +732,22 @@ public class UserRestController {
 	public void setContext(final ServletContext contextP) {
 		this.context = contextP;
 	}
+	
+	/**
+	 * Retrieves a paginated list of certified applications associated with a specific user for DataTables.
+	 *
+	 * @param input The {@link DataTablesInput} containing pagination, sorting, and filtering parameters.
+	 * @param username The username of the user whose certified applications are to be retrieved.
+	 * @return A {@link DataTablesOutput} containing a list of {@link ApplicationCertDTO} objects for the specified user.
+	 */
+	@JsonView(DataTablesOutput.View.class)
+	@RequestMapping(path = "/userappdatatable", method = RequestMethod.POST)
+	public DataTablesOutput<ApplicationCertDTO> certApplications(@NotEmpty final DataTablesInput input, @RequestParam("userNameValue") final String username) {
+		
+		final User user = this.userService.getUserByUserName(username);
+		
+		final DataTablesOutput<ApplicationCertDTO> certApplications = this.appService.getApplicationsUser(input, user.getUserId());
 
+		return certApplications;
+	}
 }

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import es.gob.fire.commons.utils.UtilsStringChar;
@@ -28,6 +29,7 @@ public class ApplicationCertDTO {
 	/**
 	 * Attribute that represents the value of the input fechaAltaApp of the application in the form.
 	 */
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm")
 	private Date fechaAltaApp;
 
 	/**
