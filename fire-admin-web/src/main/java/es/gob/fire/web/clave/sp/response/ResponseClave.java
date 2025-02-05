@@ -1,11 +1,16 @@
 package es.gob.fire.web.clave.sp.response;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +36,7 @@ import es.gob.fire.web.clave.sp.SpProtocolEngineFactory;
 import es.gob.fire.web.clave.sp.utils.Constants;
 import es.gob.fire.web.clave.sp.utils.SPConfig;
 import es.gob.fire.web.clave.sp.utils.SessionHolder;
+import es.gob.fire.web.config.WebSecurityConfig;
 import eu.eidas.auth.commons.EidasStringUtil;
 import eu.eidas.auth.commons.attribute.AttributeDefinition;
 import eu.eidas.auth.commons.attribute.AttributeValue;
@@ -52,7 +58,7 @@ public class ResponseClave {
     private CustomUserAuthentication customUserAuthentication;
 	
 	@RequestMapping(value = "/ResponseClave", method = RequestMethod.POST)
-    public String responseClave(HttpServletRequest request, final Model model) {
+    public String responseClave(HttpServletRequest request, HttpServletResponse response, final Model model) {
 		AtomicReference<String> dniRef =  new AtomicReference<>("");
 		try {
 			
@@ -75,7 +81,7 @@ public class ResponseClave {
 	           	.orElseThrow(() -> new BadCredentialsException(
 	           			Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] {dniRef.get()})
 	        ));
-	
+	    	
 	    	// Creamos el token de autenticacion
 	        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
 	            
@@ -85,6 +91,11 @@ public class ResponseClave {
 	        // Si la autenticación es exitosa, guardamos el resultado en el contexto de seguridad
 	        SecurityContextHolder.getContext().setAuthentication(authResult);
 	        
+	        // Generaremos una nueva cookie por cada inicio de sesion, para evitar problemas entre servidores
+	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, this.generateCookieValue());
+	    	cookie.setPath("/");
+	    	response.addCookie(cookie);
+	    	
 	        // Informamos en la traza que el usuario X se ha logueado en la administracion
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
 	        return "inicio.html";
@@ -175,5 +186,19 @@ public class ResponseClave {
 			}
 		}
 		return null;
-	} 
+	}
+    
+    public static String generateCookieValue() {
+        // Generamos un UUID aleatorio
+        String uuid = UUID.randomUUID().toString().replace("-", ""); // Eliminar guiones
+        
+        // Convertimos UUID a bytes y codificar en Base64 para mayor entropía
+        String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.getBytes(StandardCharsets.UTF_8));
+        
+        // Agregamos un número aleatorio al final similar a la estructura del valor
+        int randomInt = (int) (Math.random() * Integer.MAX_VALUE);
+
+        // Concatenamos con un símbolo especial
+        return encoded + "!-" + randomInt;
+    }
 }
