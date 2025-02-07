@@ -148,4 +148,11 @@ public interface IApplicationService {
 	 * @throws IllegalArgumentException if {@code input} is empty.
 	 */
 	DataTablesOutput<ApplicationCertDTO> getApplicationsUser(@NotEmpty DataTablesInput input, Long userId);
+	
+	/**
+	 * Method that stores an application in the persistence.
+	 * @param app a {@link Application} with the information of the application.
+	 * @return The application.
+	 */
+	Application saveApplication(Application application);
 }

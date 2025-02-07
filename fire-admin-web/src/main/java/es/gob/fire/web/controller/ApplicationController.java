@@ -216,4 +216,21 @@ public class ApplicationController {
 		return "modal/applicationViewForm.html"; //$NON-NLS-1$
 	}
 	
+	/**
+	 * Method that maps the request for opening the application enable confirmation modal
+	 * @param appId Long that represents the application id
+	 * @param model view Model object
+	 * @return String that represents the navigation HTML modal
+	 */
+	@RequestMapping(value = "/confirmEnableApplication", method = RequestMethod.GET)
+	public String confirmEnableApplication(@RequestParam("appId") final String appId, final Model model) {
+		final Application app = this.applicationService.getAppByAppId(appId);
+
+		final ApplicationDTO appDto = this.applicationService.applicationEntityToDto(app);
+		
+		model.addAttribute("application", appDto);
+		model.addAttribute("enabled", appDto.getHabilitado());
+		
+		return "modal/applicationConfirmEnable.html";
+	}
 }

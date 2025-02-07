@@ -511,4 +511,10 @@ public class ApplicationService implements IApplicationService{
 		    LOGGER.error("Se produjo un error procesando los certificados", e);
 		}
 	}
+
+	@Override
+	public Application saveApplication(Application application) {
+		Application savedApp = repository.save(application);
+		return savedApp;
+	}
 }

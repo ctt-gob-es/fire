@@ -1,0 +1,85 @@
+<div class="modal" tabindex="-1" role="dialog" id="applicationConfirmEnableModal">
+	<div class="modal-dialog-centered">
+		<div class="modal-content lg-900">
+			<div class="modal-header">
+				<div id="titleAdd">
+					<h4 class="modal-title" th:text="#{modal.application.confirmEnable.title}"></h4>
+				</div>
+				<button type="button" class="close"
+					onclick="closeModal('applicationConfirmEnableModal')" aria-label="Cerrar">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form name="applicationConfirmEnableForm" role="form" id="applicationConfirmEnableForm"
+					th:object="${application}" action="@{/enableApplication}" method="post" enctype="multipart/form-data">
+							
+					<!-- El id de la aplicacion -->
+					<input type='hidden' id="appId" th:field="*{appId}" />	
+					<input type='hidden' id="habilitado" th:field="*{habilitado}" />			
+					
+					<div id="errorEnableApplication" role="alert"></div>
+					
+					<!-- Mensaje -->
+					<div class="form-group col-md-12">
+					    <!-- Se muestra si enabled es true -->
+					    <p class="c-grey-900" th:if="${enabled == true}" th:text="#{modal.application.enable.disable.message}"></p>
+					    
+					    <!-- Se muestra si enabled es false -->
+					    <p class="c-grey-900" th:if="${enabled != true}" th:text="#{modal.application.enable.enable.message}"></p>
+					</div>
+				</form>
+				<div class="modal-footer">
+				    <!-- Botón de Cerrar -->
+				    <button type="button" class="btn btn-default"
+				        onclick="closeModal('applicationConfirmEnableModal')"
+				        th:text="#{modal.application.enable.close}">
+				    </button>
+				
+				    <!-- Botón de Habilitar/Deshabilitar -->
+					<button type="button" id="enableApplication" onclick="enableApplication();"
+					    class="btn btn-primary"
+					    th:text="${enabled == true} ? #{modal.application.enable.disable.button} : #{modal.application.enable.enable.button}">
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:inline="javascript">
+	$(document).ready(function() {
+		cleanSpan('appAddForm');
+	});
+	
+	function enableApplication() {
+		var actionEnableApplication = /*[[@{/enableApplication}]]*/;
+		
+		var applicationId = $('#appId').val();
+		var enabled = $('#habilitado').val();
+		
+		$.ajax(actionEnableApplication,{
+			data:$.param({'appId':applicationId, 'enabled':enabled}),
+	        type:'POST',
+           	success: function(data) {
+	           	// Se oculta la capa 'Cargando...'
+	           	hide();
+
+    			closeModalButton('applicationConfirmEnableModal', 'idApplicationForm');
+    			
+    			$('#appTable').DataTable().ajax.reload(null, false);
+           },
+           error: function(xhr) {
+               // Captura el mensaje de error desde la respuesta JSON
+               var errorMessage = "Ocurrió un error al habilitar la aplicación.";
+               
+               if (xhr.status === 404 && xhr.responseJSON && xhr.responseJSON.error) {
+                   errorMessage = xhr.responseJSON.error; // "Aplicación no encontrada"
+               }
+
+               // Mostrar mensaje de error en el div correspondiente
+               $('#errorEnableApplication').html(errorMessage);
+               $('#errorEnableApplication').addClass('alert alert-danger');
+           }
+		});
+	}
+</script>
