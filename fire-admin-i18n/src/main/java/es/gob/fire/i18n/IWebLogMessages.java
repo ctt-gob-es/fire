@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>08/10/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 02/06/2021.
+ * @version 1.2, 07/02/2025.
  */
 package es.gob.fire.i18n;
 
@@ -28,7 +28,7 @@ package es.gob.fire.i18n;
 /**
  * <p>Interface that contains the keys to the log messages for the web module.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.1, 02/06/2021.
+ * @version 1.2, 07/02/2025.
  */
 public interface IWebLogMessages {
 
@@ -194,4 +194,28 @@ public interface IWebLogMessages {
 	 * Constant attribute that represents the name of the property <code>errorweb031</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB031 = "errorweb031";
+
+	/***********************/
+	/** Mensajes para la tarea de validacion **/
+	/***********************/
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>errorValidateDate</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String ERROR_VALIDATE_DATE = "errorValidateDate";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>infoUpdateTaskOk</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String INFO_UPDATE_TASK_OK = "infoUpdateTaskOk";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>errorParseDate</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String ERROR_PARSE_DATE = "errorParseDate";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>errorUpdateTaskWeb</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String ERROR_UPDATE_TASK_WEB = "errorUpdateTaskWeb";
 }

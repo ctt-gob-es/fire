@@ -24,7 +24,7 @@
  * </p>
  * <b>Project:</b>
  * <p>
- * Application for signing documents of @firma suite systems.
+ * Application for signing documents of FIRe suite systems.
  * </p>
  * <b>Date:</b>
  * <p>
@@ -32,7 +32,7 @@
  * </p>
  *
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.3, 28/01/2025.
+ * @version 1.4, 07/02/2025.
  */
 package es.gob.fire.i18n;
 
@@ -44,8 +44,8 @@ import es.gob.fire.i18n.utils.Logger;
 
 /**
  * <p>Class responsible for managing the access to language resources.</p>
- * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 02/02/2021.
+ * <b>Project:</b><p>Application for signing documents of FIRe suite systems.</p>
+ * @version 1.4, 07/02/2025.
  */
 public final class Language {
 
@@ -97,6 +97,21 @@ public final class Language {
 	private static final String BUNDLENAME_PERSISTENCE_GENERAL = "messages.persistence.general";
 
 	/**
+	 * Constant attribute that represents the string to identify the bundle name to the file related with persistence constants.
+	 */
+	private static final String BUNDLENAME_PERSISTENCE_CONSTANTS = "messages.persistence.constants";
+	
+	/**
+	 * Attribute that represents the location of file that contains the general messages quartz module.
+	 */
+	private static final String CONTENT_QUARTZ_GENERAL_PATH = "messages.fire-quartz.general";
+	
+	/**
+	 * Attribute that represents the location of file that contains the TSL messages core module.
+	 */
+	private static final String CONTENT_CORE_TASKS_PATH = "messages.core.tasks";
+	
+	/**
 	 * Constant attribute that represents the key for the configured locale for the platform.
 	 */
 	private static final String LANGUAGE = "LANGUAGE";
@@ -121,6 +136,21 @@ public final class Language {
 	 */
 	private static ResourceBundle resPersistenceGeneral = null;
 
+	/**
+	 * Attribute that represents the properties for the locale for the core bundle constants.
+	 */
+	private static ResourceBundle resPersistenceBundleConstants = null;
+	
+	/**
+	 * Attribute that represents the resource bundle with the general messages for the quartz module.
+	 */
+	private static ResourceBundle quartzGeneral = null;
+	
+	/**
+	 * Attribute that represents the resource bundle with the general messages for the tasks.
+	 */
+	private static ResourceBundle resCoreTasks = null;
+	
 	static {
 		// Preparamos el URLClassLoader con el que se cargaran los mensajes de logs
 		try {
@@ -168,8 +198,13 @@ public final class Language {
 		resWebAdminGeneral = ResourceBundle.getBundle(BUNDLENAME_WEBADMIN_GENERAL, currentLocale, classLoaderMessages);	
 		// Cargamos los mensajes del modulo de commons utils.
 		resCommonsUtilsBundle = ResourceBundle.getBundle(BUNDLENAME_COMMONUTILS_FIRE, currentLocale, classLoaderMessages);
-		// Cargamos los mensajes del modulo de persistence general.
+		// Se cargan las constantes del módulo de persistencia.
 		resPersistenceGeneral = ResourceBundle.getBundle(BUNDLENAME_PERSISTENCE_GENERAL, currentLocale, classLoaderMessages);
+		resPersistenceBundleConstants = ResourceBundle.getBundle(BUNDLENAME_PERSISTENCE_CONSTANTS, currentLocale, classLoaderMessages);
+		// Se cargan los mensajes del modulo general de quartz
+		quartzGeneral = ResourceBundle.getBundle(CONTENT_QUARTZ_GENERAL_PATH, currentLocale, classLoaderMessages);
+		// Se cargan los mensajes del modulo del core
+		resCoreTasks = ResourceBundle.getBundle(CONTENT_CORE_TASKS_PATH, currentLocale, classLoaderMessages);
 	}
 	
 	/**
@@ -248,4 +283,60 @@ public final class Language {
 		return new MessageFormat(resPersistenceGeneral.getString(key), currentLocale).format(values);
 	}
 
+	/**
+	 * Gets the message with the key and values indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @param values Values for insert in the message.
+	 * @return String with the message well-formed.
+	 */
+	public static String getFormatResPersistenceConstants(String key, Object[ ] values) {
+		return new MessageFormat(resPersistenceBundleConstants.getString(key), currentLocale).format(values);
+	}
+
+	/**
+	 * Gets the message with the key indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @return String with the message.
+	 */
+	public static String getResPersistenceConstants(String key) {
+		return resPersistenceBundleConstants.getString(key);
+	}
+	
+	/**
+	 * Gets the general message (quartz module) with the key and values indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @param values Values for insert in the message.
+	 * @return String with the message well-formed.
+	 */
+	public static String getFormatResQuartzGeneral(final String key, final Object... values) {
+		return new MessageFormat(quartzGeneral.getString(key), currentLocale).format(values);
+	}
+
+	/**
+	 * Gets the general message (quartz module) with the key indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @return String with the message.
+	 */
+	public static String getResQuartzGeneral(final String key) {
+		return quartzGeneral.getString(key);
+	}
+	
+	/**
+	 * Gets the Task message (core module) with the key and values indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @param values Values for insert in the message.
+	 * @return String with the message well-formed.
+	 */
+	public static String getFormatResCoreTasks(final String key, final Object... values) {
+		return new MessageFormat(resCoreTasks.getString(key), currentLocale).format(values);
+	}
+
+	/**
+	 * Gets the Task message (core module) with the key indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @return String with the message.
+	 */
+	public static String getResCoreTask(final String key) {
+		return resCoreTasks.getString(key);
+	}
 }

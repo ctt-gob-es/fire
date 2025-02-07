@@ -1,0 +1,179 @@
+<div class="container-fluid">
+	<h4 class="c-grey-900 mT-10 mB-30" th:text="#{task.validation.title}"></h4>
+<!-- 	<div class="row"> -->
+<!-- 		<div class="col-md-12"> -->
+<!-- 			<div class="bgc-white bd bdrs-3 p-20 mB-20"> -->
+<div class="row gap-20 masonry pos-r">
+	<div class="masonry-item col-md-10">
+		<div class="bgc-white p-20 bd">
+				<h5 class="c-grey-900 mB-20" id="idTitleTask"></h5>
+				<div class="mT-30">
+					<form name="altEditor-form" role="form" id="taskFormIdEdit"	th:object="${taskform}" method="post" action="">
+						<div id="messageUpdateTaskId" role="alert"></div>
+						<input type='hidden' class='primarykey' id="idTask"	th:field="*{idSchedulerEdit}">
+						<input type='hidden' id="idPlanner" th:field="*{idPlannerEdit}">
+						<input type='hidden' id="descriptionNameEdit" th:field="*{descriptionNameEdit}">
+						
+						<!-- Campo nombre -->	
+						<div class="form-group row">
+								<label for="nameId" class="col-form-label" th:text="#{task.validation.field.name}"></label>
+								<input type="text" id="nameId" th:field="*{nameEdit}" style="overflow:hidden" class="form-control" readonly/>
+						</div>
+						
+						<!-- Campo clase implementacion -->	
+						<div class="form-group row">
+								<label for="implementationClassId" class="col-form-label" th:text="#{task.validation.field.classImplementation}"></label>
+								<input type="text" id="implementationClassId" th:field="*{implementationClassEdit}" readonly style="overflow:hidden" class="form-control" />
+						</div>
+						
+						<!-- Campo tarea activa -->
+						<div class="form-group row">
+							<label for="enabledId" th:text="#{task.validation.field.enable}"
+								class="col-sm-4" />
+	
+							<div class="col-sm-2">
+								<div class="form-check">
+									<label class="form-check-label"> <input type="checkbox"
+										id="enabledId" th:field="*{isEnabledEdit}"> &nbsp;
+									</label>
+								</div>
+							</div>
+						</div>
+						<!-- Campo tipo de planificador -->
+						<div class="form-group row">
+							<label for="typePlannerId" th:text="#{task.validation.field.typePlanner}"
+								class="col-sm-4" />
+							<div class="col-sm-3">
+								<select id="typePlannerId" class="form-control"
+									th:field="*{idPlannerTypeEdit}">
+									<option th:each="tp: ${typePlanners}"
+										th:value="${tp.idConstant}" th:text="${tp.value}"
+										th:selected="${taskform.idPlannerTypeEdit == tp.idConstant}" />
+								</select>
+							</div>
+						</div>
+	
+						<!-- Campos Periodo  -->
+						<div class="form-group row">
+							<label for="hourId" class="col-sm-4" th:text="#{task.validation.field.period}"></label>
+							<div class="col-sm-1">
+								<input type="number" class="form-control" id="hourId"
+									th:field="*{hourPeriodEdit}" min="0" 
+									th:readonly="${isDisabledPeriod}">
+							</div>
+							<div class="col-sm-1">
+								<input type="number" class="form-control" id="minuteId"
+									th:field="*{minutePeriodEdit}" min="0" max="59"
+									th:readonly="${isDisabledPeriod}">
+							</div>
+							<div class="col-sm-1">
+								<input type="number" class="form-control" id="secondId"
+									th:field="*{secondPeriodEdit}" min="0" max="59"
+									th:readonly="${isDisabledPeriod}">
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="initDayId" class="col-sm-4"
+								th:text="#{task.validation.field.initDay}"></label>
+							<div class="col-sm-3">
+								<div class="input-group date" id="datetimepicker1">
+									<input type='text' class="form-control" id="initDayId"
+										th:field="*{initDayStringEdit}"> <span
+										class="input-group-addon"> <span
+										class="glyphicon glyphicon-calendar"></span>
+									</span>
+	
+								</div>
+							</div>
+						</div>
+						
+					</form>
+				</div>
+				<div class="peer">
+					<button id="updateTaskBtn" type="submit" 
+						th:text="#{task.validation.btn.update}" class="btn btn-primary"></button>
+				</div>
+				
+			</div>
+		</div>
+	</div>			
+</div>
+
+<script th:inline="javascript" type="text/javascript">
+	$(document).ready(function() {
+		var formDataTask= new FormData(document.forms["taskFormIdEdit"]);	
+		var idTask = $("#idTask").val();
+		var urlUpdateTask = /*[[@{/updatescheduler}]]*/;
+		
+		//funcion para configurar el elemento datetimepicker
+		$('#datetimepicker1').datetimepicker({
+		 format: 'DD/MM/YYYY HH:mm:ss',
+		 widgetPositioning:{
+			horizontal: 'auto',
+			vertical: 'top'
+		}
+		});
+
+		//si se cambia el tipo de planificador
+		$("#typePlannerId").change(function(){
+		if($("#typePlannerId").val() == 0 || $("#typePlannerId").val() == 2 ){
+			$('#hourId').attr('readonly', true);
+		   $('#minuteId').attr('readonly', true);
+		   $('#secondId').attr('readonly', true);
+		   $('#hourId').attr('disabled', true);
+		   $('#minuteId').attr('disabled', true);
+		   $('#secondId').attr('disabled', true);
+		}else{
+		   $('#hourId').attr('readonly', false);
+		   $('#minuteId').attr('readonly', false);
+		   $('#secondId').attr('readonly', false);
+		   $('#hourId').attr('disabled', false);
+		   $('#minuteId').attr('disabled', false);
+		   $('#secondId').attr('disabled', false);
+		}
+		});
+		
+		
+		$("#updateTaskBtn").click(function (event){
+			event.preventDefault();
+			var formData = JSON.stringify($("#taskFormIdEdit").serializeJSON());
+
+			 loading();
+			 
+			 //se borra si existiera algun mensaje
+			$('#messageUpdateTaskId').html("");
+			$('#messageUpdateTaskId').removeClass('alert alert-success');
+			$('#messageUpdateTaskId').removeClass('alert alert-danger');
+			 $.ajax({
+				 type: "POST",
+				 url: urlUpdateTask,
+				 data: formData,
+				 dataType :"json",
+				 contentType:"application/json",
+				success: function(data, error){
+					 hide();
+					if(data.msgOkEdit != "" && data.msgOkEdit != null){
+							$('#messageUpdateTaskId').html(data.msgOkEdit);
+							$('#messageUpdateTaskId').addClass('alert alert-success');
+						}
+					if(data.errorEdit != "" && data.errorEdit != null){
+							$('#messageUpdateTaskId').html(data.errorEdit);
+							$('#messageUpdateTaskId').addClass('alert alert-danger');
+					}
+					
+				 },
+				 error: function(data){
+					 if(data.errorEdit != "" && data.errorEdit != null){
+						$('#messageUpdateTaskId').html(data.errorEdit);
+						$('#messageUpdateTaskId').addClass('alert alert-danger');
+					}
+				}
+			 });//fin ajax
+
+		});
+		
+		$("#idTitleTask").text($("#descriptionNameEdit").val());
+		
+	});
+	
+</script>

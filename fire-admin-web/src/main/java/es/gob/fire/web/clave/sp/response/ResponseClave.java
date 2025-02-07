@@ -91,9 +91,10 @@ public class ResponseClave {
 	        // Si la autenticación es exitosa, guardamos el resultado en el contexto de seguridad
 	        SecurityContextHolder.getContext().setAuthentication(authResult);
 	        
-	        // Generaremos una nueva cookie por cada inicio de sesion, para evitar problemas entre servidores
+	        // Generaremos una nueva cookie por cada inicio de sesion exitoso
 	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, this.generateCookieValue());
 	    	cookie.setPath("/");
+	    	cookie.setSecure(true);
 	    	response.addCookie(cookie);
 	    	
 	        // Informamos en la traza que el usuario X se ha logueado en la administracion
