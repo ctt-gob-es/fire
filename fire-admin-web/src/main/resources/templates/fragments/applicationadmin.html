@@ -79,15 +79,21 @@ $(document).ready(function() {
                       return formattedDate;
                   }
 	          },
-              { "data": "habilitado",
-	        	"render": function (data, type, row) {
-		        	  
-	  	        	var is_checked = data == true ? "checked" : "";
-	  	        	  
-	  	        	return '<div class="checkbox checkbox-circle checkbox-info peers ai-c"><input disabled type="checkbox" id="tableAppDB" class="peer"'+ is_checked + '><label for="tableAppDB" class="peers peer-greed js-sb ai-c"><span class="peer peer-greed" ></span></label></div>';
-              	}
-              }
-            ],
+	          { 
+	        	  "data": "habilitado",
+	        	  "render": function (data, type, row) {
+	
+	        	      var is_checked = data == true ? "checked" : "";
+	
+	        	      return '<div class="checkbox checkbox-circle checkbox-info peers ai-c">' +
+	        	                  '<input type="checkbox" id="tableAppDB' + row.appId + '" class="peer" ' + is_checked + 
+	        	                      ' onclick="confirmEnableApplication(\'' + row.appId + '\'); event.preventDefault();">' +
+	        	                  '<label for="tableAppDB' + row.appId + '" class="peers peer-greed js-sb ai-c">' +
+	        	                      '<span class="peer peer-greed"></span>' +
+	        	                  '</label>' +
+	        	              '</div>';
+	        	  }
+        	}],
             dom: 'Bfrtip',
             select: 'single',
             responsive: true,
@@ -210,4 +216,21 @@ $(document).ready(function() {
         })
 
 });
+
+function confirmEnableApplication(idApplication) {
+	var actionConfirmEnableApplication = /*[[@{/confirmEnableApplication}]]*/;
+	
+	$.ajax({
+		url : actionConfirmEnableApplication,
+		type : 'GET',
+		cache : false,
+		data: $.param({'appId':idApplication}),
+		success : function(data) {
+			hide();
+			$('#modal').html(data);
+			$('#applicationConfirmEnableModal').modal('show');														
+		},
+		error : function() {}
+	});
+}
 </script>

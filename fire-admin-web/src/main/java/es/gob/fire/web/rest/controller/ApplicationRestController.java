@@ -26,6 +26,7 @@ package es.gob.fire.web.rest.controller;
 
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -39,7 +40,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -399,5 +402,21 @@ public class ApplicationRestController {
 		return dtOutput;
 	}
 
+	@RequestMapping(path = "/enableApplication", method = RequestMethod.POST)
+	public ResponseEntity<?> enableApplication(@RequestParam(FIELD_ID_APPLICATION) final String appId) {
+	    final Application app = this.appService.getAppByAppId(appId);
 
+	    if (app != null) {
+	        app.setHabilitado(!app.isHabilitado());
+
+	        Application savedApp = this.appService.saveApplication(app);
+	        
+	        ApplicationDTO savedAppDTO = this.appService.applicationEntityToDto(savedApp);
+
+	        return ResponseEntity.ok(savedAppDTO);
+	    } else {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body(Collections.singletonMap("error", "Aplicación no encontrada"));
+	    }
+	}
 }
