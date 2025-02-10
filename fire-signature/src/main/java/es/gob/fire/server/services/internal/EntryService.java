@@ -46,6 +46,7 @@ public class EntryService extends HttpServlet {
 
 		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String language = request.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
 
 		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
@@ -91,7 +92,7 @@ public class EntryService extends HttpServlet {
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, provs[0]);
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED, Boolean.TRUE.toString());
 
-			final ProviderInfo provInfo = ProviderManager.getProviderInfo(provs[0], logF);
+			final ProviderInfo provInfo = ProviderManager.getProviderInfo(provs[0], logF, language);
 
 			// Si es el proveedor de firma con certificado local, firmamos con el
 			if (provInfo.isLocalProvider()) {
@@ -108,6 +109,9 @@ public class EntryService extends HttpServlet {
 			}
 			return;
         }
+		
+		// Guardamos el idioma usado.
+		session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
 
 		// Registramos los datos guardados
 		SessionCollector.commit(session, trAux);

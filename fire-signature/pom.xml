@@ -84,6 +84,11 @@
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-signature-connector-clavefirma-test</artifactId>
 				</dependency>
+				
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-signature-i18n</artifactId>
+				</dependency>
 		
 				<dependency>
 					<groupId>es.gob.fire</groupId>

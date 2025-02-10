@@ -14,10 +14,13 @@
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="java.util.Map"%>
+<%@page import="java.util.Locale"%>
 <%@page import="es.gob.afirma.core.misc.AOUtil"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.security.cert.X509Certificate"%>
+<%@page import="es.gob.fire.i18n.Language"%>
+<%@page import="es.gob.fire.i18n.IWebViewMessages"%>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
@@ -32,6 +35,12 @@
 	}
 
 	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+	
+	String language = request.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
+	if (language == null || language.isEmpty()) {
+		language = "es";
+	}
+	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 
 	// Cargamos la sesion. Deberia estar en memoria, pero permitimos su carga de otras fuentes,
 	// ya que, por ejemplo, si el proveedor de firma en la nube requirio que se validase la
@@ -89,7 +98,7 @@
 	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Selección de certificado de firma</title>
+	<title><%= Language.getResFireSignature(IWebViewMessages.CERT_SELECTION) %></title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
@@ -110,7 +119,7 @@
 				<div class="mod_claim_in_der">
 					<div class="mod_claim_text"><%= ConfigManager.getPagesTitle() %></div>
 					<% if (appName != null && appName.length() > 0) { %>
-						<div class="mod_claim_text_sec">Firma solicitada por <%= appName %></div>
+						<div class="mod_claim_text_sec"><%= Language.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
 					<% } %>
 				</div>
 			</div>
@@ -125,7 +134,7 @@
 		<section class="contenido">
 				<div  class="container-box-title">
 					<div class="container_tit">
-						<h1 class="title"><span class="bold">Seleccione el certificado de firma</span></h1>
+						<h1 class="title"><span class="bold"><%= Language.getResFireSignature(IWebViewMessages.SELECT_CERT) %></span></h1>
 					</div>
 					
 				</div>
@@ -151,8 +160,8 @@
 						</div>
 						<div class="cert-box-center">
 							<h2 class="title-cert-box"><%= subject %></h2>
-							<p class="text-cert-box">Emitido por <%= issuer %></p>
-							<p class="text-cert-box">Fecha de caducidad: <%= date %></p>
+							<p class="text-cert-box"><%= Language.getResFireSignature(IWebViewMessages.CERT_ISSUED_BY) %> <%= issuer %></p>
+							<p class="text-cert-box"><%= Language.getResFireSignature(IWebViewMessages.CERT_EXPIRATION_DATE) %>: <%= date %></p>
 						</div>
 						<div class="cert-box-right">
 							<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_PRESIGN %>" id="certForm<%= i %>">
@@ -161,7 +170,7 @@
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 							<input  type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT %>" value="<%= cert %>">
 							<a class="button" title="Firmar con el certificado de <%= subject %>" onclick="document.getElementById('certForm<%= i %>').submit()" href="javascript:{}">
-								<span >seleccionar</span>
+								<span ><%= Language.getResFireSignature(IWebViewMessages.SELECT_BTN) %></span>
 								<span class="arrow-right"></span>
 							</a>
 							
@@ -184,7 +193,7 @@
 					</form>
 				
 					<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
-						<span >Cancelar</span>
+						<span ><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 					</a>
 				<% } else { %>
 					<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
@@ -196,7 +205,7 @@
 				
 					<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 						<span class="arrow-left-white"></span>
-						<span >Volver</span>
+						<span ><%= Language.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>
 					</a>
 				<% } %>
 			</div>		

@@ -137,12 +137,18 @@ public class ProviderManager {
 	 * mostrar a un usuario y que as&iacute; identifique su uso.
 	 * @param providerName Nombre del proveedor.
      * @param logF Formateador de trazas de log.
+     * @param language Idioma configurado.
 	 * @return Informaci&oacute;n del proveedor.
 	 */
-	public static ProviderInfo getProviderInfo(final String providerName, final LogTransactionFormatter logF) {
+	public static ProviderInfo getProviderInfo(final String providerName, final LogTransactionFormatter logF, final String language) {
 
 		if (providersInfo.containsKey(providerName)) {
-			return providersInfo.get(providerName);
+			final ProviderInfo prov = providersInfo.get(providerName);
+			/* Si el idioma configurado es el mismo al almacenado en la variable, se devuelve.
+			* En caso contrario, se sigue el proceso y se sustituye con el nuevo idioma. */ 
+			if (language != null && language.equals(prov.getLanguage())) {
+				return providersInfo.get(providerName);
+			}	
 		}
 
 		Properties infoProperties;
@@ -169,7 +175,7 @@ public class ProviderManager {
 
 		// Contruimos la informacion del proveedor y la almacenamos en la coleccion
 		// para evitar su recarga
-		final ProviderInfo providerInfo = new ProviderInfo(providerName, infoProperties);
+		final ProviderInfo providerInfo = new ProviderInfo(providerName, infoProperties, language);
 		providersInfo.put(providerName, providerInfo);
 
 		return providerInfo;

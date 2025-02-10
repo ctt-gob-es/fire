@@ -7,14 +7,14 @@
 
 /*------------------------------ HEADER ---------------------------------------*/
 
-header {width: 100%; border-top: 2px solid #FF6600; background-image: -webkit-linear-gradient(0deg, #dededf 50%, #d4d0cd 50%);}
-header .header_top { position: relative; height: auto; padding: 2% 0; background: url(../img/general/dms/bg-cabecera.png) top left no-repeat;text-align: center;}
+header {position:relative;width: 100%; border-top: 2px solid #FF6600; background-image: -webkit-linear-gradient(0deg, #dededf 50%, #d4d0cd 50%);}
+header .header_top { display:flex; flex-wrap: wrap; position: relative; height: auto; padding: 2% 0; background: url(../img/general/dms/bg-cabecera.png) top left no-repeat;text-align: center;}
 header .header_bottom { position: relative;}
-header .header_menu_right {float: right; width: 65%}
+header .header_menu_right { position: absolute; top: 10px; right: 10px;}
 
 
-.mod_claim_izq { width: 100%; } 
-.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 3em; vertical-align: top;}
+.mod_claim_izq { width: 100%; flex: 1;} 
+.mod_claim_izq .mod_claim_in { display: inline-block; margin-left: 3em; vertical-align: top;}
 .mod_claim_in_der { margin-left: 1em; margin-right: 1em; display: inline-block;width: 63%; color: #707070;margin-top: -0.65em;}
 .mod_claim_in_image img { height: 3.33em; }
 .mod_claim_text { font-family: "Helvetica Neue 35 Light", Arial, Verdana; font-size: 3.33em; color: #707070; vertical-align: bottom; font-weight: bold;}
@@ -61,8 +61,12 @@ footer .footer_bottom .comp_left { padding-left: 3em;}
 	.mod_claim_text_sec { font-family: Verdana; font-size: 0.85em; color: #707070; vertical-align: bottom; font-weight: bold;}
 }
 
-@media screen and (max-width: 380px) { 
+@media screen and (max-width: 800px) { 
 
+	header .header_menu_right { position: absolute; top: 50px; left: 10px;}
+}
+
+@media screen and (max-width: 380px) { 
 	.mod_claim_izq .mod_claim_in {display: inline-block; margin-left: 0.2em; vertical-align: top;}
 	.mod_claim_in_der { display: inline-block;width: 95%; color: #707070;margin-top:0em;}
 	.mod_claim_in_image img { height: 2.33em; }

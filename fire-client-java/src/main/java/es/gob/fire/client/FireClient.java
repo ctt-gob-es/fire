@@ -72,11 +72,13 @@ public class FireClient {
     private static final String TAG_VALUE_ALLOW_PARTIAL_UPGRADE = "$$PARTIAL$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_DOCUMENT_ID = "$$DOCID$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_STOP_ON_ERROR = "$$STOPERROR$$"; //$NON-NLS-1$
+    private static final String TAG_VALUE_LANGUAGE = "$$LANGUAGE$$"; //$NON-NLS-1$
 
     private static final String URL_PARAMETERS_BASE =
             "op=" + TAG_VALUE_OPERATION + //$NON-NLS-1$
             "&appid=" + TAG_VALUE_APP_ID + //$NON-NLS-1$
-    		"&subjectid=" + TAG_VALUE_SUBJECT_ID; //$NON-NLS-1$
+    		"&subjectid=" + TAG_VALUE_SUBJECT_ID + //$NON-NLS-1$
+    		"&language=" + TAG_VALUE_LANGUAGE; //$NON-NLS-1$
 
     private static final String URL_PARAMETERS_SIGN =
     		"&cop=" + TAG_VALUE_CRYPTO_OPERATION + //$NON-NLS-1$
@@ -287,6 +289,7 @@ public class FireClient {
      */
 	public SignOperationResult sign(
 			final String subjectId,
+			final String language,
 			final SignProcessConstants.SignatureOperation op,
 			final SignProcessConstants.SignatureFormat ft,
 			final SignProcessConstants.SignatureAlgorithm algth,
@@ -321,11 +324,16 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
+        
+        String languageUsed = language;
+        if (languageUsed == null || languageUsed.isEmpty()) {
+        	languageUsed = "es";
+        }
 
         final String dataB64 = Base64.encode(d, true);
         final String extraParamsB64 = Utils.properties2Base64(prop, true);
 
-        return sign(subjectId, op.toString(), ft.toString(),
+        return sign(subjectId, languageUsed, op.toString(), ft.toString(),
                 algth.toString(), extraParamsB64, dataB64, config);
     }
 
@@ -364,7 +372,7 @@ public class FireClient {
      * 				Error gen&eacute;rico en la operaci&oacute;n de firma.
      */
     public SignOperationResult sign(
-    		final String subjectId, final String op, final String ft,
+    		final String subjectId, final String language, final String op, final String ft,
     		final String algth, final String propB64,
     		final String dataB64, final Properties config)
             throws IOException, HttpNetworkException, HttpForbiddenException,
@@ -395,11 +403,17 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
+        
+        String languageUsed = language;
+        if (languageUsed == null || languageUsed.isEmpty()) {
+        	languageUsed = "es";
+        }
 
         final String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
+        		.replace(TAG_VALUE_LANGUAGE, languageUsed) 
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN.getId()) +
         		URL_PARAMETERS_SIGN
         		.replace(TAG_VALUE_CRYPTO_OPERATION, op)

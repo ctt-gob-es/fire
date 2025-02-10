@@ -95,6 +95,24 @@
 						<input id="upgrade-verify" type="radio" name="upgrade" value="verify"/>
 							<label for="upgrade-verify">Validar</label><br>
 			   	</fieldset>
+			   	
+			   	<fieldset  class="fieldset-fire">
+					<legend>Idioma: </legend>
+						<input id="none" type="radio" name="language" value="" checked="checked"/>
+							<label for="none" >Sin definir</label><br>
+						<input id="spanish" type="radio" name="language" value="es"/>
+							<label for="spanish">Espa&ntilde;ol</label><br>
+						<input id="english" type="radio" name="language" value="en"/>
+							<label for="english">Ingl&eacute;s</label><br>
+						<input id="catalan" type="radio" name="language" value="ca"/>
+							<label for="catalan">Catal&aacute;n</label><br>
+						<input id="basque" type="radio" name="language" value="eu"/>
+							<label for="basque">Euskera</label><br>
+						<input id="valencian" type="radio" name="language" value="va"/>
+							<label for="valencian">Valenciano</label><br>
+						<input id="galician" type="radio" name="language" value="gl"/>
+							<label for="galician">Gallego</label><br>
+			   	</fieldset>
 				
 				 <%-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
 				   - mode=implicit

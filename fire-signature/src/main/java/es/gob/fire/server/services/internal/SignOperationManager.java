@@ -57,6 +57,7 @@ public class SignOperationManager {
         final String cop			= params.getParameter(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION);
         final String format         = params.getParameter(ServiceParams.HTTP_PARAM_FORMAT);
         final String improvedFormat = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
+        final String language 		= params.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
         final String dataB64        = params.getParameter(ServiceParams.HTTP_PARAM_DATA);
         final String extraParamsB64 = params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
 
@@ -286,8 +287,9 @@ public class SignOperationManager {
         // Componemos los parametros del servicio
 		final String redirectUrl = ServiceNames.PUBLIC_SERVICE_ENTRY_POINT
     			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-    			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$;
-
+    			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$;
+    			+ "&" + ServiceParams.HTTP_PARAM_LANGUAGE + "=" + language; //$NON-NLS-1$ //$NON-NLS-2$
+    			
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		final String redirectUrlBase = PublicContext.getPublicContext(request);

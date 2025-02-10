@@ -94,6 +94,7 @@
 				<module>fire-signature-connector-clavefirma-test</module>
 				<module>fire-signature-decipher</module>
 				<module>fire-signature-document</module>
+				<module>fire-signature-i18n</module>
 				<module>fire-statistics-cmd</module>
 				<module>fire-statistics-common</module>
 				<module>fire-upgrade</module>
@@ -210,6 +211,12 @@
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-decipher</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-i18n</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
 

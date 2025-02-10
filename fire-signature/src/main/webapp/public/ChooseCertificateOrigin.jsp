@@ -10,11 +10,14 @@
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
+<%@page import="java.util.Locale"%>
 <%@page import="java.util.Map"%>
 <%@page import="java.util.Properties"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
+<%@page import="es.gob.fire.i18n.Language"%>
+<%@page import="es.gob.fire.i18n.IWebViewMessages"%>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
@@ -46,6 +49,12 @@
 
 	// Usamos la URL de error indicada en la transaccion
 	String errorUrl = connConfig.getRedirectErrorUrl();
+	
+	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
+	if (language == null || language.isEmpty()) {
+		language = "es";
+	}
+	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
@@ -81,7 +90,7 @@
 	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Selección del mecanismo de firma</title>
+	<title><%= Language.getResFireSignature(IWebViewMessages.SIGN_MECHANISM_SYSTEM_SUBTITLE) %></title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
@@ -101,11 +110,17 @@
 				<div class="mod_claim_in_der">
 					<div class="mod_claim_text"><%= ConfigManager.getPagesTitle() %></div>
 					<% if (appName != null && appName.length() > 0) { %>
-						<div class="mod_claim_text_sec">Firma solicitada por <%= appName %></div>
+						<div class="mod_claim_text_sec"><%= Language.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
 					<% } %>
 				</div>
 			</div>
 			<div class="clr"></div>
+			<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+			<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
+				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
+			</select>
+		</div>
 			
 		</div>
 	</header>
@@ -116,14 +131,14 @@
 		<section class="contenido">		
 		<div class="container-title">
 			<div class="title-head">
-				<h1 class="title">Seleccione el sistema de firma</h1>
+				<h1 class="title"><%= Language.getResFireSignature(IWebViewMessages.SIGN_SYSTEM_SELECT_TITLE) %></h1>
 			</div>	
 		</div>
 		
 		<div class="container-box">	
 		<%
 		for (String provider : providers) {
-			ProviderInfo info = ProviderManager.getProviderInfo(provider, trAux.getLogFormatter());
+			ProviderInfo info = ProviderManager.getProviderInfo(provider, trAux.getLogFormatter(), language);
 		%>
 			<div name="provider-option" class="main-box-left" id="option<%= info.getName() %>">
 			
@@ -133,6 +148,7 @@
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="<%= info.getName() %>" />
 					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_NEED_AUTH_USER %>" value="<%= info.isUserRequiredAutentication() %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" value="<%= language %>" />
 				</form>
 				
 				<div class="contain-box-top">
@@ -150,7 +166,7 @@
 					</p>
 				</div>
 				<a name="provider-option" class="button <%= info.isNeedJavaScript() ? "invisible" : "" %>" title="<%= info.getHeader() %>" onclick="document.getElementById('form<%= info.getName() %>').submit();" href="javascript:{}">
-					<span>Acceder</span>
+					<span><%= Language.getResFireSignature(IWebViewMessages.ACCESS_BTN) %></span>
 					<span class="arrow-right arrow-right-inicio"></span>
 				</a>
 			</div>
@@ -160,14 +176,15 @@
 			</div>
 			<div class="container-title">
 				<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CANCEL_OPERATION %>" id="formCancel">
-					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
-					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
-					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" name="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" value="<%= language %>" />
 				</form>
 
 				<div class="title-button">
 					<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
-						<span >Cancelar</span>
+						<span><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 					</a>
 				</div>
 			</div>
@@ -201,6 +218,44 @@
 		var disabledElementsProvOp = document.getElementsByName("provider-option");
 		for (var i = 0; i < disabledElementsProvOp.length; i++) {
 			disabledElementsProvOp[i].className=disabledElementsProvOp[i].className.replace( /(?:^|\s)invisible(?!\S)/g , '' )	
+		}
+		
+		function changeLanguage() {
+			var languageSelected = document.getElementById('languageSelect').value;
+			var subjectRefToSend = document.getElementById('subjectref').value;
+			var trIdToSend = document.getElementById('transactionid').value;
+			var errorUrlToSend = document.getElementById('errorurl').value;
+			
+			console.log(languageSelected);
+			console.log(subjectRefToSend);
+			console.log(trIdToSend);
+			console.log(errorUrlToSend);
+			
+		    // Creas un objeto con los datos a enviar
+		    var data = new FormData();
+		    data.append('language', languageSelected);
+		    data.append('subjectref', subjectRefToSend);
+		    data.append('transactionid', trIdToSend);
+		    data.append('errorurl', errorUrlToSend);
+		    
+		    // Usas fetch para enviar la solicitud POST sin encabezados personalizados
+		    fetch(window.location.href, {
+		        method: 'POST',
+		        body: data,
+		        headers: {
+		            'Accept': 'application/json',
+		        }
+		    })
+		    .then(function(response) {
+		        return response.json(); 
+		    })
+		    .then(function(data) {
+		        // Aquí puedes manejar la respuesta del servidor si es necesario
+		        console.log('Success:', data);
+		    })
+		    .catch(function(error) {
+		        console.error('Error:', error);
+		    });
 		}
    	</script>
 </body>
