@@ -54,10 +54,17 @@ public class RecoverErrorManager {
 
         // Recuperamos el resto de parametros de la sesion
         final FireSession session = SessionCollector.getFireSession(transactionId, subjectId, null, false, true, trAux);
+
+        // Cuando se ha pedido el error y no se ha encontrado la sesion, al
+        // contrario que en el resto de operaciones, vamos a devolver el error
+        // de transaccion invalida como resultado (sendResult) en lugar de como
+        // error (sendError) para que se pueda procesar como una respuesta
+        // valida, ya que se correspondera muy probablemente a una operacion
+        // legitima pero en la que la sesion de usuario hay caducado
         if (session == null) {
     		LOGGER.warning(logF.f("La transaccion no se ha inicializado o ha caducado")); //$NON-NLS-1$
     		final TransactionResult result = buildErrorResult(session, FIReError.INVALID_TRANSACTION, trAux);
-    		Responser.sendError(response, FIReError.INVALID_TRANSACTION, result);
+    		Responser.sendResult(response, result); // Usamos sendResult en lugar de sendError
     		return;
         }
 

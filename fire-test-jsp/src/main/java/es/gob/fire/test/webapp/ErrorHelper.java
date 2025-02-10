@@ -11,7 +11,6 @@ package es.gob.fire.test.webapp;
 
 import java.io.IOException;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -58,14 +57,6 @@ public class ErrorHelper {
             throws IllegalArgumentException, IOException, HttpOperationException, InvalidTransactionException {
 
     	LOGGER.info("Se intenta recuperar el error producido por la operacion"); //$NON-NLS-1$
-
-    	final Cookie[] cookies = request.getCookies();
-    	LOGGER.info("Cookies recibidas: " + (cookies == null ? "null" : Integer.toString(cookies.length))); //$NON-NLS-1$ //$NON-NLS-2$
-    	if (cookies != null) {
-    		for (final Cookie cookie : cookies) {
-    			LOGGER.info("Cookie: " + cookie.getName());
-    		}
-    	}
 
     	// El identificador de aplicacion es propio de cada aplicacion. En esta de ejemplo,
     	// se lee del fichero de configuracion
