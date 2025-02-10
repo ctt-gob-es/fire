@@ -72,6 +72,8 @@ public class ServiceParams {
 
     /** Atributo usado en el env&iacute;o de datos HTTP con el certificado de firma. */
     public static final String HTTP_ATTR_CERT = "cert"; //$NON-NLS-1$
+    /** Atributo usado en el env&iacute;o de datos HTTP con la URL a la que redirigir en caso de error. */
+    public static final String HTTP_ATTR_ERROR_URL = "errorurl"; //$NON-NLS-1$
 
     /** Par&aacute;metro para guardar en sesi&oacute;n el ID de aplicaci&oacute;n. */
     public static final String SESSION_PARAM_APPLICATION_ID = "appid"; //$NON-NLS-1$

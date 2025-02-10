@@ -107,9 +107,13 @@ public class ProviderBusiness {
 					? connConfig.isAppSkipCertSelection().booleanValue()
 							: ConfigManager.isSkipCertSelection();
 
+			// Si solo hay un certificado y se ha pedido que se seleccione automáticamente,
+			// reenviamos directamente a la operación de firma. Debemos entonces establecer
+			// ese certifiado y la URL a la que redirigir en caso de error
 			if (certificates.length == 1 && skipSelection) {
 				try {
 					request.setAttribute(ServiceParams.HTTP_ATTR_CERT, Base64.encode(certificates[0].getEncoded(), true));
+					request.setAttribute(ServiceParams.HTTP_ATTR_ERROR_URL, connConfig.getRedirectErrorUrl());
 				} catch (final Exception e) {
 					LOGGER.log(Level.SEVERE, logF.f("Error al codificar el certificado en Base64"), e); //$NON-NLS-1$
 					ErrorManager.setErrorToSession(session, FIReError.SIGNING, false, trAux);

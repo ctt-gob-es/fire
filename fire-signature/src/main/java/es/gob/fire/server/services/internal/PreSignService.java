@@ -82,14 +82,16 @@ public final class PreSignService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-    	final String trId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-    	final String userRef  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-    	String certB64        		= request.getParameter(ServiceParams.HTTP_PARAM_CERT);
+    	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+    	final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+    	String certB64 = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
+		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
-    	// Con la seleccion automatica de certificado, se recibe el certificado en un
-    	// atributo en lugar de por parametro
+    	// Con la seleccion automatica de certificado, se recibe el certificado y la URL
+		// de error en un atributo en lugar de por parametro
     	if (certB64 == null || certB64.isEmpty()) {
     		certB64 = (String) request.getAttribute(ServiceParams.HTTP_ATTR_CERT);
+        	redirectErrorUrl = (String) request.getAttribute(ServiceParams.HTTP_ATTR_ERROR_URL);
     	}
 
     	final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
@@ -116,8 +118,6 @@ public final class PreSignService extends HttpServlet {
         	return;
         }
 
-		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
-		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
