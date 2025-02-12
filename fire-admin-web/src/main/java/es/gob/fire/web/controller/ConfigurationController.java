@@ -33,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import SchedulerEditDTO.SchedulerVerifyCertExpiredDTO;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.i18n.Language;
@@ -92,7 +93,7 @@ public class ConfigurationController {
 	@RequestMapping(value = "configTaskValidation")
 	public String configTaskValidation(final Model model) {
 		
-		SchedulerEditDTO schedulerForm = new SchedulerEditDTO();
+		SchedulerEditDTO schedulerForm = new SchedulerVerifyCertExpiredDTO();
 		
 		Planner planner = new Planner();
 		
@@ -132,6 +133,15 @@ public class ConfigurationController {
 		// se obtiene fecha de inicio del planificador
 		SimpleDateFormat sdf = new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD);
 		schedulerForm.setInitDayStringEdit(sdf.format(planner.getInitDay()));
+		
+		// Obtenemos los valores para la especializacion de tarea de validacion
+		SchedulerVerifyCertExpiredDTO schedulerVerifyCertExpiredDTO = (SchedulerVerifyCertExpiredDTO) schedulerForm;
+		schedulerVerifyCertExpiredDTO.setDayAdviceNoticeEdit(
+				schedulerSelected.getAdvanceNotice() != null ? schedulerSelected.getAdvanceNotice() : NumberConstants.NUM30_LONG
+				);
+		schedulerVerifyCertExpiredDTO.setPeriodCommunicationEdit(
+				schedulerSelected.getPeriodCommunication() != null ? schedulerSelected.getPeriodCommunication() : NumberConstants.NUM5_LONG
+				);
 		
 		model.addAttribute("typePlanners", typePlanners);
 		model.addAttribute("typeTask", idScheduler);

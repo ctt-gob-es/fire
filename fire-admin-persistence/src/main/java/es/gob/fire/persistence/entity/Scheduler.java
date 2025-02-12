@@ -21,6 +21,7 @@
 package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -110,6 +111,14 @@ public class Scheduler implements Serializable {
      */
     private String schedulerName;
 
+    /**
+	 * Attribute that represents the day of the advance notice.
+	 */
+	private Long advanceNotice;
+	
+	private Long periodCommunication;
+	
+    private Date dateLastCommunication;
     /**
      * Obtiene el valor del atributo {@link #idScheduler}.
      * @return el valor del atributo {@link #idScheduler}.
@@ -317,4 +326,40 @@ public class Scheduler implements Serializable {
         this.schedulerName = schedulerNameParam;
     }
 
+    /**
+	 * Gets the value of the attribute {@link #advanceNotice}.
+	 * @return the value of the attribute {@link #advanceNotice}.
+	 */
+	@Column(name = "DIAS_PREAVISO", nullable = true, length = NumberConstants.NUM19)
+	public Long getAdvanceNotice() {
+		return advanceNotice;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #advanceNotice}.
+	 * @param taskParam The value for the attribute {@link #advanceNotice}.
+	 */
+	public void setAdvanceNotice(Long advanceNotice) {
+		this.advanceNotice = advanceNotice;
+	}
+
+	@Column(name = "PERIODO_COMUNICACION", nullable = true, length = NumberConstants.NUM19)
+	public Long getPeriodCommunication() {
+		return periodCommunication;
+	}
+
+	public void setPeriodCommunication(Long periodCommunication) {
+		this.periodCommunication = periodCommunication;
+	}
+	
+	@Column(name = "FECHA_ULTIMA_COMUNICACION", nullable = true)
+	public Date getDateLastCommunication() {
+		return dateLastCommunication;
+	}
+
+	public void setDateLastCommunication(Date dateLastCommunication) {
+		this.dateLastCommunication = dateLastCommunication;
+	}
+	
+	
 }

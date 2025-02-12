@@ -6,12 +6,13 @@
  * @author Consejería de Justicia e Interior de la Junta de Andalucía.
  * @version 1.0, 8 mar. 2019.
  */
-package es.gob.fire.web.mail;
+package es.gob.fire.mail;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
+import javax.mail.Address;
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -275,9 +276,23 @@ public class MailSenderService {
 			message.saveChanges();
 
 			// Obtenemos el objeto transport para conectarnos y enviar el correo
-			try (final Transport transport = sessionMail.getTransport(properties.getProperty(Constants.MAIL_PROTOCOL))) {
-				transport.connect();
-				transport.sendMessage(message, message.getAllRecipients());
+			Transport transport = null;
+
+			try {
+			    transport = sessionMail.getTransport(properties.getProperty(Constants.MAIL_PROTOCOL));
+			    transport.connect();
+			    transport.sendMessage(message, message.getAllRecipients());
+			} catch (MessagingException e) {
+			    LOGGER.error(e);
+			} finally {
+			    // Cerramos el transport manualmente en el bloque finally
+			    if (transport != null) {
+			        try {
+			            transport.close();
+			        } catch (MessagingException e) {
+			            e.printStackTrace();
+			        }
+			    }
 			}
 	}
 
@@ -288,7 +303,7 @@ public class MailSenderService {
 	 */
 	static class SmtpAuthenticator extends Authenticator {
 
-		/**
+		/**	
 		 * Attribute that represents the user name authentication.
 		 */
 		private final String username;
@@ -332,6 +347,52 @@ public class MailSenderService {
 	 */
 	public void setMailPasswordExpiration(final String mailPasswordExpirationP) {
 		this.mailPasswordExpiration = mailPasswordExpirationP;
+	}
+
+	public void sendEmail(Address[] addresses, String subject, StringBuilder bodySubject) {
+		Transport transport = null;
+
+	    try {
+	    	init();
+	    	
+	    	// Creamos un nuevo MimeMessage para cada correo
+            final MimeMessage message = new MimeMessage(sessionMail);
+	    	
+	        // Creamos el transport una sola vez
+	        transport = sessionMail.getTransport(properties.getProperty(Constants.MAIL_PROTOCOL));
+	        transport.connect(); // Establecemos la conexión
+
+            // Indicamos el emisor
+            message.setFrom(new InternetAddress((String) properties.get(Constants.MAIL_SMTP_MAIL_SENDER)));
+
+            // Establecemos los destinatarios
+            message.addRecipients(Message.RecipientType.TO, addresses);
+
+            // Establecemos el asunto del correo
+            message.setSubject(subject);
+
+            // Establecemos el cuerpo del correo en formato HTML
+            message.setContent(bodySubject.toString(), "text/plain; charset=UTF-8");
+
+            // Guardamos los cambios
+            message.saveChanges();
+
+            // Enviamos el mensaje
+            transport.sendMessage(message, message.getAllRecipients());
+
+            LOGGER.info("Correo enviado con exito ");
+	    } catch (Exception e) {
+	        LOGGER.error("Se ha producido un error al enviar el correo: ", e);
+	    } finally {
+	        // Cerramos el transport solo una vez al final
+	        if (transport != null) {
+	            try {
+	                transport.close();
+	            } catch (MessagingException e) {
+	                LOGGER.error("Error al cerrar el transport", e);
+	            }
+	        }
+	    }
 	}
 
 }

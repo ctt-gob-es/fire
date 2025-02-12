@@ -48,6 +48,10 @@
 					<groupId>javax.xml.crypto</groupId>
 					<artifactId>xmldsig</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>javax.mail</groupId>
+					<artifactId>mail</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -148,6 +152,12 @@
 			<artifactId>quartz</artifactId>
 		</dependency>
 		
+		<!-- JavaMail -->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>

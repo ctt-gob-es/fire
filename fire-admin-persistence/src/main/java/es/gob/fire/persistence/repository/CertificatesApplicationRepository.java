@@ -28,6 +28,7 @@ package es.gob.fire.persistence.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import es.gob.fire.persistence.entity.CertificatesApplication;
@@ -50,5 +51,8 @@ public interface CertificatesApplicationRepository extends JpaRepository<Certifi
 	 *         Returns an empty list if no entities are found.
 	 */
 	List<CertificatesApplication> findByApplicationAppId(String appId);
-	
+
+	@Query("SELECT ca FROM CertificatesApplication ca JOIN FETCH ca.certificate JOIN FETCH ca.application")
+	List<CertificatesApplication> findAllWithCertificateAndApplication();
+
 }

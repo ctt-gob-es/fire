@@ -3,8 +3,10 @@ package es.gob.fire.persistence.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import es.gob.fire.persistence.dto.MailInfoDTO;
 import es.gob.fire.persistence.entity.User;
 
 @Repository
@@ -67,4 +69,17 @@ public interface UserRepository extends JpaRepository<User, Long>  {
 	 * @return List that represents all the users from the persistence.
 	 */
 	User findAllByDni(String dni);
+	
+	@Query("SELECT DISTINCT new es.gob.fire.persistence.dto.MailInfoDTO(" +
+				"ar.responsible.email, " +
+				"ca.certificate.idCertificado, " +
+				"ca.certificate.fechaInicio, " +
+				"ca.certificate.fechaCaducidad, " +
+				"ca.certificate.subject) " +
+				"FROM CertificatesApplication ca, ApplicationResponsible ar, Rol r " +
+				"WHERE ca.application.appId = ar.application.appId " +
+				"AND ar.responsible.rol.rolId = r.rolId " +
+		       	"AND r.rolId = 2")
+	List<MailInfoDTO> obtainAllCertWithAppAndResposible();
+
 }

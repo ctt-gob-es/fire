@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import SchedulerEditDTO.SchedulerVerifyCertExpiredDTO;
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.i18n.ISchedulerIdConstants;
@@ -103,7 +104,7 @@ public class ConfigurationRestController {
 	 * @return Modified task.
 	 */
 	@RequestMapping(value = "/updatescheduler", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody SchedulerEditDTO updateScheduler(@RequestBody SchedulerEditDTO taskForm) {
+	public @ResponseBody SchedulerEditDTO updateScheduler(@RequestBody SchedulerVerifyCertExpiredDTO taskForm) {
 		
 		try {
 			if (!validateInitDate(taskForm.getInitDayStringEdit())) {
@@ -135,6 +136,10 @@ public class ConfigurationRestController {
 				
 				// se actualiza la tarea indicando si esta habilitada o no.
 				scheduler.setIsActive(taskForm.getIsEnabledEdit());
+				
+				// actualizamos los dias de preaviso y de periodo de comunicacion
+				scheduler.setAdvanceNotice(taskForm.getDayAdviceNoticeEdit());
+				scheduler.setPeriodCommunication(taskForm.getPeriodCommunicationEdit());
 				
 				// persistimos los cambios del planificador y de la tarea.
 				Scheduler updatedTask = iSchedulerService.saveScheduler(scheduler);

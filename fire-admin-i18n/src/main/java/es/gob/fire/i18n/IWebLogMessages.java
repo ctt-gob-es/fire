@@ -218,4 +218,38 @@ public interface IWebLogMessages {
 	 * Constant attribute that represents the name of the property <code>errorUpdateTaskWeb</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERROR_UPDATE_TASK_WEB = "errorUpdateTaskWeb";
+	
+	String LOG_CTV001 = "CTV001";
+
+	String LOG_CTV002 = "CTV002";
+
+	String LOG_CTV003 = "CTV003";
+
+	String LOG_CTV004 = "CTV004";
+
+	String LOG_CTV005 = "CTV005";
+
+	String LOG_CTV006 = "CTV006";
+	
+	String LOG_CTV007 = "CTV007";
+	
+	String LOG_CTV008 = "CTV008";
+	
+	String LOG_CTV009 = "CTV009";
+
+	String LOG_CTV010 = "CTV010";
+
+	String LOG_CTV011 = "CTV011";
+
+	String LOG_CTV012 = "CTV012";
+
+	String LOG_CTV013 = "CTV013";
+	
+	String LOG_CTV014 = "CTV014";
+	
+	String LOG_CTV015 = "CTV015";
+	
+	String LOG_CTV016 = "CTV016";
+
+	String LOG_CTV017 = "CTV017";
 }

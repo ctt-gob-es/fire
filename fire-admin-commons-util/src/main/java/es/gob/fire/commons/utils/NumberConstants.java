@@ -91,6 +91,11 @@ public interface NumberConstants {
 	int NUM0 = 0;
 	
 	/**
+	 * Constant attribute that represents the number 0 (type long).
+	 */
+	long NUM_0_LONG = 0l;
+	
+	/**
 	 * Constant attribute that represents the number 3.
 	 */
 	int NUM1 = 1;
@@ -144,6 +149,11 @@ public interface NumberConstants {
 	 * Constant attribute that represents the number 10.
 	 */
 	int NUM10 = 10;
+
+	/**
+	 * Constant attribute that represents the number 10 (type long).
+	 */
+	long NUM10_LONG = 10L;
 
 	/**
 	 * Constant attribute that represents the number 11.
@@ -249,6 +259,11 @@ public interface NumberConstants {
 	 * Constant attribute that represents the number 30.
 	 */
 	int NUM30 = 30;
+
+	/**
+	 * Constant attribute that represents the number 30 (type long).
+	 */
+	long NUM30_LONG = 30L;
 
 	/**
 	 * Constant attribute that represents the number 31.

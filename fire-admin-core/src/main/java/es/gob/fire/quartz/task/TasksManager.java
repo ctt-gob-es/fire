@@ -24,8 +24,15 @@
  */
 package es.gob.fire.quartz.task;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.i18n.ICoreGeneralMessages;
+import es.gob.fire.i18n.ISchedulerIdConstants;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.entity.Planner;
 import es.gob.fire.persistence.entity.Scheduler;
@@ -35,6 +42,8 @@ import es.gob.fire.quartz.planner.PlannerDate;
 import es.gob.fire.quartz.planner.PlannerPeriod;
 import es.gob.fire.quartz.scheduler.FireSchedulerException;
 import es.gob.fire.quartz.scheduler.TasksScheduler;
+import es.gob.fire.service.impl.SchedulerService;
+import es.gob.fire.spring.config.ApplicationContextProvider;
 
 /**
  * <p>Class that manages the named 'Tasks'. This tasks are only managed
@@ -42,12 +51,25 @@ import es.gob.fire.quartz.scheduler.TasksScheduler;
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * @version 1.5, 27/12/2024.
  */
+@Component
 public class TasksManager {
 
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(TasksManager.class);
+
+	@Autowired
+	ApplicationContextProvider applicationContextProvider;
+	
+	@PostConstruct
+	public void initializeTaskAfterDeployment() {
+		try {
+			addOrUpdateTaskScheduler(ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class).getSchedulerById(ISchedulerIdConstants.ID_VALIDATION_CERTIFICATES_EXPIRED));
+		} catch (BeansException | FireTaskException e) {
+			LOGGER.error(e);
+		}
+	}
 	
 	/**
 	 * Adds or update a task in the scheduler.

@@ -27,4 +27,4 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.0, 08/04/2020.
  */
-package es.gob.fire.web.mail;
+package es.gob.fire.mail;

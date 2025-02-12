@@ -50,12 +50,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
+import es.gob.fire.mail.MailSenderService;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.permissions.Permissions;
 import es.gob.fire.persistence.permissions.PermissionsChecker;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.web.authentication.CustomUserAuthentication;
-import es.gob.fire.web.mail.MailSenderService;
 
 /**
  * <p>
