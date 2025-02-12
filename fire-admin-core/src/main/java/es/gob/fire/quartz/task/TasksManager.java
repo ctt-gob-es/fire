@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * <b>Date:</b><p>20/10/2021.</p>
  * @author Gobierno de España.
- * @version 1.5, 27/12/2024.
+ * @version 1.6, 12/02/2025.
  */
 package es.gob.fire.quartz.task;
 
@@ -49,7 +49,7 @@ import es.gob.fire.spring.config.ApplicationContextProvider;
  * <p>Class that manages the named 'Tasks'. This tasks are only managed
  * by administrators of the platform.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
- * @version 1.5, 27/12/2024.
+ * @version 1.6, 12/02/2025.
  */
 @Component
 public class TasksManager {
@@ -59,9 +59,24 @@ public class TasksManager {
 	 */
 	private static final Logger LOGGER = Logger.getLogger(TasksManager.class);
 
+	/**
+	 * The {@link ApplicationContextProvider} instance used to access the Spring application context.
+	 * 
+	 * This field is injected using {@link Autowired} to provide access to the application context,
+	 * enabling interaction with Spring-managed beans and services within the application.
+	 */
 	@Autowired
 	ApplicationContextProvider applicationContextProvider;
 	
+	/**
+	 * Initializes the task scheduler after deployment by adding or updating the task for certificate expiration validation.
+	 * 
+	 * This method is invoked after the deployment process to configure the scheduler with the task for validating expired certificates.
+	 * It retrieves the scheduler from the application context and attempts to add or update the task.
+	 * 
+	 * @throws FireTaskException If there is an error while adding or updating the task in the scheduler.
+	 * @throws BeansException If there is an error retrieving the scheduler bean from the application context.
+	 */
 	@PostConstruct
 	public void initializeTaskAfterDeployment() {
 		try {

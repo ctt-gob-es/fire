@@ -21,7 +21,7 @@
  * certificates and electronic signature.</p>
  * <b>Date:</b><p>27/01/2025.</p>
  * @author Gobierno de España.
- * @version 1.0, 27/01/2025.
+ * @version 1.1, 12/02/2025.
  */
 package es.gob.fire.persistence.repository;
 
@@ -38,7 +38,7 @@ import es.gob.fire.persistence.entity.CertificatesApplicationPK;
  * <p>Interface that provides CRUD functionality for the CertificatesApplication entity.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI
  * certificates and electronic signature.</p>
- * @version 1.0, 27/01/2025.
+ * @version 1.1, 12/02/2025.
  */
 @Repository
 public interface CertificatesApplicationRepository extends JpaRepository<CertificatesApplication, CertificatesApplicationPK>{
@@ -52,6 +52,15 @@ public interface CertificatesApplicationRepository extends JpaRepository<Certifi
 	 */
 	List<CertificatesApplication> findByApplicationAppId(String appId);
 
+	/**
+	 * Retrieves all {@link CertificatesApplication} entities along with their associated {@link Certificate} and {@link Application} entities.
+	 * 
+	 * This method performs a JOIN FETCH to eagerly load the related {@link Certificate} and {@link Application} entities
+	 * for each {@link CertificatesApplication} record. It is useful when you need to fetch the data for these associated entities
+	 * in a single query to avoid N+1 query problems.
+	 * 
+	 * @return a list of {@link CertificatesApplication} entities with their associated {@link Certificate} and {@link Application}.
+	 */
 	@Query("SELECT ca FROM CertificatesApplication ca JOIN FETCH ca.certificate JOIN FETCH ca.application")
 	List<CertificatesApplication> findAllWithCertificateAndApplication();
 

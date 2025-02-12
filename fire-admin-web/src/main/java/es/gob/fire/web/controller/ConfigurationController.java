@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of FIRe system.</p>
  * <b>Date:</b><p>07/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 07/02/2025.
+ * @version 1.1, 12/02/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -48,7 +48,7 @@ import es.gob.fire.service.ISchedulerService;
 /** 
  * <p>Class that manages the requests related to the configuration interface.</p>
  * <b>Project:</b><p>Application for monitoring services of FIRe system.</p>
- * @version 1.0, 07/02/2025.
+ * @version 1.1, 12/02/2025.
  */
 @Controller
 public class ConfigurationController {

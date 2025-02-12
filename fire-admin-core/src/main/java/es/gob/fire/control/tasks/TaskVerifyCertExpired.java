@@ -1,6 +1,32 @@
+/*
+/*******************************************************************************
+ * Copyright (C) 2018 MINHAFP, Gobierno de España
+ * This program is licensed and may be used, modified and redistributed under the  terms
+ * of the European Public License (EUPL), either version 1.1 or (at your option)
+ * any later version as soon as they are approved by the European Commission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and
+ * more details.
+ * You should have received a copy of the EUPL1.1 license
+ * along with this program; if not, you may find it at
+ * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
+ ******************************************************************************/
+
+/**
+ * <b>File:</b><p>es.gob.fire.control.tasks.TaskVerifyCertExpired.java.</p>
+ * <b>Description:</b><p>Class that performs a task for updated status certificate X509 and send emails to users with differents role.</p>
+ * for all the scheduler task classes in FIRe.</p>
+ * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
+ * <b>Date:</b><p>12/02/2025.</p>
+ * @author Gobierno de España.
+ * @version 1.0, 12/02/2025.
+ */
 package es.gob.fire.control.tasks;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +58,12 @@ import es.gob.fire.quartz.task.FireTask;
 import es.gob.fire.service.impl.SchedulerService;
 import es.gob.fire.spring.config.ApplicationContextProvider;
 
+/**
+ * <p>Class that performs a task for updated status certificate X509 and send emails to users with differents role.</p>
+ * <b>Project:</b><p>Horizontal platform of validation services of multiPKI
+ * certificates and electronic signature.</p>
+ * @version 1.0, 12/02/2025.
+ */
 public class TaskVerifyCertExpired extends FireTask {
 
 	/**
@@ -39,11 +71,19 @@ public class TaskVerifyCertExpired extends FireTask {
 	 */
 	private static final Logger LOGGER = Logger.getLogger(TaskVerifyCertExpired.class);
 	
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.quartz.task.FireTask#initialMessage()
+	 */
 	@Override
 	protected void initialMessage() {
 		Language.getResWebFire(IWebLogMessages.LOG_CTV001);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.quartz.task.FireTask#doActionOfTheTask()
+	 */
 	@Transactional
 	@Override
 	protected void doActionOfTheTask() throws Exception {
@@ -51,12 +91,11 @@ public class TaskVerifyCertExpired extends FireTask {
 		List<Certificate> listCertificateExpired = new ArrayList<Certificate>();
 		List<Certificate> listCertificateExpDaysAdvanceNotice = new ArrayList<Certificate>();
 		boolean calculateAdavanceNotice = false;
-		boolean periodCommunication = false;
 		boolean sendEmailByPeriodComm = false;
 		Date futureDateCertExpired = null;
 		Date dateNow = Calendar.getInstance().getTime();
 		
-		// Obtenemos el scheduler para ver los dias de preaviso configurados 
+		// Obtenemos el scheduler para la programacion de la tarea de valiacion
 		Scheduler scheduler = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class).getSchedulerById(NumberConstants.NUM_1_LONG);
 		
 		// Si hay dias de preaviso configurado, obtenemos la fecha actual + días de preaviso
@@ -92,20 +131,20 @@ public class TaskVerifyCertExpired extends FireTask {
 			if (dateNow.before(startDate)) {
 			    // El certificado aún no es válido
 				listCertificateNotYedValid.add(certificate);
-				sendEmailWithCertNotValidToResponsible(listMailInfoDTOResponsible, certificate);
+				sendEmailToResponsiblesForCertNotValid(listMailInfoDTOResponsible, certificate);
 			} else if (dateNow.after(expDate)) {
 			    // El certificado está caducado
 				listCertificateExpired.add(certificate);
-				sendEmailWithCertExpiredToResponsible(listMailInfoDTOResponsible, certificate);
+				sendEmailToResponsiblesForCertExpired(listMailInfoDTOResponsible, certificate);
 			} else {
 			    // Si hay dias de preaviso configurados evaluaremos la validez del certificado
 			    if(calculateAdavanceNotice) {
 			    	// Verificamos si el certificado caduca en los días de preaviso configurados
 			        if (!expDate.after(futureDateCertExpired)) {
 			        	listCertificateExpDaysAdvanceNotice.add(certificate);
-			        	// Si el periodo de comunicacion esta establecido y hace mas de x dias que se envio el ultimo correo de comunicacion enviamos el email
-			        	if(periodCommunication && sendEmailByPeriodComm) {
-			        		sendEmailWithCertCloseToExpiryForResponsibles(listMailInfoDTOResponsible, certificate);
+			        	// Si el periodo de comunicacion esta establecido y entre la fecha de la ultima comunicacion y la actual hay mas de X dias de diferencia enviamos el email
+			        	if(sendEmailByPeriodComm) {
+			        		sendEmailToResponsiblesForCertCloseToExpiry(listMailInfoDTOResponsible, certificate);
 			        		//Actualizamos la fecha de ultima comunicacion del scheduler
 			        		scheduler.setDateLastCommunication(dateNow);
 			        		ApplicationContextProvider.getApplicationContext().getBean(SchedulerRepository.class).save(scheduler);
@@ -119,6 +158,14 @@ public class TaskVerifyCertExpired extends FireTask {
 		sendEmailWithDiffCertStatus(listCertificateNotYedValid, listCertificateExpired, listCertificateExpDaysAdvanceNotice);
 	}
 
+	/**
+	 * Sends an email notification regarding certificates with different statuses:
+	 * not yet valid, expired, or close to expiration.
+	 *
+	 * @param listCertificateNotYedValid         	List of certificates that are not yet valid.
+	 * @param listCertificateExpired             	List of expired certificates.
+	 * @param listCertificateExpDaysAdvanceNotice 	List of certificates nearing expiration.
+	 */
 	private void sendEmailWithDiffCertStatus(List<Certificate> listCertificateNotYedValid,
 			List<Certificate> listCertificateExpired, List<Certificate> listCertificateExpDaysAdvanceNotice) {
 		// Obtenemos los destinatarios
@@ -197,14 +244,23 @@ public class TaskVerifyCertExpired extends FireTask {
 			}
 		}
 		
-		ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject);
+		String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV021, new Object[ ] { Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+		
+		ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 	}
 
-	private void sendEmailWithCertCloseToExpiryForResponsibles(List<MailInfoDTO> listMailInfoDTOResponsible,
+	/**
+	 * Sends an email notification to responsible users for a certificate 
+	 * that is nearing its expiration date.
+	 *
+	 * @param listMailInfoDTOResponsible List of responsible users with certificate details.
+	 * @param certificate                The certificate that is close to expiration.
+	 */
+	private void sendEmailToResponsiblesForCertCloseToExpiry(List<MailInfoDTO> listMailInfoDTOResponsible,
 			Certificate certificate) {
 		List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
 		
-		if(listMailInfoDTORespWithCert != null) {
+		if(listMailInfoDTORespWithCert != null && !listMailInfoDTORespWithCert.isEmpty()) {
 			
 			Address[] addresses = listMailInfoDTORespWithCert.stream()
 				    .map(MailInfoDTO::getEmailResponsible)
@@ -227,15 +283,26 @@ public class TaskVerifyCertExpired extends FireTask {
 				bodySubject.append("\n");
 			}
 			
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject);
+			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV020, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+			
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}
 
-	private void sendEmailWithCertExpiredToResponsible(List<MailInfoDTO> listMailInfoDTOResponsible,
+	/**
+	 * Sends an email to the responsible parties for an expired certificate.
+	 * 
+	 * This method filters the list of responsible parties to get those associated with the provided certificate
+	 * and sends an email with details about the expired certificate.
+	 * 
+	 * @param listMailInfoDTOResponsible List of {@link MailInfoDTO} objects containing information about the responsible parties and their certificates.
+	 * @param certificate {@link Certificate} object containing information about the expired certificate.
+	 */
+	private void sendEmailToResponsiblesForCertExpired(List<MailInfoDTO> listMailInfoDTOResponsible,
 			Certificate certificate) {
 		List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
 		
-		if(listMailInfoDTORespWithCert != null) {
+		if(listMailInfoDTORespWithCert != null && !listMailInfoDTORespWithCert.isEmpty()) {
 			
 			Address[] addresses = listMailInfoDTORespWithCert.stream()
 				    .map(MailInfoDTO::getEmailResponsible)
@@ -258,15 +325,26 @@ public class TaskVerifyCertExpired extends FireTask {
 				bodySubject.append("\n");
 			}
 			
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject);
+			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV019, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+			
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}
 
-	private void sendEmailWithCertNotValidToResponsible(List<MailInfoDTO> listMailInfoDTOResponsible,
+	/**
+	 * Sends an email to the responsible parties for an invalid certificate.
+	 * 
+	 * This method filters the list of responsible parties to get those associated with the provided certificate
+	 * and sends an email with details about the certificate that is no longer valid.
+	 * 
+	 * @param listMailInfoDTOResponsible List of {@link MailInfoDTO} objects containing information about the responsible parties and their certificates.
+	 * @param certificate {@link Certificate} object containing information about the invalid certificate.
+	 */
+	private void sendEmailToResponsiblesForCertNotValid(List<MailInfoDTO> listMailInfoDTOResponsible,
 			Certificate certificate) {
 		List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
 		
-		if(listMailInfoDTORespWithCert != null) {
+		if(listMailInfoDTORespWithCert != null && !listMailInfoDTORespWithCert.isEmpty()) {
 			
 			Address[] addresses = listMailInfoDTORespWithCert.stream()
 				    .map(MailInfoDTO::getEmailResponsible)
@@ -289,21 +367,35 @@ public class TaskVerifyCertExpired extends FireTask {
 				bodySubject.append("\n");
 			}
 			
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject);
+			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV018, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+			
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.quartz.task.FireTask#endMessage()
+	 */
 	@Override
 	protected void endMessage() {
 		Language.getResWebFire(IWebLogMessages.LOG_CTV002);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.quartz.task.FireTask#prepareParametersForTheTask()
+	 */
 	@Override
 	protected void prepareParametersForTheTask(Map<String, Object> dataMap) throws FireTaskException {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.quartz.task.FireTask#getDataResult()
+	 */
 	@Override
 	protected Map<String, Object> getDataResult() throws FireTaskException {
 		// TODO Auto-generated method stub

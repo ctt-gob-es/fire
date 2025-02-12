@@ -16,7 +16,7 @@
  * certificates and electronic signature.</p>
  * <b>Date:</b><p>15/05/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 15/05/2020.
+ * @version 1.1, 12/02/2025.
  */
 package es.gob.fire.persistence.entity;
 
@@ -40,7 +40,7 @@ import es.gob.fire.commons.utils.NumberConstants;
  * <p>Class that represents the representation of the <i>SCHEDULER</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI
  * certificates and electronic signature.</p>
- * @version 1.0, 15/05/2020.
+ * @version 1.1, 12/02/2025.
  */
 @Entity
 @Table(name = "TB_PROGRAMADOR")
@@ -116,9 +116,16 @@ public class Scheduler implements Serializable {
 	 */
 	private Long advanceNotice;
 	
+	/**
+	 * Attribute that represents the day of the period communication.
+	 */
 	private Long periodCommunication;
 	
+	/**
+	 * Attribute that represents the date of the last period communication.
+	 */	
     private Date dateLastCommunication;
+    
     /**
      * Obtiene el valor del atributo {@link #idScheduler}.
      * @return el valor del atributo {@link #idScheduler}.
@@ -343,23 +350,38 @@ public class Scheduler implements Serializable {
 		this.advanceNotice = advanceNotice;
 	}
 
+	/**
+	 * Gets the value of the attribute {@link #periodCommunication}.
+	 * @return the value of the attribute {@link #periodCommunication}.
+	 */
 	@Column(name = "PERIODO_COMUNICACION", nullable = true, length = NumberConstants.NUM19)
 	public Long getPeriodCommunication() {
 		return periodCommunication;
 	}
 
+	/**
+	 * Sets the value of the attribute {@link #periodCommunication}.
+	 * @param periodCommunication The value for the attribute {@link #periodCommunication}.
+	 */
 	public void setPeriodCommunication(Long periodCommunication) {
 		this.periodCommunication = periodCommunication;
 	}
 	
+	/**
+	 * Gets the value of the attribute {@link #dateLastCommunication}.
+	 * @return the value of the attribute {@link #dateLastCommunication}.
+	 */
 	@Column(name = "FECHA_ULTIMA_COMUNICACION", nullable = true)
 	public Date getDateLastCommunication() {
 		return dateLastCommunication;
 	}
 
+	/**
+	 * Sets the value of the attribute {@link #dateLastCommunication}.
+	 * @param dateLastCommunication The value for the attribute {@link #dateLastCommunication}.
+	 */
 	public void setDateLastCommunication(Date dateLastCommunication) {
 		this.dateLastCommunication = dateLastCommunication;
 	}
-	
 	
 }

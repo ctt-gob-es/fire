@@ -10,7 +10,9 @@ package es.gob.fire.mail;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.mail.Address;
 import javax.mail.Authenticator;
@@ -349,7 +351,7 @@ public class MailSenderService {
 		this.mailPasswordExpiration = mailPasswordExpirationP;
 	}
 
-	public void sendEmail(Address[] addresses, String subject, StringBuilder bodySubject) {
+	public void sendEmail(Address[] addresses, String subject, StringBuilder bodySubject, String msgEmailSucces) {
 		Transport transport = null;
 
 	    try {
@@ -380,7 +382,7 @@ public class MailSenderService {
             // Enviamos el mensaje
             transport.sendMessage(message, message.getAllRecipients());
 
-            LOGGER.info("Correo enviado con exito ");
+            LOGGER.info(msgEmailSucces);
 	    } catch (Exception e) {
 	        LOGGER.error("Se ha producido un error al enviar el correo: ", e);
 	    } finally {

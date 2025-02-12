@@ -13,6 +13,9 @@ public class SchedulerVerifyCertExpiredDTO extends SchedulerEditDTO {
 	 */
 	private Long dayAdviceNoticeEdit;
 	
+	/**
+	 * Attribute that defines the number of days of period communication.
+	 */
 	private Long periodCommunicationEdit;
 	
 	/**
@@ -31,10 +34,18 @@ public class SchedulerVerifyCertExpiredDTO extends SchedulerEditDTO {
 		this.dayAdviceNoticeEdit = dayAdviceNoticeEdit;
 	}
 
+	/**
+	 * Gets the value of the attribute {@link #periodCommunicationEdit}.
+	 * @return the value of the attribute {@link #periodCommunicationEdit}.
+	 */
 	public Long getPeriodCommunicationEdit() {
 		return periodCommunicationEdit;
 	}
 
+	/**
+	 * Sets the value of the attribute {@link #periodCommunicationEdit}.
+	 * @param initDayStringEditParam The value for the attribute {@link #periodCommunicationEdit}.
+	 */
 	public void setPeriodCommunicationEdit(Long periodCommunicationEdit) {
 		this.periodCommunicationEdit = periodCommunicationEdit;
 	}

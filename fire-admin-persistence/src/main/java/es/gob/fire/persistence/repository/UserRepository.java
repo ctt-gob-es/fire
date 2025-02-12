@@ -70,6 +70,12 @@ public interface UserRepository extends JpaRepository<User, Long>  {
 	 */
 	User findAllByDni(String dni);
 	
+	/**
+	 * Retrieves a distinct list of {@link MailInfoDTO} with certificate and responsible user details.
+	 * The query filters for users with a role ID of 2.
+	 * 
+	 * @return a list of {@link MailInfoDTO} containing the user's email, certificate ID, start and expiration dates, and subject.
+	 */
 	@Query("SELECT DISTINCT new es.gob.fire.persistence.dto.MailInfoDTO(" +
 				"ar.responsible.email, " +
 				"ca.certificate.idCertificado, " +
