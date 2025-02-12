@@ -168,7 +168,12 @@ public class ApplicationService implements IApplicationService{
 			appToSave = this.repository.findByAppId(appDto.getAppId());
 			appToSave.setAppName(appDto.getAppName());
 			appToSave.setHabilitado(appDto.getHabilitado());
-
+			if (appDto.getOrganization() != null && !appDto.getOrganization().isEmpty()) {
+				appToSave.setOrganization(appDto.getOrganization());
+			}
+			if (appDto.getDir3Code() != null && !appDto.getDir3Code().isEmpty()) {
+				appToSave.setDir3Code(appDto.getDir3Code());
+			}
 		}
 
 		ApplicationResponsiblePK appRespPk = null;
@@ -334,6 +339,8 @@ public class ApplicationService implements IApplicationService{
 		appDto.setAppName(application.getAppName());
 		appDto.setFechaAltaApp(application.getFechaAltaApp());
 		appDto.setHabilitado(application.isHabilitado());
+		appDto.setOrganization(application.getOrganization());
+		appDto.setDir3Code(application.getDir3Code());
 
 		return appDto;
 	}

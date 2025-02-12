@@ -20,6 +20,8 @@ CREATE TABLE `tb_aplicaciones` (
   `nombre` varchar(45) NOT NULL,
   `fecha_alta` datetime NOT NULL,
   `habilitado` tinyint(4) DEFAULT '1',
+  `organization` varchar(255),
+  `dir3_code` varchar(50),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 

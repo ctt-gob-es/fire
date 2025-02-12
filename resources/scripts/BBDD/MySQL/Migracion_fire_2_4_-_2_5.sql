@@ -32,6 +32,8 @@ CREATE TABLE `tb_certificados_de_aplicacion` (
 -- TABLA DE APLICACIONES
 
 ALTER TABLE `tb_aplicaciones` DROP COLUMN `fk_certificado`;
+ALTER TABLE `tb_aplicaciones` ADD `organization` VARCHAR(255) NULL;
+ALTER TABLE `tb_aplicaciones` ADD `dir3_code` VARCHAR(50) NULL;
 
 -- Tabla TIPO_PLANIFICADOR
 CREATE TABLE TB_TIPO_PLANIFICADOR (

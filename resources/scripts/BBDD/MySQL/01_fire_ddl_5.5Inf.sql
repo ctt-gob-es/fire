@@ -21,6 +21,8 @@ CREATE TABLE `tb_aplicaciones` (
   `fecha_alta` TIMESTAMP NOT NULL,
   `fk_certificado` int(11) NOT NULL,
   `habilitado` tinyint(4) DEFAULT '1',
+  `organization` varchar(255),
+  `dir3_code` varchar(50),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

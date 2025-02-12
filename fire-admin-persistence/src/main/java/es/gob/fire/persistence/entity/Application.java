@@ -60,6 +60,16 @@ public class Application implements Serializable{
 	  * Attribute that represents the habilitado.
 	 */
 	private boolean habilitado;
+	
+	/**
+	 * Attribute that represents the organism.
+	 */
+	private String organization;
+	
+	/**
+	 * Attribute that represents the DIR3 code.
+	 */
+	private String dir3Code;
 
 	 /**
 	  * Attribute that represents the header list for the validation method.
@@ -198,5 +208,43 @@ public class Application implements Serializable{
 	public void setListCertificatesApplication(final List<CertificatesApplication> listCertificatesApplicationParam) {
 		// CHECKSTYLE:ON
 		this.listCertificatesApplication = listCertificatesApplicationParam;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #organization}.
+	 * @return the value of the attribute {@link #organization}.
+	 */
+
+	@Column(name = "ORGANIZATION", nullable = true, length = NumberConstants.NUM255, unique = false)
+	@Size(max = NumberConstants.NUM255)
+	public String getOrganization() {
+		return this.organization;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #organization}.
+	 * @param userNameP The value for the attribute {@link #organization}.
+	 */
+	public void setOrganization(final String organization) {
+		this.organization = organization;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #dir3Code}.
+	 * @return the value of the attribute {@link #dir3Code}.
+	 */
+
+	@Column(name = "DIR3_CODE", nullable = true, length = NumberConstants.NUM50, unique = false)
+	@Size(max = NumberConstants.NUM50)
+	public String getDir3Code() {
+		return this.dir3Code;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dir3Code}.
+	 * @param userNameP The value for the attribute {@link #dir3Code}.
+	 */
+	public void setDir3Code(final String dir3Code) {
+		this.dir3Code = dir3Code;
 	}
 }

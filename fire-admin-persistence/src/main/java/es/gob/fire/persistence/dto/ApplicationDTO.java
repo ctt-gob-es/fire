@@ -72,6 +72,16 @@ public class ApplicationDTO {
 	 * Attribute that represents index of the row of the selected application.
 	 */
 	private String rowIndexApp;
+	
+	/**
+	 * Attribute that represents the value of the organism in the form.
+	 */
+	private String organization;
+	
+	/**
+	 * Attribute that represents the value of the dir3 code in the form.
+	 */
+	private String dir3Code;
 
 	/**
 	 * Gets the value of the attribute {@link #appId}.
@@ -174,6 +184,22 @@ public class ApplicationDTO {
 	 */
 	public void setRowIndexApp(final String rowIndexApp) {
 		this.rowIndexApp = rowIndexApp;
+	}
+
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
+
+	public String getDir3Code() {
+		return dir3Code;
+	}
+
+	public void setDir3Code(String dir3Code) {
+		this.dir3Code = dir3Code;
 	}
 
 
