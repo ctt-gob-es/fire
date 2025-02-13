@@ -81,7 +81,7 @@ public class CertificateService implements ICertificateService{
 	/**
 	 * Constant that represents the String X.509.
 	 */
-	private static final String X509 = "X.509"; //$NON-NLS-1$
+	public static final String X509 = "X.509"; //$NON-NLS-1$
 
 	/** Nombre de la propiedad en la que se guarda el nombre de la aplicacion con el que debe
 	 * conectarse a la plataforma @firma. */
