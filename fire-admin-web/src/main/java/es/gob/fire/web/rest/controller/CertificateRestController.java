@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.6, 04/02/2025.
+ * @version 1.7, 13/02/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -76,7 +76,7 @@ import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 /**
  * <p>Class that manages the REST requests related to the Certificate administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.6, 04/02/2025.
+ * @version 1.7, 13/02/2025.
  */
 @RestController
 public class CertificateRestController {
@@ -113,12 +113,7 @@ public class CertificateRestController {
 	/**
 	 * Constant that represents the field 'certFile'.
 	 */
-	private static final String FIELD_FILE_CERTIFICATE1 = "certFile";
-
-	/**
-	 * Constant that represents the field 'certFile2'.
-	 */
-	private static final String FIELD_FILE_CERTIFICATE2 = "certFile2";
+	private static final String FIELD_FILE_CERTIFICATE = "certFile";
 
 	/**
 	 * Constant that represents the parameter 'certificateFile'.
@@ -134,11 +129,7 @@ public class CertificateRestController {
 	 * Constant that represents the parameter 'certFile'.
 	 */
 	private static final String PARAM_CER_PRINCIPAL = "certFile";
-	/**
-	 * Constant that represents the parameter 'certFile2'.
-	 */
-	private static final String PARAM_CER_BKUP = "certFile2";
-
+	
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
@@ -247,7 +238,7 @@ public class CertificateRestController {
 
 				final String errorValCert = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_CERT_REQUIRED, null, request.getLocale());
 
-				json.put(FIELD_FILE_CERTIFICATE1 + SPAN, errorValCert);
+				json.put(FIELD_FILE_CERTIFICATE + SPAN, errorValCert);
 				
 			}
 
@@ -405,8 +396,8 @@ public class CertificateRestController {
 
 				final String errorValCert = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_CERT_REQUIRED, null, request.getLocale());
 
-				json.put(FIELD_FILE_CERTIFICATE1 + SPAN, errorValCert);
-				json.put(FIELD_FILE_CERTIFICATE2 + SPAN, errorValCert);
+				json.put(FIELD_FILE_CERTIFICATE + SPAN, errorValCert);
+				
 			}
 
 			dtOutput.setError(json.toString());
@@ -548,7 +539,7 @@ public class CertificateRestController {
 
 		boolean hasNoFileData = false;
 
-		if ((certFile == null || certFile.isEmpty()) && (certEditForm.getCertificateB64() == null || certEditForm.getCertificateB64().isEmpty())) {
+		if ((certFile == null || certFile.isEmpty() || certFile.getSize() == 0) || (certEditForm.getCertificateB64() == null || certEditForm.getCertificateB64().isEmpty())) {
 			hasNoFileData = true;
 		}
 

@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
  * <b>Date:</b><p>01/08/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 04/02/2025.
+ * @version 1.3, 13/02/2025.
  */
 package es.gob.fire.persistence.entity;
 
@@ -45,7 +45,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 /**
  * <p>Class that maps the <i>KEYSTORE</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.2, 04/02/2025.
+ * @version 1.3, 13/02/2025.
  */
 @Entity
 @Table(name = "TB_CERTIFICADOS")
@@ -82,12 +82,26 @@ public class Certificate implements Serializable {
 	 */
 	private String huella;
 	
+	/**
+	 * Attribute that represents the init date.
+	 */
 	private Date fechaInicio;
 	
+	/**
+	 * Attribute that represents the date expired.
+	 */
 	private Date fechaCaducidad;
 
+	/**
+	 * Attribute that represents the subject.
+	 */
 	private String subject;
 	
+	/**
+	 * Attribute that represents the date of the last period communication.
+	 */	
+    private Date dateLastCommunication;
+    
 	/**
 	 * Gets the value of the attribute {@link #idKeystore}.
 	 * @return the value of the attribute {@link #idKeystore}.
@@ -236,8 +250,21 @@ public class Certificate implements Serializable {
 	public void setSubject(final String subjectParam) {
 		this.subject = subjectParam;
 	}
+	
+	/**
+	 * Gets the value of the attribute {@link #dateLastCommunication}.
+	 * @return the value of the attribute {@link #dateLastCommunication}.
+	 */
+	@Column(name = "FECHA_ULTIMA_COMUNICACION", nullable = true)
+	public Date getDateLastCommunication() {
+		return dateLastCommunication;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dateLastCommunication}.
+	 * @param dateLastCommunication The value for the attribute {@link #dateLastCommunication}.
+	 */
+	public void setDateLastCommunication(Date dateLastCommunication) {
+		this.dateLastCommunication = dateLastCommunication;
+	}
 }
-
-
-
-

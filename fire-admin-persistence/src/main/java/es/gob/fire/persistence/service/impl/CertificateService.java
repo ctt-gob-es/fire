@@ -17,10 +17,10 @@
 /**
  * <b>File:</b><p>es.gob.fire.persistence.service.CertificateService.java.</p>
  * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
-  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
+  * <b>Project:</b><p>Application for signing documents of FIRe system</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.6, 04/02/2025.
+ * @version 1.7, 13/02/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -66,8 +66,8 @@ import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
- * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.6, 04/02/2025.
+ * <b>Project:</b><p>Application for signing documents of FIRe system.</p>
+ * @version 1.7, 13/02/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -135,7 +135,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.ICertificateService#saveCertificate(es.gob.fire.persistence.entity.Certificate)
+	 * @see es.gob.fire.persistence.services.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate)
 	 */
 	@Override
 	public Certificate saveCertificate(final Certificate certificate) {
@@ -207,7 +207,54 @@ public class CertificateService implements ICertificateService{
 		return newCertificate;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.service.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate, java.security.cert.X509Certificate)
+	 */
+	@Override
+	public Certificate updateCertificateFromTaskValidation(final Certificate certificate, final X509Certificate x509Certificate) 
+	        throws IOException, CertificateEncodingException {
 
+	    // Extraer los bytes y calcular la huella digital
+	    byte[] certBytes = x509Certificate.getEncoded();
+	    String certBase64 = Base64.encode(certBytes);
+
+	    MessageDigest md;
+	    String fingerprint = null;
+	    try {
+	        md = MessageDigest.getInstance("SHA-1");
+	        fingerprint = Base64.encode(md.digest(certBytes));
+	    } catch (NoSuchAlgorithmException e) {
+	        LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e);
+	    }
+
+	    // Extraer otros campos del certificado
+	    String subject = x509Certificate.getSubjectX500Principal().getName();
+	    Date notBefore = x509Certificate.getNotBefore();
+	    Date notAfter = x509Certificate.getNotAfter();
+
+	    // Comparación segura de valores previos con los nuevos
+	    boolean isUpdated = 
+	        (certificate.getCertificate() == null || !certificate.getCertificate().equals(certBase64)) ||
+	        (certificate.getHuella() == null || !certificate.getHuella().equals(fingerprint)) ||
+	        (certificate.getSubject() == null || !certificate.getSubject().equals(subject)) ||
+	        (certificate.getFechaInicio() == null || certificate.getFechaInicio().getTime() != notBefore.getTime()) ||
+	        (certificate.getFechaCaducidad() == null || certificate.getFechaCaducidad().getTime() != notAfter.getTime());
+
+	    // Si hubo cambios, actualizamos los valores y la fecha de alta
+	    if (isUpdated) {
+	        certificate.setCertificate(certBase64);
+	        certificate.setHuella(fingerprint);
+	        certificate.setSubject(subject);
+	        certificate.setFechaInicio(notBefore);
+	        certificate.setFechaCaducidad(notAfter);
+	        certificate.setFechaAlta(new Date());
+	    }
+
+	    return repository.save(certificate);
+	}
+
+	
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.ICertificateService#certificateDtoToEntity(es.gob.fire.persistence.dto.CertificateDTO)
 	 */

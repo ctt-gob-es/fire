@@ -11,6 +11,7 @@ CREATE TABLE `tb_certificados` (
   `fec_inicio` datetime NULL,
   `fec_caducidad` datetime NULL,
   `subject` varchar(4000) NULL,
+  `fecha_ultima_comunicacion` datetime NULL,
   PRIMARY KEY (`id_certificado`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='tabla de certificados';
 
@@ -186,7 +187,6 @@ CREATE TABLE TB_PROGRAMADOR (
   TIEMPO_COMPROBACION BIGINT,
   DIAS_PREAVISO BIGINT,
   PERIODO_COMUNICACION BIGINT,
-  FECHA_ULTIMA_COMUNICACION BIGINT,
   ID_PLANIFICADOR BIGINT NOT NULL,
   NOMBRE_PROGRAMADOR VARCHAR(50) NOT NULL,
   PRIMARY KEY (ID_PROGRAMADOR),

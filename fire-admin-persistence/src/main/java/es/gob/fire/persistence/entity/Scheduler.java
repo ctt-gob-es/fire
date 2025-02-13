@@ -121,11 +121,6 @@ public class Scheduler implements Serializable {
 	 */
 	private Long periodCommunication;
 	
-	/**
-	 * Attribute that represents the date of the last period communication.
-	 */	
-    private Date dateLastCommunication;
-    
     /**
      * Obtiene el valor del atributo {@link #idScheduler}.
      * @return el valor del atributo {@link #idScheduler}.
@@ -365,23 +360,6 @@ public class Scheduler implements Serializable {
 	 */
 	public void setPeriodCommunication(Long periodCommunication) {
 		this.periodCommunication = periodCommunication;
-	}
-	
-	/**
-	 * Gets the value of the attribute {@link #dateLastCommunication}.
-	 * @return the value of the attribute {@link #dateLastCommunication}.
-	 */
-	@Column(name = "FECHA_ULTIMA_COMUNICACION", nullable = true)
-	public Date getDateLastCommunication() {
-		return dateLastCommunication;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #dateLastCommunication}.
-	 * @param dateLastCommunication The value for the attribute {@link #dateLastCommunication}.
-	 */
-	public void setDateLastCommunication(Date dateLastCommunication) {
-		this.dateLastCommunication = dateLastCommunication;
 	}
 	
 }

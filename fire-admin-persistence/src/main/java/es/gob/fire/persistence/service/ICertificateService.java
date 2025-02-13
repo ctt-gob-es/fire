@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>15/06/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 04/02/2025.
+ * @version 1.3, 13/02/2025.
  */
 package es.gob.fire.persistence.service;
 
@@ -155,4 +155,18 @@ public interface ICertificateService {
 	 * @throws WSServiceInvokerException If there is an issue invoking the web service.
 	 */
 	VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate) throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException;
+
+	/**
+	 * Updates a Certificate entity with the latest information from an X509Certificate.
+	 * This includes encoding the certificate, generating its fingerprint, and extracting
+	 * relevant metadata such as the subject and validity dates.
+	 * 
+	 * @param certificate      The Certificate entity to be updated.
+	 * @param x509Certificate  The X509Certificate containing the latest data.
+	 * @return The updated Certificate entity after being saved in the repository.
+	 * @throws IOException                  If an error occurs during encoding.
+	 * @throws CertificateEncodingException If the X509Certificate cannot be properly encoded.
+	 */
+	Certificate updateCertificateFromTaskValidation(Certificate existingCertificate, X509Certificate x509Certificate)
+			throws IOException, CertificateEncodingException;
 }

@@ -21,7 +21,7 @@
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * <b>Date:</b><p>12/02/2025.</p>
  * @author Gobierno de España.
- * @version 1.0, 12/02/2025.
+ * @version 1.1, 13/02/2025.
  */
 package es.gob.fire.control.tasks;
 
@@ -57,8 +57,8 @@ import es.gob.fire.persistence.entity.CertificatesApplication;
 import es.gob.fire.persistence.entity.Scheduler;
 import es.gob.fire.persistence.repository.CertificateRepository;
 import es.gob.fire.persistence.repository.CertificatesApplicationRepository;
-import es.gob.fire.persistence.repository.SchedulerRepository;
 import es.gob.fire.persistence.repository.UserRepository;
+import es.gob.fire.persistence.service.ICertificateService;
 import es.gob.fire.persistence.service.impl.CertificateService;
 import es.gob.fire.quartz.job.FireTaskException;
 import es.gob.fire.quartz.task.FireTask;
@@ -69,7 +69,7 @@ import es.gob.fire.spring.config.ApplicationContextProvider;
  * <p>Class that performs a task for updated status certificate X509 and send emails to users with differents role.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI
  * certificates and electronic signature.</p>
- * @version 1.0, 12/02/2025.
+ * @version 1.1, 13/02/2025.
  */
 public class TaskVerifyCertExpired extends FireTask {
 
@@ -98,7 +98,7 @@ public class TaskVerifyCertExpired extends FireTask {
 		List<Certificate> listCertificateExpired = new ArrayList<Certificate>();
 		List<Certificate> listCertificateExpDaysAdvanceNotice = new ArrayList<Certificate>();
 		boolean calculateAdavanceNotice = false;
-		boolean sendEmailByPeriodComm = false;
+		boolean periodCommunication = false;
 		Date futureDateCertExpired = null;
 		Date dateNow = Calendar.getInstance().getTime();
 		
@@ -117,12 +117,7 @@ public class TaskVerifyCertExpired extends FireTask {
 		
 		// Si existe un periodo de comunicacion expresado en dias lo obtenemos
 		if(scheduler.getPeriodCommunication() != null && !scheduler.getPeriodCommunication().equals(NumberConstants.NUM_0_LONG)) {
-			// Si han transcurrido mas de x dias desde la ultima fecha de comunicacion hasta ahora, deberemos enviar correo a los responsables para aquellos
-			// certificados que esten proximos a caducar
-			if(null == scheduler.getDateLastCommunication() || TimeUnit.DAYS.convert((dateNow.getTime() - scheduler.getDateLastCommunication().getTime()), TimeUnit.MILLISECONDS) 
-					> scheduler.getPeriodCommunication()){
-				sendEmailByPeriodComm = true;
-			}
+			periodCommunication = true;
 		} else {
 			LOGGER.warn(Language.getResWebFire(IWebLogMessages.LOG_CTV004));
 		}
@@ -145,29 +140,42 @@ public class TaskVerifyCertExpired extends FireTask {
 					// Verificamos si el certificado caduca en los días de preaviso configurados
 			        if (!x509Certificate.getNotAfter().after(futureDateCertExpired)) {
 			        	listCertificateExpDaysAdvanceNotice.add(certificate);
-			        	// Si el periodo de comunicacion esta establecido y entre la fecha de la ultima comunicacion y la actual hay mas de X dias de diferencia enviamos el email, lo comunicamos al responsable
-			        	if(sendEmailByPeriodComm) {
-			        		sendEmailToResponsiblesForCertCloseToExpiry(listMailInfoDTOResponsible, certificate);
-			        		//Actualizamos la fecha de ultima comunicacion del scheduler
-			        		scheduler.setDateLastCommunication(dateNow);
-			        		ApplicationContextProvider.getApplicationContext().getBean(SchedulerRepository.class).save(scheduler);
+			        	if(periodCommunication) {
+			        		// Enviaremos email al responsable cuando:
+				        	//		- No haya fecha de ultima comunicacion
+				        	//		- La diferencia de dias entre la fecha actual y la fecha de la ultima comunicacion sea mayor o igual que el numero de dias establecidos para el periodo de comunicacion
+				        	//		- La diferencia de dias entre la fecha de caducidad y la fecha actual sea menor o igual que el numero de dias establecidos para el periodo de comunicacion
+			        		if(certificate.getDateLastCommunication() == null ) {
+			        			sendEmailToResponsiblesForCertCloseToExpiry(listMailInfoDTOResponsible, certificate);
+				        		certificate.setDateLastCommunication(dateNow);
+			        		} else {
+			        			// Obtenemos la diferencia de dias entre la fecha actual y la fecha de la ultima comunicacion
+					        	Long diffDaysBetweenDNandDLC = TimeUnit.DAYS.convert((dateNow.getTime() - certificate.getDateLastCommunication().getTime()), TimeUnit.MILLISECONDS); 
+								// Obtenemos la diferencia de dias entre la fecha actual y la fecha de caducidad
+					        	Long diffDaysBetweenDEandDLC = TimeUnit.DAYS.convert((x509Certificate.getNotAfter().getTime() - dateNow.getTime()), TimeUnit.MILLISECONDS); 
+					        	if(diffDaysBetweenDNandDLC >= scheduler.getPeriodCommunication() || diffDaysBetweenDEandDLC <= scheduler.getPeriodCommunication()) {
+					        		sendEmailToResponsiblesForCertCloseToExpiry(listMailInfoDTOResponsible, certificate);
+					        		certificate.setDateLastCommunication(dateNow);
+					        	}
+			        		}
+			        		
 			        	}
 			        }
 				}
 			} catch (final CertificateExpiredException e) {
 				 // El certificado está caducado
 				listCertificateExpired.add(certificate);
+				certificate.setDateLastCommunication(dateNow);
 				sendEmailToResponsiblesForCertExpired(listMailInfoDTOResponsible, certificate);
 			} catch (final CertificateNotYetValidException e) {
 				// El certificado aún no es válido
 				listCertificateNotYedValid.add(certificate);
+				certificate.setDateLastCommunication(dateNow);
 				sendEmailToResponsiblesForCertNotValid(listMailInfoDTOResponsible, certificate);
 			}
 			
-			// Actualizamos las fechas de inicio y de caducidad
-			certificate.setFechaInicio(x509Certificate.getNotBefore());
-			certificate.setFechaCaducidad(x509Certificate.getNotAfter());
-			ApplicationContextProvider.getApplicationContext().getBean(CertificateRepository.class).save(certificate);
+			// Actualizamos los campos del certificados
+			ApplicationContextProvider.getApplicationContext().getBean(ICertificateService.class).updateCertificateFromTaskValidation(certificate, x509Certificate);
 		}
 		
 		// Ahora enviaremos los mails a los administradores
