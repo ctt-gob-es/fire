@@ -64,7 +64,7 @@ public class ResponseClave {
 	private ILoginService iLoginService;
 	
 	@RequestMapping(value = "/ResponseClave", method = RequestMethod.POST)
-    public String responseClave(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, final Model model, @RequestParam(PARAM_TIMEOUT) final boolean timeout) {
+    public String responseClave(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, final Model model) {
 		AtomicReference<String> dniRef =  new AtomicReference<>("");
 		try {
 			
@@ -78,7 +78,7 @@ public class ResponseClave {
 	    	String claveReturnUrl = spConfig.getProperty(Constants.SP_RETURN);
 	    	
 	    	// Validaremos la respuesta devuelta por clave
-	    	IAuthenticationResponseNoMetadata authnResponse = validateRespAndActivateCertContigency(timeout, claveReturnUrl, samlResponse, relayState, remoteHost);
+	    	IAuthenticationResponseNoMetadata authnResponse = validateRespAndActivateCertContigency(claveReturnUrl, samlResponse, relayState, remoteHost);
 	    	
 	    	// Despues de obtener la respuesta eliminaremos del control de acceso los registros puesto que se considera una respuesta valida
 	    	String ipUser = (String) httpSession.getAttribute("ipUser");
@@ -159,7 +159,6 @@ public class ResponseClave {
      * - An exception occurs during SAML validation.
      * - The response from Cl@ve contains a critical error requiring certificate activation.
      *
-     * @param timeout       Indicates if a timeout occurred while accessing the gateway.
      * @param claveReturnUrl The return URL for Cl@ve authentication.
      * @param samlResponse  The SAML response received from the authentication provider.
      * @param relayState    The relay state for session validation.
@@ -167,12 +166,10 @@ public class ResponseClave {
      * @return An {@code IAuthenticationResponseNoMetadata} containing authentication details.
      * @throws ClaveException If validation fails or the contingency certificate needs activation.
      */
-	private IAuthenticationResponseNoMetadata validateRespAndActivateCertContigency(boolean timeout, String claveReturnUrl,
+	private IAuthenticationResponseNoMetadata validateRespAndActivateCertContigency(String claveReturnUrl,
 			String samlResponse, String relayState, String remoteHost) throws ClaveException {
 		
-		if(timeout) {
-			throw new ClaveException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009)); 
-		} else if (samlResponse == null || samlResponse.trim().isEmpty()) {
+		if (samlResponse == null || samlResponse.trim().isEmpty()) {
 			throw new ClaveException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
 		}
 

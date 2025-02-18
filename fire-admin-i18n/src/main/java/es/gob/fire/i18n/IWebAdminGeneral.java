@@ -188,4 +188,9 @@ public interface IWebAdminGeneral {
 	 * Constant attribute that represents the property key <code>ML006</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
 	 */
 	String LOG_ML006 = "ML006";
+
+	/**
+	 * Constant attribute that represents the property key <code>ML007</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_ML007 = "ML007";
 }

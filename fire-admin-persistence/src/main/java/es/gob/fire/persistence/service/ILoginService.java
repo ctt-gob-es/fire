@@ -53,17 +53,6 @@ public interface ILoginService {
      */
 	void saveControlAccess(ControlAccess controlAccess);
 
-    /**
-     * Retrieves the IP address of the client making the request.
-     * <p>This method first checks the HTTP headers for common proxy-related headers 
-     * to retrieve the original client IP, such as 'X-Forwarded-For', 'Proxy-Client-IP', and 'WL-Proxy-Client-IP'. 
-     * If none of these headers are found, it falls back to using the remote address of the client.</p>
-     *
-     * @param request the {@link HttpServletRequest} object containing the client's request information
-     * @return the IP address of the client making the request
-     */
-	String getClientIp(HttpServletRequest request);
-
 	/**
     * Checks if the Pasarela service is available by sending a GET request to its URL.
     * <p>This method attempts to establish a connection to the Pasarela service and checks if the response code is 200 (OK). 

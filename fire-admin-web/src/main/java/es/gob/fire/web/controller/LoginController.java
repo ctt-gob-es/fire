@@ -141,7 +141,7 @@ public class LoginController {
     public String loginWithClave(final Model model, HttpServletRequest request, HttpSession httpSession) {
     	String samlRequestB64;
     	Date currentDate = Calendar.getInstance().getTime(); // Obtenemos la fecha actual
-    	String ipUser = iLoginService.getClientIp(request); // Obtenemos la ip del cliente que realiza la peticion
+    	String ipUser = request.getRemoteAddr(); // Obtenemos la ip del cliente que realiza la peticion
     	
     	try {
     		// Construimos la petición SAML en codificada en B64
@@ -151,9 +151,13 @@ public class LoginController {
 			return "login.html";
 		}
     	
+    	// Guardaremos en la sesion la ip con la que el usuario ha realizado la peticion
+    	httpSession.setAttribute("ipUser", ipUser);
+    	
     	// Comprobaremos si necesitamos activar el certificado de contingencia
-    	if(activateCertificateContingency(model, currentDate, ipUser)) {
-    		model.addAttribute("errorMessage", Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
+    	StringBuilder activateMsg = new StringBuilder();
+    	if(activateCertificateContingency(model, currentDate, ipUser, activateMsg)) {
+    		model.addAttribute("errorMessage", activateMsg);
     		model.addAttribute("accessByCertificate", true);
 			return "login.html";
     	}
@@ -164,9 +168,6 @@ public class LoginController {
     	controlAccess.setStartDateAccess(currentDate);
     	iLoginService.saveControlAccess(controlAccess);
         
-    	// Guardaremos en la sesion la ip con la que el usuario ha realizado la peticion
-    	httpSession.setAttribute("ipUser", ipUser);
-    	
     	model.addAttribute("samlRequest", samlRequestB64);
     	model.addAttribute("relayState", RequestClave.relayState);
     	model.addAttribute("nodeServiceUrl", RequestClave.nodeServiceUrl);
@@ -181,9 +182,11 @@ public class LoginController {
      * @param model the Model to add attributes for the view
      * @param currentDate the current date for time comparison
      * @param ipUser the IP address of the user
+     * @param activateMsg a message indicating the reason for activating contingency mode
+     * 
      * @return true if contingency is activated, false otherwise
      */
-	private boolean activateCertificateContingency(final Model model, Date currentDate, String ipUser) {
+	private boolean activateCertificateContingency(final Model model, Date currentDate, String ipUser, StringBuilder activateMsg) {
 		LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML004));
 		
 		boolean activate = false;
@@ -198,6 +201,7 @@ public class LoginController {
 		
 		// 1.- Comprobaremos si la plataforma de clave esta disponible
     	if(!iLoginService.isPasarelaAvailable()) {
+    		activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
     		activate = true;
     	}
     	
@@ -212,6 +216,7 @@ public class LoginController {
             			// Evaluamos si supera el intervalo de X segundos de contingencia
             			if(secondsDifference >= confCertIntervalContingency) {
             				// Si es asi activamos el login con certificado por contigencia
+            				activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML007));
             				activate = true;
             			}
             		}
