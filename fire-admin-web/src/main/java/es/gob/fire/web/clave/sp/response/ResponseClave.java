@@ -1,16 +1,14 @@
 package es.gob.fire.web.clave.sp.response;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.service.ILoginService;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.web.authentication.CustomUserAuthentication;
 import es.gob.fire.web.clave.sp.SpProtocolEngineFactory;
@@ -61,12 +60,15 @@ public class ResponseClave {
 	@Autowired
     private CustomUserAuthentication customUserAuthentication;
 	
+	@Autowired
+	private ILoginService iLoginService;
+	
 	@RequestMapping(value = "/ResponseClave", method = RequestMethod.POST)
-    public String responseClave(HttpServletRequest request, HttpServletResponse response, final Model model, @RequestParam(PARAM_TIMEOUT) final boolean timeout) {
+    public String responseClave(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, final Model model, @RequestParam(PARAM_TIMEOUT) final boolean timeout) {
 		AtomicReference<String> dniRef =  new AtomicReference<>("");
 		try {
 			
-			// Obtenemos los parámetros de la solicitud si es necesario
+			// Obtenemos los parametros de la solicitud
 	        String samlResponse = request.getParameter("SAMLResponse");
 	    	String relayState = request.getParameter("RelayState");
 	    	String remoteHost = request.getRemoteHost();
@@ -75,7 +77,12 @@ public class ResponseClave {
 	    		
 	    	String claveReturnUrl = spConfig.getProperty(Constants.SP_RETURN);
 	    	
+	    	// Validaremos la respuesta devuelta por clave
 	    	IAuthenticationResponseNoMetadata authnResponse = validateRespAndActivateCertContigency(timeout, claveReturnUrl, samlResponse, relayState, remoteHost);
+	    	
+	    	// Despues de obtener la respuesta eliminaremos del control de acceso los registros puesto que se considera una respuesta valida
+	    	String ipUser = (String) httpSession.getAttribute("ipUser");
+	    	iLoginService.deleteControlAccessByIp(ipUser);
 	    	
 	    	PersonalInfoBean personalInfoBean = this.obtenerDatosUsuario(authnResponse);
 	    	
@@ -98,7 +105,7 @@ public class ResponseClave {
 	        SecurityContextHolder.getContext().setAuthentication(authResult);
 	        
 	        // Generaremos una nueva cookie por cada inicio de sesion exitoso
-	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, this.generateCookieValue());
+	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, iLoginService.generateCookieValue());
 	    	cookie.setPath("/");
 	    	cookie.setSecure(true);
 	    	response.addCookie(cookie);
@@ -219,17 +226,4 @@ public class ResponseClave {
 		return null;
 	}
     
-    public static String generateCookieValue() {
-        // Generamos un UUID aleatorio
-        String uuid = UUID.randomUUID().toString().replace("-", ""); // Eliminar guiones
-        
-        // Convertimos UUID a bytes y codificar en Base64 para mayor entropía
-        String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.getBytes(StandardCharsets.UTF_8));
-        
-        // Agregamos un número aleatorio al final similar a la estructura del valor
-        int randomInt = (int) (Math.random() * Integer.MAX_VALUE);
-
-        // Concatenamos con un símbolo especial
-        return encoded + "!-" + randomInt;
-    }
 }

@@ -1,7 +1,12 @@
 package es.gob.fire.server.admin.service;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.Base64;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.server.admin.dao.UsersDAO;
 import es.gob.fire.server.admin.entity.User;
 import es.gob.fire.server.admin.message.UserMessages;
@@ -82,4 +88,53 @@ public class LoginService extends HttpServlet {
 
 		resp.sendRedirect("Application/AdminMainPage.jsp"); //$NON-NLS-1$
 	}
+	
+	private String generateCookieValue() {
+        // Generamos un UUID aleatorio
+        String uuid = UUID.randomUUID().toString().replace("-", ""); // Eliminar guiones
+        
+        // Convertimos UUID a bytes y codificar en Base64 para mayor entropía
+        String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.getBytes(StandardCharsets.UTF_8));
+        
+        // Agregamos un número aleatorio al final similar a la estructura del valor
+        int randomInt = (int) (Math.random() * Integer.MAX_VALUE);
+
+        // Concatenamos con un símbolo especial
+        return encoded + "!-" + randomInt;
+    }
+	
+	private boolean isPasarelaAvailable() {
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(URL_SERVICE_PASARELA);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000); // 5 segundos de timeout
+            connection.setReadTimeout(5000);
+            connection.connect();
+
+            return connection.getResponseCode() == NumberConstants.NUM200;
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+            return false;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+    
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
+    }
 }

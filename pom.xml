@@ -345,12 +345,17 @@
 				<artifactId>commons-codec</artifactId>
 				<version>1.14</version>
 			</dependency>
+			<!-- BouncyCastle -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk16</artifactId>
-				<version>1.46</version>
+				<artifactId>bcmail-jdk18on</artifactId>
+				<version>1.77</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-jdk18on</artifactId>
+				<version>1.77</version>
+			</dependency>
 			<!-- Jackson -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -477,7 +482,8 @@
 					<fork>true</fork>
 					<!-- <compilerArgs> <arg>-Xbootclasspath:${java.home}/lib/jsse.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</arg> 
 						</compilerArgs> -->
-					<debug>false</debug>
+					<debug>true</debug>
+					<debuglevel>lines,vars,source</debuglevel>
 				</configuration>
 			</plugin>
 

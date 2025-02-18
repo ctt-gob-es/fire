@@ -16,11 +16,11 @@
 
 /** 
  * <b>File:</b><p>es.gob.valet.spring.config.WebSecurityConfig.java.</p>
- * <b>Description:</b><p> Class that enables and configures the security of the Valet application.</p>
-  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <b>Description:</b><p> Class that enables and configures the security of the FIRe application.</p>
+  * <b>Project:</b><p></p>
  * <b>Date:</b><p>13 jun. 2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 22/01/2025.
+ * @version 1.2, 18/02/2025.
  */
 package es.gob.fire.web.config;
 
@@ -37,9 +37,9 @@ import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.web.authentication.CustomUserAuthentication;
 
 /** 
- * <p>Class that enables and configures the security of the Valet application. </p>
- * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.1, 22/01/2025.
+ * <p>Class that enables and configures the security of the FIRe application. </p>
+ * <b>Project:</b><p></p>
+ * @version 1.2, 18/02/2025.
  */
 @Configuration
 @EnableWebSecurity
@@ -64,7 +64,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     protected void configure(HttpSecurity http) throws Exception {  
       http.authorizeRequests()
 	    .antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/chartist/**", // Enable css, images and js when logged out 
-	    		"/mailpasswordrestoration", "/mailRestorePasswordUser/**", "/restorepassword", "/loginClave", "/ResponseClave") // Rutas publicas que no requieren autenticacion
+	    		"/mailpasswordrestoration", "/mailRestorePasswordUser/**", "/restorepassword", "/loginClave", "/ResponseClave", "/loginWithCertificate") // Rutas publicas
 	    .permitAll()
 		.and()
 		.authorizeRequests()

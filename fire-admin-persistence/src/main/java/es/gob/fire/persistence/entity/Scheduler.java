@@ -27,11 +27,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
 import es.gob.fire.commons.utils.NumberConstants;
@@ -127,6 +130,8 @@ public class Scheduler implements Serializable {
      */
     @Id
     @Column(name = "ID_PROGRAMADOR", unique = true, nullable = false, precision = NumberConstants.NUM19)
+    @GeneratedValue(generator = "tb_programador_seq")
+	@GenericGenerator(name = "tb_programador_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_PROGRAMADOR_SEQ"), @Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
     public Long getIdScheduler() {
         return idScheduler;
     }

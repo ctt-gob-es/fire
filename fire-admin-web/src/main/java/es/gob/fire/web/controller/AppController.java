@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import es.gob.fire.i18n.IWebAdminGeneral;
@@ -49,7 +50,7 @@ public class AppController {
 	private UserLoggedDTO userLoggedDTO;
 
 	@GetMapping({"/"})
-	public String index() {
+	public String index(final Model model) {
 		return "login.html";
 	}
 

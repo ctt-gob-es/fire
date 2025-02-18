@@ -19,7 +19,7 @@
 			<form id="formLogin" th:object="${formLogin}" class="login-form validate-form"
 					th:action="@{/}" method="post">
 					
-					<input type='hidden' id="signatureBase64" name="signatureBase64">
+				<input type='hidden' id="signatureBase64" name="signatureBase64">
 					
 				<span class="login-form-title p-b-48">
 				 <img class="fire-admin-front-img" th:src="@{images/Logo_FIRe_02.jpg}"
@@ -68,6 +68,14 @@
 							th:text="#{fire-admin-web.login.acceso.clave.button}"></button>
 						</div>
 					</div>
+					
+					<div class="container-login-form-btn" th:if="${accessByCertificate}">
+						<div class="wrap-login-form-btn">
+							<div class="login-form-bgbtn"></div>
+							<button onclick="authenticateCertificate(autenticar,'');return false;" class="login-form-btn" th:text="#{fire-admin-web.login.acceso.certificado.button}"></button>
+						</div>
+					</div>
+					
 					<br></br>
 							
 					<div id="PasswordButton" >
@@ -79,9 +87,11 @@
 			</form>
 		</div>		
 	</div>
-	<script th:src="@{js/jquery/jquery-3.2.1.min.js}"></script>
+	<script th:src="@{js/jquery/jquery-3.5.1.min.js}"></script>
 	<script th:src="@{js/jquery/jquery.serializejson.js}"></script>
 	<script th:src="@{js/main.js}"></script>
+	<script th:src="@{js/miniapplet/functions.js}"></script>
+	<script th:src="@{js/miniapplet/autoscript.js}"></script>
 	<script th:inline="javascript">
 	
 		function usernamePassword(form) {
@@ -101,8 +111,43 @@
 			var loginClave = /*[[@{/loginClave}]]*/;
 		    document.getElementById("formLogin").action = loginClave;
             document.getElementById("formLogin").submit();
-// 			window.location.href = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/loginClave');
 		}
+		
+		function authenticateCertificate(functionAutenticar, filter) {
+			cargaAppAfirma("");
+			var randomString = getRandomStringToLogin();
+			authenticate(functionAutenticar, filter, randomString);
+		}
+		
+		function autenticar(signatureBase64) {
+			// asignamos el valor de la firma al campo oculto y lo enviamos al back
+			$('#signatureBase64').val(signatureBase64);
+			var loginWithCertificate = /*[[@{/loginWithCertificate}]]*/;
+		    document.getElementById("formLogin").action = loginWithCertificate;
+            document.getElementById("formLogin").submit();
+		}
+		
+		function getRandomStringToLogin() {
+		    const banco = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+		    let cadena = "";
+
+		    for (let i = 0; i < 12; i++) {
+		        const indiceAleatorio = numeroAleatorioEnRango(0, banco.length - 1);
+		        cadena += banco.charAt(indiceAleatorio);
+		    }
+
+		    cadena += "-" + getTimeToMillis();
+		    return cadena;
+		}
+
+		function numeroAleatorioEnRango(minimo, maximo) {
+		    return Math.floor(Math.random() * (maximo - minimo + 1)) + minimo;
+		}
+
+		function getTimeToMillis() {
+		    return new Date().getTime();
+		}
+		
 	</script>
 	
 </body>
