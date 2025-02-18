@@ -1,0 +1,223 @@
+<div class="container-fluid">
+    <h4 class="c-grey-900 mT-10 mB-30" th:text="#{config.general.title}"></h4>
+    <div class="row gap-20 masonry pos-r">
+        <div class="masonry-item col-md-10">
+            <div class="bgc-white pL-40 pR-40 pT-20 pB-20 bd">
+                <h5 class="c-grey-900 mB-20" id="idTitleTask"></h5>
+                <div class="mT-30">
+                    <form name="altEditor-form" role="form" id="generalConfig" th:object="${generalConfig}" method="post" action="">
+                        <div id="messageGeneralConfig" role="alert"></div>
+                        
+                        <!-- Sección Configuración General -->
+                        <h5 class="c-grey-900 mB-10" th:text="#{config.general.section.size}"></h5>
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <label for="maxSizeDoc" class="col-form-label" th:text="#{config.general.field.maxSizeDoc}"></label>
+                                <input type="text" id="maxSizeDoc" th:field="*{maxSizeDoc}" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="maxSizePetition" class="col-form-label" th:text="#{config.general.field.maxSizePetition}"></label>
+                                <input type="text" id="maxSizePetition" th:field="*{maxSizePetition}" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="maxAmountDocs" class="col-form-label" th:text="#{config.general.field.maxAmountDocs}"></label>
+                                <input type="text" id="maxAmountDocs" th:field="*{maxAmountDocs}" class="form-control" />
+                            </div>
+                        </div>
+                        
+                        <!-- Sección Proveedores -->
+                        <h5 class="c-grey-900 mT-20 mB-10" th:text="#{config.general.section.providers}"></h5>
+                        <div class="form-group">
+                            <table id="providersTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th th:text="#{table.providers.provider}"></th>
+                                        <th th:text="#{table.providers.mandatory}"></th>
+                                        <th th:text="#{table.providers.enabled}"></th>
+                                        <th th:text="#{table.providers.order}"></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Disclaimer debajo de la tabla -->
+                        <p class="text-danger mT-10" th:text="#{table.providers.disclaimer}"></p>
+                    </form>
+                </div>
+                <div class="peer">
+                    <button id="saveConfigBtn" type="submit" th:text="#{config.general.btn.save}" class="btn btn-primary"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript" type="text/javascript">
+
+var messageSuccess = /*[[#{config.general.success}]]*/;
+var messageError = /*[[#{config.general.error}]]*/;
+var messageEnableProvider = /*[[#{config.general.enableProvider}]]*/;
+$(document).ready(function() {
+    var getProviders = /*[[@{/getProvidersGeneral}]]*/;
+    var table = $('#providersTable').DataTable({
+        "processing": true,
+        "serverSide": false,
+        "paging": false,
+        "info": false,
+        "ordering": false,
+        "searching": false,
+        "ajax": {
+            "url": getProviders,
+            "type": "GET",
+            "dataSrc": ""
+        },
+        "columns": [
+            { "data": "id", "visible": false },
+            { "data": "name" },
+            { "data": "mandatory",
+              "render": function(data, type, row) {
+                  var is_checked = data ? "checked" : "";
+                  return `
+                      <div class="checkbox checkbox-circle checkbox-info peers ai-c">
+                          <input type="checkbox" id="mandatory_${row.id}" class="peer chk-mandatory" ${is_checked}>
+                          <label for="mandatory_${row.id}" class="peers peer-greed js-sb ai-c">
+                              <span class="peer peer-greed"></span>
+                          </label>
+                      </div>`;
+              }
+            },
+            { "data": "enabled",
+              "render": function(data, type, row) {
+                  var is_checked = data ? "checked" : "";
+                  return `
+                      <div class="checkbox checkbox-circle checkbox-info peers ai-c">
+                          <input type="checkbox" id="enabled_${row.id}" class="peer chk-enabled" ${is_checked}>
+                          <label for="enabled_${row.id}" class="peers peer-greed js-sb ai-c">
+                              <span class="peer peer-greed"></span>
+                          </label>
+                      </div>`;
+              }
+            },
+            { "data": "orderIndex",
+                "render": function(data, type, row, meta) {
+                    return `
+                        <div class="d-flex">
+                            <span class="order-value" style="display: none;">${meta.row + 1}</span>
+                            <a class="btn move-up" title="Subir"><span class="c-blue-500 ti-arrow-circle-up icon-tb"></span></a>
+                            <a class="btn move-down" title="Bajar"><span class="c-blue-500 ti-arrow-circle-down icon-tb"></span></a>
+                        </div>
+                    `;
+                }
+            }
+        ],
+        "language": {
+            "url": "js/datatables/i18n/spanish.json",
+            select: {
+                rows: {
+                    _: "%d filas seleccionadas",
+                    1: "1 fila seleccionada"
+                }
+              }
+        }
+    });
+
+    // Función para actualizar los valores de orderIndex después de mover filas
+    function actualizarOrden() {
+        $('#providersTable tbody tr').each(function(index) {
+            $(this).find('.order-value').text(index + 1);
+        });
+    }
+
+    // Manejadores de eventos para mover filas
+    $('#providersTable tbody').on('click', '.move-up', function(event) {
+        event.preventDefault();
+        let row = $(this).closest('tr');
+        if (row.prev().length) {
+            row.insertBefore(row.prev());
+            actualizarOrden();
+        }
+    });
+
+    $('#providersTable tbody').on('click', '.move-down', function(event) {
+        event.preventDefault();
+        let row = $(this).closest('tr');
+        if (row.next().length) {
+            row.insertAfter(row.next());
+            actualizarOrden();
+        }
+    });
+
+    $('#saveConfigBtn').click(function(event) {
+        event.preventDefault();
+
+        var saveConfigGeneral = /*[[@{/saveConfigGeneral}]]*/;
+        var table = $('#providersTable').DataTable();
+        
+        // Capturar datos del formulario
+        let formData = {
+            maxSizeDoc: $('#maxSizeDoc').val(),
+            maxSizePetition: $('#maxSizePetition').val(),
+            maxAmountDocs: $('#maxAmountDocs').val(),
+            providers: []
+        };
+
+        let hasEnabledProvider = false; // Bandera para validar que al menos un proveedor esté habilitado
+        
+        // Capturar datos de la tabla correctamente con DataTables API
+        table.rows().every(function(rowIdx) {
+            var rowData = this.data();
+            var orderValue = $(this.node()).find('.order-value').text().trim();
+            var isEnabled = $(this.node()).find('.chk-enabled').prop('checked');
+
+            let provider = {
+                idProvider: rowData.id,
+                name: rowData.name,
+                mandatory: $(this.node()).find('.chk-mandatory').prop('checked'),
+                enabled: isEnabled,
+                orderIndex: parseInt(orderValue, 10) || rowIdx + 1
+            };
+
+            formData.providers.push(provider);
+            if (isEnabled) hasEnabledProvider = true; // Si al menos un proveedor está habilitado, marcar la bandera
+        });
+
+        // Validación: al menos un proveedor debe estar habilitado
+        if (!hasEnabledProvider) {
+        	$('#messageGeneralConfig').html(messageEnableProvider);
+        	$('#messageGeneralConfig').removeClass('alert alert-success')	
+			$('#messageGeneralConfig').addClass('alert alert-danger');
+		 	$("#messageGeneralConfig").fadeTo(2000, 500).slideUp(500, function() {
+				$("#messageGeneralConfig").slideUp(500);
+		 	});
+            return;
+        }
+
+        // Enviar datos por AJAX
+        $.ajax({
+            url: saveConfigGeneral,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+            	$('#messageGeneralConfig').html(messageSuccess);
+				$('#messageGeneralConfig').removeClass('alert alert-danger')	
+				$('#messageGeneralConfig').addClass('alert alert-success');
+			 	$("#messageGeneralConfig").fadeTo(2000, 500).slideUp(500, function() {
+					$("#messageGeneralConfig").slideUp(500);
+			 	});
+            },
+            error: function(xhr, status, error) {
+                console.error("Error al guardar:", error);
+                $('#messageGeneralConfig').html(messageError);
+				$('#messageGeneralConfig').removeClass('alert alert-success')	
+				$('#messageGeneralConfig').addClass('alert alert-danger');
+			 	$("#messageGeneralConfig").fadeTo(2000, 500).slideUp(500, function() {
+					$("#messageGeneralConfig").slideUp(500);
+			 	});
+            }
+        });
+    });
+});
+</script>

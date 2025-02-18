@@ -19,13 +19,18 @@ CREATE TABLE `tb_certificados` (
 CREATE TABLE `tb_aplicaciones` (
   `id` varchar(48) NOT NULL,
   `nombre` varchar(45) NOT NULL,
-  `fecha_alta` TIMESTAMP NOT NULL,
-  `fk_certificado` int(11) NOT NULL,
+  `fecha_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `habilitado` tinyint(4) DEFAULT '1',
   `organization` varchar(255),
   `dir3_code` varchar(50),
+  `proveedor_personalizado` char(1) DEFAULT 'N' NOT NULL,
+  `tamano_personalizado` char(1) DEFAULT 'N' NOT NULL,
+  `tamano_maximo_documento` bigint,
+  `tamano_maximo_peticion` bigint,
+  `cantidad_maxima_documentos` bigint,
+  
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 CREATE TABLE `tb_usuarios` (
@@ -202,3 +207,37 @@ CREATE TABLE TB_CONTROL_ACCESO (
     PRIMARY KEY (ID_CONTROL_ACCESO)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Tabla TB_PROVEEDORES
+CREATE TABLE `tb_proveedores` (
+  `id_proveedor` bigint NOT NULL,
+  `nombre` varchar(50) NOT NULL,
+  `obligatorio` char(1) NOT NULL,
+  `habilitado` char(1) NOT NULL,
+  `orden` tinyint(4) NOT NULL,
+  
+  PRIMARY KEY (`id_proveedor`)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+-- Tabla TB_PROVEEDORES_APLICACION
+CREATE TABLE `tb_proveedores_aplicacion` (
+  `id_proveedor` bigint NOT NULL,
+  `id_aplicacion` varchar(48) NOT NULL,
+  `obligatorio` char(1) NOT NULL,
+  `habilitado` char(1) NOT NULL,
+  `orden` tinyint(4) NOT NULL,
+  
+  PRIMARY KEY (`id_aplicacion`, `id_proveedor`),
+  CONSTRAINT `fk_aplicacion` FOREIGN KEY (`id_aplicacion`) REFERENCES `tb_aplicaciones` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_proveedor` FOREIGN KEY (`id_proveedor`) REFERENCES `tb_proveedores` (`id_proveedor`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+-- Tabla TB_PROPIEDADES
+CREATE TABLE `tb_propiedades` (
+  `clave` varchar(255) NOT NULL,
+  `valor_texto` varchar(4000),
+  `valor_numerico` decimal(19,4),
+  `valor_fecha` datetime,
+  `tipo` varchar(20) NOT NULL,
+  
+  PRIMARY KEY (`clave`)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;

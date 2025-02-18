@@ -43,6 +43,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -57,12 +58,16 @@ import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.IWebViewMessages;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.ApplicationDTO;
+import es.gob.fire.persistence.dto.ProviderApplicationDTO;
+import es.gob.fire.persistence.dto.ProviderDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Certificate;
+import es.gob.fire.persistence.entity.ProviderApplication;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.persistence.service.IProviderService;
 
 /**
  * <p>Class that manages the REST requests related to the Applications administration and JSON communication.</p>
@@ -135,6 +140,13 @@ public class ApplicationRestController {
 	 */
 	@Autowired
 	private ICertificateService certificateService;
+	
+	/**
+	 * Attribute that represents the service object for accessing the
+	 * repository.
+	 */
+	@Autowired
+	private IProviderService providerService;
 
 	/**
 	 * Attribute that represents the view message wource.
@@ -212,33 +224,42 @@ public class ApplicationRestController {
 	 */
 	@RequestMapping(value = "/saveapp", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@JsonView(DataTablesOutput.View.class)
-	public @ResponseBody DataTablesOutput<Application> saveApplication(@RequestPart("appForm") final ApplicationDTO appForm, 
-			@RequestPart(FIELD_ID_USERS_SELECTED) final String idUsersSelected, 
-			@RequestPart(FIELD_ID_CERTIFICATES_SELECTED) final String idCertificatesSelected,
-			final HttpServletRequest request) {
+	public @ResponseBody DataTablesOutput<Application> saveApplication(@RequestPart("appForm") final ApplicationDTO appForm, final HttpServletRequest request) {
 		final DataTablesOutput<Application> dtOutput = new DataTablesOutput<>();
+		
 		List<Application> listNewApplication = new ArrayList<>();
+		
 		final JSONObject json = new JSONObject();
+		
+		//Lista de usuarios
 		final List<Long> listUsers = new ArrayList<>();
 
-		if (!"-1".equals(idUsersSelected)) {
-			final String[] arrayUsers = idUsersSelected.split(",");
+		if (!"-1".equals(appForm.getIdUsersSelected())) {
+			final String[] arrayUsers = appForm.getIdUsersSelected().split(",");
 
 			for(int i=0; i < arrayUsers.length;i++){
 				listUsers.add(new Long(arrayUsers[i]));
 			}
 		}
 
+		//Lista de certificados
 		final List<Long> listCertificates = new ArrayList<>();
 		
-		if (!"-1".equals(idCertificatesSelected)) {
-			final String[] arrayCertificates = idCertificatesSelected.split(",");
+		if (!"-1".equals(appForm.getIdCertificatesSelected())) {
+			final String[] arrayCertificates = appForm.getIdCertificatesSelected().split(",");
 			
 			for(int i=0; i < arrayCertificates.length;i++){
 				listCertificates.add(new Long(arrayCertificates[i]));
 			}
 		}
 
+		//Proveedores
+		List<ProviderApplicationDTO> customProviders = new ArrayList<>();
+		if (appForm.getCustomProviders() != null && !appForm.getCustomProviders().isEmpty()) {
+			customProviders = appForm.getCustomProviders();
+		}
+
+		//Comprobaciones de inputs
 		if (isAppNameBlank(appForm.getAppName()) || isAppNameSizeNotValid(appForm.getAppName()) || !isResponsibleSelected(listUsers) || !isCertificatesSelected(listCertificates)) {
 
 			if (isAppNameBlank(appForm.getAppName())) {
@@ -272,9 +293,8 @@ public class ApplicationRestController {
 			dtOutput.setError(json.toString());
 
 		} else {
-
 			try {
-				final Application newApp = this.appService.saveApplication(appForm, listUsers, listCertificates);
+				final Application newApp = this.appService.saveApplication(appForm, listUsers, listCertificates, customProviders);
 
 				listNewApplication.add(newApp);
 
@@ -418,5 +438,14 @@ public class ApplicationRestController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 	                             .body(Collections.singletonMap("error", "Aplicación no encontrada"));
 	    }
+	}
+	
+	@GetMapping(path = "/getProvidersOfApplication")
+	public ResponseEntity<?> getApplicationProviders(@RequestParam(FIELD_ID_APPLICATION) final String appId) {
+		Application app = this.appService.getAppByAppId(appId);
+		
+		List<ProviderApplicationDTO> listProviders = this.appService.findProvidersByApplication(app);
+
+        return ResponseEntity.ok(listProviders);
 	}
 }

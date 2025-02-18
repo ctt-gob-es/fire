@@ -12,7 +12,6 @@ SET `dni` = 'X0000000T';
 
 
 -- TABLA DE CERTIFICADOS
-
 ALTER TABLE `tb_certificados` CHANGE COLUMN `cert_principal` `certificado` varchar(5000);
 ALTER TABLE `tb_certificados` CHANGE COLUMN `huella_principal` `huella` varchar(45);
 ALTER TABLE `tb_certificados` DROP COLUMN `cert_backup`;
@@ -35,6 +34,12 @@ CREATE TABLE `tb_certificados_de_aplicacion` (
 ALTER TABLE `tb_aplicaciones` DROP COLUMN `fk_certificado`;
 ALTER TABLE `tb_aplicaciones` ADD `organization` VARCHAR(255) NULL;
 ALTER TABLE `tb_aplicaciones` ADD `dir3_code` VARCHAR(50) NULL;
+ALTER TABLE `tb_aplicaciones` ADD `proveedor_personalizado` char(1) DEFAULT 'N' NOT NULL;
+ALTER TABLE `tb_aplicaciones` ADD `tamano_personalizado` char(1) DEFAULT 'N' NOT NULL;
+ALTER TABLE `tb_aplicaciones` ADD `tamano_maximo_documento` bigint;
+ALTER TABLE `tb_aplicaciones` ADD `tamano_maximo_peticion` bigint;
+ALTER TABLE `tb_aplicaciones` ADD `cantidad_maxima_documentos` bigint;
+
 
 -- Tabla TIPO_PLANIFICADOR
 CREATE TABLE TB_TIPO_PLANIFICADOR (
@@ -86,6 +91,41 @@ CREATE TABLE TB_CONTROL_ACCESO (
     FECHA_INICIO_ACCESO TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (ID_CONTROL_ACCESO)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabla TB_PROVEEDORES
+CREATE TABLE `tb_proveedores` (
+  `id_proveedor` bigint NOT NULL,
+  `nombre` varchar(50) NOT NULL,
+  `obligatorio` char(1) NOT NULL,
+  `habilitado` char(1) NOT NULL,
+  `orden` tinyint(4) NOT NULL,
+  
+  PRIMARY KEY (`id_proveedor`)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+-- Tabla TB_PROVEEDORES_APLICACION
+CREATE TABLE `tb_proveedores_aplicacion` (
+  `id_proveedor` bigint NOT NULL,
+  `id_aplicacion` varchar(48) NOT NULL,
+  `obligatorio` char(1) NOT NULL,
+  `habilitado` char(1) NOT NULL,
+  `orden` tinyint(4) NOT NULL,
+  
+  PRIMARY KEY (`id_aplicacion`, `id_proveedor`),
+  CONSTRAINT `fk_aplicacion` FOREIGN KEY (`id_aplicacion`) REFERENCES `tb_aplicaciones` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_proveedor` FOREIGN KEY (`id_proveedor`) REFERENCES `tb_proveedores` (`id_proveedor`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+-- Tabla TB_PROPIEDADES
+CREATE TABLE `tb_propiedades` (
+  `clave` varchar(255) NOT NULL,
+  `valor_texto` varchar(4000),
+  `valor_numerico` decimal(19,4),
+  `valor_fecha` datetime,
+  `tipo` varchar(20) NOT NULL,
+  
+  PRIMARY KEY (`clave`)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Insertar valores en la tabla TIPO_PLANIFICADOR
 INSERT INTO TB_TIPO_PLANIFICADOR (ID_TIPO_PLANIFICADOR, NOMBRE_TOKEN) 

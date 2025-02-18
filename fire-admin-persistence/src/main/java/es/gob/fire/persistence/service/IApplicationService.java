@@ -10,9 +10,13 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
+import es.gob.fire.persistence.dto.ProviderApplicationDTO;
+import es.gob.fire.persistence.dto.ProviderDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.CertificatesApplication;
+import es.gob.fire.persistence.entity.Provider;
+import es.gob.fire.persistence.entity.ProviderApplication;
 
 /**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
@@ -40,9 +44,10 @@ public interface IApplicationService {
 	 * Method that stores a application in the persistence.
 	 * @param app a {@link ApplicationDTO} with the information of the application.
 	 * @param listIdCertificates 
+	 * @param customProviders 
 	 * @return The application.
 	 */
-	Application saveApplication(ApplicationDTO app, List<Long> idsUsers, List<Long> listIdCertificates) throws GeneralSecurityException;
+	Application saveApplication(ApplicationDTO app, List<Long> idsUsers, List<Long> listIdCertificates, List<ProviderApplicationDTO> customProviders) throws GeneralSecurityException;
 
 	/**
 	 * Method that deletes a application in the persistence.
@@ -155,4 +160,36 @@ public interface IApplicationService {
 	 * @return The application.
 	 */
 	Application saveApplication(Application application);
+	
+	/**
+	 * Retrieves a list of ProviderApplication entities associated with the specified application.
+	 *
+	 * @param application the application whose providers are to be retrieved.
+	 * @return a list of {@link ProviderApplicationDTO} entities linked to the given application. If no entities are found, an empty list is returned.
+	 */
+	List<ProviderApplicationDTO> findProvidersByApplication(Application application);
+	
+	/**
+	 * Method that transforms a DTO object into a provider entity.
+	 * @param dto {@link ProviderApplicationDTO} with the info required
+	 * @return a {@link ProviderApplication} entity equivalent to the info from the DTO
+	 */
+	ProviderApplication convertDTOToEntity(ProviderApplicationDTO dto);
+	
+	/**
+	 * Method that transforms an entity object into a DTO object.
+	 * @param entity {@link ProviderApplication} with the info required
+	 * @return a {@link ProviderApplicationDTO} DTO equivalent to the info from the entity
+	 */
+	ProviderApplicationDTO convertEntityToDTO(ProviderApplication entity);
+	
+	/**
+	 * Method that transforms an entity object into a DTO object.
+	 * @param entity {@link Provider} with the info required
+	 * @param application {@link Application} with the info required
+	 * @return a {@link ProviderApplicationDTO} DTO equivalent to the info from the entity
+	 */
+	ProviderApplicationDTO convertProviderEntityToProviderApplicationDTO(Provider entity, Application application);
+
+	ProviderApplication convertProviderApplicationDTOToEntity(ProviderApplicationDTO dto, Application application);
 }
