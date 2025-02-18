@@ -83,7 +83,7 @@
 	Properties upgradeConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_UPGRADE_CONFIG);
 	
 	
-	// AutoFirma es estricto al validar los atributos de los extraParams, asi que los expandimos
+	// Autofirma es estricto al validar los atributos de los extraParams, asi que los expandimos
 	// nostros previamente y no cancelamos la operacion en caso de no poder expandir alguno 
 	try {
 		extraParams = ExtraParamsProcessor.expandProperties(
@@ -381,26 +381,26 @@
 			}
 			
 			/**
-			 * Actualiza el texto de requisitos de usuario en base al tipo de cliente
-			 * @firma que se encuentre cargado.
+			 * Actualiza el texto de requisitos de usuario en base a la
+			 * version de Autofirma correspondiente al sistema del usuario.
 			 */
 			function updateRequirementsText() {
 				var app;
 				var appVersion;
 				var href;
 				if (AutoScript.isAndroid()) {
-					app = "Cliente @firma Android";
-					appVersion = "Cliente m\u00F3vil @firma 1.8 o superior";
+					app = "Autofirma App Android";
+					appVersion = "Autofirma App 1.8 o superior";
 					href = "https://play.google.com/store/apps/details?id=es.gob.afirma";
 				}
 				else if (AutoScript.isIOS()) {
-					app = "Cliente @firma iOS";
-					appVersion = "Cliente m\u00F3vil @firma 1.8 o superior";
+					app = "Autofirma App iOS";
+					appVersion = "Autofirma App 1.8 o superior";
 					href = "https://itunes.apple.com/es/app/cliente-firma-movil/id627410001?mt=8&uo=4";
 				}
 				else {
-					app = "AutoFirma";
-					appVersion = "AutoFirma 1.8 o superior";
+					app = "Autofirma";
+					appVersion = "Autofirma 1.8 o superior";
 					href = "http://firmaelectronica.gob.es/Home/Descargas";
 				}
 
@@ -475,11 +475,10 @@
 			</div>		
 			<div class="nota-firmar">
 					<span class="bold">Advertencia:</span> 
-					La firma se va a realizar con <span id="signningApp" class="bold">AutoFirma</span>. 
+					La firma se va a realizar con <span id="signningApp" class="bold">Autofirma</span>. 
 					Aseg&uacute;rese de tener instalado 
-						<a id="linkDownload" href="#" target="_blanc"> <span id="signningAppVersion" class="bold">AutoFirma</span>.</a>		
+						<a id="linkDownload" href="#" target="_blanc"> <span id="signningAppVersion" class="bold">Autofirma</span>.</a>		
 			</div>
-			
 
 			<div id="progressDialog" class="progress-dialog">
 				<div class="progress-dialog-window">
