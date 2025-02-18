@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -33,6 +34,7 @@ import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.web.authentication.CustomUserAuthentication;
 import es.gob.fire.web.clave.sp.SpProtocolEngineFactory;
+import es.gob.fire.web.clave.sp.exception.ClaveException;
 import es.gob.fire.web.clave.sp.utils.Constants;
 import es.gob.fire.web.clave.sp.utils.SPConfig;
 import es.gob.fire.web.clave.sp.utils.SessionHolder;
@@ -50,6 +52,8 @@ public class ResponseClave {
 	
 	/** The Constant LOG. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResponseClave.class);
+
+	private static final String PARAM_TIMEOUT = "timeout";
 	
 	@Autowired
 	private IUserService iUserService;
@@ -58,7 +62,7 @@ public class ResponseClave {
     private CustomUserAuthentication customUserAuthentication;
 	
 	@RequestMapping(value = "/ResponseClave", method = RequestMethod.POST)
-    public String responseClave(HttpServletRequest request, HttpServletResponse response, final Model model) {
+    public String responseClave(HttpServletRequest request, HttpServletResponse response, final Model model, @RequestParam(PARAM_TIMEOUT) final boolean timeout) {
 		AtomicReference<String> dniRef =  new AtomicReference<>("");
 		try {
 			
@@ -70,12 +74,14 @@ public class ResponseClave {
 	    	Properties spConfig = SPConfig.loadSPConfigs();
 	    		
 	    	String claveReturnUrl = spConfig.getProperty(Constants.SP_RETURN);
-	    		
-	    	PersonalInfoBean personalInfoBean = this.obtenerDatosUsuario(claveReturnUrl, samlResponse, relayState, remoteHost);
+	    	
+	    	IAuthenticationResponseNoMetadata authnResponse = validateRespAndActivateCertContigency(timeout, claveReturnUrl, samlResponse, relayState, remoteHost);
+	    	
+	    	PersonalInfoBean personalInfoBean = this.obtenerDatosUsuario(authnResponse);
 	    	
 	    	dniRef.set(personalInfoBean.getDni());
 	    		
-	    	User user = StreamSupport.stream(iUserService.getAllUser().spliterator(), false) // Convierte el Iterable a Stream
+	    	User user = StreamSupport.stream(iUserService.getAllUser().spliterator(), false)
 	           	.filter(p -> p.getDni().equals(dniRef.get()))
 	           	.findFirst()
 	           	.orElseThrow(() -> new BadCredentialsException(
@@ -101,6 +107,10 @@ public class ResponseClave {
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
 	        return "inicio.html";
 		
+		}catch (ClaveException e) {
+			model.addAttribute("errorMessage", e.getMessage());
+			model.addAttribute("accessByCertificate", true);
+			return "login.html";
 		}catch (BadCredentialsException e) {
 			LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
 			model.addAttribute("errorMessage", e.getMessage());
@@ -113,18 +123,50 @@ public class ResponseClave {
 	
 	/**
      * Retrieves user data from the provided SAML response.
+	 * @param authnResponse TODO
      * 
-     * @param claveReturnUrl The return URL of Cl@ve.
-     * @param samlResponse The SAML response in Base64 format.
-     * @param relayState The relay state associated with the SAML request.
-     * @param remoteHost The remote host address.
      * @return A {@link PersonalInfoBean} object containing the user's personal information.
      * @throws SecurityException If the SAML response is invalid or the relay state does not match.
      */
-    public PersonalInfoBean obtenerDatosUsuario(String claveReturnUrl, String samlResponse, String relayState, String remoteHost) {
+    public PersonalInfoBean obtenerDatosUsuario(IAuthenticationResponseNoMetadata authnResponse) {
 		
-		if (samlResponse == null || samlResponse.trim().isEmpty()) {
-			throw new SecurityException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG002));
+		ImmutableMap<AttributeDefinition<?>, ImmutableSet<? extends AttributeValue<?>>> attrMap
+			= authnResponse.getAttributes().getAttributeMap();
+
+		String infoToken = SecureRandomXmlIdGenerator.INSTANCE.generateIdentifier(8);
+		
+		PersonalInfoBean personalInfo = new PersonalInfoBean();
+		personalInfo.setNombre(extractFromAttrMap("FirstName", attrMap));
+		personalInfo.setApellidos(extractFromAttrMap("FamilyName", attrMap));
+		personalInfo.setDni(extractFromAttrMap("PersonIdentifier", attrMap));
+		personalInfo.setInfoToken(infoToken);
+		
+		return personalInfo;
+	}
+
+    /**
+     * Validates the SAML response and activates the contingency certificate if necessary.
+     * The contingency certificate will be activated in the following cases:
+     * - A timeout occurred while accessing the gateway.
+     * - The SAML response is empty or null.
+     * - An exception occurs during SAML validation.
+     * - The response from Cl@ve contains a critical error requiring certificate activation.
+     *
+     * @param timeout       Indicates if a timeout occurred while accessing the gateway.
+     * @param claveReturnUrl The return URL for Cl@ve authentication.
+     * @param samlResponse  The SAML response received from the authentication provider.
+     * @param relayState    The relay state for session validation.
+     * @param remoteHost    The remote host requesting authentication.
+     * @return An {@code IAuthenticationResponseNoMetadata} containing authentication details.
+     * @throws ClaveException If validation fails or the contingency certificate needs activation.
+     */
+	private IAuthenticationResponseNoMetadata validateRespAndActivateCertContigency(boolean timeout, String claveReturnUrl,
+			String samlResponse, String relayState, String remoteHost) throws ClaveException {
+		
+		if(timeout) {
+			throw new ClaveException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009)); 
+		} else if (samlResponse == null || samlResponse.trim().isEmpty()) {
+			throw new ClaveException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
 		}
 
 		byte[] decSamlToken = EidasStringUtil.decodeBytesFromBase64(samlResponse);
@@ -144,28 +186,16 @@ public class ResponseClave {
 
 		} catch (EIDASSAMLEngineException e) {
 			LOGGER.error(e.getMessage());
-			throw new SecurityException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG004));
+			throw new ClaveException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
 		}
-
-		// Eliminamos el valor de comprobacion de la sesion
-		SessionHolder.sessionsSAML.remove(authnResponse.getInResponseToId());
 		
 		if (authnResponse.isFailure()) {
-			throw new SecurityException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG005));
+			throw new ClaveException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
 		}
-
-		ImmutableMap<AttributeDefinition<?>, ImmutableSet<? extends AttributeValue<?>>> attrMap
-			= authnResponse.getAttributes().getAttributeMap();
-
-		String infoToken = SecureRandomXmlIdGenerator.INSTANCE.generateIdentifier(8);
 		
-		PersonalInfoBean personalInfo = new PersonalInfoBean();
-		personalInfo.setNombre(extractFromAttrMap("FirstName", attrMap));
-		personalInfo.setApellidos(extractFromAttrMap("FamilyName", attrMap));
-		personalInfo.setDni(extractFromAttrMap("PersonIdentifier", attrMap));
-		personalInfo.setInfoToken(infoToken);
-		
-		return personalInfo;
+		// Eliminamos el valor de comprobacion de la sesion
+		SessionHolder.sessionsSAML.remove(authnResponse.getInResponseToId());
+		return authnResponse;
 	}
 	
     /**

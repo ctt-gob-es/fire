@@ -104,7 +104,7 @@ public class RequestClave {
         reqBuilder.nameIdFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent");
         reqBuilder.binding(EidasSamlBinding.EMPTY.getName());
         reqBuilder.assertionConsumerServiceURL(returnUrl);
-        reqBuilder.forceAuth(false);
+        reqBuilder.forceAuth(true);
         reqBuilder.spApplication(spApplication);
         
         IRequestMessageNoMetadata binaryRequestMessage = null;
