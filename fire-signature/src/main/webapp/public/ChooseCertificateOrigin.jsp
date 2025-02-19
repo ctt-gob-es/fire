@@ -163,7 +163,7 @@
 					<h2 class="title-box"><%= info.getHeader() %></h2>
 					<% if (info.isNeedJavaScript()) { %>
 						<noscript>
-							<p class="text-box">Su navegador web tiene JavaScript desactivado. Habilite JavaScript para poder usar sus certificados.</p>
+							<p class="text-box"><%= Language.getResFireSignature(IWebViewMessages.JAVASCRIPT_WARNING) %></p>
 						</noscript>
 					<% } %>
 					<p name="provider-description" class="text-box <%= info.isNeedJavaScript() ? "hide" : "" %>">

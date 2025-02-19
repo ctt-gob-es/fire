@@ -515,10 +515,10 @@
 		
 		<% if (docInfos != null && docInfos.length > 0) { %>
 		<section class="contenido-firmar-listadocs">
-			<div class="titulo-listaDocs" >Documentos a Firmar</div>
+			<div class="titulo-listaDocs" ><%= Language.getResFireSignature(IWebViewMessages.DOCUMENTS_TO_SIGN) %></div>
 			<div id="listDocs" class="container-box">
-					<div class="cabecera-listaDocs">Id. Documento</div>		
-					<div class="cabecera-listaDocs">Título</div>
+					<div class="cabecera-listaDocs"><%= Language.getResFireSignature(IWebViewMessages.DOCUMENT_ID) %></div>		
+					<div class="cabecera-listaDocs"><%= Language.getResFireSignature(IWebViewMessages.DOCUMENT_TITLE) %></div>
 				<% int i=1;
 				for (DocInfo docInfo : docInfos)  { %>
 					<div class="celda-listaDocs"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>	

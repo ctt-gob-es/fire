@@ -12,6 +12,7 @@ public interface IWebViewMessages {
 	String SELECT_LANGUAGE = "select.language";
 	String ACCESS_BTN = "btn.access";
 	String CANCEL_BTN = "btn.cancel";
+	String JAVASCRIPT_WARNING = "javascript.warning";
 	
 	/******************************/
 	/** Mensajes de seleccion de certificado **/
@@ -39,6 +40,9 @@ public interface IWebViewMessages {
 	String ERROR_SIGN_OPERATION = "sign.error.operation";
 	String EXECUTING_SIGN = "sign.executing";
 	String RETRY_BTN = "btn.retry";
+	String DOCUMENTS_TO_SIGN = "documents.sign";
+	String DOCUMENT_ID = "documents.id";
+	String DOCUMENT_TITLE = "documents.title";
 	
 	/******************************/
 	/** Mensajes para pantalla sin certificados **/
