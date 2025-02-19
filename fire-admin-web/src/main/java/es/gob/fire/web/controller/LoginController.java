@@ -20,23 +20,18 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>1.0, 27/01/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 18/02/2025.
+ * @version 1.3, 19/02/2025.
  */
 package es.gob.fire.web.controller;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.Cookie;
@@ -51,7 +46,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,7 +59,7 @@ import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.entity.ControlAccess;
-import es.gob.fire.persistence.service.ILoginService;
+import es.gob.fire.service.ILoginService;
 import es.gob.fire.web.clave.sp.request.RequestClave;
 import es.gob.fire.web.config.WebSecurityConfig;
 import es.gob.fire.web.exception.WebAdminException;
@@ -79,7 +73,7 @@ import es.gob.fire.web.exception.WebAdminException;
  * 
  * </p>
  *
- * @version 1.2, 18/02/2025.
+ * @version 1.3, 19/02/2025.
  */
 @Controller
 public class LoginController {
@@ -241,58 +235,60 @@ public class LoginController {
 	 * @return the view name after login attempt
 	 */
 	@RequestMapping(value = "/loginWithCertificate", method = RequestMethod.POST)
-    public String loginWithCertificate(@RequestParam(PARAM_SIGNATUREB64) final String signatureBase64, final Model model, HttpServletResponse response, HttpSession httpSession) {
-    	X509Certificate certificate = null;
-    	try {
-    		byte[] signBase64Bytes = Base64.getDecoder().decode(signatureBase64.getBytes());
-        	
-        	// Realizamos el anÃ¡lisis de la firma por IAIK
-            CAdESAnalizer analizer = new CAdESAnalizer();
-            analizer.init(signBase64Bytes);
-            List<X509Certificate> certs = analizer.getSigningCertificates();
-            
-            // Obtenemos el certificado
-            certificate = certs.get(0);
-        
-            // Analizamos la validez del certificado
-            certificate.checkValidity();
-    	
-            // TODO: debemos buscar por el NIF/NIE del usuario en la BD al igual que se hace con clave
-            // TODO: realizar el proceso de autorizacion en otra tarea
-            
-            // Despues de haber obtenido el dni correctamente para el usuario que se va a loguear limpiamos su control de acceso
-	    	String ipUser = (String) httpSession.getAttribute("ipUser");
-	    	iLoginService.deleteControlAccessByIp(ipUser);
-            
-            // Generaremos una nueva cookie por cada inicio de sesion exitoso
+	public String loginWithCertificate(@RequestParam(PARAM_SIGNATUREB64) final String signatureBase64,
+	                                   final Model model, HttpServletResponse response, HttpSession httpSession) {
+	    
+	    String passTrustStoreUsers = "changeit";
+	    X509Certificate certificate = null;
+	    KeyStore trustStoreUsers = null;
+
+	    try {
+	        // Decodificamos la firma en Base64
+	        byte[] signBase64Bytes = Base64.getDecoder().decode(signatureBase64.getBytes());
+
+	        // Analizamos la firma con CAdESAnalizer y obtenemos el certificado del usuario
+	        CAdESAnalizer analizer = iLoginService.analizeSignWithCAdES(signBase64Bytes);
+	        List<X509Certificate> certs = analizer.getSigningCertificates();
+	        certificate = certs.get(0);
+	       
+	        // Verificamos vigencia del certificado
+	        iLoginService.validatePeriodCertificate(certificate);
+	        
+	        // Cargamos el almacen de confianza
+	        trustStoreUsers = iLoginService.loadTrustStoreUsers(passTrustStoreUsers, trustStoreUsers);
+	        
+	        // Buscamos el certificado del emisor en el TrustStore
+	        X509Certificate issuerCert = iLoginService.validateIssuerWithTrustStore(certificate, trustStoreUsers);
+
+	        // Verificamos la firma del certificado con la clave pública del emisor
+	        iLoginService.verifyPublicKey(certificate, issuerCert);
+
+	        // Eliminamos intentos fallidos de acceso para esta IP
+	        String ipUser = (String) httpSession.getAttribute("ipUser");
+	        iLoginService.deleteControlAccessByIp(ipUser);
+
+	        // Generamos una nueva cookie de sesión
 	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, iLoginService.generateCookieValue());
-	    	cookie.setPath("/");
-	    	cookie.setSecure(true);
-	    	response.addCookie(cookie);
-	    	
-	    	// Informamos en la traza que el usuario X se ha logueado en la administracion
-	    	// LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
-            return "inicio.html";
-            
-    	}catch (CertificateExpiredException e) {
-    		// El certificado ha expirado
-    		String msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML001, new Object[] {certificate.getSubjectX500Principal()});
-    		model.addAttribute("errorMessage", msgerror);
-    		model.addAttribute("accessByCertificate", true);
-			return "login.html";
-		} catch (CertificateNotYetValidException e) {
-			// El certificado aun no es valido
-			String msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML002, new Object[] {certificate.getSubjectX500Principal()});
-    		model.addAttribute("errorMessage", msgerror);
-    		model.addAttribute("accessByCertificate", true);
-    		return "login.html";
-		} catch (CertificateException | IOException e) {
-			// La firma del certificado no es valida
-			String msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML003);
-    		model.addAttribute("errorMessage", msgerror);
-    		model.addAttribute("accessByCertificate", true);
-			return "login.html";
-		}
-    }
-      
+	        cookie.setPath("/");
+	        cookie.setSecure(true);
+	        response.addCookie(cookie);
+
+	        return "inicio.html";
+
+	    } catch (Exception e) {
+	        String msgerror;
+
+	        if (e instanceof CertificateException) {
+	        	msgerror = e.getMessage();
+	        } else if (e instanceof KeyStoreException) {
+	        	msgerror = e.getMessage();
+	        } else {
+	            msgerror = e.getMessage();
+	        }
+
+	        model.addAttribute("errorMessage", msgerror);
+	        model.addAttribute("accessByCertificate", true);
+	        return "login.html";
+	    }
+	}
 }

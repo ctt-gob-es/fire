@@ -20,21 +20,33 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 18/02/2025.
+ * @version 1.1, 19/02/2025.
  */
-package es.gob.fire.persistence.service.impl;
+package es.gob.fire.service.impl;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -42,14 +54,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.commons.utils.UtilsKeystore;
+import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
+import es.gob.fire.i18n.IWebAdminGeneral;
+import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.repository.ControlAccessRepository;
-import es.gob.fire.persistence.service.ILoginService;
+import es.gob.fire.service.ILoginService;
 
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p></p>
- * @version 1.0, 18/02/2025.
+ * @version 1.1, 19/02/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -59,6 +75,9 @@ public class LoginService implements ILoginService {
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(LoginService.class);
+	
+	@Value("${conf.cert.path.truestore.issuers}")
+	private String confCertPathTruestoreIssuers;
 	
 	/**
 	 * Attribute that represents the url to service pasarela.
@@ -139,7 +158,97 @@ public class LoginService implements ILoginService {
     @Transactional
 	@Override
 	public void deleteControlAccessByIp(String ipUser) {
-		// TODO Auto-generated method stub
 		controlAccessRepository.deleteAllByIp(ipUser);
+	}
+    
+    /**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.service#analizeSignWithCAdES(byte[])
+	 */
+    public CAdESAnalizer analizeSignWithCAdES(byte[] signBase64Bytes) throws CertificateException {
+		CAdESAnalizer analizer = new CAdESAnalizer();
+		try {
+			analizer.init(signBase64Bytes);
+		} catch (CertificateException | IOException e) {
+			LOGGER.error(e);
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML003));
+		}
+		return analizer;
+	}
+    
+    /**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.service#loadTrustStoreUsers(java.lang.String, java.security.KeyStore)
+	 */
+    public KeyStore loadTrustStoreUsers(String passTrustStoreUsers, KeyStore trustStoreUsers) throws KeyStoreException {
+		// Cargar el TrustStore
+		try (FileInputStream keyStoreFile = new FileInputStream(confCertPathTruestoreIssuers)) {
+		    trustStoreUsers = KeyStore.getInstance(UtilsKeystore.JKS);
+		    trustStoreUsers.load(keyStoreFile, passTrustStoreUsers.toCharArray());
+		} catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException e) {
+		    throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
+		}
+		return trustStoreUsers;
+	}
+    
+    /**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.service#validateIssuerWithTrustStore(java.security.cert.X509Certificate, java.security.KeyStore)
+	 */
+    public X509Certificate validateIssuerWithTrustStore(X509Certificate certificate, KeyStore trustStoreUsers) throws KeyStoreException {
+    	X509Certificate issuerCert = null;
+    	try {
+    		String issuerDN = certificate.getIssuerX500Principal().getName();
+    		
+    		Enumeration<String> aliases = trustStoreUsers.aliases();
+    		while (aliases.hasMoreElements()) {
+    		    String alias = aliases.nextElement();
+    		    Certificate cert = trustStoreUsers.getCertificate(alias);
+    		    if (cert instanceof X509Certificate) {
+    		        X509Certificate x509Cert = (X509Certificate) cert;
+    		        if (x509Cert.getSubjectX500Principal().getName().equals(issuerDN)) {
+    		            LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML011, new Object[]{x509Cert.getSubjectX500Principal().getName()}));
+    		        	issuerCert = x509Cert;
+    		            break;
+    		        }
+    		    }
+    		}
+    	} catch (KeyStoreException e) {
+    		throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
+		}
+		
+		return issuerCert;
+	}
+    
+    /**
+   	 * {@inheritDoc}
+   	 * @see es.gob.fire.persistence.service#verifyPublicKey(java.security.cert.X509Certificate, java.security.cert.X509Certificate)
+   	 */
+    public void verifyPublicKey(X509Certificate certificate, X509Certificate issuerCert) throws CertificateException {
+		if (issuerCert != null) {
+			try {
+				certificate.verify(issuerCert.getPublicKey());
+			} catch (InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException e) {
+				throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML009));
+			}
+		} else {
+		    throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML010));
+		}
+	}
+
+    /**
+   	 * {@inheritDoc}
+   	 * @see es.gob.fire.persistence.service#validatePeriodCertificate(java.security.cert.X509Certificate)
+   	 */
+	@Override
+	public void validatePeriodCertificate(X509Certificate certificate) throws CertificateException {
+		try {
+			certificate.checkValidity();
+		} catch (CertificateExpiredException e) {
+			throw new CertificateException(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML001, new Object[]{certificate.getSubjectX500Principal()}));
+		} catch (CertificateNotYetValidException e) {
+			throw new CertificateException(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML002, new Object[]{certificate.getSubjectX500Principal()}));
+		}
+		
 	}
 }

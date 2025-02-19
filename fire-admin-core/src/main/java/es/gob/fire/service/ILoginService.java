@@ -20,20 +20,24 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 18/02/2025.
+ * @version 1.1, 19/02/2025.
  */
-package es.gob.fire.persistence.service;
+package es.gob.fire.service;
 
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
+import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.persistence.entity.ControlAccess;
+import es.gob.fire.persistence.repository.ControlAccessRepository;
 
 /**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p></p>
- * @version 1.0, 18/02/2025.
+ * @version 1.1, 19/02/2025.
  */
 public interface ILoginService {
 
@@ -77,4 +81,51 @@ public interface ILoginService {
      * @param ipUser the IP address whose associated control access records should be deleted
      */
 	void deleteControlAccessByIp(String ipUser);
+
+	/**
+	 * Analyzes a CAdES signature using the provided Base64 encoded byte array.
+	 *
+	 * @param signBase64Bytes the Base64 encoded CAdES signature bytes
+	 * @return an initialized {@link CAdESAnalizer} instance
+	 * @throws CertificateException if initialization fails or there is a certificate error
+	 * @throws IOException if an I/O error occurs during analysis
+	 */
+	CAdESAnalizer analizeSignWithCAdES(byte[] signBase64Bytes) throws CertificateException;
+
+	/**
+	 * Loads a TrustStore of users from the specified file path.
+	 *
+	 * @param passTrustStoreUsers the password for the TrustStore
+	 * @param trustStoreUsers the KeyStore instance to load the TrustStore into
+	 * @return the loaded {@link KeyStore} instance
+	 * @throws KeyStoreException if there is an error loading the TrustStore
+	 */
+	KeyStore loadTrustStoreUsers(String passTrustStoreUsers, KeyStore trustStoreUsers) throws KeyStoreException;
+
+	/**
+	 * Validates the issuer of the given certificate against the provided TrustStore.
+	 *
+	 * @param certificate the X.509 certificate whose issuer is to be validated
+	 * @param trustStoreUsers the KeyStore containing trusted issuer certificates
+	 * @return the X.509 certificate of the issuer if found, or {@code null} if not
+	 * @throws KeyStoreException if there is an error accessing the TrustStore
+	 */
+	X509Certificate validateIssuerWithTrustStore(X509Certificate certificate, KeyStore trustStoreUsers) throws KeyStoreException;
+
+	/**
+	 * Verifies the public key of the given certificate using the issuer's public key.
+	 *
+	 * @param certificate the X.509 certificate to verify
+	 * @param issuerCert the X.509 certificate of the issuer
+	 * @throws CertificateException if verification fails or if the issuer certificate is null
+	 */
+	void verifyPublicKey(X509Certificate certificate, X509Certificate issuerCert) throws CertificateException;
+
+	/**
+	 * Validates the validity period of the given X.509 certificate.
+	 *
+	 * @param certificate the X.509 certificate to validate
+	 * @throws CertificateException if the certificate is expired or not yet valid
+	 */
+	void validatePeriodCertificate(X509Certificate certificate) throws CertificateException;
 }
