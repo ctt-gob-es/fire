@@ -1,5 +1,8 @@
 package es.gob.fire.server.services;
 
+import es.gob.fire.i18n.IErrorMessages;
+import es.gob.fire.i18n.Language;
+
 /**
  * Errores que pueden darse en FIRe.
  * @author carlos.gamuci
@@ -8,62 +11,62 @@ public enum FIReError {
 
 	// Errores de la peticion que devuelven informacion significativa
 
-	READING_PARAMETERS(1, 400, "Error en la lectura de los par\u00E1metros de entrada."), //$NON-NLS-1$
-	PARAMETER_APP_ID_NEEDED(2, 400, "No se ha indicado el identificador de la aplicaci\u00F3n."), //$NON-NLS-1$
-	PARAMETER_OPERATION_NEEDED(3, 400, "No se ha indicado la operaci\u00F3n a realizar."), //$NON-NLS-1$
-	PARAMETER_OPERATION_NOT_SUPPORTED(5, 400, "Se ha indicado un id de operaci\u00F3n no soportado."), //$NON-NLS-1$
-	PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED(6, 400, "No se ha indicado el certificado de autenticaci\u00F3n."), //$NON-NLS-1$
-	PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID(7, 400, "Se ha indicado un certificado de autenticaci\u00F3n mal formado."), //$NON-NLS-1$
-	PARAMETER_USER_ID_NEEDED(8, 400, "No se ha indicado el identificador de usuario."), //$NON-NLS-1$
-	PARAMETER_SIGNATURE_ALGORITHM_NEEDED(9, 400, "No se ha indicado el algoritmo de firma."), //$NON-NLS-1$
-	PARAMETER_SIGNATURE_OPERATION_NEEDED(10, 400, "No se ha indicado la operaci\u00F3n de firma."), //$NON-NLS-1$
-	PARAMETER_SIGNATURE_FORMAT_NEEDED(11, 400, "No se ha indicado el formato de firma."), //$NON-NLS-1$
-	PARAMETER_DATA_TO_SIGN_NEEDED(12, 400, "No se han indicado los datos que firmar."), //$NON-NLS-1$
-	PARAMETER_DATA_TO_SIGN_INVALID(13, 400, "Se han indicado datos a firmar mal codificados."), //$NON-NLS-1$
-	PARAMETER_DATA_TO_SIGN_NOT_FOUND(14, 404, "No se han encontrado los datos a firmar."), //$NON-NLS-1$
-	PARAMETER_CONFIG_TRANSACTION_NEEDED(15, 400, "No se ha indicado la configuraci\u00F3n de transacci\u00F3n."), //$NON-NLS-1$
-	PARAMETER_CONFIG_TRANSACTION_INVALID(16, 400, "Se ha indicado una configuraci\u00F3n de transacci\u00F3n mal formada."), //$NON-NLS-1$
-	PARAMETER_URL_ERROR_REDIRECION_NEEDED(17, 400, "No se ha indicado en la configuraci\u00F3n de la transacci\u00F3n la URL de redirecci\u00F3n en caso de error."), //$NON-NLS-1$
-	PARAMETER_TRANSACTION_ID_NEEDED(18, 400, "No se ha indicado el identificador de transacci\u00F3n"), //$NON-NLS-1$
-	PARAMETER_SIGNATURE_PARAMS_INVALID(20, 400, "Se han indicado propiedades de configuraci\u00F3n de fima mal formadas."), //$NON-NLS-1$
-	UNKNOWN_USER(21, 400, "El proveedor no tiene dado de alta al usuario indicado."), //$NON-NLS-1$
-	CERTIFICATE_DUPLICATED(22, 500, "El usuario ya dispone de un certificado del tipo que se est\u00E1 solicitando generar."), //$NON-NLS-1$
-	CERTIFICATE_ERROR(23, 500, "Error al obtener los certificados del usuario o al generar uno nuevo."), //$NON-NLS-1$
-	CERTIFICATE_WEAK_REGISTRY(24, 500, "El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente."), //$NON-NLS-1$
-	UNDEFINED_ERROR(25, 500, "Error desconocido durante la operaci\u00F3n."), //$NON-NLS-1$
-	SIGNING(26, 500, "Error durante la firma."), //$NON-NLS-1$
-	PROVIDER_NOT_SELECTED(27, 400, "No se seleccion\u00F3 un proveedor de firma."), //$NON-NLS-1$
-	INVALID_SIGNATURE(31, 500, "La firma generada no es v\u00E1lida."), //$NON-NLS-1$
-	UPGRADING_SIGNATURE(32, 500, "Error durante la actualizaci\u00F3n de firma."), //$NON-NLS-1$
-	PARAMETER_ASYNC_ID_NEEDED(34, 400, "No se ha indicado el identificador de los datos as\u00EDncronos."), //$NON-NLS-1$
-	PARAMETER_DOCUMENT_MANAGER_INVALID(35, 400, "Gestor de documentos no v\u00E1lido."), //$NON-NLS-1$
-	CERTIFICATE_BLOCKED(38, 500, "Los certificados del usuario est\u00E1n bloqueados."), //$NON-NLS-1$
-	CERTIFICATE_NO_CERTS(39, 500, "El usuario no dispone de certificados y el proveedor no le permite generarlos en este momento."), //$NON-NLS-1$
-	BATCH_DUPLICATE_DOCUMENT(42, 400, "El identificador de documento ya existe en el lote."), //$NON-NLS-1$
-	BATCH_NUM_DOCUMENTS_EXCEEDED(43, 400, "Se ha excedido el n\u00FAmero m\u00E1ximo de documentos permitidos en el lote."), //$NON-NLS-1$
-	BATCH_NO_DOCUMENTS(44, 400, "Se intenta firmar un lote sin documentos"), //$NON-NLS-1$
-	PARAMETER_DOCUMENT_ID_NEEDED(48, 400, "No se ha indicado el identificador del documento del lote."), //$NON-NLS-1$
-	BATCH_NO_SIGNED(49, 500, "No se ha firmado previamente el lote."), //$NON-NLS-1$
-	BATCH_SIGNING(50, 500, "Error al firmar el lote."), //$NON-NLS-1$
-	BATCH_RECOVERED(51, 500, "La firma se recuper\u00F3 anteriormente."), //$NON-NLS-1$
-	BATCH_DOCUMENT_GRACE_PERIOD(52, 500, "Se requiere esperar un periodo de gracia para recuperar el documento."), //$NON-NLS-1$
-	BATCH_INVALID_DOCUMENT(53, 500, "El documento no estaba en el lote."), //$NON-NLS-1$
-	BATCH_RESULT_RECOVERED(54, 500, "El resultado del lote se recuper\u00F3 anteriormente."), //$NON-NLS-1$
-	PARAMETER_PROVIDERS_INVALID(55, 400, "El listado de proveedores indicado no permite seleccionar un proveedor v\u00E1lido."), //$NON-NLS-1$
-	PARAMETER_DOCUMENT_ID_INVALID(56, 400, "Se ha indicado un identificador de documento con longitud o caracteres no soportados"), //$NON-NLS-1$
+	READING_PARAMETERS(1, 400, IErrorMessages.READING_PARAMETERS),
+	PARAMETER_APP_ID_NEEDED(2, 400, IErrorMessages.PARAMETER_APP_ID_NEEDED),
+	PARAMETER_OPERATION_NEEDED(3, 400, IErrorMessages.PARAMETER_OPERATION_NEEDED),
+	PARAMETER_OPERATION_NOT_SUPPORTED(5, 400, IErrorMessages.PARAMETER_OPERATION_NOT_SUPPORTED),
+	PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED(6, 400, IErrorMessages.PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED),
+	PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID(7, 400, IErrorMessages.PARAMETER_AUTHENTICATION_CERTIFICATE_INVALID),
+	PARAMETER_USER_ID_NEEDED(8, 400, IErrorMessages.PARAMETER_USER_ID_NEEDED),
+	PARAMETER_SIGNATURE_ALGORITHM_NEEDED(9, 400, IErrorMessages.PARAMETER_SIGNATURE_ALGORITHM_NEEDED),
+	PARAMETER_SIGNATURE_OPERATION_NEEDED(10, 400, IErrorMessages.PARAMETER_SIGNATURE_OPERATION_NEEDED),
+	PARAMETER_SIGNATURE_FORMAT_NEEDED(11, 400, IErrorMessages.PARAMETER_SIGNATURE_FORMAT_NEEDED),
+	PARAMETER_DATA_TO_SIGN_NEEDED(12, 400, IErrorMessages.PARAMETER_DATA_TO_SIGN_NEEDED),
+	PARAMETER_DATA_TO_SIGN_INVALID(13, 400, IErrorMessages.PARAMETER_DATA_TO_SIGN_INVALID),
+	PARAMETER_DATA_TO_SIGN_NOT_FOUND(14, 404, IErrorMessages.PARAMETER_DATA_TO_SIGN_NOT_FOUND),
+	PARAMETER_CONFIG_TRANSACTION_NEEDED(15, 400, IErrorMessages.PARAMETER_CONFIG_TRANSACTION_NEEDED),
+	PARAMETER_CONFIG_TRANSACTION_INVALID(16, 400, IErrorMessages.PARAMETER_CONFIG_TRANSACTION_INVALID),
+	PARAMETER_URL_ERROR_REDIRECION_NEEDED(17, 400, IErrorMessages.PARAMETER_URL_ERROR_REDIRECTION_NEEDED),
+	PARAMETER_TRANSACTION_ID_NEEDED(18, 400, IErrorMessages.PARAMETER_TRANSACTION_ID_NEEDED),
+	PARAMETER_SIGNATURE_PARAMS_INVALID(20, 400, IErrorMessages.PARAMETER_SIGNATURE_PARAMS_INVALID),
+	UNKNOWN_USER(21, 400, IErrorMessages.UNKNOWN_USER),
+	CERTIFICATE_DUPLICATED(22, 500, IErrorMessages.CERTIFICATE_DUPLICATED),
+	CERTIFICATE_ERROR(23, 500, IErrorMessages.CERTIFICATE_ERROR),
+	CERTIFICATE_WEAK_REGISTRY(24, 500, IErrorMessages.CERTIFICATE_WEAK_REGISTRY),
+	UNDEFINED_ERROR(25, 500, IErrorMessages.UNDEFINED_ERROR),
+	SIGNING(26, 500, IErrorMessages.SIGNING),
+	PROVIDER_NOT_SELECTED(27, 400, IErrorMessages.PROVIDER_NOT_SELECTED),
+	INVALID_SIGNATURE(31, 500, IErrorMessages.INVALID_SIGNATURE),
+	UPGRADING_SIGNATURE(32, 500, IErrorMessages.UPGRADING_SIGNATURE),
+	PARAMETER_ASYNC_ID_NEEDED(34, 400, IErrorMessages.PARAMETER_ASYNC_ID_NEEDED),
+	PARAMETER_DOCUMENT_MANAGER_INVALID(35, 400, IErrorMessages.PARAMETER_DOCUMENT_MANAGER_INVALID),
+	CERTIFICATE_BLOCKED(38, 500, IErrorMessages.CERTIFICATE_BLOCKED),
+	CERTIFICATE_NO_CERTS(39, 500, IErrorMessages.CERTIFICATE_NO_CERTS),
+	BATCH_DUPLICATE_DOCUMENT(42, 400, IErrorMessages.BATCH_DUPLICATE_DOCUMENT),
+	BATCH_NUM_DOCUMENTS_EXCEEDED(43, 400, IErrorMessages.BATCH_NUM_DOCUMENTS_EXCEEDED),
+	BATCH_NO_DOCUMENTS(44, 400, IErrorMessages.BATCH_NO_DOCUMENTS),
+	PARAMETER_DOCUMENT_ID_NEEDED(48, 400, IErrorMessages.PARAMETER_DOCUMENT_ID_NEEDED),
+	BATCH_NO_SIGNED(49, 500, IErrorMessages.BATCH_NO_SIGNED),
+	BATCH_SIGNING(50, 500, IErrorMessages.BATCH_SIGNING),
+	BATCH_RECOVERED(51, 500, IErrorMessages.BATCH_RECOVERED),
+	BATCH_DOCUMENT_GRACE_PERIOD(52, 500, IErrorMessages.BATCH_DOCUMENT_GRACE_PERIOD),
+	BATCH_INVALID_DOCUMENT(53, 500, IErrorMessages.BATCH_INVALID_DOCUMENT),
+	BATCH_RESULT_RECOVERED(54, 500, IErrorMessages.BATCH_RESULT_RECOVERED),
+	PARAMETER_PROVIDERS_INVALID(55, 400, IErrorMessages.PARAMETER_PROVIDERS_INVALID),
+	PARAMETER_DOCUMENT_ID_INVALID(56, 400, IErrorMessages.PARAMETER_DOCUMENT_ID_INVALID),
 
 
 	// Errores que no devuelven informacion significativa a la aplicacion
-	INTERNAL_ERROR(500, 500, "Error interno del servidor. Espere unos momentos antes de reintentar la operaci\u00F3n."), //$NON-NLS-1$
-	FORBIDDEN(501, 403, "Petici\u00F3n rechazada."), //$NON-NLS-1$
-	UNAUTHORIZED(502, 401, "No se proporcionaron los par\u00E1metros de autenticaci\u00F3n o no son correctos."), //$NON-NLS-1$
-	INVALID_TRANSACTION(503, 403, "La transacci\u00F3n no se ha inicializado o ha caducado."), //$NON-NLS-1$
-	EXTERNAL_SERVICE_ERROR_TO_LOGIN(504, 500, "Error detectado despues de llamar a la pasarela externa para autenticar al usuario."), //$NON-NLS-1$
-	EXTERNAL_SERVICE_ERROR_TO_SIGN(505, 500, "Error detectado despues de llamar a la pasarela externa para firmar."), //$NON-NLS-1$
-	EXTERNAL_SERVICE_ERROR(506, 500, "Error detectado despues de llamar a la pasarela externa."), //$NON-NLS-1$
-	OPERATION_CANCELED(507, 400, "Operaci\u00F3n cancelada."), //$NON-NLS-1$
-	PROVIDER_ERROR(508, 500, "El proveedor de firma devolvi\u00F3 un error."), //$NON-NLS-1$
-	PROVIDER_INACCESIBLE_SERVICE(510, 500, "No se pudo conectar con el proveedor de firma."), //$NON-NLS-1$
+	INTERNAL_ERROR(500, 500, IErrorMessages.INTERNAL_ERROR),
+	FORBIDDEN(501, 403, IErrorMessages.FORBIDDEN),
+	UNAUTHORIZED(502, 401, IErrorMessages.UNAUTHORIZED),
+	INVALID_TRANSACTION(503, 403, IErrorMessages.INVALID_TRANSACTION),
+	EXTERNAL_SERVICE_ERROR_TO_LOGIN(504, 500, IErrorMessages.EXTERNAL_SERVICE_ERROR_TO_LOGIN),
+	EXTERNAL_SERVICE_ERROR_TO_SIGN(505, 500, IErrorMessages.EXTERNAL_SERVICE_ERROR_TO_SIGN),
+	EXTERNAL_SERVICE_ERROR(506, 500, IErrorMessages.EXTERNAL_SERVICE_ERROR),
+	OPERATION_CANCELED(507, 400, IErrorMessages.OPERATION_CANCELED),
+	PROVIDER_ERROR(508, 500, IErrorMessages.PROVIDER_ERROR),
+	PROVIDER_INACCESIBLE_SERVICE(510, 500, IErrorMessages.PROVIDER_INACCESIBLE_SERVICE),
 	;
 
 
@@ -98,7 +101,16 @@ public enum FIReError {
 	 * @return Mensaje de error.
 	 */
 	public String getMessage() {
-		return this.message;
+		return Language.getResFireSignature(this.message);
+	}
+	
+	public static FIReError getByCode(final int code) {
+		for (final FIReError error : FIReError.values()) {
+			if (error.getCode() == code) {
+				return error;
+			}
+		}
+		return null;
 	}
 
 }

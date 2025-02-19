@@ -74,6 +74,12 @@
   	<servlet-name>backService</servlet-name>
   	<servlet-class>es.gob.fire.server.services.internal.BackService</servlet-class>
   </servlet>
+    <servlet>
+  	<description>Servicio interno para actualizar cambios en una pagina</description>
+  	<display-name>changeService</display-name>
+  	<servlet-name>changeService</servlet-name>
+  	<servlet-class>es.gob.fire.server.services.internal.ChangeService</servlet-class>
+  </servlet>
   <servlet>
   	<description>Servicio interno para la seleccion de certificado y prefirma de los datos</description>
   	<display-name>presignService</display-name>
@@ -196,6 +202,10 @@
   <servlet-mapping>
   	<servlet-name>backService</servlet-name>
   	<url-pattern>/public/backService</url-pattern>
+  </servlet-mapping>
+    <servlet-mapping>
+  	<servlet-name>changeService</servlet-name>
+  	<url-pattern>/public/changeService</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
   	<servlet-name>MiniAppletSuccessService</servlet-name>

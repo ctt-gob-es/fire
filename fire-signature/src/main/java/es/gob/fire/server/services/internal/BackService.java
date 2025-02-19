@@ -66,6 +66,7 @@ public class BackService extends HttpServlet {
 			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
+		
 		try {
         	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, StandardCharsets.UTF_8.name());
         }

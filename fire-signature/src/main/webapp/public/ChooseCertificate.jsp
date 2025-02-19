@@ -35,12 +35,6 @@
 	}
 
 	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
-	
-	String language = request.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
-	if (language == null || language.isEmpty()) {
-		language = "es";
-	}
-	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 
 	// Cargamos la sesion. Deberia estar en memoria, pero permitimos su carga de otras fuentes,
 	// ya que, por ejemplo, si el proveedor de firma en la nube requirio que se validase la
@@ -51,6 +45,12 @@
 		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
+	
+	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
+	if (language == null || language.isEmpty()) {
+		language = "es";
+	}
+	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 		
 	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	if (appId != null) {
@@ -73,9 +73,8 @@
 	boolean originForced = Boolean
 			.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 		
-	// Extraemos de la sesion los certificados y los eliminamos de la misma
+	// Extraemos de la sesion los certificados
 	final X509Certificate[] certificates = (X509Certificate[]) fireSession.getObject(trId + "-certs"); //$NON-NLS-1$
-	fireSession.removeAttribute(trId + "-certs"); //$NON-NLS-1$
 
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
@@ -124,6 +123,16 @@
 				</div>
 			</div>
 			<div class="clr"></div>
+			<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+				<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
+				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
+				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
+				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
+				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
+				</select>
+			</div>
 		</div>
 	</header>
 
@@ -208,7 +217,15 @@
 						<span ><%= Language.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>
 					</a>
 				<% } %>
-			</div>		
+			</div>	
+			
+			<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHANGE %>" id="changeLangForm">
+				<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+				<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+				<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+				<input type="hidden" id="languageConf" name="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" value="<%= language %>" />
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_CHOOSE_CERTIFICATE %>" />
+			</form>	
 		</section>
 	</main>
 	
@@ -226,5 +243,14 @@
 			</div>
 		</div>
 	</footer>
+	<script type="text/javascript">
+	
+	function changeLanguage() {
+		var languageSelected = document.getElementById('languageSelect').value;	
+		document.getElementById('languageConf').value = languageSelected;
+	    document.getElementById('changeLangForm').submit();
+	}
+	
+	</script>
 </body>
 </html>

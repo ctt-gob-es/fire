@@ -12,6 +12,9 @@
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="java.util.Properties"%>
+<%@page import="java.util.Locale"%>
+<%@page import="es.gob.fire.i18n.Language"%>
+<%@page import="es.gob.fire.i18n.IWebViewMessages"%>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
@@ -33,6 +36,12 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
+	
+	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
+	if (language == null || language.isEmpty()) {
+		language = "es";
+	}
+	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 
 	// Recuperamos la informacion del la aplicacion
 	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
@@ -85,7 +94,7 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>P&aacute;gina de error</title>
+	<title><%= Language.getResFireSignature(IWebViewMessages.ERROR_PAGE) %></title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
@@ -104,11 +113,21 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 				<div class="mod_claim_in_der">
 					<div class="mod_claim_text"><%= ConfigManager.getPagesTitle() %></div>	
 					<% if (appName != null && appName.length() > 0) { %>				
-						<div class="mod_claim_text_sec">Firma solicitada por <%=appName %></div>	
+						<div class="mod_claim_text_sec"><%= Language.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%=appName %></div>	
 					<% } %>				
 				</div>
 			</div>
 			<div class="clr"></div>
+			<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+			<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
+				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
+				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
+				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
+				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
+			</select>
+		</div>
 		</div>
 	</header>
 
@@ -132,7 +151,7 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 							</form>
 						
 							<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
-								<span >Cancelar</span>
+								<span ><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 							</a>
 						</div>
 					<% if (!originForced) { %>
@@ -147,7 +166,7 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 						
 							<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 								<span class="arrow-left-white"></span>
-								<span >Volver</span>
+								<span ><%= Language.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>
 							</a>
 					<% } %>
 						</div>
@@ -156,6 +175,17 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 				</div>
 			</div>
 		</section>
+		
+		<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHANGE %>" id="changeLangForm">
+			<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+			<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+			<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+			<input type="hidden" id="languageConf" name="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" value="<%= language %>" />
+			<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_SIGNATURE_ERROR %>" />
+			<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_TYPE %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_TYPE %>" value="<%= errorType %>" />
+			<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_MESSAGE %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_MESSAGE %>" value="<%= errorMsg %>" />
+		</form>
+		
 	</main>		
 	
 	<%-- Pie de pagina --%>
@@ -172,5 +202,12 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 			</div>
 		</div>
 	</footer>
+	<script type="text/javascript">
+	 	function changeLanguage() {
+			var languageSelected = document.getElementById('languageSelect').value;	
+			document.getElementById('languageConf').value = languageSelected;
+			document.getElementById('changeLangForm').submit();
+		}   		
+	</script>
 </body>
 </html>

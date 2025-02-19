@@ -7,6 +7,7 @@
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderInfo"%>
 <%@page import="es.gob.fire.server.services.internal.ProviderManager"%>
+<%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
@@ -115,10 +116,14 @@
 				</div>
 			</div>
 			<div class="clr"></div>
-			<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+		<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
 			<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
 				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
 				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
+				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
+				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
+				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
 			</select>
 		</div>
 			
@@ -181,6 +186,14 @@
 					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" name="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" value="<%= language %>" />
 				</form>
+				
+				<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHANGE %>" id="changeLangForm">
+					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+					<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+					<input type="hidden" id="languageConf" name="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" value="<%= language %>" />
+					<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_CHOOSE_CERTIFICATE_ORIGIN %>" />
+				</form>
 
 				<div class="title-button">
 					<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
@@ -221,41 +234,9 @@
 		}
 		
 		function changeLanguage() {
-			var languageSelected = document.getElementById('languageSelect').value;
-			var subjectRefToSend = document.getElementById('subjectref').value;
-			var trIdToSend = document.getElementById('transactionid').value;
-			var errorUrlToSend = document.getElementById('errorurl').value;
-			
-			console.log(languageSelected);
-			console.log(subjectRefToSend);
-			console.log(trIdToSend);
-			console.log(errorUrlToSend);
-			
-		    // Creas un objeto con los datos a enviar
-		    var data = new FormData();
-		    data.append('language', languageSelected);
-		    data.append('subjectref', subjectRefToSend);
-		    data.append('transactionid', trIdToSend);
-		    data.append('errorurl', errorUrlToSend);
-		    
-		    // Usas fetch para enviar la solicitud POST sin encabezados personalizados
-		    fetch(window.location.href, {
-		        method: 'POST',
-		        body: data,
-		        headers: {
-		            'Accept': 'application/json',
-		        }
-		    })
-		    .then(function(response) {
-		        return response.json(); 
-		    })
-		    .then(function(data) {
-		        // Aquí puedes manejar la respuesta del servidor si es necesario
-		        console.log('Success:', data);
-		    })
-		    .catch(function(error) {
-		        console.error('Error:', error);
-		    });
+			var languageSelected = document.getElementById('languageSelect').value;	
+			document.getElementById('languageConf').value = languageSelected;
+		    document.getElementById('changeLangForm').submit();
 		}
    	</script>
 </body>
