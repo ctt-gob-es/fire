@@ -21,9 +21,12 @@ import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.CertificatesApplication;
+import es.gob.fire.persistence.entity.Provider;
+import es.gob.fire.persistence.entity.ProviderApplication;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.persistence.service.IProviderService;
 import es.gob.fire.persistence.service.IUserService;
 
 
@@ -75,6 +78,12 @@ public class ApplicationController {
 	 */
 	@Autowired
 	private IUserService userService;
+	
+	/**
+	 * Attribute that represents the service object for accessing the repository.
+	 */
+	@Autowired
+	private IProviderService providerService;
 
 
 	/**
@@ -175,7 +184,6 @@ public class ApplicationController {
 		model.addAttribute("availableUsers", availableUsers); //$NON-NLS-1$
 		model.addAttribute("availableCertficates", availableCertficatesDTO);
 		model.addAttribute("selectedCertificates", selectedCertificatesDTO);
-		
 		model.addAttribute("appEditForm", appDto); //$NON-NLS-1$
 
 		return "modal/applicationEditForm.html"; //$NON-NLS-1$

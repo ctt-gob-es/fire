@@ -3,27 +3,27 @@
 		<div class="modal-content lg-900">
 			<div class="modal-header">
 				<div id="titleAdd">
-					<h4 class="modal-title" th:text="#{form.application.edit.title}">
+					<h4 class="modal-title" th:text="#{form.application.edit.title}"></h4>
 				</div>
 				<button type="button" class="close"
 					onclick="closeModal('appEditModal')" aria-label="Cerrar">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<div class="modal-body">
+			<div class="modal-body modal-body-applicationForm">
 				<form name="appEditForm" role="form" id="appEditForm"
 					th:object="${appEditForm}" action="@{/saveeditapp}" method="post" enctype="multipart/form-data">
 										
 					<input type="hidden" id="appId" th:field="*{appId}"/>
 					<input type="hidden" id="fechaAltaApp" th:field="*{fechaAltaApp}"/>
+					<input type='hidden' id="customSizeHidden" th:field="*{customSize}" />
+					<input type='hidden' id="customProviderHidden" th:field="*{customProvider}" />
 					
 					<div id="resultAddApp" data-dismiss="alert"></div>	
 						
 					<div class="form-group">
-						<div class="col-md-6">
-							<label for="habilitado" th:text="#{form.application.enabled}"></label>
-							<input type="checkbox" id="habilitado" th:field="*{habilitado}"/>
-						</div>
+						<input type="checkbox" id="habilitado" th:field="*{habilitado}"/>
+						<label for="habilitado" class="mL-10" th:text="#{form.application.enabled}"></label>
 					</div>
 								
 					<div class="form-group">
@@ -32,6 +32,8 @@
 						<input type="text" id="appName" th:field="*{appName}" class="form-control" />
 						<span id="appName_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 					</div>
+					
+					<h5 class="c-grey-900 mB-10" th:text="#{form.application.section.organization}"></h5>
 					
 					<div class="form-group">
 						<label for="organization" class="col-form-label"
@@ -44,6 +46,57 @@
 						<input type="text" id="dir3Code" th:field="*{dir3Code}" class="form-control" />
 						<span id="dir3Code_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 	
 					</div>
+					
+					<h5 class="c-grey-900 mB-10" th:text="#{form.application.section.customConfiguration}"></h5>
+					
+					<div class="form-group mT-30">
+                        <input type="checkbox" id="customSize" onchange="toggleCustomSize()"/>
+                        <label for="customSize" class="mL-10" th:text="#{form.application.field.customSizeCheckbox}"></label>
+                    </div>
+                    
+                    <div id="customSizeSection" style="display: none;">
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <label for="maxSizeDoc" class="col-form-label" th:text="#{config.general.field.maxSizeDoc}"></label>
+                                <input type="text" id="maxSizeDoc" th:field="*{maxSizeDoc}" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="maxSizePetition" class="col-form-label" th:text="#{config.general.field.maxSizePetition}"></label>
+                                <input type="text" id="maxSizePetition" th:field="*{maxSizePetition}" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="maxAmountDocs" class="col-form-label" th:text="#{config.general.field.maxAmountDocs}"></label>
+                                <input type="text" id="maxAmountDocs" th:field="*{maxAmountDocs}" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mT-30">
+                        <input type="checkbox" id="customProvider" onchange="toggleCustomProviders()"/>
+                        <label for="customProvider" class="mL-10" th:text="#{form.application.field.customProvidersCheckbox}"></label>
+                    </div>
+                    
+                    <div id="customProvidersSection" class="form-group" style="display: none;">
+                    	<div id="messageCustomProviders" role="alert"></div>
+                        <table id="customProvidersTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th th:text="#{table.providers.provider}"></th>
+                                    <th th:text="#{table.providers.mandatory}"></th>
+                                    <th th:text="#{table.providers.enabled}"></th>
+                                    <th th:text="#{table.providers.order}"></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        
+                        <!-- Disclaimer debajo de la tabla -->
+                    	<p class="text-danger mT-10" th:text="#{table.providers.disclaimer}"></p>
+                    </div>
+					
+					<h5 class="c-grey-900 mB-10" th:text="#{form.application.section.responsibles}"></h5>
 					
 					<div class="form-group row">
 				        <div class="col-5">
@@ -73,6 +126,8 @@
 				        </div>
 				    </div>
 				    
+					<h5 class="c-grey-900 mB-10" th:text="#{form.application.section.certificates}"></h5>
+					
 					<div class="form-group row">
 						<div class="col-5">
 					        <label for="multiselectCertificate" class="col-form-label" th:text="#{form.application.certificates.system}"></label>
@@ -112,15 +167,29 @@
 			</div>
 		</div>
 	</div>
-
+</div>
 <script th:inline="javascript">
+var messageEnableProvider = /*[[#{config.general.enableProvider}]]*/;
 
-$(document)
-.ready(function() {
-			
-			cleanSpan('appEditForm');
-			$('#multiselectUser').multiselect();
-			$('#multiselectCertificate').multiselect();
+$(document).ready(function() {
+    cleanSpan('appEditForm');
+    $('#multiselectUser').multiselect();
+    $('#multiselectCertificate').multiselect();
+
+    // Verificar si customProviders es true en appEditForm y generar la tabla directamente desde el hidden
+    var customProvidersEnabled = $('#customProviderHidden').val() === 'true';
+    $('#customProvider').prop('checked', customProvidersEnabled);
+    if (customProvidersEnabled) {
+        $('#customProvidersSection').show();
+        initializeProvidersTable();
+    }
+
+    // Verificar si customSize es true en appEditForm y mostrar la sección directamente desde el hidden
+    var customSizeEnabled = $('#customSizeHidden').val() === 'true';
+    $('#customSize').prop('checked', customSizeEnabled);
+    if (customSizeEnabled) {
+        $('#customSizeSection').show();
+    }
 });
 			
 function saveEditApp() {
@@ -150,10 +219,59 @@ function saveEditApp() {
 		idCertificatesSelected = "-1";
 	}
     
-	var blob = new Blob([JSON.stringify($("#appEditForm").serializeJSON())], {type: "application/json"});
+	// Convertimos el formulario en un objeto JSON
+    var appForm = $("#appEditForm").serializeJSON();
+
+    // Añadimos los IDs de usuarios y certificados al objeto
+    appForm.idUsersSelected = idUsersSelected;
+    appForm.idCertificatesSelected = idCertificatesSelected;
+    
+ 	// Agregar valores de customSize y customProvider al objeto
+    appForm.customSize = $('#customSize').prop('checked');
+    appForm.customProvider = $('#customProvider').prop('checked');
+
+    // Construimos el array de proveedores personalizados
+    var customProvidersData = [];
+    if ($.fn.DataTable.isDataTable("#customProvidersTable")) {
+        var table = $('#customProvidersTable').DataTable();
+        
+        let hasEnabledProvider = false;
+        
+        table.rows().every(function(rowIdx, tableLoop, rowLoop) {
+            var rowData = this.data();
+            var rowNode = $(this.node());
+		    var orderValue = rowNode.find('.order-value').text().trim();
+            var isEnabled = $(this.node()).find('.chk-enabled').prop('checked');
+
+            customProvidersData.push({
+                idProvider: rowData.idProvider,
+                idApplication: rowData.idApplication,
+                name: rowData.name,
+                mandatory: rowNode.find('.chk-mandatory').prop('checked'),
+                enabled: rowNode.find('.chk-enabled').prop('checked'),
+                orderIndex: parseInt(orderValue, 10) || rowIdx + 1 // Usar el valor del span o rowIdx como fallback
+            });
+            
+            if (isEnabled) hasEnabledProvider = true;
+        });
+        
+        if (!hasEnabledProvider) {
+        	$('#messageCustomProviders').html(messageEnableProvider);
+        	$('#messageCustomProviders').removeClass('alert alert-success')	
+			$('#messageCustomProviders').addClass('alert alert-danger');
+		 	$("#messageCustomProviders").fadeTo(2000, 500).slideUp(500, function() {
+				$("#messageCustomProviders").slideUp(500);
+		 	});
+            return;
+        }
+    }
+
+    // Agregamos la lista de proveedores al objeto `appForm`
+    appForm.customProviders = customProvidersData;
+
+    // Convertimos `appForm` a un Blob JSON
+    var blob = new Blob([JSON.stringify(appForm)], { type: "application/json" });
     formData.append('appForm', blob);
-    formData.append("idUsersSelected", idUsersSelected);
-    formData.append("idCertificatesSelected", idCertificatesSelected);
     
  	loading();
  	
@@ -235,5 +353,131 @@ function saveEditApp() {
  			});
  	  }
  }
+ 
+function toggleCustomSize() {
+    var checkBox = document.getElementById("customSize");
+    var section = document.getElementById("customSizeSection");
+    section.style.display = checkBox.checked ? "block" : "none";
+}
+
+function toggleCustomProviders() {
+    var checkBox = document.getElementById("customProvider");
+    var section = document.getElementById("customProvidersSection");
+
+    if (checkBox.checked) {
+        section.style.display = "block";
+        initializeProvidersTable();
+    } else {
+        section.style.display = "none";
+        if ($.fn.DataTable.isDataTable("#customProvidersTable")) {
+            $("#customProvidersTable").DataTable().clear().destroy();
+        }
+    }
+}
+
+function initializeProvidersTable() {
+    var appId = $("#appId").val();
+    var getProvidersOfApplication = /*[[@{/getProvidersOfApplication}]]*/;
+
+    // Si ya existe una tabla, la destruye antes de crearla de nuevo
+    if ($.fn.DataTable.isDataTable("#customProvidersTable")) {
+        $("#customProvidersTable").DataTable().clear().destroy();
+    }
+
+    // Inicializa la tabla con DataTables
+    var table = $('#customProvidersTable').DataTable({
+        "processing": true,
+        "serverSide": false,
+        "paging": false,
+        "info": false,
+        "ordering": false,
+        "searching": false,
+        "ajax": {
+            "url": getProvidersOfApplication,
+            "type": "GET",
+            "data": { appId: appId },
+            "dataSrc": ""
+        },
+        "columns": [
+            { "data": "idProvider", "visible": false },
+            { "data": "idApplication", "visible": false },
+            { "data": "name" },
+            { "data": "mandatory",
+                "render": function(data, type, row) {
+                    var is_checked = data ? "checked" : "";
+                    return `
+                        <div class="checkbox checkbox-circle checkbox-info peers ai-c">
+                            <input type="checkbox" id="mandatory_${row.id}" class="peer chk-mandatory" ${is_checked}>
+                            <label for="mandatory_${row.id}" class="peers peer-greed js-sb ai-c">
+                                <span class="peer peer-greed"></span>
+                            </label>
+                        </div>`;
+                }
+              },
+              { "data": "enabled",
+                "render": function(data, type, row) {
+                    var is_checked = data ? "checked" : "";
+                    return `
+                        <div class="checkbox checkbox-circle checkbox-info peers ai-c">
+                            <input type="checkbox" id="enabled_${row.id}" class="peer chk-enabled" ${is_checked}>
+                            <label for="enabled_${row.id}" class="peers peer-greed js-sb ai-c">
+                                <span class="peer peer-greed"></span>
+                            </label>
+                        </div>`;
+                }
+              },
+              { "data": "orderIndex",
+                  "render": function(data, type, row, meta) {
+                      return `
+                          <div class="d-flex">
+                              <span class="order-value" style="display: none;">${meta.row + 1}</span>
+                              <a class="btn move-up" title="Subir"><span class="c-blue-500 ti-arrow-circle-up icon-tb"></span></a>
+                              <a class="btn move-down" title="Bajar"><span class="c-blue-500 ti-arrow-circle-down icon-tb"></span></a>
+                          </div>
+                      `;
+                  }
+              }
+        ],
+        "language": {
+            "url": "js/datatables/i18n/spanish.json",
+            select: {
+                rows: {
+                    _: "%d filas seleccionadas",
+                    1: "1 fila seleccionada"
+                }
+              }
+		}
+    });
+    
+ 	// Función para actualizar los valores de orderIndex después de mover filas
+    function actualizarOrden() {
+        $('#customProvidersTable tbody tr').each(function(index) {
+            $(this).find('.order-value').text(index + 1);
+        });
+    }
+ 	
+    $('#customProvidersTable tbody').off('click', '.move-up');
+    $('#customProvidersTable tbody').off('click', '.move-down');
+
+ 	// Manejadores de eventos para mover filas
+    $('#customProvidersTable tbody').on('click', '.move-up', function(event) {
+        event.preventDefault();
+        let row = $(this).closest('tr');
+        if (row.prev().length) {
+            row.insertBefore(row.prev());
+            actualizarOrden();
+        }
+    });
+
+    $('#customProvidersTable tbody').on('click', '.move-down', function(event) {
+        event.preventDefault();
+        let row = $(this).closest('tr');
+        if (row.next().length) {
+            row.insertAfter(row.next());
+            actualizarOrden();
+        }
+    });
+
+}
  
 </script>

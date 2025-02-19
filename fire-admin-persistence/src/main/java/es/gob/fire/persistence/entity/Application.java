@@ -3,6 +3,7 @@ package es.gob.fire.persistence.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,6 +17,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -81,6 +83,33 @@ public class Application implements Serializable{
 	 */
 	private List<CertificatesApplication> listCertificatesApplication;
 
+	/**
+	 * Attribute that represents if the app has a custom provider configuration.
+	 */
+	private boolean customProvider;
+	
+	/**
+	 * Attribute that represents if the app has a custom size configuration.
+	 */
+	private boolean customSize;
+	
+    private List<ProviderApplication> providers;
+    
+    /**
+	 * Attribute that represents the maximum size of the documents for this application.
+	 */
+    private Long maxSizeDoc;
+    
+    /**
+	 * Attribute that represents the maximum size of the petitions for this application.
+	 */
+    private Long maxSizePetition;
+    
+    /**
+	 * Attribute that represents the maximum amount of documents for this application.
+	 */
+    private Long maxAmountDocs;
+	
 	/**
 	 * Gets the value of the attribute {@link #appId}.
 	 * @return the value of the attribute {@link #appId}.
@@ -246,5 +275,77 @@ public class Application implements Serializable{
 	 */
 	public void setDir3Code(final String dir3Code) {
 		this.dir3Code = dir3Code;
+	}
+	
+	/**
+     * Gets the value of the attribute {@link #customProvider}.
+     * @return the value of the attribute {@link #customProvider}.
+     */
+    @Column(name = "PROVEEDOR_PERSONALIZADO", nullable = false, precision = 1)
+    @Type(type = "yes_no")
+    public Boolean getCustomProvider() {
+        return customProvider;
+    }
+    
+    /**
+	 * Sets the value of the attribute {@link #customProvider}.
+	 * @param userNameP The value for the attribute {@link #customProvider}.
+	 */
+	public void setCustomProvider(final Boolean customProvider) {
+		this.customProvider = customProvider;
+	}
+	
+	/**
+     * Gets the value of the attribute {@link #customSize}.
+     * @return the value of the attribute {@link #customSize}.
+     */
+    @Column(name = "TAMANO_PERSONALIZADO", nullable = false, precision = 1)
+    @Type(type = "yes_no")
+    public Boolean getCustomSize() {
+        return customSize;
+    }
+    
+    /**
+	 * Sets the value of the attribute {@link #customSize}.
+	 * @param userNameP The value for the attribute {@link #customSize}.
+	 */
+	public void setCustomSize(final Boolean customSize) {
+		this.customSize = customSize;
+	}
+
+	@OneToMany(mappedBy = "application", cascade = {CascadeType.ALL }, orphanRemoval = true, fetch = FetchType.LAZY)
+	public List<ProviderApplication> getProviders() {
+		return providers;
+	}
+
+	public void setProviders(List<ProviderApplication> providers) {
+		this.providers = providers;
+	}
+
+	@Column(name = "TAMANO_MAXIMO_DOCUMENTO", precision = NumberConstants.NUM19)
+	public Long getMaxSizeDoc() {
+		return maxSizeDoc;
+	}
+
+	public void setMaxSizeDoc(Long maxSizeDoc) {
+		this.maxSizeDoc = maxSizeDoc;
+	}
+	
+	@Column(name = "TAMANO_MAXIMO_PETICION", precision = NumberConstants.NUM19)
+	public Long getMaxSizePetition() {
+		return maxSizePetition;
+	}
+
+	public void setMaxSizePetition(Long maxSizePetition) {
+		this.maxSizePetition = maxSizePetition;
+	}
+	
+	@Column(name = "CANTIDAD_MAXIMA_DOCUMENTOS", precision = NumberConstants.NUM19)
+	public Long getMaxAmountDocs() {
+		return maxAmountDocs;
+	}
+
+	public void setMaxAmountDocs(Long maxAmountDocs) {
+		this.maxAmountDocs = maxAmountDocs;
 	}
 }

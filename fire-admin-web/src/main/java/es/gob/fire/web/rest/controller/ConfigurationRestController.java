@@ -28,9 +28,12 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -43,10 +46,14 @@ import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.i18n.ISchedulerIdConstants;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.GeneralConfigDTO;
+import es.gob.fire.persistence.dto.ProviderDTO;
 import es.gob.fire.persistence.dto.SchedulerEditDTO;
 import es.gob.fire.persistence.entity.CPlannerType;
 import es.gob.fire.persistence.entity.Planner;
 import es.gob.fire.persistence.entity.Scheduler;
+import es.gob.fire.persistence.service.IPropertyService;
+import es.gob.fire.persistence.service.IProviderService;
 import es.gob.fire.quartz.task.TasksManager;
 import es.gob.fire.service.ICPlannerTypeService;
 import es.gob.fire.service.IPlannerService;
@@ -97,6 +104,18 @@ public class ConfigurationRestController {
 	 */
 	@Autowired
 	private ISchedulerService iSchedulerService;
+	
+	/**
+	 * Attribute that represents the service object for accessing the repository.
+	 */
+	@Autowired
+	private IProviderService providerService;
+	
+	/**
+	 * Attribute that represents the service object for accessing the repository.
+	 */
+	@Autowired
+	private IPropertyService propertyService;
 	
 	/**
 	 * Method to update the task.
@@ -188,4 +207,13 @@ public class ConfigurationRestController {
 
 		return result;
 	}
+
+    @PostMapping("/saveConfigGeneral")
+    public ResponseEntity<String> saveConfig(@RequestBody GeneralConfigDTO request) {
+    	providerService.saveProviders(request.getProviders());
+    	
+    	propertyService.saveGeneralConfig(request);
+
+        return ResponseEntity.ok("Configuración guardada exitosamente.");
+    }
 }

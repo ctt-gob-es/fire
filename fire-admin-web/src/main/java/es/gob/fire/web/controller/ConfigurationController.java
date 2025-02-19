@@ -31,6 +31,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import SchedulerEditDTO.SchedulerVerifyCertExpiredDTO;
@@ -38,10 +39,14 @@ import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.ConstantsDTO;
+import es.gob.fire.persistence.dto.GeneralConfigDTO;
+import es.gob.fire.persistence.dto.Property;
 import es.gob.fire.persistence.dto.SchedulerEditDTO;
 import es.gob.fire.persistence.entity.CPlannerType;
 import es.gob.fire.persistence.entity.Planner;
 import es.gob.fire.persistence.entity.Scheduler;
+import es.gob.fire.persistence.service.IPropertyService;
+import es.gob.fire.persistence.service.impl.PropertyService;
 import es.gob.fire.service.ICPlannerTypeService;
 import es.gob.fire.service.ISchedulerService;
 
@@ -79,6 +84,12 @@ public class ConfigurationController {
 	 */
 	@Autowired
 	private ICPlannerTypeService iCPlannerTypeService;
+	
+	/**
+	 * Attribute that represents the service object for accessing the repository.
+	 */
+	@Autowired
+	private IPropertyService propertyService;
 	
 	/**
 	 * Configures the task validation settings and prepares the model attributes for rendering the task validation page.
@@ -177,4 +188,28 @@ public class ConfigurationController {
 		return Language.getResPersistenceConstants(key);
 	}
 	
+	@GetMapping(value = "configGeneral")
+	public String configGeneral(final Model model) {
+		GeneralConfigDTO generalConfigForm = new GeneralConfigDTO();
+		
+		List<Property> properties = propertyService.getAllProperties();
+		
+		for (Property prop : properties) {
+			if (prop.getKey().equalsIgnoreCase(PropertyService.PROPERTY_NAME_MAX_SIZE_DOC) && prop.getType().equalsIgnoreCase(PropertyService.PROPERTY_DATA_TYPE_NUMERIC)) {
+				generalConfigForm.setMaxSizeDoc(prop.getNumericValue());
+			}
+			
+			if (prop.getKey().equalsIgnoreCase(PropertyService.PROPERTY_NAME_MAX_SIZE_PETITION) && prop.getType().equalsIgnoreCase(PropertyService.PROPERTY_DATA_TYPE_NUMERIC)) {
+				generalConfigForm.setMaxSizePetition(prop.getNumericValue());
+			}
+			
+			if (prop.getKey().equalsIgnoreCase(PropertyService.PROPERTY_NAME_MAX_AMOUNT_DOCS) && prop.getType().equalsIgnoreCase(PropertyService.PROPERTY_DATA_TYPE_NUMERIC)) {
+				generalConfigForm.setMaxAmountDocs(prop.getNumericValue());
+			}
+		}
+		
+		model.addAttribute("generalConfig", generalConfigForm);
+		
+		return "fragments/configGeneral.html";
+	}
 }
