@@ -71,7 +71,7 @@ public class ResponseClave {
     public String responseClave(HttpServletRequest request, HttpServletResponse response, final Model model) {
 		AtomicReference<String> dniRef =  new AtomicReference<>("");
 		try {
-			Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG013);
+			LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG013));
 			// Obtenemos los parametros de la solicitud
 	        String samlResponse = request.getParameter("SAMLResponse");
 	    	String relayState = request.getParameter("RelayState");

@@ -148,7 +148,7 @@ public class LoginController {
      */
     @RequestMapping(value = "/loginClave", method = RequestMethod.POST)
     public String loginWithClave(final Model model, HttpServletRequest request) {
-    	Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG011);
+    	LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG011));
     	String samlRequestB64;
     	Date currentDate = Calendar.getInstance().getTime(); // Obtenemos la fecha actual
     	String ipUser = request.getRemoteAddr(); // Obtenemos la ip del cliente que realiza la peticion
@@ -164,7 +164,7 @@ public class LoginController {
     	// Comprobaremos si necesitamos activar el certificado de contingencia
     	StringBuilder activateMsg = new StringBuilder();
     	if(activateCertificateContingency(model, currentDate, ipUser, activateMsg)) {
-    		Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG012);
+    		LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG012));
     		model.addAttribute("errorMessage", activateMsg);
     		model.addAttribute("accessByCertificate", true);
 			return "login.html";
@@ -252,7 +252,7 @@ public class LoginController {
 	    X509Certificate certificate = null;
 	    AtomicReference<String> dniRef =  new AtomicReference<>("");
 	    try {
-	    	Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML014);
+	    	LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML014));
 	        // Decodificamos la firma en Base64
 	        byte[] signBase64Bytes = Base64.getDecoder().decode(signatureBase64.getBytes());
 
