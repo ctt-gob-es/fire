@@ -32,7 +32,9 @@ import java.util.Base64;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +45,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -59,7 +65,10 @@ import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.entity.ControlAccess;
+import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
+import es.gob.fire.web.authentication.CustomUserAuthentication;
 import es.gob.fire.web.clave.sp.request.RequestClave;
 import es.gob.fire.web.config.WebSecurityConfig;
 import es.gob.fire.web.exception.WebAdminException;
@@ -101,6 +110,12 @@ public class LoginController {
 	@Autowired
 	private ILoginService iLoginService;
 	
+	@Autowired
+	private IUserService iUserService;
+	
+	@Autowired
+    private CustomUserAuthentication customUserAuthentication;
+	
 	/**
 	 * Handles the login error by retrieving the authentication exception from the session and displaying 
 	 * an error message on the login page.
@@ -132,7 +147,8 @@ public class LoginController {
      * @return String that represents the name of the view to forward.
      */
     @RequestMapping(value = "/loginClave", method = RequestMethod.POST)
-    public String loginWithClave(final Model model, HttpServletRequest request, HttpSession httpSession) {
+    public String loginWithClave(final Model model, HttpServletRequest request) {
+    	Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG011);
     	String samlRequestB64;
     	Date currentDate = Calendar.getInstance().getTime(); // Obtenemos la fecha actual
     	String ipUser = request.getRemoteAddr(); // Obtenemos la ip del cliente que realiza la peticion
@@ -145,12 +161,10 @@ public class LoginController {
 			return "login.html";
 		}
     	
-    	// Guardaremos en la sesion la ip con la que el usuario ha realizado la peticion
-    	httpSession.setAttribute("ipUser", ipUser);
-    	
     	// Comprobaremos si necesitamos activar el certificado de contingencia
     	StringBuilder activateMsg = new StringBuilder();
     	if(activateCertificateContingency(model, currentDate, ipUser, activateMsg)) {
+    		Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG012);
     		model.addAttribute("errorMessage", activateMsg);
     		model.addAttribute("accessByCertificate", true);
 			return "login.html";
@@ -181,8 +195,6 @@ public class LoginController {
      * @return true if contingency is activated, false otherwise
      */
 	private boolean activateCertificateContingency(final Model model, Date currentDate, String ipUser, StringBuilder activateMsg) {
-		LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML004));
-		
 		boolean activate = false;
 		
 		// Obtenemos todos los controles de accesos ordenados por fecha mas antigua
@@ -236,13 +248,11 @@ public class LoginController {
 	 */
 	@RequestMapping(value = "/loginWithCertificate", method = RequestMethod.POST)
 	public String loginWithCertificate(@RequestParam(PARAM_SIGNATUREB64) final String signatureBase64,
-	                                   final Model model, HttpServletResponse response, HttpSession httpSession) {
-	    
-	    String passTrustStoreUsers = "changeit";
+	                                   final Model model, HttpServletResponse response) {
 	    X509Certificate certificate = null;
-	    KeyStore trustStoreUsers = null;
-
+	    AtomicReference<String> dniRef =  new AtomicReference<>("");
 	    try {
+	    	Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML014);
 	        // Decodificamos la firma en Base64
 	        byte[] signBase64Bytes = Base64.getDecoder().decode(signatureBase64.getBytes());
 
@@ -252,27 +262,44 @@ public class LoginController {
 	        certificate = certs.get(0);
 	       
 	        // Verificamos vigencia del certificado
-	        iLoginService.validatePeriodCertificate(certificate);
+	        iLoginService.validatePeriodToCertUser(certificate);
 	        
 	        // Cargamos el almacen de confianza
-	        trustStoreUsers = iLoginService.loadTrustStoreUsers(passTrustStoreUsers, trustStoreUsers);
+	        KeyStore trustStoreUsers = iLoginService.loadTrustStoreUsers();
 	        
-	        // Buscamos el certificado del emisor en el TrustStore
-	        X509Certificate issuerCert = iLoginService.validateIssuerWithTrustStore(certificate, trustStoreUsers);
+	        // Buscamos en el almacen de confianza algun certificado que tenga el mismo emisor
+	        X509Certificate issuerCert = iLoginService.validateIssuerWithTrustStoreUsers(certificate, trustStoreUsers);
 
 	        // Verificamos la firma del certificado con la clave pública del emisor
-	        iLoginService.verifyPublicKey(certificate, issuerCert);
+	        iLoginService.verifyPublicKeyToCertUser(certificate, issuerCert);
 
-	        // Eliminamos intentos fallidos de acceso para esta IP
-	        String ipUser = (String) httpSession.getAttribute("ipUser");
-	        iLoginService.deleteControlAccessByIp(ipUser);
+	        // Obtenemos el dni a partir de un certificado valido
+	        dniRef.set(iLoginService.obtainDNIfromCertUser(certificate));
+	        
+	        // Buscamos al usuario en la base de datos
+	        User user = StreamSupport.stream(iUserService.getAllUser().spliterator(), false)
+	        		.filter(p -> p.getDni().equals(dniRef.get()))
+		           	.findFirst()
+		           	.orElseThrow(() -> new BadCredentialsException(
+		           			Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] {dniRef.get()})
+		    ));
+	        
+	        // Autenticamos el token utilizando el usuario consultado previamente
+	        Authentication authentication = iLoginService.obtainAuthAndUpdateLastAccess(user);
+	            
+	        // Si la autenticación es exitosa, guardamos el resultado en el contexto de seguridad
+	        SecurityContextHolder.getContext().setAuthentication(authentication);
+	        
+	        // Eliminamos intentos fallidos de acceso para todas las ip
+	        iLoginService.deleteAllControlAccess();
 
 	        // Generamos una nueva cookie de sesión
 	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, iLoginService.generateCookieValue());
 	        cookie.setPath("/");
 	        cookie.setSecure(true);
 	        response.addCookie(cookie);
-
+	        
+	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
 	        return "inicio.html";
 
 	    } catch (Exception e) {
@@ -281,6 +308,9 @@ public class LoginController {
 	        if (e instanceof CertificateException) {
 	        	msgerror = e.getMessage();
 	        } else if (e instanceof KeyStoreException) {
+	        	msgerror = e.getMessage();
+	        } else if (e instanceof BadCredentialsException) {
+	        	LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
 	        	msgerror = e.getMessage();
 	        } else {
 	            msgerror = e.getMessage();

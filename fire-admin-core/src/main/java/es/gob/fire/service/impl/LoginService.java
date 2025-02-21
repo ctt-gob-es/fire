@@ -24,7 +24,6 @@
  */
 package es.gob.fire.service.impl;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -35,31 +34,41 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Enumeration;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.commons.utils.UtilsCertificate;
 import es.gob.fire.commons.utils.UtilsKeystore;
 import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.entity.ControlAccess;
+import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.repository.ControlAccessRepository;
+import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
 
 /**
@@ -83,12 +92,23 @@ public class LoginService implements ILoginService {
 	 * Attribute that represents the url to service pasarela.
 	 */
 	private static final String URL_SERVICE_PASARELA = "https://pasarela.clave.gob.es/Proxy2/Certificates";
+
+	/**
+	 * Attribute that represents the administrator role.
+	 */
+	public static final String ROLE_ADMIN = "Administrator";
 	
 	/**
 	 * Attribute that represents the service object for accessing the repository of control access.
 	 */
 	@Autowired
 	private ControlAccessRepository controlAccessRepository;
+	
+	@Autowired
+	private UserLoggedDTO userLoggedDTO;
+	
+	@Autowired
+	private IUserService iUserService;
 	
 	/**
 	 * {@inheritDoc}
@@ -153,12 +173,12 @@ public class LoginService implements ILoginService {
     
     /**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.service#deleteControlAccessByIp(java.lang.String)
+	 * @see es.gob.fire.persistence.service#deleteAllControlAccess()
 	 */
     @Transactional
 	@Override
-	public void deleteControlAccessByIp(String ipUser) {
-		controlAccessRepository.deleteAllByIp(ipUser);
+	public void deleteAllControlAccess() {
+		controlAccessRepository.deleteAll();
 	}
     
     /**
@@ -178,13 +198,14 @@ public class LoginService implements ILoginService {
     
     /**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.service#loadTrustStoreUsers(java.lang.String, java.security.KeyStore)
+	 * @see es.gob.fire.persistence.service#loadTrustStoreUsers()
 	 */
-    public KeyStore loadTrustStoreUsers(String passTrustStoreUsers, KeyStore trustStoreUsers) throws KeyStoreException {
-		// Cargar el TrustStore
-		try (FileInputStream keyStoreFile = new FileInputStream(confCertPathTruestoreIssuers)) {
-		    trustStoreUsers = KeyStore.getInstance(UtilsKeystore.JKS);
-		    trustStoreUsers.load(keyStoreFile, passTrustStoreUsers.toCharArray());
+    public KeyStore loadTrustStoreUsers() throws KeyStoreException {
+    	KeyStore trustStoreUsers = null;
+    	try {
+    		// Cargamos el TrustStore
+			String passTrustStoreUsers = "changeit";
+			trustStoreUsers = UtilsKeystore.loadTrustStore(confCertPathTruestoreIssuers, UtilsKeystore.JKS, passTrustStoreUsers);
 		} catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException e) {
 		    throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
 		}
@@ -193,25 +214,23 @@ public class LoginService implements ILoginService {
     
     /**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.service#validateIssuerWithTrustStore(java.security.cert.X509Certificate, java.security.KeyStore)
+     * @see es.gob.fire.persistence.service#validateIssuerWithTrustStoreUsers(java.security.cert.X509Certificate, java.security.KeyStore)
 	 */
-    public X509Certificate validateIssuerWithTrustStore(X509Certificate certificate, KeyStore trustStoreUsers) throws KeyStoreException {
+    public X509Certificate validateIssuerWithTrustStoreUsers(X509Certificate certificate, KeyStore trustStoreUsers) throws KeyStoreException, CertificateException {
+    	
     	X509Certificate issuerCert = null;
     	try {
-    		String issuerDN = certificate.getIssuerX500Principal().getName();
     		
-    		Enumeration<String> aliases = trustStoreUsers.aliases();
-    		while (aliases.hasMoreElements()) {
-    		    String alias = aliases.nextElement();
-    		    Certificate cert = trustStoreUsers.getCertificate(alias);
-    		    if (cert instanceof X509Certificate) {
-    		        X509Certificate x509Cert = (X509Certificate) cert;
-    		        if (x509Cert.getSubjectX500Principal().getName().equals(issuerDN)) {
-    		            LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML011, new Object[]{x509Cert.getSubjectX500Principal().getName()}));
-    		        	issuerCert = x509Cert;
-    		            break;
-    		        }
-    		    }
+    		// Obtenemos el emisor del certificado
+	        String issuerDN = certificate.getIssuerX500Principal().getName();
+	        
+    		// Evaluamos si el certificado elegido tiene como emisor alguno de los certificados de nuestro almacen de confianza
+    		issuerCert = UtilsKeystore.isIssuer(issuerDN, trustStoreUsers);
+    		
+    		if(issuerCert != null) {
+    			LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML011, new Object[]{issuerDN}));
+    		} else {
+    			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML010));
     		}
     	} catch (KeyStoreException e) {
     		throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
@@ -222,33 +241,103 @@ public class LoginService implements ILoginService {
     
     /**
    	 * {@inheritDoc}
-   	 * @see es.gob.fire.persistence.service#verifyPublicKey(java.security.cert.X509Certificate, java.security.cert.X509Certificate)
+   	 * @see es.gob.fire.persistence.service#verifyPublicKeyToCertUser(java.security.cert.X509Certificate, java.security.cert.X509Certificate)
    	 */
-    public void verifyPublicKey(X509Certificate certificate, X509Certificate issuerCert) throws CertificateException {
-		if (issuerCert != null) {
-			try {
-				certificate.verify(issuerCert.getPublicKey());
-			} catch (InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException e) {
-				throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML009));
-			}
-		} else {
-		    throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML010));
+    public void verifyPublicKeyToCertUser(X509Certificate certificate, X509Certificate issuerCert) throws CertificateException {
+    	try {
+    		UtilsKeystore.verify(certificate, issuerCert);
+		} catch (InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException e) {
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML009));
 		}
 	}
 
     /**
    	 * {@inheritDoc}
-   	 * @see es.gob.fire.persistence.service#validatePeriodCertificate(java.security.cert.X509Certificate)
+   	 * @see es.gob.fire.persistence.service#validatePeriodToCertUser(java.security.cert.X509Certificate)
    	 */
 	@Override
-	public void validatePeriodCertificate(X509Certificate certificate) throws CertificateException {
+	public void validatePeriodToCertUser(X509Certificate certificate) throws CertificateException {
 		try {
-			certificate.checkValidity();
+			UtilsCertificate.checkValidity(certificate);
 		} catch (CertificateExpiredException e) {
 			throw new CertificateException(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML001, new Object[]{certificate.getSubjectX500Principal()}));
 		} catch (CertificateNotYetValidException e) {
 			throw new CertificateException(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML002, new Object[]{certificate.getSubjectX500Principal()}));
 		}
 		
+	}
+	
+	/**
+   	 * {@inheritDoc}
+   	 * @see es.gob.fire.persistence.service#obtainDNIfromCertUser(java.security.cert.X509Certificate)
+   	 */
+	public String obtainDNIfromCertUser(X509Certificate certificate) throws CertificateException {
+		String dni = null;
+		String CN = UtilsCertificate.extractDN(certificate.getIssuerX500Principal().getName(), UtilsCertificate.DN_CN);
+		if(CN.equals(UtilsCertificate.ISSUED_BY_AC_SECTOR_PUBLICO)) {
+			// Obtenemos la identidad administrativa del certificado proveniente de SANs (Subject Alternative Names)
+			Map<String, String> mapIdentityAdministrative = UtilsCertificate.getSANsType4(certificate);
+			// En base al tipo de Certificado enviamos un OID u otro
+			if(mapIdentityAdministrative.get(UtilsCertificate.OID_CERT_TYPE_EMPL_PUBLIC_NIVEL_MEDIO) != null) {
+				dni = UtilsCertificate.decodeASN1Hex(mapIdentityAdministrative.get(UtilsCertificate.OID_NIF_ENTIDAD_EMPL_PUBLIC_NIVEL_MEDIO).substring(1));
+			} else if(mapIdentityAdministrative.get(UtilsCertificate.OID_CERT_TYPE_EMPL_PUBLIC_NIVEL_ALTO) != null) {
+				dni = UtilsCertificate.decodeASN1Hex(mapIdentityAdministrative.get(UtilsCertificate.OID_NIF_ENTIDAD_EMPL_PUBLIC_NIVEL_ALTO).substring(1));
+			} else if(mapIdentityAdministrative.get(UtilsCertificate.OID_CERT_TYPE_EMPL_PUBLIC_CON_PSEUDONIMO_NIVEL_MEDIO) != null) {
+				dni = UtilsCertificate.decodeASN1Hex(mapIdentityAdministrative.get(UtilsCertificate.OID_NIF_ENTIDAD_EMPL_PUBLIC_CON_PSEUDONIMO_NIVEL_MEDIO).substring(1));
+			} else if(mapIdentityAdministrative.get(UtilsCertificate.OID_CERT_TYPE_EMPL_PUBLIC_CON_PSEUDONIMO_NIVEL_ALTO) != null) {
+				dni = UtilsCertificate.decodeASN1Hex(mapIdentityAdministrative.get(UtilsCertificate.OID_NIF_ENTIDAD_EMPL_PUBLIC_CON_PSEUDONIMO_NIVEL_ALTO).substring(1));
+			} else if(mapIdentityAdministrative.get(UtilsCertificate.OID_CERT_TYPE_EMPL_PUBLIC_SELLO_ELECT_NIVEL_MEDIO) != null) {
+				dni = UtilsCertificate.decodeASN1Hex(mapIdentityAdministrative.get(UtilsCertificate.OID_NIF_ENTIDAD_EMPL_PUBLIC_SELLO_ELECT_NIVEL_MEDIO).substring(1));
+			}
+		} else if(CN.equals(UtilsCertificate.ISSUED_BY_AC_FNMT_USUARIOS)) {
+			// Obtenemos la identidad administrativa del certificado proveniente de SANs (Subject Alternative Names)
+			Map<String, String> mapIdentityAdministrative = UtilsCertificate.getSANsType4(certificate);
+			dni = UtilsCertificate.decodeASN1Hex(mapIdentityAdministrative.get(UtilsCertificate.OID_AC_FNMT_USUARIOS).substring(1));
+		} else if(CN.equals(UtilsCertificate.ISSUED_BY_AC_DNIE_004) || CN.equals(UtilsCertificate.ISSUED_BY_AC_DNIE_005) || CN.equals(UtilsCertificate.ISSUED_BY_AC_DNIE_006)) {
+			Map<String, String>  mapDN = UtilsCertificate.parseDN(certificate.getSubjectX500Principal().getName());
+			dni = UtilsCertificate.decodeASN1Hex(mapDN.get(UtilsCertificate.OID_AC_DNIE));
+		} else {
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML013));
+		}
+		
+		if(dni == null || dni.isEmpty()) {
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML012));
+		}
+		
+		return dni;
+	}
+	
+	/**
+   	 * {@inheritDoc}
+   	 * @see es.gob.fire.persistence.service#obtainAuthAndUpdateLastAccess(es.gob.fire.persistence.entity.User)
+   	 */
+	public Authentication obtainAuthAndUpdateLastAccess(User user) {
+		// Creamos el token de autenticacion
+    	final List<GrantedAuthority> grantedAuths = new ArrayList<>();
+		grantedAuths.add(new SimpleGrantedAuthority(ROLE_ADMIN));
+    	Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword(), grantedAuths);
+        
+    	// Asignamos al bean de spring del usuario para usarlo en la app
+		userLoggedDTO.setDni(user.getDni());
+		userLoggedDTO.setEmail(user.getEmail());
+		userLoggedDTO.setIdRol(user.getRol().getRolId());
+		userLoggedDTO.setName(user.getName());
+		userLoggedDTO.setPassword(user.getPassword());
+		userLoggedDTO.setPhone(user.getPhone());
+		userLoggedDTO.setRenovationCode(user.getRenovationCode());
+		userLoggedDTO.setRenovationDate(user.getRenovationDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getRenovationDate()));
+		userLoggedDTO.setRestPassword(user.getRestPassword());
+		userLoggedDTO.setRoot(user.getRoot());
+		userLoggedDTO.setStartDate(user.getStartDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getStartDate()));
+		userLoggedDTO.setSurnames(user.getSurnames());
+		userLoggedDTO.setUserId(user.getUserId());
+		userLoggedDTO.setUserName(user.getUserName());
+		userLoggedDTO.setFecUltimoAcceso(user.getFecUltimoAcceso() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getFecUltimoAcceso()));
+		
+		// Actualizamos la fecha de último acceso
+		user.setFecUltimoAcceso(Calendar.getInstance().getTime());
+		iUserService.saveUser(user);
+		
+		return authentication;
 	}
 }

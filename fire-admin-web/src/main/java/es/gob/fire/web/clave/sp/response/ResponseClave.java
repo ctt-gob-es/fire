@@ -1,6 +1,10 @@
 package es.gob.fire.web.clave.sp.response;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
@@ -16,7 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +36,7 @@ import com.google.common.collect.ImmutableSet;
 
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
@@ -52,22 +61,17 @@ public class ResponseClave {
 	/** The Constant LOG. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResponseClave.class);
 
-	private static final String PARAM_TIMEOUT = "timeout";
-	
 	@Autowired
 	private IUserService iUserService;
-	
-	@Autowired
-    private CustomUserAuthentication customUserAuthentication;
 	
 	@Autowired
 	private ILoginService iLoginService;
 	
 	@RequestMapping(value = "/ResponseClave", method = RequestMethod.POST)
-    public String responseClave(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, final Model model) {
+    public String responseClave(HttpServletRequest request, HttpServletResponse response, final Model model) {
 		AtomicReference<String> dniRef =  new AtomicReference<>("");
 		try {
-			
+			Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG013);
 			// Obtenemos los parametros de la solicitud
 	        String samlResponse = request.getParameter("SAMLResponse");
 	    	String relayState = request.getParameter("RelayState");
@@ -80,9 +84,8 @@ public class ResponseClave {
 	    	// Validaremos la respuesta devuelta por clave
 	    	IAuthenticationResponseNoMetadata authnResponse = validateRespAndActivateCertContigency(claveReturnUrl, samlResponse, relayState, remoteHost);
 	    	
-	    	// Despues de obtener la respuesta eliminaremos del control de acceso los registros puesto que se considera una respuesta valida
-	    	String ipUser = (String) httpSession.getAttribute("ipUser");
-	    	iLoginService.deleteControlAccessByIp(ipUser);
+	    	// Eliminamos intentos fallidos de acceso para todas las ip
+	    	iLoginService.deleteAllControlAccess();
 	    	
 	    	PersonalInfoBean personalInfoBean = this.obtenerDatosUsuario(authnResponse);
 	    	
@@ -95,14 +98,11 @@ public class ResponseClave {
 	           			Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] {dniRef.get()})
 	        ));
 	    	
-	    	// Creamos el token de autenticacion
-	        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
-	            
-	        // Autenticamos el token utilizando CustomUserAuthentication que hereda AuthenticationManager
-	        Authentication authResult = customUserAuthentication.authenticate(authentication);
+	        // Autenticamos el token utilizando el usuario consultado previamente
+	        Authentication authentication = iLoginService.obtainAuthAndUpdateLastAccess(user);
 	            
 	        // Si la autenticación es exitosa, guardamos el resultado en el contexto de seguridad
-	        SecurityContextHolder.getContext().setAuthentication(authResult);
+	        SecurityContextHolder.getContext().setAuthentication(authentication);
 	        
 	        // Generaremos una nueva cookie por cada inicio de sesion exitoso
 	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, iLoginService.generateCookieValue());

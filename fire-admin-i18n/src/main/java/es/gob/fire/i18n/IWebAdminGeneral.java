@@ -20,14 +20,14 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p> 22/01/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.6, 19/02/2025.
+ * @version 1.7, 20/02/2025.
  */
 package es.gob.fire.i18n;
 
 /** 
  * <p>Interface that contains the keys of the messages shown in the @firma administration.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
- * @version 1.6, 19/02/2025.
+ * @version 1.7, 20/02/2025.
  */
 public interface IWebAdminGeneral {
 
@@ -80,6 +80,21 @@ public interface IWebAdminGeneral {
 	 * Constant attribute that represents the property key <code>UD010</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
 	 */
 	String UD_LOG010 = "UD010";
+	
+	/**
+	 * Constant attribute that represents the property key <code>UD011</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String UD_LOG011 = "UD011";
+	
+	/**
+	 * Constant attribute that represents the property key <code>UD012</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String UD_LOG012 = "UD012";
+	
+	/**
+	 * Constant attribute that represents the property key <code>UD013</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String UD_LOG013 = "UD013";
 	
 	/***********************/
 	/** Mensajes para errores en el módulo de certificados **/ 
@@ -213,4 +228,19 @@ public interface IWebAdminGeneral {
 	 * Constant attribute that represents the property key <code>ML011</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
 	 */
 	String LOG_ML011 = "ML011";
+
+	/**
+	 * Constant attribute that represents the property key <code>ML012</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_ML012 = "ML012";
+
+	/**
+	 * Constant attribute that represents the property key <code>ML013</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_ML013 = "ML013";
+	
+	/**
+	 * Constant attribute that represents the property key <code>ML014</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_ML014 = "ML014";
 }
