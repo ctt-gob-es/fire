@@ -77,7 +77,7 @@ public final class GenerateCertificateService extends HttpServlet {
 
     /** Solicitud de un nuevo certificado de firma. */
     @Override
-    protected void service(final HttpServletRequest request,
+	protected void doPost(final HttpServletRequest request,
     		               final HttpServletResponse response) {
 
 		LOGGER.fine("Peticion recibida"); //$NON-NLS-1$
@@ -99,6 +99,13 @@ public final class GenerateCertificateService extends HttpServlet {
 	    		return;
 	    	}
 		}
+		
+		// Verificar si los servicios antiguos están habilitados
+	    if (!ConfigManager.isLegacyServicesEnabled()) {
+	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos están deshabilitadas"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos están deshabilitados"); //$NON-NLS-1$
+	        return;
+	    }
 
     	final RequestParameters params;
     	try {

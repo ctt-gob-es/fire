@@ -52,17 +52,17 @@
 	
 	TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 	
-	String language = request.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
-	if (language == null || language.isEmpty()) {
-		language = "es";
-	}
-	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
-	
 	FireSession fireSession = SessionCollector.getFireSessionOfuscated(trId, subjectRef, session, true, false, trAux);
 	if (fireSession == null) {
 		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
+	
+	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
+	if (language == null || language.isEmpty()) {
+		language = "es";
+	}
+	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 
 	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	trAux.setAppId(appId);
@@ -442,6 +442,16 @@
 				</div>
 			</div>
 			<div class="clr"></div>
+			<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+				<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
+				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
+				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
+				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
+				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
+				</select>
+			</div>
 		</div>
 	</header>
 
@@ -505,10 +515,10 @@
 		
 		<% if (docInfos != null && docInfos.length > 0) { %>
 		<section class="contenido-firmar-listadocs">
-			<div class="titulo-listaDocs" >Documentos a Firmar</div>
+			<div class="titulo-listaDocs" ><%= Language.getResFireSignature(IWebViewMessages.DOCUMENTS_TO_SIGN) %></div>
 			<div id="listDocs" class="container-box">
-					<div class="cabecera-listaDocs">Id. Documento</div>		
-					<div class="cabecera-listaDocs">Título</div>
+					<div class="cabecera-listaDocs"><%= Language.getResFireSignature(IWebViewMessages.DOCUMENT_ID) %></div>		
+					<div class="cabecera-listaDocs"><%= Language.getResFireSignature(IWebViewMessages.DOCUMENT_TITLE) %></div>
 				<% int i=1;
 				for (DocInfo docInfo : docInfos)  { %>
 					<div class="celda-listaDocs"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>	
@@ -531,7 +541,7 @@
 				<span ><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 			</a>
 		<% } else { %>
-			<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
+			<form method="GET" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
 				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
@@ -544,7 +554,13 @@
 			</a>
 		<% } %>
 		</div>
-		
+		<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHANGE %>" id="changeLangForm">
+			<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+			<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+			<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+			<input type="hidden" id="languageConf" name="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" value="<%= language %>" />
+			<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_CLIENTE_AFIRMA %>" />
+		</form>
 	</main>
 
 	
@@ -585,6 +601,11 @@
 			document.getElementById("progressDialog").style.display = "none";
 		}
 		
+		function changeLanguage() {
+			var languageSelected = document.getElementById('languageSelect').value;	
+			document.getElementById('languageConf').value = languageSelected;
+		    document.getElementById('changeLangForm').submit();
+		}
 	</script>
 
 </body>

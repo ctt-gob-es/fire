@@ -31,6 +31,7 @@ import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
 
@@ -50,13 +51,23 @@ public class MiniAppletSuccessService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletSuccessService.class.getName());
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
 		// Comprobamos que se hayan prorcionado los parametros indispensables
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
         if (trId == null || trId.isEmpty()) {
         	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.FORBIDDEN);
@@ -68,9 +79,9 @@ public class MiniAppletSuccessService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de exito de firma con certificado local")); //$NON-NLS-1$
 
-		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 
-        String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+        String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
@@ -105,15 +116,15 @@ public class MiniAppletSuccessService extends HttpServlet {
 
 		// Agregamos el certificado en caso de haberlo recibido. Para el proceso de firma simple,
 		// sera obligatorio ya que se requerira para completar la firma
-		final String certB64 = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
+		final String certB64 = params.getParameter(ServiceParams.HTTP_PARAM_CERT);
         if (certB64 != null && !certB64.isEmpty()) {
         	session.setAttribute(ServiceParams.SESSION_PARAM_CERT, certB64);
         }
 
         // Se comprueba si se ha realizado una firma de lote para actualizar el estado del lote
     	// en la sesion
-        if (Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_IS_BATCH_OPERATION))) {
-        	final String afirmaBatchResultB64 = request.getParameter(ServiceParams.HTTP_PARAM_AFIRMA_BATCH_RESULT);
+        if (Boolean.parseBoolean(params.getParameter(ServiceParams.HTTP_PARAM_IS_BATCH_OPERATION))) {
+        	final String afirmaBatchResultB64 = params.getParameter(ServiceParams.HTTP_PARAM_AFIRMA_BATCH_RESULT);
         	final boolean stopOnError = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR));
         	final BatchResult batchResult = (BatchResult) session.getObject(ServiceParams.SESSION_PARAM_BATCH_RESULT);
 

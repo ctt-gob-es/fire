@@ -82,13 +82,9 @@ public final class LoadService extends HttpServlet {
     	// Configuramos el modulo de alarmas
     	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
     }
-
-    /** Carga los datos para su posterior firma en servidor.
-     * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
-    @Override
-    protected void service(final HttpServletRequest request,
-    		               final HttpServletResponse response) {
-
+    
+	@Override
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 		LOGGER.info("Peticion de tipo LOAD_DATA"); //$NON-NLS-1$
 
 		if (!ConfigManager.isInitialized()) {
@@ -108,6 +104,13 @@ public final class LoadService extends HttpServlet {
 	    		return;
 	    	}
 		}
+		
+		// Verificar si los servicios antiguos están habilitados
+	    if (!ConfigManager.isLegacyServicesEnabled()) {
+	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos están deshabilitadas"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos están deshabilitados"); //$NON-NLS-1$
+	        return;
+	    }
 
     	final RequestParameters params;
     	try {

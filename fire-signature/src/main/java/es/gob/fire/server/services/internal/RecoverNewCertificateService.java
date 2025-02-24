@@ -28,6 +28,7 @@ import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
 
@@ -43,14 +44,24 @@ public class RecoverNewCertificateService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(RecoverNewCertificateService.class.getName());
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		String errorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
+		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		String errorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
 		if (trId == null || trId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$

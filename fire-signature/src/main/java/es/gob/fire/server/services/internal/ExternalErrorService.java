@@ -9,16 +9,20 @@
  */
 package es.gob.fire.server.services.internal;
 
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 
 /**
@@ -39,15 +43,24 @@ public class ExternalErrorService extends HttpServlet {
 	private static final String EXT_ERR_INVALID_OPERATION = "12"; //$NON-NLS-1$
 	private static final String EXT_ERR_UNSUPPORTED_ALGORITHM = "13"; //$NON-NLS-1$
 
-
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
+		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
         if (trId == null || trId.isEmpty()
@@ -62,7 +75,7 @@ public class ExternalErrorService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de error tras la redireccion a un servicio externo")); //$NON-NLS-1$
 
-		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
 		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
@@ -100,7 +113,7 @@ public class ExternalErrorService extends HttpServlet {
         	return;
         }
         // Se recibe el tipo de error pero por ahora no hacemos nada con el
-		final String errorCode = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_TYPE);
+		final String errorCode = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_TYPE);
         LOGGER.severe(logF.f("Error notificado por el servicio externo: " + errorCode)); //$NON-NLS-1$
 
         // Traducimos el codigo de error del servicio a uno de los tipos de error

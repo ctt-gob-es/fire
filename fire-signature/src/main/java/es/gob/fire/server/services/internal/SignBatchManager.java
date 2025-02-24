@@ -45,6 +45,7 @@ public class SignBatchManager {
     	final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
     	final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String stopOnError = params.getParameter(ServiceParams.HTTP_PARAM_BATCH_STOP_ON_ERROR);
+		final String language 		= params.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
 
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
@@ -104,8 +105,9 @@ public class SignBatchManager {
         // Componemos los parametros del servicio
 		final String redirectUrl = ServiceNames.PUBLIC_SERVICE_ENTRY_POINT
     			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
-    			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$;
-
+    			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$;
+    			+ "&" + ServiceParams.HTTP_PARAM_LANGUAGE + "=" + language; //$NON-NLS-1$ //$NON-NLS-2$
+		
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		final String redirectUrlBase = PublicContext.getPublicContext(request);

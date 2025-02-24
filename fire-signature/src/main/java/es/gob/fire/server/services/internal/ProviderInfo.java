@@ -57,8 +57,6 @@ public class ProviderInfo {
 	private static final String DATA_URI_IMAGE_HEADER = "image/png;base64,"; //$NON-NLS-1$
 
 	private static final String PROVIDER_LOCAL_NAME = "local"; //$NON-NLS-1$
-	
-	private static final String LANGUAGE_ES = "es";
 
 	private static final Logger LOGGER = Logger.getLogger(ProviderInfo.class.getName());
 
@@ -77,7 +75,7 @@ public class ProviderInfo {
 		if (config == null) {
 			throw new NullPointerException("La configuracion del proveedor no puede ser nula"); //$NON-NLS-1$
 		}
-		if (language == null || LANGUAGE_ES.equals(language)) {
+		if (language == null) {
 			this.language = "";
 		} else {
 			this.language = "." + language;
@@ -99,7 +97,11 @@ public class ProviderInfo {
 	 * @return T&iacute;tulo del proveedor.
 	 */
 	public String getTitle() {
-		return this.config.getProperty(PROP_TITLE + this.language, DEFAULT_TITLE);
+		String title = this.config.getProperty(PROP_TITLE + this.language);
+		if (title == null) {
+			title = this.config.getProperty(PROP_TITLE, DEFAULT_TITLE);
+		}
+		return title;
 	}
 
 	/**
@@ -107,7 +109,11 @@ public class ProviderInfo {
 	 * @return Cabecera del proveedor.
 	 */
 	public String getHeader() {
-		return this.config.getProperty(PROP_HEADER + this.language, DEFAULT_HEADER);
+		String header = this.config.getProperty(PROP_HEADER + this.language);
+		if (header == null) {
+			header = this.config.getProperty(PROP_HEADER, DEFAULT_HEADER);
+		}
+		return header;
 	}
 
 	/**
@@ -115,7 +121,11 @@ public class ProviderInfo {
 	 * @return Descripci&oacute;n del proveedor.
 	 */
 	public String getDescription() {
-		return this.config.getProperty(PROP_DESCRIPTION + this.language, DEFAULT_DESCRIPTION);
+		String desc = this.config.getProperty(PROP_DESCRIPTION + this.language);
+		if (desc == null) {
+			desc = this.config.getProperty(PROP_DESCRIPTION, DEFAULT_DESCRIPTION);
+		}
+		return desc;
 	}
 
 	/**
@@ -123,7 +133,11 @@ public class ProviderInfo {
 	 * @return Mensaje de error.
 	 */
 	public String getNoRegisteredMessage() {
-		return this.config.getProperty(PROP_NO_REGISTERED + this.language, DEFAULT_NO_REGISTERED);
+		String noRegMsg = this.config.getProperty(PROP_NO_REGISTERED + this.language);
+		if (noRegMsg == null) {
+			noRegMsg = this.config.getProperty(PROP_NO_REGISTERED, DEFAULT_NO_REGISTERED);
+		}
+		return noRegMsg;
 	}
 
 	/**
@@ -133,7 +147,10 @@ public class ProviderInfo {
 	public String getLogoUri() {
 
 		// Si es una URI compatible, la usamos directamente
-		String uri = this.config.getProperty(PROP_LOGO_PATH + this.language, DEFAULT_LOGO_URI);
+		String uri = this.config.getProperty(PROP_LOGO_PATH + this.language);
+		if (uri == null) {
+			uri = this.config.getProperty(PROP_LOGO_PATH, DEFAULT_LOGO_URI);
+		}
 		if (uri.isEmpty() ||
 				uri.startsWith(DATA_URI_SCHEME) ||
 				uri.startsWith(HTTP_URI_SCHEME) ||

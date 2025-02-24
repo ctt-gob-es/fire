@@ -10,8 +10,10 @@
 package es.gob.fire.server.services.internal;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.statistics.entity.Browser;
 
@@ -35,7 +38,7 @@ public class EntryService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(EntryService.class.getName());
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
 		// Este es el punto de entrada del usuario a la operativa de FIRe,  por lo que se
 		// establece aqui el tiempo maximo de sesion
@@ -44,9 +47,19 @@ public class EntryService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String language = request.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
+		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String language = params.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
 
 		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
 		final LogTransactionFormatter logF = trAux.getLogFormatter();

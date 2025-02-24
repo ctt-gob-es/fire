@@ -12,6 +12,7 @@ package es.gob.fire.server.services.internal;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 
 /**
@@ -35,19 +37,24 @@ public class CancelOperationService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(CancelOperationService.class.getName());
 
 	@Override
-	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doGet(req, resp);
-	}
-
-	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+		
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
+		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
 		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
 		final LogTransactionFormatter logF = trAux.getLogFormatter();

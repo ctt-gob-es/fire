@@ -10,7 +10,8 @@
 header {position:relative;width: 100%; border-top: 2px solid #FF6600; background-image: -webkit-linear-gradient(0deg, #dededf 50%, #d4d0cd 50%);}
 header .header_top { display:flex; flex-wrap: wrap; position: relative; height: auto; padding: 2% 0; background: url(../img/general/dms/bg-cabecera.png) top left no-repeat;text-align: center;}
 header .header_bottom { position: relative;}
-header .header_menu_right { position: absolute; top: 10px; right: 10px;}
+header .header_menu_right { display:flex; flex-wrap: wrap; position: relative; height: 1.50em;}
+header .header_menu_right select{ text-align: center; margin-left: 2px;}
 
 
 .mod_claim_izq { width: 100%; flex: 1;} 
@@ -63,7 +64,7 @@ footer .footer_bottom .comp_left { padding-left: 3em;}
 
 @media screen and (max-width: 800px) { 
 
-	header .header_menu_right { position: absolute; top: 50px; left: 10px;}
+	header .header_menu_right { margin-left: 0.2em; }
 }
 
 @media screen and (max-width: 380px) { 

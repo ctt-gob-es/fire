@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -212,6 +213,10 @@ public final class ServiceUtil {
     			catch (final IOException e) {
     				throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED, "No se encontro el certificado cliente en la peticion entrante", e); //$NON-NLS-1$
     			}
+    			
+    			if (isExpired(certificates[0])) {
+    				throw new UnauthorizedApplicacionException("El certificado esta caducado"); //$NON-NLS-1$
+    			}
 
     			try {
     				ApplicationAccessChecker.checkValidCertificate(certificates, registeredAppInfo);
@@ -234,5 +239,16 @@ public final class ServiceUtil {
     	}
 
 		return appInfo;
+	}
+	
+	/**
+	 * Indica si un certificado est&aacute; fuera de su periodo de vigencia.
+	 * @param cert Certificado a comprobar.
+	 * @return {@code true} si el certificado est&aacute;caducado o a&uacute;n no es v&aacute;lido,
+	 * {@code false} en caso contrario.
+	 */
+	private static boolean isExpired(final X509Certificate cert) {
+		final long currentDate = new Date().getTime();
+		return currentDate >= cert.getNotAfter().getTime() || currentDate <= cert.getNotBefore().getTime();
 	}
 }

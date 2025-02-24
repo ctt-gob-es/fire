@@ -948,6 +948,7 @@ public class FireClient {
      * @param transactionId Identificador de la transacci&oacute;n devuelta por la
      * operaci&oacute;n de creaci&oacute;n del lote.
      * @param subjectId Identificador del usuario que realiza la transacci&oacute;n.
+     * @param language Idioma que se ha configurado.
      * @param stopOnError Indica si se debe detener el proceso de firma al fallar una de las firmas.
      * @return Objeto con la URL de redirecci&oacute;n para la firma del lote.
      * @throws IOException Cuando no se puede conectar con el servicio.
@@ -957,7 +958,7 @@ public class FireClient {
      * @throws InvalidTransactionException
      * 			   Cuando la transacci&oacute;n no existe o est&aacute; caducada.
      */
-    public SignOperationResult signBatch(final String transactionId, final String subjectId, final boolean stopOnError)
+    public SignOperationResult signBatch(final String transactionId, final String subjectId, final String language, final boolean stopOnError)
     		throws IOException, HttpForbiddenException, HttpNetworkException, HttpOperationException,
     			InvalidTransactionException {
 
@@ -971,11 +972,17 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-
+        
+        String languageUsed = language;
+        if (languageUsed == null || languageUsed.isEmpty()) {
+        	languageUsed = "es";
+        }
+        
         final String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
+        		.replace(TAG_VALUE_LANGUAGE, languageUsed) 
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN_BATCH.getId()) +
         		URL_PARAMETERS_SIGN_BATCH
                 .replace(TAG_VALUE_TRANSACTION, transactionId)

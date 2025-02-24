@@ -38,6 +38,7 @@ import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.SignOperation;
@@ -76,16 +77,25 @@ public final class PreSignService extends HttpServlet {
     /** Carga los datos para su posterior firma en servidor.
      * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
     @Override
-    protected void service(final HttpServletRequest request,
+	protected void doPost(final HttpServletRequest request,
     		               final HttpServletResponse response) {
-
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-    	final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-    	final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-    	String certB64 = request.getParameter(ServiceParams.HTTP_PARAM_CERT);
-		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
+    	final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+    	final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+    	String certB64 = params.getParameter(ServiceParams.HTTP_PARAM_CERT);
+		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
     	// Con la seleccion automatica de certificado, se recibe el certificado y la URL
 		// de error en un atributo en lugar de por parametro
