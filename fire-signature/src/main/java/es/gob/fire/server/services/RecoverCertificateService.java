@@ -75,10 +75,8 @@ public final class RecoverCertificateService extends HttpServlet {
 
     /** Recepci&oacute;n de la petici&oacute;n GET y realizaci&oacute;n de la
      * firma. */
-    @Override
-    protected void service(final HttpServletRequest request,
-    					   final HttpServletResponse response) {
-
+	@Override
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
         if (!ConfigManager.isInitialized()) {
 			try {
 				ConfigManager.checkConfiguration();
@@ -96,6 +94,13 @@ public final class RecoverCertificateService extends HttpServlet {
 	    		return;
 	    	}
 		}
+        
+        // Verificar si los servicios antiguos están habilitados
+	    if (!ConfigManager.isLegacyServicesEnabled()) {
+	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos están deshabilitadas"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos están deshabilitados"); //$NON-NLS-1$
+	        return;
+	    }
 
     	RequestParameters params;
     	try {

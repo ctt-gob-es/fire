@@ -73,11 +73,8 @@ public final class CertificateService extends HttpServlet {
     	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
     }
 
-    @Override
-    protected void service(final HttpServletRequest request,
-    		               final HttpServletResponse response) {
-
-
+	@Override
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
     	LOGGER.info("Peticion de tipo GET_CERTIFICATES"); //$NON-NLS-1$
 
 		if (!ConfigManager.isInitialized()) {
@@ -97,7 +94,14 @@ public final class CertificateService extends HttpServlet {
 	    		return;
 	    	}
 		}
-
+		
+		// Verificar si los servicios antiguos están habilitados
+	    if (!ConfigManager.isLegacyServicesEnabled()) {
+	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos estan deshabilitadas"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos están deshabilitados"); //$NON-NLS-1$
+	        return;
+	    }
+		
     	final RequestParameters params;
     	try {
     		params = RequestParameters.extractParameters(request);
@@ -231,7 +235,7 @@ public final class CertificateService extends HttpServlet {
         Responser.sendResult(response, certJSON.getBytes(StandardCharsets.UTF_8));
     }
 
-    /** Crea un JSON para el conjunto de certificados.
+	/** Crea un JSON para el conjunto de certificados.
      * @param certificates Lista de certificados.
      * @throws CertificateEncodingException Excepci&oacute;n en el codficicaci&oacute;n de un certificado.
      * @return JSON conteniendo los certificados obtenidos. */

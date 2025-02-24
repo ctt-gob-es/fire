@@ -20,7 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import es.gob.fire.signature.ConfigManager;
 
 /**
- * Clase para la lectura y guardado de los par&aacute;metros de una petici&oacute;n.
+ * Clase para la lectura y guardado de los par&aacute;metros de una
+ * petici&oacute;n.
  */
 public class RequestParameters extends HashMap<String, String> {
 
@@ -33,7 +34,9 @@ public class RequestParameters extends HashMap<String, String> {
 
 	/**
 	 * Recupera un par&aacute;metro de la petici&oacute;n.
-	 * @param name Nombre del par&aacute;metro.
+	 * 
+	 * @param name
+	 *            Nombre del par&aacute;metro.
 	 * @return Valor del par&aacute;metro o {@code null} si no existe.
 	 */
 	public String getParameter(final String name) {
@@ -42,9 +45,11 @@ public class RequestParameters extends HashMap<String, String> {
 
 	/**
 	 * Indica si se especific&oacute; un par&aacute;metro en la petici&oacute;n.
-	 * @param name Nombre del par&aacute;metro.
+	 * 
+	 * @param name
+	 *            Nombre del par&aacute;metro.
 	 * @return {@code true} si se indic&oacute; el par&aacute;metro,
-	 * {@code false} en caso contrario.
+	 *         {@code false} en caso contrario.
 	 */
 	public boolean containsParameter(final String name) {
 		return containsKey(name);
@@ -52,11 +57,15 @@ public class RequestParameters extends HashMap<String, String> {
 
 	/**
 	 * Parsea una petici&oacute;n al servicio.
-	 * @param request Petici&oacute;n al servicio.
+	 * 
+	 * @param request
+	 *            Petici&oacute;n al servicio.
 	 * @return Objetos extra&iacute;dos de la petici&oacute;n.
-	 * @throws IOException Cuando ocurre un error en la lectura de la petici&oacute;n
-	 * o uno de sus par&aacute;metros.
-	 * @throws IllegalArgumentException Si la peticion no esta bien formada.
+	 * @throws IOException
+	 *             Cuando ocurre un error en la lectura de la petici&oacute;n o
+	 *             uno de sus par&aacute;metros.
+	 * @throws IllegalArgumentException
+	 *             Si la peticion no esta bien formada.
 	 */
 	public static RequestParameters extractParameters(final HttpServletRequest request) throws IOException {
 
@@ -64,19 +73,18 @@ public class RequestParameters extends HashMap<String, String> {
 
 		final long requestMaxSize = ConfigManager.getRequestMaxSize();
 		if (requestMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && request.getContentLengthLong() > requestMaxSize) {
-			throw new IOException("La peticion excede el tamano maximo configurado. Tamano declarado en la peticion: " + request.getContentLength()); //$NON-NLS-1$
+			throw new IOException("La peticion excede el tamano maximo configurado. Tamano declarado en la peticion: " //$NON-NLS-1$
+					+ request.getContentLength());
 		}
 
 		if ("GET".equals(request.getMethod())) { //$NON-NLS-1$
 			extractParametersFromUrl(request, params);
-		}
-		else {
+		} else {
 			extractParametersFromBody(request, params, ConfigManager.getParamMaxSize(), requestMaxSize);
 		}
 
 		return params;
 	}
-
 
 	private static void extractParametersFromUrl(final HttpServletRequest request, final RequestParameters params) {
 
@@ -87,70 +95,58 @@ public class RequestParameters extends HashMap<String, String> {
 		}
 	}
 
-	private static void extractParametersFromBody(final HttpServletRequest request, final RequestParameters params, final int paramsMaxSize, final long requestMaxSize) throws IOException {
-		final char[] block = new char[1048576];
-		final StringBuilder buffer = new StringBuilder(1048576);
+	private static void extractParametersFromBody(final HttpServletRequest request, final RequestParameters params,
+			final int paramsMaxSize, final long requestMaxSize) throws IOException {
 
-		long totalSize = 0;
-
-		int n = 0;
 		request.setCharacterEncoding("utf-8"); //$NON-NLS-1$
-		try (final BufferedReader reader = request.getReader(); ) {
-			while ((n = reader.read(block, 0, block.length)) > 0) {
 
-				// Comprobamos que la peticion en conjunto no exceda el tamano maximo configurado
-				totalSize += n;
-				if (requestMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit(totalSize, requestMaxSize)) {
-					throw new IOException("La peticion excede el tamano maximo configurado. Tamano leido: " + totalSize); //$NON-NLS-1$
+		// Obtener parámetros de la petición sin consumir el InputStream
+		request.getParameterMap().forEach((key, values) -> {
+			if (values.length > 0) {
+				String value = values[0];
+
+				// Comprobamos si el valor excede el tamaño máximo permitido
+				if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE
+						&& checkLimit((long) value.length(), paramsMaxSize)) {
+					throw new RuntimeException(
+							"Se envió un parámetro que excedía el tamaño máximo permitido: " + paramsMaxSize);
 				}
 
-				int startParamsIdx = 0;
-				for (int i = 0; i < n; i++) {
-					if (block[i] == '&') {
-						if (i > 0) {
-
-							// Comprobamos que el tamano no exceda el maximo configurado
-							if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit((long)i - startParamsIdx, paramsMaxSize)) {
-								throw new IOException("Se envio un parametro al servicio que excedia el tamano maximo permitido: " + paramsMaxSize); //$NON-NLS-1$
-							}
-							// Agregamos al buffer el parametro que ya tenemos leido
-							buffer.append(Arrays.copyOfRange(block, startParamsIdx, i));
-						}
-
-						saveParam(params, buffer);
-						startParamsIdx = i + 1;
-					}
-				}
-
-				// Comprobamos que el parametro almacenado en el buffer mas lo nuevo no exceda el
-				// tamano maximo configurado
-
-				if (paramsMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit((long)buffer.length() + n - startParamsIdx, paramsMaxSize)) {
-					throw new IOException("Se envio un parametro al servicio que excedia el tamano maximo permitido: " + paramsMaxSize); //$NON-NLS-1$
-				}
-				// Agregamos al buffer el inicio de parametro que ya tenemos leido
-				buffer.append(Arrays.copyOfRange(block, startParamsIdx, n));
+				// Guardar el parámetro
+				params.put(key, value);
 			}
-			saveParam(params, buffer);
+		});
+
+		// Comprobar el tamaño total de la petición
+		long totalSize = request.getContentLengthLong();
+		if (requestMaxSize != ConfigManager.UNLIMITED_MAX_SIZE && checkLimit(totalSize, requestMaxSize)) {
+			throw new IOException("La petición excede el tamaño máximo configurado. Tamaño leído: " + totalSize);
 		}
 	}
 
 	/**
-	 * Hace un calculo aproximado de si un tama&ntilde;o de datos Base 64 exceder&iacute;a un
-	 * tama&ntilde;o de datos expresado en bytes.
-	 * @param base64Size Numero de caracteres en base 64.
-	 * @param maxBytesSize Tama&ntilde;o m&aacute;ximo en bytes.
-	 * @return {@code true} si el los datos excederian el tama&ntilde; indicado, {@code false} en
-	 * caso contrario.
+	 * Hace un calculo aproximado de si un tama&ntilde;o de datos Base 64
+	 * exceder&iacute;a un tama&ntilde;o de datos expresado en bytes.
+	 * 
+	 * @param base64Size
+	 *            Numero de caracteres en base 64.
+	 * @param maxBytesSize
+	 *            Tama&ntilde;o m&aacute;ximo en bytes.
+	 * @return {@code true} si el los datos excederian el tama&ntilde; indicado,
+	 *         {@code false} en caso contrario.
 	 */
 	private static boolean checkLimit(final long base64Size, final long maxBytesSize) {
 		return base64Size * 0.75 > maxBytesSize;
 	}
 
 	/**
-	 * Guarda en el mapa de par&aacute;metros aquel que se encuentra en {@code param} y luego vacia este buffer.
-	 * @param params Mapa en el que almacenar el nuevo parm&aacute;metro.
-	 * @param param Buffer con el nuevo par&aacute;metro.
+	 * Guarda en el mapa de par&aacute;metros aquel que se encuentra en
+	 * {@code param} y luego vacia este buffer.
+	 * 
+	 * @param params
+	 *            Mapa en el que almacenar el nuevo parm&aacute;metro.
+	 * @param param
+	 *            Buffer con el nuevo par&aacute;metro.
 	 */
 	private static void saveParam(final HashMap<String, String> params, final StringBuilder param) {
 
@@ -168,8 +164,11 @@ public class RequestParameters extends HashMap<String, String> {
 
 	/**
 	 * Reemplaza la clave/nombre de una propiedad.
-	 * @param oldKey Clave antigua.
-	 * @param newKey Clave nueva.
+	 * 
+	 * @param oldKey
+	 *            Clave antigua.
+	 * @param newKey
+	 *            Clave nueva.
 	 */
 	void replaceParamKey(final String oldKey, final String newKey) {
 		if (containsKey(oldKey)) {

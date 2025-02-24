@@ -157,7 +157,7 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 					<% if (!originForced) { %>
 						<div class="containerbutton">
 							<div class="separatorbutton"></div>
-							<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
+							<form method="GET" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
 								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />

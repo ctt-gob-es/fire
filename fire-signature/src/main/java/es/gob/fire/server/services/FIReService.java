@@ -113,7 +113,7 @@ public class FIReService extends HttpServlet {
     	LOGGER.info("Componente central de FIRe cargado correctamente"); //$NON-NLS-1$
     }
 
-	@Override
+    @Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		LOGGER.fine("Nueva peticion entrante"); //$NON-NLS-1$

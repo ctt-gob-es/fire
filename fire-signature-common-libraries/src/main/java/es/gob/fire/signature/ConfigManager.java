@@ -170,6 +170,12 @@ public class ConfigManager {
 
 	private static final String PREFIX_CIPHERED_TEXT = "{@ciphered:"; //$NON-NLS-1$
 	private static final String SUFIX_CIPHERED_TEXT = "}"; //$NON-NLS-1$
+	
+	/**
+	 * Propiedad que indica si se deben permitir las peticiones a los servicios antiguos.
+	 * Su valor se obtiene del fichero de configuración y puede ser "true" (habilitado) o "false" (deshabilitado).
+	 */
+	private static final String PROP_LEGACY_SERVICES_ENABLED = "legacy.services.enabled";
 
 	/**
 	 * N&uacute;mero que identifica cuando el valor de configuraci&oacute;n que indica que
@@ -1143,5 +1149,15 @@ public class ConfigManager {
 		}
 
 		return poolSize;
+	}
+	
+	/**
+	 * Obtiene el valor de la propiedad que indica si se deben permitir las peticiones a los servicios antiguos.
+	 * Si la propiedad no está definida, devuelve false por defecto.
+	 *
+	 * @return true si los servicios antiguos están habilitados, false en caso contrario.
+	 */
+	public static boolean isLegacyServicesEnabled() {
+	    return Boolean.parseBoolean(getProperty(PROP_LEGACY_SERVICES_ENABLED, "false"));
 	}
 }

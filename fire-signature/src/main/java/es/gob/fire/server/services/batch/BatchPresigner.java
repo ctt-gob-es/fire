@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 
 
@@ -50,7 +51,18 @@ public final class BatchPresigner extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request,
 			               final HttpServletResponse response) {
-		final String json = request.getParameter(BATCH_JSON_PARAM);
+		
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
+		final String json = params.getParameter(BATCH_JSON_PARAM);
 		if (json == null) {
 			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
@@ -71,7 +83,7 @@ public final class BatchPresigner extends HttpServlet {
 			return;
 		}
 
-		final String certListUrlSafeBase64 = request.getParameter(BATCH_CRT_PARAM);
+		final String certListUrlSafeBase64 = params.getParameter(BATCH_CRT_PARAM);
 		if (certListUrlSafeBase64 == null) {
 			LOGGER.severe("No se ha recibido la cadena de certificados del firmante en el parametro " + BATCH_CRT_PARAM); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);

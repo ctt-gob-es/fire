@@ -10,6 +10,7 @@
 package es.gob.fire.server.services.internal;
 
 import java.net.URLDecoder;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.statistics.entity.Browser;
@@ -34,19 +36,29 @@ public class ChooseCertificateOriginService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(ChooseCertificateOriginService.class.getName());
 
 	private static final String URL_ENCODING = "utf-8"; //$NON-NLS-1$
-
+	
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
 		// Obtenemos los datos proporcionados por parametro
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String subjectRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		final String origin = request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
-		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-		final String needAuthUser = request.getParameter(ServiceParams.HTTP_PARAM_NEED_AUTH_USER);
+		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		final String origin = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
+		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+		final String needAuthUser = params.getParameter(ServiceParams.HTTP_PARAM_NEED_AUTH_USER);
 
 		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
 		final LogTransactionFormatter logF = trAux.getLogFormatter();

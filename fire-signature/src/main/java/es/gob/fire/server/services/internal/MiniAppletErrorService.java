@@ -11,6 +11,7 @@ package es.gob.fire.server.services.internal;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 
 /**
@@ -33,13 +35,23 @@ public class MiniAppletErrorService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(MiniAppletErrorService.class.getName());
 
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+		
+		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 
 		// Comprobamos que se hayan prorcionado los parametros indispensables
         if (trId == null || trId.isEmpty()
@@ -54,7 +66,7 @@ public class MiniAppletErrorService extends HttpServlet {
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de error de firma con certificado local")); //$NON-NLS-1$
 
-        String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+        String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
@@ -69,7 +81,7 @@ public class MiniAppletErrorService extends HttpServlet {
 		}
 
         // Se recibe el tipo de error pero por ahora no hacemos nada con el
-		final String errorMessage = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_MESSAGE);
+		final String errorMessage = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_MESSAGE);
 
 		final FireSession session = SessionCollector.getFireSessionOfuscated(trId, userRef, request.getSession(false), false, false, trAux);
 		if (session == null) {

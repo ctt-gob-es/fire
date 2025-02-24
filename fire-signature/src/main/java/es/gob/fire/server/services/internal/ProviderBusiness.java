@@ -107,8 +107,8 @@ public class ProviderBusiness {
 					? connConfig.isAppSkipCertSelection().booleanValue()
 							: ConfigManager.isSkipCertSelection();
 
-			// Si solo hay un certificado y se ha pedido que se seleccione automáticamente,
-			// reenviamos directamente a la operación de firma. Debemos entonces establecer
+			// Si solo hay un certificado y se ha pedido que se seleccione automaticamente,
+			// reenviamos directamente a la operacion de firma. Debemos entonces establecer
 			// ese certifiado y la URL a la que redirigir en caso de error
 			if (certificates.length == 1 && skipSelection) {
 				try {

@@ -177,7 +177,7 @@
 							<p class="text-error-box"><%= Language.getResFireSignature(IWebViewMessages.CERT_SIGN_LOCAL) %></p>
 						</div>								  				
 						<div  id="certLocalcontainer" class="error-box hide">
-							<form id="certLocal" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>">
+							<form method="POST" id="certLocal" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
@@ -214,7 +214,7 @@
 							<span ><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 						</a>
 					<% } else { %>
-						<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
+						<form method="GET" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />

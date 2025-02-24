@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.signature.ConfigManager;
@@ -64,8 +65,19 @@ public final class RetrieveService extends HttpServlet {
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		LOGGER.fine("== INICIO DE LA RECUPERACION =="); //$NON-NLS-1$
+		
+		// Leemos la entrada
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request);
+		}
+		catch (final Exception e) {
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));
+			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));
+			return;
+		}
 
-		final String operation = request.getParameter(PARAMETER_NAME_OPERATION);
+		final String operation = params.getParameter(PARAMETER_NAME_OPERATION);
 		response.setHeader("Access-Control-Allow-Origin", "*"); //$NON-NLS-1$ //$NON-NLS-2$
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -81,8 +93,8 @@ public final class RetrieveService extends HttpServlet {
 			return;
 		}
 
-		final String syntaxVersion = request.getParameter(PARAMETER_NAME_SYNTAX_VERSION);
-		final String id = request.getParameter(PARAMETER_NAME_ID);
+		final String syntaxVersion = params.getParameter(PARAMETER_NAME_SYNTAX_VERSION);
+		final String id = params.getParameter(PARAMETER_NAME_ID);
 
 		if (syntaxVersion == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_SYNTAX_VERSION));
