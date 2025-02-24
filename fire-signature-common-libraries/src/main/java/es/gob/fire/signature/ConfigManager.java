@@ -287,6 +287,19 @@ public class ConfigManager {
 		}
 	}
 
+	/**
+	 * Indica si la configuraci&oacute;n se cargar&aacute; parcialmente de base
+	 * de datos o si s&oacute;lo se usar&aacute; el fichero de
+	 * configuraci&oacute;n.
+	 * @return {@code true} si las propiedades que se permitan se
+	 * cargar&aacute;n de base de datos, {@code false} si todo se
+	 * cargar&aacute;n del fichero de configuraci&oacute;n.
+	 */
+	public static boolean isUsingDatabase(){
+		return getDatasourceJNDIName() != null;
+	}
+
+
 
 	/**
 	 * Devuelve el listado de nombres de los proveedores configurados.

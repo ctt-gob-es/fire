@@ -31,7 +31,7 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(DBApplicationsDAO.class.getName());
 
-	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT configurado, nombre, habilitado, huella_principal, huella_backup FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT nombre, habilitado, huella_principal, huella_backup FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado"; //$NON-NLS-1$
 
 	private static final String STATEMENT_SELECT_OPERATION_CONFIG = "SELECT tamano_peticion, tamano_documento, tamano_lote, proveedores FROM tb_aplicaciones  WHERE  tb_aplicaciones.id =  ?"; //$NON-NLS-1$
 
