@@ -115,10 +115,10 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 	}
 
 	@Override
-	public AplicationOperationConfig getOperationConfig(final String appId,
+	public ApplicationOperationConfig getOperationConfig(final String appId,
 			final TransactionAuxParams trAux) throws IOException {
 
-		final AplicationOperationConfig config = new AplicationOperationConfig();
+		final ApplicationOperationConfig config = new ApplicationOperationConfig();
 		config.setParamsMaxSize(ConfigManager.getParamMaxSize());
 		config.setRequestMaxSize(ConfigManager.getRequestMaxSize());
 		config.setBatchMaxDocuments(ConfigManager.getBatchMaxDocuments());

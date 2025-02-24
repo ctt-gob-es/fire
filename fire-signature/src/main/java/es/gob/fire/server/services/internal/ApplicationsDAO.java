@@ -39,6 +39,6 @@ public interface ApplicationsDAO {
 	 * @return Informaci&oacute;n de acceso o {@code null} si la aplicacion no tiene informaci&oacute;n de acceso asociada.
 	 * @throws IOException Cuando no se puede realizar la comprobaci&oacute;n.
 	 */
-	AplicationOperationConfig getOperationConfig(String appId, TransactionAuxParams trAux)
+	ApplicationOperationConfig getOperationConfig(String appId, TransactionAuxParams trAux)
 			throws IOException;
 }

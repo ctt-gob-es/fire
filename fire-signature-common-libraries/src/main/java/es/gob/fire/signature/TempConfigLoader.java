@@ -1,7 +1,7 @@
 package es.gob.fire.signature;
 
 import java.io.IOException;
-import java.util.Properties;
+import java.util.Hashtable;
 import java.util.logging.Logger;
 
 /**
@@ -24,12 +24,12 @@ public abstract class TempConfigLoader extends ConfigLoader {
 	private long timeout = 5 * 60 * 1000;	// 5 minutos
 
 	@Override
-	protected final synchronized void loadConfig() throws IOException {
+	protected final synchronized void loadConfig() throws IOException, ConfigException {
 
 		if (!this.loaded) {
 
 			// Cargamos la configuracion
-			Properties newConfig;
+			Hashtable<Object, Object> newConfig;
 			try {
 				newConfig = loadConfiguration();
 			}
@@ -37,9 +37,13 @@ public abstract class TempConfigLoader extends ConfigLoader {
 				LOGGER.warning("Error al cargar la configuracion. Se mantendra la configuracion actual: " + e); //$NON-NLS-1$
 				throw e;
 			}
+			catch (final ConfigException e) {
+				LOGGER.warning("Se han encontrado errores en la configuracion. Se mantendra la configuracion actual: " + e); //$NON-NLS-1$
+				throw e;
+			}
 
 			// Establecemos la nueva configuracion
-			setProperties(newConfig);
+			setConfig(newConfig);
 			// Lanzamos el hilo para limitar la duracion de la configuracion
 			new TimeoutThread(this, this.timeout).start();
 			// Marcamos que la configuracion esta cargada
@@ -50,8 +54,9 @@ public abstract class TempConfigLoader extends ConfigLoader {
 	/**
 	 * Carga la configuraci&acute;n de duraci&oacute;n temporal.
 	 * @throws IOException Cuando ocurre un error durante la carga de la configuraci&oacute;n.
+	 * @
 	 */
-	public abstract Properties loadConfiguration() throws IOException;
+	public abstract Hashtable<Object, Object> loadConfiguration() throws IOException, ConfigException;
 
 	/**
 	 * Establece el tiempo que durar&aacute; vigente esta configuraci&oacute;n.

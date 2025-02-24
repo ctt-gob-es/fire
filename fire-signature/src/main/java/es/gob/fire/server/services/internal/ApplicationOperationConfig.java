@@ -5,7 +5,7 @@ import es.gob.fire.signature.ProviderElement;
 /**
  * Configuraci&oacute;n de aplicaci&oacute;n.
  */
-public class AplicationOperationConfig {
+public class ApplicationOperationConfig {
 
 	/** Taman&tilde;o m&aacute;ximo en bytes  de una petici&oacute;n al servicio. */
 	private long requestMaxSize = 0;
@@ -19,7 +19,7 @@ public class AplicationOperationConfig {
 	/** N&acute;mero m&aacute;ximo de documentos que pueden ir en un lote de firma. */
 	private int batchMaxDocuments = 0;
 
-	/** Listado de proveedores habilitados. */
+	/** Configuraci&oacute;n de proveedores habilitados. */
 	private ProviderElement[] providers = null;
 
 	/**
@@ -82,7 +82,22 @@ public class AplicationOperationConfig {
 	 * Establece el listado de proveedores habilitados.
 	 * @param providerElements Listado de proveedores habilitados.
 	 */
-	public void setProviders(final ProviderElement[] providerElements) {
-		this.providers = providerElements;
+	public void setProviders(final ProviderElement[] providers) {
+		this.providers = providers;
+	}
+
+	@Override
+	protected ApplicationOperationConfig clone() {
+
+		final ApplicationOperationConfig object = new ApplicationOperationConfig();
+		object.setBatchMaxDocuments(getBatchMaxDocuments());
+		object.setParamsMaxSize(getParamsMaxSize());
+		object.setRequestMaxSize(getRequestMaxSize());
+		final ProviderElement[] provs = getProviders();
+		if (provs != null) {
+			object.setProviders(provs.clone());
+		}
+
+		return object;
 	}
 }

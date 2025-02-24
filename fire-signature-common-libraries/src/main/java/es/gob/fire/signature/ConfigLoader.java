@@ -1,29 +1,33 @@
 package es.gob.fire.signature;
 
 import java.io.IOException;
-import java.util.Properties;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
 
 /**
  * Clase para el acceso a las propiedades de configuraci&oacute;n.
  */
 public abstract class ConfigLoader {
 
-	private Properties config;
+	private Hashtable<Object, Object> config;
 
 	/**
 	 * Metodo para cargar la configur&aacute;cion.
 	 * @throws IOException Cuando no es posible cargar la configuraci&oacute;n.
+	 * @throws ConfigException Cuando no se ha encontrado algun dato imprescindible
+	 * de la configuraci&oacute;n.
 	 */
-	protected abstract void loadConfig() throws IOException;
+	protected abstract void loadConfig() throws IOException, ConfigException;
 
 	/**
 	 * Establece la configuraci&oacute;n actual.
 	 * @param newConfig Propiedades de configuraci&oacute;n.
 	 */
-	protected final void setProperties(final Properties newConfig) {
+	protected final void setConfig(final Hashtable<Object, Object> newConfig) {
 		// Reseteamos la configuracion
 		if (this.config == null) {
-			this.config = new Properties();
+			this.config = new Hashtable<>();
 		} else {
 			this.config.clear();
 		}
@@ -43,13 +47,13 @@ public abstract class ConfigLoader {
 		// Cargamos la configuracion
 		try {
 			loadConfig();
-		} catch (final IOException e) {
+		} catch (final IOException | ConfigException e) {
 			if (this.config == null) {
 				return null;
 			}
 		}
 
-		return this.config.getProperty(key);
+		return (String) this.config.get(key);
 	}
 
 	/**
@@ -63,13 +67,32 @@ public abstract class ConfigLoader {
 		// Cargamos la configuracion
 		try {
 			loadConfig();
-		} catch (final IOException e) {
+		} catch (final IOException | ConfigException e) {
 			if (this.config == null) {
 				return defaultValue;
 			}
 		}
 
-		return this.config.getProperty(key, defaultValue);
+		return (String) this.config.getOrDefault(key, defaultValue);
+	}
+
+	/**
+	 * Obtiene el objeto asociado a una propiedad de la configuraci&pacute;n.
+	 * @param key Clave de la propiedad de la que se desea obtener el valor.
+	 * @return Valor de la propiedad o {@code null} si no se
+	 * encontr&oacute;.
+	 */
+	public Object getObject(final String key) {
+		// Cargamos la configuracion
+		try {
+			loadConfig();
+		} catch (final IOException | ConfigException e) {
+			if (this.config == null) {
+				return null;
+			}
+		}
+
+		return this.config.get(key);
 	}
 
 	/**
@@ -83,13 +106,13 @@ public abstract class ConfigLoader {
 		// Cargamos la configuracion
 		try {
 			loadConfig();
-		} catch (final IOException e) {
+		} catch (final IOException | ConfigException e) {
 			if (this.config == null) {
 				return defaultValue;
 			}
 		}
 
-		final String value = this.config.getProperty(key);
+		final String value = (String) this.config.get(key);
 		if (value == null || value.isEmpty()) {
 			return defaultValue;
 		}
@@ -115,13 +138,13 @@ public abstract class ConfigLoader {
 		// Cargamos la configuracion
 		try {
 			loadConfig();
-		} catch (final IOException e) {
+		} catch (final IOException | ConfigException e) {
 			if (this.config == null) {
 				return false;
 			}
 		}
 
-		final String value = this.config.getProperty(key);
+		final String value = (String) this.config.get(key);
 		return Boolean.parseBoolean(value);
 	}
 
@@ -137,13 +160,13 @@ public abstract class ConfigLoader {
 		// Cargamos la configuracion
 		try {
 			loadConfig();
-		} catch (final IOException e) {
+		} catch (final IOException | ConfigException e) {
 			if (this.config == null) {
 				return defaultValue;
 			}
 		}
 
-		final String value = this.config.getProperty(key);
+		final String value = (String) this.config.get(key);
 		if (value == null || value.isEmpty()) {
 			return defaultValue;
 		}
@@ -167,30 +190,54 @@ public abstract class ConfigLoader {
 		// Cargamos la configuracion
 		try {
 			loadConfig();
-		} catch (final IOException e) {
+		} catch (final IOException | ConfigException e) {
 			if (this.config == null) {
 				return false;
 			}
 		}
 
-		final String value = this.config.getProperty(key);
+		final String value = (String) this.config.get(key);
 		return value != null && !value.isEmpty();
 	}
 
-	public Properties getConfig() {
+	/**
+	 * Obtiene el conjunto de propiedades de la configuraci&oacute;n
+	 * @return Configuraci&oacute;n.
+	 */
+	public Hashtable<Object, Object> getConfig() {
 		// Cargamos la configuracion
 		try {
 			loadConfig();
-		} catch (final IOException e) {
+		} catch (final IOException | ConfigException e) {
 			if (this.config == null) {
 				return null;
 			}
 		}
 
 		// Devolvemos una copia
-		final Properties copy = new Properties();
+		final Hashtable<Object, Object> copy = new Hashtable<>();
 		copy.putAll(this.config);
 
 		return copy;
+	}
+
+	/**
+	 * Obtiene el conjunto de nombre de las propiedades configuradas.
+	 * @return Conjunto de nombres.
+	 */
+	public Set<String> keys() {
+		// Cargamos la configuracion
+		try {
+			loadConfig();
+		} catch (final IOException | ConfigException e) {
+			if (this.config == null) {
+				return null;
+			}
+		}
+
+		final Set<String> keys = new HashSet<>();
+		this.config.keySet().forEach(t -> keys.add(t.toString()));
+
+		return keys;
 	}
 }

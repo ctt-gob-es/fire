@@ -15,8 +15,8 @@ public class ProviderElement {
 	private final boolean indispensable;
 
 	/**
-	 * Construye el elemento proveedor.
-	 * @param name Nombre del proveedor.
+	 * Construye el elemento proveedor, extrayendo de su nombre si es indispensable o no.
+	 * @param name Nombre del proveedor. Si el nombre del pro
 	 */
 	public ProviderElement(final String name) {
 
@@ -39,6 +39,21 @@ public class ProviderElement {
 			this.name = provName;
 			this.indispensable = false;
 		}
+	}
+
+	/**
+	 * Construye el elemento proveedor, indic&acute;ndo directamente si es indispensable o no.
+	 * @param name Nombre del proveedor.
+	 * @param mandatory Indica si es indispensable que el proveedor se muestre al usuario.
+	 */
+	public ProviderElement(final String name, final boolean mandatory) {
+
+		if (name == null || name.trim().isEmpty()) {
+			throw new NullPointerException("No se puede establecer un proveedor sin nombre"); //$NON-NLS-1$
+		}
+
+		this.name = name.trim();
+		this.indispensable = mandatory;
 	}
 
 	/**
