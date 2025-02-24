@@ -4,15 +4,13 @@
  * <b>Project:</b><p>Servicios Integrales de Firma Electronica para el Ambito Judicial.</p>
  * <b>Date:</b><p>8 mar. 2019.</p>
  * @author Consejería de Justicia e Interior de la Junta de Andalucía.
- * @version 1.0, 8 mar. 2019.
+ * @version 1.2, 24/02/2025.
  */
 package es.gob.fire.mail;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import javax.mail.Address;
 import javax.mail.Authenticator;
@@ -33,13 +31,11 @@ import org.springframework.stereotype.Component;
 
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Constants;
-import es.gob.fire.commons.utils.UtilsStringChar;
-import es.gob.fire.persistence.entity.User;
 
 /**
  * <p>Class that manages the emails.</p>
  * <b>Project:</b><p>Servicios Integrales de Firma Electronica para el Ambito Judicial.</p>
- * @version 1.1, 7 oct. 2019.
+ * @version 1.2, 24/02/2025.
  */
 @Component
 public class MailSenderService {
@@ -180,39 +176,6 @@ public class MailSenderService {
 			// Obtenemos la sesion sin seguridad
 			sessionMail = Session.getDefaultInstance(properties);
 		}
-	}
-
-	/**
-	 * Method that sends a email to restore the user password.
-	 * @param user to send the email
-	 * @param URL to restore the user password
-	 * @throws FileNotFoundException file not found
-	 * @throws IOException error load file
-	 * @throws MessagingException
-	 * @throws AddressException
-	 */
-	public void sendEmail(final User user, final String url) throws FileNotFoundException, IOException, AddressException, MessagingException {
-			init();
-
-			// Insertamos todos los destinatarios configurados en el properties
-			final String email = user.getEmail();
-			if (email == null || email.trim().isEmpty()) {
-				LOGGER.warn("Se ha pedido reestablecer la contrasena de un usuario que no tiene correo electronico asociado"); //$NON-NLS-1$
-				return;
-			}
-			final String[ ] listaDestinatarios = email.split(UtilsStringChar.SYMBOL_COMMA_STRING);
-
-
-			// Creamos el cuerpo del correo
-			final String bodyBase = Constants.MAIL_TEXT + "<br><br>" + Constants.MAIL_FOOTER; //$NON-NLS-1$
-			final String body = bodyBase
-					.replace("%%NAME%%", user.getName()) //$NON-NLS-1$
-					.replace("%%USERNAME%%", user.getUserName()) //$NON-NLS-1$
-					.replace("%%MAIL%%", user.getEmail()) //$NON-NLS-1$
-					.replace("%%URL%%", url); //$NON-NLS-1$
-
-
-			sendEmail(listaDestinatarios, body);
 	}
 
 	/**

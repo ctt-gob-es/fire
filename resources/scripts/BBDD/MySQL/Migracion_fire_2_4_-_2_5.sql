@@ -10,6 +10,9 @@ ADD `fec_ultimo_acceso` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 UPDATE `tb_usuarios`
 SET `dni` = 'X0000000T';
 
+ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `nombre_usuario`;
+ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `clave`;
+
 
 -- TABLA DE CERTIFICADOS
 ALTER TABLE `tb_certificados` CHANGE COLUMN `cert_principal` `certificado` varchar(5000);

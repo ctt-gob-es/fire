@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.7, 04/02/2025.
+ * @version 1.8, 24/02/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -63,7 +63,6 @@ import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
-import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.dto.UserTableDTO;
 import es.gob.fire.persistence.dto.validation.OrderedValidation;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
@@ -84,7 +83,7 @@ import es.gob.fire.persistence.service.IUserService;
  * Application for signing documents of @firma suite systems.
  * </p>
  * 
- * @version 1.7, 04/02/2025.
+ * @version 1.8, 24/02/2025.
  */
 @RestController
 public class UserRestController {
@@ -129,6 +128,9 @@ public class UserRestController {
 	@Autowired
 	private ServletContext context;
 
+	/**
+	 * Attribute that represents the internationalization to messages.
+	 */
 	@Autowired
 	private MessageSource messageSource;
 
@@ -159,7 +161,6 @@ public class UserRestController {
 	    if (searchValue != null && !searchValue.isEmpty()) {
 	        dtoList = dtoList.stream()
 	            .filter(dto -> 
-	                (dto.getUserName() != null && dto.getUserName().toLowerCase().contains(searchValue.toLowerCase())) ||
 	                (dto.getEmail() != null && dto.getEmail().toLowerCase().contains(searchValue.toLowerCase())) ||
 	                (dto.getName() != null && dto.getName().toLowerCase().contains(searchValue.toLowerCase())) ||
 	                (dto.getSurnames() != null && dto.getSurnames().toLowerCase().contains(searchValue.toLowerCase())) ||
@@ -181,15 +182,6 @@ public class UserRestController {
 
 	        // Determinar la columna por la cual se está ordenando y manejar los valores nulos
 	        switch (input.getColumns().get(columnIndex).getData()) {
-	            case "userName":
-	                comparator = (dto1, dto2) -> {
-	                    String userName1 = dto1.getUserName();
-	                    String userName2 = dto2.getUserName();
-	                    if (userName1 == null) return 1;
-	                    if (userName2 == null) return -1;
-	                    return userName1.compareTo(userName2);
-	                };
-	                break;
 	            case "email":
 	                comparator = (dto1, dto2) -> {
 	                    String email1 = dto1.getEmail();
@@ -245,12 +237,12 @@ public class UserRestController {
 	            	};
 	            	break;
 	            default:
-	                comparator = (dto1, dto2) -> {
-	                    String userName1 = dto1.getUserName();
-	                    String userName2 = dto2.getUserName();
-	                    if (userName1 == null) return 1;
-	                    if (userName2 == null) return -1;
-	                    return userName1.compareTo(userName2);
+	            	comparator = (dto1, dto2) -> {
+	                    String name1 = dto1.getName();
+	                    String name2 = dto2.getName();
+	                    if (name1 == null) return 1;
+	                    if (name2 == null) return -1;
+	                    return name1.compareTo(name2);
 	                };
 	        }
 
@@ -289,12 +281,12 @@ public class UserRestController {
 	 * @return String that represents the name of the view to redirect.
 	 */
 	@RequestMapping(path = "/deleteuser", method = RequestMethod.POST)
-	public String deleteUser(@RequestParam("username") final String username,
+	public String deleteUser(@RequestParam("idUser") final Long idUser,
 			@RequestParam("index") final String index) {
 
 		String result = index;
 
-		final User user = this.userService.getUserByUserName(username);
+		final User user = this.userService.getUserByUserId(idUser);
 
 		if (user.getRoot() == Boolean.TRUE) {
 			result = "error.No se puede eliminar al administrador principal.";
@@ -342,28 +334,6 @@ public class UserRestController {
 
 		final Rol rol = this.userService.getRol(userForm.getRolId());
 		final boolean hasAccessPermission = PermissionsChecker.hasPermission(rol, Permissions.ACCESS);
-
-		// Si el usuario debe tener acceso a la administracion, entonces es
-		// obligatorio que tenga contrasena
-		if (hasAccessPermission && emptyAdminPassword(userForm.getPasswordAdd())) {
-			error = true;
-			json.put("passwordAdd" + SPAN, "El campo contrase\u00F1a es obligatorio.");
-
-		}
-
-		if (hasAccessPermission
-				&& !matchingConfirmPassword(userForm.getPasswordAdd(), userForm.getConfirmPasswordAdd())) {
-			error = true;
-			json.put("passwordAdd" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
-			json.put("confirmPasswordAdd" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
-
-		}
-
-		if (this.userService.getUserByUserName(userForm.getLoginAdd()) != null) {
-			error = true;
-			json.put("loginAdd" + SPAN, "Ya existe un usuario con el login seleccionado.");
-
-		}
 
 		if (userForm.getEmailAdd() != null && !userForm.getEmailAdd().isEmpty()
 				&& !Utils.isValidEmail(userForm.getEmailAdd())) {
@@ -455,30 +425,6 @@ public class UserRestController {
 	}
 
 	/**
-	 * Method that checks if the password field is empty
-	 * 
-	 * @param userForm
-	 * @return
-	 */
-	private static boolean emptyAdminPassword(final String password) {
-		return password == null || password.isEmpty();
-	}
-
-	/**
-	 * Method that checks if a user had the access permission.
-	 * 
-	 * @param userId
-	 *            User id.
-	 * @return
-	 */
-	private boolean hadAccessBeforeEdit(final Long userId) {
-
-		final User user = this.userService.getUserByUserId(userId);
-
-		return PermissionsChecker.hasPermission(user, Permissions.ACCESS);
-	}
-
-	/**
 	 * Method that updates a user.
 	 * 
 	 * @param userForm
@@ -511,19 +457,7 @@ public class UserRestController {
 		// comprobamos que se hayan establecido correctamente las contrasenas
 		final Rol rol = this.userService.getRol(userForm.getRolId());
 		final boolean hasAccessPermission = PermissionsChecker.hasPermission(rol, Permissions.ACCESS);
-
-		if (hasAccessPermission && !LOGIN_ADMIN_USER.equals(userForm.getUsernameEdit())
-				&& !hadAccessBeforeEdit(userForm.getIdUserFireEdit())) {
-			if (emptyAdminPassword(userForm.getPasswordEdit())) {
-				error = true;
-				json.put("passwordEdit" + SPAN, "El campo contrase\u00F1a es obligatorio.");
-			} else if (!matchingConfirmPassword(userForm.getPasswordEdit(), userForm.getConfirmPasswordEdit())) {
-				error = true;
-				json.put("passwordEdit" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
-				json.put("confirmPasswordEdit" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
-			}
-		}
-
+		
 		if (userForm.getEmailEdit() != null && !userForm.getEmailEdit().isEmpty()
 				&& !Utils.isValidEmail(userForm.getEmailEdit())) {
 			error = true;
@@ -615,51 +549,6 @@ public class UserRestController {
 	}
 
 	/**
-	 * Method that changes the password.
-	 * 
-	 * @param userFormPassword
-	 *            UserFormPassword
-	 * @param bindingResult
-	 *            BindingResult
-	 * @return String result
-	 */
-	@RequestMapping(value = "/saveuserpassword", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public String savePassword(@Validated(OrderedValidation.class) @RequestBody final UserPasswordDTO userFormPassword,
-			final BindingResult bindingResult) {
-		String result = UtilsStringChar.EMPTY_STRING;
-
-		if (bindingResult.hasErrors()) {
-			final JSONObject json = new JSONObject();
-			for (final FieldError o : bindingResult.getFieldErrors()) {
-				json.put(o.getField() + SPAN, o.getDefaultMessage());
-			}
-			result = json.toString();
-
-		} else if (!matchingConfirmPassword(userFormPassword.getPassword(), userFormPassword.getConfirmPassword())) {
-
-			final JSONObject json = new JSONObject();
-			json.put("password" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
-			json.put("confirmPassword" + SPAN, "Los campos de contrase\u00F1a deben coincidir.");
-			result = json.toString();
-
-		} else {
-
-			result = this.userService.changeUserPassword(userFormPassword);
-		}
-
-		return result;
-	}
-
-	/**
-	 * @param password
-	 * @param confirmPassword
-	 * @return
-	 */
-	private static boolean matchingConfirmPassword(final String password, final String confirmPassword) {
-		return password.equals(confirmPassword);
-	}
-
-	/**
 	 * Method that edits the user.
 	 * 
 	 * @param userForm
@@ -742,9 +631,9 @@ public class UserRestController {
 	 */
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/userappdatatable", method = RequestMethod.POST)
-	public DataTablesOutput<ApplicationCertDTO> certApplications(@NotEmpty final DataTablesInput input, @RequestParam("userNameValue") final String username) {
+	public DataTablesOutput<ApplicationCertDTO> certApplications(@NotEmpty final DataTablesInput input, @RequestParam("idUser") final Long idUser) {
 		
-		final User user = this.userService.getUserByUserName(username);
+		final User user = this.userService.getUserByUserId(idUser);
 		
 		final DataTablesOutput<ApplicationCertDTO> certApplications = this.appService.getApplicationsUser(input, user.getUserId());
 

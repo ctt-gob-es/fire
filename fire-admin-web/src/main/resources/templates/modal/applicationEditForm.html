@@ -103,7 +103,7 @@
 				        	<label for="multiselectUser" class="col-form-label" th:text="#{form.application.responsibles.system}"></label>
 				            <select name="from[]" id="multiselectUser" class="form-control" size="9" multiple="multiple">
 				                <option th:each="au: ${availableUsers}"
-									th:value="${au.userId}" th:text="${au.userName}"/>
+									th:value="${au.userId}" th:text="${au.nameAndSurname}"/>
 				            </select>
 				            
 				        </div>
@@ -117,7 +117,7 @@
 				        	<label for="multiselectUser_to" class="col-form-label" th:text="#{form.application.responsibles.app}"></label>
 				            <select name="to[]" id="multiselectUser_to" class="form-control" size="9" multiple="multiple">
 				            	<option th:each="su: ${selectedUsers}"
-									th:value="${su.userId}" th:text="${su.userName}"/>
+									th:value="${su.userId}" th:text="${su.nameAndSurname}"/>
 				            </select>
 				        </div>
 				        

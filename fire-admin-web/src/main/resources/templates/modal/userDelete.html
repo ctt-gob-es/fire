@@ -27,11 +27,11 @@
 					<!-- El índice de la fila de la tabla -->
 					<input type='hidden' id="tableIndexRow" th:field="${tableIndexRow}" />
 
-					<!-- Nombre de usuario -->
+					<!-- DNI de usuario -->
 					<div class="form-group">
-						<label for="userName" class="col-form-label"
-							th:text="#{form.user.delete.username}"></label> <input
-							type="text" id="userName" th:field="*{userName}"
+						<label for="dni" class="col-form-label"
+							th:text="#{form.user.delete.dni}"></label> <input
+							type="text" id="dni" th:field="*{dni}"
 							class="form-control" readonly />
 					</div>
 
@@ -82,12 +82,12 @@ function deleteUser(){
 	var msgErrorDelete =  /*[[#{message.delete.user.error}]]*/;
 	var actionDelete = /*[[@{/deleteuser}]]*/;
 	
-	var userNameValue = $('#userName').val();
+	var idUser = $('#idUser').val();
 	var indexRow = $('#email').val();
 	
 	tableUser = $("#userTable").DataTable();
 	$.ajax(actionDelete,{
-			data:$.param({'username':userNameValue, 'index':indexRow}),
+			data:$.param({'idUser':idUser, 'index':indexRow}),
 	        type:'POST',
            success: function(data){
            	
@@ -125,7 +125,7 @@ function closeModalButton(btnId, nameForm){
 }
 
 function createAssociatedAppTable() {
-	var userNameValue = $('#userName').val();
+	var idUser = $('#idUser').val();
     var getUserApps = /*[[@{/userappdatatable}]]*/;
 
     // Inicializa la tabla solo si aún no está creada
@@ -136,7 +136,7 @@ function createAssociatedAppTable() {
             "ajax": {
                 "url": getUserApps,
                 "data": {
-                    "userNameValue": userNameValue
+                    "idUser": idUser
                 },
                 "type": "POST"
             },

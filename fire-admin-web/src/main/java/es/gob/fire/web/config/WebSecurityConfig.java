@@ -20,26 +20,23 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>13 jun. 2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 18/02/2025.
+ * @version 1.3, 24/02/2025.
  */
 package es.gob.fire.web.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import es.gob.fire.commons.utils.Constants;
-import es.gob.fire.web.authentication.CustomUserAuthentication;
 
 /** 
  * <p>Class that enables and configures the security of the FIRe application. </p>
  * <b>Project:</b><p></p>
- * @version 1.2, 18/02/2025.
+ * @version 1.3, 24/02/2025.
  */
 @Configuration
 @EnableWebSecurity
@@ -51,12 +48,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	public static final String SESSION_TRACKING_COOKIE_NAME = "JSESSIONID";
 	
 	/**
-	 * Attribute that represents the injected service for user authentication. 
-	 */
-	@Autowired
-    private CustomUserAuthentication customUserAuthentication;
-	
-	/**
 	 * {@inheritDoc}
 	 * @see org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter#configure(org.springframework.security.config.annotation.web.builders.HttpSecurity)
 	 */
@@ -64,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     protected void configure(HttpSecurity http) throws Exception {  
       http.authorizeRequests()
 	    .antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/chartist/**", // Enable css, images and js when logged out 
-	    		"/mailpasswordrestoration", "/mailRestorePasswordUser/**", "/restorepassword", "/loginClave", "/ResponseClave", "/loginWithCertificate") // Rutas publicas
+	    		"/loginClave", "/ResponseClave", "/loginWithCertificate") // Rutas publicas
 	    .permitAll()
 		.and()
 		.authorizeRequests()
@@ -102,13 +93,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	    return new HttpSessionEventPublisher();
 	}
 
-	/**
-     * Method that sets the authentication global configuration.
-     * @param auth Object that represents the Spring security builder.
-     * @throws Exception Object that represents the exception thrown in case of error.
-     */
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(customUserAuthentication);
-    }
 }

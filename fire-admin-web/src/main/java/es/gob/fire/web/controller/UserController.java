@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 20/01/2025.
+ * @version 1.3, 24/02/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -48,8 +48,8 @@ import es.gob.fire.persistence.service.IUserService;
 
 /**
  * <p>Class that manages the requests related to the Users administration.</p>
- * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 20/01/2025.
+ * <b>Project:</b><p></p>
+ * @version 1.3, 24/02/2025.
  */
 @Controller
 public class UserController {
@@ -61,9 +61,15 @@ public class UserController {
 	@Autowired
 	private IUserService userService;
 	
+	/**
+	 * Attribute that represents the internationalization to messages.
+	 */
 	@Autowired
     private MessageSource messageSource;
 
+	/**
+	 * Attribute that represents the DTO to transport information about user logged.
+	 */
 	@Autowired
 	private UserLoggedDTO userLoggedDTO;
 	
@@ -100,38 +106,20 @@ public class UserController {
 	}
 
 	/**
-	 * Method that opens the modal form password.
-	 * @param username String that represents the user's name
-	 * @param model view Model object
-	 * @return String that represents the navigation HTML fragment
-	 */
-	@RequestMapping(value = "menupass")
-	public String menuPass(@RequestParam("username") final String username, final Model model) {
-		final User user = this.userService.getUserByUserName(username);
-		final UserPasswordDTO userFormPassword = new UserPasswordDTO();
-
-		userFormPassword.setIdUser(user.getUserId());
-
-		model.addAttribute("userFormPassword", userFormPassword);
-		return "modal/userFormPass.html";
-	}
-
-	/**
 	 * Method that opens the modal form user edit.
 	 * @param username String that represents the user's name
 	 * @param model view Model object
 	 * @return String that represents the navigation HTML fragment
 	 */
 	@RequestMapping(value = "menuedit")
-	public String menuEdit(@RequestParam("username") final String username, final Model model, Locale locale) {
-		 final User user = this.userService.getUserByUserName(username);
+	public String menuEdit(@RequestParam("email") final String email, final Model model, Locale locale) {
+		 final User user = this.userService.getUserByEmail(email);
 		 final UserEditDTO userformedit = new UserEditDTO();
 
 		userformedit.setIdUserFireEdit(user.getUserId());
 		userformedit.setNameEdit(user.getName());
 		userformedit.setSurnamesEdit(user.getSurnames());
 		userformedit.setEmailEdit(user.getEmail());
-		userformedit.setUsernameEdit(user.getUserName());
 		userformedit.setRolId(user.getRol().getRolId());
 		userformedit.setTelfEdit(user.getPhone());
 		userformedit.setDniEdit(user.getDni());
@@ -188,8 +176,8 @@ public class UserController {
 	}
 	
 	@RequestMapping(value = "menuDeleteUser")
-	public String loadConfirmDeleteUser(@RequestParam("username") final String username, Long index, final Model model, Locale locale) {
-		User user = this.userService.getUserByUserName(username);
+	public String loadConfirmDeleteUser(@RequestParam("email") final String email, Long index, final Model model, Locale locale) {
+		User user = this.userService.getUserByEmail(email);
 		model.addAttribute("userDeleteForm", user);
 		model.addAttribute("tableIndexRow", index);
 		return "modal/userDelete.html";

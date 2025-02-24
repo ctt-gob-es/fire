@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>22/01/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 22/01/2025.
+ * @version 1.1, 24/02/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -38,7 +38,7 @@ import es.gob.fire.persistence.dto.UserLoggedDTO;
 /** 
  * <p>Controller for handling HTTP GET requests and navigating between views.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 22/01/2025.
+ * @version 1.1, 24/02/2025.
  */
 @Controller
 public class AppController {
@@ -73,11 +73,6 @@ public class AppController {
 	@GetMapping("/certificates")
 	public String certificates() {
 		return "certificates";
-	}
-	
-	@GetMapping("/mailpasswordrestoration")
-	public String mailPasswordRestoration() {
-		return "mailpasswordrestoration.html";
 	}
 	
 }

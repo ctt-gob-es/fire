@@ -32,16 +32,6 @@
 					</div>
 					
 					<div class="form-group">
-						
-							<label for="usernameEdit" class="col-form-label" th:text="#{form.user.login}"></label>
-							<span id="usernameEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
-							<input type="text" id="usernameEdit" th:field="*{usernameEdit}" style="overflow:hidden" autocomplete="nope" class="form-control" maxlength="30" required />
-							<div id="invalid-login" class="invalid-feedback" ></div>
-						
-						<div style="clear:both;"/>
-					</div>
-					
-					<div class="form-group">
 			
 						<label for="idRol" th:text="#{form.user.rol}"></label>
 							<select id="rolId" name="rolId" class="form-control" th:field="*{rolId}">
@@ -58,27 +48,6 @@
 					    <input type="text" name="dniEdit" id="dniEdit" th:field="*{dniEdit}" class="form-control" maxlength="9" />
 					    <div id="invalid-dniEdit" class="invalid-modal"></div>
 					    <div style="clear:both;"></div>
-					</div>
-					
-					<div class="form-group">
-						
-							<label for="passwordEdit" class="col-form-label" th:text="#{form.user.password}"></label>
-							<span id="passwordEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
-							<input type="password" style="display:none">
-							<input type="password" name="passwordEdit" id="passwordEdit" th:field="*{passwordEdit}" class="form-control" maxlength="16" required />
-							<div id="invalid-passwordAdd" class="invalid-modal" ></div>
-						
-						<div style="clear:both;"/>
-					</div>
-					
-					<div class="form-group">
-						
-							<label for="confirmPasswordEdit" class="col-form-label" th:text="#{form.user.confirmPassword}"></label>
-							<span id="confirmPasswordEdit_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
-							<input type="password" name="confirmPasswordEdit" id="confirmPasswordEdit" th:field="*{confirmPasswordEdit}" class="form-control" maxlength="16" required />
-							<div id="invalid-confirmPassword" class="invalid-modal" ></div>
-						
-						<div style="clear:both;"/>
 					</div>
 					
 					<div class="form-group">
@@ -118,17 +87,6 @@
 		
 		$('#rolId_').val($('#rolId').val());
 		
-		// El administrador principal (admin) no puede modificar su nombre de usuario ni su rol
-		if ($('#usernameEdit').val() == "admin") {
-			$('#usernameEdit').prop("readonly", true);
-			$('#rolId').prop("disabled", true);		
-		}
-		
-		// Las contrasenas no pueden modificarse desde este formulario. Los campos estaran deshabilitados por defecto
-		// y se activaran solo cuando se le cambie el rol de un usuario a administradorcuando
- 		$('#passwordEdit').prop("disabled", true);
-		$('#confirmPasswordEdit').prop("disabled", true);
-		
 		// El indice del rol inicial para identificar si era adminis
 		currentRol = $("#rolId option:selected").val();
 		
@@ -149,10 +107,6 @@
 		// Tampoco se activaran cuando se asigne un rol distinto de administrador 
 		if (currentRol == 1 || rolSelected != 1) {
 
-			$('#passwordEdit').prop("disabled", true);
-			$('#passwordEdit').val('');
-			$('#confirmPasswordEdit').prop("disabled", true);
-			$('#confirmPasswordEdit').val('');
 			if(rolSelected != 1) {
 				$('#dniEdit').prop("disabled", true);	
 			} else {
@@ -160,31 +114,10 @@
 			}
 			$('#dniEdit').val('');
 		} else {
-			$('#passwordEdit').prop("disabled", false);
-			$("passwordEdit").prop('required',true);
-			$('#confirmPasswordEdit').prop("disabled", false);
-			$("confirmPasswordEdit").prop('required',true);
 			$('#dniEdit').prop("disabled", false);
 		}
 
 	});
-	
-	function validateConfirmPassword(){
-		
-		var pass = $('#passwordEdit').val();
-	    var repass = $('#confirmPasswordEdit').val();
-		var messageConfirmPassword = /*[[#{form.user.confirmPassword.pattern}]]*/ 'default';
-		
-	    if (pass != repass) {
-	    	$('#invalid-confirmPassword').html(messageConfirmPassword);
-			$('#invalid-confirmPassword').addClass("invalid-modal");
-	    }
-	    else {
-	    	$('#invalid-confirmPassword').html('');
-			$('#invalid-confirmPassword').removeClass("invalid-modal");
-	    }
-		
-	}
 	
 	$( "#editBtnModal" ).click(function( event ) {
 		  event.preventDefault();

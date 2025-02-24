@@ -24,9 +24,6 @@
  */
 package es.gob.fire.persistence.service.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 
@@ -37,19 +34,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import es.gob.fire.commons.log.Logger;
-import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
-import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
-import es.gob.fire.persistence.permissions.Permissions;
-import es.gob.fire.persistence.permissions.PermissionsChecker;
 import es.gob.fire.persistence.repository.RolRepository;
 import es.gob.fire.persistence.repository.UserRepository;
 import es.gob.fire.persistence.repository.datatable.UserDataTablesRepository;
@@ -134,18 +125,8 @@ public class UserService implements IUserService {
 			user.setRoot(Boolean.FALSE);
 		}
 
-		// Actualizaremos la contrasena solo si se establece
-		if (!StringUtils.isEmpty(userDto.getPasswordAdd())) {
-			final String pwd = userDto.getPasswordAdd();
-			final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
-			final String hashPwd = bcpe.encode(pwd);
-
-			user.setPassword(hashPwd);
-		}
-
 		// Al usuario root nunca le cambiaremos el nombre de usuario ni el rol
 		if (user.getRoot() != Boolean.TRUE) {
-			user.setUserName(userDto.getLoginAdd());
 			user.setRol(this.rolRepository.findByRolId(userDto.getRolId()));
 		}
 		user.setName(userDto.getNameAdd());
@@ -179,26 +160,9 @@ public class UserService implements IUserService {
 
 		// Al usuario root nunca le cambiaremos el nombre de usuario ni el rol
 		if (user.getRoot() != Boolean.TRUE) {
-			user.setUserName(userDto.getUsernameEdit());
 			user.setRol(this.rolRepository.findByRolId(userDto.getRolId()));
 		}
-
-
-		// Eliminamos la contrasena, si el rol del usuario no tiene permisos de acceso
-		// Se da por hecho, que el permiso de acceso siempre se representara con un valor concreto
-		if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
-			user.setPassword(null);
-		}         
-		// Actualizaremos la contrasena si se establece y si el usuario
-        // no tenia ya una contrasena, ya que en ese caso la estariamos cambiando.
-        else if (!StringUtils.isEmpty(userDto.getPasswordEdit()) && StringUtils.isEmpty(user.getPassword())) {
-            final String pwd = userDto.getPasswordEdit();
-            final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
-            final String hashPwd = bcpe.encode(pwd);
-
-            user.setPassword(hashPwd);
-        }
-
+		
 		user.setName(userDto.getNameEdit());
 		user.setSurnames(userDto.getSurnamesEdit());
 		user.setEmail(userDto.getEmailEdit());
@@ -229,29 +193,11 @@ public class UserService implements IUserService {
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.IUserService#getUserByUserName(java.lang.String)
-	 */
-	@Override
-	public User getUserByUserName(final String userName) {
-		return this.repository.findByUserName(userName);
-	}
-
-	/**
-	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IUserService#getUserByRenovationCode(java.lang.String)
 	 */
 	@Override
 	public User getUserByRenovationCode(final String renovationCode) {
 		return this.repository.findByRenovationCode(renovationCode);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.IUserService#getUserByUserNameOrEmail(java.lang.String,java.lang.String)
-	 */
-	@Override
-	public User getUserByUserNameOrEmail(final String userName, final String email) {
-		return this.repository.findByUserNameOrEmail(userName, email);
 	}
 
 	/**
@@ -262,68 +208,6 @@ public class UserService implements IUserService {
 	public DataTablesOutput<User> getAllUser(final DataTablesInput input) {
 
 		return this.dtRepository.findAll(input);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @see es.gob.fire.service.IUserService#changeUserPassword(es.gob.fire.persistence.configuration.dto.UserPasswordDTO)
-	 */
-	@Override
-	@Transactional
-	public String changeUserPassword(final UserPasswordDTO userPasswordDto) {
-
-		final User user = this.repository.findByUserId(userPasswordDto.getIdUser());
-
-		String result = null;
-		final String oldPwd = userPasswordDto.getOldPassword();
-		final String pwd = userPasswordDto.getPassword();
-		final BCryptPasswordEncoder bcpe = new BCryptPasswordEncoder();
-
-		final String hashPwd = bcpe.encode(pwd);
-		try {
-			if (bcpe.matches(oldPwd, user.getPassword()) || checkPasswordOldSystem(oldPwd, user.getPassword())) {
-				user.setPassword(hashPwd);
-				this.repository.save(user);
-				result = "0"; //$NON-NLS-1$
-			} else {
-				result = "-1"; //$NON-NLS-1$
-			}
-		} catch (final Exception e) {
-			result = "-2"; //$NON-NLS-1$
-			throw e;
-		}
-		return result;
-	}
-
-	/**
-	 * Method that checks if the password belong to the user and is
-	 * stored with the old format.
-	 * @param insertedPassword
-	 *            inserted password
-	 * @param expectedPassword
-	 *            configured password Base64 encoded
-	 * @return {@code true} if the password is of the user, {@code false} an
-	 *         other case.
-	 */
-	private static boolean checkPasswordOldSystem(final String insertedPassword, final String expectedPassword) {
-
-		final byte[] md;
-		boolean result = false;
-		try {
-			md = MessageDigest.getInstance(MD_ALGORITHM).digest(insertedPassword.getBytes(DEFAULT_CHARSET));
-			if (expectedPassword != null && expectedPassword.equals(Base64.encode(md))) {
-				result = true;
-			}
-			else {
-				LOGGER.warn("La contrasena insertada no es valida"); //$NON-NLS-1$
-			}
-		} catch (final NoSuchAlgorithmException nsae) {
-			LOGGER.error("Error de configuracion en el servicio de administracion. Algoritmo de huella incorrecto", //$NON-NLS-1$
-					nsae);
-		} catch (final UnsupportedEncodingException uee) {
-			LOGGER.error("Error de configuracion en el servicio de administracion. Codificacion incorrecta", uee); //$NON-NLS-1$
-		}
-		return result;
 	}
 
 	/* (non-Javadoc)
@@ -351,12 +235,7 @@ public class UserService implements IUserService {
 	public User getUserByEmail(final String email) {
 		return this.repository.findByEmail(email);
 	}
-
-	@Override
-	public List<User> getAllUserByUserNameOrEmail(String userName, String email) {
-		return this.repository.findAllByUserNameOrEmail(userName, email);
-	}
-
+	
 	@Override
 	public List<User> getAllUserByEmail(String email) {
 		return this.repository.findAllByEmail(email);

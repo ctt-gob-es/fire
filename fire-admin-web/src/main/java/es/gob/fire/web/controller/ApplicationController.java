@@ -17,29 +17,27 @@ import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
 import es.gob.fire.persistence.dto.CertificateDTO;
+import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.CertificatesApplication;
-import es.gob.fire.persistence.entity.Provider;
-import es.gob.fire.persistence.entity.ProviderApplication;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.ICertificateService;
-import es.gob.fire.persistence.service.IProviderService;
 import es.gob.fire.persistence.service.IUserService;
 
 
 /**
  * <p>
- * Class that manages the requests related to the Users administration.
+ * Class that manages the requests related to the Application administration.
  * </p>
  * <b>Project:</b>
  * <p>
- * Application for monitoring services of @firma suite systems.
+ * 
  * </p>
  *
- * @version 1.4, 28/01/2025.
+ * @version 1.5, 24/02/2025.
  */
 
 
@@ -78,13 +76,6 @@ public class ApplicationController {
 	 */
 	@Autowired
 	private IUserService userService;
-	
-	/**
-	 * Attribute that represents the service object for accessing the repository.
-	 */
-	@Autowired
-	private IProviderService providerService;
-
 
 	/**
 	 * Method that maps the list applications web requests to the controller and
@@ -112,17 +103,14 @@ public class ApplicationController {
 		final List<CertificateDTO> listCertificateDTO = this.certificateService.obtainAllCertificateToDTO(this.certificateService.getAllCertificate());
 		final List<CertificateDTO> selectedCertificatesDTO = new ArrayList<>();
 		
-		final List<User> selectedUsers = new ArrayList<>();
-		final List<User> availableUsers = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
+		final List<UserDTO> selectedUsers = new ArrayList<>();
+		final List<UserDTO> availableUsers = new ArrayList<>();
 
-		String userName;
-		for (final User userApp : availableUsers) {
-
-			userName = userApp.getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(userApp.getSurnames());
-			userApp.setUserName(userName.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING)
-					.concat(UtilsStringChar.SYMBOL_OPEN_BRACKET_STRING)
-					.concat(userApp.getUserName().concat(UtilsStringChar.SYMBOL_CLOSE_BRACKET_STRING)));
-
+		for (final User userApp : StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList())) {
+			UserDTO userDTO = new UserDTO();
+			userDTO.setUserId(userApp.getUserId());
+			userDTO.setNameAndSurname(userApp.getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(userApp.getSurnames()));
+			availableUsers.add(userDTO);
 		}
 
 		model.addAttribute("selectedUsers", selectedUsers); //$NON-NLS-1$
@@ -147,24 +135,21 @@ public class ApplicationController {
 
 		final ApplicationDTO appDto = this.applicationService.applicationEntityToDto(app);
 
-		final List<User> selectedUsers = new ArrayList<>();
+		final List<UserDTO> selectedUsers = new ArrayList<>();
 
-		final List<ApplicationResponsible> appRespList = this.applicationService.getApplicationResponsibleByApprId(appId);
-
-		for (final ApplicationResponsible appResp : appRespList) {
-
-			selectedUsers.add(appResp.getResponsible());
+		for (final ApplicationResponsible appResp : this.applicationService.getApplicationResponsibleByApprId(appId)) {
+			UserDTO userDTO = new UserDTO();
+			userDTO.setUserId(appResp.getResponsible().getUserId());
+			userDTO.setNameAndSurname(appResp.getResponsible().getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(appResp.getResponsible().getSurnames()));
+			selectedUsers.add(userDTO);
 		}
 
-		final List<User> availableUsers = StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList());
-
-		String userName;
-		for (final User userApp : availableUsers) {
-
-			userName = userApp.getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(userApp.getSurnames());
-			userApp.setUserName(userName.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING)
-					.concat(UtilsStringChar.SYMBOL_OPEN_BRACKET_STRING)
-					.concat(userApp.getUserName().concat(UtilsStringChar.SYMBOL_CLOSE_BRACKET_STRING)));
+		final List<UserDTO> availableUsers = new ArrayList<>();
+		for (final User userApp : StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList())) {
+			UserDTO userDTO = new UserDTO();
+			userDTO.setUserId(userApp.getUserId());
+			userDTO.setNameAndSurname(userApp.getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(userApp.getSurnames()));
+			availableUsers.add(userDTO);
 		}
 		
 		final List<Certificate> selectedCertificates = new ArrayList<>();

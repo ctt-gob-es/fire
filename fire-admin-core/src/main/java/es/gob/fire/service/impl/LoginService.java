@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 19/02/2025.
+ * @version 1.2, 24/02/2025.
  */
 package es.gob.fire.service.impl;
 
@@ -50,7 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -67,14 +67,17 @@ import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.persistence.permissions.Permissions;
+import es.gob.fire.persistence.permissions.PermissionsChecker;
 import es.gob.fire.persistence.repository.ControlAccessRepository;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
+import es.gob.fire.web.authentication.DniAuthenticationToken;
 
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p></p>
- * @version 1.1, 19/02/2025.
+ * @version 1.2, 24/02/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -104,9 +107,15 @@ public class LoginService implements ILoginService {
 	@Autowired
 	private ControlAccessRepository controlAccessRepository;
 	
+	/**
+	 * Attribute that represents the DTO to transport information about user logged.
+	 */
 	@Autowired
 	private UserLoggedDTO userLoggedDTO;
 	
+	/**
+	 * Attribute that represents the service object for accessing the repository of control access.
+	 */
 	@Autowired
 	private IUserService iUserService;
 	
@@ -315,14 +324,18 @@ public class LoginService implements ILoginService {
 		// Creamos el token de autenticacion
     	final List<GrantedAuthority> grantedAuths = new ArrayList<>();
 		grantedAuths.add(new SimpleGrantedAuthority(ROLE_ADMIN));
-    	Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword(), grantedAuths);
+    	Authentication authentication = new DniAuthenticationToken(user.getDni(), grantedAuths);
         
+    	if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
+    		LOGGER.error("El usuario con DNI "+ user.getDni() +" no tiene permisos de acceso "); //$NON-NLS-1$
+			throw new InsufficientAuthenticationException("El usuario con DNI " + user.getDni() + " no tiene permisos de acceso"); //$NON-NLS-1$
+		}
+    	
     	// Asignamos al bean de spring del usuario para usarlo en la app
 		userLoggedDTO.setDni(user.getDni());
 		userLoggedDTO.setEmail(user.getEmail());
 		userLoggedDTO.setIdRol(user.getRol().getRolId());
 		userLoggedDTO.setName(user.getName());
-		userLoggedDTO.setPassword(user.getPassword());
 		userLoggedDTO.setPhone(user.getPhone());
 		userLoggedDTO.setRenovationCode(user.getRenovationCode());
 		userLoggedDTO.setRenovationDate(user.getRenovationDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getRenovationDate()));
@@ -331,7 +344,6 @@ public class LoginService implements ILoginService {
 		userLoggedDTO.setStartDate(user.getStartDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getStartDate()));
 		userLoggedDTO.setSurnames(user.getSurnames());
 		userLoggedDTO.setUserId(user.getUserId());
-		userLoggedDTO.setUserName(user.getUserName());
 		userLoggedDTO.setFecUltimoAcceso(user.getFecUltimoAcceso() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getFecUltimoAcceso()));
 		
 		// Actualizamos la fecha de último acceso

@@ -11,8 +11,8 @@ VALUES (1,'admin','1,2'),
 	   (3,'contact', NULL);
 
 -- USUARIO POR DEFECTO --------
-INSERT INTO tb_usuarios (nombre_usuario,clave,nombre,apellidos,usu_defecto,fk_rol,dni) 
-VALUES('admin','$2y$12$JfP4bTV0i29Mnb3XBPOQl.L8JdbTrpn4fQljv8EEJKIp6NRZLB5TC','default name','default surnames',1,1,'X0000000T');
+INSERT INTO tb_usuarios (nombre,apellidos,usu_defecto,fk_rol,dni) 
+VALUES('default name','default surnames',1,1,'X0000000T');
 
 -- Insertar valores en la tabla TIPO_PLANIFICADOR
 INSERT INTO TB_TIPO_PLANIFICADOR (ID_TIPO_PLANIFICADOR, NOMBRE_TOKEN) 

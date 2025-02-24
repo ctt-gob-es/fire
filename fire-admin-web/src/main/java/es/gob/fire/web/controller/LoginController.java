@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>1.0, 27/01/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.3, 19/02/2025.
+ * @version 1.4, 24/02/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -68,7 +67,6 @@ import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
-import es.gob.fire.web.authentication.CustomUserAuthentication;
 import es.gob.fire.web.clave.sp.request.RequestClave;
 import es.gob.fire.web.config.WebSecurityConfig;
 import es.gob.fire.web.exception.WebAdminException;
@@ -82,7 +80,7 @@ import es.gob.fire.web.exception.WebAdminException;
  * 
  * </p>
  *
- * @version 1.3, 19/02/2025.
+ * @version 1.4, 24/02/2025.
  */
 @Controller
 public class LoginController {
@@ -110,11 +108,11 @@ public class LoginController {
 	@Autowired
 	private ILoginService iLoginService;
 	
+	/**
+	 * Attribute that represents the service object for accessing the repository.
+	 */
 	@Autowired
 	private IUserService iUserService;
-	
-	@Autowired
-    private CustomUserAuthentication customUserAuthentication;
 	
 	/**
 	 * Handles the login error by retrieving the authentication exception from the session and displaying 

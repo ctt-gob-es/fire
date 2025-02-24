@@ -16,8 +16,7 @@
 		
 	<div class="container-login">
 		<div class="wrap-login">
-			<form id="formLogin" th:object="${formLogin}" class="login-form validate-form"
-					th:action="@{/}" method="post">
+			<form id="formLogin" class="login-form validate-form" th:action="@{/}" method="post">
 					
 				<input type='hidden' id="signatureBase64" name="signatureBase64">
 					
@@ -33,32 +32,8 @@
 				 th:text="#{fire-admin-web.login.warn.logout}"></div>
 				 <div class="alert alert-danger" th:if="${restoreerror}"
 				 th:text="${restoreErrorMessage}"></div>
-				 <div class="alert alert-success" th:if="${mailsuccess}"
-				 th:text="#{fire-admin-web.send.mail.success}"></div>
-				 <div class="alert alert-success" th:if="${restorepasswordsuccess}"
-				 th:text="#{fire-admin-web.restore.password.success}"></div>
-				
+				 
 				<div id ="fieldsLoginUsername">
-					<div class="wrap-input validate-input"
-						data-validate="Introduzca nombre de usuario">
-						<span class="label-input" th:text="#{fire-admin-web.login.username.field}"></span>
-						 <input id="username" class="input100" type="text" autocomplete="off" name="username">
-					</div>
-
-					<div class="wrap-input validate-input"
-						data-validate="Introduzca contraseña">
-						<span class="label-input" th:text="#{fire-admin-web.login.password.field}"></span>
-						 <span class="btn-show-pass"> <i class="zmdi zmdi-eye"></i>
-						</span> <input id="password" class="input100" type="password"
-							name="password">
-					</div>
-					<div class="container-login-form-btn">
-						<div class="wrap-login-form-btn">
-							<div class="login-form-bgbtn"></div>
-							<button onclick="usernamePassword(this);" class="login-form-btn"
-							 th:text="#{fire-admin-web.login.acceso.button}"></button>
-						</div>	
-					</div>
 					<div class="container-login-form-btn">
 						<div class="wrap-login-form-btn">
 							<div class="login-form-bgbtn"></div>
@@ -75,15 +50,7 @@
 							<button onclick="authenticateCertificate(autenticar,'');return false;" class="login-form-btn" th:text="#{fire-admin-web.login.acceso.certificado.button}"></button>
 						</div>
 					</div>
-					
-					<br></br>
-							
-					<div id="PasswordButton" >
-						<p style="color: #808080; left:inherit;"></p>
-						<a align="center" href="inicio" type='link' class='btn btn-link' style='text-align:center' id="¿Has olvidado tu contrase&ntilde;a?" th:href="@{/mailpasswordrestoration}" th:text="#{fire-admin-web.login.password.restoration}"></a>
-					</div>
 				</div>
-					
 			</form>
 		</div>		
 	</div>
@@ -93,19 +60,6 @@
 	<script th:src="@{js/miniapplet/functions.js}"></script>
 	<script th:src="@{js/miniapplet/autoscript.js}"></script>
 	<script th:inline="javascript">
-	
-		function usernamePassword(form) {
-			if ($('#username').val().trim() == '') {
-				var thisAlertUsername =$('#username').parent();
-		        $(thisAlertUsername).addClass('alert-validate');
-			} else if ($('#password').val().trim() == '') {
-				var thisAlertPassword =$('#password').parent();
-		        $(thisAlertPassword).addClass('alert-validate');
-			} else {
-				submit(form);
-			}
-			
-		}
 	
 		function redirectClave() {
 			var loginClave = /*[[@{/loginClave}]]*/;
