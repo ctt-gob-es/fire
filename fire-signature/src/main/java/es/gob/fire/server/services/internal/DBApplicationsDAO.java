@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.signature.DbManager;
+import es.gob.fire.signature.ProviderElements;
 
 
 /**
@@ -31,15 +32,16 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(DBApplicationsDAO.class.getName());
 
-	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT nombre, habilitado, huella_principal, huella_backup FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT configurado, nombre, habilitado, huella_principal, huella_backup FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado"; //$NON-NLS-1$
+
+	private static final String STATEMENT_SELECT_OPERATION_CONFIG = "SELECT tamano_peticion, tamano_documento, tamano_lote, proveedores FROM tb_aplicaciones  WHERE  tb_aplicaciones.id =  ?"; //$NON-NLS-1$
+
 
 	@Override
 	public ApplicationAccessInfo getApplicationAccessInfo(final String appId, final TransactionAuxParams trAux)
 			throws IOException {
 
-
 		ApplicationAccessInfo result;
-
 
 		// Comprobamos en BD
 		try (Connection conn = DbManager.getConnection();
@@ -105,5 +107,40 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 			digestInfo = null;
 		}
 		return digestInfo;
+	}
+
+	@Override
+	public AplicationOperationConfig getOperationConfig(final String appId, final TransactionAuxParams trAux) throws IOException {
+
+		AplicationOperationConfig result = null;
+
+		// Comprobamos en BD
+		try (Connection conn = DbManager.getConnection();
+				PreparedStatement st = conn.prepareStatement(STATEMENT_SELECT_OPERATION_CONFIG);) {
+
+			st.setString(1, appId);
+
+			try (ResultSet rs = st.executeQuery()) {
+				if (!rs.next()) {
+					LOGGER.fine(trAux.getLogFormatter().f("No se ha encontrado en el sistema la aplicacion con el ID: " + appId)); //$NON-NLS-1$
+					return null;
+				}
+
+				final boolean configured = rs.getBoolean(1);
+				if (configured) {
+					result = new AplicationOperationConfig();
+					result.setRequestMaxSize(rs.getInt(2));
+					result.setParamsMaxSize(rs.getInt(3));
+					result.setBatchMaxDocuments(rs.getInt(4));
+					result.setProviders(ProviderElements.parse(rs.getString(5)));
+				}
+			}
+		}
+		catch (final SQLException e) {
+    		AlarmsManager.notify(Alarm.CONNECTION_DB);
+			throw new IOException("Error al consultar en BD la configuracion de la apicacion", e); //$NON-NLS-1$
+		}
+
+		return result;
 	}
 }

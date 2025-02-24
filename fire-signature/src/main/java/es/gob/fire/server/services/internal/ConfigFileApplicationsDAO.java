@@ -102,7 +102,8 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 		return digestInfo;
 	}
 
-	private static X509Certificate buildCertificate(final String certB64) throws CertificateException, IOException {
+	private static X509Certificate buildCertificate(final String certB64)
+			throws CertificateException, IOException {
 
 		X509Certificate cert;
 		final byte[] certEncoded = Base64.getDecoder().decode(certB64);
@@ -111,6 +112,19 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 			cert = (X509Certificate) fact.generateCertificate(bis);
 		}
 		return cert;
+	}
+
+	@Override
+	public AplicationOperationConfig getOperationConfig(final String appId,
+			final TransactionAuxParams trAux) throws IOException {
+
+		final AplicationOperationConfig config = new AplicationOperationConfig();
+		config.setParamsMaxSize(ConfigManager.getParamMaxSize());
+		config.setRequestMaxSize(ConfigManager.getRequestMaxSize());
+		config.setBatchMaxDocuments(ConfigManager.getBatchMaxDocuments());
+		config.setProviders(ConfigManager.getProviders());
+
+		return config;
 	}
 
 

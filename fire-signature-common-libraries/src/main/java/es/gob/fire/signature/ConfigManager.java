@@ -290,21 +290,7 @@ public class ConfigManager {
 	 */
 	public static ProviderElement[] getProviders() {
 		final String providers = getProperty(PROP_PROVIDERS_LIST);
-		if (providers == null) {
-			return new ProviderElement[0];
-		}
-
-		final List<ProviderElement> providersList = new ArrayList<>();
-		final String[] providersTempList = providers.split(VALUES_SEPARATOR);
-		for (final String provider : providersTempList) {
-			if (provider != null && !provider.trim().isEmpty()) {
-				final ProviderElement prov = new ProviderElement(provider);
-				if (!providersList.contains(prov)) {
-					providersList.add(prov);
-				}
-			}
-		}
-		return providersList.toArray(new ProviderElement[providersList.size()]);
+		return ProviderElements.parse(providers);
 	}
 
 	/**
@@ -397,8 +383,7 @@ public class ConfigManager {
 	/**
 	 * Recupera el tama&ntilde;o m&aacute;ximo que puede tener un par&aacute;metro enviado en la
 	 * petici&oacute;n. Si se devuelve el valor {@code #UNLIMITED_MAX_SIZE} se
-	 * debe considerar que no hay l&iacute;mite al n&uacute;mero de documentos de un
-	 * lote.
+	 * debe considerar que no hay l&iacute;mite.
 	 * @return Tama&ntilde;o m&aacute;ximo de un par&aacute;metro enviado al servicio.
 	 */
 	public static int getParamMaxSize() {
@@ -413,8 +398,12 @@ public class ConfigManager {
 		}
 	}
 
-
-
+	/**
+	 * Recupera el tama&ntilde;o m&aacute;ximo que puede tener una petici&oacute;n.
+	 * Si se devuelve el valor {@code #UNLIMITED_MAX_SIZE} se
+	 * debe considerar que no hay l&iacute;mite.
+	 * @return Tama&ntilde;o m&aacute;ximo de la petici&oacute;n enviada al servicio.
+	 */
 	public static long getRequestMaxSize() {
 		try {
 			return Long.parseLong(getProperty(PROP_REQUEST_MAX_SIZE, DEFAULT_REQUEST_MAX_SIZE));
@@ -430,8 +419,7 @@ public class ConfigManager {
 	/**
 	 * Recupera el n&uacute;mero m&aacute;ximo de documentos que se pueden agregar a
 	 * un lote de firma. Si se devuelve el valor {@code #UNLIMITED_NUM_DOCUMENTS} se
-	 * debe considerar que no hay l&iacute;mite al n&uacute;mero de documentos de un
-	 * lote.
+	 * debe considerar que no hay l&iacute;mite.
 	 * @return N&uacute;mero de documentos que se pueden agregar a un lote.
 	 */
 	public static int getBatchMaxDocuments() {
@@ -445,6 +433,8 @@ public class ConfigManager {
 			return UNLIMITED_NUM_DOCUMENTS;
 		}
 	}
+
+
 
 	/**
 	 * Lanza una excepci&oacute;n en caso de que no encuentre el fichero de configuraci&oacute;n o

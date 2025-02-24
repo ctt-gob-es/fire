@@ -29,4 +29,16 @@ public interface ApplicationsDAO {
 	 */
 	ApplicationAccessInfo getApplicationAccessInfo(String appId, TransactionAuxParams trAux)
 			throws IOException;
+
+	/**
+	 * Obtiene la configuraci&oacute;n de la aplicaci&oacute;n que afecta al servicio. En caso de
+	 * estar deshabilitada la aplicaci&oacute;n, puede omitirse la informaci&oacute;n de los certificados
+	 * necesarios para la autenticaci&oacute;n.
+	 * @param appId Identificador de la aplicaci&oacute;n.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+	 * @return Informaci&oacute;n de acceso o {@code null} si la aplicacion no tiene informaci&oacute;n de acceso asociada.
+	 * @throws IOException Cuando no se puede realizar la comprobaci&oacute;n.
+	 */
+	AplicationOperationConfig getOperationConfig(String appId, TransactionAuxParams trAux)
+			throws IOException;
 }
