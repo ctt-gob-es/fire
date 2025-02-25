@@ -274,7 +274,7 @@ public class TaskVerifyCertExpired extends FireTask {
 			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV021, new Object[ ] { Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
 			// Configuramos las propiedades de Java Mail y enviamos el correo
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).confJavaMailFromFromEnv();
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 		
@@ -317,7 +317,7 @@ public class TaskVerifyCertExpired extends FireTask {
 			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV020, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
 			// Configuramos las propiedades de Java Mail y enviamos el correo
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).confJavaMailFromFromEnv();
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}
@@ -361,7 +361,7 @@ public class TaskVerifyCertExpired extends FireTask {
 			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV019, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
 			// Configuramos las propiedades de Java Mail y enviamos el correo
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).confJavaMailFromFromEnv();
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}
@@ -405,7 +405,7 @@ public class TaskVerifyCertExpired extends FireTask {
 			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV018, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
 			// Configuramos las propiedades de Java Mail y enviamos el correo
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).confJavaMailFromFromEnv();
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}

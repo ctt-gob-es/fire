@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import es.gob.fire.commons.log.Logger;
-import es.gob.fire.utils.ConstantsJavaMail;
-import es.gob.fire.utils.ConstantsJavaMailFromBD;
+import es.gob.fire.utils.ConstantsMail;
+import es.gob.fire.utils.ConstantsMailProperties;
 
 @Component
 public class ConfigurationMail {
@@ -108,36 +108,36 @@ public class ConfigurationMail {
      * </p>
      * In case of an error, it logs the failure.
      */
-    public void confJavaMailFromFromEnv() {
+    public void init() {
     	try {
-    		properties.put(ConstantsJavaMail.MAIL_SMTP_HOST, mailSmtpHost);
-            properties.put(ConstantsJavaMail.MAIL_SMTP_PORT, mailSmtpPort);
-            properties.put(ConstantsJavaMail.MAIL_SMTP_MAIL_SENDER, mailSmtpMailSender);
-            properties.put(ConstantsJavaMail.MAIL_SMTP_STARTTLS_ENABLE, mailSmtpStarttlsEnable);
+    		properties.put(ConstantsMail.MAIL_SMTP_HOST, mailSmtpHost);
+            properties.put(ConstantsMail.MAIL_SMTP_PORT, mailSmtpPort);
+            properties.put(ConstantsMail.MAIL_SMTP_MAIL_SENDER, mailSmtpMailSender);
+            properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE, mailSmtpStarttlsEnable);
 
             String starttlsRequired = mailSmtpStarttlsRequired;
             if (!starttlsRequired.isEmpty()) {
-                properties.put(ConstantsJavaMail.MAIL_SMTP_STARTTLS_REQUIRED, starttlsRequired);
+                properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_REQUIRED, starttlsRequired);
             }
 
             String sslProtocols = mailSmtpSslProtocols;
             if (!sslProtocols.isEmpty()) {
-                properties.put(ConstantsJavaMail.MAIL_SMTP_SSL_PROTOCOLS, sslProtocols);
+                properties.put(ConstantsMail.MAIL_SMTP_SSL_PROTOCOLS, sslProtocols);
             }
 
             String socketFactoryPort = mailSmtpSocketFactoryPort;
             if (!socketFactoryPort.isEmpty()) {
-                properties.put(ConstantsJavaMail.MAIL_SMTP_SOCKETFACTORY_PORT, socketFactoryPort);
+                properties.put(ConstantsMail.MAIL_SMTP_SOCKETFACTORY_PORT, socketFactoryPort);
             }
 
-            properties.put(ConstantsJavaMail.MAIL_PROTOCOL, mailProtocol);
+            properties.put(ConstantsMail.MAIL_PROTOCOL, mailProtocol);
 
             // Comprobamos si es necesaria autenticación
             String mailSmtpAuth = this.mailSmtpAuth;
             if ("true".equalsIgnoreCase(mailSmtpAuth)) {
-                properties.put(ConstantsJavaMail.MAIL_SMTP_AUTH, mailSmtpAuth);
-                properties.put(ConstantsJavaMail.MAIL_SMTP_USER, mailSmtpUser);
-                properties.put(ConstantsJavaMail.MAIL_SMTP_PASSWORD, mailSmtpPassword);
+                properties.put(ConstantsMail.MAIL_SMTP_AUTH, mailSmtpAuth);
+                properties.put(ConstantsMail.MAIL_SMTP_USER, mailSmtpUser);
+                properties.put(ConstantsMail.MAIL_SMTP_PASSWORD, mailSmtpPassword);
 
                 // Obtenemos la sesión con seguridad
                 final Authenticator smtpAuthenticator = new SmtpAuthenticator(
@@ -156,52 +156,51 @@ public class ConfigurationMail {
     }
 	
     /**
-     * Configures JavaMail properties using values retrieved from the database.
+     * Initializes the email configuration using the provided {@link Properties} object.
      * <p>
-     * This method initializes the mail properties based on the provided {@link Properties} object,
-     * which contains values fetched from the database. If authentication is required, it sets up 
-     * a secure mail session with the given credentials.
+     * This method sets up the necessary properties for sending emails. If authentication
+     * is required, it configures a secure session using the provided credentials.
      * </p>
-     * In case of an error, it logs the failure.
+     * If an error occurs during the setup, it is logged appropriately.
      *
-     * @param propertiesFromBD A {@link Properties} object containing mail configuration from the database.
+     * @param properties A {@link Properties} object containing email configuration values.
      */
-	public void confJavaMailFromBD(Properties propertiesFromBD) {
+	public void init(Properties properties) {
 		try {
-			properties.put(ConstantsJavaMail.MAIL_SMTP_HOST, propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_HOST_BD));
-	        properties.put(ConstantsJavaMail.MAIL_SMTP_PORT, propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_PORT_BD));
-	        this.mailSmtpMailSender = propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_MAIL_SENDER_BD);
-	        properties.put(ConstantsJavaMail.MAIL_SMTP_MAIL_SENDER, propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_MAIL_SENDER_BD));
-	        properties.put(ConstantsJavaMail.MAIL_SMTP_STARTTLS_ENABLE, propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_STARTTLS_ENABLE_BD));
+			properties.put(ConstantsMail.MAIL_SMTP_HOST, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_HOST));
+	        properties.put(ConstantsMail.MAIL_SMTP_PORT, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_PORT));
+	        this.mailSmtpMailSender = properties.getProperty(ConstantsMailProperties.MAIL_SMTP_MAIL_SENDER);
+	        properties.put(ConstantsMail.MAIL_SMTP_MAIL_SENDER, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_MAIL_SENDER));
+	        properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_STARTTLS_ENABLE));
 
-	        String starttlsRequired = propertiesFromBD.getProperty(propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_STARTTLS_REQUIRED_BD), "");
+	        String starttlsRequired = properties.getProperty(properties.getProperty(ConstantsMailProperties.MAIL_SMTP_STARTTLS_REQUIRED), "");
 	        if (!starttlsRequired.isEmpty()) {
-	            properties.put(ConstantsJavaMail.MAIL_SMTP_STARTTLS_REQUIRED, starttlsRequired);
+	            properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_REQUIRED, starttlsRequired);
 	        }
 
-	        String sslProtocols = propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_SSL_PROTOCOLS_BD, "");
+	        String sslProtocols = properties.getProperty(ConstantsMailProperties.MAIL_SMTP_SSL_PROTOCOLS, "");
 	        if (!sslProtocols.isEmpty()) {
-	            properties.put(ConstantsJavaMail.MAIL_SMTP_SSL_PROTOCOLS, sslProtocols);
+	            properties.put(ConstantsMail.MAIL_SMTP_SSL_PROTOCOLS, sslProtocols);
 	        }
 
-	        String socketFactoryPort = propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_SOCKETFACTORY_PORT_BD, "");
+	        String socketFactoryPort = properties.getProperty(ConstantsMailProperties.MAIL_SMTP_SOCKETFACTORY_PORT, "");
 	        if (!socketFactoryPort.isEmpty()) {
-	            properties.put(ConstantsJavaMail.MAIL_SMTP_SOCKETFACTORY_PORT, socketFactoryPort);
+	            properties.put(ConstantsMail.MAIL_SMTP_SOCKETFACTORY_PORT, socketFactoryPort);
 	        }
 
-	        properties.put(ConstantsJavaMail.MAIL_PROTOCOL, propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_PROTOCOL_BD));
+	        properties.put(ConstantsMail.MAIL_PROTOCOL, properties.getProperty(ConstantsMailProperties.MAIL_PROTOCOL));
 
 	        // Comprobamos si es necesaria autenticación
-	        String mailSmtpAuth = propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_AUTH_BD);
+	        String mailSmtpAuth = properties.getProperty(ConstantsMailProperties.MAIL_SMTP_AUTH);
 	        if ("true".equalsIgnoreCase(mailSmtpAuth)) {
-	            properties.put(ConstantsJavaMail.MAIL_SMTP_AUTH, mailSmtpAuth);
-	            properties.put(ConstantsJavaMail.MAIL_SMTP_USER, propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_USER_BD));
-	            properties.put(ConstantsJavaMail.MAIL_SMTP_PASSWORD, propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_PASSWORD_BD));
+	            properties.put(ConstantsMail.MAIL_SMTP_AUTH, mailSmtpAuth);
+	            properties.put(ConstantsMail.MAIL_SMTP_USER, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_USER));
+	            properties.put(ConstantsMail.MAIL_SMTP_PASSWORD, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_PASSWORD));
 
 	            // Obtenemos la sesión con seguridad
 	            final Authenticator smtpAuthenticator = new SmtpAuthenticator(
-	            	propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_USER_BD),
-	            	propertiesFromBD.getProperty(ConstantsJavaMailFromBD.MAIL_SMTP_PASSWORD_BD)
+	            	properties.getProperty(ConstantsMailProperties.MAIL_SMTP_USER),
+	            	properties.getProperty(ConstantsMailProperties.MAIL_SMTP_PASSWORD)
 	            );
 	            sessionMail = Session.getInstance(properties, smtpAuthenticator);
 	        } else {

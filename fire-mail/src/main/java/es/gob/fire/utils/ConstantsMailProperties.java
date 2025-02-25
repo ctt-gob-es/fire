@@ -1,6 +1,6 @@
 package es.gob.fire.utils;
 
-public class ConstantsJavaMail {
+public class ConstantsMailProperties {
 	
 	/**
 	 * Attribute that represents the smtp property.
@@ -31,7 +31,7 @@ public class ConstantsJavaMail {
 	 * Attribute that represents the mail.smtp.starttls.enable property.
 	 */
 	public static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
-
+	
 	/**
 	 * Attribute that represents the mail.smtp.starttls.required property.
 	 */

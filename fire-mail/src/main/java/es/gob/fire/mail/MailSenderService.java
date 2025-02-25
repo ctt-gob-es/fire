@@ -18,7 +18,7 @@ import javax.mail.internet.MimeMessage;
 import org.springframework.stereotype.Component;
 
 import es.gob.fire.commons.log.Logger;
-import es.gob.fire.utils.ConstantsJavaMail;
+import es.gob.fire.utils.ConstantsMail;
 
 /**
  * <p>Class that manages the emails.</p>
@@ -50,11 +50,11 @@ public class MailSenderService extends ConfigurationMail {
             final MimeMessage message = new MimeMessage(sessionMail);
 	    	
 	        // Creamos el transport una sola vez
-	        transport = sessionMail.getTransport(properties.getProperty(ConstantsJavaMail.MAIL_PROTOCOL));
+	        transport = sessionMail.getTransport(properties.getProperty(ConstantsMail.MAIL_PROTOCOL));
 	        transport.connect(); // Establecemos la conexión
 
             // Indicamos el emisor
-            message.setFrom(new InternetAddress((String) properties.get(ConstantsJavaMail.MAIL_SMTP_MAIL_SENDER)));
+            message.setFrom(new InternetAddress((String) properties.get(ConstantsMail.MAIL_SMTP_MAIL_SENDER)));
 
             // Establecemos los destinatarios
             message.addRecipients(Message.RecipientType.TO, addresses);
