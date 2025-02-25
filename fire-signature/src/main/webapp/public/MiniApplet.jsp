@@ -587,6 +587,17 @@
 		AutoScript.setServlets("<%= baseUrl + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_STORAGE %>", "<%= baseUrl  + "afirma/" + ServiceNames.PUBLIC_SERVICE_AFIRMA_RETRIEVE %>");
 		AutoScript.cargarAppAfirma("<%= baseUrl %>afirma");
 		
+		var name = "<%= appName %>";
+		if (name == null || name.length == 0 || name == "null") { 
+			name = "FIRe";
+		} else {
+			// Convertimos a HTML por si se quieren codificar caracteres especiales
+			var txt = document.createElement('textarea');
+			txt.innerHTML = name;
+			name = txt.value;
+		}
+		AutoScript.setAppName(name);
+		
 		// Actualizamos el texto de requisitos
 		updateRequirementsText();
 		
