@@ -21,7 +21,7 @@
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * <b>Date:</b><p>12/02/2025.</p>
  * @author Gobierno de España.
- * @version 1.1, 13/02/2025.
+ * @version 1.2, 25/02/2025.
  */
 package es.gob.fire.control.tasks;
 
@@ -69,7 +69,7 @@ import es.gob.fire.spring.config.ApplicationContextProvider;
  * <p>Class that performs a task for updated status certificate X509 and send emails to users with differents role.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI
  * certificates and electronic signature.</p>
- * @version 1.1, 13/02/2025.
+ * @version 1.2, 25/02/2025.
  */
 public class TaskVerifyCertExpired extends FireTask {
 
@@ -273,6 +273,8 @@ public class TaskVerifyCertExpired extends FireTask {
 			
 			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV021, new Object[ ] { Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
+			// Configuramos las propiedades de Java Mail y enviamos el correo
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).confJavaMailFromFromEnv();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 		
@@ -314,6 +316,8 @@ public class TaskVerifyCertExpired extends FireTask {
 			
 			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV020, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
+			// Configuramos las propiedades de Java Mail y enviamos el correo
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).confJavaMailFromFromEnv();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}
@@ -356,6 +360,8 @@ public class TaskVerifyCertExpired extends FireTask {
 			
 			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV019, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
+			// Configuramos las propiedades de Java Mail y enviamos el correo
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).confJavaMailFromFromEnv();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}
@@ -398,6 +404,8 @@ public class TaskVerifyCertExpired extends FireTask {
 			
 			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV018, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
+			// Configuramos las propiedades de Java Mail y enviamos el correo
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).confJavaMailFromFromEnv();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
 	}
