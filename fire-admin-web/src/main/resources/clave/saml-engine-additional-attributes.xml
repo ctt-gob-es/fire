@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>Dynamic attributes</comment>
+
+    <entry key="1.NameUri">http://eidas.europa.eu/attributes/naturalperson/AdditionalAttribute</entry>
+    <entry key="1.FriendlyName">AdditionalAttribute</entry>
+    <entry key="1.PersonType">NaturalPerson</entry>
+    <entry key="1.Required">false</entry>
+    <entry key="1.XmlType.NamespaceUri">http://www.w3.org/2001/XMLSchema</entry>
+    <entry key="1.XmlType.LocalPart">string</entry>
+    <entry key="1.XmlType.NamespacePrefix">xs</entry>
+    <entry key="1.AttributeValueMarshaller">eu.eidas.auth.commons.attribute.impl.LiteralStringAttributeValueMarshaller</entry>
+
+    <entry key="2.NameUri">http://eidas.europa.eu/attributes/legalperson/LegalAdditionalAttribute</entry>
+    <entry key="2.FriendlyName">LegalAdditionalAttribute</entry>
+    <entry key="2.PersonType">LegalPerson</entry>
+    <entry key="2.Required">false</entry>
+    <entry key="2.XmlType.NamespaceUri">http://www.w3.org/2001/XMLSchema</entry>
+    <entry key="2.XmlType.LocalPart">string</entry>
+    <entry key="2.XmlType.NamespacePrefix">xs</entry>
+    <entry key="2.AttributeValueMarshaller">eu.eidas.auth.commons.attribute.impl.LiteralStringAttributeValueMarshaller</entry>
+	
+	<entry key="3.NameUri">http://es.minhafp.clave/PartialAfirma</entry>
+    <entry key="3.FriendlyName">PartialAfirma</entry>
+    <entry key="3.PersonType">NaturalPerson</entry>
+    <entry key="3.Required">false</entry>
+    <entry key="3.XmlType.NamespaceUri">http://www.w3.org/2001/XMLSchema</entry>
+    <entry key="3.XmlType.LocalPart">string</entry>
+    <entry key="3.XmlType.NamespacePrefix">xs</entry>
+    <entry key="3.AttributeValueMarshaller">eu.eidas.auth.commons.attribute.impl.LiteralStringAttributeValueMarshaller</entry>
+
+</properties>

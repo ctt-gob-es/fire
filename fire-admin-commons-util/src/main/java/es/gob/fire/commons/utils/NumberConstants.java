@@ -3,7 +3,7 @@
  * <b>Description:</b><p>Interface that defines numeric es.gob.fire.constants for generalized usage.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>21 oct. 2019.</p>
- * @version 1.1, 21/05/2021.
+ * @version 1.2, 12/02/2025.
  */
 package es.gob.fire.commons.utils;
 
@@ -11,7 +11,7 @@ package es.gob.fire.commons.utils;
 /** 
  * <p>Interface that defines numeric es.gob.fire.constants for generalized usage.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.1, 21/05/2021.
+ * @version 1.2, 12/02/2025.
  */
 public interface NumberConstants {
 
@@ -91,6 +91,11 @@ public interface NumberConstants {
 	int NUM0 = 0;
 	
 	/**
+	 * Constant attribute that represents the number 0 (type long).
+	 */
+	long NUM_0_LONG = 0l;
+	
+	/**
 	 * Constant attribute that represents the number 3.
 	 */
 	int NUM1 = 1;
@@ -144,6 +149,11 @@ public interface NumberConstants {
 	 * Constant attribute that represents the number 10.
 	 */
 	int NUM10 = 10;
+
+	/**
+	 * Constant attribute that represents the number 10 (type long).
+	 */
+	long NUM10_LONG = 10L;
 
 	/**
 	 * Constant attribute that represents the number 11.
@@ -249,6 +259,11 @@ public interface NumberConstants {
 	 * Constant attribute that represents the number 30.
 	 */
 	int NUM30 = 30;
+
+	/**
+	 * Constant attribute that represents the number 30 (type long).
+	 */
+	long NUM30_LONG = 30L;
 
 	/**
 	 * Constant attribute that represents the number 31.

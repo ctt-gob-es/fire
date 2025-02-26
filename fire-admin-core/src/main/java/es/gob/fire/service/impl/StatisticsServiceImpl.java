@@ -1,3 +1,27 @@
+/*
+/*******************************************************************************
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
+ * This program is licensed and may be used, modified and redistributed under the  terms
+ * of the European Public License (EUPL), either version 1.1 or (at your option)
+ * any later version as soon as they are approved by the European Commission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and
+ * more details.
+ * You should have received a copy of the EUPL1.1 license
+ * along with this program; if not, you may find it at
+ * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
+ ******************************************************************************/
+
+/** 
+ * <b>File:</b><p>es.gob.fire.service.impl.StatisticsServiceImpl.java.</p>
+ * <b>Description:</b><p>Service for creating Fire statistics charts.</p>
+ * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
+ * <b>Date:</b><p> 22/01/2025.</p>
+ * @author Gobierno de España.
+ * @version 1.0, 22/01/2025.
+ */
 package es.gob.fire.service.impl;
 
 import java.awt.Color;
@@ -19,21 +43,21 @@ import org.jfree.chart.labels.PieSectionLabelGenerator;
 import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.stereotype.Service;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.HeaderFooter;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.pdf.DefaultFontMapper;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfTemplate;
-import com.lowagie.text.pdf.PdfWriter;
+import com.aowagie.text.Document;
+import com.aowagie.text.DocumentException;
+import com.aowagie.text.Element;
+import com.aowagie.text.Font;
+import com.aowagie.text.FontFactory;
+import com.aowagie.text.HeaderFooter;
+import com.aowagie.text.PageSize;
+import com.aowagie.text.Paragraph;
+import com.aowagie.text.Phrase;
+import com.aowagie.text.pdf.DefaultFontMapper;
+import com.aowagie.text.pdf.PdfContentByte;
+import com.aowagie.text.pdf.PdfPCell;
+import com.aowagie.text.pdf.PdfPTable;
+import com.aowagie.text.pdf.PdfTemplate;
+import com.aowagie.text.pdf.PdfWriter;
 
 import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.NumberConstants;
@@ -48,7 +72,7 @@ import es.gob.fire.statistics.util.CustomPieSectionLabelGenerator;
 /**
  * <p>Service for creating Fire statistics charts.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.0, 10/07/2020.
+ * @version 1.0, 22/01/2025.
  */
 @Service
 public class StatisticsServiceImpl implements IStatisticsService {

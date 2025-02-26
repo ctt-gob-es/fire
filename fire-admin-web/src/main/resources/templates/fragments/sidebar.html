@@ -157,6 +157,45 @@
                 
                 <!-- Fin Auditoría -->
                
+               <!-- Configuracion -->
+               
+               <li class="nav-item dropdown">
+               		<a id="aConfigurationAdmin" class='sidebar-link' href="#">
+		                <span class="icon-holder">
+		                	<i class="c-indigo-500 ti-settings"></i>
+		                </span>
+		                <span class="title" th:text="#{menu.admin.config}"></span>
+	              	</a>	
+               		<ul class="dropdown-menu">
+               			<li class="nav-item">
+							<a id="aConfigGeneral" class='sidebar-link' href="#">
+			                <span class="icon-holder">
+			                  <i class="c-green-500 ti-files"></i>
+			                </span>
+			                <span class="title" th:text="#{menu.admin.config.general}"></span>
+			                <script th:inline="javascript">
+			                	var actionConfigGeneral = /*[[@{/configGeneral}]]*/;
+			                	$('#aConfigGeneral').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionConfigGeneral, 'optionReplacement', 'GET', null, true); return false;});
+			                </script>
+			              </a>
+						</li>
+               			<li class="nav-item">
+							<a id="aConfigTaskValidationAdmin" class='sidebar-link' href="#">
+			                <span class="icon-holder">
+			                  <i class="c-cyan-500 ti-calendar"></i>
+			                </span>
+			                <span class="title" th:text="#{menu.admin.config.task.validation}"></span>
+			                <script th:inline="javascript">
+			                	var actionConfigTaskValidation = /*[[@{/configTaskValidation}]]*/;
+			                	$('#aConfigTaskValidationAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionConfigTaskValidation, 'optionReplacement', 'GET', null, true); return false;});
+			                </script>
+			              </a>
+						</li>
+               		</ul>
+               </li>
+               
+               <!-- Fin Configuracion -->
+               
 	          </ul>
           </form>
         </div>

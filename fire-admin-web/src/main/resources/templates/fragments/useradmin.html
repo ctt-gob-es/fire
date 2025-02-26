@@ -10,13 +10,12 @@
 						<tr>
 							<!-- Columna oculta para el identificador de usuario -->
 							<th></th>
-							<th th:text="#{table.user.login}"></th>
 							<th th:text="#{table.user.name}"></th>
 							<th th:text="#{table.user.surnames}"></th>
-							<th th:text="#{table.user.password}"></th>
+							<th th:text="#{table.user.rol}"></th>
+							<th th:text="#{table.user.dni}"></th>
 							<th th:text="#{table.user.email}"></th>
 							<th th:text="#{table.user.telf}"></th>
-							<th th:text="#{table.user.rol}"></th>
 						</tr>
 					</thead>
 				</table>
@@ -73,12 +72,13 @@ $(document).ready(function() {
 						  var d = dt.rows({
 		                   selected: !0
 						  });
-						  var name = d.data()[0][a[1].id];
+						  debugger;
+						  var email = d.data()[0][a[5].id];
 						  var menuEdit = /*[[@{/menuedit}]]*/;
 						  $.ajax({
 		 						url : menuEdit,
 		 						type : 'GET',
-		 						data : $.param({'username':name}),
+		 						data : $.param({'email':email}),
 		 						cache : false,
 		 						success : function(data) {
 		 							hide();
@@ -108,11 +108,11 @@ $(document).ready(function() {
       				  	 
       				  	  hide();
       				  	 
-      					  var idUser = d.data()[0][a[1].id];
+      					  var email = d.data()[0][a[5].id];
       					  var index = dt.row({selected: !0}).index();
       					  var indexRow = index-1;
       					  $.ajax(actionDelete,{
-      									data:$.param({'username':idUser, 'index':indexRow}),
+      									data:$.param({'email':email, 'index':indexRow}),
       							        type:'POST',
    						                success: function(data){
    						                	
@@ -171,14 +171,12 @@ $(document).ready(function() {
 		"columns": [
 	        { "data": "userId",
 	          "visible": false},
-	          { "data": "userName" },
 	        { "data": "name" },
 	        { "data": "surnames" },
-	        { "data": "password",
-	          "visible": false},
+	        { "data": "rolName" },
+	        { "data": "dni" },
 	        { "data": "email" },
-	        { "data": "phone" },
-	        { "data": "rolName" }
+	        { "data": "phone" }
 	        ]
 		}).on('crudaction', function(e, accion, idUserFire, data, rowindex){
 		    // e          Evento Jquery

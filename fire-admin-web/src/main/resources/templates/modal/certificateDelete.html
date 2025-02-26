@@ -78,13 +78,20 @@ function deleteCertificate(){
         		
         		var msgError = data.replace('error.','');
         		$('#modalDeleteCert .modal-body .alert').remove();
-	            $('#modalDeleteCert .modal-body').append('<div class="alert alert-danger" role="alert"><strong>' + msgError + '</strong></div>');
+        		// Insertamos el mensaje de error justo debajo del <h5>
+        		$('#modalDeleteCert .modal-body h5').after(
+        		    '<div class="alert alert-danger" role="alert"><strong>' + msgError + '</strong></div>'
+        		);
         		$('#idDeleteResponsibleBtn').prop('disabled', true);
         		$('#appCertTableWrapper').show();
         		createAssociatedAppTable();
 	    	} else {                    
         	
-        		tableCertFire.row(data.index).remove().draw();
+	    		var index = tableCertFire.row({
+	                selected: !0
+	            }).index();
+	    		
+        		tableCertFire.row(index).remove().draw();
                 
                 $('#modalDeleteCert .modal-body .alert').remove();
                 closeModalButton('modalDeleteCert', 'idCertificateForm');

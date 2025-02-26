@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>07/07/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 21/05/2021.
+ * @version 1.3, 24/02/2025.
  */
 package es.gob.fire.persistence.entity;
 
@@ -51,7 +51,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 /**
  * <p>Class that maps the <i>TB_USUARIOS</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.
- * @version 1.1, 21/05/2021.
+ * @version 1.3, 24/02/2025.
  */
 @Entity
 @Table(name = "TB_USUARIOS")
@@ -69,11 +69,6 @@ public class User implements Serializable {
 	private Long userId;
 
 	/**
-	 * Attribute that represents the user name.
-	 */
-	private String userName;
-
-	/**
 	 * Attribute that represents the email.
 	 */
 	private String email;
@@ -82,12 +77,7 @@ public class User implements Serializable {
 	 * Attribute that represents the name.
 	 */
 	private String name;
-
-	/**
-	 * Attribute that represents the password.
-	 */
-	private String password;
-
+	
 	/**
 	 * Attribute that represents the surnames.
 	 */
@@ -129,6 +119,16 @@ public class User implements Serializable {
 	private Rol rol;
 
 	/**
+	 * Attribute that represents the DNI.
+	 */
+	private String dni;
+	
+	/**
+	 * Attribute that represents the date last access.
+	 */
+	private Date fecUltimoAcceso;
+	
+	/**
 	 * Gets the value of the attribute {@link #userId}.
 	 * @return the value of the attribute {@link #userId}.
 	 */
@@ -147,25 +147,6 @@ public class User implements Serializable {
 	 */
 	public void setUserId(final Long userIdP) {
 		this.userId = userIdP;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #userName}.
-	 * @return the value of the attribute {@link #userName}.
-	 */
-
-	@Column(name = "NOMBRE_USUARIO", nullable = false, length = NumberConstants.NUM30, unique = true)
-	@JsonView(DataTablesOutput.View.class)
-	public String getUserName() {
-		return this.userName;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #userName}.
-	 * @param userNameP The value for the attribute {@link #userName}.
-	 */
-	public void setUserName(final String userNameP) {
-		this.userName = userNameP;
 	}
 
 	/**
@@ -219,24 +200,6 @@ public class User implements Serializable {
 	 */
 	public void setName(final String nameP) {
 		this.name = nameP;
-	}
-
-	/**
-	 * Gets the value of the attribute {@link #password}.
-	 * @return the value of the attribute {@link #password}.
-	 */
-	@Column(name = "CLAVE", nullable = true, length = NumberConstants.NUM100)
-	@JsonView(DataTablesOutput.View.class)
-	public String getPassword() {
-		return this.password;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #password}.
-	 * @param passwordP The value for the attribute {@link #password}.
-	 */
-	public void setPassword(final String passwordP) {
-		this.password = passwordP;
 	}
 
 	/**
@@ -363,4 +326,39 @@ public class User implements Serializable {
 		this.rol = rolP;
 	}
 
+	/**
+	 * Gets the value of the attribute {@link #dni}.
+	 * @return the value of the attribute {@link #dni}.
+	 */
+	@Column(name = "DNI", nullable = true, length = NumberConstants.NUM9)
+	public String getDni() {
+		return dni;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dni}.
+	 * @param dni The value for the attribute {@link #dni}.
+	 */
+	public void setDni(String dni) {
+		this.dni = dni;
+	}
+
+	/**
+	 * Gets the value of the attribute {@link #fecUltimoAcceso}.
+	 * @return the value of the attribute {@link #fecUltimoAcceso}.
+	 */
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "FEC_ULTIMO_ACCESO", nullable = false, length = NumberConstants.NUM6)
+	public Date getFecUltimoAcceso() {
+		return fecUltimoAcceso;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #fecUltimoAcceso}.
+	 * @param fecUltimoAcceso The value for the attribute {@link #fecUltimoAcceso}.
+	 */
+	public void setFecUltimoAcceso(Date fecUltimoAcceso) {
+		this.fecUltimoAcceso = fecUltimoAcceso;
+	}
+	
 }

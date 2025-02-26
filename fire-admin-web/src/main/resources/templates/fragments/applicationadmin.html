@@ -55,16 +55,45 @@ $(document).ready(function() {
         "columns": [
               { "data": "appName" },
               { "data": "appId"},
-	          { "data": "fechaAltaApp" },
-              { "data": "habilitado",
-	        	"render": function (data, type, row) {
-		        	  
-	  	        	var is_checked = data == true ? "checked" : "";
-	  	        	  
-	  	        	return '<div class="checkbox checkbox-circle checkbox-info peers ai-c"><input disabled type="checkbox" id="tableAppDB" class="peer"'+ is_checked + '><label for="tableAppDB" class="peers peer-greed js-sb ai-c"><span class="peer peer-greed" ></span></label></div>';
-              	}
-              }
-            ],
+	          { 
+            	  "data": "fechaAltaApp",
+            	  "render": function (data, type, row) {
+                      if (!data) return ""; // Manejo de valores nulos
+                      let date = new Date(data);
+
+                      let formatter = new Intl.DateTimeFormat('es-ES', { 
+                          day: '2-digit', month: '2-digit', year: 'numeric', 
+                          hour: '2-digit', minute: '2-digit', hour12: false
+                      });
+
+                      let parts = formatter.formatToParts(date);
+                      
+                      // Construimos la fecha manualmente sin la coma
+                      let formattedDate = 
+                          parts.find(p => p.type === 'day').value + "/" +
+                          parts.find(p => p.type === 'month').value + "/" +
+                          parts.find(p => p.type === 'year').value + " " +
+                          parts.find(p => p.type === 'hour').value + ":" +
+                          parts.find(p => p.type === 'minute').value;
+                      
+                      return formattedDate;
+                  }
+	          },
+	          { 
+	        	  "data": "habilitado",
+	        	  "render": function (data, type, row) {
+	
+	        	      var is_checked = data == true ? "checked" : "";
+	
+	        	      return '<div class="checkbox checkbox-circle checkbox-info peers ai-c">' +
+	        	                  '<input type="checkbox" id="tableAppDB' + row.appId + '" class="peer" ' + is_checked + 
+	        	                      ' onclick="confirmEnableApplication(\'' + row.appId + '\'); event.preventDefault();">' +
+	        	                  '<label for="tableAppDB' + row.appId + '" class="peers peer-greed js-sb ai-c">' +
+	        	                      '<span class="peer peer-greed"></span>' +
+	        	                  '</label>' +
+	        	              '</div>';
+	        	  }
+        	}],
             dom: 'Bfrtip',
             select: 'single',
             responsive: true,
@@ -187,4 +216,21 @@ $(document).ready(function() {
         })
 
 });
+
+function confirmEnableApplication(idApplication) {
+	var actionConfirmEnableApplication = /*[[@{/confirmEnableApplication}]]*/;
+	
+	$.ajax({
+		url : actionConfirmEnableApplication,
+		type : 'GET',
+		cache : false,
+		data: $.param({'appId':idApplication}),
+		success : function(data) {
+			hide();
+			$('#modal').html(data);
+			$('#applicationConfirmEnableModal').modal('show');														
+		},
+		error : function() {}
+	});
+}
 </script>

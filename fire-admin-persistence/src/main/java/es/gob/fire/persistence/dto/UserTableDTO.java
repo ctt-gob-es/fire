@@ -18,12 +18,6 @@ public class UserTableDTO {
     private Long userId;
 
 	@JsonView(DataTablesOutput.View.class)
-    private String userName;
-	
-	@JsonView(DataTablesOutput.View.class)
-	private String password;
-
-	@JsonView(DataTablesOutput.View.class)
     private String email;
 
 	@JsonView(DataTablesOutput.View.class)
@@ -44,14 +38,15 @@ public class UserTableDTO {
 	@JsonView(DataTablesOutput.View.class)
     private String rolName;
 
+	@JsonView(DataTablesOutput.View.class)
+	private String dni;
+	
     // Constructors
     public UserTableDTO() {
     }
     
     public UserTableDTO(User user) {
         this.userId = user.getUserId();
-        this.userName = user.getUserName();
-        this.password = user.getPassword();
         this.email = user.getEmail();
         this.name = user.getName();
         this.surnames = user.getSurnames();
@@ -59,12 +54,11 @@ public class UserTableDTO {
         this.startDate = user.getStartDate();
         this.root = user.getRoot();
         this.rolName = user.getRol() != null ? user.getRol().getRolName() : null;
+        this.dni = user.getDni();
     }
 
-    public UserTableDTO(Long userId, String userName, String password, String email, String name, String surnames, String phone, Date startDate, Boolean root, String rolName) {
+    public UserTableDTO(Long userId, String email, String name, String surnames, String phone, Date startDate, Boolean root, String rolName) {
         this.userId = userId;
-        this.userName = userName;
-        this.password = password;
         this.email = email;
         this.name = name;
         this.surnames = surnames;
@@ -82,15 +76,7 @@ public class UserTableDTO {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
+  
     public String getEmail() {
         return email;
     }
@@ -146,12 +132,13 @@ public class UserTableDTO {
     public void setRolName(String rolName) {
         this.rolName = rolName;
     }
-
-	public String getPassword() {
-		return password;
+	
+	public String getDni() {
+		return dni;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setDni(String dni) {
+		this.dni = dni;
 	}
+	
 }

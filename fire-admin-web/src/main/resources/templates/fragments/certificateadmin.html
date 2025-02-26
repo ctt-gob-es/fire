@@ -13,8 +13,8 @@
 							<!-- Columna oculta para el identificador de certificado -->
 							<th></th>
 							<th th:text="#{table.certificate.alias}"></th>
-							<th th:text="#{table.certificate.cert1}"></th>
-							<th th:text="#{table.certificate.cert2}"></th>
+							<th th:text="#{table.certificate.cert}"></th>
+							<th th:text="#{table.certificate.status}"></th>
 							<th th:text="#{table.certificate.fecha_alta}"></th>
 						</tr>
 					</thead>
@@ -40,11 +40,8 @@ var tableCertFire = $('#certServiceTable').DataTable({
         $('#certServiceTable_wrapper .dataTables_scrollBody').css("overflow-x", "hidden");
        
     },
-    "iTotalRecords": "totalElements",
-    "iTotalDisplayRecords": "numberOfElements",
-    
-	"processing": true,
-    "serverSide": true,
+    "processing": true,
+    "serverSide": false,
     "ajax":{
 		"url": loadCertificates, 
 		"dataSrc": "data",
@@ -63,10 +60,10 @@ var tableCertFire = $('#certServiceTable').DataTable({
           }
         },
         "columns" : [
-            { data: 'idCertificado', "visible": false },
+            { data: 'idCertificate', "visible": false },
             { data: 'certificateName', "orderable": true },
-            { data: 'certPrincipal', "orderable": false },
-            { data: 'certBackup', "orderable": false },
+            { data: 'certificate', "orderable": false },
+            { data: 'status', "orderable": true },
             { data: 'fechaAlta', "orderable": true }
         ],
     "order" : [ 1, 'desc' ],

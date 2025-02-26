@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<link type="text/css" rel="stylesheet"
+	th:href="@{css/bootstrap.min.css}" />
+<link type="text/css" rel="stylesheet" th:href="@{css/main.css}" />
+<link type="text/css" rel="stylesheet" th:href="@{css/util.css}" />
+    <link type="text/css" rel="stylesheet" th:href="@{css/loginClave.css}" />
+<link type="text/css" rel="stylesheet"
+	th:href="@{css/material-design-iconic-font.min.css}" />
+<link type="text/css" rel="stylesheet"
+	th:href="@{css/font-awesome.min.css}" />
+<link type="text/css" rel="stylesheet"
+	th:href="@{css/material-design-iconic-font.css}" />
+<!--[if IE]><link rel="shortcut icon" th:src="@{images/chart_ico.png}"><![endif]-->
+<link type="image/png" rel="icon" th:href="@{images/chart_favicon.png}">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title th:text="#{fire-admin-web.title}"></title>
+</head>
+<body>
+	<div class="limiter">
+		<h3 style="text-align:center">Conectando con pasarela Cl@ve...</h3>
+		<form:form id="redirectForm" name="redirectForm" method="post">
+			<input type="hidden" id="relayState" name="RelayState"
+				th:value="${relayState}">
+			<input type="hidden" id="SAMLRequest" name="SAMLRequest"
+				th:value="${samlRequest}" />
+			<input type="hidden" id="nodeServiceUrl" name="nodeServiceUrl"
+				th:value="${nodeServiceUrl}" />
+		</form:form>
+	</div>
+	</div>
+	</div>
+	<script th:src="@{js/jquery/jquery-3.2.1.min.js}"></script>
+	<script th:src="@{js/jquery/jquery.serializejson.js}"></script>
+	<script th:src="@{js/main.js}"></script>
+	<script th:src="@{js/miniapplet/functions.js}"></script>
+	<script th:src="@{js/miniapplet/autoscript.js}"></script>
+	<script th:inline="javascript">
+		function submitRedirectFormAction() {
+			var relayState = document.getElementById('relayState').value;
+			var samlRequest = document.getElementById('SAMLRequest').value;
+			var serviceUrl = document.getElementById('nodeServiceUrl').value;
+
+			var form = document.createElement('form');
+
+			form.setAttribute('method', 'post');
+			form.setAttribute('action', serviceUrl);
+
+			var relayStateInput = document.createElement('input');
+			relayStateInput.setAttribute('type', 'hidden');
+			relayStateInput.setAttribute('name', 'RelayState');
+			relayStateInput.setAttribute('value', relayState);
+			form.appendChild(relayStateInput);
+
+			var samlRequestInput = document.createElement('input');
+			samlRequestInput.setAttribute('type', 'hidden');
+			samlRequestInput.setAttribute('name', 'SAMLRequest');
+			samlRequestInput.setAttribute('value', samlRequest);
+			form.appendChild(samlRequestInput);
+
+			document.body.appendChild(form);
+			
+	        form.submit();
+		}
+
+		window.onload = function() {
+			submitRedirectFormAction();
+		};
+	</script>
+</body>
+</html>

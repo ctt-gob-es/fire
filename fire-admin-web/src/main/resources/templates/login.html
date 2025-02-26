@@ -16,10 +16,9 @@
 		
 	<div class="container-login">
 		<div class="wrap-login">
-			<form id="formLogin" th:object="${formLogin}" class="login-form validate-form"
-					th:action="@{/}" method="post">
+			<form id="formLogin" class="login-form validate-form" th:action="@{/}" method="post">
 					
-					<input type='hidden' id="signatureBase64" name="signatureBase64">
+				<input type='hidden' id="signatureBase64" name="signatureBase64">
 					
 				<span class="login-form-title p-b-48">
 				 <img class="fire-admin-front-img" th:src="@{images/Logo_FIRe_02.jpg}"
@@ -33,62 +32,76 @@
 				 th:text="#{fire-admin-web.login.warn.logout}"></div>
 				 <div class="alert alert-danger" th:if="${restoreerror}"
 				 th:text="${restoreErrorMessage}"></div>
-				 <div class="alert alert-success" th:if="${mailsuccess}"
-				 th:text="#{fire-admin-web.send.mail.success}"></div>
-				 <div class="alert alert-success" th:if="${restorepasswordsuccess}"
-				 th:text="#{fire-admin-web.restore.password.success}"></div>
-				
+				 
 				<div id ="fieldsLoginUsername">
-					<div class="wrap-input validate-input"
-						data-validate="Introduzca nombre de usuario">
-						<span class="label-input" th:text="#{fire-admin-web.login.username.field}"></span>
-						 <input id="username" class="input100" type="text" autocomplete="off" name="username">
-					</div>
-
-					<div class="wrap-input validate-input"
-						data-validate="Introduzca contraseña">
-						<span class="label-input" th:text="#{fire-admin-web.login.password.field}"></span>
-						 <span class="btn-show-pass"> <i class="zmdi zmdi-eye"></i>
-						</span> <input id="password" class="input100" type="password"
-							name="password">
-					</div>
 					<div class="container-login-form-btn">
 						<div class="wrap-login-form-btn">
 							<div class="login-form-bgbtn"></div>
-							<button onclick="usernamePassword(this);" class="login-form-btn"
-							 th:text="#{fire-admin-web.login.acceso.button}"></button>
-						</div>	
+							<button
+							onclick="redirectClave();"
+							class="login-form-btn"
+							th:text="#{fire-admin-web.login.acceso.clave.button}"></button>
+						</div>
 					</div>
 					
-					<br></br>
-							
-					<div id="PasswordButton" >
-						<p style="color: #808080; left:inherit;"></p>
-						<a align="center" href="inicio" type='link' class='btn btn-link' style='text-align:center' id="¿Has olvidado tu contrase&ntilde;a?" th:href="@{/mailpasswordrestoration}" th:text="#{fire-admin-web.login.password.restoration}"></a>
+					<div class="container-login-form-btn" th:if="${accessByCertificate}">
+						<div class="wrap-login-form-btn">
+							<div class="login-form-bgbtn"></div>
+							<button onclick="authenticateCertificate(autenticar,'');return false;" class="login-form-btn" th:text="#{fire-admin-web.login.acceso.certificado.button}"></button>
+						</div>
 					</div>
 				</div>
-					
 			</form>
 		</div>		
 	</div>
-	<script th:src="@{js/jquery/jquery-3.2.1.min.js}"></script>
+	<script th:src="@{js/jquery/jquery-3.5.1.min.js}"></script>
 	<script th:src="@{js/jquery/jquery.serializejson.js}"></script>
 	<script th:src="@{js/main.js}"></script>
+	<script th:src="@{js/miniapplet/functions.js}"></script>
+	<script th:src="@{js/miniapplet/autoscript.js}"></script>
 	<script th:inline="javascript">
 	
-		function usernamePassword(form) {
-			if ($('#username').val().trim() == '') {
-				var thisAlertUsername =$('#username').parent();
-		        $(thisAlertUsername).addClass('alert-validate');
-			} else if ($('#password').val().trim() == '') {
-				var thisAlertPassword =$('#password').parent();
-		        $(thisAlertPassword).addClass('alert-validate');
-			} else {
-				submit(form);
-			}
-			
+		function redirectClave() {
+			var loginClave = /*[[@{/loginClave}]]*/;
+		    document.getElementById("formLogin").action = loginClave;
+            document.getElementById("formLogin").submit();
 		}
-	
+		
+		function authenticateCertificate(functionAutenticar, filter) {
+			cargaAppAfirma("");
+			var randomString = getRandomStringToLogin();
+			authenticate(functionAutenticar, filter, randomString);
+		}
+		
+		function autenticar(signatureBase64) {
+			// asignamos el valor de la firma al campo oculto y lo enviamos al back
+			$('#signatureBase64').val(signatureBase64);
+			var loginWithCertificate = /*[[@{/loginWithCertificate}]]*/;
+		    document.getElementById("formLogin").action = loginWithCertificate;
+            document.getElementById("formLogin").submit();
+		}
+		
+		function getRandomStringToLogin() {
+		    const banco = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+		    let cadena = "";
+
+		    for (let i = 0; i < 12; i++) {
+		        const indiceAleatorio = numeroAleatorioEnRango(0, banco.length - 1);
+		        cadena += banco.charAt(indiceAleatorio);
+		    }
+
+		    cadena += "-" + getTimeToMillis();
+		    return cadena;
+		}
+
+		function numeroAleatorioEnRango(minimo, maximo) {
+		    return Math.floor(Math.random() * (maximo - minimo + 1)) + minimo;
+		}
+
+		function getTimeToMillis() {
+		    return new Date().getTime();
+		}
+		
 	</script>
 	
 </body>

@@ -20,13 +20,15 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>15/06/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 15/06/2018.
+ * @version 1.3, 13/02/2025.
  */
 package es.gob.fire.persistence.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -35,6 +37,9 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.User;
+import es.gob.fire.upgrade.afirma.PlatformWsException;
+import es.gob.fire.upgrade.afirma.VerifyAfirmaCertificateResponse;
+import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 public interface ICertificateService {
 	/**
@@ -63,7 +68,7 @@ public interface ICertificateService {
 	 * @param userDto a {@link CertificateDTO} with the information of the certificate.
 	 * @return {@link Certificate} The Certificate.
 	 */
-	Certificate saveCertificate(CertificateDTO certificateDto) throws IOException;
+	Certificate saveCertificate(CertificateDTO certificateDto, X509Certificate x509Certificate) throws IOException;
 					
 	/**
 	 * Method that deletes a certificate in the persistence.
@@ -121,4 +126,47 @@ public interface ICertificateService {
 	 * @return
 	 */
 	String getCertificateText(String certificate);
+
+	/**
+	 * Converts a list of {@code Certificate} objects to a list of {@code CertificateDTO} objects.
+	 * 
+	 * <p>This method maps each {@code Certificate} object to a {@code CertificateDTO} and enriches the DTO
+	 * with additional information such as the certificate's validity status and formatted expiration date.
+	 * The validity of the certificate is determined using its X.509 structure.</p>
+	 *
+	 * @param listCertificate the list of {@code Certificate} objects to be converted.
+	 * @return a list of {@code CertificateDTO} objects containing mapped and enriched data.
+	 *
+	 * @throws CertificateException if an error occurs while parsing the certificate.
+	 * @throws IOException if an error occurs during Base64 decoding of the certificate.
+	 */
+	List<CertificateDTO> obtainAllCertificateToDTO(List<Certificate> listCertificate);
+
+	/**
+	 * Validates the status of an X.509 certificate using the Afirma web service.
+	 *
+	 * <p>This method establishes a connection with AfirmaWS, initializes the necessary 
+	 * configuration properties, and invokes the certificate verification service.</p>
+	 *
+	 * @param x509Certificate The X.509 certificate to be validated.
+	 * @return A {@link VerifyAfirmaCertificateResponse} containing the verification result.
+	 * @throws CertificateEncodingException If there is an issue encoding the certificate.
+	 * @throws PlatformWsException If there is an error with the platform web service.
+	 * @throws WSServiceInvokerException If there is an issue invoking the web service.
+	 */
+	VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate) throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException;
+
+	/**
+	 * Updates a Certificate entity with the latest information from an X509Certificate.
+	 * This includes encoding the certificate, generating its fingerprint, and extracting
+	 * relevant metadata such as the subject and validity dates.
+	 * 
+	 * @param certificate      The Certificate entity to be updated.
+	 * @param x509Certificate  The X509Certificate containing the latest data.
+	 * @return The updated Certificate entity after being saved in the repository.
+	 * @throws IOException                  If an error occurs during encoding.
+	 * @throws CertificateEncodingException If the X509Certificate cannot be properly encoded.
+	 */
+	Certificate updateCertificateFromTaskValidation(Certificate existingCertificate, X509Certificate x509Certificate)
+			throws IOException, CertificateEncodingException;
 }

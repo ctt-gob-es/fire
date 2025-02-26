@@ -61,5 +61,26 @@
         </main>
       </div>
     </div>
+    <script th:inline="javascript">
+	    $(document).ready(function() {
+	        var userLastAccess = /*[[@{/userLastAccess}]]*/;
+	        //Muestra el modal si es la primera vez que se muestra el modal de inicio de sesión
+	        $.ajax({
+	    		url: userLastAccess,
+	            type:'GET',
+	            success: function(data){
+	            	hide();
+	        		// Se oculta la capa 'cargando...'
+	        		$('#modal').html(data);
+	    			$('#modalUserLastAccess').modal('show');
+	    		},
+	            error:function(data){
+	            	$('#messageErrorUserLastAccess').html(data.error);
+	    			$('#messageErrorUserLastAccess').addClass('alert alert-danger');
+	            	hide();       
+	    		}
+	    	});
+	    });
+	</script>
   </body>
 </html>

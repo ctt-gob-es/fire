@@ -27,6 +27,8 @@
 		<log-consumer.version>1.3</log-consumer.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<log4j.version>2.20.0</log4j.version>
+		<quartz.version>2.3.2</quartz.version>
+		<javaMail.version>1.6.2</javaMail.version>
 		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
 		<javax.json-api.version>1.1.3</javax.json-api.version>
 		<org.glassfish-javax.json.version>1.1.3</org.glassfish-javax.json.version>
@@ -99,6 +101,7 @@
 				<module>fire-statistics-common</module>
 				<module>fire-upgrade</module>
 				<module>fire-upgrade-afirma</module>
+				<module>fire-mail</module>
 				<module>log-consumer-api</module>
 				<module>log-consumer-register</module>
 			</modules>
@@ -248,7 +251,11 @@
 				<artifactId>fire-alarms-eventmanager</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-mail</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
 			<!-- Hibernate 5 -->
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -352,12 +359,17 @@
 				<artifactId>commons-codec</artifactId>
 				<version>1.14</version>
 			</dependency>
+			<!-- BouncyCastle -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk16</artifactId>
-				<version>1.46</version>
+				<artifactId>bcmail-jdk18on</artifactId>
+				<version>1.77</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-jdk18on</artifactId>
+				<version>1.77</version>
+			</dependency>
 			<!-- Jackson -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -416,6 +428,22 @@
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-1.2-api</artifactId>
 				<version>${log4j.version}</version>
+			</dependency>
+			
+			<!-- Quartz -->
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>${quartz.version}</version>
+				<scope>compile</scope>
+			</dependency>
+			
+			<!-- JavaMail -->
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>${javaMail.version}</version>
+				<scope>compile</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -477,7 +505,8 @@
 					<fork>true</fork>
 					<!-- <compilerArgs> <arg>-Xbootclasspath:${java.home}/lib/jsse.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</arg> 
 						</compilerArgs> -->
-					<debug>false</debug>
+					<debug>true</debug>
+					<debuglevel>lines,vars,source</debuglevel>
 				</configuration>
 			</plugin>
 
@@ -503,4 +532,7 @@
 		<releases> <enabled>true</enabled> <updatePolicy>never</updatePolicy> </releases> 
 		<snapshots> <enabled>false</enabled> <updatePolicy>never</updatePolicy> </snapshots> 
 		</pluginRepository> </pluginRepositories> -->
+	<modules>
+		<module>fire-mail</module>
+	</modules>
 </project>

@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>19/06/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 21/05/2021.
+ * @version 1.4, 24/02/2025.
  */
 package es.gob.fire.persistence.dto;
 
@@ -35,7 +35,7 @@ import es.gob.fire.persistence.dto.validation.ThenCheckIt;
 /**
  * <p>Class that represents the backing form for editing an user.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 21/05/2021.
+ * @version 1.4, 24/02/2025.
  */
 public class UserEditDTO {
 	/**
@@ -59,14 +59,7 @@ public class UserEditDTO {
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.surnames.notempty}")
 	@Size(min = 1, max = NumberConstants.NUM100, groups = ThenCheckIt.class)
 	private String surnamesEdit = UtilsStringChar.EMPTY_STRING;
-
-	/**
-	 * Attribute that represents the value of the input username of the user in
-	 * the form. It can be empty if the user is root.
-	 */
-	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.login.notempty}")
-	@Size(min = NumberConstants.NUM1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
-	private String usernameEdit = UtilsStringChar.EMPTY_STRING;
+	
 
 	/**
 	 * Attribute that represents the value of the input email of the user in the
@@ -75,21 +68,6 @@ public class UserEditDTO {
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.email.notempty}")
 	@Size(min=NumberConstants.NUM3, max=NumberConstants.NUM45, groups=ThenCheckIt.class)
 	private String emailEdit = UtilsStringChar.EMPTY_STRING;
-
-	/**
-	 * Attribute that represents the value of the input password of the user in the form.
-	 * It can be empty if the user isn't change its role to admin.
-	 */
-	//@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
-	//@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message="{form.valid.user.password.noPattern}", groups=ThenCheckIt.class)
-    private String passwordEdit = UtilsStringChar.EMPTY_STRING;
-
-	/**
-	 * Attribute that represents the value of the input password of the user in the form.
-	 * It can be empty if the user isn't change its role to admin.
-	 */
-	//@Size(min=NumberConstants.NUM7, max=NumberConstants.NUM30, groups=ThenCheckIt.class)
-    private String confirmPasswordEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Attribute that represents the identifier for the use role selected in the user form.
@@ -114,6 +92,10 @@ public class UserEditDTO {
 	//@Size(min = 1, max = NumberConstants.NUM30, groups = ThenCheckIt.class)
 	private String rolEdit = UtilsStringChar.EMPTY_STRING;
 
+	/**
+	 * Attribute that represents the value of the input DNI of the user in the form.
+	 */
+	private String dniEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**
 	 * Gets the value of the attribute {@link #idUserFireEdit}.
@@ -167,26 +149,6 @@ public class UserEditDTO {
 	public void setSurnamesEdit(final String surnamesEditParam) {
 		this.surnamesEdit = surnamesEditParam;
 	}
-
-
-	/**
-	 * Gets the value of the attribute {@link #usernameEdit}.
-	 * @return the value of the attribute {@link #usernameEdit}.
-	 */
-	public String getUsernameEdit() {
-		return this.usernameEdit;
-	}
-
-
-
-	/**
-	 * Sets the value of the attribute {@link #usernameEdit}.
-	 * @param usernameEditParam The value for the attribute {@link #usernameEdit}.
-	 */
-	public void setUsernameEdit(final String usernameEditParam) {
-		this.usernameEdit = usernameEditParam;
-	}
-
 
 	/**
 	 * Gets the value of the attribute {@link #emailEdit}.
@@ -257,34 +219,19 @@ public class UserEditDTO {
 	}
 
 	/**
-	 * Gets the value of the attribute {@link #password}.
-	 * @return the value of the attribute {@link #password}.
+	 * Gets the value of the attribute {@link #dniEdit}.
+	 * @return the value of the attribute {@link #dniEdit}.
 	 */
-	public String getPasswordEdit() {
-		return this.passwordEdit;
+	public String getDniEdit() {
+		return dniEdit;
 	}
 
 	/**
-	 * Sets the value of the attribute {@link #password}.
-	 * @param passwordParam The value for the attribute {@link #password}.
+	 * Sets the value of the attribute {@link #dniEdit}.
+	 * @param dniEdit The value for the attribute {@link #dniEdit}.
 	 */
-	public void setPasswordEdit(final String passwordParam) {
-		this.passwordEdit = passwordParam;
+	public void setDniEdit(String dniEdit) {
+		this.dniEdit = dniEdit;
 	}
-
-	/**
-	 * Gets the value of the attribute {@link #confirmPassword}.
-	 * @return the value of the attribute {@link #confirmPassword}.
-	 */
-	public String getConfirmPasswordEdit() {
-		return this.confirmPasswordEdit;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #confirmPassword}.
-	 * @param confirmPasswordParam The value for the attribute {@link #confirmPassword}.
-	 */
-	public void setConfirmPasswordEdit(final String confirmPasswordParam) {
-		this.confirmPasswordEdit = confirmPasswordParam;
-	}
+	
 }

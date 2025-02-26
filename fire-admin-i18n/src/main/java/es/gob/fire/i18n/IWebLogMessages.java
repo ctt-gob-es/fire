@@ -1,6 +1,6 @@
 /*
 /*******************************************************************************
- * Copyright (C) 2018 MINHAFP, Gobierno de Espana
+ * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
  * of the European Public License (EUPL), either version 1.1 or (at your option)
  * any later version as soon as they are approved by the European Commission.
@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>08/10/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 02/06/2021.
+ * @version 1.3, 12/02/2025.
  */
 package es.gob.fire.i18n;
 
@@ -28,7 +28,7 @@ package es.gob.fire.i18n;
 /**
  * <p>Interface that contains the keys to the log messages for the web module.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.1, 02/06/2021.
+ * @version 1.3, 12/02/2025.
  */
 public interface IWebLogMessages {
 
@@ -194,4 +194,133 @@ public interface IWebLogMessages {
 	 * Constant attribute that represents the name of the property <code>errorweb031</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String ERRORWEB031 = "errorweb031";
+
+	/***********************/
+	/** Mensajes para la tarea de validacion **/
+	/***********************/
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>errorValidateDate</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String ERROR_VALIDATE_DATE = "errorValidateDate";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>infoUpdateTaskOk</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String INFO_UPDATE_TASK_OK = "infoUpdateTaskOk";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>errorParseDate</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String ERROR_PARSE_DATE = "errorParseDate";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>errorUpdateTaskWeb</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String ERROR_UPDATE_TASK_WEB = "errorUpdateTaskWeb";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV001</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV001 = "CTV001";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV002</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV002 = "CTV002";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV003</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV003 = "CTV003";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV004</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV004 = "CTV004";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV005</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV005 = "CTV005";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV006</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV006 = "CTV006";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV007</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV007 = "CTV007";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV008</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV008 = "CTV008";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV009</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV009 = "CTV009";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV010</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV010 = "CTV010";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV011</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV011 = "CTV011";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV012</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV012 = "CTV012";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV013</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV013 = "CTV013";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV014</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV014 = "CTV014";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV015</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV015 = "CTV015";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV016</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV016 = "CTV016";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV017</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV017 = "CTV017";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV018</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV018 = "CTV018";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV019</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV019 = "CTV019";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV020</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV020 = "CTV020";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV021</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV021 = "CTV021";
 }

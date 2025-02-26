@@ -24,6 +24,10 @@
 			<groupId>es.gob.logconsumer</groupId>
 			<artifactId>log-consumer-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-upgrade-afirma</artifactId>
+		</dependency>
 		<!-- Licencia Apache 2.0 -->
 		<dependency>
 			<groupId>javax.json</groupId>

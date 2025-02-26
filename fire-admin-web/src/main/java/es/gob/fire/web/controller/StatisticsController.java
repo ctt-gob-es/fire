@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>14/04/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 22/01/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.lowagie.text.DocumentException;
+import com.aowagie.text.DocumentException;
 
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Constants;
@@ -64,7 +64,7 @@ import es.gob.fire.service.IStatisticsService;
 /**
  * <p>Class that manages the requests related to the statistics administration.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 22/01/2025.
  */
 @Controller
 public class StatisticsController {

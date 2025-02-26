@@ -17,10 +17,10 @@
 /**
  * <b>File:</b><p>es.gob.fire.persistence.service.CertificateService.java.</p>
  * <b>Description:</b><p>Class that implements the communication with the operations of the persistence layer.</p>
-  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
+  * <b>Project:</b><p>Application for signing documents of FIRe system</p>
  * <b>Date:</b><p>22/01/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 02/02/2022.
+ * @version 1.7, 13/02/2025.
  */
 package es.gob.fire.persistence.service.impl;
 
@@ -29,14 +29,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -47,16 +51,23 @@ import org.springframework.transaction.annotation.Transactional;
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.Utils;
+import es.gob.fire.i18n.IPersistenceGeneral;
+import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.repository.CertificateRepository;
 import es.gob.fire.persistence.repository.datatable.CertificateDataTablesRepository;
 import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.upgrade.afirma.AfirmaConnector;
+import es.gob.fire.upgrade.afirma.PlatformWsException;
+import es.gob.fire.upgrade.afirma.Verify;
+import es.gob.fire.upgrade.afirma.VerifyAfirmaCertificateResponse;
+import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
- * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.2, 02/02/2022.
+ * <b>Project:</b><p>Application for signing documents of FIRe system.</p>
+ * @version 1.7, 13/02/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -70,8 +81,36 @@ public class CertificateService implements ICertificateService{
 	/**
 	 * Constant that represents the String X.509.
 	 */
-	private static final String X509 = "X.509"; //$NON-NLS-1$
+	public static final String X509 = "X.509"; //$NON-NLS-1$
 
+	/** Nombre de la propiedad en la que se guarda el nombre de la aplicacion con el que debe
+	 * conectarse a la plataforma @firma. */
+	private static final String PROP_APPID = "afirma.appId"; //$NON-NLS-1$
+	
+	/**
+	 * Constant that represents the afirma appId property.
+	 */
+	@Value("${afirma.appId}")
+	private String afirmaAppId;
+	
+	/**
+	 * Constant that represents the webservices timeout property.
+	 */
+	@Value("${webservices.timeout}")
+	private String webServiceTimeout;
+	
+	/**
+	 * Constant that represents the webservices endpoint property.
+	 */
+	@Value("${webservices.endpoint}")
+	private String webServicesEndpoint;
+	
+	/**
+	 * Constant that represents the webservices verify certificate property.
+	 */
+	@Value("${webservices.service.verifyCertificate}")
+	private String webServiceVerifyCertificate;
+	
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
@@ -96,7 +135,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.ICertificateService#saveCertificate(es.gob.fire.persistence.entity.Certificate)
+	 * @see es.gob.fire.persistence.services.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate)
 	 */
 	@Override
 	public Certificate saveCertificate(final Certificate certificate) {
@@ -135,7 +174,7 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.service.ICertificateService#saveCertificate(es.gob.fire.persistence.dto.CertificateDTO)
 	 */
 	@Override
-	public Certificate saveCertificate(final CertificateDTO certificateDto) throws IOException {
+	public Certificate saveCertificate(final CertificateDTO certificateDto, X509Certificate x509Certificate) throws IOException {
 
 		Certificate newCertificate = null;
 
@@ -144,32 +183,78 @@ public class CertificateService implements ICertificateService{
 		try {
 			md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
 
-			if (certificateDto.getCertBytes1() != null) {
+			if (certificateDto.getCertBytes() != null) {
 
-				final byte[] digest = md.digest(certificateDto.getCertBytes1());
-				certificateDto.setHuellaPrincipal(Base64.encode(digest));
-				certificateDto.setCertPrincipal(Base64.encode(certificateDto.getCertBytes1()));
+				final byte[] digest = md.digest(certificateDto.getCertBytes());
+				certificateDto.setHuella(Base64.encode(digest));
+				certificateDto.setCertificate(Base64.encode(certificateDto.getCertBytes()));
 			}
-			if (certificateDto.getCertBytes2() != null) {
-
-				final byte[] digest = md.digest(certificateDto.getCertBytes2());
-				certificateDto.setHuellaBackup(Base64.encode(digest));
-				certificateDto.setCertBackup(Base64.encode(certificateDto.getCertBytes2()));
-			}
-
+		
 		} catch (final NoSuchAlgorithmException e) {
 			LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e); //$NON-NLS-1$
 		}
 
 		newCertificate = certificateDtoToEntity(certificateDto);
 		newCertificate.setFechaAlta(new Date());
-
+		newCertificate.setFechaInicio(x509Certificate.getNotBefore());
+		newCertificate.setFechaCaducidad(x509Certificate.getNotAfter());
+		final String certSubject = x509Certificate.getSubjectX500Principal().getName();
+		final String[] txtCert = certSubject.split(",");
+		newCertificate.setSubject(txtCert[0]);
+		
 		newCertificate = this.repository.save(newCertificate);
 
 		return newCertificate;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.service.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate, java.security.cert.X509Certificate)
+	 */
+	@Override
+	public Certificate updateCertificateFromTaskValidation(final Certificate certificate, final X509Certificate x509Certificate) 
+	        throws IOException, CertificateEncodingException {
 
+	    // Extraer los bytes y calcular la huella digital
+	    byte[] certBytes = x509Certificate.getEncoded();
+	    String certBase64 = Base64.encode(certBytes);
+
+	    MessageDigest md;
+	    String fingerprint = null;
+	    try {
+	        md = MessageDigest.getInstance("SHA-1");
+	        fingerprint = Base64.encode(md.digest(certBytes));
+	    } catch (NoSuchAlgorithmException e) {
+	        LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e);
+	    }
+
+	    // Extraer otros campos del certificado
+	    String subject = x509Certificate.getSubjectX500Principal().getName();
+	    Date notBefore = x509Certificate.getNotBefore();
+	    Date notAfter = x509Certificate.getNotAfter();
+
+	    // Comparación segura de valores previos con los nuevos
+	    boolean isUpdated = 
+	        (certificate.getCertificate() == null || !certificate.getCertificate().equals(certBase64)) ||
+	        (certificate.getHuella() == null || !certificate.getHuella().equals(fingerprint)) ||
+	        (certificate.getSubject() == null || !certificate.getSubject().equals(subject)) ||
+	        (certificate.getFechaInicio() == null || certificate.getFechaInicio().getTime() != notBefore.getTime()) ||
+	        (certificate.getFechaCaducidad() == null || certificate.getFechaCaducidad().getTime() != notAfter.getTime());
+
+	    // Si hubo cambios, actualizamos los valores y la fecha de alta
+	    if (isUpdated) {
+	        certificate.setCertificate(certBase64);
+	        certificate.setHuella(fingerprint);
+	        certificate.setSubject(subject);
+	        certificate.setFechaInicio(notBefore);
+	        certificate.setFechaCaducidad(notAfter);
+	        certificate.setFechaAlta(new Date());
+	    }
+
+	    return repository.save(certificate);
+	}
+
+	
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.ICertificateService#certificateDtoToEntity(es.gob.fire.persistence.dto.CertificateDTO)
 	 */
@@ -180,11 +265,9 @@ public class CertificateService implements ICertificateService{
 
 		certificate.setIdCertificado(certificateDto.getIdCertificate());
 		certificate.setCertificateName(certificateDto.getAlias());
-		certificate.setCertPrincipal(certificateDto.getCertPrincipal());
-		certificate.setCertBackup(certificateDto.getCertBackup());
-		certificate.setHuellaPrincipal(certificateDto.getHuellaPrincipal());
-		certificate.setHuellaBackup(certificateDto.getHuellaBackup());
-
+		certificate.setCertificate(certificateDto.getCertificate());
+		certificate.setHuella(certificateDto.getHuella());
+		
 		return certificate;
 	}
 
@@ -198,13 +281,10 @@ public class CertificateService implements ICertificateService{
 
 		certificateDto.setIdCertificate(certificate.getIdCertificado());
 		certificateDto.setAlias(certificate.getCertificateName());
-		certificateDto.setCertPrincipal(certificate.getCertPrincipal());
-		certificateDto.setCertBackup(certificate.getCertBackup());
-		certificateDto.setHuellaPrincipal(certificate.getHuellaPrincipal());
-		certificateDto.setHuellaBackup(certificate.getHuellaBackup());
-		certificateDto.setCertPrincipalB64(certificate.getCertPrincipal());
-		certificateDto.setCertBackupB64(certificate.getCertBackup());
-
+		certificateDto.setCertificate(certificate.getCertificate());
+		certificateDto.setHuella(certificate.getHuella());
+		certificateDto.setCertificateB64(certificate.getCertificate());
+		
 		return certificateDto;
 	}
 
@@ -227,31 +307,16 @@ public class CertificateService implements ICertificateService{
 	@Override
 	public void getSubjectValuesForView(final List<Certificate> certificates) {
 
-		X509Certificate x509CertPrincipal = null;
-		X509Certificate x509CertBackup = null;
-
+		X509Certificate x509Certificate = null;
+		
 		for (final Certificate certificate : certificates) {
 			try {
 
-				if (certificate.getCertPrincipal() != null && !certificate.getCertPrincipal().isEmpty()) {
+				if (certificate.getCertificate() != null && !certificate.getCertificate().isEmpty()) {
 
-					x509CertPrincipal = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertPrincipal()))); //$NON-NLS-1$
+					x509Certificate = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertificate()))); //$NON-NLS-1$
 				} else {
-					x509CertPrincipal = null;
-				}
-
-			} catch (final IOException e) {
-				LOGGER.error("No se ha podido leer el certificado", e); //$NON-NLS-1$
-			} catch (final CertificateException e) {
-				LOGGER.error("Los datos proporcionados no se corresponden con un certificado", e); //$NON-NLS-1$
-			}
-
-			try {
-
-				if (certificate.getCertBackup() != null && !certificate.getCertBackup().isEmpty()) {
-					x509CertBackup = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertBackup()))); //$NON-NLS-1$
-				} else {
-					x509CertBackup = null;
+					x509Certificate = null;
 				}
 
 			} catch (final IOException e) {
@@ -262,26 +327,16 @@ public class CertificateService implements ICertificateService{
 
 			java.util.Date expDatePrincipal = new java.util.Date();
 
-			if (x509CertPrincipal != null) {
-				expDatePrincipal = x509CertPrincipal.getNotAfter();
-				final String certSubject = x509CertPrincipal.getSubjectX500Principal().getName();
+			if (x509Certificate != null) {
+				expDatePrincipal = x509Certificate.getNotAfter();
+				final String certSubject = x509Certificate.getSubjectX500Principal().getName();
 				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
 				final String[] txtCert = certSubject.split(","); //$NON-NLS-1$
-				certificate.setCertPrincipal(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
+				certificate.setCertificate(txtCert[0] + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
 			} else {
-				certificate.setCertPrincipal(""); //$NON-NLS-1$
+				certificate.setCertificate(""); //$NON-NLS-1$
 			}
-
-			if (x509CertBackup != null) {
-
-				expDatePrincipal = x509CertBackup.getNotAfter();
-				final String certSubject = x509CertBackup.getSubjectX500Principal().getName();
-				//String cnFieldBegin = certSubject.substring(certSubject.indexOf("CN"));
-				final String[] txtCert = certSubject.split(","); //$NON-NLS-1$
-				certificate.setCertBackup(txtCert[0] + "</br> Fecha de Caducidad=" + Utils.getStringDateFormat(expDatePrincipal)); //$NON-NLS-1$
-			} else {
-				certificate.setCertBackup(""); //$NON-NLS-1$
-			}
+			
 		}
 	}
 
@@ -298,7 +353,7 @@ public class CertificateService implements ICertificateService{
 		String txtCert = null;
 		if (cert != null) {
 			final Date expDate = cert.getNotAfter();
-			txtCert = cert.getSubjectX500Principal().getName() + ", Fecha de Caducidad=" + DateFormat.getInstance().format(expDate); //$NON-NLS-1$
+			txtCert = cert.getSubjectX500Principal().getName() + ", Fecha de Caducidad=" + Utils.getStringDateFormat(expDate); //$NON-NLS-1$
 		}
 
 		String certData = ""; //$NON-NLS-1$
@@ -339,4 +394,57 @@ public class CertificateService implements ICertificateService{
 
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IApplicationService#obtainZipWithCertificatesApp(java.util.List<Certificate>)
+	 */
+	@Override
+	public List<CertificateDTO> obtainAllCertificateToDTO(List<Certificate> listCertificate) {
+		List<CertificateDTO> listCertificateDTO = new ArrayList<>();
+		for (Certificate certificate : listCertificate) {
+			CertificateDTO certificateDTO = new CertificateDTO();
+			certificateDTO.setIdCertificate(certificate.getIdCertificado());
+			certificateDTO.setCertificateName(certificate.getCertificateName());
+			certificateDTO.setCertificate(certificate.getCertificate());
+			certificateDTO.setFechaAlta(certificate.getfechaAlta());
+			
+			java.util.Date expDate = certificate.getFechaCaducidad();
+			java.util.Date startDate = certificate.getFechaInicio();
+			java.util.Date dateNow = Calendar.getInstance().getTime();
+
+			if (dateNow.before(startDate)) {
+			    // El certificado aún no es válido
+			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV004));
+			} else if (dateNow.after(expDate)) {
+			    // El certificado está caducado
+			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV002));
+			} else {
+			    // El certificado es válido
+			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV001));
+			}
+			
+			certificateDTO.setCertificate(certificate.getSubject() + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDate));
+			
+			listCertificateDTO.add(certificateDTO);
+		}
+		return listCertificateDTO;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.persistence.services.IApplicationService#validateStatusCertificateInAfirmaWS(java.security.cert.X509Certificate)
+	 */
+	public VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate) throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException {
+		// Obtenemos la conexión con AfirmaWS
+		AfirmaConnector afirmaConnector = new AfirmaConnector();
+		Properties config = new Properties();
+		config.setProperty("afirma.appId", afirmaAppId);
+		config.setProperty("webservices.timeout", webServiceTimeout);
+		config.setProperty("webservices.endpoint", webServicesEndpoint);
+		config.setProperty("webservices.service.verifyCertificate", webServiceVerifyCertificate);
+		
+		afirmaConnector.init(config);
+		
+		return Verify.verifyCertificate(afirmaConnector, x509Certificate, config.getProperty(PROP_APPID));
+	}
 }

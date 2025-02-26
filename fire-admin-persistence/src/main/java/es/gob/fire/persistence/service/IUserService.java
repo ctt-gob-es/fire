@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>15/06/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 15/06/2018.
+ * @version 1.1, 24/02/2025.
  */
 package es.gob.fire.persistence.service;
 import java.util.List;
@@ -30,14 +30,13 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
-import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
 
 /**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p>Platform for detection and validation of certificates recognized in European TSL.</p>
- * @version 1.0, 15/06/2018.
+ * @version 1.1, 24/02/2025.
  */
 public interface IUserService {
 	/**
@@ -46,21 +45,6 @@ public interface IUserService {
 	 * @return {@link User}
 	 */
 	User getUserByUserId(Long userId);
-
-	/**
-	 * Method that obtains an user by its user name.
-	 * @param userName The user login.
-	 * @return {@link User}
-	 */
-	User getUserByUserName(String userName);
-
-	/**
-	 * Method that obtains an user by its user name or email.
-	 * @param userName The user login.
-	 * @param email The user email.
-	 * @return {@link User}
-	 */
-	User getUserByUserNameOrEmail(String userName, String email);
 
 	/**
 	 * Method that obtains an user by its email.
@@ -127,29 +111,18 @@ public interface IUserService {
 	 * @return {@link DataTablesOutput}
 	 */
 	DataTablesOutput<User> getAllUser(DataTablesInput input);
-
-	/**
-	 * Method that change the password of a user.
-	 * @param userPasswordDto a {@link UserPasswordDTO} with the information of the user.
-	 * @return {@link String} The result of the password change:
-	 * 		0: Change success
-	 * 	   -1: Old password and new password doesn't match
-	 *     -2: Error updating the user with new password
-	 */
-	String changeUserPassword(UserPasswordDTO userPasswordDto);
-
-	/**
-	 * Method that obtains a list of users by an email or username value.
-	 * @param userName The user login.
-	 * @param email The user email.
-	 * @return a {@link List<User>} with the information of all users.
-	 */
-	List<User> getAllUserByUserNameOrEmail(String userName, String email);
-
+	
 	/**
 	 * Method that obtains a list of users by an email value.
 	 * @param email The user email.
 	 * @return a {@link List<User>} with the information of all users.
 	 */
 	List<User> getAllUserByEmail(String email);
+	
+	/**
+	 * Method that obtains a user by an dni value.
+	 * @param dni The user dni.
+	 * @return a {@link User} with the information of user.
+	 */
+	User getUserByDni(String dniAdd);
 }

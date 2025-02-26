@@ -15,10 +15,8 @@
 					th:object="${certEditForm}" action="@{/saveeditcert}" method="post" enctype="multipart/form-data">
 										
 					<input type="hidden" id="idCertificate" th:field="*{idCertificate}"/>
-					<input type="hidden" id="certPrincipal" th:field="*{certPrincipal}"/>
-					<input type="hidden" id="certBackup" th:field="*{certBackup}"/>
-					<input type="hidden" id="certPrincipalB64" th:field="*{certPrincipalB64}"/>
-					<input type="hidden" id="certBackupB64" th:field="*{certBackupB64}"/>
+					<input type="hidden" id="certificate" th:field="*{certificate}"/>
+					<input type="hidden" id="certificateB64" th:field="*{certificateB64}"/>
 					
 					<div id="resultEditCert" data-dismiss="alert"></div>					
 					<div class="form-group">
@@ -30,56 +28,23 @@
 					</div>
 					<div class="form-row">
 						<div class="form-group col-md-8">
-							<label for="certFile1" class="col-form-label"
-									th:text="#{form.certificate.certificado1}"></label>
+							<label for="certFile" class="col-form-label"
+									th:text="#{form.certificate.certificado}"></label>
 								<div class="custom-file" id="customFile1" lang="es"> 
-									<input type="file" class="custom-file-input" id="certFile1" accept=".cer,.crt"
-										name="certFile1" th:field="*{certFile1}" aria-describedby="fileHelp">
+									<input type="file" class="custom-file-input" id="certFile" accept=".cer,.crt"
+										name="certFile" th:field="*{certFile}" aria-describedby="fileHelp">
 									<label class="custom-file-label" for="file"
 										th:text="#{form.certificate.file.choose}"></label>
-									<span id="certFile1_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 			
+									<span id="certFile_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 			
 								</div>
 								<div style="clear: both;" />
-						</div>
-						<div class="form-group col-md-4">
-							<div class="btn_align">
-								<button type="button" class="btn btn-primary" onclick="deleteCert('certFile1')">Eliminar certificado 1</button>
-							</div>
 						</div>
 					</div>
 					<div id="cert-prin" name="cert-prin" class="edit-txt" 
 					style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
 					 resize: none; background: rgb(245, 245, 245);">
 					</div>	
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<div class="form-row">
-						<div class="form-group col-md-8">
-							<label for="certFile2" class="col-form-label"
-									th:text="#{form.certificate.certificado2}"></label>
-								<div class="custom-file" id="customFile" lang="es">
-									<input type="file" class="custom-file-input" id="certFile2" accept=".cer,.crt"
-										name="certFile2" th:field="*{certFile2}" aria-describedby="fileHelp">
-									<label class="custom-file-label" for="file"
-										th:text="#{form.certificate.file.choose}"></label>
-									<span id="certFile2_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 		
-								</div>
-								<div style="clear: both;" />
-						</div>
-						<div class="form-group col-md-4">
-							<div class="btn_align">
-								<button type="button" class="btn btn-primary" onclick="deleteCert('certFile2')">Eliminar certificado 2</button>
-							</div>
-						</div>
-					</div>
-					<div id="cert-resp" name="cert-resp" class="edit-txt" 
-					style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
-					 resize: none; background: rgb(245, 245, 245);">
-						
-					</div>	
-
+				
 				</form>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default"
@@ -105,15 +70,14 @@ $(document)
 	$('#certEditModal').on('shown.bs.modal', function (e) {
 	
 		hide();
-		$("#cert-prin").html($("#certPrincipal").val());
-		$("#cert-resp").html($("#certBackup").val());
+		$("#cert-prin").html($("#certificate").val());
 		
 		/* var urlDataPart = 'data:text/plain;base64,';
 		
-		if ($("#certPrincipalB64").val() != null && $("#certPrincipalB64").val() != '' && $("#certPrincipalB64").val() != undefined) {
-			var urlDataFile = urlDataPart + $("#certPrincipalB64").val();
+		if ($("#certificateB64").val() != null && $("#certificateB64").val() != '' && $("#certificateB64").val() != undefined) {
+			var urlDataFile = urlDataPart + $("#certificateB64").val();
 			var alias =  $("#alias").val();
-			$("#certFile1").prop('files').push(dataURLtoFile(urlDataFile, alias + '_1.cer'));
+			$("#certFile").prop('files').push(dataURLtoFile(urlDataFile, alias + '_1.cer'));
 		}
 		
 		if ($("#certBackupB64").val() != null && $("#certBackupB64").val() != '' && $("#certBackupB64").val() != undefined) {
@@ -129,31 +93,21 @@ $(document)
 		
 		hide();
 		var formData = new FormData();
-	 	var file1 =  $('#certFile1').prop('files')[0];
+	 	var file =  $('#certFile').prop('files')[0];
 	 	
-	 	if (file1 == undefined) {
-	 		file1 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
+	 	if (file == undefined) {
+	 		file = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
 	 	}
-	 	
-	 	var file2 =  $('#certFile2').prop('files')[0];
-	 	
-	 	if (file2 == undefined) {
-			file2 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
-		}
 	 	
 	 	var id = event.target.id;
 	 	
-	 	formData.append("certFile1", file1);
-	 	formData.append("certFile2", file2);
+	 	formData.append("certFile", file);
 	 	formData.append("idField",id)
 	 	
 		//var data = new FormData($("#certEditForm")[0]);
 		var idResult;
-		if (id == "certFile1") {
+		if (id == "certFile") {
 			idResult = "cert-prin";
-			
-		} else if (id == "certFile2") {
-			idResult = "cert-resp";
 			
 		}
 		$.ajax(previewCertUrl,{
@@ -199,23 +153,16 @@ function saveEditCert() {
 	var saveeditcert = /*[[@{/saveeditcert}]]*/;
 	var formData = new FormData();
 	
- 	var file1 =  $('#certFile1').prop('files')[0];
+ 	var file =  $('#certFile').prop('files')[0];
  	
- 	if (file1 == undefined) {
- 		file1 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
+ 	if (file == undefined) {
+ 		file = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
  	}
- 	
- 	var file2 =  $('#certFile2').prop('files')[0];
- 	
- 	if (file2 == undefined) {
-		file2 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
-	}
  	
     var blob = new Blob([JSON.stringify($("#certEditForm").serializeJSON())], {type: "application/json"});
     
     formData.append('certEditForm', blob);
-    formData.append("certFile1", file1);
- 	formData.append("certFile2", file2);
+    formData.append("certFile", file);
  	
  	loading();
  	
@@ -263,9 +210,20 @@ function saveEditCert() {
  						});
  					  });
  				  }else{
- 					  
+ 					
  					 hide();
- 					 tableCertFire.row.add($(data.data)).draw(false);
+ 					// Encuentra la fila en la tabla usando una función de búsqueda
+  					var row = $('#certServiceTable').DataTable().row(function (idx, rowData, node) {
+  					    return rowData.idCertificate === data.data[0].idCertificate;
+  					});
+
+  					if (row.length) {
+  					    // Si la fila existe, actualiza los datos y redibuja la tabla
+  					    row.data(data.data[0]).invalidate().draw(false); // .invalidate() asegura que los cambios se reflejen
+  					} else {
+  					    // Si no existe, añade una nueva fila
+  					    $('#certServiceTable').DataTable().row.add(data.data[0]).draw(false);
+  					}
  				  
  					 $("#certEditForm")[0].reset();
  					 $('#certEditForm *').filter('span').each(function(){
@@ -304,35 +262,6 @@ function saveEditCert() {
  			});
  	  }
  }
- 
- function deleteCert(id) {
-	 
-	 hide();
-	 
-	 var idResult;
-	 var hiddenField;
-	 var hiddenField64;
-	 var fileField;
-	 
-	 if (id == "certFile1") {
-			idResult = "cert-prin";
-			hiddenField = "certPrincipal";
-			hiddenField64 = "certPrincipalB64";
-			fileField = "certFile1";
-			
-	 } else if (id == "certFile2") {
-			idResult = "cert-resp";
-			hiddenField = "certBackup";
-			hiddenField64 = "certBackupB64";
-			fileField = "certFile2";
-			
-	 }
-	 	 
-	 $("#" + hiddenField).val(null);
-	 $("#" + hiddenField64).val(null);
-	 $("#" + idResult).html('');
-	 $("#" + fileField).val(null);
-}
  
  function dataURLtoFile(dataurl, filename) {
 	 

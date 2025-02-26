@@ -1,0 +1,79 @@
+
+.bg-title{
+	background-color:#529ed2!important;
+	color:#e9ecef;
+	font-size: 16px;
+}
+
+.userLastAccessInfoParagraph {
+    text-align: center;
+    font-size: 0.9rem;
+    margin: 0.5rem;
+}
+
+.userLastAccessInfoParagraphValues {
+    font-weight: 700;
+    color: #6f7477;
+}
+
+.fa {
+	display: inline-block;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale
+}
+
+.fa-multiselect {
+
+	font: normal normal normal 14px/1 FontAwesome,Roboto, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale
+}
+
+.fa-key-multiselect-green:before {
+	content: "\f084";
+	margin-right: 5px;
+	color: #43e500;
+}
+
+.fa-key-multiselect-red:before {
+	content: "\f084";
+	margin-right: 5px;
+	color: red;
+}
+
+.fa-key-multiselect-black:before {
+	content: "\f084";
+	margin-right: 5px;
+	color: black;
+}
+
+.fa-key-multiselect-yellow:before {
+	content: "\f084";
+	margin-right: 5px;
+	color: #ffe000;
+}
+
+.mT-85{
+	margin-top: 85px !important;
+}
+
+.btn-custom-block {
+	background-color: #efefef;
+}
+
+.input-group-addon{
+	padding: 6px 12px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1;
+    color: #555;
+    text-align: center;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}

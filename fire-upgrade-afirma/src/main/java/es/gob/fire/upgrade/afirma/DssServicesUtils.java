@@ -261,4 +261,48 @@ final class DssServicesUtils {
 
         return dss.toString();
     }
+
+    /**
+     * Generates a DSS (Digital Signature Service) XML request for verifying a certificate 
+     * using the Afirma web service.
+     *
+     * <p>This method constructs an XML request following the DSS standard to verify the 
+     * status of a Base64-encoded X.509 certificate.</p>
+     *
+     * @param certificateB64 The Base64-encoded X.509 certificate to be verified.
+     * @param afirmaAppName The name of the Afirma application making the request.
+     * @return A {@link String} containing the XML request formatted according to the DSS specification.
+     */
+	public static String createDssAfirmaVerifyCertificate(String certificateB64, String afirmaAppName) {
+		// Creamos la peticion
+        final StringBuilder dss = new StringBuilder();
+        dss.append("<?xml version='1.0' encoding='UTF-8'?>");
+        dss.append("<dss:VerifyRequest Profile='urn:afirma:dss:1.0:profile:XSS' xmlns:dss='urn:oasis:names:tc:dss:1.0:core:schema' xmlns:ds='http://www.w3.org/2000/09/xmldsig#' xmlns:afxp='urn:afirma:dss:1.0:profile:XSS:schema' xmlns:ades='urn:oasis:names:tc:dss:1.0:profiles:AdES:schema#' xmlns:cmism='http://docs.oasis-open.org/ns/cmis/messaging/200908/' xmlns:vr='urn:oasis:names:tc:dss:1.0:profiles:verificationreport:schema#'>");
+        dss.append("<dss:OptionalInputs>");	
+        dss.append("<dss:ClaimedIdentity>");	
+        dss.append("<dss:Name>");	
+        dss.append(afirmaAppName);
+        dss.append("</dss:Name>");
+        dss.append("</dss:ClaimedIdentity>");
+        dss.append("<vr:ReturnVerificationReport>");
+        dss.append("<vr:CheckOptions>");
+        dss.append("<vr:CheckCertificateStatus>");
+        dss.append("true");
+        dss.append("</vr:CheckCertificateStatus>");
+        dss.append("</vr:CheckOptions>");
+        dss.append("</vr:ReturnVerificationReport>");
+        dss.append("</dss:OptionalInputs>");
+        dss.append("<dss:SignatureObject>");
+        dss.append("<dss:Other>");
+        dss.append("<ds:X509Data>");
+        dss.append("<ds:X509Certificate>");
+        dss.append(certificateB64);
+        dss.append("</ds:X509Certificate>");
+        dss.append("</ds:X509Data>");
+        dss.append("</dss:Other>");
+        dss.append("</dss:SignatureObject>");
+        dss.append("</dss:VerifyRequest>");
+        
+        return dss.toString();
+	}
 }

@@ -3,6 +3,7 @@ package es.gob.fire.persistence.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -11,12 +12,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -30,7 +31,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 /**
  * <p>Class that maps the <i>APPLICATION</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.0, 24/12/2020.
+ * @version 1.1, 27/01/2025.
  */
 @Entity
 @Table(name = "TB_APLICACIONES")
@@ -53,12 +54,6 @@ public class Application implements Serializable{
 	private String appName;
 
 	/**
-	 * Attribute that represents the certificate.
-	 */
-	private Certificate certificate;
-
-
-	/**
 	 * Attribute that represents the data.
 	 */
 	private Date fechaAltaApp;
@@ -67,12 +62,54 @@ public class Application implements Serializable{
 	  * Attribute that represents the habilitado.
 	 */
 	private boolean habilitado;
+	
+	/**
+	 * Attribute that represents the organism.
+	 */
+	private String organization;
+	
+	/**
+	 * Attribute that represents the DIR3 code.
+	 */
+	private String dir3Code;
 
 	 /**
 	  * Attribute that represents the header list for the validation method.
 	  */
 	private List<ApplicationResponsible> listApplicationResponsible;
+	
+	/**
+	 * Attribute that represents the header list for the validation method.
+	 */
+	private List<CertificatesApplication> listCertificatesApplication;
 
+	/**
+	 * Attribute that represents if the app has a custom provider configuration.
+	 */
+	private boolean customProvider;
+	
+	/**
+	 * Attribute that represents if the app has a custom size configuration.
+	 */
+	private boolean customSize;
+	
+    private List<ProviderApplication> providers;
+    
+    /**
+	 * Attribute that represents the maximum size of the documents for this application.
+	 */
+    private Long maxSizeDoc;
+    
+    /**
+	 * Attribute that represents the maximum size of the petitions for this application.
+	 */
+    private Long maxSizePetition;
+    
+    /**
+	 * Attribute that represents the maximum amount of documents for this application.
+	 */
+    private Long maxAmountDocs;
+	
 	/**
 	 * Gets the value of the attribute {@link #appId}.
 	 * @return the value of the attribute {@link #appId}.
@@ -138,25 +175,6 @@ public class Application implements Serializable{
 	}
 
 	/**
-	 * Gets the value of the attribute {@link #certificate}.
-	 * @return the value of the attribute {@link #certificate}.
-	 */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "FK_CERTIFICADO", nullable = false)
-	@JsonView(DataTablesOutput.View.class)
-	public Certificate getCertificate() {
-		return this.certificate;
-	}
-
-	/**
-	 * Sets the value of the attribute {@link #certificate}.
-	 * @param rolP The value for the attribute {@link #certificate}.
-	 */
-	public void setCertificate(final Certificate certificateP) {
-		this.certificate = certificateP;
-	}
-
-	/**
 	 * Gets the value of the attribute {@link #habilitado}.
 	 * @return the value of the attribute {@link #habilitado}.
 	 */
@@ -196,5 +214,138 @@ public class Application implements Serializable{
 	public void setListApplicationResponsible(final List<ApplicationResponsible> listApplicationResponsibleParam) {
 		// CHECKSTYLE:ON
 		this.listApplicationResponsible = listApplicationResponsibleParam;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #listCertificatesApplication}.
+	 * @return the value of the attribute {@link #listCertificatesApplication}.
+	 */
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	@OneToMany(mappedBy = "application", cascade = {CascadeType.ALL }, orphanRemoval = true, fetch = FetchType.LAZY)
+	public List<CertificatesApplication> getListCertificatesApplication() {
+		// CHECKSTYLE:ON
+		return this.listCertificatesApplication;
+	}
+	
+	/**
+	 * Sets the value of the attribute {@link #listCertificatesApplication}.
+	 * @param listCertificatesApplication The value for the attribute {@link #listCertificatesApplication}.
+	 */
+	// CHECKSTYLE:OFF -- Checkstyle rule "Design for Extension" is not applied
+	// because Hibernate JPA needs not final access methods.
+	public void setListCertificatesApplication(final List<CertificatesApplication> listCertificatesApplicationParam) {
+		// CHECKSTYLE:ON
+		this.listCertificatesApplication = listCertificatesApplicationParam;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #organization}.
+	 * @return the value of the attribute {@link #organization}.
+	 */
+
+	@Column(name = "ORGANIZATION", nullable = true, length = NumberConstants.NUM255, unique = false)
+	@Size(max = NumberConstants.NUM255)
+	public String getOrganization() {
+		return this.organization;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #organization}.
+	 * @param userNameP The value for the attribute {@link #organization}.
+	 */
+	public void setOrganization(final String organization) {
+		this.organization = organization;
+	}
+	
+	/**
+	 * Gets the value of the attribute {@link #dir3Code}.
+	 * @return the value of the attribute {@link #dir3Code}.
+	 */
+
+	@Column(name = "DIR3_CODE", nullable = true, length = NumberConstants.NUM50, unique = false)
+	@Size(max = NumberConstants.NUM50)
+	public String getDir3Code() {
+		return this.dir3Code;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dir3Code}.
+	 * @param userNameP The value for the attribute {@link #dir3Code}.
+	 */
+	public void setDir3Code(final String dir3Code) {
+		this.dir3Code = dir3Code;
+	}
+	
+	/**
+     * Gets the value of the attribute {@link #customProvider}.
+     * @return the value of the attribute {@link #customProvider}.
+     */
+    @Column(name = "PROVEEDOR_PERSONALIZADO", nullable = false, precision = 1)
+    @Type(type = "yes_no")
+    public Boolean getCustomProvider() {
+        return customProvider;
+    }
+    
+    /**
+	 * Sets the value of the attribute {@link #customProvider}.
+	 * @param userNameP The value for the attribute {@link #customProvider}.
+	 */
+	public void setCustomProvider(final Boolean customProvider) {
+		this.customProvider = customProvider;
+	}
+	
+	/**
+     * Gets the value of the attribute {@link #customSize}.
+     * @return the value of the attribute {@link #customSize}.
+     */
+    @Column(name = "TAMANO_PERSONALIZADO", nullable = false, precision = 1)
+    @Type(type = "yes_no")
+    public Boolean getCustomSize() {
+        return customSize;
+    }
+    
+    /**
+	 * Sets the value of the attribute {@link #customSize}.
+	 * @param userNameP The value for the attribute {@link #customSize}.
+	 */
+	public void setCustomSize(final Boolean customSize) {
+		this.customSize = customSize;
+	}
+
+	@OneToMany(mappedBy = "application", cascade = {CascadeType.ALL }, orphanRemoval = true, fetch = FetchType.LAZY)
+	public List<ProviderApplication> getProviders() {
+		return providers;
+	}
+
+	public void setProviders(List<ProviderApplication> providers) {
+		this.providers = providers;
+	}
+
+	@Column(name = "TAMANO_MAXIMO_DOCUMENTO", precision = NumberConstants.NUM19)
+	public Long getMaxSizeDoc() {
+		return maxSizeDoc;
+	}
+
+	public void setMaxSizeDoc(Long maxSizeDoc) {
+		this.maxSizeDoc = maxSizeDoc;
+	}
+	
+	@Column(name = "TAMANO_MAXIMO_PETICION", precision = NumberConstants.NUM19)
+	public Long getMaxSizePetition() {
+		return maxSizePetition;
+	}
+
+	public void setMaxSizePetition(Long maxSizePetition) {
+		this.maxSizePetition = maxSizePetition;
+	}
+	
+	@Column(name = "CANTIDAD_MAXIMA_DOCUMENTOS", precision = NumberConstants.NUM19)
+	public Long getMaxAmountDocs() {
+		return maxAmountDocs;
+	}
+
+	public void setMaxAmountDocs(Long maxAmountDocs) {
+		this.maxAmountDocs = maxAmountDocs;
 	}
 }

@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>21/06/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 21/05/2021.
+ * @version 1.3, 24/02/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import es.gob.fire.persistence.dto.RolDTO;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
+import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.dto.UserPasswordDTO;
 import es.gob.fire.persistence.entity.Rol;
 import es.gob.fire.persistence.entity.User;
@@ -47,8 +48,8 @@ import es.gob.fire.persistence.service.IUserService;
 
 /**
  * <p>Class that manages the requests related to the Users administration.</p>
- * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.1, 21/05/2021.
+ * <b>Project:</b><p></p>
+ * @version 1.3, 24/02/2025.
  */
 @Controller
 public class UserController {
@@ -60,9 +61,18 @@ public class UserController {
 	@Autowired
 	private IUserService userService;
 	
+	/**
+	 * Attribute that represents the internationalization to messages.
+	 */
 	@Autowired
     private MessageSource messageSource;
 
+	/**
+	 * Attribute that represents the DTO to transport information about user logged.
+	 */
+	@Autowired
+	private UserLoggedDTO userLoggedDTO;
+	
 	/**
 	 * Method that maps the list users web requests to the controller and
 	 * forwards the list of users to the view.
@@ -96,41 +106,24 @@ public class UserController {
 	}
 
 	/**
-	 * Method that opens the modal form password.
-	 * @param username String that represents the user's name
-	 * @param model view Model object
-	 * @return String that represents the navigation HTML fragment
-	 */
-	@RequestMapping(value = "menupass")
-	public String menuPass(@RequestParam("username") final String username, final Model model) {
-		final User user = this.userService.getUserByUserName(username);
-		final UserPasswordDTO userFormPassword = new UserPasswordDTO();
-
-		userFormPassword.setIdUser(user.getUserId());
-
-		model.addAttribute("userFormPassword", userFormPassword);
-		return "modal/userFormPass.html";
-	}
-
-	/**
 	 * Method that opens the modal form user edit.
 	 * @param username String that represents the user's name
 	 * @param model view Model object
 	 * @return String that represents the navigation HTML fragment
 	 */
 	@RequestMapping(value = "menuedit")
-	public String menuEdit(@RequestParam("username") final String username, final Model model, Locale locale) {
-		 final User user = this.userService.getUserByUserName(username);
+	public String menuEdit(@RequestParam("email") final String email, final Model model, Locale locale) {
+		 final User user = this.userService.getUserByEmail(email);
 		 final UserEditDTO userformedit = new UserEditDTO();
 
 		userformedit.setIdUserFireEdit(user.getUserId());
 		userformedit.setNameEdit(user.getName());
 		userformedit.setSurnamesEdit(user.getSurnames());
 		userformedit.setEmailEdit(user.getEmail());
-		userformedit.setUsernameEdit(user.getUserName());
 		userformedit.setRolId(user.getRol().getRolId());
 		userformedit.setTelfEdit(user.getPhone());
-
+		userformedit.setDniEdit(user.getDni());
+		
 		model.addAttribute("listRoles", loadRoles(locale));
 		model.addAttribute("userformedit", userformedit);
 		return "modal/userFormEdit.html";
@@ -183,11 +176,37 @@ public class UserController {
 	}
 	
 	@RequestMapping(value = "menuDeleteUser")
-	public String loadConfirmDeleteUser(@RequestParam("username") final String username, Long index, final Model model, Locale locale) {
-		User user = this.userService.getUserByUserName(username);
+	public String loadConfirmDeleteUser(@RequestParam("email") final String email, Long index, final Model model, Locale locale) {
+		User user = this.userService.getUserByEmail(email);
 		model.addAttribute("userDeleteForm", user);
 		model.addAttribute("tableIndexRow", index);
 		return "modal/userDelete.html";
+	}
+	
+	/**
+	 * Handles the GET request to retrieve and display the user's last access information in a modal.
+	 * 
+	 * @param idUser The ID of the user whose last access information is being retrieved.
+	 * @param model The Spring Model object to which attributes are added for rendering in the view.
+	 * @return The name of the view template to be rendered, "modal/inicio/userLastAccess.html".
+	 * 
+	 */
+	@RequestMapping(value = "userLastAccess", method = { RequestMethod.GET })
+	public String getUserLastAccessModal(final Model model) {
+		// Obtain the date
+	    String formattedLastAccessDate = userLoggedDTO.getFecUltimoAcceso().split(" ")[0];
+	    
+	    // Obtain the time
+	    String formattedLastAccessTime = userLoggedDTO.getFecUltimoAcceso().split(" ")[1];
+
+	    //Format the user name
+	    String userName = userLoggedDTO.getName() + " " + userLoggedDTO.getSurnames();
+	    
+		model.addAttribute("userName", userName);
+		model.addAttribute("formattedLastAccessDate", formattedLastAccessDate);
+	    model.addAttribute("formattedLastAccessTime", formattedLastAccessTime);
+	    
+		return "modal/inicio/userLastAccess.html";
 	}
 
 }

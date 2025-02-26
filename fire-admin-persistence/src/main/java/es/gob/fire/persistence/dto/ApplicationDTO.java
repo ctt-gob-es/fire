@@ -25,6 +25,7 @@
 package es.gob.fire.persistence.dto;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -72,6 +73,56 @@ public class ApplicationDTO {
 	 * Attribute that represents index of the row of the selected application.
 	 */
 	private String rowIndexApp;
+	
+	/**
+	 * Attribute that represents the value of the organism in the form.
+	 */
+	private String organization;
+	
+	/**
+	 * Attribute that represents the value of the dir3 code in the form.
+	 */
+	private String dir3Code;
+	
+	/**
+	 * Attribute that represents the value of the input customProvider of the application in the form.
+	 */
+	private boolean customProvider;
+	
+	/**
+	 * Attribute that represents the value of the input customSize of the application in the form.
+	 */
+	private boolean customSize;
+	
+	/** 
+	 * Lista de IDs de usuarios seleccionados 
+	 */
+    private String idUsersSelected;
+
+    /** 
+     * Lista de IDs de certificados seleccionados
+     */
+    private String idCertificatesSelected;
+	
+	/** 
+	 * Lista de proveedores personalizados
+	 */
+    private List<ProviderApplicationDTO> customProviders;
+    
+    /**
+	 * Attribute that represents the maximum size of the documents for this application.
+	 */
+    private Long maxSizeDoc;
+    
+    /**
+	 * Attribute that represents the maximum size of the petitions for this application.
+	 */
+    private Long maxSizePetition;
+    
+    /**
+	 * Attribute that represents the maximum amount of documents for this application.
+	 */
+    private Long maxAmountDocs;
 
 	/**
 	 * Gets the value of the attribute {@link #appId}.
@@ -176,5 +227,84 @@ public class ApplicationDTO {
 		this.rowIndexApp = rowIndexApp;
 	}
 
+	public String getOrganization() {
+		return organization;
+	}
 
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
+
+	public String getDir3Code() {
+		return dir3Code;
+	}
+
+	public void setDir3Code(String dir3Code) {
+		this.dir3Code = dir3Code;
+	}
+
+
+	public boolean isCustomProvider() {
+		return customProvider;
+	}
+
+	public void setCustomProvider(boolean customProvider) {
+		this.customProvider = customProvider;
+	}
+
+	public boolean isCustomSize() {
+		return customSize;
+	}
+
+	public void setCustomSize(boolean customSize) {
+		this.customSize = customSize;
+	}
+	
+	public String getIdUsersSelected() { 
+		return idUsersSelected; 
+	}
+	
+    public void setIdUsersSelected(String idUsersSelected) { 
+    	this.idUsersSelected = idUsersSelected; 
+    }
+
+    public String getIdCertificatesSelected() { 
+    	return idCertificatesSelected; 
+    }
+    
+    public void setIdCertificatesSelected(String idCertificatesSelected) { 
+    	this.idCertificatesSelected = idCertificatesSelected; 
+    }
+	
+	public List<ProviderApplicationDTO> getCustomProviders() { 
+		return customProviders; 
+	}
+	
+    public void setCustomProviders(List<ProviderApplicationDTO> customProviders) { 
+    	this.customProviders = customProviders; 
+    }
+
+	public Long getMaxSizeDoc() {
+		return maxSizeDoc;
+	}
+
+	public void setMaxSizeDoc(Long maxSizeDoc) {
+		this.maxSizeDoc = maxSizeDoc;
+	}
+
+	public Long getMaxSizePetition() {
+		return maxSizePetition;
+	}
+
+	public void setMaxSizePetition(Long maxSizePetition) {
+		this.maxSizePetition = maxSizePetition;
+	}
+
+	public Long getMaxAmountDocs() {
+		return maxAmountDocs;
+	}
+
+	public void setMaxAmountDocs(Long maxAmountDocs) {
+		this.maxAmountDocs = maxAmountDocs;
+	}
 }

@@ -15,10 +15,8 @@
 					th:object="${certViewForm}" action="#" method="post" enctype="multipart/form-data">
 										
 					<input type="hidden" id="idCertificate" th:field="*{idCertificate}"/>
-					<input type="hidden" id="certPrincipal" th:field="*{certPrincipal}"/>
-					<input type="hidden" id="certBackup" th:field="*{certBackup}"/>
-					<input type="hidden" id="certPrincipalB64" th:field="*{certPrincipalB64}"/>
-					<input type="hidden" id="certBackupB64" th:field="*{certBackupB64}"/>
+					<input type="hidden" id="certificate" th:field="*{certificate}"/>
+					<input type="hidden" id="certificateB64" th:field="*{certificateB64}"/>
 												
 					<div class="form-group">
 						<label for="alias" class="col-form-label"
@@ -29,33 +27,17 @@
 					</div>
 					<div class="form-row">
 						<div class="form-group col-md-10">
-								<div th:if= "${certPrincipal != '' && certPrincipal != null}" class="btn_align">
-									<button type="button" class="btn btn-primary" onclick="downLoadCert('certPrincipalB64','1')">Descargar certificado 1</button>
+								<div th:if= "${certificate != '' && certificate != null}" class="btn_align">
+									<button type="button" class="btn btn-primary" onclick="downLoadCert('certificateB64','1')">Descargar certificado</button>
 								</div>
 						</div>
 						
 
 					</div>
-					<div th:if= "${certPrincipal != '' && certPrincipal != null}" id="cert-prin" name="cert-prin" class="edit-txt" 
+					<div th:if= "${certificate != '' && certificate != null}" id="cert-prin" name="cert-prin" class="edit-txt" 
 						style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
 					 	resize: none; background: rgb(245, 245, 245);">
 					</div>	
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<div class="form-row">
-						<div class="form-group col-md-10">
-							<div th:if= "${certBackup != '' && certBackup != null}" class="btn_align">
-								<button type="button" class="btn btn-primary" onclick="downLoadCert('certBackupB64','2')">Descargar certificado 2</button>
-							</div>
-						</div>
-						
-					</div>
-					<div th:if= "${certBackup != '' && certBackup != null}" id="cert-resp" name="cert-resp" class="edit-txt" 
-						style="width: 100%; height: 8em; overflow-y: auto; margin-top: 3px;
-					 	resize: none; background: rgb(245, 245, 245);">
-					</div>
 					<td></td>
 					<td></td>
 					<td></td>
@@ -93,8 +75,7 @@
 $('#certViewModal').on('shown.bs.modal', function (e) {
 	
 	hide();
-	$("#cert-prin").html($("#certPrincipal").val());
-	$("#cert-resp").html($("#certBackup").val());
+	$("#cert-prin").html($("#certificate").val());
 	
 	var idCertificado = $("#idCertificate").val();
 	var getCertApps = /*[[@{/certappdatatable}]]*/;
@@ -135,31 +116,21 @@ $('#certViewModal').on('shown.bs.modal', function (e) {
 		
 		hide();
 		var formData = new FormData();
-	 	var file1 =  $('#certFile1').prop('files')[0];
+	 	var file =  $('#certFile').prop('files')[0];
 	 	
-	 	if (file1 == undefined) {
-	 		file1 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
+	 	if (file == undefined) {
+	 		file = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
 	 	}
-	 	
-	 	var file2 =  $('#certFile2').prop('files')[0];
-	 	
-	 	if (file2 == undefined) {
-			file2 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
-		}
 	 	
 	 	var id = event.target.id;
 	 	
-	 	formData.append("certFile1", file1);
-	 	formData.append("certFile2", file2);
+	 	formData.append("certFile", file);
 	 	formData.append("idField",id)
 	 	
 		//var data = new FormData($("#certViewForm")[0]);
 		var idResult;
-		if (id == "certFile1") {
+		if (id == "certFile") {
 			idResult = "cert-prin";
-			
-		} else if (id == "certFile2") {
-			idResult = "cert-resp";
 			
 		}
 		$.ajax(previewCertUrl,{

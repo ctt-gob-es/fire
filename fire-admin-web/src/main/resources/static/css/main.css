@@ -568,3 +568,7 @@ iframe {
     padding: 1rem;
     margin-top: 20px;
 }
+
+.modal-body-applicationForm {
+	padding: 1rem 2.5rem !important;
+}

@@ -26,9 +26,11 @@ public final class AfirmaConnector {
     public static final String SIGNUPGRADE_OPERATION_UPGRADE = "verify"; //$NON-NLS-1$
     public static final String SIGNUPGRADE_OPERATION_VERIFY = "verify"; //$NON-NLS-1$
     public static final String RECOVERSIGN_OPERATION_ASYNC_RECOVER = "getProcessResponse"; //$NON-NLS-1$
+    public static final String VERIFYCERTIFICATE_OPERATION_VERIFY = "verify"; //$NON-NLS-1$
 
     private String signUpgradeService;
     private String recoverSignatureService;
+    private String dssAfirmaVerifyCertificate;
 
     private WebServiceInvoker wsInvoker;
 
@@ -45,6 +47,7 @@ public final class AfirmaConnector {
 
         this.signUpgradeService = wsConfig.getServiceVerify();
         this.recoverSignatureService = wsConfig.getServiceRecovery();
+        this.dssAfirmaVerifyCertificate = wsConfig.getServiceVerifyCertificate();
     }
 
     /**
@@ -107,4 +110,14 @@ public final class AfirmaConnector {
     byte[] recoverSignatureAsync(final String inputDss) throws WSServiceInvokerException {
     	return doPlatformCall(inputDss, this.recoverSignatureService, RECOVERSIGN_OPERATION_ASYNC_RECOVER);
     }
+
+    /**
+     * Realiza una petici&oacute;n para verificar el estado de un certificado en la Plataforma de @firma.
+     * @param inputDss Mensaje a enviar.
+     * @return Respuesta del servicio.
+     * @throws WSServiceInvokerException Cuando ocurre un error en la llamada.
+     */
+	byte[] verifyCertificate(String inputDss) throws WSServiceInvokerException {
+		return doPlatformCall(inputDss, this.dssAfirmaVerifyCertificate, VERIFYCERTIFICATE_OPERATION_VERIFY);
+	}
 }
