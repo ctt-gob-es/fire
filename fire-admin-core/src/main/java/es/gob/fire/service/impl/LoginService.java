@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 24/02/2025.
+ * @version 1.3, 04/03/2025.
  */
 package es.gob.fire.service.impl;
 
@@ -77,7 +77,7 @@ import es.gob.fire.web.authentication.DniAuthenticationToken;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p></p>
- * @version 1.2, 24/02/2025.
+ * @version 1.3, 04/03/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -173,7 +173,7 @@ public class LoginService implements ILoginService {
 
             return connection.getResponseCode() == NumberConstants.NUM200;
         } catch (final IOException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error(e);
             return false;
         } finally {
             if (connection != null) {
@@ -220,7 +220,8 @@ public class LoginService implements ILoginService {
 			final String passTrustStoreUsers = "changeit";
 			trustStoreUsers = UtilsKeystore.loadTrustStore(this.confCertPathTruststoreIssuers, UtilsKeystore.JKS, passTrustStoreUsers);
 		} catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException e) {
-		    throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008), e);
+		    throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
 		}
 		return trustStoreUsers;
 	}
@@ -247,7 +248,8 @@ public class LoginService implements ILoginService {
     			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML010));
     		}
     	} catch (final KeyStoreException e) {
-    		throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
+    		LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008), e);
+    		throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
 		}
 
 		return issuerCert;
@@ -262,7 +264,8 @@ public class LoginService implements ILoginService {
     	try {
     		UtilsKeystore.verify(certificate, issuerCert);
 		} catch (InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException e) {
-			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML009));
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML009), e);
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
 		}
 	}
 

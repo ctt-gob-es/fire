@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>1.0, 27/01/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.4, 24/02/2025.
+ * @version 1.5, 04/03/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -41,8 +41,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -59,6 +57,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ibm.icu.util.Calendar;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
@@ -80,15 +79,17 @@ import es.gob.fire.web.exception.WebAdminException;
  *
  * </p>
  *
- * @version 1.4, 24/02/2025.
+ * @version 1.5, 04/03/2025.
  */
 @Controller
 public class LoginController {
 
 	private static final String PARAM_SIGNATUREB64 = "signatureBase64";
 
-	/** The Constant LOG. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
+	/**
+	 * Attribute that represents the object that manages the log of the class.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(LoginController.class);
 
 	/**
 	 * Attribute that represent a property configure in admin_config.properties
@@ -308,10 +309,11 @@ public class LoginController {
 	        } else if (e instanceof KeyStoreException) {
 	        	msgerror = e.getMessage();
 	        } else if (e instanceof BadCredentialsException) {
-	        	LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
+	        	LOGGER.error(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
 	        	msgerror = e.getMessage();
 	        } else {
-	            msgerror = e.getMessage();
+	        	LOGGER.error(e);
+	            msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015);
 	        }
 
 	        model.addAttribute("errorMessage", msgerror);

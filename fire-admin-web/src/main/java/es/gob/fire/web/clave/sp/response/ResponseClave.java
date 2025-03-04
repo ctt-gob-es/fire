@@ -9,8 +9,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import es.gob.fire.commons.log.Logger;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.entity.User;
@@ -34,6 +33,7 @@ import es.gob.fire.web.clave.sp.utils.Constants;
 import es.gob.fire.web.clave.sp.utils.SPConfig;
 import es.gob.fire.web.clave.sp.utils.SessionHolder;
 import es.gob.fire.web.config.WebSecurityConfig;
+import es.gob.fire.web.controller.LoginController;
 import eu.eidas.auth.commons.EidasStringUtil;
 import eu.eidas.auth.commons.attribute.AttributeDefinition;
 import eu.eidas.auth.commons.attribute.AttributeValue;
@@ -45,8 +45,10 @@ import eu.eidas.engine.exceptions.EIDASSAMLEngineException;
 @Controller
 public class ResponseClave {
 	
-	/** The Constant LOG. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ResponseClave.class);
+	/**
+	 * Attribute that represents the object that manages the log of the class.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(LoginController.class);
 
 	@Autowired
 	private IUserService iUserService;
@@ -110,7 +112,8 @@ public class ResponseClave {
 			model.addAttribute("errorMessage", e.getMessage());
 			return "login.html";
 		}catch (Exception e) {
-			model.addAttribute("errorMessage", e.getMessage());
+			LOGGER.error(e);
+			model.addAttribute("errorMessage", Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
 			return "login.html";
 		}
     }
