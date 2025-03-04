@@ -88,24 +88,6 @@ public class CertificateService implements ICertificateService{
 	private static final String PROP_APPID = "afirma.appId"; //$NON-NLS-1$
 	
 	/**
-	 * Constant that represents the afirma appId property.
-	 */
-	@Value("${afirma.appId}")
-	private String afirmaAppId;
-	
-	/**
-	 * Constant that represents the webservices timeout property.
-	 */
-	@Value("${webservices.timeout}")
-	private String webServiceTimeout;
-	
-	/**
-	 * Constant that represents the webservices endpoint property.
-	 */
-	@Value("${webservices.endpoint}")
-	private String webServicesEndpoint;
-	
-	/**
 	 * Constant that represents the webservices verify certificate property.
 	 */
 	@Value("${webservices.service.verifyCertificate}")
