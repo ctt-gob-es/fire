@@ -88,7 +88,7 @@ public class LoginService implements ILoginService {
 	 */
 	private static final Logger LOGGER = Logger.getLogger(LoginService.class);
 	
-	@Value("${conf.cert.path.truestore.issuers}")
+	@Value("${conf.cert.path.truststore.issuers}")
 	private String confCertPathTruestoreIssuers;
 	
 	/**
