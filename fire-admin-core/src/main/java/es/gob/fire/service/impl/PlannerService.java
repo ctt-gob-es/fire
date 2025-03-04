@@ -20,11 +20,13 @@
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * <b>Date:</b><p>03/10/2020.</p>
  * @author Gobierno de España.
- * @version 1.3, 13/06/2023.
+ * @version 1.4, 04/03/2025.
  */
 package es.gob.fire.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,15 +36,19 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.ConstantsDTO;
+import es.gob.fire.persistence.entity.CPlannerType;
 import es.gob.fire.persistence.entity.Planner;
 import es.gob.fire.persistence.repository.PlannerRepository;
+import es.gob.fire.service.ICPlannerTypeService;
 import es.gob.fire.service.IPlannerService;
 
 /**
  * <p>Class that implements the communication with the operations of the persistence layer for Planner.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI
  * certificates and electronic signature.</p>
- * @version 1.3, 13/06/2023.
+ * @version 1.4, 04/03/2025.
  */
 @Service("plannerService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -53,6 +59,12 @@ public class PlannerService implements IPlannerService {
 	 */
 	@Autowired
 	private PlannerRepository repository;
+	
+	/**
+	 * Attribute that represents the service object for accessing the repository.
+	 */
+	@Autowired
+	private ICPlannerTypeService iCPlannerTypeService;
 	
 	/**
 	 * {@inheritDoc}
@@ -95,4 +107,29 @@ public class PlannerService implements IPlannerService {
 
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @see es.gob.fire.service.IPlannerService#loadTypePlanner()
+	 */
+	public List<ConstantsDTO> loadTypePlanner() {
+		List<ConstantsDTO> listPlannerType = new ArrayList<ConstantsDTO>();
+		// obtenemos los tipos de planificadores.
+		List<CPlannerType> listCPlannerType = iCPlannerTypeService.getAllPlannerType();
+		for (CPlannerType typePlanner: listCPlannerType) {
+			ConstantsDTO item = new ConstantsDTO(typePlanner.getIdPlannerType(), getConstantsValue(typePlanner.getTokenName()));
+			listPlannerType.add(item);
+		}
+
+		return listPlannerType;
+	}
+	
+	/**
+	 * Method that gets string constant from multilanguage file.
+	 *
+	 * @param key Key for getting constant string from multilanguage file.
+	 * @return Constants string.
+	 */
+	private String getConstantsValue(String key) {
+		return Language.getResPersistenceConstants(key);
+	}
 }

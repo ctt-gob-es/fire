@@ -1,0 +1,281 @@
+<div class="container-fluid">
+	<h4 class="c-grey-900 mT-10 mB-30" th:text="#{ws.afirma.title}"></h4>
+	<div class="row gap-20 masonry pos-r">
+		<div class="masonry-item col-md-10">
+			<div class="bgc-white p-20 bd">
+				<h4 class="c-grey-900 mB-20" th:text="#{ws.afirma.title}"></h4>
+				<form name="altEditor-form" role="form" id="serverAfirmaFormId"	th:object="${serverAfirmaDTO}">
+					<div id="messageWsAfirmaFormId" role="alert"></div>
+					<input type='hidden' class='primarykey' id="idServerAfirma" th:field="*{idServerAfirma}">
+					<input type="hidden" id="keystoreB64" th:field="*{keystoreB64}"/>
+					
+					<!-- URL -->	
+					<div class="form-group row">
+						<label for="urlServerId" class="col-sm-3" th:text="#{ws.afirma.field.url}"></label>
+						<div class="col-sm-9">
+							<input type="text" id="urlServerId" th:field="*{urlServer}" style="overflow:hidden; margin-left: -15px;" class="form-control"/>
+							<span id="urlServerId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;" ></span>
+						</div>
+					</div>
+					<!-- Timeout -->	
+					<div class="form-group row">
+						<label for="connectionTimeoutId" class="col-sm-3" th:text="#{ws.afirma.field.timeout}"></label>
+						<div class="col-sm-2">
+							<input type="number" id="timeoutId" th:field="*{timeout}" style="overflow:hidden; margin-left: -15px;" class="form-control" min=1 />
+							<span id="timeoutId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;"></span>
+						</div>
+					</div>
+					<!-- Application -->	
+					<div class="form-group row">
+						<label for="applicationId" class="col-sm-3" th:text="#{ws.afirma.field.appName}"></label>
+						<div class="col-sm-4">
+							<input  type="text" id="nameAppId" th:field="*{nameApp}" style="overflow:hidden; margin-left: -15px;" class="form-control"/>
+							<span id="nameAppId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;"></span>
+							</div>
+					</div>
+					<!-- Autenticacion -->
+						<div class="form-group row">
+							<label for="authenticationId" th:text="#{ws.afirma.field.authentication}" class="col-sm-3"></label>
+							<select id="authenticationId" class="col-sm-3 form-control"
+								th:field="*{idAuthenticationType}">
+								<option th:each="at: ${listCAuthenticationTypeDTO}" th:value="${at.idAuthenticationType}" th:text="${at.value}" th:selected="${idAuthenticationType == at.idAuthenticationType}" />
+							</select>
+						</div>
+						<!-- Usuario -->	
+						<div class="form-group row">
+							<label for="userId" class="col-sm-3" th:text="#{ws.afirma.field.user}"></label>
+							<div class="col-sm-4">
+								<input  type="text" id="userId" th:field="*{user}" style="overflow:hidden; margin-left: -15px;" class="form-control" th:readonly="*{disabledUserPass}"/>
+								<span id="userId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;" ></span>
+							</div>
+						</div>
+						<!-- Password -->
+						<div class="form-group row">
+							<label for="password" class="col-sm-3" th:text="#{ws.afirma.field.password}"></label>
+							<div class="col-sm-4">
+								<input type="password" name="password" id="password" th:value="*{password}" style="overflow:hidden; margin-left: -15px;" class="form-control" th:readonly="*{disabledUserPass}" />
+								<span id="password_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;" ></span>
+							</div>
+						</div>
+						<!-- Keystore -->
+						<div class="form-group row">
+						    <label for="keystoreFile" class="col-sm-3" th:text="#{ws.afirma.field.keystore}"></label>
+						    <div class="col-sm-6 custom-file">
+								<input type="file" class="custom-file-input" id="keystoreFile" accept=".p12" name="keystoreFile" th:field="*{keystoreFile}" aria-describedby="fileHelp" th:disabled="*{disabledKeystore}">
+						        <label class="custom-file-label" for="keystoreFile" th:text="#{ws.afirma.field.keystore.file.choose}"></label>
+						        <span id="keystoreFile_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left: -15px;"></span>
+							</div>
+						</div>
+						
+						<!-- Subject -->
+						<div class="form-group row">
+						    <div class="col-sm-6">
+						        <div id="subjectContainer" name="subjectContainer" class="offset-sm-6 edit-txt" 
+						            style="width: 105%; margin-top:12px; height: 8em; overflow-y: auto; background: rgb(245, 245, 245); 
+						                   border: 1px solid #ccc; padding: 5px;">
+						            <textarea id="subject" name="subject" th:text="*{subject}" readonly
+						                style="white-space: pre-wrap; word-wrap: break-word; font-family: monospace; 
+						                       margin: 0; padding: 0; border: none; background: transparent; width: 100%; height: 100%; 
+						                       resize: none; outline: none;">
+						            </textarea>
+						        </div>
+						    </div>
+						</div>
+						<!-- Descargar certificado -->
+						<div class="form-group row" id="idDownLoadCert" name="idDownLoadCert"
+						     th:style="*{keystoreB64 != '' && keystoreB64 != null ? 'display:block;' : 'display:none;'}">
+						    <div class="col-sm-3"></div>
+						    <div class="col-sm-6">
+						        <button type="button" class="btn btn-primary" onclick="downLoadCert()" style="margin-left: -15px;">
+						            Descargar certificado
+						        </button>
+						    </div>
+						</div>
+
+						<!-- Password Keystore -->
+						<div class="form-group row">
+							<label for="password" class="col-sm-3" th:text="#{ws.afirma.field.keystore.password}"></label>
+							<div class="col-sm-4">
+								<input type="password" name="passwordKeystore" id="passwordKeystore" th:value="*{passwordKeystore}" style="overflow:hidden; margin-left: -15px;" class="form-control" th:readonly="*{disabledKeystore}" />
+								<span id="passwordKeystore_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left: -15px;"></span>
+							</div>
+						</div>
+					</form>
+				<div class="peer">
+					<button id="updateWsAfirmaBtn" type="submit" th:text="#{ws.afirma.btn.update}" class="btn btn-primary"></button>
+				</div>
+			</div>
+		</div>
+	</div>			
+</div>
+<script th:inline="javascript" type="text/javascript">
+	$(document).ready(function() {
+		$("#authenticationId").change(function(){
+			if($("#authenticationId").val() == 2){
+				$('#userId').attr('readonly', true);
+	 			$('#password').attr('readonly', true);
+	 			$('#keystoreFile').attr('readonly', false);
+	 			$('#passwordKeystore').attr('readonly', false);
+	 			$('#userId').attr('disabled', true);
+	 			$('#password').attr('disabled', true);
+	 			$('#keystoreFile').attr('disabled', false);
+	 			$('#passwordKeystore').attr('disabled', false);
+	 			$('#userId').val("");
+	 			$('#password').val("");
+	 		} else if($("#authenticationId").val() == 1){
+	 			$('#userId').attr('readonly', false);
+	 			$('#password').attr('readonly', false);
+	 			$('#keystoreFile').attr('readonly', true);
+	 			$('#passwordKeystore').attr('readonly', true);
+	 			$('#userId').attr('disabled', false);
+	 			$('#password').attr('disabled', false);
+	 			$('#keystoreFile').attr('disabled', true);
+	 			$('#passwordKeystore').attr('disabled', true);
+	 			$("#keystoreFile").val("");
+	 			$('#passwordKeystore').val("");
+	 			var selectFile = /*[[#{ws.afirma.field.keystore.file.choose}]]*/;
+	 			$(".custom-file-label").text(selectFile);
+	 			$('#subject').val("");
+	 		} else if($("#authenticationId").val() == 0){
+	 			$('#userId').attr('readonly', true);
+	 			$('#password').attr('readonly', true);
+	 			$('#keystoreFile').attr('readonly', true);
+	 			$('#passwordKeystore').attr('readonly', true);
+	 			$('#userId').attr('disabled', true);
+	 			$('#password').attr('disabled', true);
+	 			$('#keystoreFile').attr('disabled', true);
+	 			$('#passwordKeystore').attr('disabled', true);
+	 			$('#userId').val("");
+	 			$('#password').val("");
+	 			$("#keystoreFile").val("");
+	 			var selectFile = /*[[#{ws.afirma.field.keystore.file.choose}]]*/;
+	 			$(".custom-file-label").text(selectFile);
+	 			$('#subject').val("");
+	 		}
+		});
+		
+		$("#keystoreFile").change(function() {
+			var selectFile = /*[[#{ws.afirma.field.keystore.file.choose}]]*/;
+			
+			var file = $(this).prop("files")[0]; // Obtenemos el archivo seleccionado
+		    if (file) {
+		        $(this).next(".custom-file-label").text(file.name); // Actualizamos el label con el nombre del archivo
+		    } else {
+		        $(this).next(".custom-file-label").text(selectFile); // Texto por defecto
+		    }
+		});
+
+		
+		$("#updateWsAfirmaBtn").click(function (event){
+			event.preventDefault();
+			
+			cleanSpan();
+			
+			var formData = new FormData();
+			
+		 	var file =  $('#keystoreFile').prop('files')[0];
+		 	
+		 	if (file == undefined) {
+		 		file = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
+		 	}
+		 	
+		    var blob = new Blob([JSON.stringify($("#serverAfirmaFormId").serializeJSON())], {type: "application/json"});
+		    
+		    formData.append('serverAfirmaDTO', blob);
+		    formData.append("keystoreFile", file);
+			
+			loading();
+			
+			//se borra si existiera algun mensaje
+			$('#messageWsAfirmaFormId').html("");
+			$('#messageWsAfirmaFormId').removeClass('alert alert-success');
+			$('#messageWsAfirmaFormId').removeClass('alert alert-danger');
+			
+			var updateWsAfirmaAction = /*[[@{/updateWsAfirma}]]*/;
+			
+			$.ajax({
+				url: updateWsAfirmaAction,
+				type: "POST",
+				data: formData,
+				processData: false,
+	 			contentType: false,
+	 			success: function(data){
+	 				hide();
+					if(data.error != "" && data.error != null){
+						var errores = JSON.parse(data.error);
+						jQuery.each(errores, function(i, val) {
+							$('#serverAfirmaFormId *').filter('span').each(function(){
+								if (i == $(this).attr('id')){
+									$("#" + i).text(val);
+								}
+							});
+						});
+					} else {
+						var messageOk = /*[[#{ws.afirma.message.update.ok}]]*/;
+						$('#messageWsAfirmaFormId').html(messageOk);
+						$('#messageWsAfirmaFormId').addClass('alert alert-success');
+						$("#messageWsAfirmaFormId").fadeTo(5000, 500).slideUp(500, function() {
+							$("#messageWsAfirmaFormId").slideUp(500);
+						});
+						// Asignamos los valores del objeto `ServerAfirmaDTO` a los campos del formulario
+				        $("#serverAfirmaFormId").find(":input").each(function() {
+				            var inputName = $(this).attr("name"); // Nombre del input en el formulario
+
+				            if (inputName && data[inputName] !== undefined) {
+				                $(this).val(data[inputName]); // Asigna el valor del DTO al campo correspondiente
+				            }
+				        });
+						
+						debugger;
+						
+				     	// Asignamos manualmente el valor al subject
+						if (data.subject !== undefined && data.subject !== "") {
+				            $("#subject").val(data.subject);
+				            $("#idDownLoadCert").show();
+				        } else {
+				        	$("#idDownLoadCert").hide();
+				        }
+					}
+	 			},
+	 			error:function() {
+					hide();
+	 				var messageResponse = /*[[#{ws.afirma.message.error}]]*/;
+	 				$('#messageWsAfirmaFormId').removeClass('alert-success')	
+	 				$('#messageWsAfirmaFormId').addClass('alert alert-danger');
+	 				$("#messageWsAfirmaFormId").html(messageResponse);
+				}
+			});
+		});
+		
+	});
+	
+	function cleanSpan(){
+ 		$('#serverAfirmaFormId *').filter('span.badge').each(function(){
+ 			$(this).text("");				
+ 		});
+ 	}
+	
+	function downLoadCert() {
+		debugger;
+		var keystoreBlob = b64toBlob($("#keystoreB64").val(), 'application/x-x509-ca-cert');
+		var fileName = "ServidorAfirma.p12";
+		
+		var reader = new FileReader();
+		reader.onload = function(event) {
+			var save = document.createElement('a');
+			save.href = event.target.result;
+			save.target = '_blank';
+			save.download = fileName || 'certificado.cer';
+			var clicEvent = new MouseEvent('click', {
+				'view' : window,
+				'bubbles' : true,
+				'cancelable' : true
+			});
+			save.dispatchEvent(clicEvent);
+			(window.URL || window.webkitURL)
+					.revokeObjectURL(save.href);
+						
+		};
+		reader.readAsDataURL(keystoreBlob);
+	}
+</script>

@@ -20,14 +20,14 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p> 22/01/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.7, 20/02/2025.
+ * @version 1.8, 04/03/2025.
  */
 package es.gob.fire.i18n;
 
 /** 
  * <p>Interface that contains the keys of the messages shown in the @firma administration.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
- * @version 1.7, 20/02/2025.
+ * @version 1.8, 04/03/2025.
  */
 public interface IWebAdminGeneral {
 
@@ -243,4 +243,78 @@ public interface IWebAdminGeneral {
 	 * Constant attribute that represents the property key <code>ML014</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
 	 */
 	String LOG_ML014 = "ML014";
+	
+	/***********************/
+	/** Mensajes para errores en el módulo de configuracion **/ 
+	/***********************/
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA001</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA001 = "CSA001";
+
+	/**
+	 * Constant attribute that represents the property key <code>CSA002</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA002 = "CSA002";
+
+	/**
+	 * Constant attribute that represents the property key <code>CSA003</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA003 = "CSA003";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA004</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA004 = "CSA004";
+
+	/**
+	 * Constant attribute that represents the property key <code>CSA005</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA005 = "CSA005";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA006</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA006 = "CSA006";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA007</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA007 = "CSA007";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA008</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA008 = "CSA008";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA009</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA009 = "CSA009";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA010</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA010 = "CSA010";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA011</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA011 = "CSA011";
+
+	/**
+	 * Constant attribute that represents the property key <code>CSA012</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA012 = "CSA012";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA013</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA013 = "CSA013";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA014</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA014 = "CSA014";
 }

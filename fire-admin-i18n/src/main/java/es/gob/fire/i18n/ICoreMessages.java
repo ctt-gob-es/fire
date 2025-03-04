@@ -21,7 +21,7 @@
  * <b>Project:</b><p>Application for signing documents of FIRe suite systems</p>
  * <b>Date:</b><p>20/10/2021.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 21/12/2022.
+ * @version 1.3, 04/03/2025.
  */
 package es.gob.fire.i18n;
 
@@ -29,10 +29,14 @@ package es.gob.fire.i18n;
  * <p>Interface that defines all the token constants for the messages
  * in the core module of FIRe: general.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
- * @version 1.2, 21/12/2022.
+ * @version 1.3, 04/03/2025.
  */
-public interface ICoreGeneralMessages {
+public interface ICoreMessages {
 
+	/***********************/
+	/** Mensajes para errores para las tareas **/ 
+	/***********************/
+	
 	/**
 	 * Constant attribute that represents the property key <code>TASK_MNG_002</code> belonging to the
 	 * file messages/core/task_xx.properties.
@@ -44,5 +48,15 @@ public interface ICoreGeneralMessages {
 	 * file messages/core/task_xx.properties.
 	 */
 	String TASK_MNG_003 = "TASK_MNG_003";
+	
+	/***********************/
+	/** Mensajes para errores para los errores del core de fire **/ 
+	/***********************/
+	
+	/**
+	 * Constant attribute that represents the property key <code>CE001</code> belonging to the
+	 * file messages/core/fire_xx.properties.
+	 */
+	String LOG_CE001 = "CE001";
 
 }

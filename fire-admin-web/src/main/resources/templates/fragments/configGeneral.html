@@ -3,7 +3,7 @@
     <div class="row gap-20 masonry pos-r">
         <div class="masonry-item col-md-10">
             <div class="bgc-white pL-40 pR-40 pT-20 pB-20 bd">
-                <h5 class="c-grey-900 mB-20" id="idTitleTask"></h5>
+                <h4 class="c-grey-900 mT-10 mB-30" th:text="#{config.general.title}"></h4>
                 <div class="mT-30">
                     <form name="altEditor-form" role="form" id="generalConfig" th:object="${generalConfig}" method="post" action="">
                         <div id="messageGeneralConfig" role="alert"></div>

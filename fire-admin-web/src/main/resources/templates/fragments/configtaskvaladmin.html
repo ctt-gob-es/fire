@@ -6,7 +6,7 @@
 <div class="row gap-20 masonry pos-r">
 	<div class="masonry-item col-md-10">
 		<div class="bgc-white p-20 bd">
-				<h5 class="c-grey-900 mB-20" id="idTitleTask"></h5>
+				<h4 class="c-grey-900 mB-20" th:text="#{task.validation.title}"></h4>
 				<div class="mT-30">
 					<form name="altEditor-form" role="form" id="taskFormIdEdit"	th:object="${taskform}" method="post" action="">
 						<div id="messageUpdateTaskId" role="alert"></div>
@@ -16,14 +16,18 @@
 						
 						<!-- Campo nombre -->	
 						<div class="form-group row">
-								<label for="nameId" class="col-form-label" th:text="#{task.validation.field.name}"></label>
+							<label for="nameId" class="col-sm-4" th:text="#{task.validation.field.name}"></label>
+							<div class="col-sm-6">
 								<input type="text" id="nameId" th:field="*{nameEdit}" style="overflow:hidden" class="form-control" readonly/>
+							</div>
 						</div>
 						
 						<!-- Campo clase implementacion -->	
 						<div class="form-group row">
-								<label for="implementationClassId" class="col-form-label" th:text="#{task.validation.field.classImplementation}"></label>
+							<label for="implementationClassId" class="col-sm-4" th:text="#{task.validation.field.classImplementation}"></label>
+							<div class="col-sm-6">
 								<input type="text" id="implementationClassId" th:field="*{implementationClassEdit}" readonly style="overflow:hidden" class="form-control" />
+							</div>
 						</div>
 						
 						<!-- Campo tarea activa -->
