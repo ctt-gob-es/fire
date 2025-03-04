@@ -25,8 +25,9 @@ public class DBOperationConfigLoader {
 	private static final String SQL_SELECT_DEFAULT_PROPERTIES = "SELECT clave, valor_numerico FROM tb_propiedades WHERE tipo = 'NUMBER'"; //$NON-NLS-1$
 
 	private static final String SQL_SELECT_APP_PROPERTIES = "SELECT id_aplicacion, tamano_maximo_documento, tamano_maximo_peticion, cantidad_maxima_documentos FROM tb_aplicaciones WHERE tamano_personalizado = TRUE"; //$NON-NLS-1$
+
 	private static final String SQL_SELECT_APP_PROVIDERS = "SELECT app.id_aplicacion, prov.nombre, rel.obligatorio " //$NON-NLS-1$
-			+ "FROM tb_aplicaciones app, tb_proveedores_aplicacion rel, ib_proveedores prov " //$NON-NLS-1$
+			+ "FROM tb_aplicaciones app, tb_proveedores_aplicacion rel, tb_proveedores prov " //$NON-NLS-1$
 			+ "WHERE app.proveedor_personalizado = TRUE AND app.id_aplicacion = rel.id_aplicacion AND prov.id_proveedor = rel.id_proveedor AND rel.habilitado = TRUE AND prov.habilitado = TRUE " //$NON-NLS-1$
 			+ "ORDER BY rel.id_aplicacion, rel.orden"; //$NON-NLS-1$
 
@@ -135,7 +136,7 @@ public class DBOperationConfigLoader {
 			return providers.toArray(new ProviderElement[0]);
 		}
 
-		private static Map<String, ApplicationOperationConfig> loadAppsParticularConfig(final Connection conn, final ApplicationOperationConfig defaultConfig) throws SQLException, ConfigException {
+		private static Map<String, ApplicationOperationConfig> loadAppsParticularConfig(final Connection conn, final ApplicationOperationConfig defaultConfig) throws SQLException {
 
 			// Obtenemos los parametros y los proveedores que se han establecido personalidzados para rodas las aplicaciones
 			final Map<String, ApplicationOperationConfig> sizes = getAppsParticularSizes(conn);

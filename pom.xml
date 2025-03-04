@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
-	<version>2.4</version>
+	<version>3.0-SNAPSHOT</version>
 	<artifactId>fire-artifacts</artifactId>
 	<packaging>pom</packaging>
 	<name>fire-artifacts</name>
@@ -21,7 +21,7 @@
 
 		<jdk.version>1.8</jdk.version>
 
-		<fire.version>2.4</fire.version>
+		<fire.version>3.0-SNAPSHOT</fire.version>
 		<clienteafirma.version>1.9</clienteafirma.version>
 		<fnmt.version>2.0</fnmt.version>
 		<log-consumer.version>1.3</log-consumer.version>

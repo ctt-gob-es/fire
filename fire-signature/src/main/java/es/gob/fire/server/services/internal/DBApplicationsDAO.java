@@ -31,9 +31,11 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(DBApplicationsDAO.class.getName());
 
-	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT nombre, habilitado, huella_principal, huella_backup FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado"; //$NON-NLS-1$
-
-	private static final String STATEMENT_SELECT_OPERATION_CONFIG = "SELECT tamano_peticion, tamano_documento, tamano_lote, proveedores FROM tb_aplicaciones  WHERE  tb_aplicaciones.id =  ?"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT tb_aplicaciones.nombre, tb_aplicaciones.habilitado, tb_certificados.huella " //$NON-NLS-1$
+			+ "FROM tb_aplicaciones, tb_certificados " //$NON-NLS-1$
+			+ "WHERE tb_aplicaciones.id =  ? " //$NON-NLS-1$
+				+ "AND tb_aplicaciones.id=tb_certificados_de_aplicacion.id_aplicaciones " //$NON-NLS-1$
+				+ "AND tb_certificados.id_certificado=tb_certificados_de_aplicacion.id_certificados"; //$NON-NLS-1$
 
 	private final DBOperationConfigLoader operationConfigLoader;
 
@@ -63,7 +65,7 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 				final boolean enabled = rs.getBoolean(2);
 				if (enabled) {
-					digestInfo = loadCertificatesInfo(rs.getString(3), rs.getString(4), trAux);
+					digestInfo = loadCertificatesInfo(rs, trAux);
 				}
 
 				result = new ApplicationAccessInfo(appId, rs.getString(1), enabled, digestInfo);
@@ -77,19 +79,16 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 		return result;
 	}
 
-	private static DigestInfo[] loadCertificatesInfo(final String certDigest1, final String certDigest2, final TransactionAuxParams trAux) {
+	private static DigestInfo[] loadCertificatesInfo(final ResultSet rs, final TransactionAuxParams trAux) throws SQLException {
 
 		final List<DigestInfo> certDigests = new ArrayList<>();
 
-		final DigestInfo digest1 = loadCertDigest(certDigest1, trAux);
-		if (digest1 != null) {
-			certDigests.add(digest1);
-		}
-
-		final DigestInfo digest2 = loadCertDigest(certDigest2, trAux);
-		if (digest2 != null) {
-			certDigests.add(digest2);
-		}
+		do {
+			final DigestInfo digest1 = loadCertDigest(rs.getString(3), trAux);
+			if (digest1 != null) {
+				certDigests.add(digest1);
+			}
+		} while (rs.next());
 
 		return !certDigests.isEmpty() ? certDigests.toArray(new DigestInfo[0]) : null;
 	}
