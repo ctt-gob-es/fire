@@ -42,7 +42,7 @@ import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
-import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.service.ICertificateService;
 
 /**
  * <p>

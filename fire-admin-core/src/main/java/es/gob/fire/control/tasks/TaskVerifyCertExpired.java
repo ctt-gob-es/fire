@@ -58,10 +58,10 @@ import es.gob.fire.persistence.entity.Scheduler;
 import es.gob.fire.persistence.repository.CertificateRepository;
 import es.gob.fire.persistence.repository.CertificatesApplicationRepository;
 import es.gob.fire.persistence.repository.UserRepository;
-import es.gob.fire.persistence.service.ICertificateService;
-import es.gob.fire.persistence.service.impl.CertificateService;
 import es.gob.fire.quartz.job.FireTaskException;
 import es.gob.fire.quartz.task.FireTask;
+import es.gob.fire.service.ICertificateService;
+import es.gob.fire.service.impl.CertificateService;
 import es.gob.fire.service.impl.SchedulerService;
 import es.gob.fire.spring.config.ApplicationContextProvider;
 

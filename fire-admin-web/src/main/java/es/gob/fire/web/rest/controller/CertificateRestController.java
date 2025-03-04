@@ -68,7 +68,7 @@ import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.service.IApplicationService;
-import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.service.ICertificateService;
 import es.gob.fire.upgrade.afirma.PlatformWsException;
 import es.gob.fire.upgrade.afirma.VerifyAfirmaCertificateResponse;
 import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;

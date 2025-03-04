@@ -66,8 +66,8 @@ import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.ProviderApplication;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
-import es.gob.fire.persistence.service.ICertificateService;
 import es.gob.fire.persistence.service.IProviderService;
+import es.gob.fire.service.ICertificateService;
 
 /**
  * <p>Class that manages the REST requests related to the Applications administration and JSON communication.</p>
