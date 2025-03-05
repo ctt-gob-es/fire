@@ -14,7 +14,7 @@
 						<label for="urlServerId" class="col-sm-3" th:text="#{ws.afirma.field.url}"></label>
 						<div class="col-sm-9">
 							<input type="text" id="urlServerId" th:field="*{urlServer}" style="overflow:hidden; margin-left: -15px;" class="form-control"/>
-							<span id="urlServerId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;" ></span>
+							<span id="urlServerId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left: -15px;" ></span>
 						</div>
 					</div>
 					<!-- Timeout -->	
@@ -22,7 +22,7 @@
 						<label for="connectionTimeoutId" class="col-sm-3" th:text="#{ws.afirma.field.timeout}"></label>
 						<div class="col-sm-2">
 							<input type="number" id="timeoutId" th:field="*{timeout}" style="overflow:hidden; margin-left: -15px;" class="form-control" min=1 />
-							<span id="timeoutId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;"></span>
+							<span id="timeoutId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left: -15px;"></span>
 						</div>
 					</div>
 					<!-- Application -->	
@@ -30,7 +30,7 @@
 						<label for="applicationId" class="col-sm-3" th:text="#{ws.afirma.field.appName}"></label>
 						<div class="col-sm-4">
 							<input  type="text" id="nameAppId" th:field="*{nameApp}" style="overflow:hidden; margin-left: -15px;" class="form-control"/>
-							<span id="nameAppId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;"></span>
+							<span id="nameAppId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left: -15px;"></span>
 							</div>
 					</div>
 					<!-- Autenticacion -->
@@ -46,7 +46,7 @@
 							<label for="userId" class="col-sm-3" th:text="#{ws.afirma.field.user}"></label>
 							<div class="col-sm-4">
 								<input  type="text" id="userId" th:field="*{user}" style="overflow:hidden; margin-left: -15px;" class="form-control" th:readonly="*{disabledUserPass}"/>
-								<span id="userId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;" ></span>
+								<span id="userId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left: -15px;" ></span>
 							</div>
 						</div>
 						<!-- Password -->
@@ -54,7 +54,7 @@
 							<label for="password" class="col-sm-3" th:text="#{ws.afirma.field.password}"></label>
 							<div class="col-sm-4">
 								<input type="password" name="password" id="password" th:value="*{password}" style="overflow:hidden; margin-left: -15px;" class="form-control" th:readonly="*{disabledUserPass}" />
-								<span id="password_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill" style="margin-left: -15px;" ></span>
+								<span id="password_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left: -15px;" ></span>
 							</div>
 						</div>
 						<!-- Keystore -->
@@ -82,16 +82,11 @@
 						    </div>
 						</div>
 						<!-- Descargar certificado -->
-						<div class="form-group row" id="idDownLoadCert" name="idDownLoadCert"
-						     th:style="*{keystoreB64 != '' && keystoreB64 != null ? 'display:block;' : 'display:none;'}">
-						    <div class="col-sm-3"></div>
-						    <div class="col-sm-6">
-						        <button type="button" class="btn btn-primary" onclick="downLoadCert()" style="margin-left: -15px;">
-						            Descargar certificado
-						        </button>
+						<div class="form-group row" id="idDownLoadCert" name="idDownLoadCert" th:style="*{keystoreB64 != '' && keystoreB64 != null ? 'display:block;' : 'display:none;'}">
+						    <div class="col-sm-6 offset-sm-3">
+						        <button type="button" class="btn btn-primary" onclick="downLoadCert()" style="margin-left: -15px;" th:text="#{ws.afirma.btn.update.download.cert}"></button>
 						    </div>
 						</div>
-
 						<!-- Password Keystore -->
 						<div class="form-group row">
 							<label for="password" class="col-sm-3" th:text="#{ws.afirma.field.keystore.password}"></label>
@@ -254,7 +249,6 @@
  	}
 	
 	function downLoadCert() {
-		debugger;
 		var keystoreBlob = b64toBlob($("#keystoreB64").val(), 'application/x-x509-ca-cert');
 		var fileName = "ServidorAfirma.p12";
 		

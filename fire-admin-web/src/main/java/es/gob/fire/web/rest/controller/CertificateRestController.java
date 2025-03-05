@@ -529,17 +529,17 @@ public class CertificateRestController {
 
 
 	/**
-	 * Method that checks if no certificate data is sent during edit
-	 * @param certEditForm
-	 * @param certFile
-	 * @param certFile2
-	 * @return
+	 * Checks whether there is no certificate data available, either in the uploaded file or in the base64-encoded certificate data.
+	 *
+	 * @param certEditForm A {@link CertificateDTO} object containing the certificate data in base64 format.
+	 * @param certFile The certificate file provided as a {@link MultipartFile}.
+	 * @return {@code true} if no certificate data is available (neither file nor base64 data), {@code false} otherwise.
 	 */
 	private static boolean hasNoCertData(final CertificateDTO certEditForm, final MultipartFile certFile) {
 
 		boolean hasNoFileData = false;
 
-		if ((certFile == null || certFile.isEmpty() || certFile.getSize() == 0) || (certEditForm.getCertificateB64() == null || certEditForm.getCertificateB64().isEmpty())) {
+		if ((certFile == null || certFile.isEmpty() || certFile.getSize() == 0)) {
 			hasNoFileData = true;
 		}
 

@@ -53,6 +53,7 @@ import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.i18n.IPersistenceGeneral;
+import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
@@ -425,6 +426,10 @@ public class CertificateService implements ICertificateService{
 	public VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate) throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException {
 		// Obtenemos las propiedades de configuracion para el servidor afirma
 		ServerAfirma serverAfirma = iServerAfirmaService.obtainServerAfirmaService(NumberConstants.NUM_1_LONG);
+		
+		if(serverAfirma == null) {
+			throw new WSServiceInvokerException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC015));
+		}
 		
 		// Obtenemos la conexión con AfirmaWS
 		AfirmaConnector afirmaConnector = new AfirmaConnector();

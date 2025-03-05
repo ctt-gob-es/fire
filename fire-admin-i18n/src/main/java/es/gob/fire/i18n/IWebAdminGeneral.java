@@ -96,6 +96,11 @@ public interface IWebAdminGeneral {
 	 */
 	String UD_LOG013 = "UD013";
 	
+	/**
+	 * Constant attribute that represents the property key <code>UD014</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String UD_LOG014 = "UD014";
+	
 	/***********************/
 	/** Mensajes para errores en el módulo de certificados **/ 
 	/***********************/
@@ -169,6 +174,11 @@ public interface IWebAdminGeneral {
 	 * Constant attribute that represents the property key <code>MC014</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
 	 */
 	String LOG_MC014 = "MC014";
+	
+	/**
+	 * Constant attribute that represents the property key <code>MC015</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_MC015 = "MC015";
 
 	/***********************/
 	/** Mensajes para errores en el módulo de login **/ 
@@ -317,4 +327,9 @@ public interface IWebAdminGeneral {
 	 * Constant attribute that represents the property key <code>CSA014</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
 	 */
 	String LOG_CSA014 = "CSA014";
+	
+	/**
+	 * Constant attribute that represents the property key <code>CSA015</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA015 = "CSA015";
 }

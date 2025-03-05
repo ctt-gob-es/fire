@@ -379,6 +379,10 @@ public class ConfigurationRestController {
 			String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA001);
 			LOGGER.error(msgError);
 			json.put(FIELD_URL_SERVER_ID + "_span", msgError);
+		} else if(!serverAfirmaDTO.getUrlServer().endsWith("/")) {
+			String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA015);
+			LOGGER.error(msgError);
+			json.put(FIELD_URL_SERVER_ID + "_span", msgError);
 		}
 		
 		if (serverAfirmaDTO.getTimeout() == null) {
