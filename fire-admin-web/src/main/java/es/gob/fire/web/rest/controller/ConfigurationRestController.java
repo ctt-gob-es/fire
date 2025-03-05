@@ -341,7 +341,7 @@ public class ConfigurationRestController {
     		serverAfirma.setUser(null);
     		serverAfirma.setPassword(null);
     		// Obtenemos el subject del certificado para mostrarlo
-        	KeyStore keyStore = UtilsKeystore.loadKsPKCS12(keystoreFile.getBytes(), serverAfirmaDTO.getPasswordKeystore());
+        	KeyStore keyStore = UtilsKeystore.loadKsPKCS12(Base64.getDecoder().decode(serverAfirmaDTO.getKeystoreB64()), serverAfirmaDTO.getPasswordKeystore());
         	serverAfirmaDTO.setSubject(UtilsKeystore.listAllSubjects(keyStore).get(NumberConstants.NUM0));
     	} else if(cAuthenticationType.getIdAuthenticationType().equals(NumberConstants.NUM_1_LONG)) {
     		serverAfirma.setUser(serverAfirmaDTO.getUser());
@@ -398,7 +398,7 @@ public class ConfigurationRestController {
 		}
 		
 		if(serverAfirmaDTO.getIdAuthenticationType().equals(NumberConstants.NUM_2_LONG)) {
-			if(keystoreFile.isEmpty()) {
+			if(keystoreFile.isEmpty() && (serverAfirmaDTO.getKeystoreB64() == null || serverAfirmaDTO.getKeystoreB64().isEmpty())) {
 				String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA004);
 				LOGGER.error(msgError);
 				json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
@@ -408,8 +408,9 @@ public class ConfigurationRestController {
 				json.put(FIELD_PASSWORD_KEYSTORE + "_span", msgError);
 			} else {
 				try {
-					serverAfirmaDTO.setKeystoreB64(Base64.getEncoder().encodeToString(keystoreFile.getBytes()));
-					KeyStore keyStore = UtilsKeystore.loadKsPKCS12(keystoreFile.getBytes(), serverAfirmaDTO.getPasswordKeystore());
+					byte[] byteCert = !keystoreFile.isEmpty() ? keystoreFile.getBytes() : Base64.getDecoder().decode(serverAfirmaDTO.getKeystoreB64());
+					serverAfirmaDTO.setKeystoreB64(Base64.getEncoder().encodeToString(byteCert));
+					KeyStore keyStore = UtilsKeystore.loadKsPKCS12(byteCert, serverAfirmaDTO.getPasswordKeystore());
 					List<X509Certificate> listX509Certificate = UtilsKeystore.listAllX509Certificate(keyStore);
 					if(listX509Certificate.size() > NumberConstants.NUM_1_LONG) {
 						String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA012);

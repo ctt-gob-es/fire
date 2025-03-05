@@ -24,6 +24,7 @@
  */
 package es.gob.fire.web.rest.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
@@ -214,7 +215,7 @@ public class CertificateRestController {
 		List<Certificate> listNewCertificate = new ArrayList<>();
 		final JSONObject json = new JSONObject();
 
-		if (isAliasBlank(certAddForm.getAlias()) || isAliasSizeNotValid(certAddForm.getAlias()) || hasNoCertData(certAddForm, certFile)) {
+		if (isAliasBlank(certAddForm.getAlias()) || isAliasSizeNotValid(certAddForm.getAlias()) || hasNoCertData(certFile)) {
 			listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
 
 			if (isAliasBlank(certAddForm.getAlias())) {
@@ -232,7 +233,7 @@ public class CertificateRestController {
 			}
 
 
-			if (hasNoCertData(certAddForm, certFile)) {
+			if (hasNoCertData(certFile)) {
 
 				//"Al menos debe indicarse un archivo de certificado"
 
@@ -412,21 +413,24 @@ public class CertificateRestController {
 
 				X509Certificate cert1 = null;
 				
+				byte[] certBytes = null;
+				
 				// Si no se actualiza el certificado 1, dejamos el que estaba
 				if (certFile.isEmpty() && certEditForm.getCertificateB64() != null) {
-
-					certEditForm.setCertBytes(Base64.decode(certEditForm.getCertificateB64()));
+					certBytes = Base64.decode(certEditForm.getCertificateB64());
+					certEditForm.setCertBytes(certBytes);
 				// Si se actualiza el certificado 1, tenemos que comprobar que el archivo representa un certificado valido
 				} else if (!certFile.isEmpty()) {
-
-					try (final InputStream certIs = certFile.getInputStream();) {
-	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			certEditForm.setCertBytes(cert1.getEncoded());
-	        		} catch (final CertificateException e) {
-	        			msgerror = certFile.getOriginalFilename() + " no representa un certificado v\u00E1lido";
-	        			throw e;
-	        		}
+					certBytes = certFile.getBytes();
 				}
+				
+				try (final InputStream certIs = new ByteArrayInputStream(certBytes)) {
+        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
+        			certEditForm.setCertBytes(cert1.getEncoded());
+        		} catch (final CertificateException e) {
+        			msgerror = certFile.getOriginalFilename() + " no representa un certificado v\u00E1lido";
+        			throw e;
+        		}
 				
 				try {
 					// Validaremos si el certificado esta caducado o bien si su fecha de validez aun no ha entrado en vigor
@@ -529,20 +533,38 @@ public class CertificateRestController {
 
 
 	/**
-	 * Checks whether there is no certificate data available, either in the uploaded file or in the base64-encoded certificate data.
+	 * Checks whether there is no certificate data available from either the provided file 
+	 * or the certificate DTO.
 	 *
-	 * @param certEditForm A {@link CertificateDTO} object containing the certificate data in base64 format.
-	 * @param certFile The certificate file provided as a {@link MultipartFile}.
-	 * @return {@code true} if no certificate data is available (neither file nor base64 data), {@code false} otherwise.
+	 * @param certEditForm The {@link CertificateDTO} containing the base64-encoded certificate.
+	 * @param certFile The {@link MultipartFile} representing the uploaded certificate file.
+	 * @return {@code true} if neither the file nor the DTO contains certificate data, otherwise {@code false}.
 	 */
 	private static boolean hasNoCertData(final CertificateDTO certEditForm, final MultipartFile certFile) {
 
 		boolean hasNoFileData = false;
 
-		if ((certFile == null || certFile.isEmpty() || certFile.getSize() == 0)) {
+		if ((certFile == null || certFile.isEmpty() || certFile.getSize() == 0) && (certEditForm.getCertificateB64() == null || certEditForm.getCertificateB64().isEmpty())) {
 			hasNoFileData = true;
 		}
 
+		return hasNoFileData;
+	}
+
+	/**
+	 * Checks whether the provided certificate file is empty or null.
+	 *
+	 * @param certFile The {@link MultipartFile} representing the uploaded certificate file.
+	 * @return {@code true} if the file is null, empty, or has a size of zero, otherwise {@code false}.
+	 */
+	private static boolean hasNoCertData(final MultipartFile certFile) {
+		
+		boolean hasNoFileData = false;
+		
+		if ((certFile == null || certFile.isEmpty() || certFile.getSize() == 0)) {
+			hasNoFileData = true;
+		}
+		
 		return hasNoFileData;
 	}
 
