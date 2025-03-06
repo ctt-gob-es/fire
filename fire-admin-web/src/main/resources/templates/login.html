@@ -47,7 +47,7 @@
 					<div class="container-login-form-btn" th:if="${accessByCertificate}">
 						<div class="wrap-login-form-btn">
 							<div class="login-form-bgbtn"></div>
-							<button onclick="authenticateCertificate(autenticar,'');return false;" class="login-form-btn" th:text="#{fire-admin-web.login.acceso.certificado.button}"></button>
+							<button onclick="authenticateCertificate(autenticar,'filters.1=nonexpired:;issuer.rfc2254:(O=DIRECCION GENERAL DE LA POLICIA)\nfilters.2=nonexpired:;issuer.rfc2254:(|(CN=AC FNMT Usuarios)(O=FNMT-RCM))\nfilters.3=nonexpired:;issuer.rfc2254:(|(CN=AC Sector Público)(O=FNMT-RCM))');return false;" class="login-form-btn" th:text="#{fire-admin-web.login.acceso.certificado.button}"></button>
 						</div>
 					</div>
 				</div>
@@ -69,7 +69,7 @@
 		
 		function authenticateCertificate(functionAutenticar, filter) {
 			cargaAppAfirma("");
-			var randomString = getRandomStringToLogin();
+			var randomString = [[${randomStringLogin}]];
 			authenticate(functionAutenticar, filter, randomString);
 		}
 		
@@ -80,29 +80,8 @@
 		    document.getElementById("formLogin").action = loginWithCertificate;
             document.getElementById("formLogin").submit();
 		}
-		
-		function getRandomStringToLogin() {
-		    const banco = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-		    let cadena = "";
-
-		    for (let i = 0; i < 12; i++) {
-		        const indiceAleatorio = numeroAleatorioEnRango(0, banco.length - 1);
-		        cadena += banco.charAt(indiceAleatorio);
-		    }
-
-		    cadena += "-" + getTimeToMillis();
-		    return cadena;
-		}
-
-		function numeroAleatorioEnRango(minimo, maximo) {
-		    return Math.floor(Math.random() * (maximo - minimo + 1)) + minimo;
-		}
-
-		function getTimeToMillis() {
-		    return new Date().getTime();
-		}
-		
-	</script>
+	
+		</script>
 	
 </body>
 </html>

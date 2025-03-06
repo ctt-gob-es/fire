@@ -15,16 +15,19 @@
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * <b>Date:</b><p>10/09/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 06/03/2025.
  */
 package es.gob.fire.commons.utils;
+
+import java.util.Calendar;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.codec.binary.Hex;
 
 /**
  * <p>Class that provides functionality for managing strings and characters.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
- * @version 1.0, 14/04/2020.
+ * @version 1.1, 06/03/2025.
  */
 public final class UtilsStringChar {
 
@@ -378,4 +381,41 @@ public final class UtilsStringChar {
 		return result;
 	}
 
+	/**
+	 * Method returning a random string
+	 * @return string
+	 */
+	public static String getRandomStringToLogin(){
+		String banco = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+		
+		String cadena = "";
+	    for (int x = 0; x < NumberConstants.NUM12; x++) {
+	        int indiceAleatorio = numeroAleatorioEnRango(0, banco.length() - 1);
+	        char caracterAleatorio = banco.charAt(indiceAleatorio);
+	        cadena += caracterAleatorio;
+	    }
+	    cadena += "-" + getTimeToMillis();
+
+	    return cadena;
+		
+	}
+	
+	/**
+	 * Method returning the current date in milliseconds
+	 * @return date
+	 */
+	private static Long getTimeToMillis(){
+	    Calendar calendar = Calendar.getInstance();
+	    return calendar.getTimeInMillis();
+	}
+	
+	/**
+	 * Method that a random range
+	 * @param minimo
+	 * @param maximo
+	 * @return number
+	 */
+	private static int numeroAleatorioEnRango(int minimo, int maximo) {
+	    return ThreadLocalRandom.current().nextInt(minimo, maximo + 1);
+	}
 }

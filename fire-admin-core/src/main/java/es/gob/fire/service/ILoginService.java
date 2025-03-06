@@ -20,14 +20,16 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 20/02/2025.
+ * @version 1.3, 06/03/2025.
  */
 package es.gob.fire.service;
 
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
@@ -40,7 +42,7 @@ import es.gob.fire.persistence.repository.ControlAccessRepository;
 /**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p></p>
- * @version 1.2, 20/02/2025.
+ * @version 1.3, 06/03/2025.
  */
 public interface ILoginService {
 
@@ -146,4 +148,18 @@ public interface ILoginService {
 	 * @return an {@link Authentication} token containing the user's credentials and roles
 	 */
 	Authentication obtainAuthAndUpdateLastAccess(User user);
+
+	/**
+	 * Validates the signature security by comparing the signature and the time limits.
+	 * 
+	 * This method checks if the signature provided in the {@link CAdESAnalizer} matches the stored
+	 * random string login and verifies if the limit sign generation time has passed.
+	 * It throws a {@link CertificateException} if the validation fails, such as if the signature
+	 * doesn't match or if the time difference exceeds the allowed limit.
+	 * 
+	 * @param analizer the {@link CAdESAnalizer} containing the content to be validated
+	 * @throws CertificateException if the signature is invalid or the time limit has expired
+	 * @throws ParseException if the time format cannot be parsed correctly
+	 */
+	void validateIfSignSecure(CAdESAnalizer analizer) throws CertificateException, ParseException;
 }

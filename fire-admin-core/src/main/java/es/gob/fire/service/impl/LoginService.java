@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 24/02/2025.
+ * @version 1.3, 06/03/2025.
  */
 package es.gob.fire.service.impl;
 
@@ -38,14 +38,18 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -57,13 +61,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsCertificate;
+import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.commons.utils.UtilsKeystore;
 import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.ThreadInfoDataSecureDTO;
 import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.entity.User;
@@ -77,7 +82,7 @@ import es.gob.fire.web.authentication.DniAuthenticationToken;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p></p>
- * @version 1.2, 24/02/2025.
+ * @version 1.3, 06/03/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -86,7 +91,7 @@ public class LoginService implements ILoginService {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(LoginService.class);
+	private static final Logger LOGGER = LogManager.getLogger(LoginService.class);
 	
 	@Value("${conf.cert.path.truststore.issuers}")
 	private String confCertPathTruestoreIssuers;
@@ -100,6 +105,11 @@ public class LoginService implements ILoginService {
 	 * Attribute that represents the administrator role.
 	 */
 	public static final String ROLE_ADMIN = "Administrator";
+	
+	public static final String PARAM_RANDOM_STRING_LOGIN = "randomStringLogin";
+
+	@Autowired
+	private ThreadInfoDataSecureDTO threadInfoDataSecure;
 	
 	/**
 	 * Attribute that represents the service object for accessing the repository of control access.
@@ -351,5 +361,43 @@ public class LoginService implements ILoginService {
 		iUserService.saveUser(user);
 		
 		return authentication;
+	}
+	
+	/**
+   	 * {@inheritDoc}
+   	 * @see es.gob.fire.persistence.service#validateIfSignSecure(es.gob.fire.crypto.cades.verifier.CAdESAnalizer)
+   	 */
+	public void validateIfSignSecure(CAdESAnalizer analizer) throws CertificateException, ParseException {
+		String strSign = new String(analizer.getContent());
+		if (!strSign.equalsIgnoreCase(threadInfoDataSecure.getRandomStringLogin())) {
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+		} else {
+
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD);
+
+			Date pastDate = simpleDateFormat.parse(threadInfoDataSecure.getLimitSignGen());
+
+			Date currentDate = new Date();
+
+			long differenceInMillis = currentDate.getTime() - pastDate.getTime();
+
+			// Convertimos a minutos
+			long differenceInMinutes = differenceInMillis / (60 * 1000);
+
+			if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
+				LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML017));
+				throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+			}
+
+			differenceInMillis = currentDate.getTime() - analizer.getSigningTime().getTime();
+
+			differenceInMinutes = differenceInMillis / (60 * 1000);
+
+			if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
+				LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML018));
+				throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+			}
+		}
 	}
 }
