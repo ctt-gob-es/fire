@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -38,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
@@ -72,8 +73,8 @@ public class CertificateController {
 	/**
 	 * Constant that represents the parameter log.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(CertificateController.class);
-
+	private static final Logger LOGGER = LogManager.getLogger(CertificateController.class);
+	
 	/**
 	 * Attribute that represents the identifier of the html input text field for the SSL alias certificate.
 	 */

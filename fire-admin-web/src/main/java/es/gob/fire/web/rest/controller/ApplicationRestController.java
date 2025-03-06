@@ -34,7 +34,8 @@ import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 
-import es.gob.fire.commons.log.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -59,11 +60,9 @@ import es.gob.fire.i18n.IWebViewMessages;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.ApplicationDTO;
 import es.gob.fire.persistence.dto.ProviderApplicationDTO;
-import es.gob.fire.persistence.dto.ProviderDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.Certificate;
-import es.gob.fire.persistence.entity.ProviderApplication;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.IProviderService;
@@ -80,7 +79,7 @@ public class ApplicationRestController {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ApplicationRestController.class);
+	private static final Logger LOGGER = LogManager.getLogger(ApplicationRestController.class);
 
 	/**
 	 * Attribute that represents the identifier of the selected alarms from the summary.

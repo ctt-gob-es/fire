@@ -42,9 +42,10 @@ import java.util.stream.Collectors;
 import javax.mail.Address;
 import javax.mail.internet.InternetAddress;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.Utils;
@@ -76,7 +77,7 @@ public class TaskVerifyCertExpired extends FireTask {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(TaskVerifyCertExpired.class);
+	private static final Logger LOGGER = LogManager.getLogger(TaskVerifyCertExpired.class);
 	
 	/**
 	 * {@inheritDoc}

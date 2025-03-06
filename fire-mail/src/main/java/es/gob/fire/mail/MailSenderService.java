@@ -15,9 +15,10 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.utils.ConstantsMail;
 
 /**
@@ -28,7 +29,7 @@ import es.gob.fire.utils.ConstantsMail;
 @Component
 public class MailSenderService extends ConfigurationMail {
 
-	private static final Logger LOGGER = Logger.getLogger(MailSenderService.class);
+	private static final Logger LOGGER = LogManager.getLogger(MailSenderService.class);
 
 	/**
 	 * Constructor method for the class EmailSenderService.java.

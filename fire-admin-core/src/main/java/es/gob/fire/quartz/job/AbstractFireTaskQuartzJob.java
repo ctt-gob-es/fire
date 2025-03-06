@@ -28,13 +28,14 @@ package es.gob.fire.quartz.job;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.i18n.IQuartzGeneralMessages;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.quartz.scheduler.AbstractQuartzScheduler;
@@ -50,7 +51,7 @@ public abstract class AbstractFireTaskQuartzJob implements Job {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(AbstractFireTaskQuartzJob.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractFireTaskQuartzJob.class);
 
 	
 	/**

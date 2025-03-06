@@ -40,6 +40,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -54,7 +56,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import SchedulerEditDTO.SchedulerVerifyCertExpiredDTO;
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.commons.utils.UtilsKeystore;
@@ -92,7 +93,7 @@ public class ConfigurationRestController {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ConfigurationRestController.class);
+	private static final Logger LOGGER = LogManager.getLogger(ConfigurationRestController.class);
 	
 	/**
 	 * Constant attribute that represents the number to identify the daily planner type.

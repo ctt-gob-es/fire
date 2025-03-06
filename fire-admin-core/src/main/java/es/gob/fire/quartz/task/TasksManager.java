@@ -26,11 +26,12 @@ package es.gob.fire.quartz.task;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.i18n.ICoreMessages;
 import es.gob.fire.i18n.ISchedulerIdConstants;
 import es.gob.fire.i18n.Language;
@@ -57,7 +58,7 @@ public class TasksManager {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(TasksManager.class);
+	private static final Logger LOGGER = LogManager.getLogger(TasksManager.class);
 
 	/**
 	 * The {@link ApplicationContextProvider} instance used to access the Spring application context.

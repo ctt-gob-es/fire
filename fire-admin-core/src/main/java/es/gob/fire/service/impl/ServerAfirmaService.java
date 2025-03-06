@@ -31,12 +31,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Base64;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsKeystore;
 import es.gob.fire.crypto.aes.AESCipher;
@@ -58,7 +59,7 @@ public class ServerAfirmaService implements IServerAfirmaService {
 	/**
 	 * Constant that represents the parameter log.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ServerAfirmaService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ServerAfirmaService.class);
 	
 	/**
 	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.

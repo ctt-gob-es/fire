@@ -28,6 +28,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.Date;
@@ -41,8 +42,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -60,13 +61,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.ibm.icu.util.Calendar;
 
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.commons.utils.UtilsDate;
+import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.ThreadInfoDataSecureDTO;
 import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
+import es.gob.fire.service.impl.LoginService;
 import es.gob.fire.web.clave.sp.request.RequestClave;
 import es.gob.fire.web.config.WebSecurityConfig;
 import es.gob.fire.web.exception.WebAdminException;
@@ -87,8 +92,10 @@ public class LoginController {
 
 	private static final String PARAM_SIGNATUREB64 = "signatureBase64";
 
-	/** The Constant LOG. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
+	/**
+	 * Attribute that represents the object that manages the log of the class.
+	 */
+	private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
 	
 	/**
 	 * Attribute that represent a property configure in admin_config.properties
@@ -113,6 +120,12 @@ public class LoginController {
 	 */
 	@Autowired
 	private IUserService iUserService;
+	
+	/**
+	 * Attribute that represents the DTO for current user session.
+	 */
+	@Autowired
+	private ThreadInfoDataSecureDTO threadInfoDataSecureDTO;
 	
 	/**
 	 * Handles the login error by retrieving the authentication exception from the session and displaying 
@@ -163,6 +176,10 @@ public class LoginController {
     	StringBuilder activateMsg = new StringBuilder();
     	if(activateCertificateContingency(model, currentDate, ipUser, activateMsg)) {
     		LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG012));
+    		String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+    		threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
+    		threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
     		model.addAttribute("errorMessage", activateMsg);
     		model.addAttribute("accessByCertificate", true);
 			return "login.html";
@@ -245,8 +262,7 @@ public class LoginController {
 	 * @return the view name after login attempt
 	 */
 	@RequestMapping(value = "/loginWithCertificate", method = RequestMethod.POST)
-	public String loginWithCertificate(@RequestParam(PARAM_SIGNATUREB64) final String signatureBase64,
-	                                   final Model model, HttpServletResponse response) {
+	public String loginWithCertificate(	@RequestParam(PARAM_SIGNATUREB64) final String signatureBase64, final Model model, HttpServletResponse response) {
 	    X509Certificate certificate = null;
 	    AtomicReference<String> dniRef =  new AtomicReference<>("");
 	    try {
@@ -256,6 +272,10 @@ public class LoginController {
 
 	        // Analizamos la firma con CAdESAnalizer y obtenemos el certificado del usuario
 	        CAdESAnalizer analizer = iLoginService.analizeSignWithCAdES(signBase64Bytes);
+	        
+	        // Validamos si la firma es segura
+	        iLoginService.validateIfSignSecure(analizer);
+	        
 	        List<X509Certificate> certs = analizer.getSigningCertificates();
 	        certificate = certs.get(0);
 	       
@@ -297,6 +317,9 @@ public class LoginController {
 	        cookie.setSecure(true);
 	        response.addCookie(cookie);
 	        
+	        // Antes de ir al inicio limpiamos ThreadLocal para evitar memory leaks
+	        threadInfoDataSecureDTO.clear();
+	        
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
 	        return "inicio.html";
 
@@ -311,7 +334,8 @@ public class LoginController {
 	        	LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
 	        	msgerror = e.getMessage();
 	        } else {
-	            msgerror = e.getMessage();
+	        	LOGGER.error(e);
+	            msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016);
 	        }
 
 	        model.addAttribute("errorMessage", msgerror);
@@ -319,4 +343,5 @@ public class LoginController {
 	        return "login.html";
 	    }
 	}
+
 }
