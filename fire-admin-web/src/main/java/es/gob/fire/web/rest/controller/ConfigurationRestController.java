@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of FIRe system.</p>
  * <b>Date:</b><p>07/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 04/03/2025.
+ * @version 1.2, 06/03/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -57,6 +57,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import SchedulerEditDTO.SchedulerVerifyCertExpiredDTO;
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.commons.utils.UtilsCertificate;
 import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.commons.utils.UtilsKeystore;
 import es.gob.fire.crypto.aes.AESCipher;
@@ -85,7 +86,7 @@ import es.gob.fire.service.IServerAfirmaService;
 /** 
  * <p>Class that manages the REST requests related to the Configuration administration and JSON communication.</p>
  * <b>Project:</b><p>Application for monitoring services of FIRe system.</p>
- * @version 1.1, 04/03/2025.
+ * @version 1.2, 06/03/2025.
  */
 @RestController
 public class ConfigurationRestController {
@@ -343,7 +344,7 @@ public class ConfigurationRestController {
     		serverAfirma.setPassword(null);
     		// Obtenemos el subject del certificado para mostrarlo
         	KeyStore keyStore = UtilsKeystore.loadKsPKCS12(Base64.getDecoder().decode(serverAfirmaDTO.getKeystoreB64()), serverAfirmaDTO.getPasswordKeystore());
-        	serverAfirmaDTO.setSubject(UtilsKeystore.listAllSubjects(keyStore).get(NumberConstants.NUM0));
+        	serverAfirmaDTO.setSubject(UtilsCertificate.getReadableSubject(UtilsKeystore.listAllX509Certificate(keyStore).get(NumberConstants.NUM0)));
     	} else if(cAuthenticationType.getIdAuthenticationType().equals(NumberConstants.NUM_1_LONG)) {
     		serverAfirma.setUser(serverAfirmaDTO.getUser());
     		serverAfirma.setPassword(AESCipher.getInstance().encryptMessageWithBC(serverAfirmaDTO.getPassword()));
@@ -413,7 +414,11 @@ public class ConfigurationRestController {
 					serverAfirmaDTO.setKeystoreB64(Base64.getEncoder().encodeToString(byteCert));
 					KeyStore keyStore = UtilsKeystore.loadKsPKCS12(byteCert, serverAfirmaDTO.getPasswordKeystore());
 					List<X509Certificate> listX509Certificate = UtilsKeystore.listAllX509Certificate(keyStore);
-					if(listX509Certificate.size() > NumberConstants.NUM_1_LONG) {
+					if(null == listX509Certificate || listX509Certificate.isEmpty()) {
+						String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA012);
+						LOGGER.error(msgError);
+						json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
+					} else if(listX509Certificate.size() > NumberConstants.NUM_1_LONG) {
 						String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA012);
 						LOGGER.error(msgError);
 						json.put(FIELD_KEYSTORE_FILE + "_span", msgError);

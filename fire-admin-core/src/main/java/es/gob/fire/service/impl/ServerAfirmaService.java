@@ -20,7 +20,7 @@
  * <b>Project:</b><p></p>
  * <b>Date:</b><p>15/05/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 04/03/2025.
+ * @version 1.1, 06/03/2025.
  */
 package es.gob.fire.service.impl;
 
@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.commons.utils.UtilsCertificate;
 import es.gob.fire.commons.utils.UtilsKeystore;
 import es.gob.fire.crypto.aes.AESCipher;
 import es.gob.fire.crypto.exceptions.CipherException;
@@ -50,7 +51,7 @@ import es.gob.fire.service.IServerAfirmaService;
 /** 
  * <p>Class that implements the communication with the operations of the persistence layer for Server Afirma.</p>
  * <b>Project:</b><p></p>
- * @version 1.0, 04/03/2025.
+ * @version 1.1, 06/03/2025.
  */
 @Service("serverAfirmaService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -83,7 +84,7 @@ public class ServerAfirmaService implements IServerAfirmaService {
 					String passwordKeystore = AESCipher.getInstance().decryptMessageBC(serverAfirma.getPasswordKeystore());
 					byte[] keystorePksc12 = Base64.getDecoder().decode(serverAfirma.getKeystore());
 					KeyStore keyStore = UtilsKeystore.loadKsPKCS12(keystorePksc12, passwordKeystore);
-					String subject = UtilsKeystore.listAllSubjects(keyStore).get(NumberConstants.NUM0);
+					String subject = UtilsCertificate.getReadableSubject(UtilsKeystore.listAllX509Certificate(keyStore).get(NumberConstants.NUM0));
 					serverAfirmaDTO.setSubject(subject);
 					serverAfirmaDTO.setPasswordKeystore(passwordKeystore);
 					serverAfirmaDTO.setDisabledKeystore(false);

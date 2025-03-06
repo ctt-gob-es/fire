@@ -21,12 +21,12 @@
  * <b>Project:</b><p></p>
  * <b>Date:</b><p>19/06/2020.</p>
  * @author Gobierno de España.
- * @version 1.0, 04/03/2025.
+ * @version 1.1, 06/03/2025.
  */
-
 package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,7 +41,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 /**
  * <p>Class that represents the representation of the <i>TB_SERVIDOR_AFIRMA</i> database table as a Plain Old Java Object.</p>
  * <b>Project:</b><p></p>
- * @version 1.0, 04/03/2025.
+ * @version 1.1, 06/03/2025.
  */
 @Entity
 @Table(name = "TB_SERVIDOR_AFIRMA")
@@ -105,8 +105,14 @@ public class ServerAfirma implements Serializable {
 	/**
 	 * Attribute that represents the name of the password keystore.
 	 */
-	@Column(name = "PASSWORD_ALMACEN")
+	@Column(name = "PASSWORD_ALMACEN", nullable = true)
 	private String passwordKeystore;
+	
+	/**
+	 * Attribute that represents the date of the last period communication.
+	 */
+	@Column(name = "FECHA_ULTIMA_COMUNICACION", nullable = true)
+	private Date dateLastCommunication;
 	
 	/**
 	 * Gets the value of the attribute {@link #idServerAfirma}.
@@ -252,4 +258,20 @@ public class ServerAfirma implements Serializable {
 		this.passwordKeystore = passwordKeystore;
 	}
 
+	/**
+	 * Gets the value of the attribute {@link #dateLastCommunication}.
+	 * @return the value of the attribute {@link #dateLastCommunication}.
+	 */
+	public Date getDateLastCommunication() {
+		return dateLastCommunication;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #dateLastCommunication}.
+	 * @param dateLastCommunication The value for the attribute {@link #dateLastCommunication}.
+	 */
+	public void setDateLastCommunication(Date dateLastCommunication) {
+		this.dateLastCommunication = dateLastCommunication;
+	}
+	
 }

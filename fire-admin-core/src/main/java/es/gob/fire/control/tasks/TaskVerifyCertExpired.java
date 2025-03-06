@@ -21,11 +21,16 @@
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * <b>Date:</b><p>12/02/2025.</p>
  * @author Gobierno de España.
- * @version 1.2, 25/02/2025.
+ * @version 1.3, 06/03/2025.
  */
 package es.gob.fire.control.tasks;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
@@ -49,6 +54,10 @@ import org.springframework.transaction.annotation.Transactional;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.Utils;
+import es.gob.fire.commons.utils.UtilsCertificate;
+import es.gob.fire.commons.utils.UtilsKeystore;
+import es.gob.fire.crypto.aes.AESCipher;
+import es.gob.fire.crypto.exceptions.CipherException;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.mail.MailSenderService;
@@ -56,12 +65,14 @@ import es.gob.fire.persistence.dto.MailInfoDTO;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.CertificatesApplication;
 import es.gob.fire.persistence.entity.Scheduler;
+import es.gob.fire.persistence.entity.ServerAfirma;
 import es.gob.fire.persistence.repository.CertificateRepository;
 import es.gob.fire.persistence.repository.CertificatesApplicationRepository;
 import es.gob.fire.persistence.repository.UserRepository;
 import es.gob.fire.quartz.job.FireTaskException;
 import es.gob.fire.quartz.task.FireTask;
 import es.gob.fire.service.ICertificateService;
+import es.gob.fire.service.IServerAfirmaService;
 import es.gob.fire.service.impl.CertificateService;
 import es.gob.fire.service.impl.SchedulerService;
 import es.gob.fire.spring.config.ApplicationContextProvider;
@@ -70,7 +81,7 @@ import es.gob.fire.spring.config.ApplicationContextProvider;
  * <p>Class that performs a task for updated status certificate X509 and send emails to users with differents role.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI
  * certificates and electronic signature.</p>
- * @version 1.2, 25/02/2025.
+ * @version 1.3, 06/03/2025.
  */
 public class TaskVerifyCertExpired extends FireTask {
 
@@ -89,39 +100,47 @@ public class TaskVerifyCertExpired extends FireTask {
 	}
 
 	/**
+	 * The future date when the certificate is set to expire.
+	 */
+	private Date futureDateCertExpired = null;
+
+	/**
+	 * Flag indicating whether the system should calculate the days remaining 
+	 * until the certificate expires and trigger related actions.
+	 */
+	private boolean calculateDaysCloseToExpiry = false;
+
+	/**
+	 * Flag indicating whether a periodic communication process is active.
+	 */
+	private boolean periodCommunication = false;
+
+	/**
+	 * The current system date at the moment of processing.
+	 */
+	private Date dateNow;
+
+	/**
+	 * Scheduler instance responsible for handling scheduled tasks.
+	 */
+	private Scheduler scheduler;
+	
+	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.quartz.task.FireTask#doActionOfTheTask()
 	 */
 	@Transactional
 	@Override
 	protected void doActionOfTheTask() throws Exception {
+		LOGGER.info(Language.getResWebFire(IWebLogMessages.LOG_CTV022));
+		
 		List<Certificate> listCertificateNotYedValid = new ArrayList<Certificate>();
 		List<Certificate> listCertificateExpired = new ArrayList<Certificate>();
 		List<Certificate> listCertificateExpDaysAdvanceNotice = new ArrayList<Certificate>();
-		boolean calculateAdavanceNotice = false;
-		boolean periodCommunication = false;
-		Date futureDateCertExpired = null;
-		Date dateNow = Calendar.getInstance().getTime();
+		dateNow = Calendar.getInstance().getTime();
 		
-		// Obtenemos el scheduler para la programacion de la tarea de valiacion
-		Scheduler scheduler = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class).getSchedulerById(NumberConstants.NUM_1_LONG);
-		
-		// Si hay dias de preaviso configurado, obtenemos la fecha actual + días de preaviso
-		if(scheduler.getAdvanceNotice() != null && !scheduler.getAdvanceNotice().equals(NumberConstants.NUM_0_LONG)) {
-			calculateAdavanceNotice  = true;
-			Calendar futureCal = Calendar.getInstance();
-			futureCal.add(Calendar.DAY_OF_YEAR, scheduler.getAdvanceNotice().intValue());
-			futureDateCertExpired = futureCal.getTime();
-		} else {
-			LOGGER.warn(Language.getResWebFire(IWebLogMessages.LOG_CTV003));
-		}
-		
-		// Si existe un periodo de comunicacion expresado en dias lo obtenemos
-		if(scheduler.getPeriodCommunication() != null && !scheduler.getPeriodCommunication().equals(NumberConstants.NUM_0_LONG)) {
-			periodCommunication = true;
-		} else {
-			LOGGER.warn(Language.getResWebFire(IWebLogMessages.LOG_CTV004));
-		}
+		scheduler = obtainDaysCloseToExpiry();
+		periodCommunication = isExistPeriodCommunication(periodCommunication, scheduler);
 		
 		// Obtenemos una lista de todos los responsables que tienen asociados una app y un certificado
 		List<MailInfoDTO> listMailInfoDTOResponsible =  ApplicationContextProvider.getApplicationContext().getBean(UserRepository.class).obtainAllCertWithAppAndResposible();
@@ -137,7 +156,7 @@ public class TaskVerifyCertExpired extends FireTask {
 			try {
 				x509Certificate.checkValidity();
 				// Cuando el certificado es valido evaluamos la caducidad en base a dias de preaviso y periodo de comunicacion
-				if(calculateAdavanceNotice) {
+				if(calculateDaysCloseToExpiry) {
 					// Verificamos si el certificado caduca en los días de preaviso configurados
 			        if (!x509Certificate.getNotAfter().after(futureDateCertExpired)) {
 			        	listCertificateExpDaysAdvanceNotice.add(certificate);
@@ -159,7 +178,6 @@ public class TaskVerifyCertExpired extends FireTask {
 					        		certificate.setDateLastCommunication(dateNow);
 					        	}
 			        		}
-			        		
 			        	}
 			        }
 				}
@@ -179,8 +197,95 @@ public class TaskVerifyCertExpired extends FireTask {
 			ApplicationContextProvider.getApplicationContext().getBean(ICertificateService.class).updateCertificateFromTaskValidation(certificate, x509Certificate);
 		}
 		
-		// Ahora enviaremos los mails a los administradores
-		sendEmailWithDiffCertStatus(listCertificateNotYedValid, listCertificateExpired, listCertificateExpDaysAdvanceNotice);
+		// Enviaremos los mails a los administradores con el estado de los certificados de sistema
+		sendEmailToCertSystemWithDiffCertStatus(listCertificateNotYedValid, listCertificateExpired, listCertificateExpDaysAdvanceNotice);
+		
+		// Comprobaremos si el servidor de afirma esta configurado con autenticacion de certficado y enviaremos un mail dependiendo de si esta caducado o proximo a caducar
+		validateCertAfirmaServerAndSendEmail();
+	}
+
+	/**
+	 * Validates the certificate of the Afirma server and sends an email notification 
+	 * if the certificate is close to expiration or has expired.
+	 *
+	 * @throws KeyStoreException       If there is an issue with the keystore.
+	 * @throws NoSuchAlgorithmException If the cryptographic algorithm is not available.
+	 * @throws CertificateException     If the certificate is invalid.
+	 * @throws CipherException          If there is an issue during decryption.
+	 * @throws IOException              If an I/O error occurs.
+	 */
+	private void validateCertAfirmaServerAndSendEmail() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, CipherException, IOException {
+		LOGGER.info(Language.getResWebFire(IWebLogMessages.LOG_CTV023));
+		ServerAfirma serverAfirma = ApplicationContextProvider.getApplicationContext().getBean(IServerAfirmaService.class).obtainServerAfirmaService(NumberConstants.NUM_1_LONG);
+		if(null != serverAfirma && serverAfirma.getcAuthenticationType().getIdAuthenticationType().equals(NumberConstants.NUM_2_LONG)) {
+			byte[] byteKeyStore = Base64.decode(serverAfirma.getKeystore());
+			String passwordKeystore = AESCipher.getInstance().decryptMessageBC(serverAfirma.getPasswordKeystore());
+			KeyStore keyStore = UtilsKeystore.loadKsPKCS12(byteKeyStore, passwordKeystore);
+			X509Certificate x509Certificate = UtilsKeystore.listAllX509Certificate(keyStore).get(NumberConstants.NUM0);
+			try{
+				x509Certificate.checkValidity();
+				// Cuando el certificado es valido evaluamos la caducidad en base a dias de preaviso y periodo de comunicacion
+				if(calculateDaysCloseToExpiry) {
+					// Verificamos si el certificado caduca en los días de preaviso configurados
+			        if (!x509Certificate.getNotAfter().after(futureDateCertExpired)) {
+			        	if(periodCommunication) {
+			        		// Enviaremos email a los administradores cuando:
+				        	//		- No haya fecha de ultima comunicacion
+				        	//		- La diferencia de dias entre la fecha actual y la fecha de la ultima comunicacion sea mayor o igual que el numero de dias establecidos para el periodo de comunicacion
+				        	//		- La diferencia de dias entre la fecha de caducidad y la fecha actual sea menor o igual que el numero de dias establecidos para el periodo de comunicacion
+			        		if(serverAfirma.getDateLastCommunication() == null) {
+			        			String status = Language.getResWebFire(IWebLogMessages.LOG_CTV026);
+			        			sendEmailToServerAfirmaWithStatusExpiredOrCloseExpired(x509Certificate, status);
+			        			serverAfirma.setDateLastCommunication(dateNow);
+			        		} else {
+			        			// Obtenemos la diferencia de dias entre la fecha actual y la fecha de la ultima comunicacion
+					        	Long diffDaysBetweenDNandDLC = TimeUnit.DAYS.convert((dateNow.getTime() - serverAfirma.getDateLastCommunication().getTime()), TimeUnit.MILLISECONDS); 
+								// Obtenemos la diferencia de dias entre la fecha actual y la fecha de caducidad
+					        	Long diffDaysBetweenDEandDLC = TimeUnit.DAYS.convert((x509Certificate.getNotAfter().getTime() - dateNow.getTime()), TimeUnit.MILLISECONDS); 
+					        	if(diffDaysBetweenDNandDLC >= scheduler.getPeriodCommunication() || diffDaysBetweenDEandDLC <= scheduler.getPeriodCommunication()) {
+					        		String status = Language.getResWebFire(IWebLogMessages.LOG_CTV026);
+					        		sendEmailToServerAfirmaWithStatusExpiredOrCloseExpired(x509Certificate, status);
+				        			serverAfirma.setDateLastCommunication(dateNow);
+					        	}
+			        		}
+			        		
+			        		// Actualizamos los campos del servidor de afirma con la fecha de la ultima comuinicacion
+			    			ApplicationContextProvider.getApplicationContext().getBean(IServerAfirmaService.class).saveServerAfirma(serverAfirma);
+			        	}
+			        }
+				}
+			} catch (final CertificateExpiredException e) {
+				String status = Language.getResWebFire(IWebLogMessages.LOG_CTV025);
+				sendEmailToServerAfirmaWithStatusExpiredOrCloseExpired(x509Certificate, status);
+			}
+		}
+	}
+	
+	/**
+	 * Sends an email notification to administrators when the Afirma server's certificate 
+	 * is either close to expiration or has already expired.
+	 *
+	 * @param x509Certificate The X.509 certificate of the Afirma server.
+	 * @param status          The status message indicating whether the certificate is close to expiration or expired.
+	 */
+	private void sendEmailToServerAfirmaWithStatusExpiredOrCloseExpired(X509Certificate x509Certificate, String status) {
+		// Obtenemos los destinatarios
+		Address[] addresses = obtainUsersAdmin();
+		
+		String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV024);
+		
+		StringBuilder bodySubject = new StringBuilder();
+		
+		String subjectCert = UtilsCertificate.getReadableSubject(x509Certificate);
+		String dateExp = Utils.getStringDateFormat(x509Certificate.getNotAfter());
+		bodySubject.append(Language.getFormatResWebFire(IWebLogMessages.LOG_CTV027, new Object[ ] { subjectCert, dateExp,  status }));
+		
+		String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV021, new Object[ ] { Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+		
+		// Configuramos las propiedades de Java Mail y enviamos el correo
+		ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
+		ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
+		
 	}
 
 	/**
@@ -191,24 +296,13 @@ public class TaskVerifyCertExpired extends FireTask {
 	 * @param listCertificateExpired             	List of expired certificates.
 	 * @param listCertificateExpDaysAdvanceNotice 	List of certificates nearing expiration.
 	 */
-	private void sendEmailWithDiffCertStatus(List<Certificate> listCertificateNotYedValid,
+	private void sendEmailToCertSystemWithDiffCertStatus(List<Certificate> listCertificateNotYedValid,
 			List<Certificate> listCertificateExpired, List<Certificate> listCertificateExpDaysAdvanceNotice) {
 		
 		// Solo enviaremos correo de notificacion a los administradores si hay algun certificado en estado: aun no valido, caducado o proximo a caducar
 		if(!listCertificateNotYedValid.isEmpty() || !listCertificateExpired.isEmpty() || !listCertificateExpDaysAdvanceNotice.isEmpty()) {
 			// Obtenemos los destinatarios
-			Address[] addresses = ApplicationContextProvider.getApplicationContext()
-				    .getBean(UserRepository.class)
-				    .findAll().stream()
-				    .filter(p -> p.getRol().getRolId().equals(NumberConstants.NUM_1_LONG))
-				    .map(user -> {
-				        try {
-				            return new InternetAddress(user.getEmail());
-				        } catch (Exception e) {
-				            throw new RuntimeException(e);
-				        }
-				    })
-				    .toArray(InternetAddress[]::new);
+			Address[] addresses = obtainUsersAdmin();
 			
 			String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV011);
 			
@@ -409,6 +503,66 @@ public class TaskVerifyCertExpired extends FireTask {
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
 		}
+	}
+	
+	/**
+	 * Retrieves the email addresses of all users who have an administrator role.
+	 *
+	 * @return An array of {@link Address} objects representing the email addresses of administrators.
+	 */
+	private Address[] obtainUsersAdmin() {
+		Address[] addresses = ApplicationContextProvider.getApplicationContext()
+			    .getBean(UserRepository.class)
+			    .findAll().stream()
+			    .filter(p -> p.getRol().getRolId().equals(NumberConstants.NUM_1_LONG))
+			    .map(user -> {
+			        try {
+			            return new InternetAddress(user.getEmail());
+			        } catch (Exception e) {
+			            throw new RuntimeException(e);
+			        }
+			    })
+			    .toArray(InternetAddress[]::new);
+		return addresses;
+	}
+	
+	/**
+	 * Checks if a period of communication is defined based on the scheduler configuration.
+	 *
+	 * @param periodCommunication The current status of period communication (true/false).
+	 * @param scheduler           The scheduler containing configuration details.
+	 * @return {@code true} if a period of communication exists, otherwise {@code false}.
+	 */
+	private boolean isExistPeriodCommunication(boolean periodCommunication, Scheduler scheduler) {
+		// Si existe un periodo de comunicacion expresado en dias lo obtenemos
+		if(scheduler.getPeriodCommunication() != null && !scheduler.getPeriodCommunication().equals(NumberConstants.NUM_0_LONG)) {
+			periodCommunication = true;
+		} else {
+			LOGGER.warn(Language.getResWebFire(IWebLogMessages.LOG_CTV004));
+		}
+		return periodCommunication;
+	}
+
+	/**
+	 * Retrieves the scheduler configuration and calculates the future expiration date 
+	 * based on the advance notice period.
+	 *
+	 * @return A {@link Scheduler} object containing the scheduling configuration.
+	 */
+	private Scheduler obtainDaysCloseToExpiry() {
+		// Obtenemos el scheduler para la programacion de la tarea de valiacion
+		Scheduler scheduler = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class).getSchedulerById(NumberConstants.NUM_1_LONG);
+		
+		// Si hay dias de preaviso configurado, obtenemos la fecha actual + días de preaviso
+		if(scheduler.getAdvanceNotice() != null && !scheduler.getAdvanceNotice().equals(NumberConstants.NUM_0_LONG)) {
+			calculateDaysCloseToExpiry  = true;
+			Calendar futureCal = Calendar.getInstance();
+			futureCal.add(Calendar.DAY_OF_YEAR, scheduler.getAdvanceNotice().intValue());
+			futureDateCertExpired = futureCal.getTime();
+		} else {
+			LOGGER.warn(Language.getResWebFire(IWebLogMessages.LOG_CTV003));
+		}
+		return scheduler;
 	}
 
 	/**

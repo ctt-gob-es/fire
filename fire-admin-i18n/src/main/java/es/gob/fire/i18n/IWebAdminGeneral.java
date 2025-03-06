@@ -20,14 +20,14 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p> 22/01/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.8, 04/03/2025.
+ * @version 1.9, 06/03/2025.
  */
 package es.gob.fire.i18n;
 
 /** 
  * <p>Interface that contains the keys of the messages shown in the @firma administration.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
- * @version 1.8, 04/03/2025.
+ * @version 1.9, 06/03/2025.
  */
 public interface IWebAdminGeneral {
 
@@ -264,8 +264,14 @@ public interface IWebAdminGeneral {
 	 */
 	String LOG_ML016 = "ML016";
 	
+	/**
+	 * Constant attribute that represents the property key <code>ML017</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
 	String LOG_ML017 = "ML017";
 	
+	/**
+	 * Constant attribute that represents the property key <code>ML018</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
 	String LOG_ML018 = "ML018";
 	
 	/***********************/
@@ -346,5 +352,10 @@ public interface IWebAdminGeneral {
 	 * Constant attribute that represents the property key <code>CSA015</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
 	 */
 	String LOG_CSA015 = "CSA015";
+
+	/**
+	 * Constant attribute that represents the property key <code>CSA016</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_CSA016 = "CSA016";
 	
 }
