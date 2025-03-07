@@ -198,7 +198,7 @@ public class TaskVerifyCertExpired extends FireTask {
 		}
 		
 		// Enviaremos los mails a los administradores con el estado de los certificados de sistema
-		sendEmailToCertSystemWithDiffCertStatus(listCertificateNotYedValid, listCertificateExpired, listCertificateExpDaysAdvanceNotice);
+		sendEmailToAdminForCertWithDiffStatus(listCertificateNotYedValid, listCertificateExpired, listCertificateExpDaysAdvanceNotice);
 		
 		// Comprobaremos si el servidor de afirma esta configurado con autenticacion de certficado y enviaremos un mail dependiendo de si esta caducado o proximo a caducar
 		validateCertAfirmaServerAndSendEmail();
@@ -235,7 +235,7 @@ public class TaskVerifyCertExpired extends FireTask {
 				        	//		- La diferencia de dias entre la fecha de caducidad y la fecha actual sea menor o igual que el numero de dias establecidos para el periodo de comunicacion
 			        		if(serverAfirma.getDateLastCommunication() == null) {
 			        			String status = Language.getResWebFire(IWebLogMessages.LOG_CTV026);
-			        			sendEmailToServerAfirmaWithStatusExpiredOrCloseExpired(x509Certificate, status);
+			        			sendEmailToAdminForCertWithStatusExpiredOrCloseToExpired(x509Certificate, status);
 			        			serverAfirma.setDateLastCommunication(dateNow);
 			        		} else {
 			        			// Obtenemos la diferencia de dias entre la fecha actual y la fecha de la ultima comunicacion
@@ -244,7 +244,7 @@ public class TaskVerifyCertExpired extends FireTask {
 					        	Long diffDaysBetweenDEandDLC = TimeUnit.DAYS.convert((x509Certificate.getNotAfter().getTime() - dateNow.getTime()), TimeUnit.MILLISECONDS); 
 					        	if(diffDaysBetweenDNandDLC >= scheduler.getPeriodCommunication() || diffDaysBetweenDEandDLC <= scheduler.getPeriodCommunication()) {
 					        		String status = Language.getResWebFire(IWebLogMessages.LOG_CTV026);
-					        		sendEmailToServerAfirmaWithStatusExpiredOrCloseExpired(x509Certificate, status);
+					        		sendEmailToAdminForCertWithStatusExpiredOrCloseToExpired(x509Certificate, status);
 				        			serverAfirma.setDateLastCommunication(dateNow);
 					        	}
 			        		}
@@ -256,7 +256,7 @@ public class TaskVerifyCertExpired extends FireTask {
 				}
 			} catch (final CertificateExpiredException e) {
 				String status = Language.getResWebFire(IWebLogMessages.LOG_CTV025);
-				sendEmailToServerAfirmaWithStatusExpiredOrCloseExpired(x509Certificate, status);
+				sendEmailToAdminForCertWithStatusExpiredOrCloseToExpired(x509Certificate, status);
 			}
 		}
 	}
@@ -268,7 +268,7 @@ public class TaskVerifyCertExpired extends FireTask {
 	 * @param x509Certificate The X.509 certificate of the Afirma server.
 	 * @param status          The status message indicating whether the certificate is close to expiration or expired.
 	 */
-	private void sendEmailToServerAfirmaWithStatusExpiredOrCloseExpired(X509Certificate x509Certificate, String status) {
+	private void sendEmailToAdminForCertWithStatusExpiredOrCloseToExpired(X509Certificate x509Certificate, String status) {
 		// Obtenemos los destinatarios
 		Address[] addresses = obtainUsersAdmin();
 		
@@ -296,7 +296,7 @@ public class TaskVerifyCertExpired extends FireTask {
 	 * @param listCertificateExpired             	List of expired certificates.
 	 * @param listCertificateExpDaysAdvanceNotice 	List of certificates nearing expiration.
 	 */
-	private void sendEmailToCertSystemWithDiffCertStatus(List<Certificate> listCertificateNotYedValid,
+	private void sendEmailToAdminForCertWithDiffStatus(List<Certificate> listCertificateNotYedValid,
 			List<Certificate> listCertificateExpired, List<Certificate> listCertificateExpDaysAdvanceNotice) {
 		
 		// Solo enviaremos correo de notificacion a los administradores si hay algun certificado en estado: aun no valido, caducado o proximo a caducar
