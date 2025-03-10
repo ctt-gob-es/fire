@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>1.0, 27/01/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.4, 24/02/2025.
+ * @version 1.5, 10/03/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -85,7 +85,7 @@ import es.gob.fire.web.exception.WebAdminException;
  * 
  * </p>
  *
- * @version 1.4, 24/02/2025.
+ * @version 1.5, 10/03/2025.
  */
 @Controller
 public class LoginController {
@@ -210,7 +210,6 @@ public class LoginController {
      * @return true if contingency is activated, false otherwise
      */
 	private boolean activateCertificateContingency(final Model model, Date currentDate, String ipUser, StringBuilder activateMsg) {
-		boolean activate = false;
 		
 		// Obtenemos todos los controles de accesos ordenados por fecha mas antigua
     	List<ControlAccess> listControlAccess = iLoginService
@@ -223,7 +222,7 @@ public class LoginController {
 		// 1.- Comprobaremos si la plataforma de clave esta disponible
     	if(!iLoginService.isPasarelaAvailable()) {
     		activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
-    		activate = true;
+    		return true;
     	}
     	
     	// 2.- Evaluaremos si para esta ip el usuario a intentando entrar mas de X veces en menos de X segundos
@@ -236,9 +235,12 @@ public class LoginController {
             			long secondsDifference  = (currentDate.getTime() - controlAccess.getStartDateAccess().getTime()) / NumberConstants.NUM1000; 
             			// Evaluamos si supera el intervalo de X segundos de contingencia
             			if(secondsDifference >= confCertIntervalContingency) {
+            				LOGGER.warn(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML007));
             				// Si es asi activamos el login con certificado por contigencia
-            				activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML007));
-            				activate = true;
+            				activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
+            				// Eliminamos intentos fallidos de acceso para todas las ip puesto que clave sigue estando operativo
+            		    	iLoginService.deleteAllControlAccess();
+            				return true;
             			}
             		}
     			} else {
@@ -249,7 +251,7 @@ public class LoginController {
     		}
     	}
     	
-    	return activate;
+    	return false;
 	}
     
 	/**
@@ -320,7 +322,7 @@ public class LoginController {
 	        // Antes de ir al inicio limpiamos ThreadLocal para evitar memory leaks
 	        threadInfoDataSecureDTO.clear();
 	        
-	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
+	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG016)}));
 	        return "inicio.html";
 
 	    } catch (Exception e) {

@@ -8,6 +8,7 @@
 					<div id="messageWsAfirmaFormId" role="alert"></div>
 					<input type='hidden' class='primarykey' id="idServerAfirma" th:field="*{idServerAfirma}">
 					<input type="hidden" id="keystoreB64" th:field="*{keystoreB64}"/>
+					<input type="hidden" id="certificateB64" th:field="*{certificateB64}"/>
 					
 					<!-- URL -->	
 					<div class="form-group row">
@@ -131,6 +132,8 @@
 	 			var selectFile = /*[[#{ws.afirma.field.keystore.file.choose}]]*/;
 	 			$(".custom-file-label").text(selectFile);
 	 			$('#subject').val("");
+	 			$("#idDownLoadCert").hide();
+	 			$("#keystoreB64").val("");
 	 		} else if($("#authenticationId").val() == 0){
 	 			$('#userId').attr('readonly', true);
 	 			$('#password').attr('readonly', true);
@@ -143,9 +146,12 @@
 	 			$('#userId').val("");
 	 			$('#password').val("");
 	 			$("#keystoreFile").val("");
+	 			$('#passwordKeystore').val("");
 	 			var selectFile = /*[[#{ws.afirma.field.keystore.file.choose}]]*/;
 	 			$(".custom-file-label").text(selectFile);
 	 			$('#subject').val("");
+	 			$("#idDownLoadCert").hide();
+	 			$("#keystoreB64").val("");
 	 		}
 		});
 		
@@ -249,8 +255,8 @@
  	}
 	
 	function downLoadCert() {
-		var keystoreBlob = b64toBlob($("#keystoreB64").val(), 'application/x-x509-ca-cert');
-		var fileName = "ServidorAfirma.p12";
+		var keystoreBlob = b64toBlob($("#certificateB64").val(), 'application/x-x509-ca-cert');
+		var fileName = "ServidorAfirma.cer";
 		
 		var reader = new FileReader();
 		reader.onload = function(event) {

@@ -107,7 +107,7 @@ public class ResponseClave {
 	    	response.addCookie(cookie);
 	    	
 	        // Informamos en la traza que el usuario X se ha logueado en la administracion
-	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
+	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG015)}));
 	        return "inicio.html";
 		
 		}catch (ClaveException e) {

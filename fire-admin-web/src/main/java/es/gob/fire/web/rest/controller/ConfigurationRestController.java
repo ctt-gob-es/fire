@@ -20,7 +20,7 @@
  * <b>Project:</b><p>Application for signing documents of FIRe system.</p>
  * <b>Date:</b><p>07/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 06/03/2025.
+ * @version 1.3, 10/03/2025.
  */
 package es.gob.fire.web.rest.controller;
 
@@ -86,7 +86,7 @@ import es.gob.fire.service.IServerAfirmaService;
 /** 
  * <p>Class that manages the REST requests related to the Configuration administration and JSON communication.</p>
  * <b>Project:</b><p>Application for monitoring services of FIRe system.</p>
- * @version 1.2, 06/03/2025.
+ * @version 1.3, 10/03/2025.
  */
 @RestController
 public class ConfigurationRestController {
@@ -216,7 +216,7 @@ public class ConfigurationRestController {
 				}
 				
 				// se actualiza la fecha inicial por si se ha modificado.
-				Date initDay = UtilsDate.transformDate(taskForm.getInitDayStringEdit(), UtilsDate.FORMAT_DATE_TIME_STANDARD);
+				Date initDay = UtilsDate.transformDate(taskForm.getInitDayStringEdit(), UtilsDate.FORMAT_DATE_TIME);
 				planner.setInitDay(initDay);
 				
 				CPlannerType plannerType = iCPlannerTypeService.getCPlannerTypeById(idCPlannerType);
@@ -265,7 +265,7 @@ public class ConfigurationRestController {
 		Boolean result = true;
 		// se comprueba que la fecha indicada no sea anterior a la actual
 		LocalDate now = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UtilsDate.FORMAT_DATE_TIME_STANDARD);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UtilsDate.FORMAT_DATE_TIME);
 		if(date!=null && !date.isEmpty()){
 			LocalDate initDay = LocalDate.parse(date, formatter);
 			if (initDay == null || initDay.isBefore(now)) {
@@ -344,7 +344,9 @@ public class ConfigurationRestController {
     		serverAfirma.setPassword(null);
     		// Obtenemos el subject del certificado para mostrarlo
         	KeyStore keyStore = UtilsKeystore.loadKsPKCS12(Base64.getDecoder().decode(serverAfirmaDTO.getKeystoreB64()), serverAfirmaDTO.getPasswordKeystore());
-        	serverAfirmaDTO.setSubject(UtilsCertificate.getReadableSubject(UtilsKeystore.listAllX509Certificate(keyStore).get(NumberConstants.NUM0)));
+        	X509Certificate x509Certificate = UtilsKeystore.listAllX509Certificate(keyStore).get(NumberConstants.NUM0);
+        	serverAfirmaDTO.setSubject(UtilsCertificate.getReadableSubject(x509Certificate));
+        	serverAfirmaDTO.setCertificateB64(Base64.getEncoder().encodeToString(x509Certificate.getEncoded()));
     	} else if(cAuthenticationType.getIdAuthenticationType().equals(NumberConstants.NUM_1_LONG)) {
     		serverAfirma.setUser(serverAfirmaDTO.getUser());
     		serverAfirma.setPassword(AESCipher.getInstance().encryptMessageWithBC(serverAfirmaDTO.getPassword()));

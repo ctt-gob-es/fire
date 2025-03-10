@@ -104,6 +104,11 @@ public class ServerAfirmaDTO {
 	private MultipartFile keystoreFile;
 	
 	/**
+	 * Attribute that represent the value to certificate in base64.
+	 */
+	private String certificateB64;
+	
+	/**
 	 * Default constructor for {@link ServerAfirmaDTO}.
 	 *
 	 * <p>Creates an empty instance of {@code ServerAfirmaDTO} with default values.</p>
@@ -351,5 +356,22 @@ public class ServerAfirmaDTO {
 	 */
 	public void setKeystoreFile(MultipartFile keystoreFile) {
 		this.keystoreFile = keystoreFile;
-	}	
+	}
+
+	/**
+	 * Gets the value of the attribute {@link #certificateB64}.
+	 * @return the value of the attribute {@link #certificateB64}.
+	 */
+	public String getCertificateB64() {
+		return certificateB64;
+	}
+
+	/**
+	 * Sets the value of the attribute {@link #certificateB64}.
+	 * @param certificateB64 the value for the attribute {@link #certificateB64} to set.
+	 */
+	public void setCertificateB64(String certificateB64) {
+		this.certificateB64 = certificateB64;
+	}
+	
 }
