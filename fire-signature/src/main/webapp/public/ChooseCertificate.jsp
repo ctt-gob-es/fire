@@ -19,8 +19,8 @@
 <%@page import="es.gob.afirma.core.misc.Base64"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.security.cert.X509Certificate"%>
-<%@page import="es.gob.fire.i18n.Language"%>
-<%@page import="es.gob.fire.i18n.IWebViewMessages"%>
+<%@page import="es.gob.fire.signature.i18n.Language"%>
+<%@page import="es.gob.fire.signature.i18n.IWebViewMessages"%>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%

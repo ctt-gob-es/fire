@@ -225,6 +225,22 @@
 				</dependency>
 			</dependencies>
 		</profile>
+		
+		<!-- Perfil que agrega el modulo para el envio de notificaciones por correo electronico -->
+		<profile>
+			<id>mail</id>	
+			<activation>
+				<property>
+					<name>all</name> <!-- Se activa siempre que se indique esta propiedad -->
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-alarms-mail</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
 	</profiles>
 	
 	

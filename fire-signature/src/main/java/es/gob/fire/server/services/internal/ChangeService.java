@@ -12,11 +12,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.i18n.Language;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.signature.i18n.Language;
 
 public class ChangeService extends HttpServlet {
 

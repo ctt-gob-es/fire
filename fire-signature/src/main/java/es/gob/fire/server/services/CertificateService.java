@@ -70,7 +70,7 @@ public final class CertificateService extends HttpServlet {
     	}
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
     }
 
 	@Override

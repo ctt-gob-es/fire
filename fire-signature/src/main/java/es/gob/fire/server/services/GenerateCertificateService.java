@@ -72,7 +72,7 @@ public final class GenerateCertificateService extends HttpServlet {
     	}
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
     }
 
     /** Solicitud de un nuevo certificado de firma. */

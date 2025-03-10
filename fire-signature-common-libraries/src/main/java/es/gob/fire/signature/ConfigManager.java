@@ -723,11 +723,11 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Recupera la clase {@code AlarmNotifier}
+	 * Recupera el nombre {@code AlarmNotifier}
 	 * con la que notificar las alarmas identificadas.
 	 * @return Nombre cualificado de la clase.
 	 */
-	public static String getAlarmsNotifierClassName() {
+	public static String getAlarmsNotifierName() {
 
 		if (config == null) {
 			try {
@@ -921,6 +921,25 @@ public class ConfigManager {
 			 }
 		 }
 		 return getProperty(PROP_HTTP_CERT_ATTR, DEFAULT_HTTP_CERT_ATTR);
+	 }
+	
+	 /**
+	 * Recupera el nombre de la clase implementada para el notificador que
+	 * se indica por par&aacute;metro.
+	 * @param notifierName Identificador de la aplicaci&oacute;n.
+	 * @return Nombre de la clase.
+	 */
+	public static String getNotifierClassName(final String notifierName) {
+
+		 if (config == null) {
+			 try {
+				 loadConfig();
+			 } catch (final ConfigFilesException e) {
+				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+				 return null;
+			 }
+		 }
+		 return getProperty(notifierName + ".notifierclass");
 	 }
 
 	/**

@@ -13,8 +13,8 @@
 <%@page import="java.net.URLEncoder"%>
 <%@page import="java.util.Properties"%>
 <%@page import="java.util.Locale"%>
-<%@page import="es.gob.fire.i18n.Language"%>
-<%@page import="es.gob.fire.i18n.IWebViewMessages"%>
+<%@page import="es.gob.fire.signature.i18n.Language"%>
+<%@page import="es.gob.fire.signature.i18n.IWebViewMessages"%>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%

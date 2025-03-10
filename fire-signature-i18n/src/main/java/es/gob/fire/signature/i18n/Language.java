@@ -34,25 +34,17 @@
  * @author Gobierno de Espa&ntilde;a.
  * @version 1.2, 02/02/2021.
  */
-package es.gob.fire.i18n;
+package es.gob.fire.signature.i18n;
 
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
-
-import es.gob.fire.i18n.utils.Logger;
-
 /**
  * <p>Class responsible for managing the access to language resources.</p>
  * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
  * @version 1.2, 02/02/2021.
  */
 public final class Language {
-
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(Language.class);
 
 	/**
 	 * Constructor method for the class Language.java.
@@ -104,7 +96,7 @@ public final class Language {
 			classLoaderMessages = Language.class.getClassLoader();
 			reloadFireSignatureMessagesConfiguration();
 		} catch (final RuntimeException e) {
-			LOGGER.error(e);
+			//LOGGER.error(e);
 		}
 	}
 
@@ -136,11 +128,11 @@ public final class Language {
 		}
 		// Si hay que tomar el locale por defecto...
 		if (takeDefaultLocale) {
-			LOGGER.error("No property was obtained correctly determining the Locale for log messages. Will take the default locale.");
+			//LOGGER.error("No property was obtained correctly determining the Locale for log messages. Will take the default locale.");
 			currentLocale = Locale.getDefault();
 		}
 		// Se informa en el log del Locale selecccionado.
-		LOGGER.info("Take the next locale for messages logs: " + currentLocale.toString());
+		//LOGGER.info("Take the next locale for messages logs: " + currentLocale.toString());
 		// Se cargan los mensajes del modulo de administracion web.
 		resFireSignatureBundle = ResourceBundle.getBundle(BUNDLENAME_FIRESIGNATURE, currentLocale, classLoaderMessages);
 	}
@@ -151,7 +143,7 @@ public final class Language {
 	public static void changeFireSignatureMessagesConfiguration(final Locale newLocale) {
 		currentLocale = newLocale;	
 		// Se informa en el log del Locale selecccionado.
-		LOGGER.info("Take the next locale for messages logs: " + currentLocale.toString());
+		//LOGGER.info("Take the next locale for messages logs: " + currentLocale.toString());
 		// Se cargan los mensajes del modulo de administracion web.
 		resFireSignatureBundle = ResourceBundle.getBundle(BUNDLENAME_FIRESIGNATURE, newLocale, classLoaderMessages);
 	}

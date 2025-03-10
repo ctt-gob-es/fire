@@ -90,7 +90,7 @@ public final class SignService extends HttpServlet {
     	}
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
     }
 
     /** Recepci&oacute;n de la petici&oacute;n POST y realizaci&oacute;n de la

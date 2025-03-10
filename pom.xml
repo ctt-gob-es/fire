@@ -134,6 +134,14 @@
 				<module>fire-alarms-eventmanager</module>
 			</modules>
 		</profile>
+		
+		<profile>
+			<id>mail</id>	<!-- Perfil que genera el conector para el envío de notificaciones por correo electronico -->
+
+			<modules>
+				<module>fire-alarms-mail</module>
+			</modules>
+		</profile>
 	</profiles>
 
 	<dependencyManagement>
@@ -249,6 +257,11 @@
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-alarms-eventmanager</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-alarms-mail</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
 			<dependency>

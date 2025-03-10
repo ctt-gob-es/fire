@@ -1,4 +1,4 @@
-package es.gob.fire.i18n;
+package es.gob.fire.signature.i18n;
 
 public interface IWebViewMessages {
 

@@ -56,7 +56,7 @@ public class FIReService extends HttpServlet {
     	super.init();
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
 
     	// Comprobamos la configuracion
     	try {

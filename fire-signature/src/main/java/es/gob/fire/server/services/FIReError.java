@@ -1,7 +1,7 @@
 package es.gob.fire.server.services;
 
-import es.gob.fire.i18n.IErrorMessages;
-import es.gob.fire.i18n.Language;
+import es.gob.fire.signature.i18n.IErrorMessages;
+import es.gob.fire.signature.i18n.Language;
 
 /**
  * Errores que pueden darse en FIRe.
