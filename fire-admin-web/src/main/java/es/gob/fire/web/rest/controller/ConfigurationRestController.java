@@ -417,7 +417,7 @@ public class ConfigurationRestController {
 					KeyStore keyStore = UtilsKeystore.loadKsPKCS12(byteCert, serverAfirmaDTO.getPasswordKeystore());
 					List<X509Certificate> listX509Certificate = UtilsKeystore.listAllX509Certificate(keyStore);
 					if(null == listX509Certificate || listX509Certificate.isEmpty()) {
-						String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA012);
+						String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA016);
 						LOGGER.error(msgError);
 						json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 					} else if(listX509Certificate.size() > NumberConstants.NUM_1_LONG) {
