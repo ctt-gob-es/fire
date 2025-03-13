@@ -428,28 +428,28 @@ public class ConfigurationRestController {
 						listX509Certificate.get(NumberConstants.NUM0).checkValidity();
 					}
 				} catch (CertificateExpiredException e) {
+					LOGGER.error(e);
 					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA013);
-					LOGGER.error(msgError);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 				} catch (CertificateNotYetValidException e) {
+					LOGGER.error(e);
 					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA014);
-					LOGGER.error(msgError);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 				} catch (KeyStoreException e) {
+					LOGGER.error(e);
 					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA006);
-					LOGGER.error(msgError);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 				} catch (NoSuchAlgorithmException e) {
+					LOGGER.error(e);
 					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA007);
-					LOGGER.error(msgError);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 				} catch (CertificateException e) {
+					LOGGER.error(e);
 					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA008);
-					LOGGER.error(msgError);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 				} catch (IOException e) {
+					LOGGER.error(e);
 					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA009);
-					LOGGER.error(msgError);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 				}
 			}
