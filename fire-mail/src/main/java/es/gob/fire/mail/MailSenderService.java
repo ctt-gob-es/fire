@@ -42,7 +42,12 @@ public class MailSenderService extends ConfigurationMail {
 	 */
 	public static final String MAIL_TEXT_PLAIN_CHARSET = "text/plain; charset=UTF-8";
 	
-	public void sendEmail(Address[] addresses, String subject, StringBuilder bodySubject, String msgEmailSucces) {
+	/**
+	 * Attribute that represents the HTML text type.
+	 */
+	public static final String MAIL_TEXT_HTML_CHARSET = "text/html; charset=UTF-8";
+	
+	public void sendEmail(final Address[] addresses, final String subject, final StringBuilder bodySubject, final String msgEmailSucces, final String textType) {
 		Transport transport = null;
 
 	    try {
@@ -62,8 +67,8 @@ public class MailSenderService extends ConfigurationMail {
             // Establecemos el asunto del correo
             message.setSubject(subject);
 
-            // Establecemos el cuerpo del correo en formato HTML
-            message.setContent(bodySubject.toString(), MAIL_TEXT_PLAIN_CHARSET);
+            // Establecemos el cuerpo del correo en el formato que se haya indicado
+            message.setContent(bodySubject.toString(), textType);
 
             // Guardamos los cambios
             message.saveChanges();
@@ -72,14 +77,14 @@ public class MailSenderService extends ConfigurationMail {
             transport.sendMessage(message, message.getAllRecipients());
 
             LOGGER.info(msgEmailSucces);
-	    } catch (Exception e) {
+	    } catch (final Exception e) {
 	        LOGGER.error("Se ha producido un error al enviar el correo: ", e);
 	    } finally {
 	        // Cerramos el transport solo una vez al final
 	        if (transport != null) {
 	            try {
 	                transport.close();
-	            } catch (MessagingException e) {
+	            } catch (final MessagingException e) {
 	                LOGGER.error("Error al cerrar el transport", e);
 	            }
 	        }

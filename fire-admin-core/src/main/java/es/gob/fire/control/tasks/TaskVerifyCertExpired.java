@@ -94,21 +94,21 @@ public class TaskVerifyCertExpired extends FireTask {
 	@Transactional
 	@Override
 	protected void doActionOfTheTask() throws Exception {
-		List<Certificate> listCertificateNotYedValid = new ArrayList<Certificate>();
-		List<Certificate> listCertificateExpired = new ArrayList<Certificate>();
-		List<Certificate> listCertificateExpDaysAdvanceNotice = new ArrayList<Certificate>();
+		final List<Certificate> listCertificateNotYedValid = new ArrayList<Certificate>();
+		final List<Certificate> listCertificateExpired = new ArrayList<Certificate>();
+		final List<Certificate> listCertificateExpDaysAdvanceNotice = new ArrayList<Certificate>();
 		boolean calculateAdavanceNotice = false;
 		boolean periodCommunication = false;
 		Date futureDateCertExpired = null;
-		Date dateNow = Calendar.getInstance().getTime();
+		final Date dateNow = Calendar.getInstance().getTime();
 		
 		// Obtenemos el scheduler para la programacion de la tarea de valiacion
-		Scheduler scheduler = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class).getSchedulerById(NumberConstants.NUM_1_LONG);
+		final Scheduler scheduler = ApplicationContextProvider.getApplicationContext().getBean(SchedulerService.class).getSchedulerById(NumberConstants.NUM_1_LONG);
 		
 		// Si hay dias de preaviso configurado, obtenemos la fecha actual + días de preaviso
 		if(scheduler.getAdvanceNotice() != null && !scheduler.getAdvanceNotice().equals(NumberConstants.NUM_0_LONG)) {
 			calculateAdavanceNotice  = true;
-			Calendar futureCal = Calendar.getInstance();
+			final Calendar futureCal = Calendar.getInstance();
 			futureCal.add(Calendar.DAY_OF_YEAR, scheduler.getAdvanceNotice().intValue());
 			futureDateCertExpired = futureCal.getTime();
 		} else {
@@ -123,14 +123,14 @@ public class TaskVerifyCertExpired extends FireTask {
 		}
 		
 		// Obtenemos una lista de todos los responsables que tienen asociados una app y un certificado
-		List<MailInfoDTO> listMailInfoDTOResponsible =  ApplicationContextProvider.getApplicationContext().getBean(UserRepository.class).obtainAllCertWithAppAndResposible();
+		final List<MailInfoDTO> listMailInfoDTOResponsible =  ApplicationContextProvider.getApplicationContext().getBean(UserRepository.class).obtainAllCertWithAppAndResposible();
 		
 		// Para cada certificado evaluaremos si esta caducado, aun no valido o va a caducar en funcion de los dias de preaviso configurados
-		List<Certificate> listCertificate = ApplicationContextProvider.getApplicationContext().getBean(CertificateRepository.class).findAll();
-		for (Certificate certificate : listCertificate) {
+		final List<Certificate> listCertificate = ApplicationContextProvider.getApplicationContext().getBean(CertificateRepository.class).findAll();
+		for (final Certificate certificate : listCertificate) {
 			
 			// Obtenemos a partir de la factoria de java un certificado X509
-			X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance(CertificateService.X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertificate()))); //$NON-NLS-1$
+			final X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance(CertificateService.X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertificate())));
 			
 			// Chequeamos la validez del certificado
 			try {
@@ -150,9 +150,9 @@ public class TaskVerifyCertExpired extends FireTask {
 				        		certificate.setDateLastCommunication(dateNow);
 			        		} else {
 			        			// Obtenemos la diferencia de dias entre la fecha actual y la fecha de la ultima comunicacion
-					        	Long diffDaysBetweenDNandDLC = TimeUnit.DAYS.convert((dateNow.getTime() - certificate.getDateLastCommunication().getTime()), TimeUnit.MILLISECONDS); 
+					        	final Long diffDaysBetweenDNandDLC = TimeUnit.DAYS.convert((dateNow.getTime() - certificate.getDateLastCommunication().getTime()), TimeUnit.MILLISECONDS); 
 								// Obtenemos la diferencia de dias entre la fecha actual y la fecha de caducidad
-					        	Long diffDaysBetweenDEandDLC = TimeUnit.DAYS.convert((x509Certificate.getNotAfter().getTime() - dateNow.getTime()), TimeUnit.MILLISECONDS); 
+					        	final Long diffDaysBetweenDEandDLC = TimeUnit.DAYS.convert((x509Certificate.getNotAfter().getTime() - dateNow.getTime()), TimeUnit.MILLISECONDS); 
 					        	if(diffDaysBetweenDNandDLC >= scheduler.getPeriodCommunication() || diffDaysBetweenDEandDLC <= scheduler.getPeriodCommunication()) {
 					        		sendEmailToResponsiblesForCertCloseToExpiry(listMailInfoDTOResponsible, certificate);
 					        		certificate.setDateLastCommunication(dateNow);
@@ -190,42 +190,42 @@ public class TaskVerifyCertExpired extends FireTask {
 	 * @param listCertificateExpired             	List of expired certificates.
 	 * @param listCertificateExpDaysAdvanceNotice 	List of certificates nearing expiration.
 	 */
-	private void sendEmailWithDiffCertStatus(List<Certificate> listCertificateNotYedValid,
-			List<Certificate> listCertificateExpired, List<Certificate> listCertificateExpDaysAdvanceNotice) {
+	private void sendEmailWithDiffCertStatus(final List<Certificate> listCertificateNotYedValid,
+			final List<Certificate> listCertificateExpired, final List<Certificate> listCertificateExpDaysAdvanceNotice) {
 		
 		// Solo enviaremos correo de notificacion a los administradores si hay algun certificado en estado: aun no valido, caducado o proximo a caducar
 		if(!listCertificateNotYedValid.isEmpty() || !listCertificateExpired.isEmpty() || !listCertificateExpDaysAdvanceNotice.isEmpty()) {
 			// Obtenemos los destinatarios
-			Address[] addresses = ApplicationContextProvider.getApplicationContext()
+			final Address[] addresses = ApplicationContextProvider.getApplicationContext()
 				    .getBean(UserRepository.class)
 				    .findAll().stream()
 				    .filter(p -> p.getRol().getRolId().equals(NumberConstants.NUM_1_LONG))
 				    .map(user -> {
 				        try {
 				            return new InternetAddress(user.getEmail());
-				        } catch (Exception e) {
+				        } catch (final Exception e) {
 				            throw new RuntimeException(e);
 				        }
 				    })
 				    .toArray(InternetAddress[]::new);
 			
-			String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV011);
+			final String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV011);
 			
-			StringBuilder bodySubject = new StringBuilder();
+			final StringBuilder bodySubject = new StringBuilder();
 			
 			bodySubject.append(Language.getResWebFire(IWebLogMessages.LOG_CTV012));
 			bodySubject.append("\n");
 			bodySubject.append("\n");
 			
-			List<CertificatesApplication> listCertificatesApplication = ApplicationContextProvider.getApplicationContext().getBean(CertificatesApplicationRepository.class).findAllWithCertificateAndApplication();
+			final List<CertificatesApplication> listCertificatesApplication = ApplicationContextProvider.getApplicationContext().getBean(CertificatesApplicationRepository.class).findAllWithCertificateAndApplication();
 
 			if(!listCertificateNotYedValid.isEmpty()) {
 				
 				bodySubject.append(Language.getFormatResWebFire(IWebLogMessages.LOG_CTV013, new Object[ ] { listCertificateNotYedValid.size()}));
 				bodySubject.append("\n");
 				
-				for (Certificate certificateNotYedValid : listCertificateNotYedValid) {
-					String appNames = listCertificatesApplication.stream()
+				for (final Certificate certificateNotYedValid : listCertificateNotYedValid) {
+					final String appNames = listCertificatesApplication.stream()
 						    .filter(p -> p.getCertificate().getIdCertificado().equals(certificateNotYedValid.getIdCertificado()))
 						    .map(p -> p.getApplication().getAppName())
 						    .distinct()
@@ -242,8 +242,8 @@ public class TaskVerifyCertExpired extends FireTask {
 				bodySubject.append(Language.getFormatResWebFire(IWebLogMessages.LOG_CTV015, new Object[ ] { listCertificateExpired.size()}));
 				bodySubject.append("\n");
 				
-				for (Certificate certificateExpired : listCertificateExpired) {
-					String appNames = listCertificatesApplication.stream()
+				for (final Certificate certificateExpired : listCertificateExpired) {
+					final String appNames = listCertificatesApplication.stream()
 						    .filter(p -> p.getCertificate().getIdCertificado().equals(certificateExpired.getIdCertificado()))
 						    .map(p -> p.getApplication().getAppName())
 						    .distinct()
@@ -260,8 +260,8 @@ public class TaskVerifyCertExpired extends FireTask {
 				bodySubject.append(Language.getFormatResWebFire(IWebLogMessages.LOG_CTV017, new Object[ ] { listCertificateExpDaysAdvanceNotice.size()}));
 				bodySubject.append("\n");
 				
-				for (Certificate certificateCloseToExpired : listCertificateExpDaysAdvanceNotice) {
-					String appNames = listCertificatesApplication.stream()
+				for (final Certificate certificateCloseToExpired : listCertificateExpDaysAdvanceNotice) {
+					final String appNames = listCertificatesApplication.stream()
 							.filter(p -> p.getCertificate().getIdCertificado().equals(certificateCloseToExpired.getIdCertificado()))
 							.map(p -> p.getApplication().getAppName())
 							.distinct()
@@ -271,11 +271,11 @@ public class TaskVerifyCertExpired extends FireTask {
 				}
 			}
 			
-			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV021, new Object[ ] { Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+			final String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV021, new Object[ ] { Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
 			// Configuramos las propiedades de Java Mail y enviamos el correo
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses, subject, bodySubject, msgEmailSucces, MailSenderService.MAIL_TEXT_PLAIN_CHARSET);
 		}
 		
 	}
@@ -287,38 +287,38 @@ public class TaskVerifyCertExpired extends FireTask {
 	 * @param listMailInfoDTOResponsible List of responsible users with certificate details.
 	 * @param certificate                The certificate that is close to expiration.
 	 */
-	private void sendEmailToResponsiblesForCertCloseToExpiry(List<MailInfoDTO> listMailInfoDTOResponsible,
-			Certificate certificate) {
-		List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
+	private void sendEmailToResponsiblesForCertCloseToExpiry(final List<MailInfoDTO> listMailInfoDTOResponsible,
+			final Certificate certificate) {
+		final List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
 		
 		if(listMailInfoDTORespWithCert != null && !listMailInfoDTORespWithCert.isEmpty()) {
 			
-			Address[] addresses = listMailInfoDTORespWithCert.stream()
+			final Address[] addresses = listMailInfoDTORespWithCert.stream()
 				    .map(MailInfoDTO::getEmailResponsible)
 				    .distinct()
 				    .map(email -> {
 				        try {
 				            return new InternetAddress(email);
-				        } catch (Exception e) {
+				        } catch (final Exception e) {
 				            throw new RuntimeException(e);
 				        }
 				    })
 				    .toArray(InternetAddress[]::new);
 			
-			String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV005);
+			final String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV005);
 			
-			StringBuilder bodySubject = new StringBuilder();
+			final StringBuilder bodySubject = new StringBuilder();
 			
-			for (MailInfoDTO mailInfoDTO : listMailInfoDTORespWithCert) {
+			for (final MailInfoDTO mailInfoDTO : listMailInfoDTORespWithCert) {
 				bodySubject.append(Language.getFormatResWebFire(IWebLogMessages.LOG_CTV006, new Object[ ] { mailInfoDTO.getSubjectCertificate(), mailInfoDTO.getDateCertExpired()}));
 				bodySubject.append("\n");
 			}
 			
-			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV020, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+			final String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV020, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
 			// Configuramos las propiedades de Java Mail y enviamos el correo
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses, subject, bodySubject, msgEmailSucces, MailSenderService.MAIL_TEXT_PLAIN_CHARSET);
 		}
 	}
 
@@ -331,38 +331,38 @@ public class TaskVerifyCertExpired extends FireTask {
 	 * @param listMailInfoDTOResponsible List of {@link MailInfoDTO} objects containing information about the responsible parties and their certificates.
 	 * @param certificate {@link Certificate} object containing information about the expired certificate.
 	 */
-	private void sendEmailToResponsiblesForCertExpired(List<MailInfoDTO> listMailInfoDTOResponsible,
-			Certificate certificate) {
-		List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
+	private void sendEmailToResponsiblesForCertExpired(final List<MailInfoDTO> listMailInfoDTOResponsible,
+			final Certificate certificate) {
+		final List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
 		
 		if(listMailInfoDTORespWithCert != null && !listMailInfoDTORespWithCert.isEmpty()) {
 			
-			Address[] addresses = listMailInfoDTORespWithCert.stream()
+			final Address[] addresses = listMailInfoDTORespWithCert.stream()
 				    .map(MailInfoDTO::getEmailResponsible)
 				    .distinct()
 				    .map(email -> {
 				        try {
 				            return new InternetAddress(email);
-				        } catch (Exception e) {
+				        } catch (final Exception e) {
 				            throw new RuntimeException(e);
 				        }
 				    })
 				    .toArray(InternetAddress[]::new);
 			
-			String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV007);
+			final String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV007);
 			
-			StringBuilder bodySubject = new StringBuilder();
+			final StringBuilder bodySubject = new StringBuilder();
 			
-			for (MailInfoDTO mailInfoDTO : listMailInfoDTORespWithCert) {
+			for (final MailInfoDTO mailInfoDTO : listMailInfoDTORespWithCert) {
 				bodySubject.append(Language.getFormatResWebFire(IWebLogMessages.LOG_CTV008, new Object[ ] { mailInfoDTO.getSubjectCertificate(), mailInfoDTO.getDateCertExpired()}));
 				bodySubject.append("\n");
 			}
 			
-			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV019, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+			final String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV019, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
 			// Configuramos las propiedades de Java Mail y enviamos el correo
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses, subject, bodySubject, msgEmailSucces, MailSenderService.MAIL_TEXT_PLAIN_CHARSET);
 		}
 	}
 
@@ -375,38 +375,38 @@ public class TaskVerifyCertExpired extends FireTask {
 	 * @param listMailInfoDTOResponsible List of {@link MailInfoDTO} objects containing information about the responsible parties and their certificates.
 	 * @param certificate {@link Certificate} object containing information about the invalid certificate.
 	 */
-	private void sendEmailToResponsiblesForCertNotValid(List<MailInfoDTO> listMailInfoDTOResponsible,
-			Certificate certificate) {
-		List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
+	private void sendEmailToResponsiblesForCertNotValid(final List<MailInfoDTO> listMailInfoDTOResponsible,
+			final Certificate certificate) {
+		final List<MailInfoDTO> listMailInfoDTORespWithCert = listMailInfoDTOResponsible.stream().filter(p -> p.getIdCertificado().equals(certificate.getIdCertificado())).collect(Collectors.toList());
 		
 		if(listMailInfoDTORespWithCert != null && !listMailInfoDTORespWithCert.isEmpty()) {
 			
-			Address[] addresses = listMailInfoDTORespWithCert.stream()
+			final Address[] addresses = listMailInfoDTORespWithCert.stream()
 				    .map(MailInfoDTO::getEmailResponsible)
 				    .distinct()
 				    .map(email -> {
 				        try {
 				            return new InternetAddress(email);
-				        } catch (Exception e) {
+				        } catch (final Exception e) {
 				            throw new RuntimeException(e);
 				        }
 				    })
 				    .toArray(InternetAddress[]::new);
 			
-			String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV009);
+			final String subject = Language.getResWebFire(IWebLogMessages.LOG_CTV009);
 			
-			StringBuilder bodySubject = new StringBuilder();
+			final StringBuilder bodySubject = new StringBuilder();
 			
-			for (MailInfoDTO mailInfoDTO : listMailInfoDTORespWithCert) {
+			for (final MailInfoDTO mailInfoDTO : listMailInfoDTORespWithCert) {
 				bodySubject.append(Language.getFormatResWebFire(IWebLogMessages.LOG_CTV010, new Object[ ] { mailInfoDTO.getSubjectCertificate(), mailInfoDTO.getDateCertExpired()}));
 				bodySubject.append("\n");
 			}
 			
-			String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV018, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
+			final String msgEmailSucces = Language.getFormatResWebFire(IWebLogMessages.LOG_CTV018, new Object[ ] { certificate.getCertificateName(), Arrays.stream(addresses).map(Address::toString).collect(Collectors.joining(", ")) });
 			
 			// Configuramos las propiedades de Java Mail y enviamos el correo
 			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).init();
-			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses,subject,bodySubject, msgEmailSucces);
+			ApplicationContextProvider.getApplicationContext().getBean(MailSenderService.class).sendEmail(addresses, subject, bodySubject, msgEmailSucces, MailSenderService.MAIL_TEXT_PLAIN_CHARSET);
 		}
 	}
 
@@ -424,7 +424,7 @@ public class TaskVerifyCertExpired extends FireTask {
 	 * @see es.gob.fire.quartz.task.FireTask#prepareParametersForTheTask()
 	 */
 	@Override
-	protected void prepareParametersForTheTask(Map<String, Object> dataMap) throws FireTaskException {
+	protected void prepareParametersForTheTask(final Map<String, Object> dataMap) throws FireTaskException {
 		// TODO Auto-generated method stub
 		
 	}
