@@ -38,24 +38,24 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 	private boolean loaded = false;
 
 	@Override
-	public ApplicationAccessInfo getApplicationAccessInfo(final String appId, final TransactionAuxParams trAux)
+	public ApplicationAccessInfo getApplicationAccessInfo(final String appId, final LogTransactionFormatter logF)
 			throws IOException {
 
 
 		if (!this.loaded) {
-			this.accessInfo = loadAccessInfo(appId, trAux);
+			this.accessInfo = loadAccessInfo(appId, logF);
 			this.loaded = true;
 		}
 
 		return this.accessInfo;
 	}
 
-	private static ApplicationAccessInfo loadAccessInfo(final String appId, final TransactionAuxParams trAux) {
+	private static ApplicationAccessInfo loadAccessInfo(final String appId, final LogTransactionFormatter logF) {
 
 		// Comprobamos que haya una aplicacion registrada en el fichero
 		final String configuredAppId = ConfigManager.getAppId();
 		if (configuredAppId == null || configuredAppId.isEmpty()) {
-			LOGGER.warning(trAux.getLogFormatter().f("No hay ID de aplicacion dado de alta en el fichero de configuracion. No se permitira el acceso.")); //$NON-NLS-1$
+			LOGGER.warning(logF.f("No hay ID de aplicacion dado de alta en el fichero de configuracion. No se permitira el acceso.")); //$NON-NLS-1$
 			return null;
 		}
 
@@ -64,7 +64,7 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 			return null;
 		}
 
-		final DigestInfo digestInfo = loadDigestInfoFromConfig(trAux);
+		final DigestInfo digestInfo = loadDigestInfoFromConfig(logF);
 
 		return new ApplicationAccessInfo(
 				configuredAppId,
@@ -73,7 +73,7 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 				digestInfo != null ? new DigestInfo[] { digestInfo } : null );
 	}
 
-	private static DigestInfo loadDigestInfoFromConfig(final TransactionAuxParams trAux) {
+	private static DigestInfo loadDigestInfoFromConfig(final LogTransactionFormatter logF) {
 
 		DigestInfo digestInfo = null;
 
@@ -85,7 +85,7 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 				cert = buildCertificate(certB64);
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, trAux.getLogFormatter().f("No se pudo construir el certificado configurado", e)); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("No se pudo construir el certificado configurado", e)); //$NON-NLS-1$
 				cert = null;
 			}
 
@@ -94,7 +94,7 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 					final byte[] certDigest = MessageDigest.getInstance(SHA_256).digest(cert.getEncoded());
 					digestInfo = new DigestInfo(SHA_256, certDigest);
 				} catch (final Exception e) {
-					LOGGER.log(Level.SEVERE, trAux.getLogFormatter().f("No se pudo calcular la huella del certificado configurado", e)); //$NON-NLS-1$
+					LOGGER.log(Level.SEVERE, logF.f("No se pudo calcular la huella del certificado configurado", e)); //$NON-NLS-1$
 				}
 			}
 		}
@@ -116,7 +116,7 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 
 	@Override
 	public ApplicationOperationConfig getOperationConfig(final String appId,
-			final TransactionAuxParams trAux) throws IOException {
+			final LogTransactionFormatter logF) throws IOException {
 
 		final ApplicationOperationConfig config = new ApplicationOperationConfig();
 		config.setParamsMaxSize(ConfigManager.getParamMaxSize());

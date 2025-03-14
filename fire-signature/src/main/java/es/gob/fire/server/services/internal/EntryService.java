@@ -9,7 +9,6 @@
  */
 package es.gob.fire.server.services.internal;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +37,7 @@ public class EntryService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(EntryService.class.getName());
 
 	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// Este es el punto de entrada del usuario a la operativa de FIRe,  por lo que se
 		// establece aqui el tiempo maximo de sesion
@@ -56,7 +55,7 @@ public class EntryService extends HttpServlet {
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		
+
 		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String language = params.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
@@ -122,7 +121,7 @@ public class EntryService extends HttpServlet {
 			}
 			return;
         }
-		
+
 		// Guardamos el idioma usado.
 		session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
 

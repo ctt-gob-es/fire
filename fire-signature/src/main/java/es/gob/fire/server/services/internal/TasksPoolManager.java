@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
  * Gestor con los m&eacute;todos para la espera de un pool de tareas.
  */
 public class TasksPoolManager {
-	
+
 	//Objeto usado para la sincronizacion del uso de session, sin tener que utilizar el propio objeto session para ello
 	private static final Object sessionLock = new Object();
 
@@ -55,6 +55,8 @@ public class TasksPoolManager {
 					}
         		}
         	}
+
+System.out.println(" ================= Tareas vivas: " + lives);
 
         	// Actualizamos en la sesion el numero de hilos que faltan por terminar
         	if (session != null && attrName != null) {

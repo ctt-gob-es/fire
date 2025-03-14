@@ -14,6 +14,20 @@ VALUES (1,'admin','1,2'),
 INSERT INTO tb_usuarios (nombre,apellidos,usu_defecto,fk_rol,dni) 
 VALUES('default name','default surnames',1,1,'X0000000T');
 
+-- Proveedores por defecto --
+INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
+VALUES ('clavefirma', 'Cl@ve Firma', 1);
+
+INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
+VALUES ('clavefirmatest', 'Simulador Cl@ve Firma', 2);
+
+INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
+VALUES ('fnmt', "CloudID", 3);
+
+INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
+VALUES ('local', "Firma local", 4);
+
+
 -- Insertar valores en la tabla TIPO_PLANIFICADOR
 INSERT INTO TB_TIPO_PLANIFICADOR (ID_TIPO_PLANIFICADOR, NOMBRE_TOKEN) 
 VALUES (0, 'TIPO_PLANIFICADOR00');

@@ -89,6 +89,7 @@
 				<module>fire-admin-persistence</module>
 				<module>fire-alarms</module>
 				<module>fire-alarms-graylog</module>
+				<module>fire-alarms-mail</module>
 				<module>fire-client-java</module>
 				<module>fire-log-handlers</module>
 				<module>fire-signature-common-libraries</module>
@@ -134,14 +135,7 @@
 				<module>fire-alarms-eventmanager</module>
 			</modules>
 		</profile>
-		
-		<profile>
-			<id>mail</id>	<!-- Perfil que genera el conector para el envío de notificaciones por correo electronico -->
 
-			<modules>
-				<module>fire-alarms-mail</module>
-			</modules>
-		</profile>
 	</profiles>
 
 	<dependencyManagement>

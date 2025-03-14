@@ -122,7 +122,7 @@ public class SignOperationManager {
 		String[] provs;
 		final String[] requestedProvs = connConfig.getProviders();
 		if (requestedProvs != null) {
-			provs = ProviderManager.getFilteredProviders(requestedProvs);
+			provs = ProviderManager.getFilteredProviders(appId, requestedProvs, logF);
 			if (provs.length == 0) {
 				LOGGER.warning(logF.f("No hay proveedores dados de alta que se ajusten a los criterios establecidos en la peticion")); //$NON-NLS-1$
 				Responser.sendError(response, FIReError.PARAMETER_PROVIDERS_INVALID);
@@ -289,7 +289,7 @@ public class SignOperationManager {
     			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
     			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef //$NON-NLS-1$ //$NON-NLS-2$;
     			+ "&" + ServiceParams.HTTP_PARAM_LANGUAGE + "=" + language; //$NON-NLS-1$ //$NON-NLS-2$
-    			
+
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		final String redirectUrlBase = PublicContext.getPublicContext(request);

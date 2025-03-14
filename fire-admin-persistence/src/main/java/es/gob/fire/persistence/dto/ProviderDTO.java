@@ -4,65 +4,65 @@ public class ProviderDTO {
 	/**
 	 * Attribute that represents the value of the idProvider attribute.
 	 */
-	private Long idProvider;
-	
+	private String idProvider;
+
 	/**
 	 * Attribute that represents the value of the name attribute.
 	 */
 	private String name;
-	
+
 	/**
 	 * Attribute that represents the value of the mandatory attribute.
 	 */
 	private Boolean mandatory;
-	
+
 	/**
 	 * Attribute that represents the value of the enabled attribute.
 	 */
 	private Boolean enabled;
-	
+
 	/**
 	 * Attribute that represents the value of the order attribute.
 	 */
 	private Long orderIndex;
 
-	public Long getIdProvider() {
-		return idProvider;
+	public String getIdProvider() {
+		return this.idProvider;
 	}
 
-	public void setIdProvider(Long idProvider) {
+	public void setIdProvider(final String idProvider) {
 		this.idProvider = idProvider;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
 	public Boolean getMandatory() {
-		return mandatory;
+		return this.mandatory;
 	}
 
-	public void setMandatory(Boolean mandatory) {
+	public void setMandatory(final Boolean mandatory) {
 		this.mandatory = mandatory;
 	}
 
 	public Boolean getEnabled() {
-		return enabled;
+		return this.enabled;
 	}
 
-	public void setEnabled(Boolean enabled) {
+	public void setEnabled(final Boolean enabled) {
 		this.enabled = enabled;
 	}
 
 	public Long getOrderIndex() {
-		return orderIndex;
+		return this.orderIndex;
 	}
 
-	public void setOrderIndex(Long orderIndex) {
+	public void setOrderIndex(final Long orderIndex) {
 		this.orderIndex = orderIndex;
 	}
 }

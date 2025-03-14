@@ -94,14 +94,14 @@ public final class CertificateService extends HttpServlet {
 	    		return;
 	    	}
 		}
-		
-		// Verificar si los servicios antiguos están habilitados
+
+        // Verificar si los servicios antiguos estan habilitados
 	    if (!ConfigManager.isLegacyServicesEnabled()) {
 	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos estan deshabilitadas"); //$NON-NLS-1$
-	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos están deshabilitados"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos estan deshabilitados"); //$NON-NLS-1$
 	        return;
 	    }
-		
+
     	final RequestParameters params;
     	try {
     		params = RequestParameters.extractParameters(request);

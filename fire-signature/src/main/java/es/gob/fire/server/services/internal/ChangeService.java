@@ -39,7 +39,7 @@ public class ChangeService extends HttpServlet {
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		
+
 		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String returnPage = params.getParameter(ServiceParams.HTTP_PARAM_PAGE);
@@ -78,7 +78,7 @@ public class ChangeService extends HttpServlet {
 			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
-		
+
 		try {
         	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, StandardCharsets.UTF_8.name());
         }
@@ -92,13 +92,13 @@ public class ChangeService extends HttpServlet {
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
-		
+
 		// Actualizamos la sesion con el idioma en caso de que se haya indicado por parametro
 		if (language != null && !language.isEmpty()) {
 			Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 			session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
 		}
-		
+
 		// Si se indicara algun mensaje de error lo guardamos en la sesion
 		if (errorType != null && !errorType.isEmpty() && errorMsg != null && !errorMsg.isEmpty()) {
 			final FIReError error = FIReError.getByCode(Integer.valueOf(errorType));

@@ -14,13 +14,13 @@ import es.gob.fire.persistence.service.IProviderService;
 
 @Service
 public class ProviderService implements IProviderService{
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
 	 */
 	@Autowired
 	private ProviderRepository repository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
 	 */
@@ -29,86 +29,87 @@ public class ProviderService implements IProviderService{
 
 	@Override
 	public List<Provider> findProviders() {
-		return repository.findAllByOrderByOrderIndexAsc();
+		return this.repository.findAllByOrderByOrderIndexAsc();
 	}
 
 	@Override
-	public Provider saveProvider(Provider provider) {
-		return repository.save(provider);
+	public Provider saveProvider(final Provider provider) {
+		return this.repository.save(provider);
 	}
 
 	@Override
-	public Provider findProviderById(Long idProvider) {
-		Optional<Provider> opt = repository.findById(idProvider);
-		
+	public Provider findProviderById(final String idProvider) {
+		final Optional<Provider> opt = this.repository.findById(idProvider);
+
 		if (opt.isPresent()) {
 			return opt.get();
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	// Subir el orden del proveedor
-    public void moveProviderUp(int providerOrder, Long idProvider) {
-        Optional<Provider> currentProviderOpt = repository.findById(idProvider);
+    public void moveProviderUp(final int providerOrder, final String idProvider) {
+        final Optional<Provider> currentProviderOpt = this.repository.findById(idProvider);
         if (currentProviderOpt.isPresent()) {
-            Provider currentProvider = currentProviderOpt.get();
-            Optional<Provider> previousProviderOpt = repository.findByOrderIndex(providerOrder - 1);
-            
+            final Provider currentProvider = currentProviderOpt.get();
+            final Optional<Provider> previousProviderOpt = this.repository.findByOrderIndex(providerOrder - 1);
+
             if (previousProviderOpt.isPresent()) {
-                Provider previousProvider = previousProviderOpt.get();
+                final Provider previousProvider = previousProviderOpt.get();
 
                 // Intercambiar los valores de orden
-                Long tempOrder = currentProvider.getOrderIndex();
+                final Long tempOrder = currentProvider.getOrderIndex();
                 currentProvider.setOrderIndex(previousProvider.getOrderIndex());
                 previousProvider.setOrderIndex(tempOrder);
 
                 // Guardar cambios
-                repository.save(previousProvider);
-                repository.save(currentProvider);
+                this.repository.save(previousProvider);
+                this.repository.save(currentProvider);
             }
         }
     }
 
     // Bajar el orden del proveedor
-    public void moveProviderDown(int providerOrder, Long idProvider) {
-        Optional<Provider> currentProviderOpt = repository.findById(idProvider);
+    public void moveProviderDown(final int providerOrder, final String idProvider) {
+        final Optional<Provider> currentProviderOpt = this.repository.findById(idProvider);
         if (currentProviderOpt.isPresent()) {
-            Provider currentProvider = currentProviderOpt.get();
-            Optional<Provider> nextProviderOpt = repository.findByOrderIndex(providerOrder + 1);
-            
+            final Provider currentProvider = currentProviderOpt.get();
+            final Optional<Provider> nextProviderOpt = this.repository.findByOrderIndex(providerOrder + 1);
+
             if (nextProviderOpt.isPresent()) {
-                Provider nextProvider = nextProviderOpt.get();
+                final Provider nextProvider = nextProviderOpt.get();
 
                 // Intercambiar los valores de orden
-                Long tempOrder = currentProvider.getOrderIndex();
+                final Long tempOrder = currentProvider.getOrderIndex();
                 currentProvider.setOrderIndex(nextProvider.getOrderIndex());
                 nextProvider.setOrderIndex(tempOrder);
 
                 // Guardar cambios
-                repository.save(nextProvider);
-                repository.save(currentProvider);
+                this.repository.save(nextProvider);
+                this.repository.save(currentProvider);
             }
         }
     }
 
     @Override
-    public void saveProviders(List<ProviderDTO> providers) {
+    public void saveProviders(final List<ProviderDTO> providers) {
     	if (providers == null || providers.isEmpty()) {
             return;
         }
 
-        for (ProviderDTO dto : providers) {
-            Provider provider = convertDTOToEntity(dto);
-            repository.save(provider);
+        for (final ProviderDTO dto : providers) {
+            final Provider provider = convertDTOToEntity(dto);
+            this.repository.save(provider);
         }
     }
 
 	@Override
-    public Provider convertDTOToEntity(ProviderDTO dto) {
-        if (dto == null) return null;
+    public Provider convertDTOToEntity(final ProviderDTO dto) {
+        if (dto == null) {
+			return null;
+		}
 
-        Provider provider = new Provider();
+        final Provider provider = new Provider();
         provider.setId(dto.getIdProvider());
         provider.setName(dto.getName());
         provider.setMandatory(dto.getMandatory());
@@ -119,10 +120,12 @@ public class ProviderService implements IProviderService{
     }
 
     @Override
-    public ProviderDTO convertEntityToDTO(Provider entity) {
-        if (entity == null) return null;
+    public ProviderDTO convertEntityToDTO(final Provider entity) {
+        if (entity == null) {
+			return null;
+		}
 
-        ProviderDTO dto = new ProviderDTO();
+        final ProviderDTO dto = new ProviderDTO();
         dto.setIdProvider(entity.getId());
         dto.setName(entity.getName());
         dto.setMandatory(entity.getMandatory());

@@ -113,9 +113,13 @@ public class ProviderManager {
 
 	/**
 	 * Obtiene el listado de proveedores configurados.
+	 * @param logF Formateador de trazas de log.
 	 * @return Listado con los proveedores.
 	 */
-	public static ProviderElement[] getProviders() {
+	public static ProviderElement[] getProviders(final String appId, final LogTransactionFormatter logF) {
+
+//		ApplicationsDAOFactory.getApplicationsDAO().getOperationConfig(appId, logF);
+
 		return ConfigManager.getProviders();
 	}
 
@@ -145,10 +149,10 @@ public class ProviderManager {
 		if (providersInfo.containsKey(providerName)) {
 			final ProviderInfo prov = providersInfo.get(providerName);
 			/* Si el idioma configurado es el mismo al almacenado en la variable, se devuelve.
-			* En caso contrario, se sigue el proceso y se sustituye con el nuevo idioma. */ 
+			* En caso contrario, se sigue el proceso y se sustituye con el nuevo idioma. */
 			if (language != null && language.equals(prov.getLanguage())) {
 				return providersInfo.get(providerName);
-			}	
+			}
 		}
 
 		Properties infoProperties;
@@ -334,13 +338,15 @@ public class ProviderManager {
 	 * por la aplicaci&oacute;n y aquellos configurados como imprescindibles. Los
 	 * proveedores indicados por la aplicaci&oacute;n y no configurados en el componente
 	 * central se ignoran.
+	 * @param appId Identificador de aplicaci&oacute;n.
 	 * @param requestedProviders Proveedores solicitados.
+	 * @param logF Formateador de trazas de log.
 	 * @return Listado de proveedores ya filtrados.
 	 */
-	public static String[] getFilteredProviders(final String[] requestedProviders) {
+	public static String[] getFilteredProviders(final String appId, final String[] requestedProviders, final LogTransactionFormatter logF) {
 
 		final List<String> filteredProviders = new ArrayList<>();
-		final ProviderElement[] allProviders = getProviders();
+		final ProviderElement[] allProviders = getProviders(appId, logF);
 
 		// Agregamos al listado final los proveedores solicitados en el orden
 		// en el que se indican

@@ -31,7 +31,11 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(DBApplicationsDAO.class.getName());
 
-	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT nombre, habilitado, huella_principal, huella_backup FROM tb_aplicaciones, tb_certificados  WHERE  tb_aplicaciones.id =  ?  AND tb_aplicaciones.fk_certificado=tb_certificados.id_certificado"; //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT tb_aplicaciones.nombre, tb_aplicaciones.habilitado, tb_certificados.huella " //$NON-NLS-1$
+			+ "FROM tb_aplicaciones, tb_certificados, tb_certificados_de_aplicacion " //$NON-NLS-1$
+			+ "WHERE tb_aplicaciones.id =  ? " //$NON-NLS-1$
+				+ "AND tb_aplicaciones.id=tb_certificados_de_aplicacion.id_aplicaciones " //$NON-NLS-1$
+				+ "AND tb_certificados.id_certificado=tb_certificados_de_aplicacion.id_certificados"; //$NON-NLS-1$
 
 	private static final String STATEMENT_SELECT_OPERATION_CONFIG = "SELECT tamano_peticion, tamano_documento, tamano_lote, proveedores FROM tb_aplicaciones  WHERE  tb_aplicaciones.id =  ?"; //$NON-NLS-1$
 
@@ -42,7 +46,7 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 	}
 
 	@Override
-	public ApplicationAccessInfo getApplicationAccessInfo(final String appId, final TransactionAuxParams trAux)
+	public ApplicationAccessInfo getApplicationAccessInfo(final String appId, final LogTransactionFormatter logF)
 			throws IOException {
 
 		ApplicationAccessInfo result;
@@ -55,18 +59,19 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 			try (ResultSet rs = st.executeQuery()) {
 				if (!rs.next()) {
-					LOGGER.fine(trAux.getLogFormatter().f("No se ha encontrado en el sistema la aplicacion con el ID: " + appId)); //$NON-NLS-1$
+					LOGGER.fine(logF.f("No se ha encontrado en el sistema la aplicacion con el ID: " + appId)); //$NON-NLS-1$
 					return null;
 				}
 
-				DigestInfo[] digestInfo = null;
-
+				final String appName = rs.getString(1);
 				final boolean enabled = rs.getBoolean(2);
+				DigestInfo[] digestInfos = null;
+
 				if (enabled) {
-					digestInfo = loadCertificatesInfo(rs.getString(3), rs.getString(4), trAux);
+					digestInfos = loadCertificatesInfo(rs, logF);
 				}
 
-				result = new ApplicationAccessInfo(appId, rs.getString(1), enabled, digestInfo);
+				result = new ApplicationAccessInfo(appId, appName, enabled, digestInfos);
 			}
 		}
 		catch (final SQLException e) {
@@ -77,24 +82,21 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 		return result;
 	}
 
-	private static DigestInfo[] loadCertificatesInfo(final String certDigest1, final String certDigest2, final TransactionAuxParams trAux) {
+	private static DigestInfo[] loadCertificatesInfo(final ResultSet rs, final LogTransactionFormatter logF) throws SQLException {
 
 		final List<DigestInfo> certDigests = new ArrayList<>();
 
-		final DigestInfo digest1 = loadCertDigest(certDigest1, trAux);
-		if (digest1 != null) {
-			certDigests.add(digest1);
-		}
-
-		final DigestInfo digest2 = loadCertDigest(certDigest2, trAux);
-		if (digest2 != null) {
-			certDigests.add(digest2);
-		}
+		do {
+			final DigestInfo digest = loadCertDigest(rs.getString(3), logF);
+			if (digest != null) {
+				certDigests.add(digest);
+			}
+		} while (rs.next());
 
 		return !certDigests.isEmpty() ? certDigests.toArray(new DigestInfo[0]) : null;
 	}
 
-	private static DigestInfo loadCertDigest(final String certDigest, final TransactionAuxParams trAux) {
+	private static DigestInfo loadCertDigest(final String certDigest, final LogTransactionFormatter logF) {
 
 		if (certDigest == null || certDigest.isEmpty()) {
 			return null;
@@ -107,7 +109,7 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 			digestInfo = DigestInfo.create(hash);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(trAux.getLogFormatter().f("Una de las huellas registrada por la aplicacion no es valida: " + e)); //$NON-NLS-1$
+			LOGGER.warning(logF.f("Una de las huellas registrada por la aplicacion no es valida: " + e)); //$NON-NLS-1$
 			digestInfo = null;
 		}
 		return digestInfo;
@@ -115,7 +117,7 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 	@Override
 	public ApplicationOperationConfig getOperationConfig(final String appId,
-			final TransactionAuxParams trAux) throws IOException {
+			final LogTransactionFormatter logF) throws IOException {
 		return this.operationConfigLoader.getOperationConfig(appId);
 	}
 }

@@ -17,8 +17,8 @@ public class Provider implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_PROVEEDOR")
-    private Long id;
+    @Column(name = "ID_PROVEEDOR", length = 20)
+    private String id;
 
     @Column(name = "NOMBRE", nullable = false, length = 50)
     private String name;
@@ -35,43 +35,43 @@ public class Provider implements Serializable {
     private Long orderIndex;
 
     // Getters y Setters
-	public Long getId() {
-		return id;
+	public String getId() {
+		return this.id;
 	}
 
-	public void setId(Long id) {
+	public void setId(final String id) {
 		this.id = id;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
 	public boolean getMandatory() {
-		return mandatory;
+		return this.mandatory;
 	}
 
-	public void setMandatory(boolean mandatory) {
+	public void setMandatory(final boolean mandatory) {
 		this.mandatory = mandatory;
 	}
 
 	public boolean getEnabled() {
-		return enabled;
+		return this.enabled;
 	}
 
-	public void setEnabled(boolean enabled) {
+	public void setEnabled(final boolean enabled) {
 		this.enabled = enabled;
 	}
 
 	public Long getOrderIndex() {
-		return orderIndex;
+		return this.orderIndex;
 	}
 
-	public void setOrderIndex(Long orderIndex) {
+	public void setOrderIndex(final Long orderIndex) {
 		this.orderIndex = orderIndex;
 	}
 }

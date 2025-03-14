@@ -23,6 +23,7 @@ import es.gob.fire.server.services.internal.ApplicationAccessChecker;
 import es.gob.fire.server.services.internal.ApplicationAccessInfo;
 import es.gob.fire.server.services.internal.ApplicationInfo;
 import es.gob.fire.server.services.internal.ApplicationsDAOFactory;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigManager;
 
@@ -169,10 +170,12 @@ public final class ServiceUtil {
 	public static ApplicationInfo checkAccess(final String appId, final HttpServletRequest request, final TransactionAuxParams trAux)
 			throws IOException, IllegalArgumentException, UnauthorizedApplicacionException, CertificateValidationException {
 
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
 		ApplicationInfo appInfo = null;
 
     	if (ConfigManager.isCheckApplicationNeeded() || ConfigManager.isCheckCertificateNeeded()) {
-    		LOGGER.fine(trAux.getLogFormatter().f("Se comprueba que la aplicacion este dada de alta en el sistema")); //$NON-NLS-1$
+    		LOGGER.fine(logF.f("Se comprueba que la aplicacion este dada de alta en el sistema")); //$NON-NLS-1$
 
     		if (appId == null) {
     			throw new IllegalArgumentException("No se ha proporcionado el identificador de aplicacion"); //$NON-NLS-1$
@@ -181,7 +184,7 @@ public final class ServiceUtil {
     		ApplicationAccessInfo registeredAppInfo = null;
 			try {
 				registeredAppInfo = ApplicationsDAOFactory.getApplicationsDAO()
-						.getApplicationAccessInfo(appId, trAux);
+						.getApplicationAccessInfo(appId, logF);
 			}
 			catch (final IOException e) {
 				throw new IOException("No se pudo obtener la informacion del sistema para la validacion de la peticion", e); //$NON-NLS-1$
@@ -191,7 +194,7 @@ public final class ServiceUtil {
 
     		// Comprobamos que la aplicacion este registrada en el sistema y habilitada
     		if (ConfigManager.isCheckApplicationNeeded()) {
-    			LOGGER.fine(trAux.getLogFormatter().f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
+    			LOGGER.fine(logF.f("Se realizara la validacion del Id de aplicacion")); //$NON-NLS-1$
     			try {
     				ApplicationAccessChecker.checkAppEnabled(registeredAppInfo);
     			}
@@ -200,11 +203,11 @@ public final class ServiceUtil {
     			}
     		}
     		else {
-    			LOGGER.fine(trAux.getLogFormatter().f("No se realiza la validacion del identificador de aplicacion")); //$NON-NLS-1$
+    			LOGGER.fine(logF.f("No se realiza la validacion del identificador de aplicacion")); //$NON-NLS-1$
     		}
 
     		if (ConfigManager.isCheckCertificateNeeded()) {
-    			LOGGER.fine(trAux.getLogFormatter().f("Se realizara la validacion del certificado")); //$NON-NLS-1$
+    			LOGGER.fine(logF.f("Se realizara la validacion del certificado")); //$NON-NLS-1$
 
     			X509Certificate[] certificates;
     			try {
@@ -213,7 +216,7 @@ public final class ServiceUtil {
     			catch (final IOException e) {
     				throw new CertificateValidationException(FIReError.PARAMETER_AUTHENTICATION_CERTIFICATE_NEEDED, "No se encontro el certificado cliente en la peticion entrante", e); //$NON-NLS-1$
     			}
-    			
+
     			if (isExpired(certificates[0])) {
     				throw new UnauthorizedApplicacionException("El certificado esta caducado"); //$NON-NLS-1$
     			}
@@ -226,7 +229,7 @@ public final class ServiceUtil {
     			}
     		}
     		else {
-    			LOGGER.fine(trAux.getLogFormatter().f("No se valida el certificado"));//$NON-NLS-1$
+    			LOGGER.fine(logF.f("No se valida el certificado"));//$NON-NLS-1$
     		}
     	}
 
@@ -240,7 +243,7 @@ public final class ServiceUtil {
 
 		return appInfo;
 	}
-	
+
 	/**
 	 * Indica si un certificado est&aacute; fuera de su periodo de vigencia.
 	 * @param cert Certificado a comprobar.

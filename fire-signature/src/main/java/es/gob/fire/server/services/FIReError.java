@@ -103,7 +103,7 @@ public enum FIReError {
 	public String getMessage() {
 		return Language.getResFireSignature(this.message);
 	}
-	
+
 	public static FIReError getByCode(final int code) {
 		for (final FIReError error : FIReError.values()) {
 			if (error.getCode() == code) {
