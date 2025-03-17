@@ -46,6 +46,8 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -53,7 +55,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Hexify;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
@@ -89,7 +90,7 @@ public class ApplicationService implements IApplicationService{
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ApplicationService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
 
 	/**
 	 *

@@ -416,7 +416,7 @@ public class RecoverBatchResultManager {
         	// interrumpimos todos si detectamos que alguno de
         	// ellos fue interrumpido y no se admiten errores parciales
         	TasksPoolManager.waitTasks(results, stopOnError,
-        			session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS);
+        			session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS, trAux);
 
         	// Liberamos el pool de hilos
         	shutdownExecutorService(executorService);
@@ -581,7 +581,7 @@ public class RecoverBatchResultManager {
         // interrumpimos todos si detectamos que alguno de
         // ellos fue interrumpido y no se admiten errores parciales
         TasksPoolManager.waitTasks(results, stopOnError,
-        		session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS);
+        		session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS, trAux);
 
     	// Liberamos el pool de hilos
         shutdownExecutorService(executorService);

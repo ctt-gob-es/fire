@@ -116,7 +116,7 @@ public class RequestClave {
             binaryRequestMessage = protocolEngine.generateRequestMessage(authRequest, true);
         } catch (EIDASSAMLEngineException e) {
             LOGGER.error(e.getMessage(), e);
-            throw new WebAdminException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG001));
+            throw new WebAdminException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG014));
         }
         
         SessionHolder.sessionsSAML.put(authRequest.getId(), relayState);

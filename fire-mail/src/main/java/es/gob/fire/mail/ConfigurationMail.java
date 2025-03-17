@@ -6,17 +6,18 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.utils.ConstantsMail;
 import es.gob.fire.utils.ConstantsMailProperties;
 
 @Component
 public class ConfigurationMail {
 
-	private static final Logger LOGGER = Logger.getLogger(ConfigurationMail.class);
+	private static final Logger LOGGER = LogManager.getLogger(ConfigurationMail.class);
 	
 	/**
 	 * Attribute that represents the default expired time.

@@ -22,7 +22,7 @@
  * @author Gobierno de Espa&ntilde;a.
  * @version 1.7, 13/02/2025.
  */
-package es.gob.fire.persistence.service.impl;
+package es.gob.fire.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -48,16 +50,19 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
+import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.i18n.IPersistenceGeneral;
+import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
+import es.gob.fire.persistence.entity.ServerAfirma;
 import es.gob.fire.persistence.repository.CertificateRepository;
 import es.gob.fire.persistence.repository.datatable.CertificateDataTablesRepository;
-import es.gob.fire.persistence.service.ICertificateService;
+import es.gob.fire.service.ICertificateService;
+import es.gob.fire.service.IServerAfirmaService;
 import es.gob.fire.upgrade.afirma.AfirmaConnector;
 import es.gob.fire.upgrade.afirma.PlatformWsException;
 import es.gob.fire.upgrade.afirma.Verify;
@@ -76,7 +81,7 @@ public class CertificateService implements ICertificateService{
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(CertificateService.class);
+	private static final Logger LOGGER = LogManager.getLogger(CertificateService.class);
 
 	/**
 	 * Constant that represents the String X.509.
@@ -86,24 +91,6 @@ public class CertificateService implements ICertificateService{
 	/** Nombre de la propiedad en la que se guarda el nombre de la aplicacion con el que debe
 	 * conectarse a la plataforma @firma. */
 	private static final String PROP_APPID = "afirma.appId"; //$NON-NLS-1$
-	
-	/**
-	 * Constant that represents the afirma appId property.
-	 */
-	@Value("${afirma.appId}")
-	private String afirmaAppId;
-	
-	/**
-	 * Constant that represents the webservices timeout property.
-	 */
-	@Value("${webservices.timeout}")
-	private String webServiceTimeout;
-	
-	/**
-	 * Constant that represents the webservices endpoint property.
-	 */
-	@Value("${webservices.endpoint}")
-	private String webServicesEndpoint;
 	
 	/**
 	 * Constant that represents the webservices verify certificate property.
@@ -124,9 +111,12 @@ public class CertificateService implements ICertificateService{
 	@Autowired
 	private CertificateDataTablesRepository dtRepository;
 
+	@Autowired
+	private IServerAfirmaService iServerAfirmaService;
+	
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.ICertificateService#getCertificatetByCertificateId(java.lang.Long)
+	 * @see es.gob.fire.service.services.ICertificateService#getCertificatetByCertificateId(java.lang.Long)
 	 */
 	@Override
 	public Certificate getCertificateByCertificateId(final Long idCertificado) {
@@ -135,7 +125,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate)
+	 * @see es.gob.fire.service.services.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate)
 	 */
 	@Override
 	public Certificate saveCertificate(final Certificate certificate) {
@@ -144,7 +134,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.ICertificateService#deleteCertificate(java.lang.Long)
+	 * @see es.gob.fire.service.services.ICertificateService#deleteCertificate(java.lang.Long)
 	 */
 	@Override
 	@Transactional
@@ -154,7 +144,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.ICertificateService#getAllCertificate()
+	 * @see es.gob.fire.service.services.ICertificateService#getAllCertificate()
 	 */
 	@Override
 	public List<Certificate> getAllCertificate() {
@@ -163,7 +153,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.ICertificateService#getCertificateByCertificateName(java.lang.String)
+	 * @see es.gob.fire.service.services.ICertificateService#getCertificateByCertificateName(java.lang.String)
 	 */
 	@Override
 	public Certificate getCertificateByCertificateName(final String nombre_cert) {
@@ -209,7 +199,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.service.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate, java.security.cert.X509Certificate)
+	 * @see es.gob.fire.service.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate, java.security.cert.X509Certificate)
 	 */
 	@Override
 	public Certificate updateCertificateFromTaskValidation(final Certificate certificate, final X509Certificate x509Certificate) 
@@ -435,12 +425,19 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.services.IApplicationService#validateStatusCertificateInAfirmaWS(java.security.cert.X509Certificate)
 	 */
 	public VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate) throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException {
+		// Obtenemos las propiedades de configuracion para el servidor afirma
+		ServerAfirma serverAfirma = iServerAfirmaService.obtainServerAfirmaService(NumberConstants.NUM_1_LONG);
+		
+		if(serverAfirma == null) {
+			throw new WSServiceInvokerException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC015));
+		}
+		
 		// Obtenemos la conexión con AfirmaWS
 		AfirmaConnector afirmaConnector = new AfirmaConnector();
 		Properties config = new Properties();
-		config.setProperty("afirma.appId", afirmaAppId);
-		config.setProperty("webservices.timeout", webServiceTimeout);
-		config.setProperty("webservices.endpoint", webServicesEndpoint);
+		config.setProperty("afirma.appId", serverAfirma.getNameApp());
+		config.setProperty("webservices.timeout", serverAfirma.getTimeout().toString());
+		config.setProperty("webservices.endpoint", serverAfirma.getUrlServer());
 		config.setProperty("webservices.service.verifyCertificate", webServiceVerifyCertificate);
 		
 		afirmaConnector.init(config);

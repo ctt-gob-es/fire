@@ -24,8 +24,8 @@ import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.CertificatesApplication;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IApplicationService;
-import es.gob.fire.persistence.service.ICertificateService;
 import es.gob.fire.persistence.service.IUserService;
+import es.gob.fire.service.ICertificateService;
 
 
 /**

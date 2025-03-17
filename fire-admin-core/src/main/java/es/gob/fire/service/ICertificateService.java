@@ -22,7 +22,7 @@
  * @author Gobierno de Espa&ntilde;a.
  * @version 1.3, 13/02/2025.
  */
-package es.gob.fire.persistence.service;
+package es.gob.fire.service;
 
 import java.io.IOException;
 import java.io.InputStream;

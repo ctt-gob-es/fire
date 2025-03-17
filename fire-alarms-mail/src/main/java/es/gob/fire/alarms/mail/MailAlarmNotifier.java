@@ -28,68 +28,68 @@ import es.gob.fire.mail.MailSenderService;
 public class MailAlarmNotifier implements AlarmNotifier {
 
 	static final Logger LOGGER = Logger.getLogger(MailAlarmNotifier.class.getName());
-	
+
 	/**
 	 * Campo declarado con el nombre del modulo de FIRe. Este campo no se toma del
-	 * fichero de propiedades, ya que este fichero pueden usarlo varios modulos. El
-	 * valor se indica en la solicitud de notificaci&oacute;n.
+	 * fichero de propiedades, ya que este fichero pueden usarlo varios m&oacute;dulos.
+	 * El valor se indica en la solicitud de notificaci&oacute;n.
 	 */
 	public static final String PROP_EXTRA_FIELD_MODULE = "module"; //$NON-NLS-1$
-	
+
 	/**
 	 * Nombre de la propiedad de configuraci&oacute;n que determina los destinatarios
 	 * de la alarma por correo.
 	 */
 	public static final String PROP_MAIL_RECIPIENTS = "mail.recipients"; //$NON-NLS-1$
-	
+
 	/**
 	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones
 	 * para enviar un correo.
 	 */
 	public static final String PROP_MAIL_NOTIFY_LIMIT = "mail.notify.limit"; //$NON-NLS-1$
-	
+
 	/**
 	 * Intervalo de tiempo en el que se comprobar&aacute; cuantas alarmas hay registradas.
 	 */
 	public static final String PROP_MAIL_NOTIFY_DELAY = "mail.notify.delay.time"; //$NON-NLS-1$
-	
+
 	/**
 	 * Asunto del correo a enviar.
 	 */
 	public static final String PROP_MAIL_SUBJECT = "mail.subject"; //$NON-NLS-1$
-	
+
 	/**
 	 * Entorno desde el que se notifica.
 	 */
 	public static final String PROP_MAIL_ENVIRONMENT = "mail.environment"; //$NON-NLS-1$
-	
+
 	/**
 	 * Nombre del nodo desde el que se notifica.
 	 */
 	public static final String ENVIRONMENT_VAR_NODE_NAME = "fire.node.name"; //$NON-NLS-1$
-	
+
 	/**
 	 * Intervalo de minutos por defecto para la ejecuci&oacute;n de la tarea.
 	 */
 	public static int DEFAULT_DELAY_TIME = 30;
-	
+
 	/**
 	 * Fecha desde la que se comprueba que existan alarmas registradas.
 	 */
 	public static Date lastDateChecked;
-	
+
 	private static MailSenderService mailService;
 
 	/**
 	 * Nombre de la propiedad de configuraci&oacute;n se ha inicializado.
 	 */
 	public static boolean initialized = false;
-	
+
 	/**
 	 * Nombre de la propiedad de configuraci&oacute;n que indica el limite de notificaciones para enviar un correo.
 	 */
 	public static int notifyLimits = 5;
-	
+
 	/**
 	 * Intentos de notificacion.
 	 */
@@ -99,11 +99,11 @@ public class MailAlarmNotifier implements AlarmNotifier {
 	 * Configuraci&oacute;n adicional com&uacute;n a todas las alarmas.
 	 */
 	private static Properties config;
-	
+
 	/**
 	 * Mapa con alarmas registradas donde la clave es el mensaje, ya que es el que diferencia una alarma de otra.
 	 */
-	private static Map<String, AlarmNotification> alarmsRegistered = new HashMap<String, AlarmNotification>();
+	private static Map<String, AlarmNotification> alarmsRegistered = new HashMap<>();
 
 	@Override
 	public void init(final Properties clientConfig) throws InitializationException {
@@ -115,23 +115,30 @@ public class MailAlarmNotifier implements AlarmNotifier {
 			}
 
 			config = initConfig(clientConfig);
-			
+
 			mailService = new MailSenderService();
 			mailService.init(clientConfig);
-			
+
 			if (config.containsKey(PROP_MAIL_NOTIFY_LIMIT)) {
 				final String val = config.getProperty(PROP_MAIL_NOTIFY_LIMIT, ""); //$NON-NLS-1$
 				if (!val.isEmpty()) {
-					notifyLimits = Integer.valueOf(val);
+					notifyLimits = Integer.parseInt(val);
 				}
 			}
 
 			initialized = true;
-			
+
 			// Se programa una tarea cada X tiempo que detectara si se debe de enviar un resumen de las alarmas enviadas por
 			// correo o no.
-			final CheckAlarmsScheduler alarmsScheduler = new CheckAlarmsScheduler(Integer.valueOf(config.getProperty(PROP_MAIL_NOTIFY_DELAY), DEFAULT_DELAY_TIME));
-			alarmsScheduler.scheduleTask();
+			final String delayString = config.getProperty(PROP_MAIL_NOTIFY_DELAY);
+			int delay;
+			try {
+				delay = delayString != null ? Integer.parseInt(delayString) : DEFAULT_DELAY_TIME;
+			}
+			catch (final Exception e) {
+				delay = DEFAULT_DELAY_TIME;
+			}
+			new CheckAlarmsScheduler(delay).scheduleTask();
 		}
 	}
 
@@ -161,23 +168,23 @@ public class MailAlarmNotifier implements AlarmNotifier {
 	@Override
 	public void notify(final AlarmLevel level, final Alarm alarm, final String... source)
 			throws IOException {
-		
+
 		String message;
 		if (source == null) {
 			message = alarm.getDescription();
 		} else {
 			message = alarm.formatDescription((Object[]) source);
 		}
-		
+
 		notifyAttemps++;
 		if (alarmsRegistered.containsKey(message)) {
-			alarmsRegistered.get(message).addNotification();			
+			alarmsRegistered.get(message).addNotification();
 		} else {
 			final AlarmNotification notification = new AlarmNotification(alarm, level);
 			alarmsRegistered.put(message, notification);
 		}
 	}
-	
+
 	public static void sendSummary() {
 		final String recipients = config.getProperty(PROP_MAIL_RECIPIENTS);
 		final String [] addresses = recipients.split(","); //$NON-NLS-1$
@@ -195,7 +202,7 @@ public class MailAlarmNotifier implements AlarmNotifier {
 		alarmsRegistered.clear();
 		notifyAttemps = 0;
 	}
-	
+
 	private static StringBuilder buildBodySubject() {
 		final StringBuilder bodySubject = new StringBuilder();
 		final String nodeName = System.getProperty(ENVIRONMENT_VAR_NODE_NAME);
@@ -206,36 +213,36 @@ public class MailAlarmNotifier implements AlarmNotifier {
 		// Se imprime un mensaje de introduccion u otro depende de las propiedades indicadas
 		if (nodeName != null && !nodeName.isEmpty() && envMsg != null && !envMsg.isEmpty()) {
 			bodySubject.append(AlarmInternalMessages.getString("AlarmBodySubject.1",  //$NON-NLS-1$
-																hourFormat.format(lastDateChecked), 
+																hourFormat.format(lastDateChecked),
 																hourFormat.format(actualDate),
 																dateFormat.format(actualDate),
 																nodeName,
 																envMsg));
 		} else if (nodeName != null && !nodeName.isEmpty()) {
 			bodySubject.append(AlarmInternalMessages.getString("AlarmBodySubject.2",  //$NON-NLS-1$
-																hourFormat.format(lastDateChecked), 
+																hourFormat.format(lastDateChecked),
 																hourFormat.format(actualDate),
 																dateFormat.format(actualDate),
 																nodeName));
 		} else if (envMsg != null && !envMsg.isEmpty()) {
 			bodySubject.append(AlarmInternalMessages.getString("AlarmBodySubject.3",  //$NON-NLS-1$
-																hourFormat.format(lastDateChecked), 
+																hourFormat.format(lastDateChecked),
 																hourFormat.format(actualDate),
 																dateFormat.format(actualDate),
 																envMsg));
 		} else {
 			bodySubject.append(AlarmInternalMessages.getString("AlarmBodySubject.0",  //$NON-NLS-1$
-																hourFormat.format(lastDateChecked), 
+																hourFormat.format(lastDateChecked),
 																hourFormat.format(actualDate),
 																dateFormat.format(actualDate)));
 		}
-		
+
 		bodySubject.append("\n\n"); //$NON-NLS-1$
-		
+
 		bodySubject.append("<ul>"); //$NON-NLS-1$
 		// Se imprimen las alarmas registradas y sus notificaciones
         for (final Map.Entry<String, AlarmNotification> entry : alarmsRegistered.entrySet()) {
-            final String key = entry.getKey(); // 
+            final String key = entry.getKey(); //
             final AlarmNotification value = entry.getValue();
             bodySubject.append("<li>"); //$NON-NLS-1$
             if (value.getNotifications() > 1) {
@@ -248,7 +255,7 @@ public class MailAlarmNotifier implements AlarmNotifier {
             bodySubject.append("\n"); //$NON-NLS-1$
         }
         bodySubject.append("</ul>"); //$NON-NLS-1$
-        
+
 		return bodySubject;
 	}
 }

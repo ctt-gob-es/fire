@@ -46,9 +46,6 @@ public class AppController {
 	/** The Constant LOG. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
 	
-	@Autowired
-	private UserLoggedDTO userLoggedDTO;
-
 	@GetMapping({"/"})
 	public String index(final Model model) {
 		return "login.html";
@@ -56,8 +53,6 @@ public class AppController {
 
 	@GetMapping("/inicio")
 	public String inicio() {
-		// Informamos en la traza que el usuario X se ha logueado en la administracion
-		LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {userLoggedDTO.getName()}));
 		return "inicio.html";
 	}
 	@GetMapping("/user-form")

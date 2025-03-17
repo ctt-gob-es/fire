@@ -276,9 +276,6 @@ class PostSignBatchTask implements Callable<String> {
     		return null;
     	}
 
-
-System.out.println(" ========= FIN CORRECTO DE UNA TAREA DE POSTFIRMA");
-
     	// Registrar en el listado de resultados el de la operacion
     	this.batchResult.setSuccessResult(this.docId);
     	return this.docId;

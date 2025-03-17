@@ -2,6 +2,8 @@ package es.gob.fire.web.rest.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.persistence.entity.Provider;
 import es.gob.fire.persistence.service.IProviderService;
 
@@ -19,7 +20,7 @@ public class ProviderRestController {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ProviderRestController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProviderRestController.class);
 
 	/**
 	 * Attribute that represents the service object for accessing the repository.

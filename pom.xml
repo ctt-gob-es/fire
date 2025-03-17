@@ -114,7 +114,7 @@
 			<modules>
 				<module>fire-admin-web</module>
 				<module>clavefirma-test-services</module>
-				<module>fire-signature</module>
+				<module>fire-signature</module>	
 				<module>fire-test-jsp</module>
 				<module>log-consumer-service</module>
 			</modules>
@@ -539,7 +539,4 @@
 		<releases> <enabled>true</enabled> <updatePolicy>never</updatePolicy> </releases> 
 		<snapshots> <enabled>false</enabled> <updatePolicy>never</updatePolicy> </snapshots> 
 		</pluginRepository> </pluginRepositories> -->
-	<modules>
-		<module>fire-mail</module>
-	</modules>
 </project>
