@@ -11,7 +11,12 @@ public class CheckAlarmsTask implements Runnable {
 
 	@Override
 	public void run() {
-		if (MailAlarmNotifier.initialized && MailAlarmNotifier.notifyAttemps >= MailAlarmNotifier.notifyLimits) {
+		if (MailAlarmNotifier.initialized && 
+			(MailAlarmNotifier.criticalNotifyAttemps >= MailAlarmNotifier.criticalNotifyLimits ||
+			MailAlarmNotifier.errorNotifyAttemps >= MailAlarmNotifier.errorNotifyLimits ||
+			MailAlarmNotifier.warningNotifyAttemps >= MailAlarmNotifier.warningNotifyLimits ||
+			MailAlarmNotifier.infoNotifyAttemps >= MailAlarmNotifier.infoNotifyLimits)) {
+			
 			MailAlarmNotifier.sendSummary();
 		} else {
 			MailAlarmNotifier.lastDateChecked = new Date();

@@ -19,7 +19,15 @@ public enum Alarm {
 	/** No se ha podido conectar con un proveedor de firma en la nube. */
 	CONNECTION_SIGNATURE_PROVIDER("005", AlarmLevel.ERROR, AlarmInternalMessages.getString("Alarm.6")), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con el gestor de documentos. */
-	CONNECTION_DOCUMENT_MANAGER("006", AlarmLevel.ERROR, AlarmInternalMessages.getString("Alarm.7")); //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_DOCUMENT_MANAGER("006", AlarmLevel.ERROR, AlarmInternalMessages.getString("Alarm.7")), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Operacion cancelada. */
+	CANCELLED_OPERATION("007", AlarmLevel.INFO, AlarmInternalMessages.getString("Alarm.9")), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Error en la firma. */
+	SIGN_ERROR("008", AlarmLevel.WARNING, AlarmInternalMessages.getString("Alarm.10")), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Acceso no autorizado. */
+	ACCESS_ERROR("009", AlarmLevel.WARNING, AlarmInternalMessages.getString("Alarm.11")), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Error en envio a plataforma externa. */
+	EXTERNAL_PLATFORM_ERROR("010", AlarmLevel.WARNING, AlarmInternalMessages.getString("Alarm.12")); //$NON-NLS-1$ //$NON-NLS-2$
 
 	private final String eventCode;
 	private final AlarmLevel defaultLevel;

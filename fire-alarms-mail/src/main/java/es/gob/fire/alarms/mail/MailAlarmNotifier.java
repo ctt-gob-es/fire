@@ -43,10 +43,28 @@ public class MailAlarmNotifier implements AlarmNotifier {
 	public static final String PROP_MAIL_RECIPIENTS = "mail.recipients"; //$NON-NLS-1$
 
 	/**
-	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones
+	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones CRITICAL
 	 * para enviar un correo.
 	 */
-	public static final String PROP_MAIL_NOTIFY_LIMIT = "mail.notify.limit"; //$NON-NLS-1$
+	public static final String PROP_MAIL_CRITICAL_NOTIFY_LIMIT = "mail.critical.notify.limit"; //$NON-NLS-1
+
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones ERROR
+	 * para enviar un correo.
+	 */
+	public static final String PROP_MAIL_ERROR_NOTIFY_LIMIT = "mail.error.notify.limit"; //$NON-NLS-1$
+	
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones WARNING
+	 * para enviar un correo.
+	 */
+	public static final String PROP_MAIL_WARNING_NOTIFY_LIMIT = "mail.warning.notify.limit"; //$NON-NLS-1$
+	
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones INFO
+	 * para enviar un correo.
+	 */
+	public static final String PROP_MAIL_INFO_NOTIFY_LIMIT = "mail.info.notify.limit"; //$NON-NLS-1$
 
 	/**
 	 * Intervalo de tiempo en el que se comprobar&aacute; cuantas alarmas hay registradas.
@@ -86,14 +104,48 @@ public class MailAlarmNotifier implements AlarmNotifier {
 	public static boolean initialized = false;
 
 	/**
-	 * Nombre de la propiedad de configuraci&oacute;n que indica el limite de notificaciones para enviar un correo.
+	 * Nombre de la propiedad de configuraci&oacute;n que indica el limite de
+	 * notificaciones CRITICAL para enviar un correo.
 	 */
-	public static int notifyLimits = 5;
+	public static int criticalNotifyLimits = 0;
 
 	/**
-	 * Intentos de notificacion.
+	 * Nombre de la propiedad de configuraci&oacute;n que indica el limite de
+	 * notificaciones ERROR para enviar un correo.
 	 */
-	public static int notifyAttemps = 0;
+	public static int errorNotifyLimits = 0;
+
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que indica el limite de
+	 * notificaciones WARNING para enviar un correo.
+	 */
+	public static int warningNotifyLimits = 0;
+
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que indica el limite de
+	 * notificaciones INFO para enviar un correo.
+	 */
+	public static int infoNotifyLimits = 0;
+
+	/**
+	 * Intentos de notificacion de alertas CRITICAL.
+	 */
+	public static int criticalNotifyAttemps = 0;
+
+	/**
+	 * Intentos de notificacion de alertas ERROR.
+	 */
+	public static int errorNotifyAttemps = 0;
+
+	/**
+	 * Intentos de notificacion de alertas WARNING.
+	 */
+	public static int warningNotifyAttemps = 0;
+
+	/**
+	 * Intentos de notificacion de alertas INFO.
+	 */
+	public static int infoNotifyAttemps = 0;
 
 	/**
 	 * Configuraci&oacute;n adicional com&uacute;n a todas las alarmas.
@@ -119,10 +171,28 @@ public class MailAlarmNotifier implements AlarmNotifier {
 			mailService = new MailSenderService();
 			mailService.init(clientConfig);
 
-			if (config.containsKey(PROP_MAIL_NOTIFY_LIMIT)) {
-				final String val = config.getProperty(PROP_MAIL_NOTIFY_LIMIT, ""); //$NON-NLS-1$
+			if (config.containsKey(PROP_MAIL_CRITICAL_NOTIFY_LIMIT)) {
+				final String val = config.getProperty(PROP_MAIL_CRITICAL_NOTIFY_LIMIT, ""); //$NON-NLS-1$
 				if (!val.isEmpty()) {
-					notifyLimits = Integer.parseInt(val);
+					criticalNotifyLimits = Integer.valueOf(val);
+				}
+			}
+			if (config.containsKey(PROP_MAIL_ERROR_NOTIFY_LIMIT)) {
+				final String val = config.getProperty(PROP_MAIL_ERROR_NOTIFY_LIMIT, ""); //$NON-NLS-1$
+				if (!val.isEmpty()) {
+					errorNotifyLimits = Integer.valueOf(val);
+				}
+			}
+			if (config.containsKey(PROP_MAIL_WARNING_NOTIFY_LIMIT)) {
+				final String val = config.getProperty(PROP_MAIL_WARNING_NOTIFY_LIMIT, ""); //$NON-NLS-1$
+				if (!val.isEmpty()) {
+					warningNotifyLimits = Integer.valueOf(val);
+				}
+			}
+			if (config.containsKey(PROP_MAIL_INFO_NOTIFY_LIMIT)) {
+				final String val = config.getProperty(PROP_MAIL_INFO_NOTIFY_LIMIT, ""); //$NON-NLS-1$
+				if (!val.isEmpty()) {
+					infoNotifyLimits = Integer.valueOf(val);
 				}
 			}
 
@@ -176,11 +246,28 @@ public class MailAlarmNotifier implements AlarmNotifier {
 			message = alarm.formatDescription((Object[]) source);
 		}
 
-		notifyAttemps++;
+		switch(level) {
+			case CRITICAL:
+				criticalNotifyAttemps++;
+				break;
+			case ERROR:
+				errorNotifyAttemps++;
+				break;
+			case WARNING:
+				warningNotifyAttemps++;
+				break;
+			case INFO:
+				infoNotifyAttemps++;
+				break;
+			default:
+				break;			
+		}
+		
 		if (alarmsRegistered.containsKey(message)) {
 			alarmsRegistered.get(message).addNotification();
 		} else {
 			final AlarmNotification notification = new AlarmNotification(alarm, level);
+			notification.addNotification();
 			alarmsRegistered.put(message, notification);
 		}
 	}
@@ -200,7 +287,10 @@ public class MailAlarmNotifier implements AlarmNotifier {
 		LOGGER.log(Level.INFO, "Se procedera a enviar una notificacion de alarma por correo electronico"); //$NON-NLS-1$
 		mailService.sendEmail(emails, config.getProperty(PROP_MAIL_SUBJECT, AlarmInternalMessages.getString("Alarm.8")), bodySubject, "Notificacion de alarma enviada", MailSenderService.MAIL_TEXT_HTML_CHARSET); //$NON-NLS-1$ //$NON-NLS-2$
 		alarmsRegistered.clear();
-		notifyAttemps = 0;
+		criticalNotifyAttemps = 0;
+		errorNotifyAttemps = 0;
+		warningNotifyAttemps = 0;
+		infoNotifyAttemps = 0;
 	}
 
 	private static StringBuilder buildBodySubject() {

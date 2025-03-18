@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.alarms.Alarm;
+import es.gob.fire.alarms.AlarmInternalMessages;
 import es.gob.fire.server.services.internal.AddDocumentBatchManager;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.ApplicationInfo;
@@ -173,17 +174,20 @@ public class FIReService extends HttpServlet {
 		}
     	catch (final CertificateValidationException e) {
     		LOGGER.log(Level.WARNING, logF.f("Error al validar el certificado cliente"), e); //$NON-NLS-1$
-            Responser.sendError(response, e.getError());
+    		AlarmsManager.notify(Alarm.SIGN_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Error al validar el certificado cliente");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+    		Responser.sendError(response, e.getError());
             return;
 		}
     	catch (final UnauthorizedApplicacionException e) {
     		LOGGER.log(Level.WARNING, logF.f("Acceso denegado"), e); //$NON-NLS-1$
+    		AlarmsManager.notify(Alarm.ACCESS_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Acceso denegado");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
             Responser.sendError(response, FIReError.UNAUTHORIZED);
             return;
 		}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error desconocido al validar la peticion"), e); //$NON-NLS-1$
-            Responser.sendError(response, FIReError.INTERNAL_ERROR);
+    		AlarmsManager.notify(Alarm.SIGN_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Error desconocido al validar la peticion");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+    		Responser.sendError(response, FIReError.INTERNAL_ERROR);
             return;
 		}
 

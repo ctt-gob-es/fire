@@ -28,6 +28,7 @@ import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.alarms.Alarm;
+import es.gob.fire.alarms.AlarmInternalMessages;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
@@ -121,6 +122,7 @@ public final class SignService extends HttpServlet {
         // Verificar si los servicios antiguos estan habilitados
 	    if (!ConfigManager.isLegacyServicesEnabled()) {
 	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos estan deshabilitadas"); //$NON-NLS-1$
+	        AlarmsManager.notify(Alarm.ACCESS_ERROR, "Acceso denegado: las peticiones a los servicios antiguos están deshabilitadas"); //$NON-NLS-1$
 	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos estan deshabilitados"); //$NON-NLS-1$
 	        return;
 	    }
@@ -167,6 +169,7 @@ public final class SignService extends HttpServlet {
 		}
     	catch (final UnauthorizedApplicacionException e) {
     		LOGGER.log(Level.WARNING, logF.f("Acceso denegado: ") + e); //$NON-NLS-1$
+    		AlarmsManager.notify(Alarm.ACCESS_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - " + "Acceso denegado"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             Responser.sendError(response, HttpServletResponse.SC_UNAUTHORIZED);
             return;
 		}

@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
@@ -78,6 +79,7 @@ public class RecoverErrorManager {
             	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autenticar al usuario")); //$NON-NLS-1$
             	final TransactionResult result = buildErrorResult(session, FIReError.EXTERNAL_SERVICE_ERROR_TO_LOGIN, trAux);
             	SessionCollector.removeSession(session, trAux);
+            	AlarmsManager.notify(Alarm.ACCESS_ERROR,  "Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autenticar al usuario");  //$NON-NLS-1$
             	Responser.sendResult(response, result);
         		return;
         	}
@@ -85,6 +87,7 @@ public class RecoverErrorManager {
             	LOGGER.warning(logF.f("Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autorizar la firma en la nube o emitir certificados")); //$NON-NLS-1$
             	final TransactionResult result = buildErrorResult(session, FIReError.EXTERNAL_SERVICE_ERROR_TO_SIGN, trAux);
             	SessionCollector.removeSession(session, trAux);
+            	AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  "Ocurrio un error desconocido despues de llamar a la pasarela del proveedor para autorizar la firma en la nube o emitir certificados");  //$NON-NLS-1$
             	Responser.sendResult(response, result);
         		return;
         	}
