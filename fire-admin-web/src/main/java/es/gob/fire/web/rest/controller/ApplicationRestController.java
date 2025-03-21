@@ -1,4 +1,3 @@
-/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -178,30 +177,10 @@ public class ApplicationRestController {
 	 */
 	@RequestMapping(path = "/previewCertApp", method = RequestMethod.GET)
 	public String previewCertApp(@RequestParam("idCertificate") final Long idCertificate) {
-
-		LOGGER.warn(" ======= /previewCertApp: Obtenemos los certificados asociados al ID: " + idCertificate);
-
-
 		String data = "";
 		final Certificate cert = this.certificateService.getCertificateByCertificateId(idCertificate);
-
-
-		LOGGER.warn(" ======= /previewCertApp: Hemos obtenido los certificados: " + cert);
-
-
-
-
 		if (cert != null) {
-
-			LOGGER.warn(" ======= /previewCertApp: Certificado principal: " + cert.getCertificate());
-
-
-
 			final String certPrincipal = this.certificateService.getCertificateText(cert.getCertificate());
-
-
-			LOGGER.warn(" ======= /previewCertApp: Texto del certificado principal: " + certPrincipal);
-
 			if(certPrincipal.isEmpty()) {
 				data += "--"; //$NON-NLS-1$
 			} else {
@@ -257,7 +236,7 @@ public class ApplicationRestController {
 		if (appForm.getCustomProviders() != null && !appForm.getCustomProviders().isEmpty()) {
 			customProviders = appForm.getCustomProviders();
 		}
-
+		
 		//Comprobaciones de inputs
 		if (isAppNameBlank(appForm.getAppName()) || isAppNameSizeNotValid(appForm.getAppName()) || !isResponsibleSelected(listUsers) || !isCertificatesSelected(listCertificates)) {
 
@@ -293,11 +272,12 @@ public class ApplicationRestController {
 
 		} else {
 			try {
+				
 				final Application newApp = this.appService.saveApplication(appForm, listUsers, listCertificates, customProviders);
 
 				listNewApplication.add(newApp);
 
-			} catch (final GeneralSecurityException e) {
+			} catch (final Exception e) {				
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
 				listNewApplication = StreamSupport.stream(this.appService.getAllApplication().spliterator(), false).collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_APP, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
@@ -435,7 +415,7 @@ public class ApplicationRestController {
 	        return ResponseEntity.ok(savedAppDTO);
 	    } else {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                             .body(Collections.singletonMap("error", "Aplicación no encontrada"));
+	                             .body(Collections.singletonMap("error", "Aplicacion no encontrada"));
 	    }
 	}
 	

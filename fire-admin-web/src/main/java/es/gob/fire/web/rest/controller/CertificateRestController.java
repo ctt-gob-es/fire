@@ -269,7 +269,7 @@ public class CertificateRestController {
 					// Validaremos si el certificado esta caducado o bien si su fecha de validez aun no ha entrado en vigor
 					cert1.checkValidity();
 					
-					// Validaremos otros estados del certificado haciendo una petición SOAP
+					// Validaremos otros estados del certificado haciendo una peticion SOAP
 					VerifyAfirmaCertificateResponse verifyAfirmaCertificateResponse = this.certificateService.validateStatusCertificateInAfirmaWS(cert1);
 					
 					LOGGER.info(verifyAfirmaCertificateResponse.getDescription());
@@ -436,7 +436,7 @@ public class CertificateRestController {
 					// Validaremos si el certificado esta caducado o bien si su fecha de validez aun no ha entrado en vigor
 					cert1.checkValidity();
 					
-					// Validaremos otros estados del certificado haciendo una petición SOAP
+					// Validaremos otros estados del certificado haciendo una peticion SOAP
 					VerifyAfirmaCertificateResponse verifyAfirmaCertificateResponse = this.certificateService.validateStatusCertificateInAfirmaWS(cert1);
 					
 					LOGGER.info(verifyAfirmaCertificateResponse.getDescription());

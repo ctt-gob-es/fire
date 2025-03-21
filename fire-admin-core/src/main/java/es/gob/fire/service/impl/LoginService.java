@@ -104,9 +104,9 @@ public class LoginService implements ILoginService {
 	/**
 	 * Attribute that represents the administrator role.
 	 */
-	public static final String ROLE_ADMIN = "Administrator";
+	public static final String ROLE_ADMIN = "Administrator"; //$NON-NLS-1$
 
-	public static final String PARAM_RANDOM_STRING_LOGIN = "randomStringLogin";
+	public static final String PARAM_RANDOM_STRING_LOGIN = "randomStringLogin"; //$NON-NLS-1$
 
 	@Autowired
 	private ThreadInfoDataSecureDTO threadInfoDataSecure;
@@ -154,7 +154,7 @@ public class LoginService implements ILoginService {
 	@Override
 	public String generateCookieValue() {
         // Generamos un UUID aleatorio
-        final String uuid = UUID.randomUUID().toString().replace("-", ""); // Eliminar guiones
+        final String uuid = UUID.randomUUID().toString().replace("-", ""); // Eliminar guiones //$NON-NLS-1$ //$NON-NLS-2$
 
         // Convertimos UUID a bytes y codificar en Base64 para mayor entropia
         final String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.getBytes(StandardCharsets.UTF_8));
@@ -163,7 +163,7 @@ public class LoginService implements ILoginService {
         final int randomInt = (int) (Math.random() * Integer.MAX_VALUE);
 
         // Concatenamos con un simbolo especial
-        return encoded + "!-" + randomInt;
+        return encoded + "!-" + randomInt; //$NON-NLS-1$
     }
 
 	/**
@@ -176,7 +176,7 @@ public class LoginService implements ILoginService {
         try {
             final URL url = new URL(URL_SERVICE_PASARELA);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod("GET"); //$NON-NLS-1$
             connection.setConnectTimeout(5000); // 5 segundos de timeout
             connection.setReadTimeout(5000);
             connection.connect();
@@ -227,7 +227,7 @@ public class LoginService implements ILoginService {
     	KeyStore trustStoreUsers = null;
     	try {
     		// Cargamos el TrustStore
-			final String passTrustStoreUsers = "changeit";
+			final String passTrustStoreUsers = "changeit"; //$NON-NLS-1$
 			trustStoreUsers = UtilsKeystore.loadTrustStore(this.confCertPathTruststoreIssuers, UtilsKeystore.JKS, passTrustStoreUsers);
 		} catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException e) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008), e);
@@ -348,8 +348,8 @@ public class LoginService implements ILoginService {
     	final Authentication authentication = new DniAuthenticationToken(user.getDni(), grantedAuths);
 
     	if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
-    		LOGGER.error("El usuario con DNI "+ user.getDni() +" no tiene permisos de acceso "); //$NON-NLS-1$
-			throw new InsufficientAuthenticationException("El usuario con DNI " + user.getDni() + " no tiene permisos de acceso"); //$NON-NLS-1$
+    		LOGGER.error("El usuario con DNI "+ user.getDni() +" no tiene permisos de acceso "); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new InsufficientAuthenticationException("El usuario con DNI " + user.getDni() + " no tiene permisos de acceso"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
     	// Asignamos al bean de spring del usuario para usarlo en la app
@@ -359,13 +359,13 @@ public class LoginService implements ILoginService {
 		this.userLoggedDTO.setName(user.getName());
 		this.userLoggedDTO.setPhone(user.getPhone());
 		this.userLoggedDTO.setRenovationCode(user.getRenovationCode());
-		this.userLoggedDTO.setRenovationDate(user.getRenovationDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getRenovationDate()));
+		this.userLoggedDTO.setRenovationDate(user.getRenovationDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getRenovationDate())); //$NON-NLS-1$
 		this.userLoggedDTO.setRestPassword(user.getRestPassword());
 		this.userLoggedDTO.setRoot(user.getRoot());
-		this.userLoggedDTO.setStartDate(user.getStartDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getStartDate()));
+		this.userLoggedDTO.setStartDate(user.getStartDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getStartDate())); //$NON-NLS-1$
 		this.userLoggedDTO.setSurnames(user.getSurnames());
 		this.userLoggedDTO.setUserId(user.getUserId());
-		this.userLoggedDTO.setFecUltimoAcceso(user.getFecUltimoAcceso() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getFecUltimoAcceso()));
+		this.userLoggedDTO.setFecUltimoAcceso(user.getFecUltimoAcceso() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getFecUltimoAcceso())); //$NON-NLS-1$
 
 		// Actualizamos la fecha de ultimo acceso
 		user.setFecUltimoAcceso(Calendar.getInstance().getTime());
@@ -379,36 +379,36 @@ public class LoginService implements ILoginService {
    	 * @see es.gob.fire.persistence.service#validateIfSignSecure(es.gob.fire.crypto.cades.verifier.CAdESAnalizer)
    	 */
 	public void validateIfSignSecure(CAdESAnalizer analizer) throws CertificateException, ParseException {
-		String strSign = new String(analizer.getContent());
-		if (!strSign.equalsIgnoreCase(threadInfoDataSecure.getRandomStringLogin())) {
+		String strSigned = new String(analizer.getContent());
+		String token = threadInfoDataSecure.getRandomStringLogin();
+		if (!strSigned.equalsIgnoreCase(token)) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
 			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
-		} else {
+		}
 
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD);
 
-			Date pastDate = simpleDateFormat.parse(threadInfoDataSecure.getLimitSignGen());
+		Date pastDate = simpleDateFormat.parse(threadInfoDataSecure.getLimitSignGen());
 
-			Date currentDate = new Date();
+		Date currentDate = new Date();
 
-			long differenceInMillis = currentDate.getTime() - pastDate.getTime();
+		long differenceInMillis = currentDate.getTime() - pastDate.getTime();
 
-			// Convertimos a minutos
-			long differenceInMinutes = differenceInMillis / (60 * 1000);
+		// Convertimos a minutos
+		long differenceInMinutes = differenceInMillis / (60 * 1000);
 
-			if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
-				LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML017));
-				throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
-}
+		if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML017));
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+		}
 
-			differenceInMillis = currentDate.getTime() - analizer.getSigningTime().getTime();
+		differenceInMillis = currentDate.getTime() - analizer.getSigningTime().getTime();
 
-			differenceInMinutes = differenceInMillis / (60 * 1000);
+		differenceInMinutes = differenceInMillis / (60 * 1000);
 
-			if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
-				LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML018));
-				throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
-			}
+		if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML018));
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
 		}
 	}
 }

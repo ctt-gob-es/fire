@@ -294,7 +294,7 @@ public class ConfigurationRestController {
     	
     	propertyService.saveGeneralConfig(request);
 
-        return ResponseEntity.ok("Configuración guardada exitosamente.");
+        return ResponseEntity.ok("Configuracion guardada exitosamente.");
     }
     
     /**

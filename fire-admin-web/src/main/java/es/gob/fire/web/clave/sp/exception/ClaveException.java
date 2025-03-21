@@ -47,7 +47,7 @@ public class ClaveException extends Exception {
 	public ClaveException(final String errorDescParam) {
 		super(Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_005, new Object[ ] { errorDescParam }));
 		errorDesc = errorDescParam;
-		// Solamente en trace escribimos el mensaje y la excepción, por si es
+		// Solamente en trace escribimos el mensaje y la excepcion, por si es
 		// controlada
 		// posteriormente para ocultarla pero es necesario tenerla en cuenta
 		// para
@@ -64,7 +64,7 @@ public class ClaveException extends Exception {
 		super(Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_000, new Object[ ] { errorCodeParam, errorDescParam }));
 		errorCode = errorCodeParam;
 		errorDesc = errorDescParam;
-		// Solamente en trace escribimos el mensaje y la excepción, por si es
+		// Solamente en trace escribimos el mensaje y la excepcion, por si es
 		// controlada
 		// posteriormente para ocultarla pero es necesario tenerla en cuenta
 		// para
@@ -84,7 +84,7 @@ public class ClaveException extends Exception {
 		errorCode = errorCodeParam;
 		errorDesc = errorDescParam;
 		exception = exceptionParam;
-		// Solamente en trace escribimos el mensaje y la excepción, por si es
+		// Solamente en trace escribimos el mensaje y la excepcion, por si es
 		// controlada
 		// posteriormente para ocultarla pero es necesario tenerla en cuenta
 		// para

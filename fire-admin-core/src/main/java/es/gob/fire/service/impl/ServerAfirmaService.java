@@ -78,7 +78,7 @@ public class ServerAfirmaService implements IServerAfirmaService {
 		ServerAfirmaDTO serverAfirmaDTO = new ServerAfirmaDTO();
 		try {
 			ServerAfirma serverAfirma = serverAfirmaRepository.findByIdServerAfirma(idServerAfirma);
-			if(null != serverAfirma) {
+			if (null != serverAfirma) {
 				serverAfirmaDTO = new ServerAfirmaDTO(serverAfirma.getcAuthenticationType().getIdAuthenticationType(), serverAfirma.getIdServerAfirma(), serverAfirma.getNameApp(), serverAfirma.getTimeout(), serverAfirma.getUrlServer());
 				// Si el servidor afirma quiere firmas en las respuestas a partir de un almacen p12 obtenemos su informacion
 				if(serverAfirma.getcAuthenticationType().getIdAuthenticationType().equals(NumberConstants.NUM_2_LONG)) {
@@ -101,7 +101,7 @@ public class ServerAfirmaService implements IServerAfirmaService {
 					serverAfirmaDTO.setDisabledUserPass(false);
 				}
 			}
-		}catch (CipherException | KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+		} catch (Exception e) {
 			LOGGER.error(e);
 		}
 		

@@ -97,7 +97,7 @@ public class ResponseClave {
 	        // Autenticamos el token utilizando el usuario consultado previamente
 	        Authentication authentication = iLoginService.obtainAuthAndUpdateLastAccess(user);
 	            
-	        // Si la autenticación es exitosa, guardamos el resultado en el contexto de seguridad
+	        // Si la autenticacion es exitosa, guardamos el resultado en el contexto de seguridad
 	        SecurityContextHolder.getContext().setAuthentication(authentication);
 	        
 	        // Generaremos una nueva cookie por cada inicio de sesion exitoso
