@@ -72,7 +72,7 @@ public final class StorageService extends HttpServlet {
 		// Leemos la entrada
 		RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.extractParameters(request, null, null);
 		}
 		catch (final Exception e) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));

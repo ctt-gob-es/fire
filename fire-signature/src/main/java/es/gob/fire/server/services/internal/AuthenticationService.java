@@ -42,30 +42,30 @@ public class AuthenticationService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		RequestParameters params;
-		try {
-			params = RequestParameters.extractParameters(request);
-		}
-		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.READING_PARAMETERS);
-			return;
-		}
-		
-		// Obtenemos los datos proporcionados por parametro
-		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
-
-		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
-		final LogTransactionFormatter logF = trAux.getLogFormatter();
-
-		// Comprobamos que se haya indicado el identificador de transaccion
+		// Recuperamos el identificador de transaccion
+		final String trId = RequestParameters.getTransactionId(request);
 		if (trId == null || trId.isEmpty()) {
-			LOGGER.warning(logF.f("No se ha proporcionado el identificador de transaccion")); //$NON-NLS-1$
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request, null, logF);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, logF.f("Error en la lectura de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		// Obtenemos los datos proporcionados por parametro
+		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
 		// Comprobamos que se haya indicado el identificador de usuario
 		if (subjectRef == null || subjectRef.isEmpty()) {

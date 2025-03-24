@@ -181,7 +181,7 @@ CREATE TABLE TB_PROGRAMADOR (
   ID_PROGRAMADOR BIGINT NOT NULL AUTO_INCREMENT,
   NOMBRE_TOKEN VARCHAR(30) NOT NULL,
   NOMBRE_CLASE VARCHAR(255) NOT NULL,
-  ESTA_ACTIVO CHAR(1) NOT NULL,
+  ESTA_ACTIVO tinyint(1) NOT NULL,
   NUM_HILOS BIGINT,
   NUM_PROCESOS BIGINT,
   PERIODO_EXPIRADO BIGINT,
@@ -209,8 +209,8 @@ CREATE TABLE TB_CONTROL_ACCESO (
 CREATE TABLE `tb_proveedores` (
   `id_proveedor` varchar(20) NOT NULL,
   `nombre` varchar(50) NOT NULL,
-  `obligatorio` char(1) DEFAULT 0,
-  `habilitado` char(1) DEFAULT 1,
+  `obligatorio` tinyint(1) DEFAULT 0,
+  `habilitado` tinyint(1) DEFAULT 1,
   `orden` tinyint(4) NOT NULL,
   
   PRIMARY KEY (`id_proveedor`)
@@ -220,8 +220,8 @@ CREATE TABLE `tb_proveedores` (
 CREATE TABLE `tb_proveedores_aplicacion` (
   `id_proveedor` varchar(20) NOT NULL,
   `id_aplicacion` varchar(48) NOT NULL,
-  `obligatorio` char(1) DEFAULT 0,
-  `habilitado` char(1) DEFAULT 1,
+  `obligatorio` tinyint(1) DEFAULT 0,
+  `habilitado` tinyint(1) DEFAULT 1,
   `orden` tinyint(4) NOT NULL,
   
   PRIMARY KEY (`id_aplicacion`, `id_proveedor`),

@@ -96,7 +96,7 @@ public class TasksManager {
 	
 		// Obtenemos el nombre de la tarea.
 		String taskName = scheduler.getSchedulerName();
-		// Obtenemos su implementación.
+		// Obtenemos su implementacion.
 		String implementationClassName = scheduler.getClassName();
 		
 		try {
@@ -108,16 +108,15 @@ public class TasksManager {
 				tasksScheduler.stopTask(taskName);
 			}
 
-			// Si la tarea está habilitada, la generamos de nuevo.
-			if (scheduler.getIsActive()) {
-				// Llamamos al método auxiliar (para reducir complejidad
-				// ciclomática).
+			// Si la tarea esta habilitada, la generamos de nuevo.
+			if (scheduler.isActive()) {
+				// Llamamos al metodo auxiliar (para reducir complejidad
+				// ciclomatica).
 				loadSchedulersAux(scheduler, taskName, implementationClassName);
 			}
 						
-		}catch (Exception e) {
-			
-			
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al programar la tarea", e);			
 		}
 	}
 	

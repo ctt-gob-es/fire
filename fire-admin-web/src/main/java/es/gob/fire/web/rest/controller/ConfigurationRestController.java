@@ -225,7 +225,7 @@ public class ConfigurationRestController {
 				Scheduler scheduler = iSchedulerService.getSchedulerById(taskForm.getIdSchedulerEdit());
 				
 				// se actualiza la tarea indicando si esta habilitada o no.
-				scheduler.setIsActive(taskForm.getIsEnabledEdit());
+				scheduler.setActive(taskForm.getIsEnabledEdit());
 				
 				// actualizamos los dias de preaviso y de periodo de comunicacion
 				scheduler.setAdvanceNotice(taskForm.getDayAdviceNoticeEdit());

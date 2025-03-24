@@ -21,17 +21,14 @@ import es.gob.fire.signature.TempConfigLoader;
 
 public class DBOperationConfigLoader {
 
-	private static final String SQL_SELECT_DEFAULT_PROVIDERS = "SELECT nombre, obligatorio FROM tb_proveedores WHERE habilitado = TRUE ORDER BY orden"; //$NON-NLS-1$
+	private static final String SQL_SELECT_DEFAULT_PROVIDERS = "SELECT nombre, obligatorio FROM tb_proveedores WHERE habilitado = 1 ORDER BY orden"; //$NON-NLS-1$
 	private static final String SQL_SELECT_DEFAULT_PROPERTIES = "SELECT clave, valor_numerico FROM tb_propiedades WHERE tipo = 'NUMBER'"; //$NON-NLS-1$
 
-	private static final String SQL_SELECT_APP_PROPERTIES = "SELECT id_aplicacion, tamano_maximo_documento, tamano_maximo_peticion, cantidad_maxima_documentos FROM tb_aplicaciones WHERE tamano_personalizado = TRUE"; //$NON-NLS-1$
-	private static final String SQL_SELECT_APP_PROVIDERS = "SELECT app.id_aplicacion, prov.nombre, rel.obligatorio " //$NON-NLS-1$
-			+ "FROM tb_aplicaciones app, tb_proveedores_aplicacion rel, ib_proveedores prov " //$NON-NLS-1$
-			+ "WHERE app.proveedor_personalizado = TRUE AND app.id_aplicacion = rel.id_aplicacion AND prov.id_proveedor = rel.id_proveedor AND rel.habilitado = TRUE AND prov.habilitado = TRUE " //$NON-NLS-1$
+	private static final String SQL_SELECT_APP_PROPERTIES = "SELECT id, tamano_maximo_documento, tamano_maximo_peticion, cantidad_maxima_documentos FROM tb_aplicaciones WHERE tamano_personalizado = 1"; //$NON-NLS-1$
+	private static final String SQL_SELECT_APP_PROVIDERS = "SELECT app.id, prov.nombre, rel.obligatorio " //$NON-NLS-1$
+			+ "FROM tb_aplicaciones app, tb_proveedores_aplicacion rel, tb_proveedores prov " //$NON-NLS-1$
+			+ "WHERE app.proveedor_personalizado = 1 AND app.id = rel.id_aplicacion AND prov.id_proveedor = rel.id_proveedor AND rel.habilitado = 1 AND prov.habilitado = 1 " //$NON-NLS-1$
 			+ "ORDER BY rel.id_aplicacion, rel.orden"; //$NON-NLS-1$
-
-	private static final String PROVIDER_MANDATORY_SIGN = "@"; //$NON-NLS-1$
-	private static final String PROVIDER_SEPARATOR_SIGN = ","; //$NON-NLS-1$
 
 	private static final String CONFIG_APP_PREFIX = "app"; //$NON-NLS-1$
 	private static final String CONFIG_DEFAULT = "default"; //$NON-NLS-1$
@@ -42,11 +39,23 @@ public class DBOperationConfigLoader {
 		this.configLoader = new DBApplicationConfigLoader();
 	}
 
+	/**
+	 * Obtiene la configuraci&oacute;n correspondiente a una aplicaci&oacute;n
+	 * concreta para operar. En caso de no contar con configuraci&oacute;n particular,
+	 * se devolver&aacute;n la configuraci&oacute;n por defecto. Si no se pudiese
+	 * carga ninguna configuraci&oacute;n, no se establecer&iacute;n l&iacute;mites.
+	 * @param app
+	 * @return
+	 */
 	public ApplicationOperationConfig getOperationConfig(final String app) {
 
-		final ApplicationOperationConfig config = (ApplicationOperationConfig) this.configLoader.getObject(CONFIG_APP_PREFIX + app);
+		ApplicationOperationConfig config = (ApplicationOperationConfig) this.configLoader.getObject(CONFIG_APP_PREFIX + app);
 
-		return config != null ? config : (ApplicationOperationConfig) this.configLoader.getObject(CONFIG_DEFAULT);
+		if (config == null) {
+			config = (ApplicationOperationConfig) this.configLoader.getObject(CONFIG_DEFAULT);
+		}
+
+		return config;
 	}
 
 	/**
@@ -54,6 +63,10 @@ public class DBOperationConfigLoader {
 	 * la configuraci&oacute;n se renueve.
 	 */
 	private static class DBApplicationConfigLoader extends TempConfigLoader {
+
+		public DBApplicationConfigLoader() {
+			// Constructor unico de la clase
+		}
 
 		@Override
 		public Hashtable<Object, Object> loadConfiguration() throws IOException, ConfigException {
@@ -74,7 +87,7 @@ public class DBOperationConfigLoader {
 			}
 			catch (final SQLException e) {
 				AlarmsManager.notify(Alarm.CONNECTION_DB);
-				throw new IOException("Error al consultar en BD la configuracion de la apicacion", e); //$NON-NLS-1$
+				throw new IOException("Error al consultar en BD la configuracion de la aplicacion", e); //$NON-NLS-1$
 			}
 
 			return result;
@@ -135,13 +148,13 @@ public class DBOperationConfigLoader {
 			return providers.toArray(new ProviderElement[0]);
 		}
 
-		private static Map<String, ApplicationOperationConfig> loadAppsParticularConfig(final Connection conn, final ApplicationOperationConfig defaultConfig) throws SQLException, ConfigException {
+		private static Map<String, ApplicationOperationConfig> loadAppsParticularConfig(final Connection conn, final ApplicationOperationConfig defaultConfig) throws SQLException {
 
 			// Obtenemos los parametros y los proveedores que se han establecido personalidzados para rodas las aplicaciones
 			final Map<String, ApplicationOperationConfig> sizes = getAppsParticularSizes(conn);
 			final Map<String, List<ProviderElement>> providers = getAppsParticularProviders(conn);
 
-			// Identificamos todas aquellas aplicaciones que usan alguna configuracion personalizada
+			// Identificamos los nombres de todas aquellas aplicaciones que usan alguna configuracion personalizada
 			final Set<String> appsWithParticularConfig = new HashSet<>();
 			appsWithParticularConfig.addAll(sizes.keySet());
 			appsWithParticularConfig.addAll(providers.keySet());

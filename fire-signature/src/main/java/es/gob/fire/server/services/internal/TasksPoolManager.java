@@ -26,6 +26,7 @@ public class TasksPoolManager {
 	 * @param session Sesi&oacute;n en la que guardar el n&uacute;mero de hilos que
 	 * a&uacute;n no han terminado.
 	 * @param attrName Nombre del atributo de sesi&oacute;n con el que se guardar&aacute;.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
 	public static void waitTasks(final List<Future<String>> tasks, final boolean stopOnError, final FireSession session, final String attrName, final TransactionAuxParams trAux) {
 

@@ -119,6 +119,7 @@ public class FIReService extends HttpServlet {
 
 		LOGGER.fine("Nueva peticion entrante"); //$NON-NLS-1$
 
+		// Comprobamos que la configuracion este inicializada
 		if (!ConfigManager.isInitialized()) {
 			try {
 				ConfigManager.checkConfiguration();
@@ -137,32 +138,23 @@ public class FIReService extends HttpServlet {
 	    	}
 		}
 
-		RequestParameters params;
-		try {
-			params = RequestParameters.extractParameters(request);
-		}
-		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.READING_PARAMETERS);
-			return;
-		}
-
-    	final String appId     = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
-        final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
-        final String trId      = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-
-        final TransactionAuxParams trAux = new TransactionAuxParams(appId, LogUtils.limitText(trId));
-		final LogTransactionFormatter logF = trAux.getLogFormatter();
+		// Obtenemos unicamente los identificadores de la peticion para hacer con ellos las distintas comprobaciones de acceso
+		final String appId = RequestParameters.getAppId(request, false);
+        final String trId  = RequestParameters.getTransactionId(request);
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario
 		// validarlo posteriormente
     	if (appId == null || appId.isEmpty()) {
-    		LOGGER.warning(logF.f("No se ha proporcionado el identificador de la aplicacion en una peticion entrante")); //$NON-NLS-1$
+    		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en una peticion entrante"); //$NON-NLS-1$
             Responser.sendError(response, FIReError.PARAMETER_APP_ID_NEEDED);
             return;
         }
 
-    	// Comprobamos que la peticion este autorizada
+        // Construimos el formateado de logs
+		final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
+		// Comprobamos que la peticion este autorizada
     	ApplicationInfo appInfo;
     	try {
     		appInfo = ServiceUtil.checkAccess(appId, request, trAux);
@@ -192,6 +184,19 @@ public class FIReService extends HttpServlet {
 		}
 
     	LOGGER.fine(logF.f("Peticion autorizada")); //$NON-NLS-1$
+
+    	// Extraemos el resto de parametros de la peticion
+		RequestParameters params;
+		try {
+			params = RequestParameters.extractParameters(request, appId, logF);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+        final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 
         if (operation == null || operation.isEmpty()) {
             LOGGER.warning(logF.f("No se ha indicado la operacion a realizar en servidor")); //$NON-NLS-1$

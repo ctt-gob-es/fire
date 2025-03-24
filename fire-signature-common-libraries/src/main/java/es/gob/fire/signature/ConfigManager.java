@@ -105,7 +105,9 @@ public class ConfigManager {
 
 	private static final String PROP_FIRE_PUBLIC_URL = "pages.public.url"; //$NON-NLS-1$
 
-	private static final String PROP_ALARMS_NOTIFIER = "alarms.notifier"; //$NON-NLS-1$
+	private static final String PROP_ALARMS_NOTIFIER = "alarms.notifiers"; //$NON-NLS-1$
+
+	private static final String PREFIX_PROP_NOTIFIER = "notifier."; //$NON-NLS-1$
 
 	private static final String PROP_DOCUMENT_MANAGER_PREFIX = "docmanager."; //$NON-NLS-1$
 
@@ -228,62 +230,65 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Carga el fichero de configuraci&oacute;n del m&oacute;dulo.
+	 * Carga el fichero de configuraci&oacute;n del m&oacute;dulo si no
+	 * estaba cargado ya
 	 * @throws ConfigFilesException Cuando no se encuentra o no se puede cargar el fichero de configuraci&oacute;n.
 	 */
 	private static void loadConfig() throws  ConfigFilesException {
 
+		if (config != null) {
+			return;
+		}
+
 		String configFilename;
-		if (config == null) {
+		try {
+			config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
+			configFilename = CONFIG_FILE;
+		}
+		catch (final Exception e) {
 			try {
-				config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
-				configFilename = CONFIG_FILE;
+				config = ConfigFileLoader.loadConfigFile(CONFIG_FILE_OLD);
+				configFilename = CONFIG_FILE_OLD;
 			}
-			catch (final Exception e) {
-				try {
-					config = ConfigFileLoader.loadConfigFile(CONFIG_FILE_OLD);
-					configFilename = CONFIG_FILE_OLD;
-				}
-				catch (final Exception e2) {
-					throw new ConfigFilesException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
-				}
+			catch (final Exception e2) {
+				throw new ConfigFilesException("No se pudo cargar el fichero de configuracion " + CONFIG_FILE, CONFIG_FILE, e); //$NON-NLS-1$
 			}
+		}
 
-			LOGGER.info("Se carga la configuracion de FIRe a traves del fichero " + configFilename); //$NON-NLS-1$
+		LOGGER.info("Se carga la configuracion de FIRe a traves del fichero " + configFilename); //$NON-NLS-1$
 
-			try {
-				config = mapEnvironmentVariables(config);
-			}
-			catch (final Exception e) {
-				LOGGER.severe("No se pudieron mapear las variables de entorno del fichero de configuracion " + configFilename); //$NON-NLS-1$
-			}
+		try {
+			config = mapEnvironmentVariables(config);
+		}
+		catch (final Exception e) {
+			LOGGER.severe("No se pudieron mapear las variables de entorno del fichero de configuracion " + configFilename); //$NON-NLS-1$
+		}
 
-			// Comprobamos el valor establecido para la clase de cifrado
-			if (config != null) {
-				if (config.containsKey(PARAM_CIPHER_CLASS)) {
-					final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
-					if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
-						try {
-							final Class<?> decipherClass = Class.forName(decipherClassname);
-							final Object decipher = decipherClass.getConstructor().newInstance();
-							if (PropertyDecipher.class.isInstance(decipher)) {
-								decipherImpl = (PropertyDecipher) decipher;
-							}
+		// Comprobamos el valor establecido para la clase de cifrado
+		if (config != null) {
+			if (config.containsKey(PARAM_CIPHER_CLASS)) {
+				final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
+				if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
+					try {
+						final Class<?> decipherClass = Class.forName(decipherClassname);
+						final Object decipher = decipherClass.getConstructor().newInstance();
+						if (PropertyDecipher.class.isInstance(decipher)) {
+							decipherImpl = (PropertyDecipher) decipher;
 						}
-						catch (final Exception e) {
-							LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
-						}
+					}
+					catch (final Exception e) {
+						LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
 					}
 				}
 			}
+		}
 
-			// Comprobamos si se establecieron las propiedades para la conexion con la base de
-			// datos y advertimos de las consecuencias en caso contrario
-			if (getProperty(PROP_DATASOURCE_JNDI_NAME) == null) {
-				LOGGER.warning("No se ha declarado el nombre del datasource encargado de la conexión a base de datos." //$NON-NLS-1$
-						+ String.format("Asegurese de habilitar las propiedades %1s y %2s como alternativa", //$NON-NLS-1$
-								PROP_APP_ID, PROP_CERTIFICATE));
-			}
+		// Comprobamos si se establecieron las propiedades para la conexion con la base de
+		// datos y advertimos de las consecuencias en caso contrario
+		if (getProperty(PROP_DATASOURCE_JNDI_NAME) == null) {
+			LOGGER.warning("No se ha declarado el nombre del datasource encargado de la conexion a base de datos." //$NON-NLS-1$
+					+ String.format("Asegurese de habilitar las propiedades %1s y %2s como alternativa", //$NON-NLS-1$
+							PROP_APP_ID, PROP_CERTIFICATE));
 		}
 	}
 
@@ -525,16 +530,6 @@ public class ConfigManager {
 	 * temporal del sistema. En caso de error, devolver&aacute; {@code null}.
 	 */
 	public static String getTempDir() {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return null;
-			}
-		}
-
 		return getProperty(PROP_TEMP_DIR, DEFAULT_TMP_DIR);
 	}
 
@@ -663,17 +658,6 @@ public class ConfigManager {
 	 * ficheros temporales.
 	 */
 	public static long getTempsTimeout() {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central. Se usaran " //$NON-NLS-1$
-						+ DEFAULT_FIRE_TEMP_TIMEOUT + " segundos: " + e); //$NON-NLS-1$
-				return (long) DEFAULT_FIRE_TEMP_TIMEOUT * 1000;
-			}
-		}
-
 		try {
 			return Long.parseLong(getProperty(PROP_FIRE_TEMP_TIMEOUT, Integer.toString(DEFAULT_FIRE_TEMP_TIMEOUT)))
 					* 1000;
@@ -692,15 +676,6 @@ public class ConfigManager {
 	 * especific&oacute; uno.
 	 */
 	public static String getPagesTitle() {
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return ""; //$NON-NLS-1$
-			}
-		}
-
 		return getProperty(PROP_FIRE_PAGES_TITLE, ""); //$NON-NLS-1$
 	}
 
@@ -710,15 +685,6 @@ public class ConfigManager {
 	 * @return URL completa de la imagen de logo o cadena vac&iacute;a si no se ha configurado.
 	 */
 	public static String getPagesLogoUrl() {
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return ""; //$NON-NLS-1$
-			}
-		}
-
 		return getProperty(PROP_FIRE_PAGES_LOGO_URL);
 	}
 
@@ -728,16 +694,6 @@ public class ConfigManager {
 	 * @return Nombre cualificado de la clase.
 	 */
 	public static String getAlarmsNotifierName() {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return ""; //$NON-NLS-1$
-			}
-		}
-
 		return getProperty(PROP_ALARMS_NOTIFIER);
 	}
 
@@ -748,16 +704,6 @@ public class ConfigManager {
 	 * @return Nombre cualificado de la clase.
 	 */
 	public static String getDocumentManagerClassName(final String docManager) {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return ""; //$NON-NLS-1$
-			}
-		}
-
 		return getProperty(PROP_DOCUMENT_MANAGER_PREFIX + docManager);
 	}
 
@@ -792,16 +738,6 @@ public class ConfigManager {
 	 * si no se ha podido recuperar o no se ha configurado.
 	 */
 	public static String getSessionsDao() {
-
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return null;
-			}
-		}
-
 		return getProperty(PROP_SESSIONS_DAO);
 	}
 
@@ -822,15 +758,6 @@ public class ConfigManager {
 	 * {@code null} si no se ha podido recuperar o no se ha configurado.
 	 */
 	public static String getTempDocumentsDao() {
-		if (config == null) {
-			try {
-				loadConfig();
-			} catch (final ConfigFilesException e) {
-				LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				return null;
-			}
-		}
-
 		return getProperty(PROP_TEMP_DOCUMENTS_DAO);
 	}
 
@@ -840,16 +767,6 @@ public class ConfigManager {
 	  * si no se ha podido recuperar o no se ha configurado.
 	  */
 	 public static String getPublicContextUrl() {
-
-	 	if (config == null) {
-	 		try {
-	 			loadConfig();
-	 		} catch (final ConfigFilesException e) {
-	 			LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-	 			return null;
-	 		}
-	 	}
-
 	 	return getProperty(PROP_FIRE_PUBLIC_URL);
 	 }
 
@@ -858,16 +775,6 @@ public class ConfigManager {
 	  * @return Directorio de los ficheros de log o {@code null} si no se configur&oacute;.
 	  */
 	 public static String getLogsDir() {
-
-		 if (config == null) {
-			 try {
-				 loadConfig();
-			 } catch (final ConfigFilesException e) {
-				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				 return null;
-			 }
-		 }
-
 		 return getProperty(PROP_LOGS_DIR);
 	 }
 
@@ -911,15 +818,6 @@ public class ConfigManager {
 	 * @return Nombre del atributo configurado.
 	 */
 	public static String getHttpsCertAttributeHeader() {
-
-		 if (config == null) {
-			 try {
-				 loadConfig();
-			 } catch (final ConfigFilesException e) {
-				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				 return null;
-			 }
-		 }
 		 return getProperty(PROP_HTTP_CERT_ATTR, DEFAULT_HTTP_CERT_ATTR);
 	 }
 
@@ -930,16 +828,7 @@ public class ConfigManager {
 	 * @return Nombre de la clase.
 	 */
 	public static String getNotifierClassName(final String notifierName) {
-
-		 if (config == null) {
-			 try {
-				 loadConfig();
-			 } catch (final ConfigFilesException e) {
-				 LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
-				 return null;
-			 }
-		 }
-		 return getProperty(notifierName + ".notifierclass");
+		 return getProperty(PREFIX_PROP_NOTIFIER + notifierName);
 	 }
 
 	/**
@@ -1003,6 +892,14 @@ public class ConfigManager {
 	 * indic&oacute; encontr&oacute;.
 	 */
 	private static String getProperty(final String key, final String defaultValue, final boolean required) throws InvalidConfigurationException {
+
+		try {
+			loadConfig();
+		} catch (final ConfigFilesException e) {
+			LOGGER.warning("No se puede cargar el fichero de configuracion del componente central: " + e); //$NON-NLS-1$
+			return null;
+		}
+
 		final String value = getDecipheredProperty(config, key, defaultValue);
 		if (required && (value == null || value.isEmpty())) {
 			throw new InvalidConfigurationException(key, CONFIG_FILE);
@@ -1175,11 +1072,11 @@ public class ConfigManager {
 
 	/**
 	 * Obtiene el valor de la propiedad que indica si se deben permitir las peticiones a los servicios antiguos.
-	 * Si la propiedad no está definida, devuelve false por defecto.
+	 * Si la propiedad no est&aacute; definida, devuelve {@code false} por defecto.
 	 *
-	 * @return true si los servicios antiguos están habilitados, false en caso contrario.
+	 * @return {@code true} si los servicios antiguos est&aacute;n habilitados, {@code false} en caso contrario.
 	 */
 	public static boolean isLegacyServicesEnabled() {
-	    return Boolean.parseBoolean(getProperty(PROP_LEGACY_SERVICES_ENABLED, "false"));
+	    return Boolean.parseBoolean(getProperty(PROP_LEGACY_SERVICES_ENABLED, Boolean.FALSE.toString()));
 	}
 }

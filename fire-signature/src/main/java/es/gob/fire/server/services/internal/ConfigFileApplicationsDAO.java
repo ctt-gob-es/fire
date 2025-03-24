@@ -126,6 +126,4 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 
 		return config;
 	}
-
-
 }

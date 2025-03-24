@@ -112,15 +112,19 @@ public class ProviderManager {
 	}
 
 	/**
-	 * Obtiene el listado de proveedores configurados.
+	 * Obtiene el listado de proveedores configurados para una aplicaci&oacute;n o,
+	 * si no tiene una configuraci&oacute;n concreta, todos los proveedores habilitados.
+	 * @param appId Aplicaci&oacute;n para la que deseamos obtener los proveedores.
 	 * @param logF Formateador de trazas de log.
-	 * @return Listado con los proveedores.
+	 * @return Listado con los proveedores de los que puede hacer uso la aplicaci&oacute;n.
+	 * @throws IOException Cuando no se ha podido obtener el listado de proveedores habilitado.
 	 */
-	public static ProviderElement[] getProviders(final String appId, final LogTransactionFormatter logF) {
+	public static ProviderElement[] getProviders(final String appId, final LogTransactionFormatter logF) throws IOException {
 
-//		ApplicationsDAOFactory.getApplicationsDAO().getOperationConfig(appId, logF);
+		final ApplicationsDAO dao = ApplicationsDAOFactory.getApplicationsDAO();
+		final ApplicationOperationConfig config = dao.getOperationConfig(appId, logF);
 
-		return ConfigManager.getProviders();
+		return config.getProviders();
 	}
 
 	/**
@@ -342,8 +346,9 @@ public class ProviderManager {
 	 * @param requestedProviders Proveedores solicitados.
 	 * @param logF Formateador de trazas de log.
 	 * @return Listado de proveedores ya filtrados.
+	 * @throws IOException Cuando no se puede obtener el listado de proveedores habilitado.
 	 */
-	public static String[] getFilteredProviders(final String appId, final String[] requestedProviders, final LogTransactionFormatter logF) {
+	public static String[] getFilteredProviders(final String appId, final String[] requestedProviders, final LogTransactionFormatter logF) throws IOException {
 
 		final List<String> filteredProviders = new ArrayList<>();
 		final ProviderElement[] allProviders = getProviders(appId, logF);

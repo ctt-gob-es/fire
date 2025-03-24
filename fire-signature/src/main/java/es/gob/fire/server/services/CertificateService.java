@@ -44,9 +44,6 @@ public final class CertificateService extends HttpServlet {
 
     private static final long serialVersionUID = 9165731108863824136L;
 
-	private static final String PARAM_APPLICATION_ID = "appId"; //$NON-NLS-1$
-    private static final String PARAM_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
-
     private static final Logger LOGGER = Logger.getLogger(CertificateService.class.getName());
 
     @Override
@@ -102,17 +99,17 @@ public final class CertificateService extends HttpServlet {
 	        return;
 	    }
 
-    	final RequestParameters params;
-    	try {
-    		params = RequestParameters.extractParameters(request);
-    	}
-    	catch (final Exception e) {
-    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
-    		return;
-		}
+	    // Obtenemos el identificador de aplicacion para configuracion el log y
+	    // sus permisos
+    	final String appId = RequestParameters.getAppId(request, false);
 
-    	final String appId = params.getParameter(PARAM_APPLICATION_ID);
+		// El identificador de aplicacion es obligatorio, incluso si no es necesario
+		// validarlo posteriormente
+    	if (appId == null || appId.isEmpty()) {
+    		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en una peticion entrante"); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.PARAMETER_APP_ID_NEEDED);
+            return;
+        }
 
     	final TransactionAuxParams trAux = new TransactionAuxParams(appId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
@@ -142,7 +139,18 @@ public final class CertificateService extends HttpServlet {
             return;
 		}
 
-        final String subjectId = params.getParameter(PARAM_SUBJECT_ID);
+        // Extraemos el resto de parametros
+    	final RequestParameters params;
+    	try {
+    		params = RequestParameters.extractParameters(request, appId, true, logF);
+    	}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+		}
+
+        final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
         if (subjectId == null || subjectId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el identificador del titular"));//$NON-NLS-1$
         	Responser.sendError(response,

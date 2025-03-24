@@ -45,12 +45,6 @@ public final class GenerateCertificateService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(GenerateCertificateService.class.getName());
 
-    private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
-    private static final String OLD_PARAMETER_NAME_APPLICATION_ID = "appId"; //$NON-NLS-1$
-
-    private static final String PARAMETER_NAME_SUBJECT_ID = "subjectid"; //$NON-NLS-1$
-    private static final String OLD_PARAMETER_NAME_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
-
     @Override
     public void init() throws ServletException {
     	super.init();
@@ -107,22 +101,20 @@ public final class GenerateCertificateService extends HttpServlet {
 	        return;
 	    }
 
-    	final RequestParameters params;
-    	try {
-    		params = RequestParameters.extractParameters(request);
-    	}
-    	catch (final Exception e) {
-    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
-    		return;
-		}
+	    // Obtenemos el identificador de aplicacion para configuracion el log y
+	    // sus permisos
+    	final String appId = RequestParameters.getAppId(request, true);
+    	final String trId  = RequestParameters.getTransactionId(request);
 
-    	updateParamNames(params);
+		// El identificador de aplicacion es obligatorio, incluso si no es necesario
+		// validarlo posteriormente
+    	if (appId == null || appId.isEmpty()) {
+    		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en una peticion entrante"); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.PARAMETER_APP_ID_NEEDED);
+            return;
+        }
 
-    	final String appId = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
-    	final String trId	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-
-    	final TransactionAuxParams trAux = new TransactionAuxParams(LogUtils.limitText(appId), LogUtils.limitText(trId));
+    	final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
     	// Comprobamos que la peticion este autorizada
@@ -150,6 +142,17 @@ public final class GenerateCertificateService extends HttpServlet {
             return;
 		}
 
+    	// Obtenemos los parametros de la peticion
+    	final RequestParameters params;
+    	try {
+    		params = RequestParameters.extractParameters(request, appId, true, logF);
+    	}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+		}
+
     	// Comprobamos si se indica un proveedor y, si no, se utiliza el
     	// por defecto de Clave Firma
     	String certOrigin = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
@@ -161,11 +164,6 @@ public final class GenerateCertificateService extends HttpServlet {
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion
     	generateCertificate(params, response, trAux);
-    }
-
-    private static void updateParamNames(final RequestParameters params) {
-    	params.replaceParamKey(OLD_PARAMETER_NAME_APPLICATION_ID, PARAMETER_NAME_APPLICATION_ID);
-    	params.replaceParamKey(OLD_PARAMETER_NAME_SUBJECT_ID, PARAMETER_NAME_SUBJECT_ID);
     }
 
     /**

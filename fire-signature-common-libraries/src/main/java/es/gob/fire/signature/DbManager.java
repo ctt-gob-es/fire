@@ -28,7 +28,7 @@ public class DbManager {
 
 	/**
 	 * Obtiene la conexi&oacute;n de base de datos.
-	 * 
+	 *
 	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo
 	 *         conectar.
 	 * @throws SQLException Cuando no se puede crear la conexi&oacute;n.
@@ -39,7 +39,7 @@ public class DbManager {
 
 	/**
 	 * Obtiene la conexi&oacute;n de base de datos.
-	 * 
+	 *
 	 * @param autoCommit Indica si se debe hacer commit autom&aacute;tico tras cada
 	 *                   operaci&oacute;n de inserci&oacute;n y borrado de entradas
 	 *                   en base de datos.
@@ -63,7 +63,7 @@ public class DbManager {
 	/**
 	 * Inicializa al completo el manejador de base de datos, leyendo el fichero
 	 * de configuraci&oacute;n y recuperando la conexi&oacute;n.
-	 * 
+	 *
 	 * @return Conexi&oacute;n de base de datos o {@code null} si se produce un
 	 *         error.
 	 * @throws IOException Cuando no se encuentra correctamente configurada la
@@ -71,14 +71,14 @@ public class DbManager {
 	 */
 	private static void initialize() throws IOException {
 		try {
-			Context context = new InitialContext();
+			final Context context = new InitialContext();
 			dataSource = (DataSource) context.lookup(ConfigManager.getDatasourceJNDIName());
 
 			checkConnection();
 		} catch (final Exception e) {
 			dataSource = null;
 			configured = false;
-			throw new IOException("No se ha podido verificar el correcto funcionamiento de la conexion", e);
+			throw new IOException("No se ha podido verificar el correcto funcionamiento de la conexion", e); //$NON-NLS-1$
 		}
 
 		configured = true;
@@ -103,7 +103,7 @@ public class DbManager {
 
 	/**
 	 * Indica si la conexi&oacute;n a base de datos esta conigurada y puede usarse.
-	 * 
+	 *
 	 * @return {@code true} si la conexi&oacute;n a base de datos puede usarse.
 	 *         {@code false} en caso contrario.
 	 */

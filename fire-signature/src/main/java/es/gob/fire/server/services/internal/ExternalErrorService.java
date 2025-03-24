@@ -9,13 +9,11 @@
  */
 package es.gob.fire.server.services.internal;
 
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,29 +47,28 @@ public class ExternalErrorService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
+		// Recuperamos el identificador de transaccion
+		final String trId = RequestParameters.getTransactionId(request);
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
+			return;
+		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
 		RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.extractParameters(request, null, logF);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, logF.f("Error en la lectura de los parametros de entrada"), e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		
-		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+
 		final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-
-		// Comprobamos que se hayan prorcionado los parametros indispensables
-        if (trId == null || trId.isEmpty()
-        		|| userRef == null || userRef.isEmpty()) {
-        	LOGGER.warning("No se han proporcionado los parametros necesarios"); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.FORBIDDEN);
-            return;
-        }
-
-		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
-        final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de error tras la redireccion a un servicio externo")); //$NON-NLS-1$
 

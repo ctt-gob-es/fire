@@ -22,10 +22,10 @@ INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
 VALUES ('clavefirmatest', 'Simulador Cl@ve Firma', 2);
 
 INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
-VALUES ('fnmt', "CloudID", 3);
+VALUES ('fnmt', 'CloudID', 3);
 
 INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
-VALUES ('local', "Firma local", 4);
+VALUES ('local', 'Firma local', 4);
 
 
 -- Insertar valores en la tabla TIPO_PLANIFICADOR

@@ -215,8 +215,8 @@ public class ApplicationRestController {
 		if (!"-1".equals(appForm.getIdUsersSelected())) {
 			final String[] arrayUsers = appForm.getIdUsersSelected().split(",");
 
-			for(int i=0; i < arrayUsers.length;i++){
-				listUsers.add(new Long(arrayUsers[i]));
+			for (int i = 0; i < arrayUsers.length; i++) {
+				listUsers.add(Long.valueOf(arrayUsers[i]));
 			}
 		}
 
@@ -226,8 +226,8 @@ public class ApplicationRestController {
 		if (!"-1".equals(appForm.getIdCertificatesSelected())) {
 			final String[] arrayCertificates = appForm.getIdCertificatesSelected().split(",");
 			
-			for(int i=0; i < arrayCertificates.length;i++){
-				listCertificates.add(new Long(arrayCertificates[i]));
+			for (int i = 0; i < arrayCertificates.length; i++) {
+				listCertificates.add(Long.valueOf(arrayCertificates[i]));
 			}
 		}
 
@@ -275,16 +275,30 @@ public class ApplicationRestController {
 				
 				final Application newApp = this.appService.saveApplication(appForm, listUsers, listCertificates, customProviders);
 
+LOGGER.info(" ============== FIN DEL GUARDADO!!");
+				
 				listNewApplication.add(newApp);
 
-			} catch (final Exception e) {				
+LOGGER.info(" ============== postGUARDADO!!");
+				
+			} catch (final Exception e) {
+				LOGGER.info(" ============== Excepcion: " + e);
+				
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB022), e);
+				LOGGER.info(" ============== a");
 				listNewApplication = StreamSupport.stream(this.appService.getAllApplication().spliterator(), false).collect(Collectors.toList());
+				LOGGER.info(" ============== b");
 				json.put(KEY_JS_ERROR_SAVE_APP, Language.getResWebFire(IWebLogMessages.ERRORWEB022));
+				LOGGER.info(" ============== c");
 				dtOutput.setError(json.toString());
+				LOGGER.info(" ============== d");
 			}
+
+			LOGGER.info(" ============== FIN 1");
 		}
 
+LOGGER.info(" ============== FIN 2");
+		
 		dtOutput.setData(listNewApplication);
 
 		return dtOutput;

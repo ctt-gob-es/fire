@@ -174,6 +174,10 @@ public class ApplicationService implements IApplicationService{
 	@Override
 	@Transactional
 	public Application saveApplication(final ApplicationDTO appDto, final List<Long> idsUsers, final List<Long> listIdCertificates, final List<ProviderApplicationDTO> customProviders) throws GeneralSecurityException{
+		
+		
+LOGGER.info(" =============== GUARDAR APLICACION");
+		
 		Application appToSave = null;
 
 		// Nueva aplicacion
@@ -275,17 +279,29 @@ public class ApplicationService implements IApplicationService{
 		//app.setListApplicationResponsible(listApplicationResponsible);
 		final Application savedApp = this.repository.saveAndFlush(appToSave);
 
+LOGGER.info(" =============== COMPROBAMOS CONFIGURACION PERSONALIZADA DE PROVEEDORES");
+		
 		//Guardar los proveedores
-		if (savedApp.getCustomProvider()) {
+		if (savedApp.isCustomProvider()) {
+LOGGER.info(" =============== 1");
 			for (final ProviderApplicationDTO dto : customProviders) {
-				this.providerApplicationRepository.save(convertProviderApplicationDTOToEntity(dto, savedApp));
+				LOGGER.info(" =============== Convertimos a entidad la del proveedor: " + dto.getIdProvider());
+				ProviderApplication provApp = convertProviderApplicationDTOToEntity(dto, savedApp);
+				LOGGER.info(" =============== Habilitado: " + provApp.getEnabled());
+				LOGGER.info(" =============== Obligatorio: " + provApp.getMandatory());
+				LOGGER.info(" =============== Guardamos configuracion de proveedor para la aplicacion: " + provApp.getProvider().getId());
+				this.providerApplicationRepository.save(provApp);
+				LOGGER.info(" =============== Guardado"); 
 			}
 		} else {
+LOGGER.info(" =============== 2");
 			for (final ProviderApplication pa : this.providerApplicationRepository.findByApplicationOrderByOrderIndexAsc(savedApp)) {
 				this.providerApplicationRepository.delete(pa);
 			}
 		}
 
+		LOGGER.info(" =============== FIN GUARDADO");
+		
 		return savedApp;
 	}
 
@@ -395,10 +411,10 @@ public class ApplicationService implements IApplicationService{
 		appDto.setOrganization(application.getOrganization());
 		appDto.setDir3Code(application.getDir3Code());
 
-		appDto.setCustomProvider(application.getCustomProvider());
-		appDto.setCustomSize(application.getCustomSize());
+		appDto.setCustomProvider(application.isCustomProvider());
+		appDto.setCustomSize(application.isCustomSize());
 
-		if (application.getCustomSize()) {
+		if (application.isCustomSize()) {
 			appDto.setMaxSizeDoc(application.getMaxSizeDoc());
 			appDto.setMaxSizePetition(application.getMaxSizePetition());
 			appDto.setMaxAmountDocs(application.getMaxAmountDocs());
@@ -634,7 +650,7 @@ public class ApplicationService implements IApplicationService{
 			return null;
 		}
 
-		//TODO: terminar implementación
+		//TODO: terminar implementacion
 
 		return null;
 	}
@@ -697,11 +713,8 @@ public class ApplicationService implements IApplicationService{
 				entity.setOrderIndex(dto.getOrderIndex());
 
 				return entity;
-			} else {
-				return null;
 			}
-		} else {
-			return null;
 		}
+		return null;
 	}
 }

@@ -37,8 +37,6 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 				+ "AND tb_aplicaciones.id=tb_certificados_de_aplicacion.id_aplicaciones " //$NON-NLS-1$
 				+ "AND tb_certificados.id_certificado=tb_certificados_de_aplicacion.id_certificados"; //$NON-NLS-1$
 
-	private static final String STATEMENT_SELECT_OPERATION_CONFIG = "SELECT tamano_peticion, tamano_documento, tamano_lote, proveedores FROM tb_aplicaciones  WHERE  tb_aplicaciones.id =  ?"; //$NON-NLS-1$
-
 	private final DBOperationConfigLoader operationConfigLoader;
 
 	public DBApplicationsDAO() {
@@ -118,6 +116,15 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 	@Override
 	public ApplicationOperationConfig getOperationConfig(final String appId,
 			final LogTransactionFormatter logF) throws IOException {
-		return this.operationConfigLoader.getOperationConfig(appId);
+
+		ApplicationOperationConfig config = this.operationConfigLoader.getOperationConfig(appId);
+
+		if (config == null) {
+			LOGGER.warning(logF.f("No se encuentra establecida ninguna configuracion para las aplicaciones. " //$NON-NLS-1$
+					+ "No se estableceran limites para el servicio")); //$NON-NLS-1$
+			config = new ApplicationOperationConfig();
+		}
+
+		return config;
 	}
 }

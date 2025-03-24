@@ -77,7 +77,7 @@ public abstract class ConfigLoader {
 	}
 
 	/**
-	 * Obtiene el objeto asociado a una propiedad de la configuraci&pacute;n.
+	 * Obtiene el objeto asociado a una propiedad de la configuraci&oacute;n.
 	 * @param key Clave de la propiedad de la que se desea obtener el valor.
 	 * @return Valor de la propiedad o {@code null} si no se
 	 * encontr&oacute;.

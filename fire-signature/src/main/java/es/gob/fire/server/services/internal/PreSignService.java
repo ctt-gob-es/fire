@@ -82,17 +82,27 @@ public final class PreSignService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
+		// Recuperamos el identificador de transaccion
+		final String trId = RequestParameters.getTransactionId(request);
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
+			return;
+		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
 		RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.extractParameters(request, null, logF);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, logF.f("Error en la lectura de los parametros de entrada"), e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		
-    	final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+
     	final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
     	String certB64 = params.getParameter(ServiceParams.HTTP_PARAM_CERT);
 		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
@@ -104,17 +114,7 @@ public final class PreSignService extends HttpServlet {
         	redirectErrorUrl = (String) request.getAttribute(ServiceParams.HTTP_ATTR_ERROR_URL);
     	}
 
-    	final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
-    	final LogTransactionFormatter logF = trAux.getLogFormatter();
-
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de prefirma")); //$NON-NLS-1$
-
-        // Comprobamos que se hayan proporcionado los parametros indispensables
-        if (trId == null || trId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
-            return;
-        }
 
         if (userRef == null || userRef.isEmpty()) {
             LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$

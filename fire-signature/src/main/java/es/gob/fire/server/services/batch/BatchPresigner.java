@@ -11,7 +11,6 @@ package es.gob.fire.server.services.batch;
 
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +51,7 @@ public final class BatchPresigner extends HttpServlet {
 	@Override
 	protected void service(final HttpServletRequest request,
 			               final HttpServletResponse response) {
-		
+
 		RequestParameters params;
 		try {
 			params = RequestParameters.extractParameters(request);
@@ -62,7 +61,7 @@ public final class BatchPresigner extends HttpServlet {
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		
+
 		final String json = params.getParameter(BATCH_JSON_PARAM);
 		if (json == null) {
 			LOGGER.severe("No se ha recibido una definicion de lote en el parametro " + BATCH_JSON_PARAM); //$NON-NLS-1$

@@ -122,7 +122,14 @@ public class SignOperationManager {
 		String[] provs;
 		final String[] requestedProvs = connConfig.getProviders();
 		if (requestedProvs != null) {
-			provs = ProviderManager.getFilteredProviders(appId, requestedProvs, logF);
+			try {
+				provs = ProviderManager.getFilteredProviders(appId, requestedProvs, logF);
+			}
+			catch (final Exception e) {
+				LOGGER.warning(logF.f("No se ha podido cargar el listado de proveedores configurados en el sistema")); //$NON-NLS-1$
+				Responser.sendError(response, FIReError.INTERNAL_ERROR);
+				return;
+			}
 			if (provs.length == 0) {
 				LOGGER.warning(logF.f("No hay proveedores dados de alta que se ajusten a los criterios establecidos en la peticion")); //$NON-NLS-1$
 				Responser.sendError(response, FIReError.PARAMETER_PROVIDERS_INVALID);

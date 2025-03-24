@@ -72,6 +72,11 @@ public class ServiceParams {
     /** Atributo usado en el env&iacute;o de datos HTTP con el idioma a usar. */
     public static final String HTTP_PARAM_LANGUAGE = "language"; //$NON-NLS-1$
 
+    /** Antiguo par&aacute;metro para indicar el ID de aplicaci&oacute;n. */
+    public static final String OLD_HTTP_PARAM_APPLICATION_ID = "appId"; //$NON-NLS-1$
+    /** Antiguo par&aacute;metro para indicar el ID de usuario. */
+    public static final String OLD_HTTP_PARAM_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
+
     /** Atributo usado en el env&iacute;o de datos HTTP con el certificado de firma. */
     public static final String HTTP_ATTR_CERT = "cert"; //$NON-NLS-1$
     /** Atributo usado en el env&iacute;o de datos HTTP con la URL a la que redirigir en caso de error. */

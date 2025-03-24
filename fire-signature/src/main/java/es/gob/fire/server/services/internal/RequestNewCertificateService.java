@@ -50,34 +50,34 @@ public final class RequestNewCertificateService extends HttpServlet {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
+		// Recuperamos el identificador de aplicacion y el de transaccion
+		final String appId  = RequestParameters.getAppId(request, false);
+		final String trId = RequestParameters.getTransactionId(request);
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
+			return;
+		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
 		RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.extractParameters(request, appId, logF);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, logF.f("Error en la lectura de los parametros de entrada"), e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		
-		final String appId  = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
-		final String trId  = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+
 		final String subjectRef  = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		final boolean originForced = Boolean.parseBoolean(params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
 		final String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 
-		final TransactionAuxParams trAux = new TransactionAuxParams(appId, LogUtils.limitText(trId));
-		final LogTransactionFormatter logF = trAux.getLogFormatter();
-
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de solicitud de certificado")); //$NON-NLS-1$
-
-		// Comprobamos que se hayan proporcionado los parametros indispensables
-        if (trId == null || trId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el identificador de transaccion")); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.FORBIDDEN);
-            return;
-        }
 
 		// Comprobamos del usuario
     	if (subjectRef == null || subjectRef.isEmpty()) {

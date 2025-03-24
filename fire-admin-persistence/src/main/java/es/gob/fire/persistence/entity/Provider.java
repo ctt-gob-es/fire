@@ -24,11 +24,9 @@ public class Provider implements Serializable {
     private String name;
 
     @Column(name = "OBLIGATORIO", nullable = false)
-    @Type(type = "yes_no")
     private boolean mandatory;
 
     @Column(name = "HABILITADO", nullable = false)
-    @Type(type = "yes_no")
     private boolean enabled;
 
     @Column(name = "ORDEN", nullable = false)

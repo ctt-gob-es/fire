@@ -152,7 +152,7 @@ public class ConfigurationController {
 		}
 				
 		// se indica si la tarea esta habilitada o no.
-		schedulerForm.setIsEnabledEdit(schedulerSelected.getIsActive());
+		schedulerForm.setIsEnabledEdit(schedulerSelected.isActive());
 
 		// se obtiene la hora, minutos, segundos asociados al planificador
 		schedulerForm.setHourPeriodEdit(planner.getHourPeriod());
