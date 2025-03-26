@@ -101,10 +101,21 @@ public final class GenerateCertificateService extends HttpServlet {
 	        return;
 	    }
 
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, true);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
 	    // Obtenemos el identificador de aplicacion para configuracion el log y
 	    // sus permisos
-    	final String appId = RequestParameters.getAppId(request, true);
-    	final String trId  = RequestParameters.getTransactionId(request);
+    	final String appId = params.getAppId();
+    	final String trId  = params.getTransactionId();
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario
 		// validarlo posteriormente
@@ -142,13 +153,12 @@ public final class GenerateCertificateService extends HttpServlet {
             return;
 		}
 
-    	// Obtenemos los parametros de la peticion
-    	final RequestParameters params;
+    	// Comprobamos los parametros de la peticion
     	try {
-    		params = RequestParameters.extractParameters(request, appId, true, logF);
+    		params.checkParameters(appId, logF);
     	}
     	catch (final Exception e) {
-    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
     		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
     		return;
 		}
@@ -159,7 +169,7 @@ public final class GenerateCertificateService extends HttpServlet {
     	if (certOrigin == null) {
     		certOrigin = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
     	}
-    	params.put(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
+    	params.putParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
 
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion

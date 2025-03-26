@@ -1,12 +1,10 @@
 package es.gob.fire.server.services.internal;
 
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,12 +21,24 @@ public class BackService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(BackService.class.getName());
 
 	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
+
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, false);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
 		// Recuperamos el identificador de transaccion
-		final String trId = RequestParameters.getTransactionId(request);
+		final String trId = params.getTransactionId();
 		if (trId == null || trId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
@@ -38,13 +48,12 @@ public class BackService extends HttpServlet {
 		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
-		RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request, null, logF);
+			params.checkParameters(logF);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, logF.f("Error en la lectura de los parametros de entrada"), e); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 

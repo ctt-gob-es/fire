@@ -99,9 +99,20 @@ public final class CertificateService extends HttpServlet {
 	        return;
 	    }
 
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, true);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
 	    // Obtenemos el identificador de aplicacion para configuracion el log y
 	    // sus permisos
-    	final String appId = RequestParameters.getAppId(request, false);
+    	final String appId = params.getAppId();
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario
 		// validarlo posteriormente
@@ -139,16 +150,16 @@ public final class CertificateService extends HttpServlet {
             return;
 		}
 
-        // Extraemos el resto de parametros
-    	final RequestParameters params;
+        // Validamos los parametros
     	try {
-    		params = RequestParameters.extractParameters(request, appId, true, logF);
+    		params.checkParameters(appId, logF);
     	}
     	catch (final Exception e) {
-    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
     		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
     		return;
 		}
+
 
         final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
         if (subjectId == null || subjectId.isEmpty()) {

@@ -52,13 +52,24 @@ public final class BatchPresigner extends HttpServlet {
 	protected void service(final HttpServletRequest request,
 			               final HttpServletResponse response) {
 
-		RequestParameters params;
+
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.parseParameters(request, false);
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		try {
+			params.checkParameters();
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la comprobacion de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 

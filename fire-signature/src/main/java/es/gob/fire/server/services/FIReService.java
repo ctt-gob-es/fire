@@ -138,9 +138,20 @@ public class FIReService extends HttpServlet {
 	    	}
 		}
 
-		// Obtenemos unicamente los identificadores de la peticion para hacer con ellos las distintas comprobaciones de acceso
-		final String appId = RequestParameters.getAppId(request, false);
-        final String trId  = RequestParameters.getTransactionId(request);
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, false);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		// Cargamos los datos esenciales para la autenticacion
+		final String appId = params.getAppId();
+        final String trId  = params.getTransactionId();
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario
 		// validarlo posteriormente
@@ -185,15 +196,14 @@ public class FIReService extends HttpServlet {
 
     	LOGGER.fine(logF.f("Peticion autorizada")); //$NON-NLS-1$
 
-    	// Extraemos el resto de parametros de la peticion
-		RequestParameters params;
+    	// Comprobamos los parametros de la peticion
 		try {
-			params = RequestParameters.extractParameters(request, appId, logF);
+			params.checkParameters(appId, logF);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.READING_PARAMETERS);
-			return;
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
 		}
 
         final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);

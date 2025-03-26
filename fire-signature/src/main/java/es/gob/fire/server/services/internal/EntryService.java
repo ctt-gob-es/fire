@@ -9,6 +9,7 @@
  */
 package es.gob.fire.server.services.internal;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,8 +46,19 @@ public class EntryService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, false);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
 		// Recuperamos el identificador de transaccion
-		final String trId = RequestParameters.getTransactionId(request);
+		final String trId = params.getTransactionId();
 		if (trId == null || trId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
@@ -56,13 +68,12 @@ public class EntryService extends HttpServlet {
 		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
-		RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request, null, logF);
+			params.checkParameters(logF);
 		}
 		catch (final Exception e) {
-			LOGGER.log(Level.WARNING, logF.f("Error en la lectura de los parametros de entrada"), e); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
 
@@ -103,7 +114,15 @@ public class EntryService extends HttpServlet {
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, provs[0]);
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED, Boolean.TRUE.toString());
 
-			final ProviderInfo provInfo = ProviderManager.getProviderInfo(provs[0], logF, language);
+			ProviderInfo provInfo;
+			try {
+				provInfo = ProviderManager.getProviderInfo(provs[0], logF, language);
+			} catch (final IOException e) {
+				ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, true, trAux);
+				final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+				Responser.redirectToExternalUrl(connConfig.getRedirectErrorUrl(), request, response, trAux);
+				return;
+			}
 
 			// Si es el proveedor de firma con certificado local, firmamos con el
 			if (provInfo.isLocalProvider()) {

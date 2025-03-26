@@ -137,7 +137,7 @@ public class SignOperationManager {
 			}
 		}
         else {
-        	provs = ProviderManager.getProviderNames();
+        	provs = ProviderManager.getProviderNames(appId, logF);
         }
 
 		// Se identifica si se debe omitir

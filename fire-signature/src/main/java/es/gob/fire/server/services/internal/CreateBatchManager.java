@@ -142,7 +142,7 @@ public class CreateBatchManager {
 			}
 		}
         else {
-        	provs = ProviderManager.getProviderNames();
+        	provs = ProviderManager.getProviderNames(appId, logF);
         }
 
 		final String appTitle = connConfig.getAppTitle();

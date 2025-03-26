@@ -94,8 +94,19 @@ public final class RecoverCertificateService extends HttpServlet {
 	        return;
 	    }
 
-    	final String appId = RequestParameters.getAppId(request, true);
-    	final String trId = RequestParameters.getTransactionId(request);
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, true);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+    	final String appId = params.getAppId();
+    	final String trId = params.getTransactionId();
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario
 		// validarlo posteriormente
@@ -135,14 +146,13 @@ public final class RecoverCertificateService extends HttpServlet {
             return;
 		}
 
-    	RequestParameters params;
     	try {
-    		params = RequestParameters.extractParameters(request, appId, true, logF);
+    		params.checkParameters(appId, logF);
     	}
     	catch (final Exception e) {
-			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-			Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST, "Error en la lectura de los parametros de entrada"); //$NON-NLS-1$
-			return;
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
 		}
 
     	// Comprobamos si se indica un proveedor y, si no, se utiliza el
@@ -151,7 +161,7 @@ public final class RecoverCertificateService extends HttpServlet {
     	if (certOrigin == null) {
     		certOrigin = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
     	}
-    	params.put(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
+    	params.putParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
 
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion

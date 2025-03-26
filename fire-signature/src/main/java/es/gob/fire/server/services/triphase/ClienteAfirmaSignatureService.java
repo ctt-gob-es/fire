@@ -103,12 +103,22 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 		LOGGER.fine("== INICIO FIRMA TRIFASICA =="); //$NON-NLS-1$
 
-		RequestParameters parameters;
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
 		try {
-			parameters = RequestParameters.extractParameters(request);
+			params = RequestParameters.parseParameters(request, false);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		try {
+			params.checkParameters();
 		}
 		catch (final Throwable e) {
-			LOGGER.severe("No se pudieron leer los parametros de la peticion: " + e); //$NON-NLS-1$
+			LOGGER.severe("Error en la comprobacion de los parametros de entrada: " + e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.FORBIDDEN);
 			return;
 		}
@@ -119,7 +129,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		response.setCharacterEncoding("utf-8"); //$NON-NLS-1$
 
 		// Obtenemos el codigo de operacion
-		final String operation = parameters.get(PARAM_NAME_OPERATION);
+		final String operation = params.getParameter(PARAM_NAME_OPERATION);
 		if (operation == null) {
 			LOGGER.severe("No se ha indicado la operacion trifasica a realizar"); //$NON-NLS-1$
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_OPERATION));
@@ -127,14 +137,14 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		// Obtenemos el codigo de operacion
-		final SignOperation cryptoOperation = SignOperation.parse(parameters.get(PARAM_NAME_CRYPTO_OPERATION));
+		final SignOperation cryptoOperation = SignOperation.parse(params.getParameter(PARAM_NAME_CRYPTO_OPERATION));
 		if (cryptoOperation == null) {
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_CRYPTO_OPERATION));
 			return;
 		}
 
 		// Obtenemos el formato de firma
-		final String format = parameters.get(PARAM_NAME_FORMAT);
+		final String format = params.getParameter(PARAM_NAME_FORMAT);
 		LOGGER.fine("Formato de firma seleccionado: " + format); //$NON-NLS-1$
 		if (format == null) {
 			LOGGER.warning("No se ha indicado formato de firma"); //$NON-NLS-1$
@@ -144,9 +154,9 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 		// Obtenemos los parametros adicionales para la firma
 		Properties extraParams;
-		if (parameters.containsKey(PARAM_NAME_EXTRA_PARAM)) {
+		if (params.containsKey(PARAM_NAME_EXTRA_PARAM)) {
 			try {
-				extraParams = PropertiesUtils.base642Properties(parameters.get(PARAM_NAME_EXTRA_PARAM));
+				extraParams = PropertiesUtils.base642Properties(params.getParameter(PARAM_NAME_EXTRA_PARAM));
 			}
 			catch (final Exception e) {
 				LOGGER.severe("El formato de los parametros adicionales suministrado es erroneo: " +  e); //$NON-NLS-1$
@@ -186,8 +196,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		// Obtenemos los parametros adicionales para la firma
 		byte[] sessionData = null;
 		try {
-			if (parameters.containsKey(PARAM_NAME_SESSION_DATA)) {
-				sessionData = Base64.decode(parameters.get(PARAM_NAME_SESSION_DATA).trim(), true);
+			if (params.containsKey(PARAM_NAME_SESSION_DATA)) {
+				sessionData = Base64.decode(params.getParameter(PARAM_NAME_SESSION_DATA).trim(), true);
 			}
 		}
 		catch (final Exception e) {
@@ -202,7 +212,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		// Obtenemos el certificado
-		final String cert = parameters.get(PARAM_NAME_CERT);
+		final String cert = params.getParameter(PARAM_NAME_CERT);
 		if (cert == null) {
 			LOGGER.warning("No se ha indicado certificado de firma"); //$NON-NLS-1$
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_CERTIFICATE));
@@ -229,7 +239,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		byte[] docBytes = null;
-		final String docId = parameters.get(PARAM_NAME_DOCID);
+		final String docId = params.getParameter(PARAM_NAME_DOCID);
 		if (docId != null) {
 			try {
 				LOGGER.fine("Recuperamos el documento mediante el DocumentManager"); //$NON-NLS-1$
@@ -246,7 +256,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		// Obtenemos el algoritmo de firma
-		final String algorithm = parameters.get(PARAM_NAME_ALGORITHM);
+		final String algorithm = params.getParameter(PARAM_NAME_ALGORITHM);
 		if (algorithm == null) {
 			LOGGER.warning("No se ha indicado algoritmo de firma"); //$NON-NLS-1$
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_ALGORITHM));

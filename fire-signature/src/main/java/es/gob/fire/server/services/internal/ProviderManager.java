@@ -129,10 +129,13 @@ public class ProviderManager {
 
 	/**
 	 * Obtiene el listado con el nombre de los proveedores configurados.
+	 * @param appId Aplicaci&oacute;n para la que deseamos obtener los proveedores.
+	 * @param logF Formateador de trazas de log.
 	 * @return Listado con los nombres de los proveedores.
+	 * @throws IOException Cuando no se ha podido obtener el listado de proveedores habilitado.
 	 */
-	public static String[] getProviderNames() {
-		final ProviderElement[] provs = ConfigManager.getProviders();
+	public static String[] getProviderNames(final String appId, final LogTransactionFormatter logF) throws IOException {
+		final ProviderElement[] provs = getProviders(appId, logF);
 		final String[] provNames = new String[provs.length];
 		for (int i = 0; i < provs.length; i++) {
 			provNames[i] = provs[i].getName();
@@ -147,8 +150,9 @@ public class ProviderManager {
      * @param logF Formateador de trazas de log.
      * @param language Idioma configurado.
 	 * @return Informaci&oacute;n del proveedor.
+	 * @throws IOException Cuando no se puede cargar la informaci&oacute;n del proveedor.
 	 */
-	public static ProviderInfo getProviderInfo(final String providerName, final LogTransactionFormatter logF, final String language) {
+	public static ProviderInfo getProviderInfo(final String providerName, final LogTransactionFormatter logF, final String language) throws IOException {
 
 		if (providersInfo.containsKey(providerName)) {
 			final ProviderInfo prov = providersInfo.get(providerName);
@@ -164,21 +168,26 @@ public class ProviderManager {
 			infoProperties = loadLocalProviderInfoProperties(logF);
 		}
 		else {
-			final String classname = ConfigManager.getProviderClass(providerName);
-			final String infoFilename = ConfigManager.getProviderInfoFile(providerName);
+			try {
+				final String classname = ConfigManager.getProviderClass(providerName);
+				final String infoFilename = ConfigManager.getProviderInfoFile(providerName);
 
-			infoProperties = loadProviderInfoProperties(classname, null, logF);
+				infoProperties = loadProviderInfoProperties(classname, null, logF);
 
-			// Si se detecta un fichero 'provider info' externo, miramos primero si el conector permite usarlo mediante la
-			// propiedad 'allowexternalproviderinfo', en caso de que no se permita se cargaran las propiedades del fichero
-			// 'provider info' interno.
+				// Si se detecta un fichero 'provider info' externo, miramos primero si el conector permite usarlo mediante la
+				// propiedad 'allowexternalproviderinfo', en caso de que no se permita se cargaran las propiedades del fichero
+				// 'provider info' interno.
 
-			final boolean allowExternalProviderInfo = ProviderInfo.isAllowExternalProviderInfo(infoProperties);
+				final boolean allowExternalProviderInfo = ProviderInfo.isAllowExternalProviderInfo(infoProperties);
 
-			if (infoFilename != null && allowExternalProviderInfo) {
-				infoProperties = loadProviderInfoProperties(classname, infoFilename, logF);
+				if (infoFilename != null && allowExternalProviderInfo) {
+					infoProperties = loadProviderInfoProperties(classname, infoFilename, logF);
+				}
 			}
-
+			catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el proveedor '%s'", LogUtils.cleanText(providerName), e)); //$NON-NLS-1$
+				throw new IOException("No se ha podido cargar el proveedor " + LogUtils.cleanText(providerName), e); //$NON-NLS-1$
+			}
 		}
 
 		// Contruimos la informacion del proveedor y la almacenamos en la coleccion

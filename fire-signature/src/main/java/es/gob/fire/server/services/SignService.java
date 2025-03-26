@@ -125,8 +125,19 @@ public final class SignService extends HttpServlet {
 	        return;
 	    }
 
-    	final String appId      = RequestParameters.getAppId(request, true);
-        final String transactId = RequestParameters.getTransactionId(request);
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, true);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+    	final String appId      = params.getAppId();
+        final String transactId = params.getTransactionId();
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario
 		// validarlo posteriormente
@@ -165,13 +176,12 @@ public final class SignService extends HttpServlet {
             return;
 		}
 
-        // Recepcion de los parametros.
-    	final RequestParameters params;
+        // Comprobacion de los parametros
     	try {
-    		params = RequestParameters.extractParameters(request, appId, true, logF);
+    		params.checkParameters(appId, logF);
     	}
     	catch (final Exception e) {
-    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
     		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
     		return;
 		}

@@ -53,7 +53,7 @@
 	
 	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
 	if (language == null || language.isEmpty()) {
-		language = "es";
+		language = "es"; //$NON-NLS-1$
 	}
 	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 
@@ -142,9 +142,14 @@
 		
 		<div class="container-box">	
 		<%
-		for (String provider : providers) {
-			ProviderInfo info = ProviderManager.getProviderInfo(provider, trAux.getLogFormatter(), language);
-		%>
+			for (String provider : providers) {
+				ProviderInfo info;
+				try {
+					info = ProviderManager.getProviderInfo(provider, trAux.getLogFormatter(), language);
+				} catch (Exception e) {
+					continue;
+				}
+			%>
 			<div name="provider-option" class="main-box-left" id="option<%= info.getName() %>">
 			
 				<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>" id="form<%= info.getName() %>" class="formProvider">
