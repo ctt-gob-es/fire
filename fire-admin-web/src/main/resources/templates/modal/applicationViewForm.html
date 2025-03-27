@@ -186,7 +186,7 @@
 	    document.body.removeChild(link); // Limpiamos el DOM
 	}
 	
-	function initializeProvidersTable() {
+	function initializeProvidersTable() { 
 	    var appId = $("#appId").val();
 	    var getProvidersOfApplication = /*[[@{/getProvidersOfApplication}]]*/;
 
@@ -218,27 +218,26 @@
 	                    var is_checked = data ? "checked" : "";
 	                    return `
 	                        <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-	                            <input type="checkbox" id="mandatory_${row.id}" class="peer chk-mandatory" ${is_checked}>
+	                            <input type="checkbox" id="mandatory_${row.id}" class="peer chk-mandatory" ${is_checked} disabled>
 	                            <label for="mandatory_${row.id}" class="peers peer-greed js-sb ai-c">
 	                                <span class="peer peer-greed"></span>
 	                            </label>
 	                        </div>`;
 	                }
-	              },
-	              { "data": "enabled",
+	            },
+	            { "data": "enabled",
 	                "render": function(data, type, row) {
 	                    var is_checked = data ? "checked" : "";
 	                    return `
 	                        <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-	                            <input type="checkbox" id="enabled_${row.id}" class="peer chk-enabled" ${is_checked}>
+	                            <input type="checkbox" id="enabled_${row.id}" class="peer chk-enabled" ${is_checked} disabled>
 	                            <label for="enabled_${row.id}" class="peers peer-greed js-sb ai-c">
 	                                <span class="peer peer-greed"></span>
 	                            </label>
 	                        </div>`;
 	                }
-	              },
-	              { "data": "orderIndex", "visible": false 
-	              }
+	            },
+	            { "data": "orderIndex", "visible": false }
 	        ],
 	        "language": {
 	            "url": "js/datatables/i18n/spanish.json",
@@ -247,38 +246,8 @@
 	                    _: "%d filas seleccionadas",
 	                    1: "1 fila seleccionada"
 	                }
-	              }
-			}
-	    });
-	    
-	 	// Función para actualizar los valores de orderIndex después de mover filas
-	    function actualizarOrden() {
-	        $('#customProvidersTable tbody tr').each(function(index) {
-	            $(this).find('.order-value').text(index + 1);
-	        });
-	    }
-	 	
-	    $('#customProvidersTable tbody').off('click', '.move-up');
-	    $('#customProvidersTable tbody').off('click', '.move-down');
-
-	 	// Manejadores de eventos para mover filas
-	    $('#customProvidersTable tbody').on('click', '.move-up', function(event) {
-	        event.preventDefault();
-	        let row = $(this).closest('tr');
-	        if (row.prev().length) {
-	            row.insertBefore(row.prev());
-	            actualizarOrden();
+	            }
 	        }
 	    });
-
-	    $('#customProvidersTable tbody').on('click', '.move-down', function(event) {
-	        event.preventDefault();
-	        let row = $(this).closest('tr');
-	        if (row.next().length) {
-	            row.insertAfter(row.next());
-	            actualizarOrden();
-	        }
-	    });
-
 	}
 </script>

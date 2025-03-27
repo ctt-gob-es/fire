@@ -39,6 +39,7 @@ import es.gob.fire.web.clave.sp.exception.ClaveException;
 import es.gob.fire.web.clave.sp.utils.Constants;
 import es.gob.fire.web.clave.sp.utils.SPConfig;
 import es.gob.fire.web.clave.sp.utils.SessionHolder;
+import es.gob.fire.web.config.VersionProperties;
 import es.gob.fire.web.config.WebSecurityConfig;
 import eu.eidas.auth.commons.EidasStringUtil;
 import eu.eidas.auth.commons.attribute.AttributeDefinition;
@@ -62,6 +63,9 @@ public class ResponseClave {
 	
 	@Autowired
 	private ThreadInfoDataSecureDTO threadInfoDataSecure;
+	
+	@Autowired
+    private VersionProperties versionProperties;
 	
 	@RequestMapping(value = "/ResponseClave", method = RequestMethod.POST)
     public String responseClave(HttpServletRequest request, HttpServletResponse response, final Model model) {
@@ -105,6 +109,9 @@ public class ResponseClave {
 	    	cookie.setPath("/");
 	    	cookie.setSecure(true);
 	    	response.addCookie(cookie);
+	    	
+	    	model.addAttribute("appVersion", versionProperties.getProjectVersion());
+	        model.addAttribute("copyrightYear", versionProperties.getCopyrightYear());
 	    	
 	        // Informamos en la traza que el usuario X se ha logueado en la administracion
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG015)}));
