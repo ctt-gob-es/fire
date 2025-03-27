@@ -48,7 +48,7 @@ public interface ApplicationRepository extends JpaRepository<Application, String
 	 * Method that gets the applications associated to the Certificate identified by idCertificate.
 	 * @return ApplicationCertDTO
 	 */
-	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, ap.fechaAltaApp) FROM Application ap WHERE ap.appId = :appId")
+	@Query("SELECT new es.gob.fire.persistence.dto.ApplicationCertDTO(ap.appId, ap.appName, ap.fechaAltaApp, ap.organization, ap.dir3Code, ap.customSize, ap.customProvider, ap.maxSizeDoc, ap.maxSizePetition, ap.maxAmountDocs) FROM Application ap WHERE ap.appId = :appId")
 	ApplicationCertDTO findViewApplication(@Param("appId") String appId);
 	
 }

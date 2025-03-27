@@ -73,6 +73,7 @@ import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
 import es.gob.fire.service.impl.LoginService;
 import es.gob.fire.web.clave.sp.request.RequestClave;
+import es.gob.fire.web.config.VersionProperties;
 import es.gob.fire.web.config.WebSecurityConfig;
 import es.gob.fire.web.exception.WebAdminException;
 
@@ -126,6 +127,9 @@ public class LoginController {
 	 */
 	@Autowired
 	private ThreadInfoDataSecureDTO threadInfoDataSecureDTO;
+	
+	@Autowired
+    private VersionProperties versionProperties;
 
 	/**
 	 * Handles the login error by retrieving the authentication exception from the session and displaying
@@ -322,6 +326,9 @@ public class LoginController {
 
 	        // Antes de ir al inicio limpiamos ThreadLocal para evitar memory leaks
 	        this.threadInfoDataSecureDTO.clear();
+	        
+	        model.addAttribute("appVersion", versionProperties.getProjectVersion());
+	        model.addAttribute("copyrightYear", versionProperties.getCopyrightYear());
 
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG016)}));
 	        return "inicio.html";

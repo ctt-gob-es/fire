@@ -6877,7 +6877,8 @@ hr {
       transform: scale(1, 1); }
     .header .header-container .nav-left {
       float: left;
-      margin-left: 15px; }
+      margin-left: 15px; 
+      height: 100%; }
     .header .header-container .nav-right {
       float: right; }
       .header .header-container .nav-right .dropdown-menu {
@@ -50348,3 +50349,23 @@ footer {
 /*@import 'vendor/index';*/
 
 /*# sourceMappingURL=stylesheet.css.map */
+
+.footer {
+	height: 61px;
+	text-align: left;
+	padding-left: 2rem;
+}
+
+.footer-container {
+  display: flex;
+  align-items: center;   /* Alineación vertical */
+  justify-content: center; /* Alineación horizontal */
+  padding: 0 15px;
+  min-height: 60px;      /* Puedes ajustar la altura mínima según tus necesidades */
+}
+
+.footer-text {
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}

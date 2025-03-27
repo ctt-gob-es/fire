@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.UserLoggedDTO;
+import es.gob.fire.web.config.VersionProperties;
 
 /** 
  * <p>Controller for handling HTTP GET requests and navigating between views.</p>
@@ -46,13 +47,18 @@ public class AppController {
 	/** The Constant LOG. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
 	
+	@Autowired
+    private VersionProperties versionProperties;
+	
 	@GetMapping({"/"})
 	public String index(final Model model) {
 		return "login.html";
 	}
 
 	@GetMapping("/inicio")
-	public String inicio() {
+	public String inicio(final Model model) {
+		model.addAttribute("appVersion", versionProperties.getProjectVersion());
+        model.addAttribute("copyrightYear", versionProperties.getCopyrightYear());
 		return "inicio.html";
 	}
 	@GetMapping("/user-form")
