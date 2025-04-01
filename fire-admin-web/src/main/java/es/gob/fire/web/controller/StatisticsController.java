@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -119,11 +121,11 @@ public class StatisticsController {
 	 * @return String that represents the name of the view to forward.
 	 */
 	@RequestMapping(value = "statisticsresult", method = RequestMethod.GET)
-    public String statisticsResult(final Model model, final @RequestParam("query") String query, final @RequestParam("monthDate") String monthDate) {
+    public String statisticsResult(final Model model, final @RequestParam("query") String query, final @RequestParam("monthDate") String monthDate, final @RequestParam("endMonthDate") String endMonthDate) {
 		List<TransactionDTO> transactions = null;
 		List<SignatureDTO> signatures = null;
 
-		if (!StringUtils.isEmpty(query) && !StringUtils.isEmpty(monthDate)) {
+		if (!StringUtils.isEmpty(query) && !StringUtils.isEmpty(monthDate) && StringUtils.isEmpty(endMonthDate)) {
 			final Integer month = Integer.valueOf(monthDate.substring(0, NumberConstants.NUM2));
 			final Integer year = Integer.valueOf(monthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
 			// Consultas de transacciones
@@ -134,6 +136,9 @@ public class StatisticsController {
 				model.addAttribute("textGood", Constants.TRANS_CORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_APP));
 				model.addAttribute("textBad", Constants.TRANS_INCORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_APP));
 				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_ENDED_BY_APP.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByProvider(month, year).spliterator(), false).collect(Collectors.toList());
@@ -142,18 +147,27 @@ public class StatisticsController {
 				model.addAttribute("textGood", Constants.TRANS_CORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_PROVEEDOR));
 				model.addAttribute("textBad", Constants.TRANS_INCORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_PROVEEDOR));
 				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByDatesSizeApp(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByDatesSize", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
 				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getId());
+				model.addAttribute("enableDonutChart", Boolean.FALSE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByOperation(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByOperation", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
 				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
 			
 			// Consulta de firmas
@@ -162,26 +176,298 @@ public class StatisticsController {
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_APP.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByProvider(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByFormat(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByImprovedFormat(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
 			model.addAttribute("tableStatisticsTitle", query + " para el mes " + monthDate);
+		} else if (!StringUtils.isEmpty(query) && !StringUtils.isEmpty(monthDate) && !StringUtils.isEmpty(endMonthDate)) {
+			final Integer month = Integer.valueOf(monthDate.substring(0, NumberConstants.NUM2));
+			final Integer year = Integer.valueOf(monthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
+			
+			final Integer endMonth = Integer.valueOf(endMonthDate.substring(0, NumberConstants.NUM2));
+			final Integer endYear = Integer.valueOf(endMonthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
+			
+			Integer currentMonth = month;
+			Integer currentYear = year;
+			
+			// Consultas de transacciones
+			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_APP.getName())) {
+				transactions = StreamSupport.stream(this.transactionService.getTransactionsByApplication(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
+
+				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+				boolean x = currentYear.intValue() < endYear.intValue();
+				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByApplication(currentMonth, currentYear);
+
+					// Formatear la clave en formato MM/YYYY
+				    String key = String.format("%02d/%04d", currentMonth, currentYear);
+				    
+				    // Agregar la lista al Map con la clave correspondiente
+				    transactionsByMonth.put(key, transactionsOfMonth);
+					
+				    // Incrementamos el mes
+				    currentMonth++;
+				    if (currentMonth > 12) {
+				        currentMonth = 1;
+				        currentYear++;
+				    }
+				}
+
+				model.addAttribute("queryStatisticsByMonth", transactionsByMonth);
+				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
+				model.addAttribute("queryStatisticsResult", transactions);
+				model.addAttribute("textGood", Constants.TRANS_CORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_APP));
+				model.addAttribute("textBad", Constants.TRANS_INCORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_APP));
+				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_ENDED_BY_APP.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
+			}
+			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getName())) {
+				transactions = StreamSupport.stream(this.transactionService.getTransactionsByProvider(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
+				
+				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByProvider(currentMonth, currentYear);
+				    
+					// Formatear la clave en formato MM/YYYY
+				    String key = String.format("%02d/%04d", currentMonth, currentYear);
+				    
+				    // Agregar la lista al Map con la clave correspondiente
+				    transactionsByMonth.put(key, transactionsOfMonth);
+					
+				    // Incrementamos el mes
+				    currentMonth++;
+				    if (currentMonth > 12) {
+				        currentMonth = 1;
+				        currentYear++;
+				    }
+				}
+				
+				model.addAttribute("queryStatisticsByMonth", transactionsByMonth);
+				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
+				model.addAttribute("queryStatisticsResult", transactions);
+				model.addAttribute("textGood", Constants.TRANS_CORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_PROVEEDOR));
+				model.addAttribute("textBad", Constants.TRANS_INCORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_PROVEEDOR));
+				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
+			}
+			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getName())) {
+				transactions = StreamSupport.stream(this.transactionService.getTransactionsByDatesSizeApp(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
+
+				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByDatesSizeApp(currentMonth, currentYear);
+
+					// Formatear la clave en formato MM/YYYY
+				    String key = String.format("%02d/%04d", currentMonth, currentYear);
+				    
+				    // Agregar la lista al Map con la clave correspondiente
+				    transactionsByMonth.put(key, transactionsOfMonth);
+					
+				    // Incrementamos el mes
+				    currentMonth++;
+				    if (currentMonth > 12) {
+				        currentMonth = 1;
+				        currentYear++;
+				    }
+				}
+				
+				model.addAttribute("queryStatisticsByMonth", transactionsByMonth);
+				model.addAttribute("isQueryByDatesSize", Boolean.TRUE);
+				model.addAttribute("queryStatisticsResult", transactions);
+				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getId());
+				model.addAttribute("enableDonutChart", Boolean.FALSE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
+			}
+			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getName())) {
+				transactions = StreamSupport.stream(this.transactionService.getTransactionsByOperation(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
+
+				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByOperation(currentMonth, currentYear);
+
+					// Formatear la clave en formato MM/YYYY
+				    String key = String.format("%02d/%04d", currentMonth, currentYear);
+				    
+				    // Agregar la lista al Map con la clave correspondiente
+				    transactionsByMonth.put(key, transactionsOfMonth);
+					
+				    // Incrementamos el mes
+				    currentMonth++;
+				    if (currentMonth > 12) {
+				        currentMonth = 1;
+				        currentYear++;
+				    }
+				}
+
+				model.addAttribute("queryStatisticsByMonth", transactionsByMonth);
+				model.addAttribute("isQueryByOperation", Boolean.TRUE);
+				model.addAttribute("queryStatisticsResult", transactions);
+				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
+			}
+			
+			// Consulta de firmas
+			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_APP.getName())) {
+				signatures = StreamSupport.stream(this.signatureService.getSignaturesByApplication(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
+				
+				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+				    // Obtener la lista de firmas para el mes y año actual
+				    List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByApplication(currentMonth, currentYear);
+				    
+				    // Formatear la clave en formato MM/YYYY
+				    String key = String.format("%02d/%04d", currentMonth, currentYear);
+				    
+				    // Agregar la lista al Map con la clave correspondiente
+				    signaturesByMonth.put(key, signaturesOfMonth);
+				    
+				    // Incrementar el mes y, si es necesario, el año
+				    currentMonth++;
+				    if (currentMonth > 12) {
+				        currentMonth = 1;
+				        currentYear++;
+				    }
+				}
+
+				model.addAttribute("queryStatisticsByMonth", signaturesByMonth);
+				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("queryStatisticsResult", signatures);
+				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_APP.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
+			}
+			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getName())) {
+				signatures = StreamSupport.stream(this.signatureService.getSignaturesByProvider(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
+				
+				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+				
+				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+					List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByProvider(currentMonth, currentYear);
+					
+					// Formatear la clave en formato MM/YYYY
+				    String key = String.format("%02d/%04d", currentMonth, currentYear);
+				    
+				    // Agregar la lista al Map con la clave correspondiente
+				    signaturesByMonth.put(key, signaturesOfMonth);
+				    
+				    // Incrementamos el mes
+				    currentMonth++;
+				    if (currentMonth > 12) {
+				        currentMonth = 1;
+				        currentYear++;
+				    }
+				}
+				
+				model.addAttribute("queryStatisticsByMonth", signaturesByMonth);
+				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("queryStatisticsResult", signatures);
+				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
+			}
+			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getName())) {
+				signatures = StreamSupport.stream(this.signatureService.getSignaturesByFormat(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
+				
+				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+					List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByFormat(currentMonth, currentYear);
+
+					// Formatear la clave en formato MM/YYYY
+				    String key = String.format("%02d/%04d", currentMonth, currentYear);
+				    
+				    // Agregar la lista al Map con la clave correspondiente
+				    signaturesByMonth.put(key, signaturesOfMonth);
+				    
+				    // Incrementamos el mes
+				    currentMonth++;
+				    if (currentMonth > 12) {
+				        currentMonth = 1;
+				        currentYear++;
+				    }
+				}
+
+				model.addAttribute("queryStatisticsByMonth", signaturesByMonth);
+				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("queryStatisticsResult", signatures);
+				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
+			}
+			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getName())) {
+				signatures = StreamSupport.stream(this.signatureService.getSignaturesByImprovedFormat(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
+				
+				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+					List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByImprovedFormat(currentMonth, currentYear);
+
+					// Formatear la clave en formato MM/YYYY
+				    String key = String.format("%02d/%04d", currentMonth, currentYear);
+				    
+				    // Agregar la lista al Map con la clave correspondiente
+				    signaturesByMonth.put(key, signaturesOfMonth);
+				    
+				    // Incrementamos el mes
+				    currentMonth++;
+				    if (currentMonth > 12) {
+				        currentMonth = 1;
+				        currentYear++;
+				    }
+				}
+
+				model.addAttribute("queryStatisticsByMonth", signaturesByMonth);
+				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("queryStatisticsResult", signatures);
+				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getId());
+				model.addAttribute("enableDonutChart", Boolean.TRUE);
+				model.addAttribute("enableBarChart", Boolean.TRUE);
+				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
+			}
+			model.addAttribute("isDateRange", Boolean.TRUE);
+			model.addAttribute("tableStatisticsTitle", query + " para el intervalo de meses " + monthDate + " a " + endMonthDate);
 		}
         return "fragments/querystatisticstable.html";
     }

@@ -50381,3 +50381,9 @@ footer {
 	color: white;
 	background-color: #6c757d;
 }
+
+.stats-datepicker {
+	flex: none !important;
+	max-width: none !important;
+	margin-left: 1rem !important;
+}

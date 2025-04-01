@@ -103,4 +103,52 @@ public interface ITransactionService {
 	 * @return A set of DataTable rows that matches the query.
 	 */
 	DataTablesOutput<Transaction> getAllTransaction(DataTablesInput input);
+	
+	/**
+	 * Retrieves a list of transactions grouped or filtered by application, 
+	 * within a date range defined by the provided start and end month/year.
+	 *
+	 * @param startMonth the starting month (1–12) of the date range
+	 * @param startYear the starting year of the date range
+	 * @param endMonth the ending month (1–12) of the date range
+	 * @param endYear the ending year of the date range
+	 * @return a list of {@link TransactionDTO} objects matching the specified date range
+	 */
+	List<TransactionDTO> getTransactionsByApplication(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
+	
+	/**
+	 * Retrieves a list of transactions grouped or filtered by provider,
+	 * within a date range defined by the provided start and end month/year.
+	 *
+	 * @param startMonth the starting month (1–12) of the date range
+	 * @param startYear the starting year of the date range
+	 * @param endMonth the ending month (1–12) of the date range
+	 * @param endYear the ending year of the date range
+	 * @return a list of {@link TransactionDTO} objects matching the specified date range
+	 */
+	List<TransactionDTO> getTransactionsByProvider(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
+	
+	/**
+	 * Retrieves a list of transactions grouped by application and filtered by size and date range.
+	 * The range is defined by the provided start and end month/year values.
+	 *
+	 * @param startMonth the starting month (1–12) of the date range
+	 * @param startYear the starting year of the date range
+	 * @param endMonth the ending month (1–12) of the date range
+	 * @param endYear the ending year of the date range
+	 * @return a list of {@link TransactionDTO} objects filtered by date and size per application
+	 */
+	List<TransactionDTO> getTransactionsByDatesSizeApp(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
+	
+	/**
+	 * Retrieves a list of transactions grouped or filtered by operation type,
+	 * within a date range defined by the provided start and end month/year.
+	 *
+	 * @param startMonth the starting month (1–12) of the date range
+	 * @param startYear the starting year of the date range
+	 * @param endMonth the ending month (1–12) of the date range
+	 * @param endYear the ending year of the date range
+	 * @return a list of {@link TransactionDTO} objects matching the specified operation and date range
+	 */
+	List<TransactionDTO> getTransactionsByOperation(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
 }

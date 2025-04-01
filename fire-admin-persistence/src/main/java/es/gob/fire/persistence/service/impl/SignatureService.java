@@ -251,4 +251,135 @@ public class SignatureService implements ISignatureService {
 		return dtRepository.findAll(input);
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<SignatureDTO> getSignaturesByApplication(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear) {
+	    List<SignatureDTO> signatures = null;
+	    final String queryString = "select f.aplicacion, " 
+	            + " sum(case when f.correcta = '1' then total else 0 end) as corrects, "
+	            + " sum(case when f.correcta = '0' then total else 0 end) as incorrects "
+	            + " from tb_firmas f "
+	            + " where (EXTRACT(YEAR FROM f.fecha) * 100 + EXTRACT(MONTH FROM f.fecha)) BETWEEN ? AND ? "
+	            + " group by f.aplicacion ";
+	    
+	    Query nativeQuery = entityManager.createNativeQuery(queryString);
+	    
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+	    
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+	    
+	    List<Object[]> results = nativeQuery.getResultList();
+	    
+	    signatures = results.stream()
+	            .map(result -> new SignatureDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+	            .collect(Collectors.toList());
+	    
+	    return signatures;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<SignatureDTO> getSignaturesByProvider(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear) {
+	    List<SignatureDTO> signatures = null;
+	    final String queryString = "select f.proveedor, " 
+	            + " sum(case when f.correcta = '1' then total else 0 end) as corrects, "
+	            + " sum(case when f.correcta = '0' then total else 0 end) as incorrects "
+	            + " from tb_firmas f "
+	            + " where (EXTRACT(YEAR FROM f.fecha) * 100 + EXTRACT(MONTH FROM f.fecha)) BETWEEN ? AND ? "
+	            + " group by f.proveedor ";
+	    
+	    Query nativeQuery = entityManager.createNativeQuery(queryString);
+	    
+	    // Construir los límites inferior y superior en formato AAAAMM.
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+	    
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+	    
+	    List<Object[]> results = nativeQuery.getResultList();
+	    
+	    signatures = results.stream()
+	            .map(result -> new SignatureDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+	            .collect(Collectors.toList());
+	    
+	    return signatures;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<SignatureDTO> getSignaturesByFormat(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear) {
+	    List<SignatureDTO> signatures = null;
+	    final String queryString = "select f.formato, " 
+	            + " sum(case when f.correcta = '1' then total else 0 end) as corrects, "
+	            + " sum(case when f.correcta = '0' then total else 0 end) as incorrects "
+	            + " from tb_firmas f "
+	            + " where (EXTRACT(YEAR FROM f.fecha) * 100 + EXTRACT(MONTH FROM f.fecha)) BETWEEN ? AND ? "
+	            + " group by f.formato ";
+	    
+	    Query nativeQuery = entityManager.createNativeQuery(queryString);
+	    
+	    // Calcular los límites inferior y superior en formato AAAAMM
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+	    
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+	    
+	    List<Object[]> results = nativeQuery.getResultList();
+	    
+	    signatures = results.stream()
+	            .map(result -> new SignatureDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+	            .collect(Collectors.toList());
+	    
+	    return signatures;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<SignatureDTO> getSignaturesByImprovedFormat(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear) {
+	    List<SignatureDTO> signatures = null;
+	    final String queryString = "select f.formato_mejorado, " 
+	            + " sum(case when f.correcta = '1' then total else 0 end) as corrects, "
+	            + " sum(case when f.correcta = '0' then total else 0 end) as incorrects "
+	            + " from tb_firmas f "
+	            + " where (EXTRACT(YEAR FROM f.fecha) * 100 + EXTRACT(MONTH FROM f.fecha)) BETWEEN ? AND ? "
+	            + " and f.formato_mejorado is not null "
+	            + " group by f.formato_mejorado ";
+	    
+	    Query nativeQuery = entityManager.createNativeQuery(queryString);
+	    
+	    // Calcular los límites inferior y superior en formato AAAAMM.
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+	    
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+	    
+	    List<Object[]> results = nativeQuery.getResultList();
+	    
+	    signatures = results.stream()
+	            .map(result -> new SignatureDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+	            .collect(Collectors.toList());
+	    
+	    return signatures;
+	}
 }
