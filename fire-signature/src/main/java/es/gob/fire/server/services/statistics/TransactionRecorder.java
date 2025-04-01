@@ -157,6 +157,13 @@ public class TransactionRecorder {
 				transactionCube.setApplication(UNDEFINED_VALUE);
 			}
 		}
+		
+		// Codigo DIR3
+		String dir3Code = fireSession.getString(ServiceParams.SESSION_PARAM_DIR3_CODE);
+		if (dir3Code == null) {
+			dir3Code = UNDEFINED_VALUE;
+		}
+		transactionCube.setDir3Code(dir3Code);
 
 		// Operacion
 		TransactionType type = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);

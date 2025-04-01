@@ -70,7 +70,8 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 				configuredAppId,
 				configuredAppId,
 				true,
-				digestInfo != null ? new DigestInfo[] { digestInfo } : null );
+				digestInfo != null ? new DigestInfo[] { digestInfo } : null ,
+				null);
 	}
 
 	private static DigestInfo loadDigestInfoFromConfig(final LogTransactionFormatter logF) {

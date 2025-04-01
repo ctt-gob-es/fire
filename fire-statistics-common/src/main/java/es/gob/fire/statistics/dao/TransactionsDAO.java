@@ -24,8 +24,8 @@ public class TransactionsDAO {
 
 	/** SQL para insertar una transacci&oacute;n. */
 	private static final String ST_INSERT_TRANSACTION = "INSERT INTO TB_TRANSACCIONES " //$NON-NLS-1$
-			+ "(fecha, aplicacion, operacion, proveedor, proveedor_forzado, correcta, tamanno, total)" //$NON-NLS-1$
-			+ " VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
+			+ "(fecha, aplicacion, dir3_code, operacion, proveedor, proveedor_forzado, correcta, tamanno, total)" //$NON-NLS-1$
+			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 	/** Transacciones finalizadas correctamente/ incorrectamente por cada aplicaci&oacute;n
 	 * (Filtrado por a&ntilde;o y mes). */
@@ -133,12 +133,13 @@ public class TransactionsDAO {
 		try (final PreparedStatement st = conn.prepareStatement(ST_INSERT_TRANSACTION);) {
 			st.setTimestamp(1, new java.sql.Timestamp(date.getTime()));
 			st.setString(2, transaction.getApplication());
-			st.setString(3, transaction.getOperation());
-			st.setString(4, transaction.getProvider());
-			st.setBoolean(5, transaction.isMandatoryProvider());
-			st.setBoolean(6, transaction.isResultTransaction());
-			st.setLong(7, total.getDataSize());
-			st.setLong(8, total.getTotal());
+			st.setString(3, transaction.getDir3Code());
+			st.setString(4, transaction.getOperation());
+			st.setString(5, transaction.getProvider());
+			st.setBoolean(6, transaction.isMandatoryProvider());
+			st.setBoolean(7, transaction.isResultTransaction());
+			st.setLong(8, total.getDataSize());
+			st.setLong(9, total.getTotal());
 			totalInsertReg = st.executeUpdate();
 			if (totalInsertReg < 1) {
 				throw new SQLException("No se insertaron registros en la tabla de transacciones"); //$NON-NLS-1$

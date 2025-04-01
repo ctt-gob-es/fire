@@ -10,6 +10,7 @@ import java.util.Objects;
 public class TransactionCube {
 
 	private String application;
+	private String dir3Code;
 	private String operation;
 	private String  provider;
 	private  boolean mandatoryProvider = false;
@@ -55,21 +56,24 @@ public class TransactionCube {
 
 		// Aplicacion
 		trans.setApplication(cube[0]);
+		
+		// Codigo DIR3
+		trans.setDir3Code(cube[1]);
 
 		// Operacion
-		trans.setOperation(cube[1]);
+		trans.setOperation(cube[2]);
 
 		// Proveedor
-		trans.setProvider(cube[2]);
+		trans.setProvider(cube[3]);
 
 		// Proveedor forzado
-		trans.setMandatoryProvider("1".equals(cube[3])); //$NON-NLS-1$
+		trans.setMandatoryProvider("1".equals(cube[4])); //$NON-NLS-1$
 
 		// Resultado de la transaccion
-		trans.setResultTransaction("1".equals(cube[4])); //$NON-NLS-1$
+		trans.setResultTransaction("1".equals(cube[5])); //$NON-NLS-1$
 
 		// Identificador de la transaccion
-		trans.setIdTransaction(cube[5]);
+		trans.setIdTransaction(cube[6]);
 
 		return trans;
 	}
@@ -84,7 +88,7 @@ public class TransactionCube {
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		if (registryDatas == null || registryDatas.length != 6) {
+		if (registryDatas == null || registryDatas.length != 7) {
 			return false;
 		}
 
@@ -104,6 +108,14 @@ public class TransactionCube {
 
 	public final void setApplication(final String application) {
 		this.application = application;
+	}
+	
+	public final String getDir3Code() {
+		return this.dir3Code;
+	}
+
+	public final void setDir3Code(final String dir3Code) {
+		this.dir3Code = dir3Code;
 	}
 
 	public final String getOperation() {
@@ -175,23 +187,28 @@ public class TransactionCube {
 
 		final StringBuilder result = new StringBuilder();
 
-		if (this.getApplication() != null) {
-			result.append(clean(this.getApplication(), 45));
+		if (getApplication() != null) {
+			result.append(clean(getApplication(), 45));
+		}
+		result.append(";");//$NON-NLS-1$
+		
+		if (getDir3Code() != null) {
+			result.append(clean(getDir3Code(), 45));
 		}
 		result.append(";");//$NON-NLS-1$
 
-		if (this.getOperation() != null) {
-			result.append(clean(this.getOperation(), 10));
+		if (getOperation() != null) {
+			result.append(clean(getOperation(), 10));
 		}
 		result.append(";");//$NON-NLS-1$
 
-		if (this.getProvider() != null  && !this.getProvider().isEmpty()) {
-			result.append(clean(this.getProvider(), 45));
+		if (getProvider() != null  && !getProvider().isEmpty()) {
+			result.append(clean(getProvider(), 45));
 		}
 		result.append(";") //$NON-NLS-1$
-			.append(this.isMandatoryProvider() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.append(this.isResultTransaction() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.append(this.getIdTransaction() != null ? this.getIdTransaction() : "0"); //$NON-NLS-1$
+			.append(isMandatoryProvider() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.append(isResultTransaction() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.append(getIdTransaction() != null ? getIdTransaction() : "0"); //$NON-NLS-1$
 
 		return result.toString();
 	}
@@ -232,6 +249,12 @@ public class TransactionCube {
 		// Aplicacion
 		if (!(getApplication() == null && transaction.getApplication() == null ||
 				getApplication() != null && getApplication().equals(transaction.getApplication()))) {
+			return false;
+		}
+		
+		// Codigo DIR3
+		if (!(getDir3Code() == null && transaction.getDir3Code() == null ||
+				getDir3Code() != null && getDir3Code().equals(transaction.getDir3Code()))) {
 			return false;
 		}
 

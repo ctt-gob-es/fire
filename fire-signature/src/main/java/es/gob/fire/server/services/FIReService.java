@@ -229,7 +229,7 @@ public class FIReService extends HttpServlet {
     	try {
     		switch (op) {
     		case SIGN:
-    			SignOperationManager.sign(request, appInfo.getName(), params, trAux, response);
+    			SignOperationManager.sign(request, appInfo, params, trAux, response);
     			break;
     		case RECOVER_SIGN:
     			RecoverSignManager.recoverSignature(params, trAux, response);
@@ -238,7 +238,7 @@ public class FIReService extends HttpServlet {
     			RecoverSignResultManager.recoverSignature(params, trAux, response);
     			break;
     		case CREATE_BATCH:
-    			CreateBatchManager.createBatch(request, appInfo.getName(), params, trAux, response);
+    			CreateBatchManager.createBatch(request, appInfo, params, trAux, response);
     			break;
     		case ADD_DOCUMENT_TO_BATCH:
     			AddDocumentBatchManager.addDocument(params, trAux, response);

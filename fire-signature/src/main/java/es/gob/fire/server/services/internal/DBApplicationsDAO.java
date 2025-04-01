@@ -31,7 +31,7 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(DBApplicationsDAO.class.getName());
 
-	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT tb_aplicaciones.nombre, tb_aplicaciones.habilitado, tb_certificados.huella " //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT tb_aplicaciones.nombre, tb_aplicaciones.habilitado, tb_certificados.huella, tb_aplicaciones.dir3_code " //$NON-NLS-1$
 			+ "FROM tb_aplicaciones, tb_certificados, tb_certificados_de_aplicacion " //$NON-NLS-1$
 			+ "WHERE tb_aplicaciones.id =  ? " //$NON-NLS-1$
 				+ "AND tb_aplicaciones.id=tb_certificados_de_aplicacion.id_aplicaciones " //$NON-NLS-1$
@@ -64,12 +64,13 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 				final String appName = rs.getString(1);
 				final boolean enabled = rs.getBoolean(2);
 				DigestInfo[] digestInfos = null;
+				final String dir3Code = rs.getString(4);
 
 				if (enabled) {
 					digestInfos = loadCertificatesInfo(rs, logF);
 				}
 
-				result = new ApplicationAccessInfo(appId, appName, enabled, digestInfos);
+				result = new ApplicationAccessInfo(appId, appName, enabled, digestInfos, dir3Code);
 			}
 		}
 		catch (final SQLException e) {

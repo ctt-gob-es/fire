@@ -164,6 +164,8 @@ public class ServiceParams {
 	public static final String SESSION_PARAM_TRANSACTION_SIZE = "transactionsize"; //$NON-NLS-1$
 	/** Par&aacute;metro para guardar en sesi&oacute;n el idioma a usar. */
     public static final String SESSION_PARAM_LANGUAGE = "language"; //$NON-NLS-1$
+    /** Par&aacute;metro con el c&oacute;digo DIR 3. */
+    public static final String SESSION_PARAM_DIR3_CODE = "dir3Code"; //$NON-NLS-1$
 
     /** Valor del parametro de actualizacion que determina que la firma debe validarse. */
     public static final String UPGRADE_VERIFY = "verify"; //$NON-NLS-1$
