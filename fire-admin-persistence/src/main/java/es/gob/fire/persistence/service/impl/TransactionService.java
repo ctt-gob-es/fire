@@ -256,4 +256,134 @@ public class TransactionService implements ITransactionService {
 		return this.dtRepository.findAll(input);
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<TransactionDTO> getTransactionsByApplication(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear) {
+	    List<TransactionDTO> transactions = null;
+	    final String queryString = "SELECT t.aplicacion, " +
+	            "SUM(t.correcta) AS corrects, " +
+	            "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects " +
+	            "FROM tb_transacciones t " +
+	            "WHERE (EXTRACT(YEAR FROM t.fecha) * 100 + EXTRACT(MONTH FROM t.fecha)) BETWEEN ? AND ? " +
+	            "GROUP BY t.aplicacion";
+	    
+	    final Query nativeQuery = this.entityManager.createNativeQuery(queryString);
+	    
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+	    
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+	    
+	    final List<Object[]> results = nativeQuery.getResultList();
+	    
+	    transactions = results.stream()
+	            .map(result -> new TransactionDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+	            .collect(Collectors.toList());
+	    
+	    return transactions;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<TransactionDTO> getTransactionsByProvider(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear) {
+	    List<TransactionDTO> transactions = null;
+	    final String queryString = "SELECT t.proveedor, "
+	            + "SUM(t.correcta) AS corrects, "
+	            + "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects "
+	            + "FROM tb_transacciones t "
+	            + "WHERE (EXTRACT(YEAR FROM t.fecha) * 100 + EXTRACT(MONTH FROM t.fecha)) BETWEEN ? AND ? "
+	            + "GROUP BY t.proveedor";
+
+	    final Query nativeQuery = this.entityManager.createNativeQuery(queryString);
+
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+
+	    final List<Object[]> results = nativeQuery.getResultList();
+
+	    transactions = results.stream()
+	            .map(result -> new TransactionDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+	            .collect(Collectors.toList());
+
+	    return transactions;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<TransactionDTO> getTransactionsByDatesSizeApp(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear) {
+	    List<TransactionDTO> transactions = null;
+	    final String queryString = "select t.aplicacion, "
+	            + "sum(t.tamanno) as sizeBytes "
+	            + "from tb_transacciones t "
+	            + "where (extract(year from t.fecha) * 100 + extract(month from t.fecha)) between ? and ? "
+	            + "group by t.aplicacion";
+	            
+	    final Query nativeQuery = this.entityManager.createNativeQuery(queryString);
+	    
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+	    
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+	    
+	    final List<Object[]> results = nativeQuery.getResultList();
+	    
+	    transactions = results.stream()
+	            .map(result -> new TransactionDTO(
+	                    (String) result[0],
+	                    Math.floor(((BigDecimal) result[1]).intValue() / (1024 * 1024.0) * 100) / 100))
+	            .collect(Collectors.toList());
+	    
+	    return transactions;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<TransactionDTO> getTransactionsByOperation(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear) {
+	    List<TransactionDTO> transactions = null;
+	    final String queryString = "select t.aplicacion, "
+	            + "sum(case when t.operacion = 'SIGN' then (case when t.correcta = '1' then t.total else 0 end) else 0 end ) as correctSimpleSignatures, "
+	            + "sum(case when t.operacion = 'SIGN' then (case when t.correcta = '0' then t.total else 0 end) else 0 end ) as incorrectSimpleSignatures, "
+	            + "sum(case when t.operacion = 'BATCH' then (case when t.correcta = '1' then t.total else 0 end) else 0 end ) as correctBatchSignatures, "
+	            + "sum(case when t.operacion = 'BATCH' then (case when t.correcta = '0' then t.total else 0 end) else 0 end ) as incorrectBatchSignatures "
+	            + "from tb_transacciones t "
+	            + "where (extract(year from t.fecha) * 100 + extract(month from t.fecha)) between ? and ? "
+	            + "group by t.aplicacion";
+
+	    final Query nativeQuery = this.entityManager.createNativeQuery(queryString);
+
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+
+	    final List<Object[]> results = nativeQuery.getResultList();
+
+	    transactions = results.stream()
+	            .map(result -> new TransactionDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[3]).intValue(),
+	                    ((BigDecimal) result[4]).intValue(),
+	                    ((BigDecimal) result[3]).intValue() + ((BigDecimal) result[4]).intValue()))
+	            .collect(Collectors.toList());
+
+	    return transactions;
+	}
+
 }

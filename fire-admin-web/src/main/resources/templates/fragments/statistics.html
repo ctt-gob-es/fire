@@ -19,12 +19,25 @@
 							<div id="invalid-query" class="invalid-feedback">Se debe seleccionar una consulta.</div>
 						</div>
 
-						<!--  Mes -->
-						<div class="form-group col-md-statistics-month">
+						<!--  Mes de inicio -->
+						<div class="form-group col-md-statistics-month stats-datepicker" >
 							<div id="datepicker-statistics-pane">
 								<label for="month-datepicker-statistics"
 									th:text="#{form.statistics.month}"></label> <input type="text"
 									id="month-datepicker-statistics" name="monthDate"
+									class="form-control" style="overflow: hidden"
+									onblur="validateMonthDate(this);" pattern="\d{1,2}/\d{4}">
+								<div id="invalid-month-date-statistics" class="invalid-feedback">El
+									formato de la fecha no es v&aacute;lido.</div>
+							</div>
+						</div>
+						
+						<!--  Mes de fin -->
+						<div class="form-group col-md-statistics-month stats-datepicker">
+							<div id="datepicker-statistics-pane">
+								<label for="endMonth-datepicker-statistics"
+									th:text="#{form.statistics.month}"></label> <input type="text"
+									id="endMonth-datepicker-statistics" name="endMonthDate"
 									class="form-control" style="overflow: hidden"
 									onblur="validateMonthDate(this);" pattern="\d{1,2}/\d{4}">
 								<div id="invalid-month-date-statistics" class="invalid-feedback">El
@@ -62,6 +75,41 @@ $(function() {
 
 	
      $('#month-datepicker-statistics').datepicker({
+	    dateFormat: "mm/yy",
+	    changeMonth: true,
+	    changeYear: true,                 
+	    showButtonPanel: true,
+	    defaultDate: new Date(yearDef, monthDef, 1),
+	    closeText: 'Cerrar',
+		prevText: '<Ant',
+		nextText: 'Sig>',
+		currentText: 'Hoy',
+		monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+		monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
+	    onClose: function(dateText, inst) {
+	        function isDonePressed(){
+	            return ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1);
+	        }
+	        if (isDonePressed()){
+	            var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+	            var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+	            $(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');                               
+	            $('.date-picker').focusout()//Added to remove focus from datepicker input box on selecting date
+	        }
+	    },
+	    beforeShow : function(input, inst) {
+	        inst.dpDiv.addClass('month_year_datepicker')
+	        if ((datestr = $(this).val()).length > 0) {
+	            year = datestr.substring(datestr.length-4, datestr.length);
+	            month = datestr.substring(0, 2);
+	            $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
+	            $(this).datepicker('setDate', new Date(year, month-1, 1));
+	            $(".ui-datepicker-calendar").hide();
+	        }
+	    }
+	})
+	
+	$('#endMonth-datepicker-statistics').datepicker({
 	    dateFormat: "mm/yy",
 	    changeMonth: true,
 	    changeYear: true,                 
@@ -154,6 +202,12 @@ $( "#statisticsBtn" ).click(function( event ) {
 		$('#query').prop('selectedIndex', '');
 		$('#month-datepicker-statistics').val('');
 		$('#month-datepicker-statistics').removeClass("is-invalid");
+		if ($("#invalid-month-date-statistics").is("visible")) {
+			$("#invalid-month-date-statistics").hide();
+			$("#invalid-month-date-statistics").css("display", "block");
+		}
+		$('#endMonth-datepicker-statistics').val('');
+		$('#endMonth-datepicker-statistics').removeClass("is-invalid");
 		if ($("#invalid-month-date-statistics").is("visible")) {
 			$("#invalid-month-date-statistics").hide();
 			$("#invalid-month-date-statistics").css("display", "block");

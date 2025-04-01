@@ -6,15 +6,20 @@
           <i class="ti-layout"></i>
         </span> Table
     </button>
-	<button class="statsViewControlButton" id="statsViewButtonDoughnut">
+	<button class="statsViewControlButton" id="statsViewButtonDoughnut" th:if="${enableDonutChart}">
 		<span class="icon-holder mR-10">
           <i class="ti-pie-chart"></i>
         </span> Donut
 	</button>
-	<button class="statsViewControlButton" id="statsViewButtonBar">
+	<button class="statsViewControlButton" id="statsViewButtonBar" th:if="${enableBarChart}">
 		<span class="icon-holder mR-10">
           <i class="ti-bar-chart"></i>
         </span> Barras
+	</button>
+	<button class="statsViewControlButton" id="statsViewButtonBarTimeEvolution" th:if="${enableBarTimeChart}">
+		<span class="icon-holder mR-10">
+          <i class="ti-bar-chart"></i>
+        </span> Barras Evolución
 	</button>
 </div>
 
@@ -118,6 +123,11 @@
 	<canvas id="barChart"></canvas>
 </div>
 
+<!-- Contenedor de la vista Bar -->
+<div id="barTimeEvolutionChartContainer" class="masonry-sizer p-20 bgc-white" style="display: none;">
+	<canvas id="barTimeEvolutionChart"></canvas>
+</div>
+
 <script th:inline="javascript">
 var doughnutChart, doughnutChartTotales, barChart; // Variables para almacenar las instancias de Chart.js
 
@@ -127,6 +137,25 @@ function str2bytes(str) {
       bytes[i] = str.charCodeAt(i);
     }
     return bytes;
+}
+
+function generateBaseHue(index, total) {
+  return index * 360 / total;
+}
+
+function generateCorrectColor(hue) {
+  return `hsl(${hue}, 70%, 50%)`;
+}
+
+function generateIncorrectColor(hue) {
+  return `hsl(${hue}, 70%, 70%)`;
+}
+
+function generateCorrectBatchColor(hue) {
+  return `hsl(${hue}, 80%, 50%)`;
+}
+function generateIncorrectBatchColor(hue) {
+  return `hsl(${hue}, 80%, 70%)`;
 }
 
 $(document).ready(function() {
@@ -248,6 +277,7 @@ $(document).ready(function() {
       $("#tableContainer").show();
       $("#doughnutChartContainer").hide();
       $("#barChartContainer").hide();
+      $("#barTimeEvolutionChartContainer").hide();
     });
 	
  	// Botón Doughnut: muestra los gráficos Doughnut y oculta las demás vistas
@@ -255,6 +285,7 @@ $(document).ready(function() {
 		$("#tableContainer").hide();
 		$("#barChartContainer").hide();
 		$("#doughnutChartContainer").show();
+	    $("#barTimeEvolutionChartContainer").hide();
 		
 		var results = /*[[${queryStatisticsResult}]]*/ [];
 		var totalCorrect = 0;
@@ -492,6 +523,8 @@ $(document).ready(function() {
 	  $("#tableContainer").hide();
 	  $("#doughnutChartContainer").hide();
 	  $("#barChartContainer").show();
+      $("#barTimeEvolutionChartContainer").hide();
+      
 	  var isApplicable = /*[[${isSignatureQuery} or ${isQueryByAppOrProvider}]]*/ false;
 	    
       if (isApplicable) {
@@ -651,6 +684,316 @@ $(document).ready(function() {
 	    	}
 	    }
 	});
+	
+	// Botón Table: muestra la tabla y oculta los gráficos
+    $("#statsViewButtonBarTimeEvolution").click(function(){
+      $("#tableContainer").hide();
+      $("#doughnutChartContainer").hide();
+      $("#barChartContainer").hide();
+      $("#barTimeEvolutionChartContainer").show();
+      
+      var statisticsByMonth = /*[[${queryStatisticsByMonth}]]*/ [];
+      
+      console.log(statisticsByMonth);
+      
+      var isApplicable = /*[[${isSignatureQuery} or ${isQueryByAppOrProvider}]]*/ false;
+      
+      if (isApplicable) {
+    	  var labels = Object.keys(statisticsByMonth).sort(function(a, b) {
+              var partsA = a.split('/');
+              var partsB = b.split('/');
+              
+              var yearA = parseInt(partsA[1], 10), monthA = parseInt(partsA[0], 10);
+              var yearB = parseInt(partsB[1], 10), monthB = parseInt(partsB[0], 10);
+              return (yearA - yearB) || (monthA - monthB);
+          });
+          
+          var namesSet = {};
+          
+          labels.forEach(function(monthKey) {
+              statisticsByMonth[monthKey].forEach(function(entry) {
+            	  namesSet[entry.name] = true;
+              });
+          });
+          
+          var names = Object.keys(namesSet);
+          
+          var data = {};
+          
+          names.forEach(function(name) {
+        	    data[name] = {
+        	        corrects: new Array(labels.length).fill(0),
+        	        incorrects: new Array(labels.length).fill(0)
+        	    };
+        	});
+
+          labels.forEach(function(monthKey, monthIndex) {
+        	    statisticsByMonth[monthKey].forEach(function(entry) {
+        	        var entryName = entry.name;
+        	        data[entryName].corrects[monthIndex] = entry.corrects;
+        	        data[entryName].incorrects[monthIndex] = entry.incorrects;
+        	    });
+        	});
+          
+          var totalEntries = names.length;
+          var index = 0;
+          var datasets = [];
+
+          for (var entry in data) {
+      		var hue = generateBaseHue(index, totalEntries);
+    		var correctColor = generateCorrectColor(hue);
+   			var incorrectColor = generateIncorrectColor(hue);
+	       	  datasets.push({
+	       	        label: entry + " - Correctas",
+	       	        data: data[entry].corrects,
+	       	        backgroundColor: correctColor ,
+	       	        borderColor: correctColor ,
+	       	        borderWidth: 1,
+	       	        stack: entry  // Mismo stack para agrupar correctas e incorrectas de la misma aplicación
+	       	    });
+	       	    // Dataset para transacciones incorrectas de la aplicación
+	       	    datasets.push({
+	       	        label: entry + " - Incorrectas",
+	       	        data: data[entry].incorrects,
+	       	        backgroundColor: incorrectColor,
+	       	        borderColor: incorrectColor,
+	       	        borderWidth: 1,
+	       	        stack: entry  // Mismo stack para que se apile sobre las correctas
+	       	    });
+	       	    index++;
+          }
+          
+          var timeEvolutionCtx = document.getElementById('barTimeEvolutionChart').getContext('2d');
+          
+          var timeEvolutionChart = new Chart(timeEvolutionCtx, {
+              type: 'bar',
+              data: {
+                labels: labels,
+                datasets: datasets
+              },
+              options: {
+                responsive: true,
+                scales: {
+                  x: {
+                    stacked: true,
+                    title: {
+                      display: true,
+                      text: 'Mes/Año'
+                    }
+                  },
+                  y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: 'Número de Transacciones'
+                    }
+                  }
+                }
+              }
+            });
+      } else {
+		  var isQueryByOperation = /*[[${isQueryByOperation}]]*/ false;
+		  
+    	  if (isQueryByOperation) {
+    			// 1. Extraer y ordenar las etiquetas del eje X (meses en formato "MM/YYYY")
+     	    	var labels = Object.keys(statisticsByMonth).sort(function(a, b) {
+	      	      var partsA = a.split('/');
+	      	      var partsB = b.split('/');
+	      	      var yearA = parseInt(partsA[1], 10), monthA = parseInt(partsA[0], 10);
+	      	      var yearB = parseInt(partsB[1], 10), monthB = parseInt(partsB[0], 10);
+	      	      return (yearA - yearB) || (monthA - monthB);
+	      	    });
+    			
+     	    	// 2. Obtener la lista única de nombres de aplicaciones
+     	       var appSet = {};
+     	       labels.forEach(function(monthKey) {
+     	         statisticsByMonth[monthKey].forEach(function(entry) {
+     	           appSet[entry.name] = true;
+     	         });
+     	       });
+     	       var appNames = Object.keys(appSet);
+     	       
+    	   		// 3. Preparar la estructura de datos por aplicación
+     	      var appData = {};
+     	      appNames.forEach(function(app) {
+     	        appData[app] = {
+     	          correctSimple: new Array(labels.length).fill(0),
+     	          incorrectSimple: new Array(labels.length).fill(0),
+     	          correctBatch: new Array(labels.length).fill(0),
+     	          incorrectBatch: new Array(labels.length).fill(0)
+     	        };
+     	      });
+     	      
+     	  		// 4. Rellenar los arrays según los datos de cada mes
+     	     labels.forEach(function(monthKey, monthIndex) {
+     	       statisticsByMonth[monthKey].forEach(function(entry) {
+     	         var app = entry.name;
+     	         appData[app].correctSimple[monthIndex] = entry.correctSimpleSignatures || 0;
+     	         appData[app].incorrectSimple[monthIndex] = entry.incorrectSimpleSignatures || 0;
+     	         appData[app].correctBatch[monthIndex] = entry.correctBatchSignatures || 0;
+     	         appData[app].incorrectBatch[monthIndex] = entry.incorrectBatchSignatures || 0;
+     	       });
+     	     });
+     	  		
+     	 	// 5. Crear los datasets para Chart.js.
+     	 	var datasets = [];
+		    var totalApps = appNames.length;
+		    appNames.forEach(function(app, index) {
+		      var hue = generateBaseHue(index, totalApps);
+		      datasets.push({
+		        label: app + " - Simple Correctas",
+		        data: appData[app].correctSimple,
+		        backgroundColor: generateCorrectColor(hue),
+		        borderColor: generateCorrectColor(hue),
+		        borderWidth: 1,
+		        stack: app + "-simple"
+		      });
+		      datasets.push({
+		        label: app + " - Simple Incorrectas",
+		        data: appData[app].incorrectSimple,
+		        backgroundColor: generateIncorrectColor(hue),
+		        borderColor: generateIncorrectColor(hue),
+		        borderWidth: 1,
+		        stack: app + "-simple"
+		      });
+		      datasets.push({
+		        label: app + " - Batch Correctas",
+		        data: appData[app].correctBatch,
+		        backgroundColor: generateCorrectBatchColor(hue),
+		        borderColor: generateCorrectBatchColor(hue),
+		        borderWidth: 1,
+		        stack: app + "-batch"
+		      });
+		      datasets.push({
+		        label: app + " - Batch Incorrectas",
+		        data: appData[app].incorrectBatch,
+		        backgroundColor: generateIncorrectBatchColor(hue),
+		        borderColor: generateIncorrectBatchColor(hue),
+		        borderWidth: 1,
+		        stack: app + "-batch"
+		      });
+		    });
+		    
+	 		// 6. Configurar el gráfico de barras apiladas
+		    var timeEvolutionCtx = document.getElementById('barTimeEvolutionChart').getContext('2d');
+          
+          	var timeEvolutionChart = new Chart(timeEvolutionCtx, {
+		      type: 'bar',
+		      data: {
+		        labels: labels, // Los meses ordenados
+		        datasets: datasets
+		      },
+		      options: {
+		        responsive: true,
+		        plugins: {
+		          title: {
+		            display: true,
+		            text: 'Evolución Mensual de Firmas por Aplicación'
+		          }
+		        },
+		        scales: {
+		          x: {
+		            stacked: true,
+		            title: {
+		              display: true,
+		              text: 'Mes/Año'
+		            }
+		          },
+		          y: {
+		            stacked: true,
+		            beginAtZero: true,
+		            title: {
+		              display: true,
+		              text: 'Número de Firmas'
+		            }
+		          }
+		        }
+		      }
+		    });
+     	 	//Fin de procesado de grafico de barras de Simples y Batch
+    	  } else {
+    			// 1. Extraer y ordenar las etiquetas (meses) en formato "MM/YYYY"
+    		    var labels = Object.keys(statisticsByMonth).sort(function(a, b) {
+    		      var partsA = a.split('/');
+    		      var partsB = b.split('/');
+    		      var yearA = parseInt(partsA[1], 10), monthA = parseInt(partsA[0], 10);
+    		      var yearB = parseInt(partsB[1], 10), monthB = parseInt(partsB[0], 10);
+    		      return (yearA - yearB) || (monthA - monthB);
+    		    });
+    			
+    		 	// 2. Extraer la lista única de aplicaciones
+    		    var appSet = {};
+    		    labels.forEach(function(monthKey) {
+    		      statisticsByMonth[monthKey].forEach(function(entry) {
+    		        appSet[entry.name] = true;
+    		      });
+    		    });
+    		    var appNames = Object.keys(appSet);
+    		    
+    		 	// 3. Preparar la estructura de datos para cada aplicación
+    		    var appData = {};
+    		    appNames.forEach(function(app) {
+    		      appData[app] = new Array(labels.length).fill(0);
+    		    });
+    		    
+    		 	// 4. Rellenar la estructura: para cada mes, asignar el valor de sizeBytes para cada aplicación
+    		    labels.forEach(function(monthKey, index) {
+    		      statisticsByMonth[monthKey].forEach(function(entry) {
+    		        var app = entry.name;
+    		        appData[app][index] = entry.sizeBytes || 0;
+    		      });
+    		    });
+    		    
+    		 	// 5. Construir los datasets para Chart.js: un dataset por aplicación
+    		    var datasets = [];
+    		    var totalApps = appNames.length;
+    		    appNames.forEach(function(app, index) {
+    		      var hue = generateBaseHue(index, totalApps);
+    		      var color = generateCorrectColor(hue);
+    		      datasets.push({
+    		        label: app,
+    		        data: appData[app],
+    		        backgroundColor: color,
+    		        borderColor: color,
+    		        borderWidth: 1
+    		      });
+    		    });
+    		    
+    		 	// 7. Crear el gráfico de barras
+    		    var timeEvolutionCtx = document.getElementById('barTimeEvolutionChart').getContext('2d');
+          
+          		var timeEvolutionChart = new Chart(timeEvolutionCtx, {
+    		      type: 'bar',
+    		      data: {
+    		        labels: labels,  // Meses ordenados
+    		        datasets: datasets
+    		      },
+    		      options: {
+    		        responsive: true,
+    		        scales: {
+    		          x: {
+    		            title: {
+    		              display: true,
+    		              text: 'Mes/Año'
+    		            },
+    		            // Si deseas barras agrupadas, no se necesita "stacked"
+    		            stacked: false 
+    		          },
+    		          y: {
+    		            beginAtZero: true,
+    		            title: {
+    		              display: true,
+    		              text: 'Tamaño (Bytes)'
+    		            }
+    		          }
+    		        }
+    		      }
+    		    });
+    	  }
+      }
+      //
+    });
 });
 					
 

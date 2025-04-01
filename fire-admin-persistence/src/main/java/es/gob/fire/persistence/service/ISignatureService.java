@@ -103,4 +103,52 @@ public interface ISignatureService {
 	 * @return A set of DataTable rows that matches the query.
 	 */
 	DataTablesOutput<Signature> getAllSignature(DataTablesInput input);
+	
+	/**
+	 * Retrieves a list of signatures grouped or filtered by application,
+	 * within a date range defined by the provided start and end month/year.
+	 *
+	 * @param startMonth the starting month (1–12) of the date range
+	 * @param startYear the starting year of the date range
+	 * @param endMonth the ending month (1–12) of the date range
+	 * @param endYear the ending year of the date range
+	 * @return a list of {@link SignatureDTO} objects matching the specified date range
+	 */
+	List<SignatureDTO> getSignaturesByApplication(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
+	
+	/**
+	 * Retrieves a list of signatures grouped or filtered by provider,
+	 * within a date range defined by the provided start and end month/year.
+	 *
+	 * @param startMonth the starting month (1–12) of the date range
+	 * @param startYear the starting year of the date range
+	 * @param endMonth the ending month (1–12) of the date range
+	 * @param endYear the ending year of the date range
+	 * @return a list of {@link SignatureDTO} objects matching the specified date range
+	 */
+	List<SignatureDTO> getSignaturesByProvider(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
+	
+	/**
+	 * Retrieves a list of signatures grouped or filtered by signature format,
+	 * within a date range defined by the provided start and end month/year.
+	 *
+	 * @param startMonth the starting month (1–12) of the date range
+	 * @param startYear the starting year of the date range
+	 * @param endMonth the ending month (1–12) of the date range
+	 * @param endYear the ending year of the date range
+	 * @return a list of {@link SignatureDTO} objects matching the specified date range and format
+	 */
+	List<SignatureDTO> getSignaturesByFormat(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
+	
+	/**
+	 * Retrieves a list of signatures grouped or filtered by improved signature format,
+	 * within a date range defined by the provided start and end month/year.
+	 *
+	 * @param startMonth the starting month (1–12) of the date range
+	 * @param startYear the starting year of the date range
+	 * @param endMonth the ending month (1–12) of the date range
+	 * @param endYear the ending year of the date range
+	 * @return a list of {@link SignatureDTO} objects matching the specified date range and improved format
+	 */
+	List<SignatureDTO> getSignaturesByImprovedFormat(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
 }
